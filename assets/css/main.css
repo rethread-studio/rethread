@@ -2233,7 +2233,7 @@ input[type="radio"]:focus+label:before {
 }
 
 .image {
-    box-shadow: 0 0 0 4px #ffffff, 0 0 0 5px #e6e6e6;
+    /* box-shadow: 0 0 0 4px #ffffff, 0 0 0 5px #e6e6e6; */
 }
 
 .image.phone {
@@ -2590,14 +2590,14 @@ header.major:after {
 
 .spotlight .image {
     width: 30%;
-    border-radius: 100%;
+    /* border-radius: 100%; */
     margin: 0 3em 0 0;
     display: block;
 }
 
 .spotlight .image img {
     display: block;
-    border-radius: 100%;
+    /* border-radius: 100%; */
     width: 100%;
 }
 
@@ -2888,7 +2888,7 @@ table.alt tbody tr td {
 }
 
 .wrapper.style1 .image {
-    box-shadow: 0 0 0 4px #6a71f7, 0 0 0 5px rgba(255, 255, 255, 0.25);
+    /* box-shadow: 0 0 0 4px #6a71f7, 0 0 0 5px rgba(255, 255, 255, 0.25); */
 }
 
 .wrapper.style1 .image.phone {
@@ -3109,7 +3109,7 @@ table.alt tbody tr td {
 }
 
 .wrapper.style2 .image {
-    box-shadow: 0 0 0 4px #fbfbfb, 0 0 0 5px #e6e6e6;
+    /* box-shadow: 0 0 0 4px #fbfbfb, 0 0 0 5px #e6e6e6; */
 }
 
 .wrapper.style2 .image.phone {
@@ -3333,7 +3333,7 @@ table.alt tbody tr td {
 }
 
 .wrapper.style3 .image {
-    box-shadow: 0 0 0 4px #f7f7f7, 0 0 0 5px #d6d6d6;
+    /* box-shadow: 0 0 0 4px #f7f7f7, 0 0 0 5px #d6d6d6; */
 }
 
 .wrapper.style3 .image.phone {
@@ -3620,7 +3620,7 @@ table.alt tbody tr td {
 }
 
 #header .image {
-    box-shadow: 0 0 0 4px #6a71f7, 0 0 0 5px rgba(255, 255, 255, 0.25);
+    /* box-shadow: 0 0 0 4px #6a71f7, 0 0 0 5px rgba(255, 255, 255, 0.25); */
 }
 
 #header .image.phone {
