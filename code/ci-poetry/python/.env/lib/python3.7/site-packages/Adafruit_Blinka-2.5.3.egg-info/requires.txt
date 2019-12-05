@@ -1,0 +1,8 @@
+Adafruit-PlatformDetect
+Adafruit-PureIO
+
+[:platform_system != "Windows"]
+sysv_ipc
+
+[:sys_platform == "linux"]
+spidev

@@ -1,0 +1,85 @@
+Metadata-Version: 2.1
+Name: Adafruit-PlatformDetect
+Version: 1.3.4
+Summary: Platform detection for use by libraries like Adafruit-Blinka.
+Home-page: https://github.com/adafruit/Adafruit_Python_PlatformDetect
+Author: Adafruit Industries
+Author-email: circuitpython@adafruit.com
+License: MIT
+Description: 
+        Introduction
+        ============
+        
+        This library provides best-guess platform detection for a range of single-board
+        computers and (potentially) other platforms.  It was written primarily for use
+        in `Adafruit_Blinka <https://github.com/adafruit/Adafruit_Blinka>`_, but may be
+        useful in other contexts.
+        
+        Platform detection is divided into "chip" and "board" detection, with the latter
+        generally dependent on the former.  Platform info is gathered from:
+        
+          - Python's `sys.platform`
+        
+          - Various files on Linux systems:
+        
+            - `/proc/cpuinfo` (for processor info, Raspberry Pi hardware revisions, etc.)
+        
+            - `/proc/device-tree/compatible` (for 96Boards info)
+        
+          - Beaglebone EEPROM board IDs
+        
+          - Distribution-specific files such as `/etc/armbian-release`.
+        
+        The API is currently unstable and may change drastically in future releases.
+        
+        Installation
+        ============
+        
+        On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
+        PyPI <https://pypi.org/project/adafruit-circuitpython-motorkit/>`_. To install for current user:
+        
+        .. code-block:: shell
+        
+            pip3 install Adafruit-PlatformDetect
+        
+        To install system-wide (this may be required in some cases):
+        
+        .. code-block:: shell
+        
+            sudo pip3 install Adafruit-PlatformDetect
+        
+        To install in a virtual environment in your current project:
+        
+        .. code-block:: shell
+        
+            mkdir project-name && cd project-name
+            python3 -m venv .env
+            source .env/bin/activate
+            pip3 install Adafruit-PlatformDetect
+        
+        Usage
+        =====
+        
+        .. code-block:: python
+        
+            from adafruit_platformdetect import Detector
+            detector = Detector()
+            print("Chip id: ", detector.chip.id)
+            print("Board id: ", detector.board.id)
+        
+            # Check for specific board models:
+            print("Pi 3B+? ", detector.board.RASPBERRY_PI_3B_PLUS)
+            print("BBB? ", detector.board.BEAGLEBONE_BLACK)
+            print("Orange Pi PC? ", detector.board.ORANGE_PI_PC)
+            print("generic Linux PC? ", detector.board.GENERIC_LINUX_PC)
+        
+        See https://github.com/adafruit/Adafruit_Python_PlatformDetect/blob/master/bin/detect.py for more possible detectable boards
+        
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: Implementation :: MicroPython
+Requires-Python: >=3.4.0
+Description-Content-Type: text/x-rst

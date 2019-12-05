@@ -1,0 +1,30 @@
+Metadata-Version: 1.1
+Name: python-uinput
+Version: 0.11.2
+Summary: Pythonic API to Linux uinput kernel module.
+Home-page: http://tjjr.fi/sw/python-uinput/
+Author: Tuomas Räsänen
+Author-email: tuomasjjrasanen@tjjr.fi
+License: GPLv3+
+Download-URL: http://tjjr.fi/sw/python-uinput/releases/python-uinput-0.11.2.tar.gz
+Description: 
+        Python-uinput is Python interface to Linux uinput kernel module which
+        allows attaching userspace device drivers into kernel. In practice,
+        Python-uinput makes it dead simple to create virtual joysticks,
+        keyboards and mice for generating arbitrary input events
+        programmatically.
+        
+Platform: Linux
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Topic :: System :: Operating System Kernels :: Linux
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.1
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Programming Language :: Python :: 3.4
