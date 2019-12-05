@@ -7,6 +7,8 @@ Using Raspberry Pi 4: [Adafruit_MPR121](https://circuitpython.readthedocs.io/pro
 
 (old) Tests using Arduino: Requires libraries [Adafruit_MPR121](https://github.com/adafruit/Adafruit_MPR121) and [CapacitiveSensor](https://playground.arduino.cc/Main/CapacitiveSensor/)
 
+Run `pip3 install -r requirements.txt` in the `python` folder and then run `python3 serial-to-osc.py` to send th sensor data to SuperCollider via OSC.
+
 ## Visualization
 Uses Processing, requires library [oscP5](http://www.sojamo.de/libraries/oscP5/)
 
