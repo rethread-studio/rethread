@@ -1,6 +1,11 @@
 # retrash
 interactive installation for kids made from scrap electronics
 
+## Sensors
+Using Raspberry Pi 4: [Adafruit_MPR121](https://circuitpython.readthedocs.io/projects/mpr121/en/latest/index.html)
+
+(old) Tests using Arduino: Requires libraries [Adafruit_MPR121](https://github.com/adafruit/Adafruit_MPR121) and [CapacitiveSensor](https://playground.arduino.cc/Main/CapacitiveSensor/)
+
 ## Getting data from the sensors
 
 Run one of the python scripts `serial-to-osc.py` or `serial-to-osc2.py`
@@ -18,7 +23,9 @@ to start the visuals run
 ~~~
 $ node bridge.js
 ~~~
-and open index.html on a browser to view locally
+and open index.html on a browser to view locally.
+
+You can also run the visuals on a different machine by putting the IP address of the machine running the visuals in the `~visosc` `NetAddr` object in `main.scd` and running the node bridge and opening index.html on that machine.
 
 
 
