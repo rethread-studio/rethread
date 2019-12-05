@@ -55,7 +55,7 @@ openshot-qt==2.4.3
 osc4py3==1.0.8
 pdfarranger==1.1.1
 pexpect==4.6.0
-Pillow==5.4.1
+Pillow==6.2.0
 psutil==5.5.1
 PyAudio==0.2.11
 pycairo==1.16.2
