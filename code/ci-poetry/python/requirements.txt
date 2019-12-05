@@ -79,7 +79,7 @@ python-apt==1.8.4
 python-dateutil==2.7.3
 python-debian==0.1.34
 python-debianbts==2.8.2
-python-gnupg==0.4.4
+python-gnupg==0.4.5
 python-magic==0.4.16
 pytz==2018.9
 pyxdg==0.26
