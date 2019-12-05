@@ -8,7 +8,7 @@ Using Raspberry Pi 4: [Adafruit_MPR121](https://circuitpython.readthedocs.io/pro
 
 ## Getting data from the sensors
 
-Run one of the python scripts `serial-to-osc.py` or `serial-to-osc2.py`
+Run `pip3 install -r requirements.txt` in the `python` folder and then run `python3 serial-to-osc.py` to send th sensor data to SuperCollider via OSC.
 
 ## p5.js generative shapes
 Demo only visuals by pressing keys (q w e r t y u i o p a s d and c to clear) here: [https://editor.p5js.org/nadiacw/full/t9UswxDz4](https://editor.p5js.org/nadiacw/full/t9UswxDz4)
