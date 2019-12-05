@@ -14,3 +14,5 @@ Uses Processing, requires library [oscP5](http://www.sojamo.de/libraries/oscP5/)
 ## Sonification and editing of poem
 
 This is done through a SuperCollider program. The sonification implementation is in `sonification.scd` which is loaded and run by `main.scd`. `main.scd` also includes the logic for having the virtual poets edit the master poem and transfer the results to Processing via OSC.
+
+For the TTS part of the sonification, the [Festival Speech Synthesis System](http://www.cstr.ed.ac.uk/projects/festival/) needs to be installed as well as the [festvox CMU ARCTIC voices](http://www.festvox.org/cmu_arctic/).
