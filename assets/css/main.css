@@ -3504,8 +3504,9 @@ table.alt tbody tr td {
     background-position: top left, center center;
     background-attachment: fixed, fixed;
     background-size: auto, cover;
-    height: 100vh;
-    min-height: 35em;
+    height: 50vw;
+    width: 100%;
+    /* min-height: 35em; */
 }
 
 #header input[type="submit"],
@@ -3780,8 +3781,8 @@ table.alt tbody tr td {
 
 @media screen and (max-width: 980px) {
     #header {
-        height: auto;
-        min-height: 0;
+        /* height: auto; */
+        /* min-height: 0; */
     }
     #header .content {
         margin: -2em 4em 0 0;
