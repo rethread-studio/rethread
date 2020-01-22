@@ -3486,6 +3486,7 @@ table.alt tbody tr td {
 
 #header {
     /* background-color: #6a71f7; */
+    background-color: black;
     color: #d1e5f9;
     padding: 4.5em 0 2.5em 0;
     -moz-align-items: center;
