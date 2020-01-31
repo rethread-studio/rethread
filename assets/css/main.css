@@ -2148,7 +2148,7 @@ input[type="radio"]:focus+label:before {
 .image.fit {
     display: block;
     margin: 0 0 2em 0;
-    width: 100%;
+    width: 100% !important;
 }
 
 .image.fit img {
@@ -3776,7 +3776,7 @@ table.alt tbody tr td {
 
 @media screen and (max-width: 1280px) {
     #header {
-        background-image: url("images/overlay.png"), url("images/pattern-size2.svg");
+        /* background-image: url("images/overlay.png"), url("images/pattern-size2.svg"); */
     }
 }
 
@@ -3817,7 +3817,7 @@ table.alt tbody tr td {
 
 @media screen and (max-width: 736px) {
     #header {
-        background-image: url("images/overlay.png"), url("images/pattern-size3.svg");
+        /* background-image: url("images/overlay.png"), url("images/pattern-size3.svg"); */
     }
     #header h1 {
         font-size: 2em;
