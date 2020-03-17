@@ -7,8 +7,8 @@
 // Catch all the packages and do a simple sonification.
 (
 s.waitForBoot({
-// SynthDefs written by Eli Fieldsteel, https://sccode.org/1-5bA
-//fm synth
+	// SynthDefs written by Eli Fieldsteel, https://sccode.org/1-5bA
+	//fm synth
 	SynthDef(\fm, {
 		arg freq=500, mRatio=1, cRatio=1,
 		index=1, iScale=5, cAtk=4, cRel=(-4),
