@@ -78,7 +78,7 @@ let language_grid = new Grid([0.3, 0.2, 0.2, 0.1, 0.04, 0.02, 0.04, 0.03, 0.03, 
 let browser_grid = new Grid([0.8, 0.13, 0.07], NUM_INDICES);
 
 function randomizeGrids() {
-    let n_elements = Math.floor(Math.random() * 8 + 2);
+    let n_elements = Math.floor(Math.random() * 10 + 3);
     screen_size_grid.set_grid(getRandomGrid(n_elements));
     n_elements = Math.floor(Math.random() * 3 + 2);
     browser_grid.set_grid(getRandomGrid(n_elements));
@@ -107,6 +107,7 @@ let bars = 0;
 let chord_synth_i = 0;
 let chord_note_i = 0;
 let lead_synth_i = 0;
+let lead_note_i = 0;
 
 let play = {
     bassDrum : false,
@@ -310,7 +311,12 @@ function generateChord() {
             chord.push(extraNotes[j] + (12*(i+1)));
         }
     }
+    if(browser_bias_i <= 1) {
+        chord = chord.sort();
+    }
 }
+
+
 
 function gridPlayback(time) {
     chord = chords[0];
@@ -340,16 +346,26 @@ function gridPlayback(time) {
     snareSynth.volume.value = snare_db;
     snareSynth.triggerAttackRelease('16n', time);
 
+    // LEAD SYNTH
     let leadDensity = Math.floor(screen_size_grid.value(6) * 24 + 1);
+    let leadOctave = 48;
+    if(screen_size_grid.value(15) > 0.5/screen_size_grid.grid.length) {
+        leadOctave += 12;
+    }
     if(counter%leadDensity == 0) {
         let db = amp2db(browser_grid.value(5) * 0.5);
         leadSynths[lead_synth_i].volume.value = db;
-        let note = chord[Math.floor((canvas_grid.value(7) + browser_grid.value(6))*0.5*chord.length)];
-        note = Tone.Frequency(note-12, "midi"),
+        // add -1 or 1 to the lead_note_i, creating a random walk
+        lead_note_i = (lead_note_i + ((Math.random() > 0.4) * 2 - 1)) % chord.length;
+        if (lead_note_i < 0) lead_note_i += chord.length;
+        let note = chord[lead_note_i];
+        note = note % 12 + leadOctave; // bring the note into a specific range
+        note = Tone.Frequency(note, "midi"),
         leadSynths[lead_synth_i].triggerAttackRelease(note, "8n.", time);
         lead_synth_i = (lead_synth_i+1) % leadSynths.length;
     }
 
+    // BASS DRUM
     if(language_grid.value(1) > 0.1) {
         let db = amp2db(language_grid.value(0));
         bassSynth.volume.value = db;
@@ -357,8 +373,10 @@ function gridPlayback(time) {
         note = Tone.Frequency(note-48, "midi");
         bassSynth.triggerAttackRelease(note, "1n", time);
     }
-
-    if(counter%1 == 0) {
+    // CHORD
+    let chordDensity = 1 + (language_grid.value(15) < 1/language_grid.grid.length);
+    console.log("chordDensity: " + chordDensity);
+    if(counter%chordDensity == 0) {
         chord_note_i %= chord.length;
         
         let num_notes = Math.floor(browser_grid.value(11) * 3 + 1);
