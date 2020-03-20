@@ -13,6 +13,10 @@ class Index {
     progress() {
         this.v = (this.v+1) % this.length;
     }
+    set_length(length) {
+        this.length = length;
+        this.v = this.v % this.length;
+    }
 }
 
 class Grid {
@@ -30,6 +34,12 @@ class Grid {
     }
     progress(i) {
         this.indices[i].progress();
+    }
+    set_grid(grid) {
+        this.grid = grid;
+        for(let i = 0; i < this.indices.length; i++) {
+            this.indices[i].set_length(this.grid.length);
+        }
     }
 }
 
@@ -54,6 +64,7 @@ let chords = [
     [72, 75, 79, 82, 84],
     [84, 87, 91, 94, 96],
 ];
+let root_note = 60;
 
 const NUM_INDICES = 16;
 
@@ -66,6 +77,30 @@ let language_grid = new Grid([0.3, 0.2, 0.2, 0.1, 0.04, 0.02, 0.04, 0.03, 0.03, 
 // Could be browser as in Firefox/Chrome/Safari or browser versions etc.
 let browser_grid = new Grid([0.8, 0.13, 0.07], NUM_INDICES);
 
+function randomizeGrids() {
+    let n_elements = Math.floor(Math.random() * 8 + 2);
+    screen_size_grid.set_grid(getRandomGrid(n_elements));
+    n_elements = Math.floor(Math.random() * 3 + 2);
+    browser_grid.set_grid(getRandomGrid(n_elements));
+    n_elements = Math.floor(Math.random() * 10 + 2);
+    language_grid.set_grid(getRandomGrid(n_elements));
+    n_elements = Math.floor(Math.random() * 16 + 4);
+    canvas_grid.set_grid(getRandomGrid(n_elements));
+}
+
+function getRandomGrid(num_elements) {
+    let grid = [];
+    for(let i = 0; i < num_elements; i++) {
+        grid.push(Math.random());
+    }
+    return normalizeArray(grid);
+}
+
+function normalizeArray(array) {
+    let normalizer = 1/array.reduce((a, b) => a + b, 0);
+    let normalizedArray = array.map(x => x * normalizer);
+    return normalizedArray;
+}
 
 let counter = 0;
 let bars = 0;
@@ -90,7 +125,7 @@ function setup() {
 
     reverb = new Tone.Reverb(0.5).toMaster();
     reverb.generate();
-    longverb = new Tone.Reverb(3).toMaster();
+    longverb = new Tone.Reverb(8).toMaster();
     longverb.generate();
 
     bassSynth = new Tone.MembraneSynth(
@@ -108,7 +143,7 @@ function setup() {
                 attackCurve : "exponential"
                 } 
         }
-    ).toMaster();
+    ).connect(longverb).toMaster();
 
     snareSynth = new Tone.NoiseSynth(
         {
@@ -211,49 +246,7 @@ function setup() {
     }
     
 
-    
-
     Tone.Transport.bpm.value = 140;
-    let beatCounter = 0;
-    let beatBars = 0;
-    loopBeat = new Tone.Loop(function(time){
-        if(beatCounter%2 === 0 && play.bassDrum) {
-            bassSynth.triggerAttackRelease('c1', '8n', time);
-            bassSynth.pitchDecay = Math.random() * 0.1 + 0.05;
-            bassSynth.octaves = Math.random() * 5 + 5;
-        }
-        
-        if( ( (beatCounter+2) % 4 === 0 || beatCounter === 13) && play.snare ) {
-            snareSynth.triggerAttackRelease('8n', time);
-            if(beatCounter===14) {
-                if(Math.random() > 0.0) { // && beatBars%2 === 1) {
-                    let selected = Math.random();
-                    if(selected < 0.3) {
-                        snareSynth.triggerAttackRelease('16n', '@8n');
-                        snareSynth.triggerAttackRelease('16n', '@8n.');
-                    } else if (selected >= 0.3 && selected < 0.66) {
-                        // scheduling with @ on the transport doesn't seem to work with triplets
-                        snareSynth.triggerAttackRelease('16n', '+8n');
-                        snareSynth.triggerAttackRelease('16n', '+8t');
-                        snareSynth.triggerAttackRelease('16n', '+4t');
-                    } else {
-                        snareSynth.triggerAttackRelease('16n', '@16n');
-                        snareSynth.triggerAttackRelease('16n', '@8n');
-                        snareSynth.triggerAttackRelease('16n', '@8n.');
-                    }
-                }
-            }
-        }
-
-        // if(beatCounter%2 === 1) {
-        //     snareSynth.volume.value = -12;
-        //     snareSynth.triggerAttackRelease('8n', time);
-        // }
-
-        beatCounter = (beatCounter+1)%16;
-        beatBars = (beatBars+1) % 8;
-    }, '8n');
-    loopBeat.start(0);
 
     let gridLoop = new Tone.Loop(gridPlayback, '8n');
     gridLoop.start(0);
@@ -271,6 +264,54 @@ function setup() {
 let note = chord[0];
 let noteIndex = 0;
 
+/// Construct a chord based on the current grids so that it only changes when the grids change
+/// TODO: first choose a scale, then create the chord?
+function generateChord() {
+    let canvas_grid_size = canvas_grid.grid.length;
+    let browser_grid_size = browser_grid.grid.length;
+    let language_grid_size = language_grid.grid.length;
+    let screen_size_grid_size = screen_size_grid.grid.length;
+    // What it the highest value in the array?
+    let screen_size_bias = Math.max.apply(Math, screen_size_grid.grid);
+    let screen_size_bias_i = screen_size_grid.grid.indexOf(screen_size_bias);
+    let language_bias = Math.max.apply(Math, language_grid.grid);
+    let language_bias_i = language_grid.grid.indexOf(language_bias);
+    let browser_bias = Math.max.apply(Math, browser_grid.grid);
+    let browser_bias_i = browser_grid.grid.indexOf(browser_bias);
+    
+    let root_note = 20 + canvas_grid_size + browser_grid_size + language_grid_size + screen_size_grid_size;
+    let third = 4;
+    if(browser_bias > 0.5) {
+        third = 3;
+    }
+    chord = [root_note, root_note + 7];
+    // chord[0] += Math.floor((screen_size_grid.value(15)) * 12);
+    if(screen_size_bias > 0.3) {
+        chord.push(chord[0] + third);
+    } else {
+        chord.push(chord[0] + third + 12);
+    }
+    if(screen_size_bias_i > 2) {
+        chord.push(chord[0] + 13);
+    } else {
+        chord.push(chord[0] + 14);
+    }
+    if(language_bias < 0.4) {
+        chord.push(chord[0] + 19);
+        chord.push(chord[0] + 21);
+    }
+    if(language_bias_i > 1) {
+        chord.push(chord[0] + 11);
+    }
+    let octaves = Math.floor((screen_size_grid.value(15)) * 4);
+    let extraNotes = chord.slice();
+    for(let i = 0; i < octaves; i++) {
+        for(let j = 0; j < extraNotes.length; j++) {
+            chord.push(extraNotes[j] + (12*(i+1)));
+        }
+    }
+}
+
 function gridPlayback(time) {
     chord = chords[0];
 
@@ -287,33 +328,27 @@ function gridPlayback(time) {
     } else {
         chord.push(chord[0] + 8);
     }
-    let octaves = Math.floor((screen_size_grid.value(15)) * 4);
-    let extraNotes = chord.slice();
-    for(let i = 0; i < octaves; i++) {
-        for(let j = 0; j < extraNotes.length; j++) {
-            chord.push(extraNotes[j] + (12*(i+1)));
-        }
-    }
+    
     chord.sort();
-    console.log("chord: " + chord);
 
-    chord = [60, 64, 67, 69, 72, 72, 79];
+    chord = [60, 64, 67, 69, 72, 74, 79];
+
+    generateChord();
 
     let snare_amp = (screen_size_grid.value(0)*0.5 + screen_size_grid.value(3)*0.25 + language_grid.value(1)*0.25);
     let snare_db = amp2db(snare_amp*0.5 * browser_grid.value(15));
     snareSynth.volume.value = snare_db;
     snareSynth.triggerAttackRelease('16n', time);
 
-    // let leadDensity = Math.floor(screen_size_grid.value(6) * 24 + 1);
-    // if(counter%leadDensity == 0) {
-    //     console.log("leadDensity: " + leadDensity);
-    //     let db = amp2db(browser_grid.value(5) * 0.5);
-    //     leadSynths[lead_synth_i].volume.value = db;
-    //     let note = chord[Math.floor((canvas_grid.value(7) + browser_grid.value(6))*0.5*chord.length)];
-    //     note = Tone.Frequency(note-12, "midi"),
-    //     leadSynths[lead_synth_i].triggerAttackRelease(note, "8n.", time);
-    //     lead_synth_i = (lead_synth_i+1) % leadSynths.length;
-    // }
+    let leadDensity = Math.floor(screen_size_grid.value(6) * 24 + 1);
+    if(counter%leadDensity == 0) {
+        let db = amp2db(browser_grid.value(5) * 0.5);
+        leadSynths[lead_synth_i].volume.value = db;
+        let note = chord[Math.floor((canvas_grid.value(7) + browser_grid.value(6))*0.5*chord.length)];
+        note = Tone.Frequency(note-12, "midi"),
+        leadSynths[lead_synth_i].triggerAttackRelease(note, "8n.", time);
+        lead_synth_i = (lead_synth_i+1) % leadSynths.length;
+    }
 
     if(language_grid.value(1) > 0.1) {
         let db = amp2db(language_grid.value(0));
@@ -323,8 +358,7 @@ function gridPlayback(time) {
         bassSynth.triggerAttackRelease(note, "1n", time);
     }
 
-    if(counter%2 == 0) {
-        
+    if(counter%1 == 0) {
         chord_note_i %= chord.length;
         
         let num_notes = Math.floor(browser_grid.value(11) * 3 + 1);
@@ -332,13 +366,12 @@ function gridPlayback(time) {
             chordSynths[chord_synth_i].volume.value = amp2db(language_grid.value(4));
             chordSynths[chord_synth_i]
                 .triggerAttackRelease(
-                    Tone.Frequency(chord[chord_note_i], "midi"),
+                    Tone.Frequency(chord[chord.length-1-chord_note_i], "midi"),
                     '8n',
                     time
                 );
             chord_synth_i = (chord_synth_i + 1) % chordSynths.length;
             chord_note_i = (chord_note_i + 1) % chord.length;
-            console.log("chord_note_i: " + chord_note_i + " chord.length: " + chord.length);
         }
     }
     // Progress the different indexes
@@ -375,3 +408,5 @@ document.getElementById("test").onclick = function(){
             );
         });
 }
+
+document.getElementById('randomize-grids').onclick = randomizeGrids;
