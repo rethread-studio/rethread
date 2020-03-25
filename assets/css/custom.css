@@ -12,3 +12,20 @@
     width: 100%;
     height: 100%;
 }
+
+/* Image gallery flexbox */
+.gallery-container {
+    display: flex; /* or inline-flex */
+    flex-direction: row;
+    justify-content: space-between;
+}
+@media screen and (max-width: 736px) {
+    .gallery-container {
+        display: flex; /* or inline-flex */
+        flex-direction: column;
+        justify-content: space-between;
+    }
+}
+.gallery-container span,img,div {
+    margin: 0.5em;
+}
