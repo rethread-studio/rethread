@@ -11,98 +11,43 @@ var camera = new THREE.PerspectiveCamera(
   nearClipping,
   farClipping
 );
-camera.position.z = 800;
+camera.position.z = 1000;
 let delta = 0;
 const clock = new THREE.Clock();
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(width, height);
-renderer.autoClearColor = false;
+renderer.setClearColor(0xed560b, 1);
 document.body.appendChild(renderer.domElement);
 
-function roundedCornerLine(points, radius, smoothness, closed) {
-  radius = radius !== undefined ? radius : 0.1;
-  smoothness = smoothness !== undefined ? Math.floor(smoothness) : 3;
-  closed = closed !== undefined ? closed : false;
-
-  let geometry = new THREE.BufferGeometry();
-
-  if (points === undefined) {
-    console.log("RoundedCornerLine: 'points' is undefined");
-    return geometry;
+function roundedCornerLine(points, radius, smoothness, weight) {
+  var nurbsControlPoints = [];
+  var nurbsKnots = [];
+  var nurbsDegree = 2; // quadratic
+  for (let i = 0; i <= nurbsDegree; i++) {
+    nurbsKnots.push(0);
   }
-  if (points.length < 3) {
-    console.log(
-      "RoundedCornerLine: 'points' has insufficient length (should be equal or greater than 3)"
+  for (let i = 0, j = points.length; i < j; i++) {
+    nurbsControlPoints.push(
+      new THREE.Vector4(
+        points[i].x,
+        points[i].y,
+        points[i].z,
+        i === 1 ? weight : 1
+      )
     );
-    return geometry.setFromPoints(points);
+    let knot = (i + 1) / (j - nurbsDegree);
+    nurbsKnots.push(THREE.Math.clamp(knot, 0, 1));
   }
-
-  // minimal segment
-  let minVector = new THREE.Vector3();
-  let minLength = minVector.subVectors(points[0], points[1]).length();
-  for (let i = 1; i < points.length - 1; i++) {
-    minLength = Math.min(
-      minLength,
-      minVector.subVectors(points[i], points[i + 1]).length()
-    );
-  }
-  if (closed) {
-    minLength = Math.min(
-      minLength,
-      minVector.subVectors(points[points.length - 1], points[0]).length()
-    );
-  }
-
-  radius = radius > minLength * 0.5 ? minLength * 0.5 : radius; // radius can't be greater than a half of a minimal segment
-
-  let startIndex = 1;
-  let endIndex = points.length - 2;
-  if (closed) {
-    startIndex = 0;
-    endIndex = points.length - 1;
-  }
-
-  let curvePath = new THREE.CurvePath();
-
-  for (let i = startIndex; i <= endIndex; i++) {
-    let iStart = i - 1 < 0 ? points.length - 1 : i - 1;
-    let iMid = i;
-    let iEnd = i + 1 > points.length - 1 ? 0 : i + 1;
-    let pStart = points[iStart];
-    let pMid = points[iMid];
-    let pEnd = points[iEnd];
-
-    // key points
-    let keyStart = new THREE.Vector3().subVectors(pStart, pMid).normalize();
-    let keyMid = pMid;
-    let keyEnd = new THREE.Vector3().subVectors(pEnd, pMid).normalize();
-
-    let halfAngle = keyStart.angleTo(keyEnd) * 0.5;
-
-    let keyLength = radius / Math.tan(halfAngle);
-
-    keyStart.multiplyScalar(keyLength).add(keyMid);
-    keyEnd.multiplyScalar(keyLength).add(keyMid);
-
-    curvePath.add(new THREE.QuadraticBezierCurve3(keyStart, keyMid, keyEnd));
-  }
-
-  let curvePoints = curvePath.getPoints(smoothness);
-
-  let fullPoints = [];
-  if (!closed) {
-    fullPoints.push(points[0]);
-  }
-  fullPoints = fullPoints.concat(curvePoints);
-  if (!closed) {
-    fullPoints.push(points[points.length - 1]);
-  } else {
-    fullPoints.push(fullPoints[0].clone());
-  }
-
-  return geometry.setFromPoints(fullPoints);
+  let nurbsCurve = new THREE.NURBSCurve(
+    nurbsDegree,
+    nurbsKnots,
+    nurbsControlPoints
+  );
+  return new THREE.BufferGeometry().setFromPoints(
+    nurbsCurve.getPoints(smoothness)
+  );
 }
 
 let fingerPrints = [];
@@ -111,8 +56,8 @@ const values = {};
 const points = [];
 const points_geometry = new THREE.Geometry();
 var particle_system_material = new THREE.PointsMaterial({
-  color: 0xffffff,
-  size: 1
+  color: 0xc7cc00,
+  size: 2
 });
 let particleSystem = null;
 $.ajax({
@@ -143,10 +88,11 @@ $.ajax({
       particle_system_material
     );
     scene.add(particleSystem);
+    renderFingerPrint();
   }
 });
 
-var material = new THREE.LineDashedMaterial({ color: 0xffffff, linewidth: 1 });
+var material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 5 });
 var line = new THREE.Line(new THREE.BufferGeometry(), material);
 scene.add(line);
 
@@ -166,21 +112,22 @@ function renderFingerPrint() {
     p.push(values[v]);
   }
   var radius = 10;
-  var smoothness = 12;
-  line.geometry = roundedCornerLine(p, radius, smoothness, false);
+  var smoothness = 1000;
+  line.geometry = roundedCornerLine(p, radius, smoothness, 1);
 }
-setInterval(renderFingerPrint, 1000);
+renderFingerPrint();
+setInterval(renderFingerPrint, 2500);
 
-light = new THREE.DirectionalLight(0xffffff, 0.7);
+light = new THREE.DirectionalLight(0xeb2a00, 0.8);
 light.position.set(-1, 0, 1);
 scene.add(light);
 
 const smokeTexture = new THREE.TextureLoader().load("data/Smoke-Element.png");
 const smokeMaterial = new THREE.MeshLambertMaterial({
-  color: 0xffffff,
+  color: 0xeb2a00,
   map: smokeTexture,
   transparent: true,
-  opacity: 0.22
+  opacity: 0.1
 });
 const smokeGeo = new THREE.PlaneGeometry(400, 400);
 const smokeParticles = [];
@@ -200,7 +147,7 @@ for (p = 0; p < 150; p++) {
 function evolveSmoke() {
   var sp = smokeParticles.length;
   while (sp--) {
-    smokeParticles[sp].rotation.z += delta * 0.15;
+    smokeParticles[sp].rotation.z += delta * 0.2;
   }
 }
 
@@ -208,8 +155,8 @@ function animate() {
   requestAnimationFrame(animate);
   delta = clock.getDelta();
   if (particleSystem) {
-    particleSystem.rotateY(delta * 0.1);
-    line.rotateY(delta * 0.1);
+    particleSystem.rotateY(delta * 0.005);
+    line.rotateY(delta * 0.005);
   }
   evolveSmoke();
   renderer.render(scene, camera);
