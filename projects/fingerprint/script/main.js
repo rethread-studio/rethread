@@ -11,7 +11,7 @@ var camera = new THREE.PerspectiveCamera(
   nearClipping,
   farClipping
 );
-camera.position.z = 1000;
+camera.position.z = 800;
 let delta = 0;
 const clock = new THREE.Clock();
 
@@ -21,11 +21,100 @@ renderer.setSize(width, height);
 renderer.autoClearColor = false;
 document.body.appendChild(renderer.domElement);
 
+function roundedCornerLine(points, radius, smoothness, closed) {
+  radius = radius !== undefined ? radius : 0.1;
+  smoothness = smoothness !== undefined ? Math.floor(smoothness) : 3;
+  closed = closed !== undefined ? closed : false;
+
+  let geometry = new THREE.BufferGeometry();
+
+  if (points === undefined) {
+    console.log("RoundedCornerLine: 'points' is undefined");
+    return geometry;
+  }
+  if (points.length < 3) {
+    console.log(
+      "RoundedCornerLine: 'points' has insufficient length (should be equal or greater than 3)"
+    );
+    return geometry.setFromPoints(points);
+  }
+
+  // minimal segment
+  let minVector = new THREE.Vector3();
+  let minLength = minVector.subVectors(points[0], points[1]).length();
+  for (let i = 1; i < points.length - 1; i++) {
+    minLength = Math.min(
+      minLength,
+      minVector.subVectors(points[i], points[i + 1]).length()
+    );
+  }
+  if (closed) {
+    minLength = Math.min(
+      minLength,
+      minVector.subVectors(points[points.length - 1], points[0]).length()
+    );
+  }
+
+  radius = radius > minLength * 0.5 ? minLength * 0.5 : radius; // radius can't be greater than a half of a minimal segment
+
+  let startIndex = 1;
+  let endIndex = points.length - 2;
+  if (closed) {
+    startIndex = 0;
+    endIndex = points.length - 1;
+  }
+
+  let curvePath = new THREE.CurvePath();
+
+  for (let i = startIndex; i <= endIndex; i++) {
+    let iStart = i - 1 < 0 ? points.length - 1 : i - 1;
+    let iMid = i;
+    let iEnd = i + 1 > points.length - 1 ? 0 : i + 1;
+    let pStart = points[iStart];
+    let pMid = points[iMid];
+    let pEnd = points[iEnd];
+
+    // key points
+    let keyStart = new THREE.Vector3().subVectors(pStart, pMid).normalize();
+    let keyMid = pMid;
+    let keyEnd = new THREE.Vector3().subVectors(pEnd, pMid).normalize();
+
+    let halfAngle = keyStart.angleTo(keyEnd) * 0.5;
+
+    let keyLength = radius / Math.tan(halfAngle);
+
+    keyStart.multiplyScalar(keyLength).add(keyMid);
+    keyEnd.multiplyScalar(keyLength).add(keyMid);
+
+    curvePath.add(new THREE.QuadraticBezierCurve3(keyStart, keyMid, keyEnd));
+  }
+
+  let curvePoints = curvePath.getPoints(smoothness);
+
+  let fullPoints = [];
+  if (!closed) {
+    fullPoints.push(points[0]);
+  }
+  fullPoints = fullPoints.concat(curvePoints);
+  if (!closed) {
+    fullPoints.push(points[points.length - 1]);
+  } else {
+    fullPoints.push(fullPoints[0].clone());
+  }
+
+  return geometry.setFromPoints(fullPoints);
+}
+
 let fingerPrints = [];
 let headers = [];
 const values = {};
 const points = [];
 const points_geometry = new THREE.Geometry();
+var particle_system_material = new THREE.PointsMaterial({
+  color: 0xffffff,
+  size: 1
+});
+let particleSystem = null;
 $.ajax({
   type: "GET",
   url: "data/amiunique-fp.min.csv",
@@ -42,14 +131,14 @@ $.ajax({
           values[v] = new THREE.Vector3(
             Math.random() * 1000 - 500,
             Math.random() * 1000 - 500,
-            Math.random() * 1000 - 250
+            Math.random() * 1000 - 500
           );
           points.push(values[v]);
         }
       }
     }
     points_geometry.setFromPoints(points);
-    var particleSystem = new THREE.Points(
+    particleSystem = new THREE.Points(
       points_geometry,
       particle_system_material
     );
@@ -57,15 +146,8 @@ $.ajax({
   }
 });
 
-
-
-var material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 0.1 });
-var particle_system_material = new THREE.PointsMaterial({
-  color: 0xffffff,
-  size: 1
-});
-var geometry = new THREE.BufferGeometry().setFromPoints([]);
-var line = new THREE.Line(geometry, material);
+var material = new THREE.LineDashedMaterial({ color: 0xffffff, linewidth: 1 });
+var line = new THREE.Line(new THREE.BufferGeometry(), material);
 scene.add(line);
 
 function getRandomFingerPrint() {
@@ -77,14 +159,15 @@ function renderFingerPrint() {
     return;
   }
   const p = [];
-  let fingerPrint = getRandomFingerPrint()
+  let fingerPrint = getRandomFingerPrint();
   const vs = fingerPrint.split(",");
   for (let i in vs) {
     let v = headers[i] + "_" + vs[i];
-    p.push(values[v])
+    p.push(values[v]);
   }
-  line.geometry = new THREE.BufferGeometry().setFromPoints(p);
-  // line.geometry.rotateY(delta * 0.2);
+  var radius = 10;
+  var smoothness = 12;
+  line.geometry = roundedCornerLine(p, radius, smoothness, false);
 }
 setInterval(renderFingerPrint, 1000);
 
@@ -124,7 +207,10 @@ function evolveSmoke() {
 function animate() {
   requestAnimationFrame(animate);
   delta = clock.getDelta();
-  // points_geometry.rotateZ(delta * 0.01);
+  if (particleSystem) {
+    particleSystem.rotateY(delta * 0.1);
+    line.rotateY(delta * 0.1);
+  }
   evolveSmoke();
   renderer.render(scene, camera);
 }
