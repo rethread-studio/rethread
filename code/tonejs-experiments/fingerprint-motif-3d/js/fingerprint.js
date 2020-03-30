@@ -42,6 +42,7 @@ class Motif {
     }
     addDur(v) {
         this.pitches.push(pitchSet[5]);
+        // this.pitches.push(110);
         this.durations.push(v%6 + 1);
     }
     changePitch(i, newPitchIndex) {
@@ -136,7 +137,8 @@ class Fingerprint {
             this.material.opacity = distance2/100;
         }
         this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2/100), 1.0));
-        let numParameters = 24 - (distance2/20);
+        this.synth.envelope.release = Math.max(0.5 - distance2/500, 0.002);
+        let numParameters = 24 - (distance2/40);
         if(numParameters != this.numParameters) {
             this.numParametersUsed = numParameters;
             this.updateMotif();

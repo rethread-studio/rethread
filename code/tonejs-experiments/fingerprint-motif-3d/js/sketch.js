@@ -44,7 +44,7 @@ function setup() {
 
     reverb = new Tone.Reverb(0.5).toMaster();
     reverb.generate();
-    longverb = new Tone.Reverb(8).toMaster();
+    longverb = new Tone.Reverb(6).toMaster();
     longverb.generate();
 
     fmSynth = new Tone.FMSynth( {

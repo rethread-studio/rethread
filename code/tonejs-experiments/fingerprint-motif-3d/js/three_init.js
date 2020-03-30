@@ -19,7 +19,7 @@ var color = new THREE.Color();
 // SCENE
 var scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x555555 );
-scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+scene.fog = new THREE.FogExp2( 0x555555, 0.02 );
 
 var renderer = new THREE.WebGLRenderer( { antialias: true } );
 renderer.setPixelRatio( window.devicePixelRatio );
@@ -28,12 +28,6 @@ document.body.appendChild( renderer.domElement );
 
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
 camera.position.y = 10;
-
-var geometry = new THREE.BoxGeometry();
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-var cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
-material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
 
 var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
 light.position.set( 0.5, 1, 0.75 );
@@ -159,8 +153,6 @@ function onWindowResize() {
 
 function animate() {
     requestAnimationFrame( animate );
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
     // controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
 
     // PointerLockControl
