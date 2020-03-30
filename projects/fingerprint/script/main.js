@@ -88,19 +88,23 @@ $.ajax({
       particle_system_material
     );
     scene.add(particleSystem);
-    renderFingerPrint();
+    renderFingerPrints();
   }
 });
 
 var material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 5 });
-var line = new THREE.Line(new THREE.BufferGeometry(), material);
-scene.add(line);
+const lines = []
+for (let i = 0; i < 10; i++) {
+  const line = new THREE.Line(new THREE.BufferGeometry(), material);
+  scene.add(line)
+  lines.push(line);
+}
 
 function getRandomFingerPrint() {
   return fingerPrints[Math.floor(fingerPrints.length * Math.random())];
 }
 
-function renderFingerPrint() {
+function renderFingerPrint(line) {
   if (fingerPrints.length == 0) {
     return;
   }
@@ -115,8 +119,12 @@ function renderFingerPrint() {
   var smoothness = 1000;
   line.geometry = roundedCornerLine(p, radius, smoothness, 1);
 }
-renderFingerPrint();
-setInterval(renderFingerPrint, 2500);
+function renderFingerPrints() {
+  for(let line of lines) {
+    renderFingerPrint(line)
+  }
+}
+setInterval(renderFingerPrints, 2500);
 
 light = new THREE.DirectionalLight(0xeb2a00, 0.8);
 light.position.set(-1, 0, 1);
@@ -155,8 +163,10 @@ function animate() {
   requestAnimationFrame(animate);
   delta = clock.getDelta();
   if (particleSystem) {
-    particleSystem.rotateY(delta * 0.005);
-    line.rotateY(delta * 0.005);
+    // particleSystem.rotateY(delta * 0.005);
+    // for (let line of lines) {
+    //   line.rotateY(delta * 0.5);
+    // }
   }
   evolveSmoke();
   renderer.render(scene, camera);
