@@ -6,6 +6,41 @@
 		<style>
 			body { margin: 0; }
 			canvas { width: 100%; height: 100% }
+			#blocker {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0,0,0,0.5);
+			}
+
+			#instructions {
+				width: 100%;
+				height: 100%;
+
+				display: -webkit-box;
+				display: -moz-box;
+				display: box;
+
+				-webkit-box-orient: horizontal;
+				-moz-box-orient: horizontal;
+				box-orient: horizontal;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+
+				-webkit-box-align: center;
+				-moz-box-align: center;
+				box-align: center;
+
+				color: #ffffff;
+				text-align: center;
+				font-family: Arial;
+				font-size: 14px;
+				line-height: 24px;
+
+				cursor: pointer;
+			}
 		</style>
 	</head>
 	<body>
@@ -29,23 +64,23 @@
 			<tone-play-toggle></tone-play-toggle>
 		</tone-demo> -->
 
-		<button id="start-stop">Start/stop</button>
+		<!-- <button id="start-stop">Start/stop</button>
 		<button id="test1">Test1</button>
 		<button id="test2">Test2</button>
 		<button id="test3">Add fingerprint motif</button>
 		<button id="clear-timeline">Clear Timeline</button>
 		<button id="randomize-grids">Randomize grids</button>
-		<label for="quantity">Number of fingerprint parameters used:</label>
-		<input type="number" id="numParameters" name="numParameters" min="1" max="29"> 
+		<label for="quantity">Number of fingerprint parameters used:</label> -->
+		<!-- <input type="number" id="numParameters" name="numParameters" min="1" max="29">  -->
 		<div id="data"></div>
 		<div id="blocker">
 
 			<div id="instructions">
-				<span style="font-size:36px">Click to play</span>
+				<span style="font-size:36px">Click to activate</span>
 				<br /><br />
 				Move: WASD<br/>
-				Jump: SPACE<br/>
-				Look: MOUSE
+				Look: MOUSE<br/>
+				Activation field size: Q/E
 			</div>
 
 		</div>

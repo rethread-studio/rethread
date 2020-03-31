@@ -8,6 +8,12 @@ let numParametersUsed = 24;
 let fmSynth;
 let fmSynth2;
 let fmSynth3;
+let chorus;
+let reverb;
+let longverb;
+let midverb;
+
+let oscillators = ["sine", "square", "triangle", "sawtooth"];
 
 let fm2_lfo1;
 let fm2_lfo2;
@@ -34,7 +40,7 @@ function setup() {
             }
           }
           // Render a few fingerprints per default
-            for(let i = 0; i < 10; i++) {
+            for(let i = 0; i < 40; i++) {
                 renderFingerPrint();
             }
         }
@@ -44,8 +50,12 @@ function setup() {
 
     reverb = new Tone.Reverb(0.5).toMaster();
     reverb.generate();
+    midverb = new Tone.Reverb(2.5).toMaster();
+    midverb.generate();
     longverb = new Tone.Reverb(6).toMaster();
     longverb.generate();
+
+    chorus = new Tone.Chorus(1.5, 0.5, 0.3).connect(midverb).toMaster();
 
     fmSynth = new Tone.FMSynth( {
             harmonicity : 3 ,
@@ -145,7 +155,7 @@ function setup() {
             Tone.Transport.toggle();
             console.log("Toggled transport");
         })
-    //Tone.Transport.start();
+    // Tone.Transport.start();
 
 }
 
@@ -155,29 +165,64 @@ function newSynth(){
             modulationIndex : Math.floor(Math.pow(Math.random(), 2.0) * 10) + 1 ,
             detune : 0 ,
             oscillator : {
-            type : "sine"
-        },
-        envelope : {
-            attack : 0.01 ,
-            decay : 0.01 ,
-            sustain : 1 ,
-            release : 0.2
-        },
-        modulation : {
-            type : "square"
-        },
-            modulationEnvelope : {
-            attack : 0.5 ,
-            decay : 0 ,
-            sustain : 1 ,
-            release : 0.5
+                type : "sine"
+            },
+            envelope : {
+                attack : 0.01 ,
+                decay : 0.01 ,
+                sustain : 1 ,
+                release : 0.2
+            },
+            modulation : {
+                type : "square"
+            },
+                modulationEnvelope : {
+                attack : 0.5 ,
+                decay : 0 ,
+                sustain : 1 ,
+                release : 0.5
+                }
             }
-        }
-    ).connect(longverb).toMaster();
+    ).connect(chorus);
     synth.volume.value = -10;
     // synth.sync();
     synths.push(synth);
     return synth;
+}
+
+function newNoiseSynth() {
+    // let newSynth = new Tone.NoiseSynth(
+    //     {
+    //         noise : {
+    //             type : "pink"
+    //         },
+    //         envelope : {
+    //             attack : 0.005 ,
+    //             decay : 0.01 ,
+    //             sustain : 0.001
+    //         }
+    //     }   
+    // ).chain(chorus, reverb);
+    // newSynth.volume.value = -12;
+
+    let newSynth = new Tone.MembraneSynth( {
+        pitchDecay : 0.05 ,
+        octaves : 10 ,
+        oscillator : {
+        type : "sine"
+        }
+        ,
+        envelope : {
+        attack : 0.005 ,
+        decay : 0.4 ,
+        sustain : 0.01 ,
+        release : 1.4 ,
+        attackCurve : "exponential"
+        }
+        }
+        ).chain(chorus, reverb).toMaster();
+    newSynth.volume.value = -10;
+    return newSynth;
 }
 
 function getRandomFingerPrint() {
@@ -189,7 +234,8 @@ function renderFingerPrint() {
       return;
     }
     const p = [];
-    let fingerprint = new Fingerprint(getRandomFingerPrint(), Math.random() * 40, Math.random() * 40, Math.random() * 40);
+    let size = 140;
+    let fingerprint = new Fingerprint(getRandomFingerPrint(), Math.random() * size - (size/2), Math.random() * size - (size/2), Math.random() * size - (size/2));
     fingerprints.push(fingerprint);
 }
 
@@ -199,34 +245,34 @@ StartAudioContext(Tone.context, 'start-stop').then(function(){
 })
 
 let fmSynthOn = false;
-document.getElementById("test1").onclick = function(){
-    if(!fmSynthOn) {
-        fmSynth.triggerAttack("c2");
-    } else {
-        fmSynth.triggerRelease();
-    }
-    fmSynthOn = !fmSynthOn;
-}
+// document.getElementById("test1").onclick = function(){
+//     if(!fmSynthOn) {
+//         fmSynth.triggerAttack("c2");
+//     } else {
+//         fmSynth.triggerRelease();
+//     }
+//     fmSynthOn = !fmSynthOn;
+// }
 
-document.getElementById("test2").onclick = function(){
-    fmSynth2.triggerAttack("c2");
-}
+// document.getElementById("test2").onclick = function(){
+//     fmSynth2.triggerAttack("c2");
+// }
 
-document.getElementById("test3").onclick = function(){
-    renderFingerPrint();
-}
+// document.getElementById("test3").onclick = function(){
+//     renderFingerPrint();
+// }
 
-document.getElementById("clear-timeline").onclick = function(){
-    for(id of schedulingIds) {
-        Tone.Transport.clear(id);
-    }
-    schedulingIds = [];
-}
+// document.getElementById("clear-timeline").onclick = function(){
+//     for(id of schedulingIds) {
+//         Tone.Transport.clear(id);
+//     }
+//     schedulingIds = [];
+// }
 
-document.getElementById("numParameters").value = numParametersUsed;
-document.getElementById("numParameters").addEventListener('input', function(e){
-    numParametersUsed = e.target.value;
-});
+// document.getElementById("numParameters").value = numParametersUsed;
+// document.getElementById("numParameters").addEventListener('input', function(e){
+//     numParametersUsed = e.target.value;
+// });
 
 let scale = [0, 2, 4, 5, 7, 11];
 scale = pitchSet;
