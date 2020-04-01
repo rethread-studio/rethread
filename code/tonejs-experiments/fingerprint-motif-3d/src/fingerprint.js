@@ -1,5 +1,8 @@
-// let pitchSet = [60, 59, 62, 64, 65, 67, 69, 71, 72, 74];
-let pitchSet = [60, 59, 62, 64, 67, 69, 72, 74];
+import * as global from './globals.js'
+import * as tone_init from './tone_init.js';
+import * as THREE from 'three';
+import * as Tone from 'tone';
+import * as graphics from './graphics.js';
 
 class Motif {
     pitches;
@@ -21,10 +24,7 @@ class Motif {
         this.startDurOffset = 0;
     }
     schedulePlayback(synth, noiseSynth, transport, material, color) {
-        for (let id of this.schedulingIds) {
-            // console.log("clearing id: " + id);
-            Tone.Transport.clear(id);
-        }
+        tone_init.clearIdsFromTransport(this.schedulingIds);
         this.schedulingIds = [];
         let totalDur = this.startDurOffset;
         // console.log("pitchlen: " + this.pitches.length + " durlen: " + this.durations.length);
@@ -34,7 +34,12 @@ class Motif {
         for (let i in this.pitches) {
             // Schedule the note to be played
             let pitch = Tone.Frequency.mtof(this.pitches[i] + this.pitchOffset);
-            let dur = this.durations[i].valueOf();
+            let dur = "16n";
+            // if(this.durations[i] > 4) {
+            //     dur = "4n";
+            // } else if(this.durations[i] > 2) {
+            //     dur = "8n";
+            // }
             let atk = this.attacks[i];
             let schedTime = dur16ToTransport(totalDur);
             let schedSynth = synth;
@@ -55,7 +60,7 @@ class Motif {
                 } else {
                     schedSynth.triggerAttackRelease(
                         pitch,
-                        "16n",//dur16ToTransport(dur/2),
+                        dur,//dur16ToTransport(dur/2),
                         time
                     );
                 }
@@ -70,20 +75,20 @@ class Motif {
         }
     }
     addDur(v) {
-        this.pitches.push(pitchSet[5]);
+        this.pitches.push(global.sound.pitchSet[5]);
         // this.pitches.push(110);
-        this.durations.push(v % 8 + 1);
+        this.durations.push((v * 5) % 16 + 1);
         this.attacks.push(0.001);
         this.noises.push(true);
     }
     changePitch(i, newPitchIndex) {
         let index = Math.floor(i) % (this.pitches.length);
-        this.pitches[index] = pitchSet[newPitchIndex % pitchSet.length];
+        this.pitches[index] = global.sound.pitchSet[newPitchIndex % global.sound.pitchSet.length];
         this.attacks[index] = 0.01;
         this.noises[index] = false;
     }
     addPitch(i) {
-        this.pitches.push(pitchSet[i % pitchSet.length]);
+        this.pitches.push(global.sound.pitchSet[i % global.sound.pitchSet.length]);
         this.durations.push(2);
         this.attacks.push(0.01);
     }
@@ -141,18 +146,21 @@ class Fingerprint {
         this.mesh.position.x = this.position.x;
         this.mesh.position.y = this.position.y;
         this.mesh.position.z = this.position.z;
-        scene.add(this.mesh);
+        graphics.scene.add(this.mesh);
         this.motif = new Motif();
         this.numParametersUsed = 24;
-        this.synth = newSynth();
-        this.noiseSynth = newNoiseSynth();
-        objects.push(this.mesh);
+        this.synth = tone_init.newSynth();
+        this.noiseSynth = tone_init.newNoiseSynth();
+        graphics.objects.push(this.mesh);
         this.updateMotif();
     }
     updateMotif() {
         this.motif.clear();
+        this.motif.startDurOffset = (this.fingerprintSum) % 32;
+        // For every 300 points two fingerprints differ they will be separated by a 5th
+        this.motif.pitchOffset = (Math.floor(this.fingerprintSum/300) * 7) % 12;
         for (let i = 0; i < this.rawFingerprint.length && i < this.numParametersUsed; i++) {
-            let v = headers[i] + "_" + this.rawFingerprint[i];
+            let v = global.data.headers[i] + "_" + this.rawFingerprint[i];
             // switch(i%2) {
             //     case 0:
             //         motif.addPitch(vs[i]);
@@ -167,19 +175,22 @@ class Fingerprint {
             } else if (i == 2) {
                 this.synth.envelope.attack = Math.max(Math.min(0.0001 * this.rawFingerprint[i], 0.2), 0.001);
                 // this.motif.pitchOffset = ((this.rawFingerprint[i] - 6) * 2) % 12;
-                // For every 300 points two fingerprints differ they will be separated by a 5th
-                this.motif.pitchOffset = (Math.floor(this.fingerprintSum/300) * 7) % 12;
-            } else if (i == 1) {
-                this.motif.startDurOffset = this.rawFingerprint[i] - 0;
+                
+                
+            } else if (i == 1) { // headers[1] == "dnt", do not track, 0 or 1
+                // this.motif.startDurOffset = (this.rawFingerprint[i] * 6) % 32;
+                if(this.rawFingerprint[i] == 1) {
+                    this.synth.envelope.decay = 0.5;
+                }
             } else if (i == 3) {
-                this.synth.oscillator.type = oscillators[this.rawFingerprint[i] % oscillators.length];
-            } else if (i - 4 < Math.floor((headers.length - 4) / 2)) {
+                this.synth.oscillator.type = global.sound.oscillators[this.rawFingerprint[i] % global.sound.oscillators.length];
+            } else if (i - 4 < Math.floor((global.data.headers.length - 4) / 2)) {
                 this.motif.addDur(this.rawFingerprint[i]);
             } else {
-                this.motif.changePitch(i - Math.floor((headers.length - 4) / 2) - 4, this.rawFingerprint[i]);
+                this.motif.changePitch(i - Math.floor((global.data.headers.length - 4) / 2) - 4, this.rawFingerprint[i]);
             }
         }
-        this.motif.schedulePlayback(this.synth, this.noiseSynth, Tone.Transport, this.material, this.color);
+        this.motif.schedulePlayback(this.synth, this.noiseSynth, tone_init.getTransport(), this.material, this.color);
     }
     setAmp(amp) {
         this.synth.volume.value = amp2db(amp);
@@ -187,7 +198,7 @@ class Fingerprint {
     }
     setDb(db) {
         this.synth.volume.value = db;
-        this.noiseSynth.volume.value = db * 1.5;
+        this.noiseSynth.volume.value = db * 1.3;
     }
     updateDistanceSquared(distance2) {
         this.setDb(distance2 * -0.05 - 10);
@@ -206,3 +217,19 @@ class Fingerprint {
         this.material.color.multiplyScalar(0.9);
     }
 }
+
+function getRandomFingerPrint() {
+    return global.data.rawFingerprints[Math.floor(global.data.rawFingerprints.length * Math.random())];
+}
+
+function renderFingerPrint() {
+    if (global.data.rawFingerprints.length == 0) {
+      return;
+    }
+    const p = [];
+    let size = 140;
+    let fingerprint = new Fingerprint(getRandomFingerPrint(), Math.random() * size - (size/2), Math.random() * size - (size/2), Math.random() * size - (size/2));
+    global.data.fingerprints.push(fingerprint);
+}
+
+export { Motif, Fingerprint, renderFingerPrint }

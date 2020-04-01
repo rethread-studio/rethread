@@ -1,0 +1,25 @@
+{
+  "name": "fingerprint-motif-3d",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "dependencies": {
+    "three": "^0.115.0",
+    "tone": "^13.8.25"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.9.0",
+    "babel-loader": "^8.1.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
