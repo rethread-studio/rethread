@@ -56,7 +56,7 @@ async function getNextSequenceValue(sequenceName) {
 (async () => {
   for (key of keys) {
     try {
-      await counter_c.insert({ _id: key, sequence_value: 0 });
+      await counter_c.insertOne({ _id: key, sequence_value: 0 });
     } catch (error) {
       // error is expected if the key already exists
     }
@@ -76,6 +76,25 @@ const port = 80;
 
 app.use("/", express.static(__dirname + "/static"));
 
+app.get("/api/fp/keys/:key", async function(req, res) {
+  res.json(await counter_c.find({ key: req.params.key }).toArray());
+});
+app.get("/api/fp/counters", async function(req, res) {
+  const output = {};
+  await counter_c.find({}).forEach(elem => {
+    output[elem._id] = elem.sequence_value;
+  });
+  res.json(output);
+});
+
+app.get("/api/fp/random", async function(req, res) {
+  const original = await o_fp_c.aggregate([{ $sample: { size: 1 } }]).next();
+  const normalized = await n_fp_c.findOne({ _id: original._id });
+  res.json({ original, normalized });
+});
+app.get("/api/fp/count", async function(req, res) {
+  res.json(await o_fp_c.countDocuments({}));
+});
 app
   .route("/api/fp/")
   .get(function(req, res) {
@@ -126,13 +145,15 @@ app
       let id = 0;
       if (key == null) {
         id = await getNextSequenceValue(p);
-        await k_fp_c.insertOne({ key: p, value: fp[p], index: id });
+        await k_fp_c.insertOne({ key: p, value: fp[p], index: id, used: 1 });
       } else {
         id = key.index;
+        await k_fp_c.updateOne({ key: p, value: fp[p] }, { $inc: { used: 1 } });
       }
       normalized[p] = id;
     }
-    o_fp_c.insertOne(fp);
+    const fpDB = await o_fp_c.insertOne(fp);
+    normalized._id = fpDB.ops[0]._id;
     n_fp_c.insertOne(normalized);
     res.json({ original: fp, normalized });
   });
