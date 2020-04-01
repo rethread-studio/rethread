@@ -284,10 +284,46 @@ function fpCallback(fingerprint) {
     }
     endShape()
     pop()
-    //
-    //
 
+    //doNotTrack
 
+    //plugins
+
+    //canvas
+    let canvas = fingerprint[19].value;
+//    console.log (canvas[1])
+    //webgl
+
+    //webglVendorAndRenderer
+
+    //adBlock
+    let adBlock = fingerprint[22].value;
+    push()
+    if (allFonts[22])
+        rotate(radians(allFonts[22].charCodeAt(1)));
+    if (adBlock)
+        asterisk(100 * cos(adBlock), 100 * sin(adBlock), 7);
+    pop()
+
+    //hasLiedLanguages
+
+    //hasLiedResolution
+
+    //hasLiedOs
+
+    //hasLiedBrowser
+
+    //touchSupport
+
+    //fontsFlash
+
+    // audio
+    let audio = fingerprint[30].value;
+    push()
+    rotate(radians(audio))
+    fill(255)
+    moon(200 * cos(audio), 200 * sin(audio), 30)
+    pop()
 
 
     //
@@ -307,6 +343,17 @@ function fpCallback(fingerprint) {
 
 
 
+}
+
+function moon(x, y, size, curve = 0.8) {
+    let w = size * curve;
+    let h = size;
+    let a = size * 0.3;
+    beginShape()
+    vertex(x, y);
+    bezierVertex(x + w, y, x + w, y + h, x, y + h);
+    bezierVertex(x + w - a, y + h - a, x + w - a, y + a, x, y);
+    endShape()
 }
 
 function asterisk(x, y, r) {
