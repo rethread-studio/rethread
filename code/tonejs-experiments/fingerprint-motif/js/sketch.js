@@ -5,7 +5,7 @@
 let pitchSet = [60, 59, 62, 64, 65, 67, 69, 71, 72, 74];
 let schedulingIds = [];
 let synths = [];
-let numParametersUsed = 1;
+let numParametersUsed = 24;
 
 class Motif {
     pitches;
@@ -299,12 +299,18 @@ document.getElementById("numParameters").addEventListener('input', function(e){
 });
 
 let scale = [0, 2, 4, 5, 7, 11];
+scale = pitchSet;
 
 function updateSound(x, y) {
     // console.log("x: " + x + " y: " + y);
     fmSynth.modulationIndex.value = x * 100;
     fmSynth.harmonicity.value = Math.floor(Math.abs(x-y) * 20) + 1;
-    fmSynth.detune.value = Math.floor(y * 50) * 100;
+    // fmSynth.detune.value = Math.floor(y * 50) * 100;
+    let scale_i = Math.floor(y * scale.length * 2);
+    let octave = Math.floor(scale_i/scale.length);
+    let midinote = scale[scale_i%scale.length] + (12 * octave);
+    let freq = Tone.Frequency.mtof(midinote);
+    fmSynth.frequency.value = freq;
 
     fm2_lfo1.max = Math.pow(x, 2)*200;
     fm2_lfo1.frequency.value = Math.sin(y * 20) * 5 + 6;
@@ -312,13 +318,13 @@ function updateSound(x, y) {
     fm2_lfo2.frequency.value = Math.sin(x * 30) * 3 + 3.1;
     fm2_lfo2.max = y * 2;
 
-    let scale_i = Math.sin( (1 - (x * y)) * 20) * 0.5 + 0.5;
+    scale_i = Math.sin( (1 - (x * y)) * 20) * 0.5 + 0.5;
     scale_i = Math.floor(scale_i * scale.length*3.2);
-    let octave = Math.floor(scale_i/scale.length) + 2;
+    octave = Math.floor(scale_i/scale.length) + 2;
     // console.log("oct: " + octave);
-    let note_offset = Math.floor(y * 5) + 1;
-    let midinote = scale[(scale_i*note_offset)%scale.length] + (12 * octave);
-    let freq = Tone.Frequency.mtof(midinote);
+    note_offset = Math.floor(y * 5) + 1;
+    midinote = scale[(scale_i*note_offset)%scale.length] + (12 * octave);
+    freq = Tone.Frequency.mtof(midinote);
 
     fmSynth2.frequency.value = freq;
 }
