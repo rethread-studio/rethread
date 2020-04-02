@@ -37,7 +37,10 @@ var mouse = new THREE.Vector2(0, 0);
 var mouseClicked = false;
 
 var allTexturesLoaded = false;
-var textures = {};
+var textures = {
+    numLoaded: 0,
+    totalNumTextures: 2,
+};
 
 var hudElement;
 var hudContainer;
@@ -57,14 +60,34 @@ function init_three() {
     // instantiate a loader
     var loader = new THREE.TextureLoader();
 
-    // load a resource
     loader.load(
         // resource URL
         'data/textures/space.jpg',
         // onLoad callback
         function ( texture ) {
             textures.space = texture;
-            allTexturesLoaded = true;
+            textures.numLoaded += 1;
+            if(textures.numLoaded == textures.totalNumTextures) {
+                allTexturesLoaded = true;
+            }
+        },
+        // onProgress callback currently not supported
+        undefined,
+        // onError callback
+        function ( err ) {
+            console.error( 'An error happened while loading a texture: ' + err );
+        }
+    );
+    loader.load(
+        // resource URL
+        'data/textures/nadia-shape.jpg',
+        // onLoad callback
+        function ( texture ) {
+            textures.nadia_shape = texture;
+            textures.numLoaded += 1;
+            if(textures.numLoaded == textures.totalNumTextures) {
+                allTexturesLoaded = true;
+            }
         },
         // onProgress callback currently not supported
         undefined,
@@ -495,10 +518,17 @@ let portalRoom = {
         portal.castShadow = true;
         portal.rotateY(Math.PI);
         portal.position.set(0, 0, 28);
-        
         portal.userData.roomPointer = spaceRoom;
         scene.add(portal);
         portalRoom.portals.push(portal);
+
+        let portalMaterial2 = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.FrontSide, map: textures.nadia_shape} );
+        let portal2 = new THREE.Mesh( portalGeometry, portalMaterial2 );
+        portal2.castShadow = true;
+        // portal.rotateY(Math.PI);
+        portal2.position.set(0, 0, -28);
+        scene.add(portal2);
+        portalRoom.portals.push(portal2);
     },
     update: function(cameraDirection) {
 
