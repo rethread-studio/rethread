@@ -10,10 +10,12 @@ class Motif {
     durations;
     attacks;
     octave;
+    pitchSet;
     pitchOffset;
     startDurOffset;
     schedulingIds;
     constructor() {
+        this.pitchSet = global.sound.pitchSets[0];
         this.pitches = [];
         this.durations = [];
         this.attacks = [];
@@ -83,12 +85,12 @@ class Motif {
     }
     changePitch(i, newPitchIndex) {
         let index = Math.floor(i) % (this.pitches.length);
-        this.pitches[index] = global.sound.pitchSet[newPitchIndex % global.sound.pitchSet.length];
+        this.pitches[index] = this.pitchSet[newPitchIndex % this.pitchSet.length];
         this.attacks[index] = 0.01;
         this.noises[index] = false;
     }
     addPitch(i) {
-        this.pitches.push(global.sound.pitchSet[i % global.sound.pitchSet.length]);
+        this.pitches.push( this.pitchSet[i % this.pitchSet.length]);
         this.durations.push(2);
         this.attacks.push(0.01);
     }
@@ -158,7 +160,9 @@ class Fingerprint {
         this.motif.clear();
         this.motif.startDurOffset = (this.fingerprintSum) % 32;
         // For every 300 points two fingerprints differ they will be separated by a 5th
-        this.motif.pitchOffset = (Math.floor(this.fingerprintSum/300) * 7) % 12;
+        // this.motif.pitchOffset = (Math.floor(this.fingerprintSum/300) * 7) % 12;
+        // Choose a pitch set based on the fingerprint sum
+        this.motif.pitchSet = global.sound.pitchSets[Math.floor(this.fingerprintSum/300) % global.sound.pitchSets.length];
         for (let i = 0; i < this.rawFingerprint.length && i < this.numParametersUsed; i++) {
             let v = global.data.headers[i] + "_" + this.rawFingerprint[i];
             // switch(i%2) {

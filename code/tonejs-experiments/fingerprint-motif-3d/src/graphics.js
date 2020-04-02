@@ -36,6 +36,9 @@ var sphere;
 var mouse = new THREE.Vector2(0, 0);
 var mouseClicked = false;
 
+var allTexturesLoaded = false;
+var textures = {};
+
 // A room is an object with an init and an update function
 var rooms = {};
 var currentRoom = {
@@ -45,6 +48,27 @@ var currentRoom = {
 
 // init variables
 function init_three() {
+    // LOAD TEXTURES
+    // instantiate a loader
+    var loader = new THREE.TextureLoader();
+
+    // load a resource
+    loader.load(
+        // resource URL
+        'data/textures/space.jpg',
+        // onLoad callback
+        function ( texture ) {
+            textures.space = texture;
+            allTexturesLoaded = true;
+        },
+        // onProgress callback currently not supported
+        undefined,
+        // onError callback
+        function ( err ) {
+            console.error( 'An error happened while loading a texture: ' + err );
+        }
+    );
+
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -432,7 +456,7 @@ let portalRoom = {
         // Add portals that can be used to teleport to a new room
         portalRoom.portals = []; // Remove any old ones lying around
         let portalGeometry = new THREE.PlaneGeometry( 14, 14, 1, 1 );
-        let portalMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.DoubleSide} );
+        let portalMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.DoubleSide, map: textures.space} );
         let portal = new THREE.Mesh( portalGeometry, portalMaterial );
         portal.castShadow = true;
         portal.position.set(0, 0, 28);

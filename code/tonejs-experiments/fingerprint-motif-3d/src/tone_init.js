@@ -2,6 +2,7 @@ import * as Tone from 'tone';
 import * as global from './globals.js'
 
 var bassSynth;
+var sonarSynth;
 
 function init_tone() {
     // Tone.js
@@ -47,7 +48,41 @@ function init_tone() {
     bassSynth.triggerAttackRelease("E0", "1n", "3:0:0", 0.1);
     bassSynth.triggerAttackRelease("D#0", "1n", "3:3:3", 0.03);
 
-    Tone.Transport.bpm.value = 140;
+    sonarSynth = new Tone.FMSynth( {
+        harmonicity : 2 ,
+        modulationIndex : 2 ,
+        detune : 0 ,
+        oscillator : {
+            type : "sine"
+        },
+        envelope : {
+            attack : 0.01 ,
+            decay : 0.01 ,
+            sustain : 1 ,
+            release : 0.2
+        },
+        modulation : {
+            type : "sine"
+        },
+            modulationEnvelope : {
+            attack : 0.5 ,
+            decay : 0 ,
+            sustain : 1 ,
+            release : 0.5
+            }
+        }
+    ).connect(global.sound.longverb).toMaster();
+    sonarSynth.volume.value = -12;
+    sonarSynth.sync();
+    let sonarPitch = Tone.Frequency.mtof(global.sound.stablePitches[1]+12);
+    sonarSynth.triggerAttackRelease(sonarPitch, "16n", 0, 0.4);
+    sonarSynth.triggerAttackRelease(sonarPitch, "16n", "0:0:2", 0.2);
+    sonarSynth.triggerAttackRelease(sonarPitch, "16n", "2:2:0", 0.4);
+    sonarSynth.triggerAttackRelease(sonarPitch, "16n", "2:2:2", 0.2);
+    
+
+
+    Tone.Transport.bpm.value = 110;
     Tone.Transport.loop = true;
     Tone.Transport.setLoopPoints(0, "4m");
 
