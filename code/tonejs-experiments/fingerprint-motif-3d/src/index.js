@@ -25,9 +25,6 @@ $.ajax({
           // Add some global information for that specific data point
         }
       }
-      // Render a few fingerprints per default
-        for(let i = 0; i < 40; i++) {
-            fingerprint.renderFingerPrint();
-        }
+      global.data.loadedData = true;
     }
   });

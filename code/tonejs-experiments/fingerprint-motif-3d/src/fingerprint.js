@@ -192,6 +192,10 @@ class Fingerprint {
         }
         this.motif.schedulePlayback(this.synth, this.noiseSynth, tone_init.getTransport(), this.material, this.color);
     }
+    clearFromTransport() {
+        tone_init.clearIdsFromTransport(this.motif.schedulingIds);
+        this.motif.schedulingIds = [];
+    }
     setAmp(amp) {
         this.synth.volume.value = amp2db(amp);
         this.noiseSynth.volume.value = amp2db(amp);

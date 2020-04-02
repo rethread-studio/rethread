@@ -14,6 +14,7 @@ var sound = {
 
 
 var data = {
+    loadedData: false,
     fingerprints: [], // the Fingerprint objects created
     rawFingerprints: [], // the raw data strings
     headers: [],
