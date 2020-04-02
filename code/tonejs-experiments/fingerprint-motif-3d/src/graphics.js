@@ -39,6 +39,11 @@ var mouseClicked = false;
 var allTexturesLoaded = false;
 var textures = {};
 
+var hudElement;
+var hudContainer;
+
+var font = null;
+
 // A room is an object with an init and an update function
 var rooms = {};
 var currentRoom = {
@@ -68,6 +73,17 @@ function init_three() {
             console.error( 'An error happened while loading a texture: ' + err );
         }
     );
+
+    // LOAD FONT
+    var fontLoader = new THREE.FontLoader();
+
+    fontLoader.load( 'data/fonts/droid_sans_mono_regular.typeface.json', function ( fontLoaded ) {
+        font = fontLoaded;
+    } );
+
+
+    hudElement = document.getElementById("hud");
+    hudContainer = document.getElementById("hud-container");
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -126,6 +142,8 @@ function init_three() {
 
         instructions.style.display = 'none';
         blocker.style.display = 'none';
+        hudContainer.style.display = 'block';
+        hudElement.style.display = '';
         Tone.Transport.start();
 
     });
@@ -134,6 +152,8 @@ function init_three() {
 
         blocker.style.display = 'block';
         instructions.style.display = '';
+        hudContainer.style.display = 'none';
+        hudElement.style.display = 'none';
         Tone.Transport.stop();
 
     });
@@ -422,6 +442,7 @@ let spaceRoom = {
 
 let portalRoom = {
     portals: [],
+    clickPortalText: null,
     init: function() {
         // SCENE
         scene = new THREE.Scene();
@@ -453,20 +474,33 @@ let portalRoom = {
         // Place camera at origin
         controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
 
+        // Create text to click portal
+        // let textMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff, side: THREE.FrontSide  } );
+        // var textGeometry = new THREE.TextGeometry( 'Click to enter', {
+        //     font: font,
+        //     size: 1,
+        //     height: 2,
+        //     curveSegments: 12,
+        //     bevelEnabled: false,
+        // } );
+        // portalRoom.clickPortalText = new THREE.Mesh( textGeometry, textMaterial );
+        // portalRoom.clickPortalText.rotateY(Math.PI);
+        // scene.add(portalRoom.clickPortalText);
+
         // Add portals that can be used to teleport to a new room
         portalRoom.portals = []; // Remove any old ones lying around
         let portalGeometry = new THREE.PlaneGeometry( 14, 14, 1, 1 );
-        let portalMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.DoubleSide, map: textures.space} );
+        let portalMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.FrontSide, map: textures.space} );
         let portal = new THREE.Mesh( portalGeometry, portalMaterial );
         portal.castShadow = true;
+        portal.rotateY(Math.PI);
         portal.position.set(0, 0, 28);
+        
         portal.userData.roomPointer = spaceRoom;
         scene.add(portal);
         portalRoom.portals.push(portal);
     },
     update: function(cameraDirection) {
-        
-        
 
         // Move sphere and light to where the camera is
         sphere.position.copy(controls.getObject().position);
@@ -494,6 +528,8 @@ let portalRoom = {
 
         // This should be last in the update function as it might trigger the cleanup of this room
         for (let i = 0; i < intersects.length; i++ ) {
+            hudElement.innerHTML = "<span>Click to enter</span>";
+            hudElement.style.opacity = 1.0;
             if(mouseClicked) { // && intersects[i].object.userData.roomPointer != undefined) {
                 // Travel to this portal
                 travelToRoom(intersects[i].object.userData.roomPointer);
@@ -508,12 +544,17 @@ let portalRoom = {
                     - uv : intersection point in the object's UV coordinates (THREE.Vector2)
             */
         }
+        if( intersects.length == 0) {
+            // hudElement.innerHTML = "";
+            hudElement.style.opacity = 0.0;
+        }
     },
     cleanUp: function() {
         for(let fprint of global.data.fingerprints) {
             fprint.clearFromTransport();
         }
         portalRoom.portals = [];
+        hudElement.innerHTML = "";
     }
 }
 

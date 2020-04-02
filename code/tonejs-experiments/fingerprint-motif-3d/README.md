@@ -1,14 +1,26 @@
+# Browser fingerprint artwork (work in progress)
+
+Fingerprints are rendered as a motif in the space view. To hear one you travel closer to it.
 
 
 
-
-## Build and serve
-
-I'm sure there's a more efficient way of building and serving this automatically
+## Build
 
 ```
 > npm install
 > npm run build
-> python -m http.server 8000
 ```
-go to the `dist` folder.
+
+## Serve for developmen
+
+Using webpack-dev-server the project will be automatically rebuilt any time there's a change and reloaded in the browser.
+
+```
+> npm start
+```
+
+## TODO
+
+- [ ] Entering a motif opens a room
+- [X] Portal to other parts of the exhibition
+- [ ] Text overlay for instructions and information
