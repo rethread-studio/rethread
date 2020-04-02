@@ -10,7 +10,6 @@ function setup() {
     createCanvas(700, 700);
     background(0);
 
-
 }
 
 
@@ -64,6 +63,8 @@ function fpCallback(fingerprint) {
     // 31: {key: "enumerateDevices", value: Array(14)}
 
     translate(width / 2, height / 2);
+
+    //////---///---///---///
 
 
     // fonts
@@ -133,6 +134,7 @@ function fpCallback(fingerprint) {
         if (language.charAt(i) != '-') {
             let x = 200 * cos(language.charCodeAt(i));
             let y = 200 * sin(language.charCodeAt(i));
+
             vertex(x, y);
         }
     }
@@ -291,10 +293,12 @@ function fpCallback(fingerprint) {
 
     //canvas
     let canvas = fingerprint[19].value;
-//    console.log (canvas[1])
+    // console.log(canvas[1])
     //webgl
 
     //webglVendorAndRenderer
+    let webglVendorAndRenderer = fingerprint[21].value;
+
 
     //adBlock
     let adBlock = fingerprint[22].value;
@@ -314,16 +318,33 @@ function fpCallback(fingerprint) {
     //hasLiedBrowser
 
     //touchSupport
+    push()
+    noStroke();
+    translate(150 * cos(radians(160)), 150 * sin(radians(160)))
+    rotate(radians(platform.charCodeAt(0)));
+    let touchSupport = fingerprint[27].value;
+    fill(220, 10, 10);
+    if (touchSupport[1])
+        rect(0, 0, 20, 20)
+
+    noFill();
+    stroke(10, 10, 220);
+    if (touchSupport[2])
+        rect(10, 10, 20, 20)
+    pop()
+
+    // fonts
+    //// moved up
 
     //fontsFlash
 
     // audio
     let audio = fingerprint[30].value;
-    push()
-    rotate(radians(audio))
-    fill(255)
-    moon(200 * cos(audio), 200 * sin(audio), 30)
-    pop()
+    push();
+    rotate(radians(audio));
+    fill(255);
+    moon(200 * cos(audio), 200 * sin(audio), 30);
+    pop();
 
 
     //
@@ -332,17 +353,36 @@ function fpCallback(fingerprint) {
 
     // enumerateDevices
     enumerateDevices = fingerprint[31].value;
-    for (var i = 0; i < enumerateDevices.length; i++) {
-        let a1 = 0;
-        let a2 = 0;
-        for (var j = 0; j < enumerateDevices[i].length; j++) {
-            a1 = a1 + enumerateDevices[i].charCodeAt(j);
-        }
-        // ellipse(-200 + i * 10, a1/100, 2);
+    push();
+    translate(200 * cos(radians(130)), 200 * sin(radians(130)))
+    rotate(radians(enumerateDevices.length));
+    if (enumerateDevices.length < 3 || enumerateDevices == "not available") {
+        fill(255)
+        equiTriangle(0, 0, 30);
     }
+    else {
+        for (var i = 0; i < enumerateDevices.length; i++) {
+            let a1 = 0;
+            for (var j = 0; j < enumerateDevices[i].length; j++) {
+                a1 = a1 + enumerateDevices[i].charCodeAt(j);
+            }
+            line(enumerateDevices.length * 10 / 2 - i * 10, -a1 / 200, 0, 0);
+            if (enumerateDevices[i].charCodeAt(22) > 60)
+                fill(255);
+            if (enumerateDevices[i].charCodeAt(31) > 60)
+                ellipse(enumerateDevices.length * 10 / 2 - i * 10, -a1 / 200, 5);
+        }
+    }
+    pop();
 
 
 
+}
+
+function equiTriangle(x, y, side) {
+    var h = side * (Math.sqrt(3) / 2);
+    translate(x, y);
+    triangle(-side / 2, h / 2, side / 2, h / 2, 0, -h / 2);
 }
 
 function moon(x, y, size, curve = 0.8) {
