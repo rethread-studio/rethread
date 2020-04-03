@@ -1,5 +1,5 @@
 import * as Tone from 'tone';
-import * as global from './globals.js'
+import * as Global from './globals.js'
 
 var bassSynth;
 var sonarSynth;
@@ -7,15 +7,15 @@ var sonarSynth;
 function init_tone() {
     // Tone.js
 
-    global.sound.reverb = new Tone.Reverb(0.5).toMaster();
-    global.sound.reverb.generate();
-    global.sound.midverb = new Tone.Reverb(2.5).toMaster();
-    global.sound.midverb.generate();
-    global.sound.longverb = new Tone.Reverb(6).toMaster();
-    global.sound.longverb.generate();
+    Global.sound.reverb = new Tone.Reverb(0.5).toMaster();
+    Global.sound.reverb.generate();
+    Global.sound.midverb = new Tone.Reverb(2.5).toMaster();
+    Global.sound.midverb.generate();
+    Global.sound.longverb = new Tone.Reverb(6).toMaster();
+    Global.sound.longverb.generate();
 
-    global.sound.chorus = new Tone.Chorus(1.5, 0.5, 0.3).connect(global.sound.midverb).toMaster();
-    global.sound.globalSynthLPF = new Tone.Filter(600, "lowpass").connect(global.sound.chorus);
+    Global.sound.chorus = new Tone.Chorus(1.5, 0.5, 0.3).connect(Global.sound.midverb).toMaster();
+    Global.sound.globalSynthLPF = new Tone.Filter(600, "lowpass").connect(Global.sound.chorus);
 
     bassSynth = new Tone.MembraneSynth(
         {
@@ -32,7 +32,7 @@ function init_tone() {
                 attackCurve : "exponential"
                 } 
         }
-    ).connect(global.sound.longverb).toMaster();
+    ).connect(Global.sound.longverb).toMaster();
     bassSynth.sync();
 
     bassSynth.triggerAttackRelease("D0", "1n", 0, 0.4);
@@ -71,10 +71,10 @@ function init_tone() {
             release : 0.5
             }
         }
-    ).connect(global.sound.longverb).toMaster();
+    ).connect(Global.sound.longverb).toMaster();
     sonarSynth.volume.value = -12;
     sonarSynth.sync();
-    let sonarPitch = Tone.Frequency.mtof(global.sound.stablePitches[1]+12);
+    let sonarPitch = Tone.Frequency.mtof(Global.sound.stablePitches[1]+12);
     sonarSynth.triggerAttackRelease(sonarPitch, "16n", 0, 0.4);
     sonarSynth.triggerAttackRelease(sonarPitch, "16n", "0:0:2", 0.2);
     sonarSynth.triggerAttackRelease(sonarPitch, "16n", "2:2:0", 0.4);
@@ -82,7 +82,7 @@ function init_tone() {
     
 
 
-    Tone.Transport.bpm.value = 110;
+    Tone.Transport.bpm.value = 120;
     Tone.Transport.loop = true;
     Tone.Transport.setLoopPoints(0, "4m");
 
@@ -123,7 +123,7 @@ function newSynth(){
     );
     synth.volume.value = -10;
     
-    synth.connect(global.sound.globalSynthLPF);
+    synth.connect(Global.sound.globalSynthLPF);
     // let lfo = new Tone.LFO("4n", 400, 4000);
     // lfo.connect(filter.frequency);
     return synth;
@@ -159,7 +159,7 @@ function newNoiseSynth() {
         attackCurve : "exponential"
         }
         }
-        ).chain(global.sound.chorus, global.sound.reverb).toMaster();
+        ).chain(Global.sound.chorus, Global.sound.reverb).toMaster();
     newSynth.volume.value = -10;
     return newSynth;
 }

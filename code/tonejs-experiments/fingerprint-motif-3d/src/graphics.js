@@ -6,8 +6,8 @@ import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass';
 import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 
-import * as global from './globals.js';
-import * as fingerprint from './fingerprint.js';
+import * as Global from './globals.js';
+import * as Fingerprint from './fingerprint.js';
 
 var raycaster;
 var controls;
@@ -286,14 +286,9 @@ function onWindowResize() {
 
 }
 
-let then = 0;
 function animate(now) {
     requestAnimationFrame(animate);
     // controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
-
-    now *= 0.001;  // convert to seconds
-    const deltaTime = now - then;
-    then = now;
 
     // PointerLockControl
 
@@ -323,13 +318,12 @@ function animate(now) {
         controls.getObject().position.y -= (velocity.y * delta);
         controls.getObject().position.z -= (velocity.z * delta); // new behavior
 
-        currentRoom.update(cameraDirection);
+        currentRoom.update(cameraDirection, currentRoom, delta);
 
         prevTime = time;
     }
 
     renderer.render(scene, camera);
-    // composer.render(deltaTime);
 }
 
 // **************************** ROOMS **************************
@@ -338,6 +332,8 @@ let spaceRoom = {
     // Since the fingerprint data may not have loaded when the scene is initiated
     // we will initiate them in the update function and keep track of it here
     fingerprintsAdded: false,
+    objects: [],
+    fingerprints: [],
 
     init: function() {
         // SCENE
@@ -380,12 +376,15 @@ let spaceRoom = {
     },
     update: function(cameraDirection) {
         // Initiate fingerprints if the data has been loaded from the server
-        if(spaceRoom.fingerprintsAdded == false && global.data.loadedData == true) {
+        if(spaceRoom.fingerprintsAdded == false && Global.data.loadedData == true) {
             // Add the fingerprints to the room
+            let size = 150;
             for(let i = 0; i < 40; i++) {
-                fingerprint.renderFingerPrint();
+                Global.data.fingerprints[i].addToSpace(scene, spaceRoom.objects, Math.random() * size - (size/2), Math.random() * size - (size/2), Math.random() * size - (size/2));
+                spaceRoom.fingerprints.push(Global.data.fingerprints[i]);
             }
             spaceRoom.fingerprintsAdded = true;
+            console.log("Added all the fingerprints");
         }
         
         // React to keys being pressed to change the size of the influence radius
@@ -401,11 +400,21 @@ let spaceRoom = {
             sphere.scale.set(sphereScale, sphereScale, sphereScale);
         }
 
-        raycaster.ray.origin.copy(controls.getObject().position);
-        var intersections = raycaster.intersectObjects(objects);
+        // raycaster.ray.origin.copy(controls.getObject().position);
+        // As long as we're using a PointerLock the mouse should always be in the center
+        raycaster.setFromCamera( mouse, camera );
+        var intersections = raycaster.intersectObjects(spaceRoom.objects);
 
         for (var i = 0; i < intersections.length; i++) {
-            console.log(intersections[i]);
+            if(intersections[i].distance < 2.0) {
+                // Travel into the fingerprint
+                let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
+                travelToRoom(fingerprintRoom);
+            } else if(intersections[i].distance < 10.0) {
+                displayOnHud("<span>Travel into fingerprint</span>");
+            }
+            
+            // console.log(intersections[i]);
             /*
                 An intersection has the following properties :
                     - object : intersected object (THREE.Mesh)
@@ -416,24 +425,27 @@ let spaceRoom = {
                     - uv : intersection point in the object's UV coordinates (THREE.Vector2)
             */
         }
+        if( intersections.length == 0) {
+            hideHud();
+        }
 
         // Calculate distance to objects
         let minDist = 100000.0;
-        for (let fp of global.data.fingerprints) {
+        for (let fp of spaceRoom.fingerprints) {
             let d2 = controls.getObject().position.distanceToSquared(fp.mesh.position);
             fp.updateDistanceSquared(d2 * (1.0 / sphereScale));
             if (d2 < minDist) { minDist = d2; }
         }
 
         // Make the fog really thick when you're close to an object
-        if (minDist < 150) {
-            scene.fog.density = Math.max(Math.pow(1 - (minDist / 150), 3.0), 0.02);
-        } else {
-            scene.fog.density = 0.02;
-        }
+        // if (minDist < 150) {
+        //     scene.fog.density = Math.max(Math.pow(1 - (minDist / 150), 3.0), 0.02);
+        // } else {
+        //     scene.fog.density = 0.02;
+        // }
 
         if (minDist < 1000) {
-            global.sound.globalSynthLPF.frequency.value = 2000 - (minDist * 1.4);
+            Global.sound.globalSynthLPF.frequency.value = 2000 - (minDist * 1.4);
         }
 
         // Move sphere and light to where the camera is
@@ -455,11 +467,12 @@ let spaceRoom = {
         }
     },
     cleanUp: function() {
-        for(let fprint of global.data.fingerprints) {
+        for(let fprint of spaceRoom.fingerprints) {
             fprint.clearFromTransport();
         }
-        global.data.fingerprints = [];
         spaceRoom.fingerprintsAdded = false;
+        spaceRoom.fingerprints = [];
+        hideHud();
     }
 }
 
@@ -533,7 +546,6 @@ let portalRoom = {
     update: function(cameraDirection) {
 
         // Move sphere and light to where the camera is
-        sphere.position.copy(controls.getObject().position);
         spotLight.position.copy(controls.getObject().position);
         spotLight.target.position.copy(cameraDirection);
         spotLight.target.position.add(controls.getObject().position);
@@ -558,8 +570,7 @@ let portalRoom = {
 
         // This should be last in the update function as it might trigger the cleanup of this room
         for (let i = 0; i < intersects.length; i++ ) {
-            hudElement.innerHTML = "<span>Click to enter</span>";
-            hudElement.style.opacity = 1.0;
+            displayOnHud("<span>Click to enter</span>");
             if(mouseClicked) { // && intersects[i].object.userData.roomPointer != undefined) {
                 // Travel to this portal
                 travelToRoom(intersects[i].object.userData.roomPointer);
@@ -576,15 +587,12 @@ let portalRoom = {
         }
         if( intersects.length == 0) {
             // hudElement.innerHTML = "";
-            hudElement.style.opacity = 0.0;
+            hideHud();
         }
     },
     cleanUp: function() {
-        for(let fprint of global.data.fingerprints) {
-            fprint.clearFromTransport();
-        }
         portalRoom.portals = [];
-        hudElement.innerHTML = "";
+        hideHud();
     }
 }
 
@@ -595,9 +603,23 @@ function teleportToPortal() {
 }
 
 function travelToRoom(room) {
-    currentRoom.cleanUp();
+    currentRoom.cleanUp(currentRoom)
     currentRoom = room;
-    currentRoom.init();
+    currentRoom.init(currentRoom);
 }
 
-export { init_three, animate, scene, objects, spaceRoom, currentRoom }; 
+function displayOnHud(html) {
+    hudElement.innerHTML = html;
+    hudElement.style.opacity = 1.0;
+}
+function hideHud() {
+    hudElement.style.opacity = 0.0;
+}
+
+function newScene(color, fog) {
+    scene = new THREE.Scene();
+    scene.background = color;
+    scene.fog = fog;
+}
+
+export { init_three, animate, scene, controls, spaceRoom, currentRoom, newScene }; 

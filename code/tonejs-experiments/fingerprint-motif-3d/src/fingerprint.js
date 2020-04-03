@@ -1,8 +1,8 @@
-import * as global from './globals.js'
+import * as Global from './globals.js'
 import * as tone_init from './tone_init.js';
 import * as THREE from 'three';
 import * as Tone from 'tone';
-import * as graphics from './graphics.js';
+import * as Graphics from './graphics.js';
 
 class Motif {
     pitches;
@@ -15,7 +15,7 @@ class Motif {
     startDurOffset;
     schedulingIds;
     constructor() {
-        this.pitchSet = global.sound.pitchSets[0];
+        this.pitchSet = Global.sound.pitchSets[0];
         this.pitches = [];
         this.durations = [];
         this.attacks = [];
@@ -77,7 +77,7 @@ class Motif {
         }
     }
     addDur(v) {
-        this.pitches.push(global.sound.pitchSet[5]);
+        this.pitches.push(Global.sound.pitchSet[5]);
         // this.pitches.push(110);
         this.durations.push((v * 5) % 16 + 1);
         this.attacks.push(0.001);
@@ -135,26 +135,167 @@ class Fingerprint {
     rawFingerprint;
     fingerprintSum;
     color;
-    constructor(fingerprint, x, y, z) {
-        const vs = fingerprint.split(",");
+    constructor(rawFingerprint) {
+        const vs = rawFingerprint.split(",");
         this.rawFingerprint = vs.map(el => Number(el));
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
         this.color = new THREE.Color();
         this.color.setHSL((this.fingerprintSum % 1000)/1000, 0.6, 0.55);
+    }
+    addToSpace(scene, objects, x, y, z) {
         this.position = new THREE.Vector3(x, y, -z);
         this.material = new THREE.MeshStandardMaterial({ color: 0x00cccc })
-        this.geometry = new THREE.TetrahedronGeometry(5, vs[0]);
+        this.geometry = new THREE.TetrahedronGeometry(5, this.rawFingerprint[0]);
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.position.x = this.position.x;
         this.mesh.position.y = this.position.y;
         this.mesh.position.z = this.position.z;
-        graphics.scene.add(this.mesh);
+        this.mesh.userData.fingerprintPtr = this;
+        scene.add(this.mesh);
         this.motif = new Motif();
-        this.numParametersUsed = 24;
+        this.numParametersUsed = 0;
         this.synth = tone_init.newSynth();
         this.noiseSynth = tone_init.newNoiseSynth();
-        graphics.objects.push(this.mesh);
+        objects.push(this.mesh);
         this.updateMotif();
+    }
+    generateFingerprintRoom() {
+        let newRoom = {};
+        newRoom.fingerprint = this;
+        newRoom.init = function (room) {
+            Graphics.newScene(new THREE.Color(0x333333), new THREE.FogExp2(0xfffefe, 0.01));
+    
+            let lightColor = new THREE.Color().copy(room.fingerprint.color).multiplyScalar(1.5);
+
+            room.light = new THREE.PointLight(lightColor, 0.5, 50);
+            room.light.position.set(0.5, 1, 0.75);
+            room.light.castShadow = true;
+            room.light.shadow.camera.far = 4000;
+            Graphics.scene.add(room.light);
+    
+            if (room.fingerprint.rawFingerprint[1] == 1) {
+                room.spotLight = new THREE.SpotLight(lightColor);
+                room.spotLight.castShadow = true;
+                room.spotLight.shadow.camera.far = 4000;
+                room.spotLight.power = 2;
+                room.spotLight.angle = 0.7;
+                room.spotLight.penumbra = 0.9;
+                Graphics.scene.add(room.spotLight);
+                Graphics.scene.add(room.spotLight.target);
+            }
+    
+            // let geometry = new THREE.BoxGeometry(40, 60, 30);
+            let geometry = new THREE.TetrahedronGeometry(50, room.fingerprint.fingerprintSum % 4)
+            let material = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide });
+            let roomCube = new THREE.Mesh(geometry, material);
+            roomCube.receiveShadow = true;
+            Graphics.scene.add(roomCube);
+    
+            // Place camera at origin
+            Graphics.controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
+
+            // Add geometry to display a shader on
+            let shaderGeometry = new THREE.PlaneGeometry( 18, 18, 1, 1 );
+            // let shaderMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.FrontSide} );
+            let shaderUniforms = {
+                time: { value: 1.0 },
+                resolution: {  value: new THREE.Vector2() }
+            };
+            let shaderMaterial = new THREE.ShaderMaterial( {
+                uniforms: shaderUniforms,
+                // general vertex shader for fragment shaders
+                vertexShader: `varying vec2 vUv; 
+                void main()
+                {
+                    vUv = uv;
+                
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0 );
+                    gl_Position = projectionMatrix * mvPosition;
+                }`,
+                // This is where the magic happens
+                // https://stackoverflow.com/questions/24820004/how-to-implement-a-shadertoy-shader-in-three-js
+                // for coordinates, use `vec2 p = -1.0 + 2.0 *vUv;`
+                fragmentShader: `
+uniform float time;
+uniform vec2 resolution;
+
+varying vec2 vUv;
+
+vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
+{
+    return a + b*cos( 6.28318*(c*t+d) );
+}
+
+void main()
+{
+	vec2 p = -1.0 + 2.0 *vUv;
+    
+    // animate
+    p.x += 0.11*time;
+    
+    // compute colors
+    vec3                col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.33,0.67) );
+    if( p.y>(1.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.10,0.20) );
+    if( p.y>(2.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.3,0.20,0.20) );
+    if( p.y>(3.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,0.5),vec3(0.8,0.90,0.30) );
+    if( p.y>(4.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,0.7,0.4),vec3(0.0,0.15,0.20) );
+    if( p.y>(5.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25) );
+    if( p.y>(6.0/7.0) ) col = pal( p.x, vec3(0.8,0.5,0.4),vec3(0.2,0.4,0.2),vec3(2.0,1.0,1.0),vec3(0.0,0.25,0.25) );
+    
+
+    // band
+    float f = fract(p.y*7.0);
+    // borders
+    col *= smoothstep( 0.49, 0.47, abs(f-0.5) );
+    // shadowing
+    col *= 0.5 + 0.5*sqrt(4.0*f*(1.0-f));
+    // dithering
+    // col += (1.0/255.0)*texture( iChannel0, fragCoord.xy/iChannelResolution[0].xy ).xyz;
+
+	gl_FragColor = vec4( col, 1.0 );
+}
+
+`,
+                side: THREE.DoubleSide,
+            } );
+            let shader = new THREE.Mesh( shaderGeometry, shaderMaterial );
+            shader.castShadow = true;
+            shader.rotateY(Math.PI);
+            shader.position.set(0, 0, 28);
+            Graphics.scene.add(shader);
+            room.shader = shader;
+            room.shaderUniforms = shaderUniforms;
+            room.shaderMaterial = shaderMaterial;
+        }
+    
+        newRoom.update = function (cameraDirection, room, delta) {
+    
+            // Move the spotlight to the camera
+            if(room.spotLight != undefined) {
+                room.spotLight.position.copy(Graphics.controls.getObject().position);
+                room.spotLight.target.position.copy(cameraDirection);
+                room.spotLight.target.position.add(Graphics.controls.getObject().position);
+            }
+    
+            let outOfBounds = 200;
+            let camPos = Graphics.controls.getObject().position;
+            if (camPos.x > outOfBounds
+                || camPos.x < -outOfBounds
+                || camPos.y > outOfBounds
+                || camPos.y < -outOfBounds
+                || camPos.z > outOfBounds
+                || camPos.x < -outOfBounds
+            ) {
+                Graphics.controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
+            }
+
+            // update shader uniforms
+            room.shaderUniforms.time.value += delta;
+        }
+
+        newRoom.cleanUp = function(room) {}
+
+        return newRoom;
     }
     updateMotif() {
         this.motif.clear();
@@ -162,9 +303,9 @@ class Fingerprint {
         // For every 300 points two fingerprints differ they will be separated by a 5th
         // this.motif.pitchOffset = (Math.floor(this.fingerprintSum/300) * 7) % 12;
         // Choose a pitch set based on the fingerprint sum
-        this.motif.pitchSet = global.sound.pitchSets[Math.floor(this.fingerprintSum/300) % global.sound.pitchSets.length];
+        this.motif.pitchSet = Global.sound.pitchSets[Math.floor(this.fingerprintSum/300) % Global.sound.pitchSets.length];
         for (let i = 0; i < this.rawFingerprint.length && i < this.numParametersUsed; i++) {
-            let v = global.data.headers[i] + "_" + this.rawFingerprint[i];
+            let v = Global.data.headers[i] + "_" + this.rawFingerprint[i];
             // switch(i%2) {
             //     case 0:
             //         motif.addPitch(vs[i]);
@@ -187,11 +328,11 @@ class Fingerprint {
                     this.synth.envelope.decay = 0.5;
                 }
             } else if (i == 3) {
-                this.synth.oscillator.type = global.sound.oscillators[this.rawFingerprint[i] % global.sound.oscillators.length];
-            } else if (i - 4 < Math.floor((global.data.headers.length - 4) / 2)) {
+                this.synth.oscillator.type = Global.sound.oscillators[this.rawFingerprint[i] % Global.sound.oscillators.length];
+            } else if (i - 4 < Math.floor((Global.data.headers.length - 4) / 2)) {
                 this.motif.addDur(this.rawFingerprint[i]);
             } else {
-                this.motif.changePitch(i - Math.floor((global.data.headers.length - 4) / 2) - 4, this.rawFingerprint[i]);
+                this.motif.changePitch(i - Math.floor((Global.data.headers.length - 4) / 2) - 4, this.rawFingerprint[i]);
             }
         }
         this.motif.schedulePlayback(this.synth, this.noiseSynth, tone_init.getTransport(), this.material, this.color);
@@ -210,9 +351,9 @@ class Fingerprint {
     }
     updateDistanceSquared(distance2) {
         this.setDb(distance2 * -0.05 - 10);
-        if (distance2 < 100) {
+        if (distance2 < 110) {
             this.material.transparent = true;
-            this.material.opacity = distance2 / 100;
+            this.material.opacity = (distance2-10) / 100;
         }
         this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2 / 100), 1.0));
         this.synth.envelope.release = Math.max(0.5 - distance2 / 500, 0.002);
@@ -227,17 +368,16 @@ class Fingerprint {
 }
 
 function getRandomFingerPrint() {
-    return global.data.rawFingerprints[Math.floor(global.data.rawFingerprints.length * Math.random())];
+    return Global.data.rawFingerprints[Math.floor(Global.data.rawFingerprints.length * Math.random())];
 }
 
-function renderFingerPrint() {
-    if (global.data.rawFingerprints.length == 0) {
+function generateRandomFingerPrint() {
+    if (Global.data.rawFingerprints.length == 0) {
       return;
     }
     const p = [];
-    let size = 140;
-    let fingerprint = new Fingerprint(getRandomFingerPrint(), Math.random() * size - (size/2), Math.random() * size - (size/2), Math.random() * size - (size/2));
-    global.data.fingerprints.push(fingerprint);
+    let fingerprint = new Fingerprint(getRandomFingerPrint());
+    Global.data.fingerprints.push(fingerprint);
 }
 
-export { Motif, Fingerprint, renderFingerPrint }
+export { Motif, Fingerprint, generateRandomFingerPrint }
