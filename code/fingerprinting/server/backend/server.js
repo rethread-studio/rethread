@@ -1,9 +1,9 @@
 const bodyParser = require("body-parser");
+const methodOverride = require('method-override')
 const ObjectId = require("mongodb").ObjectId;
 const MongoClient = require("mongodb").MongoClient;
-// Connection URL
+
 const URL_DB = "mongodb://mongo:27017";
-// Database Name
 const DB_NAME = "fp";
 
 const client = new MongoClient(URL_DB, {
@@ -85,6 +85,13 @@ if (app.get("env") === "production") {
   app.set("trust proxy", 1);
   sess.cookie.secure = true;
 }
+app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
+  next();
+});
 
 const port = 80;
 
