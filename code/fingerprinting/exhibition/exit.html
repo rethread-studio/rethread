@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<title>Fingerprinting Software Art</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://kit.fontawesome.com/7ff2c0391b.js" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" type="text/css" href="style.css">
+
+<script>
+    /* When the user clicks on the button,
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+
+<body>
+
+    <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
+        <div class="w3-display-topleft w3-padding-large w3-xlarge">
+
+        </div>
+        <div id="thanks" class="w3-display-middle">
+            <p style="color: #c5a0c5">a software art experience about browser fingerprinting</p>
+            <h1 class="w3-jumbo w3-animate-top"> <b>thank you</b> </h1>
+            <p>#browserfingerprinting</p>
+            <button id="participate" href="#" class="w3-large w3-center">Download your browser fingerprint art</button>
+            <p>This project was created by re|thread. <a href="https://rethread.art/" class="linkButton"></p>
+            <p>See more of our work with software and art.</a></p>
+
+        </div>
+    </div>
+
+    <div class="dropdown">
+            <button onclick="myFunction()" class="dropbtn"> </button>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="index.html">Back to artwork gallery</a>
+            </div>
+        </div>
+
+</body>
+
+</html>
