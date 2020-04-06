@@ -1,90 +1,18 @@
 import * as Tone from 'tone';
 import * as Global from './globals.js'
 
-var bassSynth;
-var sonarSynth;
-
 function init_tone() {
     // Tone.js
 
     Global.sound.reverb = new Tone.Reverb(0.5).toMaster();
     Global.sound.reverb.generate();
-    Global.sound.midverb = new Tone.Reverb(2.5).toMaster();
-    Global.sound.midverb.generate();
-    Global.sound.longverb = new Tone.Reverb(6).toMaster();
+    // Global.sound.midverb = new Tone.Reverb(2.5).toMaster();
+    // Global.sound.midverb.generate();
+    Global.sound.longverb = new Tone.Reverb(4.5).toMaster();
     Global.sound.longverb.generate();
 
-    Global.sound.chorus = new Tone.Chorus(1.5, 0.5, 0.3).connect(Global.sound.midverb).toMaster();
+    Global.sound.chorus = new Tone.Chorus(1.5, 0.5, 0.3).connect(Global.sound.longverb).toMaster();
     Global.sound.globalSynthLPF = new Tone.Filter(600, "lowpass").connect(Global.sound.chorus);
-
-    bassSynth = new Tone.MembraneSynth(
-        {
-            pitchDecay  : 0.2,
-            octaves     : 10,
-            oscillator  : {
-                type    : "sine"
-            },
-            envelope : {
-                attack  : 0.001 ,
-                decay   : 0.4 ,
-                sustain : 0.01 ,
-                release : 1.4 ,
-                attackCurve : "exponential"
-                } 
-        }
-    ).connect(Global.sound.longverb).toMaster();
-    bassSynth.sync();
-
-    bassSynth.triggerAttackRelease("D0", "1n", 0, 0.4);
-    // bassSynth.triggerAttackRelease("A0", "1n", "4n", 0.1);
-    bassSynth.triggerAttackRelease("D#0", "1n", "2n", 0.15);
-    // bassSynth.triggerAttackRelease("A0", "1n", "2n.", 0.1);
-    bassSynth.triggerAttackRelease("E0", "1n", "1m", 0.1);
-    // bassSynth.triggerAttackRelease("A0", "1n", "1:1", 0.1);
-    bassSynth.triggerAttackRelease("F0", "1n", "1:2", 0.05);
-    bassSynth.triggerAttackRelease("D#0", "1n", "1:2:3", 0.03);
-    bassSynth.triggerAttackRelease("D#0", "1n", "1:3:3", 0.03);
-    bassSynth.triggerAttackRelease("D0", "1n", "2:0:0", 0.15);
-    bassSynth.triggerAttackRelease("E0", "1n", "3:0:0", 0.1);
-    bassSynth.triggerAttackRelease("D#0", "1n", "3:3:3", 0.03);
-
-    sonarSynth = new Tone.FMSynth( {
-        harmonicity : 2 ,
-        modulationIndex : 2 ,
-        detune : 0 ,
-        oscillator : {
-            type : "sine"
-        },
-        envelope : {
-            attack : 0.01 ,
-            decay : 0.01 ,
-            sustain : 1 ,
-            release : 0.2
-        },
-        modulation : {
-            type : "sine"
-        },
-            modulationEnvelope : {
-            attack : 0.5 ,
-            decay : 0 ,
-            sustain : 1 ,
-            release : 0.5
-            }
-        }
-    ).connect(Global.sound.longverb).toMaster();
-    sonarSynth.volume.value = -12;
-    sonarSynth.sync();
-    let sonarPitch = Tone.Frequency.mtof(Global.sound.stablePitches[1]+12);
-    sonarSynth.triggerAttackRelease(sonarPitch, "16n", 0, 0.4);
-    sonarSynth.triggerAttackRelease(sonarPitch, "16n", "0:0:2", 0.2);
-    sonarSynth.triggerAttackRelease(sonarPitch, "16n", "2:2:0", 0.4);
-    sonarSynth.triggerAttackRelease(sonarPitch, "16n", "2:2:2", 0.2);
-    
-
-
-    Tone.Transport.bpm.value = 120;
-    Tone.Transport.loop = true;
-    Tone.Transport.setLoopPoints(0, "4m");
 
     //start/stop the transport
     // document.getElementById('start-stop')
@@ -171,15 +99,10 @@ function clearIdsFromTransport(ids) {
     }
 }
 
-function getTransport() {
-    return Tone.Transport;
-}
-
-
 
 // StartAudioContext(Tone.context, 'start-stop').then(function(){
 //     //callback is invoked when the AudioContext.state is 'running'
 //     console.log("Starts audio context");
 // });
 
-export { init_tone, newSynth, newNoiseSynth, clearIdsFromTransport, getTransport };
+export { init_tone, newSynth, newNoiseSynth, clearIdsFromTransport };
