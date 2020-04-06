@@ -57,46 +57,35 @@ const points = [];
 const points_geometry = new THREE.Geometry();
 var particle_system_material = new THREE.PointsMaterial({
   color: 0xc7cc00,
-  size: 2
+  size: 2,
 });
 let particleSystem = null;
-$.ajax({
-  type: "GET",
-  url: "data/amiunique-fp.min.csv",
-  dataType: "text",
-  success: function(data) {
-    const t = data.split("\n");
-    headers = t[0].split(",");
-    fingerPrints = t.slice(1);
-    for (let l of fingerPrints) {
-      const vs = l.split(",");
-      for (let i in vs) {
-        let v = headers[i] + "_" + vs[i];
-        if (values[v] == null) {
-          values[v] = new THREE.Vector3(
-            Math.random() * 1000 - 500,
-            Math.random() * 1000 - 500,
-            Math.random() * 1000 - 500
-          );
-          points.push(values[v]);
-        }
+getAllNormalizedFingerPrints(function (fps) {
+  fingerPrints = fps;
+  for (let vs of fingerPrints) {
+    for (let i in vs) {
+      let v = i + "_" + vs[i];
+      if (values[v] == null) {
+        values[v] = new THREE.Vector3(
+          Math.random() * 1000 - 500,
+          Math.random() * 1000 - 500,
+          Math.random() * 1000 - 500
+        );
+        points.push(values[v]);
       }
     }
-    points_geometry.setFromPoints(points);
-    particleSystem = new THREE.Points(
-      points_geometry,
-      particle_system_material
-    );
-    scene.add(particleSystem);
-    renderFingerPrints();
   }
+  points_geometry.setFromPoints(points);
+  particleSystem = new THREE.Points(points_geometry, particle_system_material);
+  scene.add(particleSystem);
+  renderFingerPrints();
 });
 
 var material = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 5 });
-const lines = []
+const lines = [];
 for (let i = 0; i < 10; i++) {
   const line = new THREE.Line(new THREE.BufferGeometry(), material);
-  scene.add(line)
+  scene.add(line);
   lines.push(line);
 }
 
@@ -110,9 +99,8 @@ function renderFingerPrint(line) {
   }
   const p = [];
   let fingerPrint = getRandomFingerPrint();
-  const vs = fingerPrint.split(",");
-  for (let i in vs) {
-    let v = headers[i] + "_" + vs[i];
+  for (let i in fingerPrint) {
+    let v = i + "_" + fingerPrint[i];
     p.push(values[v]);
   }
   var radius = 10;
@@ -120,8 +108,8 @@ function renderFingerPrint(line) {
   line.geometry = roundedCornerLine(p, radius, smoothness, 1);
 }
 function renderFingerPrints() {
-  for(let line of lines) {
-    renderFingerPrint(line)
+  for (let line of lines) {
+    renderFingerPrint(line);
   }
 }
 setInterval(renderFingerPrints, 2500);
@@ -130,12 +118,12 @@ light = new THREE.DirectionalLight(0xeb2a00, 0.8);
 light.position.set(-1, 0, 1);
 scene.add(light);
 
-const smokeTexture = new THREE.TextureLoader().load("data/Smoke-Element.png");
+const smokeTexture = new THREE.TextureLoader().load("images/Smoke-Element.png");
 const smokeMaterial = new THREE.MeshLambertMaterial({
   color: 0xeb2a00,
   map: smokeTexture,
   transparent: true,
-  opacity: 0.1
+  opacity: 0.1,
 });
 const smokeGeo = new THREE.PlaneGeometry(400, 400);
 const smokeParticles = [];
