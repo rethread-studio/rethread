@@ -162,23 +162,20 @@ function init_three() {
     }, false);
 
     controls.addEventListener('lock', function () {
-
         instructions.style.display = 'none';
         blocker.style.display = 'none';
         hudContainer.style.display = 'block';
         hudElement.style.display = '';
         Tone.Transport.start();
-
+        console.log("Controls locked, transport started");
     });
 
     controls.addEventListener('unlock', function () {
-
         blocker.style.display = 'block';
         instructions.style.display = '';
         hudContainer.style.display = 'none';
         hudElement.style.display = 'none';
         Tone.Transport.stop();
-
     });
 
     document.addEventListener('mousedown', () => { mouseClicked = true });
@@ -335,7 +332,7 @@ let spaceRoom = {
     objects: [],
     fingerprints: [],
 
-    init: function() {
+    init: function(room) {
         // SCENE
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xdddddd);
@@ -372,7 +369,103 @@ let spaceRoom = {
             metalness: 1.0
         });
         sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        scene.add(sphere);
+        // scene.add(sphere);
+
+        spaceRoom.initSound();
+    },
+    initSound: function() {
+        Tone.Transport.bpm.value = 120;
+        // Tone.Transport.loop = true;
+        // Tone.Transport.setLoopPoints(0, "4m");
+
+        let bassSynth = new Tone.MembraneSynth(
+            {
+                pitchDecay  : 0.2,
+                octaves     : 10,
+                oscillator  : {
+                    type    : "sine"
+                },
+                envelope : {
+                    attack  : 0.001 ,
+                    decay   : 0.4 ,
+                    sustain : 0.01 ,
+                    release : 1.4 ,
+                    attackCurve : "exponential"
+                    } 
+            }
+        ).connect(Global.sound.longverb).toMaster();
+
+        let sonarSynth = new Tone.FMSynth( {
+            harmonicity : 2 ,
+            modulationIndex : 2 ,
+            detune : 0 ,
+            oscillator : {
+                type : "sine"
+            },
+            envelope : {
+                attack : 0.01 ,
+                decay : 0.01 ,
+                sustain : 1 ,
+                release : 0.2
+            },
+            modulation : {
+                type : "sine"
+            },
+                modulationEnvelope : {
+                attack : 0.5 ,
+                decay : 0 ,
+                sustain : 1 ,
+                release : 0.5
+                }
+            }
+        ).connect(Global.sound.longverb).toMaster();
+        sonarSynth.volume.value = -12;
+        spaceRoom.sonarPitch = Tone.Frequency.mtof(Global.sound.stablePitches[1]+12);
+        
+        spaceRoom.bassSynth = bassSynth;
+        spaceRoom.sonarSynth = sonarSynth;
+        
+        spaceRoom.loopCounter = 0;
+        spaceRoom.loop = new Tone.Loop(function(time){
+            switch(spaceRoom.loopCounter) {
+                case 0:
+                    spaceRoom.bassSynth.triggerAttackRelease("D0", "1n", time, 0.4);
+                    spaceRoom.sonarSynth.triggerAttackRelease(spaceRoom.sonarPitch, "16n", time, 0.4);
+                    break;
+                case 2:
+                    spaceRoom.sonarSynth.triggerAttackRelease(spaceRoom.sonarPitch, "16n", time, 0.2);
+                    break;
+                case 8:
+                    spaceRoom.bassSynth.triggerAttackRelease("D#0", "1n", time, 0.15);
+                    break;
+                case 16:
+                    spaceRoom.bassSynth.triggerAttackRelease("E0", "1n", time, 0.1);
+                    break;
+                case 24:
+                    spaceRoom.bassSynth.triggerAttackRelease("F0", "1n", time, 0.05);
+                    break;
+                case 27:
+                    spaceRoom.bassSynth.triggerAttackRelease("D#0", "1n", time, 0.03);
+                    break;
+                case 31:
+                    spaceRoom.bassSynth.triggerAttackRelease("D#0", "1n", time, 0.03);
+                    break;
+                case 32:
+                    spaceRoom.bassSynth.triggerAttackRelease("D0", "1n", time, 0.15);
+                    break;
+                case 48:
+                    spaceRoom.bassSynth.triggerAttackRelease("E0", "1n", time, 0.1);
+                    spaceRoom.sonarSynth.triggerAttackRelease(spaceRoom.sonarPitch, "16n", time, 0.4);
+                    break;
+                case 50:
+                    spaceRoom.sonarSynth.triggerAttackRelease(spaceRoom.sonarPitch, "16n", time, 0.2);
+                case 63:
+                    spaceRoom.bassSynth.triggerAttackRelease("D#0", "1n", time, 0.03);
+                    break;
+            }
+            
+            spaceRoom.loopCounter = (spaceRoom.loopCounter + 1) % 64;
+        }, "16n").start(0);
     },
     update: function(cameraDirection) {
         // Initiate fingerprints if the data has been loaded from the server
@@ -468,10 +561,11 @@ let spaceRoom = {
     },
     cleanUp: function() {
         for(let fprint of spaceRoom.fingerprints) {
-            fprint.clearFromTransport();
+            fprint.motif.stopSpaceLoop();
         }
         spaceRoom.fingerprintsAdded = false;
         spaceRoom.fingerprints = [];
+        spaceRoom.loop.stop();
         hideHud();
     }
 }
@@ -597,9 +691,9 @@ let portalRoom = {
 }
 
 function teleportToPortal() {
-    currentRoom.cleanUp();
+    currentRoom.cleanUp(currentRoom);
     currentRoom = portalRoom;
-    currentRoom.init();
+    currentRoom.init(currentRoom);
 }
 
 function travelToRoom(room) {

@@ -14,6 +14,7 @@ class Motif {
     pitchOffset;
     startDurOffset;
     schedulingIds;
+    loop;
     constructor() {
         this.pitchSet = Global.sound.pitchSets[0];
         this.pitches = [];
@@ -25,56 +26,46 @@ class Motif {
         this.pitchOffset = 0;
         this.startDurOffset = 0;
     }
-    schedulePlayback(synth, noiseSynth, transport, material, color) {
-        tone_init.clearIdsFromTransport(this.schedulingIds);
-        this.schedulingIds = [];
-        let totalDur = this.startDurOffset;
-        // console.log("pitchlen: " + this.pitches.length + " durlen: " + this.durations.length);
-        // console.log("durations: " + this.durations);
-        // console.log("pitches: " + this.pitches);
-        // console.log("noises: " + this.noises);
-        for (let i in this.pitches) {
-            // Schedule the note to be played
-            let pitch = Tone.Frequency.mtof(this.pitches[i] + this.pitchOffset);
-            let dur = "16n";
-            // if(this.durations[i] > 4) {
-            //     dur = "4n";
-            // } else if(this.durations[i] > 2) {
-            //     dur = "8n";
-            // }
-            let atk = this.attacks[i];
-            let schedTime = dur16ToTransport(totalDur);
-            let schedSynth = synth;
-            let noisePlayback = false;
-            if(this.noises[i]) {
-                schedSynth = noiseSynth;
-                // noisePlayback = true;
-                pitch = Tone.Frequency.mtof((this.pitches[i] + this.pitchOffset) % 12 + 12);
-            }
-            let id = transport.schedule(function (time) {
-                // console.log("pitch: " + pitch + " dur: " + dur + " time: " + time);
-                schedSynth.envelope.attack = atk;
-                if(noisePlayback) {
-                    schedSynth.triggerAttackRelease(
-                        "16n",//dur16ToTransport(dur/2),
-                        time
-                    );
-                } else {
-                    schedSynth.triggerAttackRelease(
-                        pitch,
-                        dur,//dur16ToTransport(dur/2),
-                        time
-                    );
-                }
-                
-                material.color.copy(color);
-                // material.color.setScalar(1.0);
-            }, schedTime);
-            // For later removing the event from scheduling
-            this.schedulingIds.push(id);
-            // Add the scheduling time so the next note is scheduled after this one.
-            totalDur += this.durations[i];
+    schedulePlaybackSpace(synth, noiseSynth, transport, material, color) {
+        console.log("motif scheduled for space playback!");
+        if(this.loop != undefined) {
+            this.loop.stop();
         }
+        // An attempt at fooling javascript into having a consistent this
+        let motif = this;
+        this.loop = new Tone.Loop(function(time){
+            for(let i = 0; i < motif.durations.length; i++) {
+                // Have the loop be in sync with the spaceRoom loop
+                if(motif.durations[i] + motif.startDurOffset == Graphics.spaceRoom.loopCounter) {
+                    let pitch = Tone.Frequency.mtof(motif.pitches[i] + motif.pitchOffset);
+                    let dur = "16n";
+                    let atk = motif.attacks[i];
+                    let schedSynth = synth;
+                    let noisePlayback = false;
+                    if(motif.noises[i]) {
+                        schedSynth = noiseSynth;
+                        // noisePlayback = true;
+                        pitch = Tone.Frequency.mtof((motif.pitches[i] + motif.pitchOffset) % 12 + 12);
+                    }
+                    let id = transport.schedule(function (time) {
+                        // console.log("pitch: " + pitch + " dur: " + dur + " time: " + time);
+                        schedSynth.envelope.attack = atk;
+                        if(noisePlayback) {
+                            schedSynth.triggerAttackRelease(
+                                "16n",//dur16ToTransport(dur/2),
+                                );
+                        } else {
+                            schedSynth.triggerAttackRelease(
+                                pitch,
+                                dur,//dur16ToTransport(dur/2),
+                            );
+                        }
+                        material.color.copy(color);
+                        // material.color.setScalar(1.0);
+                    }, time);
+                }
+            }
+        }, "16n").start(0);
     }
     addDur(v) {
         this.pitches.push(Global.sound.pitchSet[5]);
@@ -106,6 +97,11 @@ class Motif {
         this.octave = 0;
         this.pitchOffset = 0;
         this.startDurOffset = 0;
+    }
+    stopSpaceLoop() {
+        if(this.loop != undefined) {
+            this.loop.stop();
+        }
     }
 }
 
@@ -158,6 +154,7 @@ class Fingerprint {
         this.noiseSynth = tone_init.newNoiseSynth();
         objects.push(this.mesh);
         this.updateMotif();
+        this.motif.schedulePlaybackSpace(this.synth, this.noiseSynth, Tone.Transport, this.material, this.color);
     }
     generateFingerprintRoom() {
         let newRoom = {};
@@ -266,6 +263,94 @@ void main()
             room.shader = shader;
             room.shaderUniforms = shaderUniforms;
             room.shaderMaterial = shaderMaterial;
+
+            room.initSound(room);
+        }
+
+        newRoom.initSound = function(room) {
+            room.fingerprint.numParametersUsed = 24;
+            room.fingerprint.updateMotif();
+            Tone.Transport.bpm.value = 80;
+            Tone.Transport.loop = false;
+
+            let sonarSynth = new Tone.FMSynth( {
+                harmonicity : 2 ,
+                modulationIndex : 2 ,
+                detune : 0 ,
+                oscillator : {
+                    type : "sine"
+                },
+                envelope : {
+                    attack : 0.2 ,
+                    decay : 0.7 ,
+                    sustain : 0.5 ,
+                    release : 1
+                },
+                modulation : {
+                    type : "sine"
+                },
+                    modulationEnvelope : {
+                    attack : 0.5 ,
+                    decay : 0 ,
+                    sustain : 1 ,
+                    release : 0.5
+                    }
+                }
+            ).connect(Global.sound.longverb).toMaster();
+            sonarSynth.volume.value = -12;
+            room.sonarSynth = sonarSynth;
+            let sonarLFO = new Tone.LFO('8n', -20, -6);
+            sonarLFO.type = 'sawtooth';
+            sonarLFO.connect(sonarSynth.volume);
+            sonarLFO.start(0);
+            room.sonarLFO = sonarLFO;
+            let sonarLFOEnv = new Tone.ScaledEnvelope(0.7, 1.5, 0.4, 0.01);
+            sonarLFOEnv.connect(sonarLFO.frequency);
+            sonarLFOEnv.max = 2.0;
+            room.sonarLFOEnv = sonarLFOEnv;
+
+            // Set up music loop function
+            room.motif = room.fingerprint.motif;
+            room.loopCounter = 0;
+            room.loop = new Tone.Loop(function(time){
+                let motif = room.motif;
+                // console.log("room.motif.pitches: " + JSON.stringify(room.motif.pitches));
+                // let pitchIndex = room.loopCounter % room.motif.pitches.length;
+                // let sonarPitch = Tone.Frequency.mtof(room.motif.pitches[pitchIndex]);
+                // // if(room.loopCounter % 6) {
+                // //     room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, Math.random() * 0.4);
+                // // }
+                // switch(room.loopCounter) {
+                //     case 0:
+                        
+                //         break;
+                //     case 2:
+                //         room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, 0.2);
+                //         break;
+                //     case 48:
+                //         room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, 0.4);
+                //         break;
+                //     case 50:
+                //         room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, 0.2);
+                //         break;
+                // }
+                for(let i = 0; i < motif.durations.length; i++) {
+                    // Have the loop be in sync with the spaceRoom loop
+                    if(motif.durations[i] * 4 + motif.startDurOffset == room.loopCounter) {
+                        let pitch = Tone.Frequency.mtof(room.motif.pitches[i] + room.motif.pitchOffset);
+                        let dur = {"16n": (motif.durations[i] * 4) - 2};
+                        let schedSynth = sonarSynth;
+                        schedSynth.triggerAttackRelease(
+                            pitch,
+                            dur,//dur16ToTransport(dur/2),
+                            time,
+                        );
+                        sonarLFOEnv.triggerAttackRelease(dur, time);
+                    }
+                }
+                
+                room.loopCounter = (room.loopCounter + 1) % 128;
+            }, "16n").start(0);
         }
     
         newRoom.update = function (cameraDirection, room, delta) {
@@ -293,7 +378,9 @@ void main()
             room.shaderUniforms.time.value += delta;
         }
 
-        newRoom.cleanUp = function(room) {}
+        newRoom.cleanUp = function(room) {
+            room.loop.stop();
+        }
 
         return newRoom;
     }
@@ -335,11 +422,12 @@ void main()
                 this.motif.changePitch(i - Math.floor((Global.data.headers.length - 4) / 2) - 4, this.rawFingerprint[i]);
             }
         }
-        this.motif.schedulePlayback(this.synth, this.noiseSynth, tone_init.getTransport(), this.material, this.color);
     }
     clearFromTransport() {
-        tone_init.clearIdsFromTransport(this.motif.schedulingIds);
-        this.motif.schedulingIds = [];
+        // tone_init.clearIdsFromTransport(this.motif.schedulingIds);
+        // this.motif.schedulingIds = [];
+        this.motif.clear();
+        this.motif.stopSpaceLoop();
     }
     setAmp(amp) {
         this.synth.volume.value = amp2db(amp);
