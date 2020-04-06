@@ -1,13 +1,14 @@
 const bodyParser = require("body-parser");
+const methodOverride = require('method-override')
+const ObjectId = require("mongodb").ObjectId;
 const MongoClient = require("mongodb").MongoClient;
-// Connection URL
+
 const URL_DB = "mongodb://mongo:27017";
-// Database Name
 const DB_NAME = "fp";
 
 const client = new MongoClient(URL_DB, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 client.connect();
 
@@ -36,7 +37,7 @@ const keys = [
   "timezone",
   "userAgent-js",
   "webGLVendor",
-  "webGLRenderer"
+  "webGLRenderer",
 ];
 
 const db = client.db(DB_NAME);
@@ -47,7 +48,7 @@ async function getNextSequenceValue(sequenceName) {
     { _id: sequenceName },
     { $inc: { sequence_value: 1 } },
     {
-      upsert: true
+      upsert: true,
     }
   );
   return r.value.sequence_value;
@@ -69,38 +70,82 @@ const k_fp_c = db.collection("keys");
 k_fp_c.createIndex({ key: 1, value: 1 }, { unique: true });
 
 var express = require("express");
+const session = require("express-session");
 const app = express();
 app.use(bodyParser());
+app.use(
+  session({
+    secret: "fingerprintislife",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {},
+  })
+);
+if (app.get("env") === "production") {
+  app.set("trust proxy", 1);
+  sess.cookie.secure = true;
+}
+app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
+  next();
+});
 
 const port = 80;
 
 app.use("/", express.static(__dirname + "/static"));
 
-app.get("/api/fp/keys/:key", async function(req, res) {
+app.get("/api/fp/keys/:key", async function (req, res) {
   res.json(await counter_c.find({ key: req.params.key }).toArray());
 });
-app.get("/api/fp/counters", async function(req, res) {
+app.get("/api/fp/counters", async function (req, res) {
   const output = {};
-  await counter_c.find({}).forEach(elem => {
+  await counter_c.find({}).forEach((elem) => {
     output[elem._id] = elem.sequence_value;
   });
   res.json(output);
 });
 
-app.get("/api/fp/random", async function(req, res) {
+const connectedUser = new Set();
+
+app.get("/api/fp/normalized", async function (req, res) {
+  const normalized = await n_fp_c.find().toArray();
+  res.json(normalized);
+});
+
+app.get("/api/fp/conntected", async function (req, res) {
+  console.log(connectedUser)
+  var objIds = Array.from(connectedUser).map(function(id) { return ObjectId(id); });
+  const originals = await o_fp_c.find({ _id: { $in: objIds } }).toArray();
+  const normalized = await n_fp_c.find({ _id: { $in: objIds } }).toArray();
+  res.json({ originals, normalized });
+});
+
+app.get("/api/fp/random", async function (req, res) {
   const original = await o_fp_c.aggregate([{ $sample: { size: 1 } }]).next();
   const normalized = await n_fp_c.findOne({ _id: original._id });
   res.json({ original, normalized });
 });
-app.get("/api/fp/count", async function(req, res) {
+
+app.get("/api/fp/count", async function (req, res) {
   res.json(await o_fp_c.countDocuments({}));
+});
+app.post("/api/session/logout", async function (req, res) {
+  connectedUser.delete(req.session.fpId);
+  res.send("ok");
 });
 app
   .route("/api/fp/")
-  .get(function(req, res) {
+  .get(function (req, res) {
     res.send("Get a random book");
   })
-  .put(async function(req, res) {
+  .put(async function (req, res) {
+    if (req.session.fp) {
+      connectedUser.add(req.session.fpId);
+      return res.json(req.session.fp);
+    }
     function keyValueFP(fp, key) {
       for (let p of fp) {
         if (p.key == key) {
@@ -134,7 +179,7 @@ app
         timezone: keyValueFP(fp, "timezone"),
         "userAgent-js": keyValueFP(fp, "userAgent"),
         webGLVendor: keyValueFP(fp, "webglVendorAndRenderer").split("~")[0],
-        webGLRenderer: keyValueFP(fp, "webglVendorAndRenderer").split("~")[1]
+        webGLRenderer: keyValueFP(fp, "webglVendorAndRenderer").split("~")[1],
       };
       return output;
     }
@@ -154,8 +199,12 @@ app
     }
     const fpDB = await o_fp_c.insertOne(fp);
     normalized._id = fpDB.ops[0]._id;
-    n_fp_c.insertOne(normalized);
-    res.json({ original: fp, normalized });
+    const responseQuery = await n_fp_c.insertOne(normalized);
+    const output = { original: fp, normalized };
+    req.session.fp = output;
+    req.session.fpId = responseQuery.insertedId.toString();
+    connectedUser.add(req.session.fpId);
+    res.json(output);
   });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
