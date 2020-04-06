@@ -182,7 +182,7 @@ class Fingerprint {
             }
     
             // let geometry = new THREE.BoxGeometry(40, 60, 30);
-            let geometry = new THREE.TetrahedronGeometry(50, room.fingerprint.fingerprintSum % 4)
+            let geometry = new THREE.TetrahedronGeometry(60, room.fingerprint.fingerprintSum % 4)
             let material = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide });
             let roomCube = new THREE.Mesh(geometry, material);
             roomCube.receiveShadow = true;
@@ -309,6 +309,37 @@ void main()
             sonarLFOEnv.max = 2.0;
             room.sonarLFOEnv = sonarLFOEnv;
 
+            // Distorted noise
+
+            let noise;
+
+            noise = new Tone.Noise("pink").start();
+            var noiseGain = new Tone.Gain(0.2).connect(Global.sound.reverb).toMaster();
+            var chebyenv = new Tone.ScaledEnvelope({
+                "attack" : 5.0,
+                "decay" : 0.01,
+                "sustain" : 1.0,
+                "release" : 5.0,
+            });
+            chebyenv.releaseCurve = "linear";
+            chebyenv.max = 0.5;
+
+            var chebylfofreq = new Tone.LFO(0.1, 0.05, 0.3).start();
+            var chebylfo = new Tone.LFO(0.1, 0.05, 0.1).start();
+            chebylfofreq.connect(chebylfo.frequency);
+
+            var gainMult = new Tone.Multiply();
+            // Multiply two signals together
+            chebyenv.connect(gainMult, 0, 0);
+            chebylfo.connect(gainMult, 0, 1);
+            // Use as gain control
+            gainMult.connect(noiseGain.gain);
+
+
+            var cheby = new Tone.Chebyshev(300).connect(noiseGain);
+            noise.connect(cheby);
+            room.chebyenv = chebyenv;
+
             // Set up music loop function
             room.motif = room.fingerprint.motif;
             room.loopCounter = 0;
@@ -320,25 +351,23 @@ void main()
                 // // if(room.loopCounter % 6) {
                 // //     room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, Math.random() * 0.4);
                 // // }
-                // switch(room.loopCounter) {
-                //     case 0:
-                        
-                //         break;
-                //     case 2:
-                //         room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, 0.2);
-                //         break;
-                //     case 48:
-                //         room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, 0.4);
-                //         break;
-                //     case 50:
-                //         room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, 0.2);
-                //         break;
-                // }
+                switch(room.loopCounter) {
+                    case 0:
+                        room.chebyenv.triggerAttack();
+                        break;
+                    case 2:
+                        break;
+                    case 48:
+                        break;
+                    case 64:
+                        room.chebyenv.triggerRelease();
+                        break;
+                }
                 for(let i = 0; i < motif.durations.length; i++) {
                     // Have the loop be in sync with the spaceRoom loop
                     if(motif.durations[i] * 4 + motif.startDurOffset == room.loopCounter) {
                         let pitch = Tone.Frequency.mtof(room.motif.pitches[i] + room.motif.pitchOffset);
-                        let dur = {"16n": (motif.durations[i] * 4) - 2};
+                        let dur = {"16n": Math.min((motif.durations[i] * 4) - 2, 16)};
                         let schedSynth = sonarSynth;
                         schedSynth.triggerAttackRelease(
                             pitch,
