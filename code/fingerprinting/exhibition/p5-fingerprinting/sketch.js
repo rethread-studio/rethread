@@ -7,7 +7,7 @@ function setup() {
 
     // P5
     // createCanvas(1024, 1024);
-    createCanvas(700, 700);
+    createCanvas(800, 800);
     background(0);
 
 }
@@ -403,6 +403,10 @@ function asterisk(x, y, r) {
     line(x + r * cos(radians(315)), y + r * sin(radians(315)), x + r * cos(radians(135)), y + r * sin(radians(135)));
 }
 
-function mouseClicked() {
-    img = save('shape.png');
-}
+// function mouseClicked() {
+//     img = save('shape.png');
+// }
+
+// $("#download").click(function () {
+//     img = save('shape.png');
+// });

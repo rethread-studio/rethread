@@ -6,79 +6,10 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://kit.fontawesome.com/7ff2c0391b.js" crossorigin="anonymous"></script>
+
 <script src="script.js"></script>
-<style>
-    @import url('https://fonts.googleapis.com/css?family=Gotu&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,400&display=swap');
-
-    @font-face {
-        font-family: 'Ortica';
-        src: url('Ortica-Bold.woff2') format('woff2'),
-            /* Super Modern Browsers */
-            url('Ortica-Bold.woff') format('woff'),
-            /* Pretty Modern Browsers */
-            url('Ortica-Bold.otf') format('truetype'),
-            /* Safari, Android, iOS */
-    }
-
-    body {
-        text-align: center;
-        background-color: thistle;
-        transition: background-color 0.5s ease;
-    }
-
-    .mainPage {
-        background: midnightblue;
-    }
-
-    h1,
-    h2,
-    h3 {
-        /* font-family: 'Gotu', sans-serif; */
-        font-family: 'Ortica', sans-serif;
-        /* text-transform: uppercase; */
-    }
-
-    body,
-    html {
-        height: 100%;
-        font-family: 'Roboto Mono', monospace;
-    }
-
-    .bgimg {
-        min-height: 100%;
-        background-position: center;
-        background-size: cover;
-    }
-
-    button {
-        border: none;
-        padding: 1em;
-        border-radius: 2em;
-        color: midnightblue;
-        cursor: pointer;
-    }
-
-    .linkButton {
-        color: white;
-        background: none;
-        text-decoration: underline;
-        cursor: pointer;
-    }
-
-    .artBubble {
-        border-radius: 5em;
-        /* padding: 1em; */
-        margin: 3em;
-        cursor: pointer;
-        color: midnightblue;
-        background: white;
-        height: 10em;
-        width: 10em;
-        background-position: center;
-        background-size: cover;
-    }
-</style>
+<link rel="stylesheet" type="text/css" href="style.css">
 
 <body>
 
@@ -87,10 +18,11 @@
 
         </div>
         <div id="welcome" class="w3-display-middle">
+            <p style="color: #c5a0c5">a software art experience about browser fingerprinting</p>
             <h1 class="w3-jumbo w3-animate-top"> <b>are you unique on the internet?</b> </h1>
             <button id="participate" href="#" class="w3-large w3-center">Participate</button>
             <p><button id="noThanks" href="#" class="linkButton">No thanks, just take me to the art.</button></p>
-
+            <p style="color: #c5a0c5">sound on <i class="fas fa-volume-up"></i></p>
 
         </div>
 
@@ -106,13 +38,13 @@
         </div>
 
         <div style="display:none" id="main" class="w3-display-middle">
-            <div style="background-image: url('images/art0.png'); align-content: right;" class="artBubble">
+            <div id="3Dart" style="background-image: url('images/art0.png'); align-content: right;" class="artBubble">
             </div>
             <h2 class="w3-animate-top"> <b>are you unique on the internet?</b> </h2>
             <button id="participateStill" href="#" class="w3-center">participate</button>
             <button id="myFP" href="#" class="w3-center">See my fingerprint</button>
             <p></p>
-            <div style="background-image: url('images/art1.png')" class="artBubble">
+            <div id="2Dart" style="background-image: url('images/art1.png')" class="artBubble">
             </div>
 
         </div>

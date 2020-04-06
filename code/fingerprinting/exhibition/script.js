@@ -1,3 +1,5 @@
+let hasConsented = false;
+
 $(document).ready(function () {
     // Participate
     $("#participate").click(function () {
@@ -31,6 +33,7 @@ $(document).ready(function () {
 
     // Agree consent
     $("#consentButton").click(function () {
+        hasConsented = true;
         // Go to main page
 
         // document.body.style.backgroundColor = "red";
@@ -44,6 +47,24 @@ $(document).ready(function () {
         $("#myFP").show();
 
 
+    });
+
+
+    // see my fingerprint
+    $("#myFP").click(function () {
+        // Show a dashboard with the "raw" fingerprint data, hover to reveal what each thing means
+    });
+
+    ////// ARTWORK
+
+    $("#3Dart").click(function () {
+        // Go to 3D art
+    });
+
+
+    $("#2Dart").click(function () {
+        // Go to 2D art
+        window.location.href = "p5-fingerprinting/index.html";
     });
 
 });

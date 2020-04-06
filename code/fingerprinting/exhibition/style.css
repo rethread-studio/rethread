@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css?family=Gotu&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+@font-face {
+    font-family: 'Ortica';
+    src: url('Ortica-Bold.woff2') format('woff2'),
+        /* Super Modern Browsers */
+        url('Ortica-Bold.woff') format('woff'),
+        /* Pretty Modern Browsers */
+        url('Ortica-Bold.otf') format('truetype'),
+        /* Safari, Android, iOS */
+}
+
+html, body {margin: 0; height: 100%; overflow: hidden}
+
+body {
+    text-align: center;
+    background-color: thistle;
+    transition: background-color 0.5s ease;
+}
+
+.mainPage {
+    background: midnightblue;
+}
+
+h1,
+h2,
+h3 {
+    /* font-family: 'Gotu', sans-serif; */
+    font-family: 'Ortica', sans-serif;
+    /* text-transform: uppercase; */
+}
+
+body,
+html {
+    height: 100%;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.bgimg {
+    min-height: 100%;
+    background-position: center;
+    background-size: cover;
+}
+
+button {
+    border: none;
+    padding: 1em;
+    border-radius: 2em;
+    color: midnightblue;
+    cursor: pointer;
+    outline: none;
+}
+
+/* button:hover {
+    background-color:gold;
+} */
+
+.linkButton {
+    color: white;
+    background: none;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.artBubble {
+    border-radius: 5em;
+    /* padding: 1em; */
+    margin: 3em;
+    cursor: pointer;
+    color: midnightblue;
+    background: white;
+    height: 10em;
+    width: 10em;
+    background-position: center;
+    background-size: cover;
+}
