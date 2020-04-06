@@ -11,6 +11,29 @@
 <script src="script.js"></script>
 <link rel="stylesheet" type="text/css" href="style.css">
 
+<!-- Script for dot menu -->
+<script>
+        /* When the user clicks on the button,
+        toggle between hiding and showing the dropdown content */
+        function myFunction() {
+            document.getElementById("myDropdown").classList.toggle("show");
+        }
+    
+        // Close the dropdown menu if the user clicks outside of it
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+
 <body>
 
     <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
@@ -40,7 +63,9 @@
         <div style="display:none" id="main" class="w3-display-middle">
             <!-- <div id="3Dart" style="background-image: url('images/art0.png');" class="artBubble">
             </div> -->
-            <button id="3Dart" class="artBubble" style="background-image: url('images/art0.png');"><p class="text">explore and listen to a 3D world of fingerprints</p></button>
+            <button id="3Dart" class="artBubble" style="background-image: url('images/art0.png');">
+                <p class="text">explore and listen to a 3D world of fingerprints</p>
+            </button>
             <h2 class="w3-animate-top"> <b>are you unique on the internet?</b> </h2>
             <p>a software art experience about browser fingerprinting</p>
             <p></p>
@@ -49,13 +74,22 @@
             <p></p>
             <!-- <div id="2Dart" style="background-image: url('images/art1.png')" class="artBubble">
             </div> -->
-            <button id="2Dart" style="background-image: url('images/art1.png')" class="artBubble"><p class="text">what does your fingerprint look like?</p></button>
+            <button id="2Dart" style="background-image: url('images/art1.png')" class="artBubble">
+                <p class="text">what does your fingerprint look like?</p>
+            </button>
 
         </div>
 
 
         <!-- <div class="w3-display-bottomleft w3-padding-large">
         </div> -->
+    </div>
+
+    <div style="display: none;" id="dotMenu" class="dropdown">
+        <button id="mainPageDot" onclick="myFunction()" class="dropbtn"> </button>
+        <div id="myDropdown" class="dropdown-content">
+            <a href="exit.html">Leave exhibition</a>
+        </div>
     </div>
 
 </body>
