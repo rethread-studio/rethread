@@ -171,3 +171,16 @@ button:hover {
 .show {
     display: block;
 }
+
+/* /// END Navigation /// */
+
+/* only for main page - different background color of the dot */
+#mainPageDot{
+    background: thistle; 
+    border-color: thistle;
+}
+
+#mainPageDot:hover, #mainPageDot:focus {
+    background-color: transparent;
+
+}

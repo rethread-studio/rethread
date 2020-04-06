@@ -25,6 +25,7 @@ $(document).ready(function () {
     //No thanks
     $("#noThanksAgain").click(function () {
         $("#main").fadeIn();
+        $("#dotMenu").show();
         $("#consentInfo").hide();
         $("#participateStill").show();
         $("#myFP").hide();
@@ -43,6 +44,7 @@ $(document).ready(function () {
 
         $("#consentInfo").fadeOut();
         $("#main").fadeIn();
+        $("#dotMenu").show();
         $("#participateStill").hide();
         $("#myFP").show();
 

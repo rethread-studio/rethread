@@ -12,7 +12,6 @@ function setup() {
 
 }
 
-
 var options = { fonts: { extendedJsFonts: true }, excludes: { userAgent: true } }
 $(document).ready(async () => {
     if (window.requestIdleCallback) {
