@@ -1,88 +1,149 @@
 let hasConsented = false;
 
+if (localStorage.getItem('hasConsented') != null) {
+    hasConsented = localStorage.getItem('hasConsented');
+}
+
+const pages = ['welcome', 'consentInfo', 'myFp', 'main']
+
+function getCurrentPage() {
+    if (window.location.hash) {
+        return window.location.hash.substring(1);
+    } else {
+        return 'welcome';
+    }
+}
+function goToPage() {
+    const currentPage = getCurrentPage();
+    for (let page of pages) {
+        if (page != currentPage) {
+            $("#" + page).hide();
+        }
+    }
+
+    page = window[window.location.hash.substring(1) + 'Page'];
+    if (page) {
+        page();
+    } else {
+        $("#welcome").fadeIn();
+    }
+}
+window.addEventListener("hashchange", goToPage, false);
+
+function displayPage(name) {
+    window.location.hash = name;
+}
+
+function welcomePage() {
+    displayPage('welcome');
+}
+
+function consentInfoPage() {
+    displayPage('consentInfo');
+    $("#main").fadeOut();
+    $("#welcome").fadeOut();
+    $("#consentInfo").fadeIn();
+}
+
+function generateFPText(fp) {
+    return `Your browser fingerprint is everything a website can know about you without using cookies. You are using ${fp.original['user-agent']} browser on a ${fp.original.platform} platform with a ${fp.original.webGLRenderer} GPU on a ${fp.original.screen_width}x${fp.original.screen_height} screen. You have ${fp.original['font-js'].length} fonts installed.`
+}
+function myFpPage() {
+    displayPage('myFp');
+    $("#main").fadeOut();
+    $("#consentInfo").fadeOut();
+    $("#participateStill").hide();
+
+    getFingerPrint(fp => {
+        $("#myFp").fadeIn();
+        $("#fptext").text(generateFPText(fp))
+    })
+}
+
+function mainPage() {
+    displayPage('main');
+    $("#myFp").fadeOut();
+    $("#consentInfo").fadeOut();
+    if (hasConsented) {
+        $("#participateStill").hide();
+        $("#seeMyFP").show();
+    } else {
+        console.log("no consent!)");
+        $("#participateStill").show();
+        $("#seeMyFP").hide();
+    }
+    $("#dotMenu").show();
+    $("#main").fadeIn();
+}
+
+function participateButton() {
+    consentInfoPage();
+}
+function participateStillButton() {
+    consentInfoPage();
+}
+function noThanksButton() {
+    mainPage();
+    $("#participateStill").show();
+    $("#seeMyFP").hide();
+}
+function noThanksAgainButton() {
+    noThanksPage();
+    $("#dotMenu").show();
+    $("#consentInfo").hide();
+}
+function consentInfoButton() {
+    myFpPage();
+    hasConsented = true;
+    localStorage.setItem('hasConsented', true)
+    // Go to fingerprint with animation
+
+    $("body").toggleClass('mainPage');
+}
+function mainButton() {
+    displayPage('main');
+    // Go to main page
+    mainPage();
+
+    if (hasConsented) {
+        $("#myFp").fadeOut();
+        $("#consentInfo").fadeOut();
+        $("#dotMenu").show();
+        $("#participateStill").hide();
+        $("#seeMyFP").show();
+    } else {
+        console.log("no consent!)");
+    }
+}
+function myFpButton() {
+    // Show fingerprint WITHOUT animation
+    myFpPage()
+}
 
 $(document).ready(function () {
+    if (window.location.hash) {
+        goToPage()
+    }
 
     // Participate
-    $("#participate").click(function () {
-        $("#welcome").fadeOut();
-        $("#consentInfo").fadeIn();
-    });
+    $("#participate").click(participateButton);
 
-    $("#participateStill").click(function () {
-        $("#main").fadeOut();
-        $("#consentInfo").fadeIn();
-    });
-
+    $("#participateStill").click(participateStillButton);
 
     //No thanks
-    $("#noThanks").click(function () {
-
-        $("#welcome").fadeOut();
-        $("#main").fadeIn();
-        $("#participateStill").show();
-        $("#seeMyFP").hide();
-    });
+    $("#noThanks").click(noThanksButton);
 
     //No thanks
-    $("#noThanksAgain").click(function () {
-        $("#main").fadeIn();
-        $("#dotMenu").show();
-        $("#consentInfo").hide();
-        $("#participateStill").show();
-        $("#seeMyFP").hide();
-    });
+    $("#noThanksAgain").click(noThanksAgainButton);
 
     // Agree consent --- See fingerprint
-    $("#consentButton").click(function () {
-        hasConsented = true;
-
-        $("#consentInfo").fadeOut();
-        $("body").toggleClass('mainPage');
-
-        // Get fingerprint
-        getFingerPrint((fingerprint) => {
-            console.log(fingerprint.original['platform']);
-            // Go to fingerprint with animation
-            $("#myFp").fadeIn();
-            $("#participateStill").hide();
-
-            // change text
-            $("#fptext").text("Your browser fingerprint is everything a website can know about you without using cookies. You are using a " + fingerprint.original['platform'] + " platform.");
-        });
-
-
-
-
-    });
-
+    $("#consentButton").click(consentInfoButton);
 
     // Seen fingerprint - continue experience
-    $("#goToMainPage").click(function () {
-        // Go to main page
-
-        if (hasConsented) {
-            $("#myFp").fadeOut();
-            $("#consentInfo").fadeOut();
-            $("#main").fadeIn();
-            $("#dotMenu").show();
-            $("#participateStill").hide();
-            $("#seeMyFP").show();
-        }
-        else {
-            console.log("no consent!)");
-        }
-
-
-    });
-
+    $("#goToMainPage").click(mainButton);
 
     // see my fingerprint
-    $("#seeMyFP").click(function () {
-        // Show fingerprint WITHOUT animation
-        $("#main").fadeOut();
-        $("#myFp").fadeIn();
-    });
+    $("#seeMyFP").click(myFpButton);
 
     ////// ARTWORK
 
@@ -90,10 +151,8 @@ $(document).ready(function () {
         // Go to 3D art
     });
 
-
     $("#2Dart").click(function () {
         // Go to 2D art
         window.location.href = "p5-fingerprinting/index.html";
     });
-
 });
