@@ -38,29 +38,29 @@ class Motif {
             for(let i = 0; i < motif.durations.length; i++) {
                 // Have the loop be in sync with the spaceRoom loop
                 if(motif.durations[i] + motif.startDurOffset == motif.loopCounter) {
-                    console.log("Play note in Loop with loopmax " + motif.loopMax + " durations: " + motif.durations);
+                    // console.log("Play note in Loop with loopmax " + motif.loopMax + " durations: " + motif.durations);
                     let pitch = Tone.Frequency.mtof(motif.pitches[i] + motif.pitchOffset);
                     let dur = "16n";
                     let atk = motif.attacks[i];
-                    let schedSynth = synth;
                     let noisePlayback = false;
                     if(motif.noises[i]) {
-                        schedSynth = noiseSynth;
-                        // noisePlayback = true;
+                        noisePlayback = true;
                         pitch = Tone.Frequency.mtof((motif.pitches[i] + motif.pitchOffset) % 12 + 12);
                     }
                     let id = transport.schedule(function (time) {
                         // console.log("pitch: " + pitch + " dur: " + dur + " time: " + time);
-                        schedSynth.envelope.attack = atk;
+                        synth.envelope.attack = atk;
                         if(noisePlayback) {
-                            schedSynth.triggerAttackRelease(
+                            console.log("noise playback " + motif.noises);
+                            noiseSynth.triggerAttackRelease(
+                                pitch,
                                 "16n",//dur16ToTransport(dur/2),
                                 time);
                         } else {
-                            schedSynth.triggerAttackRelease(
+                            synth.triggerAttackRelease(
                                 pitch,
                                 dur,//dur16ToTransport(dur/2),
-                            time);
+                                time);
                         }
                         material.color.copy(color);
                         // material.color.setScalar(1.0);
@@ -73,11 +73,18 @@ class Motif {
     }
     update() {
         this.loopMax = this.durations.reduce((a, b) => a + b, 0) + this.startDurOffset;
+        // Set the loop point to the closest higher multiple of 8 16ths
+        for(let i = 1; i < 16; i++) {
+            if(i * 8 > this.loopMax) {
+                this.loopMax = i * 8;
+                break;
+            }
+        }
     }
     addDur(v) {
         this.pitches.push(Global.sound.pitchSet[5]);
         // this.pitches.push(110);
-        this.durations.push((v * 5) % 16 + 1);
+        this.durations.push((v * 5) % 12 + 1);
         this.attacks.push(0.001);
         this.noises.push(true);
     }
@@ -87,15 +94,15 @@ class Motif {
         this.attacks[index] = 0.01;
         this.noises[index] = false;
     }
-    addPitch(i) {
-        this.pitches.push( this.pitchSet[i % this.pitchSet.length]);
-        this.durations.push(2);
-        this.attacks.push(0.01);
-    }
-    changeDur(i, newDur) {
-        let index = Math.floor(i) % (this.durations.length);
-        this.durations[index] = newDur;
-    }
+    // addPitch(i) {
+    //     this.pitches.push( this.pitchSet[i % this.pitchSet.length]);
+    //     this.durations.push(2);
+    //     this.attacks.push(0.01);
+    // }
+    // changeDur(i, newDur) {
+    //     let index = Math.floor(i) % (this.durations.length);
+    //     this.durations[index] = newDur;
+    // }
     clear() {
         this.pitches = [];
         this.durations = [];
@@ -148,6 +155,7 @@ class Fingerprint {
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
         this.color = new THREE.Color();
         this.color.setHSL((this.fingerprintSum % 1000)/1000, 0.6, 0.55);
+        console.log("new fingerprint with sum " + this.fingerprintSum + " and raw fingerprint " + JSON.stringify(this.rawFingerprint));
     }
     addToSpace(scene, objects, x, y, z) {
         this.position = new THREE.Vector3(x, y, -z);
@@ -660,6 +668,7 @@ void main()
             this.numParametersUsed = numParameters;
             this.updateMotif();
         }
+        this.numParametersUsed = 24;
 
         this.material.color.multiplyScalar(0.9);
     }

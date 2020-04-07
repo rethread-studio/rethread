@@ -543,8 +543,9 @@ let spaceRoom = {
 
         if (minDist < 1000) {
             Global.sound.globalSynthLPF.frequency.value = 2000 - (minDist * 1.4);
-            Global.sound.noiseUsrGain.value = Math.pow(1.0 - (minDist * 0.001), 4.0) * 0.05;
-            
+        }
+        if(minDist < 500) {
+            Global.sound.noiseUsrGain.value = Math.pow(1.0 - (minDist/500), 4.0) * 0.05;
         }
         if (minDist < 200) {
             fogFade = Math.pow(1.0 - (minDist / 200), 4.0);
