@@ -4,6 +4,10 @@ if (localStorage.getItem('hasConsented') != null) {
     hasConsented = localStorage.getItem('hasConsented');
 }
 
+if (hasConsented) {
+    $("body").toggleClass('mainPage');
+}
+
 const pages = ['welcome', 'consentInfo', 'myFp', 'main']
 
 function getCurrentPage() {

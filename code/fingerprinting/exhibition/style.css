@@ -16,7 +16,7 @@ html, body {
 body {
     text-align: center;
     background-color: thistle;
-    transition: background-color 0.5s ease;
+    /* transition: background-color 0.5s ease; */
 }
 
 .mainPage {
