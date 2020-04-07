@@ -25,9 +25,10 @@ class Motif {
         this.octave = 0;
         this.pitchOffset = 0;
         this.startDurOffset = 0;
+        this.loopCounter = 0;
+        this.loopMax = 0;
     }
     schedulePlaybackSpace(synth, noiseSynth, transport, material, color) {
-        console.log("motif scheduled for space playback!");
         if(this.loop != undefined) {
             this.loop.stop();
         }
@@ -36,7 +37,8 @@ class Motif {
         this.loop = new Tone.Loop(function(time){
             for(let i = 0; i < motif.durations.length; i++) {
                 // Have the loop be in sync with the spaceRoom loop
-                if(motif.durations[i] + motif.startDurOffset == Graphics.spaceRoom.loopCounter) {
+                if(motif.durations[i] + motif.startDurOffset == motif.loopCounter) {
+                    console.log("Play note in Loop with loopmax " + motif.loopMax + " durations: " + motif.durations);
                     let pitch = Tone.Frequency.mtof(motif.pitches[i] + motif.pitchOffset);
                     let dur = "16n";
                     let atk = motif.attacks[i];
@@ -53,19 +55,24 @@ class Motif {
                         if(noisePlayback) {
                             schedSynth.triggerAttackRelease(
                                 "16n",//dur16ToTransport(dur/2),
-                                );
+                                time);
                         } else {
                             schedSynth.triggerAttackRelease(
                                 pitch,
                                 dur,//dur16ToTransport(dur/2),
-                            );
+                            time);
                         }
                         material.color.copy(color);
                         // material.color.setScalar(1.0);
                     }, time);
+                    motif.schedulingIds.push(id);
                 }
             }
+            motif.loopCounter = (motif.loopCounter + 1) % motif.loopMax;
         }, "16n").start(0);
+    }
+    update() {
+        this.loopMax = this.durations.reduce((a, b) => a + b, 0) + this.startDurOffset;
     }
     addDur(v) {
         this.pitches.push(Global.sound.pitchSet[5]);
@@ -99,8 +106,12 @@ class Motif {
         this.startDurOffset = 0;
     }
     stopSpaceLoop() {
+        for(let id of this.schedulingIds) {
+            Tone.Transport.clear(id);
+        }
         if(this.loop != undefined) {
             this.loop.stop();
+            console.log("Stopped space loop of motif");
         }
     }
 }
@@ -127,13 +138,13 @@ class Fingerprint {
     mesh; // the 3D mesh that represents this
     synth; // the synth playing this fingerprint's motif
     noiseSynth;
+    chordSynths;
     numParametersUsed;
     rawFingerprint;
     fingerprintSum;
     color;
     constructor(rawFingerprint) {
-        const vs = rawFingerprint.split(",");
-        this.rawFingerprint = vs.map(el => Number(el));
+        this.rawFingerprint = rawFingerprint;
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
         this.color = new THREE.Color();
         this.color.setHSL((this.fingerprintSum % 1000)/1000, 0.6, 0.55);
@@ -161,6 +172,7 @@ class Fingerprint {
         newRoom.fingerprint = this;
         newRoom.init = function (room) {
             Graphics.newScene(new THREE.Color(0x333333), new THREE.FogExp2(0xfffefe, 0.01));
+            Graphics.setFogFade(1.0);
     
             let lightColor = new THREE.Color().copy(room.fingerprint.color).multiplyScalar(1.5);
 
@@ -180,13 +192,6 @@ class Fingerprint {
                 Graphics.scene.add(room.spotLight);
                 Graphics.scene.add(room.spotLight.target);
             }
-    
-            // let geometry = new THREE.BoxGeometry(40, 60, 30);
-            let geometry = new THREE.TetrahedronGeometry(60, room.fingerprint.fingerprintSum % 4)
-            let material = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide });
-            let roomCube = new THREE.Mesh(geometry, material);
-            roomCube.receiveShadow = true;
-            Graphics.scene.add(roomCube);
     
             // Place camera at origin
             Graphics.controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
@@ -253,6 +258,78 @@ void main()
 }
 
 `,
+//                 fragmentShader: `
+//                 uniform float time;
+//                 uniform vec2 resolution;
+                
+//                 varying vec2 vUv;
+                
+// float opSmoothUnion( float d1, float d2, float k )
+// {
+//     float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
+//     return mix( d2, d1, h ) - k*h*(1.0-h);
+// }
+
+// float sdSphere( vec3 p, float s )
+// {
+//   return length(p)-s;
+// } 
+
+// float map(vec3 p)
+// {
+// 	float d = 2.0;
+// 	for (int i = 0; i < 16; i++)
+// 	{
+// 		float fi = float(i);
+// 		float t = time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
+// 		d = opSmoothUnion(
+//             sdSphere(p + sin(t + fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8), mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
+// 			d,
+// 			0.4
+// 		);
+// 	}
+// 	return d;
+// }
+
+// vec3 calcNormal( in vec3 p )
+// {
+//     const float h = 1e-5; // or some other value
+//     const vec2 k = vec2(1,-1);
+//     return normalize( k.xyy*map( p + k.xyy*h ) + 
+//                       k.yyx*map( p + k.yyx*h ) + 
+//                       k.yxy*map( p + k.yxy*h ) + 
+//                       k.xxx*map( p + k.xxx*h ) );
+// }
+
+// void main()
+// {
+//     vec2 uv = -1.0 + 2.0 *vUv;
+    
+//     // screen size is 6m x 6m
+// 	vec3 rayOri = vec3((uv - 0.5) * 6.0, 3.0);
+// 	vec3 rayDir = vec3(0.0, 0.0, -1.0);
+	
+// 	float depth = 0.0;
+// 	vec3 p;
+	
+// 	for(int i = 0; i < 64; i++) {
+// 		p = rayOri + rayDir * depth;
+// 		float dist = map(p);
+//         depth += dist;
+// 		if (dist < 1e-6) {
+// 			break;
+// 		}
+// 	}
+	
+//     depth = min(6.0, depth);
+// 	vec3 n = calcNormal(p);
+//     float b = max(0.0, dot(n, vec3(0.577)));
+//     vec3 col = (0.5 + 0.5 * cos((b + time * 3.0) + uv.xyx * 2.0 + vec3(0,2,4))) * (0.85 + b * 0.35);
+//     col *= exp( -depth * 0.15 );
+	
+//     // maximum thickness is 2m in alpha channel
+//     gl_FragColor = vec4(col, 1.0 - (depth - 0.5) / 2.0);
+// }`,
                 side: THREE.DoubleSide,
             } );
             let shader = new THREE.Mesh( shaderGeometry, shaderMaterial );
@@ -264,6 +341,21 @@ void main()
             room.shaderUniforms = shaderUniforms;
             room.shaderMaterial = shaderMaterial;
 
+            // let geometry = new THREE.BoxGeometry(40, 60, 30);
+            let geometry = new THREE.TetrahedronGeometry(60, room.fingerprint.fingerprintSum % 4)
+            let material = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide });
+            let roomCube = new THREE.Mesh(geometry, material);
+            roomCube.receiveShadow = true;
+            room.roomCube = roomCube;
+            Graphics.scene.add(roomCube);
+
+            // PORTALS
+            // room.portals = [];
+            // room.spacePortal = Graphics.getNewSpacePortal();
+            // room.spacePortal.position.set()
+            // room.portals.push(room.spacePortal);
+            // Graphics.scene.add(room.spacePortal);
+
             room.initSound(room);
         }
 
@@ -272,6 +364,10 @@ void main()
             room.fingerprint.updateMotif();
             Tone.Transport.bpm.value = 80;
             Tone.Transport.loop = false;
+            room.motif = room.fingerprint.motif;
+
+            Global.sound.globalSynthLPF.frequency.value = 500;
+            Global.sound.noiseEnv.triggerRelease();
 
             let sonarSynth = new Tone.FMSynth( {
                 harmonicity : 2 ,
@@ -281,7 +377,7 @@ void main()
                     type : "sine"
                 },
                 envelope : {
-                    attack : 0.2 ,
+                    attack : 1.0 ,
                     decay : 0.7 ,
                     sustain : 0.5 ,
                     release : 1
@@ -296,17 +392,17 @@ void main()
                     release : 0.5
                     }
                 }
-            ).connect(Global.sound.longverb).toMaster();
-            sonarSynth.volume.value = -12;
+            ).connect(Global.sound.chorus).toMaster();
+            sonarSynth.volume.value = -24;
             room.sonarSynth = sonarSynth;
-            let sonarLFO = new Tone.LFO('8n', -20, -6);
-            sonarLFO.type = 'sawtooth';
+            let sonarLFO = new Tone.LFO('8n', -24, -18);
+            sonarLFO.type = 'sine';
             sonarLFO.connect(sonarSynth.volume);
             sonarLFO.start(0);
             room.sonarLFO = sonarLFO;
             let sonarLFOEnv = new Tone.ScaledEnvelope(0.7, 1.5, 0.4, 0.01);
             sonarLFOEnv.connect(sonarLFO.frequency);
-            sonarLFOEnv.max = 2.0;
+            sonarLFOEnv.max = 4.0;
             room.sonarLFOEnv = sonarLFOEnv;
 
             // Distorted noise
@@ -340,9 +436,33 @@ void main()
             noise.connect(cheby);
             room.chebyenv = chebyenv;
 
+            // Pads
+
+            room.padSynths = [];
+
+            for(let i = 0; i < 5; i++) {
+                let newSynth = tone_init.newPadSynth(20);
+                newSynth.pitchIndex = i;
+                newSynth.playing = false;
+                newSynth.midi = room.motif.pitchSet[newSynth.pitchIndex];
+                newSynth.toggle = function(pad, time) {
+                    if(pad.playing) {
+                        pad.env.triggerRelease(time);
+                        pad.playing = false;
+                    } else {
+                        pad.filter.frequency.value = Tone.Frequency.mtof(pad.midi);
+                        let vel = Math.random() * 0.75 + 0.25;
+                        pad.env.triggerAttack(time, vel);
+                        pad.playing = true;
+                    }
+                }
+                room.padSynths.push(newSynth); // Tone.Frequency.mtof(notes[i]-12)
+            }
+
             // Set up music loop function
-            room.motif = room.fingerprint.motif;
+            
             room.loopCounter = 0;
+            room.loopCounterLv2 = 0; // how many times the first loop counter has started over
             room.loop = new Tone.Loop(function(time){
                 let motif = room.motif;
                 // console.log("room.motif.pitches: " + JSON.stringify(room.motif.pitches));
@@ -351,6 +471,27 @@ void main()
                 // // if(room.loopCounter % 6) {
                 // //     room.sonarSynth.triggerAttackRelease(sonarPitch, "8n", time, Math.random() * 0.4);
                 // // }
+
+                // Change padSynth pitches
+                for(let i = 0; i < room.padSynths.length; i++) {
+                    if(room.loopCounterLv2 % 2 == 0) {
+                        if((room.loopCounterLv2 + room.loopCounter) % ((i+1)) == 0) {
+                            room.padSynths[i].pitchIndex -= 1;
+                            if(room.padSynths[i].pitchIndex < 0) {
+                                room.padSynths[i].pitchIndex += room.motif.pitchSet.length;
+                            }
+                            room.padSynths[i].midi = room.motif.pitchSet[room.padSynths[i].pitchIndex];
+                            // Transpose down an octave
+                            if(Math.random() > 0.6) {
+                                room.padSynths[i].midi -= 12;
+                            } else if(Math.random() > 0.7) {
+                                room.padSynths[i].midi -= 24;
+                            }
+                            room.padSynths[i].toggle(room.padSynths[i], time);
+                        }
+                    }
+                }
+
                 switch(room.loopCounter) {
                     case 0:
                         room.chebyenv.triggerAttack();
@@ -375,14 +516,25 @@ void main()
                             time,
                         );
                         sonarLFOEnv.triggerAttackRelease(dur, time);
+
+                        // start two new pad synths
+                        let index = Math.floor(Math.random() * room.padSynths.length);
+                        room.padSynths[index].toggle(room.padSynths[index], time);
                     }
                 }
                 
-                room.loopCounter = (room.loopCounter + 1) % 128;
+                room.loopCounter += 1;
+                if(room.loopCounter >= 128) {
+                    room.loopCounter = 0;
+                    room.loopCounterLv2 += 1;
+                }
             }, "16n").start(0);
         }
     
         newRoom.update = function (cameraDirection, room, delta) {
+
+            Graphics.setFogFade(Graphics.fogFade * (1.0 - (delta*4)));
+            Graphics.updateSceneFog();
     
             // Move the spotlight to the camera
             if(room.spotLight != undefined) {
@@ -403,25 +555,53 @@ void main()
                 Graphics.controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
             }
 
+            // As long as we're using a PointerLock the mouse should always be in the center
+            Graphics.raycaster.setFromCamera( new THREE.Vector2(0, 0), Graphics.controls.getObject() );    
+
+            //3. compute intersections
+            var intersections = Graphics.raycaster.intersectObjects( [room.roomCube] );
+
+            // This should be last in the update function as it might trigger the cleanup of this room
+            for (let i = 0; i < intersections.length; i++ ) {
+                if (intersections[i].distance < 2.0) {
+                    // Travel into the space room
+                    Graphics.travelToRoom(Graphics.spaceRoom);
+                } else if (intersections[i].distance < 30.0) {
+                    Graphics.displayOnHud("<span>continue forward to exit</span>");
+                } else {
+                    Graphics.hideHud();
+                }
+            }
+            if( intersections.length == 0) {
+                // hudElement.innerHTML = "";
+                Graphics.hideHud();
+            }
+
+            // TODO: Raycast backwards to check that we aren't backing out of the fingerprint room alt. disable moving backwards
+
             // update shader uniforms
             room.shaderUniforms.time.value += delta;
         }
 
         newRoom.cleanUp = function(room) {
             room.loop.stop();
+            room.chebyenv.triggerRelease();
+            room.sonarLFOEnv.dispose();
+            for(let syn of room.padSynths) {
+                syn.dispose(syn);
+            }
         }
 
         return newRoom;
     }
     updateMotif() {
         this.motif.clear();
-        this.motif.startDurOffset = (this.fingerprintSum) % 32;
+        this.motif.startDurOffset = (this.fingerprintSum) % 8;
         // For every 300 points two fingerprints differ they will be separated by a 5th
         // this.motif.pitchOffset = (Math.floor(this.fingerprintSum/300) * 7) % 12;
         // Choose a pitch set based on the fingerprint sum
         this.motif.pitchSet = Global.sound.pitchSets[Math.floor(this.fingerprintSum/300) % Global.sound.pitchSets.length];
         for (let i = 0; i < this.rawFingerprint.length && i < this.numParametersUsed; i++) {
-            let v = Global.data.headers[i] + "_" + this.rawFingerprint[i];
             // switch(i%2) {
             //     case 0:
             //         motif.addPitch(vs[i]);
@@ -451,6 +631,7 @@ void main()
                 this.motif.changePitch(i - Math.floor((Global.data.headers.length - 4) / 2) - 4, this.rawFingerprint[i]);
             }
         }
+        this.motif.update();
     }
     clearFromTransport() {
         // tone_init.clearIdsFromTransport(this.motif.schedulingIds);
@@ -468,13 +649,13 @@ void main()
     }
     updateDistanceSquared(distance2) {
         this.setDb(distance2 * -0.05 - 10);
-        if (distance2 < 110) {
-            this.material.transparent = true;
-            this.material.opacity = (distance2-10) / 100;
-        }
+        // if (distance2 < 110) {
+        //     this.material.transparent = true;
+        //     this.material.opacity = (distance2-10) / 100;
+        // }
         this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2 / 100), 1.0));
         this.synth.envelope.release = Math.max(0.5 - distance2 / 500, 0.002);
-        let numParameters = 24 - ((distance2 - 150) / 30);
+        let numParameters = Math.max(Math.floor(24 - ((distance2 - 150) / 30)), 0);
         if (numParameters != this.numParameters) {
             this.numParametersUsed = numParameters;
             this.updateMotif();

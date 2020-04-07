@@ -33,6 +33,8 @@ var spotLight;
 var sphereScale;
 var sphere;
 
+var fogFade = 1.0; // to fade the fog between scenes, this is added to the fog value
+
 var mouse = new THREE.Vector2(0, 0);
 var mouseClicked = false;
 
@@ -50,8 +52,8 @@ var font = null;
 // A room is an object with an init and an update function
 var rooms = {};
 var currentRoom = {
-    init: function() {},
-    update: function() {},
+    init: function (room) { },
+    update: function (cameraDirection) { },
 };
 
 // init variables
@@ -64,45 +66,45 @@ function init_three() {
         // resource URL
         'data/textures/space.jpg',
         // onLoad callback
-        function ( texture ) {
+        function (texture) {
             textures.space = texture;
             textures.numLoaded += 1;
-            if(textures.numLoaded == textures.totalNumTextures) {
+            if (textures.numLoaded == textures.totalNumTextures) {
                 allTexturesLoaded = true;
             }
         },
         // onProgress callback currently not supported
         undefined,
         // onError callback
-        function ( err ) {
-            console.error( 'An error happened while loading a texture: ' + err );
+        function (err) {
+            console.error('An error happened while loading a texture: ' + err);
         }
     );
     loader.load(
         // resource URL
         'data/textures/nadia-shape.jpg',
         // onLoad callback
-        function ( texture ) {
+        function (texture) {
             textures.nadia_shape = texture;
             textures.numLoaded += 1;
-            if(textures.numLoaded == textures.totalNumTextures) {
+            if (textures.numLoaded == textures.totalNumTextures) {
                 allTexturesLoaded = true;
             }
         },
         // onProgress callback currently not supported
         undefined,
         // onError callback
-        function ( err ) {
-            console.error( 'An error happened while loading a texture: ' + err );
+        function (err) {
+            console.error('An error happened while loading a texture: ' + err);
         }
     );
 
     // LOAD FONT
     var fontLoader = new THREE.FontLoader();
 
-    fontLoader.load( 'data/fonts/droid_sans_mono_regular.typeface.json', function ( fontLoaded ) {
+    fontLoader.load('data/fonts/droid_sans_mono_regular.typeface.json', function (fontLoaded) {
         font = fontLoaded;
-    } );
+    });
 
 
     hudElement = document.getElementById("hud");
@@ -117,11 +119,10 @@ function init_three() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.y = 10;
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500);
 
     currentRoom = spaceRoom;
-    currentRoom.init();
+    currentRoom.init(currentRoom);
 
     // POST-PROCESSING
 
@@ -331,14 +332,16 @@ let spaceRoom = {
     fingerprintsAdded: false,
     objects: [],
     fingerprints: [],
+    spaceFog: 0.02,
 
-    init: function(room) {
+    init: function (room) {
+        fogFade = 1.0;
         // SCENE
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xdddddd);
-        scene.fog = new THREE.FogExp2(0xdddddd, 0.02);
+        scene.fog = new THREE.FogExp2(0xdddddd, room.spaceFog + fogFade);
 
-        
+
 
         light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
         light.position.set(0.5, 1, 0.75);
@@ -357,7 +360,7 @@ let spaceRoom = {
         scene.add(spotLight.target);
 
         var sphereRadius = 30;
-        sphereScale = 1.0;
+        sphereScale = 2.0;
         var sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 32);
         var sphereMaterial = new THREE.MeshStandardMaterial({
             color: 0x222233,
@@ -373,61 +376,61 @@ let spaceRoom = {
 
         spaceRoom.initSound();
     },
-    initSound: function() {
+    initSound: function () {
         Tone.Transport.bpm.value = 120;
-        // Tone.Transport.loop = true;
-        // Tone.Transport.setLoopPoints(0, "4m");
+
+        Global.sound.noiseEnv.triggerAttack();
 
         let bassSynth = new Tone.MembraneSynth(
             {
-                pitchDecay  : 0.2,
-                octaves     : 10,
-                oscillator  : {
-                    type    : "sine"
+                pitchDecay: 0.2,
+                octaves: 10,
+                oscillator: {
+                    type: "sine"
                 },
-                envelope : {
-                    attack  : 0.001 ,
-                    decay   : 0.4 ,
-                    sustain : 0.01 ,
-                    release : 1.4 ,
-                    attackCurve : "exponential"
-                    } 
-            }
-        ).connect(Global.sound.longverb).toMaster();
-
-        let sonarSynth = new Tone.FMSynth( {
-            harmonicity : 2 ,
-            modulationIndex : 2 ,
-            detune : 0 ,
-            oscillator : {
-                type : "sine"
-            },
-            envelope : {
-                attack : 0.01 ,
-                decay : 0.01 ,
-                sustain : 1 ,
-                release : 0.2
-            },
-            modulation : {
-                type : "sine"
-            },
-                modulationEnvelope : {
-                attack : 0.5 ,
-                decay : 0 ,
-                sustain : 1 ,
-                release : 0.5
+                envelope: {
+                    attack: 0.001,
+                    decay: 0.4,
+                    sustain: 0.01,
+                    release: 1.4,
+                    attackCurve: "exponential"
                 }
             }
         ).connect(Global.sound.longverb).toMaster();
+
+        let sonarSynth = new Tone.FMSynth({
+            harmonicity: 2,
+            modulationIndex: 2,
+            detune: 0,
+            oscillator: {
+                type: "sine"
+            },
+            envelope: {
+                attack: 0.01,
+                decay: 0.01,
+                sustain: 1,
+                release: 0.2
+            },
+            modulation: {
+                type: "sine"
+            },
+            modulationEnvelope: {
+                attack: 0.5,
+                decay: 0,
+                sustain: 1,
+                release: 0.5
+            }
+        }
+        ).connect(Global.sound.longverb).toMaster();
         sonarSynth.volume.value = -12;
-        spaceRoom.sonarPitch = Tone.Frequency.mtof(Global.sound.stablePitches[1]+12);
-        
+        spaceRoom.sonarPitch = Tone.Frequency.mtof(Global.sound.stablePitches[1] + 12);
+
         spaceRoom.bassSynth = bassSynth;
         spaceRoom.sonarSynth = sonarSynth;
-        
+
         spaceRoom.loopCounter = 0;
-        spaceRoom.loop = new Tone.Loop(function(time){
-            switch(spaceRoom.loopCounter) {
+        spaceRoom.loop = new Tone.Loop(function (time) {
+            switch (spaceRoom.loopCounter) {
                 case 0:
                     spaceRoom.bassSynth.triggerAttackRelease("D0", "1n", time, 0.4);
                     spaceRoom.sonarSynth.triggerAttackRelease(spaceRoom.sonarPitch, "16n", time, 0.4);
@@ -463,23 +466,23 @@ let spaceRoom = {
                     spaceRoom.bassSynth.triggerAttackRelease("D#0", "1n", time, 0.03);
                     break;
             }
-            
+
             spaceRoom.loopCounter = (spaceRoom.loopCounter + 1) % 64;
         }, "16n").start(0);
     },
-    update: function(cameraDirection) {
+    update: function (cameraDirection, room, delta) {
         // Initiate fingerprints if the data has been loaded from the server
-        if(spaceRoom.fingerprintsAdded == false && Global.data.loadedData == true) {
+        if (spaceRoom.fingerprintsAdded == false && Global.data.loadedData == true) {
             // Add the fingerprints to the room
-            let size = 150;
-            for(let i = 0; i < 40; i++) {
-                Global.data.fingerprints[i].addToSpace(scene, spaceRoom.objects, Math.random() * size - (size/2), Math.random() * size - (size/2), Math.random() * size - (size/2));
+            let size = 50;
+            for (let i = 0; i < 10; i++) {
+                Global.data.fingerprints[i].addToSpace(scene, spaceRoom.objects, Math.random() * size - (size / 2), Math.random() * size - (size / 2), Math.random() * size - (size / 2));
                 spaceRoom.fingerprints.push(Global.data.fingerprints[i]);
             }
             spaceRoom.fingerprintsAdded = true;
             console.log("Added all the fingerprints");
         }
-        
+
         // React to keys being pressed to change the size of the influence radius
         if (enlargeRadius) {
             sphereScale *= 1.03;
@@ -495,18 +498,19 @@ let spaceRoom = {
 
         // raycaster.ray.origin.copy(controls.getObject().position);
         // As long as we're using a PointerLock the mouse should always be in the center
-        raycaster.setFromCamera( mouse, camera );
+        raycaster.setFromCamera(mouse, camera);
         var intersections = raycaster.intersectObjects(spaceRoom.objects);
 
         for (var i = 0; i < intersections.length; i++) {
-            if(intersections[i].distance < 2.0) {
+            if (intersections[i].distance < 2.0) {
                 // Travel into the fingerprint
                 let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
                 travelToRoom(fingerprintRoom);
-            } else if(intersections[i].distance < 10.0) {
+            } else if (intersections[i].distance < 10.0) {
                 displayOnHud("<span>Travel into fingerprint</span>");
+                console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
             }
-            
+
             // console.log(intersections[i]);
             /*
                 An intersection has the following properties :
@@ -518,7 +522,7 @@ let spaceRoom = {
                     - uv : intersection point in the object's UV coordinates (THREE.Vector2)
             */
         }
-        if( intersections.length == 0) {
+        if (intersections.length == 0) {
             hideHud();
         }
 
@@ -539,6 +543,19 @@ let spaceRoom = {
 
         if (minDist < 1000) {
             Global.sound.globalSynthLPF.frequency.value = 2000 - (minDist * 1.4);
+            Global.sound.noiseUsrGain.value = Math.pow(1.0 - (minDist * 0.001), 4.0) * 0.05;
+            
+        }
+        if (minDist < 200) {
+            fogFade = Math.pow(1.0 - (minDist / 200), 4.0);
+        }
+
+        // Update fog
+        if (fogFade > 0.0) {
+            scene.fog.density = room.spaceFog + fogFade;
+            fogFade *= 0.9;
+        } else {
+            scene.fog.density = room.spaceFog;
         }
 
         // Move sphere and light to where the camera is
@@ -559,8 +576,8 @@ let spaceRoom = {
             controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
         }
     },
-    cleanUp: function() {
-        for(let fprint of spaceRoom.fingerprints) {
+    cleanUp: function (room) {
+        for (let fprint of spaceRoom.fingerprints) {
             fprint.motif.stopSpaceLoop();
         }
         spaceRoom.fingerprintsAdded = false;
@@ -573,7 +590,7 @@ let spaceRoom = {
 let portalRoom = {
     portals: [],
     clickPortalText: null,
-    init: function() {
+    init: function () {
         // SCENE
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x333333);
@@ -596,10 +613,10 @@ let portalRoom = {
         // scene.add(spotLight.target);
 
         let geometry = new THREE.BoxGeometry(30, 20, 60);
-        let material = new THREE.MeshStandardMaterial( { color: 0xffffff, side: THREE.BackSide  } );
-        let roomCube = new THREE.Mesh( geometry, material );
+        let material = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide });
+        let roomCube = new THREE.Mesh(geometry, material);
         roomCube.receiveShadow = true;
-        scene.add( roomCube );
+        scene.add(roomCube);
 
         // Place camera at origin
         controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
@@ -619,9 +636,9 @@ let portalRoom = {
 
         // Add portals that can be used to teleport to a new room
         portalRoom.portals = []; // Remove any old ones lying around
-        let portalGeometry = new THREE.PlaneGeometry( 14, 14, 1, 1 );
-        let portalMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.FrontSide, map: textures.space} );
-        let portal = new THREE.Mesh( portalGeometry, portalMaterial );
+        let portalGeometry = new THREE.PlaneGeometry(14, 14, 1, 1);
+        let portalMaterial = new THREE.MeshBasicMaterial({ color: 0xccccff, side: THREE.FrontSide, map: textures.space });
+        let portal = new THREE.Mesh(portalGeometry, portalMaterial);
         portal.castShadow = true;
         portal.rotateY(Math.PI);
         portal.position.set(0, 0, 28);
@@ -629,15 +646,15 @@ let portalRoom = {
         scene.add(portal);
         portalRoom.portals.push(portal);
 
-        let portalMaterial2 = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.FrontSide, map: textures.nadia_shape} );
-        let portal2 = new THREE.Mesh( portalGeometry, portalMaterial2 );
+        let portalMaterial2 = new THREE.MeshBasicMaterial({ color: 0xccccff, side: THREE.FrontSide, map: textures.nadia_shape });
+        let portal2 = new THREE.Mesh(portalGeometry, portalMaterial2);
         portal2.castShadow = true;
         // portal.rotateY(Math.PI);
         portal2.position.set(0, 0, -28);
         scene.add(portal2);
         portalRoom.portals.push(portal2);
     },
-    update: function(cameraDirection) {
+    update: function (cameraDirection) {
 
         // Move sphere and light to where the camera is
         spotLight.position.copy(controls.getObject().position);
@@ -657,15 +674,15 @@ let portalRoom = {
         }
 
         // As long as we're using a PointerLock the mouse should always be in the center
-        raycaster.setFromCamera( mouse, camera );    
+        raycaster.setFromCamera(mouse, camera);
 
         //3. compute intersections
-        var intersects = raycaster.intersectObjects( portalRoom.portals );
+        var intersects = raycaster.intersectObjects(portalRoom.portals);
 
         // This should be last in the update function as it might trigger the cleanup of this room
-        for (let i = 0; i < intersects.length; i++ ) {
+        for (let i = 0; i < intersects.length; i++) {
             displayOnHud("<span>Click to enter</span>");
-            if(mouseClicked) { // && intersects[i].object.userData.roomPointer != undefined) {
+            if (mouseClicked) { // && intersects[i].object.userData.roomPointer != undefined) {
                 // Travel to this portal
                 travelToRoom(intersects[i].object.userData.roomPointer);
             }
@@ -679,15 +696,26 @@ let portalRoom = {
                     - uv : intersection point in the object's UV coordinates (THREE.Vector2)
             */
         }
-        if( intersects.length == 0) {
+        if (intersects.length == 0) {
             // hudElement.innerHTML = "";
             hideHud();
         }
     },
-    cleanUp: function() {
+    cleanUp: function () {
         portalRoom.portals = [];
         hideHud();
     }
+}
+
+function getNewSpacePortal() {
+    let portalGeometry = new THREE.PlaneGeometry(14, 14, 1, 1);
+    let portalMaterial = new THREE.MeshBasicMaterial({ color: 0xccccff, side: THREE.FrontSide, map: textures.space });
+    let portal = new THREE.Mesh(portalGeometry, portalMaterial);
+    portal.castShadow = true;
+    portal.rotateY(Math.PI);
+    portal.position.set(0, 0, 28);
+    portal.userData.roomPointer = spaceRoom;
+    return portal;
 }
 
 function teleportToPortal() {
@@ -716,4 +744,30 @@ function newScene(color, fog) {
     scene.fog = fog;
 }
 
-export { init_three, animate, scene, controls, spaceRoom, currentRoom, newScene }; 
+function setFogFade(density) {
+    fogFade = density;
+}
+
+function updateSceneFog() {
+    if(fogFade > 0.0001) {
+        scene.fog.density = 0.02 + fogFade;
+    }
+}
+
+export { init_three, 
+    animate, 
+    scene, 
+    controls, 
+    spaceRoom, 
+    currentRoom, 
+    newScene, 
+    mouseClicked, 
+    getNewSpacePortal, 
+    displayOnHud, 
+    hideHud, 
+    raycaster, 
+    travelToRoom, 
+    fogFade, 
+    setFogFade,
+    updateSceneFog,
+ }; 

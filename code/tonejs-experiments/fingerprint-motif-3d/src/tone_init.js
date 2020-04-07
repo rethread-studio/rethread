@@ -4,6 +4,8 @@ import * as Global from './globals.js'
 function init_tone() {
     // Tone.js
 
+    Tone.Transport.loop = false;
+
     Global.sound.reverb = new Tone.Reverb(0.5).toMaster();
     Global.sound.reverb.generate();
     // Global.sound.midverb = new Tone.Reverb(2.5).toMaster();
@@ -13,6 +15,23 @@ function init_tone() {
 
     Global.sound.chorus = new Tone.Chorus(1.5, 0.5, 0.3).connect(Global.sound.longverb).toMaster();
     Global.sound.globalSynthLPF = new Tone.Filter(600, "lowpass").connect(Global.sound.chorus);
+
+    
+    Global.sound.noisegain = new Tone.Gain(0.01).toMaster();
+    Global.sound.noise = new Tone.Noise('pink').start().connect(Global.sound.noisegain);
+    Global.sound.noiseGainMult = new Tone.Multiply();
+    Global.sound.noiseEnv = new Tone.ScaledEnvelope({
+        "attack" : 2.0,
+        "decay" : 0.01,
+        "sustain" : 1.0,
+        "release" : 10.0,
+    });
+    Global.sound.noiseEnv.releaseCurve = "linear";
+    // Multiply two signals together
+    Global.sound.noiseEnv.connect(Global.sound.noiseGainMult, 0, 0);
+    Global.sound.noiseUsrGain = new Tone.Signal(0.001).connect(Global.sound.noiseGainMult, 0, 1);
+    // Use as gain control
+    Global.sound.noiseGainMult.connect(Global.sound.noisegain.gain);
 
     //start/stop the transport
     // document.getElementById('start-stop')
@@ -92,6 +111,39 @@ function newNoiseSynth() {
     return newSynth;
 }
 
+// Smooth pad!
+// Its gain is very tilted to the left for some unknown reason
+function newPadSynth(freq) {
+    console.log(freq);
+    let noise = new Tone.Noise("pink").start();
+    let padenv = new Tone.ScaledEnvelope({
+        "attack" : 5.0,
+        "decay" : 0.01,
+        "sustain" : 1.0,
+        "release" : 5.0,
+    });
+    padenv.releaseCurve = "linear";
+    padenv.max = 2.0;
+    let filter = new Tone.Filter(freq, 'bandpass', -48);
+    filter.Q.value = 500;
+    let padGain = new Tone.Gain(1.0).connect(Global.sound.longverb).toMaster();
+    noise.connect(filter);
+    filter.connect(padGain);
+    padenv.connect(padGain.gain);
+    return {
+        noise: noise,
+        env: padenv,
+        filter: filter,
+        gain: padGain,
+        dispose: function(syn) {
+            syn.env.dispose();
+            syn.filter.dispose();
+            syn.gain.dispose();
+            syn.noise.dispose();
+        }
+    };
+}
+
 function clearIdsFromTransport(ids) {
     for (let id of ids) {
         // console.log("clearing id: " + id);
@@ -105,4 +157,4 @@ function clearIdsFromTransport(ids) {
 //     console.log("Starts audio context");
 // });
 
-export { init_tone, newSynth, newNoiseSynth, clearIdsFromTransport };
+export { init_tone, newSynth, newNoiseSynth, newPadSynth, clearIdsFromTransport };
