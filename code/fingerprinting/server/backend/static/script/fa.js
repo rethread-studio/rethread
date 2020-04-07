@@ -1,3 +1,4 @@
+const HOST = 'https://fp.durieux.me'
 var options = {
   fonts: {
     extendedJsFonts: true,
@@ -1070,7 +1071,7 @@ var options = {
 
 function getRandomFingerPrint(callback) {
   $.ajax({
-    url: "/api/fp/random",
+    url: HOST + "/api/fp/random",
     type: "get",
     async: false,
     success: function (data) {
@@ -1078,9 +1079,10 @@ function getRandomFingerPrint(callback) {
     },
   });
 }
+
 function getAllNormalizedFingerPrints(callback) {
   $.ajax({
-    url: "/api/fp/normalized",
+    url: HOST + "/api/fp/normalized",
     type: "get",
     async: false,
     success: function (data) {
@@ -1091,7 +1093,7 @@ function getAllNormalizedFingerPrints(callback) {
 
 window.onbeforeunload = function () {
   $.ajax({
-    url: "/api/session/logout",
+    url: HOST + "/api/session/logout",
     type: "POST",
     async: true
   });
@@ -1099,7 +1101,7 @@ window.onbeforeunload = function () {
 
 function getConnectedFingerPrints(callback) {
   $.ajax({
-    url: "/api/fp/conntected",
+    url: HOST + "/api/fp/conntected",
     type: "get",
     async: false,
     success: function (data) {
@@ -1111,7 +1113,7 @@ function getConnectedFingerPrints(callback) {
 function getFingerPrint(callback) {
   function fpCallback(components) {
     $.ajax({
-      url: "/api/fp",
+      url: HOST + "/api/fp",
       type: "PUT",
       data: JSON.stringify(components),
       contentType: "application/json; charset=utf-8",
