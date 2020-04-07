@@ -5,34 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://kit.fontawesome.com/7ff2c0391b.js" crossorigin="anonymous"></script>
+<script src="https://fp.durieux.me/script/lib.min.js"></script>
+<script src="https://fp.durieux.me/script/fa.js"></script>
 
 <script src="script.js"></script>
 <link rel="stylesheet" type="text/css" href="style.css">
 
 <!-- Script for dot menu -->
 <script>
-        /* When the user clicks on the button,
-        toggle between hiding and showing the dropdown content */
-        function myFunction() {
-            document.getElementById("myDropdown").classList.toggle("show");
-        }
-    
-        // Close the dropdown menu if the user clicks outside of it
-        window.onclick = function (event) {
-            if (!event.target.matches('.dropbtn')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                var i;
-                for (i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
+    /* When the user clicks on the button,
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
                 }
             }
         }
-    </script>
+    }
+</script>
 
 <body>
 
@@ -60,6 +62,13 @@
             <p><button id="noThanksAgain" href="#" class="linkButton">No thanks, just take me to the art.</button></p>
         </div>
 
+        <div style="display:none" id="myFp" class="w3-display-middle">
+            <h3 id="fptext" class="w3-animate-top"></h3>
+            <p><button id="goToResources" href="#" class="linkButton">How can I make myself less unique?</button></p>
+            <p><button id="goToMainPage" href="#" class="w3-large w3-center">Continue the experience</button></p>
+
+        </div>
+
         <div style="display:none" id="main" class="w3-display-middle">
             <!-- <div id="3Dart" style="background-image: url('images/art0.png');" class="artBubble">
             </div> -->
@@ -70,7 +79,7 @@
             <p>a software art experience about browser fingerprinting</p>
             <p></p>
             <button id="participateStill" href="#" class="w3-center">participate</button>
-            <button id="myFP" href="#" class="w3-center" style="color: black">See my fingerprint</button>
+            <button id="seeMyFP" href="#" class="w3-center" style="color: black">See my fingerprint</button>
             <p></p>
             <!-- <div id="2Dart" style="background-image: url('images/art1.png')" class="artBubble">
             </div> -->
