@@ -64,11 +64,11 @@ function mainPage() {
     displayPage('main');
     $("#myFp").fadeOut();
     $("#consentInfo").fadeOut();
+    console.log("consent: " + hasConsented);
     if (hasConsented) {
         $("#participateStill").hide();
         $("#seeMyFP").show();
     } else {
-        console.log("no consent!)");
         $("#participateStill").show();
         $("#seeMyFP").hide();
     }
@@ -88,7 +88,7 @@ function noThanksButton() {
     $("#seeMyFP").hide();
 }
 function noThanksAgainButton() {
-    noThanksPage();
+    mainPage();
     $("#dotMenu").show();
     $("#consentInfo").hide();
 }
