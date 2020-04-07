@@ -1,6 +1,8 @@
 let hasConsented = false;
 
+
 $(document).ready(function () {
+
     // Participate
     $("#participate").click(function () {
         $("#welcome").fadeOut();
@@ -34,13 +36,22 @@ $(document).ready(function () {
     // Agree consent --- See fingerprint
     $("#consentButton").click(function () {
         hasConsented = true;
-        // Go to fingerprint with animation
-
-        $("body").toggleClass('mainPage');
 
         $("#consentInfo").fadeOut();
-        $("#myFp").fadeIn();
-        $("#participateStill").hide();
+        $("body").toggleClass('mainPage');
+
+        // Get fingerprint
+        getFingerPrint((fingerprint) => {
+            console.log(fingerprint.original['platform']);
+            // Go to fingerprint with animation
+            $("#myFp").fadeIn();
+            $("#participateStill").hide();
+
+            // change text
+            $("#fptext").text("Your browser fingerprint is everything a website can know about you without using cookies. You are using a " + fingerprint.original['platform'] + " platform.");
+        });
+
+
 
 
     });

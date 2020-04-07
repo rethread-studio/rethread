@@ -26,7 +26,17 @@ body {
 h1, h2, h3 {
     /* font-family: 'Gotu', sans-serif; */
     font-family: 'Ortica', sans-serif;
-    /* text-transform: uppercase; */
+    font-size: 1.5em;
+
+}
+@media only screen and (max-width: 768px) {
+    h2, h3 {
+        font-family: 'Ortica', sans-serif;
+        font-size: 1em;
+    }
+    .w3-display-middle{
+        width: 80%;
+    }
 }
 
 body, html {
@@ -45,6 +55,7 @@ button {
     padding: 1em;
     border-radius: 2em;
     color: midnightblue;
+    background-color: white;
     cursor: pointer;
     outline: none;
     transition: 0.3s;
