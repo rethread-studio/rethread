@@ -13,26 +13,26 @@
 
 <!-- Script for dot menu -->
 <script>
-        /* When the user clicks on the button,
-        toggle between hiding and showing the dropdown content */
-        function myFunction() {
-            document.getElementById("myDropdown").classList.toggle("show");
-        }
-    
-        // Close the dropdown menu if the user clicks outside of it
-        window.onclick = function (event) {
-            if (!event.target.matches('.dropbtn')) {
-                var dropdowns = document.getElementsByClassName("dropdown-content");
-                var i;
-                for (i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
+    /* When the user clicks on the button,
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
                 }
             }
         }
-    </script>
+    }
+</script>
 
 <body>
 
@@ -60,6 +60,18 @@
             <p><button id="noThanksAgain" href="#" class="linkButton">No thanks, just take me to the art.</button></p>
         </div>
 
+        <div style="display:none" id="myFp" class="w3-display-middle">
+            <h3 class="w3-animate-top">text to be animated etc Lorem ipsum dolor sit
+                amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+                laborum.</h3>
+            <p><button id="goToResources" href="#" class="linkButton">How can I make myself less unique?</button></p>
+            <p><button id="goToMainPage" href="#" class="w3-large w3-center">Continue the experience</button></p>
+
+        </div>
+
         <div style="display:none" id="main" class="w3-display-middle">
             <!-- <div id="3Dart" style="background-image: url('images/art0.png');" class="artBubble">
             </div> -->
@@ -70,7 +82,7 @@
             <p>a software art experience about browser fingerprinting</p>
             <p></p>
             <button id="participateStill" href="#" class="w3-center">participate</button>
-            <button id="myFP" href="#" class="w3-center" style="color: black">See my fingerprint</button>
+            <button id="seeMyFP" href="#" class="w3-center" style="color: black">See my fingerprint</button>
             <p></p>
             <!-- <div id="2Dart" style="background-image: url('images/art1.png')" class="artBubble">
             </div> -->

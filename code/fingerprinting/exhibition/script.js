@@ -19,7 +19,7 @@ $(document).ready(function () {
         $("#welcome").fadeOut();
         $("#main").fadeIn();
         $("#participateStill").show();
-        $("#myFP").hide();
+        $("#seeMyFP").hide();
     });
 
     //No thanks
@@ -28,33 +28,49 @@ $(document).ready(function () {
         $("#dotMenu").show();
         $("#consentInfo").hide();
         $("#participateStill").show();
-        $("#myFP").hide();
+        $("#seeMyFP").hide();
     });
 
-
-    // Agree consent
+    // Agree consent --- See fingerprint
     $("#consentButton").click(function () {
         hasConsented = true;
-        // Go to main page
+        // Go to fingerprint with animation
 
-        // document.body.style.backgroundColor = "red";
-        // $(document.body).animate({ backgroundColor: "red" }, 1000);
-        console.log($("body"))
         $("body").toggleClass('mainPage');
 
         $("#consentInfo").fadeOut();
-        $("#main").fadeIn();
-        $("#dotMenu").show();
+        $("#myFp").fadeIn();
         $("#participateStill").hide();
-        $("#myFP").show();
+
+
+    });
+
+
+    // Seen fingerprint - continue experience
+    $("#goToMainPage").click(function () {
+        // Go to main page
+
+        if (hasConsented) {
+            $("#myFp").fadeOut();
+            $("#consentInfo").fadeOut();
+            $("#main").fadeIn();
+            $("#dotMenu").show();
+            $("#participateStill").hide();
+            $("#seeMyFP").show();
+        }
+        else {
+            console.log("no consent!)");
+        }
 
 
     });
 
 
     // see my fingerprint
-    $("#myFP").click(function () {
-        // Show a dashboard with the "raw" fingerprint data, hover to reveal what each thing means
+    $("#seeMyFP").click(function () {
+        // Show fingerprint WITHOUT animation
+        $("#main").fadeOut();
+        $("#myFp").fadeIn();
     });
 
     ////// ARTWORK
