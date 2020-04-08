@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import * as Tone from 'tone';
 import * as Graphics from './graphics.js';
 
+const playbackMethods = ['long_notes', 'short_notes', 'repeated_notes'];
 class Motif {
     pitches;
     // Duration is the number of 16th notes the pitch spans
@@ -15,6 +16,7 @@ class Motif {
     startDurOffset;
     schedulingIds;
     loop;
+    playbackMethod;
     constructor() {
         this.pitchSet = Global.sound.pitchSets[0];
         this.pitches = [];
@@ -27,6 +29,9 @@ class Motif {
         this.startDurOffset = 0;
         this.loopCounter = 0;
         this.loopMax = 0;
+        this.playbackMethod = playbackMethods[0];
+        this.lastPitch = 0;
+        this.repeatsLeft = 0;
     }
     schedulePlaybackSpace(synth, noiseSynth, transport, material, color) {
         if(this.loop != undefined) {
@@ -35,17 +40,27 @@ class Motif {
         // An attempt at fooling javascript into having a consistent this
         let motif = this;
         this.loop = new Tone.Loop(function(time){
+            let playedNote = false;
             for(let i = 0; i < motif.durations.length; i++) {
                 // Have the loop be in sync with the spaceRoom loop
                 if(motif.durations[i] + motif.startDurOffset == motif.loopCounter) {
+                    playedNote = true;
                     // console.log("Play note in Loop with loopmax " + motif.loopMax + " durations: " + motif.durations);
-                    let pitch = Tone.Frequency.mtof(motif.pitches[i] + motif.pitchOffset);
+                    let pitch = Tone.Frequency.mtof(motif.pitches[i] + motif.pitchOffset + (motif.octave * 12));
                     let dur = "16n";
+                    if(motif.playbackMethod == 'long_notes') {
+                        dur = "8n";
+                    }
+                    if(motif.playbackMethod == 'repeated_notes') {
+                        motif.repeatsLeft = 8;
+                        motif.lastPitch = pitch;
+                    }
                     let atk = motif.attacks[i];
                     let noisePlayback = false;
                     if(motif.noises[i]) {
                         noisePlayback = true;
                         pitch = Tone.Frequency.mtof((motif.pitches[i] + motif.pitchOffset) % 12 + 12);
+                        motif.repeatsLeft = 0;
                     }
                     let id = transport.schedule(function (time) {
                         // console.log("pitch: " + pitch + " dur: " + dur + " time: " + time);
@@ -67,6 +82,16 @@ class Motif {
                     }, time);
                     motif.schedulingIds.push(id);
                 }
+            }
+            if(!playedNote && motif.repeatsLeft > 0) {
+                synth.triggerAttackRelease(
+                    motif.lastPitch,
+                    "32n",//dur16ToTransport(dur/2),
+                    time,
+                    motif.repeatsLeft/10
+                    );
+                material.color.copy(color);
+                motif.repeatsLeft -= 1;
             }
             motif.loopCounter = (motif.loopCounter + 1) % motif.loopMax;
         }, "16n").start(0);
@@ -93,6 +118,9 @@ class Motif {
         this.pitches[index] = this.pitchSet[newPitchIndex % this.pitchSet.length];
         this.attacks[index] = 0.01;
         this.noises[index] = false;
+    }
+    setPlaybackMethod(num) {
+        this.playbackMethod = playbackMethods[num % playbackMethods.length];
     }
     // addPitch(i) {
     //     this.pitches.push( this.pitchSet[i % this.pitchSet.length]);
@@ -155,13 +183,15 @@ class Fingerprint {
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
         this.color = new THREE.Color();
         this.color.setHSL((this.fingerprintSum % 1000)/1000, 0.6, 0.55);
-        console.log("new fingerprint with sum " + this.fingerprintSum + " and raw fingerprint " + JSON.stringify(this.rawFingerprint));
+        // console.log("new fingerprint with sum " + this.fingerprintSum + " and raw fingerprint " + JSON.stringify(this.rawFingerprint));
     }
-    addToSpace(scene, objects, x, y, z) {
-        this.position = new THREE.Vector3(x, y, -z);
+    addToSpace(scene, objects, position) {
+        this.position = position;
         this.material = new THREE.MeshStandardMaterial({ color: 0x00cccc })
-        this.geometry = new THREE.TetrahedronGeometry(5, this.rawFingerprint[0]);
+        this.geometry = new THREE.TetrahedronGeometry(5, 0);
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.rotation.z = this.rawFingerprint[3] + this.rawFingerprint[4];
+        this.mesh.rotation.y = this.rawFingerprint[5] + this.rawFingerprint[6];
         this.mesh.position.x = this.position.x;
         this.mesh.position.y = this.position.y;
         this.mesh.position.z = this.position.z;
@@ -609,6 +639,8 @@ void main()
         // this.motif.pitchOffset = (Math.floor(this.fingerprintSum/300) * 7) % 12;
         // Choose a pitch set based on the fingerprint sum
         this.motif.pitchSet = Global.sound.pitchSets[Math.floor(this.fingerprintSum/300) % Global.sound.pitchSets.length];
+
+        this.motif.octave = (this.fingerprintSum % 4) - 1;
         for (let i = 0; i < this.rawFingerprint.length && i < this.numParametersUsed; i++) {
             // switch(i%2) {
             //     case 0:
@@ -620,16 +652,18 @@ void main()
 
             // }
             if (i == 0) {
-                this.motif.octave = ((this.rawFingerprint[i]) % 3) - 1;
+                
             } else if (i == 2) {
                 this.synth.envelope.attack = Math.max(Math.min(0.0001 * this.rawFingerprint[i], 0.2), 0.001);
+                this.motif.setPlaybackMethod(this.rawFingerprint[i]);
                 // this.motif.pitchOffset = ((this.rawFingerprint[i] - 6) * 2) % 12;
                 
                 
             } else if (i == 1) { // headers[1] == "dnt", do not track, 0 or 1
                 // this.motif.startDurOffset = (this.rawFingerprint[i] * 6) % 32;
                 if(this.rawFingerprint[i] == 1) {
-                    this.synth.envelope.decay = 0.5;
+                    // this.synth.envelope.decay = 0.5;
+                    this.synth.type = 'triangle';
                 }
             } else if (i == 3) {
                 this.synth.oscillator.type = Global.sound.oscillators[this.rawFingerprint[i] % Global.sound.oscillators.length];
@@ -653,22 +687,22 @@ void main()
     }
     setDb(db) {
         this.synth.volume.value = db;
-        this.noiseSynth.volume.value = db * 1.3;
+        this.noiseSynth.volume.value = db * 1.1;
     }
-    updateDistanceSquared(distance2) {
-        this.setDb(distance2 * -0.05 - 10);
+    updateDistanceSquared(relativeDistance) {
+        this.setDb(relativeDistance * -6.5 - 16);
         // if (distance2 < 110) {
         //     this.material.transparent = true;
         //     this.material.opacity = (distance2-10) / 100;
         // }
-        this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2 / 100), 1.0));
-        this.synth.envelope.release = Math.max(0.5 - distance2 / 500, 0.002);
-        let numParameters = Math.max(Math.floor(24 - ((distance2 - 150) / 30)), 0);
+        // this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2 / 10), 1.0));
+        // this.synth.envelope.release = Math.max(0.5 - distance2 / 50, 0.002);
+        let numParameters = Math.max(Math.floor(24 - (Math.max(relativeDistance - 1.0, 0) * 8.0)), 0);
         if (numParameters != this.numParameters) {
             this.numParametersUsed = numParameters;
+            // this.numParametersUsed = 24;
             this.updateMotif();
         }
-        this.numParametersUsed = 24;
 
         this.material.color.multiplyScalar(0.9);
     }

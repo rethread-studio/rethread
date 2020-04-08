@@ -333,13 +333,16 @@ let spaceRoom = {
     objects: [],
     fingerprints: [],
     spaceFog: 0.02,
+    currentlyConnectedRadius2: 2000,
+    lightColor: new THREE.Color(0xdddddd),
+    darkColor: new THREE.Color(0x555555),
 
     init: function (room) {
         fogFade = 1.0;
         // SCENE
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xdddddd);
-        scene.fog = new THREE.FogExp2(0xdddddd, room.spaceFog + fogFade);
+        scene.background = room.lightColor;
+        scene.fog = new THREE.FogExp2(room.lightColor, room.spaceFog + fogFade);
 
 
 
@@ -476,8 +479,7 @@ let spaceRoom = {
             // Add the fingerprints to the room
             let size = 50;
             for (let i = 0; i < 10; i++) {
-                Global.data.fingerprints[i].addToSpace(scene, spaceRoom.objects, Math.random() * size - (size / 2), Math.random() * size - (size / 2), Math.random() * size - (size / 2));
-                spaceRoom.fingerprints.push(Global.data.fingerprints[i]);
+                room.addAdditionalFingerprint(room, camera.position, 50);
             }
             spaceRoom.fingerprintsAdded = true;
             console.log("Added all the fingerprints");
@@ -507,8 +509,11 @@ let spaceRoom = {
                 let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
                 travelToRoom(fingerprintRoom);
             } else if (intersections[i].distance < 10.0) {
-                displayOnHud("<span>Travel into fingerprint</span>");
-                console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
+                displayOnHud("<span>travel into fingerprint</span>");
+                // console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
+            } else if(intersections[i].distance < 30.0) {
+                let fprintid = intersections[i].object.userData.fingerprintPtr.fingerprintSum;
+                displayOnHud("<span>fingerprint id " + fprintid + "</span>");
             }
 
             // console.log(intersections[i]);
@@ -530,8 +535,11 @@ let spaceRoom = {
         let minDist = 100000.0;
         for (let fp of spaceRoom.fingerprints) {
             let d2 = controls.getObject().position.distanceToSquared(fp.mesh.position);
-            fp.updateDistanceSquared(d2 * (1.0 / sphereScale));
+            fp.distance2 = d2;
             if (d2 < minDist) { minDist = d2; }
+        }
+        for(let fp of spaceRoom.fingerprints) {
+            fp.updateDistanceSquared( (fp.distance2/minDist) * (1.0 / sphereScale));
         }
 
         // Make the fog really thick when you're close to an object
@@ -542,13 +550,31 @@ let spaceRoom = {
         // }
 
         if (minDist < 1000) {
-            Global.sound.globalSynthLPF.frequency.value = 2000 - (minDist * 1.4);
+            Global.sound.globalSynthLPF.frequency.value = 2000 - (minDist * 1.3);
         }
         if(minDist < 500) {
-            Global.sound.noiseUsrGain.value = Math.pow(1.0 - (minDist/500), 4.0) * 0.05;
+            Global.sound.noiseUsrGain.value = Math.pow(1.0 - (minDist/500), 4.0) * 0.01;
         }
         if (minDist < 200) {
             fogFade = Math.pow(1.0 - (minDist / 200), 4.0);
+        }
+
+        // Calculate distance to object at a position forward in space
+        minDist = 100000.0;
+        let positionForward = new THREE.Vector3();
+        camera.getWorldDirection(positionForward);
+        positionForward.multiplyScalar(44).add(controls.getObject().position);
+        for (let fp of spaceRoom.fingerprints) {
+            let d2 = positionForward.distanceToSquared(fp.mesh.position);
+            fp.distance2 = d2;
+            if (d2 < minDist) { minDist = d2; }
+        }
+        // Add new fingerprints if they're too far out
+        if (minDist > 1000) {
+            let numPrints = Math.random() * 4;
+            for(let i = 0; i<numPrints; i++) {
+                room.addAdditionalFingerprint(room, positionForward, 20);   
+            }
         }
 
         // Update fog
@@ -557,6 +583,24 @@ let spaceRoom = {
             fogFade *= 0.9;
         } else {
             scene.fog.density = room.spaceFog;
+        }
+        let d2FromCenter = controls.getObject().position.distanceToSquared(new THREE.Vector3(0, 0, 0));
+        if( d2FromCenter > room.currentlyConnectedRadius2) {
+            console.log("dark space");
+            // we are in a darker space where old non-connected fingerprints are shown
+            room.spaceFog = 0.05;
+            scene.fog.color = room.darkColor;
+            scene.background = room.darkColor;
+        } else if(d2FromCenter > room.currentlyConnectedRadius2 * 0.8) {
+            let lerp = (room.currentlyConnectedRadius2 - d2FromCenter) / (room.currentlyConnectedRadius2 * 0.2);
+            let lerpColor = new THREE.Color(room.darkColor);
+            lerpColor.lerp(room.lightColor, lerp);
+            scene.fog.color = lerpColor;
+            scene.background = lerpColor;
+        } else {
+            room.spaceFog = 0.02;
+            scene.fog.color = room.lightColor;
+            scene.background = room.lightColor;
         }
 
         // Move sphere and light to where the camera is
@@ -577,6 +621,14 @@ let spaceRoom = {
             controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
         }
     },
+    addAdditionalFingerprint: function(room, relativePos, size) {
+        let minDist = 0.2;
+        let randomIndex = Math.floor(Math.random() * Global.data.fingerprints.length);
+        let position = getRandomSphereCoordinate(size, minDist);
+        position.add(relativePos);
+        Global.data.fingerprints[randomIndex].addToSpace(scene, spaceRoom.objects, position);
+        room.fingerprints.push(Global.data.fingerprints[randomIndex]);
+    },
     cleanUp: function (room) {
         for (let fprint of spaceRoom.fingerprints) {
             fprint.motif.stopSpaceLoop();
@@ -586,6 +638,24 @@ let spaceRoom = {
         spaceRoom.loop.stop();
         hideHud();
     }
+}
+
+// adapted from https://karthikkaranth.me/blog/generating-random-points-in-a-sphere/
+function getRandomSphereCoordinate(radius, distPercentage) {
+    let u = Math.random();
+    let v = Math.random();
+    let theta = u * 2.0 * Math.PI;
+    let phi = Math.acos(2.0 * v - 1.0);
+    let r = Math.cbrt(Math.random()) * (1.0 - distPercentage) + distPercentage;
+    r *= radius;
+    let sinTheta = Math.sin(theta);
+    let cosTheta = Math.cos(theta);
+    let sinPhi = Math.sin(phi);
+    let cosPhi = Math.cos(phi);
+    let x = r * sinPhi * cosTheta;
+    let y = r * sinPhi * sinTheta;
+    let z = r * cosPhi;
+    return new THREE.Vector3(x, y, z);    
 }
 
 let portalRoom = {
