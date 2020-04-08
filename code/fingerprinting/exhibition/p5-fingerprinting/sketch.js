@@ -2,6 +2,7 @@ let canvas;
 let width = 0;
 let height = 0;
 
+let c = 200;
 
 function setup() {
 
@@ -115,8 +116,8 @@ function fpCallback(fingerprint) {
     let fontColor = color(map(allFonts.length, 1, 400, 255, 0), 70, 190);
     fill(fontColor);
     // big circle depending on font quantity
-    let fontsX = 200 * cos(allFonts.length);
-    let fontsY = 200 * sin(allFonts.length);
+    let fontsX = c * cos(allFonts.length);
+    let fontsY = c * sin(allFonts.length);
     push()
     translate(0, 0, -10);
     ellipse(fontsX, fontsY, allFonts.length / 3)
@@ -135,7 +136,7 @@ function fpCallback(fingerprint) {
             f = 0;
             g += fonts.length / 300;
         }
-        line(-180 + f * 1 + g, 0 + f * 2 + g, -200 + f * 1 + g, 0 + f * 2 + g)
+        line(-0.9*c + f * 1 + g, 0 + f * 2 + g, -c + f * 1 + g, 0 + f * 2 + g)
         f++;
     }
     pop()
@@ -149,30 +150,30 @@ function fpCallback(fingerprint) {
     let dnt = fp['dnt'];
     if (dnt == "not available") {
         stroke(220, 10, 110);
-        line(200 * cos(radians(60)), 200 * sin(radians(60)), 200 * cos(radians(130)), 200 * sin(radians(130)));
-        ellipse(200 * cos(radians(60)), 200 * sin(radians(60)), 10);
+        line(c * cos(radians(60)), c * sin(radians(60)), c * cos(radians(130)), c * sin(radians(130)));
+        ellipse(c * cos(radians(60)), c * sin(radians(60)), 10);
     }
     else if (dnt == "unspecified") {
         stroke(220, 10, 110);
-        line(200 * cos(radians(180)), 200 * sin(radians(180)), 200 * cos(radians(130)), 200 * sin(radians(130)));
-        ellipse(200 * cos(radians(130)), 200 * sin(radians(130)), 10);
+        line(c * cos(radians(180)), c * sin(radians(180)), c * cos(radians(130)), c * sin(radians(130)));
+        ellipse(c * cos(radians(130)), c * sin(radians(130)), 10);
     }
     else if (dnt == "true") {
         stroke(220, 10, 110);
-        line(200 * cos(radians(270)), 200 * sin(radians(270)), 200 * cos(radians(0)), 200 * sin(radians(0)));
-        ellipse(200 * cos(radians(0)), 200 * sin(radians(0)), 20);
+        line(c * cos(radians(270)), c * sin(radians(270)), c * cos(radians(0)), c * sin(radians(0)));
+        ellipse(c * cos(radians(0)), c * sin(radians(0)), 20);
     }
     else if (dnt == "false") {
         stroke(220, 10, 110);
-        line(200 * cos(radians(0)), 200 * sin(radians(0)), 200 * cos(radians(10)), 200 * sin(radians(10)));
-        ellipse(200 * cos(radians(0)), 200 * sin(radians(0)), 10);
+        line(c * cos(radians(0)), c * sin(radians(0)), c * cos(radians(10)), c * sin(radians(10)));
+        ellipse(c * cos(radians(0)), c * sin(radians(0)), 10);
     }
 
     // old
     //         beginShape()
     // for (var i = 0; i < webdriver.length; i++) {
-    //     let x = 200 * cos(webdriver.charCodeAt(i));
-    //     let y = 200 * sin(webdriver.charCodeAt(i));
+    //     let x = c * cos(webdriver.charCodeAt(i));
+    //     let y = c * sin(webdriver.charCodeAt(i));
     //     vertex(x, y);
     // }
     // endShape()
@@ -186,8 +187,8 @@ function fpCallback(fingerprint) {
     beginShape()
     for (var i = 0; i < language.length; i++) {
         if (language.charAt(i) != '-') {
-            let x = 200 * cos(language.charCodeAt(i));
-            let y = 200 * sin(language.charCodeAt(i));
+            let x = c * cos(language.charCodeAt(i));
+            let y = c * sin(language.charCodeAt(i));
 
             vertex(x, y);
         }
@@ -200,7 +201,7 @@ function fpCallback(fingerprint) {
     push()
     if (allFonts[colorDepth])
         rotate(radians(allFonts[colorDepth].charCodeAt(0)));
-    ellipse(200 * cos(colorDepth), 200 * sin(colorDepth), colorDepth);
+    ellipse(c * cos(colorDepth), c * sin(colorDepth), colorDepth);
     pop()
 
     //plugins
@@ -209,7 +210,7 @@ function fpCallback(fingerprint) {
     push()
     if (allFonts[plugins.length])
         rotate(radians(allFonts[plugins.length].charCodeAt(1)));
-    ellipse(200 * cos(plugins.length), 200 * sin(plugins.length), plugins.length);
+    ellipse(c * cos(plugins.length), c * sin(plugins.length), plugins.length);
     pop()
 
     //pixelRatio
@@ -218,7 +219,7 @@ function fpCallback(fingerprint) {
     push()
     if (allFonts[pixelRatio])
         rotate(radians(allFonts[pixelRatio].charCodeAt(2)));
-    ellipse(200 * cos(pixelRatio), 200 * sin(pixelRatio), pixelRatio);
+    ellipse(c * cos(pixelRatio), c * sin(pixelRatio), pixelRatio);
     pop()
 
     //hardwareConcurrency
@@ -257,8 +258,8 @@ function fpCallback(fingerprint) {
     //timezoneOffset
     let timezoneOffset = fp['timezoneOffset'];
     let colorTOff = map(timezoneOffset, -840, 840, 0, 255);
-    let posTOff = map(timezoneOffset, -840, 840, -200, 200);
-    let radTOff = map(timezoneOffset, -840, 840, 50, 200);
+    let posTOff = map(timezoneOffset, -840, 840, -c, c);
+    let radTOff = map(timezoneOffset, -840, 840, 50, c);
     colorMode(HSB);
     stroke(colorTOff, 20, 150);
     fill(colorTOff, 20, 150);
@@ -310,30 +311,30 @@ function fpCallback(fingerprint) {
     beginShape()
     if (platform.length > 4) {
         for (var i = 0; i < 4; i++) {
-            let x = 200 * cos(platform.charCodeAt(i));
-            let y = 200 * sin(platform.charCodeAt(i));
+            let x = c * cos(platform.charCodeAt(i));
+            let y = c * sin(platform.charCodeAt(i));
             vertex(x, y);
         }
-        ellipse(200 * cos(platform.charCodeAt(3)), 200 * sin(platform.charCodeAt(3)), 20);
+        ellipse(c * cos(platform.charCodeAt(3)), c * sin(platform.charCodeAt(3)), 20);
         if (fp['indexedDB']) {
             strokeWeight(3)
-            ellipse(200 * cos(platform.charCodeAt(2)), 200 * sin(platform.charCodeAt(2)), 20);
+            ellipse(c * cos(platform.charCodeAt(2)), c * sin(platform.charCodeAt(2)), 20);
         }
         if (fp['addBehavior']) {
             strokeWeight(1);
-            ellipse(200 * cos(platform.charCodeAt(1)), 200 * sin(platform.charCodeAt(1)), 20);
+            ellipse(c * cos(platform.charCodeAt(1)), c * sin(platform.charCodeAt(1)), 20);
         }
         strokeWeight(1);
         if (fp['openDatabase']) {
             fill(255);
-            ellipse(200 * cos(platform.charCodeAt(0)), 200 * sin(platform.charCodeAt(0)), 20);
+            ellipse(c * cos(platform.charCodeAt(0)), c * sin(platform.charCodeAt(0)), 20);
         }
         noFill();
     }
     else {
         for (var i = 0; i < platform.length; i++) {
-            let x = 200 * cos(platform.charCodeAt(i));
-            let y = 200 * sin(platform.charCodeAt(i));
+            let x = c * cos(platform.charCodeAt(i));
+            let y = c * sin(platform.charCodeAt(i));
             vertex(x, y);
         }
     }
@@ -398,7 +399,7 @@ function fpCallback(fingerprint) {
     push();
     rotate(radians(audio));
     fill(255);
-    moon(200 * cos(audio), 200 * sin(audio), 30);
+    moon(c * cos(audio), c * sin(audio), 30);
     pop();
 
 
@@ -409,7 +410,7 @@ function fpCallback(fingerprint) {
     // enumerateDevices
     enumerateDevices = fp['enumerateDevices'].split(',');
     push();
-    translate(200 * cos(radians(130)), 200 * sin(radians(130)))
+    translate(c * cos(radians(130)), c * sin(radians(130)))
     rotate(radians(enumerateDevices.length));
     if (enumerateDevices.length < 3 || enumerateDevices == "not available") {
         fill(255)
@@ -421,11 +422,11 @@ function fpCallback(fingerprint) {
             for (var j = 0; j < enumerateDevices[i].length; j++) {
                 a1 = a1 + enumerateDevices[i].charCodeAt(j);
             }
-            line(enumerateDevices.length * 10 / 2 - i * 10, -a1 / 200, 0, 0);
+            line(enumerateDevices.length * 10 / 2 - i * 10, -a1 / c, 0, 0);
             if (enumerateDevices[i].charCodeAt(22) > 60)
                 fill(255);
             if (enumerateDevices[i].charCodeAt(31) > 60)
-                ellipse(enumerateDevices.length * 10 / 2 - i * 10, -a1 / 200, 5);
+                ellipse(enumerateDevices.length * 10 / 2 - i * 10, -a1 / c, 5);
         }
     }
     pop();
