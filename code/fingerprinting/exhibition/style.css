@@ -79,6 +79,13 @@ button:hover {
     background: none;
 }
 
+.fpHighlight{
+    font-weight: bold;
+    color: white;
+}
+
+/* Main page */
+
 .artBubble {
     border-radius: 10em;
     /* padding: 1em; */

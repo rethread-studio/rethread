@@ -50,7 +50,17 @@ function consentInfoPage() {
 }
 
 function generateFPText(fp) {
-    return `Your browser fingerprint is everything a website can know about you without using cookies. You are using ${fp.original['user-agent']} browser on a ${fp.original.platform} platform with a ${fp.original.webGLRenderer} GPU on a ${fp.original.screen_width}x${fp.original.screen_height} screen. You have ${fp.original['font-js'].length} fonts installed.`
+    let s = "You are using <span class = 'fpHighlight'>"
+        + fp.original['user-agent'] + "</span> browser on a <span class = 'fpHighlight'>" + fp.original.platform + " </span> platform with a <span class = 'fpHighlight'>"
+        + fp.original.webGLRenderer + "</span> GPU on a <span class = 'fpHighlight'>" + fp.original.screen_width + "x" + fp.original.screen_height
+        + "</span> screen. You have <span class = 'fpHighlight'>" + fp.original['font-js'].split(',').length + "</span> fonts installed. Your language is set to <span class = 'fpHighlight'> "
+        + fp.original['languages-js'] + "</span>. You are in <span class = 'fpHighlight'>" + fp.original.timezone.split('/')[0] + "</span>, specifically, in <span class = 'fpHighlight'>" 
+        + fp.original.timezone.split('/')[1]+"</span>."
+    return s;
+    // return `Your browser fingerprint is everything a website can know about you without using cookies. 
+    // You are using ${fp.original['user-agent']} browser on a ${fp.original.platform} platform with 
+    // a ${fp.original.webGLRenderer} GPU on a ${fp.original.screen_width}x${fp.original.screen_height} screen. 
+    // You have ${fp.original['font-js'].split(',').length} fonts installed.`
 }
 function myFpPage() {
     displayPage('myFp');
@@ -60,7 +70,9 @@ function myFpPage() {
 
     getFingerPrint(fp => {
         $("#myFp").fadeIn();
-        $("#fptext").text(generateFPText(fp))
+        // $("#fptext").text(generateFPText(fp));
+        $("#fptext").html(generateFPText(fp));
+        console.log(fp);
     })
 }
 
