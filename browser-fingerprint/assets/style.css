@@ -2,9 +2,57 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 @font-face {
     font-family: 'Ortica';
-    src: url('Ortica-Bold.woff2') format('woff2'), /* Super Modern Browsers */
-    url('Ortica-Bold.woff') format('woff'), /* Pretty Modern Browsers */
-    url('Ortica-Bold.otf') format('truetype'), /* Safari, Android, iOS */
+    src: url('./fonts/ortica/Ortica-Bold.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./fonts/ortica/Ortica-Bold.woff') format('woff'), /* Pretty Modern Browsers */
+    url('./fonts/ortica/Ortica-Bold.otf') format('truetype'), /* Safari, Android, iOS */
+}
+
+/* roboto-mono-regular - latin */
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: url('./fonts/roboto-mono/roboto-mono-v7-latin-regular.eot');
+    /* IE9 Compat Modes */
+    src: local('Roboto Mono'), local('RobotoMono-Regular'), url('./fonts/roboto-mono/roboto-mono-v7-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-regular.woff') format('woff'), /* Modern Browsers */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-regular.svg#RobotoMono') format('svg');
+    /* Legacy iOS */
+}
+
+/* roboto-mono-italic - latin */
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: italic;
+    font-weight: 400;
+    src: url('./fonts/roboto-mono/roboto-mono-v7-latin-italic.eot');
+    /* IE9 Compat Modes */
+    src: local('Roboto Mono Italic'), local('RobotoMono-Italic'), url('./fonts/roboto-mono/roboto-mono-v7-latin-italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-italic.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-italic.woff') format('woff'), /* Modern Browsers */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-italic.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-italic.svg#RobotoMono') format('svg');
+    /* Legacy iOS */
+}
+
+/* roboto-mono-700 - latin */
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 700;
+    src: url('./fonts/roboto-mono/roboto-mono-v7-latin-700.eot');
+    /* IE9 Compat Modes */
+    src: local('Roboto Mono Bold'), local('RobotoMono-Bold'), url('./fonts/roboto-mono/roboto-mono-v7-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-700.woff') format('woff'), /* Modern Browsers */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('./fonts/roboto-mono/roboto-mono-v7-latin-700.svg#RobotoMono') format('svg');
+    /* Legacy iOS */
 }
 
 html, body {
