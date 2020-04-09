@@ -1,4 +1,4 @@
-const HOST = "https://fp.durieux.me";
+const HOST = "http://localhost:5001";
 var options = {
   fonts: {
     extendedJsFonts: true,

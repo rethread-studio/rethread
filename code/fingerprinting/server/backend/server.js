@@ -47,7 +47,19 @@ const keys = [
   "enumerateDevices",
   "webGLVendor",
   "webGLRenderer",
-  "hardwareConcurrency"
+  "hardwareConcurrency",
+  "browser_name",
+  "browser_version",
+  "engine_name",
+  "engine_version",
+  "os_name",
+  "os_version",
+  "device_type",
+  "device_model",
+  "device_vendor",
+  "engine_version",
+  "engine_name",
+  "cpu.architecture"
 ];
 
 const db = client.db(DB_NAME);
@@ -201,6 +213,18 @@ app
         webGLVendor: keyValueFP(fp, "webglVendorAndRenderer").split("~")[0],
         webGLRenderer: keyValueFP(fp, "webglVendorAndRenderer").split("~")[1],
       };
+      const UAParser = keyValueFP(fp, "UAParser");
+      if (UAParser) {
+        for (let key in UAParser) {
+          if (key == 'ua') {
+            continue
+          }
+          for (let pro in UAParser[key]) {
+            output[key + '_' + pro] = UAParser[key][pro]
+            console.log(key + '_' + pro)
+          }
+        }
+      }
       return output;
     }
     const fp = transformFP(req.body);
