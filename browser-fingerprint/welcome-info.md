@@ -11,6 +11,6 @@ We will now collect the fingerprint of the web browser you use to visit the exhb
 - the gpu brand and version, for the nerdy touch
 - the rendering of beautiful emojis 😃 🦠 🎉 🚀 🖼️
 
-We use your data to generate the art works of this exhbition, live. We let you experience your data through different sound and visuals and to compare the fingerprint of your browser with the fingerprint of other visitors.
+We use your data to generate this exhbition, live. We let you experience your data through different sound and visuals and compare the fingerprint of your browser with the fingerprint of other visitors.
 
 When you leave the exhibition, we are happy to keep your fingerprint in a safe and comfortable server, which only one of the artists can access through a secure connection. If you want, you have the opportunity to delete your data.
