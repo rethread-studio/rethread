@@ -16,7 +16,7 @@ let addText = false;
 
 let robotoMono;
 function preload() {
-    robotoMono = loadFont('assets/RobotoMono-Regular.ttf');
+    robotoMono = loadFont('assets/fonts/roboto-mono/roboto-mono-v7-latin-regular.ttf');
 }
 
 function setup() {
