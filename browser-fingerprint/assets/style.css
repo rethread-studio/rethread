@@ -2,7 +2,7 @@
     font-family: 'Ortica';
     src: url('./fonts/ortica/Ortica-Bold.woff2') format('woff2'), /* Super Modern Browsers */
     url('./fonts/ortica/Ortica-Bold.woff') format('woff'), /* Pretty Modern Browsers */
-    url('./fonts/ortica/Ortica-Bold.otf') format('truetype'), /* Safari, Android, iOS */
+    url('./fonts/ortica/Ortica-Bold.otf') format('truetype'); /* Safari, Android, iOS */
 }
 
 /* roboto-mono-regular - latin */
