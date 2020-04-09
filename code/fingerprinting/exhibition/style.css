@@ -23,13 +23,21 @@ body {
     background: midnightblue;
 }
 
-h1, h2, h3 {
-    /* font-family: 'Gotu', sans-serif; */
+h1 {
+    font-family: 'Ortica', sans-serif;
+    font-size: 4em;
+}
+
+h2, h3 {
     font-family: 'Ortica', sans-serif;
     font-size: 1.5em;
-
 }
+
 @media only screen and (max-width: 768px) {
+    h1 {
+        font-family: 'Ortica', sans-serif;
+        font-size: 2em;
+    }
     h2, h3 {
         font-family: 'Ortica', sans-serif;
         font-size: 1em;
