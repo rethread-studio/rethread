@@ -186,4 +186,14 @@ $(document).ready(function () {
         // Go to 2D art
         window.location.href = "p5-fingerprinting/index.html";
     });
+
+    $("#Sky").click(function () {
+        // Go to 2D art
+        window.location.href = "https://rethread.art/code/fingerprinting/server/backend/static/sky.html";
+    });
+
+    $("#Font").click(function () {
+        // Go to 2D art
+        window.location.href = "https://rethread.art/code/fingerprinting/server/backend/static/font.html";
+    });
 });
