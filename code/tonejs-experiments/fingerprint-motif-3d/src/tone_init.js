@@ -17,7 +17,7 @@ function init_tone() {
     Global.sound.globalSynthLPF = new Tone.Filter(600, "lowpass").connect(Global.sound.chorus);
 
     
-    Global.sound.noisegain = new Tone.Gain(0.01).toMaster();
+    Global.sound.noisegain = new Tone.Gain(0.00).toMaster();
     Global.sound.noise = new Tone.Noise('pink').start().connect(Global.sound.noisegain);
     Global.sound.noiseGainMult = new Tone.Multiply();
     Global.sound.noiseEnv = new Tone.ScaledEnvelope({

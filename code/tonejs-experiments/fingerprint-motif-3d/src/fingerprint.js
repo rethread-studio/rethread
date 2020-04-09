@@ -3,6 +3,8 @@ import * as tone_init from './tone_init.js';
 import * as THREE from 'three';
 import * as Tone from 'tone';
 import * as Graphics from './graphics.js';
+import * as Shaders from './shaders.js'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 
 const playbackMethods = ['long_notes', 'short_notes', 'repeated_notes'];
 class Motif {
@@ -33,7 +35,7 @@ class Motif {
         this.lastPitch = 0;
         this.repeatsLeft = 0;
     }
-    schedulePlaybackSpace(synth, noiseSynth, transport, material, color) {
+    schedulePlaybackSpace(synth, noiseSynth, transport, fingerprint) {
         if(this.loop != undefined) {
             this.loop.stop();
         }
@@ -66,7 +68,6 @@ class Motif {
                         // console.log("pitch: " + pitch + " dur: " + dur + " time: " + time);
                         synth.envelope.attack = atk;
                         if(noisePlayback) {
-                            console.log("noise playback " + motif.noises);
                             noiseSynth.triggerAttackRelease(
                                 pitch,
                                 "16n",//dur16ToTransport(dur/2),
@@ -77,7 +78,7 @@ class Motif {
                                 dur,//dur16ToTransport(dur/2),
                                 time);
                         }
-                        material.color.copy(color);
+                        fingerprint.setActivation(1.0);
                         // material.color.setScalar(1.0);
                     }, time);
                     motif.schedulingIds.push(id);
@@ -90,7 +91,7 @@ class Motif {
                     time,
                     motif.repeatsLeft/10
                     );
-                material.color.copy(color);
+                fingerprint.setActivation(1.0);
                 motif.repeatsLeft -= 1;
             }
             motif.loopCounter = (motif.loopCounter + 1) % motif.loopMax;
@@ -165,7 +166,10 @@ function amp2db(amp) {
     20 * log10(amp);
 }
 
+const FPrintTypes = {"local":1, "connected":2, "old":3};
+Object.freeze(FPrintTypes);
 class Fingerprint {
+    type; 
     motif; // a Motif
     position; // a THREE.Vector3
     material;
@@ -178,16 +182,23 @@ class Fingerprint {
     rawFingerprint;
     fingerprintSum;
     color;
-    constructor(rawFingerprint) {
+    activation; // used to display that the fingerprint is sonically activated
+    constructor(rawFingerprint, type) {
+        this.type = type;
         this.rawFingerprint = rawFingerprint;
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
         this.color = new THREE.Color();
         this.color.setHSL((this.fingerprintSum % 1000)/1000, 0.6, 0.55);
         // console.log("new fingerprint with sum " + this.fingerprintSum + " and raw fingerprint " + JSON.stringify(this.rawFingerprint));
+        this.activation = 0.0;
+    }
+    setActivation(v) {
+        this.activation = v;
     }
     addToSpace(scene, objects, position) {
         this.position = position;
         this.material = new THREE.MeshStandardMaterial({ color: 0x00cccc })
+        // this.material = newFingerprintOutsideShaderMaterial();
         this.geometry = new THREE.TetrahedronGeometry(5, 0);
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.rotation.z = this.rawFingerprint[3] + this.rawFingerprint[4];
@@ -203,7 +214,7 @@ class Fingerprint {
         this.noiseSynth = tone_init.newNoiseSynth();
         objects.push(this.mesh);
         this.updateMotif();
-        this.motif.schedulePlaybackSpace(this.synth, this.noiseSynth, Tone.Transport, this.material, this.color);
+        this.motif.schedulePlaybackSpace(this.synth, this.noiseSynth, Tone.Transport, this);
     }
     generateFingerprintRoom() {
         let newRoom = {};
@@ -244,130 +255,8 @@ class Fingerprint {
             let shaderMaterial = new THREE.ShaderMaterial( {
                 uniforms: shaderUniforms,
                 // general vertex shader for fragment shaders
-                vertexShader: `varying vec2 vUv; 
-                void main()
-                {
-                    vUv = uv;
-                
-                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0 );
-                    gl_Position = projectionMatrix * mvPosition;
-                }`,
-                // This is where the magic happens
-                // https://stackoverflow.com/questions/24820004/how-to-implement-a-shadertoy-shader-in-three-js
-                // for coordinates, use `vec2 p = -1.0 + 2.0 *vUv;`
-                fragmentShader: `
-uniform float time;
-uniform vec2 resolution;
-
-varying vec2 vUv;
-
-vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
-{
-    return a + b*cos( 6.28318*(c*t+d) );
-}
-
-void main()
-{
-	vec2 p = -1.0 + 2.0 *vUv;
-    
-    // animate
-    p.x += 0.11*time;
-    
-    // compute colors
-    vec3                col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.33,0.67) );
-    if( p.y>(1.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.0,0.10,0.20) );
-    if( p.y>(2.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,1.0),vec3(0.3,0.20,0.20) );
-    if( p.y>(3.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,1.0,0.5),vec3(0.8,0.90,0.30) );
-    if( p.y>(4.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(1.0,0.7,0.4),vec3(0.0,0.15,0.20) );
-    if( p.y>(5.0/7.0) ) col = pal( p.x, vec3(0.5,0.5,0.5),vec3(0.5,0.5,0.5),vec3(2.0,1.0,0.0),vec3(0.5,0.20,0.25) );
-    if( p.y>(6.0/7.0) ) col = pal( p.x, vec3(0.8,0.5,0.4),vec3(0.2,0.4,0.2),vec3(2.0,1.0,1.0),vec3(0.0,0.25,0.25) );
-    
-
-    // band
-    float f = fract(p.y*7.0);
-    // borders
-    col *= smoothstep( 0.49, 0.47, abs(f-0.5) );
-    // shadowing
-    col *= 0.5 + 0.5*sqrt(4.0*f*(1.0-f));
-    // dithering
-    // col += (1.0/255.0)*texture( iChannel0, fragCoord.xy/iChannelResolution[0].xy ).xyz;
-
-	gl_FragColor = vec4( col, 1.0 );
-}
-
-`,
-//                 fragmentShader: `
-//                 uniform float time;
-//                 uniform vec2 resolution;
-                
-//                 varying vec2 vUv;
-                
-// float opSmoothUnion( float d1, float d2, float k )
-// {
-//     float h = clamp( 0.5 + 0.5*(d2-d1)/k, 0.0, 1.0 );
-//     return mix( d2, d1, h ) - k*h*(1.0-h);
-// }
-
-// float sdSphere( vec3 p, float s )
-// {
-//   return length(p)-s;
-// } 
-
-// float map(vec3 p)
-// {
-// 	float d = 2.0;
-// 	for (int i = 0; i < 16; i++)
-// 	{
-// 		float fi = float(i);
-// 		float t = time * (fract(fi * 412.531 + 0.513) - 0.5) * 2.0;
-// 		d = opSmoothUnion(
-//             sdSphere(p + sin(t + fi * vec3(52.5126, 64.62744, 632.25)) * vec3(2.0, 2.0, 0.8), mix(0.5, 1.0, fract(fi * 412.531 + 0.5124))),
-// 			d,
-// 			0.4
-// 		);
-// 	}
-// 	return d;
-// }
-
-// vec3 calcNormal( in vec3 p )
-// {
-//     const float h = 1e-5; // or some other value
-//     const vec2 k = vec2(1,-1);
-//     return normalize( k.xyy*map( p + k.xyy*h ) + 
-//                       k.yyx*map( p + k.yyx*h ) + 
-//                       k.yxy*map( p + k.yxy*h ) + 
-//                       k.xxx*map( p + k.xxx*h ) );
-// }
-
-// void main()
-// {
-//     vec2 uv = -1.0 + 2.0 *vUv;
-    
-//     // screen size is 6m x 6m
-// 	vec3 rayOri = vec3((uv - 0.5) * 6.0, 3.0);
-// 	vec3 rayDir = vec3(0.0, 0.0, -1.0);
-	
-// 	float depth = 0.0;
-// 	vec3 p;
-	
-// 	for(int i = 0; i < 64; i++) {
-// 		p = rayOri + rayDir * depth;
-// 		float dist = map(p);
-//         depth += dist;
-// 		if (dist < 1e-6) {
-// 			break;
-// 		}
-// 	}
-	
-//     depth = min(6.0, depth);
-// 	vec3 n = calcNormal(p);
-//     float b = max(0.0, dot(n, vec3(0.577)));
-//     vec3 col = (0.5 + 0.5 * cos((b + time * 3.0) + uv.xyx * 2.0 + vec3(0,2,4))) * (0.85 + b * 0.35);
-//     col *= exp( -depth * 0.15 );
-	
-//     // maximum thickness is 2m in alpha channel
-//     gl_FragColor = vec4(col, 1.0 - (depth - 0.5) / 2.0);
-// }`,
+                vertexShader: Shaders.vShader,
+                fragmentShader: Shaders.colorBandFShader,
                 side: THREE.DoubleSide,
             } );
             let shader = new THREE.Mesh( shaderGeometry, shaderMaterial );
@@ -689,22 +578,46 @@ void main()
         this.synth.volume.value = db;
         this.noiseSynth.volume.value = db * 1.1;
     }
-    updateDistanceSquared(relativeDistance) {
-        this.setDb(relativeDistance * -6.5 - 16);
-        // if (distance2 < 110) {
-        //     this.material.transparent = true;
-        //     this.material.opacity = (distance2-10) / 100;
-        // }
-        // this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2 / 10), 1.0));
-        // this.synth.envelope.release = Math.max(0.5 - distance2 / 50, 0.002);
-        let numParameters = Math.max(Math.floor(24 - (Math.max(relativeDistance - 1.0, 0) * 8.0)), 0);
-        if (numParameters != this.numParameters) {
-            this.numParametersUsed = numParameters;
-            // this.numParametersUsed = 24;
-            this.updateMotif();
+    setPosition(pos) {
+        this.position.copy(pos);
+        this.mesh.position.copy(pos);
+    }
+    getHoverText() {
+        let text = "";
+        if(this.type == FPrintTypes.local) {
+            text = "your device's fingerprint";
+        } else if (this.type == FPrintTypes.connected) {
+            text = "currently connected, id: " + this.fingerprintSum;
+        } else if (this.type == FPrintTypes.old) {
+            text = "old fingerprint, id: " + this.fingerprintSum;
         }
+        return text;
+    }
+    updateSpace(relativeDistance, delta) {
+        if(relativeDistance > 0 && relativeDistance < 100000) {
+            this.setDb(relativeDistance * -6.5 - 16);
+            // if (distance2 < 110) {
+            //     this.material.transparent = true;
+            //     this.material.opacity = (distance2-10) / 100;
+            // }
+            // this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2 / 10), 1.0));
+            // this.synth.envelope.release = Math.max(0.5 - distance2 / 50, 0.002);
+            let numParameters = Math.max(Math.floor(24 - (Math.max(relativeDistance - 1.0, 0) * 8.0)), 0);
+            if (numParameters != this.numParameters) {
+                this.numParametersUsed = numParameters;
+                // this.numParametersUsed = 24;
+                this.updateMotif();
+            }
 
-        this.material.color.multiplyScalar(0.9);
+            this.activation = this.activation * 0.9;
+            this.material.color = this.color.clone().multiplyScalar(0.1 + (this.activation * 0.9));
+
+            // this.material.color.multiplyScalar(0.9);
+            // this.material.uniforms.time.value += delta;
+        } else {
+            console.log("Bad distance to fingerprint: " + relativeDistance);
+        }
+        
     }
 }
 
@@ -721,4 +634,29 @@ function generateRandomFingerPrint() {
     Global.data.fingerprints.push(fingerprint);
 }
 
-export { Motif, Fingerprint, generateRandomFingerPrint }
+function newFingerprintOutsideShaderMaterial() {
+
+    let shaderUniforms = {
+        time: { value: 1.0 },
+        resolution: {  value: new THREE.Vector2() },
+        alpha: { value: 1.0 },
+        fogColor:    { value: Graphics.scene.fog.color },
+        fogNear:     { value: Graphics.scene.fog.near },
+        fogFar:      { value: Graphics.scene.fog.far }
+    };
+    let shaderMaterial = new THREE.ShaderMaterial( {
+        uniforms: shaderUniforms,
+        // general vertex shader for fragment shaders
+        vertexShader: Shaders.vShader,
+        // This is where the magic happens
+        // https://stackoverflow.com/questions/24820004/how-to-implement-a-shadertoy-shader-in-three-js
+        // for coordinates, use `vec2 p = -1.0 + 2.0 *vUv;`
+        fragmentShader: Shaders.fingerprintFShader,
+        side: THREE.FrontSide,
+        fog: false,
+    } );
+    // shaderMaterial.fog = true;
+    return shaderMaterial;
+}
+
+export { Motif, Fingerprint, generateRandomFingerPrint, FPrintTypes }

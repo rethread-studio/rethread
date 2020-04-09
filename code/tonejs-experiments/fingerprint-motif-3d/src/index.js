@@ -29,8 +29,10 @@ $.ajax({
         Global.data.rawFingerprints.push(newArr);
       }
       for(let i = 0; i < 200; i++) {
-        Fingerprint.generateRandomFingerPrint();
+        let fingerprint = new Fingerprint.Fingerprint(Global.data.rawFingerprints[i], Fingerprint.FPrintTypes.old);
+        Global.data.fingerprints.push(fingerprint);
       }
+      
       Global.data.loadedData = true;
     }
   });
@@ -72,7 +74,8 @@ Global.data.headers = headers;
       normalizedArr.push(Number(data.normalized[h]));
     }
     Global.data.localRawFingerprint = normalizedArr;
-    console.log(Global.data.localRawFingerprint);
+    Global.data.localFingerprint = new Fingerprint.Fingerprint(Global.data.localRawFingerprint, Fingerprint.FPrintTypes.local);
+    Global.data.loadedLocal = true;
   });
 
   getConnectedFingerPrints(function(data) {

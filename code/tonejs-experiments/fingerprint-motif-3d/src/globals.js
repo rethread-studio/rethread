@@ -27,9 +27,11 @@ var sound = {
 
 var data = {
     loadedData: false,
+    loadedLocal: false,
     fingerprints: [], // the Fingerprint objects created
     rawFingerprints: [], // the raw data strings
     headers: [],
+    //localRawFingerprint is set in index.js
 }
 
 export { sound, data }
