@@ -36,6 +36,11 @@ window.addEventListener("hashchange", goToPage, false);
 
 function displayPage(name) {
     window.location.hash = name;
+    if (hasConsented) {
+        $("body").addClass('mainPage');
+    } else {
+        $("body").removeClass('mainPage');
+    }
 }
 
 function welcomePage() {
@@ -70,11 +75,20 @@ function myFpPage() {
     $("#main").fadeOut();
     $("#consentInfo").fadeOut();
     $("#participateStill").hide();
+    $("#myFp").fadeIn();
 
-    getFingerPrint(fp => {
-        $("#myFp").fadeIn();
+    var parser = new UAParser();
+    var result = parser.getResult();
+    let currentText = "You are using <span class = 'fpHighlight'>"
+    + result.browser.name + "</span> with <span class = 'fpHighlight'>" + result.os.name + " </span>";
+
+    const opts = {element: document.getElementById("fptext"), html: currentText}
+    typewriter = setupTypewriter(opts)
+    typewriter.type();
+    getFingerPrint(async fp => {
         // $("#fptext").text(generateFPText(fp));
-        $("#fptext").html(generateFPText(fp));
+        const text = generateFPText(fp);
+        opts.html = text
         console.log(fp);
     })
 }
@@ -116,8 +130,6 @@ function consentInfoButton() {
     hasConsented = true;
     localStorage.setItem('hasConsented', true)
     // Go to fingerprint with animation
-
-    $("body").toggleClass('mainPage');
 }
 function mainButton() {
     displayPage('main');
