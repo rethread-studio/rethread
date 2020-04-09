@@ -1,4 +1,4 @@
-const HOST = 'https://fp.durieux.me'
+const HOST = "https://fp.durieux.me";
 var options = {
   fonts: {
     extendedJsFonts: true,
@@ -1055,6 +1055,17 @@ var options = {
   },
   extraComponents: [
     {
+      key: "UAParser",
+      getData: function (done, options) {
+        if (UAParser) {
+          var parser = new UAParser();
+          done(parser.getResult());
+        } else {
+            done(null)
+        }
+      },
+    },
+    {
       key: "screen_width",
       getData: function (done, options) {
         done(window.screen.width);
@@ -1095,7 +1106,7 @@ window.onbeforeunload = function () {
   $.ajax({
     url: HOST + "/api/session/logout",
     type: "POST",
-    async: true
+    async: true,
   });
 };
 
