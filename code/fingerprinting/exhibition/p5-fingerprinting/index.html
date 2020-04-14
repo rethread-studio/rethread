@@ -37,6 +37,9 @@
             filter: blur(20px);
             transition: filter 2s ease;
         }
+        .compare {
+            left: -20% !important;
+        }
 
         .art {
             filter: blur(0px);
@@ -77,12 +80,21 @@
             // debug
             // $("#info").hide();
 
-
-
             $("#seeArt").click(function () {
                 $("canvas").toggleClass('art');
                 $("#info").fadeOut();
+                $("#galleryButton").delay("2500").fadeIn();
             });
+
+            $("#galleryButton").hide();
+            $("#seeAnother").hide();
+
+            $("#seeGallery").click(function () {
+                // $("canvas").toggleClass('compare');
+                $("#seeGallery").hide();
+                $("#seeAnother").show();
+            });
+
         });
 
     </script>
@@ -97,17 +109,20 @@
             <h3 style="color: white">
                 <p>data as constellation</p>
             </h3>
-            <p>Lorem ipsum dolor sit
-                amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </p>
+            <p>Each element from your browser fingerprint (screen size, language, fonts etc.) contributes to an element
+                in the constellation. Compare your constellation to the others that have been collected to visually see
+                how unique your fingerprint is.</p>
             <p>by Nadia Campo Woytuk.</p>
             <button id="seeArt">loading...</button>
 
 
         </div>
 
-        <!-- <p>Gallery</p> -->
+        <div style="top: 80%" id="galleryButton" class="w3-display-middle">
+            <button class="linkButton" id="seeGallery">Compare mine to a random constellation</button>
+            <button class="linkButton" id="seeAnother">See another random constellation</button>
+        </div>
+
     </div>
 
     <div class="dropdown">

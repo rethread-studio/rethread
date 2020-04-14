@@ -1,37 +1,90 @@
-let canvas;
+let canvas, canvasC;
 let width = 0;
 let height = 0;
 
 let c = 200;
+let myFP;
 
 function setup() {
 
     width = windowWidth;
     height = windowHeight;
-    canvas = createCanvas(width, height);
+    canvas = createCanvas(width / 2, height / 2);
     $("canvas").hide();
-    canvas.position(0, 0);
+    canvas.position(width / 4, height / 4);
 
     // createCanvas(800, 800);
     background(0);
 
 }
 
+$(document).ready(function () {
+
+    $("#seeAnother").click(function () {
+        // erase old one and show another
+        push();
+        translate(width / 4, height / 4);
+        noStroke();
+        fill(0);
+        rect(width / 4, -height / 4, width / 2, height / 2);
+        translate(width / 2, 0);
+        another();
+        pop();
+    });
+
+    $("#seeGallery").click(function () {
+        // first time getting a new fp
+        canvas.position(0, height / 4);
+        resizeCanvas(width, height / 2);
+        push();
+        translate(width / 4, height / 4);
+        constellation(myFP);
+        translate(width / 2, 0);
+        another();
+        pop();
+    });
+
+});
+
+function another() {
+    $("#seeAnother").hide();
+    // get random fp
+    getRandomFingerPrint(anotherfpCallback);
+}
+
+
+// My fingerprint
 getFingerPrint(fpCallback);
-
-// getFingerPrint(fp => {
-//     console.log(fp.original);
-//     console.log(fp.original['user-agent']);
-//     console.log(fp.original.webGLRenderer);
-// });
-
 
 function fpCallback(fingerprint) {
 
+    myFP = fingerprint;
+
     $("canvas").fadeIn();
     $("#seeArt").text("see my constellation");
+
+    translate(width / 4, height / 4);
+    constellation(fingerprint);
+}
+
+function anotherfpCallback(fingerprint) {
+    $("#seeAnother").show();
+    // 36 is the length of the fingerprint -- at the moment
+    if (Object.keys(fingerprint.original).length < 36) {
+        // strange data, get a new one
+        getRandomFingerPrint(anotherfpCallback);
+    }
+    else {
+        constellation(fingerprint);
+    }
+}
+
+
+
+function constellation(fingerprint) {
+
     let fp = fingerprint.original;
-    // console.log(fp);
+    console.log(fp);
 
     // host: "fp.durieux.me"
     // dnt: "not available"
@@ -67,44 +120,7 @@ function fpCallback(fingerprint) {
     // _id: "5e8c7e74a24de50028d3b44f"
 
 
-    // old
-
-    // 0: {key: "webdriver", value: "not available"}
-    // 1: {key: "language", value: "sv-SE"}
-    // 2: {key: "colorDepth", value: 24}
-    // 3: {key: "deviceMemory", value: 8}
-    // 4: {key: "pixelRatio", value: 2}
-    // 5: {key: "hardwareConcurrency", value: 8}
-    // 6: {key: "screenResolution", value: Array(2)}
-    // 7: {key: "availableScreenResolution", value: Array(2)}
-    // 8: {key: "timezoneOffset", value: -120}
-    // 9: {key: "timezone", value: "Europe/Stockholm"}
-    // 10: {key: "sessionStorage", value: true}
-    // 11: {key: "localStorage", value: true}
-    // 12: {key: "indexedDb", value: true}
-    // 13: {key: "addBehavior", value: false}
-    // 14: {key: "openDatabase", value: true}
-    // 15: {key: "cpuClass", value: "not available"}
-    // 16: {key: "platform", value: "MacIntel"}
-    // 17: {key: "doNotTrack", value: "not available"}
-    // 18: {key: "plugins", value: Array(3)}
-    // 19: {key: "canvas", value: Array(2)}
-    // 20: {key: "webgl", value: Array(65)}
-    // 21: {key: "webglVendorAndRenderer", value: "Intel Inc.~Intel Iris Pro OpenGL Engine"}
-    // 22: {key: "adBlock", value: false}
-    // 23: {key: "hasLiedLanguages", value: false}
-    // 24: {key: "hasLiedResolution", value: false}
-    // 25: {key: "hasLiedOs", value: false}
-    // 26: {key: "hasLiedBrowser", value: false}
-    // 27: {key: "touchSupport", value: Array(3)}
-    // 28: {key: "fonts", value: Array(168)}
-    // 29: {key: "fontsFlash", value: "swf object not loaded"}
-    // 30: {key: "audio", value: "124.04345808873768"}
-    // 31: {key: "enumerateDevices", value: Array(14)}
-
     //////---///---///---///
-
-    translate(width / 2, height / 2);
 
 
     // fonts
@@ -136,7 +152,7 @@ function fpCallback(fingerprint) {
             f = 0;
             g += fonts.length / 300;
         }
-        line(-0.9*c + f * 1 + g, 0 + f * 2 + g, -c + f * 1 + g, 0 + f * 2 + g)
+        line(-0.9 * c + f * 1 + g, 0 + f * 2 + g, -c + f * 1 + g, 0 + f * 2 + g)
         f++;
     }
     pop()
@@ -215,12 +231,14 @@ function fpCallback(fingerprint) {
 
     //pixelRatio
     fill(255);
-    let pixelRatio = fp['pixelRatio'];
-    push()
-    if (allFonts[pixelRatio])
-        rotate(radians(allFonts[pixelRatio].charCodeAt(2)));
-    ellipse(c * cos(pixelRatio), c * sin(pixelRatio), pixelRatio);
-    pop()
+    if (fp['pixelRatio']) {
+        let pixelRatio = fp['pixelRatio'];
+        push()
+        if (allFonts[pixelRatio])
+            rotate(radians(allFonts[pixelRatio].charCodeAt(2)));
+        ellipse(c * cos(pixelRatio), c * sin(pixelRatio), pixelRatio);
+        pop();
+    }
 
     //hardwareConcurrency
     noFill();
@@ -248,22 +266,28 @@ function fpCallback(fingerprint) {
     pop();
 
     //availableScreenResolution
-    let availableScreenResolution = fp['availableScreenResolution'].split(',');
-    let aSRx = map(availableScreenResolution[0], 320, 4096, 0, 255);
-    let aSRy = map(availableScreenResolution[1], 200, 2160, 0, 255);
-    noStroke();
-    fill(sRy * 0.5, 40, sRx);
-    ellipse(100 * cos(aSRx), 100 * sin(aSRy), 15);
+    if (fp['availableScreenResolution']) {
+        let availableScreenResolution = fp['availableScreenResolution'].split(',');
+        let aSRx = map(availableScreenResolution[0], 320, 4096, 0, 255);
+        let aSRy = map(availableScreenResolution[1], 200, 2160, 0, 255);
+        noStroke();
+        fill(sRy * 0.5, 40, sRx);
+        ellipse(100 * cos(aSRx), 100 * sin(aSRy), 15);
+    }
 
     //timezoneOffset
-    let timezoneOffset = fp['timezoneOffset'];
-    let colorTOff = map(timezoneOffset, -840, 840, 0, 255);
-    let posTOff = map(timezoneOffset, -840, 840, -c, c);
-    let radTOff = map(timezoneOffset, -840, 840, 50, c);
-    colorMode(HSB);
-    stroke(colorTOff, 20, 150);
-    fill(colorTOff, 20, 150);
-    arc(posTOff, posTOff, radTOff / 2, radTOff / 2, radians(0), radians(timezoneOffset));
+    let colorTOff = map(0, -840, 840, 0, 255);
+    let posTOff = map(0, -840, 840, -c, c);
+    if (fp['timezoneOffset']) {
+        let timezoneOffset = fp['timezoneOffset'];
+        colorTOff = map(timezoneOffset, -840, 840, 0, 255);
+        posTOff = map(timezoneOffset, -840, 840, -c, c);
+        let radTOff = map(timezoneOffset, -840, 840, 50, c);
+        colorMode(HSB);
+        stroke(colorTOff, 20, 150);
+        fill(colorTOff, 20, 150);
+        arc(posTOff, posTOff, radTOff / 2, radTOff / 2, radians(0), radians(timezoneOffset));
+    }
 
     //timezone
     let timezone = fp['timezone'];
@@ -378,16 +402,18 @@ function fpCallback(fingerprint) {
     noStroke();
     translate(150 * cos(radians(160)), 150 * sin(radians(160)))
     rotate(radians(platform.charCodeAt(0)));
-    let touchSupport = fp['touchSupport'].split(',');
-    // touchSupport = [0,"true","true"]; // debug
-    fill(220, 10, 110);
-    if (touchSupport[1] == "true")
-        rect(0, 0, 20, 20)
-    noFill();
-    stroke(110, 110, 220);
-    if (touchSupport[2] == "true")
-        rect(10, 10, 20, 20)
-    pop()
+    if (fp['touchSupport']) {
+        let touchSupport = fp['touchSupport'].split(',');
+        // touchSupport = [0,"true","true"]; // debug
+        fill(220, 10, 110);
+        if (touchSupport[1] == "true")
+            rect(0, 0, 20, 20)
+        noFill();
+        stroke(110, 110, 220);
+        if (touchSupport[2] == "true")
+            rect(10, 10, 20, 20)
+        pop()
+    }
 
     // fonts
     //// moved up
@@ -408,29 +434,30 @@ function fpCallback(fingerprint) {
     //
 
     // enumerateDevices
-    enumerateDevices = fp['enumerateDevices'].split(',');
-    push();
-    translate(c * cos(radians(130)), c * sin(radians(130)))
-    rotate(radians(enumerateDevices.length));
-    if (enumerateDevices.length < 3 || enumerateDevices == "not available") {
-        fill(255)
-        equiTriangle(0, 0, 30);
-    }
-    else {
-        for (var i = 0; i < enumerateDevices.length; i++) {
-            let a1 = 0;
-            for (var j = 0; j < enumerateDevices[i].length; j++) {
-                a1 = a1 + enumerateDevices[i].charCodeAt(j);
-            }
-            line(enumerateDevices.length * 10 / 2 - i * 10, -a1 / c, 0, 0);
-            if (enumerateDevices[i].charCodeAt(22) > 60)
-                fill(255);
-            if (enumerateDevices[i].charCodeAt(31) > 60)
-                ellipse(enumerateDevices.length * 10 / 2 - i * 10, -a1 / c, 5);
+    if (fp['enumerateDevices']) {
+        enumerateDevices = fp['enumerateDevices'].split(',');
+        push();
+        translate(c * cos(radians(130)), c * sin(radians(130)))
+        rotate(radians(enumerateDevices.length));
+        if (enumerateDevices.length < 3 || enumerateDevices == "not available") {
+            fill(255)
+            equiTriangle(0, 0, 30);
         }
+        else {
+            for (var i = 0; i < enumerateDevices.length; i++) {
+                let a1 = 0;
+                for (var j = 0; j < enumerateDevices[i].length; j++) {
+                    a1 = a1 + enumerateDevices[i].charCodeAt(j);
+                }
+                line(enumerateDevices.length * 10 / 2 - i * 10, -a1 / c, 0, 0);
+                if (enumerateDevices[i].charCodeAt(22) > 60)
+                    fill(255);
+                if (enumerateDevices[i].charCodeAt(31) > 60)
+                    ellipse(enumerateDevices.length * 10 / 2 - i * 10, -a1 / c, 5);
+            }
+        }
+        pop();
     }
-    pop();
-
 
 
 }
