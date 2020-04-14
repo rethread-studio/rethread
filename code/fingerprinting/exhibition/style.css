@@ -125,13 +125,16 @@ button:hover {
     color: white;
     border: none;
     background: none;
-    text-decoration: underline;
+    text-decoration: underline solid white;
     cursor: pointer;
+    transition: 0.3s;
 }
 
 .linkButton:hover {
+    padding: 1em;
     border: none;
     background: none;
+    text-decoration: underline dotted white;
 }
 
 .fpHighlight {

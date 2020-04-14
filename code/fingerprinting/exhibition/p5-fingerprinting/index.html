@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>My browser fingerprint art</title>
+    <title>· .* . · ¨ .· constellations .¨ · *. ·:. ·</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
@@ -37,6 +37,7 @@
             filter: blur(20px);
             transition: filter 2s ease;
         }
+
         .compare {
             left: -20% !important;
         }
@@ -77,17 +78,38 @@
         }
 
         $(document).ready(function () {
+
+            // // hide from start
+            // $("#galleryButton").hide();
+            // $("#seeAnother").hide();
+
             // debug
             // $("#info").hide();
+            // localStorage.clear();
+
+            if (localStorage.getItem('hasConsented')) {
+                $("#participate").hide();
+            }
+            else{
+                $("#participate").fadeIn();
+            }
+            $("#participate").click(function () {
+                window.location.href = "../index.html#consentInfo";
+            });
 
             $("#seeArt").click(function () {
                 $("canvas").toggleClass('art');
                 $("#info").fadeOut();
                 $("#galleryButton").delay("2500").fadeIn();
-            });
+                if (localStorage.getItem('hasConsented')) {
+                    $("#seeAnother").hide();
+                }
+                else {
 
-            $("#galleryButton").hide();
-            $("#seeAnother").hide();
+                    $("#seeGallery").hide();
+                    $("#seeAnother").fadeIn();
+                }
+            });
 
             $("#seeGallery").click(function () {
                 // $("canvas").toggleClass('compare');
@@ -104,23 +126,32 @@
 <body>
 
     <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
+        <div class="w3-display-middle" style="top: 95%; color:dimgray">
+            <p>by Nadia Campo Woytuk.</p>
+        </div>
 
         <div id="info" class="w3-display-middle">
             <h3 style="color: white">
-                <p>data as constellation</p>
+                <p>· .* . · ¨ .· constellations .¨ · *. ·:. ·</p>
             </h3>
             <p>Each element from your browser fingerprint (screen size, language, fonts etc.) contributes to an element
-                in the constellation. Compare your constellation to the others that have been collected to visually see
-                how unique your fingerprint is.</p>
-            <p>by Nadia Campo Woytuk.</p>
+                in the constellation. </p>
+            <p>Compare your constellation to the others that have been collected to see
+                how visually unique your fingerprint is.</p>
+
+
+
             <button id="seeArt">loading...</button>
 
 
         </div>
 
-        <div style="top: 80%" id="galleryButton" class="w3-display-middle">
+        <div style="top: 80%; display: none;" id="galleryButton" class="w3-display-middle">
             <button class="linkButton" id="seeGallery">Compare mine to a random constellation</button>
             <button class="linkButton" id="seeAnother">See another random constellation</button>
+            <p></p>
+            <button class="linkButton" id="participate">Take me back to the consent, I want to participate!</button>
+
         </div>
 
     </div>

@@ -1,3 +1,6 @@
+// Check consent
+console.log(localStorage.getItem('hasConsented'));
+
 let canvas, canvasC;
 let width = 0;
 let height = 0;
@@ -16,45 +19,84 @@ function setup() {
     // createCanvas(800, 800);
     background(0);
 
+
+    if (localStorage.getItem('hasConsented')) {
+        // get my fingerprint
+        getFingerPrint(fpCallback);
+    }
+    else {
+        // no consent
+        // get and show random fp
+        console.log("no consent")
+        getRandomFingerPrint(noConsentCallback);
+    }
+
 }
 
 $(document).ready(function () {
+    if (localStorage.getItem('hasConsented')) {
+        $("#seeAnother").click(function () {
+            // erase old one and show another
+            push();
+            translate(width / 4, height / 4);
+            noStroke();
+            fill(0);
+            rect(width / 4, -height / 4, width / 2, height / 2);
+            translate(width / 2, 0);
+            another();
+            pop();
+        });
 
-    $("#seeAnother").click(function () {
-        // erase old one and show another
-        push();
-        translate(width / 4, height / 4);
-        noStroke();
-        fill(0);
-        rect(width / 4, -height / 4, width / 2, height / 2);
-        translate(width / 2, 0);
-        another();
-        pop();
-    });
+        $("#seeGallery").click(function () {
+            // first time getting a new fp
+            canvas.position(0, height / 4);
+            resizeCanvas(width, height / 2);
+            push();
+            translate(width / 4, height / 4);
+            constellation(myFP);
+            translate(width / 2, 0);
+            another();
+            pop();
+        });
+    }
+    else {
 
-    $("#seeGallery").click(function () {
-        // first time getting a new fp
-        canvas.position(0, height / 4);
-        resizeCanvas(width, height / 2);
-        push();
-        translate(width / 4, height / 4);
-        constellation(myFP);
-        translate(width / 2, 0);
-        another();
-        pop();
-    });
+        $("#seeAnother").click(function () {
+            $("#seeAnother").hide();
+            // erase old one and show another
+            push();
+            noStroke();
+            fill(0);
+            rect(-width/4, -height/4, width / 2, height / 2);
+            another();
+            pop();
+        });
 
+    }
 });
 
+
+function noConsentCallback(fingerprint) {
+    myFP = fingerprint;
+    $("canvas").fadeIn();
+    $("#seeArt").text("see a random constellation (not my data)");
+
+    // 36 is the length of the fingerprint -- at the moment
+    if (Object.keys(fingerprint.original).length < 36) {
+        // strange data, get a new one
+        getRandomFingerPrint(noConsentCallback);
+    }
+    else {
+        console.log(fingerprint)
+        translate(width / 4, height / 4);
+        constellation(fingerprint);
+    }
+}
+
 function another() {
-    $("#seeAnother").hide();
     // get random fp
     getRandomFingerPrint(anotherfpCallback);
 }
-
-
-// My fingerprint
-getFingerPrint(fpCallback);
 
 function fpCallback(fingerprint) {
 
@@ -68,7 +110,6 @@ function fpCallback(fingerprint) {
 }
 
 function anotherfpCallback(fingerprint) {
-    $("#seeAnother").show();
     // 36 is the length of the fingerprint -- at the moment
     if (Object.keys(fingerprint.original).length < 36) {
         // strange data, get a new one
@@ -76,6 +117,7 @@ function anotherfpCallback(fingerprint) {
     }
     else {
         constellation(fingerprint);
+        $("#seeAnother").show();
     }
 }
 
@@ -84,7 +126,7 @@ function anotherfpCallback(fingerprint) {
 function constellation(fingerprint) {
 
     let fp = fingerprint.original;
-    console.log(fp);
+    // console.log(fp);
 
     // host: "fp.durieux.me"
     // dnt: "not available"
