@@ -1,11 +1,13 @@
 let hasConsented = false;
 getFingerPrint(fpDone);
-function fpDone(fingerprint){
+function fpDone(fingerprint) {
     // Check consent
     console.log("fingerprint is random? " + fingerprint.random);
     hasConsented = !fingerprint.random;
     console.log("has consented? " + hasConsented);
 }
+
+hasConsented = true;
 
 let canvas, canvasC;
 let width = 0;
@@ -24,6 +26,7 @@ function setup() {
 
     // createCanvas(800, 800);
     background(0);
+    c = width * 0.10;
 
 
     if (hasConsented) {
@@ -73,19 +76,19 @@ $(document).ready(function () {
             push();
             noStroke();
             fill(0);
-            rect(-width/4, -height/4, width / 2, height / 2);
+            rect(-width / 4, -height / 4, width / 2, height / 2);
             another();
             pop();
         });
 
     }
 
-// Show and hide stuff
+    // Show and hide stuff
 
     if (hasConsented) {
         $("#participate").hide();
     }
-    else{
+    else {
         $("#participate").fadeIn();
     }
     $("#participate").click(function () {
@@ -216,7 +219,7 @@ function constellation(fingerprint) {
     let fontsX = c * cos(allFonts.length);
     let fontsY = c * sin(allFonts.length);
     push()
-    translate(0, 0, -10);
+    translate(0, 0, -c * 0.05);
     ellipse(fontsX, fontsY, allFonts.length / 3)
     pop()
 
@@ -248,22 +251,22 @@ function constellation(fingerprint) {
     if (dnt == "not available") {
         stroke(220, 10, 110);
         line(c * cos(radians(60)), c * sin(radians(60)), c * cos(radians(130)), c * sin(radians(130)));
-        ellipse(c * cos(radians(60)), c * sin(radians(60)), 10);
+        ellipse(c * cos(radians(60)), c * sin(radians(60)), c * 0.05);
     }
     else if (dnt == "unspecified") {
         stroke(220, 10, 110);
         line(c * cos(radians(180)), c * sin(radians(180)), c * cos(radians(130)), c * sin(radians(130)));
-        ellipse(c * cos(radians(130)), c * sin(radians(130)), 10);
+        ellipse(c * cos(radians(130)), c * sin(radians(130)), c * 0.05);
     }
     else if (dnt == "true") {
         stroke(220, 10, 110);
         line(c * cos(radians(270)), c * sin(radians(270)), c * cos(radians(0)), c * sin(radians(0)));
-        ellipse(c * cos(radians(0)), c * sin(radians(0)), 20);
+        ellipse(c * cos(radians(0)), c * sin(radians(0)), c * 0.1);
     }
     else if (dnt == "false") {
         stroke(220, 10, 110);
         line(c * cos(radians(0)), c * sin(radians(0)), c * cos(radians(10)), c * sin(radians(10)));
-        ellipse(c * cos(radians(0)), c * sin(radians(0)), 10);
+        ellipse(c * cos(radians(0)), c * sin(radians(0)), c * 0.05);
     }
 
     // old
@@ -298,7 +301,7 @@ function constellation(fingerprint) {
     push()
     if (allFonts[colorDepth])
         rotate(radians(allFonts[colorDepth].charCodeAt(0)));
-    ellipse(c * cos(colorDepth), c * sin(colorDepth), colorDepth);
+    ellipse(c * cos(colorDepth), c * sin(colorDepth), c * colorDepth);
     pop()
 
     //plugins
@@ -307,7 +310,7 @@ function constellation(fingerprint) {
     push()
     if (allFonts[plugins.length])
         rotate(radians(allFonts[plugins.length].charCodeAt(1)));
-    ellipse(c * cos(plugins.length), c * sin(plugins.length), plugins.length);
+    ellipse(c * cos(plugins.length), c * sin(plugins.length), c * 0.01 * plugins.length);
     pop()
 
     //pixelRatio
@@ -317,7 +320,7 @@ function constellation(fingerprint) {
         push()
         if (allFonts[pixelRatio])
             rotate(radians(allFonts[pixelRatio].charCodeAt(2)));
-        ellipse(c * cos(pixelRatio), c * sin(pixelRatio), pixelRatio);
+        ellipse(c * cos(pixelRatio), c * sin(pixelRatio), c * 0.01 * pixelRatio);
         pop();
     }
 
@@ -326,7 +329,7 @@ function constellation(fingerprint) {
     stroke(255);
     push()
     let hardwareConcurrency = fp['hardwareConcurrency'];
-    let side = hardwareConcurrency * 4;
+    let side = c * 0.03 * hardwareConcurrency;
     var h = side * (Math.sqrt(3) / 2);
     rotate(colorDepth)
     translate(100 * cos(hardwareConcurrency), 100 * sin(hardwareConcurrency));
@@ -339,11 +342,12 @@ function constellation(fingerprint) {
     let sRy = map(fp['screen_height'], 200, 2160, 0, 255);
     stroke(sRy * 0.5, 40, sRx);
     push();
-    rotate(-hardwareConcurrency)
-    line(-sRx, 0, sRy, 0);
+    rotate(-hardwareConcurrency);
+    let c_ = 0.005;
+    line(-sRx * c * c_, 0, sRy * c * c_, 0);
     // line(-sRx + sRx / 2 * cos(radians(90)), 0 + sRx / 2 * sin(radians(90)), sRy + sRy / 2 * cos(radians(90)), 0 + sRy / 2 * sin(radians(90)));
-    ellipse(-sRx, 0, sRx * 1.5, sRx * 1.5);
-    ellipse(sRy, 0, sRy * 1.5, sRy * 1.5);
+    ellipse(-sRx * c * c_, 0, sRx * c * c_ * 1.5, sRx * c * c_ * 1.5);
+    ellipse(sRy * c * c_, 0, sRy * c * c_ * 1.5, sRy * c * c_ * 1.5);
     pop();
 
     //availableScreenResolution
@@ -353,7 +357,7 @@ function constellation(fingerprint) {
         let aSRy = map(availableScreenResolution[1], 200, 2160, 0, 255);
         noStroke();
         fill(sRy * 0.5, 40, sRx);
-        ellipse(100 * cos(aSRx), 100 * sin(aSRy), 15);
+        ellipse(c / 2 * cos(aSRx), c / 2 * sin(aSRy), c * 0.1);
     }
 
     //timezoneOffset
@@ -375,9 +379,9 @@ function constellation(fingerprint) {
     stroke(colorTOff, 50, 110);
     fill(colorTOff, 50, 110);
     for (var i = 0; i < timezone.length; i++) {
-        let x = posTOff + timezone.charCodeAt(i) * cos(timezone.charCodeAt(i));
-        let y = posTOff + timezone.charCodeAt(i) * sin(timezone.charCodeAt(i));
-        ellipse(x, y, 5);
+        let x = posTOff + c * 0.005 * timezone.charCodeAt(i) * cos(timezone.charCodeAt(i));
+        let y = posTOff + c * 0.005 * timezone.charCodeAt(i) * sin(timezone.charCodeAt(i));
+        ellipse(x, y, 0.025 * c);
         line(x, y, posTOff, posTOff);
     }
 
@@ -389,7 +393,7 @@ function constellation(fingerprint) {
 
     //localStorage
     if (fp['storage_local'])
-        ellipse(140, -155, 7, 7);
+        ellipse(c * 0.7, -c * 0.75, c * 0.035);
 
     //indexedDb
     if (fp['indexedDb'])
@@ -397,11 +401,11 @@ function constellation(fingerprint) {
 
     //addBehavior
     if (fp['addBehavior'])
-        asterisk(150, -140, 10);
+        asterisk(c * 0.75, -c * 0.7, c * 0.05);
 
     //openDatabase
     if (fp['openDatabase'])
-        asterisk(120, -120, 20)
+        asterisk(c * 0.6, -c * 0.6, c * 0.1);
 
     //cpuClass
 
@@ -420,19 +424,19 @@ function constellation(fingerprint) {
             let y = c * sin(platform.charCodeAt(i));
             vertex(x, y);
         }
-        ellipse(c * cos(platform.charCodeAt(3)), c * sin(platform.charCodeAt(3)), 20);
+        ellipse(c * cos(platform.charCodeAt(3)), c * sin(platform.charCodeAt(3)), c * 0.1);
         if (fp['indexedDB']) {
             strokeWeight(3)
-            ellipse(c * cos(platform.charCodeAt(2)), c * sin(platform.charCodeAt(2)), 20);
+            ellipse(c * cos(platform.charCodeAt(2)), c * sin(platform.charCodeAt(2)), c * 0.1);
         }
         if (fp['addBehavior']) {
             strokeWeight(1);
-            ellipse(c * cos(platform.charCodeAt(1)), c * sin(platform.charCodeAt(1)), 20);
+            ellipse(c * cos(platform.charCodeAt(1)), c * sin(platform.charCodeAt(1)), c * 0.1);
         }
         strokeWeight(1);
         if (fp['openDatabase']) {
             fill(255);
-            ellipse(c * cos(platform.charCodeAt(0)), c * sin(platform.charCodeAt(0)), 20);
+            ellipse(c * cos(platform.charCodeAt(0)), c * sin(platform.charCodeAt(0)), c * 0.1);
         }
         noFill();
     }
@@ -467,7 +471,7 @@ function constellation(fingerprint) {
     if (allFonts[22])
         rotate(radians(allFonts[22].charCodeAt(1)));
     if (adBlock)
-        asterisk(100 * cos(adBlock), 100 * sin(adBlock), 7);
+        asterisk(c / 2 * cos(adBlock), c / 2 * sin(adBlock), c * 0.035);
     pop()
 
     //hasLiedLanguages
@@ -481,18 +485,18 @@ function constellation(fingerprint) {
     //touchSupport
     push()
     noStroke();
-    translate(150 * cos(radians(160)), 150 * sin(radians(160)))
+    translate(0.75 * c * cos(radians(160)), 0.75 * c * sin(radians(160)))
     rotate(radians(platform.charCodeAt(0)));
     if (fp['touchSupport']) {
         let touchSupport = fp['touchSupport'].split(',');
         // touchSupport = [0,"true","true"]; // debug
         fill(220, 10, 110);
         if (touchSupport[1] == "true")
-            rect(0, 0, 20, 20)
+            rect(0, 0, 0.1 * c, 0.1 * c)
         noFill();
         stroke(110, 110, 220);
         if (touchSupport[2] == "true")
-            rect(10, 10, 20, 20)
+            rect(10, 10, 0.1 * c, 0.1 * c)
         pop()
     }
 
@@ -506,7 +510,7 @@ function constellation(fingerprint) {
     push();
     rotate(radians(audio));
     fill(255);
-    moon(c * cos(audio), c * sin(audio), 30);
+    moon(c * cos(audio), c * sin(audio), 0.15 * c);
     pop();
 
 
@@ -522,7 +526,7 @@ function constellation(fingerprint) {
         rotate(radians(enumerateDevices.length));
         if (enumerateDevices.length < 3 || enumerateDevices == "not available") {
             fill(255)
-            equiTriangle(0, 0, 30);
+            equiTriangle(0, 0, c * 0.15);
         }
         else {
             for (var i = 0; i < enumerateDevices.length; i++) {
@@ -530,11 +534,13 @@ function constellation(fingerprint) {
                 for (var j = 0; j < enumerateDevices[i].length; j++) {
                     a1 = a1 + enumerateDevices[i].charCodeAt(j);
                 }
-                line(enumerateDevices.length * 10 / 2 - i * 10, -a1 / c, 0, 0);
+                let x_start = enumerateDevices.length - i*5;
+                let y_start = -a1 /c;
+                line(x_start, y_start, 0, 0);
                 if (enumerateDevices[i].charCodeAt(22) > 60)
                     fill(255);
                 if (enumerateDevices[i].charCodeAt(31) > 60)
-                    ellipse(enumerateDevices.length * 10 / 2 - i * 10, -a1 / c, 5);
+                    ellipse(x_start, y_start, c * 0.025);
             }
         }
         pop();
