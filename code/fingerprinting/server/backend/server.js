@@ -95,7 +95,7 @@ k_fp_c.createIndex({ key: 1, value: 1 }, { unique: true });
 var express = require("express");
 const session = require("express-session");
 const app = express();
-app.use(bodyParser());
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(
   session({
     secret: "fingerprintislife",
@@ -226,6 +226,9 @@ app
       return res.json(req.session.fp);
     }
     function keyValueFP(fp, key) {
+      if (!fp) {
+        return null;
+      }
       for (let p of fp) {
         if (p.key == key) {
           return p.value;
