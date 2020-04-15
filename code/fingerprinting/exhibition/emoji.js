@@ -45,7 +45,7 @@ ws.onmessage = (m) => {
 };
 function drawEmoji(emoji, x, y, width, height) {
   ct.font = "100px Time";
-  ct.fillStyle = "rgba(0, 0, 0, 0.1)";
+  ct.fillStyle = "rgba(0, 0, 0, 0.05)";
   ct.strokeStyle = ct.fillStyle;
   ct.textAlign = "center";
   const xRatio = window.innerWidth / width;

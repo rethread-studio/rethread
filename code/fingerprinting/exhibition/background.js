@@ -25,7 +25,9 @@ function setup() {
     height = windowHeight;
     canvas = createCanvas(width, height);
     // canvas.parent('main_header');
-    canvas.style('display', 'block');
+    if (getCurrentPage () != 'welcome') {
+        canvas.style('display', 'none');
+    }
     canvas.position(0, 0);
     canvas.style("z-index", "-1");
     canvas.id("bgCanvas");
