@@ -23,35 +23,27 @@ function EmojiParticle (emoji, me) {
     ct.font = "100px Time";
     ct.textAlign = "center";
 
-    ct.fillStyle = "rgba(255, 255, 255, 0.05)";
+    ct.globalAlpha = 0.05;
+    ct.fillStyle = "rgb(255, 255, 255)";
     for (let coord of this.history) {
       if (this.image) {
         img.src = this.image;
-        ct.globalAlpha = 0.05;
+        
         ct.drawImage(img, coord[0], coord[1]);
-        ct.globalAlpha = 1;
       } else {
         ct.fillText(this.emoji, coord[0], coord[1] + 50)
       }
     }
-    
-    ct.fillStyle = "rgba(125, 125, 125, 0.2)";
+    ct.globalAlpha = 0.2;
+    ct.fillStyle = "rgb(125, 125, 125)";
     ct.strokeStyle = ct.fillStyle;
-    if (me) {
-      ct.beginPath();
-      ct.arc(this.x, this.y, 55, 0, 2*Math.PI);
-      ct.fill();
-    }
     if (this.image) {
       img.src = this.image;
-      ct.globalAlpha = 0.2;
       ct.drawImage(img, this.x, this.y);
-      ct.globalAlpha = 1;
     } else {
       ct.fillText(this.emoji, this.x, this.y + 50);
     }
-    ct.fillText(this.emoji, this.x, this.y + 50);
-    
+    ct.globalAlpha = 1;
   }
 }
 
