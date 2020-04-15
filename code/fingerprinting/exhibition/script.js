@@ -1,12 +1,11 @@
+loadFont()
 let hasConsented = false;
-
-if (localStorage.getItem('hasConsented') != null) {
-    hasConsented = localStorage.getItem('hasConsented');
-}
-
-if (hasConsented) {
-    $("body").toggleClass('mainPage');
-}
+getSession((session) => {
+  hasConsented = session.terms;
+  if (hasConsented) {
+    $("body").toggleClass("mainPage");
+  }
+});
 
 const pages = ['welcome', 'consentInfo', 'myFp', 'main']
 
@@ -126,10 +125,11 @@ function noThanksAgainButton() {
     $("#consentInfo").hide();
 }
 function consentInfoButton() {
-    myFpPage();
-    hasConsented = true;
-    localStorage.setItem('hasConsented', true)
-    // Go to fingerprint with animation
+    acceptCondition(() => {
+        hasConsented = true;
+        // Go to fingerprint with animation
+        myFpPage();
+    })
 }
 function mainButton() {
     displayPage('main');
