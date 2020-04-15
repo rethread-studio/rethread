@@ -100,17 +100,18 @@ app.use(
     secret: "fingerprintislife",
     resave: false,
     saveUninitialized: true,
-    cookie: { sameSite: true, secure: true },
+    cookie: { sameSite: 'None', secure: true },
   })
 );
 app.use(methodOverride("X-HTTP-Method-Override"));
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "https://rethread.art/");
-  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Origin", "https://rethread.art");
+  res.header("Access-Control-Allow-Headers", "Access-Control-Allow-Origin,Authorization,Origin,x-requested-with,Content-Type,Content-Range,Content-Disposition,Content-Description");
   res.header("Access-Control-Allow-Credentials", true);
   res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
   next();
 });
+app.set('trust proxy', 1)
 
 const port = 80;
 
