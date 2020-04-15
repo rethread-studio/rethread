@@ -28,7 +28,6 @@ function EmojiParticle (emoji, me) {
     for (let coord of this.history) {
       if (this.image) {
         img.src = this.image;
-        
         ct.drawImage(img, coord[0], coord[1]);
       } else {
         ct.fillText(this.emoji, coord[0], coord[1] + 50)
@@ -60,6 +59,7 @@ const ct = emojis_c.getContext("2d");
 let emoji = null;
 const ws = new WebSocket(HOST.replace("http", "ws"));
 let myEmoji = null;
+
 ws.onopen = () => {
   getEmoji((e) => {
     emoji = e;
@@ -75,7 +75,7 @@ ws.onopen = () => {
     ctx.fillText(emoji, canvas.width / 2, canvas.height);
     ws.send(JSON.stringify({ emoji, image: canvas.toDataURL() }));
   });
-  document.addEventListener("mousemove", (event) => {
+  const handle = (event) => {
     if (myEmoji) {
       myEmoji.update(event.clientX, event.clientY, window.innerWidth, window.innerHeight)
     }
@@ -88,7 +88,9 @@ ws.onopen = () => {
         height: window.innerHeight,
       })
     );
-  });
+  }
+  document.addEventListener("mousemove", handle);
+  document.addEventListener("touchmove", handle);
 };
 setInterval(() => {
   ct.clearRect(0, 0, emojis_c.width, emojis_c.height);
