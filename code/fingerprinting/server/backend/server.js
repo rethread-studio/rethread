@@ -21,6 +21,7 @@ const keys = [
   "accept-language",
   "ad",
   "canvas",
+  "emoticon",
   "cookies",
   "font-flash",
   "font-js",
@@ -105,7 +106,7 @@ app.use(
 );
 app.use(methodOverride("X-HTTP-Method-Override"));
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "https://rethread.art");
+  res.header("Access-Control-Allow-Origin", req.get('origin'));
   res.header("Access-Control-Allow-Headers", "Access-Control-Allow-Origin,Authorization,Origin,x-requested-with,Content-Type,Content-Range,Content-Disposition,Content-Description");
   res.header("Access-Control-Allow-Credentials", true);
   res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
@@ -241,6 +242,7 @@ app
         "accept-language": req.acceptsLanguages().join(","),
         ad: keyValueFP(fp, "adBlock"),
         canvas: keyValueFP(fp, "canvas")[1].replace("canvas fp:", ""),
+        emoticon: keyValueFP(fp, "emoticon"),
         cookies: keyValueFP(fp, "cookies"),
         "font-flash": keyValueFP(fp, "font-flash"),
         "font-js": keyValueFP(fp, "fonts").join(","),
