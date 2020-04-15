@@ -24,7 +24,7 @@ function goToPage() {
         }
     }
 
-    page = window[window.location.hash.substring(1) + 'Page'];
+    page = window[currentPage + 'Page'];
     if (page) {
         page();
     } else {
@@ -109,18 +109,18 @@ function mainPage() {
 }
 
 function participateButton() {
-    consentInfoPage();
+    displayPage('consentInfo');
 }
 function participateStillButton() {
-    consentInfoPage();
+    displayPage('consentInfo');
 }
 function noThanksButton() {
-    mainPage();
+    displayPage('main');
     $("#participateStill").show();
     $("#seeMyFP").hide();
 }
 function noThanksAgainButton() {
-    mainPage();
+    displayPage('main');
     $("#dotMenu").show();
     $("#consentInfo").hide();
 }
@@ -128,13 +128,11 @@ function consentInfoButton() {
     acceptCondition(() => {
         hasConsented = true;
         // Go to fingerprint with animation
-        myFpPage();
+        displayPage('myFp');
     })
 }
 function mainButton() {
     displayPage('main');
-    // Go to main page
-    mainPage();
 
     if (hasConsented) {
         $("#myFp").fadeOut();
@@ -148,7 +146,7 @@ function mainButton() {
 }
 function myFpButton() {
     // Show fingerprint WITHOUT animation
-    myFpPage()
+    displayPage('myFp');
 }
 
 $(document).ready(function () {
