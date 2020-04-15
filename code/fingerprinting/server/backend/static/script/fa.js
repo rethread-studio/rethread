@@ -1,5 +1,5 @@
 const HOST = "https://fp.durieux.me";
-const fonts = [
+const fontsToTest = [
   ".Aqua Kana",
   ".Helvetica LT MM",
   ".Times LT MM",
@@ -1048,7 +1048,7 @@ var options = {
   fonts: {
     extendedJsFonts: false,
     swfPath: "script/FontList.swf",
-    userDefinedFonts: fonts,
+    userDefinedFonts: fontsToTest,
   },
   excludes: {
     fontsFlash: false,
@@ -1101,7 +1101,7 @@ function loadFont() {
   var ctx = canvas.getContext("2d");
 
   timedChunk(
-    fonts,
+    fontsToTest,
     (font) => {
       ctx.font = "1px " + font;
       ctx.fillText("a", 0, 0);
