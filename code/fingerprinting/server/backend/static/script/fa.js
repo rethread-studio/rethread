@@ -1044,6 +1044,22 @@ const fontsToTest = [
   "mry_KacstQurn",
   "ori1Uni",
 ];
+
+function isConnected(callback) {
+  $.get(HOST + '/api/session/connected', (res) => {
+    callback(res)
+  })
+}
+function acceptedCondition(callback) {
+  $.get(HOST + '/api/session/accepted', (res) => {
+    callback(res)
+  })
+}
+function acceptCondition(callback) {
+  $.post(HOST + '/api/session/accepted', (res) => {
+    callback(res)
+  })
+}
 var options = {
   fonts: {
     extendedJsFonts: false,
