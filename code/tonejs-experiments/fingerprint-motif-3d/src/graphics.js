@@ -5,10 +5,13 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass';
 import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+import * as Index from './index.js';
 
 import * as Global from './globals.js';
 import * as Fingerprint from './fingerprint.js';
 import * as Synthesis from './synthesis.js';
+
+var TIME_BETWEEN_CONNECTED_DEVICES_UPDATE = 30.0;
 
 var raycaster;
 var controls;
@@ -358,6 +361,7 @@ let spaceRoom = {
     lightColor: new THREE.Color(0xdddddd),
     darkColor: new THREE.Color(0x555555),
     spaceSection: "currently connected devices",
+    timeUntilConnectedUpdate: 30,
 
     init: function (room) {
         fogFade = 1.0;
@@ -521,7 +525,7 @@ let spaceRoom = {
         // Initiate fingerprints if the data has been loaded from the server
         if (spaceRoom.fingerprintsAdded == false && Global.data.loadedData == true && Global.data.loadedLocal && Global.data.loadedConnected) {
 
-            room.connectedSphereRadius = 20 + (Global.data.connectedFingerprints.length * 3);
+            room.connectedSphereRadius = 30 + Math.pow(Global.data.connectedFingerprints.length * 40, 1/3);
             // Its handy to keep the squared radius for distance calculations
             room.connectedSphereRadius2 = room.connectedSphereRadius * room.connectedSphereRadius;
             sphereScale = 2.0;
@@ -710,6 +714,12 @@ let spaceRoom = {
 
                 room.localFingerprint.setPosition(mirrorPosition);
             }
+
+            room.timeUntilConnectedUpdate -= delta;
+            if(room.timeUntilConnectedUpdate <= 0) {
+                room.timeUntilConnectedUpdate = TIME_BETWEEN_CONNECTED_DEVICES_UPDATE;
+                Index.refreshConnectedFingerPrints();
+            }
             
 
             // Move light to where the camera is
@@ -770,9 +780,18 @@ let spaceRoom = {
         }
         
     },
+    removeFingerprint: function(room, fprint) {
+        for(let i = 0; i < room.fingerprints.length; i++) {
+            if (fprint.rawFingerprint == room.fingerprints[i]) {
+                room.fingerprints[i].cleanUpSpace(scene);
+                room.fingerprints.splice(i, 1);
+                i--;
+            }
+        }
+    },
     cleanUp: function (room) {
         for (let fprint of spaceRoom.fingerprints) {
-            fprint.motif.stopSpaceLoop();
+            fprint.cleanUpSpace(scene);
         }
         spaceRoom.fingerprintsAdded = false;
         spaceRoom.fingerprints = [];
@@ -919,6 +938,10 @@ let portalRoom = {
     }
 }
 
+function removeFingerprintFromRoom(fprint) {
+    currentRoom.removeFingerprint(currentRoom, fprint);
+}
+
 function getNewSpacePortal() {
     let portalGeometry = new THREE.PlaneGeometry(14, 14, 1, 1);
     let portalMaterial = new THREE.MeshBasicMaterial({ color: 0xccccff, side: THREE.FrontSide, map: textures.space });
@@ -982,4 +1005,5 @@ export { init_three,
     fogFade, 
     setFogFade,
     updateSceneFog,
+    removeFingerprintFromRoom,
  }; 

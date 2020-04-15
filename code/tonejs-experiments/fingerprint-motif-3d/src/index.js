@@ -9,33 +9,33 @@ Synthesis.init_tone();
 Graphics.init_three();
 Graphics.animate();
 
-// Get the data
-$.ajax({
-    type: "GET",
-    url: "data/amiunique-fp.min.csv",
-    dataType: "text",
-    success: function(data) {
-      const t = data.split("\n");
-      Global.data.headers = t[0].split(",");
-      Global.data.rawFingerprintStrings = t.slice(1);
-      // Convert to the same format as we're using for the dedicated server fingerprints
-      Global.data.rawFingerprints = [];
-      for (let l of Global.data.rawFingerprintStrings) {
-        const vs = l.split(",");
-        let newArr = [];
-        for(let s of vs) {
-          newArr.push(Number(s));
-        }
-        Global.data.rawFingerprints.push(newArr);
-      }
-      for(let i = 0; i < 200; i++) {
-        let fingerprint = new Fingerprint.Fingerprint(Global.data.rawFingerprints[i], Fingerprint.FPrintTypes.old);
-        Global.data.fingerprints.push(fingerprint);
-      }
+// Get the data from the amiunique dataset
+// $.ajax({
+//     type: "GET",
+//     url: "data/amiunique-fp.min.csv",
+//     dataType: "text",
+//     success: function(data) {
+//       const t = data.split("\n");
+//       Global.data.headers = t[0].split(",");
+//       Global.data.rawFingerprintStrings = t.slice(1);
+//       // Convert to the same format as we're using for the dedicated server fingerprints
+//       Global.data.rawFingerprints = [];
+//       for (let l of Global.data.rawFingerprintStrings) {
+//         const vs = l.split(",");
+//         let newArr = [];
+//         for(let s of vs) {
+//           newArr.push(Number(s));
+//         }
+//         Global.data.rawFingerprints.push(newArr);
+//       }
+//       for(let i = 0; i < 200; i++) {
+//         let fingerprint = new Fingerprint.Fingerprint(Global.data.rawFingerprints[i], Fingerprint.FPrintTypes.old);
+//         Global.data.fingerprints.push(fingerprint);
+//       }
       
-      Global.data.loadedData = true;
-    }
-  });
+//       Global.data.loadedData = true;
+//     }
+//   });
 let headers = [
   "host",
   "dnt",
@@ -103,36 +103,81 @@ getConnectedFingerPrints(function(data) {
     Global.data.connectedFingerprints.push(new Fingerprint.Fingerprint(rawFingerprint, Fingerprint.FPrintTypes.connected));
   }
   Global.data.loadedConnected = true;
-})
+});
+
+/// Function called repeatedly to add new and remove old connected users
+function refreshConnectedFingerPrints() {
+  getConnectedFingerPrints(function(data) {
+    console.log("Connected users:");
+    console.log(data);
+    Global.data.rawConnectedFingerprintsObjects = data.normalized;
+    Global.data.rawConnectedFingerprints = [];
+    // Convert into arrays of numbers
+    for (let datapoint of Global.data.rawConnectedFingerprintsObjects) {
+      let newArr = [];
+      for(let h of headers) {
+        newArr.push(Number(datapoint[h]));
+      }
+      Global.data.rawConnectedFingerprints.push(newArr);
+    }
+    // Remove any fingerprint that has disconnected
+    for(let i = 0; i < Global.data.connectedFingerprints.length; i++) {
+      if(Global.data.connectedFingerprints[i].isInRawFingerprintList(Global.data.rawConnectedFingerprints) != true) {
+        let removed = Global.data.connectedFingerprints.splice(i, 1);
+        Graphics.removeFingerprintFromRoom(removed[0]);
+        i--;
+      }
+    }
+    // Add any new fingerprints that may have connected
+    for(let rawPrint of Global.data.rawConnectedFingerprints) {
+      let printFound = false;
+      for(let i = 0; i < Global.data.connectedFingerprints.length; i++) {
+        if(rawPrint == Global.data.connectedFingerprints[i]) {
+          printFound = true;
+        }
+      }
+      if(!printFound) {
+        // Create a new fingerprint
+        Global.data.connectedFingerprints.push(new Fingerprint.Fingerprint(rawPrint, Fingerprint.FPrintTypes.connected));
+      }
+    }
+  });
+}
   
 
 
-// getAllNormalizedFingerPrints(function(data) {
-//   console.log(data);
-//   // The data is an array of objects with the following fields:
-//   // _id, host, dnt, user-agent, accept, accept-encoding, accept-language, 
-//   // ad, canvas, cookies, font-flash, font-js, language-flash, platform-flash, 
-//   // languages-js, platform, plugins, screen_width, screen_height, screen_depth, 
-//   // storage_local, storage_session, timezone, userAgent-js, webGLVendor, webGLRenderer
-//   
-//   
-//   Global.data.rawFingerprintsObjects = data;
-//   Global.data.rawFingerprints = [];
-//   // Convert into arrays of numbers
-//   for (let datapoint of Global.data.rawFingerprintsObjects) {
-//     let newArr = [];
-//     for(let h of headers) {
-//       newArr.push(Number(datapoint[h]));
-//     }
-//     Global.data.rawFingerprints.push(newArr);
-//   }
-//   for(let i = 0; i < 200; i++) {
-//     Fingerprint.generateRandomFingerPrint();
-//   }
-//   console.log(JSON.stringify(Global.data.rawFingerprints[10]));
-//   console.log(JSON.stringify(Global.data.fingerprints[10]));
-//   Global.data.loadedData = true;
-// });
+getAllNormalizedFingerPrints(function(data) {
+  console.log(data);
+  // The data is an array of objects with the following fields:
+  // _id, host, dnt, user-agent, accept, accept-encoding, accept-language, 
+  // ad, canvas, cookies, font-flash, font-js, language-flash, platform-flash, 
+  // languages-js, platform, plugins, screen_width, screen_height, screen_depth, 
+  // storage_local, storage_session, timezone, userAgent-js, webGLVendor, webGLRenderer
+  
+  
+  Global.data.rawFingerprintsObjects = data;
+  Global.data.rawFingerprints = [];
+  // Convert into arrays of numbers
+  for (let datapoint of Global.data.rawFingerprintsObjects) {
+    let newArr = [];
+    for(let h of headers) {
+      newArr.push(Number(datapoint[h]));
+    }
+    Global.data.rawFingerprints.push(newArr);
+  }
+  // for(let i = 0; i < 200; i++) {
+  //   Fingerprint.generateRandomFingerPrint();
+  // }
+  for(let i = 0; i < 200; i++) {
+      let fingerprint = new Fingerprint.Fingerprint(Global.data.rawFingerprints[i], Fingerprint.FPrintTypes.old);
+      Global.data.fingerprints.push(fingerprint);
+  }
+  console.log(JSON.stringify(Global.data.rawFingerprints[10]));
+  console.log(JSON.stringify(Global.data.fingerprints[10]));
+  Global.data.loadedData = true;
+});
+
+
 
 // Dot Menu
 
@@ -156,10 +201,4 @@ window.onclick = function (event) {
   }
 }
 
-/// Function called repeatedly to add new and remove old connected users
-function refreshConnectedFingerPrints() {
-  getConnectedFingerPrints(function(data) {
-    console.log("Connected users:");
-    console.log(data);
-  })
-}
+export { refreshConnectedFingerPrints }

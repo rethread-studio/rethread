@@ -211,7 +211,7 @@ class Fingerprint {
         this.rawFingerprint = rawFingerprint;
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
         this.color = new THREE.Color();
-        this.color.setHSL((this.fingerprintSum % 1000)/1000, 0.6, 0.55);
+        this.color.setHSL(((this.fingerprintSum * 73) % 1000)/1000, 0.6, 0.55);
         // console.log("new fingerprint with sum " + this.fingerprintSum + " and raw fingerprint " + JSON.stringify(this.rawFingerprint));
         this.activation = 0.0;
         this.synth = undefined;
@@ -242,22 +242,28 @@ class Fingerprint {
         this.updateMotif();
         
     }
+    cleanUpSpace(scene) {
+        scene.remove(this.mesh);
+        this.motif.stopSpaceLoop();
+        this.returnSynths();
+    }
     generateFingerprintRoom() {
         let newRoom = {};
         newRoom.fingerprint = this;
         newRoom.init = function (room) {
-            Graphics.newScene(new THREE.Color(0x333333), new THREE.FogExp2(0xfffefe, 0.01));
-            Graphics.setFogFade(1.0);
+            Graphics.newScene(new THREE.Color(0x000000), new THREE.FogExp2(0xfffefe, 0.01));
+            Graphics.setFogFade(0.0);
     
-            let lightColor = new THREE.Color().copy(room.fingerprint.color).multiplyScalar(1.5);
+            // let lightColor = new THREE.Color().copy(room.fingerprint.color).multiplyScalar(1.5);
+            let lightColor = new THREE.Color(0xffffff);
 
             room.light = new THREE.PointLight(lightColor, 0.5, 50);
             room.light.position.set(0.5, 1, 0.75);
             room.light.castShadow = true;
-            room.light.shadow.camera.far = 4000;
+            room.light.shadow.camera.far = 400;
             Graphics.scene.add(room.light);
     
-            if (room.fingerprint.rawFingerprint[1] == 1) {
+            // if (room.fingerprint.rawFingerprint[1] == 1) {
                 room.spotLight = new THREE.SpotLight(lightColor);
                 room.spotLight.castShadow = true;
                 room.spotLight.shadow.camera.far = 4000;
@@ -266,7 +272,7 @@ class Fingerprint {
                 room.spotLight.penumbra = 0.9;
                 Graphics.scene.add(room.spotLight);
                 Graphics.scene.add(room.spotLight.target);
-            }
+            // }
     
             // Place camera at origin
             Graphics.controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
@@ -296,7 +302,8 @@ class Fingerprint {
 
             // let geometry = new THREE.BoxGeometry(40, 60, 30);
             let geometry = new THREE.TetrahedronGeometry(60, 2)
-            let material = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide });
+            let material = new THREE.MeshStandardMaterial({ color: room.fingerprint.color, side: THREE.BackSide });
+            material.receiveShadow = true;
             let roomCube = new THREE.Mesh(geometry, material);
             roomCube.receiveShadow = true;
             room.roomCube = roomCube;
@@ -362,8 +369,8 @@ class Fingerprint {
 
             let noise;
 
-            noise = new Tone.Noise("pink").start();
-            var noiseGain = new Tone.Gain(0.2).connect(Synthesis.reverb).toMaster();
+            noise = new Tone.Noise("pink");
+            var noiseGain = new Tone.Gain(0.0).connect(Synthesis.reverb).toMaster();
             var chebyenv = new Tone.ScaledEnvelope({
                 "attack" : 5.0,
                 "decay" : 0.01,
@@ -388,6 +395,8 @@ class Fingerprint {
             var cheby = new Tone.Chebyshev(300).connect(noiseGain);
             noise.connect(cheby);
             room.chebyenv = chebyenv;
+
+            noise.start();
 
             // Pads
 
@@ -486,7 +495,7 @@ class Fingerprint {
     
         newRoom.update = function (cameraDirection, room, delta) {
 
-            Graphics.setFogFade(Graphics.fogFade * (1.0 - (delta*4)));
+            // Graphics.setFogFade(Graphics.fogFade * (1.0 - (delta*4)));
             Graphics.updateSceneFog();
     
             // Move the spotlight to the camera
@@ -544,6 +553,7 @@ class Fingerprint {
                 syn.dispose(syn);
             }
         }
+        newRoom.removeFingerprint = function(room) {}
 
         return newRoom;
     }
@@ -656,10 +666,22 @@ class Fingerprint {
         }   
     }
     returnSynths() {
-        Synthesis.returnFMSynth(this.synth.index);
-        this.synth = undefined;
-        Synthesis.returnNoiseSynth(this.noiseSynth.index);
-        this.noiseSynth = undefined;
+        if(this.synth != undefined) {
+            Synthesis.returnFMSynth(this.synth.index);
+            this.synth = undefined;
+        }
+        if(this.noiseSynth != undefined) {
+            Synthesis.returnNoiseSynth(this.noiseSynth.index);
+            this.noiseSynth = undefined;
+        }
+    }
+    isInRawFingerprintList(rawList) {
+        for(let rawPrint of rawList) {
+            if (this.rawFingerprint == rawPrint) {
+                return true;
+            }
+        }
+        return false;
     }
     updateSpace(relativeDistance, delta) {
         if(relativeDistance > 0 && relativeDistance < 100000) {
