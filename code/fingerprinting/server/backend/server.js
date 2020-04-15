@@ -100,16 +100,14 @@ app.use(
     secret: "fingerprintislife",
     resave: false,
     saveUninitialized: true,
-    cookie: {sameSite: true, secure: true},
+    cookie: { sameSite: true, secure: true },
   })
 );
 app.use(methodOverride("X-HTTP-Method-Override"));
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
+  res.header("Access-Control-Allow-Origin", "https://rethread.art/");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Credentials", true);
   res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
   next();
 });
@@ -188,7 +186,10 @@ app.post("/api/session/logout", async function (req, res) {
   res.send("ok");
 });
 app.get("/api/session/", async function (req, res) {
-  res.json({connected: req.session.fp != null, terms: req.session.accept === true});
+  res.json({
+    connected: req.session.fp != null,
+    terms: req.session.accept === true,
+  });
 });
 app.get("/api/session/connected", async function (req, res) {
   res.json(req.session.fp != null);
