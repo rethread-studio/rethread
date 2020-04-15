@@ -214,6 +214,7 @@ app
       return res.json(req.session.fp);
     } else {
       req.session.fp = await getRandomFingerPrint();
+      req.session.fp.random = true;
       req.session.fpId = req.session.fp.original._id;
       return res.json(req.session.fp);
     }
@@ -303,6 +304,7 @@ app
     const responseQuery = await n_fp_c.insertOne(normalized);
     const output = { original: fp, normalized };
     req.session.fp = output;
+    req.session.fp.random = false;
     req.session.fpId = responseQuery.insertedId.toString();
     connectedUser.add(req.session.fpId);
     res.json(output);
