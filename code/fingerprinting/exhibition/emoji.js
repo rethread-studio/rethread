@@ -90,7 +90,9 @@ ws.onopen = () => {
     );
   }
   document.addEventListener("mousemove", handle);
-  document.addEventListener("touchmove", handle);
+  document.addEventListener("touchmove", (event) => {
+    handle(event.touches[0]);
+  });
 };
 setInterval(() => {
   ct.clearRect(0, 0, emojis_c.width, emojis_c.height);
