@@ -1,5 +1,5 @@
 const bodyParser = require("body-parser");
-const methodOverride = require('method-override')
+const methodOverride = require("method-override");
 const ObjectId = require("mongodb").ObjectId;
 const MongoClient = require("mongodb").MongoClient;
 
@@ -59,7 +59,7 @@ const keys = [
   "device_vendor",
   "engine_version",
   "engine_name",
-  "cpu.architecture"
+  "cpu.architecture",
 ];
 
 const db = client.db(DB_NAME);
@@ -107,10 +107,13 @@ if (app.get("env") === "production") {
   app.set("trust proxy", 1);
   sess.cookie.secure = true;
 }
-app.use(methodOverride('X-HTTP-Method-Override'));
-app.use(function(req, res, next) {
+app.use(methodOverride("X-HTTP-Method-Override"));
+app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
   next();
 });
@@ -138,17 +141,47 @@ app.get("/api/fp/normalized", async function (req, res) {
 });
 
 app.get("/api/fp/conntected", async function (req, res) {
-  console.log(connectedUser)
-  var objIds = Array.from(connectedUser).map(function(id) { return ObjectId(id); });
+  console.log(connectedUser);
+  var objIds = Array.from(connectedUser).map(function (id) {
+    return ObjectId(id);
+  });
   const originals = await o_fp_c.find({ _id: { $in: objIds } }).toArray();
   const normalized = await n_fp_c.find({ _id: { $in: objIds } }).toArray();
   res.json({ originals, normalized });
 });
 
+async function getRandomFingerPrint(diff) {
+  let normalized = null;
+  if (diff) {
+    const query = [];
+    for (let key in diff.normalized) {
+      if (key == "_id") {
+        continue;
+      }
+      const v = {};
+      v[key] = { $ne: diff.normalized[key] };
+      query.push(v);
+    }
+    normalized = await n_fp_c
+      .aggregate([
+        {
+          $match: {
+            $or: query,
+          },
+        },
+        {
+          $sample: { size: 1 },
+        },
+      ])
+      .next();
+  } else {
+    normalized = await n_fp_c.aggregate([{ $sample: { size: 1 } }]).next();
+  }
+  const original = await o_fp_c.findOne({ _id: normalized._id });
+  return { original, normalized };
+}
 app.get("/api/fp/random", async function (req, res) {
-  const original = await o_fp_c.aggregate([{ $sample: { size: 1 } }]).next();
-  const normalized = await n_fp_c.findOne({ _id: original._id });
-  res.json({ original, normalized });
+  return res.json(await getRandomFingerPrint(req.session.fp));
 });
 
 app.get("/api/fp/count", async function (req, res) {
@@ -158,10 +191,28 @@ app.post("/api/session/logout", async function (req, res) {
   connectedUser.delete(req.session.fpId);
   res.send("ok");
 });
+app.get("/api/session/connected", async function (req, res) {
+  res.json(req.session.fp != null);
+});
+app.get("/api/session/accept", async function (req, res) {
+  req.session.accept = true;
+  if (req.session.fp) {
+    connectedUser.delete(req.session.fpId);
+    req.session.fp = null;
+  }
+  res.send("ok");
+});
 app
   .route("/api/fp/")
-  .get(function (req, res) {
-    res.send("Get a random book");
+  .get(async function (req, res) {
+    if (req.session.fp) {
+      connectedUser.add(req.session.fpId);
+      return res.json(req.session.fp);
+    } else {
+      req.session.fp = await getRandomFingerPrint();
+      req.session.fpId = req.session.fp.original._id;
+      return res.json(req.session.fp);
+    }
   })
   .put(async function (req, res) {
     if (req.session.fp) {
@@ -196,19 +247,22 @@ app
         screen_width: keyValueFP(fp, "screen_width"),
         screen_height: keyValueFP(fp, "screen_height"),
         screen_depth: keyValueFP(fp, "colorDepth"),
-        "pixelRatio": keyValueFP(fp, "pixelRatio"),
-        "hardwareConcurrency": keyValueFP(fp, "hardwareConcurrency"),
-        "availableScreenResolution": keyValueFP(fp, "availableScreenResolution").join(','),
-        "indexedDb": keyValueFP(fp, "indexedDb"),
-        "addBehavior": keyValueFP(fp, "addBehavior"),
-        "openDatabase": keyValueFP(fp, "openDatabase"),
-        "touchSupport": keyValueFP(fp, "touchSupport").join(','),
-        "audio": keyValueFP(fp, "audio"),
-        "enumerateDevices": keyValueFP(fp, "enumerateDevices").join(','),
+        pixelRatio: keyValueFP(fp, "pixelRatio"),
+        hardwareConcurrency: keyValueFP(fp, "hardwareConcurrency"),
+        availableScreenResolution: keyValueFP(
+          fp,
+          "availableScreenResolution"
+        ).join(","),
+        indexedDb: keyValueFP(fp, "indexedDb"),
+        addBehavior: keyValueFP(fp, "addBehavior"),
+        openDatabase: keyValueFP(fp, "openDatabase"),
+        touchSupport: keyValueFP(fp, "touchSupport").join(","),
+        audio: keyValueFP(fp, "audio"),
+        enumerateDevices: keyValueFP(fp, "enumerateDevices").join(","),
         storage_local: keyValueFP(fp, "localStorage"),
         storage_session: keyValueFP(fp, "sessionStorage"),
         timezone: keyValueFP(fp, "timezone"),
-        "timezoneOffset": keyValueFP(fp, "timezoneOffset"),
+        timezoneOffset: keyValueFP(fp, "timezoneOffset"),
         "userAgent-js": keyValueFP(fp, "userAgent"),
         webGLVendor: keyValueFP(fp, "webglVendorAndRenderer").split("~")[0],
         webGLRenderer: keyValueFP(fp, "webglVendorAndRenderer").split("~")[1],
@@ -216,12 +270,11 @@ app
       const UAParser = keyValueFP(fp, "UAParser");
       if (UAParser) {
         for (let key in UAParser) {
-          if (key == 'ua') {
-            continue
+          if (key == "ua") {
+            continue;
           }
           for (let pro in UAParser[key]) {
-            output[key + '_' + pro] = UAParser[key][pro]
-            console.log(key + '_' + pro)
+            output[key + "_" + pro] = UAParser[key][pro];
           }
         }
       }
