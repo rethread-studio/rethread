@@ -100,13 +100,9 @@ app.use(
     secret: "fingerprintislife",
     resave: false,
     saveUninitialized: true,
-    cookie: {},
+    cookie: {sameSite: true, secure: true},
   })
 );
-if (app.get("env") === "production") {
-  app.set("trust proxy", 1);
-  sess.cookie.secure = true;
-}
 app.use(methodOverride("X-HTTP-Method-Override"));
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");

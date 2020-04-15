@@ -1046,14 +1046,30 @@ const fontsToTest = [
 ];
 
 function getSession(callback) {
-  $.get(HOST + '/api/session/', (res) => {
-    callback(res)
-  })
+  $.ajax({
+    url: HOST + '/api/session/',
+    type: "get",
+    async: false,
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function (data) {
+      callback(data);
+    },
+  });
 }
 function acceptCondition(callback) {
-  $.post(HOST + '/api/session/accept', (res) => {
-    callback(res)
-  })
+  $.ajax({
+    url: HOST + '/api/session/accept',
+    type: "post",
+    async: false,
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function (data) {
+      callback(data);
+    },
+  });
 }
 var options = {
   fonts: {
@@ -1126,6 +1142,9 @@ function getRandomFingerPrint(callback) {
     url: HOST + "/api/fp/random",
     type: "get",
     async: false,
+    xhrFields: {
+      withCredentials: true
+    },
     success: function (data) {
       callback(data);
     },
@@ -1137,6 +1156,9 @@ function getAllNormalizedFingerPrints(callback) {
     url: HOST + "/api/fp/normalized",
     type: "get",
     async: false,
+    xhrFields: {
+      withCredentials: true
+    },
     success: function (data) {
       callback(data);
     },
@@ -1147,6 +1169,9 @@ window.onbeforeunload = function () {
   $.ajax({
     url: HOST + "/api/session/logout",
     type: "POST",
+    xhrFields: {
+      withCredentials: true
+    },
     async: true,
   });
 };
@@ -1156,6 +1181,9 @@ function getConnectedFingerPrints(callback) {
     url: HOST + "/api/fp/conntected",
     type: "get",
     async: false,
+    xhrFields: {
+      withCredentials: true
+    },
     success: function (data) {
       callback(data);
     },
@@ -1172,6 +1200,9 @@ function getFingerPrint(callback) {
           data: JSON.stringify(components),
           contentType: "application/json; charset=utf-8",
           async: false,
+          xhrFields: {
+            withCredentials: true
+          },
           success: function (data) {
             callback(data);
           },
@@ -1192,6 +1223,9 @@ function getFingerPrint(callback) {
         url: HOST + "/api/fp",
         type: "GET",
         async: false,
+        xhrFields: {
+          withCredentials: true
+        },
         success: function (data) {
           callback(data);
         },
