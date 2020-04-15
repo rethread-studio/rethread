@@ -77,48 +77,6 @@
             }
         }
 
-        $(document).ready(function () {
-
-            // // hide from start
-            // $("#galleryButton").hide();
-            // $("#seeAnother").hide();
-
-            // debug
-            // $("#info").hide();
-            // localStorage.clear();
-
-            if (localStorage.getItem('hasConsented')) {
-                $("#participate").hide();
-            }
-            else{
-                $("#participate").fadeIn();
-            }
-            $("#participate").click(function () {
-                window.location.href = "../index.html#consentInfo";
-            });
-
-            $("#seeArt").click(function () {
-                $("canvas").toggleClass('art');
-                $("#info").fadeOut();
-                $("#galleryButton").delay("2500").fadeIn();
-                if (localStorage.getItem('hasConsented')) {
-                    $("#seeAnother").hide();
-                }
-                else {
-
-                    $("#seeGallery").hide();
-                    $("#seeAnother").fadeIn();
-                }
-            });
-
-            $("#seeGallery").click(function () {
-                // $("canvas").toggleClass('compare');
-                $("#seeGallery").hide();
-                $("#seeAnother").show();
-            });
-
-        });
-
     </script>
 
 </head>

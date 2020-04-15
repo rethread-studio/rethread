@@ -1094,6 +1094,22 @@ var options = {
       },
     },
     {
+      key: 'emojis',
+      getData: (done, options) => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext("2d");
+        canvas.width = 650;
+        canvas.height = 220;
+
+        ctx.font = "100px Time";
+        ctx.fillStyle = "rgb(0, 0, 0)";
+        ctx.strokeStyle = ctx.fillStyle;
+        ctx.textAlign = "center";
+        ctx.fillText("😃 🦠 🎉 🚀 🖼️", canvas.width / 2, canvas.height / 2);
+        done(canvas.toDataURL())
+      }
+    },
+    {
       key: "screen_width",
       getData: function (done, options) {
         done(window.screen.width);

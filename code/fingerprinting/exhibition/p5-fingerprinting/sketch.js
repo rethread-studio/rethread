@@ -1,5 +1,11 @@
-// Check consent
-console.log(localStorage.getItem('hasConsented'));
+let hasConsented = false;
+getFingerPrint(fpDone);
+function fpDone(fingerprint){
+    // Check consent
+    console.log("fingerprint is random? " + fingerprint.random);
+    hasConsented = !fingerprint.random;
+    console.log("has consented? " + hasConsented);
+}
 
 let canvas, canvasC;
 let width = 0;
@@ -20,21 +26,21 @@ function setup() {
     background(0);
 
 
-    if (localStorage.getItem('hasConsented')) {
+    if (hasConsented) {
         // get my fingerprint
         getFingerPrint(fpCallback);
     }
     else {
         // no consent
         // get and show random fp
-        console.log("no consent")
+        console.log("no consent, use random")
         getRandomFingerPrint(noConsentCallback);
     }
 
 }
 
 $(document).ready(function () {
-    if (localStorage.getItem('hasConsented')) {
+    if (hasConsented) {
         $("#seeAnother").click(function () {
             // erase old one and show another
             push();
@@ -59,7 +65,7 @@ $(document).ready(function () {
             pop();
         });
     }
-    else {
+    else if (!hasConsented) {
 
         $("#seeAnother").click(function () {
             $("#seeAnother").hide();
@@ -73,7 +79,41 @@ $(document).ready(function () {
         });
 
     }
+
+// Show and hide stuff
+
+    if (hasConsented) {
+        $("#participate").hide();
+    }
+    else{
+        $("#participate").fadeIn();
+    }
+    $("#participate").click(function () {
+        window.location.href = "../index.html#consentInfo";
+    });
+
+    $("#seeArt").click(function () {
+        $("canvas").toggleClass('art');
+        $("#info").fadeOut();
+        $("#galleryButton").delay("2500").fadeIn();
+        if (hasConsented) {
+            $("#seeAnother").hide();
+        }
+        else {
+
+            $("#seeGallery").hide();
+            $("#seeAnother").fadeIn();
+        }
+    });
+
+    $("#seeGallery").click(function () {
+        // $("canvas").toggleClass('compare');
+        $("#seeGallery").hide();
+        $("#seeAnother").show();
+    });
+
 });
+
 
 
 function noConsentCallback(fingerprint) {
@@ -87,7 +127,6 @@ function noConsentCallback(fingerprint) {
         getRandomFingerPrint(noConsentCallback);
     }
     else {
-        console.log(fingerprint)
         translate(width / 4, height / 4);
         constellation(fingerprint);
     }
