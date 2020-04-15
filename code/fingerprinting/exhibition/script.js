@@ -1,10 +1,10 @@
 loadFont()
 let hasConsented = false;
 getSession((session) => {
-  hasConsented = session.terms;
-  if (hasConsented) {
-    $("body").toggleClass("mainPage");
-  }
+    hasConsented = session.terms;
+    if (hasConsented) {
+        $("body").toggleClass("blueBackground");
+    }
 });
 
 const pages = ['welcome', 'consentInfo', 'myFp', 'main']
@@ -36,9 +36,9 @@ window.addEventListener("hashchange", goToPage, false);
 function displayPage(name) {
     window.location.hash = name;
     if (hasConsented) {
-        $("body").addClass('mainPage');
+        $("body").addClass('blueBackground');
     } else {
-        $("body").removeClass('mainPage');
+        $("body").removeClass('blueBackground');
     }
 }
 
@@ -47,10 +47,14 @@ function welcomePage() {
 }
 
 function consentInfoPage() {
-    displayPage('consentInfo');
-    $("#main").fadeOut();
-    $("#welcome").fadeOut();
-    $("#consentInfo").fadeIn();
+
+    $("#bgCanvas").fadeOut(function () {
+        displayPage('consentInfo');
+        $("#main").fadeOut();
+        $("#welcome").fadeOut();
+        $("#consentInfo").fadeIn();
+    });
+
 }
 
 function generateFPText(fp) {
@@ -79,9 +83,9 @@ function myFpPage() {
     var parser = new UAParser();
     var result = parser.getResult();
     let currentText = "You are using <span class = 'fpHighlight'>"
-    + result.browser.name + "</span> with <span class = 'fpHighlight'>" + result.os.name + " </span>";
+        + result.browser.name + "</span> with <span class = 'fpHighlight'>" + result.os.name + " </span>";
 
-    const opts = {element: document.getElementById("fptext"), html: currentText}
+    const opts = { element: document.getElementById("fptext"), html: currentText }
     typewriter = setupTypewriter(opts)
     typewriter.type();
     getFingerPrint(async fp => {
@@ -115,9 +119,12 @@ function participateStillButton() {
     displayPage('consentInfo');
 }
 function noThanksButton() {
-    displayPage('main');
-    $("#participateStill").show();
-    $("#seeMyFP").hide();
+    $("#bgCanvas").fadeOut(function () {
+        displayPage('main');
+        $("#participateStill").show();
+        $("#seeMyFP").hide();
+    });
+
 }
 function noThanksAgainButton() {
     displayPage('main');

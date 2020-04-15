@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Ortica';
-    font-style: bold;
+    font-weight: bold;
     src: url('./fonts/ortica/Ortica-Bold.woff2') format('woff2'), /* Super Modern Browsers */
     url('./fonts/ortica/Ortica-Bold.woff') format('woff'), /* Pretty Modern Browsers */
     url('./fonts/ortica/Ortica-Bold.otf') format('truetype');
@@ -75,9 +75,14 @@ body {
     /* transition: background-color 0.5s ease; */
 }
 
-.mainPage {
+.blueBackground {
     background: midnightblue;
 }
+
+
+
+
+
 
 h1 {
     font-family: 'Ortica', sans-serif;
