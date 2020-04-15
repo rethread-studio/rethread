@@ -1045,13 +1045,8 @@ const fontsToTest = [
   "ori1Uni",
 ];
 
-function isConnected(callback) {
-  $.get(HOST + '/api/session/connected', (res) => {
-    callback(res)
-  })
-}
-function acceptedCondition(callback) {
-  $.get(HOST + '/api/session/accept', (res) => {
+function getSession(callback) {
+  $.get(HOST + '/api/session/', (res) => {
     callback(res)
   })
 }
@@ -1168,8 +1163,8 @@ function getConnectedFingerPrints(callback) {
 }
 
 function getFingerPrint(callback) {
-  isConnected((connected) => {
-    if (!connected) {
+  getSession((session) => {
+    if (session.connected == false && session.terms == true) {
       function fpCallback(components) {
         $.ajax({
           url: HOST + "/api/fp",

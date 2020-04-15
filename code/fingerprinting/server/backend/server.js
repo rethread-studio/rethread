@@ -191,6 +191,9 @@ app.post("/api/session/logout", async function (req, res) {
   connectedUser.delete(req.session.fpId);
   res.send("ok");
 });
+app.get("/api/session/", async function (req, res) {
+  res.json({connected: req.session.fp != null, terms: req.session.accept});
+});
 app.get("/api/session/connected", async function (req, res) {
   res.json(req.session.fp != null);
 });
