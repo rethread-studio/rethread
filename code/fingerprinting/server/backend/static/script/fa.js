@@ -1051,12 +1051,12 @@ function isConnected(callback) {
   })
 }
 function acceptedCondition(callback) {
-  $.get(HOST + '/api/session/accepted', (res) => {
+  $.get(HOST + '/api/session/accept', (res) => {
     callback(res)
   })
 }
 function acceptCondition(callback) {
-  $.post(HOST + '/api/session/accepted', (res) => {
+  $.post(HOST + '/api/session/accept', (res) => {
     callback(res)
   })
 }

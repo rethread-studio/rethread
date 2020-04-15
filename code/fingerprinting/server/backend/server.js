@@ -195,7 +195,7 @@ app.get("/api/session/connected", async function (req, res) {
   res.json(req.session.fp != null);
 });
 app.get("/api/session/accept", async function (req, res) {
-  res.json(req.session.accept != null);
+  res.json(req.session.accept === true);
 });
 app.post("/api/session/accept", async function (req, res) {
   req.session.accept = true;
