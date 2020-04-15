@@ -192,7 +192,7 @@ app.post("/api/session/logout", async function (req, res) {
   res.send("ok");
 });
 app.get("/api/session/", async function (req, res) {
-  res.json({connected: req.session.fp != null, terms: req.session.accept});
+  res.json({connected: req.session.fp != null, terms: req.session.accept === true});
 });
 app.get("/api/session/connected", async function (req, res) {
   res.json(req.session.fp != null);
