@@ -4,20 +4,22 @@
 		<meta charset=utf-8>
 		<title>browser fingerprint soundscape WIP</title>
 		<style>
-			body { margin: 0; }
-			canvas { width: 100%; height: 100% }
+			body { margin: 0; overflow: hidden; }
+			canvas { width: 100%; height: 100vh; margin: 0; }
 			#blocker {
 				position: absolute;
 				width: 100%;
-				height: 100%;
+				height: 100vh;
 				background-color: rgba(0,0,0,0.5);
+				margin: 0;
 			}
 			#hud-container {
 				position: absolute;
 				width: 100%;
 				height: 100%;
 				background-color: rgba(0,0,0,0.0);
-				display: none,
+				display: none;
+				margin: 0;
 			}
 
 			.instructions-overlay {
@@ -172,7 +174,7 @@
 		<div id="blocker">
 
 			<div class="instructions-overlay" id="instructions">
-				<span style="font-size:36px">Click to activate</span>
+				<span style="font-size:36px">Loading ...</span>
 				<br /><br />
 				Move: W<br/>
 				Look: MOUSE<br/>
@@ -180,7 +182,7 @@
 			</div>
 
 		</div>
-		<div class="dropdown">
+		<div class="dropdown" style="position: absolute;">
 			<button id="dropdown-menu-button" class="dropbtn"> </button>
 			<div id="myDropdown" class="dropdown-content">
 				<a href="../index.html">Back to artwork gallery</a>

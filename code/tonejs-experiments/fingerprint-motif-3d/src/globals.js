@@ -28,10 +28,23 @@ var sound = {
 var data = {
     loadedData: false,
     loadedLocal: false,
+    loadedConnected: false,
     fingerprints: [], // the Fingerprint objects created
     rawFingerprints: [], // the raw data strings
     headers: [],
+    localFingerprint: undefined,
+    localRawFingerprint: undefined,
     //localRawFingerprint is set in index.js
 }
 
-export { sound, data }
+var html = {
+    inactiveInstructions: `<span style="font-size:36px">Click to activate</span>
+    <br /><br />
+    Move: WS<br/>
+    Look: MOUSE<br/>
+    Enter portal: P<br/>
+    <br/><br/>
+    Explore browser fingerprints as sound objects in space. In your presence each fingerprint will reveal its uniqueness.`,
+}
+
+export { sound, data, html }

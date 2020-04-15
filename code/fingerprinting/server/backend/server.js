@@ -21,6 +21,7 @@ const keys = [
   "accept-language",
   "ad",
   "canvas",
+  "emojis",
   "cookies",
   "font-flash",
   "font-js",
@@ -94,7 +95,7 @@ k_fp_c.createIndex({ key: 1, value: 1 }, { unique: true });
 var express = require("express");
 const session = require("express-session");
 const app = express();
-app.use(bodyParser());
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(
   session({
     secret: "fingerprintislife",
@@ -105,7 +106,7 @@ app.use(
 );
 app.use(methodOverride("X-HTTP-Method-Override"));
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "https://rethread.art");
+  res.header("Access-Control-Allow-Origin", req.get('origin'));
   res.header("Access-Control-Allow-Headers", "Access-Control-Allow-Origin,Authorization,Origin,x-requested-with,Content-Type,Content-Range,Content-Disposition,Content-Description");
   res.header("Access-Control-Allow-Credentials", true);
   res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
@@ -225,6 +226,9 @@ app
       return res.json(req.session.fp);
     }
     function keyValueFP(fp, key) {
+      if (!fp) {
+        return null;
+      }
       for (let p of fp) {
         if (p.key == key) {
           return p.value;
@@ -241,6 +245,7 @@ app
         "accept-language": req.acceptsLanguages().join(","),
         ad: keyValueFP(fp, "adBlock"),
         canvas: keyValueFP(fp, "canvas")[1].replace("canvas fp:", ""),
+        emojis: keyValueFP(fp, "emojis"),
         cookies: keyValueFP(fp, "cookies"),
         "font-flash": keyValueFP(fp, "font-flash"),
         "font-js": keyValueFP(fp, "fonts").join(","),
