@@ -1,5 +1,5 @@
 import * as Global from './globals.js'
-import * as tone_init from './tone_init.js';
+import * as Synthesis from './synthesis.js';
 import * as THREE from 'three';
 import * as Tone from 'tone';
 import * as Graphics from './graphics.js';
@@ -19,6 +19,7 @@ class Motif {
     schedulingIds;
     loop;
     playbackMethod;
+    playing; // whether the motif is actively playing on the transport or paused
     constructor() {
         this.pitchSet = Global.sound.pitchSets[0];
         this.pitches = [];
@@ -34,6 +35,7 @@ class Motif {
         this.playbackMethod = playbackMethods[0];
         this.lastPitch = 0;
         this.repeatsLeft = 0;
+        this.playing = false;
     }
     schedulePlaybackSpace(synth, noiseSynth, transport, fingerprint) {
         if(this.loop != undefined) {
@@ -78,10 +80,18 @@ class Motif {
                                 dur,//dur16ToTransport(dur/2),
                                 time);
                         }
-                        fingerprint.setActivation(1.0);
-                        // material.color.setScalar(1.0);
+                        // Matching visual changes
+                        Tone.Draw.schedule(function(){
+                            //this callback is invoked from a requestAnimationFrame
+                            //and will be invoked close to AudioContext time
+                            fingerprint.setActivation(1.0);
+
+                        }, time) //use AudioContext time of the event
+                        
                     }, time);
                     motif.schedulingIds.push(id);
+
+                    
                 }
             }
             if(!playedNote && motif.repeatsLeft > 0) {
@@ -150,6 +160,19 @@ class Motif {
             console.log("Stopped space loop of motif");
         }
     }
+    pause() {
+        if(this.playing) {
+            // Only pause if we were playing
+            this.stopSpaceLoop();
+            this.playing = false;
+        }
+    }
+    play(synth, noiseSynth, transport, fingerprint) {
+        if(!this.playing) {
+            this.schedulePlaybackSpace(synth, noiseSynth, transport, fingerprint);
+            this.playing = true;
+        }
+    }
 }
 
 /// Converts a duration based on the number of 16th notes to the Tone.Transport format "bar:quarter:sixteenth"
@@ -191,6 +214,9 @@ class Fingerprint {
         this.color.setHSL((this.fingerprintSum % 1000)/1000, 0.6, 0.55);
         // console.log("new fingerprint with sum " + this.fingerprintSum + " and raw fingerprint " + JSON.stringify(this.rawFingerprint));
         this.activation = 0.0;
+        this.synth = undefined;
+        this.oscillatorType = 'sine';
+        this.synthType = 'sine';
     }
     setActivation(v) {
         this.activation = v;
@@ -210,11 +236,11 @@ class Fingerprint {
         scene.add(this.mesh);
         this.motif = new Motif();
         this.numParametersUsed = 0;
-        this.synth = tone_init.newSynth();
-        this.noiseSynth = tone_init.newNoiseSynth();
+        this.synth = undefined;
+        this.noiseSynth = undefined;
         objects.push(this.mesh);
         this.updateMotif();
-        this.motif.schedulePlaybackSpace(this.synth, this.noiseSynth, Tone.Transport, this);
+        
     }
     generateFingerprintRoom() {
         let newRoom = {};
@@ -269,7 +295,7 @@ class Fingerprint {
             room.shaderMaterial = shaderMaterial;
 
             // let geometry = new THREE.BoxGeometry(40, 60, 30);
-            let geometry = new THREE.TetrahedronGeometry(60, room.fingerprint.fingerprintSum % 4)
+            let geometry = new THREE.TetrahedronGeometry(60, 2)
             let material = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide });
             let roomCube = new THREE.Mesh(geometry, material);
             roomCube.receiveShadow = true;
@@ -293,8 +319,8 @@ class Fingerprint {
             Tone.Transport.loop = false;
             room.motif = room.fingerprint.motif;
 
-            Global.sound.globalSynthLPF.frequency.value = 500;
-            Global.sound.noiseEnv.triggerRelease();
+            Synthesis.globalSynthLPF.frequency.value = 500;
+            Synthesis.noiseEnv.triggerRelease();
 
             let sonarSynth = new Tone.FMSynth( {
                 harmonicity : 2 ,
@@ -319,7 +345,7 @@ class Fingerprint {
                     release : 0.5
                     }
                 }
-            ).connect(Global.sound.chorus).toMaster();
+            ).connect(Synthesis.chorus).toMaster();
             sonarSynth.volume.value = -24;
             room.sonarSynth = sonarSynth;
             let sonarLFO = new Tone.LFO('8n', -24, -18);
@@ -337,7 +363,7 @@ class Fingerprint {
             let noise;
 
             noise = new Tone.Noise("pink").start();
-            var noiseGain = new Tone.Gain(0.2).connect(Global.sound.reverb).toMaster();
+            var noiseGain = new Tone.Gain(0.2).connect(Synthesis.reverb).toMaster();
             var chebyenv = new Tone.ScaledEnvelope({
                 "attack" : 5.0,
                 "decay" : 0.01,
@@ -368,7 +394,7 @@ class Fingerprint {
             room.padSynths = [];
 
             for(let i = 0; i < 5; i++) {
-                let newSynth = tone_init.newPadSynth(20);
+                let newSynth = Synthesis.newPadSynth(20);
                 newSynth.pitchIndex = i;
                 newSynth.playing = false;
                 newSynth.midi = room.motif.pitchSet[newSynth.pitchIndex];
@@ -543,7 +569,7 @@ class Fingerprint {
             if (i == 0) {
                 
             } else if (i == 2) {
-                this.synth.envelope.attack = Math.max(Math.min(0.0001 * this.rawFingerprint[i], 0.2), 0.001);
+                this.motif.attack = Math.max(Math.min(0.0001 * this.rawFingerprint[i], 0.2), 0.001);
                 this.motif.setPlaybackMethod(this.rawFingerprint[i]);
                 // this.motif.pitchOffset = ((this.rawFingerprint[i] - 6) * 2) % 12;
                 
@@ -552,10 +578,10 @@ class Fingerprint {
                 // this.motif.startDurOffset = (this.rawFingerprint[i] * 6) % 32;
                 if(this.rawFingerprint[i] == 1) {
                     // this.synth.envelope.decay = 0.5;
-                    this.synth.type = 'triangle';
+                    this.synthType = 'triangle';
                 }
             } else if (i == 3) {
-                this.synth.oscillator.type = Global.sound.oscillators[this.rawFingerprint[i] % Global.sound.oscillators.length];
+                this.oscillatorType = Global.sound.oscillators[this.rawFingerprint[i] % Global.sound.oscillators.length];
             } else if (i - 4 < Math.floor((Global.data.headers.length - 4) / 2)) {
                 this.motif.addDur(this.rawFingerprint[i]);
             } else {
@@ -569,18 +595,29 @@ class Fingerprint {
         // this.motif.schedulingIds = [];
         this.motif.clear();
         this.motif.stopSpaceLoop();
+        // Return the synth
+        if(this.synth != undefined) {
+            Synthesis.returnFMSynth(this.synth.index);
+        }
     }
     setAmp(amp) {
-        this.synth.volume.value = amp2db(amp);
-        this.noiseSynth.volume.value = amp2db(amp);
+        if(this.synth != undefined) {
+            this.synth.synth.volume.value = amp2db(amp);
+        }
+        if(this.noiseSynth != undefined) {
+            this.noiseSynth.synth.volume.value = amp2db(amp);
+        }
     }
     setDb(db) {
-        this.synth.volume.value = db;
-        this.noiseSynth.volume.value = db * 1.1;
+        if(this.synth != undefined) {
+            this.synth.synth.volume.value = db;
+        }
+        if(this.noiseSynth != undefined) {
+            this.noiseSynth.synth.volume.value = db * 1.1;
+        }
     }
-    setPosition(pos) {
-        this.position.copy(pos);
-        this.mesh.position.copy(pos);
+    setPosition(givenPos) {
+        this.mesh.position.copy(givenPos);
     }
     getHoverText() {
         let text = "";
@@ -589,9 +626,40 @@ class Fingerprint {
         } else if (this.type == FPrintTypes.connected) {
             text = "currently connected, id: " + this.fingerprintSum;
         } else if (this.type == FPrintTypes.old) {
-            text = "old fingerprint, id: " + this.fingerprintSum;
+            text = "archived fingerprint, id: " + this.fingerprintSum;
         }
         return text;
+    }
+    requestNewSynths() {
+        // Get fm synth
+        if(this.synth == undefined) {
+            let synthResult = Synthesis.requestFMSynth();
+            if(synthResult != undefined) {
+                this.synth = synthResult;
+                this.synth.synth.type = this.synthType;
+                this.synth.synth.oscillator.type = this.oscillatorType;
+            } else {
+                console.log("No synth was received when requested");
+                this.synth = undefined;
+            }
+        }
+        
+        // Get noise synth
+        if(this.noiseSynth == undefined) {
+            let synthResult = Synthesis.requestNoiseSynth();
+            if(synthResult != undefined) {
+                this.noiseSynth = synthResult;
+            } else {
+                console.log("No synth was received when requested");
+                this.noiseSynth = undefined;
+            }
+        }   
+    }
+    returnSynths() {
+        Synthesis.returnFMSynth(this.synth.index);
+        this.synth = undefined;
+        Synthesis.returnNoiseSynth(this.noiseSynth.index);
+        this.noiseSynth = undefined;
     }
     updateSpace(relativeDistance, delta) {
         if(relativeDistance > 0 && relativeDistance < 100000) {
@@ -603,19 +671,41 @@ class Fingerprint {
             // this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2 / 10), 1.0));
             // this.synth.envelope.release = Math.max(0.5 - distance2 / 50, 0.002);
             let numParameters = Math.max(Math.floor(24 - (Math.max(relativeDistance - 1.0, 0) * 8.0)), 0);
-            if (numParameters != this.numParameters) {
+            if (numParameters != this.numParametersUsed) {
+                if(this.numParametersUsed > 0 && this.synth == undefined) {
+                    // if numParameters were 0 we have returned or not requested a synth
+                    this.requestNewSynths();
+                } else if (numParameters == 0) {
+                    // we go frome some parameters to none
+                    // return the synth to the pool
+                    if(this.synth != undefined) {
+                        this.returnSynths();
+                    }
+                }
                 this.numParametersUsed = numParameters;
                 // this.numParametersUsed = 24;
                 this.updateMotif();
             }
 
-            this.activation = this.activation * 0.9;
+            if(this.numParametersUsed > 0 && this.synth != undefined && this.noiseSynth != undefined) {
+                // This only schedules the motif if it wasn't already playing
+                this.motif.play(this.synth.synth, this.noiseSynth.synth, Tone.Transport, this);
+            } else {
+                // Pauses the motif if it was playing
+                this.motif.pause();
+            }
+
+            this.activation = this.activation * 0.8;
             this.material.color = this.color.clone().multiplyScalar(0.1 + (this.activation * 0.9));
+
+            if(this.type == FPrintTypes.connected) {
+                this.mesh.position.add(new THREE.Vector3((Math.random()-.5)*.1, (Math.random()-.5)*.1, (Math.random()-.5)*.1));
+            }
 
             // this.material.color.multiplyScalar(0.9);
             // this.material.uniforms.time.value += delta;
         } else {
-            console.log("Bad distance to fingerprint: " + relativeDistance);
+            console.log("Bad distance to fingerprint: " + relativeDistance + " position: " + JSON.stringify(this.mesh.position));
         }
         
     }

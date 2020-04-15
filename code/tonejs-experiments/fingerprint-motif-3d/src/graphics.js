@@ -8,7 +8,7 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 
 import * as Global from './globals.js';
 import * as Fingerprint from './fingerprint.js';
-import * as tone_init from './tone_init.js';
+import * as Synthesis from './synthesis.js';
 
 var raycaster;
 var controls;
@@ -34,6 +34,9 @@ var spotLight;
 var sphereScale;
 var sphere;
 
+var inactiveOverlay = document.getElementById("instructions");
+var inactiveHtml = "";
+
 var fogFade = 1.0; // to fade the fog between scenes, this is added to the fog value
 
 var mouse = new THREE.Vector2(0, 0);
@@ -44,6 +47,9 @@ var textures = {
     numLoaded: 0,
     totalNumTextures: 2,
 };
+
+var loadingDots = 1;
+var nextLoadingDot = 0.3;
 
 var hudElement;
 var hudContainer;
@@ -56,6 +62,23 @@ var currentRoom = {
     init: function (room) { },
     update: function (cameraDirection) { },
 };
+
+function resizeCanvasToDisplaySize() {
+    const canvas = renderer.domElement;
+    // look up the size the canvas is being displayed
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+  
+    // adjust displayBuffer size to match
+    if (canvas.width !== width || canvas.height !== height) {
+      // you must pass false here or three.js sadly fights the browser
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+  
+      // update any render target sizes here
+    }
+  }
 
 // init variables
 function init_three() {
@@ -113,7 +136,7 @@ function init_three() {
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    // renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
 
@@ -267,30 +290,35 @@ function init_three() {
 
     // RESIZING
 
-    window.addEventListener('resize', onWindowResize, false);
+    // window.addEventListener('resize', onWindowResize, false);
 }
 
-function onWindowResize() {
-    const canvas = renderer.domElement;
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+// function onWindowResize() {
+//     const canvas = renderer.domElement;
+//     camera.aspect = window.innerWidth / window.innerHeight;
+//     camera.updateProjectionMatrix();
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    // composer.setSize(canvas.width, canvas.height);
+//     // renderer.setSize(window.innerWidth, window.innerHeight);
+//     // composer.setSize(canvas.width, canvas.height);
 
-}
+// }
 
 function animate(now) {
     requestAnimationFrame(animate);
     // controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
 
+    resizeCanvasToDisplaySize()
+
     // PointerLockControl
 
+    var time = performance.now();
+    var delta = (time - prevTime) / 1000;
+
+    // Get the direction the camera is pointing in world coordinates
+    // Rotate to the direction we're looking (the camera always looks down its negative z-axis)
+    let cameraDirection = camera.getWorldDirection(new THREE.Vector3(0, 0, -1));
+
     if (controls.isLocked === true) {
-
-        var time = performance.now();
-        var delta = (time - prevTime) / 1000;
-
         // damping
         velocity.x -= velocity.x * 1.0 * delta;
         velocity.z -= velocity.z * 1.0 * delta;
@@ -301,8 +329,7 @@ function animate(now) {
         // direction.y = 0;
         // direction.normalize(); // this ensures consistent movements in all directions
 
-        // Rotate to the direction we're looking
-        let cameraDirection = camera.getWorldDirection(new THREE.Vector3(0, 0, -1));
+        
         // direction = cameraDirection.multiplyScalar(direction.z);
         direction.copy(cameraDirection).multiplyScalar(Number(moveForward) - Number(moveBackward));
 
@@ -310,14 +337,13 @@ function animate(now) {
 
         controls.getObject().position.x -= (velocity.x * delta);
         controls.getObject().position.y -= (velocity.y * delta);
-        controls.getObject().position.z -= (velocity.z * delta); // new behavior
-
-        currentRoom.update(cameraDirection, currentRoom, delta);
-
-        prevTime = time;
+        controls.getObject().position.z -= (velocity.z * delta);   
     }
+    currentRoom.update(cameraDirection, currentRoom, delta);
 
     renderer.render(scene, camera);
+
+    prevTime = time;
 }
 
 // **************************** ROOMS **************************
@@ -329,7 +355,6 @@ let spaceRoom = {
     objects: [],
     fingerprints: [],
     spaceFog: 0.02,
-    currentlyConnectedRadius2: 2000,
     lightColor: new THREE.Color(0xdddddd),
     darkColor: new THREE.Color(0x555555),
     spaceSection: "currently connected devices",
@@ -340,8 +365,6 @@ let spaceRoom = {
         scene = new THREE.Scene();
         scene.background = room.lightColor;
         scene.fog = new THREE.FogExp2(room.lightColor, room.spaceFog + fogFade);
-
-
 
         light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
         light.position.set(0.5, 1, 0.75);
@@ -359,27 +382,12 @@ let spaceRoom = {
         scene.add(spotLight);
         scene.add(spotLight.target);
 
-        var sphereRadius = 30;
-        sphereScale = 2.0;
-        var sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 32);
-        var sphereMaterial = new THREE.MeshStandardMaterial({
-            color: 0x222233,
-            side: THREE.BackSide,
-            wireframe: false,
-            transparent: true,
-            opacity: 0.8,
-            flatShading: true,
-            metalness: 1.0
-        });
-        sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        // scene.add(sphere);
-
         spaceRoom.initSound(spaceRoom);
     },
     initSound: function (room) {
         Tone.Transport.bpm.value = 120;
 
-        Global.sound.noiseEnv.triggerAttack();
+        Synthesis.noiseEnv.triggerAttack();
 
         let bassSynth = new Tone.MembraneSynth(
             {
@@ -396,7 +404,7 @@ let spaceRoom = {
                     attackCurve: "exponential"
                 }
             }
-        ).connect(Global.sound.longverb).toMaster();
+        ).connect(Synthesis.longverb).toMaster();
 
         let sonarSynth = new Tone.FMSynth({
             harmonicity: 2,
@@ -421,7 +429,7 @@ let spaceRoom = {
                 release: 0.5
             }
         }
-        ).connect(Global.sound.longverb).toMaster();
+        ).connect(Synthesis.longverb).toMaster();
         sonarSynth.volume.value = -12;
         spaceRoom.sonarPitch = Tone.Frequency.mtof(Global.sound.stablePitches[1] + 12);
 
@@ -430,8 +438,9 @@ let spaceRoom = {
 
         room.padSynths = [];
         room.pitchSet = Global.sound.pitchSets[0];
+        room.octave = 0;
         for(let i = 0; i < 5; i++) {
-            let newSynth = tone_init.newPadSynth(20);
+            let newSynth = Synthesis.newPadSynth(20);
             newSynth.pitchIndex = i;
             newSynth.playing = false;
             newSynth.midi = room.pitchSet[newSynth.pitchIndex];
@@ -457,7 +466,7 @@ let spaceRoom = {
                     if(room.padSynths[i].pitchIndex < 0) {
                         room.padSynths[i].pitchIndex += room.pitchSet.length;
                     }
-                    room.padSynths[i].midi = room.pitchSet[room.padSynths[i].pitchIndex];
+                    room.padSynths[i].midi = room.pitchSet[room.padSynths[i].pitchIndex] + (12 * room.octave);
                     // Transpose down an octave
                     if(Math.random() > 0.6) {
                         room.padSynths[i].midi -= 12;
@@ -510,25 +519,46 @@ let spaceRoom = {
     },
     update: function (cameraDirection, room, delta) {
         // Initiate fingerprints if the data has been loaded from the server
-        if (spaceRoom.fingerprintsAdded == false && Global.data.loadedData == true && Global.data.loadedLocal) {
-            
-            // Add the fingerprints to the room
-            let size = 50;
-            for (let i = 0; i < 20; i++) {
-                room.addAdditionalFingerprint(room, camera.position, 50);
-            }
-            // Set all the newly added fingerprints as current fingerprints for DEBUG
-            for(let i = 0; i < room.fingerprints.length; i++) {
-                room.fingerprints[i].type = Fingerprint.FPrintTypes.connected;
-            }
+        if (spaceRoom.fingerprintsAdded == false && Global.data.loadedData == true && Global.data.loadedLocal && Global.data.loadedConnected) {
 
-            // Add the fingerprint of the current user
-            Global.data.localFingerprint.addToSpace(scene, spaceRoom.objects, camera.position);
-            room.fingerprints.push(Global.data.localFingerprint);
-            // Move a little bit from the center so you don't collide with your own fingerprint
-            controls.getObject().position.z = 15;
+            room.connectedSphereRadius = 20 + (Global.data.connectedFingerprints.length * 3);
+            // Its handy to keep the squared radius for distance calculations
+            room.connectedSphereRadius2 = room.connectedSphereRadius * room.connectedSphereRadius;
+            sphereScale = 2.0;
+            var sphereGeometry = new THREE.SphereGeometry(room.connectedSphereRadius, 32, 32);
+            var sphereMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                side: THREE.DoubleSide,
+                wireframe: false,
+                transparent: true,
+                opacity: 0.5,
+                flatShading: true,
+                metalness: 1.0
+            });
+            room.connectedSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            scene.add(room.connectedSphere);
+            
+            // Add the currently connected fingerprints to the room
+            room.addAllFingerprints(room, camera.position, room.connectedSphereRadius, Global.data.connectedFingerprints);
+            // Set all the newly added fingerprints as current fingerprints for DEBUG
+            // for(let i = 0; i < room.fingerprints.length; i++) {
+            //     room.fingerprints[i].type = Fingerprint.FPrintTypes.connected;
+            // }
+
+            // Add the fingerprint of the current user if they have consented to have it
+            if(Global.data.localFingerprint != undefined) {
+                Global.data.localFingerprint.addToSpace(scene, spaceRoom.objects, camera.position);
+                room.fingerprints.push(Global.data.localFingerprint);
+                room.localFingerprint = Global.data.localFingerprint;
+                // Move a little bit from the center so you don't collide with your own fingerprint
+                controls.getObject().position.z = 15;
+            } else {
+                room.localFingerprint = undefined;
+            }
+            
 
             spaceRoom.fingerprintsAdded = true;
+            inactiveOverlay.innerHTML = Global.html.inactiveInstructions;
             console.log("Added all the fingerprints");
         }
 
@@ -568,6 +598,9 @@ let spaceRoom = {
                 }
 
                 // console.log(intersections[i]);
+                let hasSynth = true;
+                if(intersections[i].object.userData.fingerprintPtr.synth == undefined) { hasSynth = false; }
+                console.log(hasSynth);
                 /*
                     An intersection has the following properties :
                         - object : intersected object (THREE.Mesh)
@@ -590,6 +623,7 @@ let spaceRoom = {
                 if (d2 < minDist) { 
                     minDist = d2;
                     room.pitchSet = fp.motif.pitchSet;
+                    room.octave = fp.motif.octave;
                 }
             }
             if(minDist == 0) { minDist = 1;} // avoid division by zero
@@ -605,13 +639,13 @@ let spaceRoom = {
             // }
 
             if (minDist < 1000) {
-                Global.sound.globalSynthLPF.frequency.value = 2000 - (minDist * 1.3);
+                Synthesis.globalSynthLPF.frequency.value = 2000 - (minDist * 1.3);
             }
             if(minDist < 500) {
-                Global.sound.noiseUsrGain.value = Math.pow(1.0 - (minDist/500), 4.0) * 0.01;
+                Synthesis.noiseUsrGain.value = Math.pow(1.0 - (minDist/500), 4.0) * 0.01;
             }
-            if (minDist < 200) {
-                fogFade = Math.pow(1.0 - (minDist / 200), 4.0);
+            if (minDist < 150) {
+                fogFade = Math.pow(1.0 - (minDist / 150), 5.0);
             }
 
             // Calculate distance to object at a position forward in space
@@ -624,12 +658,19 @@ let spaceRoom = {
                 fp.distance2 = d2;
                 if (d2 < minDist) { minDist = d2; }
             }
-            // Add new fingerprints if they're too far out
+            // Add new fingerprints if they're too far out 
             if (minDist > 1500) {
-                let numPrints = Math.random() * 4;
-                for(let i = 0; i<numPrints; i++) {
-                    room.addAdditionalFingerprint(room, positionForward, 20);   
+                let newFingerprintRadius = 20;
+                // Check that the fingerprints are in the "dark" space for archived devices
+                if(positionForward.distanceToSquared(new THREE.Vector3(0, 0, 0)) > 
+                    (room.connectedSphereRadius2 + Math.pow(newFingerprintRadius, 2))) {
+                    // add a variable number of new fingerprints
+                    let numPrints = Math.random() * 4;
+                    for(let i = 0; i<numPrints; i++) {
+                        room.addAdditionalFingerprint(room, positionForward, newFingerprintRadius, Global.data.fingerprints);   
+                    }
                 }
+                
             }
 
             // Update fog
@@ -640,15 +681,15 @@ let spaceRoom = {
                 scene.fog.density = room.spaceFog;
             }
             let d2FromCenter = controls.getObject().position.distanceToSquared(new THREE.Vector3(0, 0, 0));
-            if( d2FromCenter > room.currentlyConnectedRadius2) {
-                console.log("dark space");
-                room.spaceSection = "unconnected devices"
+            if( d2FromCenter > room.connectedSphereRadius2) {
+                // console.log("dark space");
+                room.spaceSection = "archived device traces"
                 // we are in a darker space where old non-connected fingerprints are shown
                 room.spaceFog = 0.05;
                 scene.fog.color = room.darkColor;
                 scene.background = room.darkColor;
-            } else if(d2FromCenter > room.currentlyConnectedRadius2 * 0.8) {
-                let lerp = (room.currentlyConnectedRadius2 - d2FromCenter) / (room.currentlyConnectedRadius2 * 0.2);
+            } else if(d2FromCenter > room.connectedSphereRadius2 * 0.8) {
+                let lerp = (room.connectedSphereRadius2 - d2FromCenter) / (room.connectedSphereRadius2 * 0.2);
                 let lerpColor = new THREE.Color(room.darkColor);
                 lerpColor.lerp(room.lightColor, lerp);
                 scene.fog.color = lerpColor;
@@ -660,15 +701,18 @@ let spaceRoom = {
                 room.spaceSection = "currently connected devices";
             }
 
-            // let mirrorPosition = controls.getObject().position.clone();
-            // mirrorPosition.z = -10;
-            // mirrorPosition.y = 10;
-            // mirrorPosition.x = 10;
-            // Why does this not work?
-            // Global.data.localFingerprint.setPosition(new THREE.Vector3(10, 10, 10));
+            if(room.localFingerprint != undefined) {
+                // mirror the position of the user and the local fingerprint
+                let mirrorPosition = controls.getObject().position.clone();
+                mirrorPosition.z *= -1;
+                // mirrorPosition.y *= -1;
+                mirrorPosition.x *= -1;
 
-            // Move sphere and light to where the camera is
-            // sphere.position.copy(controls.getObject().position);
+                room.localFingerprint.setPosition(mirrorPosition);
+            }
+            
+
+            // Move light to where the camera is
             spotLight.position.copy(controls.getObject().position);
             spotLight.target.position.copy(cameraDirection);
             spotLight.target.position.add(controls.getObject().position);
@@ -684,15 +728,47 @@ let spaceRoom = {
             ) {
                 controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
             }
+        } else {
+            let dots = "";
+            for(let i = 0; i < loadingDots; i++) {
+                dots += ".";
+            }
+            nextLoadingDot -= delta;
+            if(nextLoadingDot <= 0) {
+                loadingDots = (loadingDots + 1) % 5;
+                nextLoadingDot = 0.5;
+            }
+            inactiveHtml = `<span style="font-size:36px">Loading data ` + dots + `</span><br /><br />`;
+            if(Global.data.loadedData) {
+                inactiveHtml += "Currently connected device fingerprints loaded<br/>";
+            }
+            if(Global.data.loadedLocal && Global.data.localFingerprint != undefined) {
+                inactiveHtml += "Fingerprint of local device loaded<br/>";
+            }
+            if(Global.data.loadedConnected) {
+                inactiveHtml += "Fingerprint of connected devices loaded<br/>";
+            }
+            inactiveOverlay.innerHTML = inactiveHtml;
         }
     },
-    addAdditionalFingerprint: function(room, relativePos, size) {
+    addAdditionalFingerprint: function(room, relativePos, size, fingerprintArray) {
         let minDist = 0.2;
-        let randomIndex = Math.floor(Math.random() * Global.data.fingerprints.length);
+        let randomIndex = Math.floor(Math.random() * fingerprintArray.length);
         let position = getRandomSphereCoordinate(size, minDist);
         position.add(relativePos);
-        Global.data.fingerprints[randomIndex].addToSpace(scene, spaceRoom.objects, position);
-        room.fingerprints.push(Global.data.fingerprints[randomIndex]);
+        console.log("Adding fingerprint at " + JSON.stringify(position));
+        fingerprintArray[randomIndex].addToSpace(scene, spaceRoom.objects, position);
+        room.fingerprints.push(fingerprintArray[randomIndex]);
+    },
+    addAllFingerprints: function(room, relativePos, size, fingerprintArray) {
+        let minDist = 0.2;
+        for(let fprint of fingerprintArray) {
+            let position = getRandomSphereCoordinate(size, minDist);
+            position.add(relativePos);
+            fprint.addToSpace(scene, spaceRoom.objects, position);
+            room.fingerprints.push(fprint);
+        }
+        
     },
     cleanUp: function (room) {
         for (let fprint of spaceRoom.fingerprints) {

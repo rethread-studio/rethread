@@ -1,11 +1,11 @@
 // The first main module
 
-import * as tone_init from './tone_init.js';
+import * as Synthesis from './synthesis.js';
 import * as Graphics from './graphics.js';
 import * as Fingerprint from './fingerprint.js';
 import * as Global from './globals.js';
 
-tone_init.init_tone();
+Synthesis.init_tone();
 Graphics.init_three();
 Graphics.animate();
 
@@ -64,24 +64,48 @@ let headers = [
   "webGLRenderer",
 ];
 Global.data.headers = headers;
+console.log("num headers: " + headers.length);
 
-  // Get the fingerprint for the local user
-  getFingerPrint(function(data) {
-    console.log("Current user:");
-    
+// Get the fingerprint for the local user
+getFingerPrint(function(data) {
+  console.log("Current user:");
+  
+  if(data.random != true) {
     let normalizedArr = [];
     for(let h of headers) {
       normalizedArr.push(Number(data.normalized[h]));
     }
+    console.log(normalizedArr);
+    console.log("random_print: " + data.random);
     Global.data.localRawFingerprint = normalizedArr;
     Global.data.localFingerprint = new Fingerprint.Fingerprint(Global.data.localRawFingerprint, Fingerprint.FPrintTypes.local);
-    Global.data.loadedLocal = true;
-  });
+  }
+  
+  Global.data.loadedLocal = true;
+});
 
-  getConnectedFingerPrints(function(data) {
-    console.log("Connected users:");
-    console.log(data);
-  })
+  
+getConnectedFingerPrints(function(data) {
+  console.log("Connected users:");
+  console.log(data);
+  Global.data.rawConnectedFingerprintsObjects = data.normalized;
+  Global.data.rawConnectedFingerprints = [];
+  // Convert into arrays of numbers
+  for (let datapoint of Global.data.rawConnectedFingerprintsObjects) {
+    let newArr = [];
+    for(let h of headers) {
+      newArr.push(Number(datapoint[h]));
+    }
+    Global.data.rawConnectedFingerprints.push(newArr);
+  }
+  Global.data.connectedFingerprints = [];
+  for(let rawFingerprint of Global.data.rawConnectedFingerprints) {
+    Global.data.connectedFingerprints.push(new Fingerprint.Fingerprint(rawFingerprint, Fingerprint.FPrintTypes.connected));
+  }
+  Global.data.loadedConnected = true;
+})
+  
+
 
 // getAllNormalizedFingerPrints(function(data) {
 //   console.log(data);
@@ -130,4 +154,12 @@ window.onclick = function (event) {
           }
       }
   }
+}
+
+/// Function called repeatedly to add new and remove old connected users
+function refreshConnectedFingerPrints() {
+  getConnectedFingerPrints(function(data) {
+    console.log("Connected users:");
+    console.log(data);
+  })
 }
