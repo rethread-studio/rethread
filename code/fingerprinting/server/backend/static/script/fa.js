@@ -1168,26 +1168,39 @@ function getConnectedFingerPrints(callback) {
 }
 
 function getFingerPrint(callback) {
-  function fpCallback(components) {
-    $.ajax({
-      url: HOST + "/api/fp",
-      type: "PUT",
-      data: JSON.stringify(components),
-      contentType: "application/json; charset=utf-8",
-      async: false,
-      success: function (data) {
-        callback(data);
-      },
-    });
-  }
-
-  if (window.requestIdleCallback) {
-    requestIdleCallback(function () {
-      Fingerprint2.get(options, fpCallback);
-    });
-  } else {
-    setTimeout(function () {
-      Fingerprint2.get(options, fpCallback);
-    }, 500);
-  }
+  isConnected((connected) => {
+    if (!connected) {
+      function fpCallback(components) {
+        $.ajax({
+          url: HOST + "/api/fp",
+          type: "PUT",
+          data: JSON.stringify(components),
+          contentType: "application/json; charset=utf-8",
+          async: false,
+          success: function (data) {
+            callback(data);
+          },
+        });
+      }
+    
+      if (window.requestIdleCallback) {
+        requestIdleCallback(function () {
+          Fingerprint2.get(options, fpCallback);
+        });
+      } else {
+        setTimeout(function () {
+          Fingerprint2.get(options, fpCallback);
+        }, 500);
+      }
+    } else {
+      $.ajax({
+        url: HOST + "/api/fp",
+        type: "GET",
+        async: false,
+        success: function (data) {
+          callback(data);
+        },
+      });
+    }
+  })
 }
