@@ -28,13 +28,13 @@ The specific fingerprint information we collect is:
 - the presence of AdBlock: Test to find out if the AdBlock extension is installed
 - the list of fonts: Flash attribute that gives the entire list of fonts installed on the operating system (flash.text.Font.enumerateFonts(true))
 
-The complete source code to collect this data is open source and available [here]().
+The complete source code to collect this data is open source and available [here](https://github.com/castor-software/rethread/tree/master/code/fingerprinting/server/backend).
 
 In addition to these data, we collect set a cookie a session cookie on your device. This how you can be virtually present in the exhibition and participate in its real-time co-creation. This cookie allows us to retrieve your fingerprint and delete it if you want us to do so when you leave the exhibition.
 
 ### Cookies
 
-We set a cookie that persists for XXX for the purpose of letting participate in the exhibition with your own fingerprint. If you want to disable/enable browser cookies, you can visit [this page](https://www.avast.com/c-enable-disable-cookies) to find the specific way for your browser. You should be aware that entirely disabling cookies may prevent you from enjoying the artworks presented in the virtual [browser fingerprint exhibition](https://rethread.art/browser-fingerprint/).
+We set a 2-hour cookie for to let you participate in the exhibition with your own fingerprint. If you want to disable/enable browser cookies, you can visit [this page](https://www.avast.com/c-enable-disable-cookies) to find the specific way for your browser. You should be aware that entirely disabling cookies may prevent you from enjoying the artworks presented in the virtual [browser fingerprint exhibition](https://rethread.art/browser-fingerprint/).
 
 
 ## Security
