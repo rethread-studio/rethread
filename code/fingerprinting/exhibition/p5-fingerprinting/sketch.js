@@ -1,13 +1,15 @@
 let hasConsented = false;
 getFingerPrint(fpDone);
+
+getSession((session) => {
+    hasConsented = session.terms;
+    console.log("has consented? " + hasConsented);
+});
+
 function fpDone(fingerprint) {
     // Check consent
     console.log("fingerprint is random? " + fingerprint.random);
-    hasConsented = !fingerprint.random;
-    console.log("has consented? " + hasConsented);
 }
-
-hasConsented = true;
 
 let canvas, canvasC;
 let width = 0;
@@ -122,7 +124,7 @@ $(document).ready(function () {
 function noConsentCallback(fingerprint) {
     myFP = fingerprint;
     $("canvas").fadeIn();
-    $("#seeArt").text("see a random constellation (not my data)");
+    $("#seeArt").text("see someone else's constellation (not my data)");
 
     // 36 is the length of the fingerprint -- at the moment
     if (Object.keys(fingerprint.original).length < 36) {
@@ -220,7 +222,7 @@ function constellation(fingerprint) {
     let fontsY = c * sin(allFonts.length);
     push()
     translate(0, 0, -c * 0.05);
-    ellipse(fontsX, fontsY, allFonts.length / 3)
+    ellipse(fontsX, fontsY, allFonts.length * c * 0.002);
     pop()
 
     noFill()
@@ -522,25 +524,41 @@ function constellation(fingerprint) {
     if (fp['enumerateDevices']) {
         enumerateDevices = fp['enumerateDevices'].split(',');
         push();
-        translate(c * cos(radians(130)), c * sin(radians(130)))
+        translate(c * cos(radians(130)), c * sin(radians(130)));
         rotate(radians(enumerateDevices.length));
         if (enumerateDevices.length < 3 || enumerateDevices == "not available") {
             fill(255)
             equiTriangle(0, 0, c * 0.15);
         }
         else {
+            // for (var i = 0; i < enumerateDevices.length; i++) {
+            //     let a1 = 0;
+            //     for (var j = 0; j < enumerateDevices[i].length; j++) {
+            //         a1 = a1 + enumerateDevices[i].charCodeAt(j);
+            //     }
+            //     let x_start = c * 0.01 * enumerateDevices.length - i * 5;
+            //     let y_start = -a1 / c;
+            //     line(x_start, y_start, 0, 0);
+            //     if (enumerateDevices[i].charCodeAt(22) > 60)
+            //         fill(255);
+            //     if (enumerateDevices[i].charCodeAt(31) > 60)
+            //         ellipse(x_start, y_start, c * 0.025);
+            // }
             for (var i = 0; i < enumerateDevices.length; i++) {
                 let a1 = 0;
+                let last_a1 = 0;
                 for (var j = 0; j < enumerateDevices[i].length; j++) {
+                    last_a1 = a1;
                     a1 = a1 + enumerateDevices[i].charCodeAt(j);
                 }
-                let x_start = enumerateDevices.length - i*5;
-                let y_start = -a1 /c;
-                line(x_start, y_start, 0, 0);
+                let x = c * 0.00002 * a1 * cos(a1);
+                let y = c * 0.00002 * a1 * sin(a1);
                 if (enumerateDevices[i].charCodeAt(22) > 60)
                     fill(255);
                 if (enumerateDevices[i].charCodeAt(31) > 60)
-                    ellipse(x_start, y_start, c * 0.025);
+                    ellipse(x, y, 0.025 * c);
+
+                line(x, y, 0, 0);
             }
         }
         pop();
