@@ -56,6 +56,7 @@ function welcomePage() {
 function howToPage(){
     $("#welcome").fadeOut(function () {
         $("#howTo").fadeIn();
+        $("#howToDot").fadeIn();
         $("#dotMenu").fadeIn();
     });
 }
@@ -63,13 +64,15 @@ function howToPage(){
 function consentInfoPage() {
     if ($("#bgCanvas").length == 0) {
         $("#main").fadeOut();
-        $("#welcome").fadeOut();
+        $("#howTo").fadeOut();
+        $("#howToDot").fadeOut();
         $("#consentInfo").fadeIn();
     }
     $("#bgCanvas").fadeOut(function () {
         displayPage('consentInfo');
         $("#main").fadeOut();
-        $("#welcome").fadeOut();
+        $("#howTo").fadeOut();
+        $("#howToDot").fadeOut();
         $("#consentInfo").fadeIn();
     });
 
@@ -118,6 +121,7 @@ function mainPage() {
     displayPage('main');
     $("#myFp").fadeOut();
     $("#consentInfo").fadeOut();
+    $("#howToDot").fadeOut();
     console.log("consent: " + hasConsented);
     if (hasConsented) {
         $("#participateStill").hide();
@@ -157,6 +161,7 @@ function noThanksAgainButton() {
     displayPage('main');
     $("#dotMenu").show();
     $("#consentInfo").hide();
+    $("#howToDot").fadeOut();
 }
 function consentInfoButton() {
     acceptCondition(() => {
