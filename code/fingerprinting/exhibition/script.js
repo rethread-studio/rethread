@@ -220,7 +220,7 @@ $(document).ready(function () {
 
     $("#3Dart").click(function () {
         // Go to 3D art
-        window.location.href = "https://rethread.art/code/tonejs-experiments/fingerprint-motif-3d/dist/";
+        window.location.href = "https://rethread.art/code/fingerprinting/exhibition/fingerprint-3d/index.html";
     });
 
     $("#2Dart").click(function () {
