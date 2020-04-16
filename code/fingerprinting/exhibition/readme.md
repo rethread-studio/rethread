@@ -5,6 +5,7 @@ main url [https://rethread.art/code/fingerprinting/exhibition/](https://rethread
 To do list is [here](https://github.com/castor-software/rethread/issues/22).
 
 Known issues:
+* doesn't work on Safari
 * Mobile version is very buggy
 * Exit page: Download link not implemented yet
 * Fade in and fade out of pages is a big buggy
