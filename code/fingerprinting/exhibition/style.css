@@ -272,12 +272,12 @@ button:hover {
 
 /* only for main page - different background color of the dot */
 
-#mainPageDot {
+.pinkDot {
     background: thistle;
     border-color: thistle;
 }
 
-#mainPageDot:hover, #mainPageDot:focus {
+.pinkDot:hover, .pinkDot:focus {
     background-color: transparent;
 }
 
