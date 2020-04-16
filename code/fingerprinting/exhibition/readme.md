@@ -14,4 +14,9 @@ Known issues:
 * Constellation experiment : mobile version needs work, images might be cropped
 
 
+## Schedule for the opening
+15:00 We test everything and make any last minute changes.
+16:00 Clear the server of old data and the have everyone in the ASSERT team and maybe relatives connect and give us some fingerprints to start with (my experiment works much better if there is an archive of old fingerprints that aren't connected so extra devices that we won't otherwise use would be great for that).
+16:59 Redirect URL to exhibition
+17:00 Showtime!
 
