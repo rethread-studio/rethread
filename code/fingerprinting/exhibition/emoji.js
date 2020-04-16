@@ -99,13 +99,18 @@ ws.onopen = () => {
 };
 setInterval(() => {
   // ct.clearRect(0, 0, emojis_c.width, emojis_c.height);
-  ctx.fillStyle = rgba(0, 0, 0, 0.05);
-  ctx.fillRect(0, 0, emojis_c.width, emojis_c.height);
+  ct.save();
+  ct.globalAlpha = 0.15;
+  let backgroundColor = window.getComputedStyle( document.body ,null).getPropertyValue('background-color');
+  ct.fillStyle = backgroundColor;
+  ct.fillRect(0, 0, emojis_c.width, emojis_c.height);
+  ct.restore();
+  // ct.fillStyle = rgba(0, 0, 0, 1.0);
   if (myEmoji) {
     myEmoji.draw();
   }
   drawEmojis();
-}, 60)
+}, 30)
 
 window.addEventListener('resize', () => {
   emojis_c.width = window.innerWidth;
