@@ -11,6 +11,8 @@ import * as Global from './globals.js';
 Global.state.mobile = window.matchMedia("only screen and (max-width: 960px)").matches;
 if(Global.state.mobile) {
   Global.html.inactiveInstructions += "<br/>You are on a mobile device";
+} else {
+  Global.html.inactiveInstructions += "<br/>You are on a desktop device";
 }
 
 Synthesis.init_tone();
