@@ -631,12 +631,12 @@ let spaceRoom = {
             for (var i = 0; i < intersections.length; i++) {
                 if (intersections[i].distance < 2.0) {
                     // Travel into the fingerprint
-                    let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
-                    travelToRoom(fingerprintRoom);
-                    return;
+                    // let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
+                    // travelToRoom(fingerprintRoom);
+                    // return;
                 } else if (intersections[i].distance < 10.0) {
-                    let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
-                    displayOnHud("<span>" + text + "</span><br/><br/><span>travel into fingerprint</span>");
+                    // let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
+                    // displayOnHud("<span>" + text + "</span><br/><br/><span>travel into fingerprint</span>");
                     // console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
                 } else if(intersections[i].distance < 30.0) {
                     let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
