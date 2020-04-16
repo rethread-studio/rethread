@@ -47,6 +47,8 @@
         <div class="w3-display-topleft w3-padding-large w3-xlarge">
 
         </div>
+
+        <!-- WELCOME -->
         <div id="welcome" class="w3-display-middle">
             <!-- <p style="color: #c5a0c5">a software art experience about browser fingerprinting</p> -->
             <h2>Welcome to<span style="font-family: Roboto Mono"> session x01 </span>of software art experiments by <a
@@ -60,19 +62,27 @@
             <button id="enter" href="#" class="w3-large w3-center">Enter the exhibition 🎟️</button>
 
         </div>
-        <div id="howTo" style="display:none;" class="w3-display-middle">
+        <!-- HOW TO -->
+        <div id="howTo" style="display:none; color:midnightblue;" class="w3-display-middle">
             <!-- <p style="color: #c5a0c5">a software art experience about browser fingerprinting</p> -->
-            <h2>How to navigate this exhibition 🧭</h2>
+            <h2>How to navigate this exhibition</h2>
+            <br>
+            <div style="text-align: left">
 
-            <h2>Use the menu in the top right corner to exit at any time.</h2>
+                <p>* Use the menu at the top right corner to exit at any time.</p>
 
-            <!-- Possibly change the title of the exhibition below -->
-            <!-- <h1 class="w3-animate-top"><b>a software art experience about browser fingerprinting</b></h1> -->
-            <button id="participate" href="#" class="w3-large w3-center">Participate</button>
+                <p>* Some experiments are sound art, so turn up your volume <i class="fas fa-volume-up"></i></p>
+
+                <p>* This is a collaborative exhibition, you can participate with your browser fingerprint (detailed on
+                    the
+                    next page), or just view parts of the exhibition that don't require collaboration.</p>
+            </div>
+            <br>
+
+            <button id="participate" href="#" class="w3-large w3-center">🎉 Participate 🎉</button>
             <p><button id="noThanks" href="#" class="linkButton">No thanks, maybe later.</button></p>
-            <p>sound on <i class="fas fa-volume-up"></i></p>
             <p></p>
-            <h2>Join our Discord chat to socialize during the exhibition! link: --- </h2>
+            <h2>Join our Discord chat to socialize during the exhibition! <a href="https://discord.gg/yfaMYt" target="_blank">https://discord.gg/yfaMYt</a></h2>
 
         </div>
 
@@ -91,8 +101,9 @@
                 <p id="fptext"></p>
                 <!-- <p> So yeah, you're sort of unique, which means that websites can track you. To get deeper technical results we recommend you check out amIUnique.com.</p> -->
             </h3>
-            <img id="myEmoji" src="" alt="">
-            <p><button id="goToResources" href="#" class="linkButton">How can I make myself less unique? <i class="fas fa-external-link-alt"></i></button></p>
+            <span id="myEmoji" style="font-size: 100px;"></span>
+            <p><button id="goToResources" href="https://amiunique.org/tools/" target="_blank" class="linkButton">How can I make myself
+                    less unique? <i class="fas fa-external-link-alt"></i></button></p>
             <p><button id="goToMainPage" href="#" class="w3-large w3-center">Continue the experience</button></p>
 
         </div>
@@ -134,12 +145,13 @@
             <a href="exit.html">Leave exhibition</a>
         </div>
     </div>
-    <div id="howToDot" style="display: none; position: fixed; top: 2em; left: 7em; color: white;">
-            <h2>👈 this dot is a menu, use it to navigate the exhibition</h2>
+    <div id="howToDot" style="display: none; position: fixed; top: 2em; left: 7em; color: midnightblue;">
+        <h2>👈 this dot is a menu, use it to navigate the exhibition</h2>
     </div>
     <canvas id="emojis" style="display: none;"></canvas>
 </body>
 <script src="emoji.js"></script>
 <script src="background.js"></script>
 <script src="script.js"></script>
+
 </html>

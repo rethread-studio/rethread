@@ -47,7 +47,11 @@ function goToPage() {
     if (currentPage != 'welcome') {
         $("#bgCanvas").hide();
         if (hasConsented) {
-            $("#emojis").show();
+            if (currentPage != 'myFp') {
+                $("#emojis").show();
+            } else {
+                $("#emojis").hide();
+            }
         }
         $("#dotMenu").show();
     } else {
@@ -101,7 +105,6 @@ function consentInfoPage() {
 function generateFPText(fp) {
     var parser = new UAParser();
     var result = parser.getResult();
-    console.log(parser.device);
     let s = "You are using <span class = 'fpHighlight'>"
         + result.browser.name + "</span> with <span class = 'fpHighlight'>" + result.os.name + " </span> on a <span class = 'fpHighlight'>" + fp.original.platform + "</span> machine with <span class = 'fpHighlight'>"
         + fp.original.webGLRenderer + "</span> GPU on a <span class = 'fpHighlight'>" + fp.original.screen_width + "x" + fp.original.screen_height
@@ -122,7 +125,6 @@ function myFpPage() {
     $("#consentInfo").fadeOut();
     $("#participateStill").hide();
     $("#myFp").fadeIn();
-    // $("#emojis").hide();
 
     var parser = new UAParser();
     var result = parser.getResult();
@@ -133,19 +135,21 @@ function myFpPage() {
         element: document.getElementById("fptext"), html: currentText, callback: () => {
             // execute the fadeIn
             console.log("typing done");
+            getEmoji((e) => {
+                $("#myEmoji").html(e);     
+            })
             $("#goToResources").fadeIn();
             $("#goToMainPage").fadeIn();
             $("#emojis").fadeIn();
         }
     }
+    $("#myEmoji").html(''); 
     typewriter = setupTypewriter(opts)
     typewriter.type();
     getFingerPrint(async fp => {
         // $("#fptext").text(generateFPText(fp));
         const text = generateFPText(fp);
         opts.html = text;
-
-        $("#myEmoji").src = fp.original.emojis;
 
         console.log(fp);
     })
