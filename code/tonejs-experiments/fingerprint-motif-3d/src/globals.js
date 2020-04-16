@@ -39,7 +39,7 @@ var data = {
 
 var html = {
     inactiveInstructions: `
-    <span style="font-size:36px; letter-spacing: 1em;">SPATIAL SONIC FINGERPRINTS</span>
+    <span style="font-size:36px; line-height: 2.5em; letter-spacing: 1em;">SPATIAL SONIC FINGERPRINTS</span>
     <br/><br/><br/><br/><br/>
     <span style="font-size:24px">Click to activate</span>
     <br /><br />

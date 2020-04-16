@@ -91,7 +91,7 @@ console.log("num headers: " + headers.length);
 
 // Get the fingerprint for the local user
 getFingerPrint(function(data) {
-  console.log("Current user:");
+  console.log("Current user:" + JSON.stringify(data));
   
   if(data.random != true) {
     let normalizedArr = [];
@@ -102,6 +102,8 @@ getFingerPrint(function(data) {
     console.log("random_print: " + data.random);
     Global.data.localRawFingerprint = normalizedArr;
     Global.data.localFingerprint = new Fingerprint.Fingerprint(Global.data.localRawFingerprint, Fingerprint.FPrintTypes.local);
+  } else {
+    Global.data.localFingerprint = undefined;
   }
   
   Global.data.loadedLocal = true;
@@ -191,7 +193,7 @@ getAllNormalizedFingerPrints(function(data) {
   // for(let i = 0; i < 200; i++) {
   //   Fingerprint.generateRandomFingerPrint();
   // }
-  for(let i = 0; i < 200; i++) {
+  for(let i = 0; i < 200 && i < Global.data.rawFingerprints.length; i++) {
     let index = Global.data.rawFingerprints.length - 1 - i;
       let fingerprint = new Fingerprint.Fingerprint(Global.data.rawFingerprints[index], Fingerprint.FPrintTypes.old);
       Global.data.fingerprints.push(fingerprint);

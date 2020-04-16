@@ -207,6 +207,7 @@ class Fingerprint {
     color;
     activation; // used to display that the fingerprint is sonically activated
     constructor(rawFingerprint, type) {
+        console.log("Created fingerprint with raw: " + JSON.stringify(rawFingerprint));
         this.type = type;
         this.rawFingerprint = rawFingerprint;
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
