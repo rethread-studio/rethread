@@ -3,11 +3,13 @@ let hasConsented = false;
 getSession((session) => {
     hasConsented = session.terms;
     if (hasConsented) {
-        $("body").toggleClass("blueBackground");
+        $("body").addClass("blueBackground");
+    } else {
+        $("body").removeClass("blueBackground");
     }
 });
 
-const pages = ['welcome', 'consentInfo', 'myFp', 'main']
+const pages = ['welcome', 'howTo', 'consentInfo', 'myFp', 'main']
 
 function getCurrentPage() {
     if (window.location.hash) {
@@ -30,6 +32,9 @@ function goToPage() {
     } else {
         $("#welcome").fadeIn();
     }
+    if (page != 'welcome' && page != 'consentInfo') {
+        $("#bgCanvas").hide();
+    }
 }
 window.addEventListener("hashchange", goToPage, false);
 
@@ -46,8 +51,18 @@ function welcomePage() {
     displayPage('welcome');
 }
 
-function consentInfoPage() {
+function howToPage(){
+    $("#welcome").fadeOut(function () {
+        $("#howTo").fadeIn();
+    });
+}
 
+function consentInfoPage() {
+    if ($("#bgCanvas").length == 0) {
+        $("#main").fadeOut();
+        $("#welcome").fadeOut();
+        $("#consentInfo").fadeIn();
+    }
     $("#bgCanvas").fadeOut(function () {
         displayPage('consentInfo');
         $("#main").fadeOut();
@@ -112,6 +127,10 @@ function mainPage() {
     $("#main").fadeIn();
 }
 
+function enterButton() {
+    displayPage('howTo');
+}
+
 function participateButton() {
     displayPage('consentInfo');
 }
@@ -119,6 +138,11 @@ function participateStillButton() {
     displayPage('consentInfo');
 }
 function noThanksButton() {
+    if ($("#bgCanvas").length == 0) {
+        displayPage('main');
+        $("#participateStill").show();
+        $("#seeMyFP").hide();
+    }
     $("#bgCanvas").fadeOut(function () {
         displayPage('main');
         $("#participateStill").show();
@@ -161,6 +185,9 @@ $(document).ready(function () {
         goToPage()
     }
 
+    // Enter
+    $("#enter").click(enterButton);
+
     // Participate
     $("#participate").click(participateButton);
 
@@ -185,6 +212,7 @@ $(document).ready(function () {
 
     $("#3Dart").click(function () {
         // Go to 3D art
+        window.location.href = "https://rethread.art/code/tonejs-experiments/fingerprint-motif-3d/dist/";
     });
 
     $("#2Dart").click(function () {

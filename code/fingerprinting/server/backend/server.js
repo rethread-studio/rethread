@@ -1,3 +1,5 @@
+const http = require("http");
+const WebSocket = require("ws");
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const ObjectId = require("mongodb").ObjectId;
@@ -11,6 +13,159 @@ const client = new MongoClient(URL_DB, {
   useUnifiedTopology: true,
 });
 client.connect();
+
+const emojis = [
+  "😂",
+  "❤️",
+  "😍",
+  "🤣",
+  "😊",
+  "🙏",
+  "💕",
+  "😭",
+  "😘",
+  "👍",
+  "😅",
+  "👏",
+  "😁",
+  "♥️",
+  "🔥",
+  "💔",
+  "💖",
+  "💙",
+  "😢",
+  "🤔",
+  "😆",
+  "🙄",
+  "💪",
+  "😉",
+  "☺️",
+  "👌",
+  "🤗",
+  "💜",
+  "😔",
+  "😎",
+  "😇",
+  "🌹",
+  "🤦",
+  "🎉",
+  "‼️",
+  "💞",
+  "✌️",
+  "✨",
+  "🤷",
+  "😱",
+  "😌",
+  "🌸",
+  "🙌",
+  "😋",
+  "💗",
+  "💚",
+  "😏",
+  "💛",
+  "🙂",
+  "💓",
+  "🤩",
+  "😄",
+  "😀",
+  "🖤",
+  "😃",
+  "💯",
+  "🙈",
+  "👇",
+  "🎶",
+  "😒",
+  "🤭",
+  "❣️",
+  "❗",
+  "😜",
+  "💋",
+  "👀",
+  "😪",
+  "😑",
+  "💥",
+  "🙋",
+  "😞",
+  "😩",
+  "😡",
+  "🤪",
+  "👊",
+  "☀️",
+  "😥",
+  "🤤",
+  "👉",
+  "💃",
+  "😳",
+  "✋",
+  "😚",
+  "😝",
+  "😴",
+  "🌟",
+  "😬",
+  "🙃",
+  "🍀",
+  "🌷",
+  "😻",
+  "😓",
+  "⭐",
+  "✅",
+  "🌈",
+  "😈",
+  "🤘",
+  "💦",
+  "✔️",
+  "😣",
+  "🏃",
+  "💐",
+  "☹️",
+  "🎊",
+  "💘",
+  "😠",
+  "☝️",
+  "😕",
+  "🌺",
+  "🎂",
+  "🌻",
+  "😐",
+  "🖕",
+  "💝",
+  "🙊",
+  "😹",
+  "🗣️",
+  "💫",
+  "💀",
+  "👑",
+  "🎵",
+  "🤞",
+  "😛",
+  "🔴",
+  "😤",
+  "🌼",
+  "😫",
+  "⚽",
+  "🤙",
+  "☕",
+  "🏆",
+  "🧡",
+  "🎁",
+  "⚡",
+  "🌞",
+  "🎈",
+  "❌",
+  "✊",
+  "👋",
+  "😲",
+  "🌿",
+  "🤫",
+  "👈",
+  "😮",
+  "🙆",
+  "🍻",
+  "🍃",
+  "🐶",
+  "💁",
+  "😰",
+];
 
 const keys = [
   "host",
@@ -95,24 +250,30 @@ k_fp_c.createIndex({ key: 1, value: 1 }, { unique: true });
 var express = require("express");
 const session = require("express-session");
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
-app.use(
-  session({
-    secret: "fingerprintislife",
-    resave: false,
-    saveUninitialized: true,
-    cookie: { sameSite: 'None', secure: true },
-  })
-);
+app.use(bodyParser.json({ extended: true, limit: "5mb" }));
+const sess = {
+  secret: "fingerprintislife",
+  resave: false,
+  saveUninitialized: true,
+  cookie: { sameSite: "None" },
+}
+sess.cookie.secure = true;
+sess.cookie.secure = false;
+
+const sessionParser = session(sess)
+app.use(sessionParser);
 app.use(methodOverride("X-HTTP-Method-Override"));
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", req.get('origin'));
-  res.header("Access-Control-Allow-Headers", "Access-Control-Allow-Origin,Authorization,Origin,x-requested-with,Content-Type,Content-Range,Content-Disposition,Content-Description");
+  res.header("Access-Control-Allow-Origin", req.get("origin"));
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Access-Control-Allow-Origin,Authorization,Origin,x-requested-with,Content-Type,Content-Range,Content-Disposition,Content-Description"
+  );
   res.header("Access-Control-Allow-Credentials", true);
   res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
   next();
 });
-app.set('trust proxy', 1)
+app.set("trust proxy", 1);
 
 const port = 80;
 
@@ -195,6 +356,12 @@ app.get("/api/session/", async function (req, res) {
 });
 app.get("/api/session/connected", async function (req, res) {
   res.json(req.session.fp != null);
+});
+app.get("/api/session/emoji", function (req, res) {
+  if (!req.session.emoji) {
+    req.session.emoji = emojis[Math.round(Math.random() * (emojis.length - 1))];
+  }
+  res.send(req.session.emoji);
 });
 app.get("/api/session/accept", async function (req, res) {
   res.json(req.session.accept === true);
@@ -315,4 +482,52 @@ app
     res.json(output);
   });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ clientTracking: true, noServer: true });
+
+wss.broadcast = function broadcast(data, from) {
+  wss.clients.forEach(client => {
+    if (client == from) {
+      return;
+    }
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(data, error => {
+          if (error) {
+              console.error(error);
+          }
+      });
+    }
+  });
+};
+
+server.on("upgrade", function (request, socket, head) {
+  console.log("Parsing session from request...");
+
+  sessionParser(request, {}, () => {
+    if (!request.session.id) {
+      socket.destroy();
+      return;
+    }
+
+    wss.handleUpgrade(request, socket, head, function (ws) {
+      wss.emit("connection", ws, request);
+    });
+  });
+});
+
+wss.on("connection", function (ws, request) {
+  const userId = request.session.id;
+
+  ws.on("message", function (message) {
+    console.log(`Received message ${message} from user ${userId}`);
+    wss.broadcast(message, ws)
+  });
+
+  ws.on("close", function () {
+    
+  });
+});
+
+server.listen(port, function () {
+  console.log("Listening on http://localhost:${port}");
+});

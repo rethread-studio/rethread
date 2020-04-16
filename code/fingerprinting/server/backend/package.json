@@ -14,7 +14,8 @@
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "method-override": "^3.0.0",
-    "mongodb": "^3.5.5"
+    "mongodb": "^3.5.5",
+    "ws": "^7.2.3"
   },
   "nodemonConfig": {
     "ignore": [
