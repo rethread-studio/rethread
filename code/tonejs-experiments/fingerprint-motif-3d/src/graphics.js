@@ -115,49 +115,49 @@ function init_three() {
     // instantiate a loader
     var loader = new THREE.TextureLoader();
 
-    loader.load(
-        // resource URL
-        'data/textures/space.jpg',
-        // onLoad callback
-        function (texture) {
-            textures.space = texture;
-            textures.numLoaded += 1;
-            if (textures.numLoaded == textures.totalNumTextures) {
-                allTexturesLoaded = true;
-            }
-        },
-        // onProgress callback currently not supported
-        undefined,
-        // onError callback
-        function (err) {
-            console.error('An error happened while loading a texture: ' + err);
-        }
-    );
-    loader.load(
-        // resource URL
-        'data/textures/nadia-shape.jpg',
-        // onLoad callback
-        function (texture) {
-            textures.nadia_shape = texture;
-            textures.numLoaded += 1;
-            if (textures.numLoaded == textures.totalNumTextures) {
-                allTexturesLoaded = true;
-            }
-        },
-        // onProgress callback currently not supported
-        undefined,
-        // onError callback
-        function (err) {
-            console.error('An error happened while loading a texture: ' + err);
-        }
-    );
+    // loader.load(
+    //     // resource URL
+    //     'data/textures/space.jpg',
+    //     // onLoad callback
+    //     function (texture) {
+    //         textures.space = texture;
+    //         textures.numLoaded += 1;
+    //         if (textures.numLoaded == textures.totalNumTextures) {
+    //             allTexturesLoaded = true;
+    //         }
+    //     },
+    //     // onProgress callback currently not supported
+    //     undefined,
+    //     // onError callback
+    //     function (err) {
+    //         console.error('An error happened while loading a texture: ' + err);
+    //     }
+    // );
+    // loader.load(
+    //     // resource URL
+    //     'data/textures/nadia-shape.jpg',
+    //     // onLoad callback
+    //     function (texture) {
+    //         textures.nadia_shape = texture;
+    //         textures.numLoaded += 1;
+    //         if (textures.numLoaded == textures.totalNumTextures) {
+    //             allTexturesLoaded = true;
+    //         }
+    //     },
+    //     // onProgress callback currently not supported
+    //     undefined,
+    //     // onError callback
+    //     function (err) {
+    //         console.error('An error happened while loading a texture: ' + err);
+    //     }
+    // );
 
     // LOAD FONT
-    var fontLoader = new THREE.FontLoader();
+    // var fontLoader = new THREE.FontLoader();
 
-    fontLoader.load('data/fonts/droid_sans_mono_regular.typeface.json', function (fontLoaded) {
-        font = fontLoaded;
-    });
+    // fontLoader.load('data/fonts/droid_sans_mono_regular.typeface.json', function (fontLoaded) {
+    //     font = fontLoaded;
+    // });
 
 
     hudElement = document.getElementById("hud");
@@ -228,7 +228,7 @@ function init_three() {
         controls = new DeviceOrientationControls( camera );
         scene.add(camera);
         // Add touch events
-        instructions.addEventListener('touch', function () {
+        instructions.addEventListener('touchstart', function () {
             controls.lock();
             mobileLock = true;
             lockIntoExperience();
@@ -273,17 +273,9 @@ function init_three() {
             //     moveRight = true;
             //     break;
 
-            // case 81: // q
-            //     enlargeRadius = true;
+            // case 80: // p
+            //     teleportToPortal();
             //     break;
-
-            // case 69: // e
-            //     reduceRadius = true;
-            //     break;
-
-            case 80: // p
-                teleportToPortal();
-                break;
         }
 
     };
@@ -310,14 +302,6 @@ function init_three() {
             case 39: // right
             case 68: // d
                 moveRight = false;
-                break;
-
-            case 81: // q
-                enlargeRadius = false;
-                break;
-
-            case 69: // e
-                reduceRadius = false;
                 break;
         }
 
