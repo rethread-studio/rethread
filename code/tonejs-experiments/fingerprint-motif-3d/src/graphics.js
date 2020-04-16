@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import * as Tone from 'tone';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass';
-import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass';
+// import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+// import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+// import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass';
+// import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+import { DeviceOrientationControls } from 'three/examples/jsm/controls/DeviceOrientationControls';
 import * as Index from './index.js';
 
 import * as Global from './globals.js';
@@ -55,6 +56,7 @@ var loadingDots = 1;
 var nextLoadingDot = 0.3;
 
 var hudElement;
+var hudFooter;
 var hudContainer;
 
 var font = null;
@@ -135,6 +137,7 @@ function init_three() {
 
 
     hudElement = document.getElementById("hud");
+    hudFooter = document.getElementById("hud-footer");
     hudContainer = document.getElementById("hud-container");
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -146,7 +149,7 @@ function init_three() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 400);
 
     currentRoom = spaceRoom;
     currentRoom.init(currentRoom);
@@ -178,7 +181,12 @@ function init_three() {
 
     // var controls = new THREE.FirstPersonControls( camera, renderer.domElement );
 
-    controls = new PointerLockControls(camera, document.body);
+    if(!Global.state.mobile) {
+        controls = new PointerLockControls(camera, document.body);
+    } else if(Global.state.mobile)  {
+        controls = new DeviceOrientationControls( camera );
+    }
+    
 
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
@@ -194,6 +202,9 @@ function init_three() {
         blocker.style.display = 'none';
         hudContainer.style.display = 'block';
         hudElement.style.display = '';
+        hudFooter.style.display = '';
+        displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
+        
         Tone.Transport.start();
         console.log("Controls locked, transport started");
     });
@@ -203,6 +214,8 @@ function init_three() {
         instructions.style.display = '';
         hudContainer.style.display = 'none';
         hudElement.style.display = 'none';
+        hudFooter.style.display = 'none';
+        hideHudFooter();
         Tone.Transport.stop();
     });
 
@@ -341,6 +354,10 @@ function animate(now) {
         controls.getObject().position.x -= (velocity.x * delta);
         controls.getObject().position.y -= (velocity.y * delta);
         controls.getObject().position.z -= (velocity.z * delta);   
+    }
+    if(Global.state.mobile) {
+        // We're using DeviceOrientationControls which need to be updated
+        controls.update();
     }
     currentRoom.update(cameraDirection, currentRoom, delta);
 
@@ -688,6 +705,7 @@ let spaceRoom = {
             if( d2FromCenter > room.connectedSphereRadius2) {
                 // console.log("dark space");
                 room.spaceSection = "archived device traces"
+                displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
                 // we are in a darker space where old non-connected fingerprints are shown
                 room.spaceFog = 0.05;
                 scene.fog.color = room.darkColor;
@@ -703,6 +721,7 @@ let spaceRoom = {
                 scene.fog.color = room.lightColor;
                 scene.background = room.lightColor;
                 room.spaceSection = "currently connected devices";
+                displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
             }
 
             if(room.localFingerprint != undefined) {
@@ -972,6 +991,13 @@ function displayOnHud(html) {
 function hideHud() {
     hudElement.style.opacity = 0.0;
 }
+function displayOnHudFooter(html) {
+    hudFooter.innerHTML = html;
+    hudFooter.style.opacity = 1.0;
+}
+function hideHudFooter() {
+    hudFooter.style.opacity = 0.0;
+}
 
 function newScene(color, fog) {
     scene = new THREE.Scene();
@@ -1000,6 +1026,7 @@ export { init_three,
     getNewSpacePortal, 
     displayOnHud, 
     hideHud, 
+    displayOnHudFooter,
     raycaster, 
     travelToRoom, 
     fogFade, 

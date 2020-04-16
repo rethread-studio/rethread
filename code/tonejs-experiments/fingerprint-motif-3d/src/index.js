@@ -5,6 +5,11 @@ import * as Graphics from './graphics.js';
 import * as Fingerprint from './fingerprint.js';
 import * as Global from './globals.js';
 
+
+// Check if we're on a mobile device and set a global flag
+
+Global.state.mobile = window.matchMedia("only screen and (max-width: 760px)").matches;
+
 Synthesis.init_tone();
 Graphics.init_three();
 Graphics.animate();
@@ -108,8 +113,8 @@ getConnectedFingerPrints(function(data) {
 /// Function called repeatedly to add new and remove old connected users
 function refreshConnectedFingerPrints() {
   getConnectedFingerPrints(function(data) {
-    console.log("Connected users:");
-    console.log(data);
+    console.log("Refreshing connected");
+    // console.log(data);
     Global.data.rawConnectedFingerprintsObjects = data.normalized;
     Global.data.rawConnectedFingerprints = [];
     // Convert into arrays of numbers
@@ -169,7 +174,8 @@ getAllNormalizedFingerPrints(function(data) {
   //   Fingerprint.generateRandomFingerPrint();
   // }
   for(let i = 0; i < 200; i++) {
-      let fingerprint = new Fingerprint.Fingerprint(Global.data.rawFingerprints[i], Fingerprint.FPrintTypes.old);
+    let index = Global.data.rawFingerprints.length - 1 - i;
+      let fingerprint = new Fingerprint.Fingerprint(Global.data.rawFingerprints[index], Fingerprint.FPrintTypes.old);
       Global.data.fingerprints.push(fingerprint);
   }
   console.log(JSON.stringify(Global.data.rawFingerprints[10]));

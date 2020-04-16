@@ -38,13 +38,20 @@ var data = {
 }
 
 var html = {
-    inactiveInstructions: `<span style="font-size:36px">Click to activate</span>
+    inactiveInstructions: `
+    <span style="font-size:36px; letter-spacing: 1em;">WORK TITLE</span>
+    <br/><br/><br/><br/><br/>
+    <span style="font-size:24px">Click to activate</span>
     <br /><br />
     Move: WS<br/>
     Look: MOUSE<br/>
-    Enter portal: P<br/>
+    Return here: ESC<br/>
     <br/><br/>
-    Explore browser fingerprints as sound objects in space. In your presence each fingerprint will reveal its uniqueness.`,
+    <span style="font-size:24px;">Explore browser fingerprints as sonic objects in space. In your presence each fingerprint will reveal its sonic identity.</span>`,
 }
 
-export { sound, data, html }
+var state = {
+    mobile: false,
+}
+
+export { sound, data, html, state }

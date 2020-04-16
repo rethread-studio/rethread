@@ -47,12 +47,26 @@
 				font-family: Arial;
 				font-size: 14px;
 				line-height: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
 
 				cursor: pointer;
 			}
 
 			#hud {
+				height: 80%;
 				font-size: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+				opacity: 0;
+   				transition: opacity .25s ease-in-out;
+			}
+
+			#hud-footer {
+				top: 80vh;
+				height: 20vh;
+				text-align: right;
+				font-size: 1em;
 				font-weight: 200;
 				letter-spacing: 0.5em;
 				opacity: 0;
@@ -169,17 +183,22 @@
 			<div id="hud" class="instructions-overlay" style="display: none;">
 <!-- This is filled with overlay instructions in the js -->
 			</div>
+			<div id="hud-footer" class="instructions-overlay" style="display: none;"> hud footer</div>
 		</div>
 		
 		<div id="blocker">
 
 			<div class="instructions-overlay" id="instructions">
-				<span style="font-size:36px">Loading ...</span>
+				<span style="font-size:36px">WORK TITLE</span>
+    			<br/><br/>
+				<span style="font-size:36px">Click to activate</span>
 				<br /><br />
-				Move: W<br/>
+				Move: WS<br/>
 				Look: MOUSE<br/>
-				Enter portal: P
-			</div>
+				Return here: ESC<br/>
+				<br/><br/>
+				<span style="font-size:24px;">Explore browser fingerprints as sound objects in space. In your presence each fingerprint will reveal its sonic identity.</span>
+				</div>
 
 		</div>
 		<div class="dropdown" style="position: absolute;">

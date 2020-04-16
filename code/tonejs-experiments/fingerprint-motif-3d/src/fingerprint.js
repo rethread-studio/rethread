@@ -320,11 +320,15 @@ class Fingerprint {
         }
 
         newRoom.initSound = function(room) {
-            room.fingerprint.numParametersUsed = 24;
-            room.fingerprint.updateMotif();
+            
             Tone.Transport.bpm.value = 80;
             Tone.Transport.loop = false;
+            
+            room.fingerprint.requestNewSynths();
+            room.fingerprint.numParametersUsed = 24;
+            room.fingerprint.updateMotif();
             room.motif = room.fingerprint.motif;
+            room.motif.play(room.fingerprint.synth.synth, room.fingerprint.noiseSynth.synth, Tone.Transport, room.fingerprint);
 
             Synthesis.globalSynthLPF.frequency.value = 500;
             Synthesis.noiseEnv.triggerRelease();
@@ -495,6 +499,8 @@ class Fingerprint {
     
         newRoom.update = function (cameraDirection, room, delta) {
 
+            Graphics.displayOnHudFooter("inside a single browser fingerprint");
+
             // Graphics.setFogFade(Graphics.fogFade * (1.0 - (delta*4)));
             Graphics.updateSceneFog();
     
@@ -547,6 +553,7 @@ class Fingerprint {
 
         newRoom.cleanUp = function(room) {
             room.loop.stop();
+            room.fingerprint.returnSynths();
             room.chebyenv.triggerRelease();
             room.sonarLFOEnv.dispose();
             for(let syn of room.padSynths) {
