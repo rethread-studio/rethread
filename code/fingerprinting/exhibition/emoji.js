@@ -66,13 +66,13 @@ ws.onopen = () => {
     myEmoji = new EmojiParticle(emoji, true);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    canvas.width = 100;
-    canvas.height = 100;
+    canvas.width = 150;
+    canvas.height = 150;
     ctx.font = "100px Time";
     ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.strokeStyle = ctx.fillStyle;
     ctx.textAlign = "center";
-    ctx.fillText(emoji, canvas.width / 2, canvas.height);
+    ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
     ws.send(JSON.stringify({ emoji, image: canvas.toDataURL() }));
   });
   const handle = (event) => {
