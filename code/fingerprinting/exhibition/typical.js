@@ -5,13 +5,16 @@ function setupTypewriter(otps) {
     tag = "",
     writingTag = false,
     tagOpen = false,
-    typeSpeed = 100,
+    typeSpeed = 50,
     stop = false,
     tempTypeSpeed = 0;
 
   var type = function () {
     if (stop) {
-        return;
+      if (otps.callback) {
+        otps.callback();
+      }
+      return;
     }
     if (writingTag === true) {
       tag += otps.html[cursorPosition];
@@ -54,11 +57,15 @@ function setupTypewriter(otps) {
     cursorPosition += 1;
     if (cursorPosition < otps.html.length - 1) {
       setTimeout(type, tempTypeSpeed);
+    } else {
+      if (otps.callback) {
+        otps.callback();
+      }
     }
   };
 
   return {
     type: type,
-    stop: () => stop = true
+    stop: () => (stop = true),
   };
 }

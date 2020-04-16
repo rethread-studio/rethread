@@ -107,7 +107,7 @@ function generateFPText(fp) {
         + fp.original.webGLRenderer + "</span> GPU on a <span class = 'fpHighlight'>" + fp.original.screen_width + "x" + fp.original.screen_height
         + "</span> screen. You have <span class = 'fpHighlight'>" + fp.original['font-js'].split(',').length + "</span> fonts installed. Your language is set to <span class = 'fpHighlight'> "
         + ISO6391.getName(fp.original['languages-js'].split('-')[0]) + "</span>. You are in <span class = 'fpHighlight'>" + fp.original.timezone.split('/')[0] + "</span>, specifically, in <span class = 'fpHighlight'>"
-        + fp.original.timezone.split('/')[1] + "</span>."
+        + fp.original.timezone.split('/')[1] + "</span>." + "<p>Your emojis are drawn in a specific style, depending on your device's operating system. This is the emoji that represents you during the exhibition:</p>"
     return s;
     // return `Your browser fingerprint is everything a website can know about you without using cookies. 
     // You are using ${fp.original['user-agent']} browser on a ${fp.original.platform} platform with 
@@ -145,7 +145,7 @@ function mainPage() {
     console.log("consent: " + hasConsented);
     if (hasConsented) {
         $("#participateStill").hide();
-        $("#seeMyFP").show();
+        $("#seeMyFP").fadeIn();
     } else {
         $("#participateStill").show();
         $("#seeMyFP").hide();
