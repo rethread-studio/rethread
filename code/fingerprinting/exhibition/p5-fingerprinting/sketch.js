@@ -170,7 +170,7 @@ function anotherfpCallback(fingerprint) {
 function constellation(fingerprint) {
 
     let fp = fingerprint.original;
-    // console.log(fp);
+    console.log(fp);
 
     // host: "fp.durieux.me"
     // dnt: "not available"
@@ -309,10 +309,14 @@ function constellation(fingerprint) {
     //plugins
     fill(255);
     let plugins = fp['plugins'].split(',');
+    let c_plugins = 0.005;
     push()
+    noFill();
+    stroke(255);
+    strokeWeight(3);
     if (allFonts[plugins.length])
         rotate(radians(allFonts[plugins.length].charCodeAt(1)));
-    ellipse(c * cos(plugins.length), c * sin(plugins.length), c * 0.01 * plugins.length);
+    ellipse(c * cos(plugins.length), c * sin(plugins.length), c * c_plugins * plugins.length);
     pop()
 
     //pixelRatio
