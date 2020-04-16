@@ -2,17 +2,12 @@ const MAX_EMOJI_HISTORY = 10;
 
 const particles = {}
 function EmojiParticle (emoji, me) {
-  this.history = []
   this.emoji = emoji;
   
   this.x = 0;
   this.y = 0;
 
   this.update = (newX, newY, width, height) => {
-    this.history.push([this.x, this.y])
-    if (this.history.length > MAX_EMOJI_HISTORY) {
-      this.history.shift()
-    }
     const xRatio = window.innerWidth / width;
     const yRatio = window.innerHeight / height;
     this.x = newX * xRatio;
@@ -23,16 +18,6 @@ function EmojiParticle (emoji, me) {
     ct.font = "100px Time";
     ct.textAlign = "center";
 
-    ct.globalAlpha = 0.05;
-    ct.fillStyle = "rgb(255, 255, 255)";
-    for (let coord of this.history) {
-      if (this.image) {
-        img.src = this.image;
-        ct.drawImage(img, coord[0], coord[1]);
-      } else {
-        ct.fillText(this.emoji, coord[0], coord[1] + 50)
-      }
-    }
     ct.globalAlpha = 0.2;
     ct.fillStyle = "rgb(125, 125, 125)";
     ct.strokeStyle = ct.fillStyle;
