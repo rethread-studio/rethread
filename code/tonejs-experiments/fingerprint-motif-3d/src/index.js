@@ -14,9 +14,18 @@ function isMobileDevice() {
 // Global.state.mobile = window.matchMedia("only screen and (max-width: 960px)").matches;
 Global.state.mobile = isMobileDevice();
 if(Global.state.mobile) {
-  Global.html.inactiveInstructions += "<br/>You are on a mobile device";
+  Global.html.inactiveInstructions = `
+  <span style="font-size:36px; letter-spacing: 1em;">WORK TITLE</span>
+    <br/><br/><br/><br/><br/>
+    <span style="font-size:24px">Click to activate</span>
+    <br /><br />
+    Move: Touch<br/>
+    Look: Rotate device<br/>
+    <br/><br/>
+    <span style="font-size:24px;">Explore browser fingerprints as sonic objects in space. In your presence each device will reveal its sonic identity.</span>
+    <br/><br/>Mobile devices are currently not supported`;
 } else {
-  Global.html.inactiveInstructions += "<br/>You are on a desktop device";
+  // Global.html.inactiveInstructions += "<br/>You are on a desktop device";
 }
 
 Synthesis.init_tone();
