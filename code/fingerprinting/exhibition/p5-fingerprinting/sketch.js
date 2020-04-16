@@ -222,7 +222,7 @@ function constellation(fingerprint) {
     let fontsY = c * sin(allFonts.length);
     push()
     translate(0, 0, -c * 0.05);
-    ellipse(fontsX, fontsY, allFonts.length * c * 0.002);
+    ellipse(fontsX, fontsY, allFonts.length * c * 0.0015);
     pop()
 
     noFill()
@@ -334,7 +334,7 @@ function constellation(fingerprint) {
     let side = c * 0.03 * hardwareConcurrency;
     var h = side * (Math.sqrt(3) / 2);
     rotate(colorDepth)
-    translate(100 * cos(hardwareConcurrency), 100 * sin(hardwareConcurrency));
+    translate(c * cos(hardwareConcurrency), c * sin(hardwareConcurrency));
     triangle(-side / 2, h / 2, side / 2, h / 2, 0, -h / 2);
     pop()
 
@@ -345,7 +345,7 @@ function constellation(fingerprint) {
     stroke(sRy * 0.5, 40, sRx);
     push();
     rotate(-hardwareConcurrency);
-    let c_ = 0.005;
+    let c_ = 0.0045;
     line(-sRx * c * c_, 0, sRy * c * c_, 0);
     // line(-sRx + sRx / 2 * cos(radians(90)), 0 + sRx / 2 * sin(radians(90)), sRy + sRy / 2 * cos(radians(90)), 0 + sRy / 2 * sin(radians(90)));
     ellipse(-sRx * c * c_, 0, sRx * c * c_ * 1.5, sRx * c * c_ * 1.5);
