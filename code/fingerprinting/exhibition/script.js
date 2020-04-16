@@ -105,7 +105,6 @@ function consentInfoPage() {
 function generateFPText(fp) {
     var parser = new UAParser();
     var result = parser.getResult();
-    console.log(parser.device);
     let s = "You are using <span class = 'fpHighlight'>"
         + result.browser.name + "</span> with <span class = 'fpHighlight'>" + result.os.name + " </span> on a <span class = 'fpHighlight'>" + fp.original.platform + "</span> machine with <span class = 'fpHighlight'>"
         + fp.original.webGLRenderer + "</span> GPU on a <span class = 'fpHighlight'>" + fp.original.screen_width + "x" + fp.original.screen_height
