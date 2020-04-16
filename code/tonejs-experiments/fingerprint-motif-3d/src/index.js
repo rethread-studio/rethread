@@ -15,7 +15,7 @@ function isMobileDevice() {
 Global.state.mobile = isMobileDevice();
 if(Global.state.mobile) {
   Global.html.inactiveInstructions = `
-  <span style="font-size:36px; letter-spacing: 1em;">WORK TITLE</span>
+  <span style="font-size:36px; letter-spacing: 1em;">SPATIAL SONIC FINGERPRINTS</span>
     <br/><br/><br/><br/><br/>
     <span style="font-size:24px">Click to activate</span>
     <br /><br />
