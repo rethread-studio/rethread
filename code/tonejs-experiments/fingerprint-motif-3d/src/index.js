@@ -8,7 +8,10 @@ import * as Global from './globals.js';
 
 // Check if we're on a mobile device and set a global flag
 
-Global.state.mobile = window.matchMedia("only screen and (max-width: 760px)").matches;
+Global.state.mobile = window.matchMedia("only screen and (max-width: 960px)").matches;
+if(Global.state.mobile) {
+  Global.html.inactiveInstructions += "<br/>You are on a mobile device";
+}
 
 Synthesis.init_tone();
 Graphics.init_three();
