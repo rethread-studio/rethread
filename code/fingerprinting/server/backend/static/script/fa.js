@@ -1,4 +1,4 @@
-const HOST = "https://fp.durieux.me";
+let HOST = "https://fp.durieux.me";
 const fontsToTest = [
   ".Aqua Kana",
   ".Helvetica LT MM",
@@ -1048,6 +1048,19 @@ const fontsToTest = [
 function getSession(callback) {
   $.ajax({
     url: HOST + '/api/session/',
+    type: "get",
+    async: false,
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function (data) {
+      callback(data);
+    },
+  });
+}
+function getEmoji(callback) {
+  $.ajax({
+    url: HOST + '/api/session/emoji',
     type: "get",
     async: false,
     xhrFields: {

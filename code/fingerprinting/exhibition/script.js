@@ -3,7 +3,9 @@ let hasConsented = false;
 getSession((session) => {
     hasConsented = session.terms;
     if (hasConsented) {
-        $("body").toggleClass("blueBackground");
+        $("body").addClass("blueBackground");
+    } else {
+        $("body").removeClass("blueBackground");
     }
 });
 
@@ -30,6 +32,9 @@ function goToPage() {
     } else {
         $("#welcome").fadeIn();
     }
+    if (page != 'welcome' && page != 'consentInfo') {
+        $("#bgCanvas").hide();
+    }
 }
 window.addEventListener("hashchange", goToPage, false);
 
@@ -53,7 +58,11 @@ function howToPage(){
 }
 
 function consentInfoPage() {
-
+    if ($("#bgCanvas").length == 0) {
+        $("#main").fadeOut();
+        $("#welcome").fadeOut();
+        $("#consentInfo").fadeIn();
+    }
     $("#bgCanvas").fadeOut(function () {
         displayPage('consentInfo');
         $("#main").fadeOut();
@@ -129,6 +138,11 @@ function participateStillButton() {
     displayPage('consentInfo');
 }
 function noThanksButton() {
+    if ($("#bgCanvas").length == 0) {
+        displayPage('main');
+        $("#participateStill").show();
+        $("#seeMyFP").hide();
+    }
     $("#bgCanvas").fadeOut(function () {
         displayPage('main');
         $("#participateStill").show();
