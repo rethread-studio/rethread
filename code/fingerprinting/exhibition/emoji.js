@@ -1,4 +1,4 @@
-const MAX_EMOJI_HISTORY = 350;
+const MAX_EMOJI_HISTORY = 10;
 
 const particles = {}
 function EmojiParticle (emoji, me) {
