@@ -39,7 +39,7 @@ var data = {
 
 var html = {
     inactiveInstructions: `
-    <span style="font-size:36px; letter-spacing: 1em;">WORK TITLE</span>
+    <span style="font-size:36px; letter-spacing: 1em;">SPATIAL SONIC FINGERPRINTS</span>
     <br/><br/><br/><br/><br/>
     <span style="font-size:24px">Click to activate</span>
     <br /><br />
@@ -47,7 +47,7 @@ var html = {
     Look: MOUSE<br/>
     Return here: ESC<br/>
     <br/><br/>
-    <span style="font-size:24px;">Explore browser fingerprints as sonic objects in space. In your presence each device will reveal its sonic identity.</span>`,
+    <span style="font-size:24px; line-height: 2.0em;">Explore browser fingerprints as sonic objects in space. In your presence each device will reveal its sonic identity.</span>`,
 }
 
 var state = {
