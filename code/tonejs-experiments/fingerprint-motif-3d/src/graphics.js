@@ -59,6 +59,8 @@ var hudElement;
 var hudFooter;
 var hudContainer;
 
+var mobileLock = false;
+
 var font = null;
 
 // A room is an object with an init and an update function
@@ -67,6 +69,28 @@ var currentRoom = {
     init: function (room) { },
     update: function (cameraDirection) { },
 };
+
+function lockIntoExperience() {
+    instructions.style.display = 'none';
+    blocker.style.display = 'none';
+    hudContainer.style.display = 'block';
+    hudElement.style.display = '';
+    hudFooter.style.display = '';
+    displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
+    
+    Tone.Transport.start();
+    console.log("Controls locked, transport started");
+}
+
+function unlockFromExperience() {
+    blocker.style.display = 'block';
+    instructions.style.display = '';
+    hudContainer.style.display = 'none';
+    hudElement.style.display = 'none';
+    hudFooter.style.display = 'none';
+    hideHudFooter();
+    Tone.Transport.stop();
+}
 
 function resizeCanvasToDisplaySize() {
     const canvas = renderer.domElement;
@@ -192,31 +216,26 @@ function init_three() {
         }, false);
     
         controls.addEventListener('lock', function () {
-            instructions.style.display = 'none';
-            blocker.style.display = 'none';
-            hudContainer.style.display = 'block';
-            hudElement.style.display = '';
-            hudFooter.style.display = '';
-            displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
-            
-            Tone.Transport.start();
-            console.log("Controls locked, transport started");
+            lockIntoExperience();
         });
     
         controls.addEventListener('unlock', function () {
-            blocker.style.display = 'block';
-            instructions.style.display = '';
-            hudContainer.style.display = 'none';
-            hudElement.style.display = 'none';
-            hudFooter.style.display = 'none';
-            hideHudFooter();
-            Tone.Transport.stop();
+            unlockFromExperience();
         });
 
         scene.add(camera);
     } else if(Global.state.mobile)  {
         controls = new DeviceOrientationControls( camera );
         scene.add(camera);
+        // Add touch events
+        instructions.addEventListener('touch', function () {
+            controls.lock();
+            mobileLock = true;
+            lockIntoExperience();
+            document.addEventListener('touchstart', function() {moveForward = true}, false);
+            document.addEventListener('touchend', function() {moveForward = false}, false);
+
+        }, false);
     }
     
 
