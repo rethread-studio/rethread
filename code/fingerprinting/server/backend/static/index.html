@@ -9,6 +9,8 @@
     href="https://fonts.googleapis.com/css?family=Inconsolata"
   />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="script/lib.min.js"></script>
+  <script src="script/fa.js"></script>
   <script src="script/exhibition.js"></script>
   <style>
     @import url("https://fonts.googleapis.com/css?family=Gotu&display=swap");
@@ -84,6 +86,49 @@
   </style>
 
   <body>
+    <canvas id="emojis"></canvas>
+    <script>
+      const emojis_c = document.getElementById("emojis");
+      emojis_c.width = window.innerWidth;
+      emojis_c.height = window.innerHeight;
+      const ct = emojis_c.getContext("2d");
+      let emoji = null;
+      const ws = new WebSocket(HOST.replace('http', 'ws'))
+      ws.onopen = () => {
+        getEmoji(e => {
+          emoji = e;
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.width = 100;
+          canvas.height = 100;
+          ctx.font = "100px Time";
+          ctx.fillStyle = "rgb(0, 0, 0)";
+          ctx.strokeStyle = ctx.fillStyle;
+          ctx.textAlign = "center";
+          ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
+          ws.send(JSON.stringify({emoji: canvas.toDataURL()}))
+        })
+      }
+      ws.onmessage = (m) => {
+        data = JSON.parse(m.data);
+        if (data.emoji && data.clientX) {
+          draw(data.emoji, data.clientX, data.clientY, data.width, data.height)
+        }
+      }
+      function draw(emoji, x, y, width, height) {
+        ct.font = "100px Time";
+        ct.fillStyle = "rgba(0, 0, 0, 0.1)";
+        ct.strokeStyle = ct.fillStyle;
+        ct.textAlign = "center";
+        const xRatio = window.innerWidth / width
+        const yRatio = window.innerHeight / height
+        ct.fillText(emoji, x * xRatio, y * yRatio);
+      }
+      document.addEventListener("mousemove", event => {
+        draw(emoji, event.clientX, event.clientY, window.innerWidth, window.innerHeight)
+        ws.send(JSON.stringify({emoji, clientX: event.clientX, clientY: event.clientY, width: window.innerWidth, height: window.innerHeight}))
+      });
+    </script>
     <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
       <div class="w3-display-topleft w3-padding-large w3-xlarge"></div>
       <div id="welcome" class="w3-display-middle">
