@@ -180,49 +180,54 @@ function init_three() {
     // CONTROLS
 
     // var controls = new THREE.FirstPersonControls( camera, renderer.domElement );
-
-    if(!Global.state.mobile) {
-        controls = new PointerLockControls(camera, document.body);
-    } else if(Global.state.mobile)  {
-        controls = new DeviceOrientationControls( camera );
-    }
-    
-
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
 
-    instructions.addEventListener('click', function () {
+    if(!Global.state.mobile) {
+        controls = new PointerLockControls(camera, document.body);
+        instructions.addEventListener('click', function () {
 
-        controls.lock();
+            controls.lock();
+    
+        }, false);
+    
+        controls.addEventListener('lock', function () {
+            instructions.style.display = 'none';
+            blocker.style.display = 'none';
+            hudContainer.style.display = 'block';
+            hudElement.style.display = '';
+            hudFooter.style.display = '';
+            displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
+            
+            Tone.Transport.start();
+            console.log("Controls locked, transport started");
+        });
+    
+        controls.addEventListener('unlock', function () {
+            blocker.style.display = 'block';
+            instructions.style.display = '';
+            hudContainer.style.display = 'none';
+            hudElement.style.display = 'none';
+            hudFooter.style.display = 'none';
+            hideHudFooter();
+            Tone.Transport.stop();
+        });
 
-    }, false);
+        scene.add(camera);
+    } else if(Global.state.mobile)  {
+        controls = new DeviceOrientationControls( camera );
+        scene.add(camera);
+    }
+    
 
-    controls.addEventListener('lock', function () {
-        instructions.style.display = 'none';
-        blocker.style.display = 'none';
-        hudContainer.style.display = 'block';
-        hudElement.style.display = '';
-        hudFooter.style.display = '';
-        displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
-        
-        Tone.Transport.start();
-        console.log("Controls locked, transport started");
-    });
+    
 
-    controls.addEventListener('unlock', function () {
-        blocker.style.display = 'block';
-        instructions.style.display = '';
-        hudContainer.style.display = 'none';
-        hudElement.style.display = 'none';
-        hudFooter.style.display = 'none';
-        hideHudFooter();
-        Tone.Transport.stop();
-    });
+    
 
     document.addEventListener('mousedown', () => { mouseClicked = true });
     document.addEventListener('mouseup', () => { mouseClicked = false });
 
-    scene.add(controls.getObject());
+    
 
 
     var onKeyDown = function (event) {
@@ -351,9 +356,9 @@ function animate(now) {
 
         velocity.sub(direction.multiplyScalar(20.0 * delta));
 
-        controls.getObject().position.x -= (velocity.x * delta);
-        controls.getObject().position.y -= (velocity.y * delta);
-        controls.getObject().position.z -= (velocity.z * delta);   
+        camera.position.x -= (velocity.x * delta);
+        camera.position.y -= (velocity.y * delta);
+        camera.position.z -= (velocity.z * delta);   
     }
     if(Global.state.mobile) {
         // We're using DeviceOrientationControls which need to be updated
@@ -572,7 +577,7 @@ let spaceRoom = {
                 room.fingerprints.push(Global.data.localFingerprint);
                 room.localFingerprint = Global.data.localFingerprint;
                 // Move a little bit from the center so you don't collide with your own fingerprint
-                controls.getObject().position.z = 15;
+                camera.position.z = 15;
             } else {
                 room.localFingerprint = undefined;
             }
@@ -599,7 +604,7 @@ let spaceRoom = {
             //     sphere.scale.set(sphereScale, sphereScale, sphereScale);
             // }
 
-            // raycaster.ray.origin.copy(controls.getObject().position);
+            // raycaster.ray.origin.copy(camera.position);
             // As long as we're using a PointerLock the mouse should always be in the center
             raycaster.setFromCamera(mouse, camera);
             var intersections = raycaster.intersectObjects(spaceRoom.objects);
@@ -609,6 +614,7 @@ let spaceRoom = {
                     // Travel into the fingerprint
                     let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
                     travelToRoom(fingerprintRoom);
+                    return;
                 } else if (intersections[i].distance < 10.0) {
                     let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
                     displayOnHud("<span>" + text + "</span><br/><br/><span>travel into fingerprint</span>");
@@ -639,7 +645,7 @@ let spaceRoom = {
             // Calculate distance to objects
             let minDist = 100000.0;
             for (let fp of spaceRoom.fingerprints) {
-                let d2 = controls.getObject().position.distanceToSquared(fp.mesh.position);
+                let d2 = camera.position.distanceToSquared(fp.mesh.position);
                 fp.distance2 = d2;
                 if (d2 < minDist) { 
                     minDist = d2;
@@ -673,7 +679,7 @@ let spaceRoom = {
             minDist = 100000.0;
             let positionForward = new THREE.Vector3();
             camera.getWorldDirection(positionForward);
-            positionForward.multiplyScalar(50).add(controls.getObject().position);
+            positionForward.multiplyScalar(50).add(camera.position);
             for (let fp of spaceRoom.fingerprints) {
                 let d2 = positionForward.distanceToSquared(fp.mesh.position);
                 fp.distance2 = d2;
@@ -701,7 +707,7 @@ let spaceRoom = {
             } else {
                 scene.fog.density = room.spaceFog;
             }
-            let d2FromCenter = controls.getObject().position.distanceToSquared(new THREE.Vector3(0, 0, 0));
+            let d2FromCenter = camera.position.distanceToSquared(new THREE.Vector3(0, 0, 0));
             if( d2FromCenter > room.connectedSphereRadius2) {
                 // console.log("dark space");
                 room.spaceSection = "archived device traces"
@@ -726,7 +732,7 @@ let spaceRoom = {
 
             if(room.localFingerprint != undefined) {
                 // mirror the position of the user and the local fingerprint
-                let mirrorPosition = controls.getObject().position.clone();
+                let mirrorPosition = camera.position.clone();
                 mirrorPosition.z *= -1;
                 // mirrorPosition.y *= -1;
                 mirrorPosition.x *= -1;
@@ -742,20 +748,20 @@ let spaceRoom = {
             
 
             // Move light to where the camera is
-            spotLight.position.copy(controls.getObject().position);
+            spotLight.position.copy(camera.position);
             spotLight.target.position.copy(cameraDirection);
-            spotLight.target.position.add(controls.getObject().position);
+            spotLight.target.position.add(camera.position);
 
             // If we are teleported out of bounds, jump back to the origin
             let outOfBounds = 1000;
-            if (controls.getObject().position.x > outOfBounds
-                || controls.getObject().position.x < -outOfBounds
-                || controls.getObject().position.y > outOfBounds
-                || controls.getObject().position.y < -outOfBounds
-                || controls.getObject().position.z > outOfBounds
-                || controls.getObject().position.x < -outOfBounds
+            if (camera.position.x > outOfBounds
+                || camera.position.x < -outOfBounds
+                || camera.position.y > outOfBounds
+                || camera.position.y < -outOfBounds
+                || camera.position.z > outOfBounds
+                || camera.position.x < -outOfBounds
             ) {
-                controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
+                camera.position.copy(new THREE.Vector3(0, 0, 0));
             }
         } else {
             let dots = "";
@@ -869,7 +875,7 @@ let portalRoom = {
         scene.add(roomCube);
 
         // Place camera at origin
-        controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
+        camera.position.copy(new THREE.Vector3(0, 0, 0));
 
         // Create text to click portal
         // let textMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff, side: THREE.FrontSide  } );
@@ -907,20 +913,20 @@ let portalRoom = {
     update: function (cameraDirection) {
 
         // Move sphere and light to where the camera is
-        spotLight.position.copy(controls.getObject().position);
+        spotLight.position.copy(camera.position);
         spotLight.target.position.copy(cameraDirection);
-        spotLight.target.position.add(controls.getObject().position);
+        spotLight.target.position.add(camera.position);
 
         // If we are teleported out of bounds, jump back to the origin
         let outOfBounds = 1000;
-        if (controls.getObject().position.x > outOfBounds
-            || controls.getObject().position.x < -outOfBounds
-            || controls.getObject().position.y > outOfBounds
-            || controls.getObject().position.y < -outOfBounds
-            || controls.getObject().position.z > outOfBounds
-            || controls.getObject().position.x < -outOfBounds
+        if (camera.position.x > outOfBounds
+            || camera.position.x < -outOfBounds
+            || camera.position.y > outOfBounds
+            || camera.position.y < -outOfBounds
+            || camera.position.z > outOfBounds
+            || camera.position.x < -outOfBounds
         ) {
-            controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
+            camera.position.copy(new THREE.Vector3(0, 0, 0));
         }
 
         // As long as we're using a PointerLock the mouse should always be in the center
@@ -1003,6 +1009,7 @@ function newScene(color, fog) {
     scene = new THREE.Scene();
     scene.background = color;
     scene.fog = fog;
+    scene.add(camera);
 }
 
 function setFogFade(density) {
@@ -1018,7 +1025,8 @@ function updateSceneFog() {
 export { init_three, 
     animate, 
     scene, 
-    controls, 
+    controls,
+    camera,
     spaceRoom, 
     currentRoom, 
     newScene, 

@@ -275,7 +275,7 @@ class Fingerprint {
             // }
     
             // Place camera at origin
-            Graphics.controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
+            Graphics.camera.position.copy(new THREE.Vector3(0, 0, 0));
 
             // Add geometry to display a shader on
             let shaderGeometry = new THREE.PlaneGeometry( 18, 18, 1, 1 );
@@ -506,13 +506,13 @@ class Fingerprint {
     
             // Move the spotlight to the camera
             if(room.spotLight != undefined) {
-                room.spotLight.position.copy(Graphics.controls.getObject().position);
+                room.spotLight.position.copy(Graphics.camera.position);
                 room.spotLight.target.position.copy(cameraDirection);
-                room.spotLight.target.position.add(Graphics.controls.getObject().position);
+                room.spotLight.target.position.add(Graphics.camera.position);
             }
     
             let outOfBounds = 200;
-            let camPos = Graphics.controls.getObject().position;
+            let camPos = Graphics.camera.position;
             if (camPos.x > outOfBounds
                 || camPos.x < -outOfBounds
                 || camPos.y > outOfBounds
@@ -520,11 +520,11 @@ class Fingerprint {
                 || camPos.z > outOfBounds
                 || camPos.x < -outOfBounds
             ) {
-                Graphics.controls.getObject().position.copy(new THREE.Vector3(0, 0, 0));
+                Graphics.camera.position.copy(new THREE.Vector3(0, 0, 0));
             }
 
             // As long as we're using a PointerLock the mouse should always be in the center
-            Graphics.raycaster.setFromCamera( new THREE.Vector2(0, 0), Graphics.controls.getObject() );    
+            Graphics.raycaster.setFromCamera( new THREE.Vector2(0, 0), Graphics.camera );    
 
             //3. compute intersections
             var intersections = Graphics.raycaster.intersectObjects( [room.roomCube] );

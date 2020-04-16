@@ -7,8 +7,12 @@ import * as Global from './globals.js';
 
 
 // Check if we're on a mobile device and set a global flag
+function isMobileDevice() {
+  return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+};
 
-Global.state.mobile = window.matchMedia("only screen and (max-width: 960px)").matches;
+// Global.state.mobile = window.matchMedia("only screen and (max-width: 960px)").matches;
+Global.state.mobile = isMobileDevice();
 if(Global.state.mobile) {
   Global.html.inactiveInstructions += "<br/>You are on a mobile device";
 } else {

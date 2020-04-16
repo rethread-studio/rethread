@@ -47,7 +47,7 @@ var html = {
     Look: MOUSE<br/>
     Return here: ESC<br/>
     <br/><br/>
-    <span style="font-size:24px;">Explore browser fingerprints as sonic objects in space. In your presence each fingerprint will reveal its sonic identity.</span>`,
+    <span style="font-size:24px;">Explore browser fingerprints as sonic objects in space. In your presence each device will reveal its sonic identity.</span>`,
 }
 
 var state = {
