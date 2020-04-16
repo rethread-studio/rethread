@@ -35,6 +35,7 @@ var data = {
     localFingerprint: undefined,
     localRawFingerprint: undefined,
     //localRawFingerprint is set in index.js
+    minimumMarkersInCommon: 0,
 }
 
 var html = {

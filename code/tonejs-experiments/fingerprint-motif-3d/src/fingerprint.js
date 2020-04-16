@@ -206,6 +206,7 @@ class Fingerprint {
     fingerprintSum;
     color;
     activation; // used to display that the fingerprint is sonically activated
+    hidden;
     constructor(rawFingerprint, type) {
         console.log("Created fingerprint with raw: " + JSON.stringify(rawFingerprint));
         this.type = type;
@@ -218,6 +219,7 @@ class Fingerprint {
         this.synth = undefined;
         this.oscillatorType = 'sine';
         this.synthType = 'sine';
+        this.hidden = false;
     }
     setActivation(v) {
         this.activation = v;
@@ -691,45 +693,72 @@ class Fingerprint {
         }
         return false;
     }
+    show() {
+        this.hidden = false;
+    }
+    hide() {
+        this.hidden = true;
+        // Hide the mesh
+        // Stop any playing
+        this.motif.pause();
+        this.returnSynths();
+        this.numParametersUsed = 0;
+    }
+    getNumMarkersInCommon(rawFingerprint) {
+        let numMarkers = 0;
+        for(let i = 0; i < this.rawFingerprint.length; i++) {
+            if(this.rawFingerprint[i] == rawFingerprint[i]) {
+                numMarkers += 1;
+            }
+        }
+        return numMarkers;
+    }
     updateSpace(relativeDistance, delta) {
         if(relativeDistance > 0 && relativeDistance < 100000) {
-            this.setDb(relativeDistance * -6.5 - 16);
+            if(!this.hidden) {
+                this.setDb(relativeDistance * -6.5 - 16);
             // if (distance2 < 110) {
             //     this.material.transparent = true;
             //     this.material.opacity = (distance2-10) / 100;
             // }
             // this.synth.harmonicity.value = Math.floor(Math.max(12 - (distance2 / 10), 1.0));
             // this.synth.envelope.release = Math.max(0.5 - distance2 / 50, 0.002);
-            let numParameters = Math.max(Math.floor(24 - (Math.max(relativeDistance - 1.0, 0) * 8.0)), 0);
-            if (numParameters != this.numParametersUsed) {
-                if(this.numParametersUsed > 0 && this.synth == undefined) {
-                    // if numParameters were 0 we have returned or not requested a synth
-                    this.requestNewSynths();
-                } else if (numParameters == 0) {
-                    // we go frome some parameters to none
-                    // return the synth to the pool
-                    if(this.synth != undefined) {
-                        this.returnSynths();
-                    }
+            
+                let numParameters = Math.max(Math.floor(24 - (Math.max(relativeDistance - 1.0, 0) * 8.0)), 0);
+                // Disable devices that would make very little sound to have more resources (synths) left for the ones that will be heard
+                if (numParameters < 10) {
+                    numParameters = 0;
                 }
-                this.numParametersUsed = numParameters;
-                // this.numParametersUsed = 24;
-                this.updateMotif();
-            }
+                if (numParameters != this.numParametersUsed) {
+                    if(this.numParametersUsed > 0 && this.synth == undefined) {
+                        // if numParameters were 0 we have returned or not requested a synth
+                        this.requestNewSynths();
+                    } else if (numParameters == 0) {
+                        // we go frome some parameters to none
+                        // return the synth to the pool
+                        if(this.synth != undefined) {
+                            this.returnSynths();
+                        }
+                    }
+                    this.numParametersUsed = numParameters;
+                    // this.numParametersUsed = 24;
+                    this.updateMotif();
+                }
 
-            if(this.numParametersUsed > 0 && this.synth != undefined && this.noiseSynth != undefined) {
-                // This only schedules the motif if it wasn't already playing
-                this.motif.play(this.synth.synth, this.noiseSynth.synth, Tone.Transport, this);
-            } else {
-                // Pauses the motif if it was playing
-                this.motif.pause();
-            }
+                if(this.numParametersUsed > 0 && this.synth != undefined && this.noiseSynth != undefined) {
+                    // This only schedules the motif if it wasn't already playing
+                    this.motif.play(this.synth.synth, this.noiseSynth.synth, Tone.Transport, this);
+                } else {
+                    // Pauses the motif if it was playing
+                    this.motif.pause();
+                }
 
-            this.activation = this.activation * 0.8;
-            this.material.color = this.color.clone().multiplyScalar(0.1 + (this.activation * 0.9));
+                this.activation = this.activation * 0.8;
+                this.material.color = this.color.clone().multiplyScalar(0.1 + (this.activation * 0.9));
 
-            if(this.type == FPrintTypes.connected) {
-                this.mesh.position.add(new THREE.Vector3((Math.random()-.5)*.1, (Math.random()-.5)*.1, (Math.random()-.5)*.1));
+                if(this.type == FPrintTypes.connected) {
+                    this.mesh.position.add(new THREE.Vector3((Math.random()-.5)*.1, (Math.random()-.5)*.1, (Math.random()-.5)*.1));
+                }
             }
 
             // this.material.color.multiplyScalar(0.9);

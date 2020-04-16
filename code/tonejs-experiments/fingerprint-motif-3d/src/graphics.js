@@ -59,6 +59,15 @@ var hudElement;
 var hudFooter;
 var hudContainer;
 
+var filterSlider = document.getElementById("filter-slider");
+var filterOutput = document.getElementById("filter-output");
+filterOutput.innerHTML = filterSlider.value;
+filterSlider.oninput = function() {
+    filterOutput.innerHTML = this.value;
+    Global.data.minimumMarkersInCommon = this.value;
+    updateFiltering(this.value);
+}
+
 var mobileLock = false;
 
 var font = null;
@@ -386,6 +395,8 @@ let spaceRoom = {
     darkColor: new THREE.Color(0x555555),
     spaceSection: "currently connected devices",
     timeUntilConnectedUpdate: 30,
+    lastMinimumMarkersInCommon: 0,
+    filteredOutFingerprints: [],
 
     init: function (room) {
         fogFade = 1.0;
@@ -568,6 +579,7 @@ let spaceRoom = {
             
             // Add the currently connected fingerprints to the room
             room.addAllFingerprints(room, camera.position, room.connectedSphereRadius, Global.data.connectedFingerprints);
+            room.updateFiltering(Global.data.minimumMarkersInCommon); // 
             // Set all the newly added fingerprints as current fingerprints for DEBUG
             // for(let i = 0; i < room.fingerprints.length; i++) {
             //     room.fingerprints[i].type = Fingerprint.FPrintTypes.connected;
@@ -687,6 +699,11 @@ let spaceRoom = {
                 fp.distance2 = d2;
                 if (d2 < minDist) { minDist = d2; }
             }
+            for (let fp of spaceRoom.filteredOutFingerprints) {
+                let d2 = positionForward.distanceToSquared(fp.mesh.position);
+                fp.distance2 = d2;
+                if (d2 < minDist) { minDist = d2; }
+            }
             // Add new fingerprints if they're too far out 
             if (minDist > 1500) {
                 let newFingerprintRadius = 20;
@@ -696,7 +713,8 @@ let spaceRoom = {
                     // add a variable number of new fingerprints
                     let numPrints = Math.random() * 4;
                     for(let i = 0; i<numPrints; i++) {
-                        room.addAdditionalFingerprint(room, positionForward, newFingerprintRadius, Global.data.fingerprints);   
+                        room.addAdditionalFingerprint(room, positionForward, newFingerprintRadius, Global.data.fingerprints);
+                        room.updateFiltering(this.lastMinimumMarkersInCommon);
                     }
                 }
                 
@@ -815,6 +833,34 @@ let spaceRoom = {
                 i--;
             }
         }
+    },
+    updateFiltering: function(room, minimumMarkersInCommon) {
+        if(minimumMarkersInCommon >= this.lastMinimumMarkersInCommon) {
+            // Check if any additional fingerprints need to be removed
+            if(Global.data.localRawFingerprint != undefined) {
+                for(let j = 0; j < room.fingerprints.length; j++) {
+                    if(room.fingerprints[j].getNumMarkersInCommon(Global.data.localRawFingerprint) < minimumMarkersInCommon) {
+                        room.fingerprints[j].cleanUpSpace(scene);
+                        room.filteredOutFingerprints.push(room.fingerprints[j]);
+                        room.fingerprints.splice(j, 1);
+                        j--;
+                    }
+                }
+            }
+        } else if (minimumMarkersInCommon < this.lastMinimumMarkersInCommon) {
+            // Check if any fingerprints need to be put back into the room
+            if(Global.data.localRawFingerprint != undefined) {
+                for(let j = 0; j < room.filteredOutFingerprints.length; j++) {
+                    if(room.filteredOutFingerprints[j].getNumMarkersInCommon(Global.data.localRawFingerprint) >= minimumMarkersInCommon) {
+                        scene.add(room.filteredOutFingerprints[j].mesh);
+                        room.fingerprints.push(room.filteredOutFingerprints[j]);
+                        room.filteredOutFingerprints.splice(j, 1);
+                        j--;
+                    }
+                }
+            }
+        }
+        this.lastMinimumMarkersInCommon = minimumMarkersInCommon;
     },
     cleanUp: function (room) {
         for (let fprint of spaceRoom.fingerprints) {
@@ -1021,6 +1067,12 @@ function setFogFade(density) {
 function updateSceneFog() {
     if(fogFade > 0.0001) {
         scene.fog.density = 0.02 + fogFade;
+    }
+}
+
+function updateFiltering(minimumValuesInCommon) {
+    if(currentRoom == spaceRoom) {
+        currentRoom.updateFiltering(currentRoom, minimumValuesInCommon);
     }
 }
 
