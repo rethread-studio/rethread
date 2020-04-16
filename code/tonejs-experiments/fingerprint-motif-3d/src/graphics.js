@@ -229,7 +229,6 @@ function init_three() {
         scene.add(camera);
         // Add touch events
         instructions.addEventListener('touchstart', function () {
-            controls.lock();
             mobileLock = true;
             lockIntoExperience();
             document.addEventListener('touchstart', function() {moveForward = true}, false);
