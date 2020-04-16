@@ -37,7 +37,7 @@ function goToPage() {
         $("body").removeClass("blueBackground");
         $("#dot").removeClass("pinkDot");
     }
-    
+
     page = window[currentPage + 'Page'];
     if (page) {
         page();
@@ -73,7 +73,7 @@ function welcomePage() {
     $("#welcome").fadeIn();
 }
 
-function howToPage(){
+function howToPage() {
     if (hasConsented) {
         return displayPage('main');
     }
@@ -116,23 +116,37 @@ function generateFPText(fp) {
 }
 function myFpPage() {
     displayPage('myFp');
+    $("#goToResources").hide();
+    $("#goToMainPage").hide();
     $("#main").fadeOut();
     $("#consentInfo").fadeOut();
     $("#participateStill").hide();
     $("#myFp").fadeIn();
+    // $("#emojis").hide();
 
     var parser = new UAParser();
     var result = parser.getResult();
     let currentText = "You are using <span class = 'fpHighlight'>"
         + result.browser.name + "</span> with <span class = 'fpHighlight'>" + result.os.name + " </span>";
 
-    const opts = { element: document.getElementById("fptext"), html: currentText }
+    const opts = {
+        element: document.getElementById("fptext"), html: currentText, callback: () => {
+            // execute the fadeIn
+            console.log("typing done");
+            $("#goToResources").fadeIn();
+            $("#goToMainPage").fadeIn();
+            $("#emojis").fadeIn();
+        }
+    }
     typewriter = setupTypewriter(opts)
     typewriter.type();
     getFingerPrint(async fp => {
         // $("#fptext").text(generateFPText(fp));
         const text = generateFPText(fp);
-        opts.html = text
+        opts.html = text;
+
+        $("#myEmoji").src = fp.original.emojis;
+
         console.log(fp);
     })
 }
