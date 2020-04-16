@@ -7,7 +7,7 @@ getSession((session) => {
     }
 });
 
-const pages = ['welcome', 'consentInfo', 'myFp', 'main']
+const pages = ['welcome', 'howTo', 'consentInfo', 'myFp', 'main']
 
 function getCurrentPage() {
     if (window.location.hash) {
@@ -44,6 +44,12 @@ function displayPage(name) {
 
 function welcomePage() {
     displayPage('welcome');
+}
+
+function howToPage(){
+    $("#welcome").fadeOut(function () {
+        $("#howTo").fadeIn();
+    });
 }
 
 function consentInfoPage() {
@@ -112,6 +118,10 @@ function mainPage() {
     $("#main").fadeIn();
 }
 
+function enterButton() {
+    displayPage('howTo');
+}
+
 function participateButton() {
     displayPage('consentInfo');
 }
@@ -160,6 +170,9 @@ $(document).ready(function () {
     if (window.location.hash) {
         goToPage()
     }
+
+    // Enter
+    $("#enter").click(enterButton);
 
     // Participate
     $("#participate").click(participateButton);
