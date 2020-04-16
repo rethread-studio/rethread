@@ -5,7 +5,7 @@ function setupTypewriter(otps) {
     tag = "",
     writingTag = false,
     tagOpen = false,
-    typeSpeed = 50,
+    typeSpeed = 75,
     stop = false,
     tempTypeSpeed = 0;
 
@@ -39,12 +39,12 @@ function setupTypewriter(otps) {
       if (otps.html[cursorPosition] === " ") {
         tempTypeSpeed = 0;
       } else {
-        tempTypeSpeed = Math.random() * typeSpeed + 50;
+        tempTypeSpeed = Math.random() * typeSpeed;
       }
       otps.element.innerHTML += otps.html[cursorPosition];
     }
     if (writingTag === true && otps.html[cursorPosition] === ">") {
-      tempTypeSpeed = Math.random() * typeSpeed + 50;
+      tempTypeSpeed = Math.random() * typeSpeed;
       writingTag = false;
       if (tagOpen) {
         var newSpan = document.createElement("span");

@@ -47,7 +47,11 @@ function goToPage() {
     if (currentPage != 'welcome') {
         $("#bgCanvas").hide();
         if (hasConsented) {
-            $("#emojis").show();
+            if (currentPage != 'myFp') {
+                $("#emojis").show();
+            } else {
+                $("#emojis").hide();
+            }
         }
         $("#dotMenu").show();
     } else {
@@ -122,7 +126,6 @@ function myFpPage() {
     $("#consentInfo").fadeOut();
     $("#participateStill").hide();
     $("#myFp").fadeIn();
-    // $("#emojis").hide();
 
     var parser = new UAParser();
     var result = parser.getResult();
@@ -133,19 +136,21 @@ function myFpPage() {
         element: document.getElementById("fptext"), html: currentText, callback: () => {
             // execute the fadeIn
             console.log("typing done");
+            getEmoji((e) => {
+                $("#myEmoji").html(e);     
+            })
             $("#goToResources").fadeIn();
             $("#goToMainPage").fadeIn();
             $("#emojis").fadeIn();
         }
     }
+    $("#myEmoji").html(''); 
     typewriter = setupTypewriter(opts)
     typewriter.type();
     getFingerPrint(async fp => {
         // $("#fptext").text(generateFPText(fp));
         const text = generateFPText(fp);
         opts.html = text;
-
-        $("#myEmoji").src = fp.original.emojis;
 
         console.log(fp);
     })
