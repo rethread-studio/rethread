@@ -2,14 +2,16 @@ loadFont()
 let hasConsented = false;
 getSession((session) => {
     hasConsented = session.terms;
-    if (hasConsented) {
-        $("body").addClass("blueBackground");
-        $("#dot").addClass("pinkDot");
-    } else {
-        $("body").removeClass("blueBackground");
-        $("#dot").removeClass("pinkDot");
-    }
+    goToPage();
 });
+
+function fade(element, func) {
+    if (element.length == 0) {
+        func()
+    } else {
+        element.fadeOut(func)
+    }
+}
 
 const pages = ['welcome', 'howTo', 'consentInfo', 'myFp', 'main']
 
@@ -28,14 +30,29 @@ function goToPage() {
         }
     }
 
+    if (hasConsented) {
+        $("body").addClass("blueBackground");
+        $("#dot").addClass("pinkDot");
+    } else {
+        $("body").removeClass("blueBackground");
+        $("#dot").removeClass("pinkDot");
+    }
+    
     page = window[currentPage + 'Page'];
     if (page) {
         page();
     } else {
         $("#welcome").fadeIn();
     }
-    if (page != 'welcome' && page != 'consentInfo') {
+    if (currentPage != 'welcome') {
         $("#bgCanvas").hide();
+        if (hasConsented) {
+            $("#emojis").show();
+        }
+        $("#dotMenu").show();
+    } else {
+        $("#bgCanvas").show();
+        $("#emojis").hide();
     }
 }
 window.addEventListener("hashchange", goToPage, false);
@@ -43,18 +60,24 @@ window.addEventListener("hashchange", goToPage, false);
 function displayPage(name) {
     window.location.hash = name;
     if (hasConsented) {
-        $("body").addClass('blueBackground');
+        $("body").addClass("blueBackground");
+        $("#dot").addClass("pinkDot");
     } else {
-        $("body").removeClass('blueBackground');
+        $("body").removeClass("blueBackground");
+        $("#dot").removeClass("pinkDot");
     }
 }
 
 function welcomePage() {
     displayPage('welcome');
+    $("#welcome").fadeIn();
 }
 
 function howToPage(){
-    $("#welcome").fadeOut(function () {
+    if (hasConsented) {
+        return displayPage('main');
+    }
+    fade($("#welcome"), function () {
         $("#howTo").fadeIn();
         $("#howToDot").fadeIn();
         $("#dotMenu").fadeIn();
@@ -62,13 +85,10 @@ function howToPage(){
 }
 
 function consentInfoPage() {
-    if ($("#bgCanvas").length == 0) {
-        $("#main").fadeOut();
-        $("#howTo").fadeOut();
-        $("#howToDot").fadeOut();
-        $("#consentInfo").fadeIn();
+    if (hasConsented) {
+        return displayPage('main');
     }
-    $("#bgCanvas").fadeOut(function () {
+    fade($("#bgCanvas"), function () {
         displayPage('consentInfo');
         $("#main").fadeOut();
         $("#howTo").fadeOut();
@@ -145,17 +165,11 @@ function participateStillButton() {
     displayPage('consentInfo');
 }
 function noThanksButton() {
-    if ($("#bgCanvas").length == 0) {
-        displayPage('main');
-        $("#participateStill").show();
-        $("#seeMyFP").hide();
-    }
-    $("#bgCanvas").fadeOut(function () {
+    fade($("#bgCanvas"), function () {
         displayPage('main');
         $("#participateStill").show();
         $("#seeMyFP").hide();
     });
-
 }
 function noThanksAgainButton() {
     displayPage('main');
