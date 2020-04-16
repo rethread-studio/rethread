@@ -76,6 +76,9 @@ ws.onopen = () => {
     ws.send(JSON.stringify({ emoji, image: canvas.toDataURL() }));
   });
   const handle = (event) => {
+    if (!hasConsented) {
+        return;
+    }
     if (myEmoji) {
       myEmoji.update(event.clientX, event.clientY, window.innerWidth, window.innerHeight)
     }
