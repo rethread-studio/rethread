@@ -4,8 +4,10 @@ getSession((session) => {
     hasConsented = session.terms;
     if (hasConsented) {
         $("body").addClass("blueBackground");
+        $("#dot").addClass("pinkDot");
     } else {
         $("body").removeClass("blueBackground");
+        $("#dot").removeClass("pinkDot");
     }
 });
 
@@ -54,6 +56,7 @@ function welcomePage() {
 function howToPage(){
     $("#welcome").fadeOut(function () {
         $("#howTo").fadeIn();
+        $("#dotMenu").fadeIn();
     });
 }
 
