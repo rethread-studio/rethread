@@ -98,7 +98,9 @@ ws.onopen = () => {
   });
 };
 setInterval(() => {
-  ct.clearRect(0, 0, emojis_c.width, emojis_c.height);
+  // ct.clearRect(0, 0, emojis_c.width, emojis_c.height);
+  ctx.fillStyle = rgba(0, 0, 0, 0.05);
+  ctx.fillRect(0, 0, emojis_c.width, emojis_c.height);
   if (myEmoji) {
     myEmoji.draw();
   }
