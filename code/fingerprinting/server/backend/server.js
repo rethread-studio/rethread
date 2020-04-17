@@ -516,10 +516,21 @@ server.on("upgrade", function (request, socket, head) {
 
 const userEmojis = {}
 wss.on("connection", function (ws, request) {
+  let pingInterval = null;
+  function ping() {
+    if (pingInterval) {
+      clearTimeout(pingInterval);
+    }
+    pingInterval = setTimeout(() => {
+      wss.broadcast(JSON.stringify({'event': 'close', 'from': request.session.wsId}), ws)
+      delete userEmojis[request.session.wsId];
+    }, 30000)
+  }
   ws.on("message", function (message) {
     if (!request.session.wsId) {
-      request.session.wsId = Math.round(Math.random() * 10000)
+      request.session.wsId = Math.round(Math.random() * 100000)
     }
+    ping();
     message = JSON.parse(message)
     if (message.image) {
       userEmojis[request.session.wsId] = message.image;
