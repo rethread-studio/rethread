@@ -5,6 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Browser FingerPrint Visualization</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" type="text/css" href="../style.css">
     <link
       rel="stylesheet"
       type="text/css"
@@ -17,8 +19,26 @@
       crossorigin="anonymous"
     ></script>
   </head>
-  <body style="background: #f3eeeb;">
+  <body>
     <canvas id="canvas"></canvas>
+
+    <div id="info" class="w3-display-middle">
+      <h3 style="color: white">
+          <p>FingerFonts</p>
+      </h3>
+      <p>By installing different fonts on your device you make it unique. In this visualization we highlight the diversity of font that you installed in a single drawing.</p>
+
+
+      <button id="seeArt">loading...</button>
+    </div>
+
+    <div class="dropdown">
+      <button onclick="myFunction()" class="dropbtn"> </button>
+      <div id="myDropdown" class="dropdown-content">
+          <a href="../index.html#main">Back to artwork gallery</a>
+          <a href="../exit.html">Leave exhibition</a>
+      </div>
+    </div>
   </body>
   <script src="../script/lib.min.js"></script>
   <script src="../script/fa.js"></script>

@@ -277,6 +277,6 @@ $(document).ready(function () {
 
     $("#Font").click(function () {
         // Go to 2D art
-        window.location.href = "https://rethread.art/code/fingerprinting/server/backend/static/font.html";
+        window.location.href = "font/";
     });
 });

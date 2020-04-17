@@ -2,4 +2,22 @@ html, body {
     position: relative;
     margin: 0;
     padding: 0;
+    background: rgb(68, 68, 68);
+}
+canvas {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    z-index: -1;
+    filter: blur(20px);
+    transition: filter 2s ease;
+}
+canvas.art {
+    filter: blur(0px);
+}
+#info {
+    text-align: center;
+    color: white;
 }
