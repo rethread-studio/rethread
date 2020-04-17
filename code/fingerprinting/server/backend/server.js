@@ -128,7 +128,6 @@ const emojis = [
   "🎂",
   "🌻",
   "😐",
-  "🖕",
   "💝",
   "🙊",
   "😹",
@@ -515,20 +514,24 @@ server.on("upgrade", function (request, socket, head) {
   });
 });
 
+const userEmojis = {}
 wss.on("connection", function (ws, request) {
-
   ws.on("message", function (message) {
-    if (request.session.fpId) {
-      message = JSON.parse(message)
-      message.from = request.session.fpId
-      wss.broadcast(JSON.stringify(message), ws)
+    if (!request.session.wsId) {
+      request.session.wsId = Math.round(Math.random() * 10000)
     }
+    message = JSON.parse(message)
+    if (message.image) {
+      userEmojis[request.session.wsId] = message.image;
+      ws.send(JSON.stringify({userEmojis}))
+    }
+    message.from = request.session.wsId
+    wss.broadcast(JSON.stringify(message), ws)
   });
 
   ws.on("close", function () {
-    if (request.session.fpId) {
-      wss.broadcast(JSON.stringify({'event': 'close', 'from': request.session.fpId}), ws)
-    }
+    wss.broadcast(JSON.stringify({'event': 'close', 'from': request.session.wsId}), ws)
+    delete userEmojis[request.session.wsId];
   });
 });
 

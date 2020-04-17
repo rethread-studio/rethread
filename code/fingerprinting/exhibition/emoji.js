@@ -23,7 +23,7 @@ function EmojiParticle (emoji, me) {
     ct.strokeStyle = ct.fillStyle;
     if (this.image) {
       img.src = this.image;
-      ct.drawImage(img, this.x, this.y);
+      ct.drawImage(img, this.x - 50, this.y - 50);
     } else {
       ct.fillText(this.emoji, this.x, this.y + 50);
     }
@@ -51,14 +51,15 @@ ws.onopen = () => {
     myEmoji = new EmojiParticle(emoji, true);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    canvas.width = 150;
-    canvas.height = 150;
+    canvas.width = 125;
+    canvas.height = 125;
     ctx.font = "100px Time";
     ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.strokeStyle = ctx.fillStyle;
     ctx.textAlign = "center";
-    ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
-    ws.send(JSON.stringify({ emoji, image: canvas.toDataURL() }));
+    ctx.fillText(emoji, 50, 100);
+    myEmoji.image = canvas.toDataURL();
+    ws.send(JSON.stringify({ emoji, image: myEmoji.image}));
   });
   const handle = (event) => {
     if (!hasConsented) {
@@ -103,15 +104,24 @@ window.addEventListener('resize', () => {
 })
 ws.onmessage = (m) => {
   data = JSON.parse(m.data);
-  if (data.emoji && data.clientX) {
-    if (!particles[data.emoji]) {
-      particles[data.emoji] = new EmojiParticle(data.emoji);
+  if (data.userEmojis) {
+    for (let from in data.userEmojis) {
+      if (!particles[from]) {
+        particles[from] = new EmojiParticle(data.emoji);
+      }
+      particles[from].image = data.userEmojis[from];
     }
-    particles[data.emoji].update(data.clientX, data.clientY, data.width, data.height)
+  } else if (data.emoji && data.clientX) {
+    if (!particles[data.from]) {
+      particles[data.from] = new EmojiParticle(data.emoji);
+    }
+    particles[data.from].update(data.clientX, data.clientY, data.width, data.height)
   } else if (data.emoji && data.image)  {
-    if (!particles[data.emoji]) {
-      particles[data.emoji] = new EmojiParticle(data.emoji);
+    if (!particles[data.from]) {
+      particles[data.from] = new EmojiParticle(data.emoji);
     }
-    particles[data.emoji].image = data.image
+    particles[data.from].image = data.image
+  } else if (data.event && data.event == 'close')  {
+    delete particles[data.from];
   }
 };
