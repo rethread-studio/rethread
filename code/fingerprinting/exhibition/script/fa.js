@@ -1,4 +1,4 @@
-let HOST = "https://fp.rethread.art/";
+let HOST = "https://fp.rethread.art";
 const fontsToTest = [
   ".Aqua Kana",
   ".Helvetica LT MM",
