@@ -136,14 +136,24 @@ function myFpPage() {
             // execute the fadeIn
             console.log("typing done");
             getEmoji((e) => {
-                $("#myEmoji").html(e);     
+                const canvas = document.getElementById("myEmoji");
+                const ctx = canvas.getContext("2d");
+                canvas.width = 125;
+                canvas.height = 125;
+                ctx.font = "100px Time";
+                ctx.fillStyle = "rgb(0, 0, 0)";
+                ctx.strokeStyle = ctx.fillStyle;
+                ctx.textAlign = "center";
+                ctx.fillText(e, 50, 100);     
             })
             $("#goToResources").fadeIn();
             $("#goToMainPage").fadeIn();
             $("#emojis").fadeIn();
         }
     }
-    $("#myEmoji").html(''); 
+    const canvas = document.getElementById("myEmoji");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     typewriter = setupTypewriter(opts)
     typewriter.type();
     getFingerPrint(async fp => {
