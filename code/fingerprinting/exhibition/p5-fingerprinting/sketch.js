@@ -117,6 +117,19 @@ $(document).ready(function () {
         $("#seeAnother").show();
     });
 
+    $("#seeMeaning").click(function () {
+        // Show legend
+        // legend(myFP);
+        let l = "fonts | screen size | language | timezone | "
+        $("#legendT").text(l);
+        $("#legend").fadeIn();
+    });
+    $("#closeLegend").click(function () {
+        // close legend
+        $("#legend").fadeOut();
+    });
+
+
 });
 
 
@@ -165,6 +178,47 @@ function anotherfpCallback(fingerprint) {
     }
 }
 
+function legend(fingerprint) {
+    let fp = fingerprint.original;
+
+    translate(-width / 4, -height / 4);
+
+    push()
+    fill(50,50,50,50);
+    noStroke();
+    let legendW = width - width * 0.88;
+    let marginW = width/2*0.05;
+    let marginH = height/2*0.08;
+    let stepH = marginH;
+    rect(0, 0, legendW, height/2);
+    pop()
+
+
+    // fonts
+    allFonts = fp['font-js'].split(',');
+    fonts = allFonts.join('');
+    colorMode(HSB);
+    noStroke();
+    let fontColor = color(map(allFonts.length, 1, 400, 255, 0), 70, 190);
+    fill(fontColor);
+    push()
+    translate(marginW, stepH);
+    textSize(c*0.1);
+    text("fonts",marginW,0);
+    stepH = stepH+marginH;
+    ellipse(0, 0, c * 0.15);
+    noFill()
+    stroke(map(allFonts.length, 1, 400, 255, 0), 60, 200)
+
+    rotate(radians(allFonts.length));
+    for (var i = 0; i < 5; i++) {
+        line(0,i*2,c*0.1,i*2);
+    }
+
+
+
+    pop()
+}
 
 
 function constellation(fingerprint) {
@@ -210,7 +264,6 @@ function constellation(fingerprint) {
 
 
     // fonts
-    // fonts = fingerprint.original['font-js'];
     allFonts = fp['font-js'].split(',');
     fonts = allFonts.join('');
     colorMode(HSB);
@@ -221,7 +274,6 @@ function constellation(fingerprint) {
     let fontsX = c * cos(allFonts.length);
     let fontsY = c * sin(allFonts.length);
     push()
-    translate(0, 0, -c * 0.05);
     ellipse(fontsX, fontsY, allFonts.length * c * 0.0015);
     pop()
 
@@ -232,8 +284,6 @@ function constellation(fingerprint) {
     push()
     rotate(radians(allFonts.length))
     for (var i = 0; i < allFonts.length; i++) {
-        // let x = allFonts[i].charCodeAt(5) * cos(allFonts[i].charCodeAt(0));
-        // let y = allFonts[i].charCodeAt(5) * sin(allFonts[i].charCodeAt(0));
         if (i % 50 == 0) {
             f = 0;
             g += fonts.length / 300;
