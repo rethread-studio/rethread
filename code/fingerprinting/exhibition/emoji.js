@@ -15,6 +15,9 @@ function EmojiParticle (emoji, me) {
   }
   var img = new Image();
   this.draw = function () {
+    if (this.x == 0 && this.y == 0) {
+      return;
+    }
     ct.font = "100px Time";
     ct.textAlign = "center";
 
