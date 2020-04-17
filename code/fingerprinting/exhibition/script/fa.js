@@ -1207,7 +1207,7 @@ window.onbeforeunload = function () {
 
 function getConnectedFingerPrints(callback) {
   $.ajax({
-    url: HOST + "/api/fp/conntected",
+    url: HOST + "/api/fp/connected",
     type: "get",
     async: false,
     xhrFields: {
