@@ -1,4 +1,4 @@
-let HOST = "https://fp.durieux.me";
+let HOST = "https://fp.rethread.art";
 const fontsToTest = [
   ".Aqua Kana",
   ".Helvetica LT MM",
@@ -1207,7 +1207,7 @@ window.onbeforeunload = function () {
 
 function getConnectedFingerPrints(callback) {
   $.ajax({
-    url: HOST + "/api/fp/conntected",
+    url: HOST + "/api/fp/connected",
     type: "get",
     async: false,
     xhrFields: {

@@ -57,6 +57,8 @@ var nextLoadingDot = 0.3;
 
 var hudElement;
 var hudFooter;
+var hudMessage;
+var hudMessageTimer = 0;
 var hudContainer;
 
 var filterSlider = document.getElementById("filter-slider");
@@ -82,9 +84,10 @@ var currentRoom = {
 function lockIntoExperience() {
     instructions.style.display = 'none';
     blocker.style.display = 'none';
-    hudContainer.style.display = 'block';
+    hudContainer.style.display = 'flex';
     hudElement.style.display = '';
     hudFooter.style.display = '';
+    hudMessage.style.display = '';
     displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
     
     Tone.Transport.start();
@@ -92,11 +95,13 @@ function lockIntoExperience() {
 }
 
 function unlockFromExperience() {
-    blocker.style.display = 'block';
+    blocker.style.display = 'flex';
     instructions.style.display = '';
     hudContainer.style.display = 'none';
     hudElement.style.display = 'none';
     hudFooter.style.display = 'none';
+    hudMessage.style.display = 'none';
+    currentRoom.pause(currentRoom);
     hideHudFooter();
     Tone.Transport.stop();
 }
@@ -171,6 +176,7 @@ function init_three() {
 
     hudElement = document.getElementById("hud");
     hudFooter = document.getElementById("hud-footer");
+    hudMessage = document.getElementById("hud-message");
     hudContainer = document.getElementById("hud-container");
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -284,6 +290,14 @@ function init_three() {
             // case 80: // p
             //     teleportToPortal();
             //     break;
+            // This doesn't work since the ESC keyup unlocks the pointerlock again
+            // case 27: // ESC
+            //     if(!controls.isLocked) {
+            //         controls.lock();
+            //     } else {
+            //         controls.unlock();
+            //     }
+            //     break;
         }
 
     };
@@ -346,6 +360,11 @@ function animate(now) {
     var time = performance.now();
     var delta = (time - prevTime) / 1000;
 
+    hudMessageTimer -= delta;
+    if(hudMessageTimer < 0) {
+        hideHudMessage();
+    }
+
     // Get the direction the camera is pointing in world coordinates
     // Rotate to the direction we're looking (the camera always looks down its negative z-axis)
     let cameraDirection = camera.getWorldDirection(new THREE.Vector3(0, 0, -1));
@@ -404,6 +423,8 @@ let spaceRoom = {
         scene = new THREE.Scene();
         scene.background = room.lightColor;
         scene.fog = new THREE.FogExp2(room.lightColor, room.spaceFog + fogFade);
+
+        camera.position.set(0, 0, 15);
 
         light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
         light.position.set(0.5, 1, 0.75);
@@ -481,40 +502,48 @@ let spaceRoom = {
         for(let i = 0; i < 5; i++) {
             let newSynth = Synthesis.newPadSynth(20);
             newSynth.pitchIndex = i;
-            newSynth.playing = false;
-            newSynth.midi = room.pitchSet[newSynth.pitchIndex];
-            newSynth.toggle = function(pad, time) {
-                if(pad.playing) {
-                    pad.env.triggerRelease(time);
-                    pad.playing = false;
-                } else {
-                    pad.filter.frequency.value = Tone.Frequency.mtof(pad.midi);
-                    let vel = Math.random() * 0.75 + 0.25;
-                    pad.env.triggerAttack(time, vel);
-                    pad.playing = true;
-                }
-            }
             room.padSynths.push(newSynth); // Tone.Frequency.mtof(notes[i]-12)
         }
 
         spaceRoom.loopCounter = 0;
         spaceRoom.loop = new Tone.Loop(function (time) {
-            for(let i = 0; i < room.padSynths.length; i++) {
-                if(room.loopCounter % ((i+1)) == 0) {
-                    room.padSynths[i].pitchIndex -= 1;
-                    if(room.padSynths[i].pitchIndex < 0) {
-                        room.padSynths[i].pitchIndex += room.pitchSet.length;
-                    }
-                    room.padSynths[i].midi = room.pitchSet[room.padSynths[i].pitchIndex] + (12 * room.octave);
-                    // Transpose down an octave
-                    if(Math.random() > 0.6) {
-                        room.padSynths[i].midi -= 12;
-                    } else if(Math.random() > 0.7) {
-                        room.padSynths[i].midi -= 24;
-                    }
-                    room.padSynths[i].toggle(room.padSynths[i], time);
+
+            // Change the pitch of a random pad synth
+            {
+                let i = Math.floor(Math.random() * room.padSynths.length);
+                room.padSynths[i].pitchIndex -= 1;
+                if(room.padSynths[i].pitchIndex < 0) {
+                    room.padSynths[i].pitchIndex += room.pitchSet.length;
                 }
+                room.padSynths[i].midi = room.pitchSet[room.padSynths[i].pitchIndex] + (12 * room.octave);
+                room.padSynths[i].toggle(room.padSynths[i], time);
             }
+            // Toggle a random pad synth
+            {
+                let i = Math.floor(Math.random() * room.padSynths.length);
+                room.padSynths[i].pitchIndex -= 1;
+                if(room.padSynths[i].pitchIndex < 0) {
+                    room.padSynths[i].pitchIndex += room.pitchSet.length;
+                }
+                room.padSynths[i].toggle(room.padSynths[i], time);
+            }
+            // room.padSynths[i].midi = room.pitchSet[room.padSynths[i].pitchIndex] + (12 * room.octave);
+            // for(let i = 0; i < room.padSynths.length; i++) {
+            //     if(room.loopCounter % ((i+1)) == 0) {
+            //         room.padSynths[i].pitchIndex -= 1;
+            //         if(room.padSynths[i].pitchIndex < 0) {
+            //             room.padSynths[i].pitchIndex += room.pitchSet.length;
+            //         }
+            //         room.padSynths[i].midi = room.pitchSet[room.padSynths[i].pitchIndex] + (12 * room.octave);
+            //         // Transpose down an octave
+            //         if(Math.random() > 0.6) {
+            //             room.padSynths[i].midi -= 12;
+            //         } else if(Math.random() > 0.7) {
+            //             room.padSynths[i].midi -= 24;
+            //         }
+            //         room.padSynths[i].toggle(room.padSynths[i], time);
+            //     }
+            // }
 
             // switch (spaceRoom.loopCounter) {
             //     case 0:
@@ -591,7 +620,7 @@ let spaceRoom = {
                 room.fingerprints.push(Global.data.localFingerprint);
                 room.localFingerprint = Global.data.localFingerprint;
                 // Move a little bit from the center so you don't collide with your own fingerprint
-                camera.position.z = 15;
+                // camera.position.z = 15; // This is already the default position
             } else {
                 room.localFingerprint = undefined;
             }
@@ -626,22 +655,25 @@ let spaceRoom = {
             for (var i = 0; i < intersections.length; i++) {
                 if (intersections[i].distance < 2.0) {
                     // Travel into the fingerprint
-                    // let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
-                    // travelToRoom(fingerprintRoom);
-                    // return;
+                    let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
+                    travelToRoom(fingerprintRoom);
+                    return;
                 } else if (intersections[i].distance < 10.0) {
-                    // let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
-                    // displayOnHud("<span>" + text + "</span><br/><br/><span>travel into fingerprint</span>");
-                    // console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
+                    let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
+                    displayOnHud("<span>" + text + "</span><br/><br/><span>travel into fingerprint</span>");
+                    console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
                 } else if(intersections[i].distance < 30.0) {
                     let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
                     displayOnHud("<span>" + text + "</span>");
+                    let hasSynth = true;
+                    if(intersections[i].object.userData.fingerprintPtr.synth == undefined) { 
+                        console.log("synth is undefined, free synths: " + Synthesis.getNumFreeFMSynths());
+                    }
+                    
                 }
 
                 // console.log(intersections[i]);
-                let hasSynth = true;
-                if(intersections[i].object.userData.fingerprintPtr.synth == undefined) { hasSynth = false; }
-                console.log(hasSynth);
+                
                 /*
                     An intersection has the following properties :
                         - object : intersected object (THREE.Mesh)
@@ -730,7 +762,11 @@ let spaceRoom = {
             let d2FromCenter = camera.position.distanceToSquared(new THREE.Vector3(0, 0, 0));
             if( d2FromCenter > room.connectedSphereRadius2) {
                 // console.log("dark space");
-                room.spaceSection = "archived device traces"
+                let darkSpaceSection= "archived device traces"
+                if(room.spaceSection != darkSpaceSection) {
+                    displayOnHudMessage(Global.getRandomDarkSpaceMessage());
+                }
+                room.spaceSection = darkSpaceSection;
                 displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
                 // we are in a darker space where old non-connected fingerprints are shown
                 room.spaceFog = 0.05;
@@ -746,7 +782,11 @@ let spaceRoom = {
                 room.spaceFog = 0.035;
                 scene.fog.color = room.lightColor;
                 scene.background = room.lightColor;
-                room.spaceSection = "currently connected devices";
+                let insideSphereSection = "currently connected devices";
+                if(room.spaceSection != insideSphereSection) {
+                    displayOnHudMessage(Global.getRandomInsideSphereMessage());
+                }
+                room.spaceSection = insideSphereSection;
                 displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
             }
 
@@ -862,9 +902,19 @@ let spaceRoom = {
         }
         this.lastMinimumMarkersInCommon = minimumMarkersInCommon;
     },
+    pause: function(room) {
+        // This happens when the pointer controls are unlocked
+        // Turn all of the pad synths off
+        for(let i = 0; i < room.padSynths.length; i++) {
+            room.padSynths[i].release(room.padSynths[i]);
+        }
+    },
     cleanUp: function (room) {
         for (let fprint of spaceRoom.fingerprints) {
             fprint.cleanUpSpace(scene);
+        }
+        for(let i = 0; i < room.padSynths.length; i++) {
+            room.padSynths[i].dispose(room.padSynths[i]);
         }
         spaceRoom.fingerprintsAdded = false;
         spaceRoom.fingerprints = [];
@@ -1032,9 +1082,20 @@ function teleportToPortal() {
     currentRoom.init(currentRoom);
 }
 
+function travelToCenter() {
+    if(currentRoom == spaceRoom) {
+        camera.position.set(0, 0, 15);
+    } else {
+        travelToRoom(spaceRoom);
+    }
+}
+var centerButton = document.getElementById('return-to-center-button');
+centerButton.addEventListener('click', travelToCenter);
+
 function travelToRoom(room) {
     currentRoom.cleanUp(currentRoom)
     currentRoom = room;
+    velocity.set(0, 0, 0);
     currentRoom.init(currentRoom);
 }
 
@@ -1051,6 +1112,14 @@ function displayOnHudFooter(html) {
 }
 function hideHudFooter() {
     hudFooter.style.opacity = 0.0;
+}
+function displayOnHudMessage(html, dur = 10.0) {
+    hudMessageTimer = dur;
+    hudMessage.innerHTML = html;
+    hudMessage.style.opacity = 1.0;
+}
+function hideHudMessage() {
+    hudMessage.style.opacity = 0.0;
 }
 
 function newScene(color, fog) {
@@ -1089,6 +1158,7 @@ export { init_three,
     displayOnHud, 
     hideHud, 
     displayOnHudFooter,
+    displayOnHudMessage,
     raycaster, 
     travelToRoom, 
     fogFade, 

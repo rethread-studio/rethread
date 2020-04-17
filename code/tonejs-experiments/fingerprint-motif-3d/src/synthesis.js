@@ -80,6 +80,16 @@ function returnFMSynth(index) {
     fmSynthsUsed[index] = false;
 }
 
+function getNumFreeFMSynths() {
+    let numSynths = 0;
+    for(let i = 0; i < fmSynths.length; i++) {
+        if(fmSynthsUsed[i] == false) {
+            numSynths++;
+        }
+    }
+    return numSynths;
+}
+
 function requestNoiseSynth() {
     for(let i = 0; i < noiseSynths.length; i++) {
         if(noiseSynthsUsed[i] == false) {
@@ -184,10 +194,29 @@ function newPadSynth(freq) {
     filter.connect(padGain);
     padenv.connect(padGain.gain);
     return {
+        playing: false,
+        midi: 60,
         noise: noise,
         env: padenv,
         filter: filter,
         gain: padGain,
+        toggle: function(pad, time) {
+            if(pad.playing) {
+                pad.env.triggerRelease(time);
+                pad.playing = false;
+            } else {
+                pad.filter.frequency.value = Tone.Frequency.mtof(pad.midi);
+                let vel = Math.random() * 0.75 + 0.25;
+                pad.env.triggerAttack(time, vel);
+                pad.playing = true;
+            }
+        },
+        release: function(pad) {
+            if(pad.playing) {
+                pad.env.triggerRelease();
+                pad.playing = false;
+            }
+        },
         dispose: function(syn) {
             syn.env.dispose();
             syn.filter.dispose();
@@ -213,4 +242,5 @@ function clearIdsFromTransport(ids) {
 export { init_tone, newPadSynth, clearIdsFromTransport,
     requestFMSynth, returnFMSynth, requestNoiseSynth, returnNoiseSynth,
     longverb, noise, noiseEnv, globalSynthLPF, reverb, noiseUsrGain, chorus,
+    getNumFreeFMSynths,
 };

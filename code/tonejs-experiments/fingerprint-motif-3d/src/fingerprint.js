@@ -254,6 +254,8 @@ class Fingerprint {
         let newRoom = {};
         newRoom.fingerprint = this;
         newRoom.init = function (room) {
+            Graphics.displayOnHudMessage(Global.getRandomInsideFingerprintMessage());
+
             Graphics.newScene(new THREE.Color(0x000000), new THREE.FogExp2(0xfffefe, 0.01));
             Graphics.setFogFade(0.0);
     
@@ -412,19 +414,6 @@ class Fingerprint {
             for(let i = 0; i < 5; i++) {
                 let newSynth = Synthesis.newPadSynth(20);
                 newSynth.pitchIndex = i;
-                newSynth.playing = false;
-                newSynth.midi = room.motif.pitchSet[newSynth.pitchIndex];
-                newSynth.toggle = function(pad, time) {
-                    if(pad.playing) {
-                        pad.env.triggerRelease(time);
-                        pad.playing = false;
-                    } else {
-                        pad.filter.frequency.value = Tone.Frequency.mtof(pad.midi);
-                        let vel = Math.random() * 0.75 + 0.25;
-                        pad.env.triggerAttack(time, vel);
-                        pad.playing = true;
-                    }
-                }
                 room.padSynths.push(newSynth); // Tone.Frequency.mtof(notes[i]-12)
             }
 
@@ -553,6 +542,13 @@ class Fingerprint {
             // update shader uniforms
             room.shaderUniforms.time.value += delta;
         }
+        newRoom.pause = function(room) {
+            // This happens when the pointer controls are unlocked
+            // Turn all of the pad synths off
+            for(let i = 0; i < room.padSynths.length; i++) {
+                room.padSynths[i].release(room.padSynths[i]);
+            }
+        },
 
         newRoom.cleanUp = function(room) {
             room.loop.stop();

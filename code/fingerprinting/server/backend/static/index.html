@@ -1,203 +1,37 @@
 <!DOCTYPE html>
 <html>
-  <title>Fingerprinting Software Art</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css?family=Inconsolata"
-  />
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="script/lib.min.js"></script>
-  <script src="script/fa.js"></script>
-  <script src="script/exhibition.js"></script>
-  <style>
-    @import url("https://fonts.googleapis.com/css?family=Gotu&display=swap");
-    @import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,400;0,700;1,400&display=swap");
-
-    @font-face {
-      font-family: "Ortica";
-      src: url("Ortica-Bold.woff2") format("woff2"),
-        /* Super Modern Browsers */ url("Ortica-Bold.woff") format("woff"),
-        /* Pretty Modern Browsers */ url("Ortica-Bold.otf") format("truetype");
-      /* Safari, Android, iOS */
-    }
-
-    body {
-      text-align: center;
-      background-color: thistle;
-      transition: background-color 0.5s ease;
-    }
-
-    .mainPage {
-      background: midnightblue;
-    }
-
-    h1,
-    h2,
-    h3 {
-      /* font-family: 'Gotu', sans-serif; */
-      font-family: "Ortica", sans-serif;
-      /* text-transform: uppercase; */
-    }
-
-    body,
-    html {
-      height: 100%;
-      font-family: "Roboto Mono", monospace;
-    }
-
-    .bgimg {
-      min-height: 100%;
-      background-position: center;
-      background-size: cover;
-    }
-
-    button {
-      border: none;
-      padding: 1em;
-      border-radius: 2em;
-      color: midnightblue;
-      cursor: pointer;
-    }
-
-    .linkButton {
-      color: white;
-      background: none;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .artBubble {
-      border-radius: 5em;
-      /* padding: 1em; */
-      margin: 3em;
-      cursor: pointer;
-      color: midnightblue;
-      background: white;
-      height: 10em;
-      width: 10em;
-      background-position: center;
-      background-size: cover;
-      display: inline-block;
-      z-index: 999;
-    }
-  </style>
-
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Browser FingerPrint Visualization</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="style/main.css"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+  </head>
   <body>
-    <canvas id="emojis"></canvas>
-    <script>
-      const emojis_c = document.getElementById("emojis");
-      emojis_c.width = window.innerWidth;
-      emojis_c.height = window.innerHeight;
-      const ct = emojis_c.getContext("2d");
-      let emoji = null;
-      const ws = new WebSocket(HOST.replace('http', 'ws'))
-      ws.onopen = () => {
-        getEmoji(e => {
-          emoji = e;
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          canvas.width = 100;
-          canvas.height = 100;
-          ctx.font = "100px Time";
-          ctx.fillStyle = "rgb(0, 0, 0)";
-          ctx.strokeStyle = ctx.fillStyle;
-          ctx.textAlign = "center";
-          ctx.fillText(emoji, canvas.width / 2, canvas.height / 2);
-          ws.send(JSON.stringify({emoji: canvas.toDataURL()}))
-        })
-      }
-      ws.onmessage = (m) => {
-        data = JSON.parse(m.data);
-        if (data.emoji && data.clientX) {
-          draw(data.emoji, data.clientX, data.clientY, data.width, data.height)
-        }
-      }
-      function draw(emoji, x, y, width, height) {
-        ct.font = "100px Time";
-        ct.fillStyle = "rgba(0, 0, 0, 0.1)";
-        ct.strokeStyle = ct.fillStyle;
-        ct.textAlign = "center";
-        const xRatio = window.innerWidth / width
-        const yRatio = window.innerHeight / height
-        ct.fillText(emoji, x * xRatio, y * yRatio);
-      }
-      document.addEventListener("mousemove", event => {
-        draw(emoji, event.clientX, event.clientY, window.innerWidth, window.innerHeight)
-        ws.send(JSON.stringify({emoji, clientX: event.clientX, clientY: event.clientY, width: window.innerWidth, height: window.innerHeight}))
-      });
-    </script>
-    <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
-      <div class="w3-display-topleft w3-padding-large w3-xlarge"></div>
-      <div id="welcome" class="w3-display-middle">
-        <h1 class="w3-jumbo w3-animate-top">
-          <b>are you unique on the internet?</b>
-        </h1>
-        <button id="participate" href="#" class="w3-large w3-center">
-          Participate
-        </button>
-        <p>
-          <button id="noThanks" href="#" class="linkButton">
-            No thanks, just take me to the art.
-          </button>
-        </p>
-      </div>
-
-      <div style="display: none;" id="consentInfo" class="w3-display-middle">
-        <h3 class="w3-animate-top">
-          browser fingerprinting we collect your info bla bla bla Lorem ipsum
-          dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-          incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-          commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-          velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-          occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-          mollit anim id est laborum.
-        </h3>
-        <button id="consentButton" href="#" class="w3-large w3-center">
-          I agree
-        </button>
-        <p>
-          <button id="noThanksAgain" href="#" class="linkButton">
-            No thanks, just take me to the art.
-          </button>
-        </p>
-      </div>
-
-      <div style="display: none;" id="main" class="w3-display-middle">
-        <a
-          href="http://rethread.art/code/tonejs-experiments/fingerprint-motif/index.html"
-          style="background-image: url('images/art0.png');"
-          class="artBubble"
-        ></a>
-        <a
-          href="font.html"
-          style="background-image: url('images/art3.png');"
-          class="artBubble"
-        ></a>
-
-        <h2 class="w3-animate-top"><b>are you unique on the internet?</b></h2>
-        <button id="participateStill" href="#" class="w3-center">
-          participate
-        </button>
-        <button id="myFP" href="#" class="w3-center">See my fingerprint</button>
-        <p></p>
-        <a
-          href="https://rethread.art/code/fingerprinting/p5-fingerprinting/"
-          style="background-image: url('images/art1.png');"
-          class="artBubble"
-        ></a>
-        <a
-          href="sky.html"
-          style="background-image: url('images/art4.png');"
-          class="artBubble"
-        ></a>
-      </div>
-
-      <!-- <div class="w3-display-bottomleft w3-padding-large">
-        </div> -->
-    </div>
+    <h1>FingerPrint <span id="count"></span></h1>
+    <h3>Property and the number of different unique values</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th># Unique value</th>
+        </tr>
+      </thead>
+      <tbody id="keys">
+      </tbody>
+    </table>
+    <h3>The value of a random FP</h3>
+    <div id="fp"></div>
   </body>
+  <script src="script/dashboard.js"></script>
 </html>
