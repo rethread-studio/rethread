@@ -1,5 +1,6 @@
 const http = require("http");
 const WebSocket = require("ws");
+const proxy = require('express-http-proxy');
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const ObjectId = require("mongodb").ObjectId;
@@ -277,8 +278,6 @@ app.set("trust proxy", 1);
 
 const port = 80;
 
-app.use("/", express.static(__dirname + "/static"));
-
 app.get("/api/fp/keys/:key", async function (req, res) {
   res.json(await counter_c.find({ key: req.params.key }).toArray());
 });
@@ -297,7 +296,7 @@ app.get("/api/fp/normalized", async function (req, res) {
   res.json(normalized);
 });
 
-app.get("/api/fp/conntected", async function (req, res) {
+app.get("/api/fp/connected", async function (req, res) {
   console.log(connectedUser);
   var objIds = Array.from(connectedUser).map(function (id) {
     return ObjectId(id);
@@ -482,6 +481,12 @@ app
     res.json(output);
   });
 
+app.use('/', proxy('https://rethread.art', {
+  proxyReqPathResolver: function (req) {
+    return '/code/fingerprinting/exhibition' + req.url
+  }
+}));
+
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ clientTracking: true, noServer: true });
 
@@ -504,11 +509,6 @@ server.on("upgrade", function (request, socket, head) {
   console.log("Parsing session from request...");
 
   sessionParser(request, {}, () => {
-    if (!request.session.id) {
-      socket.destroy();
-      return;
-    }
-
     wss.handleUpgrade(request, socket, head, function (ws) {
       wss.emit("connection", ws, request);
     });
@@ -516,15 +516,19 @@ server.on("upgrade", function (request, socket, head) {
 });
 
 wss.on("connection", function (ws, request) {
-  const userId = request.session.id;
 
   ws.on("message", function (message) {
-    console.log(`Received message ${message} from user ${userId}`);
-    wss.broadcast(message, ws)
+    if (request.session.fpId) {
+      message = JSON.parse(message)
+      message.from = request.session.fpId
+      wss.broadcast(JSON.stringify(message), ws)
+    }
   });
 
   ws.on("close", function () {
-    
+    if (request.session.fpId) {
+      wss.broadcast(JSON.stringify({'event': 'close', 'from': request.session.fpId}), ws)
+    }
   });
 });
 
