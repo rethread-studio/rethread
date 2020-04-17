@@ -5,6 +5,23 @@ import * as Graphics from './graphics.js';
 import * as Fingerprint from './fingerprint.js';
 import * as Global from './globals.js';
 
+document.getElementById("pre-instructions-button-1").onclick = function() {
+  document.getElementById("pre-instruction1").style.display = 'none';
+  document.getElementById("pre-instruction2").style.display = '';
+}
+document.getElementById("pre-instructions-button-2").onclick = function() {
+  document.getElementById("pre-instruction2").style.display = 'none';
+  document.getElementById("pre-instruction3").style.display = '';
+}
+document.getElementById("pre-instructions-button-3").onclick = function() {
+  document.getElementById("pre-instruction3").style.display = 'none';
+  document.getElementById("pre-instruction4").style.display = '';
+}
+document.getElementById("pre-instructions-button-final").onclick = function() {
+  document.getElementById("pre-instruction4").style.display = 'none';
+  document.getElementById("blocker2").style.display = 'none';
+}
+
 
 // Check if we're on a mobile device and set a global flag
 function isMobileDevice() {

@@ -6,10 +6,34 @@
 		<style>
 			body { margin: 0; overflow: hidden; }
 			canvas { width: 100%; height: 100vh; margin: 0; }
+			#blocker2 {
+				position: absolute;
+				width: 80%;
+				height: 80%;
+				
+				margin: 0;
+				color: #ffffff;
+				text-align: center;
+				font-family: Arial;
+				font-size: 14px;
+				line-height: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+				z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				width: 100%;
+				text-align: center;
+				margin: 10% 0;
+				min-height: 200px;
+				align-items: center;
+			}
 			#blocker {
 				position: absolute;
 				width: 100%;
-				height: 100vh;
+				height: 100%;
 				background-color: rgba(0,0,0,0.5);
 				margin: 0;
 				color: #ffffff;
@@ -30,7 +54,7 @@
 			}
 
 			.instructions-overlay {
-				width: 70%;
+				width: 100%;
 				height: 70%;
 
 				display: -webkit-box;
@@ -58,7 +82,48 @@
 				letter-spacing: 0.5em;
 
 				cursor: pointer;
-				padding-left: 15vw;
+				/* padding-left: 15%; */
+			}
+
+			.pre-instructions-overlay {
+				background-color: rgba(25, 25, 112, 0.95);
+				max-width: 60%;
+
+				display: -webkit-box;
+				display: -moz-box;
+				display: box;
+
+				-webkit-box-orient: horizontal;
+				-moz-box-orient: horizontal;
+				box-orient: horizontal;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+
+				-webkit-box-align: center;
+				-moz-box-align: center;
+				box-align: center;
+
+				color: #ffffff;
+				text-align: center;
+				font-family: Arial;
+				font-size: 1.3em;
+				line-height: 2em;
+				font-weight: 300;
+				letter-spacing: 0.3em;
+
+				cursor: pointer;				
+			}
+			@media only screen and (max-width: 968px) {
+				.pre-instructions-overlay {
+					max-width: 100%;
+				}
+			}
+
+			.pre-instruction-inner {
+				margin: 5em;
+				/* overflow-y: scroll; */
 			}
 
 			#hud {
@@ -82,9 +147,10 @@
 			}
 
 			#filter-container {
-				height: 30vh;
+				height: 30%;
 				padding: 5vh;
 				padding-top: 15vh;
+				margin: 0;
 			}
 
 			.slider {
@@ -93,7 +159,7 @@
 				max-width: 50vh;
 				height: 15px;
 				border-radius: 5px;  
-				background: #d3d3d3;
+				background: #ffffff;
 				outline: none;
 				opacity: 0.7;
 				-webkit-transition: .2s;
@@ -106,7 +172,7 @@
 				width: 25px;
 				height: 25px;
 				border-radius: 50%; 
-				background: #4CAF50;
+				background: #e8ffc7;
 				cursor: pointer;
 			}
 
@@ -114,7 +180,7 @@
 				width: 25px;
 				height: 25px;
 				border-radius: 50%;
-				background: #4CAF50;
+				background: #e8ffc7;
 				cursor: pointer;
 			}
 
@@ -190,7 +256,24 @@
 .show {
     display: block;
 }
+
+button {
+    border: none;
+    padding: 1em;
+    border-radius: 2em;
+    color: midnightblue;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+    transition: 0.3s;
+}
+
+button:hover {
+    padding-right: 2em;
+    padding-left: 2em;
+}
 		</style>
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<!-- <link rel="stylesheet" type="text/css" href="../style.css"> -->
 	</head>
 	<body>
@@ -252,6 +335,44 @@
 			</div>
 
 		</div>
+		<div id="blocker2">
+			<div id="pre-instruction1" class="pre-instructions-overlay">
+				<div class="pre-instruction-inner">
+					<span style="font-size:36px; line-height: 2em; letter-spacing: 0.6em;">Welcome
+						to the<br/> Spatial Sonic Fingerprints</span>
+					<br/><br/>
+					<button id="pre-instructions-button-1" class="w3-large w3-center">Next</button>
+				</div>
+			</div>
+			<div id="pre-instruction2" class="pre-instructions-overlay" style="display: none;">
+				<div class="pre-instruction-inner">
+					Explore differences and similarities between browser fingerprints through sound. A device is represented by a tetrahedron
+					floating in space. 
+					<br/><br/>
+					By moving closer you get to zoom in on the sound of that particular device while you can listen to a
+					group of devices by putting yourself at an equal distance from all of them.
+					<br/><br/>
+					<button id="pre-instructions-button-2" class="w3-large w3-center">Next</button>
+				</div>
+			</div>
+			<div id="pre-instruction3" class="pre-instructions-overlay" style="display: none;">
+				<div class="pre-instruction-inner">
+					You will start close to the fingerprints of devices that are currently connected to the exhibition, but you are encouraged
+					to move out of this bubble and explore the sounds of devices that have connected to the server in the past.
+					<br/><br/>
+					<button id="pre-instructions-button-3" class="w3-large w3-center">Next</button>
+				</div>
+			</div>
+			<div id="pre-instruction4" class="pre-instructions-overlay" style="display: none;">
+				<div class="pre-instruction-inner">
+					Use the filter slider to see how unique your fingerprint is among the ones surrounding you.
+					<br/><br/>
+					<button id="pre-instructions-button-final" class="w3-large w3-center">Let me in!</button>
+				</div>
+			</div>
+
+		</div>
+		
 		<div class="dropdown" style="position: absolute;">
 			<button id="dropdown-menu-button" class="dropbtn"> </button>
 			<div id="myDropdown" class="dropdown-content">
