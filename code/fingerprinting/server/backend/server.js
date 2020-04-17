@@ -533,8 +533,8 @@ wss.on("connection", function (ws, request) {
     ping();
     message = JSON.parse(message)
     if (message.image) {
-      userEmojis[request.session.wsId] = message.image;
       ws.send(JSON.stringify({userEmojis}))
+      userEmojis[request.session.wsId] = message.image;
     }
     message.from = request.session.wsId
     wss.broadcast(JSON.stringify(message), ws)

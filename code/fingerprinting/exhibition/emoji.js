@@ -45,25 +45,28 @@ emojis_c.width = window.innerWidth;
 emojis_c.height = window.innerHeight;
 const ct = emojis_c.getContext("2d");
 let emoji = null;
-const ws = new WebSocket(HOST.replace("http", "ws"));
 let myEmoji = null;
 
-ws.onopen = () => {
-  getEmoji((e) => {
-    emoji = e;
-    myEmoji = new EmojiParticle(emoji, true);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = 125;
-    canvas.height = 125;
-    ctx.font = "100px Time";
-    ctx.fillStyle = "rgb(0, 0, 0)";
-    ctx.strokeStyle = ctx.fillStyle;
-    ctx.textAlign = "center";
-    ctx.fillText(emoji, 50, 100);
-    myEmoji.image = canvas.toDataURL();
-    ws.send(JSON.stringify({ emoji, image: myEmoji.image}));
-  });
+function connectWS() {
+  const ws = new WebSocket(HOST.replace("http", "ws"));
+  ws.onopen = () => {
+    getEmoji((e) => {
+      emoji = e;
+      myEmoji = new EmojiParticle(emoji, true);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 125;
+      canvas.height = 125;
+      ctx.font = "100px Time";
+      ctx.fillStyle = "rgb(0, 0, 0)";
+      ctx.strokeStyle = ctx.fillStyle;
+      ctx.textAlign = "center";
+      ctx.fillText(emoji, 50, 100);
+      myEmoji.image = canvas.toDataURL();
+      ws.send(JSON.stringify({ emoji, image: myEmoji.image}));
+    });
+  };
+
   const handle = (event) => {
     if (!hasConsented) {
         return;
@@ -81,11 +84,46 @@ ws.onopen = () => {
       })
     );
   }
-  document.addEventListener("mousemove", handle);
-  document.addEventListener("touchmove", (event) => {
+  function touchHandle(event) {
     handle(event.touches[0]);
-  });
-};
+  }
+  document.addEventListener("mousemove", handle);
+  document.addEventListener("touchmove", touchHandle);
+
+  ws.onmessage = (m) => {
+    data = JSON.parse(m.data);
+    if (data.userEmojis) {
+      for (let from in data.userEmojis) {
+        if (!particles[from]) {
+          particles[from] = new EmojiParticle(data.emoji);
+        }
+        particles[from].image = data.userEmojis[from];
+      }
+    } else if (data.emoji && data.clientX) {
+      if (!particles[data.from]) {
+        particles[data.from] = new EmojiParticle(data.emoji);
+      }
+      particles[data.from].update(data.clientX, data.clientY, data.width, data.height)
+    } else if (data.emoji && data.image)  {
+      if (!particles[data.from]) {
+        particles[data.from] = new EmojiParticle(data.emoji);
+      }
+      particles[data.from].image = data.image
+    } else if (data.event && data.event == 'close')  {
+      delete particles[data.from];
+    }
+  };
+
+  ws.onclose = function(e) {
+    document.removeEventListener("mousemove", handle);
+    document.removeEventListener("touchmove", touchHandle);
+    console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+    setTimeout(function() {
+      connectWS();
+    }, 1000);
+  };
+}
+connectWS();
 setInterval(() => {
   // ct.clearRect(0, 0, emojis_c.width, emojis_c.height);
   ct.save();
@@ -105,26 +143,3 @@ window.addEventListener('resize', () => {
   emojis_c.width = window.innerWidth;
   emojis_c.height = window.innerHeight;
 })
-ws.onmessage = (m) => {
-  data = JSON.parse(m.data);
-  if (data.userEmojis) {
-    for (let from in data.userEmojis) {
-      if (!particles[from]) {
-        particles[from] = new EmojiParticle(data.emoji);
-      }
-      particles[from].image = data.userEmojis[from];
-    }
-  } else if (data.emoji && data.clientX) {
-    if (!particles[data.from]) {
-      particles[data.from] = new EmojiParticle(data.emoji);
-    }
-    particles[data.from].update(data.clientX, data.clientY, data.width, data.height)
-  } else if (data.emoji && data.image)  {
-    if (!particles[data.from]) {
-      particles[data.from] = new EmojiParticle(data.emoji);
-    }
-    particles[data.from].image = data.image
-  } else if (data.event && data.event == 'close')  {
-    delete particles[data.from];
-  }
-};
