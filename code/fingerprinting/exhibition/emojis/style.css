@@ -3,25 +3,14 @@ body {
     color: white;
     /* height: 100%; */
     overflow: hidden;
-    text-align: left;
-    padding-top: 100px;
+    text-align: center;
 }
 
 h1 {
     width: 80%;
     margin: auto;
 }
-canvas, #other {
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-    z-index: -1;
-}
-#other {
-    max-width: 100%;
-}
+
 #content {
     filter: blur(20px);
     transition: filter 2s ease;
