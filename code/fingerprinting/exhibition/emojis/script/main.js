@@ -13,7 +13,7 @@ setInterval(() => {
     getRandomFingerPrint(fp => {
         document.getElementById('other').src = (fp.original.emojis)
     })
-}, 500)
+}, 250)
 
 $("#seeArt").click(() => {
     $("#content").toggleClass('art');
