@@ -1111,8 +1111,8 @@ var options = {
       getData: (done, options) => {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext("2d");
-        canvas.width = 650;
-        canvas.height = 220;
+        canvas.width = 750;
+        canvas.height = 200;
 
         ctx.font = "100px Time";
         ctx.fillStyle = "rgb(0, 0, 0)";
