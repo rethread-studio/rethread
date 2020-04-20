@@ -162,7 +162,7 @@ button:hover {
     color: white;
     cursor: pointer;
 }
-#fpHighlight {
+#fpHighlight.loaded {
     position: fixed;
     background: black;
     color: white;

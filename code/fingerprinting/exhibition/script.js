@@ -117,6 +117,9 @@ function fpHighlightHover(element) {
   element.onmouseout = () => {
     $("#fpHighlight").remove();
   };
+  const offset = $(element).offset();
+  $("#fpHighlight").remove();
+  $("body").append('<div id="fpHighlight" style="top: ' + (offset.top + 25) + "px; left: " + offset.left + 'px;"></div>');
   function callback(data) {
     let totalUsage = 0;
     let usage = 0;
@@ -128,20 +131,9 @@ function fpHighlightHover(element) {
         acutalValue = value.value;
       }
     }
-    const offset = $(element).offset();
-    $("#fpHighlight").remove();
-    $("body").append(
-      '<div id="fpHighlight" style="top: ' +
-        (offset.top + 25) +
-        "px; left: " +
-        offset.left +
-        'px;">' +
-        Math.round((usage * 100) / totalUsage) +
-        '% of the visitors have also the value <span class="value">"' +
-        element.innerText +
-        '"</span>. Up to now we have collected ' +
-        data.length +
-        " different values.</div>"
+    $("#fpHighlight").addClass('loaded')
+    $("#fpHighlight").html(Math.round((usage * 100) / totalUsage) +
+        '% of the visitors have also the value <span class="value">"' + element.innerText + '"</span>. Up to now we have collected ' + data.length + " different values."
     );
   }
   if ("fpBrowserName" == id) {
