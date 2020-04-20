@@ -103,17 +103,25 @@ h3, h4 {
 }
 
 @media only screen and (max-width: 768px) {
-    h1 {
-        font-size: 2em;
+    body {
+        font-size: 12px;
     }
-    h2{
+    h1 {
         font-size: 1.5em;
     }
-    h3, h4 {
+    h2{
         font-size: 1em;
+    }
+    h3, h4 {
+        font-size: 0.7em;
     }
     .w3-display-middle {
         width: 80%;
+    }
+    html, body {
+        overflow: scroll;
+        margin-top: 1em;
+        margin-bottom: 1em;
     }
 }
 
@@ -142,6 +150,12 @@ button {
 button:hover {
     padding-right: 2em;
     padding-left: 2em;
+}
+
+@media only screen and (max-width: 768px) {
+    .w3-large{
+        font-size: 10px!important;
+    }
 }
 
 .linkButton {
