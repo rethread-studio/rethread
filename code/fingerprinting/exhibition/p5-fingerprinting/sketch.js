@@ -19,6 +19,7 @@ let c = 200;
 let myFP;
 
 let fontColor, screenColor, languageColor, timeColor, adColor, trackingColor;
+let hasAdBlock, hasTouch, hasAudio, hasOSversion;
 
 function setup() {
 
@@ -184,12 +185,19 @@ function legend() {
         + " | <span style='color:" + languageColor + "'>language settings</span>"
         + " | <span style='color:" + timeColor + "'>timezone settings</span>"
         + " | <span style='color:" + trackingColor + "'>tracking settings</span>"
-    if (adBlock)
-        l.concat(" | <span style='color:" + adColor + "'>ad blocking settings</span>")
-        
+        + " | <span style='color:" + color(255) + "'>device platform</span><img class='legendImg' src='./legend/platform.jpg'>"
+    if (hasAdBlock)
+        l = l + " | <span style='color:" + adColor + "'>ad blocking settings</span><img class='legendImg' src='./legend/adblock.jpg'>"
+    if (hasAudio)
+        l = l + " | <span style='color:" + color(255) + "'>audio settings</span><img class='legendImg' src='./legend/audio.jpg'>"
+    if (hasTouch)
+        l = l + " | <span style='color:" + trackingColor + "'>has a touch screen</span><img class='legendImg' src='./legend/touch.jpg'>"
+    if (hasOSversion)
+        l = l + " | <span style='color:" + color(255) + "'>operating system and version</span><img class='legendImg' src='./legend/os.jpg'>"
+
+
     $("#legendT").html(l);
 }
-
 
 function constellation(fingerprint) {
 
@@ -430,15 +438,35 @@ function constellation(fingerprint) {
         stroke(250, 230, 100);
 
     //addBehavior
+
     if (fp['addBehavior'])
-        asterisk(c * 0.75, -c * 0.7, c * 0.05);
+        ellipse(c * 0.8, c * 0.9, c * 0.035);
 
     //openDatabase
     if (fp['openDatabase'])
-        asterisk(c * 0.6, -c * 0.6, c * 0.1);
+        ellipse(c * 0.6, c * 0.9, c * 0.02);
 
     //cpuClass
 
+
+    // OS
+    let osName = fp['os_name'];
+    if (fp['os_version']) {
+        hasOSversion = true;
+        let osVersion = fp['os_version'];
+        osVersion = osVersion.replace('x', '');
+        osVersion = osVersion.replace('_', '');
+        osVersion = osVersion.replace('.', '');
+        console.log(osVersion);
+        push()
+        rotate(radians(osName.charCodeAt(0)));
+        asterisk(0.7 * c * cos(osVersion[0]), 0.7 * c * sin(osVersion[0]), c * 0.1);
+        pop()
+    }
+    else {
+
+        hasOSversion = false;
+    }
 
     //platform
     stroke(255);
@@ -496,15 +524,14 @@ function constellation(fingerprint) {
 
 
     //adBlock
-    let adBlock = fp['ad'];
-    adBlock = true;
+    hasAdBlock = fp['ad'];
     adColor = color(255, 255, 255);
     push()
     stroke(adColor);
     if (allFonts[22])
         rotate(radians(allFonts[22].charCodeAt(1)));
-    if (adBlock)
-        asterisk(c / 2 * cos(adBlock), c / 2 * sin(adBlock), c * 0.035);
+    if (hasAdBlock)
+        asterisk(c / 2 * cos(hasAdBlock), c / 2 * sin(hasAdBlock), c * 0.035);
     pop()
 
     //hasLiedLanguages
@@ -522,6 +549,7 @@ function constellation(fingerprint) {
     rotate(radians(platform.charCodeAt(0)));
     if (fp['touchSupport']) {
         let touchSupport = fp['touchSupport'].split(',');
+        hasTouch = (touchSupport[1] == 'true');
         // touchSupport = [0,"true","true"]; // debug
         fill(220, 10, 110);
         if (touchSupport[1] == "true")
@@ -539,12 +567,18 @@ function constellation(fingerprint) {
     //fontsFlash
 
     // audio
-    let audio = fp['audio'];
-    push();
-    rotate(radians(audio));
-    fill(255);
-    moon(c * cos(audio), c * sin(audio), 0.15 * c);
-    pop();
+    if (fp['audio']) {
+        hasAudio = true;
+        let audio = fp['audio'];
+        push();
+        rotate(radians(audio));
+        fill(255);
+        moon(c * cos(audio), c * sin(audio), 0.15 * c);
+        pop();
+    }
+    else {
+        hasAudio = false;
+    }
 
 
     //
@@ -577,7 +611,7 @@ function constellation(fingerprint) {
             // }
             for (var i = 0; i < enumerateDevices.length; i++) {
                 let a1 = 0;
-                let last_a1 = 0;
+                let last_a1;
                 for (var j = 0; j < enumerateDevices[i].length; j++) {
                     last_a1 = a1;
                     a1 = a1 + enumerateDevices[i].charCodeAt(j);
