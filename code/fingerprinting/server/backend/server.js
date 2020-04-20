@@ -255,7 +255,7 @@ const sess = {
   secret: "fingerprintislife",
   resave: false,
   saveUninitialized: true,
-  cookie: { sameSite: "None", maxAge: 2 * 60 * 60 * 1000 }, // 2h timeout
+  cookie: { sameSite: "None", maxAge: 2 * session * 60 * 1000 }, // 2h timeout
 }
 sess.cookie.secure = true;
 
