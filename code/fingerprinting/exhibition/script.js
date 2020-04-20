@@ -177,7 +177,7 @@ function generateFPText(fp) {
         "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
         fp.original.timezone.split("/")[1] +
         "</span>." +
-        "<p>Your emojis are drawn in a specific style, depending on your device's operating system. This is the emoji that represents you during the exhibition:</p>";
+        "<p>Your emojis are drawn in a specific style, depending on your device's operating system. Here's a random emoji that represents you during the exhibition:</p>";
     return s;
 }
 function myFpPage() {
