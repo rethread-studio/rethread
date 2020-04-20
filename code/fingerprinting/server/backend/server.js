@@ -278,7 +278,7 @@ app.set("trust proxy", 1);
 const port = 80;
 
 app.get("/api/fp/keys/:key", async function (req, res) {
-  res.json(await counter_c.find({ key: req.params.key }).toArray());
+  res.json(await k_fp_c.find({ key: req.params.key }).toArray());
 });
 app.get("/api/fp/counters", async function (req, res) {
   const output = {};
