@@ -1,0 +1,24 @@
+body {
+    background-color: black;
+    color: white;
+    /* height: 100%; */
+    overflow: hidden;
+    text-align: center;
+}
+
+h1 {
+    width: 80%;
+    margin: auto;
+}
+
+#content {
+    filter: blur(20px);
+    transition: filter 2s ease;
+}
+#content.art {
+    filter: blur(0px);
+}
+#info {
+    text-align: center;
+    color: white;
+}

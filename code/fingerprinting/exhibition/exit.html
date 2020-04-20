@@ -1,73 +1,128 @@
 <!DOCTYPE html>
 <html>
 <title>Fingerprinting Software Art</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://kit.fontawesome.com/7ff2c0391b.js" crossorigin="anonymous"></script>
 
-<link rel="stylesheet" type="text/css" href="style.css">
+<style>
+  @media only screen and (max-width: 768px) {
+
+    html,
+    body {
+      margin-top: 2em;
+      margin-bottom: 2em;
+      overflow: auto !important;
+    }
+    .w3-display-middle{
+      width: 100%!important;
+      padding-right: 2em;
+      padding-left: 2em;
+      position: relative;
+      top: 0;
+      left: 0;
+      transform: none;
+    }
+
+  }
+</style>
+
+<script src="script/fa.js"></script>
+
+<link rel="stylesheet" type="text/css" href="style.css" />
 
 <!-- Script for dot menu -->
 <script>
-    /* When the user clicks on the button,
-    toggle between hiding and showing the dropdown content */
-    function myFunction() {
-        document.getElementById("myDropdown").classList.toggle("show");
-    }
+  /* When the user clicks on the button,
+  toggle between hiding and showing the dropdown content */
+  function myFunction() {
+    document.getElementById("myDropdown").classList.toggle("show");
+  }
 
-    // Close the dropdown menu if the user clicks outside of it
-    window.onclick = function (event) {
-        if (!event.target.matches('.dropbtn')) {
-            var dropdowns = document.getElementsByClassName("dropdown-content");
-            var i;
-            for (i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.classList.contains('show')) {
-                    openDropdown.classList.remove('show');
-                }
-            }
+  // Close the dropdown menu if the user clicks outside of it
+  window.onclick = function (event) {
+    if (!event.target.matches(".dropbtn")) {
+      var dropdowns = document.getElementsByClassName("dropdown-content");
+      var i;
+      for (i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains("show")) {
+          openDropdown.classList.remove("show");
         }
+      }
     }
+  };
 </script>
 
 <body>
+  <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
+    <div class="w3-display-topleft w3-padding-large w3-xlarge"></div>
+    <div id="thanks" class="w3-display-middle">
+      <h1 class="w3-animate-top"><b>thank you</b></h1>
+      <p style="color: #c5a0c5;">#browserfingerprinting</p>
+      <p>
+        We'd love to know what you think about these browser fingerprinting
+        experiments, let us know and
+        <a href="mailto:baudry@kth.se">get in touch!</a>
+      </p>
+      <p>
+        To thank you for visiting our exhibition, here's a downloadable goodie
+        bag with sound snippets and images that have been generated thanks to
+        your presence. Also feel free to check out the
+        <a href="https://github.com/castor-software/rethread/tree/master/browser-fingerprint">open source code
+          repository</a>
+        containing this full exhibition.
+      </p>
+      <button id="participate" href="#" class="w3-large w3-center">
+        Download your browser fingerprint art
+      </button>
 
-    <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
-        <div class="w3-display-topleft w3-padding-large w3-xlarge">
+      <p>
+        This project was created by re|thread: Erik Natanael Gustafsson, Nadia
+        Campo Woytuk, Thomas Durieux, and Benoit Baudry.
+      </p>
 
-        </div>
-        <div id="thanks" class="w3-display-middle">
-            <p style="color: #c5a0c5">a software art experience about browser fingerprinting</p>
-            <h1 class="w3-animate-top"> <b>thank you</b> </h1>
-            <p>#browserfingerprinting</p>
-            <p>We'd love to know what you think about these browser fingerprinting experiments, let us know and <a
-                    href="mailto:baudry@kth.se">get in touch!</a></p>
-            <p>To thank you for visiting our exhibition, here's a downloadable goodie bag with sound snippets and images
-                that have been generated thanks to your presence. Also feel free to check out the <a
-                    href="https://github.com/castor-software/rethread/tree/master/browser-fingerprint">open source code
-                    repository</a> containing this full exhibition.</p>
-            <button id="participate" href="#" class="w3-large w3-center">Download your browser fingerprint art</button>
-            <p>This project was created by re|thread: Erik Natanael Gustafsson, Nadia Campo Woytuk, Thomas Durieux, and
-                Benoit Baudry.</p>
-            <p>Thanks to <a href="https://www.castor.kth.se/">CASTOR Software Research Centre</a> and <a
-                    href="https://www.kth.se/">KTH Royal Institute of Technology</a>.</p>
-            <p><a href="https://rethread.art/" target="_blank" class="linkButton">See more of our work with software and
-                    art. <i class="fas fa-external-link-alt"></i></a></p>
+      <p>
+        <a href="https://rethread.art/" target="_blank" class="linkButton">See more of our work with software and art.
+          <i class="fas fa-external-link-alt"></i></a>
+      </p>
 
-        </div>
+      <p>
+        Thanks to
+        <a href="https://www.castor.kth.se/">CASTOR Software Research Centre</a>
+        and
+        <a href="https://www.kth.se/">KTH Royal Institute of Technology</a>.
+      </p>
+
+      <button id="delete" href="#" class="w3-center" style="display: none;">
+        Delete all the data that we collected
+      </button>
     </div>
+  </div>
 
-    <div class="dropdown">
-        <button onclick="myFunction()" class="dropbtn"> </button>
-        <div id="myDropdown" class="dropdown-content">
-            <a href="./index.html#main">Back to artwork gallery</a>
-            <!-- <a href="../exit.html">Leave exhibition</a> -->
-        </div>
+  <div class="dropdown">
+    <button onclick="myFunction()" class="dropbtn"></button>
+    <div id="myDropdown" class="dropdown-content">
+      <a href="./index.html#main">Back to artwork gallery</a>
+      <!-- <a href="../exit.html">Leave exhibition</a> -->
     </div>
-
+  </div>
+  <script>
+    getSession((session) => {
+      if (session.connected && session.terms) {
+        $("#delete").show()
+      }
+    })
+    $("#delete").click(() => {
+      $("#delete").prop('disabled', true);
+      deleteSession(() => {
+        $("#delete").text('Your data has been deleted!')
+      })
+    })
+  </script>
 </body>
 
 </html>

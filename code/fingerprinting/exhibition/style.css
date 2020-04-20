@@ -75,6 +75,9 @@ body {
     /* transition: background-color 0.5s ease; */
 }
 
+.animateColor {
+    transition: background-color 1000ms linear;
+}
 .blueBackground {
     background: midnightblue;
 }
@@ -91,7 +94,7 @@ h1 {
 }
 h2{
     font-family: 'Ortica', sans-serif;
-    font-size: 2em;
+    font-size: 3em;
 }
 
 h3, h4 {
@@ -100,17 +103,24 @@ h3, h4 {
 }
 
 @media only screen and (max-width: 768px) {
-    h1 {
-        font-size: 2em;
+    body {
+        font-size: 12px;
     }
-    h2{
+    h1 {
         font-size: 1.5em;
     }
-    h3, h4 {
+    h2{
         font-size: 1em;
+    }
+    h3, h4 {
+        font-size: 0.7em;
     }
     .w3-display-middle {
         width: 80%;
+    }
+    html, body {
+        margin-top: 1em;
+        margin-bottom: 1em;
     }
 }
 
@@ -141,6 +151,12 @@ button:hover {
     padding-left: 2em;
 }
 
+@media only screen and (max-width: 768px) {
+    .w3-large{
+        font-size: 10px!important;
+    }
+}
+
 .linkButton {
     color: white;
     border: none;
@@ -160,8 +176,20 @@ button:hover {
 .fpHighlight {
     font-weight: bold;
     color: white;
+    cursor: pointer;
+}
+#fpHighlight.loaded {
+    position: fixed;
+    background: black;
+    color: white;
+    font-style: italic;
+    padding: 4px 7px;
+    width: 250px;
 }
 
+#fpHighlight .value {
+    font-weight: bolder;
+}
 /* Main page */
 
 .artBubble {
@@ -194,6 +222,15 @@ button:hover {
     color: white;
     visibility: visible;
 }
+
+@media only screen and (max-width: 768px) {
+    .artBubble {
+        height: 6em;
+        width: 6em;
+        margin: 1em;
+    }
+}
+
 
 /* /// Navigation /// */
 

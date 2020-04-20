@@ -18,6 +18,9 @@ let height = 0;
 let c = 200;
 let myFP;
 
+let fontColor, screenColor, languageColor, timeColor, adColor, trackingColor;
+let hasAdBlock, hasTouch, hasAudio, hasOSversion;
+
 function setup() {
 
     width = windowWidth;
@@ -81,6 +84,7 @@ $(document).ready(function () {
             rect(-width / 4, -height / 4, width / 2, height / 2);
             another();
             pop();
+            legend();
         });
 
     }
@@ -117,8 +121,17 @@ $(document).ready(function () {
         $("#seeAnother").show();
     });
 
-});
+    $("#seeMeaning").click(function () {
+        legend();
+        $("#legend").fadeIn();
+    });
+    $("#closeLegend").click(function () {
+        // close legend
+        $("#legend").fadeOut();
+    });
 
+
+});
 
 
 function noConsentCallback(fingerprint) {
@@ -165,7 +178,26 @@ function anotherfpCallback(fingerprint) {
     }
 }
 
+function legend() {
+    // Show legend
+    let l = "<span style='color:" + fontColor + "'>installed fonts</span>"
+        + " | <span style='color:" + screenColor + "'>screen size</span>"
+        + " | <span style='color:" + languageColor + "'>language settings</span>"
+        + " | <span style='color:" + timeColor + "'>timezone settings</span>"
+        + " | <span style='color:" + trackingColor + "'>tracking settings</span>"
+        + " | <span style='color:" + color(255) + "'>device platform</span><img class='legendImg' src='./legend/platform.jpg'>"
+    if (hasAdBlock)
+        l = l + " | <span style='color:" + adColor + "'>ad blocking settings</span><img class='legendImg' src='./legend/adblock.jpg'>"
+    if (hasAudio)
+        l = l + " | <span style='color:" + color(255) + "'>audio settings</span><img class='legendImg' src='./legend/audio.jpg'>"
+    if (hasTouch)
+        l = l + " | <span style='color:" + trackingColor + "'>has a touch screen</span><img class='legendImg' src='./legend/touch.jpg'>"
+    if (hasOSversion)
+        l = l + " | <span style='color:" + color(255) + "'>operating system and version</span><img class='legendImg' src='./legend/os.jpg'>"
 
+
+    $("#legendT").html(l);
+}
 
 function constellation(fingerprint) {
 
@@ -210,18 +242,16 @@ function constellation(fingerprint) {
 
 
     // fonts
-    // fonts = fingerprint.original['font-js'];
     allFonts = fp['font-js'].split(',');
     fonts = allFonts.join('');
     colorMode(HSB);
     noStroke();
-    let fontColor = color(map(allFonts.length, 1, 400, 255, 0), 70, 190);
+    fontColor = color(map(allFonts.length, 1, 400, 255, 0), 70, 190);
     fill(fontColor);
     // big circle depending on font quantity
     let fontsX = c * cos(allFonts.length);
     let fontsY = c * sin(allFonts.length);
     push()
-    translate(0, 0, -c * 0.05);
     ellipse(fontsX, fontsY, allFonts.length * c * 0.0015);
     pop()
 
@@ -232,8 +262,6 @@ function constellation(fingerprint) {
     push()
     rotate(radians(allFonts.length))
     for (var i = 0; i < allFonts.length; i++) {
-        // let x = allFonts[i].charCodeAt(5) * cos(allFonts[i].charCodeAt(0));
-        // let y = allFonts[i].charCodeAt(5) * sin(allFonts[i].charCodeAt(0));
         if (i % 50 == 0) {
             f = 0;
             g += fonts.length / 300;
@@ -248,25 +276,26 @@ function constellation(fingerprint) {
     colorMode(RGB);
     strokeWeight(1);
     noFill();
+    trackingColor = color(220, 10, 110);
     // do not track
     let dnt = fp['dnt'];
     if (dnt == "not available") {
-        stroke(220, 10, 110);
+        stroke(trackingColor);
         line(c * cos(radians(60)), c * sin(radians(60)), c * cos(radians(130)), c * sin(radians(130)));
         ellipse(c * cos(radians(60)), c * sin(radians(60)), c * 0.05);
     }
     else if (dnt == "unspecified") {
-        stroke(220, 10, 110);
+        stroke(trackingColor);
         line(c * cos(radians(180)), c * sin(radians(180)), c * cos(radians(130)), c * sin(radians(130)));
         ellipse(c * cos(radians(130)), c * sin(radians(130)), c * 0.05);
     }
     else if (dnt == "true") {
-        stroke(220, 10, 110);
+        stroke(trackingColor);
         line(c * cos(radians(270)), c * sin(radians(270)), c * cos(radians(0)), c * sin(radians(0)));
         ellipse(c * cos(radians(0)), c * sin(radians(0)), c * 0.1);
     }
     else if (dnt == "false") {
-        stroke(220, 10, 110);
+        stroke(trackingColor);
         line(c * cos(radians(0)), c * sin(radians(0)), c * cos(radians(10)), c * sin(radians(10)));
         ellipse(c * cos(radians(0)), c * sin(radians(0)), c * 0.05);
     }
@@ -284,7 +313,8 @@ function constellation(fingerprint) {
 
     // language
     let language = fp['languages-js'];
-    stroke(250, 230, 100);
+    languageColor = color(250, 230, 100);
+    stroke(languageColor);
     // stroke(language.charCodeAt(i),170,0);
     beginShape()
     for (var i = 0; i < language.length; i++) {
@@ -346,7 +376,8 @@ function constellation(fingerprint) {
     // let screenResolution = [4096,2160]; // debug
     let sRx = map(fp['screen_width'], 320, 4096, 0, 255);
     let sRy = map(fp['screen_height'], 200, 2160, 0, 255);
-    stroke(sRy * 0.5, 40, sRx);
+    screenColor = color(sRy * 0.5, 40, sRx);
+    stroke(screenColor);
     push();
     rotate(-hardwareConcurrency);
     let c_ = 0.0045;
@@ -382,8 +413,9 @@ function constellation(fingerprint) {
 
     //timezone
     let timezone = fp['timezone'];
-    stroke(colorTOff, 50, 110);
-    fill(colorTOff, 50, 110);
+    timeColor = color(colorTOff, 50, 110);
+    stroke(timeColor);
+    fill(timeColor);
     for (var i = 0; i < timezone.length; i++) {
         let x = posTOff + c * 0.005 * timezone.charCodeAt(i) * cos(timezone.charCodeAt(i));
         let y = posTOff + c * 0.005 * timezone.charCodeAt(i) * sin(timezone.charCodeAt(i));
@@ -406,15 +438,35 @@ function constellation(fingerprint) {
         stroke(250, 230, 100);
 
     //addBehavior
+
     if (fp['addBehavior'])
-        asterisk(c * 0.75, -c * 0.7, c * 0.05);
+        ellipse(c * 0.8, c * 0.9, c * 0.035);
 
     //openDatabase
     if (fp['openDatabase'])
-        asterisk(c * 0.6, -c * 0.6, c * 0.1);
+        ellipse(c * 0.6, c * 0.9, c * 0.02);
 
     //cpuClass
 
+
+    // OS
+    let osName = fp['os_name'];
+    if (fp['os_version']) {
+        hasOSversion = true;
+        let osVersion = fp['os_version'];
+        osVersion = osVersion.replace('x', '');
+        osVersion = osVersion.replace('_', '');
+        osVersion = osVersion.replace('.', '');
+        console.log(osVersion);
+        push()
+        rotate(radians(osName.charCodeAt(0)));
+        asterisk(0.7 * c * cos(osVersion[0]), 0.7 * c * sin(osVersion[0]), c * 0.1);
+        pop()
+    }
+    else {
+
+        hasOSversion = false;
+    }
 
     //platform
     stroke(255);
@@ -472,12 +524,14 @@ function constellation(fingerprint) {
 
 
     //adBlock
-    let adBlock = fp['ad'];
+    hasAdBlock = fp['ad'];
+    adColor = color(255, 255, 255);
     push()
+    stroke(adColor);
     if (allFonts[22])
         rotate(radians(allFonts[22].charCodeAt(1)));
-    if (adBlock)
-        asterisk(c / 2 * cos(adBlock), c / 2 * sin(adBlock), c * 0.035);
+    if (hasAdBlock)
+        asterisk(c / 2 * cos(hasAdBlock), c / 2 * sin(hasAdBlock), c * 0.035);
     pop()
 
     //hasLiedLanguages
@@ -495,6 +549,7 @@ function constellation(fingerprint) {
     rotate(radians(platform.charCodeAt(0)));
     if (fp['touchSupport']) {
         let touchSupport = fp['touchSupport'].split(',');
+        hasTouch = (touchSupport[1] == 'true');
         // touchSupport = [0,"true","true"]; // debug
         fill(220, 10, 110);
         if (touchSupport[1] == "true")
@@ -512,12 +567,18 @@ function constellation(fingerprint) {
     //fontsFlash
 
     // audio
-    let audio = fp['audio'];
-    push();
-    rotate(radians(audio));
-    fill(255);
-    moon(c * cos(audio), c * sin(audio), 0.15 * c);
-    pop();
+    if (fp['audio']) {
+        hasAudio = true;
+        let audio = fp['audio'];
+        push();
+        rotate(radians(audio));
+        fill(255);
+        moon(c * cos(audio), c * sin(audio), 0.15 * c);
+        pop();
+    }
+    else {
+        hasAudio = false;
+    }
 
 
     //
@@ -550,7 +611,7 @@ function constellation(fingerprint) {
             // }
             for (var i = 0; i < enumerateDevices.length; i++) {
                 let a1 = 0;
-                let last_a1 = 0;
+                let last_a1;
                 for (var j = 0; j < enumerateDevices[i].length; j++) {
                     last_a1 = a1;
                     a1 = a1 + enumerateDevices[i].charCodeAt(j);

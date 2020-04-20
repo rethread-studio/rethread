@@ -3,17 +3,44 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Page Title</title>
+    <title>😃 🦠 🎉 🚀 🖼️</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      media="screen"
-      href="style/main.css"
-    />
+
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
   </head>
-  <body style="background: #f3eeeb;">
-    <canvas id="canvas"></canvas>
+  <body>
+    <div id="content">
+      <div class="w3-display-middle canvasContainer w3-cell-middle">
+        <div class="bg"> </div>
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+
+    <div id="info" class="w3-display-middle">
+      <h3 style="color: white">
+          <p>Emojis</p>
+      </h3>
+      <p>Each platform, each browser, each client will renders differently the emojis. The emoji can have a different design, a different size, a different color, a different spacing. This exposition highlight those differences by dipslaying your rendering of those emojis "😃 🦠 🎉 🚀 🖼️" and a random emoji of a different user.</p>
+
+
+      <button id="seeArt">See the emojis</button>
+    </div>
+
+    <div class="dropdown">
+      <button onclick="myFunction()" class="dropbtn"> </button>
+      <div id="myDropdown" class="dropdown-content">
+          <a href="../index.html#main">Back to artwork gallery</a>
+          <a href="../exit.html">Leave exhibition</a>
+      </div>
   </body>
+  <script src="../script/fa.js"></script>
   <script src="script/main.js"></script>
 </html>

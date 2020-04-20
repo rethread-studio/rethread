@@ -44,6 +44,11 @@ function goToPage() {
     } else {
         $("#welcome").fadeIn();
     }
+    if (currentPage == 'main' || currentPage == 'myFp' || currentPage == 'howTo') {
+        $("#dotMenu").show();
+    } else {
+        $("#dotMenu").hide();
+    }
     if (currentPage != 'welcome') {
         $("#bgCanvas").hide();
         if (hasConsented) {
@@ -53,7 +58,6 @@ function goToPage() {
                 $("#emojis").hide();
             }
         }
-        $("#dotMenu").show();
     } else {
         $("#bgCanvas").show();
         $("#emojis").hide();
@@ -102,23 +106,86 @@ function consentInfoPage() {
 
 }
 
+function getKeyValues(key, callback) {
+    $.get(HOST + "/api/fp/keys/" + key, (data) => {
+        if (callback) {
+            callback(data);
+        }
+    });
+}
+
+function fpHighlightHover(element) {
+    const id = element.id;
+    $("#fpHighlight").remove();
+    element.onmouseout = () => {
+        $("#fpHighlight").remove();
+    };
+    const offset = $(element).offset();
+    $("#fpHighlight").remove();
+    $("body").append('<div id="fpHighlight" style="top: ' + (offset.top + 25) + "px; left: " + offset.left + 'px;"></div>');
+    function callback(data) {
+        let totalUsage = 0;
+        let usage = 0;
+        let acutalValue = null;
+        for (let value of data) {
+            totalUsage += value.used;
+            if (window.fp.original[value.key] == value.value) {
+                usage = value.used;
+                acutalValue = value.value;
+            }
+        }
+        $("#fpHighlight").addClass('loaded')
+        $("#fpHighlight").html(Math.round((usage * 100) / totalUsage) +
+            '% of the visitors also have the value <span class="value">"' + element.innerText + '"</span>. At the moment we have collected ' + data.length + " different values."
+        );
+    }
+    if ("fpBrowserName" == id) {
+        getKeyValues("browser_name", callback);
+    } else if ("fpOSName" == id) {
+        getKeyValues("os_name", callback);
+    } else if ("fpPlatform" == id) {
+        getKeyValues("platform", callback);
+    } else if ("fpWebGLRenderer" == id) {
+        getKeyValues("webGLRenderer", callback);
+    } else if ("fpFont" == id) {
+        getKeyValues("font-js", callback);
+    } else if ("fpScreenWidth" == id) {
+        getKeyValues("screen_width", callback);
+    } else if ("fpLanguage" == id) {
+        getKeyValues("languages-js", callback);
+    } else if ("fpTimezone" == id) {
+        getKeyValues("timezone", callback);
+    }
+}
+
 function generateFPText(fp) {
-    var parser = new UAParser();
-    var result = parser.getResult();
-    let s = "You are using <span class = 'fpHighlight'>"
-        + result.browser.name + "</span> with <span class = 'fpHighlight'>" + result.os.name + " </span> on a <span class = 'fpHighlight'>" + fp.original.platform + "</span> machine with <span class = 'fpHighlight'>"
-        + fp.original.webGLRenderer + "</span> GPU on a <span class = 'fpHighlight'>" + fp.original.screen_width + "x" + fp.original.screen_height
-        + "</span> screen. You have <span class = 'fpHighlight'>" + fp.original['font-js'].split(',').length + "</span> fonts installed. Your language is set to <span class = 'fpHighlight'> "
-        + ISO6391.getName(fp.original['languages-js'].split('-')[0]) + "</span>. You are in <span class = 'fpHighlight'>" + fp.original.timezone.split('/')[0] + "</span>, specifically, in <span class = 'fpHighlight'>"
-        + fp.original.timezone.split('/')[1] + "</span>." + "<p>Your emojis are drawn in a specific style, depending on your device's operating system. This is the emoji that represents you during the exhibition:</p>"
+    let s =
+        "You are using <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.browser_name +
+        "</span> with <span class = 'fpHighlight' id='fpOSName' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.os_name +
+        "</span> on a <span class = 'fpHighlight' id='fpPlatform' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.platform +
+        "</span> machine with <span class = 'fpHighlight' id='fpWebGLRenderer' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.webGLRenderer +
+        "</span> GPU on a <span class = 'fpHighlight' id='fpScreenWidth' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.screen_width +
+        "x" +
+        fp.original.screen_height +
+        "</span> screen. You have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
+        fp.original["font-js"].split(",").length +
+        "</span> fonts installed. Your language is set to <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'> " +
+        ISO6391.getName(fp.original["languages-js"].split("-")[0]) +
+        "</span>. You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.timezone.split("/")[0] +
+        "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.timezone.split("/")[1] +
+        "</span>." +
+        "<p>Your emojis are drawn in a specific style, depending on your device's operating system. Here's a random emoji that represents you during the exhibition:</p>";
     return s;
-    // return `Your browser fingerprint is everything a website can know about you without using cookies. 
-    // You are using ${fp.original['user-agent']} browser on a ${fp.original.platform} platform with 
-    // a ${fp.original.webGLRenderer} GPU on a ${fp.original.screen_width}x${fp.original.screen_height} screen. 
-    // You have ${fp.original['font-js'].split(',').length} fonts installed.`
 }
 function myFpPage() {
-    displayPage('myFp');
+    displayPage("myFp");
     $("#goToResources").hide();
     $("#goToMainPage").hide();
     $("#main").fadeOut();
@@ -126,41 +193,66 @@ function myFpPage() {
     $("#participateStill").hide();
     $("#myFp").fadeIn();
 
-    var parser = new UAParser();
-    var result = parser.getResult();
-    let currentText = "You are using <span class = 'fpHighlight'>"
-        + result.browser.name + "</span> with <span class = 'fpHighlight'>" + result.os.name + " </span>";
+    let currentText = "";
 
     const opts = {
-        element: document.getElementById("fptext"), html: currentText, callback: () => {
+        element: document.getElementById("fptext"),
+        html: currentText,
+        callback: () => {
             // execute the fadeIn
             console.log("typing done");
             getEmoji((e) => {
-                $("#myEmoji").html(e);     
-            })
+                const canvas = document.getElementById("myEmoji");
+                const ctx = canvas.getContext("2d");
+                canvas.width = 125;
+                canvas.height = 125;
+                ctx.font = "100px Time";
+                ctx.fillStyle = "rgb(0, 0, 0)";
+                ctx.strokeStyle = ctx.fillStyle;
+                ctx.textAlign = "center";
+                ctx.fillText(e, 50, 100);
+            });
             $("#goToResources").fadeIn();
             $("#goToMainPage").fadeIn();
             $("#emojis").fadeIn();
-        }
-    }
-    $("#myEmoji").html(''); 
-    typewriter = setupTypewriter(opts)
-    typewriter.type();
-    getFingerPrint(async fp => {
-        // $("#fptext").text(generateFPText(fp));
+        },
+    };
+    const canvas = document.getElementById("myEmoji");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    getFingerPrint(async (fp) => {
+        window.fp = fp;
+        $("#fptext").text("");
         const text = generateFPText(fp);
         opts.html = text;
-
-        console.log(fp);
-    })
+        typewriter = setupTypewriter(opts);
+        typewriter.type();
+    });
 }
+
+let questions = [
+    "are you unique on the internet?",
+    "what's left of you when you leave a web page?",
+    "how entangled are you and your device?",
+    "how often do you change your device settings?",
+    "if you switch devices, are you still the same person?",
+    "top 25 things your BROWSER says about YOU",
+    '"we have no secrets my browser and I"',
+    "where do all these fonts come from?",
+    "why save everything that is visible?"
+];
 
 function mainPage() {
     displayPage('main');
     $("#myFp").fadeOut();
     $("#consentInfo").fadeOut();
     $("#howToDot").fadeOut();
-    console.log("consent: " + hasConsented);
+
+    // update questions here
+    var randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+    $("#question").text(randomQuestion);
+
     if (hasConsented) {
         $("#participateStill").hide();
         $("#seeMyFP").fadeIn();
@@ -196,11 +288,14 @@ function noThanksAgainButton() {
     $("#howToDot").fadeOut();
 }
 function consentInfoButton() {
-    acceptCondition(() => {
-        hasConsented = true;
-        // Go to fingerprint with animation
-        displayPage('myFp');
-    })
+    $("body").addClass('animateColor');
+    $("#consentInfo").fadeOut(() => {
+        acceptCondition(() => {
+            hasConsented = true;
+            // Go to fingerprint with animation
+            displayPage('myFp');
+        })
+    });
 }
 function mainButton() {
     displayPage('main');
@@ -248,6 +343,12 @@ $(document).ready(function () {
     // see my fingerprint
     $("#seeMyFP").click(myFpButton);
 
+    // go to resources
+    $("#goToResources").click(function () {
+        window.open('https://amiunique.org/tools/');
+        return false;
+    });
+
     ////// ARTWORK
 
     $("#3Dart").click(function () {
@@ -267,6 +368,6 @@ $(document).ready(function () {
 
     $("#Font").click(function () {
         // Go to 2D art
-        window.location.href = "https://rethread.art/code/fingerprinting/server/backend/static/font.html";
+        window.location.href = "font/";
     });
 });
