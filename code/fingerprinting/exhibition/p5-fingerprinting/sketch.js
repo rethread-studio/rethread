@@ -1,14 +1,17 @@
+// Hi!
+// I'm the large script that runs the constellation experiment!
+// I'm a bit chaotic!
+// I use p5.js to generate the visuals!
+// Bye!
+
 let hasConsented = false;
-getFingerPrint(fpDone);
+// getFingerPrint(fpDone);
 
 getSession((session) => {
     hasConsented = session.terms;
-    console.log("has consented? " + hasConsented);
 });
 
 function fpDone(fingerprint) {
-    // Check consent
-    console.log("fingerprint is random? " + fingerprint.random);
 }
 
 let canvas, canvasC;
@@ -137,6 +140,9 @@ $(document).ready(function () {
 function noConsentCallback(fingerprint) {
     myFP = fingerprint;
     $("canvas").fadeIn();
+    if (fingerprint.original.touchSupport.split(',')[1] == 'true')
+        $("#landscapeMode").fadeIn();
+
     $("#seeArt").text("see someone else's constellation (not my data)");
 
     // 36 is the length of the fingerprint -- at the moment
@@ -160,6 +166,10 @@ function fpCallback(fingerprint) {
     myFP = fingerprint;
 
     $("canvas").fadeIn();
+
+    if (fingerprint.original.touchSupport.split(',')[1] == 'true')
+        $("#landscapeMode").fadeIn();
+
     $("#seeArt").text("see my constellation");
 
     translate(width / 4, height / 4);
@@ -663,3 +673,9 @@ function asterisk(x, y, r) {
 // $("#download").click(function () {
 //     img = save('shape.png');
 // });
+
+
+// poem
+
+console.log("· .* . · ¨ .· less control .¨ · *. ·:. ·");
+console.log("· .* . · ¨ .· more care .¨ · *. ·:. ·");

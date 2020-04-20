@@ -89,12 +89,12 @@ body {
 
 h1 {
     font-family: 'Ortica', sans-serif;
-    font-size: 4em;
+    font-size: 3.5em;
     font-weight: bold;
 }
 h2{
     font-family: 'Ortica', sans-serif;
-    font-size: 3em;
+    font-size: 2em;
 }
 
 h3, h4 {
@@ -113,7 +113,7 @@ h3, h4 {
         font-size: 1em;
     }
     h3, h4 {
-        font-size: 0.7em;
+        /* font-size: 0.7em; */
     }
     .w3-display-middle {
         width: 80%;
