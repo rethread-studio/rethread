@@ -14,6 +14,8 @@
     crossorigin="anonymous"
   ></script>
 
+  <script src="script/fa.js"></script>
+
   <link rel="stylesheet" type="text/css" href="style.css" />
 
   <!-- Script for dot menu -->
@@ -86,7 +88,7 @@
           ></a>
         </p>
 
-        <button id="delete" href="#" class="w3-center">
+        <button id="delete" href="#" class="w3-center" style="display: none;">
             Delete all the data that we collected
         </button>
       </div>
@@ -100,6 +102,11 @@
       </div>
     </div>
     <script>
+        getSession((session) => {
+            if (session.connected && session.terms) {
+                $("#delete").show()
+            }
+        })
         $("#delete").click(() => {
           $("#delete").prop('disabled', true);
           deleteSession(() => {

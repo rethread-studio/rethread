@@ -344,8 +344,10 @@ app.get("/api/fp/count", async function (req, res) {
 });
 app.post("/api/session/delete", async function (req, res) {
   connectedUser.delete(req.session.fpId);
-  await o_fp_c.deleteOne({_id: req.session.fpId})
-  await n_fp_c.deleteOne({_id: req.session.fpId})
+  if (req.session.fp && !req.session.random) {
+    await o_fp_c.deleteOne({_id: req.session.fpId})
+    await n_fp_c.deleteOne({_id: req.session.fpId})
+  }
   req.session.destroy();
   res.send("ok");
 });
