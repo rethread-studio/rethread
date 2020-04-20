@@ -44,6 +44,11 @@ function goToPage() {
     } else {
         $("#welcome").fadeIn();
     }
+    if (currentPage == 'main' || currentPage == 'myFp' || currentPage == 'howTo') {
+        $("#dotMenu").show();
+    } else {
+        $("#dotMenu").hide();
+    }
     if (currentPage != 'welcome') {
         $("#bgCanvas").hide();
         if (hasConsented) {
@@ -53,7 +58,6 @@ function goToPage() {
                 $("#emojis").hide();
             }
         }
-        $("#dotMenu").show();
     } else {
         $("#bgCanvas").show();
         $("#emojis").hide();
