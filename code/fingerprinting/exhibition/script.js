@@ -323,6 +323,12 @@ $(document).ready(function () {
     // see my fingerprint
     $("#seeMyFP").click(myFpButton);
 
+    // go to resources
+    $("#goToResources").click(function () {
+        window.open('https://amiunique.org/tools/');
+        return false;
+    });
+
     ////// ARTWORK
 
     $("#3Dart").click(function () {
