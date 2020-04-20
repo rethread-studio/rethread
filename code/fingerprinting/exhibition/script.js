@@ -104,7 +104,6 @@ function consentInfoPage() {
 
 function getKeyValues(key, callback) {
   $.get(HOST + "/api/fp/keys/" + key, (data) => {
-    console.log(data);
     if (callback) {
       callback(data);
     }
