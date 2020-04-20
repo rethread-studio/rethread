@@ -134,7 +134,7 @@ $(document).ready(function () {
 function noConsentCallback(fingerprint) {
     myFP = fingerprint;
     $("canvas").fadeIn();
-    if (hasTouch)
+    if (fingerprint.original.touchSupport.split(',')[1]=='true')
         $("#landscapeMode").fadeIn();
 
     $("#seeArt").text("see someone else's constellation (not my data)");
@@ -160,7 +160,8 @@ function fpCallback(fingerprint) {
     myFP = fingerprint;
 
     $("canvas").fadeIn();
-    if (hasTouch)
+
+    if (fingerprint.original.touchSupport.split(',')[1]=='true')
         $("#landscapeMode").fadeIn();
 
     $("#seeArt").text("see my constellation");
