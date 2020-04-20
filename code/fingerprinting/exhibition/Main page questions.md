@@ -8,4 +8,7 @@
 - top 25 things your BROWSER says about YOU
 - "we have no secrets my browser and I"
 - where do all these fonts come from?
-- why save everything that is visible?
+- why would a website save your browser fingerprint?
+- is your browser in the artwork or is the artwork in your browser?
+- how many emojis do you see?
+- when did you use another browser for the last time?
