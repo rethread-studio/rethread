@@ -91,7 +91,7 @@ h1 {
 }
 h2{
     font-family: 'Ortica', sans-serif;
-    font-size: 2em;
+    font-size: 3em;
 }
 
 h3, h4 {
@@ -206,6 +206,15 @@ button:hover {
     color: white;
     visibility: visible;
 }
+
+@media only screen and (max-width: 768px) {
+    .artBubble {
+        height: 6em;
+        width: 6em;
+        margin: 1em;
+    }
+}
+
 
 /* /// Navigation /// */
 
