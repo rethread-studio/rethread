@@ -143,44 +143,76 @@ function fpHighlightHover(element) {
         getKeyValues("browser_name", callback);
     } else if ("fpOSName" == id) {
         getKeyValues("os_name", callback);
+    } else if ("fpOSVersion" == id) {
+        getKeyValues("os_version", callback);
     } else if ("fpPlatform" == id) {
         getKeyValues("platform", callback);
     } else if ("fpWebGLRenderer" == id) {
-        getKeyValues("webGLRenderer", callback);
+        getKeyValues("webGLVendor", callback);
     } else if ("fpFont" == id) {
         getKeyValues("font-js", callback);
     } else if ("fpScreenWidth" == id) {
         getKeyValues("screen_width", callback);
+    } else if ("fpScreenHeight" == id) {
+        getKeyValues("screen_height", callback);
     } else if ("fpLanguage" == id) {
         getKeyValues("languages-js", callback);
+    } else if ("fpLanguages" == id) {
+        getKeyValues("accept-language", callback);
     } else if ("fpTimezone" == id) {
         getKeyValues("timezone", callback);
+    } else if ("fpBrowserVersion" == id) {
+        getKeyValues("browser_major", callback);
+    } else if ("fpCPU" == id) {
+        getKeyValues("hardwareConcurrency", callback);
+    } else if ("fpTouch" == id) {
+        getKeyValues("touchSupport", callback);
     }
 }
 
 function generateFPText(fp) {
     let s =
-        "You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.timezone.split("/")[0] +
-        "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.timezone.split("/")[1] + "</span>. Your browser is <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.browser_name +
-        "</span> with <span class = 'fpHighlight' id='fpOSName' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.os_name +
-        "</span> on a <span class = 'fpHighlight' id='fpPlatform' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.platform +
-        "</span> machine with <span class = 'fpHighlight' id='fpWebGLRenderer' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.webGLRenderer +
-        "</span> GPU on a <span class = 'fpHighlight' id='fpScreenWidth' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.screen_width +
-        "x" +
-        fp.original.screen_height +
-        "</span> screen. Did you know you have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
-        fp.original["font-js"].split(",").length +
-        "</span> fonts installed? Your language is set to <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'> " +
-        ISO6391.getName(fp.original["languages-js"].split("-")[0]) +
-        "</span>. All this information is part of your browser fingerprint: everything a website can know about you <b>without</b> using cookies." +
-        "<p>Your emojis are drawn in a specific style, depending on your device's operating system. Here's a random emoji that represents you during the exhibition:</p>";
+      "You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.timezone.split("/")[0] +
+      "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.timezone.split("/")[1] +
+      "</span>. Your favorite language to browse the web is set to <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'>" +
+      ISO6391.getName(fp.original["languages-js"].split("-")[0]) +
+      "</span>."
+      const languages = new Set();
+      for (let l of fp.original["accept-language"].split(',')) {
+        languages.add(ISO6391.getName(l.split("-")[0]))
+      }
+      if (languages.size > 1) {
+          s += "You probably also speak <span class = 'fpHighlight' id='fpLanguages' onmouseover='fpHighlightHover(this);'>"
+          for (let lang of languages) {
+            s += lang + " "
+          }
+          s += "</span>. "
+      }
+      s += "Your browser is <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.browser_name +
+      "</span> <span class = 'fpHighlight' id='fpBrowserVersion' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.browser_major +
+      "</span> on a <span class = 'fpHighlight' id='fpTouch' onmouseover='fpHighlightHover(this);'>" +
+      (fp.original.touchSupport[0] > 1 ? "" : "non") +
+      " touch screen</span> display of <span class = 'fpHighlight' id='fpScreenWidth' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.screen_width +
+      "</span> pixels wide and <span class = 'fpHighlight' id='fpScreenHeight' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.screen_height +
+      "</span> pixels height. Your computer has <span class = 'fpHighlight' id='fpCPU' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.hardwareConcurrency +
+      "</span> cores and a <span class = 'fpHighlight' id='fpWebGLRenderer' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.webGLVendor +
+      "</span> graphic card. Did you know you have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
+      fp.original["font-js"].split(",").length +
+      "</span> fonts installed? All this information is part of your browser fingerprint: everything a website can know about you <b>without</b> using cookies. <p></p>Your emojis are drawn in a specific style because your are using <span class = 'fpHighlight' id='fpOSName' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.os_name +
+      "</span> version <span class = 'fpHighlight' id='fpOSVersion' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.os_version +
+      "</span> based on the platform: <span class = 'fpHighlight' id='fpPlatform' onmouseover='fpHighlightHover(this);'>" +
+      fp.original.platform +
+      "</span>. Here's the random emoji that represents you during the exhibition:";
     return s;
 }
 function myFpPage() {
