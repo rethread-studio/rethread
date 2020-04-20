@@ -663,7 +663,16 @@ let spaceRoom = {
                 } else if (intersections[i].distance < 10.0) {
                     let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
                     displayOnHud("<span>" + text + "</span><br/><br/><span>travel into fingerprint</span>");
-                    console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
+                    if(mouseClicked) {
+                        let synTest = "there";
+                        if(intersections[i].object.userData.fingerprintPtr.synth == undefined) { 
+                            synTest = "undefined, free synths: " + Synthesis.getNumFreeFMSynths();
+                        }
+
+                        console.log("synth is " + synTest + ", free synths: " + Synthesis.getNumFreeFMSynths());
+                        console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
+                    }
+                    
                 } else if(intersections[i].distance < 30.0) {
                     let text = intersections[i].object.userData.fingerprintPtr.getHoverText();
                     displayOnHud("<span>" + text + "</span>");

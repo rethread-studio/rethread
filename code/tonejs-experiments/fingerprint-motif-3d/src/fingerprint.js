@@ -11,6 +11,7 @@ class Motif {
     pitches;
     // Duration is the number of 16th notes the pitch spans
     durations;
+    sequence; // a conversion from durations and startDurOffset to sequencer trigger positions
     attacks;
     octave;
     pitchSet;
@@ -45,9 +46,9 @@ class Motif {
         let motif = this;
         this.loop = new Tone.Loop(function(time){
             let playedNote = false;
-            for(let i = 0; i < motif.durations.length; i++) {
+            for(let i = 0; i < motif.sequence.length; i++) {
                 // Have the loop be in sync with the spaceRoom loop
-                if(motif.durations[i] + motif.startDurOffset == motif.loopCounter) {
+                if(motif.sequence[i] == motif.loopCounter) {
                     playedNote = true;
                     // console.log("Play note in Loop with loopmax " + motif.loopMax + " durations: " + motif.durations);
                     let pitch = Tone.Frequency.mtof(motif.pitches[i] + motif.pitchOffset + (motif.octave * 12));
@@ -66,7 +67,7 @@ class Motif {
                         pitch = Tone.Frequency.mtof((motif.pitches[i] + motif.pitchOffset) % 12 + 12);
                         motif.repeatsLeft = 0;
                     }
-                    let id = transport.schedule(function (time) {
+                    // let id = transport.schedule(function (time) {
                         // console.log("pitch: " + pitch + " dur: " + dur + " time: " + time);
                         synth.envelope.attack = atk;
                         if(noisePlayback) {
@@ -74,11 +75,13 @@ class Motif {
                                 pitch,
                                 "16n",//dur16ToTransport(dur/2),
                                 time);
+                            console.log("trig noise");
                         } else {
                             synth.triggerAttackRelease(
                                 pitch,
                                 dur,//dur16ToTransport(dur/2),
                                 time);
+                            console.log("trig tone");
                         }
                         // Matching visual changes
                         Tone.Draw.schedule(function(){
@@ -88,10 +91,10 @@ class Motif {
 
                         }, time) //use AudioContext time of the event
                         
-                    }, time);
-                    motif.schedulingIds.push(id);
+                    // }, time);
+                    // motif.schedulingIds.push(id);
 
-                    
+                    break;
                 }
             }
             if(!playedNote && motif.repeatsLeft > 0) {
@@ -115,6 +118,16 @@ class Motif {
                 this.loopMax = i * 8;
                 break;
             }
+        }
+        this.updateSequence();
+    }
+    updateSequence() {
+        let pos = this.startDurOffset;
+        this.sequence = [pos];
+        // add all but the last duration (because there is no note happening after that duration)
+        for(let i = 0; i < this.durations.length-1; i++) {
+            pos += this.durations[i];
+            this.sequence.push(pos);
         }
     }
     addDur(v) {
@@ -208,13 +221,11 @@ class Fingerprint {
     activation; // used to display that the fingerprint is sonically activated
     hidden;
     constructor(rawFingerprint, type) {
-        console.log("Created fingerprint with raw: " + JSON.stringify(rawFingerprint));
         this.type = type;
         this.rawFingerprint = rawFingerprint;
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
         this.color = new THREE.Color();
         this.color.setHSL(((this.fingerprintSum * 73) % 1000)/1000, 0.6, 0.55);
-        // console.log("new fingerprint with sum " + this.fingerprintSum + " and raw fingerprint " + JSON.stringify(this.rawFingerprint));
         this.activation = 0.0;
         this.synth = undefined;
         this.oscillatorType = 'sine';
@@ -661,6 +672,8 @@ class Fingerprint {
                 console.log("No synth was received when requested");
                 this.synth = undefined;
             }
+        } else {
+            console.log("Already had synth when requested one");
         }
         
         // Get noise synth
@@ -728,17 +741,18 @@ class Fingerprint {
                 if (numParameters < 10) {
                     numParameters = 0;
                 }
-                if (numParameters != this.numParametersUsed) {
-                    if(this.numParametersUsed > 0 && this.synth == undefined) {
-                        // if numParameters were 0 we have returned or not requested a synth
-                        this.requestNewSynths();
-                    } else if (numParameters == 0) {
-                        // we go frome some parameters to none
-                        // return the synth to the pool
-                        if(this.synth != undefined) {
-                            this.returnSynths();
-                        }
+                // Request and return synths
+                if(this.numParametersUsed > 0 && this.synth == undefined) {
+                    // if numParameters were 0 we have returned or not requested a synth
+                    this.requestNewSynths();
+                } else if (numParameters == 0) {
+                    // we go frome some parameters to none
+                    // return the synth to the pool
+                    if(this.synth != undefined) {
+                        this.returnSynths();
                     }
+                }
+                if (numParameters != this.numParametersUsed) {
                     this.numParametersUsed = numParameters;
                     // this.numParametersUsed = 24;
                     this.updateMotif();
