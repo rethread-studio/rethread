@@ -327,38 +327,17 @@ button:hover {
     padding-left: 2em;
 }
 		</style>
-		<script src="../script/jquery-3.4.1.min.js"></script>
-		<link rel="stylesheet" href="../style/w3.css">
-
-		<script src="../script/lib.min.js"></script>
-		<script src="../script/fa.js"></script>
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<!-- <link rel="stylesheet" type="text/css" href="../style.css"> -->
 	</head>
 	<body>
-		
-        <!-- <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/p5.js"></script> -->
-    	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"></script>
-    	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.sound.min.js"></script> -->
-		<!-- <script src="js/Tone.js"></script>
-		<script src="js/three.js"></script>
-		<script src="js/FirstPersonControls.js"></script>
-		<script src="js/PointerLockControls.js"></script> -->
-		
-
-		<!-- <script src="https://unpkg.com/@tonejs/ui"></script> -->
-		
-		<!--<tone-demo>
-			<tone-play-toggle></tone-play-toggle>
-		</tone-demo> -->
-
-		<!-- <button id="start-stop">Start/stop</button>
-		<button id="test1">Test1</button>
-		<button id="test2">Test2</button>
-		<button id="test3">Add fingerprint motif</button>
-		<button id="clear-timeline">Clear Timeline</button>
-		<button id="randomize-grids">Randomize grids</button>
-		<label for="quantity">Number of fingerprint parameters used:</label> -->
-		<!-- <input type="number" id="numParameters" name="numParameters" min="1" max="29">  -->
+		<script
+			src="https://code.jquery.com/jquery-3.4.1.min.js"
+			integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+			crossorigin="anonymous"
+			></script>
+			<script src="../script/lib.min.js"></script>
+			<script src="../script/fa.js"></script>
 		<div id="data"></div>
 		<div id="hud-container">
 			<div id="hud" class="hud-overlay" style="display: none;">
@@ -394,7 +373,7 @@ button:hover {
 			</div>
 			<div id="filter-container" class="">
 				<button id="return-to-center-button" class="w3-large w3-center">return to center</button> <br/><br/>
-				<span style="font-size:24px; line-height: 1.3em;">Filter</span><br/><br/>
+				<span id="filter-span" style="font-size:24px; line-height: 1.3em;">Filter</span><br/><br/>
 				minimum fingerprint markers in common: <span id="filter-output"></span> <br/>
 				<input type="range" min="0" max="25" value="0" class="slider" id="filter-slider">
 			</div>

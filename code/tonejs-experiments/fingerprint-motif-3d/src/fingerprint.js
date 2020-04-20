@@ -348,6 +348,8 @@ class Fingerprint {
             room.fingerprint.updateMotif();
             room.motif = room.fingerprint.motif;
             room.motif.play(room.fingerprint.synth.synth, room.fingerprint.noiseSynth.synth, Tone.Transport, room.fingerprint);
+            console.log("Started motif in room");
+            console.log("motif: " + JSON.stringify(room.motif));
 
             Synthesis.globalSynthLPF.frequency.value = 500;
             Synthesis.noiseEnv.triggerRelease();
