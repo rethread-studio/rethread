@@ -3,10 +3,12 @@
 <head>
     <title>· .* . · ¨ .· constellations .¨ · *. ·:. ·</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <script src="../script/jquery-3.4.1.min.js"></script>
     <link rel="stylesheet" href="../style/w3.css">
 
-    <link rel="stylesheet" href="../style/Inconsolata.css">
+
     <script src="../script/lib.min.js"></script>
     <script src="../script/fa.js"></script>
 
@@ -19,9 +21,8 @@
     <style>
         body {
             background-color: black;
-            /* height: 100%; */
             overflow: hidden;
-            text-align: left;
+            text-align: center;
         }
 
         canvas {
@@ -52,9 +53,6 @@
             width: 2em;
         }
 
-        /* #seeArt {
-            width: 20em;
-        } */
     </style>
     <!-- Script for dot menu -->
     <script>
@@ -77,12 +75,6 @@
                 }
             }
         }
-
-        // poem
-
-        console.log("· .* . · ¨ .· less control .¨ · *. ·:. ·");
-        console.log("· .* . · ¨ .· more care .¨ · *. ·:. ·");
-
     </script>
 
 </head>
@@ -126,11 +118,13 @@
 
     </div>
 
-    <div class="dropdown">
-        <button onclick="myFunction()" class="dropbtn"> </button>
+
+    <div id="dotMenu" class="dropdown">
+        <button id="dot" onclick="myFunction()" class="dropbtn"> </button>
         <div id="myDropdown" class="dropdown-content">
             <a href="../index.html#main">Back to artwork gallery</a>
-            <a href="../exit.html">Leave exhibition</a>
+            <a href="https://github.com/castor-software/rethread/blob/master/browser-fingerprint/privacy.md"
+                target="_blank">Privacy policy</a>
         </div>
     </div>
 
