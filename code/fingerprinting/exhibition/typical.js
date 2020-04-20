@@ -5,7 +5,7 @@ function setupTypewriter(otps) {
     tag = "",
     writingTag = false,
     tagOpen = false,
-    typeSpeed = 75,
+    typeSpeed = 50,
     stop = false,
     tempTypeSpeed = 0;
 

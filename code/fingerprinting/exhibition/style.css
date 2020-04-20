@@ -160,8 +160,20 @@ button:hover {
 .fpHighlight {
     font-weight: bold;
     color: white;
+    cursor: pointer;
+}
+#fpHighlight {
+    position: fixed;
+    background: black;
+    color: white;
+    font-style: italic;
+    padding: 4px 7px;
+    width: 250px;
 }
 
+#fpHighlight .value {
+    font-weight: bolder;
+}
 /* Main page */
 
 .artBubble {
