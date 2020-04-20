@@ -63,6 +63,7 @@ var hudContainer;
 
 var filterSlider = document.getElementById("filter-slider");
 var filterOutput = document.getElementById("filter-output");
+var filterContainer = document.getElementById('filter-container');
 filterOutput.innerHTML = filterSlider.value;
 filterSlider.oninput = function() {
     filterOutput.innerHTML = this.value;
@@ -418,6 +419,7 @@ let spaceRoom = {
     filteredOutFingerprints: [],
 
     init: function (room) {
+        showFilter();
         fogFade = 1.0;
         // SCENE
         scene = new THREE.Scene();
@@ -1145,6 +1147,20 @@ function updateFiltering(minimumValuesInCommon) {
     }
 }
 
+function showFilter() {
+    // filterContainer.style.display = '';
+    document.getElementById('filter-span').style.display = '';
+    filterOutput.style.display = '';
+    filterSlider.style.display = '';
+}
+
+function hideFilter() {
+    // filterContainer.style.display = 'none';
+    document.getElementById('filter-span').style.display = 'none';
+    filterOutput.style.display = 'none';
+    filterSlider.style.display = 'none';
+}
+
 export { init_three, 
     animate, 
     scene, 
@@ -1165,4 +1181,5 @@ export { init_three,
     setFogFade,
     updateSceneFog,
     removeFingerprintFromRoom,
+    hideFilter,
  }; 

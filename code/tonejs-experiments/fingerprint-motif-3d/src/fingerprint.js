@@ -255,6 +255,7 @@ class Fingerprint {
         newRoom.fingerprint = this;
         newRoom.init = function (room) {
             Graphics.displayOnHudMessage(Global.getRandomInsideFingerprintMessage());
+            Graphics.hideFilter();
 
             Graphics.newScene(new THREE.Color(0x000000), new THREE.FogExp2(0xfffefe, 0.01));
             Graphics.setFogFade(0.0);
@@ -285,15 +286,17 @@ class Fingerprint {
             // Add geometry to display a shader on
             let shaderGeometry = new THREE.PlaneGeometry( 18, 18, 1, 1 );
             // let shaderMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.FrontSide} );
+            console.log("rawFingerprint: " + JSON.stringify(newRoom.fingerprint.rawFingerprint));
             let shaderUniforms = {
                 time: { value: 1.0 },
-                resolution: {  value: new THREE.Vector2() }
+                resolution: {  value: new THREE.Vector2() },
+                fingerprint: { value: newRoom.fingerprint.rawFingerprint }
             };
             let shaderMaterial = new THREE.ShaderMaterial( {
                 uniforms: shaderUniforms,
                 // general vertex shader for fragment shaders
                 vertexShader: Shaders.vShader,
-                fragmentShader: Shaders.colorBandFShader,
+                fragmentShader: Shaders.fingerprintFShader2,
                 side: THREE.DoubleSide,
             } );
             let shader = new THREE.Mesh( shaderGeometry, shaderMaterial );
