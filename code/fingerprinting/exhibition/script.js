@@ -132,7 +132,7 @@ function fpHighlightHover(element) {
     }
     $("#fpHighlight").addClass('loaded')
     $("#fpHighlight").html(Math.round((usage * 100) / totalUsage) +
-        '% of the visitors have also the value <span class="value">"' + element.innerText + '"</span>. Up to now we have collected ' + data.length + " different values."
+        '% of the visitors also have the value <span class="value">"' + element.innerText + '"</span>. At the moment we have collected ' + data.length + " different values."
     );
   }
   if ("fpBrowserName" == id) {
