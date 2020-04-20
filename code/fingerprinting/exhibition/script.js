@@ -160,7 +160,10 @@ function fpHighlightHover(element) {
 
 function generateFPText(fp) {
     let s =
-        "You are using <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
+        "You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.timezone.split("/")[0] +
+        "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.timezone.split("/")[1] + "</span>. Your browser is <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
         fp.original.browser_name +
         "</span> with <span class = 'fpHighlight' id='fpOSName' onmouseover='fpHighlightHover(this);'>" +
         fp.original.os_name +
@@ -172,15 +175,11 @@ function generateFPText(fp) {
         fp.original.screen_width +
         "x" +
         fp.original.screen_height +
-        "</span> screen. You have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
+        "</span> screen. Did you know you have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
         fp.original["font-js"].split(",").length +
-        "</span> fonts installed. Your language is set to <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'> " +
+        "</span> fonts installed? Your language is set to <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'> " +
         ISO6391.getName(fp.original["languages-js"].split("-")[0]) +
-        "</span>. You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.timezone.split("/")[0] +
-        "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.timezone.split("/")[1] +
-        "</span>." +
+        "</span>. All this information is part of your browser fingerprint: everything a website can know about you <b>without</b> using cookies." +
         "<p>Your emojis are drawn in a specific style, depending on your device's operating system. Here's a random emoji that represents you during the exhibition:</p>";
     return s;
 }
