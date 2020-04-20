@@ -12,3 +12,6 @@
 - is your browser in the artwork or is the artwork in your browser?
 - how many emojis do you see?
 - when did you use another browser for the last time?
+- where is the code? where is the data? where is the art?
+- diversity is good.
+- your browser + our code = collective software art
