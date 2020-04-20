@@ -190,7 +190,7 @@ function generateFPText(fp) {
           }
           s += "</span>. "
       }
-      s += "Your browser is <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
+      s += "You are using <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
       fp.original.browser_name +
       "</span> <span class = 'fpHighlight' id='fpBrowserVersion' onmouseover='fpHighlightHover(this);'>" +
       fp.original.browser_major +
@@ -200,11 +200,19 @@ function generateFPText(fp) {
       fp.original.screen_width +
       "</span> pixels wide and <span class = 'fpHighlight' id='fpScreenHeight' onmouseover='fpHighlightHover(this);'>" +
       fp.original.screen_height +
-      "</span> pixels height. Your computer has <span class = 'fpHighlight' id='fpCPU' onmouseover='fpHighlightHover(this);'>" +
+      "</span> pixels height. Your ";
+      let device = fp.original.device_vendor;
+      if (!device) {
+        device = fp.original.device_type;
+      }
+      if (!device) {
+        device = 'computer';
+      }
+      s += device + " has <span class = 'fpHighlight' id='fpCPU' onmouseover='fpHighlightHover(this);'>" +
       fp.original.hardwareConcurrency +
       "</span> cores and a <span class = 'fpHighlight' id='fpWebGLRenderer' onmouseover='fpHighlightHover(this);'>" +
       fp.original.webGLVendor +
-      "</span> graphic card. Did you know you have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
+      "</span> graphic card. Did you also know that you have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
       fp.original["font-js"].split(",").length +
       "</span> fonts installed? All this information is part of your browser fingerprint: everything a website can know about you <b>without</b> using cookies. <p></p>Your emojis are drawn in a specific style because your are using <span class = 'fpHighlight' id='fpOSName' onmouseover='fpHighlightHover(this);'>" +
       fp.original.os_name +
@@ -219,6 +227,7 @@ function myFpPage() {
     displayPage("myFp");
     $("#goToResources").hide();
     $("#goToMainPage").hide();
+    $("#downloadFP").hide();
     $("#main").fadeOut();
     $("#consentInfo").fadeOut();
     $("#participateStill").hide();
@@ -245,6 +254,7 @@ function myFpPage() {
             });
             $("#goToResources").fadeIn();
             $("#goToMainPage").fadeIn();
+            $("#downloadFP").fadeIn();
             $("#emojis").fadeIn();
         },
     };
