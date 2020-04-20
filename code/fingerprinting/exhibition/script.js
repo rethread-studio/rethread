@@ -250,7 +250,7 @@ function myFpPage() {
                 ctx.fillStyle = "rgb(0, 0, 0)";
                 ctx.strokeStyle = ctx.fillStyle;
                 ctx.textAlign = "center";
-                ctx.fillText(e, 50, 100);
+                ctx.fillText(e, 60, 100);
             });
             $("#goToResources").fadeIn();
             $("#goToMainPage").fadeIn();
