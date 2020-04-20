@@ -255,10 +255,9 @@ const sess = {
   secret: "fingerprintislife",
   resave: false,
   saveUninitialized: true,
-  cookie: { sameSite: "None" },
+  cookie: { sameSite: "None", maxAge: 2 * 60 * 60 * 1000 }, // 2h timeout
 }
 sess.cookie.secure = true;
-sess.cookie.secure = false;
 
 const sessionParser = session(sess)
 app.use(sessionParser);
