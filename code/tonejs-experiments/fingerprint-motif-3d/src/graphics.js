@@ -417,16 +417,18 @@ let spaceRoom = {
     timeUntilConnectedUpdate: 30,
     lastMinimumMarkersInCommon: 0,
     filteredOutFingerprints: [],
+    spawnDistance: 1.5, // first time we spawn it should be close to your own fingerprint, next time not as close
 
     init: function (room) {
         showFilter();
         fogFade = 1.0;
+        setHudMessageColor('#777777');
         // SCENE
         scene = new THREE.Scene();
         scene.background = room.lightColor;
         scene.fog = new THREE.FogExp2(room.lightColor, room.spaceFog + fogFade);
 
-        camera.position.set(0, 0, 15);
+        camera.position.set(0, 0, room.spawnDistance);
 
         light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
         light.position.set(0.5, 1, 0.75);
@@ -655,7 +657,7 @@ let spaceRoom = {
             var intersections = raycaster.intersectObjects(spaceRoom.objects);
 
             for (var i = 0; i < intersections.length; i++) {
-                if (intersections[i].distance < 2.0) {
+                if (intersections[i].distance < 1.0) {
                     // Travel into the fingerprint
                     let fingerprintRoom = intersections[i].object.userData.fingerprintPtr.generateFingerprintRoom();
                     travelToRoom(fingerprintRoom);
@@ -778,6 +780,7 @@ let spaceRoom = {
                     displayOnHudMessage(Global.getRandomDarkSpaceMessage());
                 }
                 room.spaceSection = darkSpaceSection;
+                setHudMessageColor('#ffffff');
                 displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
                 // we are in a darker space where old non-connected fingerprints are shown
                 room.spaceFog = 0.05;
@@ -794,6 +797,7 @@ let spaceRoom = {
                 scene.fog.color = room.lightColor;
                 scene.background = room.lightColor;
                 let insideSphereSection = "currently connected devices";
+                setHudMessageColor('#777777');
                 if(room.spaceSection != insideSphereSection) {
                     displayOnHudMessage(Global.getRandomInsideSphereMessage());
                 }
@@ -930,6 +934,8 @@ let spaceRoom = {
         spaceRoom.fingerprintsAdded = false;
         spaceRoom.fingerprints = [];
         spaceRoom.loop.stop();
+        room.spawnDistance = 10;
+        setHudMessageColor('#ffffff');
         hideHud();
     }
 }
@@ -1129,6 +1135,9 @@ function displayOnHudMessage(html, dur = 10.0) {
     hudMessage.innerHTML = html;
     hudMessage.style.opacity = 1.0;
 }
+function setHudMessageColor(colStr) {
+    hudMessage.style.color = colStr;
+}
 function hideHudMessage() {
     hudMessage.style.opacity = 0.0;
 }
@@ -1170,6 +1179,10 @@ function hideFilter() {
     filterSlider.style.display = 'none';
 }
 
+function lookAt(pos) {
+    camera.lookAt(pos);
+}
+
 export { init_three, 
     animate, 
     scene, 
@@ -1191,4 +1204,5 @@ export { init_three,
     updateSceneFog,
     removeFingerprintFromRoom,
     hideFilter,
+    lookAt,
  }; 

@@ -298,10 +298,14 @@ class Fingerprint {
             let shaderGeometry = new THREE.PlaneGeometry( 18, 18, 1, 1 );
             // let shaderMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.FrontSide} );
             console.log("rawFingerprint: " + JSON.stringify(newRoom.fingerprint.rawFingerprint));
+            let shaderFingerprint = newRoom.fingerprint.rawFingerprint.map(num => {
+                return Math.sqrt(((num + 1) * newRoom.fingerprint.fingerprintSum) % 99);
+            })
             let shaderUniforms = {
                 time: { value: 1.0 },
                 resolution: {  value: new THREE.Vector2() },
-                fingerprint: { value: newRoom.fingerprint.rawFingerprint }
+                fingerprint: { value: shaderFingerprint },
+                orgColor: { value: newRoom.fingerprint.color.clone() }
             };
             let shaderMaterial = new THREE.ShaderMaterial( {
                 uniforms: shaderUniforms,
@@ -314,6 +318,7 @@ class Fingerprint {
             shader.castShadow = true;
             shader.rotateY(Math.PI);
             shader.position.set(0, 0, 28);
+            Graphics.lookAt(shader.position.clone());
             Graphics.scene.add(shader);
             room.shader = shader;
             room.shaderUniforms = shaderUniforms;

@@ -55,16 +55,17 @@ uniform vec2 resolution;
 uniform float alpha;
 varying vec2 vUv;
 uniform float fingerprint[25];
+uniform vec3 orgColor;
 
 mat2 rotate2d(float _angle){
     return mat2(cos(_angle),-sin(_angle),
                 sin(_angle),cos(_angle));
 }
 
-float light(in vec2 st,  in float brightness, in float focus) {
+vec3 light(in vec2 st,  in float brightness, in float focus, in vec3 mixCol) {
     int offset = 0;
     float t = time;
-    t *= 0.05;
+    t *= 0.12;
     float rotationSpeed = mod(fingerprint[0] * 413.483, 0.1) - 0.05;
     st = rotate2d(fingerprint[2] + t * rotationSpeed) * st;
   st += mod(length(st) * mod(fingerprint[0], 100.) * 0.3, 1.0);
@@ -78,12 +79,13 @@ float light(in vec2 st,  in float brightness, in float focus) {
   pct = 1./dot(j, j);
   //pct = brightness/pct;
   pct = pow(pct, focus);
-  return pct;
+  vec3 color = mix(orgColor, mixCol, (sin(t * 10. + st.x * mod(fingerprint[1] + fingerprint[3],7.52))*.5+.5));
+  return pct * color;
 }
-float light2(in vec2 st,  in float brightness, in float focus) {
+vec3 light2(in vec2 st,  in float brightness, in float focus, in vec3 mixCol) {
     int offset = 4;
     float t = time;
-    t *= 0.05;
+    t *= 0.5;
     float rotationSpeed = mod(fingerprint[4] * 413.483, 0.1) - 0.05;
     st = rotate2d(fingerprint[6] + t * rotationSpeed) * st;
   st += mod(length(st) * mod(fingerprint[4], 100.) * 0.3, 1.0);
@@ -97,13 +99,14 @@ float light2(in vec2 st,  in float brightness, in float focus) {
   pct = 1./dot(j, j);
   //pct = brightness/pct;
   pct = pow(pct, focus);
-  return pct;
+  vec3 color = mix(orgColor, mixCol, (sin(t * 10. + st.x * mod(fingerprint[5] + fingerprint[7],7.52))*.5+.5));
+  return pct * color;
 }
 
-float light3(in vec2 st,  in float brightness, in float focus) {
+vec3 light3(in vec2 st,  in float brightness, in float focus, in vec3 mixCol) {
     int offset = 8;
     float t = time;
-    t *= 0.05;
+    t *= 0.08;
     float rotationSpeed = mod(fingerprint[8] * 413.483, 0.1) - 0.05;
     st = rotate2d(fingerprint[10] + t * rotationSpeed) * st;
   st += mod(length(st) * mod(fingerprint[8], 100.) * 0.3, 1.0);
@@ -117,13 +120,14 @@ float light3(in vec2 st,  in float brightness, in float focus) {
   pct = 1./dot(j, j);
   //pct = brightness/pct;
   pct = pow(pct, focus);
-  return pct;
+  vec3 color = mix(orgColor, mixCol, (sin(t * 10. + st.x * mod(fingerprint[8] + fingerprint[11],7.52))*.5+.5));
+  return pct * color;
 }
 
-float light4(in vec2 st,  in float brightness, in float focus) {
+vec3 light4(in vec2 st,  in float brightness, in float focus, in vec3 mixCol) {
     int offset = 12;
     float t = time;
-    t *= 0.05;
+    t *= 0.15;
     float rotationSpeed = mod(fingerprint[12] * 413.483, 0.1) - 0.05;
     st = rotate2d(fingerprint[14] + t * rotationSpeed) * st;
   st += mod(length(st) * mod(fingerprint[12], 100.) * 0.3, 1.0);
@@ -137,10 +141,11 @@ float light4(in vec2 st,  in float brightness, in float focus) {
   pct = 1./dot(j, j);
   //pct = brightness/pct;
   pct = pow(pct, focus);
-  return pct;
+  vec3 color = mix(orgColor, mixCol, (sin(t * 10. + st.x * mod(fingerprint[13] + fingerprint[15],7.52))*.5+.5));
+  return pct * color;
 }
 
-float light5(in vec2 st,  in float brightness, in float focus) {
+vec3 light5(in vec2 st,  in float brightness, in float focus, in vec3 mixCol) {
     int offset = 18;
     float t = time;
     t *= 0.05;
@@ -157,7 +162,8 @@ float light5(in vec2 st,  in float brightness, in float focus) {
   pct = 1./dot(j, j);
   //pct = brightness/pct;
   pct = pow(pct, focus);
-  return pct;
+  vec3 color = mix(orgColor, mixCol, (sin(t * 10. + st.x * mod(fingerprint[19] + fingerprint[21],7.52))*.5+.5));
+  return pct * color;
 }
 
 
@@ -168,7 +174,7 @@ void main()
     
     float t = time;
     
-    t *= 0.005;
+    t *= 0.29;
         
     // Coordinate manipulations
     float rotationSpeed = mod(fingerprint[1] + fingerprint[24], 0.1) - 0.05;
@@ -186,23 +192,24 @@ void main()
     // Time varying pixel color
     vec3 col = vec3(0);
     vec3 color = vec3(
-        mod(fingerprint[0] + fingerprint[1] + fingerprint[2] + fingerprint[3], 0.83),
-        mod(fingerprint[4] + fingerprint[5] + fingerprint[6] + fingerprint[7], 0.8),
-        mod(fingerprint[8] + fingerprint[9] + fingerprint[10] + fingerprint[11], 0.82)
-        );
-    vec3 color2 = vec3(
-        mod(fingerprint[12] + fingerprint[13] + fingerprint[14] + fingerprint[15], 0.8),
-        mod(fingerprint[16] + fingerprint[17] + fingerprint[18] + fingerprint[19], 0.5),
-        mod(fingerprint[20] + fingerprint[21] + fingerprint[22] + fingerprint[23], 0.75)
+        mod(fingerprint[0] + fingerprint[1] + fingerprint[6] + fingerprint[3], 0.83),
+        mod(fingerprint[4] + fingerprint[5] + fingerprint[10] + fingerprint[7], 0.8),
+        mod(fingerprint[8] + fingerprint[9] + fingerprint[2] + fingerprint[11], 0.82)
         );
     
-    color = mix(color, color2, (sin(t * 10. + uv.x * mod(fingerprint[20] + fingerprint[10],7.52))*.5+.5));
+    // vec3 color2 = vec3(
+    //     mod(fingerprint[12] + fingerprint[13] + fingerprint[18] + fingerprint[15], 0.8),
+    //     mod(fingerprint[16] + fingerprint[21] + fingerprint[14] + fingerprint[23], 0.82),
+    //     mod(fingerprint[20] + fingerprint[17] + fingerprint[22] + fingerprint[19], 0.75)
+    //     );
     
-    col += light(uv, 0.0, .4) * color * 1.;
-    col += light2(uv + vec2(0.25, 0.25) * mod(fingerprint[6] * 45.251, 0.96), 0.0, .4) * color * (sin(t)*.5 + .5) * mod((fingerprint[3] + fingerprint[4]) * 372.91, 1.0);
-    col += light3(uv - vec2(0.25, 0.25), 0.0, .4) * color * (sin(t * 0.93)*.5 + .5) * mod((fingerprint[11] + fingerprint[13]) * 372.91, 1.0);
-    col += light4(uv + vec2(0.25, -0.25), 0.0, .4) * color * (sin(t * 0.72)*.5 + .5) * mod((fingerprint[6] + fingerprint[19]) * 372.91, 1.0);
-    col += light5(uv + vec2(-0.25, 0.25), 0.0, .4) * color * (sin(t * 0.58)*.5 + .5) * mod((fingerprint[8] + fingerprint[22]) * 372.91, 1.0);
+    
+    
+    col += light(uv, 0.0, .4, color);
+    col += light2(uv + vec2(0.25, 0.25) * mod(fingerprint[6] * 45.251, 0.96), 0.0, .4, color) * (sin(t)*.5 + .5) * mod((fingerprint[3] + fingerprint[4]) * 372.91, 1.0);
+    col += light3(uv - vec2(0.25, 0.25), 0.0, .4, color) * (sin(t * 0.93)*.5 + .5) * mod((fingerprint[11] + fingerprint[13]) * 372.91, 1.0);
+    col += light4(uv + vec2(0.25, -0.25), 0.0, .4, color) * (sin(t * 0.72)*.5 + .5) * mod((fingerprint[6] + fingerprint[19]) * 372.91, 1.0);
+    col += light5(uv + vec2(-0.25, 0.25), 0.0, .4, color) * (sin(t * 0.58)*.5 + .5) * mod((fingerprint[8] + fingerprint[22]) * 372.91, 1.0);
 
     col *= 2.0;
     // Output to screen
