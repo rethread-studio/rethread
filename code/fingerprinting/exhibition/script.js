@@ -170,7 +170,10 @@ function mainPage() {
     $("#myFp").fadeOut();
     $("#consentInfo").fadeOut();
     $("#howToDot").fadeOut();
-    console.log("consent: " + hasConsented);
+
+// update questions here
+
+
     if (hasConsented) {
         $("#participateStill").hide();
         $("#seeMyFP").fadeIn();

@@ -18,6 +18,8 @@ let height = 0;
 let c = 200;
 let myFP;
 
+let fontColor, screenColor, languageColor, timeColor, adColor, trackingColor;
+
 function setup() {
 
     width = windowWidth;
@@ -81,6 +83,7 @@ $(document).ready(function () {
             rect(-width / 4, -height / 4, width / 2, height / 2);
             another();
             pop();
+            legend();
         });
 
     }
@@ -118,10 +121,7 @@ $(document).ready(function () {
     });
 
     $("#seeMeaning").click(function () {
-        // Show legend
-        // legend(myFP);
-        let l = "fonts | screen size | language | timezone | "
-        $("#legendT").text(l);
+        legend();
         $("#legend").fadeIn();
     });
     $("#closeLegend").click(function () {
@@ -131,7 +131,6 @@ $(document).ready(function () {
 
 
 });
-
 
 
 function noConsentCallback(fingerprint) {
@@ -178,46 +177,17 @@ function anotherfpCallback(fingerprint) {
     }
 }
 
-function legend(fingerprint) {
-    let fp = fingerprint.original;
-
-    translate(-width / 4, -height / 4);
-
-    push()
-    fill(50,50,50,50);
-    noStroke();
-    let legendW = width - width * 0.88;
-    let marginW = width/2*0.05;
-    let marginH = height/2*0.08;
-    let stepH = marginH;
-    rect(0, 0, legendW, height/2);
-    pop()
-
-
-    // fonts
-    allFonts = fp['font-js'].split(',');
-    fonts = allFonts.join('');
-    colorMode(HSB);
-    noStroke();
-    let fontColor = color(map(allFonts.length, 1, 400, 255, 0), 70, 190);
-    fill(fontColor);
-    push()
-    translate(marginW, stepH);
-    textSize(c*0.1);
-    text("fonts",marginW,0);
-    stepH = stepH+marginH;
-    ellipse(0, 0, c * 0.15);
-    noFill()
-    stroke(map(allFonts.length, 1, 400, 255, 0), 60, 200)
-
-    rotate(radians(allFonts.length));
-    for (var i = 0; i < 5; i++) {
-        line(0,i*2,c*0.1,i*2);
-    }
-
-
-
-    pop()
+function legend() {
+    // Show legend
+    let l = "<span style='color:" + fontColor + "'>installed fonts</span>"
+        + " | <span style='color:" + screenColor + "'>screen size</span>"
+        + " | <span style='color:" + languageColor + "'>language settings</span>"
+        + " | <span style='color:" + timeColor + "'>timezone settings</span>"
+        + " | <span style='color:" + trackingColor + "'>tracking settings</span>"
+    if (adBlock)
+        l.concat(" | <span style='color:" + adColor + "'>ad blocking settings</span>")
+        
+    $("#legendT").html(l);
 }
 
 
@@ -268,7 +238,7 @@ function constellation(fingerprint) {
     fonts = allFonts.join('');
     colorMode(HSB);
     noStroke();
-    let fontColor = color(map(allFonts.length, 1, 400, 255, 0), 70, 190);
+    fontColor = color(map(allFonts.length, 1, 400, 255, 0), 70, 190);
     fill(fontColor);
     // big circle depending on font quantity
     let fontsX = c * cos(allFonts.length);
@@ -298,25 +268,26 @@ function constellation(fingerprint) {
     colorMode(RGB);
     strokeWeight(1);
     noFill();
+    trackingColor = color(220, 10, 110);
     // do not track
     let dnt = fp['dnt'];
     if (dnt == "not available") {
-        stroke(220, 10, 110);
+        stroke(trackingColor);
         line(c * cos(radians(60)), c * sin(radians(60)), c * cos(radians(130)), c * sin(radians(130)));
         ellipse(c * cos(radians(60)), c * sin(radians(60)), c * 0.05);
     }
     else if (dnt == "unspecified") {
-        stroke(220, 10, 110);
+        stroke(trackingColor);
         line(c * cos(radians(180)), c * sin(radians(180)), c * cos(radians(130)), c * sin(radians(130)));
         ellipse(c * cos(radians(130)), c * sin(radians(130)), c * 0.05);
     }
     else if (dnt == "true") {
-        stroke(220, 10, 110);
+        stroke(trackingColor);
         line(c * cos(radians(270)), c * sin(radians(270)), c * cos(radians(0)), c * sin(radians(0)));
         ellipse(c * cos(radians(0)), c * sin(radians(0)), c * 0.1);
     }
     else if (dnt == "false") {
-        stroke(220, 10, 110);
+        stroke(trackingColor);
         line(c * cos(radians(0)), c * sin(radians(0)), c * cos(radians(10)), c * sin(radians(10)));
         ellipse(c * cos(radians(0)), c * sin(radians(0)), c * 0.05);
     }
@@ -334,7 +305,8 @@ function constellation(fingerprint) {
 
     // language
     let language = fp['languages-js'];
-    stroke(250, 230, 100);
+    languageColor = color(250, 230, 100);
+    stroke(languageColor);
     // stroke(language.charCodeAt(i),170,0);
     beginShape()
     for (var i = 0; i < language.length; i++) {
@@ -396,7 +368,8 @@ function constellation(fingerprint) {
     // let screenResolution = [4096,2160]; // debug
     let sRx = map(fp['screen_width'], 320, 4096, 0, 255);
     let sRy = map(fp['screen_height'], 200, 2160, 0, 255);
-    stroke(sRy * 0.5, 40, sRx);
+    screenColor = color(sRy * 0.5, 40, sRx);
+    stroke(screenColor);
     push();
     rotate(-hardwareConcurrency);
     let c_ = 0.0045;
@@ -432,8 +405,9 @@ function constellation(fingerprint) {
 
     //timezone
     let timezone = fp['timezone'];
-    stroke(colorTOff, 50, 110);
-    fill(colorTOff, 50, 110);
+    timeColor = color(colorTOff, 50, 110);
+    stroke(timeColor);
+    fill(timeColor);
     for (var i = 0; i < timezone.length; i++) {
         let x = posTOff + c * 0.005 * timezone.charCodeAt(i) * cos(timezone.charCodeAt(i));
         let y = posTOff + c * 0.005 * timezone.charCodeAt(i) * sin(timezone.charCodeAt(i));
@@ -523,7 +497,10 @@ function constellation(fingerprint) {
 
     //adBlock
     let adBlock = fp['ad'];
+    adBlock = true;
+    adColor = color(255, 255, 255);
     push()
+    stroke(adColor);
     if (allFonts[22])
         rotate(radians(allFonts[22].charCodeAt(1)));
     if (adBlock)
