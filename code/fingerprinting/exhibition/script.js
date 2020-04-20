@@ -284,11 +284,14 @@ function noThanksAgainButton() {
     $("#howToDot").fadeOut();
 }
 function consentInfoButton() {
-    acceptCondition(() => {
-        hasConsented = true;
-        // Go to fingerprint with animation
-        displayPage('myFp');
-    })
+    $("body").addClass('animateColor');
+    $("#consentInfo").fadeOut(() => {
+        acceptCondition(() => {
+            hasConsented = true;
+            // Go to fingerprint with animation
+            displayPage('myFp');
+        })
+    });
 }
 function mainButton() {
     displayPage('main');
