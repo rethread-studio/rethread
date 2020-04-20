@@ -234,7 +234,7 @@ let questions = [
     "how often do you change your device settings?",
     "if you switch devices, are you still the same person?",
     "top 25 things your BROWSER says about YOU",
-    "we have no secrets my browser and I",
+    '"we have no secrets my browser and I"',
     "where do all these fonts come from?",
     "why save everything that is visible?"
 ];
