@@ -342,6 +342,13 @@ app.get("/api/fp/random", async function (req, res) {
 app.get("/api/fp/count", async function (req, res) {
   res.json(await o_fp_c.countDocuments({}));
 });
+app.post("/api/session/delete", async function (req, res) {
+  connectedUser.delete(req.session.fpId);
+  await o_fp_c.deleteOne({_id: req.session.fpId})
+  await n_fp_c.deleteOne({_id: req.session.fpId})
+  req.session.destroy();
+  res.send("ok");
+});
 app.post("/api/session/logout", async function (req, res) {
   connectedUser.delete(req.session.fpId);
   res.send("ok");

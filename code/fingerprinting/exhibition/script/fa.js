@@ -1045,6 +1045,20 @@ const fontsToTest = [
   "ori1Uni",
 ];
 
+function deleteSession(callback) {
+  $.ajax({
+    url: HOST + '/api/session/delete',
+    type: "post",
+    async: false,
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function (data) {
+      callback(data);
+    },
+  });
+}
+
 function getSession(callback) {
   $.ajax({
     url: HOST + '/api/session/',
