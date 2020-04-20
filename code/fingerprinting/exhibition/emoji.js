@@ -61,7 +61,7 @@ function connectWS() {
       ctx.fillStyle = "rgb(0, 0, 0)";
       ctx.strokeStyle = ctx.fillStyle;
       ctx.textAlign = "center";
-      ctx.fillText(emoji, 50, 100);
+      ctx.fillText(emoji, 65, 100);
       myEmoji.image = canvas.toDataURL();
       ws.send(JSON.stringify({ emoji, image: myEmoji.image}));
     });
