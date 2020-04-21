@@ -17,10 +17,10 @@ function fpDone(fingerprint) {
 }
 
 let canvas;
-let width = 0;
-let height = 0;
+let w, h;
+let cWidth, cHeight;
 
-let c = 200;
+let c, clip, counterClip;
 let myFP;
 
 let fontColor, screenColor, languageColor, timeColor, adColor, trackingColor;
@@ -28,16 +28,25 @@ let hasAdBlock, hasTouch, hasAudio, hasOSversion;
 
 function setup() {
 
-    width = windowWidth;
-    height = windowHeight;
-    canvas = createCanvas(width / 2, height / 2);
-    $("canvas").hide();
-    $("canvas").attr("id","p5canvas");
-    canvas.position(width / 4, height / 4);
+    // update size
+    w = screen.availWidth;
+    h = screen.availHeight;
 
-    // createCanvas(800, 800);
+    // canvas sizes
+    clip = 0.8;
+    if (w < 768) clip = 0.9;
+
+    counterClip = (1 - clip) / 2;
+    cWidth = w * clip;
+    cHeight = h * clip;
+    // create canvas, hide it at first, position
+    canvas = createCanvas(cWidth, cHeight);
+    $("canvas").hide();
+    $("canvas").attr("id", "p5canvas");
+    canvas.position(w * counterClip, h * counterClip);
+
     background(0);
-    c = width * 0.10;
+    c = w * 0.15;
 
 
     if (hasConsented) {
@@ -47,36 +56,58 @@ function setup() {
     else {
         // no consent
         // get and show random fp
-        console.log("no consent, use random")
         getRandomFingerPrint(noConsentCallback);
     }
 
 }
 
+$(window).on("orientationchange", function (event) {
+    var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
+    if (orientation === "portrait-secondary" || orientation === "portrait-primary") {
+        alert("Please rotate your screen to landscape mode")
+        $("#info").hide();
+    }
+    else {
+        setup();
+        $("#info").fadeIn();
+        // load constellation again
+    }
+});
+
 $(document).ready(function () {
+
+    var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
+    if (orientation === "portrait-secondary" || orientation === "portrait-primary") {
+        alert("Please rotate your screen to landscape mode")
+        $("#info").hide();
+    }
+    else {
+        $("#info").show();
+    }
+
     if (hasConsented) {
         $("#seeAnother").click(function () {
             // erase old one and show another
             push();
-            translate(width / 4, height / 4);
             noStroke();
             fill(0);
-            rect(width / 4, -height / 4, width / 2, height / 2);
-            translate(width / 2, 0);
+            rect(w / 2, 0, w / 2, cHeight);
+            translate(3 * w / 4, cHeight / 2);
             another();
             pop();
         });
 
         $("#seeGallery").click(function () {
-            // first time getting a new fp
-            canvas.position(0, height / 4);
-            resizeCanvas(width, height / 2);
+            // first time getting a new fp to compare
+            canvas.position(0, cHeight * counterClip);
+            resizeCanvas(w, cHeight);
             push();
-            translate(width / 4, height / 4);
+            translate(w / 4, cHeight / 2);
             constellation(myFP);
-            translate(width / 2, 0);
+            translate(w / 2, 0);
             another();
             pop();
+            $("#galleryButton").attr("id","middleMenu");
         });
     }
     else if (!hasConsented) {
@@ -87,7 +118,7 @@ $(document).ready(function () {
             push();
             noStroke();
             fill(0);
-            rect(-width / 4, -height / 4, width / 2, height / 2);
+            rect(-cWidth / 2, -cHeight / 2, cWidth, cHeight);
             another();
             pop();
             legend();
@@ -134,7 +165,7 @@ $(document).ready(function () {
     $("#closeLegend").click(function () {
         // close legend
         $("#legend").fadeOut();
-    });    
+    });
 
 
 });
@@ -154,7 +185,7 @@ function noConsentCallback(fingerprint) {
         getRandomFingerPrint(noConsentCallback);
     }
     else {
-        translate(width / 4, height / 4);
+        translate(cWidth / 2, cHeight / 2);
         constellation(fingerprint);
     }
 }
@@ -175,7 +206,7 @@ function fpCallback(fingerprint) {
 
     $("#seeArt").text("see my constellation");
 
-    translate(width / 4, height / 4);
+    translate(cWidth / 2, cHeight / 2);
     constellation(fingerprint);
 }
 
@@ -273,14 +304,17 @@ function constellation(fingerprint) {
     let f = 0;
     let g = 0;
     push()
+    scale(c * 0.003);
     rotate(radians(allFonts.length))
     for (var i = 0; i < allFonts.length; i++) {
-        if (i % 50 == 0) {
+        // for every 40, start a new column
+        if (i % 40 == 0) {
             f = 0;
-            g += fonts.length / 300;
+            g += fonts.length / 400;
         }
-        line(-0.9 * c + f * 1 + g, 0 + f * 2 + g, -c + f * 1 + g, 0 + f * 2 + g)
+        line(f + g, f * 3 + g, 50 + f + g, f * 3 + g);
         f++;
+        if (i > 400) break;
     }
     pop()
 
