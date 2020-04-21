@@ -343,7 +343,7 @@ button:hover {
     width: 50%;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 812px) {
     #consentInfo {
         width: auto !important;
     }
