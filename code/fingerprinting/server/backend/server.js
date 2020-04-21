@@ -1,6 +1,6 @@
 const http = require("http");
 const WebSocket = require("ws");
-const proxy = require('express-http-proxy');
+const proxy = require("express-http-proxy");
 const bodyParser = require("body-parser");
 const methodOverride = require("method-override");
 const ObjectId = require("mongodb").ObjectId;
@@ -256,10 +256,10 @@ const sess = {
   resave: false,
   saveUninitialized: true,
   cookie: { sameSite: "None", maxAge: 2 * 60 * 60 * 1000 }, // 2h timeout
-}
+};
 sess.cookie.secure = true;
 
-const sessionParser = session(sess)
+const sessionParser = session(sess);
 app.use(sessionParser);
 app.use(methodOverride("X-HTTP-Method-Override"));
 app.use(function (req, res, next) {
@@ -344,8 +344,8 @@ app.get("/api/fp/count", async function (req, res) {
 app.post("/api/session/delete", async function (req, res) {
   connectedUser.delete(req.session.fpId);
   if (req.session.fp && !req.session.random) {
-    await o_fp_c.deleteOne({_id: req.session.fpId})
-    await n_fp_c.deleteOne({_id: req.session.fpId})
+    await o_fp_c.deleteOne({ _id: req.session.fpId });
+    await n_fp_c.deleteOne({ _id: req.session.fpId });
   }
   req.session.destroy();
   res.send("ok");
@@ -413,9 +413,9 @@ app
         host: req.hostname,
         dnt: keyValueFP(fp, "doNotTrack"),
         "user-agent": req.headers["user-agent"],
-        accept: req.accepts().join(","),
-        "accept-encoding": req.acceptsEncodings().join(","),
-        "accept-language": req.acceptsLanguages().join(","),
+        accept: (req.accepts() || []).join(","),
+        "accept-encoding": (req.acceptsEncodings() || []).join(","),
+        "accept-language": (req.acceptsLanguages() || []).join(","),
         ad: keyValueFP(fp, "adBlock"),
         canvas: keyValueFP(fp, "canvas")[1].replace("canvas fp:", ""),
         emojis: keyValueFP(fp, "emojis"),
@@ -432,16 +432,16 @@ app
         screen_depth: keyValueFP(fp, "colorDepth"),
         pixelRatio: keyValueFP(fp, "pixelRatio"),
         hardwareConcurrency: keyValueFP(fp, "hardwareConcurrency"),
-        availableScreenResolution: keyValueFP(
+        availableScreenResolution: (keyValueFP(
           fp,
           "availableScreenResolution"
-        ).join(","),
+        ) || []).join(","),
         indexedDb: keyValueFP(fp, "indexedDb"),
         addBehavior: keyValueFP(fp, "addBehavior"),
         openDatabase: keyValueFP(fp, "openDatabase"),
-        touchSupport: keyValueFP(fp, "touchSupport").join(","),
+        touchSupport: (keyValueFP(fp, "touchSupport") || []).join(","),
         audio: keyValueFP(fp, "audio"),
-        enumerateDevices: keyValueFP(fp, "enumerateDevices").join(","),
+        enumerateDevices: (keyValueFP(fp, "enumerateDevices") || []).join(","),
         storage_local: keyValueFP(fp, "localStorage"),
         storage_session: keyValueFP(fp, "sessionStorage"),
         timezone: keyValueFP(fp, "timezone"),
@@ -463,50 +463,60 @@ app
       }
       return output;
     }
-    const fp = transformFP(req.body);
-    const normalized = {};
-    for (let p in fp) {
-      const key = await k_fp_c.findOne({ key: p, value: fp[p] });
-      let id = 0;
-      if (key == null) {
-        id = await getNextSequenceValue(p);
-        await k_fp_c.insertOne({ key: p, value: fp[p], index: id, used: 1 });
-      } else {
-        id = key.index;
-        await k_fp_c.updateOne({ key: p, value: fp[p] }, { $inc: { used: 1 } });
+    try {
+      const fp = transformFP(req.body);
+      const normalized = {};
+      for (let p in fp) {
+        const key = await k_fp_c.findOne({ key: p, value: fp[p] });
+        let id = 0;
+        if (key == null) {
+          id = await getNextSequenceValue(p);
+          await k_fp_c.insertOne({ key: p, value: fp[p], index: id, used: 1 });
+        } else {
+          id = key.index;
+          await k_fp_c.updateOne(
+            { key: p, value: fp[p] },
+            { $inc: { used: 1 } }
+          );
+        }
+        normalized[p] = id;
       }
-      normalized[p] = id;
+      const fpDB = await o_fp_c.insertOne(fp);
+      normalized._id = fpDB.ops[0]._id;
+      const responseQuery = await n_fp_c.insertOne(normalized);
+      const output = { original: fp, normalized };
+      req.session.fp = output;
+      req.session.fp.random = false;
+      req.session.fpId = responseQuery.insertedId.toString();
+      connectedUser.add(req.session.fpId);
+      res.json(output);
+    } catch (error) {
+      res.send(error);
     }
-    const fpDB = await o_fp_c.insertOne(fp);
-    normalized._id = fpDB.ops[0]._id;
-    const responseQuery = await n_fp_c.insertOne(normalized);
-    const output = { original: fp, normalized };
-    req.session.fp = output;
-    req.session.fp.random = false;
-    req.session.fpId = responseQuery.insertedId.toString();
-    connectedUser.add(req.session.fpId);
-    res.json(output);
   });
 
-app.use('/', proxy('https://rethread.art', {
-  proxyReqPathResolver: function (req) {
-    return '/code/fingerprinting/exhibition' + req.url
-  }
-}));
+app.use(
+  "/",
+  proxy("https://rethread.art", {
+    proxyReqPathResolver: function (req) {
+      return "/code/fingerprinting/exhibition" + req.url;
+    },
+  })
+);
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ clientTracking: true, noServer: true });
 
 wss.broadcast = function broadcast(data, from) {
-  wss.clients.forEach(client => {
+  wss.clients.forEach((client) => {
     if (client == from) {
       return;
     }
     if (client.readyState === WebSocket.OPEN) {
-      client.send(data, error => {
-          if (error) {
-              console.error(error);
-          }
+      client.send(data, (error) => {
+        if (error) {
+          console.error(error);
+        }
       });
     }
   });
@@ -522,7 +532,7 @@ server.on("upgrade", function (request, socket, head) {
   });
 });
 
-const userEmojis = {}
+const userEmojis = {};
 wss.on("connection", function (ws, request) {
   let pingInterval = null;
   function ping() {
@@ -530,26 +540,32 @@ wss.on("connection", function (ws, request) {
       clearTimeout(pingInterval);
     }
     pingInterval = setTimeout(() => {
-      wss.broadcast(JSON.stringify({'event': 'close', 'from': request.session.wsId}), ws)
+      wss.broadcast(
+        JSON.stringify({ event: "close", from: request.session.wsId }),
+        ws
+      );
       delete userEmojis[request.session.wsId];
-    }, 30000)
+    }, 30000);
   }
   ws.on("message", function (message) {
     if (!request.session.wsId) {
-      request.session.wsId = Math.round(Math.random() * 100000)
+      request.session.wsId = Math.round(Math.random() * 100000);
     }
     ping();
-    message = JSON.parse(message)
+    message = JSON.parse(message);
     if (message.image) {
-      ws.send(JSON.stringify({userEmojis}))
+      ws.send(JSON.stringify({ userEmojis }));
       userEmojis[request.session.wsId] = message.image;
     }
-    message.from = request.session.wsId
-    wss.broadcast(JSON.stringify(message), ws)
+    message.from = request.session.wsId;
+    wss.broadcast(JSON.stringify(message), ws);
   });
 
   ws.on("close", function () {
-    wss.broadcast(JSON.stringify({'event': 'close', 'from': request.session.wsId}), ws)
+    wss.broadcast(
+      JSON.stringify({ event: "close", from: request.session.wsId }),
+      ws
+    );
     delete userEmojis[request.session.wsId];
   });
 });
