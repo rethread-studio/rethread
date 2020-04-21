@@ -408,20 +408,29 @@ app
         }
       }
     }
+    function join(obj) {
+      if (obj == null) {
+        return ""
+      }
+      if (Array.isArray(obj)) {
+        return obj.join(",");
+      }
+      return obj;
+    }
     function transformFP(fp) {
       const output = {
         host: req.hostname,
         dnt: keyValueFP(fp, "doNotTrack"),
         "user-agent": req.headers["user-agent"],
-        accept: (req.accepts() || []).join(","),
-        "accept-encoding": (req.acceptsEncodings() || []).join(","),
-        "accept-language": (req.acceptsLanguages() || []).join(","),
+        accept: join(req.accepts()),
+        "accept-encoding": join(req.acceptsEncodings()),
+        "accept-language": join(req.acceptsLanguages()),
         ad: keyValueFP(fp, "adBlock"),
         canvas: keyValueFP(fp, "canvas")[1].replace("canvas fp:", ""),
         emojis: keyValueFP(fp, "emojis"),
         cookies: keyValueFP(fp, "cookies"),
         "font-flash": keyValueFP(fp, "font-flash"),
-        "font-js": keyValueFP(fp, "fonts").join(","),
+        "font-js": join(keyValueFP(fp, "fonts")),
         "language-flash": keyValueFP(fp, "language-flash"),
         "platform-flash": keyValueFP(fp, "platform-flash"),
         "languages-js": keyValueFP(fp, "language"),
@@ -432,16 +441,16 @@ app
         screen_depth: keyValueFP(fp, "colorDepth"),
         pixelRatio: keyValueFP(fp, "pixelRatio"),
         hardwareConcurrency: keyValueFP(fp, "hardwareConcurrency"),
-        availableScreenResolution: (keyValueFP(
+        availableScreenResolution: join(keyValueFP(
           fp,
           "availableScreenResolution"
-        ) || []).join(","),
+        )),
         indexedDb: keyValueFP(fp, "indexedDb"),
         addBehavior: keyValueFP(fp, "addBehavior"),
         openDatabase: keyValueFP(fp, "openDatabase"),
-        touchSupport: (keyValueFP(fp, "touchSupport") || []).join(","),
+        touchSupport: join(keyValueFP(fp, "touchSupport")),
         audio: keyValueFP(fp, "audio"),
-        enumerateDevices: (keyValueFP(fp, "enumerateDevices") || []).join(","),
+        enumerateDevices: join(keyValueFP(fp, "enumerateDevices")),
         storage_local: keyValueFP(fp, "localStorage"),
         storage_session: keyValueFP(fp, "sessionStorage"),
         timezone: keyValueFP(fp, "timezone"),
