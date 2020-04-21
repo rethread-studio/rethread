@@ -88,8 +88,8 @@ $(document).ready(function () {
             push();
             noStroke();
             fill(0);
-            rect(w/2, 0, w/2, cHeight);
-            translate(3*w/4, cHeight/2);
+            rect(w / 2, 0, w / 2, cHeight);
+            translate(3 * w / 4, cHeight / 2);
             another();
             pop();
         });
@@ -300,14 +300,17 @@ function constellation(fingerprint) {
     let f = 0;
     let g = 0;
     push()
+    scale(c * 0.003);
     rotate(radians(allFonts.length))
     for (var i = 0; i < allFonts.length; i++) {
-        if (i % 50 == 0) {
+        // for every 40, start a new column
+        if (i % 40 == 0) {
             f = 0;
-            g += fonts.length / 300;
+            g += fonts.length / 400;
         }
-        line(-0.9 * c + f * 1 + g, 0 + f * 2 + g, -c + f * 1 + g, 0 + f * 2 + g)
+        line(f + g, f * 3 + g, 50 + f + g, f * 3 + g);
         f++;
+        if (i > 400) break;
     }
     pop()
 
