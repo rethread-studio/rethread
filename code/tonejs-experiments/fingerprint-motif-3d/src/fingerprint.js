@@ -355,7 +355,7 @@ class Fingerprint {
             console.log("motif: " + JSON.stringify(room.motif));
 
             Synthesis.setSoundSignature(room.fingerprint.rawFingerprint, 0.25);
-            Synthesis.setSoundSignatureGain(0.005);
+            Synthesis.setSoundSignatureGain(0.001);
             Synthesis.globalSynthLPF.frequency.value = 500;
             Synthesis.noiseEnv.triggerRelease();
 
