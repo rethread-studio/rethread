@@ -172,55 +172,60 @@ function fpHighlightHover(element) {
 
 function generateFPText(fp) {
     let s =
-      "You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.timezone.split("/")[0] +
-      "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.timezone.split("/")[1] +
-      "</span>. Your favorite language to browse the web is set to <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'>" +
-      ISO6391.getName(fp.original["languages-js"].split("-")[0]) +
-      "</span>."
-      const languages = new Set();
-      for (let l of fp.original["accept-language"].split(',')) {
+        "You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.timezone.split("/")[0] +
+        "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.timezone.split("/")[1] +
+        "</span>. Your favorite language for browsing the web is <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'>" +
+        ISO6391.getName(fp.original["languages-js"].split("-")[0]) +
+        "</span>."
+    const languages = new Set();
+    for (let l of fp.original["accept-language"].split(',')) {
         languages.add(ISO6391.getName(l.split("-")[0]))
-      }
-      if (languages.size > 1) {
-          s += "You probably also speak <span class = 'fpHighlight' id='fpLanguages' onmouseover='fpHighlightHover(this);'>"
-          for (let lang of languages) {
-            s += lang + " "
-          }
-          s += "</span>. "
-      }
-      s += "You are using <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.browser_name +
-      "</span> <span class = 'fpHighlight' id='fpBrowserVersion' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.browser_major +
-      "</span> on a <span class = 'fpHighlight' id='fpTouch' onmouseover='fpHighlightHover(this);'>" +
-      (fp.original.touchSupport[0] > 1 ? "" : "non") +
-      " touch screen</span> display of <span class = 'fpHighlight' id='fpScreenWidth' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.screen_width +
-      "</span> pixels wide and <span class = 'fpHighlight' id='fpScreenHeight' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.screen_height +
-      "</span> pixels height. Your ";
-      let device = fp.original.device_vendor;
-      if (!device) {
+    }
+    if (languages.size > 1) {
+        s += " You also probably speak or understand <span class = 'fpHighlight' id='fpLanguages' onmouseover='fpHighlightHover(this);'>"
+        for (let lang of languages) {
+            if (lang == [...languages].pop())
+                s += " and " + lang
+            else
+                s += lang + ", "
+        }
+        s += "</span>. "
+    }
+    s += "You are using <span class = 'fpHighlight' id='fpBrowserName' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.browser_name;
+    if (fp.original.browser_major)
+        s += "</span> <span class = 'fpHighlight' id='fpBrowserVersion' onmouseover='fpHighlightHover(this);'>" + fp.original.browser_major + "</span>"
+    s += " on a "
+    if (fp.original.touchSupport[0] > 1)
+        s += "<span class = 'fpHighlight' id='fpTouch' onmouseover='fpHighlightHover(this);'>touch screen</span>"
+
+    s += "display which is <span class = 'fpHighlight' id='fpScreenWidth' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.screen_width +
+        "</span> pixels wide and <span class = 'fpHighlight' id='fpScreenHeight' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.screen_height +
+        "</span> pixels high. For the hardware geeks, your ";
+    let device = fp.original.device_vendor;
+    if (!device) {
         device = fp.original.device_type;
-      }
-      if (!device) {
+    }
+    if (!device) {
         device = 'computer';
-      }
-      s += device + " has <span class = 'fpHighlight' id='fpCPU' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.hardwareConcurrency +
-      "</span> cores and a <span class = 'fpHighlight' id='fpWebGLRenderer' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.webGLVendor +
-      "</span> graphic card. Did you also know that you have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
-      fp.original["font-js"].split(",").length +
-      "</span> fonts installed? All this information is part of your browser fingerprint: everything a website can know about you <b>without</b> using cookies. <p></p>Your emojis are drawn in a specific style because your are using <span class = 'fpHighlight' id='fpOSName' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.os_name +
-      "</span> version <span class = 'fpHighlight' id='fpOSVersion' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.os_version +
-      "</span> based on the platform: <span class = 'fpHighlight' id='fpPlatform' onmouseover='fpHighlightHover(this);'>" +
-      fp.original.platform +
-      "</span>. Here's the random emoji that represents you during the exhibition:";
+    }
+    s += device + " has <span class = 'fpHighlight' id='fpCPU' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.hardwareConcurrency +
+        "</span> cores and a <span class = 'fpHighlight' id='fpWebGLRenderer' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.webGLVendor +
+        "</span> graphic card. Did you also know that you have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
+        fp.original["font-js"].split(",").length +
+        "</span> fonts installed? All this information is part of your browser fingerprint: everything a website can know about you <b>without</b> using cookies. <p></p>Your emojis are drawn in a specific style because your are using <span class = 'fpHighlight' id='fpOSName' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.os_name +
+        "</span> version <span class = 'fpHighlight' id='fpOSVersion' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.os_version +
+        "</span> based on the platform: <span class = 'fpHighlight' id='fpPlatform' onmouseover='fpHighlightHover(this);'>" +
+        fp.original.platform +
+        "</span>. Here's the random emoji that represents you during the exhibition:";
     return s;
 }
 function myFpPage() {
