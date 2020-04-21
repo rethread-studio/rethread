@@ -29,8 +29,10 @@ let hasAdBlock, hasTouch, hasAudio, hasOSversion;
 function setup() {
 
     // update size
-    w = window.innerWidth;
-    h = window.innerHeight;
+    // w = window.innerWidth;
+    // h = window.innerHeight;
+    w = window.screen.width;
+    h = window.screen.height;
 
     // canvas sizes
     clip = 0.8;
