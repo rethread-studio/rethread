@@ -4,18 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-
-<script src="./script/jquery-3.4.1.min.js"></script>
-<link rel="stylesheet" href="./style/w3.css">
-
-
-<script src="./script/lib.min.js"></script>
-<script src="./script/fa.js"></script>
-
-
-<link rel="stylesheet" type="text/css" href="./style.css">
-
-<script src="https://kit.fontawesome.com/7ff2c0391b.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="style/w3.css" />
+<link rel="stylesheet" href="style/Inconsolata.css" />
+<script src="script/jquery-3.4.1.min.js"></script>
+<script src="script/FileSaver.min.js"></script>
+<script src="script/jszip.min.js"></script>
+<script src="script/fa.js"></script>
+<script src="script/lib.min.js"></script>
+<script src="script/p5.js"></script>
+<script src="p5-fingerprinting/sketch.js"></script>
+<script src="script/7ff2c0391b.js"></script>
 
 <style>
   @media only screen and (max-width: 768px) {
@@ -36,11 +34,12 @@
       left: 0;
       transform: none;
     }
-
+  }
+  .p5Canvas {
+    display: none!important;
+    opacity: 0;
   }
 </style>
-
-<script src="script/fa.js"></script>
 
 <link rel="stylesheet" type="text/css" href="style.css" />
 
@@ -86,7 +85,7 @@
           repository</a>
         containing this full exhibition.
       </p>
-      <button id="participate" href="#" class="w3-large w3-center">
+      <button id="download" href="#" class="w3-large w3-center">
         Download your browser fingerprint art
       </button>
 
@@ -131,6 +130,43 @@
       deleteSession(() => {
         $("#delete").text('Your data has been deleted!')
       })
+    })
+    $("#download").click(() => {
+        const zip = new JSZip();
+        getFingerPrint(fp => {
+            zip.file("fingerprint.json", JSON.stringify(fp));
+            zip.file("emojis.png", fp.original.emojis.split(',')[1], {base64: true});
+
+            var canvas = document.createElement("canvas");
+            var ctx = canvas.getContext("2d");
+            canvas.width = 1920;
+            canvas.height = 1080;
+
+            for (let font of fp.original['font-js'].split(',')) {
+                ctx.font = "100px " + font;
+                ctx.strokeStyle = "rgba(243, 238, 234, 0.1)";
+                ctx.fillStyle = "rgba(68, 68, 68, 0.001)";
+                ctx.textAlign = "center";
+                ctx.strokeText("FingerPrinting", canvas.width / 2, canvas.height / 2 - 60);
+                ctx.fillText("FingerPrinting", canvas.width / 2, canvas.height / 2 - 60);
+
+                ctx.font = "50px " + font;
+                ctx.fillStyle = "rgba(243, 238, 234, 0.1)";
+                ctx.fillText("by Re|Thread", canvas.width / 2, canvas.height / 2 + 60);
+            }
+            zip.file("FontFingerPrint.png", canvas.toDataURL().split(',')[1], {base64: true});
+            zip.file("constellation.png", document.querySelector('.p5Canvas').toDataURL().split(',')[1], {base64: true});
+
+            $.get('script/lib.min.js', (data) => {
+                zip.file("script.js", data);
+                $.get('https://rethread.art/LICENSE.txt', (data) => {
+                    zip.file("LICENSE.txt", data);
+                    zip.generateAsync({type: "blob"}).then(function(content) {
+                        saveAs(content, "FingerPrint.zip");
+                    });
+                })
+            })
+        })
     })
   </script>
 </body>
