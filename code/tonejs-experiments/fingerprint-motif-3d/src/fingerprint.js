@@ -354,6 +354,8 @@ class Fingerprint {
             console.log("Started motif in room");
             console.log("motif: " + JSON.stringify(room.motif));
 
+            Synthesis.setSoundSignature(room.fingerprint.rawFingerprint, 0.25);
+            Synthesis.setSoundSignatureGain(0.005);
             Synthesis.globalSynthLPF.frequency.value = 500;
             Synthesis.noiseEnv.triggerRelease();
 
@@ -395,7 +397,7 @@ class Fingerprint {
 
             // Distorted noise
 
-            room.cheby = Synthesis.newChebySynth();
+            // room.cheby = Synthesis.newChebySynth();
 
             // Pads
 
@@ -442,14 +444,14 @@ class Fingerprint {
 
                 switch(room.loopCounter) {
                     case 0:
-                        room.cheby.trigger(room.cheby);
+                        // room.cheby.trigger(room.cheby);
                         break;
                     case 2:
                         break;
                     case 48:
                         break;
                     case 64:
-                        room.cheby.release(room.cheby);
+                        // room.cheby.release(room.cheby);
                         break;
                 }
                 for(let i = 0; i < motif.durations.length; i++) {
@@ -549,7 +551,7 @@ class Fingerprint {
             for(let syn of room.padSynths) {
                 syn.dispose(syn);
             }
-            room.cheby.dispose(room.cheby);
+            // room.cheby.dispose(room.cheby);
         }
         newRoom.removeFingerprint = function(room) {}
 
