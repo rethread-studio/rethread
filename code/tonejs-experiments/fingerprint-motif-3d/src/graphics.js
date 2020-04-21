@@ -632,7 +632,6 @@ let spaceRoom = {
 
             spaceRoom.fingerprintsAdded = true;
             inactiveOverlay.innerHTML = Global.html.inactiveInstructions;
-            console.log("Added all the fingerprints");
         }
 
         if(spaceRoom.fingerprintsAdded) {

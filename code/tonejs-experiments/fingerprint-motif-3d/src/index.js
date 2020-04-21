@@ -104,8 +104,6 @@ let headers = [
   "webGLRenderer",
 ];
 Global.data.headers = headers;
-console.log("num headers: " + headers.length);
-
 // Get the fingerprint for the local user
 getFingerPrint(function(data) {
   // console.log("Current user:" + JSON.stringify(data));
@@ -202,7 +200,6 @@ function refreshConnectedFingerPrints() {
 
 
 getAllNormalizedFingerPrints(function(data) {
-  console.log(data);
   // The data is an array of objects with the following fields:
   // _id, host, dnt, user-agent, accept, accept-encoding, accept-language, 
   // ad, canvas, cookies, font-flash, font-js, language-flash, platform-flash, 
@@ -228,8 +225,6 @@ getAllNormalizedFingerPrints(function(data) {
       let fingerprint = new Fingerprint.Fingerprint(Global.data.rawFingerprints[index], Fingerprint.FPrintTypes.old);
       Global.data.fingerprints.push(fingerprint);
   }
-  console.log(JSON.stringify(Global.data.rawFingerprints[10]));
-  console.log(JSON.stringify(Global.data.fingerprints[10]));
   Global.data.loadedData = true;
 });
 
