@@ -597,7 +597,7 @@ let spaceRoom = {
             // Its handy to keep the squared radius for distance calculations
             room.connectedSphereRadius2 = room.connectedSphereRadius * room.connectedSphereRadius;
             sphereScale = 2.0;
-            var sphereGeometry = new THREE.SphereGeometry(room.connectedSphereRadius * 0.9, 32, 32);
+            var sphereGeometry = new THREE.SphereGeometry(room.connectedSphereRadius, 32, 32);
             var sphereMaterial = new THREE.MeshStandardMaterial({
                 color: 0xffffff,
                 side: THREE.DoubleSide,
@@ -611,7 +611,7 @@ let spaceRoom = {
             scene.add(room.connectedSphere);
             
             // Add the currently connected fingerprints to the room
-            room.addAllFingerprints(room, camera.position, room.connectedSphereRadius, Global.data.connectedFingerprints);
+            room.addAllFingerprints(room, camera.position, room.connectedSphereRadius - 5.0, Global.data.connectedFingerprints);
             room.updateFiltering(Global.data.minimumMarkersInCommon); // 
             // Set all the newly added fingerprints as current fingerprints for DEBUG
             // for(let i = 0; i < room.fingerprints.length; i++) {
@@ -703,6 +703,7 @@ let spaceRoom = {
 
             // Calculate distance to objects
             let minDist = 100000.0;
+            let closestFp = undefined;
             for (let fp of spaceRoom.fingerprints) {
                 let d2 = camera.position.distanceToSquared(fp.mesh.position);
                 fp.distance2 = d2;
@@ -710,7 +711,11 @@ let spaceRoom = {
                     minDist = d2;
                     room.pitchSet = fp.motif.pitchSet;
                     room.octave = fp.motif.octave;
+                    closestFp = fp;
                 }
+            }
+            if(closestFp != undefined) {
+                Synthesis.setSoundSignature(closestFp.rawFingerprint);
             }
             if(minDist == 0) { minDist = 1;} // avoid division by zero
             for(let fp of spaceRoom.fingerprints) {
@@ -728,7 +733,8 @@ let spaceRoom = {
                 Synthesis.globalSynthLPF.frequency.value = 2000 - (minDist * 1.3);
             }
             if(minDist < 500) {
-                Synthesis.noiseUsrGain.value = Math.pow(1.0 - (minDist/500), 4.0) * 0.01;
+                // Synthesis.noiseUsrGain.value = Math.pow(1.0 - (minDist/500), 4.0) * 0.01;
+                Synthesis.setSoundSignatureGain(Math.pow(1.0 - (minDist/500), 4.0) * 0.01);
             }
             if (minDist < 150) {
                 fogFade = Math.pow(1.0 - (minDist / 150), 5.0);
@@ -754,7 +760,7 @@ let spaceRoom = {
                 let newFingerprintRadius = 20;
                 // Check that the fingerprints are in the "dark" space for archived devices
                 if(positionForward.distanceToSquared(new THREE.Vector3(0, 0, 0)) > 
-                    (room.connectedSphereRadius2 + Math.pow(newFingerprintRadius, 2))) {
+                    (room.connectedSphereRadius2 + Math.pow(newFingerprintRadius, 2) + 5)) {
                     // add a variable number of new fingerprints
                     let numPrints = Math.random() * 4;
                     for(let i = 0; i<numPrints; i++) {

@@ -5,6 +5,7 @@ var longverb;
 var chorus;
 var reverb;
 var globalSynthLPF;
+var pingPong;
 var noisegain, noise, noiseGainMult, noiseEnv, noiseUsrGain;
 var fmSynths = [];
 var fmSynthsUsed = [];
@@ -12,6 +13,7 @@ var noiseSynths = [];
 var noiseSynthsUsed = [];
 var padSynths = [];
 var padSynthsUsed = [];
+var soundSignature;
 
 function init_tone() {
     // Tone.js
@@ -29,6 +31,9 @@ function init_tone() {
     chorus = new Tone.Chorus(1.5, 0.5, 0.3).connect(longverb).toMaster();
     globalSynthLPF = new Tone.Filter(600, "lowpass").connect(chorus);
 
+
+    pingPong = new Tone.PingPongDelay("4n", 0.2).toMaster();
+
     
     noisegain = new Tone.Gain(0.00).toMaster();
     noise = new Tone.Noise('pink').start().connect(noisegain);
@@ -42,7 +47,7 @@ function init_tone() {
     noiseEnv.releaseCurve = "linear";
     // Multiply two signals together
     noiseEnv.connect(noiseGainMult, 0, 0);
-    noiseUsrGain = new Tone.Signal(0.001).connect(noiseGainMult, 0, 1);
+    noiseUsrGain = new Tone.Signal(0.00).connect(noiseGainMult, 0, 1);
     // Use as gain control
     noiseGainMult.connect(noisegain.gain);
 
@@ -60,6 +65,8 @@ function init_tone() {
         padSynths.push(createPadSynth(20, i));
         padSynthsUsed.push(false);
     }
+
+    soundSignature = initSoundSignature();
 
     //start/stop the transport
     // document.getElementById('start-stop')
@@ -147,19 +154,6 @@ function newSynth(){
 }
 
 function newNoiseSynth() {
-    // let newSynth = new Tone.NoiseSynth(
-    //     {
-    //         noise : {
-    //             type : "pink"
-    //         },
-    //         envelope : {
-    //             attack : 0.005 ,
-    //             decay : 0.01 ,
-    //             sustain : 0.001
-    //         }
-    //     }   
-    // ).chain(chorus, reverb);
-    // newSynth.volume.value = -12;
 
     let newSynth = new Tone.MembraneSynth( {
         pitchDecay : 0.05 ,
@@ -245,8 +239,88 @@ function newPadSynth(freq) {
     return undefined;// Return undefined to signal that no synth was free
 }
 
+function initSoundSignature() {
+    let noise = new Tone.FMOscillator("C1", "sine", "square").start();
+    let noiseGain = new Tone.Gain(0.0).connect(chorus).connect(longverb).connect(pingPong).toMaster();
+    let userGain = new Tone.Signal(0.00);
+    let chebylfofreq = new Tone.LFO(0.1, -1, 1).start();
+    let chebylfo = new Tone.LFO(0.1, 0.03, 0.2).start();
+    chebylfofreq.connect(chebylfo.frequency);
+    let gainMult = new Tone.Multiply();
+    let lpf = new Tone.Filter(600, "lowpass").connect(noiseGain);
+    let lpfLFO = new Tone.LFO(1, 100, 10000).start();
+    // Multiply two signals together
+    userGain.connect(gainMult, 0, 0);
+    chebylfo.connect(gainMult, 0, 1);
+    // Use as gain control
+    gainMult.connect(noiseGain.gain);
+
+
+    let cheby = new Tone.Chebyshev(51).connect(lpf);
+    noise.connect(cheby);
+    return {
+        playing: true,
+        noise: noise,
+        chebylfo: chebylfo,
+        chebylfofreq: chebylfofreq,
+        gainMult: gainMult,
+        noiseGain: noiseGain,
+        cheby: cheby,
+        userGain: userGain,
+        lpf: lpf,
+        lpfLFO: lpfLFO, 
+
+        setGain: function(syn, gain) {
+            syn.userGain.value = gain;
+        },
+        trigger: function(syn) {
+            syn.env.triggerAttack();
+            syn.playing = true;
+        },
+        release: function(syn) {
+            if(syn.playing) {
+                syn.env.triggerRelease();
+                syn.playing = false;
+            }
+        },
+        dispose: function(syn) {
+            
+            syn.release(syn);
+            window.setTimeout(function() {
+                syn.env.dispose();
+                syn.noise.dispose();
+                syn.chebylfo.dispose();
+                syn.chebylfofreq.dispose();
+                syn.gainMult.dispose();
+                syn.noiseGain.dispose();
+                syn.cheby.dispose();
+            }, 5000)
+            // padSynthsUsed[syn.index] = false;
+        },
+        setSignatureFromFingerprint: function(syn, rawPrint, timeScale = 1) {
+            let rp = rawPrint;
+            
+            let octave = Math.floor(((rp[15] + rp[16] + rp[17]) * 5823.153) % 5);
+            let freq = Tone.Frequency.mtof((rawPrint[0] % 3) * 7 + 48 + (12 * octave));
+            syn.noise.frequency.value = freq;
+            let order = ((rp[1] + rp[2] + rp[10]) * 999.4) % 300;
+            // syn.cheby.order = order;
+            let harmonicity = ((rp[3] + rp[4] + rp[11]) * 999.4) % 14 + 2;
+            syn.noise.harmonicity.value = harmonicity;
+            let modIndex = ((rp[5] + rp[6] + rp[12]) * 999.4) % 8 + 1;
+            syn.noise.modulationIndex.value = modIndex;
+            let lfofreqfreq = (((rp[7] + rp[8] + rp[13]) * 999.4) % 8 + 1) / (((rp[9] + rp[20] + rp[14]) * 999.4) % 8 + 1);
+            syn.chebylfofreq.frequency.value = lfofreqfreq;
+
+            let lfofreqamp = freq * Math.floor((rp[22] + rp[23] + rp[24]) % 3);
+            syn.chebylfofreq.amplitude.value = lfofreqamp;
+            let lpflfofreq = 20 / (((rp[5] + rp[6] + rp[12]) * 999.4) % 20 + 1);
+            syn.lpfLFO.frequency.value = lpflfofreq * timeScale;
+        }
+    };
+}
+
 function newChebySynth() {
-    
     let noise = new Tone.Noise("pink");
     let noiseGain = new Tone.Gain(0.0).connect(reverb).toMaster();
     let chebyenv = new Tone.ScaledEnvelope({
@@ -272,6 +346,7 @@ function newChebySynth() {
     noise.connect(cheby);
 
     noise.start();
+
     return {
         playing: true,
         noise: noise,
@@ -309,6 +384,14 @@ function newChebySynth() {
     };
 }
 
+function setSoundSignature(fingerprint) {
+    soundSignature.setSignatureFromFingerprint(soundSignature, fingerprint);
+}
+
+function setSoundSignatureGain(gain) {
+    soundSignature.setGain(soundSignature, gain);
+}
+
 function clearIdsFromTransport(ids) {
     for (let id of ids) {
         // console.log("clearing id: " + id);
@@ -325,5 +408,5 @@ function clearIdsFromTransport(ids) {
 export { init_tone, newPadSynth, newChebySynth, clearIdsFromTransport,
     requestFMSynth, returnFMSynth, requestNoiseSynth, returnNoiseSynth,
     longverb, noise, noiseEnv, globalSynthLPF, reverb, noiseUsrGain, chorus,
-    getNumFreeFMSynths,
+    getNumFreeFMSynths, setSoundSignatureGain, setSoundSignature
 };
