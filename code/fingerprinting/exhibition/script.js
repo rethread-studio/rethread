@@ -173,9 +173,9 @@ function fpHighlightHover(element) {
 function generateFPText(fp) {
     let s =
         "You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.timezone.split("/")[0].replace("_"," ") +
+        fp.original.timezone.split("/")[0].replace("_", " ") +
         "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.timezone.split("/")[1].replace("_"," ") +
+        fp.original.timezone.split("/")[1].replace("_", " ") +
         "</span>. Your favorite language for browsing the web is <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'>" +
         ISO6391.getName(fp.original["languages-js"].split("-")[0]) +
         "</span>."
@@ -286,7 +286,13 @@ let questions = [
     "top 25 things your BROWSER says about YOU",
     '"we have no secrets my browser and I"',
     "where do all these fonts come from?",
-    "why save everything that is visible?"
+    "why would a website save your browser fingerprint?",
+    "is your browser in the artwork or is the artwork in your browser?",
+    "how many emojis do you see?",
+    "when was the last time you used another browser?",
+    "what is code? what is data? what is art?",
+    "diversity is good",
+    "your browser + our code = collective software art"
 ];
 
 function mainPage() {
