@@ -1235,10 +1235,11 @@ function getConnectedFingerPrints(callback) {
 
 function getFingerPrint(callback) {
   getSession((session) => {
-    console.log(session);
+    console.log(JSON.stringify(session));
     if (session.connected == false && session.terms == true) {
       function fpCallback(components) {
         console.log(components);
+        console.log(JSON.stringify(components));
         $.ajax({
           url: HOST + "/api/fp",
           type: "PUT",
@@ -1272,7 +1273,7 @@ function getFingerPrint(callback) {
           withCredentials: true
         },
         success: function (data) {
-          console.log(data);
+          console.log(JSON.stringify(data));
           callback(data);
         },
       });
