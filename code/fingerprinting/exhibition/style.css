@@ -102,7 +102,7 @@ h3, h4 {
     font-weight: normal!important;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 812px) {
     body {
         font-size: 12px;
         overflow: auto !important;
@@ -169,7 +169,7 @@ button:hover {
     padding-left: 2em;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 812px) {
     .w3-large {
         font-size: 10px!important;
     }
@@ -243,7 +243,7 @@ button:hover {
     visibility: visible;
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 812px) {
     .artBubble {
         height: 6em;
         width: 6em;

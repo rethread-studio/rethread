@@ -29,12 +29,12 @@ let hasAdBlock, hasTouch, hasAudio, hasOSversion;
 function setup() {
 
     // update size
-    w = screen.availWidth;
-    h = screen.availHeight;
+    w = window.innerWidth;
+    h = window.innerHeight;
 
     // canvas sizes
     clip = 0.8;
-    if (w < 768) clip = 0.9;
+    if (w < 812) clip = 0.9;
 
     counterClip = (1 - clip) / 2;
     cWidth = w * clip;
@@ -107,7 +107,7 @@ $(document).ready(function () {
             translate(w / 2, 0);
             another();
             pop();
-            $("#galleryButton").attr("id","middleMenu");
+            $("#galleryButton").attr("id", "middleMenu");
         });
     }
     else if (!hasConsented) {
