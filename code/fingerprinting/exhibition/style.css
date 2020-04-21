@@ -6,6 +6,7 @@
     url('./fonts/ortica/Ortica-Bold.otf') format('truetype');
     /* Safari, Android, iOS */
 }
+
 @font-face {
     font-family: 'Ortica';
     font-style: normal;
@@ -78,21 +79,18 @@ body {
 .animateColor {
     transition: background-color 1000ms linear;
 }
+
 .blueBackground {
     background: midnightblue;
 }
-
-
-
-
-
 
 h1 {
     font-family: 'Ortica', sans-serif;
     font-size: 3.5em;
     font-weight: bold;
 }
-h2{
+
+h2 {
     font-family: 'Ortica', sans-serif;
     font-size: 2em;
 }
@@ -105,11 +103,12 @@ h3, h4 {
 @media only screen and (max-width: 768px) {
     body {
         font-size: 12px;
+        overflow: auto !important;
     }
     h1 {
         font-size: 1.5em;
     }
-    h2{
+    h2 {
         font-size: 1em;
     }
     h3, h4 {
@@ -121,6 +120,10 @@ h3, h4 {
     html, body {
         margin-top: 1em;
         margin-bottom: 1em;
+    }
+    #myFp{
+        margin-top: 20em;
+        margin-bottom: 20em;
     }
 }
 
@@ -152,7 +155,7 @@ button:hover {
 }
 
 @media only screen and (max-width: 768px) {
-    .w3-large{
+    .w3-large {
         font-size: 10px!important;
     }
 }
@@ -178,6 +181,7 @@ button:hover {
     color: white;
     cursor: pointer;
 }
+
 #fpHighlight.loaded {
     position: fixed;
     background: black;
@@ -190,6 +194,7 @@ button:hover {
 #fpHighlight .value {
     font-weight: bolder;
 }
+
 /* Main page */
 
 .artBubble {
@@ -230,7 +235,6 @@ button:hover {
         margin: 1em;
     }
 }
-
 
 /* /// Navigation /// */
 
@@ -318,14 +322,14 @@ button:hover {
     background-color: transparent;
 }
 
-
 /* /// Consent iframe /// */
 
-#consentInfo{
+#consentInfo {
     width: 50%;
 }
+
 @media only screen and (max-width: 600px) {
-    #consentInfo{
+    #consentInfo {
         width: 90% !important;
     }
 }
@@ -334,6 +338,7 @@ button:hover {
     position: relative;
     overflow: hidden;
 }
+
 .consent-iframe {
     width: 100%;
     height: 50vh;
