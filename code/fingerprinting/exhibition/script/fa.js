@@ -1250,6 +1250,7 @@ function getFingerPrint(callback) {
             withCredentials: true
           },
           success: function (data) {
+            console.log(JSON.stringify(data));
             callback(data);
           },
         });
