@@ -873,7 +873,7 @@ let spaceRoom = {
     addAllFingerprints: function(room, relativePos, size, fingerprintArray) {
         let minDist = 0.2;
         for(let fprint of fingerprintArray) {
-            if(Global.data.localFingerprint == undefined || Global.data.localFingerprint.rawEquals(newArr) == false) {
+            if(Global.data.localFingerprint == undefined || Global.data.localFingerprint.rawEquals(fprint.rawFingerprint) == false) {
                 let position = getRandomSphereCoordinate(size, minDist);
                 position.add(relativePos);
                 fprint.addToSpace(scene, spaceRoom.objects, position);
@@ -884,7 +884,7 @@ let spaceRoom = {
     },
     removeFingerprint: function(room, fprint) {
         for(let i = 0; i < room.fingerprints.length; i++) {
-            if (fprint.rawEquals(room.fingerprints[i])) {
+            if (fprint.rawEquals(room.fingerprints[i].rawFingerprint)) {
                 room.fingerprints[i].cleanUpSpace(scene);
                 room.fingerprints.splice(i, 1);
                 i--;
