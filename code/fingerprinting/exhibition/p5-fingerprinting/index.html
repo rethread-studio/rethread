@@ -23,28 +23,31 @@
             background-color: black;
             overflow: hidden !important;
             text-align: center;
-            margin-top: 0!important;
+            margin-top: 0 !important;
         }
 
         @media only screen and (max-width: 768px) {
             w3-display-middle {
                 scroll-snap-align: none;
-                margin: auto !important;
-                position: absolute !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
-                width: 100% !important;
             }
-            #galleryButton{
-                /* text-align: left; */
-                width: 30%;
-                margin-left: 5%;
-                font-size: 0.75em;
+
+            #galleryButton {
+                max-width: 200px !important;
+                left: 0 !important;
             }
-            canvas{
-                right: 0!important;
-                margin-right: 0!important;
+
+            #middleMenu {
+                max-width: 200px !important;
+                margin: 0!important;
+                position: absolute!important;
+                top: 50%!important;
+                left: 50%!important;
+                transform: translate(-50%,-50%)!important;
+            }
+
+            canvas {
+                right: 0 !important;
+                margin-right: 0 !important;
             }
         }
 
@@ -53,15 +56,20 @@
             padding-left: 0;
             padding-right: 0;
             margin-left: auto;
-            margin-right: auto;
+            /* margin-right: auto; */
             display: block;
             z-index: -1;
             filter: blur(20px);
             transition: filter 2s ease;
+
+            right: 0 !important;
+            margin-right: 0 !important;
         }
 
-        #galleryButton{
-            top: 85%;
+        #galleryButton {
+            max-width: 400px;
+            left: 5em;
+            transform: none;
         }
 
         .compare {
@@ -127,7 +135,7 @@
 
         </div>
 
-        <div style="display: none;" id="galleryButton" class="w3-display-middle">
+        <div style="display: none; max-width: 400px;" id="galleryButton" class="w3-display-middle">
             <button class="linkButton" id="seeMeaning">What does it mean?</button>
             <div id="legend" style="display: none">
                 <div id="legendT"></div>

@@ -33,7 +33,10 @@ function setup() {
     h = screen.availHeight;
 
     // canvas sizes
-    clip = 0.7; counterClip = (1 - clip) / 2;
+    clip = 0.8;
+    if (w < 768) clip = 0.9;
+
+    counterClip = (1 - clip) / 2;
     cWidth = w * clip;
     cHeight = h * clip;
     // create canvas, hide it at first, position
@@ -104,6 +107,7 @@ $(document).ready(function () {
             translate(w / 2, 0);
             another();
             pop();
+            $("#galleryButton").attr("id","middleMenu");
         });
     }
     else if (!hasConsented) {
