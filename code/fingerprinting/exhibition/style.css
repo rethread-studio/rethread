@@ -93,11 +93,13 @@ h1 {
 h2 {
     font-family: 'Ortica', sans-serif;
     font-size: 2em;
+    font-weight: normal!important;
 }
 
 h3, h4 {
     font-family: 'Ortica', sans-serif;
     font-size: 1.5em;
+    font-weight: normal!important;
 }
 
 @media only screen and (max-width: 768px) {
