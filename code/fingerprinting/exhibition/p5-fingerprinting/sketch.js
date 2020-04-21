@@ -79,11 +79,12 @@ function stars(l) {
 $(window).on("orientationchange", function (event) {
     var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
     if (orientation === "portrait-secondary" || orientation === "portrait-primary") {
-        alert("Please rotate your screen to landscape mode")
+        $("#landscapePlease").show();
         $("#info").hide();
     }
     else {
         setup();
+        $("#landscapePlease").fadeOut();
         $("#info").fadeIn();
         // load constellation again
     }
@@ -93,10 +94,12 @@ $(document).ready(function () {
 
     var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
     if (orientation === "portrait-secondary" || orientation === "portrait-primary") {
-        alert("Please rotate your screen to landscape mode")
+        $("#landscapePlease").show();
         $("#info").hide();
     }
     else {
+        setup();
+        $("#landscapePlease").fadeOut();
         $("#info").show();
     }
 
