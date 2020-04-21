@@ -361,13 +361,13 @@ function myFpButton() {
     displayPage('myFp');
 }
 
-function updateConnectedCounter() {
-    getConnectedFingerPrints(function(data) {
-        console.log("number of visitors: " + data.normalized.length);
-        document.getElementById('connected-counter').innerHTML = "" + data.normalized.length;
-    });
-    window.setInterval(updateConnectedCounter(), 2000);
-}
+// function updateConnectedCounter() {
+//     getConnectedFingerPrints(function(data) {
+//         console.log("number of visitors: " + data.normalized.length);
+//         document.getElementById('connected-counter').innerHTML = "" + data.normalized.length;
+//     });
+//     window.setInterval(updateConnectedCounter(), 2000);
+// }
 
 $(document).ready(function () {
     if (window.location.hash) {
@@ -424,7 +424,5 @@ $(document).ready(function () {
         // Go to 2D art
         window.location.href = "font/";
     });
-
-    updateConnectedCounter();
 });
 
