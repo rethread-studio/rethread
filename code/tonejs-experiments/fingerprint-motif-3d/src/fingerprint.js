@@ -70,16 +70,19 @@ class Motif {
                     // let id = transport.schedule(function (time) {
                         // console.log("pitch: " + pitch + " dur: " + dur + " time: " + time);
                         synth.envelope.attack = atk;
+                        let velocity = Math.random() * 0.5 + 0.5;
                         if(noisePlayback) {
                             noiseSynth.triggerAttackRelease(
                                 pitch,
                                 "16n",//dur16ToTransport(dur/2),
-                                time);
+                                time,
+                                velocity);
                         } else {
                             synth.triggerAttackRelease(
                                 pitch,
                                 dur,//dur16ToTransport(dur/2),
-                                time);
+                                time,
+                                velocity);
                         }
                         // Matching visual changes
                         Tone.Draw.schedule(function(){
@@ -168,7 +171,6 @@ class Motif {
         }
         if(this.loop != undefined) {
             this.loop.stop();
-            console.log("Stopped space loop of motif");
         }
     }
     pause() {
@@ -218,8 +220,18 @@ class Fingerprint {
     color;
     activation; // used to display that the fingerprint is sonically activated
     hidden;
+    hoverText;
     constructor(rawFingerprint, type) {
         this.type = type;
+        if(type == FPrintTypes.connected) {
+            let i = Math.floor(Math.random() * Global.messages.connectedHoverTexts.length);
+            this.hoverText = Global.messages.connectedHoverTexts[i];
+        } else if (type == FPrintTypes.old) {
+            let i = Math.floor(Math.random() * Global.messages.archivedHoverTexts.length);
+            this.hoverText = Global.messages.archivedHoverTexts[i];
+        } else if (type == FPrintTypes.local){
+            this.hoverText = "your device's fingerprint";
+        }
         this.rawFingerprint = rawFingerprint;
         this.fingerprintSum = this.rawFingerprint.reduce((prev, curr) => prev + curr, 0);
         this.color = new THREE.Color();
@@ -292,10 +304,12 @@ class Fingerprint {
             // Place camera at origin
             Graphics.camera.position.copy(new THREE.Vector3(0, 0, 0));
 
+            let extraWidth = (room.fingerprint.fingerprintSum * 5293.184) % 16;
+            let extraHeight = (room.fingerprint.fingerprintSum * 293.184) % 16;
+
             // Add geometry to display a shader on
-            let shaderGeometry = new THREE.PlaneGeometry( 18, 18, 1, 1 );
+            let shaderGeometry = new THREE.PlaneGeometry( 12 + extraWidth, 12 + extraHeight, 1, 1 );
             // let shaderMaterial = new THREE.MeshBasicMaterial( {color: 0xccccff, side: THREE.FrontSide} );
-            console.log("rawFingerprint: " + JSON.stringify(newRoom.fingerprint.rawFingerprint));
             let shaderFingerprint = newRoom.fingerprint.rawFingerprint.map(num => {
                 return Math.sqrt(((num + 1) * newRoom.fingerprint.fingerprintSum) % 99);
             })
@@ -315,7 +329,7 @@ class Fingerprint {
             let shader = new THREE.Mesh( shaderGeometry, shaderMaterial );
             shader.castShadow = true;
             shader.rotateY(Math.PI);
-            shader.position.set(0, 0, 28);
+            shader.position.set(0, 0, 18);
             Graphics.lookAt(shader.position.clone());
             Graphics.scene.add(shader);
             room.shader = shader;
@@ -342,8 +356,8 @@ class Fingerprint {
         }
 
         newRoom.initSound = function(room) {
-            
-            Tone.Transport.bpm.value = 80;
+            let bpm = 70 + ((room.fingerprint.fingerprintSum * 73.82) % 60);
+            Tone.Transport.bpm.value = bpm;
             Tone.Transport.loop = false;
             
             room.fingerprint.requestNewSynths();
@@ -351,11 +365,14 @@ class Fingerprint {
             room.fingerprint.updateMotif();
             room.motif = room.fingerprint.motif;
             room.motif.play(room.fingerprint.synth.synth, room.fingerprint.noiseSynth.synth, Tone.Transport, room.fingerprint);
-            console.log("Started motif in room");
-            console.log("motif: " + JSON.stringify(room.motif));
+            // console.log("Started motif in room");
+            // console.log("motif: " + JSON.stringify(room.motif));
+
+            room.loopBeats = 32 + Math.floor((room.fingerprint.fingerprintSum * 73.82) % 64);
 
             Synthesis.setSoundSignature(room.fingerprint.rawFingerprint, 0.25);
-            Synthesis.setSoundSignatureGain(0.001);
+            Synthesis.setSoundSignatureGain(0.01);
+            Synthesis.releaseSoundSignature(0);
             Synthesis.globalSynthLPF.frequency.value = 500;
             Synthesis.noiseEnv.triggerRelease();
 
@@ -442,6 +459,16 @@ class Fingerprint {
                     }
                 }
 
+                // Trigger sound signature
+
+                for(let i = 0; i < motif.sequence.length; i++) {
+                    // Have the loop be in sync with the spaceRoom loop
+                    if(motif.sequence[i] == room.loopCounter) {
+                        Synthesis.attackReleaseSoundSignature(time);
+                        break;
+                    }
+                }
+
                 switch(room.loopCounter) {
                     case 0:
                         // room.cheby.trigger(room.cheby);
@@ -474,7 +501,7 @@ class Fingerprint {
                 }
                 
                 room.loopCounter += 1;
-                if(room.loopCounter >= 128) {
+                if(room.loopCounter >= room.loopBeats) {
                     room.loopCounter = 0;
                     room.loopCounterLv2 += 1;
                 }
@@ -518,8 +545,9 @@ class Fingerprint {
                 if (intersections[i].distance < 2.0) {
                     // Travel into the space room
                     Graphics.travelToRoom(Graphics.spaceRoom);
-                } else if (intersections[i].distance < 30.0) {
-                    Graphics.displayOnHud("<span>continue forward to exit</span>");
+                    return;
+                } else if (intersections[i].distance < 40.0) {
+                    Graphics.displayOnHud("<span>continue forward to exit this fingerprint</span>");
                 } else {
                     Graphics.hideHud();
                 }
@@ -530,6 +558,11 @@ class Fingerprint {
             }
 
             // TODO: Raycast backwards to check that we aren't backing out of the fingerprint room alt. disable moving backwards
+            let distanceFromCenter = Graphics.camera.position.distanceToSquared(new THREE.Vector3(0, 0, 0));
+            if(distanceFromCenter > 55*55) {
+                Graphics.travelToRoom(Graphics.spaceRoom);
+                return;
+            }
 
             // update shader uniforms
             room.shaderUniforms.time.value += delta;
@@ -630,15 +663,7 @@ class Fingerprint {
         this.mesh.position.copy(givenPos);
     }
     getHoverText() {
-        let text = "";
-        if(this.type == FPrintTypes.local) {
-            text = "your device's fingerprint";
-        } else if (this.type == FPrintTypes.connected) {
-            text = "currently connected, id: " + this.fingerprintSum;
-        } else if (this.type == FPrintTypes.old) {
-            text = "archived fingerprint, id: " + this.fingerprintSum;
-        }
-        return text;
+        return this.hoverText;
     }
     requestNewSynths() {
         // Get fm synth

@@ -60,20 +60,55 @@ var html = {
 var messages = {
     darkSpaceMessages: [
         "When a website collects and stores a browser fingerprint, it puts a tiny little trace of the human-computer cyborg on its server. Just the faintest hint of an identity, but oftentimes enough to pinpoint you in a group of hundreds of thousands. Until your human-computer cyborg configuration changes.",
-        "Welcome to the archive",
+        "Welcome to the archive!",
+        "Explore the tiny little traces of the human-computer cyborgs who chose to stay on the server after they disconnected.",
+        "Traverse the database of the formerly connected.",
+        "We can't keep the lights on for all of these devices who aren't even here! But go on, explore away. You can always return to the light."
     ],
     insideFingerprintMessages: [
         "The browser fingerprint contains a reflection of the human behind it: their languages, preferred fonts, location, choice of browser.",
         "The browser fingerprint reflects its device through the molecules of its graphics card producing slightly different visual noise, the size of the screen, the depth of its pixels.",
         "The human-computer cyborg is reflected in their data.",
-        "~~~abstract features of HumanConciousness~~~",
+        "abstract features of HumanConciousness",
+        "data and soul",
+        "settings and atoms",
+        "information and matter",
         "Can you hear how similar you are?",
         "I'm afraid we have no way of putting you in touch with this particular human-computer cyborg.",
         "Have you ever been attracted to the visual noise of a graphics card?",
-        
+        "This data in its raw format could be used to track someone. We never will though."
     ],
     insideSphereMessages: [
         "The browser fingerprint contains a reflection of the human behind it: their languages, preferred fonts, location, choice of browser. Likewise it reflects the device through the molecules of its graphics card producing slightly different visual noise, the size of the screen, the depth of its pixels.",
+        "Welcome inside the sphere of fellow exhibition visitors!",
+        "This is where we put the visitors",
+        "Have you seen your friends? They should be here.",
+    ],
+    connectedHoverTexts: [
+        "a well connected visitor",
+        "fellow exhibition visitor",
+        "look for this cyborg in the chat",
+        "a potential friend",
+        "this cyborg is only here for the wine",
+        "a fleeting online presence",
+        "a beautiful device",
+        "fingerprint belonging to someone connected",
+        "this fingerprint is right here",
+    ],
+    archivedHoverTexts: [
+        "someone who was here before",
+        "traces of past presence",
+        "this cyborg was once connected to the server",
+        "the fingerprint of an earlier visitor",
+        "the owner of this fingerprint is no longer connected",
+        "we remember this human-computer cyborg",
+        "a combination of decisions and chance from the past",
+        "the server remembers this one quite clearly",
+        "this device was once to be connected to the server",
+        "a browser fingerprint from the past",
+        "there are great memories of this one",
+        "not presently connected",
+        "we really liked this one",
     ]
 }
 
@@ -94,4 +129,4 @@ var state = {
     mobile: false,
 }
 
-export { sound, data, html, state, getRandomDarkSpaceMessage, getRandomInsideFingerprintMessage, getRandomInsideSphereMessage }
+export { sound, data, html, state, getRandomDarkSpaceMessage, getRandomInsideFingerprintMessage, getRandomInsideSphereMessage, messages }

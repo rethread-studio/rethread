@@ -90,6 +90,7 @@ function lockIntoExperience() {
     hudFooter.style.display = '';
     hudMessage.style.display = '';
     displayOnHudFooter("inside space: " + spaceRoom.spaceSection);
+    Synthesis.triggerSoundSignature();
     
     Tone.Transport.start();
     console.log("Controls locked, transport started");
@@ -103,6 +104,7 @@ function unlockFromExperience() {
     hudFooter.style.display = 'none';
     hudMessage.style.display = 'none';
     currentRoom.pause(currentRoom);
+    Synthesis.releaseSoundSignature();
     hideHudFooter();
     Tone.Transport.stop();
 }
@@ -670,8 +672,8 @@ let spaceRoom = {
                             synTest = "undefined, free synths: " + Synthesis.getNumFreeFMSynths();
                         }
 
-                        console.log("synth is " + synTest + ", free synths: " + Synthesis.getNumFreeFMSynths());
-                        console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
+                        // console.log("synth is " + synTest + ", free synths: " + Synthesis.getNumFreeFMSynths());
+                        // console.log(JSON.stringify(intersections[i].object.userData.fingerprintPtr.motif));
                     }
                     
                 } else if(intersections[i].distance < 30.0) {
@@ -679,7 +681,7 @@ let spaceRoom = {
                     displayOnHud("<span>" + text + "</span>");
                     let hasSynth = true;
                     if(intersections[i].object.userData.fingerprintPtr.synth == undefined) { 
-                        console.log("synth is undefined, free synths: " + Synthesis.getNumFreeFMSynths());
+                        // console.log("synth is undefined, free synths: " + Synthesis.getNumFreeFMSynths());
                     }
                     
                 }
@@ -1071,6 +1073,7 @@ function showFilter() {
         document.getElementById('filter-span').style.display = '';
         filterOutput.style.display = '';
         filterSlider.style.display = '';
+        document.getElementById('whole-filter-span').style.display = '';
     }
 }
 
@@ -1079,6 +1082,7 @@ function hideFilter() {
     document.getElementById('filter-span').style.display = 'none';
     filterOutput.style.display = 'none';
     filterSlider.style.display = 'none';
+    document.getElementById('whole-filter-span').style.display = 'none';
 }
 
 function lookAt(pos) {

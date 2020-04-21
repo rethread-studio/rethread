@@ -19,14 +19,12 @@
 				line-height: 24px;
 				font-weight: 200;
 				letter-spacing: 0.5em;
-				z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				flex-direction: column;
 				width: 100%;
 				text-align: center;
-				min-height: 200px;
 				align-items: center;
 			}
 			#blocker {
@@ -146,7 +144,7 @@
 				color: #ffffff;
 				text-align: center;
 				font-family: Arial;
-				font-size: 1.3em;
+				font-size: 1.5em;
 				line-height: 2em;
 				font-weight: 300;
 				letter-spacing: 0.3em;
@@ -243,7 +241,7 @@
 /* Dropdown Button */
 
 .dropbtn {
-    background-color: midnightblue;
+    background-color: thistle;
     color: white;
     width: 1em;
     height: 1em;
@@ -257,7 +255,7 @@
     outline: none;
     transition: 0.3s;
     border-style: solid;
-    border-color: midnightblue;
+    border-color: thistle;
 }
 
 /* Dropdown button on hover & focus */
@@ -351,13 +349,6 @@ button:hover {
 		</div>
 		
 		<div id="blocker">
-			<div class="dropdown" style="position: absolute;">
-				<button id="dropdown-menu-button" class="dropbtn"> </button>
-				<div id="myDropdown" class="dropdown-content">
-					<a href="../index.html#main">Back to artwork gallery</a>
-					<a href="../exit.html">Leave exhibition</a>
-				</div>
-			</div>
 
 			<div class="instructions-overlay" id="instructions">
 				<!-- <span style="font-size:36px">WORK TITLE</span>
@@ -373,9 +364,9 @@ button:hover {
 			</div>
 			<div id="filter-container" class="">
 				<button id="return-to-center-button" class="w3-large w3-center">return to center</button> <br/><br/>
-				<span id="filter-span" style="font-size:24px; line-height: 1.3em; display: none;">Filter</span><br/><br/>
+				<span id="whole-filter-span" style="display: none;"><span id="filter-span" style="font-size:24px; line-height: 1.3em; display: none;">Filter</span><br/><br/>
 				minimum fingerprint markers in common: <span id="filter-output" style="display: none;"></span> <br/>
-				<input type="range" min="0" max="25" value="0" class="slider" id="filter-slider" style="display: none;">
+				<input type="range" min="0" max="25" value="0" class="slider" id="filter-slider" style="display: none;"></span>
 			</div>
 
 		</div>
@@ -411,7 +402,7 @@ button:hover {
 				<div class="pre-instruction-inner">
 					Use the filter slider to see how unique your fingerprint is among the ones surrounding you.
 					<br/><br/>
-					This is a sonic experience! Use headphones for the optimal experience.
+					This is a sonic experience, you'll be glad you put on a pair of headphones.
 					<br/><br/><span style="font-size:36px;"><i class="fa fa-volume-up" aria-hidden="true"></i></span>
 					<br/><br/>
 					<button id="pre-instructions-button-final" class="w3-large w3-center">Let me in!</button>
@@ -419,7 +410,13 @@ button:hover {
 			</div>
 		</div>
 		
-		
+		<div class="dropdown" style="position: absolute;">
+			<button id="dropdown-menu-button" class="dropbtn"> </button>
+			<div id="myDropdown" class="dropdown-content">
+				<a href="../index.html#main">Back to artwork gallery</a>
+				<a href="../exit.html">Leave exhibition</a>
+			</div>
+		</div>
 
 		
 
