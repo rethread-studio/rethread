@@ -205,7 +205,7 @@ function generateFPText(fp) {
         fp.original.screen_width +
         "</span> pixels wide and <span class = 'fpHighlight' id='fpScreenHeight' onmouseover='fpHighlightHover(this);'>" +
         fp.original.screen_height +
-        "</span> pixels high. For the hardware geeks, your ";
+        "</span> pixels high. Your ";
     let device = fp.original.device_vendor;
     if (!device) {
         device = fp.original.device_type;
