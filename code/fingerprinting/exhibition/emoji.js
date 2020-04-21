@@ -47,22 +47,28 @@ const ct = emojis_c.getContext("2d");
 let emoji = null;
 let myEmoji = null;
 
+function generateEmojiImage() {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = 125;
+  canvas.height = 125;
+  ctx.font = "100px Time";
+  ctx.fillStyle = "rgb(0, 0, 0)";
+  ctx.strokeStyle = ctx.fillStyle;
+  ctx.textAlign = "center";
+  ctx.fillText(emoji, 65, 100);
+  return canvas.toDataURL();
+}
 function connectWS() {
   const ws = new WebSocket(HOST.replace("http", "ws"));
   ws.onopen = () => {
     getEmoji((e) => {
       emoji = e;
       myEmoji = new EmojiParticle(emoji, true);
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      canvas.width = 125;
-      canvas.height = 125;
-      ctx.font = "100px Time";
-      ctx.fillStyle = "rgb(0, 0, 0)";
-      ctx.strokeStyle = ctx.fillStyle;
-      ctx.textAlign = "center";
-      ctx.fillText(emoji, 65, 100);
-      myEmoji.image = canvas.toDataURL();
+      myEmoji.image = generateEmojiImage()
+      setInterval(()=> {
+        ws.send(JSON.stringify({ emoji, image: myEmoji.image}));  
+      }, 30000)
       ws.send(JSON.stringify({ emoji, image: myEmoji.image}));
     });
   };
