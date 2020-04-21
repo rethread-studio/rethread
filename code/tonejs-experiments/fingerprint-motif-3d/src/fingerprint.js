@@ -75,13 +75,11 @@ class Motif {
                                 pitch,
                                 "16n",//dur16ToTransport(dur/2),
                                 time);
-                            console.log("trig noise");
                         } else {
                             synth.triggerAttackRelease(
                                 pitch,
                                 dur,//dur16ToTransport(dur/2),
                                 time);
-                            console.log("trig tone");
                         }
                         // Matching visual changes
                         Tone.Draw.schedule(function(){
@@ -397,36 +395,7 @@ class Fingerprint {
 
             // Distorted noise
 
-            let noise;
-
-            noise = new Tone.Noise("pink");
-            var noiseGain = new Tone.Gain(0.0).connect(Synthesis.reverb).toMaster();
-            var chebyenv = new Tone.ScaledEnvelope({
-                "attack" : 5.0,
-                "decay" : 0.01,
-                "sustain" : 1.0,
-                "release" : 5.0,
-            });
-            chebyenv.releaseCurve = "linear";
-            chebyenv.max = 0.5;
-
-            var chebylfofreq = new Tone.LFO(0.1, 0.05, 0.3).start();
-            var chebylfo = new Tone.LFO(0.1, 0.05, 0.1).start();
-            chebylfofreq.connect(chebylfo.frequency);
-
-            var gainMult = new Tone.Multiply();
-            // Multiply two signals together
-            chebyenv.connect(gainMult, 0, 0);
-            chebylfo.connect(gainMult, 0, 1);
-            // Use as gain control
-            gainMult.connect(noiseGain.gain);
-
-
-            var cheby = new Tone.Chebyshev(300).connect(noiseGain);
-            noise.connect(cheby);
-            room.chebyenv = chebyenv;
-
-            noise.start();
+            room.cheby = Synthesis.newChebySynth();
 
             // Pads
 
@@ -473,14 +442,14 @@ class Fingerprint {
 
                 switch(room.loopCounter) {
                     case 0:
-                        room.chebyenv.triggerAttack();
+                        room.cheby.trigger(room.cheby);
                         break;
                     case 2:
                         break;
                     case 48:
                         break;
                     case 64:
-                        room.chebyenv.triggerRelease();
+                        room.cheby.release(room.cheby);
                         break;
                 }
                 for(let i = 0; i < motif.durations.length; i++) {
@@ -574,11 +543,13 @@ class Fingerprint {
         newRoom.cleanUp = function(room) {
             room.loop.stop();
             room.fingerprint.returnSynths();
-            room.chebyenv.triggerRelease();
             room.sonarLFOEnv.dispose();
+            room.sonarSynth.dispose();
+            room.sonarLFO.dispose();
             for(let syn of room.padSynths) {
                 syn.dispose(syn);
             }
+            room.cheby.dispose(room.cheby);
         }
         newRoom.removeFingerprint = function(room) {}
 
@@ -676,11 +647,11 @@ class Fingerprint {
                 this.synth.synth.type = this.synthType;
                 this.synth.synth.oscillator.type = this.oscillatorType;
             } else {
-                console.log("No synth was received when requested");
+                // console.log("No synth was received when requested");
                 this.synth = undefined;
             }
         } else {
-            console.log("Already had synth when requested one");
+            // console.log("Already had synth when requested one");
         }
         
         // Get noise synth
@@ -689,7 +660,7 @@ class Fingerprint {
             if(synthResult != undefined) {
                 this.noiseSynth = synthResult;
             } else {
-                console.log("No synth was received when requested");
+                // console.log("No synth was received when requested");
                 this.noiseSynth = undefined;
             }
         }   
@@ -706,11 +677,14 @@ class Fingerprint {
     }
     isInRawFingerprintList(rawList) {
         for(let rawPrint of rawList) {
-            if (this.rawFingerprint == rawPrint) {
+            if(this.rawEquals(rawPrint)) {
                 return true;
             }
         }
         return false;
+    }
+    rawEquals(rawPrint) {
+        return this.rawFingerprint.length === rawPrint.length && this.rawFingerprint.every((value, index) => value === rawPrint[index]);
     }
     show() {
         this.hidden = false;
@@ -784,7 +758,7 @@ class Fingerprint {
             // this.material.color.multiplyScalar(0.9);
             // this.material.uniforms.time.value += delta;
         } else {
-            console.log("Bad distance to fingerprint: " + relativeDistance + " position: " + JSON.stringify(this.mesh.position));
+            // console.log("Bad distance to fingerprint: " + relativeDistance + " position: " + JSON.stringify(this.mesh.position));
         }
         
     }

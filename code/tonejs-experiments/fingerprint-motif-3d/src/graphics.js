@@ -593,11 +593,11 @@ let spaceRoom = {
         // Initiate fingerprints if the data has been loaded from the server
         if (spaceRoom.fingerprintsAdded == false && Global.data.loadedData == true && Global.data.loadedLocal && Global.data.loadedConnected) {
 
-            room.connectedSphereRadius = 30 + Math.pow(Global.data.connectedFingerprints.length * 40, 1/3);
+            room.connectedSphereRadius = 30 + Math.pow(Global.data.connectedFingerprints.length * 50, 1/3);
             // Its handy to keep the squared radius for distance calculations
             room.connectedSphereRadius2 = room.connectedSphereRadius * room.connectedSphereRadius;
             sphereScale = 2.0;
-            var sphereGeometry = new THREE.SphereGeometry(room.connectedSphereRadius, 32, 32);
+            var sphereGeometry = new THREE.SphereGeometry(room.connectedSphereRadius * 0.9, 32, 32);
             var sphereMaterial = new THREE.MeshStandardMaterial({
                 color: 0xffffff,
                 side: THREE.DoubleSide,
@@ -866,23 +866,25 @@ let spaceRoom = {
         let randomIndex = Math.floor(Math.random() * fingerprintArray.length);
         let position = getRandomSphereCoordinate(size, minDist);
         position.add(relativePos);
-        console.log("Adding fingerprint at " + JSON.stringify(position));
+        // console.log("Adding fingerprint at " + JSON.stringify(position));
         fingerprintArray[randomIndex].addToSpace(scene, spaceRoom.objects, position);
         room.fingerprints.push(fingerprintArray[randomIndex]);
     },
     addAllFingerprints: function(room, relativePos, size, fingerprintArray) {
         let minDist = 0.2;
         for(let fprint of fingerprintArray) {
-            let position = getRandomSphereCoordinate(size, minDist);
-            position.add(relativePos);
-            fprint.addToSpace(scene, spaceRoom.objects, position);
-            room.fingerprints.push(fprint);
+            if(Global.data.localFingerprint == undefined || Global.data.localFingerprint.rawEquals(newArr) == false) {
+                let position = getRandomSphereCoordinate(size, minDist);
+                position.add(relativePos);
+                fprint.addToSpace(scene, spaceRoom.objects, position);
+                room.fingerprints.push(fprint);
+            }
         }
         
     },
     removeFingerprint: function(room, fprint) {
         for(let i = 0; i < room.fingerprints.length; i++) {
-            if (fprint.rawFingerprint == room.fingerprints[i]) {
+            if (fprint.rawEquals(room.fingerprints[i])) {
                 room.fingerprints[i].cleanUpSpace(scene);
                 room.fingerprints.splice(i, 1);
                 i--;
@@ -916,6 +918,19 @@ let spaceRoom = {
             }
         }
         this.lastMinimumMarkersInCommon = minimumMarkersInCommon;
+    },
+    addNewConnectedFingerprint: function(room, newFingerprint) {
+        // Update the sphere
+        room.connectedSphereRadius = 30 + Math.pow(Global.data.connectedFingerprints.length * 50, 1/3);
+        // Its handy to keep the squared radius for distance calculations
+        room.connectedSphereRadius2 = room.connectedSphereRadius * room.connectedSphereRadius;
+        room.connectedSphere.geometry.radius = room.connectedSphereRadius;
+
+        // Add the new fingerprint
+        let minDist = 0.2;
+        let position = getRandomSphereCoordinate(room.connectedSphereRadius * 0.9, minDist);
+        newFingerprint.addToSpace(scene, room.objects, position);
+        room.fingerprints.push(newFingerprint);
     },
     pause: function(room) {
         // This happens when the pointer controls are unlocked
@@ -956,126 +971,6 @@ function getRandomSphereCoordinate(radius, distPercentage) {
     let y = r * sinPhi * sinTheta;
     let z = r * cosPhi;
     return new THREE.Vector3(x, y, z);    
-}
-
-let portalRoom = {
-    portals: [],
-    clickPortalText: null,
-    init: function () {
-        // SCENE
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x333333);
-        scene.fog = new THREE.FogExp2(0xfffefe, 0.03);
-
-        light = new THREE.PointLight(0xfffefe, 1.3, 50);
-        light.position.set(0.5, 1, 0.75);
-        light.castShadow = true;
-        light.shadow.camera.far = 4000;
-        // light.shadow.camera.fov = 30;
-        scene.add(light);
-
-        // spotLight = new THREE.SpotLight(0xffffff);
-        // spotLight.castShadow = true;
-        // spotLight.shadow.camera.far = 4000;
-        // spotLight.power = 2;
-        // spotLight.angle = 0.8;
-        // spotLight.penumbra = 0.9;
-        // scene.add(spotLight);
-        // scene.add(spotLight.target);
-
-        let geometry = new THREE.BoxGeometry(30, 20, 60);
-        let material = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.BackSide });
-        let roomCube = new THREE.Mesh(geometry, material);
-        roomCube.receiveShadow = true;
-        scene.add(roomCube);
-
-        // Place camera at origin
-        camera.position.copy(new THREE.Vector3(0, 0, 0));
-
-        // Create text to click portal
-        // let textMaterial = new THREE.MeshStandardMaterial( { color: 0xffffff, side: THREE.FrontSide  } );
-        // var textGeometry = new THREE.TextGeometry( 'Click to enter', {
-        //     font: font,
-        //     size: 1,
-        //     height: 2,
-        //     curveSegments: 12,
-        //     bevelEnabled: false,
-        // } );
-        // portalRoom.clickPortalText = new THREE.Mesh( textGeometry, textMaterial );
-        // portalRoom.clickPortalText.rotateY(Math.PI);
-        // scene.add(portalRoom.clickPortalText);
-
-        // Add portals that can be used to teleport to a new room
-        portalRoom.portals = []; // Remove any old ones lying around
-        let portalGeometry = new THREE.PlaneGeometry(14, 14, 1, 1);
-        let portalMaterial = new THREE.MeshBasicMaterial({ color: 0xccccff, side: THREE.FrontSide, map: textures.space });
-        let portal = new THREE.Mesh(portalGeometry, portalMaterial);
-        portal.castShadow = true;
-        portal.rotateY(Math.PI);
-        portal.position.set(0, 0, 28);
-        portal.userData.roomPointer = spaceRoom;
-        scene.add(portal);
-        portalRoom.portals.push(portal);
-
-        let portalMaterial2 = new THREE.MeshBasicMaterial({ color: 0xccccff, side: THREE.FrontSide, map: textures.nadia_shape });
-        let portal2 = new THREE.Mesh(portalGeometry, portalMaterial2);
-        portal2.castShadow = true;
-        // portal.rotateY(Math.PI);
-        portal2.position.set(0, 0, -28);
-        scene.add(portal2);
-        portalRoom.portals.push(portal2);
-    },
-    update: function (cameraDirection) {
-
-        // Move sphere and light to where the camera is
-        spotLight.position.copy(camera.position);
-        spotLight.target.position.copy(cameraDirection);
-        spotLight.target.position.add(camera.position);
-
-        // If we are teleported out of bounds, jump back to the origin
-        let outOfBounds = 1000;
-        if (camera.position.x > outOfBounds
-            || camera.position.x < -outOfBounds
-            || camera.position.y > outOfBounds
-            || camera.position.y < -outOfBounds
-            || camera.position.z > outOfBounds
-            || camera.position.x < -outOfBounds
-        ) {
-            camera.position.copy(new THREE.Vector3(0, 0, 0));
-        }
-
-        // As long as we're using a PointerLock the mouse should always be in the center
-        raycaster.setFromCamera(mouse, camera);
-
-        //3. compute intersections
-        var intersects = raycaster.intersectObjects(portalRoom.portals);
-
-        // This should be last in the update function as it might trigger the cleanup of this room
-        for (let i = 0; i < intersects.length; i++) {
-            displayOnHud("<span>Click to enter</span>");
-            if (mouseClicked) { // && intersects[i].object.userData.roomPointer != undefined) {
-                // Travel to this portal
-                travelToRoom(intersects[i].object.userData.roomPointer);
-            }
-            /*
-                An intersection has the following properties :
-                    - object : intersected object (THREE.Mesh)
-                    - distance : distance from camera to intersection (number)
-                    - face : intersected face (THREE.Face3)
-                    - faceIndex : intersected face index (number)
-                    - point : intersection point (THREE.Vector3)
-                    - uv : intersection point in the object's UV coordinates (THREE.Vector2)
-            */
-        }
-        if (intersects.length == 0) {
-            // hudElement.innerHTML = "";
-            hideHud();
-        }
-    },
-    cleanUp: function () {
-        portalRoom.portals = [];
-        hideHud();
-    }
 }
 
 function removeFingerprintFromRoom(fprint) {
@@ -1167,9 +1062,11 @@ function updateFiltering(minimumValuesInCommon) {
 
 function showFilter() {
     // filterContainer.style.display = '';
-    document.getElementById('filter-span').style.display = '';
-    filterOutput.style.display = '';
-    filterSlider.style.display = '';
+    if(Global.data.localFingerprint != undefined) {
+        document.getElementById('filter-span').style.display = '';
+        filterOutput.style.display = '';
+        filterSlider.style.display = '';
+    }
 }
 
 function hideFilter() {
@@ -1181,6 +1078,12 @@ function hideFilter() {
 
 function lookAt(pos) {
     camera.lookAt(pos);
+}
+
+function addNewConnectedFingerprint(newFingerprint) {
+    if(currentRoom == spaceRoom) {
+        currentRoom.addNewConnectedFingerprint(currentRoom, newFingerprint);
+    }
 }
 
 export { init_three, 
@@ -1205,4 +1108,5 @@ export { init_three,
     removeFingerprintFromRoom,
     hideFilter,
     lookAt,
+    addNewConnectedFingerprint,
  }; 

@@ -108,19 +108,20 @@ console.log("num headers: " + headers.length);
 
 // Get the fingerprint for the local user
 getFingerPrint(function(data) {
-  console.log("Current user:" + JSON.stringify(data));
+  // console.log("Current user:" + JSON.stringify(data));
   
   if(data.random != true) {
     let normalizedArr = [];
     for(let h of headers) {
       normalizedArr.push(Number(data.normalized[h]));
     }
-    console.log(normalizedArr);
-    console.log("random_print: " + data.random);
+    // console.log(normalizedArr);
+    // console.log("random_print: " + data.random);
     Global.data.localRawFingerprint = normalizedArr;
     Global.data.localFingerprint = new Fingerprint.Fingerprint(Global.data.localRawFingerprint, Fingerprint.FPrintTypes.local);
   } else {
     Global.data.localFingerprint = undefined;
+    Global.data.localRawFingerprint = undefined;
   }
   
   Global.data.loadedLocal = true;
@@ -128,8 +129,8 @@ getFingerPrint(function(data) {
 
   
 getConnectedFingerPrints(function(data) {
-  console.log("Connected users:");
-  console.log(data);
+  // console.log("Connected users:");
+  // console.log(data);
   Global.data.rawConnectedFingerprintsObjects = data.normalized;
   Global.data.rawConnectedFingerprints = [];
   // Convert into arrays of numbers
@@ -138,7 +139,9 @@ getConnectedFingerPrints(function(data) {
     for(let h of headers) {
       newArr.push(Number(datapoint[h]));
     }
-    Global.data.rawConnectedFingerprints.push(newArr);
+    if(Global.data.localFingerprint == undefined || Global.data.localFingerprint.rawEquals(newArr) == false) {
+      Global.data.rawConnectedFingerprints.push(newArr);
+    }
   }
   Global.data.connectedFingerprints = [];
   for(let rawFingerprint of Global.data.rawConnectedFingerprints) {
@@ -160,11 +163,15 @@ function refreshConnectedFingerPrints() {
       for(let h of headers) {
         newArr.push(Number(datapoint[h]));
       }
-      Global.data.rawConnectedFingerprints.push(newArr);
+      if(Global.data.localFingerprint == undefined || Global.data.localFingerprint.rawEquals(newArr) == false) {
+        Global.data.rawConnectedFingerprints.push(newArr);
+      }
+      
     }
     // Remove any fingerprint that has disconnected
     for(let i = 0; i < Global.data.connectedFingerprints.length; i++) {
       if(Global.data.connectedFingerprints[i].isInRawFingerprintList(Global.data.rawConnectedFingerprints) != true) {
+        console.log("A fingerprint disconnected!");
         let removed = Global.data.connectedFingerprints.splice(i, 1);
         Graphics.removeFingerprintFromRoom(removed[0]);
         i--;
@@ -174,13 +181,19 @@ function refreshConnectedFingerPrints() {
     for(let rawPrint of Global.data.rawConnectedFingerprints) {
       let printFound = false;
       for(let i = 0; i < Global.data.connectedFingerprints.length; i++) {
-        if(rawPrint == Global.data.connectedFingerprints[i]) {
+        let compPrint = Global.data.connectedFingerprints[i].rawFingerprint;
+        if(compPrint.length === rawPrint.length && compPrint.every((value, index) => value === rawPrint[index])) {
           printFound = true;
         }
       }
       if(!printFound) {
+        console.log("A new device has joined us!");
+
         // Create a new fingerprint
-        Global.data.connectedFingerprints.push(new Fingerprint.Fingerprint(rawPrint, Fingerprint.FPrintTypes.connected));
+        let newFingerprint = new Fingerprint.Fingerprint(rawPrint, Fingerprint.FPrintTypes.connected);
+        Global.data.connectedFingerprints.push(newFingerprint);
+        // Add to space
+        Graphics.addNewConnectedFingerprint(newFingerprint);
       }
     }
   });

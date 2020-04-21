@@ -10,6 +10,8 @@ var fmSynths = [];
 var fmSynthsUsed = [];
 var noiseSynths = [];
 var noiseSynthsUsed = [];
+var padSynths = [];
+var padSynthsUsed = [];
 
 function init_tone() {
     // Tone.js
@@ -45,13 +47,18 @@ function init_tone() {
     noiseGainMult.connect(noisegain.gain);
 
     // Create a number of synths and hand them out
-    for(let i = 0; i < 20; i++) {
+    for(let i = 0; i < 10; i++) {
         fmSynths.push(newSynth());
         fmSynthsUsed.push(false);
     }
-    for(let i = 0; i < 20; i++) {
+    for(let i = 0; i < 10; i++) {
         noiseSynths.push(newNoiseSynth());
         noiseSynthsUsed.push(false);
+    }
+
+    for(let i = 0; i < 5; i++) {
+        padSynths.push(createPadSynth(20, i));
+        padSynthsUsed.push(false);
     }
 
     //start/stop the transport
@@ -176,8 +183,7 @@ function newNoiseSynth() {
 
 // Smooth pad!
 // Its gain is very tilted to the left for some unknown reason
-function newPadSynth(freq) {
-    console.log(freq);
+function createPadSynth(freq, index) {
     let noise = new Tone.Noise("pink").start();
     let padenv = new Tone.ScaledEnvelope({
         "attack" : 5.0,
@@ -200,6 +206,7 @@ function newPadSynth(freq) {
         env: padenv,
         filter: filter,
         gain: padGain,
+        index: index,
         toggle: function(pad, time) {
             if(pad.playing) {
                 pad.env.triggerRelease(time);
@@ -218,10 +225,86 @@ function newPadSynth(freq) {
             }
         },
         dispose: function(syn) {
-            syn.env.dispose();
-            syn.filter.dispose();
-            syn.gain.dispose();
-            syn.noise.dispose();
+            // syn.env.dispose();
+            // syn.filter.dispose();
+            // syn.gain.dispose();
+            // syn.noise.dispose();
+            padSynthsUsed[syn.index] = false;
+        }
+    };
+}
+function newPadSynth(freq) {
+    for(let i = 0; i < fmSynths.length; i++) {
+        if(padSynthsUsed[i] == false) {
+            padSynthsUsed[i] = true;
+            return padSynths[i];
+        }
+    }
+    // Optionally create a new synth if none was free
+
+    return undefined;// Return undefined to signal that no synth was free
+}
+
+function newChebySynth() {
+    
+    let noise = new Tone.Noise("pink");
+    let noiseGain = new Tone.Gain(0.0).connect(reverb).toMaster();
+    let chebyenv = new Tone.ScaledEnvelope({
+        "attack" : 5.0,
+        "decay" : 0.01,
+        "sustain" : 1.0,
+        "release" : 5.0,
+    });
+    chebyenv.releaseCurve = "linear";
+    chebyenv.max = 0.5;
+    let chebylfofreq = new Tone.LFO(0.1, 0.05, 0.3).start();
+    let chebylfo = new Tone.LFO(0.1, 0.05, 0.1).start();
+    chebylfofreq.connect(chebylfo.frequency);
+    let gainMult = new Tone.Multiply();
+    // Multiply two signals together
+    chebyenv.connect(gainMult, 0, 0);
+    chebylfo.connect(gainMult, 0, 1);
+    // Use as gain control
+    gainMult.connect(noiseGain.gain);
+
+
+    let cheby = new Tone.Chebyshev(300).connect(noiseGain);
+    noise.connect(cheby);
+
+    noise.start();
+    return {
+        playing: true,
+        noise: noise,
+        env: chebyenv,
+        chebylfo: chebylfo,
+        chebylfofreq: chebylfofreq,
+        gainMult: gainMult,
+        noiseGain: noiseGain,
+        cheby: cheby,
+
+        trigger: function(syn) {
+            syn.env.triggerAttack();
+            syn.playing = true;
+        },
+        release: function(syn) {
+            if(syn.playing) {
+                syn.env.triggerRelease();
+                syn.playing = false;
+            }
+        },
+        dispose: function(syn) {
+            
+            syn.release(syn);
+            window.setTimeout(function() {
+                syn.env.dispose();
+                syn.noise.dispose();
+                syn.chebylfo.dispose();
+                syn.chebylfofreq.dispose();
+                syn.gainMult.dispose();
+                syn.noiseGain.dispose();
+                syn.cheby.dispose();
+            }, 5000)
+            // padSynthsUsed[syn.index] = false;
         }
     };
 }
@@ -239,7 +322,7 @@ function clearIdsFromTransport(ids) {
 //     console.log("Starts audio context");
 // });
 
-export { init_tone, newPadSynth, clearIdsFromTransport,
+export { init_tone, newPadSynth, newChebySynth, clearIdsFromTransport,
     requestFMSynth, returnFMSynth, requestNoiseSynth, returnNoiseSynth,
     longverb, noise, noiseEnv, globalSynthLPF, reverb, noiseUsrGain, chorus,
     getNumFreeFMSynths,
