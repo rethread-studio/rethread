@@ -29,8 +29,8 @@ let hasAdBlock, hasTouch, hasAudio, hasOSversion;
 function setup() {
 
     // update size
-    w = screen.width;
-    h = screen.height;
+    w = screen.availWidth;
+    h = screen.availHeight;
 
     // canvas sizes
     clip = 0.7; counterClip = (1 - clip) / 2;
@@ -86,17 +86,16 @@ $(document).ready(function () {
         $("#seeAnother").click(function () {
             // erase old one and show another
             push();
-            translate(cWidth / 2, cHeight / 2);
             noStroke();
             fill(0);
-            rect(cWidth / 2, -cHeight / 2, cWidth, cHeight);
-            translate(cWidth, 0);
+            rect(w/2, 0, w/2, cHeight);
+            translate(3*w/4, cHeight/2);
             another();
             pop();
         });
 
         $("#seeGallery").click(function () {
-            // first time getting a new fp
+            // first time getting a new fp to compare
             canvas.position(0, cHeight * counterClip);
             resizeCanvas(w, cHeight);
             push();
