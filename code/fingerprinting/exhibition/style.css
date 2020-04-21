@@ -335,7 +335,7 @@ button:hover {
 
 @media only screen and (max-width: 600px) {
     #consentInfo {
-        width: 90% !important;
+        width: auto !important;
     }
 }
 
