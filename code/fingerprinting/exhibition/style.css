@@ -129,8 +129,7 @@ h3, h4 {
         margin-bottom: 1em;
     }
     #myFp {
-        margin-top: 20em;
-        margin-bottom: 20em;
+        scroll-snap-align: start;
     }
 }
 
