@@ -363,7 +363,8 @@ function myFpButton() {
 
 function updateConnectedCounter() {
     getConnectedFingerPrints(function(data) {
-        document.getElementById('connected-counter').innerHTML = data.normalized.length;
+        console.log("number of visitors: " + data.normalized.length);
+        document.getElementById('connected-counter').innerHTML = "" + data.normalized.length;
     });
     window.setInterval(updateConnectedCounter(), 2000);
 }
