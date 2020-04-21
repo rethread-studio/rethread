@@ -12,9 +12,11 @@ getSession((session) => {
 });
 
 function fpDone(fingerprint) {
+    // save image as base64 for downloading later
+    var canvasURL = document.getElementById('p5canvas').toDataURL();
 }
 
-let canvas, canvasC;
+let canvas;
 let width = 0;
 let height = 0;
 
@@ -30,6 +32,7 @@ function setup() {
     height = windowHeight;
     canvas = createCanvas(width / 2, height / 2);
     $("canvas").hide();
+    $("canvas").attr("id","p5canvas");
     canvas.position(width / 4, height / 4);
 
     // createCanvas(800, 800);
@@ -131,7 +134,7 @@ $(document).ready(function () {
     $("#closeLegend").click(function () {
         // close legend
         $("#legend").fadeOut();
-    });
+    });    
 
 
 });
@@ -467,7 +470,6 @@ function constellation(fingerprint) {
         osVersion = osVersion.replace('x', '');
         osVersion = osVersion.replace('_', '');
         osVersion = osVersion.replace('.', '');
-        console.log(osVersion);
         push()
         rotate(radians(osName.charCodeAt(0)));
         asterisk(0.7 * c * cos(osVersion[0]), 0.7 * c * sin(osVersion[0]), c * 0.1);
@@ -669,10 +671,6 @@ function asterisk(x, y, r) {
 // function mouseClicked() {
 //     img = save('shape.png');
 // }
-
-// $("#download").click(function () {
-//     img = save('shape.png');
-// });
 
 
 // poem
