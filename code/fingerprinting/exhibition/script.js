@@ -361,6 +361,13 @@ function myFpButton() {
     displayPage('myFp');
 }
 
+function updateConnectedCounter() {
+    getConnectedFingerPrints(function(data) {
+        document.getElementById('connected-counter').innerHTML = data.normalized.length;
+    });
+    window.setInterval(updateConnectedCounter(), 2000);
+}
+
 $(document).ready(function () {
     if (window.location.hash) {
         goToPage()
@@ -416,4 +423,7 @@ $(document).ready(function () {
         // Go to 2D art
         window.location.href = "font/";
     });
+
+    updateConnectedCounter();
 });
+
