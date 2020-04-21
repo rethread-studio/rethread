@@ -21,9 +21,33 @@
     <style>
         body {
             background-color: black;
-            overflow: hidden;
+            overflow: hidden !important;
             text-align: center;
+            margin-top: 0!important;
         }
+
+        @media only screen and (max-width: 768px) {
+            w3-display-middle {
+                scroll-snap-align: none;
+                margin: auto !important;
+                position: absolute !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: 100% !important;
+            }
+            #galleryButton{
+                /* text-align: left; */
+                width: 30%;
+                margin-left: 5%;
+                font-size: 0.75em;
+            }
+            canvas{
+                right: 0!important;
+                margin-right: 0!important;
+            }
+        }
+
 
         canvas {
             padding-left: 0;
@@ -34,6 +58,10 @@
             z-index: -1;
             filter: blur(20px);
             transition: filter 2s ease;
+        }
+
+        #galleryButton{
+            top: 85%;
         }
 
         .compare {
@@ -52,7 +80,6 @@
         .legendImg {
             width: 2em;
         }
-
     </style>
     <!-- Script for dot menu -->
     <script>
@@ -82,11 +109,8 @@
 <body>
 
     <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
-        <div class="w3-display-middle" style="top: 95%; color:dimgray">
-            <p>by Nadia Campo Woytuk.</p>
-        </div>
 
-        <div id="info" class="w3-display-middle">
+        <div id="info" style="display: none" class="w3-display-middle">
             <h3 style="color: white">
                 <p>· .* . · ¨ .· constellations .¨ · *. ·:. ·</p>
             </h3>
@@ -98,11 +122,12 @@
 
             <p style="display: none" id="landscapeMode">This experiment works best in landscape mode 🤳🔄</p>
 
+            <p style="top: 95%; color:dimgray">by Nadia Campo Woytuk.</p>
 
 
         </div>
 
-        <div style="top: 80%; display: none;" id="galleryButton" class="w3-display-middle">
+        <div style="display: none;" id="galleryButton" class="w3-display-middle">
             <button class="linkButton" id="seeMeaning">What does it mean?</button>
             <div id="legend" style="display: none">
                 <div id="legendT"></div>

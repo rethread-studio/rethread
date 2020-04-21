@@ -124,12 +124,21 @@ h3, h4 {
         left: 0!important;
         transform: none;
     }
-    html, body {
+    /* html, body {
         margin-top: 1em;
         margin-bottom: 1em;
-    }
+    } */
     #myFp {
         scroll-snap-align: start;
+    }
+    #main {
+        scroll-snap-align: start;
+        margin: auto!important;
+        position: absolute!important;
+        top: 50%!important;
+        left: 50%!important;
+        transform: translate(-50%, -50%);
+        width: 100%!important;
     }
 }
 

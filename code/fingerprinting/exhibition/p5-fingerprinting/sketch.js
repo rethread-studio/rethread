@@ -17,10 +17,10 @@ function fpDone(fingerprint) {
 }
 
 let canvas;
-let width = 0;
-let height = 0;
+let w, h;
+let cWidth, cHeight;
 
-let c = 200;
+let c, clip, counterClip;
 let myFP;
 
 let fontColor, screenColor, languageColor, timeColor, adColor, trackingColor;
@@ -28,16 +28,22 @@ let hasAdBlock, hasTouch, hasAudio, hasOSversion;
 
 function setup() {
 
-    width = windowWidth;
-    height = windowHeight;
-    canvas = createCanvas(width / 2, height / 2);
-    $("canvas").hide();
-    $("canvas").attr("id","p5canvas");
-    canvas.position(width / 4, height / 4);
+    // update size
+    w = screen.width;
+    h = screen.height;
 
-    // createCanvas(800, 800);
+    // canvas sizes
+    clip = 0.7; counterClip = (1 - clip) / 2;
+    cWidth = w * clip;
+    cHeight = h * clip;
+    // create canvas, hide it at first, position
+    canvas = createCanvas(cWidth, cHeight);
+    $("canvas").hide();
+    $("canvas").attr("id", "p5canvas");
+    canvas.position(w * counterClip, h * counterClip);
+
     background(0);
-    c = width * 0.10;
+    c = w * 0.15;
 
 
     if (hasConsented) {
@@ -47,34 +53,56 @@ function setup() {
     else {
         // no consent
         // get and show random fp
-        console.log("no consent, use random")
         getRandomFingerPrint(noConsentCallback);
     }
 
 }
 
+$(window).on("orientationchange", function (event) {
+    var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
+    if (orientation === "portrait-secondary" || orientation === "portrait-primary") {
+        alert("Please rotate your screen to landscape mode")
+        $("#info").hide();
+    }
+    else {
+        setup();
+        $("#info").fadeIn();
+        // load constellation again
+    }
+});
+
 $(document).ready(function () {
+
+    var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
+    if (orientation === "portrait-secondary" || orientation === "portrait-primary") {
+        alert("Please rotate your screen to landscape mode")
+        $("#info").hide();
+    }
+    else {
+        $("#info").show();
+    }
+
     if (hasConsented) {
         $("#seeAnother").click(function () {
             // erase old one and show another
             push();
-            translate(width / 4, height / 4);
+            translate(cWidth / 2, cHeight / 2);
             noStroke();
             fill(0);
-            rect(width / 4, -height / 4, width / 2, height / 2);
-            translate(width / 2, 0);
+            rect(cWidth / 2, -cHeight / 2, cWidth, cHeight);
+            translate(cWidth, 0);
             another();
             pop();
         });
 
         $("#seeGallery").click(function () {
             // first time getting a new fp
-            canvas.position(0, height / 4);
-            resizeCanvas(width, height / 2);
+            canvas.position(0, cHeight * counterClip);
+            resizeCanvas(w, cHeight);
             push();
-            translate(width / 4, height / 4);
+            translate(w / 4, cHeight / 2);
             constellation(myFP);
-            translate(width / 2, 0);
+            translate(w / 2, 0);
             another();
             pop();
         });
@@ -87,7 +115,7 @@ $(document).ready(function () {
             push();
             noStroke();
             fill(0);
-            rect(-width / 4, -height / 4, width / 2, height / 2);
+            rect(-cWidth / 2, -cHeight / 2, cWidth, cHeight);
             another();
             pop();
             legend();
@@ -134,7 +162,7 @@ $(document).ready(function () {
     $("#closeLegend").click(function () {
         // close legend
         $("#legend").fadeOut();
-    });    
+    });
 
 
 });
@@ -154,7 +182,7 @@ function noConsentCallback(fingerprint) {
         getRandomFingerPrint(noConsentCallback);
     }
     else {
-        translate(width / 4, height / 4);
+        translate(cWidth / 2, cHeight / 2);
         constellation(fingerprint);
     }
 }
@@ -175,7 +203,7 @@ function fpCallback(fingerprint) {
 
     $("#seeArt").text("see my constellation");
 
-    translate(width / 4, height / 4);
+    translate(cWidth / 2, cHeight / 2);
     constellation(fingerprint);
 }
 
