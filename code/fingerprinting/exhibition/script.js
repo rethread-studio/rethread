@@ -49,15 +49,13 @@ function goToPage() {
     } else {
         $("#dotMenu").hide();
     }
+    if (currentPage == 'main') {
+        $("#emojis").show();
+    } else {
+        $("#emojis").hide();
+    }
     if (currentPage != 'welcome') {
         $("#bgCanvas").hide();
-        if (hasConsented) {
-            if (currentPage != 'myFp') {
-                $("#emojis").show();
-            } else {
-                $("#emojis").hide();
-            }
-        }
     } else {
         $("#bgCanvas").show();
         $("#emojis").hide();
