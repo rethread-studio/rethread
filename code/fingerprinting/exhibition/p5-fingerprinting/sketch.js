@@ -61,6 +61,19 @@ function setup() {
         getRandomFingerPrint(noConsentCallback);
     }
 
+    // poem
+    console.log(stars(15) + " more care");
+    console.log("less control " + stars(15));
+
+}
+
+function stars(l) {
+    let s = '';
+    let starList = ['.', ':', '¨', '·', '·', '.', '*', '.', ' ', ' ', '  ', '·', ' ', ' '];
+    for (let i = 0; i < l; i++) {
+        s += random(starList);
+    }
+    return s
 }
 
 $(window).on("orientationchange", function (event) {
@@ -707,9 +720,3 @@ function asterisk(x, y, r) {
 // function mouseClicked() {
 //     img = save('shape.png');
 // }
-
-
-// poem
-
-console.log("· .* . · ¨ .· less control .¨ · *. ·:. ·");
-console.log("· .* . · ¨ .· more care .¨ · *. ·:. ·");
