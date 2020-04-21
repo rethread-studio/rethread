@@ -199,7 +199,7 @@ function generateFPText(fp) {
         s += "</span> <span class = 'fpHighlight' id='fpBrowserVersion' onmouseover='fpHighlightHover(this);'>" + fp.original.browser_major + "</span>"
     s += " on a "
     if (fp.original.touchSupport[0] > 1)
-        s += "<span class = 'fpHighlight' id='fpTouch' onmouseover='fpHighlightHover(this);'>touch screen</span>"
+        s += "<span class = 'fpHighlight' id='fpTouch' onmouseover='fpHighlightHover(this);'>touch screen </span>"
 
     s += "display which is <span class = 'fpHighlight' id='fpScreenWidth' onmouseover='fpHighlightHover(this);'>" +
         fp.original.screen_width +
