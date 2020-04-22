@@ -26,6 +26,7 @@ var enlargeRadius = false;
 
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
+var acceleration = 0.0;
 var direction = new THREE.Vector3();
 
 var objects = [];
@@ -386,13 +387,18 @@ function animate(now) {
 
         
         // direction = cameraDirection.multiplyScalar(direction.z);
-        direction.copy(cameraDirection).multiplyScalar(Number(moveForward) - Number(moveBackward));
+        direction.copy(cameraDirection).multiplyScalar(Number(moveForward || moveBackward));
 
-        velocity.sub(direction.multiplyScalar(20.0 * delta));
+        acceleration *= 1.0 - delta;
+        acceleration += (Number(moveForward) - Number(moveBackward)) * delta * 30.0;
+        if(acceleration > 20.0) { acceleration = 20.0}
+        if(acceleration < -20.0) { acceleration = -20.0}
+
+        velocity.sub(direction.multiplyScalar(acceleration * delta));
 
         camera.position.x -= (velocity.x * delta);
         camera.position.y -= (velocity.y * delta);
-        camera.position.z -= (velocity.z * delta);   
+        camera.position.z -= (velocity.z * delta);
     }
     if(Global.state.mobile) {
         // We're using DeviceOrientationControls which need to be updated
@@ -762,7 +768,7 @@ let spaceRoom = {
                 let newFingerprintRadius = 20;
                 // Check that the fingerprints are in the "dark" space for archived devices
                 if(positionForward.distanceToSquared(new THREE.Vector3(0, 0, 0)) > 
-                    (room.connectedSphereRadius2 + Math.pow(newFingerprintRadius, 2) + 5)) {
+                    (room.connectedSphereRadius2 + Math.pow(newFingerprintRadius, 2) + newFingerprintRadius)) {
                     // add a variable number of new fingerprints
                     let numPrints = Math.random() * 4;
                     for(let i = 0; i<numPrints; i++) {

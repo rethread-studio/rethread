@@ -112,7 +112,6 @@ var messages = {
         "the server remembers this one quite clearly",
         "this device was once connected to the server",
         "a browser fingerprint from the past",
-        "great memories of this one",
         "not presently connected",
         "really liked this one",
         "all the server remembers of this one",
