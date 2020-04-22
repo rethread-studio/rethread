@@ -374,7 +374,6 @@ class Fingerprint {
             Synthesis.setSoundSignatureGain(0.01);
             Synthesis.releaseSoundSignature(0);
             Synthesis.globalSynthLPF.frequency.value = 500;
-            Synthesis.noiseEnv.triggerRelease();
 
             let sonarSynth = new Tone.FMSynth( {
                 harmonicity : 2 ,

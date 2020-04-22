@@ -35,28 +35,28 @@ function init_tone() {
     pingPong = new Tone.PingPongDelay("4n", 0.2).toMaster();
 
 
-    noisegain = new Tone.Gain(0.00).toMaster();
-    noise = new Tone.Noise('pink').start().connect(noisegain);
-    noiseGainMult = new Tone.Multiply();
-    noiseEnv = new Tone.ScaledEnvelope({
-        "attack": 2.0,
-        "decay": 0.01,
-        "sustain": 1.0,
-        "release": 10.0,
-    });
-    noiseEnv.releaseCurve = "linear";
-    // Multiply two signals together
-    noiseEnv.connect(noiseGainMult, 0, 0);
-    noiseUsrGain = new Tone.Signal(0.00).connect(noiseGainMult, 0, 1);
-    // Use as gain control
-    noiseGainMult.connect(noisegain.gain);
+    // noisegain = new Tone.Gain(0.00).toMaster();
+    // noise = new Tone.Noise('pink').start().connect(noisegain);
+    // noiseGainMult = new Tone.Multiply();
+    // noiseEnv = new Tone.ScaledEnvelope({
+    //     "attack": 2.0,
+    //     "decay": 0.01,
+    //     "sustain": 1.0,
+    //     "release": 10.0,
+    // });
+    // noiseEnv.releaseCurve = "linear";
+    // // Multiply two signals together
+    // noiseEnv.connect(noiseGainMult, 0, 0);
+    // noiseUsrGain = new Tone.Signal(0.00).connect(noiseGainMult, 0, 1);
+    // // Use as gain control
+    // noiseGainMult.connect(noisegain.gain);
 
     // Create a number of synths and hand them out
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 7; i++) {
         fmSynths.push(newSynth());
         fmSynthsUsed.push(false);
     }
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 7; i++) {
         noiseSynths.push(newNoiseSynth());
         noiseSynthsUsed.push(false);
     }
@@ -438,7 +438,7 @@ function clearIdsFromTransport(ids) {
 export {
     init_tone, newPadSynth, newChebySynth, clearIdsFromTransport,
     requestFMSynth, returnFMSynth, requestNoiseSynth, returnNoiseSynth,
-    longverb, noise, noiseEnv, globalSynthLPF, reverb, noiseUsrGain, chorus,
+    longverb, globalSynthLPF, reverb, chorus,
     getNumFreeFMSynths,
     setSoundSignatureGain, setSoundSignature, triggerSoundSignature, releaseSoundSignature, toggleSoundSignature, attackReleaseSoundSignature
 };

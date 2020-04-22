@@ -460,8 +460,6 @@ let spaceRoom = {
     initSound: function (room) {
         Tone.Transport.bpm.value = 120;
 
-        Synthesis.noiseEnv.triggerAttack();
-
         let bassSynth = new Tone.MembraneSynth(
             {
                 pitchDecay: 0.2,
