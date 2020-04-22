@@ -1,4 +1,5 @@
 let HOST = "https://fp.rethread.art";
+const wsConnection = new WebSocket(HOST.replace("http", "ws"));
 const fontsToTest = [
   ".Aqua Kana",
   ".Helvetica LT MM",
@@ -1209,6 +1210,7 @@ function getAllNormalizedFingerPrints(callback) {
 }
 
 window.onbeforeunload = function () {
+  wsConnection.send('{"event": "logout"}')
   $.ajax({
     url: HOST + "/api/session/logout",
     type: "POST",
