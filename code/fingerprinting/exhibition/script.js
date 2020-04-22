@@ -365,13 +365,13 @@ function myFpButton() {
     displayPage('myFp');
 }
 
-// function updateConnectedCounter() {
-//     getConnectedFingerPrints(function(data) {
-//         console.log("number of visitors: " + data.normalized.length);
-//         document.getElementById('connected-counter').innerHTML = "" + data.normalized.length;
-//     });
-//     window.setInterval(updateConnectedCounter(), 2000);
-// }
+const counter = initSegmentDisplay(document.getElementById('connected-counter'), 3);
+function updateConnectedCounter() {
+    getConnectedFingerPrints(function(data) {
+        counter.update(data.normalized.length);
+    });
+}
+window.setInterval(updateConnectedCounter, 2000);
 
 $(document).ready(function () {
     if (window.location.hash) {
