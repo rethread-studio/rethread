@@ -111,6 +111,7 @@
     getSession((session) => {
       if (session.connected && session.terms) {
         $("#delete").show()
+      } else {
         $("#download").text("Download a random browser fingerprint art");
       }
     })
