@@ -13,8 +13,6 @@ function fade(element, func) {
     }
 }
 
-const pages = ['welcome', 'howTo', 'consentInfo', 'myFp', 'main']
-
 function getCurrentPage() {
     if (window.location.hash) {
         return window.location.hash.substring(1);
@@ -24,6 +22,7 @@ function getCurrentPage() {
 }
 function goToPage() {
     const currentPage = getCurrentPage();
+    const pages = ['welcome', 'howTo', 'consentInfo', 'myFp', 'main']
     for (let page of pages) {
         if (page != currentPage) {
             $("#" + page).hide();
@@ -261,16 +260,13 @@ function myFpPage() {
     const canvas = document.getElementById("myEmoji");
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     getFingerPrint(async (fp) => {
         $("#fptext").text("");
         window.fp = fp;
-        setTimeout(() => {
-            const text = generateFPText(fp);
-            opts.html = text;
-            typewriter = setupTypewriter(opts);
-            typewriter.type();
-        }, 150);
+        const text = generateFPText(fp);
+        opts.html = text;
+        typewriter = setupTypewriter(opts);
+        typewriter.type();
     });
 }
 
@@ -373,10 +369,6 @@ function updateConnectedCounter() {
 window.setInterval(updateConnectedCounter, 2000);
 
 $(document).ready(function () {
-    if (window.location.hash) {
-        goToPage()
-    }
-
     // Enter
     $("#enter").click(enterButton);
 
