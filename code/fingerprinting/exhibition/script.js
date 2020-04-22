@@ -369,14 +369,6 @@ function myFpButton() {
     displayPage('myFp');
 }
 
-const counter = initSegmentDisplay(document.getElementById('connected-counter'), 3);
-function updateConnectedCounter() {
-    getConnectedFingerPrints(function(data) {
-        counter.update(data.normalized.length);
-    });
-}
-window.setInterval(updateConnectedCounter, 2000);
-
 $(document).ready(function () {
     // Enter
     $("#enter").click(enterButton);
