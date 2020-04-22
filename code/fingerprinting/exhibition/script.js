@@ -402,17 +402,17 @@ $(document).ready(function () {
 
     $("#3Dart").click(function () {
         // Go to 3D art
-        window.location.href = "https://rethread.art/code/fingerprinting/exhibition/fingerprint-3d/index.html";
+        window.location.href = "fingerprint-3d/";
     });
 
     $("#2Dart").click(function () {
         // Go to 2D art
-        window.location.href = "p5-fingerprinting/index.html";
+        window.location.href = "p5-fingerprinting/";
     });
 
     $("#Sky").click(function () {
         // Go to 2D art
-        window.location.href = "https://rethread.art/code/fingerprinting/server/backend/static/sky.html";
+        window.location.href = "fpsky/";
     });
 
     $("#Font").click(function () {
