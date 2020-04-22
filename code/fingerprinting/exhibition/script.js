@@ -281,11 +281,11 @@ let questions = [
     "where do all these fonts come from?",
     "why would a website save your browser fingerprint?",
     "is your browser in the artwork or is the artwork in your browser?",
-    "how many emojis do you see?",
     "when was the last time you used another browser?",
     "what is code? what is data? what is art?",
-    "diversity is good",
-    "your browser + our code = collective software art"
+    "Having a diverse ecosystem of software and customisations makes you more trackable, but makes the whole ecosystem more resilient",
+    "your browser + our code = collective software art",
+    "ah but I can hack my fingerprint, can't I?"
 ];
 
 function mainPage() {
