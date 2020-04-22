@@ -170,10 +170,15 @@ function fpHighlightHover(element) {
 function generateFPText(fp) {
     let s =
         "You are in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.timezone.split("/")[0].replace("_", " ") +
-        "</span>, specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
-        fp.original.timezone.split("/")[1].replace("_", " ") +
-        "</span>. Your favorite language for browsing the web is <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'>" +
+        fp.original.timezone.split("/")[0].replace("_", " ") + "</span>";
+        if (fp.original.timezone.split("/").length > 1) {
+            s += ", specifically, in <span class = 'fpHighlight' id='fpTimezone' onmouseover='fpHighlightHover(this);'>" +
+            fp.original.timezone.split("/")[1].replace("_", " ");
+            s += "</span>. ";
+        } else {
+            s += ". ";
+        }
+        "Your favorite language for browsing the web is <span class = 'fpHighlight' id='fpLanguage'  onmouseover='fpHighlightHover(this);'>" +
         ISO6391.getName(fp.original["languages-js"].split("-")[0]) +
         "</span>."
     const languages = new Set();
