@@ -31,8 +31,11 @@ function setup() {
         // update size
         // w = window.innerWidth;
         // h = window.innerHeight;
-        w = window.screen.width;
-        h = window.screen.height;
+
+        // w = window.screen.width;
+        w = $(document).width();
+        // h = window.screen.height;
+        h = $(document).height();
 
         // canvas sizes
         clip = 0.8;
