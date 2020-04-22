@@ -105,12 +105,14 @@
     getSession((session) => {
       if (session.connected && session.terms) {
         $("#delete").show()
+        $("#download").text("Download a random browser fingerprint art");
       }
     })
     $("#delete").click(() => {
       $("#delete").prop('disabled', true);
       deleteSession(() => {
         $("#delete").text('Your data has been deleted!')
+        $("#download").text("Download a random browser fingerprint art");
       })
     })
     $("#download").click(() => {
