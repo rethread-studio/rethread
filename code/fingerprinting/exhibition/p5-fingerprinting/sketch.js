@@ -62,8 +62,30 @@ function setup() {
     }
 
     // poem
-    console.log(stars(15) + " more care");
-    console.log("less control " + stars(15));
+    console.log(stars(10) + " a constellation is connection ");
+    console.log("                  "+stars(10));
+    console.log(" '...any point of a rhizome can be connected to any other, and must be' ");
+    console.log("    "+stars(10));
+    console.log("decentralized bodies (celestial and not) " + stars(15));
+    console.log(" ");
+    console.log(stars(20));
+    console.log(" we did not need your control");
+    console.log(" we did not need your surveillance");
+    console.log("                       "+stars(10));
+    console.log(" ");
+    console.log(stars(5) + " we ache to be entangled");
+    console.log(" we yearn to be intertwined, interwoven,");
+    console.log("threads         "+stars(10));
+    console.log("threads of one another" + stars(15));
+    console.log(" ");
+    console.log(stars(15) + " we cannot thrive without each 'other' ");
+    console.log(stars(15) + " human to non-human to human to stars ");
+    console.log("               "+stars(10));
+    console.log("might we be able to repair 'our world'" + stars(15));
+    console.log("     so that we can live in it as well as possible?");
+    console.log("                                               "+stars(10));
+    console.log("                                     "+stars(10));
+
 
 }
 
@@ -263,7 +285,7 @@ function legend() {
 function constellation(fingerprint) {
 
     let fp = fingerprint.original;
-    console.log(fp);
+    // console.log(fp);
 
     // host: "fp.durieux.me"
     // dnt: "not available"
