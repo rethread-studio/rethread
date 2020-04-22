@@ -348,8 +348,9 @@ button:hover {
 }
 
 @media only screen and (max-width: 812px) {
-    #consentInfo {
-        width: 80%;
+    #consentInfo, .w3-display-middle {
+        width: 100%;
+        padding: 0 10%;
     }
 }
 
