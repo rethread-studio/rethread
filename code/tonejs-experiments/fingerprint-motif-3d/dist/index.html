@@ -2,11 +2,11 @@
 <html>
 	<head>
 		<meta charset=utf-8>
-		<title>browser fingerprint soundscape WIP</title>
+		<title>Traces of Online Presence</title>
 		<script src="https://kit.fontawesome.com/7ff2c0391b.js" crossorigin="anonymous"></script>
 		<style>
-			body { margin: 0; overflow: hidden; }
-			canvas { width: 100%; height: 100vh; margin: 0; }
+			body { margin: 0; overflow: hidden; width: 100%; height: 100%; }
+			canvas { position: absolute; width: 100%; height: 100%; margin: 0; padding:0; z-index: -1; }
 			#blocker2 {
 				background-color: rgba(25, 25, 112, 0.95);
 				position: absolute;
@@ -334,8 +334,8 @@ button:hover {
 			integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
 			crossorigin="anonymous"
 			></script>
-		<script src="https://rethread.art/code/fingerprinting/exhibition/script/lib.min.js"></script>
-		<script src="https://rethread.art/code/fingerprinting/exhibition/script/fa.js"></script>
+			<script src="../script/lib.min.js"></script>
+			<script src="../script/fa.js"></script>
 		<div id="data"></div>
 		<div id="hud-container">
 			<div id="hud" class="hud-overlay" style="display: none;">
@@ -374,17 +374,17 @@ button:hover {
 			<div id="pre-instruction1" class="pre-instructions-overlay">
 				<div class="pre-instruction-inner">
 					<span style="font-size:36px; line-height: 2em; letter-spacing: 0.6em;">Welcome
-						to the<br/> Spatial Sonic Fingerprints</span>
+						to the<br/> Traces of Online Presence</span>
 					<br/><br/>
 					<button id="pre-instructions-button-1" class="w3-large w3-center">Next</button>
 				</div>
 			</div>
 			<div id="pre-instruction2" class="pre-instructions-overlay" style="display: none;">
 				<div class="pre-instruction-inner">
-					Explore differences and similarities between browser fingerprints through sound. A device is represented by a tetrahedron
+					Explore browser fingerprints, their differences and similarities, through sound. A fingerprint is represented by a tetrahedron
 					floating in space. 
 					<br/><br/>
-					By moving closer you can zoom in on the sound of that particular device. You can listen to a
+					By moving closer you can zoom in on the sound of a particular device. You can listen to a
 					group of devices by putting yourself at an equal distance from all of them.
 					<br/><br/>
 					<button id="pre-instructions-button-2" class="w3-large w3-center">Next</button>
@@ -395,6 +395,8 @@ button:hover {
 					You will start close to the fingerprints of devices that are currently connected to the exhibition, but you are encouraged
 					to move out of this bubble and explore the sounds of devices that have connected to the server in the past.
 					<br/><br/>
+					You can enter and exit single fingerprints by flying into them.
+					<br/><br/>
 					<button id="pre-instructions-button-3" class="w3-large w3-center">Next</button>
 				</div>
 			</div>
@@ -402,7 +404,7 @@ button:hover {
 				<div class="pre-instruction-inner">
 					Use the filter slider to see how unique your fingerprint is among the ones surrounding you.
 					<br/><br/>
-					This is a sonic experience, you'll be glad you put on a pair of headphones.
+					This is a sonic experience, headphones are encouraged.
 					<br/><br/><span style="font-size:36px;"><i class="fa fa-volume-up" aria-hidden="true"></i></span>
 					<br/><br/>
 					<button id="pre-instructions-button-final" class="w3-large w3-center">Let me in!</button>

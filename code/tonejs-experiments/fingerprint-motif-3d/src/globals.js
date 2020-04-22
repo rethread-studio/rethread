@@ -40,7 +40,7 @@ var data = {
 
 var html = {
     inactiveInstructions: `
-    <span style="font-size:36px; line-height: 2.5em; letter-spacing: 1em;">SPATIAL SONIC FINGERPRINTS</span>
+    <span style="font-size:36px; line-height: 2.5em; letter-spacing: 1em;">TRACES OF ONLINE PRESENCE</span>
     <br/><br/><br/><br/><br/>
     <span style="font-size:24px">Click to activate</span>
     <br /><br />
@@ -54,7 +54,8 @@ var html = {
     Return here: ESC <i class="fa fa-keyboard-o" aria-hidden="true"></i><br/>
     <br/><span style="font-size:36px;"><i class="fa fa-volume-up" aria-hidden="true"></i></span>
     <br/>
-    <span style="font-size:24px; line-height: 2.0em;">Explore browser fingerprints as sonic objects in space. In your presence each device will reveal its sonic identity.</span>`,
+    <span style="font-size:24px; line-height: 2.0em;">Explore browser fingerprints as sonic objects in space. In your presence each device will reveal its sonic identity.</span>
+    `,
 }
 
 var messages = {
