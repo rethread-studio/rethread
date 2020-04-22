@@ -293,6 +293,7 @@ function mainPage() {
     $("#myFp").fadeOut();
     $("#consentInfo").fadeOut();
     $("#howToDot").fadeOut();
+    getFingerPrint(() =>{});
 
     // update questions here
     var randomQuestion = questions[Math.floor(Math.random() * questions.length)];
