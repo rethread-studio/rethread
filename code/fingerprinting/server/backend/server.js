@@ -287,7 +287,7 @@ app.get("/api/fp/counters", async function (req, res) {
   res.json(output);
 });
 
-const connectedUser = new Set();
+const connectedUser = {};
 
 app.get("/api/fp/normalized", async function (req, res) {
   const normalized = await n_fp_c.find().toArray();
@@ -295,8 +295,14 @@ app.get("/api/fp/normalized", async function (req, res) {
 });
 
 app.get("/api/fp/connected", async function (req, res) {
-  console.log(connectedUser);
-  var objIds = Array.from(connectedUser).map(function (id) {
+  const expirationDate = new Date();
+  expirationDate.setSeconds(expirationDate.getSeconds() - 30);
+  for (let fpId in connectedUser) {
+    if (connectedUser[fpId] < expirationDate) {
+      delete connectedUser[fpId]
+    }
+  }
+  var objIds = Array.from(Object.keys(connectedUser)).map(function (id) {
     return ObjectId(id);
   });
   const originals = await o_fp_c.find({ _id: { $in: objIds } }).toArray();
@@ -342,7 +348,7 @@ app.get("/api/fp/count", async function (req, res) {
   res.json(await o_fp_c.countDocuments({}));
 });
 app.post("/api/session/delete", async function (req, res) {
-  connectedUser.delete(req.session.fpId);
+  delete connectedUser[req.session.fpId];
   if (req.session.fp && !req.session.random) {
     await o_fp_c.deleteOne({ _id: ObjectId(req.session.fpId) });
     await n_fp_c.deleteOne({ _id: ObjectId(req.session.fpId) });
@@ -351,7 +357,7 @@ app.post("/api/session/delete", async function (req, res) {
   res.send("ok");
 });
 app.post("/api/session/logout", async function (req, res) {
-  connectedUser.delete(req.session.fpId);
+  delete connectedUser[req.session.fpId];
   res.send("ok");
 });
 app.get("/api/session/", async function (req, res) {
@@ -375,7 +381,7 @@ app.get("/api/session/accept", async function (req, res) {
 app.post("/api/session/accept", async function (req, res) {
   req.session.accept = true;
   if (req.session.fp) {
-    connectedUser.delete(req.session.fpId);
+    delete connectedUser[req.session.fpId];
     req.session.fp = null;
   }
   res.send("ok");
@@ -384,19 +390,19 @@ app
   .route("/api/fp/")
   .get(async function (req, res) {
     if (req.session.fp) {
-      connectedUser.add(req.session.fpId);
+      connectedUser[req.session.fpId] = new Date();
       return res.json(req.session.fp);
     } else {
       req.session.fp = await getRandomFingerPrint();
       req.session.fp.random = true;
       req.session.fpId = req.session.fp.original._id.toString();
-      connectedUser.add(req.session.fpId);
+      connectedUser[req.session.fpId] = new Date();
       return res.json(req.session.fp);
     }
   })
   .put(async function (req, res) {
     if (req.session.fp) {
-      connectedUser.add(req.session.fpId);
+      connectedUser[req.session.fpId] = new Date();
       return res.json(req.session.fp);
     }
     function keyValueFP(fp, key) {
@@ -497,7 +503,7 @@ app
       req.session.fp = output;
       req.session.fp.random = false;
       req.session.fpId = responseQuery.insertedId.toString();
-      connectedUser.add(req.session.fpId);
+      connectedUser[req.session.fpId] = new Date();
       res.json(output);
     } catch (error) {
       res.send(error);
@@ -544,7 +550,7 @@ server.on("upgrade", function (request, socket, head) {
 const userEmojis = {};
 wss.on("connection", function (ws, request) {
   if (request.session.fpId) {
-    connectedUser.add(request.session.fpId);
+    connectedUser[request.session.fpId] = new Date();
   }
   let pingInterval = null;
   function ping() {
@@ -563,6 +569,9 @@ wss.on("connection", function (ws, request) {
     if (!request.session.wsId) {
       request.session.wsId = Math.round(Math.random() * 100000);
     }
+    if (request.session.fpId) {
+      connectedUser[request.session.fpId] = new Date();
+    }
     ping();
     try {
       message = JSON.parse(message);
@@ -580,6 +589,7 @@ wss.on("connection", function (ws, request) {
   ws.on("close", function () {
     if (request.session.fpId) {
       connectedUser.delete(request.session.fpId);
+      delete connectedUser[request.session.fpId];
     }
     wss.broadcast(
       JSON.stringify({ event: "close", from: request.session.wsId }),
