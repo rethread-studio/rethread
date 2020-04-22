@@ -4,6 +4,7 @@
 // I use p5.js to generate the visuals!
 // Bye!
 
+
 let hasConsented = false;
 // getFingerPrint(fpDone);
 
@@ -61,6 +62,13 @@ function setup() {
         }
     });
 
+
+    console.log("hi! i am the software in charge of this art")
+    console.log("i am a chaotic jumble of javascript, mainly p5.js")
+    console.log("like the human that created me, i have many imperfections")
+    console.log("i am so fragile DO NOT BREATHE ON ME i will crumble")
+    console.log("here's a poem for you:");
+    console.log("   ")
     // poem
     console.log(stars(10) + " a constellation is connection ");
     console.log("                  " + stars(10));
@@ -127,6 +135,7 @@ $(document).ready(function () {
 
         if (hasConsented) {
             $("#seeAnother").click(function () {
+                $("#seeAnother").hide();
                 // erase old one and show another
                 push();
                 noStroke();
