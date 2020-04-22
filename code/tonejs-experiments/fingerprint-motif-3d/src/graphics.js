@@ -858,7 +858,7 @@ let spaceRoom = {
             }
             inactiveHtml = `<span style="font-size:36px">Loading data ` + dots + `</span><br /><br />`;
             if(Global.data.loadedData) {
-                inactiveHtml += "Currently connected device fingerprints loaded<br/>";
+                inactiveHtml += "Archive of device fingerprints loaded<br/>";
             }
             if(Global.data.loadedLocal && Global.data.localFingerprint != undefined) {
                 inactiveHtml += "Fingerprint of local device loaded<br/>";

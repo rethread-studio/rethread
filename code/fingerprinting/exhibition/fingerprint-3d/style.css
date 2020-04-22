@@ -1,0 +1,380 @@
+@font-face {
+    font-family: 'Ortica';
+    font-weight: bold;
+    src: url('../fonts/ortica/Ortica-Bold.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../fonts/ortica/Ortica-Bold.woff') format('woff'), /* Pretty Modern Browsers */
+    url('../fonts/ortica/Ortica-Bold.otf') format('truetype');
+    /* Safari, Android, iOS */
+}
+
+@font-face {
+    font-family: 'Ortica';
+    font-style: normal;
+    src: url('../fonts/ortica/Ortica-Light.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../fonts/ortica/Ortica-Light.woff') format('woff'), /* Pretty Modern Browsers */
+    url('../fonts/ortica/Ortica-Light.otf') format('truetype');
+    /* Safari, Android, iOS */
+}
+
+/* roboto-mono-regular - latin */
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/roboto-mono/roboto-mono-v7-latin-regular.eot');
+    /* IE9 Compat Modes */
+    src: local('Roboto Mono'), local('RobotoMono-Regular'), url('../fonts/roboto-mono/roboto-mono-v7-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-regular.woff') format('woff'), /* Modern Browsers */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-regular.svg#RobotoMono') format('svg');
+    /* Legacy iOS */
+}
+
+/* roboto-mono-italic - latin */
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: italic;
+    font-weight: 400;
+    src: url('../fonts/roboto-mono/roboto-mono-v7-latin-italic.eot');
+    /* IE9 Compat Modes */
+    src: local('Roboto Mono Italic'), local('RobotoMono-Italic'), url('../fonts/roboto-mono/roboto-mono-v7-latin-italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-italic.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-italic.woff') format('woff'), /* Modern Browsers */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-italic.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-italic.svg#RobotoMono') format('svg');
+    /* Legacy iOS */
+}
+
+/* roboto-mono-700 - latin */
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/roboto-mono/roboto-mono-v7-latin-700.eot');
+    /* IE9 Compat Modes */
+    src: local('Roboto Mono Bold'), local('RobotoMono-Bold'), url('../fonts/roboto-mono/roboto-mono-v7-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-700.woff') format('woff'), /* Modern Browsers */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
+    url('../fonts/roboto-mono/roboto-mono-v7-latin-700.svg#RobotoMono') format('svg');
+    /* Legacy iOS */
+}
+
+body { margin: 0; overflow: hidden; width: 100%; height: 100%; font-family: 'Roboto Mono', monospace; }
+			canvas { position: absolute; width: 100%; height: 100%; margin: 0; padding:0; z-index: -1; }
+			#blocker2 {
+				background-color: rgba(25, 25, 112, 0.95);
+				position: absolute;
+				height: 100%;
+				margin: 0;
+				color: #ffffff;
+				text-align: center;
+				font-size: 14px;
+				line-height: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				width: 100%;
+				text-align: center;
+				align-items: center;
+			}
+			#blocker {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0,0,0,0.5);
+				margin: 0;
+				color: #ffffff;
+				text-align: center;
+				font-size: 14px;
+				line-height: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				width: 100%;
+				text-align: center;
+				min-height: 200px;
+			}
+			#hud-container {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				background-color: rgba(0,0,0,0.0);
+				display: none;
+				margin: 0;
+				align-items: center;
+				justify-content: center;
+				flex-direction: column;
+				text-align: center;
+			}
+			.hud-overlay {
+				width: 100%;
+				height: 70%;
+
+				display: -webkit-box;
+				display: -moz-box;
+				display: box;
+
+				-webkit-box-orient: horizontal;
+				-moz-box-orient: horizontal;
+				box-orient: horizontal;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+
+				-webkit-box-align: center;
+				-moz-box-align: center;
+				box-align: center;
+
+				color: #ffffff;
+				text-align: center;
+				font-size: 14px;
+				line-height: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+
+			}
+
+			.instructions-overlay {
+				height: 70%;
+
+				display: -webkit-box;
+				display: -moz-box;
+				display: box;
+
+				-webkit-box-orient: horizontal;
+				-moz-box-orient: horizontal;
+				box-orient: horizontal;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+
+				-webkit-box-align: center;
+				-moz-box-align: center;
+				box-align: center;
+
+				color: #ffffff;
+				text-align: center;
+				font-size: 14px;
+				line-height: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+
+				cursor: pointer;
+				max-width: 70vw;
+			}
+
+			.pre-instructions-overlay {
+				
+				max-width: 60%;
+
+				display: -webkit-box;
+				display: -moz-box;
+				display: box;
+
+				-webkit-box-orient: horizontal;
+				-moz-box-orient: horizontal;
+				box-orient: horizontal;
+
+				-webkit-box-pack: center;
+				-moz-box-pack: center;
+				box-pack: center;
+
+				-webkit-box-align: center;
+				-moz-box-align: center;
+				box-align: center;
+
+				color: #ffffff;
+				text-align: center;
+				font-size: 1.5em;
+				line-height: 2em;
+				font-weight: 300;
+				letter-spacing: 0.3em;
+
+				cursor: pointer;				
+			}
+			@media only screen and (max-width: 968px) {
+				.pre-instructions-overlay {
+					max-width: 100%;
+				}
+			}
+
+			.pre-instruction-inner {
+				margin: 5em;
+				/* overflow-y: scroll; */
+			}
+
+			#hud {
+				height: 50%;
+				font-size: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+				opacity: 0;
+   				transition: opacity .25s ease-in-out;
+			}
+
+			#hud-message {
+				top: 50vh;
+				height: 40%;
+				max-width: 60%;
+				font-size: 24px;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+				opacity: 0;
+   				transition: opacity 1s ease-in-out;
+				font-size: 1.3em;
+				line-height: 2em;
+				font-weight: 300;
+				letter-spacing: 0.3em;
+			}
+
+			#hud-footer {
+				width: 100%;
+				top: 90vh;
+				height: 9vh;
+				text-align: right;
+				font-size: 1em;
+				font-weight: 200;
+				letter-spacing: 0.5em;
+				opacity: 0;
+   				transition: opacity .25s ease-in-out;
+			}
+
+			#filter-container {
+				height: 28%;
+				padding: 5vh;
+				padding-top: 5vh;
+				margin: 0;
+			}
+
+			.slider {
+				-webkit-appearance: none;
+				width: 100%;
+				max-width: 50vh;
+				height: 15px;
+				border-radius: 5px;  
+				background: #ffffff;
+				outline: none;
+				opacity: 0.7;
+				-webkit-transition: .2s;
+				transition: opacity .2s;
+			}
+
+			.slider::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 25px;
+				height: 25px;
+				border-radius: 50%; 
+				background: #e8ffc7;
+				cursor: pointer;
+			}
+
+			.slider::-moz-range-thumb {
+				width: 25px;
+				height: 25px;
+				border-radius: 50%;
+				background: #e8ffc7;
+				cursor: pointer;
+			}
+
+/* /// Navigation /// */
+
+/* Dropdown Button */
+
+.dropbtn {
+    background-color: thistle;
+    color: white;
+    width: 1em;
+    height: 1em;
+    position: fixed;
+    top: 2em;
+    left: 2em;
+    font-size: 1em;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    outline: none;
+    transition: 0.3s;
+    border-style: solid;
+    border-color: thistle;
+}
+
+/* Dropdown button on hover & focus */
+
+.dropbtn:hover, .dropbtn:focus {
+    background-color: transparent;
+    border-style: dashed;
+    padding: 1em;
+}
+
+/* The container <div> - needed to position the dropdown content */
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+
+.dropdown-content {
+    display: none;
+    /* position: absolute; */
+    position: fixed;
+    top: 3em;
+    left: 3em;
+    background-color: white;
+    min-width: 160px;
+    /* box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); */
+    z-index: 1;
+}
+
+/* Links inside the dropdown */
+
+.dropdown-content a {
+    color: black;
+    font-size: 0.7em;
+    padding: 1em;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+
+.dropdown-content a:hover {
+    background-color: cornsilk;
+}
+
+/* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+
+.show {
+    display: block;
+}
+
+button {
+    border: none;
+    padding: 1em;
+    border-radius: 2em;
+    color: midnightblue;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+    transition: 0.3s;
+}
+
+button:hover {
+    padding-right: 2em;
+    padding-left: 2em;
+}
