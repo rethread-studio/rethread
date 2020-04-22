@@ -348,8 +348,9 @@ button:hover {
 }
 
 @media only screen and (max-width: 812px) {
-    #consentInfo {
-        width: 80%;
+    #consentInfo, .w3-display-middle {
+        width: 100%;
+        padding: 0 10%;
     }
 }
 
@@ -373,7 +374,6 @@ button:hover {
     z-index: -1;
 }
 
-
 /* credit https://codepen.io/noleli/pen/abbeWRL */
 .digit {
     /* options */
@@ -384,8 +384,8 @@ button:hover {
     --segment-thickness: .11;
     --half-segment-minor-dimention: calc(var(--height) * var(--segment-thickness) / 2);
     --segment-spacing: 5%;
-    --on-color: rgba(255, 255, 255);
-    --off-color: rgba(0, 0, 0, .2);
+    --on-color: rgb(255, 255, 255);
+    --off-color: rgba(255, 255, 255, 0.2);
     
     height: var(--height);
     width: calc(var(--height) * var(--aspectRatio));

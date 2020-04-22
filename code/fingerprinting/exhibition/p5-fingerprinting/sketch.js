@@ -4,12 +4,9 @@
 // I use p5.js to generate the visuals!
 // Bye!
 
+
 let hasConsented = false;
 // getFingerPrint(fpDone);
-
-getSession((session) => {
-    hasConsented = session.terms;
-});
 
 function fpDone(fingerprint) {
     // save image as base64 for downloading later
@@ -28,63 +25,77 @@ let hasAdBlock, hasTouch, hasAudio, hasOSversion;
 
 function setup() {
 
-    // update size
-    // w = window.innerWidth;
-    // h = window.innerHeight;
-    w = window.screen.width;
-    h = window.screen.height;
+    getSession((session) => {
+        hasConsented = session.terms;
 
-    // canvas sizes
-    clip = 0.8;
-    if (w < 812) clip = 0.9;
+        // update size
+        // w = window.innerWidth;
+        // h = window.innerHeight;
 
-    counterClip = (1 - clip) / 2;
-    cWidth = w * clip;
-    cHeight = h * clip;
-    // create canvas, hide it at first, position
-    canvas = createCanvas(cWidth, cHeight);
-    $("canvas").hide();
-    $("canvas").attr("id", "p5canvas");
-    canvas.position(w * counterClip, h * counterClip);
+        // w = window.screen.width;
+        w = $(document).width();
+        // h = window.screen.height;
+        h = $(document).height();
 
-    background(0);
-    c = w * 0.15;
+        // canvas sizes
+        clip = 0.8;
+        if (w < 812) clip = 0.9;
+
+        counterClip = (1 - clip) / 2;
+        cWidth = w * clip;
+        cHeight = h * clip;
+        // create canvas, hide it at first, position
+        canvas = createCanvas(cWidth, cHeight);
+        $("canvas").hide();
+        $("canvas").attr("id", "p5canvas");
+        canvas.position(w * counterClip, h * counterClip);
+
+        background(0);
+        c = w * 0.15;
 
 
-    if (hasConsented) {
-        // get my fingerprint
-        getFingerPrint(fpCallback);
-    }
-    else {
-        // no consent
-        // get and show random fp
-        getRandomFingerPrint(noConsentCallback);
-    }
+        if (hasConsented) {
+            // get my fingerprint
+            getFingerPrint(fpCallback);
+        }
+        else {
+            // no consent
+            // get and show random fp
+            getRandomFingerPrint(noConsentCallback);
+        }
+    });
 
+
+    console.log("hi! i am the software in charge of this art")
+    console.log("i am a chaotic jumble of javascript, mainly p5.js")
+    console.log("like the human that created me, i have many imperfections")
+    console.log("i am so fragile DO NOT BREATHE ON ME i will crumble")
+    console.log("here's a poem for you:");
+    console.log("   ")
     // poem
     console.log(stars(10) + " a constellation is connection ");
-    console.log("                  "+stars(10));
+    console.log("                  " + stars(10));
     console.log(" '...any point of a rhizome can be connected to any other, and must be' ");
-    console.log("    "+stars(10));
+    console.log("    " + stars(10));
     console.log("decentralized bodies (celestial and not) " + stars(15));
     console.log(" ");
     console.log(stars(20));
     console.log(" we did not need your control");
     console.log(" we did not need your surveillance");
-    console.log("                       "+stars(10));
+    console.log("                       " + stars(10));
     console.log(" ");
     console.log(stars(5) + " we ache to be entangled");
     console.log(" we yearn to be intertwined, interwoven,");
-    console.log("threads         "+stars(10));
+    console.log("threads         " + stars(10));
     console.log("threads of one another" + stars(15));
     console.log(" ");
     console.log(stars(15) + " we cannot thrive without each 'other' ");
     console.log(stars(15) + " human to non-human to human to stars ");
-    console.log("               "+stars(10));
+    console.log("               " + stars(10));
     console.log("might we be able to repair 'our world'" + stars(15));
     console.log("     so that we can live in it as well as possible?");
-    console.log("                                               "+stars(10));
-    console.log("                                     "+stars(10));
+    console.log("                                               " + stars(10));
+    console.log("                                     " + stars(10));
 
 
 }
@@ -127,12 +138,13 @@ $(document).ready(function () {
 
         if (hasConsented) {
             $("#seeAnother").click(function () {
+                $("#seeAnother").hide();
                 // erase old one and show another
                 push();
                 noStroke();
                 fill(0);
-                rect(w / 2, 0, w / 2, cHeight);
-                translate(3 * w / 4, cHeight / 2);
+                rect(-cWidth/4, -cHeight/2, w / 2, cHeight);
+                // translate(3 * w / 4, cHeight / 2);
                 another();
                 pop();
             });
@@ -144,9 +156,12 @@ $(document).ready(function () {
                 push();
                 translate(w / 4, cHeight / 2);
                 constellation(myFP);
-                translate(w / 2, 0);
-                another();
+                // translate(w / 2, 0);
+                // translate(3 * cWidth / 4, cHeight * counterClip + cHeight / 2);
+                // translate(3 * w / 4, cHeight / 2);
                 pop();
+                translate(3 * w / 4, cHeight / 2);
+                another();
                 $("#galleryButton").attr("id", "middleMenu");
             });
         }
