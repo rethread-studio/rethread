@@ -411,7 +411,7 @@ app
     }
     function join(obj) {
       if (obj == null) {
-        return ""
+        return "";
       }
       if (Array.isArray(obj)) {
         return obj.join(",");
@@ -442,10 +442,9 @@ app
         screen_depth: keyValueFP(fp, "colorDepth"),
         pixelRatio: keyValueFP(fp, "pixelRatio"),
         hardwareConcurrency: keyValueFP(fp, "hardwareConcurrency"),
-        availableScreenResolution: join(keyValueFP(
-          fp,
-          "availableScreenResolution"
-        )),
+        availableScreenResolution: join(
+          keyValueFP(fp, "availableScreenResolution")
+        ),
         indexedDb: keyValueFP(fp, "indexedDb"),
         addBehavior: keyValueFP(fp, "addBehavior"),
         openDatabase: keyValueFP(fp, "openDatabase"),
@@ -545,7 +544,7 @@ server.on("upgrade", function (request, socket, head) {
 const userEmojis = {};
 wss.on("connection", function (ws, request) {
   if (request.session.fpId) {
-    connectedUser.add(req.session.fpId);
+    connectedUser.add(request.session.fpId);
   }
   let pingInterval = null;
   function ping() {
@@ -565,18 +564,22 @@ wss.on("connection", function (ws, request) {
       request.session.wsId = Math.round(Math.random() * 100000);
     }
     ping();
-    message = JSON.parse(message);
-    if (message.image) {
-      ws.send(JSON.stringify({ userEmojis }));
-      userEmojis[request.session.wsId] = message.image;
+    try {
+      message = JSON.parse(message);
+      if (message.image) {
+        ws.send(JSON.stringify({ userEmojis }));
+        userEmojis[request.session.wsId] = message.image;
+      }
+      message.from = request.session.wsId;
+      wss.broadcast(JSON.stringify(message), ws);
+    } catch (e) {
+      console.error(e, message);
     }
-    message.from = request.session.wsId;
-    wss.broadcast(JSON.stringify(message), ws);
   });
 
   ws.on("close", function () {
     if (request.session.fpId) {
-      connectedUser.delete(req.session.fpId);
+      connectedUser.delete(request.session.fpId);
     }
     wss.broadcast(
       JSON.stringify({ event: "close", from: request.session.wsId }),
