@@ -114,6 +114,8 @@
       })
     })
     $("#download").click(() => {
+        $("#download").prop('disabled', true);
+        $("#download").text('Generating the files...');
         const zip = new JSZip();
         getFingerPrint(fp => {
             zip.file("fingerprint.json", JSON.stringify(fp));
@@ -123,6 +125,9 @@
             var ctx = canvas.getContext("2d");
             canvas.width = 1920;
             canvas.height = 1080;
+
+            ctx.fillStyle = "rgb(68, 68, 68)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             for (let font of fp.original['font-js'].split(',')) {
                 ctx.font = "100px " + font;
@@ -147,6 +152,7 @@
                         zip.file("thankyou.md", data);
                         zip.generateAsync({type: "blob"}).then(function(content) {
                             saveAs(content, "FingerPrint.zip");
+                            $("#download").text('File Downloaded! Thank you for your visit.');
                         });
                     })
                 })
