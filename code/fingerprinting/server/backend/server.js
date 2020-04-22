@@ -544,6 +544,9 @@ server.on("upgrade", function (request, socket, head) {
 
 const userEmojis = {};
 wss.on("connection", function (ws, request) {
+  if (request.session.fpId) {
+    connectedUser.add(req.session.fpId);
+  }
   let pingInterval = null;
   function ping() {
     if (pingInterval) {
@@ -572,6 +575,9 @@ wss.on("connection", function (ws, request) {
   });
 
   ws.on("close", function () {
+    if (request.session.fpId) {
+      connectedUser.delete(req.session.fpId);
+    }
     wss.broadcast(
       JSON.stringify({ event: "close", from: request.session.wsId }),
       ws
