@@ -32,15 +32,15 @@ function isMobileDevice() {
 Global.state.mobile = isMobileDevice();
 if(Global.state.mobile) {
   Global.html.inactiveInstructions = `
-  <span style="font-size:36px; letter-spacing: 1em;">SPATIAL SONIC FINGERPRINTS</span>
+  <span style="font-size:36px; letter-spacing: 1em;">TRACES OF ONLINE PRESENCE</span>
     <br/><br/><br/><br/><br/>
-    <span style="font-size:24px">Click to activate</span>
+    <span style="font-size:24px">Tap to activate</span>
     <br /><br />
     Move: Touch<br/>
     Look: Rotate device<br/>
     <br/><br/>
     <span style="font-size:24px;">Explore browser fingerprints as sonic objects in space. In your presence each device will reveal its sonic identity.</span>
-    <br/><br/>Mobile devices are currently not supported`;
+    <br/><br/>Mobile devices are currently not fully supported`;
 } else {
   // Global.html.inactiveInstructions += "<br/>You are on a desktop device";
 }
@@ -151,7 +151,7 @@ getConnectedFingerPrints(function(data) {
 /// Function called repeatedly to add new and remove old connected users
 function refreshConnectedFingerPrints() {
   getConnectedFingerPrints(function(data) {
-    console.log("Refreshing connected");
+    // console.log("Refreshing connected");
     // console.log(data);
     Global.data.rawConnectedFingerprintsObjects = data.normalized;
     Global.data.rawConnectedFingerprints = [];
@@ -169,7 +169,7 @@ function refreshConnectedFingerPrints() {
     // Remove any fingerprint that has disconnected
     for(let i = 0; i < Global.data.connectedFingerprints.length; i++) {
       if(Global.data.connectedFingerprints[i].isInRawFingerprintList(Global.data.rawConnectedFingerprints) != true) {
-        console.log("A fingerprint disconnected!");
+        console.log("Another fingerprint enters the archive!");
         let removed = Global.data.connectedFingerprints.splice(i, 1);
         Graphics.removeFingerprintFromRoom(removed[0]);
         i--;

@@ -97,12 +97,12 @@ function lockIntoExperience() {
 }
 
 function unlockFromExperience() {
-    blocker.style.display = 'flex';
-    instructions.style.display = '';
     hudContainer.style.display = 'none';
     hudElement.style.display = 'none';
     hudFooter.style.display = 'none';
     hudMessage.style.display = 'none';
+    blocker.style.display = 'flex';
+    instructions.style.display = '';
     currentRoom.pause(currentRoom);
     Synthesis.releaseSoundSignature();
     hideHudFooter();
