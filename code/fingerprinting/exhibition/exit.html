@@ -143,9 +143,12 @@
                 zip.file("script.js", data);
                 $.get('https://rethread.art/LICENSE.txt', (data) => {
                     zip.file("LICENSE.txt", data);
-                    zip.generateAsync({type: "blob"}).then(function(content) {
-                        saveAs(content, "FingerPrint.zip");
-                    });
+                    $.get('https://rethread.art/browser-fingerprint/thankyou.md', (data) => {
+                        zip.file("thankyou.md", data);
+                        zip.generateAsync({type: "blob"}).then(function(content) {
+                            saveAs(content, "FingerPrint.zip");
+                        });
+                    })
                 })
             })
         })
