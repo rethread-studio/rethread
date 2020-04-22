@@ -128,6 +128,7 @@ function resizeCanvasToDisplaySize() {
 
 // init variables
 function init_three() {
+    console.log("Greetings visitor!");
     // LOAD TEXTURES
     // instantiate a loader
     var loader = new THREE.TextureLoader();
