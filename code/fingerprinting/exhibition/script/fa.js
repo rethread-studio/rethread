@@ -1210,7 +1210,11 @@ function getAllNormalizedFingerPrints(callback) {
 }
 
 window.onbeforeunload = function () {
-  wsConnection.send('{"event": "logout"}')
+  let id = null;
+  if (window.fp && window.fp.original) {
+    id = window.fp.original._id;
+  }
+  wsConnection.send('{"event": "logout", "fpId": "' + id + '"}')
   $.ajax({
     url: HOST + "/api/session/logout",
     type: "POST",
@@ -1272,6 +1276,7 @@ function getFingerPrint(callback) {
           withCredentials: true
         },
         success: function (data) {
+          window.fp = data;
           callback(data);
         },
       });

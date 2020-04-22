@@ -578,6 +578,9 @@ wss.on("connection", function (ws, request) {
       if (message.image) {
         ws.send(JSON.stringify({ userEmojis }));
         userEmojis[request.session.wsId] = message.image;
+      } 
+      if (message.event == 'logout' && message.fpId) {
+        delete connectedUser[message.fpId];
       }
       message.from = request.session.wsId;
       wss.broadcast(JSON.stringify(message), ws);
