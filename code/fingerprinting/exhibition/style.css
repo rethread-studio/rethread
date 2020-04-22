@@ -368,3 +368,336 @@ button:hover {
     bottom: 0;
     z-index: -1;
 }
+
+
+/* credit https://codepen.io/noleli/pen/abbeWRL */
+.digit {
+    /* options */
+    --aspectRatio: .57;
+    --height: 100px;
+    /* this is half the thickness of a segment expressed as a fraction of the height */
+    /* change the thickness of the segments by changing the decimal number */
+    --segment-thickness: .11;
+    --half-segment-minor-dimention: calc(var(--height) * var(--segment-thickness) / 2);
+    --segment-spacing: 5%;
+    --on-color: rgba(255, 255, 255);
+    --off-color: rgba(0, 0, 0, .2);
+    
+    height: var(--height);
+    width: calc(var(--height) * var(--aspectRatio));
+    
+    margin: 4px;
+    
+    display: inline-grid;
+    grid-template-columns: var(--half-segment-minor-dimention)
+       var(--half-segment-minor-dimention)
+       1fr
+       var(--half-segment-minor-dimention)
+       var(--half-segment-minor-dimention);
+    grid-template-rows: var(--half-segment-minor-dimention)
+       var(--half-segment-minor-dimention)
+       1fr
+       var(--half-segment-minor-dimention)
+       var(--half-segment-minor-dimention)
+       1fr
+       var(--half-segment-minor-dimention)
+       var(--half-segment-minor-dimention);
+    
+    transform: skew(-3deg);
+ }
+ 
+ .digit .segment {
+    width: 100%;
+    height: 100%;
+    line-height: 0;
+    display: flex;
+    align-items: center;
+ }
+ 
+ .digit .segment.segA,
+ .digit .segment.segG,
+ .digit .segment.segD {
+    flex-direction: column;
+ }
+ 
+ .digit .segment.segA {
+    grid-area: 1 / 2 / 3 / 5;
+ }
+ 
+ .digit .segment.segB {
+    grid-area: 2 / 4 / 5 / 6;
+ }
+ 
+ .digit .segment.segC {
+    grid-area: 5 / 4 / 8 / 6;
+ }
+ 
+ .digit .segment.segD {
+    grid-area: 7 / 2 / 9 / 5;
+ }
+ 
+ .digit .segment.segE {
+    grid-area: 5 / 1 / 8 / 3;
+ }
+ 
+ .digit .segment.segF {
+    grid-area: 2 / 1 / 5 / 3;
+ }
+ 
+ .digit .segment.segG {
+    grid-area: 4 / 2 / 6 / 5;
+ }
+ 
+ .digit .segment::before,
+ .digit .segment::after {
+    display: block;
+    content: "";
+    box-sizing: border-box;
+ }
+ 
+ /* horizontal segments */
+ .digit .segment.segA::before,
+ .digit .segment.segA::after,
+ .digit .segment.segG::before,
+ .digit .segment.segG::after,
+ .digit .segment.segD::before,
+ .digit .segment.segD::after {
+    border-right: var(--half-segment-minor-dimention) solid transparent;
+    border-left: var(--half-segment-minor-dimention) solid transparent;
+    width: calc(100% - var(--segment-spacing)); /* not 100% so there’s spacing between the segments */
+    height: 0;
+ }
+ 
+ .digit .segment.segA::before,
+ .digit .segment.segG::before,
+ .digit .segment.segD::before {
+    border-bottom: var(--half-segment-minor-dimention) solid var(--off-color);
+ }
+ 
+ .digit .segment.segA::after,
+ .digit .segment.segG::after,
+ .digit .segment.segD::after {
+    border-top: var(--half-segment-minor-dimention) solid var(--off-color);
+ }
+ 
+ .digit .segment.on.segA::before,
+ .digit .segment.on.segG::before,
+ .digit .segment.on.segD::before {
+    border-bottom: var(--half-segment-minor-dimention) solid var(--on-color);
+ }
+ 
+ .digit .segment.on.segA::after,
+ .digit .segment.on.segG::after,
+ .digit .segment.on.segD::after {
+    border-top: var(--half-segment-minor-dimention) solid var(--on-color);
+ }
+ 
+ /* vertical segments */
+ .digit .segment.segB::before,
+ .digit .segment.segB::after,
+ .digit .segment.segC::before,
+ .digit .segment.segC::after,
+ .digit .segment.segE::before,
+ .digit .segment.segE::after,
+ .digit .segment.segF::before,
+ .digit .segment.segF::after {
+    border-top: var(--half-segment-minor-dimention) solid transparent;
+    border-bottom: var(--half-segment-minor-dimention) solid transparent;
+    width: 0;
+    height: calc(100% - var(--segment-spacing));
+ }
+ 
+ .digit .segment.segB::before,
+ .digit .segment.segC::before,
+ .digit .segment.segE::before,
+ .digit .segment.segF::before {
+    border-right: var(--half-segment-minor-dimention) solid var(--off-color);
+ }
+ 
+ .digit .segment.segB::after,
+ .digit .segment.segC::after,
+ .digit .segment.segE::after,
+ .digit .segment.segF::after {
+    border-left: var(--half-segment-minor-dimention) solid var(--off-color);
+ }
+ 
+ .digit .segment.on.segB::before,
+ .digit .segment.on.segC::before,
+ .digit .segment.on.segE::before,
+ .digit .segment.on.segF::before {
+    border-right: var(--half-segment-minor-dimention) solid var(--on-color);
+ }
+ 
+ .digit .segment.on.segB::after,
+ .digit .segment.on.segC::after,
+ .digit .segment.on.segE::after,
+ .digit .segment.on.segF::after {
+    border-left: var(--half-segment-minor-dimention) solid var(--on-color);
+ }
+ 
+ /******* so you can add classes to the digit container for numbers *******/
+ 
+ .digit.dig0 .segment.segA::before,
+ .digit.dig0 .segment.segA::after,
+ .digit.dig0 .segment.segD::before,
+ .digit.dig0 .segment.segD::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig0 .segment.segB::before,
+ .digit.dig0 .segment.segB::after,
+ .digit.dig0 .segment.segC::before,
+ .digit.dig0 .segment.segC::after,
+ .digit.dig0 .segment.segE::before,
+ .digit.dig0 .segment.segE::after,
+ .digit.dig0 .segment.segF::before,
+ .digit.dig0 .segment.segF::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig1 .segment.segB::before,
+ .digit.dig1 .segment.segB::after,
+ .digit.dig1 .segment.segC::before,
+ .digit.dig1 .segment.segC::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig2 .segment.segA::before,
+ .digit.dig2 .segment.segA::after,
+ .digit.dig2 .segment.segD::before,
+ .digit.dig2 .segment.segD::after,
+ .digit.dig2 .segment.segG::before,
+ .digit.dig2 .segment.segG::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig2 .segment.segB::before,
+ .digit.dig2 .segment.segB::after,
+ .digit.dig2 .segment.segE::before,
+ .digit.dig2 .segment.segE::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig3 .segment.segA::before,
+ .digit.dig3 .segment.segA::after,
+ .digit.dig3 .segment.segD::before,
+ .digit.dig3 .segment.segD::after,
+ .digit.dig3 .segment.segG::before,
+ .digit.dig3 .segment.segG::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig3 .segment.segB::before,
+ .digit.dig3 .segment.segB::after,
+ .digit.dig3 .segment.segC::before,
+ .digit.dig3 .segment.segC::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig4 .segment.segG::before,
+ .digit.dig4 .segment.segG::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig4 .segment.segB::before,
+ .digit.dig4 .segment.segB::after,
+ .digit.dig4 .segment.segC::before,
+ .digit.dig4 .segment.segC::after,
+ .digit.dig4 .segment.segF::before,
+ .digit.dig4 .segment.segF::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig5 .segment.segA::before,
+ .digit.dig5 .segment.segA::after,
+ .digit.dig5 .segment.segD::before,
+ .digit.dig5 .segment.segD::after,
+ .digit.dig5 .segment.segG::before,
+ .digit.dig5 .segment.segG::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig5 .segment.segC::before,
+ .digit.dig5 .segment.segC::after,
+ .digit.dig5 .segment.segF::before,
+ .digit.dig5 .segment.segF::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig6 .segment.segA::before,
+ .digit.dig6 .segment.segA::after,
+ .digit.dig6 .segment.segD::before,
+ .digit.dig6 .segment.segD::after,
+ .digit.dig6 .segment.segG::before,
+ .digit.dig6 .segment.segG::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig6 .segment.segC::before,
+ .digit.dig6 .segment.segC::after,
+ .digit.dig6 .segment.segE::before,
+ .digit.dig6 .segment.segE::after,
+ .digit.dig6 .segment.segF::before,
+ .digit.dig6 .segment.segF::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig7 .segment.segA::before,
+ .digit.dig7 .segment.segA::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig7 .segment.segB::before,
+ .digit.dig7 .segment.segB::after,
+ .digit.dig7 .segment.segC::before,
+ .digit.dig7 .segment.segC::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig8 .segment.segA::before,
+ .digit.dig8 .segment.segA::after,
+ .digit.dig8 .segment.segD::before,
+ .digit.dig8 .segment.segD::after,
+ .digit.dig8 .segment.segG::before,
+ .digit.dig8 .segment.segG::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig8 .segment.segB::before,
+ .digit.dig8 .segment.segB::after,
+ .digit.dig8 .segment.segC::before,
+ .digit.dig8 .segment.segC::after,
+ .digit.dig8 .segment.segE::before,
+ .digit.dig8 .segment.segE::after,
+ .digit.dig8 .segment.segF::before,
+ .digit.dig8 .segment.segF::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }
+ 
+ .digit.dig9 .segment.segA::before,
+ .digit.dig9 .segment.segA::after,
+ .digit.dig9 .segment.segD::before,
+ .digit.dig9 .segment.segD::after,
+ .digit.dig9 .segment.segG::before,
+ .digit.dig9 .segment.segG::after {
+    border-top-color: var(--on-color);
+    border-bottom-color: var(--on-color);
+ }
+ .digit.dig9 .segment.segB::before,
+ .digit.dig9 .segment.segB::after,
+ .digit.dig9 .segment.segC::before,
+ .digit.dig9 .segment.segC::after,
+ .digit.dig9 .segment.segF::before,
+ .digit.dig9 .segment.segF::after {
+    border-left-color: var(--on-color);
+    border-right-color: var(--on-color);
+ }

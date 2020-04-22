@@ -13,8 +13,6 @@ function fade(element, func) {
     }
 }
 
-const pages = ['welcome', 'howTo', 'consentInfo', 'myFp', 'main']
-
 function getCurrentPage() {
     if (window.location.hash) {
         return window.location.hash.substring(1);
@@ -24,6 +22,7 @@ function getCurrentPage() {
 }
 function goToPage() {
     const currentPage = getCurrentPage();
+    const pages = ['welcome', 'howTo', 'consentInfo', 'myFp', 'main']
     for (let page of pages) {
         if (page != currentPage) {
             $("#" + page).hide();
@@ -236,14 +235,10 @@ function myFpPage() {
     $("#participateStill").hide();
     $("#myFp").fadeIn();
 
-    let currentText = "";
-
     const opts = {
         element: document.getElementById("fptext"),
-        html: currentText,
+        html: "",
         callback: () => {
-            // execute the fadeIn
-            console.log("typing done");
             getEmoji((e) => {
                 const canvas = document.getElementById("myEmoji");
                 const ctx = canvas.getContext("2d");
@@ -255,6 +250,7 @@ function myFpPage() {
                 ctx.textAlign = "center";
                 ctx.fillText(e, 60, 100);
             });
+            // execute the fadeIn
             $("#goToResources").fadeIn();
             $("#goToMainPage").fadeIn();
             $("#downloadFP").fadeIn();
@@ -264,10 +260,9 @@ function myFpPage() {
     const canvas = document.getElementById("myEmoji");
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     getFingerPrint(async (fp) => {
-        window.fp = fp;
         $("#fptext").text("");
+        window.fp = fp;
         const text = generateFPText(fp);
         opts.html = text;
         typewriter = setupTypewriter(opts);
@@ -365,19 +360,15 @@ function myFpButton() {
     displayPage('myFp');
 }
 
-// function updateConnectedCounter() {
-//     getConnectedFingerPrints(function(data) {
-//         console.log("number of visitors: " + data.normalized.length);
-//         document.getElementById('connected-counter').innerHTML = "" + data.normalized.length;
-//     });
-//     window.setInterval(updateConnectedCounter(), 2000);
-// }
+const counter = initSegmentDisplay(document.getElementById('connected-counter'), 3);
+function updateConnectedCounter() {
+    getConnectedFingerPrints(function(data) {
+        counter.update(data.normalized.length);
+    });
+}
+window.setInterval(updateConnectedCounter, 2000);
 
 $(document).ready(function () {
-    if (window.location.hash) {
-        goToPage()
-    }
-
     // Enter
     $("#enter").click(enterButton);
 

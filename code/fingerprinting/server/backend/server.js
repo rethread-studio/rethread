@@ -287,7 +287,7 @@ app.get("/api/fp/counters", async function (req, res) {
   res.json(output);
 });
 
-const connectedUser = new Set();
+const connectedUser = {};
 
 app.get("/api/fp/normalized", async function (req, res) {
   const normalized = await n_fp_c.find().toArray();
@@ -295,8 +295,17 @@ app.get("/api/fp/normalized", async function (req, res) {
 });
 
 app.get("/api/fp/connected", async function (req, res) {
-  console.log(connectedUser);
-  var objIds = Array.from(connectedUser).map(function (id) {
+  const expirationDate = new Date();
+  expirationDate.setSeconds(expirationDate.getSeconds() - 30);
+  for (let fpId in connectedUser) {
+    if (connectedUser[fpId] < expirationDate) {
+      delete connectedUser[fpId]
+    }
+  }
+  if (req.session.fpId) {
+    connectedUser[req.session.fpId] = new Date();
+  }
+  var objIds = Array.from(Object.keys(connectedUser)).map(function (id) {
     return ObjectId(id);
   });
   const originals = await o_fp_c.find({ _id: { $in: objIds } }).toArray();
@@ -342,16 +351,16 @@ app.get("/api/fp/count", async function (req, res) {
   res.json(await o_fp_c.countDocuments({}));
 });
 app.post("/api/session/delete", async function (req, res) {
-  connectedUser.delete(req.session.fpId);
+  delete connectedUser[req.session.fpId];
   if (req.session.fp && !req.session.random) {
-    await o_fp_c.deleteOne({ _id: req.session.fpId });
-    await n_fp_c.deleteOne({ _id: req.session.fpId });
+    await o_fp_c.deleteOne({ _id: ObjectId(req.session.fpId) });
+    await n_fp_c.deleteOne({ _id: ObjectId(req.session.fpId) });
   }
   req.session.destroy();
   res.send("ok");
 });
 app.post("/api/session/logout", async function (req, res) {
-  connectedUser.delete(req.session.fpId);
+  delete connectedUser[req.session.fpId];
   res.send("ok");
 });
 app.get("/api/session/", async function (req, res) {
@@ -375,7 +384,7 @@ app.get("/api/session/accept", async function (req, res) {
 app.post("/api/session/accept", async function (req, res) {
   req.session.accept = true;
   if (req.session.fp) {
-    connectedUser.delete(req.session.fpId);
+    delete connectedUser[req.session.fpId];
     req.session.fp = null;
   }
   res.send("ok");
@@ -384,18 +393,19 @@ app
   .route("/api/fp/")
   .get(async function (req, res) {
     if (req.session.fp) {
-      connectedUser.add(req.session.fpId);
+      connectedUser[req.session.fpId] = new Date();
       return res.json(req.session.fp);
     } else {
       req.session.fp = await getRandomFingerPrint();
       req.session.fp.random = true;
-      req.session.fpId = req.session.fp.original._id;
+      req.session.fpId = req.session.fp.original._id.toString();
+      connectedUser[req.session.fpId] = new Date();
       return res.json(req.session.fp);
     }
   })
   .put(async function (req, res) {
     if (req.session.fp) {
-      connectedUser.add(req.session.fpId);
+      connectedUser[req.session.fpId] = new Date();
       return res.json(req.session.fp);
     }
     function keyValueFP(fp, key) {
@@ -410,7 +420,7 @@ app
     }
     function join(obj) {
       if (obj == null) {
-        return ""
+        return "";
       }
       if (Array.isArray(obj)) {
         return obj.join(",");
@@ -441,10 +451,9 @@ app
         screen_depth: keyValueFP(fp, "colorDepth"),
         pixelRatio: keyValueFP(fp, "pixelRatio"),
         hardwareConcurrency: keyValueFP(fp, "hardwareConcurrency"),
-        availableScreenResolution: join(keyValueFP(
-          fp,
-          "availableScreenResolution"
-        )),
+        availableScreenResolution: join(
+          keyValueFP(fp, "availableScreenResolution")
+        ),
         indexedDb: keyValueFP(fp, "indexedDb"),
         addBehavior: keyValueFP(fp, "addBehavior"),
         openDatabase: keyValueFP(fp, "openDatabase"),
@@ -497,7 +506,7 @@ app
       req.session.fp = output;
       req.session.fp.random = false;
       req.session.fpId = responseQuery.insertedId.toString();
-      connectedUser.add(req.session.fpId);
+      connectedUser[req.session.fpId] = new Date();
       res.json(output);
     } catch (error) {
       res.send(error);
@@ -543,6 +552,9 @@ server.on("upgrade", function (request, socket, head) {
 
 const userEmojis = {};
 wss.on("connection", function (ws, request) {
+  if (request.session.fpId) {
+    connectedUser[request.session.fpId] = new Date();
+  }
   let pingInterval = null;
   function ping() {
     if (pingInterval) {
@@ -561,16 +573,26 @@ wss.on("connection", function (ws, request) {
       request.session.wsId = Math.round(Math.random() * 100000);
     }
     ping();
-    message = JSON.parse(message);
-    if (message.image) {
-      ws.send(JSON.stringify({ userEmojis }));
-      userEmojis[request.session.wsId] = message.image;
+    try {
+      message = JSON.parse(message);
+      if (message.image) {
+        ws.send(JSON.stringify({ userEmojis }));
+        userEmojis[request.session.wsId] = message.image;
+      } 
+      if (message.event == 'logout' && message.fpId) {
+        delete connectedUser[message.fpId];
+      }
+      message.from = request.session.wsId;
+      wss.broadcast(JSON.stringify(message), ws);
+    } catch (e) {
+      console.error(e, message);
     }
-    message.from = request.session.wsId;
-    wss.broadcast(JSON.stringify(message), ws);
   });
 
   ws.on("close", function () {
+    if (request.session.fpId) {
+      delete connectedUser[request.session.fpId];
+    }
     wss.broadcast(
       JSON.stringify({ event: "close", from: request.session.wsId }),
       ws

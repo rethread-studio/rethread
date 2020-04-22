@@ -1,4 +1,5 @@
 let HOST = "https://fp.rethread.art";
+const wsConnection = new WebSocket(HOST.replace("http", "ws"));
 const fontsToTest = [
   ".Aqua Kana",
   ".Helvetica LT MM",
@@ -1049,7 +1050,7 @@ function deleteSession(callback) {
   $.ajax({
     url: HOST + '/api/session/delete',
     type: "post",
-    async: false,
+    async: true,
     xhrFields: {
       withCredentials: true
     },
@@ -1063,7 +1064,7 @@ function getSession(callback) {
   $.ajax({
     url: HOST + '/api/session/',
     type: "get",
-    async: false,
+    async: true,
     xhrFields: {
       withCredentials: true
     },
@@ -1076,7 +1077,7 @@ function getEmoji(callback) {
   $.ajax({
     url: HOST + '/api/session/emoji',
     type: "get",
-    async: false,
+    async: true,
     xhrFields: {
       withCredentials: true
     },
@@ -1089,7 +1090,7 @@ function acceptCondition(callback) {
   $.ajax({
     url: HOST + '/api/session/accept',
     type: "post",
-    async: false,
+    async: true,
     xhrFields: {
       withCredentials: true
     },
@@ -1184,7 +1185,7 @@ function getRandomFingerPrint(callback) {
   $.ajax({
     url: HOST + "/api/fp/random",
     type: "get",
-    async: false,
+    async: true,
     xhrFields: {
       withCredentials: true
     },
@@ -1198,7 +1199,7 @@ function getAllNormalizedFingerPrints(callback) {
   $.ajax({
     url: HOST + "/api/fp/normalized",
     type: "get",
-    async: false,
+    async: true,
     xhrFields: {
       withCredentials: true
     },
@@ -1209,13 +1210,18 @@ function getAllNormalizedFingerPrints(callback) {
 }
 
 window.onbeforeunload = function () {
+  let id = null;
+  if (window.fp && window.fp.original) {
+    id = window.fp.original._id;
+  }
+  wsConnection.send('{"event": "logout", "fpId": "' + id + '"}')
   $.ajax({
     url: HOST + "/api/session/logout",
     type: "POST",
     xhrFields: {
       withCredentials: true
     },
-    async: true,
+    async: false,
   });
 };
 
@@ -1223,7 +1229,7 @@ function getConnectedFingerPrints(callback) {
   $.ajax({
     url: HOST + "/api/fp/connected",
     type: "get",
-    async: false,
+    async: true,
     xhrFields: {
       withCredentials: true
     },
@@ -1242,7 +1248,7 @@ function getFingerPrint(callback) {
           type: "PUT",
           data: JSON.stringify(components),
           contentType: "application/json; charset=utf-8",
-          async: false,
+          async: true,
           xhrFields: {
             withCredentials: true
           },
@@ -1265,11 +1271,12 @@ function getFingerPrint(callback) {
       $.ajax({
         url: HOST + "/api/fp",
         type: "GET",
-        async: false,
+        async: true,
         xhrFields: {
           withCredentials: true
         },
         success: function (data) {
+          window.fp = data;
           callback(data);
         },
       });
