@@ -369,6 +369,8 @@ button:hover {
     z-index: -1;
 }
 
+
+/* credit https://codepen.io/noleli/pen/abbeWRL */
 .digit {
     /* options */
     --aspectRatio: .57;
