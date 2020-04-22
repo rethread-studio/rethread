@@ -14,10 +14,15 @@
 <script src="script/7ff2c0391b.js"></script>
 <script src="script/p5.js"></script>
 <script src="p5-fingerprinting/sketch.js"></script>
+<script src="fingerprint-3d/shader_render.js"></script>
 
 <style>
 
   .p5Canvas {
+    display: none!important;
+    opacity: 0;
+  }
+  .shaderCanvas {
     display: none!important;
     opacity: 0;
   }
@@ -138,6 +143,8 @@
             }
             zip.file("FontFingerPrint.png", canvas.toDataURL().split(',')[1], {base64: true});
             zip.file("constellation.png", document.querySelector('.p5Canvas').toDataURL().split(',')[1], {base64: true});
+            renderShaderOnCanvas(fp); // Render the shader graphics on a new canvas
+            zip.file("traces_of_online_presence.png", document.querySelector('.shaderCanvas').toDataURL().split(',')[1], {base64: true});
 
             $.get('script/lib.min.js', (data) => {
                 zip.file("script.js", data);
