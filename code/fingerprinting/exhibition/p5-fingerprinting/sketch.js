@@ -113,66 +113,68 @@ $(window).on("orientationchange", function (event) {
 });
 
 $(document).ready(function () {
+    getSession((session) => {
+        hasConsented = session.terms;
+        var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
+        if (orientation === "portrait-secondary" || orientation === "portrait-primary") {
+            $("#landscapePlease").show();
+            $("#info").hide();
+        }
+        else {
+            $("#landscapePlease").fadeOut();
+            $("#info").show();
+        }
 
-    var orientation = (screen.orientation || {}).type || screen.mozOrientation || screen.msOrientation;
-    if (orientation === "portrait-secondary" || orientation === "portrait-primary") {
-        $("#landscapePlease").show();
-        $("#info").hide();
-    }
-    else {
-        $("#landscapePlease").fadeOut();
-        $("#info").show();
-    }
+        if (hasConsented) {
+            $("#seeAnother").click(function () {
+                // erase old one and show another
+                push();
+                noStroke();
+                fill(0);
+                rect(w / 2, 0, w / 2, cHeight);
+                translate(3 * w / 4, cHeight / 2);
+                another();
+                pop();
+            });
 
-    if (hasConsented) {
-        $("#seeAnother").click(function () {
-            // erase old one and show another
-            push();
-            noStroke();
-            fill(0);
-            rect(w / 2, 0, w / 2, cHeight);
-            translate(3 * w / 4, cHeight / 2);
-            another();
-            pop();
-        });
+            $("#seeGallery").click(function () {
+                // first time getting a new fp to compare
+                canvas.position(0, cHeight * counterClip);
+                resizeCanvas(w, cHeight);
+                push();
+                translate(w / 4, cHeight / 2);
+                constellation(myFP);
+                translate(w / 2, 0);
+                another();
+                pop();
+                $("#galleryButton").attr("id", "middleMenu");
+            });
+        }
+        else if (!hasConsented) {
 
-        $("#seeGallery").click(function () {
-            // first time getting a new fp to compare
-            canvas.position(0, cHeight * counterClip);
-            resizeCanvas(w, cHeight);
-            push();
-            translate(w / 4, cHeight / 2);
-            constellation(myFP);
-            translate(w / 2, 0);
-            another();
-            pop();
-            $("#galleryButton").attr("id", "middleMenu");
-        });
-    }
-    else if (!hasConsented) {
+            $("#seeAnother").click(function () {
+                $("#seeAnother").hide();
+                // erase old one and show another
+                push();
+                noStroke();
+                fill(0);
+                rect(-cWidth / 2, -cHeight / 2, cWidth, cHeight);
+                another();
+                pop();
+                legend();
+            });
 
-        $("#seeAnother").click(function () {
-            $("#seeAnother").hide();
-            // erase old one and show another
-            push();
-            noStroke();
-            fill(0);
-            rect(-cWidth / 2, -cHeight / 2, cWidth, cHeight);
-            another();
-            pop();
-            legend();
-        });
+        }
 
-    }
+        // Show and hide stuff
 
-    // Show and hide stuff
-
-    if (hasConsented) {
-        $("#participate").hide();
-    }
-    else {
-        $("#participate").fadeIn();
-    }
+        if (hasConsented) {
+            $("#participate").hide();
+        }
+        else {
+            $("#participate").fadeIn();
+        }
+    });
     $("#participate").click(function () {
         window.location.href = "../index.html#consentInfo";
     });
