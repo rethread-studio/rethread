@@ -218,9 +218,9 @@ function generateFPText(fp) {
     s += device + " has "
     if (fp.original.hardwareConcurrency != "not available") {
         s += "<span class = 'fpHighlight' id='fpCPU' onmouseover='fpHighlightHover(this);'>" +
-            fp.original.hardwareConcurrency + "</span> cores and";
+            fp.original.hardwareConcurrency + "</span> cores and ";
     }
-    s += device + "a <span class = 'fpHighlight' id='fpWebGLRenderer' onmouseover='fpHighlightHover(this);'>" +
+    s +=  "a <span class = 'fpHighlight' id='fpWebGLRenderer' onmouseover='fpHighlightHover(this);'>" +
         fp.original.webGLVendor +
         "</span> graphic card. Did you also know that you have <span class = 'fpHighlight' id='fpFont' onmouseover='fpHighlightHover(this);'>" +
         fp.original["font-js"].split(",").length +
