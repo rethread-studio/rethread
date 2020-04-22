@@ -588,7 +588,6 @@ wss.on("connection", function (ws, request) {
 
   ws.on("close", function () {
     if (request.session.fpId) {
-      connectedUser.delete(request.session.fpId);
       delete connectedUser[request.session.fpId];
     }
     wss.broadcast(
