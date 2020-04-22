@@ -236,14 +236,10 @@ function myFpPage() {
     $("#participateStill").hide();
     $("#myFp").fadeIn();
 
-    let currentText = "";
-
     const opts = {
         element: document.getElementById("fptext"),
-        html: currentText,
+        html: "",
         callback: () => {
-            // execute the fadeIn
-            console.log("typing done");
             getEmoji((e) => {
                 const canvas = document.getElementById("myEmoji");
                 const ctx = canvas.getContext("2d");
@@ -255,6 +251,7 @@ function myFpPage() {
                 ctx.textAlign = "center";
                 ctx.fillText(e, 60, 100);
             });
+            // execute the fadeIn
             $("#goToResources").fadeIn();
             $("#goToMainPage").fadeIn();
             $("#downloadFP").fadeIn();
@@ -264,14 +261,16 @@ function myFpPage() {
     const canvas = document.getElementById("myEmoji");
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    
     getFingerPrint(async (fp) => {
-        window.fp = fp;
         $("#fptext").text("");
-        const text = generateFPText(fp);
-        opts.html = text;
-        typewriter = setupTypewriter(opts);
-        typewriter.type();
+        window.fp = fp;
+        setTimeout(() => {
+            const text = generateFPText(fp);
+            opts.html = text;
+            typewriter = setupTypewriter(opts);
+            typewriter.type();
+        }, 150);
     });
 }
 
