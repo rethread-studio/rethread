@@ -223,16 +223,16 @@ function renderShaderOnCanvas(fp) {
     // let oldCanvas = document.getElementsByTagName('canvas');
 
     if(fp != undefined) {
-        fpCallback(fp);
+        shaderFpCallback(fp);
     } else {
         if (shHasConsented) {
             // get my fingerprint
-            getFingerPrint(fpCallback);
+            getFingerPrint(shaderFpCallback);
         }
         else {
             // no consent
             // get and show random fp
-            getRandomFingerPrint(fpCallback);
+            getRandomFingerPrint(shaderFpCallback);
         }
     }
 }
@@ -265,7 +265,7 @@ let headers = [
     "webGLRenderer",
   ];
 
-function fpCallback(fingerprint) {
+function shaderFpCallback(fingerprint) {
     let rp = [];
     for(let h of headers) {
         rp.push(Number(fingerprint.normalized[h]));
