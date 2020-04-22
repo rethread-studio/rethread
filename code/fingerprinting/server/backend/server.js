@@ -302,6 +302,9 @@ app.get("/api/fp/connected", async function (req, res) {
       delete connectedUser[fpId]
     }
   }
+  if (req.session.fpId) {
+    connectedUser[req.session.fpId] = new Date();
+  }
   var objIds = Array.from(Object.keys(connectedUser)).map(function (id) {
     return ObjectId(id);
   });
@@ -568,9 +571,6 @@ wss.on("connection", function (ws, request) {
   ws.on("message", function (message) {
     if (!request.session.wsId) {
       request.session.wsId = Math.round(Math.random() * 100000);
-    }
-    if (request.session.fpId) {
-      connectedUser[request.session.fpId] = new Date();
     }
     ping();
     try {
