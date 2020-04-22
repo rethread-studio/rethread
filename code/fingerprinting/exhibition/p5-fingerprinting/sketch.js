@@ -98,7 +98,6 @@ $(document).ready(function () {
         $("#info").hide();
     }
     else {
-        setup();
         $("#landscapePlease").fadeOut();
         $("#info").show();
     }
