@@ -28,7 +28,7 @@ ExifRead==2.1.2
 gphoto2==1.9.0
 gphoto2-cffi==0.4.2
 html5lib==1.0.1
-httplib2==0.11.3
+httplib2==0.18.0
 idna==2.6
 isodate==0.6.0
 keyring==17.1.1
