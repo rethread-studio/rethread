@@ -183,9 +183,9 @@ async function getPage(title, lang) {
       const data = JSON.parse(
         await fs.readFile(`./keywords/${page.lang}.json`)
       );
-      const keywords = Object.keys(data);
-      keywords.sort(function (x, y) {
-        return y.tf - x.tf;
+      let keywords = Object.keys(data);
+      keywords = keywords.sort(function (x, y) {
+        return data[y] - data[x];
       });
       reandme += `\n## Keywords for Bug in ${page.lang}\n`
       reandme += "```\n"
