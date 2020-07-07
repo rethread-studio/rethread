@@ -70,6 +70,24 @@ impl HighPassFilter {
 }
 
 #[derive(Copy, Clone)]
+struct LowPassFilter {
+    last_output: f64,
+    alpha: f64,
+}
+
+impl LowPassFilter {
+    fn new(alpha: f64) -> Self {
+        LowPassFilter{ last_output: 0.0, alpha }
+    }
+
+    fn next(&mut self, input: f64) -> f64 {
+        let value = self.last_output * self.alpha + (1.0-self.alpha) * input;
+        self.last_output = value;
+        value
+    }
+}
+
+#[derive(Copy, Clone)]
 struct FMSynth {
     sample_rate: f64,
     freq: f64,
@@ -201,6 +219,7 @@ fn main() {
     let mut fm_synths = vec![FMSynth::new(sample_rate as f64, 200.0, 0.0, 2.0, 1.0, 4.0); 100];
     let mut drone = FMSynth::new(sample_rate as f64, degree_to_freq(0.0), 0.15, 2.0, 1.0, 2.0);
     let mut hp_filters = vec![HighPassFilter::new(); 2];
+    let mut lp_filters = vec![LowPassFilter::new(0.5); 2];
     let mut counter = 0;
     let mut synth_index: usize = 0;
     let trig_amp = 0.5 / fm_synths.len() as f64;
@@ -254,6 +273,8 @@ fn main() {
                 // Apply filters
                 // frame[0] = hp_filters[0].next(frame[0]);
                 // frame[1] = hp_filters[1].next(frame[1]);
+                frame[0] = lp_filters[0].next(frame[0]);
+                frame[1] = lp_filters[1].next(frame[1]);
 
                 // Write the sound to the channel buffer
                 *l = frame[0] as f32;
