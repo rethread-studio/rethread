@@ -11,6 +11,8 @@ extern crate sample;
 use std::io;
 use std::str::FromStr;
 
+use std::f64::consts::PI;
+
 use sample::{signal, Signal};
 
 const PORT: u16 = 12345;
@@ -84,6 +86,56 @@ impl LowPassFilter {
         let value = self.last_output * self.alpha + (1.0-self.alpha) * input;
         self.last_output = value;
         value
+    }
+}
+
+#[derive(Copy, Clone)]
+struct BiquadFilter {
+    input_buffer: [f64; 2],
+    output_buffer: [f64; 2],
+    a1: f64,
+    a2: f64,
+    b0: f64,
+    b1: f64,
+    b2: f64,
+}
+
+impl BiquadFilter {
+    fn new(sampleRate: f64,  frequency: f64,  q: f64) -> Self {
+        let mut new_filter = BiquadFilter {
+            input_buffer: [0.0; 2],
+            output_buffer: [0.0; 2],
+            a1: 0.0,
+            a2: 0.0,
+            b0: 0.0,
+            b1: 0.0,
+            b2: 0.0,
+        };
+        new_filter.calculate_coefficients(sampleRate, frequency, q);
+        new_filter
+    }
+    /// Calculate the filter coefficients based on the given parameters
+    /// Borrows code from the Bela Biquad library, itself based on code by
+    /// Nigel Redmon
+    fn calculate_coefficients(&mut self, sampleRate: f64,  frequency: f64,  q: f64) {
+        let k = (PI * frequency / sampleRate).tan();
+        let norm = 1.0 / (1.0 + k / q + k * k);
+        
+        self.b0 = k * k * norm;
+        self.b1 = 2.0 * self.b0;
+        self.b2 = self.b0;
+        self.a1 = 2.0 * (k * k - 1.0) * norm;
+        self.a2 = (1.0 - k / q + k * k) * norm;	
+    }
+    fn next(&mut self, input: f64) -> f64 {
+        let mut output = self.b0*input + self.b1*self.input_buffer[0] + self.b2*self.input_buffer[1];
+        output -= self.a1*self.output_buffer[0] + self.a2*self.output_buffer[1];
+
+        self.input_buffer[1] = self.input_buffer[0];
+        self.input_buffer[0] = input;
+        self.output_buffer[1] = self.output_buffer[0];
+        self.output_buffer[0] = output;
+        output
     }
 }
 
@@ -220,6 +272,7 @@ fn main() {
     let mut drone = FMSynth::new(sample_rate as f64, degree_to_freq(0.0), 0.15, 2.0, 1.0, 2.0);
     let mut hp_filters = vec![HighPassFilter::new(); 2];
     let mut lp_filters = vec![LowPassFilter::new(0.5); 2];
+    let mut res_filters = vec![BiquadFilter::new(sample_rate as f64, 500.0, 3.0); 2];
     let mut counter = 0;
     let mut synth_index: usize = 0;
     let trig_amp = 0.5 / fm_synths.len() as f64;
@@ -233,6 +286,12 @@ fn main() {
     let process = jack::ClosureProcessHandler::new(
         move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             // This gets called once for every block
+
+            // Update resonant filter frequencies
+            let res_freq = (((time_cursor as f64 / SCHED_MAX as f64) * 100.0).sin() * 0.5 + 0.5).powf(2.0) * 10000.0 + 200.0;
+            for filter in res_filters.iter_mut() {
+                filter.calculate_coefficients(sample_rate as f64, res_freq, 10.0);
+            }
 
             // Get output buffer
             let out_l = out_port_l.as_mut_slice(ps);
@@ -273,8 +332,10 @@ fn main() {
                 // Apply filters
                 // frame[0] = hp_filters[0].next(frame[0]);
                 // frame[1] = hp_filters[1].next(frame[1]);
-                frame[0] = lp_filters[0].next(frame[0]);
-                frame[1] = lp_filters[1].next(frame[1]);
+                // frame[0] = lp_filters[0].next(frame[0]);
+                // frame[1] = lp_filters[1].next(frame[1]);
+                frame[0] = res_filters[0].next(frame[0]);
+                frame[1] = res_filters[1].next(frame[1]);
 
                 // Write the sound to the channel buffer
                 *l = frame[0] as f32;
