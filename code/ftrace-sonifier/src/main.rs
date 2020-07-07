@@ -53,6 +53,23 @@ impl EventMsg {
 }
 
 #[derive(Copy, Clone)]
+struct HighPassFilter {
+    last_sample: f64
+}
+
+impl HighPassFilter {
+    fn new() -> Self {
+        HighPassFilter{ last_sample: 0.0 }
+    }
+
+    fn next(&mut self, input: f64) -> f64 {
+        let value = input - self.last_sample;
+        self.last_sample = input;
+        value
+    }
+}
+
+#[derive(Copy, Clone)]
 struct FMSynth {
     sample_rate: f64,
     freq: f64,
@@ -131,7 +148,7 @@ impl FMSynth {
     }
     fn trigger(&mut self, freq: f64, amp: f64) {
         self.number_of_triggers += 1.0;
-        // Set the new frequency
+        // Set the new frequencymp: f64
         // Set it so that it is an average of all triggers
         self.freq = (self.freq * (self.number_of_triggers-1.0)/self.number_of_triggers) + 
                     (freq * (1.0/self.number_of_triggers));
@@ -182,6 +199,8 @@ fn main() {
     // FMSynth setup
     // let mut fm_synth = FMSynth::new(sample_rate as f64, 200.0, 1.0, 2.0, 1.0, 4.0);
     let mut fm_synths = vec![FMSynth::new(sample_rate as f64, 200.0, 0.0, 2.0, 1.0, 4.0); 100];
+    let mut drone = FMSynth::new(sample_rate as f64, degree_to_freq(0.0), 0.15, 2.0, 1.0, 2.0);
+    let mut hp_filters = vec![HighPassFilter::new(); 2];
     let mut counter = 0;
     let mut synth_index: usize = 0;
     let trig_amp = 0.5 / fm_synths.len() as f64;
@@ -227,6 +246,16 @@ fn main() {
                     frame[0] += new_frame[0];
                     frame[1] += new_frame[1];
                 }
+                // Mix in the drone
+                let new_frame = drone.next_stereo();
+                frame[0] += new_frame[0];
+                frame[1] += new_frame[1];
+
+                // Apply filters
+                // frame[0] = hp_filters[0].next(frame[0]);
+                // frame[1] = hp_filters[1].next(frame[1]);
+
+                // Write the sound to the channel buffer
                 *l = frame[0] as f32;
                 *r = frame[1] as f32;
                 time_cursor = (time_cursor + 1) % SCHED_MAX;
@@ -343,7 +372,7 @@ fn process_packets(received_packets: &mut Vec<Option<osc::Packet>>, model: &mut 
                                 // msg.freq = (((event.len() * 1157)) % 10000) as f64 + 100.0;
                                 // Different "generating" intervals can be used for very different sound
                                 // Pythagorean intervals such as a 3/2 or 9/8 seem to do well for a consonant sound
-                                msg.freq = degree_to_freq(((event.len() as f64 * 17.0) % (53.0 * 7.0)) + 53.0);
+                                msg.freq = degree_to_freq(((event.len() as f64 * 17.0) % (53.0 * 7.0)));
                                 msg.event_type = 0;
                             },
                             (2, osc::Type::Int(pid)) => {
