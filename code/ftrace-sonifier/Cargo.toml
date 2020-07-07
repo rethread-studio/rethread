@@ -1,0 +1,13 @@
+[package]
+name = "ftrace-sonifier"
+version = "0.1.0"
+authors = ["Erik Natanael Gustafsson <erik@eriknatanael.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+jack = { git = "https://github.com/RustAudio/rust-jack.git" }
+crossbeam-channel = "0.4"
+sample = "0.10.0"
+nannou_osc = "0.14.0"
