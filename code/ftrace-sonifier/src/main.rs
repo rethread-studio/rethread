@@ -22,10 +22,6 @@ const PORT: u16 = 12345;
 // Perhaps as simple as converting wall-clock time to samples and consider wall-clock 0 to equal 0 samples + constant 
 // delay in order to have time to send the message before it is scheduled to be played.
 
-// we modulo the schedule timestamp around this number not to risk accidental overflows
-// The audio thread has to do the modulo at every increment of the sample counter clock
-const SCHED_MAX: usize = 192000 * 60;
-
 struct Model {
     sample_rate: usize,
     /// The timestamp of the first packet received
@@ -34,7 +30,7 @@ struct Model {
 
 /// The struct for an event sent from the receiving OSC thread to the audio processing thread
 struct EventMsg {
-    /// Timestamp in samples % SCHED_MAX for when this event should be played
+    /// Timestamp in samples for when this event should be played
     timestamp: usize,
     has_been_parsed: bool, /// If the event has been parsed by the audio scheduler and should be removed
     /// Other values that can be sent to the audio thread
@@ -269,7 +265,7 @@ fn main() {
     // FMSynth setup
     // let mut fm_synth = FMSynth::new(sample_rate as f64, 200.0, 1.0, 2.0, 1.0, 4.0);
     let mut fm_synths = vec![FMSynth::new(sample_rate as f64, 200.0, 0.0, 2.0, 1.0, 4.0); 100];
-    let mut drone = FMSynth::new(sample_rate as f64, degree_to_freq(0.0), 0.15, 2.0, 1.0, 2.0);
+    let mut drone = FMSynth::new(sample_rate as f64, degree_to_freq(0.0), 0.05, 2.0, 1.0, 2.0);
     let mut hp_filters = vec![HighPassFilter::new(); 2];
     let mut lp_filters = vec![LowPassFilter::new(0.5); 2];
     let mut res_filters = vec![BiquadFilter::new(sample_rate as f64, 500.0, 3.0); 2];
@@ -288,7 +284,7 @@ fn main() {
             // This gets called once for every block
 
             // Update resonant filter frequencies
-            let res_freq = (((time_cursor as f64 / SCHED_MAX as f64) * 100.0).sin() * 0.5 + 0.5).powf(2.0) * 10000.0 + 200.0;
+            let res_freq = (((time_cursor as f64 / sample_rate as f64)).sin() * 0.5 + 0.5).powf(2.0) * 10000.0 + 200.0;
             for filter in res_filters.iter_mut() {
                 filter.calculate_coefficients(sample_rate as f64, res_freq, 10.0);
             }
@@ -340,7 +336,7 @@ fn main() {
                 // Write the sound to the channel buffer
                 *l = frame[0] as f32;
                 *r = frame[1] as f32;
-                time_cursor = (time_cursor + 1) % SCHED_MAX;
+                time_cursor += 1;
             }
 
             for synth in &mut fm_synths {
@@ -445,7 +441,7 @@ fn process_packets(received_packets: &mut Vec<Option<osc::Packet>>, model: &mut 
                                 }
                                 // Convert wall-clock time to samples depending on sample rate
                                 let sample_ts: usize = ((*timestamp - model.first_packet_timing) / 1000000.0) as usize * model.sample_rate;
-                                let sample_ts = sample_ts % SCHED_MAX;
+                                let sample_ts = sample_ts; 
                                 msg.timestamp = sample_ts;
                             },
                             (1, osc::Type::String(event)) => {
