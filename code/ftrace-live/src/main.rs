@@ -103,7 +103,7 @@ fn main() -> std::result::Result<(), std::io::Error> {
     init_trace_options(event_filter, pid);
 
     start_tracer();
-
+    send_osc_start_transmission(&osc_sender);
     read_trace_pipe(Arc::clone(&running), osc_sender);
 
     cleanup_ftrace();
@@ -238,6 +238,13 @@ fn send_osc_message(osc_sender: &osc::Sender<osc::Connected>, timestamp: f64, ev
     let packet = (osc_addr, args);
     // println!("{:?}", packet);
 
+    osc_sender.send(packet).expect("Unable to send osc message!");
+}
+
+fn send_osc_start_transmission(osc_sender: &osc::Sender<osc::Connected>) {
+    let osc_addr = "/start_transmission".to_string();
+    let args = vec![];
+    let packet = (osc_addr, args);
     osc_sender.send(packet).expect("Unable to send osc message!");
 }
 

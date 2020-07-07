@@ -420,51 +420,60 @@ fn process_packets(received_packets: &mut Vec<Option<osc::Packet>>, model: &mut 
         let owned_packet = packet.take();
         // Each packet should only ever be parsed once. If the unwrap fails something is wrong.
         for message in owned_packet.expect("Each Packet should only be parsed once").into_msgs() {
-            if message.addr == "/ftrace" {
-                let mut msg = EventMsg {
-                    timestamp: 0,
-                    event_type: 0,
-                    freq: 0.0,
-                    has_been_parsed: false,
-                    pid: 0,
-                    cpu: 0,
-                };
-                if let Some(args) = message.args {
-                    // Parse the arguments
-                    for arg in args.iter().enumerate() {
-                        match arg {
-                            (0, osc::Type::Double(timestamp)) => {
-                                // Convert a microsecond timestamp into a sample based one
-                                // Set the first packet timing the first time a packet is received
-                                if model.first_packet_timing == std::f64::MAX {
-                                    model.first_packet_timing = *timestamp;
+            match message.addr.as_ref() {
+                "/ftrace" => {
+                    let mut msg = EventMsg {
+                        timestamp: 0,
+                        event_type: 0,
+                        freq: 0.0,
+                        has_been_parsed: false,
+                        pid: 0,
+                        cpu: 0,
+                    };
+                    if let Some(args) = message.args {
+                        // Parse the arguments
+                        for arg in args.iter().enumerate() {
+                            match arg {
+                                (0, osc::Type::Double(timestamp)) => {
+                                    // Convert a microsecond timestamp into a sample based one
+                                    // Set the first packet timing the first time a packet is received
+                                    if model.first_packet_timing == std::f64::MAX {
+                                        model.first_packet_timing = *timestamp;
+                                    }
+                                    // Convert wall-clock time to samples depending on sample rate
+                                    let sample_ts: usize = ((*timestamp - model.first_packet_timing) / 1000000.0) as usize * model.sample_rate;
+                                    let sample_ts = sample_ts; 
+                                    msg.timestamp = sample_ts;
+                                },
+                                (1, osc::Type::String(event)) => {
+                                    // The formula for calculating pitch is very important to the overall sound
+                                    // Basing it on pitch in frequency leads to a noisier result
+                                    // msg.freq = (((event.len() * 1157)) % 10000) as f64 + 100.0;
+                                    // Different "generating" intervals can be used for very different sound
+                                    // Pythagorean intervals such as a 3/2 or 9/8 seem to do well for a consonant sound
+                                    msg.freq = degree_to_freq(((event.len() as f64 * 17.0) % (53.0 * 7.0)));
+                                    msg.event_type = 0;
+                                },
+                                (2, osc::Type::Int(pid)) => {
+                                    msg.pid = *pid;
                                 }
-                                // Convert wall-clock time to samples depending on sample rate
-                                let sample_ts: usize = ((*timestamp - model.first_packet_timing) / 1000000.0) as usize * model.sample_rate;
-                                let sample_ts = sample_ts; 
-                                msg.timestamp = sample_ts;
-                            },
-                            (1, osc::Type::String(event)) => {
-                                // The formula for calculating pitch is very important to the overall sound
-                                // Basing it on pitch in frequency leads to a noisier result
-                                // msg.freq = (((event.len() * 1157)) % 10000) as f64 + 100.0;
-                                // Different "generating" intervals can be used for very different sound
-                                // Pythagorean intervals such as a 3/2 or 9/8 seem to do well for a consonant sound
-                                msg.freq = degree_to_freq(((event.len() as f64 * 17.0) % (53.0 * 7.0)));
-                                msg.event_type = 0;
-                            },
-                            (2, osc::Type::Int(pid)) => {
-                                msg.pid = *pid;
+                                (3, osc::Type::Int(cpu)) => {
+                                    msg.cpu = *cpu;
+                                }
+                                _ => ()
                             }
-                            (3, osc::Type::Int(cpu)) => {
-                                msg.cpu = *cpu;
-                            }
-                            _ => ()
                         }
+                        // Send the event to the audio thread.
+                        tx.send(msg).expect("Failed to send message to audio thread");
                     }
-                    // Send the event to the audio thread.
-                    tx.send(msg).expect("Failed to send message to audio thread");
-                }
+                },
+                "/start_transmission" => {
+                    // A new transmission has started, reset
+
+                    // Set the first packet timing to the max value in order for it to be reset at the first ftrace event
+                    model.first_packet_timing = std::f64::MAX;
+                },
+                _ => ()
             }
         }
     }
