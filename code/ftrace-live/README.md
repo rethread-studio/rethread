@@ -6,7 +6,8 @@ This program is meant to be used together with the ftrace sonifier.
 
 ## Usage
 
-Has to be run as sudo. In the root ftrace-live directory:
+First run the ftrace-sonifier to open an OSC port to connect to.
+ftrace-live has to be run as sudo. In the root ftrace-live directory:
 
 ```
 cargo build --release
