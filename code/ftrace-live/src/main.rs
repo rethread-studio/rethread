@@ -248,10 +248,11 @@ fn send_osc_start_transmission(osc_sender: &osc::Sender<osc::Connected>) {
     osc_sender.send(packet).expect("Unable to send osc message!");
 }
 
+// TODO: The amount of whitespace seems to be variable between systems. Find a more clever way of parsing this
 fn parse_line(line: &str, state: &mut Model) -> (f64, String, i32, i32) {
     let _process = &line[0..16];
     let pid_str = &line[17..23];
-    let cpu_str = &line[24..27];
+    let cpu_str = &line[25..27];
     let _irq = &line[30..34];
     let timestamp = &line[35..46];
     // shave of last : of timestamp
