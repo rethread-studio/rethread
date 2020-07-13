@@ -1,0 +1,13 @@
+{
+    "General": {
+        "interface": "wlan0",
+        "sniffingAutoStart": true,
+        "oscAutoStart": false
+    },
+    "OSC": {
+        "ip": "83.251.112.103",
+        "port": "57120",
+        "server_port": 57121,
+        "address": "/package"
+    }
+}

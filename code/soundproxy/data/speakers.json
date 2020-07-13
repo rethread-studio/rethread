@@ -1,0 +1,22 @@
+[
+    {
+        "id": "North",
+        "muted": false,
+        "user": "18:f0:e4:14:b6:30"
+    },
+    {
+        "id": "South",
+        "muted": false,
+        "user": "08:e6:89:b6:9e:34"
+    },
+    {
+        "id": "East",
+        "muted": false,
+        "user": "01:00:5e:00:00:fb"
+    },
+    {
+        "id": "West",
+        "muted": false,
+        "user": null
+    }
+]

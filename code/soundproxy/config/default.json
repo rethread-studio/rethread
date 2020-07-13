@@ -1,0 +1,36 @@
+{
+    "General": {
+        "interface": "bridge100",
+        "sniffingAutoStart": true,
+        "oscAutoStart": true,
+        "port": 8080
+    },
+    "Speakers": [
+        {
+            "id": "North",
+            "muted": false,
+            "user": null
+        },
+        {
+            "id": "South",
+            "muted": false,
+            "user": null
+        },
+        {
+            "id": "East",
+            "muted": false,
+            "user": null
+        },
+        {
+            "id": "West",
+            "muted": false,
+            "user": null
+        }
+    ],
+    "OSC": {
+        "ip": "130.229.163.238",
+        "port": 57121,
+        "server_port": 57121,
+        "address": "/package"
+    }
+}
