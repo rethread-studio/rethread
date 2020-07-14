@@ -1,0 +1,30 @@
+* {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+html, body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    color: #fdfdfd;
+    background-color: #242423;
+}
+#hosts {
+    position: relative;
+    height: calc(100% - 14px);
+    width: 50%;
+    overflow-y: scroll;
+    padding: 7px;
+    margin: 7px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+#services {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+} 
