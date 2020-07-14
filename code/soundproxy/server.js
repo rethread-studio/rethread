@@ -33,9 +33,6 @@ if (fs.existsSync(__dirname + '/data/samples.json')) {
     samples = JSON.parse(fs.readFileSync(__dirname + '/data/samples.json'));
 }
 
-if (ifaces[network_interface]) {
-    console.log(ifaces[network_interface].filter((iface) => 'IPv4' === iface.family && iface.internal !== true))
-}
 function saveConfig() {
     const data = {
         "General": {
@@ -187,6 +184,15 @@ app.get('/api/users', function (req, res) {
     localDevices({
         "interface": network_interface
     }).then(devices => {
+        const ips = ifaces[network_interface].filter((iface) => 'IPv4' === iface.family && iface.internal !== true)
+        for (let i in ips) {
+            const local = ips[i]; 
+            devices.push({
+                name: "Server " + (i + 1),
+                mac: local.mac,
+                ip: local.address
+            })
+        }
         for (let device of devices) {
             if (!allUsers[device.mac]) {
                 allUsers[device.mac] = {
