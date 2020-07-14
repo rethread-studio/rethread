@@ -15,7 +15,7 @@ use std::f64::consts::PI;
 
 use sample::{signal, Signal};
 
-use ftrace_sonifier::{FMSynth, Delay, HighPassFilter, LowPassFilter, BiquadFilter};
+use ftrace_sonifier::{FMSynth, Delay, HighPassFilter, LowPassFilter, BiquadFilter, Sine, Ramp, ExponentialDecay, EnvelopeFollower, Metronome};
 
 const PORT: u16 = 12345;
 
@@ -82,6 +82,9 @@ fn main() {
     // let (tx, rx) = channel::<EventMsg>();
     let (tx, rx) = bounded::<EventMsg>(1_000_000);
 
+    let (tx_env, rx_env) = bounded::<f64>(1_000_000);
+
+
     // VecDeque is implemented as a growable ring buffer
     let mut event_queue = Vec::with_capacity(100000);
     let mut time_cursor: usize = 0;
@@ -89,13 +92,26 @@ fn main() {
     // FMSynth setup
     // let mut fm_synth = FMSynth::new(sample_rate as f64, 200.0, 1.0, 2.0, 1.0, 4.0);
     let mut fm_synths = vec![FMSynth::new(sample_rate as f64, 200.0, 0.0, 2.0, 1.0, 4.0); 100];
-    let mut drone = FMSynth::new(sample_rate as f64, degree_to_freq(0.0), 0.05, 2.0, 1.0, 2.0);
+    let mut drone = FMSynth::new(sample_rate as f64, degree_to_freq(31.0), 0.05, 4.0, 1.0, 3.0);
     let mut hp_filters = vec![HighPassFilter::new(); 2];
     let mut lp_filters = vec![LowPassFilter::new(0.5); 2];
     let mut res_filters = vec![BiquadFilter::new(sample_rate as f64, 500.0, 3.0); 2];
+    let mut exp_decay = ExponentialDecay::new(0.5, sample_rate as f64);
+    let mut filter_freq = Ramp::new(200.0, sample_rate);
+    let mut filter_freq_sine = Sine::from(4.0, 1.0, 0.0, 0.0, sample_rate as f64);
+    filter_freq_sine.set_range(100.0, 2000.0);
+    let mut ramp_up = true;
+    let delay_length = (sample_rate as f64 * 0.05) as usize;
+    // let delay_length = 10;
+    let mut delay_fluctuating = Sine::from(1.0/2.0, 1.0, 0.0, 0.0, sample_rate as f64);
+    delay_fluctuating.set_range(10.0, 100.0);
+    let mut delay = Delay::new(delay_length, delay_length).unwrap();
     let mut counter = 0;
     let mut synth_index: usize = 0;
-    let trig_amp = 0.5 / fm_synths.len() as f64;
+    let trig_amp = 0.5 / fm_synths.len() as f64; 
+
+    let mut envelope_follower = EnvelopeFollower::new(sample_rate as f64);
+    let mut metronome = Metronome::new(120, 4, sample_rate);
 
     // Model setup (general non-realtime thread state)
     let mut model = Model {
@@ -106,12 +122,6 @@ fn main() {
     let process = jack::ClosureProcessHandler::new(
         move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             // This gets called once for every block
-
-            // Update resonant filter frequencies
-            let res_freq = (((time_cursor as f64 / sample_rate as f64)).sin() * 0.5 + 0.5).powf(2.0) * 10000.0 + 200.0;
-            for filter in res_filters.iter_mut() {
-                filter.calculate_coefficients(sample_rate as f64, res_freq, 10.0);
-            }
 
             // Get output buffer
             let out_l = out_port_l.as_mut_slice(ps);
@@ -145,17 +155,63 @@ fn main() {
                     frame[1] += new_frame[1];
                 }
                 // Mix in the drone
-                let new_frame = drone.next_stereo();
-                frame[0] += new_frame[0];
-                frame[1] += new_frame[1];
+                let mut new_frame = drone.next_stereo();
+                if time_cursor % 44100 == 0 {
+                    exp_decay.trigger(1.0);
+                }
+                let drone_amp = 1.0; //exp_decay.next();
+                new_frame[0] *= drone_amp;
+                new_frame[1] *= drone_amp;
+
+                let env = envelope_follower.next((new_frame[0] + new_frame[1]) * 0.5);
+                // Send envelope to UI thread
+                tx_env.send(env).unwrap();
+
+                // Update resonant filter frequencies
+                // let res_freq = (((time_cursor as f64 / sample_rate as f64)).sin() * 0.5 + 0.5).powf(2.0) * 10000.0 + 200.0;
+                // let res_freq = filter_freq.next();
+                // if filter_freq.is_finished() {
+                //     if ramp_up {
+                //         filter_freq.ramp_to(2000.0, 1.0);
+                //     } else {
+                //         filter_freq.ramp_to(100.0, 1.0);
+                //     }
+                //     ramp_up = !ramp_up;
+                // }
+                // let res_freq = env * 100000.0 + 100.0;
+                let res_freq = filter_freq_sine.next();
+                for filter in res_filters.iter_mut() {
+                    filter.calculate_coefficients(sample_rate as f64, res_freq, 10.0);
+                }
+
+
+                frame[0] += res_filters[0].next(new_frame[0]);
+                frame[1] += res_filters[1].next(new_frame[1]);
+                // frame[0] += new_frame[0];
+                // frame[1] += new_frame[1];
 
                 // Apply filters
                 // frame[0] = hp_filters[0].next(frame[0]);
                 // frame[1] = hp_filters[1].next(frame[1]);
                 // frame[0] = lp_filters[0].next(frame[0]);
                 // frame[1] = lp_filters[1].next(frame[1]);
-                frame[0] = res_filters[0].next(frame[0]);
-                frame[1] = res_filters[1].next(frame[1]);
+                
+
+                // Apply delay
+                let new_delay_time = delay_fluctuating.next();
+                // println!("dt: {}", new_delay_time);
+                delay.set_delay_samples(new_delay_time as usize);
+                let delay_in = frame[0];// + frame[1];
+                let delay_out = delay.next(delay_in);
+                //frame[0] += delay_out;
+                frame[1] = delay_out;
+
+
+                // Add in metronome
+                let new_frame = metronome.next();
+                frame[0] += new_frame;
+                frame[1] += new_frame;
+                
 
                 // Write the sound to the channel buffer
                 *l = frame[0] as f32;
@@ -201,6 +257,11 @@ fn main() {
     loop {
         update_osc(&mut receiver, &mut received_packets);
         process_packets(&mut received_packets, &mut model, &tx);
+        // Receive from the audio thread
+        while let Ok(msg) = rx_env.try_recv() {
+            // Add the EventMsg to the message queue
+            // println!("{}", msg);
+        }
     }
 
     // 6. Optional deactivate. Not required since active_client will deactivate on

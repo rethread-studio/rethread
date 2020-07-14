@@ -47,6 +47,7 @@ pub struct BiquadFilter {
     b0: Sample,
     b1: Sample,
     b2: Sample,
+    ready: bool, // true if the coefficients have been calculated
 }
 
 impl BiquadFilter {
@@ -59,6 +60,7 @@ impl BiquadFilter {
             b0: 0.0,
             b1: 0.0,
             b2: 0.0,
+            ready: false,
         };
         new_filter.calculate_coefficients(sample_rate, frequency, q);
         new_filter
@@ -75,8 +77,14 @@ impl BiquadFilter {
         self.b2 = self.b0;
         self.a1 = 2.0 * (k * k - 1.0) * norm;
         self.a2 = (1.0 - k / q + k * k) * norm;	
+
+        self.ready = true;
     }
     pub fn next(&mut self, input: Sample) -> Sample {
+        if !self.ready {
+            // if we haven't calculated the coefficients the output could be anything
+            return input;
+        }
         let mut output = self.b0*input + self.b1*self.input_buffer[0] + self.b2*self.input_buffer[1];
         output -= self.a1*self.output_buffer[0] + self.a2*self.output_buffer[1];
 
@@ -85,6 +93,13 @@ impl BiquadFilter {
         self.output_buffer[1] = self.output_buffer[0];
         self.output_buffer[0] = output;
         output
+    }
+    /// Resets the history of the filter
+    pub fn reset(&mut self) {
+        self.input_buffer[0] = 0.0;
+        self.input_buffer[1] = 0.0;
+        self.output_buffer[0] = 0.0;
+        self.output_buffer[1] = 0.0;
     }
 }
 
@@ -107,11 +122,14 @@ pub struct Delay {
 
 impl Delay {
     pub fn new(length: usize, delay_samples: usize) -> Result<Self, String> {
-        if delay_samples < length {
+        if delay_samples <= length {
             Ok(Delay{
-                buffer: vec![0.0; length],
+                // create a Vec of length+1 samples in order to support both a delay of 0 and of
+                // `length` without too much confusion i.e. `length` and `delay_samples` can be
+                // the same value
+                buffer: vec![0.0; length+1],
                 write_ptr: 0,
-                read_ptr: length - delay_samples, // initialise read position to the 
+                read_ptr: length+1 - delay_samples, // initialise read position to the 
             })
         } else {
             Err("Delay supplied was longer than the length of the buffer".to_owned())
@@ -133,6 +151,152 @@ impl Delay {
         self.read_ptr = (self.read_ptr + 1) % self.buffer.len();
 
         output
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct Sine {
+    pub sample_rate: f64,
+    pub phase: f64,
+    pub freq: f64,
+    pub amp: f64,
+    pub add: f64,
+}
+
+impl Sine {
+    pub fn new() -> Self {
+        Sine {
+            phase: 0.0,
+            freq: 220.0,
+            amp: 0.0,
+            add: 0.0,
+            sample_rate: 44100.0,
+        }
+    }
+
+    pub fn from(freq: f64, amp: f64, add: f64, phase: f64, sample_rate: f64) -> Self {
+        Sine {
+            phase,
+            freq,
+            amp,
+            add,
+            sample_rate,
+        }
+    }
+
+    pub fn set_range(&mut self, min: f64, max: f64) {
+        self.amp = ((max - min)/2.0).abs();
+        self.add = (max + min)/2.0;
+    }
+
+    pub fn next(&mut self) -> f64 {
+        let sine_amp = (2.0 * PI * self.phase).sin();
+        self.phase += self.freq / self.sample_rate;
+        self.phase %= self.sample_rate;
+        return (sine_amp * self.amp) + self.add;
+    }
+}
+
+pub struct Ramp {
+    value: Sample,
+    increment: Sample,
+    sample_rate: usize,
+    counter: usize,
+}
+
+impl Ramp {
+    pub fn new(start: Sample, sample_rate: usize) -> Self {
+        Ramp {
+            value: start,
+            increment: 0.0,
+            sample_rate: sample_rate,
+            counter: 0,
+        }
+    }
+    pub fn set_value(&mut self, value: Sample) {
+        self.value = value;
+        self.increment = 0.0;
+        self.counter = 0;
+    }
+    pub fn ramp_to(&mut self, end: Sample, duration: f64) {
+        self.counter = (self.sample_rate as f64 * duration) as usize;
+        self.increment = (end - self.value) / self.counter as Sample;
+    }
+    pub fn next(&mut self) -> Sample {
+        if self.counter > 0 {
+            self.value += self.increment;
+            self.counter -= 1;
+        }
+        self.value
+    }
+    pub fn is_finished(&self) -> bool {
+        self.counter <= 0
+    }
+}
+
+pub struct ExponentialDecay {
+    value: Sample,
+    sample_rate: f64,
+    decay_scaler: f64,
+    duration: Sample,
+}
+
+impl ExponentialDecay {
+    pub fn new(duration: f64, sample_rate: f64) -> Self {
+        let mut s = ExponentialDecay {
+            value: 1.0,
+            sample_rate,
+            decay_scaler: 1.0,
+            duration: 0.0,
+        };
+        s.set_duration(duration);
+        s
+    }
+    pub fn set_duration(&mut self, duration: f64) {
+        // From the SC XLine implementation: growth = pow(end / start, 1.0 / counter);
+        let duration_in_samples = duration * self.sample_rate;
+        // 0.001 = -60dB
+        self.decay_scaler = (0.001_f64).powf(1.0/duration_in_samples);
+    }
+    pub fn trigger(&mut self, value: Sample) {
+        self.value = value;
+    }
+    pub fn next(&mut self) -> Sample {
+        self.value *= self.decay_scaler;
+        self.value
+    }
+}
+
+/// The EnvelopeFollower uses two lowpass filters on the absolute value of a signal, 
+/// one fast one for attack and one slow filter for release.
+pub struct EnvelopeFollower {
+    last_output: Sample,
+    attack_coeff: Sample,
+    release_coeff: Sample,
+}
+
+impl EnvelopeFollower {
+    pub fn new(sample_rate: f64) -> Self {
+        let attack_time = 0.002;
+        let decay_time = 0.1;
+        EnvelopeFollower {
+            last_output: 0.0,
+            attack_coeff: (-1.0_f64/attack_time).exp().powf(1.0/sample_rate),
+            release_coeff: (-1.0_f64/decay_time).exp().powf(1.0/sample_rate),
+        }
+    }
+    pub fn next(&mut self, input: Sample) -> Sample {
+        let abs_in = input.abs();
+        let value = if abs_in >= self.last_output {
+            // attack
+            self.last_output * self.attack_coeff + (1.0-self.attack_coeff) * abs_in
+        } else {
+            // release
+            self.last_output * self.release_coeff + (1.0-self.release_coeff) * abs_in
+        };
+        
+        self.last_output = value;
+        value
     }
 }
 
@@ -226,5 +390,46 @@ impl FMSynth {
         // self.lfo_phase = 0.0; // You may or may not want to reset the lfo phase based on how you use it
         // self.m_phase = 0.0;
         // self.c_phase = 0.0;
+    }
+}
+
+pub struct Metronome {
+    tick_duration: usize,
+    sample_counter: usize,
+    ticks_per_bar: usize,
+    current_tick: usize,
+    exponential_decay: ExponentialDecay,
+    synth: Sine,
+}
+
+impl Metronome {
+    pub fn new(bpm: usize, ticks_per_bar: usize, sample_rate: usize) -> Self {
+        let mut m = Metronome{
+            tick_duration: 60 * sample_rate / bpm,
+            sample_counter: 0,
+            ticks_per_bar,
+            current_tick: 0,
+            exponential_decay: ExponentialDecay::new(0.5, sample_rate as f64),
+            synth: Sine::from(2000.0, 0.1, 0.0, 0.0, sample_rate as f64),
+        };
+        m.exponential_decay.trigger(1.0);
+        m
+    }
+    pub fn next(&mut self) -> Sample {
+        // Progress state machine
+        self.sample_counter += 1;
+        if self.sample_counter >= self.tick_duration {
+            self.exponential_decay.trigger(1.0);
+            self.sample_counter = 0;
+            self.current_tick += 1;
+            if self.current_tick >= self.ticks_per_bar {
+                self.synth.freq = 2000.0;
+                self.current_tick = 0;
+            } else {
+                self.synth.freq = 1000.0;
+            }
+        }
+
+        self.synth.next() * self.exponential_decay.next()
     }
 }
