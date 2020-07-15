@@ -1,40 +1,6 @@
 
 (
 "../sound_forest_mixer_gui.scd".loadRelative;
-
-SynthDef(\fm_drone, {
-	arg freq=500, mRatio=1, cRatio=1,
-	index=1, iScale=5, cAtk=4, cRel=(-4),
-	amp=0.2, atk=0.01, rel=3, pan=0, gate = 1,
-	out=0, fx=0, fxsend = -inf,
-	car2, mod2,
-	sig;
-	var car, mod, env, iEnv;
-
-	index = SinOsc.ar(\index_lfo_freq.kr(3)).range(1, LFNoise1.ar(2).range(3, 9));
-	mRatio = LFNoise1.kr(1/10).range(2, 8);
-	// index = 1;
-
-	//amplitude envelope
-	env = EnvGen.kr(Env.asr(atk, 1.0, rel,curve:[cAtk,cRel]), gate: gate, doneAction:2);
-
-	//modulator/carrier
-	mod = SinOsc.ar(freq * mRatio, mul:freq * mRatio * index);
-	car = SinOsc.ar(freq * cRatio + mod) * LFNoise1.kr(1/8).range(0.4, 1.0).pow(2);
-
-	mod2 = SinOsc.ar(freq * 2, mul:freq * 2 * index);
-	car2 = SinOsc.ar(freq + mod2);
-
-	sig = Mix(car + car2);
-	sig = RLPF.ar(sig, \lpf.kr(600), 0.4);
-	sig = sig * env * amp;
-	sig = Pan2.ar(sig, pan);
-
-	//direct out/reverb send
-	Out.ar(out, sig);
-	Out.ar(fx, sig * fxsend.dbamp);
-}).add;
-
 SynthDef(\bubbly_filter, { |out|
 	var sig, maxfreq = \maxfreq.kr(2000), minfreq = \minfreq.kr(100), speed = \speed.kr(3), freq, in, delay_pan;
 	speed = LFNoise1.kr(2).range(5, 12);
@@ -72,21 +38,29 @@ SynthDef(\tick2, {
 
 SynthDef(\sub_tam, {
 	// FM synth for a sub bass type sound rev_channel.buswith some noise on top
-	var freq = \freq.kr(50), sig, env, sig1, sig2, sig3, mod1_1, mRatio = \mRatio.kr(2), mod1_2,
-	mod2_1, mod2_2, mod2_1_ratio = 16*6, mod2_2_ratio = SinOsc.ar(freq*rrand(10, 14)).range(1, 16*5);
-	env = Env.perc(\atk.kr(0.001), \rel.kr(8), 1.0, [\c0.kr(4), \c1.kr(-4)]).ar(2);
+	var freq = \freq.kr(32), sig, env, sig1, sig2, sig3, mod1_1, mRatio = \mRatio.kr(2), mod1_2,
+	mod2_1, mod2_2, mod2_1_ratio = 16*6, mod2_2_ratio = SinOsc.ar(freq*Rand(10, 14)).range(1, 16*8) *4, feedback,
+	atk = \atk.kr(05), rel = \rel.kr(5), brightnessRamp, lowcut;
 
-	mod1_2 = SinOsc.ar(freq * 3, mul: freq * mRatio * env * 0.5);
-	mod1_1 = SinOsc.ar(freq * mRatio + mod1_2, mul: freq * mRatio * env.pow(2));
+	env = Env.perc(atk, rel, 1.0, [\c0.kr(2), \c1.kr(-4)]).ar(2);
+
+	brightnessRamp = XLine.kr(0.1, 1, atk);
+
+	feedback = LocalIn.ar(1);
+	mod1_2 = SinOsc.ar(freq * 8 + feedback, mul: freq * mRatio);
+	LocalOut.ar(mod1_2 * 0.1);
+	mod1_1 = SinOsc.ar(freq * mRatio + mod1_2, mul: freq * mRatio * Line.kr(0.0, 1.0, atk/2));
 	sig1 = SinOsc.ar(freq + mod1_1) * env;
 
-	mod2_2 = SinOsc.ar(freq * mod2_2_ratio, mul: freq * mod2_2_ratio * env.pow(4));
-	mod2_1 = SinOsc.ar(freq * mod2_1_ratio + mod2_2, mul: freq * mod2_1_ratio * env.pow(3));
-	sig2 = SinOsc.ar(freq * 16 + mod2_1) * env.pow(2) * 0.005;
+	mod2_2 = SinOsc.ar(freq * mod2_2_ratio, mul: freq * mod2_2_ratio * brightnessRamp * freq);
+	mod2_1 = SinOsc.ar(freq * mod2_1_ratio + mod2_2, mul: freq * mod2_1_ratio * brightnessRamp);
+	sig2 = SinOsc.ar(freq * 16 + mod2_1) * env.pow(1.5) * XLine.kr(0.05, 0.4, atk+rel);
 
 	sig = sig1 + sig2;
 	sig = sig * \amp.kr(0.5);
 	// sig = sig + (DPW3Tri.ar(freq*2) * 0.5 * env.pow(3));
+	lowcut = brightnessRamp.pow(3);
+	sig = (HPF.ar(sig, 100) * lowcut) + (sig * (1-lowcut));
 
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
@@ -114,19 +88,64 @@ SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0 |
 	Out.ar(send, sig * send_amp);
 }).add;
 
-SynthDef(\rain_pulse, {
-	var freq = \freq.kr(200), length = \length.kr(0.5), brightness = \brightness.kr(0.9),
-	sin = SinOsc.ar(freq) * 0.05,
-	sig = Pulse.ar(freq) * 0.05,
-	env = Env.perc(\atk.kr(0.01), length, 1.0, -12).ar(2);
-	// Apply LPF to the square wave
-	sig = LPF.ar(sig, freq*Line.kr(\start_harm.kr(4), \end_harm.kr(1.0), length)) * \amp.kr(0.5);
-	// Mix the square and the sine
-	sig = ( (sig * brightness) + (sin * (1-brightness)) ) * env;
+SynthDef(\reverse_sine, {
+	var sig, env, freq = \freq.kr(220);
 
+	env = Env.perc(\atk.kr(2), \rel.kr(0.1), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
+	sig = SinOsc.ar(freq) * env;
+	2.do { |i| var mult = i+2;
+		sig = sig + SinOsc.ar(freq * mult * 1.01, // * LFNoise1.kr(7).range(0.98, 1.02),
+			mul: env.pow(mult*mult));
+	};
+
+	sig = sig * 0.3 * \amp.kr(0.5);
+	sig = Pan2.ar(sig, \pan.kr(0));
+
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\reverse_saw, {
+	var sig, env, freq = \freq.kr(220);
+
+	env = Env.perc(\atk.kr(2), \rel.kr(0.1), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
+	sig = Saw.ar(freq) * env;
+	2.do { |i| var mult = i+2;
+		sig = sig + Saw.ar(freq * mult * 1.01, // * LFNoise1.kr(7).range(0.98, 1.02),
+			mul: env.pow(mult*mult));
+	};
+
+	sig = sig * 0.3 * \amp.kr(0.5);
+	sig = Pan2.ar(sig, \pan.kr(0));
+
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\reverse_google, {
+	var sig, env, freq = \freq.kr(220);
+
+	env = Env.perc(\atk.kr(2), \rel.kr(0.1), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
+	sig = Pulse.ar(freq) * env;
+	2.do { |i| var mult = i+2;
+		sig = sig + DPW3Tri.ar(freq * mult * 1.01, // * LFNoise1.kr(7).range(0.98, 1.02),
+			mul: env.pow(mult*mult));
+	};
+
+	sig = sig * 0.3 * \amp.kr(0.5) * LFSaw.ar(Rand(1.5, 3)).range(0.2, 1.0).lag(0.01);
+	sig = Pan2.ar(sig, \pan.kr(0));
+
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+
+SynthDef(\thump, {
+	var sig, env, freq = \freq.kr(220);
+	env = Env.perc(\atk.kr(0.1), \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
+	sig = Resonz.ar(PinkNoise.ar(mul: env.pow(100) * 20), freq, 0.007, mul: 20);
+	sig = sig * \amp.kr(0.5);
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
 }).add;
+
 )
 (
 var filter_bus, filter, drone, drone_channel, cloud_channel, sine_channel, filter_channel, sub_channel, rain_channel, rev_channel;
@@ -166,7 +185,12 @@ s.newBusAllocators;
 				]
 			);
 			rrand(self.del_min, self.del_max).wait;
-		}
+		},
+		growAmp: {|self, growth|
+			self.dynamic_amp = self.dynamic_amp * growth;
+			self.dynamic_amp = max(min(self.dynamic_amp, 1.0), 0.0001);
+		},
+
 	);
 	ev.loopFunc = Task({
 		loop{
@@ -226,11 +250,9 @@ cloud_channel = ~makeMixerChannel.("Clouds", 0);
 cloud_channel.set_send(rev_channel.bus, 0.5);
 filter_channel = ~makeMixerChannel.("Filter", 0);
 filter_channel.set_send(rev_channel.bus, 0.2);
-drone_channel = ~makeMixerChannel.("Drone", filter_bus);
-drone_channel.set_amp(0.5);
 sine_channel = ~makeMixerChannel.("Sines", filter_bus);
 sub_channel = ~makeMixerChannel.("Sub", 0);
-sub_channel.set_send(rev_channel.bus, 0.0);
+sub_channel.set_send(rev_channel.bus, 0.2);
 rain_channel = ~makeMixerChannel.("Rain", 0);
 rain_channel.set_send(rev_channel.bus, 1.0);
 ~random_fm_channel = ~makeMixerChannel.("Rnd FM", 0);
@@ -239,45 +261,27 @@ rain_channel.set_send(rev_channel.bus, 1.0);
 ~startRev.(cloud_channel.bus);
 
 filter = filter_channel.play_on(\bubbly_filter, [\speed, 13, \in, filter_bus, \out, filter_channel.bus]);
-drone = drone_channel.play_on(\fm_drone, [\freq, 32, \amp, 0.1, \cRatio, 1, \mRatio, 2, \index, 7, \index_lfo_freq, 7, \iScale, 4, \out, drone_channel.bus]);
-
-// Drone update process
-~droneParams = ();
-~droneParams.energy = 0.0;
-~droneParams.amp = 0.0;
-{
-	var reciprocal_steps_per_second = 100.reciprocal, energyDecay = (0.001 / 1.0).pow(reciprocal_steps_per_second/20.0);
-	("drone energy decay: " ++ energyDecay).postln;
-	loop {
-		var amp = ~droneParams.energy.linlin(0, 10, 0.001, 0.8);
-		~droneParams.amp = (~droneParams.amp * 0.9) + (amp * 0.1);
-		drone.set(\amp, ~droneParams.amp);
-
-		~droneParams.energy = ~droneParams.energy * energyDecay;
-		reciprocal_steps_per_second.wait;
-	};
-}.fork;
-
 
 // play long sines
 {
 	loop {
-		sine_channel.play_on(\long_sine, [\freq, rrand(700, 2000), \amp, rrand(0.01, 0.2), \pan, rrand(-0.5, 0.5), \out, sine_channel.bus]);
+		var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, 5);
+		sine_channel.play_on(\long_sine, [\freq, freq, \amp, rrand(0.02, 0.4), \pan, rrand(-0.5, 0.5), \out, sine_channel.bus]);
 		rrand(1, 5).wait;
 	};
 }.fork;
 
 // play sub base
-{
+/*{
 	loop {
-		sub_channel.play_on(\sub_tam, [\freq, 32, \amp, rrand(0.1, 0.7), \pan, rrand(-0.5, 0.5), \c0, 2, \atk, rrand(4, 8), \rel, 1, \out, sub_channel.bus]);
-		rrand(7, 20).wait;
+		sub_channel.play_on(\sub_tam, [\freq, 32, \amp, rrand(0.1, 0.7), \pan, rrand(-0.5, 0.5), \c0, 2, \atk, rrand(2, 15), \rel, rrand(3, 10), \out, sub_channel.bus]);
+		rrand(7, 30).wait;
 	};
-}.fork;
+}.fork;*/
 
 // play rain
 ~chordDeltas = [9, 5, 17, 9, 13].reverse;
-~chord = [ 190, 177, 168, 151, 146, 137, 124, 115, 98, 93, 84 ] - 53;
+~chord = [ 0, 17, 31, 39, 53, 62, 75, 84, 96, 106] +  53;
 ~rainParams = ();
 ~rainParams.pan = 0;
 ~rainParams.length = 2;
@@ -286,7 +290,7 @@ drone = drone_channel.play_on(\fm_drone, [\freq, 32, \amp, 0.1, \cRatio, 1, \mRa
 ~rainParams.brightness = 0.5;
 // ~rainParams.out = 0;
 ~rainParams.out = rain_channel.bus;
-~rainParams.octave = 6;
+~rainParams.octave = 3;
 /*{ var delay_mod = 1.0;
 	loop { var chord_size = ~chord.size;
 		~chord.do{ |degree, i|
@@ -311,25 +315,20 @@ drone = drone_channel.play_on(\fm_drone, [\freq, 32, \amp, 0.1, \cRatio, 1, \mRa
 	}
 }.fork;*/
 
-~cloud = ~makeCloud.(5, 0);
-~cloud.del_max = 0.5;
+~cloud = ~makeCloud.(6, 0);
+~cloud.del_max = 0.1;
 ~cloud.amp_min = 0.01;
 ~cloud.amp = 0.4;
 ~cloud.out_bus = cloud_channel.bus;
 
-~cloud2 = ~makeCloud.(6, 0);
-~cloud2.del_max = 0.5;
-~cloud2.amp_min = 0.01;
-~cloud2.amp = 0.4;
-~cloud2.out_bus = cloud_channel.bus;
+~allClouds = [~cloud];
 
-~allClouds = [~cloud, ~cloud2];
-
-~makeSoundForestGui.([drone_channel, sine_channel, filter_channel, cloud_channel, rain_channel, ~random_fm_channel, sub_channel, rev_channel], ~allClouds);
-
+~makeSoundForestGui.([sine_channel, filter_channel, cloud_channel, rain_channel, sub_channel, rev_channel], ~allClouds);
 
 // Receive OSC packets on web traffic
 ~num_packets = 0;
+~packet_density = 0;
+~sub_tam_last_launch = Date.localtime.rawSeconds;
 // Receive packages of web traffic data
 o = OSCFunc({ arg msg, time, addr, recvPort;
 	var timestamp = msg[1],
@@ -344,7 +343,8 @@ o = OSCFunc({ arg msg, time, addr, recvPort;
 	speaker = msg[10],
 	local_mac = msg[11],
 
-	freq, mRatio = 2, iScale = 1, rel = len.linexp(1, 2000, 0.01, 2), amp = 0.6, ip_parts, degree;
+	freq, mRatio = 2, iScale = 1, rel = len.linexp(1, 2000, 0.01, 2), amp = 0.6, ip_parts, degree,
+	reverse_synth = \reverse_sine;
 
 	// Post all the data for every packet:
 	// [msg, time, addr, recvPort].postln;
@@ -352,50 +352,122 @@ o = OSCFunc({ arg msg, time, addr, recvPort;
 	// Convert out to a boolean
 	if(out == \true, { out = true }, { out = false });
 
-	if(out == true) {
-		mRatio = 9;
-	};
-
-	switch(remote_location.asSymbol,
+	/*switch(remote_location.asSymbol,
 		\Sweden, { ~chord = [ 159, 155, 124, 106, 102, 71, 53, 49, 18, 0, -4 ] },
 		"United States".asSymbol, { ~chord = [ 159, 154, 145, 137, 132, 123 ] }
-	);
+	);*/
 
 	// Interpret the IP as a float, convert it to midi note numbers and convert that to frequency.
 	// freq = remote_ip.asFloat.linexp(0.0, 255.255, 48, 72).floor.midicps;
 
 	// Extract all the integers from the remote_ip
 	ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
-	degree = ~chord[ip_parts[3] % ~chord.size];
+	// degree = ~chord[ip_parts[3] % ~chord.size];
+	degree = ~chord.choose; // random pitch from the chord
 	freq = ~s53.degreeToFreq(degree, 0.midicps, ~rainParams.octave);
 
-	if(services == \Google, {
-		iScale = 2;
-		freq = freq * 2;
+	/*if(services.asString.size > 2) {
+		services.postln;
+	};*/
+	switch(services,
+		\Google, { "Google".postln; reverse_synth = \reverse_google },
+		"Google,Youtube".asSymbol, {},
+		\Amazon, { services.postln; reverse_synth = \reverse_saw },
+		"Slack,Amazon".asSymbol, {},
+		\Facebook, { services.postln; },
+		\Cloudflare, { services.postln; },
+		"Github,Microsoft".asSymbol, { services.postln; }
+	);
+
+	// count the number of packets received
+	~num_packets = ~num_packets + 1;
+	~packet_density = ~packet_density + 1;
+
+	if(~packet_density > 100, {
+		if(Date.localtime.rawSeconds - ~sub_tam_last_launch > 10.0, {
+			"sub_tam launched".postln;
+			~sub_tam_last_launch = Date.localtime.rawSeconds;
+			sub_channel.play_on(\sub_tam, [
+				\freq, 32,
+				\amp, rrand(0.1, 0.7),
+				\pan, rrand(-0.5, 0.5),
+				\c0, 2,
+				\atk, rrand(2, 15),
+				\rel, rrand(3, 10),
+				\out, sub_channel.bus]);
+		}, {
+
+		});
+		~cloud.growAmp(1.008);
+	}, {
+		// only do if the packet density isn't too high
+		if(s.peakCPU < 80 && (s.numSynths < 100),  {
+			// Play a reverse sine if the packet is going out, and a thump if it's going in
+			if(out == true, {
+				rain_channel.play_on(reverse_synth, [
+					\freq, freq,
+					\atk, rrand(1.0, 5.0),
+					\rel, rrand(0.1, 4),
+					\c0, rrand(1, 4),
+					\c1, \sine,
+					\pan, rrand(-0.7, 0.7),
+					\amp, 0.05 * amp,
+					\out, ~rainParams.out]);
+			}, {
+				rain_channel.play_on(\thump, [
+					\freq, freq,
+					\atk, rrand(0.18, 0.21),
+					\rel, 2,
+					\c0, -3,
+					\c1, \sine,
+					\pan, rrand(-0.7, 0.7),
+					\amp, 0.05 * amp,
+					\out, ~rainParams.out]);
+			});
+		});
+
 	});
-
-
-	rain_channel.play_on(\rain_pulse, [
-		\freq, freq,
-		\pan, ~rainParams.pan,
-		\length, ~rainParams.length,
-		\start_harm, ~rainParams.start_harm,
-		\brightness, ~rainParams.brightness,
-		\end_harm, 1.0,
-		\amp, amp,
-		\out, ~rainParams.out]);
 
 	// Add to drone energy
 	~droneParams.energy = ~droneParams.energy + 1.0;
 
 
-	// count the number of packets received
-	~num_packets = ~num_packets + 1;
 
 }, '/package'); // create the OSCFunc
 
+{ // Exponential envelope growth = pow(end / start, 1.0 / counter);
+	var steps = 100, growth = (0.001).pow(1.0/steps);
+	loop {
+		~packet_density.postln;
+		~packet_density = ~packet_density * growth;
+		steps.reciprocal.wait;
+	};
+}.fork;
+
+// Slowly decrease the amp of clouds used for high intensity bursts of data
+{
+	var steps = 100, growth = (0.001).pow(1.0/(steps*5.0));
+	loop {
+		~cloud.growAmp(growth);
+		steps.reciprocal.wait;
+	};
+}.fork;
+
+
 )
+s.peakCPU
+~rainParams.octave = 3
 ~droneParams.energy
-
-
-Synth(\sub_tam, [\freq, 32, \amp, rrand(0.1, 0.7), \pan, rrand(-0.5, 0.5), \c0, 2, \atk, 4, \rel, 1, \out, 0]);
+(2.0).pow(1.0/10)
+(
+Synth(\reverse_google, [
+	\freq, 200,
+	\atk, rrand(1.0, 5.0),
+	\rel, rrand(0.1, 4),
+	\c0, rrand(1, 4),
+	\c1, \sine,
+	\pan, rrand(-0.7, 0.7),
+	\amp, 0.1,
+	\out,0]);
+)
+Date.localtime.rawSeconds
