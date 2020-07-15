@@ -1,11 +1,11 @@
 {
     "General": {
-        "interface": "wlan0",
-        "sniffingAutoStart": true,
-        "oscAutoStart": false
+        "interface": "wlp33s0",
+        "sniffingAutoStart": false,
+        "oscAutoStart": true
     },
     "OSC": {
-        "ip": "83.251.112.103",
+        "ip": "127.0.0.1",
         "port": "57120",
         "server_port": 57121,
         "address": "/package"
