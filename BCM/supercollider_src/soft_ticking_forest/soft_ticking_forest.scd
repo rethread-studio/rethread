@@ -1,5 +1,8 @@
 
 (
+~highActivityThreshold = 20;
+~mediumActivityThreshold = 10;
+~lowActivityThreshold = 1;
 "../sound_forest_mixer_gui.scd".loadRelative;
 SynthDef(\bubbly_filter, { |out|
 	var sig, maxfreq = \maxfreq.kr(2000), minfreq = \minfreq.kr(100), speed = \speed.kr(3), freq, in, delay_pan;
@@ -146,8 +149,40 @@ SynthDef(\thump, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 
+SynthDef(\softy, {
+	var sig, env, freq = \freq.kr(220);
+	env = Env.perc(\atk.kr(0.1), \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
+	sig = Resonz.ar(PinkNoise.ar(mul: env), freq, 0.007, mul: 20);
+	sig = sig * \amp.kr(0.5);
+	sig = Pan2.ar(sig, \pan.kr(0));
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\glitchy_rise, { | freq = 500, mRatio = 1, pan = 0, height = 2, atk = 0.1, rel = 1.1 |
+	var sig, env, mod, modfreq;
+
+	env = Env.perc(atk, rel, curve: [\c0.kr(2), \c1.kr(\sine)]).kr(2);
+
+	modfreq = freq * Line.kr(1.0, height, atk + rel);
+	mod = SinOsc.ar(modfreq * mRatio) * modfreq * mRatio;
+	sig = Pulse.ar(min(max(modfreq + mod, 20), 20000)) * 0.07 * env;
+	sig = sig + (Pulse.ar(freq) * 0.07 * env.pow(2));
+	sig = Pan2.ar(sig, pan);
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\bounce_away, { | freq = 300 |
+	var trig, sig, pan = \pan.kr(0);
+	trig = Impulse.ar(Line.ar(Rand(3, 10), Rand(5, 20), 2));
+	sig = Saw.ar([freq, freq * 8, Rand(freq * 8, freq*12).min(19000), Rand(freq*13, freq*14).min(19000)]) * 0.3 * Decay.ar(trig, Line.kr(0.03, 0.005, 2));
+	sig = Mix(sig);
+	sig = sig * Env.perc(\atk.kr(0.01), \rel.kr(2), curve: [\c0.kr(2), \c1.kr(\sine)]).kr(2);
+	sig = Pan2.ar(sig, pan) * \amp.kr(0.5);
+	Out.ar(\out.kr(0), sig);
+}).add;
 {
-	var filter_bus, filter, drone, drone_channel, cloud_channel, sine_channel, filter_channel, sub_channel, rain_channel, rev_channel, tick_channel;
+	var filter_bus, filter, drone, drone_channel, cloud_channel, sine_channel, filter_channel, sub_channel, rain_channel, rev_channel, tick_channel,
+	default_channel, google_channel, facebook_channel, amazon_channel, cloudflare_channel, youtube_channel;
 
 	s.newBusAllocators;
 
@@ -254,8 +289,22 @@ SynthDef(\thump, {
 	sub_channel.set_send(rev_channel.bus, 0.2);
 	rain_channel = ~makeMixerChannel.("Rain", 0);
 	rain_channel.set_send(rev_channel.bus, 1.0);
+	default_channel = ~makeMixerChannel.("Default", 0);
+	default_channel.set_send(rev_channel.bus, 1.0);
+	google_channel = ~makeMixerChannel.("Google", 0);
+	google_channel.set_send(rev_channel.bus, 1.0);
+	facebook_channel = ~makeMixerChannel.("Facebook", 0);
+	facebook_channel.set_send(rev_channel.bus, 1.0);
+	amazon_channel = ~makeMixerChannel.("Amazon", 0);
+	amazon_channel.set_send(rev_channel.bus, 1.0);
+	cloudflare_channel = ~makeMixerChannel.("Coudflare", 0);
+	cloudflare_channel.set_send(rev_channel.bus, 1.0);
+	youtube_channel = ~makeMixerChannel.("YouTube", 0);
+	youtube_channel.set_send(rev_channel.bus, 1.0);
 	tick_channel = ~makeMixerChannel.("Tick", 0);
 	tick_channel.set_send(rev_channel.bus, 1.0);
+
+
 
 
 	~startRev.(cloud_channel.bus);
@@ -277,7 +326,7 @@ SynthDef(\thump, {
 
 	~allClouds = [];
 
-	~makeSoundForestGui.([tick_channel, sine_channel, filter_channel, cloud_channel, rain_channel, sub_channel, rev_channel], ~allClouds);
+	~makeSoundForestGui.([tick_channel, default_channel, google_channel, facebook_channel, amazon_channel, cloudflare_channel, youtube_channel, rev_channel], ~allClouds);
 
 	// Create the global stats object (environment)
 
@@ -333,38 +382,301 @@ SynthDef(\thump, {
 	// Sound process factory
 	~addSoundProcessToService = { | service, inout |
 		// The tick function is the function for launching sounds that is being called
+		var soundType = \standard;
+		switch(service.identifier,
+			\Google, { soundType = \Google },
+			"Google,Youtube".asSymbol, { soundType = \YouTube},
+			\Amazon, { soundType = \Amazon },
+			"Slack,Amazon".asSymbol, { soundType = \Slack},
+			\Facebook, { soundType = \Facebook },
+			\Cloudflare, { soundType = \Cloudflare },
+			"Github,Microsoft".asSymbol, { soundType = \GitHub }
+		);
+		service.soundType = soundType;
 		if(inout == \in, {
 			service.tick = { | self |
-				if(self.packets > 0) {
-					(self.identifier.asString + self.packets).postln;
-					rain_channel.play_on(\thump, [
-						\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
-						\atk, rrand(0.18, 0.21),
-						\rel, 2,
-						\c0, -3,
-						\c1, \sine,
-						\pan, rrand(-0.7, 0.7),
-						\amp, 0.05,
-						\out, ~rainParams.out]);
-				}
+				~playSound.(self.soundType, \in, self.packets);
 			};
 		}, {
 			service.tick = { | self |
-				if(self.packets > 0) {
-					(self.identifier.asString + self.packets).postln;
-					rain_channel.play_on(\reverse_sine, [
-						\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
-						\atk, rrand(1.0, 5.0),
-						\rel, rrand(0.1, 4),
-						\c0, rrand(1, 4),
-						\c1, \sine,
-						\pan, rrand(-0.7, 0.7),
-						\amp, 0.05,
-						\out, ~rainParams.out]);
-				}
+				~playSound.(self.soundType, \out, self.packets);
 			};
 		});
 	};
+
+	//
+	~playSound = { | type, inout, packets |
+		var activity = \none;
+		if(packets > ~highActivityThreshold, {
+			activity = \high;
+		}, {
+			if(packets > ~mediumActivityThreshold, {
+				activity = \medium;
+			}, {
+				if(packets > ~lowActivityThreshold, {
+					activity = \low;
+				});
+			});
+		});
+		if(activity != \none) { var channel;
+			type.postln;
+			switch(type,
+				\standard, {
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0, thump_atk = rrand(0.18, 0.21);
+					channel = default_channel;
+					switch(activity,
+						\low, {
+							amp = amp * rrand(0.3, 0.7);
+						},
+						\medium, {
+							amp = amp * rrand(0.7, 1.2);
+							thump_atk = rrand(1, 2);
+						},
+						\high, {
+							amp = amp * rrand(1.2, 2.0);
+							freq = freq * (2.pow(rrand(-1, 1.0).round));
+							release_coeff = rrand(0.3, 0.5);
+							thump_atk = rrand(2, 3);
+						}
+					);
+					if(inout == \out, {
+						channel.play_on(\reverse_sine, [
+							\freq, freq,
+							\atk, rrand(1.0, 5.0) * release_coeff,
+							\rel, rrand(0.1, 4 * release_coeff),
+							\c0, rrand(1, 4),
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05 * amp,
+							\out, channel.bus]);
+					}, {
+						channel.play_on(\thump, [
+								\freq, freq,
+								\atk, thump_atk,
+								\rel, 2,
+								\c0, -3,
+								\c1, \sine,
+								\pan, rrand(-0.7, 0.7),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
+						});
+					},
+				\Google, {
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
+					channel = google_channel;
+					switch(activity,
+						\low, {
+							amp = amp * rrand(0.3, 0.7);
+						},
+						\medium, {
+							amp = amp * rrand(0.7, 1.2);
+						},
+						\high, {
+							amp = amp * rrand(1.2, 2.0);
+							freq = freq * (2.pow(rrand(-1, 1.0).round));
+							release_coeff = rrand(0.3, 0.5);
+						}
+					);
+					if(inout == \out, {
+						channel.play_on(\reverse_google, [
+							\freq, freq,
+							\atk, rrand(1.0, 5.0) * release_coeff,
+							\rel, rrand(0.1, 4 * release_coeff),
+							\c0, rrand(1, 4),
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05 * amp,
+							\out, channel.bus]);
+					}, {
+						channel.play_on(\tick2,
+							[
+								\freq, min(freq * 4, 18000),
+								\rq, exprand(0.001, 0.1),channel = default_channel;
+								\out, channel.bus,
+								\amp, exprand(0.01, 0.05) * amp,
+								\atk, 0.001 * release_coeff,
+								\rel, 0.01, //0.01,
+								\pan, rrand(-0.5, 0.5),
+							]
+						);
+					});
+				},
+				\Amazon, {
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
+					channel = amazon_channel;
+					switch(activity,
+						\low, {
+							amp = amp * rrand(0.3, 0.7);
+						},
+						\medium, {
+							amp = amp * rrand(0.7, 1.2);
+						},
+						\high, {
+							amp = amp * rrand(1.2, 2.0);
+							freq = freq * (2.pow(rrand(-1, 1.0).round));
+							release_coeff = rrand(0.3, 0.5);
+						}
+					);
+					if(inout == \out, {
+						channel.play_on(\reverse_saw, [
+							\freq, freq,
+							\atk, rrand(1.0, 5.0) * release_coeff,
+							\rel, rrand(0.1, 4 * release_coeff),
+							\c0, rrand(1, 4),
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05 * amp,
+							\out, channel.bus]);
+					}, {
+						channel.play_on(\tick2,
+							[
+								\freq, freq * 2,
+								\rq, exprand(0.001, 0.1),
+								\out, channel.bus,
+								\amp, exprand(0.01, 0.05) * amp,
+								\atk, 0.001 * release_coeff,
+								\rel, 0.01, //0.01,
+								\pan, rrand(-0.5, 0.5),
+							]
+						);
+					});
+				},
+				\Cloudflare, {
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
+					channel = cloudflare_channel;
+					switch(activity,
+						\low, {
+							amp = amp * rrand(0.3, 0.7);
+						},
+						\medium, {
+							amp = amp * rrand(0.7, 1.2);
+						},
+						\high, {
+							amp = amp * rrand(1.2, 2.0);
+							freq = freq * (2.pow(rrand(-1, 1.0).round));
+							release_coeff = rrand(0.3, 0.5);
+						}
+					);
+					if(inout == \out, {
+						channel.play_on(\softy, [
+							\freq, freq,
+							\atk, 3,
+							\rel, 2,
+							\c0, 2,
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05,
+							\out, channel.bus]);
+					}, {
+						if(activity == \high, {
+							channel.play_on(\glitchy_rise, [
+								\freq, freq,
+								\atk, 0.1,
+								\rel, rrand(2, 4),
+								\c0, -3,
+								\c1, -6,
+								\pan, rrand(-0.7, 0.7),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
+						}, {
+							channel.play_on(\thump, [
+								\freq, freq,
+								\atk, 0.5,
+								\rel, 2,
+								\c0, -3,
+								\c1, \sine,
+								\pan, rrand(-0.7, 0.7),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
+
+						});
+					});
+				},
+				\YouTube, {
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
+					channel = youtube_channel;
+					switch(activity,
+						\low, {
+							amp = amp * rrand(0.3, 0.7);
+						},
+						\medium, {
+							amp = amp * rrand(0.7, 1.2);
+							release_coeff = rrand(1.0, 1.5);
+						},
+						\high, {
+							amp = amp * rrand(1.2, 2.0);
+							freq = freq * (2.pow(rrand(-1, 1.0).round));
+							release_coeff = rrand(1.5, 2.5);
+						}
+					);
+					if(inout == \out, {
+						channel.play_on(\bounce_away, [
+							\freq, freq,
+							\atk, 0.1,
+							\rel, rrand(1.5, 2.0) * release_coeff,
+							\c0, 2,
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.1 * amp,
+							\out, channel.bus]);
+					}, {
+						channel.play_on(\bounce_away, [
+							\freq, freq*2,
+							\rel, 0.1,
+							\atk, rrand(0.7, 1.0) * release_coeff,
+							\c1, 2,
+							\c0, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.1 * amp,
+							\out, channel.bus]);
+					});
+				},
+				\Facebook, {
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave-2), amp = 0.5, release_coeff = 1.0, thump_atk = rrand(0.18, 0.21);
+					channel = facebook_channel;
+					switch(activity,
+						\low, {
+							amp = amp * rrand(0.3, 0.7);
+						},
+						\medium, {
+							amp = amp * rrand(0.7, 1.2);
+							release_coeff = rrand(1.0, 1.5);
+							thump_atk = rrand(0.5, 1);
+						},
+						\high, {
+							amp = amp * rrand(1.2, 2.0);
+							freq = freq * (2.pow(rrand(-1, 1.0).round));
+							release_coeff = rrand(0.3, 0.7);
+							thump_atk = rrand(1.0, 2);
+						}
+					);
+					if(inout == \out, {
+						channel.play_on(\reverse_google, [
+							\freq, freq,
+							\atk, rrand(1.0, 5.0) * release_coeff,
+							\rel, rrand(0.1, 4 * release_coeff),
+							\c0, rrand(1, 4),
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),channel = default_channel;
+							\amp, 0.05 * amp,
+							\out, channel.bus]);
+					}, {
+						channel.play_on(\thump, [
+								\freq, freq,
+								\atk, thump_atk,
+								\rel, 2,
+								\c0, -3,
+								\c1, \sine,
+								\pan, rrand(-0.7, 0.7),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
+					});
+				}
+			);
+
+		};
+	};
+
 
 	// Receive OSC packets on web traffic
 	~num_packets = 0;
@@ -417,7 +729,7 @@ SynthDef(\thump, {
 				service.packets = 0;
 			};
 
-			if(numInPackets > 0) {
+			/*if(numInPackets > 0) {
 				rain_channel.play_on(\thump, [
 					\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
 					\atk, rrand(0.18, 0.21),
@@ -453,7 +765,7 @@ SynthDef(\thump, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, 5);
 					sine_channel.play_on(\long_sine, [\freq, freq, \amp, rrand(0.1, 0.4), \pan, rrand(-0.5, 0.5), \out, sine_channel.bus]);
 				};
-			};
+			};*/
 
 			tick_channel.play_on(\tick2,
 				[
