@@ -1,6 +1,8 @@
 //! Sonifier for ftrace software trace
 
 use nannou_osc as osc;
+use nannou::prelude::*;
+use nannou::ui::prelude::*;
 
 use std::sync::mpsc::channel;
 use crossbeam_channel::bounded;
@@ -8,6 +10,7 @@ use std::collections::VecDeque;
 extern crate jack;
 extern crate sample;
 
+use std::thread;
 use std::io;
 use std::str::FromStr;
 
@@ -24,7 +27,21 @@ const PORT: u16 = 12345;
 // Perhaps as simple as converting wall-clock time to samples and consider wall-clock 0 to equal 0 samples + constant 
 // delay in order to have time to send the message before it is scheduled to be played.
 
+struct Ids {
+    ring_width: widget::Id,
+    max_lines: widget::Id,
+    friction: widget::Id,
+    force_strength: widget::Id,
+}
+
 struct Model {
+    _window: window::Id,
+    ui: Ui,
+    widget_ids: Ids,
+    
+}
+
+struct OSCModel {
     sample_rate: usize,
     /// The timestamp of the first packet received
     first_packet_timing: f64,
@@ -50,6 +67,151 @@ impl EventMsg {
             false
         }
     }
+}
+
+fn model(app: &App) -> Model {
+    let _window = app
+        .new_window()
+        .size(1024, 1024)
+        .view(view)
+        .event(window_event)
+        .build()
+        .unwrap();
+
+    // Audio setup
+
+    // let audio_interface = son::AudioInterface::new();
+
+    // Ui setup
+
+    let mut ui = app.new_ui().build().unwrap();
+
+    let widget_ids = Ids {
+        ring_width: ui.generate_widget_id(),
+        max_lines: ui.generate_widget_id(),
+        friction: ui.generate_widget_id(),
+        force_strength: ui.generate_widget_id(),
+    };
+
+    
+
+    // let mut point_dist: f32 = MAX_LINE_LENGTH2.sqrt();
+    // point_dist *= 0.6;
+    // let points_per_row: u64 =
+    //     ((app.window_rect().right() - app.window_rect().left()) / point_dist) as u64;
+
+    // for ix in 1..points_per_row {
+    //     for iy in 1..points_per_row {
+    //         let mut x = ix as f32 * point_dist + app.window_rect().left();
+    //         println!("x: {:?}", x);
+    //         if iy % 2 == 1 {
+    //             x += point_dist / 2.0;
+    //         }
+    //         let y = app.window_rect().top() - iy as f32 * point_dist;
+    //         if !(iy % 2 == 0 && ix == 1) {
+    //             let screen_point = pt2(x, y);
+    //             let image_point = pt2(
+    //                 (screen_point.x + app.window_rect().right()) * img_ratio,
+    //                 (screen_point.y + app.window_rect().top()) * img_ratio);
+    //             println!("image_point: {:?}", image_point);
+    //             let pixel = image_rgba.get_pixel(image_point.x as u32, image_point.y as u32);
+    //             let luma = pixel.to_luma().channels()[0];
+    //             let rgb_vals: Vec<f32> = pixel.channels().iter().cloned().map(|x| x as f32 / 255.0).collect();
+    //             let color: Rgba = rgba(rgb_vals[0], rgb_vals[1], rgb_vals[2], rgb_vals[3]);
+    //             let new_point = Rc::new(RefCell::new(LinePoint::new_at(
+    //                 screen_point,
+    //                 0,
+    //                 LIFETIME,
+    //                 color,
+    //             )));
+    //             points.push(new_point);
+    //         }
+    // }
+    // }
+
+    let mut model = Model {
+        _window,
+        ui,
+        widget_ids,
+    };
+    model
+}
+
+fn window_event(_app: &App, model: &mut Model, event: WindowEvent) {
+    match event {
+        KeyPressed(key) => {
+            match key {
+                Key::R => {
+                   
+                }
+                Key::Space => {
+
+                }
+                _ => (),
+            }
+        }
+        KeyReleased(_key) => {}
+        MouseMoved(_pos) => {}
+        MousePressed(_button) => {}
+        MouseReleased(_button) => {}
+        MouseEntered => {}
+        MouseExited => {}
+        MouseWheel(_amount, _phase) => {}
+        Moved(_pos) => {}
+        Resized(_size) => {}
+        Touch(_touch) => {}
+        TouchPressure(_pressure) => {}
+        HoveredFile(_path) => {}
+        DroppedFile(_path) => {}
+        HoveredFileCancelled => {}
+        Focused => {}
+        Unfocused => {}
+        Closed => {}
+    }
+}
+
+fn update(app: &App, model: &mut Model, _update: Update) {
+    {
+        // Calling `set_widgets` allows us to instantiate some widgets.
+        let ui = &mut model.ui.set_widgets();
+
+        fn slider(val: f32, min: f32, max: f32) -> widget::Slider<'static, f32> {
+            widget::Slider::new(val, min, max)
+                .w_h(200.0, 30.0)
+                .label_font_size(15)
+                .rgb(0.3, 0.3, 0.3)
+                .label_rgb(1.0, 1.0, 1.0)
+                .border(1.0)
+        }
+
+        // for value in slider(model.friction, 0.0, 1.0)
+        //     .top_left_with_margin(20.0)
+        //     .label(&format!("Friction: {}", model.friction))
+        //     .set(model.widget_ids.friction, ui)
+        // {
+        //     model.friction = value;
+        // }
+    }
+
+    // println!("fps: {}, points: {}", app.fps(), model.points.len());
+}
+
+fn view(app: &App, model: &Model, frame: Frame) {
+    // Prepare to draw.
+    let draw = app.draw();
+
+    draw.background().color(hsl(0.0, 0.5, 0.5));
+
+    // Draw text
+    // How many points have been infected
+    // How many points were "isolated" model.isolated_points.len()
+    // draw.text()
+    // Write to the window frame.
+    draw.to_frame(app, &frame).unwrap();
+
+    // Draw the state of the `Ui` to the frame.
+    model.ui.draw_to_frame(app, &frame).unwrap();
+
 }
 
 fn main() {
@@ -114,7 +276,7 @@ fn main() {
     let mut metronome = Metronome::new(120, 4, sample_rate);
 
     // Model setup (general non-realtime thread state)
-    let mut model = Model {
+    let mut osc_model = OSCModel {
         sample_rate: sample_rate,
         first_packet_timing: std::f64::MAX
     };
@@ -253,16 +415,21 @@ fn main() {
         }
     }
 
-    // Loop to receive OSC packets and send the relevant data on to the audio thread
-    loop {
-        update_osc(&mut receiver, &mut received_packets);
-        process_packets(&mut received_packets, &mut model, &tx);
-        // Receive from the audio thread
-        while let Ok(msg) = rx_env.try_recv() {
-            // Add the EventMsg to the message queue
-            // println!("{}", msg);
+    thread::spawn(move || {
+        loop {
+            update_osc(&mut receiver, &mut received_packets);
+            process_packets(&mut received_packets, &mut osc_model, &tx);
+            // Receive from the audio thread
+            while let Ok(msg) = rx_env.try_recv() {
+                // Add the EventMsg to the message queue
+                // println!("{}", msg);
+            }
         }
-    }
+    });
+    // Loop to receive OSC packets and send the relevant data on to the audio thread
+    
+
+    nannou::app(model).update(update).run();
 
     // 6. Optional deactivate. Not required since active_client will deactivate on
     // drop, though explicit deactivate may help you identify errors in
@@ -299,7 +466,7 @@ fn update_osc(receiver: &mut osc::Receiver, received_packets: &mut Vec<Option<os
     }
 }
 
-fn process_packets(received_packets: &mut Vec<Option<osc::Packet>>, model: &mut Model, tx: &crossbeam_channel::Sender<EventMsg>) {
+fn process_packets(received_packets: &mut Vec<Option<osc::Packet>>, osc_model: &mut OSCModel, tx: &crossbeam_channel::Sender<EventMsg>) {
     // The osc::Packet can be a bundle containing several messages. Therefore we can use into_msgs to get all of them.
     for packet in received_packets {
         let owned_packet = packet.take();
@@ -322,11 +489,11 @@ fn process_packets(received_packets: &mut Vec<Option<osc::Packet>>, model: &mut 
                                 (0, osc::Type::Double(timestamp)) => {
                                     // Convert a microsecond timestamp into a sample based one
                                     // Set the first packet timing the first time a packet is received
-                                    if model.first_packet_timing == std::f64::MAX {
-                                        model.first_packet_timing = *timestamp;
+                                    if osc_model.first_packet_timing == std::f64::MAX {
+                                        osc_model.first_packet_timing = *timestamp;
                                     }
                                     // Convert wall-clock time to samples depending on sample rate
-                                    let sample_ts: usize = ((*timestamp - model.first_packet_timing) / 1000000.0) as usize * model.sample_rate;
+                                    let sample_ts: usize = ((*timestamp - osc_model.first_packet_timing) / 1000000.0) as usize * osc_model.sample_rate;
                                     let sample_ts = sample_ts; 
                                     msg.timestamp = sample_ts;
                                 },
@@ -356,7 +523,7 @@ fn process_packets(received_packets: &mut Vec<Option<osc::Packet>>, model: &mut 
                     // A new transmission has started, reset
 
                     // Set the first packet timing to the max value in order for it to be reset at the first ftrace event
-                    model.first_packet_timing = std::f64::MAX;
+                    osc_model.first_packet_timing = std::f64::MAX;
                 },
                 _ => ()
             }
