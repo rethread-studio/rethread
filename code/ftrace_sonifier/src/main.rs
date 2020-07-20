@@ -242,7 +242,7 @@ fn main() {
     // 3. define process callback handler
     let sample_rate = client.sample_rate();
     // let (tx, rx) = channel::<EventMsg>();
-    let (tx, rx) = bounded::<EventMsg>(1_000_000);
+    let (event_msg_tx, event_msg_rx) = bounded::<EventMsg>(1_000_000);
 
     let (tx_env, rx_env) = bounded::<f64>(1_000_000);
 
@@ -253,7 +253,7 @@ fn main() {
 
     // FMSynth setup
     // let mut fm_synth = FMSynth::new(sample_rate as f64, 200.0, 1.0, 2.0, 1.0, 4.0);
-    let mut fm_synths = vec![FMSynth::new(sample_rate as f64, 200.0, 0.0, 2.0, 1.0, 4.0); 100];
+    let mut fm_synths = vec![FMSynth::new(sample_rate as f64, 200.0, 0.0, 2.0, 1.0, 4.0); 50];
     let mut drone = FMSynth::new(sample_rate as f64, degree_to_freq(31.0), 0.05, 4.0, 1.0, 3.0);
     let mut hp_filters = vec![HighPassFilter::new(); 2];
     let mut lp_filters = vec![LowPassFilter::new(0.5); 2];
@@ -290,7 +290,7 @@ fn main() {
             let out_r = out_port_r.as_mut_slice(ps);
 
             // Check for new event messages
-            while let Ok(msg) = rx.try_recv() {
+            while let Ok(msg) = event_msg_rx.try_recv() {
                 // Add the EventMsg to the message queue
                 event_queue.push(msg);
             }
@@ -316,64 +316,31 @@ fn main() {
                     frame[0] += new_frame[0];
                     frame[1] += new_frame[1];
                 }
-                // Mix in the drone
-                let mut new_frame = drone.next_stereo();
-                if time_cursor % 44100 == 0 {
-                    exp_decay.trigger(1.0);
-                }
-                let drone_amp = 1.0; //exp_decay.next();
-                new_frame[0] *= drone_amp;
-                new_frame[1] *= drone_amp;
 
-                let env = envelope_follower.next((new_frame[0] + new_frame[1]) * 0.5);
+
+                // let env = envelope_follower.next((new_frame[0] + new_frame[1]) * 0.5);
                 // Send envelope to UI thread
-                tx_env.send(env).unwrap();
+                // tx_env.send(env).unwrap();
 
-                // Update resonant filter frequencies
-                // let res_freq = (((time_cursor as f64 / sample_rate as f64)).sin() * 0.5 + 0.5).powf(2.0) * 10000.0 + 200.0;
-                // let res_freq = filter_freq.next();
-                // if filter_freq.is_finished() {
-                //     if ramp_up {
-                //         filter_freq.ramp_to(2000.0, 1.0);
-                //     } else {
-                //         filter_freq.ramp_to(100.0, 1.0);
-                //     }
-                //     ramp_up = !ramp_up;
+                // let res_freq = filter_freq_sine.next();
+                // for filter in res_filters.iter_mut() {
+                //     filter.calculate_coefficients(sample_rate as f64, res_freq, 10.0);
                 // }
-                // let res_freq = env * 100000.0 + 100.0;
-                let res_freq = filter_freq_sine.next();
-                for filter in res_filters.iter_mut() {
-                    filter.calculate_coefficients(sample_rate as f64, res_freq, 10.0);
-                }
-
-
-                frame[0] += res_filters[0].next(new_frame[0]);
-                frame[1] += res_filters[1].next(new_frame[1]);
-                // frame[0] += new_frame[0];
-                // frame[1] += new_frame[1];
-
-                // Apply filters
-                // frame[0] = hp_filters[0].next(frame[0]);
-                // frame[1] = hp_filters[1].next(frame[1]);
-                // frame[0] = lp_filters[0].next(frame[0]);
-                // frame[1] = lp_filters[1].next(frame[1]);
                 
 
                 // Apply delay
-                let new_delay_time = delay_fluctuating.next();
-                // println!("dt: {}", new_delay_time);
-                delay.set_delay_samples(new_delay_time as usize);
-                let delay_in = frame[0];// + frame[1];
-                let delay_out = delay.next(delay_in);
-                //frame[0] += delay_out;
-                frame[1] = delay_out;
-
+                // let new_delay_time = delay_fluctuating.next();
+                // // println!("dt: {}", new_delay_time);
+                // delay.set_delay_samples(new_delay_time as usize);
+                // let delay_in = frame[0];// + frame[1];
+                // let delay_out = delay.next(delay_in);
+                // //frame[0] += delay_out;
+                // frame[1] = delay_out;
 
                 // Add in metronome
-                let new_frame = metronome.next();
-                frame[0] += new_frame;
-                frame[1] += new_frame;
-                
+                // let new_frame = metronome.next();
+                // frame[0] += new_frame;
+                // frame[1] += new_frame;
 
                 // Write the sound to the channel buffer
                 *l = frame[0] as f32;
@@ -418,7 +385,7 @@ fn main() {
     thread::spawn(move || {
         loop {
             update_osc(&mut receiver, &mut received_packets);
-            process_packets(&mut received_packets, &mut osc_model, &tx);
+            process_packets(&mut received_packets, &mut osc_model, &event_msg_tx);
             // Receive from the audio thread
             while let Ok(msg) = rx_env.try_recv() {
                 // Add the EventMsg to the message queue

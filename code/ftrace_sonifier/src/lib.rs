@@ -311,10 +311,13 @@ pub struct FMSynth {
     pub c_phase_step: f64,
     pub m_phase: f64,
     pub m_phase_step: f64,
+    c_sample: f64,
+    m_sample: f64,
     pub lfo_freq: f64,
     pub lfo_amp: f64,
     pub lfo_add: f64,
     pub lfo_phase: f64,
+    lfo_val: f64,
     pub amp: f64,
     pub number_of_triggers: f64,
 }
@@ -337,10 +340,13 @@ impl FMSynth {
             c_phase_step: 0.0,
             m_phase: 0.0,
             m_phase_step: 0.0,
+            c_sample: 0.0,
+            m_sample: 0.0,
             lfo_freq: 3.0,
             lfo_amp: 4.0,
             lfo_add: 5.0,
             lfo_phase: 0.0,
+            lfo_val: 0.0,
             amp,
             number_of_triggers: 0.0,
         };
@@ -349,27 +355,27 @@ impl FMSynth {
     pub fn next_stereo(&mut self) -> [f64; 2] {
         // LFO
         self.lfo_phase += (2.0 * std::f64::consts::PI * self.lfo_freq) / self.sample_rate;
-        let lfo = self.lfo_phase.sin() * self.lfo_amp + self.lfo_add;
-        self.m_index = lfo;
+        self.lfo_val = self.lfo_phase.sin() * self.lfo_amp + self.lfo_add;
+        self.m_index = self.lfo_val;
 
         // Modulator
         self.m_phase_step = (2.0 * std::f64::consts::PI * self.freq * self.m_ratio) / self.sample_rate;
         self.m_phase += self.m_phase_step;
-        let m_sample = self.m_phase.sin() * self.freq * self.m_index;
+        self.m_sample = self.m_phase.sin() * self.freq * self.m_index;
 
         // Carrier
         // The frequency depends on the modulator so the phase step has to be calculated every step
-        let c_freq = self.freq * self.c_ratio + m_sample;
-        self.c_phase_step = (2.0 * std::f64::consts::PI * c_freq * self.c_ratio) / self.sample_rate;
+        // let c_freq = self.freq * self.c_ratio + self.m_sample;
+        self.c_phase_step = (2.0 * std::f64::consts::PI * self.freq * self.c_ratio + self.m_sample * self.c_ratio) / self.sample_rate;
         self.c_phase += self.c_phase_step;
 
         // The carrier output is the output of the synth
-        let c_sample = self.c_phase.sin() * self.amp;
+        self.c_sample = self.c_phase.sin() * self.amp;
 
         // Reset number of triggers
         self.number_of_triggers = 0.0;
         
-        [c_sample, c_sample]
+        [self.c_sample, self.c_sample]
     }
     pub fn set_freq(&mut self, freq: f64) {
         self.freq = freq;
