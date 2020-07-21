@@ -8,15 +8,12 @@ use std::sync::mpsc::channel;
 use crossbeam_channel::bounded;
 use std::collections::VecDeque;
 extern crate jack;
-extern crate sample;
 
 use std::thread;
 use std::io;
 use std::str::FromStr;
 
 use std::f64::consts::PI;
-
-use sample::{signal, Signal};
 
 use ftrace_sonifier::{FMSynth, Delay, HighPassFilter, LowPassFilter, BiquadFilter, Sine, Ramp, ExponentialDecay, EnvelopeFollower, Metronome};
 
