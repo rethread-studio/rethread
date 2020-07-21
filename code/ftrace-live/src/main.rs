@@ -38,7 +38,8 @@ fn main() -> std::result::Result<(), std::io::Error> {
                 .short('e')
                 .long("event")
                 .about("Sets the event filter")
-                .takes_value(true),
+                .takes_value(true)
+                .multiple(true)
         )
         .arg(
             Arg::new("pid")
@@ -62,11 +63,13 @@ fn main() -> std::result::Result<(), std::io::Error> {
         
     }
 
-    let mut event_filter = "*:*";
+    // let mut event_filter = "*:*";
 
-    if let Some(o) = matches.value_of("event") {
-        event_filter = &o;
-    }
+    // if let Some(o) = matches.value_of("event") {
+    //     event_filter = &o;
+    // }
+
+    let events = matches.values_of("event").unwrap().collect();
 
     let mut pid = None;
 
@@ -100,13 +103,13 @@ fn main() -> std::result::Result<(), std::io::Error> {
         .expect("Could not connect to socket at address");
 
     reset_trace();
-    init_trace_options(event_filter, pid);
+    init_trace_options(pid, &events);
 
     start_tracer();
     send_osc_start_transmission(&osc_sender);
     read_trace_pipe(Arc::clone(&running), osc_sender);
 
-    cleanup_ftrace();
+    cleanup_ftrace(&events);
 
     Ok(())
 }
@@ -125,13 +128,17 @@ fn start_tracer() {
     set_ftrace_parameter("tracing_on", "1");
 }
 
-fn init_trace_options(event_filter: &str, pid: Option<u32>) {
+fn init_trace_options(pid: Option<u32>, events: &Vec<&str>) {
     // Set tracer to "function"
     set_ftrace_parameter("current_tracer", "nop");
 
     // Set what events to listen for
     // set_event seems to only accept a single event string e.g. tcp:*
-    set_ftrace_parameter("set_event", event_filter);
+    // set_ftrace_parameter("set_event", event_filter);
+    for event_name in events {
+        enable_event(event_name);
+    }
+
 
     // Listen to a single pid if one was supplied
     if let Some(process) = pid {
@@ -148,6 +155,20 @@ fn init_trace_options(event_filter: &str, pid: Option<u32>) {
 
 }
 
+fn enable_event(name: &str) {
+    let mut path: String = String::from("events/");
+    path.push_str(name);
+    path.push_str("/enable");
+    set_ftrace_parameter(&path, "1");
+}
+
+fn disable_event(name: &str) {
+    let mut path: String = String::from("events/");
+    path.push_str(name);
+    path.push_str("/enable");
+    set_ftrace_parameter(&path, "0");
+}
+
 fn set_ftrace_parameter(name: &str, arg: &str) {
     let mut path: String = String::from("/sys/kernel/tracing/");
     path.push_str(name);
@@ -161,7 +182,10 @@ fn init_event(event_name: &str) {
 
 }
 
-fn cleanup_ftrace() {
+fn cleanup_ftrace(events: &Vec<&str>) {
+    for event_name in events {
+        disable_event(event_name);
+    }
     reset_trace();
 }
 
