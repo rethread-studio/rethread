@@ -7,11 +7,11 @@ This program is meant to be used together with the ftrace sonifier.
 ## Usage
 
 First run the ftrace-sonifier to open an OSC port to connect to.
-ftrace-live has to be run as sudo. In the root ftrace-live directory:
+ftrace-live has to be run as sudo. The -e or --event argument can accept multiple types of events that will all be traced. In the root ftrace-live directory:
 
 ```
 cargo build --release
-sudo ./target/release/ftrace-live -e tcp:*
+sudo ./target/release/ftrace-live -e tcp random fs
 ```
 
 CTRL-C stops the trace and exits the program.

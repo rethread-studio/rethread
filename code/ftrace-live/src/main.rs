@@ -5,6 +5,7 @@ use std::io::BufReader;
 use std::io::prelude::*;
 
 use std::str;
+use std::collections::HashMap;
 
 use std::process::Command;
 use std::process;
@@ -227,8 +228,8 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
                     // println!("{}", line);
                     if line.len() > 49 {
                         // Parse the line
-                        let (timestamp, event_type, pid, cpu) = parse_line(line, &mut state);
-                        send_osc_message(&osc_sender, timestamp, event_type, pid, cpu);
+                        let (timestamp, event_string, pid, cpu) = parse_line(line, &mut state);
+                        send_osc_message(&osc_sender, timestamp, event_string, pid, cpu);
                     }
                 }
                 // ensure the bytes we worked with aren't returned again later
@@ -255,10 +256,10 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
     }
 }
 
-fn send_osc_message(osc_sender: &osc::Sender<osc::Connected>, timestamp: f64, event_type: String, pid: i32, cpu: i32) {
+fn send_osc_message(osc_sender: &osc::Sender<osc::Connected>, timestamp: f64, event_string: String, pid: i32, cpu: i32) {
     let osc_addr = "/ftrace".to_string();
     // message format: timestamp, event_type
-    let args = vec![osc::Type::Double(timestamp), osc::Type::String(event_type), osc::Type::Int(pid), osc::Type::Int(cpu)];
+    let args = vec![osc::Type::Double(timestamp), osc::Type::String(event_string), osc::Type::Int(pid), osc::Type::Int(cpu)];
     let packet = (osc_addr, args);
     // println!("{:?}", packet);
 
@@ -275,15 +276,23 @@ fn send_osc_start_transmission(osc_sender: &osc::Sender<osc::Connected>) {
 // TODO: The amount of whitespace seems to be variable between systems. Find a more clever way of parsing this
 fn parse_line(line: &str, state: &mut Model) -> (f64, String, i32, i32) {
     let _process = &line[0..16];
+    // pid can be 5 or 6 characters on my system
     let pid_str = &line[17..23];
-    let cpu_str = &line[25..27];
-    let _irq = &line[30..34];
-    let timestamp = &line[35..46];
+    let pid_offset = if line[23..24].eq(" ") {
+        6
+    } else if line[23..24].eq("[") {
+        5
+    } else {
+        panic!("Wrong pid index");
+    };
+    let cpu_str = &line[20+pid_offset..22+pid_offset];
+    let _irq = &line[25+pid_offset..29+pid_offset];
+    let timestamp = &line[30+pid_offset..41+pid_offset];
     // shave of last : of timestamp
     // timestamp = &timestamp[..timestamp.len()-1];
     // println!("ts: {}, line: {}", timestamp, line);
     let timestamp_float = timestamp.parse::<f64>().unwrap();
-    let event = &line[49..line.len()];
+    let event = &line[43+pid_offset..line.len()];
     // Ignore the whitespace after the number by taking the first element in the string split by whitespace, e.g. Some("4827"), and unwrap
     let pid = pid_str.split_ascii_whitespace().next().unwrap().parse::<i32>().expect(&format!("Pid string wrong: {}, line: {}, process: {}", pid_str, line, _process));
     let cpu = cpu_str.parse::<i32>().expect(&format!("cpu string wrong: {}", cpu_str));
