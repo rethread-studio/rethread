@@ -18,6 +18,8 @@ type ArcMutex<T> = Arc<Mutex<T>>;
 use ftrace_sonifier::audio_interface::*;
 
 use ftrace_sonifier::event_stats::*;
+use ftrace_sonifier::midi_input::MidiDevice;
+use ftrace_sonifier::SharedState;
 
 const PORT: u16 = 12345;
 
@@ -40,6 +42,8 @@ struct Model {
     audio_interface: AudioInterface,
     main_event_map: HashMap<&'static str, ArcMutex<HashMap<&'static str, EventStat>>>,
     event_family_map: HashMap<EventFamily, ArcMutex<HashMap<&'static str, EventStat>>>,
+    midi_device: MidiDevice,
+    shared_state: ArcMutex<SharedState>,
 }
 
 struct OSCModel {
@@ -64,6 +68,10 @@ fn model(app: &App) -> Model {
     let mut audio_interface = AudioInterface::new(event_msg_rx);
     audio_interface.connect_to_system(2);
 
+    let shared_state = Arc::new(Mutex::new(SharedState::new()));
+
+    let midi_device = MidiDevice::new(shared_state.clone());
+
     // Ui setup
 
     let mut ui = app.new_ui().build().unwrap();
@@ -86,10 +94,11 @@ fn model(app: &App) -> Model {
     let mut received_packets: Vec<Option<osc::Packet>> = vec![];
     
     let mut main_map_copy = main_event_map.clone();
+    let mut shared_state_copy = shared_state.clone();
     thread::spawn(move || {
         loop {
             update_osc(&mut receiver, &mut received_packets);
-            process_packets(&mut received_packets, &mut osc_model, &event_msg_tx, &mut event_type_received, &mut main_map_copy);
+            process_packets(&mut received_packets, &mut osc_model, &event_msg_tx, &mut event_type_received, &mut main_map_copy, &mut shared_state_copy);
         }
     });
 
@@ -99,7 +108,9 @@ fn model(app: &App) -> Model {
         widget_ids,
         audio_interface,
         main_event_map,
-        event_family_map
+        event_family_map,
+        midi_device,
+        shared_state
     };
     model
 }
@@ -170,6 +181,15 @@ fn view(app: &App, model: &Model, frame: Frame) {
     draw.background().color(hsl(0.0, 0.0, 1.0));
     const decay: f64 = 0.97;
 
+    let zoom;
+    let focus_point;
+
+    {
+        let locked_shared_state = model.shared_state.lock().unwrap();
+
+        zoom = 1.0 / locked_shared_state.zoom;
+        focus_point = locked_shared_state.focus_point * frame.rect().wh() * zoom;
+    }
 
     for (family_enum, family_map) in &model.event_family_map {
         let mut locked_family_map = family_map.lock().unwrap();
@@ -178,7 +198,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
             draw.rect()
                 .color(BLACK)
                 .w_h( size, size)
-                .x_y(event_stat.pos.x * frame.rect().w(), event_stat.pos.y * frame.rect().h());
+                .x_y((event_stat.pos.x * frame.rect().w()) * zoom - focus_point.x, (event_stat.pos.y * frame.rect().h()) * zoom - focus_point.y);
             event_stat.decay_density(decay, 1.0);
         }
     }
@@ -233,7 +253,8 @@ fn process_packets(
     osc_model: &mut OSCModel, 
     tx: &crossbeam_channel::Sender<EventMsg>, 
     event_type_received: &mut HashMap<String, usize>,
-    main_map: &mut HashMap<&'static str, ArcMutex<HashMap<&'static str, EventStat>>>
+    main_map: &mut HashMap<&'static str, ArcMutex<HashMap<&'static str, EventStat>>>,
+    shared_state: &mut ArcMutex<SharedState>
 ) {
     // The osc::Packet can be a bundle containing several messages. Therefore we can use into_msgs to get all of them.
     for packet in received_packets {
@@ -289,6 +310,20 @@ fn process_packets(
                                                 let decay = 2.0;
                                                 msg.synthesis_type = SynthesisType::Bass{index, decay};
                                             }
+                                            EventFamily::RANDOM => {
+                                                let freq = random::<f64>() * 5000.0 + 9000.0;
+                                                msg.synthesis_type = SynthesisType::Frequency{freq, decay};
+                                            }
+                                            EventFamily::FS => {
+                                                let mut freq = freq;
+                                                while freq > 800.0 { freq *= 0.5 }
+                                                msg.synthesis_type = SynthesisType::Frequency{freq, decay: decay*0.5};
+                                            }
+                                            EventFamily::EXCEPTIONS => {
+                                                let mut freq = freq;
+                                                while freq < 800.0 { freq *= 2.0 }
+                                                msg.synthesis_type = SynthesisType::Frequency{freq, decay: decay*0.5};
+                                            }
                                             _ => ()
                                         }
                                         
@@ -298,16 +333,24 @@ fn process_packets(
                                             event_stat.last_triggered_timestamp = msg.timestamp;
                                         }
                                         event_stat.register_occurrence();
+                                        let locked_shared_state = shared_state.lock().unwrap();
+                                        let zoom = locked_shared_state.zoom;
+                                        let focus_point = locked_shared_state.focus_point;
+                                        let adjusted_pos = event_stat.pos - focus_point;
+                                        if adjusted_pos.x.abs() > zoom || adjusted_pos.y.abs() > zoom {
+                                            do_send_message = false;
+                                        }
                                     }
 
-                                    let event_copy = String::from(event_type);
-                                    if !event_type_received.contains_key(&event_copy) {
-                                        println!("{}", event_copy);
-                                        event_type_received.insert(event_copy, 1);
-                                    } else {
-                                        let count = event_type_received.entry(event_copy).or_insert(1);
-                                        *count += 1;
-                                    }
+                                    // Find all of the event types used
+                                    // let event_copy = String::from(event_type);
+                                    // if !event_type_received.contains_key(&event_copy) {
+                                    //     println!("{}", event_copy);
+                                    //     event_type_received.insert(event_copy, 1);
+                                    // } else {
+                                    //     let count = event_type_received.entry(event_copy).or_insert(1);
+                                    //     *count += 1;
+                                    // }
                                 },
                                 (2, osc::Type::Int(pid)) => {
                                     msg.pid = *pid;
@@ -343,3 +386,4 @@ fn degree_to_freq(degree: f64) -> f64 {
     const ROOT_FREQ: f64 = 32.703195662575;
     ROOT_FREQ * 2.0_f64.powf(degree/53.0)
 }
+

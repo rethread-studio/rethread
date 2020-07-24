@@ -12,6 +12,21 @@ pub mod audio_interface;
 
 pub mod event_stats;
 
+pub mod midi_input;
+
+/// State that is shared between the GUI thread, the OSC processing thread and the MIDI thread
+pub struct SharedState {
+    pub focus_point: nannou::geom::Point2,
+    pub zoom: f32,
+}
+impl SharedState {
+    pub fn new() -> Self {
+        SharedState {
+            focus_point: nannou::geom::pt2(0.0, 0.0),
+            zoom: 1.0
+        }
+    }
+}
 
 #[derive(Copy, Clone)]
 pub struct HighPassFilter {
