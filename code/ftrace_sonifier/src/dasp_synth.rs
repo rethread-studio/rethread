@@ -158,15 +158,7 @@ impl SynthesisEngine {
             //     Wavetable::sine(65536))
             // .mul_amp(signal::gen(|| 0.5_f64))
             // .add_amp(signal::gen(|| 0.5_f64 ));
-            let sig = Oscillator::from_freq(100.0, 
-                sample_rate, 
-                Wavetable::sine(4096))
-                .mul_amp(
-                    signal::gen_mut(move ||
-                        dampening // lfo.next() * 
-                    )
-                )
-                ;
+            let sig = signal::rate(sample_rate).const_hz(200.0).sine().mul_amp(signal::gen(move|| dampening.clone()));
             oscillators.push(
                 Box::new(sig)
             );

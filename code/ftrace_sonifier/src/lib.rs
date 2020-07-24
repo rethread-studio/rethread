@@ -3,6 +3,16 @@ use std::f64::consts::PI;
 
 type Sample = f64;
 
+pub mod synth;
+pub mod oscen_synth;
+pub mod shared_wavetable_synth;
+pub mod dasp_synth;
+
+pub mod audio_interface;
+
+pub mod event_stats;
+
+
 #[derive(Copy, Clone)]
 pub struct HighPassFilter {
     last_sample: Sample
@@ -154,49 +164,6 @@ impl Delay {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct Sine {
-    pub sample_rate: f64,
-    pub phase: f64,
-    pub freq: f64,
-    pub amp: f64,
-    pub add: f64,
-}
-
-impl Sine {
-    pub fn new() -> Self {
-        Sine {
-            phase: 0.0,
-            freq: 220.0,
-            amp: 0.0,
-            add: 0.0,
-            sample_rate: 44100.0,
-        }
-    }
-
-    pub fn from(freq: f64, amp: f64, add: f64, phase: f64, sample_rate: f64) -> Self {
-        Sine {
-            phase,
-            freq,
-            amp,
-            add,
-            sample_rate,
-        }
-    }
-
-    pub fn set_range(&mut self, min: f64, max: f64) {
-        self.amp = ((max - min)/2.0).abs();
-        self.add = (max + min)/2.0;
-    }
-
-    pub fn next(&mut self) -> f64 {
-        let sine_amp = (2.0 * PI * self.phase).sin();
-        self.phase += self.freq / self.sample_rate;
-        self.phase %= self.sample_rate;
-        return (sine_amp * self.amp) + self.add;
-    }
-}
-
 pub struct Ramp {
     value: Sample,
     increment: Sample,
@@ -231,39 +198,6 @@ impl Ramp {
     }
     pub fn is_finished(&self) -> bool {
         self.counter <= 0
-    }
-}
-
-pub struct ExponentialDecay {
-    value: Sample,
-    sample_rate: f64,
-    decay_scaler: f64,
-    duration: Sample,
-}
-
-impl ExponentialDecay {
-    pub fn new(duration: f64, sample_rate: f64) -> Self {
-        let mut s = ExponentialDecay {
-            value: 1.0,
-            sample_rate,
-            decay_scaler: 1.0,
-            duration: 0.0,
-        };
-        s.set_duration(duration);
-        s
-    }
-    pub fn set_duration(&mut self, duration: f64) {
-        // From the SC XLine implementation: growth = pow(end / start, 1.0 / counter);
-        let duration_in_samples = duration * self.sample_rate;
-        // 0.001 = -60dB
-        self.decay_scaler = (0.001_f64).powf(1.0/duration_in_samples);
-    }
-    pub fn trigger(&mut self, value: Sample) {
-        self.value = value;
-    }
-    pub fn next(&mut self) -> Sample {
-        self.value *= self.decay_scaler;
-        self.value
     }
 }
 
@@ -396,46 +330,5 @@ impl FMSynth {
         // self.lfo_phase = 0.0; // You may or may not want to reset the lfo phase based on how you use it
         // self.m_phase = 0.0;
         // self.c_phase = 0.0;
-    }
-}
-
-pub struct Metronome {
-    tick_duration: usize,
-    sample_counter: usize,
-    ticks_per_bar: usize,
-    current_tick: usize,
-    exponential_decay: ExponentialDecay,
-    synth: Sine,
-}
-
-impl Metronome {
-    pub fn new(bpm: usize, ticks_per_bar: usize, sample_rate: usize) -> Self {
-        let mut m = Metronome{
-            tick_duration: 60 * sample_rate / bpm,
-            sample_counter: 0,
-            ticks_per_bar,
-            current_tick: 0,
-            exponential_decay: ExponentialDecay::new(0.5, sample_rate as f64),
-            synth: Sine::from(2000.0, 0.1, 0.0, 0.0, sample_rate as f64),
-        };
-        m.exponential_decay.trigger(1.0);
-        m
-    }
-    pub fn next(&mut self) -> Sample {
-        // Progress state machine
-        self.sample_counter += 1;
-        if self.sample_counter >= self.tick_duration {
-            self.exponential_decay.trigger(1.0);
-            self.sample_counter = 0;
-            self.current_tick += 1;
-            if self.current_tick >= self.ticks_per_bar {
-                self.synth.freq = 2000.0;
-                self.current_tick = 0;
-            } else {
-                self.synth.freq = 1000.0;
-            }
-        }
-
-        self.synth.next() * self.exponential_decay.next()
     }
 }

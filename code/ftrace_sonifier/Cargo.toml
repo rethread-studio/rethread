@@ -12,3 +12,4 @@ crossbeam-channel = "0.4"
 dasp = { version = "0.11.0", features = ["all"] }
 nannou_osc = "0.14.0"
 nannou = "0.14.1"
+oscen = "0.1.4"
