@@ -14,17 +14,68 @@ pub mod event_stats;
 
 pub mod midi_input;
 
+#[derive(Clone, Copy)]
+pub enum SelectionMode {
+    EventFamily,
+    Square
+}
+
+#[derive(Copy, Clone)]
 /// State that is shared between the GUI thread, the OSC processing thread and the MIDI thread
 pub struct SharedState {
     pub focus_point: nannou::geom::Point2,
     pub zoom: f32,
+    pub decay_coeff_change: Option<f64>,
+    pub amp_coeff_change: Option<f64>,
+    pub param0: Option<f64>,
+    pub param1: Option<f64>,
+    pub param2: Option<f64>,
+    pub density_threshold: f64,
+    pub mute: Option<bool>,
+    pub num_textures: usize,
+    pub num_single_pitches: usize,
+    pub set_synthesis_type_texture: Option<bool>,
+    pub set_synthesis_type_pitch: Option<bool>,
+    pub set_synthesis_type_bass: Option<bool>,
+    pub tick_length: std::time::Duration,
+    pub density_approach: event_stats::DensityApproach,
+    pub selection_mode: SelectionMode,
+    pub select_family: event_stats::EventFamily,
 }
 impl SharedState {
     pub fn new() -> Self {
         SharedState {
             focus_point: nannou::geom::pt2(0.0, 0.0),
-            zoom: 1.0
+            zoom: 0.5, // Zoom 0.5 is the maximally outzoomed since it saves us an operation when checking if an event is inside
+            decay_coeff_change: None,
+            amp_coeff_change: None,
+            param0: None,
+            param1: None,
+            param2: None,
+            density_threshold: 10.0,
+            mute: None,
+            num_textures: 0,
+            num_single_pitches: 0,
+            set_synthesis_type_texture: None,
+            set_synthesis_type_pitch: None,
+            set_synthesis_type_bass: None,
+            tick_length: std::time::Duration::from_millis(8),
+            density_approach: event_stats::DensityApproach::DensityChange,
+            selection_mode: SelectionMode::Square,
+            select_family: event_stats::EventFamily::EXCEPTIONS,
         }
+    }
+    /// Reset settings carried over from midi input
+    pub fn reset(&mut self) {
+        self.decay_coeff_change = None;
+        self.amp_coeff_change = None;
+        self.param0 = None;
+        self.param1 = None;
+        self.param2 = None;
+        self.mute = None;
+        self.set_synthesis_type_texture = None;
+        self.set_synthesis_type_pitch = None;
+        self.set_synthesis_type_bass = None;
     }
 }
 
@@ -41,24 +92,6 @@ impl HighPassFilter {
     pub fn next(&mut self, input: Sample) -> Sample {
         let value = input - self.last_sample;
         self.last_sample = input;
-        value
-    }
-}
-
-#[derive(Copy, Clone)]
-pub struct LowPassFilter {
-    last_output: Sample,
-    alpha: Sample,
-}
-
-impl LowPassFilter {
-    pub fn new(alpha: Sample) -> Self {
-        LowPassFilter{ last_output: 0.0, alpha }
-    }
-
-    pub fn next(&mut self, input: Sample) -> Sample {
-        let value = self.last_output * self.alpha + (1.0-self.alpha) * input;
-        self.last_output = value;
         value
     }
 }
@@ -125,57 +158,6 @@ impl BiquadFilter {
         self.input_buffer[1] = 0.0;
         self.output_buffer[0] = 0.0;
         self.output_buffer[1] = 0.0;
-    }
-}
-
-/// A fixed size circular buffer delay
-/// ```
-/// # use ftrace_sonifier::Delay;
-/// let mut delay = Delay::new(20, 1).unwrap();
-/// for i in 1..16 {
-///     assert_eq!(delay.next(i as f64), (i-1) as f64);
-/// }
-/// delay.set_delay_samples(0);
-/// // When the delay is 0 the input and output should be the same.
-/// assert_eq!(delay.next(100.0), 100.0);
-/// ```
-pub struct Delay {
-    buffer: Vec<f64>,
-    write_ptr: usize,
-    read_ptr: usize,
-}
-
-impl Delay {
-    pub fn new(length: usize, delay_samples: usize) -> Result<Self, String> {
-        if delay_samples <= length {
-            Ok(Delay{
-                // create a Vec of length+1 samples in order to support both a delay of 0 and of
-                // `length` without too much confusion i.e. `length` and `delay_samples` can be
-                // the same value
-                buffer: vec![0.0; length+1],
-                write_ptr: 0,
-                read_ptr: length+1 - delay_samples, // initialise read position to the 
-            })
-        } else {
-            Err("Delay supplied was longer than the length of the buffer".to_owned())
-        }
-    }
-    pub fn set_delay_samples(&mut self, delay_samples: usize) {
-        if delay_samples < self.buffer.len() {
-            // Set the read_ptr to the desired distance from the write_ptr and make sure it's within bounds
-            self.read_ptr = (self.write_ptr - delay_samples + self.buffer.len()) % self.buffer.len();
-        }
-    }
-    pub fn next(&mut self, input: Sample) -> Sample {
-        // First write to the buffer. If the delay is zero the read_ptr should read the current input.
-        self.buffer[self.write_ptr] = input;
-        let output = self.buffer[self.read_ptr];
-
-        // Increment pointers
-        self.write_ptr = (self.write_ptr + 1) % self.buffer.len();
-        self.read_ptr = (self.read_ptr + 1) % self.buffer.len();
-
-        output
     }
 }
 
@@ -246,104 +228,5 @@ impl EnvelopeFollower {
         
         self.last_output = value;
         value
-    }
-}
-
-#[derive(Copy, Clone)]
-pub struct FMSynth {
-    pub sample_rate: f64,
-    pub freq: f64,
-    pub m_ratio: f64,
-    pub c_ratio: f64,
-    pub m_index: f64,
-    pub c_phase: f64,
-    pub c_phase_step: f64,
-    pub m_phase: f64,
-    pub m_phase_step: f64,
-    c_sample: f64,
-    m_sample: f64,
-    pub lfo_freq: f64,
-    pub lfo_amp: f64,
-    pub lfo_add: f64,
-    pub lfo_phase: f64,
-    lfo_val: f64,
-    pub amp: f64,
-    pub number_of_triggers: f64,
-}
-
-impl FMSynth {
-    pub fn new(sample_rate: f64, freq: f64, amp: f64, m_ratio: f64, c_ratio: f64, m_index: f64) -> Self {
-
-        // let mod_freq = signal::gen(|| [freq * m_ratio]);
-        // let modulator = signal::rate(sample_rate).hz(mod_freq).sine();
-        // let car_freq = signal::gen(|| [freq * c_ratio]).add_amp(modulator);
-        // let carrier = signal::rate(sample_rate).hz(car_freq).sine();
-
-        let mut synth = FMSynth {
-            sample_rate,
-            freq,
-            m_ratio,
-            c_ratio,
-            m_index,
-            c_phase: 0.0,
-            c_phase_step: 0.0,
-            m_phase: 0.0,
-            m_phase_step: 0.0,
-            c_sample: 0.0,
-            m_sample: 0.0,
-            lfo_freq: 3.0,
-            lfo_amp: 4.0,
-            lfo_add: 5.0,
-            lfo_phase: 0.0,
-            lfo_val: 0.0,
-            amp,
-            number_of_triggers: 0.0,
-        };
-        synth
-    }
-    pub fn next_stereo(&mut self) -> [f64; 2] {
-        // LFO
-        self.lfo_phase += (2.0 * std::f64::consts::PI * self.lfo_freq) / self.sample_rate;
-        self.lfo_val = self.lfo_phase.sin() * self.lfo_amp + self.lfo_add;
-        self.m_index = self.lfo_val;
-
-        // Modulator
-        self.m_phase_step = (2.0 * std::f64::consts::PI * self.freq * self.m_ratio) / self.sample_rate;
-        self.m_phase += self.m_phase_step;
-        self.m_sample = self.m_phase.sin() * self.freq * self.m_index;
-
-        // Carrier
-        // The frequency depends on the modulator so the phase step has to be calculated every step
-        // let c_freq = self.freq * self.c_ratio + self.m_sample;
-        self.c_phase_step = (2.0 * std::f64::consts::PI * self.freq * self.c_ratio + self.m_sample * self.c_ratio) / self.sample_rate;
-        self.c_phase += self.c_phase_step;
-
-        // The carrier output is the output of the synth
-        self.c_sample = self.c_phase.sin() * self.amp;
-
-        // Reset number of triggers
-        self.number_of_triggers = 0.0;
-        
-        [self.c_sample, self.c_sample]
-    }
-    pub fn set_freq(&mut self, freq: f64) {
-        self.freq = freq;
-    }
-    pub fn control_rate_update(&mut self) {
-        self.amp *= 0.92;
-    }
-    pub fn trigger(&mut self, freq: f64, amp: f64) {
-        self.number_of_triggers += 1.0;
-        // Set the new frequencymp: f64
-        // Set it so that it is an average of all triggers
-        self.freq = (self.freq * (self.number_of_triggers-1.0)/self.number_of_triggers) + 
-                    (freq * (1.0/self.number_of_triggers));
-                    
-        // Setting the amplitude triggers an attack
-        self.amp = amp;
-        // Reset all phases
-        // self.lfo_phase = 0.0; // You may or may not want to reset the lfo phase based on how you use it
-        // self.m_phase = 0.0;
-        // self.c_phase = 0.0;
     }
 }

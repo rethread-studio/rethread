@@ -7,58 +7,82 @@ struct LocalProcessHandler {
     out_port_l: jack::Port<jack::AudioOut>,
     out_port_r: jack::Port<jack::AudioOut>,
     synthesis_engine: SynthesisEngine,
+    tick_msg_rx: crossbeam_channel::Receiver<EventMsg>,
     event_msg_rx: crossbeam_channel::Receiver<EventMsg>,
     sample_rate: usize,
+    pub num_textures: usize,
+    pub num_single_pitches: usize,
 }
 
 impl LocalProcessHandler {
     fn new(
         out_port_l: jack::Port<jack::AudioOut>,
         out_port_r: jack::Port<jack::AudioOut>,
+        tick_msg_rx: crossbeam_channel::Receiver<EventMsg>,
         event_msg_rx: crossbeam_channel::Receiver<EventMsg>,
         sample_rate: usize,
     ) -> Self {
         let frequency = 50.0;
         // let mut fm_synth = FMSynth::new(sample_rate as f64, frequency, 1.0, 1.0, 2.5, 4.0);
         
+        let synthesis_engine = SynthesisEngine::new(sample_rate as f64);
+        let num_textures = synthesis_engine.num_textures();
+        let num_single_pitches = synthesis_engine.num_single_pitches();
 
         LocalProcessHandler {
             out_port_l,
             out_port_r,
-            synthesis_engine: SynthesisEngine::new(sample_rate as f64),
+            synthesis_engine,
+            tick_msg_rx,
             event_msg_rx,
             sample_rate,
+            num_textures,
+            num_single_pitches,
         }
+    }
+    fn parse_event_msg(&mut self, msg: EventMsg) {
+        for synth in msg.synthesis_type {
+            match synth {
+                SynthesisType::Frequency{freq, amp, decay} => {
+                    self.synthesis_engine.trigger_oscillator(freq, amp, decay);
+                }
+                SynthesisType::Bass{amp, decay, index} => {
+                    self.synthesis_engine.trigger_bass(amp, decay, index);
+                }
+                SynthesisType::Texture{index, amp, decay} => {
+                    self.synthesis_engine.trigger_texture(index, (msg.timestamp * 1000000.0) as usize, amp, decay);
+                }
+                SynthesisType::SinglePitch{index, energy} => {
+                    self.synthesis_engine.add_energy_to_pitch(index, energy);
+                }
+                _ => ()
+            }
+        }
+        
     }
 }
 
 impl jack::ProcessHandler for LocalProcessHandler {
     fn process(&mut self, _: &jack::Client, process_scope: &jack::ProcessScope) -> jack::Control {
+        // Check for new EventMsg
+        while let Ok(f) = self.event_msg_rx.try_recv() {
+            self.parse_event_msg(f);            
+        }
+        while let Ok(f) = self.tick_msg_rx.try_recv() {
+            self.parse_event_msg(f);            
+        }
+
         // Get output buffer
         let out_l = self.out_port_l.as_mut_slice(process_scope);
         let out_r = self.out_port_r.as_mut_slice(process_scope);
-
-        // Check for new EventMsg
-        while let Ok(f) = self.event_msg_rx.try_recv() {
-            match f.synthesis_type {
-                SynthesisType::Frequency{freq, decay} => {
-                    self.synthesis_engine.trigger_oscillator(freq, decay);
-                }
-                SynthesisType::Bass{index, decay} => {
-                    self.synthesis_engine.trigger_bass(index, decay);
-                }
-                _ => ()
-            }
-            
-        }
 
         // Write output
         for (l, r) in out_l.iter_mut().zip(out_r.iter_mut()) {
             let mut frame = [0.0; 2];
 
-            let modular_sample = self.synthesis_engine.next();
-            frame[0] += modular_sample;
-            frame[1] += modular_sample;
+            let new_frame = self.synthesis_engine.next();
+            frame[0] += new_frame[0];
+            frame[1] += new_frame[1];
 
             // Write the sound to the channel buffer
             *l = frame[0] as f32;
@@ -79,10 +103,12 @@ pub struct AudioInterface {
     amp_changes: Vec<(usize, f32)>,
     freq_changes: Vec<(usize, f64)>,
     pub sample_rate: usize,
+    pub num_textures: usize,
+    pub num_single_pitches: usize,
 }
 
 impl AudioInterface {
-    pub fn new(event_msg_rx: crossbeam_channel::Receiver<EventMsg>) -> Self {
+    pub fn new(tick_msg_rx: crossbeam_channel::Receiver<EventMsg>, event_msg_rx: crossbeam_channel::Receiver<EventMsg>) -> Self {
         // 1. open a client
         let client_name = "rust_jack";
         let (client, _status) =
@@ -111,7 +137,9 @@ impl AudioInterface {
 
         let mut counter = 0;
 
-        let process = LocalProcessHandler::new(out_port_l, out_port_r, event_msg_rx, sample_rate);
+        let process = LocalProcessHandler::new(out_port_l, out_port_r, tick_msg_rx, event_msg_rx, sample_rate);
+        let num_textures = process.num_textures;
+        let num_single_pitches = process.num_single_pitches;
 
         // 4. activate the client
         let active_client = client.activate_async((), process).unwrap();
@@ -123,6 +151,8 @@ impl AudioInterface {
             amp_changes: vec![],
             freq_changes: vec![],
             sample_rate,
+            num_textures,
+            num_single_pitches,
         }
     }
 

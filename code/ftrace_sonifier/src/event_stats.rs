@@ -17,39 +17,78 @@ pub enum EventFamily{
     DRM,
     EXCEPTIONS
 }
+
+impl EventFamily {
+    pub fn str(&self) -> &'static str {
+        match self {
+            EventFamily::TCP => "tcp",
+            EventFamily::FS => "fs",
+            EventFamily::RANDOM => "random",
+            EventFamily::DRM => "drm",
+            EventFamily::EXCEPTIONS => "exceptions",
+            EventFamily::IRQ => "irq",
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
 pub struct EventStat {
     pub event_family: EventFamily,
     pub name: &'static str,
     pub density: f64,
+    pub lpf_density: f64,
+    pub density_change: f64,
     pub pos: Point2,
     pub last_triggered_timestamp: f64,
+    pub decay_coeff: f64,
+    pub amp_coeff: f64,
+    pub gain: f64,
+    pub mute: bool,
+    pub synth_texture: Option<SynthesisType>,
+    pub synth_pitch: Option<SynthesisType>,
+    pub index: usize, // a unique index for this event
 }
 
 impl EventStat {
-    pub fn new(name: &'static str, event_family: EventFamily) -> Self {
+    pub fn new(name: &'static str, event_family: EventFamily, index: usize) -> Self {
         EventStat {
             event_family,
             name,
             density: 0.0,
+            lpf_density: 0.0,
+            density_change: 0.0,
             pos: pt2(0.0, 0.0),
             last_triggered_timestamp: 0.0,
+            decay_coeff: 1.0,
+            amp_coeff: 1.0,
+            gain: 0.5,
+            mute: true,
+            synth_texture: None,
+            synth_pitch: Some(SynthesisType::SinglePitch{index: index, energy: 0.5}),
+            index,
         }
     }
 
-    pub fn register_occurrence(&mut self, ) {
+    pub fn register_occurrence(&mut self) {
         self.density += 1.0;
     }
 
-    pub fn decay_density(&mut self, decay: f64, ticks: f64) {
-        self.density *= decay.powf(ticks);
+    pub fn decay_density(&mut self, decay: f64) {
+        self.density *= decay;
+        let lpf_decay = 1.0 - (1.0 - decay) * 0.001;
+        self.lpf_density = self.lpf_density * lpf_decay + self.density * (1.0 - lpf_decay);
+        if self.lpf_density > 0.0 {
+            self.density_change = (self.density - self.lpf_density).abs() / self.lpf_density;
+        }
+        
     }
 }
 
 
 
 pub fn init_stats() -> (
-    HashMap<&'static str, ArcMutex<HashMap<&'static str, EventStat>>>, 
-    HashMap<EventFamily, ArcMutex<HashMap<&'static str, EventStat>>>
+    HashMap<&'static str, ArcMutex<EventStat>>, 
+    HashMap<EventFamily, HashMap<&'static str, ArcMutex<EventStat>>>
 ) {
 
     let all_events = [
@@ -89,15 +128,15 @@ pub fn init_stats() -> (
         ("page_fault_kernel", EventFamily::EXCEPTIONS),
     ];
 
-    let mut main_map: HashMap<&str, ArcMutex<HashMap<&str, EventStat>>> = HashMap::new();
+    let mut main_map: HashMap<&str, ArcMutex<EventStat>> = HashMap::new();
 
     let mut family_map = HashMap::new();
-    family_map.insert(EventFamily::RANDOM, Arc::new(Mutex::new(HashMap::new())));
-    family_map.insert(EventFamily::FS, Arc::new(Mutex::new(HashMap::new())));
-    family_map.insert(EventFamily::IRQ, Arc::new(Mutex::new(HashMap::new())));
-    family_map.insert(EventFamily::EXCEPTIONS, Arc::new(Mutex::new(HashMap::new())));
-    family_map.insert(EventFamily::TCP, Arc::new(Mutex::new(HashMap::new())));
-    family_map.insert(EventFamily::DRM, Arc::new(Mutex::new(HashMap::new())));
+    family_map.insert(EventFamily::RANDOM, HashMap::new());
+    family_map.insert(EventFamily::FS, HashMap::new());
+    family_map.insert(EventFamily::IRQ, HashMap::new());
+    family_map.insert(EventFamily::EXCEPTIONS, HashMap::new());
+    family_map.insert(EventFamily::TCP, HashMap::new());
+    family_map.insert(EventFamily::DRM, HashMap::new());
 
     let mut family_positions = HashMap::new();
     family_positions.insert(EventFamily::RANDOM, pt2(0.0, 0.25));
@@ -107,26 +146,61 @@ pub fn init_stats() -> (
     family_positions.insert(EventFamily::TCP, pt2(0.25, 0.25));
     family_positions.insert(EventFamily::DRM, pt2(-0.25, -0.25));
 
+    let mut index = 0;
+
     for event in all_events.iter() {
-        let map = family_map.get(&event.1).unwrap();
-        let mut map_mut = map.lock().unwrap();
         // Create the stat entry
-        let mut entry = EventStat::new(event.0, event.1.clone());
+        let mut entry = EventStat::new(event.0, event.1.clone(), index);
+        index += 1;
         entry.pos = family_positions.get(&event.1).unwrap_or(&pt2(0.0, 0.0)).clone();
         entry.pos = entry.pos + pt2(random::<f32>() * 0.2 - 0.1, random::<f32>() * 0.2 - 0.1);
-        map_mut.insert(event.0, entry);
-        // Make the family map 
-        main_map.insert(event.0, map.clone());
+        
+        let arc_entry = Arc::new(Mutex::new(entry));
+        let family_map = family_map.get_mut(&event.1).unwrap();
+        family_map.insert(event.0, arc_entry.clone());
+        main_map.insert(event.0, arc_entry.clone());
     }
 
     // The main_map should now contain all of the event types pointing to all of the family maps
     (main_map, family_map)
 }
 
+#[derive(Clone, Copy)]
+pub enum DensityApproach {
+    Density,
+    LpfDensity,
+    DensityChange,
+}
+
+impl DensityApproach {
+    pub fn next(&self) -> Self {
+        match self {
+            DensityApproach::Density => DensityApproach::LpfDensity,
+            DensityApproach::LpfDensity => DensityApproach::DensityChange,
+            DensityApproach::DensityChange => DensityApproach::Density
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
 pub enum SynthesisType {
     NoSynthesis,
-    Frequency {freq: Sample, decay: Sample },
-    Bass {index: usize, decay: Sample }
+    Frequency {freq: Sample, amp: Sample, decay: Sample },
+    Bass {amp: Sample, decay: Sample, index: usize },
+    Texture {index: usize, amp: Sample, decay: Sample },
+    SinglePitch {index: usize, energy: Sample }
+}
+
+impl std::fmt::Display for SynthesisType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SynthesisType::Frequency { freq, amp, decay} => write!(f, "Frequency: (freq: {}, amp: {}, decay: {})", freq, amp, decay),
+            SynthesisType::Bass { amp, decay, index} => write!(f, "Bass: (amp: {}, decay: {}, index: {})", amp, decay, index),
+            SynthesisType::Texture { index, amp, decay} => write!(f, "Texture: (index: {}, amp: {}, decay: {})", index, amp, decay),
+            SynthesisType::SinglePitch { index, energy} => write!(f, "SinglePitch: (index: {}, energy: {})", index, energy),
+            SynthesisType::NoSynthesis => write!(f, "NoSynthesis")
+        }
+    }
 }
 
 /// The struct for an event sent from the receiving OSC thread to the audio processing thread
@@ -138,7 +212,7 @@ pub struct EventMsg {
     pub event_type: usize,
     pub pid: i32,
     pub cpu: i32,
-    pub synthesis_type: SynthesisType,
+    pub synthesis_type: Vec<SynthesisType>,
 }
 
 impl EventMsg {
