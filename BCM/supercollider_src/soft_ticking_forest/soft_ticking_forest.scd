@@ -3,7 +3,7 @@
 
 // Routing and mixer channels
 ~useAmbisonics = true;
-~ambisonicsOrder = 5;
+~ambisonicsOrder = 3;
 if(~useAmbisonics == true, {
 	~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
 }, {
@@ -105,6 +105,10 @@ if(~useAmbisonics, {
 		if(~ambisonicsOrder == 1, {
 			sig = KMHLSDome1h1pNormal6.ar(sig[0], sig[1], sig[2], sig[3], gain:30);
 		});
+		if(~ambisonicsOrder == 3, {
+			sig = KMHLSDome3h3pNormal6.ar(sig[0], sig[1], sig[2], sig[3], sig[4], sig[5], sig[6], sig[7],
+				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15], gain:30);
+		});
 		if(~ambisonicsOrder == 5, {
 			sig = KMHLSDome5h5pNormal6.ar(sig[0], sig[1], sig[2], sig[3], sig[4], sig[5], sig[6], sig[7],
 				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15],
@@ -128,6 +132,16 @@ if(~useAmbisonics, {
 		MouseY.kr(-pi * 0.5, pi * 0.5 ))*/
 		if(~ambisonicsOrder == 1, {
 			sig = HOAEncoder1.ar(
+				sig,
+				1.0,
+				radius,
+				azimuth,
+				elevation,
+				0.0
+			);
+		});
+		if(~ambisonicsOrder == 3, {
+			sig = HOAEncoder3.ar(
 				sig,
 				1.0,
 				radius,
