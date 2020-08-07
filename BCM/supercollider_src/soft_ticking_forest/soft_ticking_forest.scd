@@ -1,8 +1,22 @@
-
 (
+// CONSTANTS AND SETUP
+
+// Routing and mixer channels
+~useAmbisonics = true;
+~ambisonicsOrder = 5;
+if(~useAmbisonics == true, {
+	~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
+}, {
+	~mixerChannelOutputs = 2;
+});
+~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
+
+// Sonification activity thresholds
 ~highActivityThreshold = 20;
 ~mediumActivityThreshold = 10;
 ~lowActivityThreshold = 1;
+
+
 "../sound_forest_mixer_gui.scd".loadRelative;
 SynthDef(\bubbly_filter, { |out|
 	var sig, maxfreq = \maxfreq.kr(2000), minfreq = \minfreq.kr(100), speed = \speed.kr(3), freq, in, delay_pan;
@@ -84,12 +98,80 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 	Out.ar(out, sig);
 }).add;
 
-SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0 |
-	var sig = In.ar(in, 2);
-	sig = sig * \amp.kr(0.5);
-	Out.ar(out, sig);
-	Out.ar(send, sig * send_amp);
-}).add;
+if(~useAmbisonics, {
+	SynthDef(\decoder, { | in = 10, out = 0 |
+		var sig;
+		sig = In.ar(in, ~mixerChannelOutputs.asInteger);
+		if(~ambisonicsOrder == 1, {
+			sig = KMHLSDome1h1pNormal6.ar(sig[0], sig[1], sig[2], sig[3], gain:30);
+		});
+		if(~ambisonicsOrder == 5, {
+			sig = KMHLSDome5h5pNormal6.ar(sig[0], sig[1], sig[2], sig[3], sig[4], sig[5], sig[6], sig[7],
+				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15],
+				sig[16], sig[17], sig[18], sig[19], sig[20], sig[21], sig[22], sig[23],
+				sig[24], sig[25], sig[26], sig[27], sig[28], sig[29], sig[30], sig[31],
+				sig[32], sig[33], sig[34], sig[35], gain:30);
+		});
+		Out.ar(out, sig);
+	}).add;
+	SynthDef(\mixer_channel, { | in = 10, out = 0 |
+		var sig = In.ar(in, 2),
+		radius = 0.0, azimuth = MouseY.kr(-pi * 0.5, pi * 0.5), elevation = MouseX.kr(pi * 0.5, -pi * 0.5);
+		// azimuth = SinOsc.ar(1/4).range(-pi * 0.5, pi * 0.5);
+		// azimuth = Rand(-pi*0.5, pi*0.5);
+
+		radius = 0.0;
+		sig = Mix(sig) * \amp.kr(0.5);
+		/*HOAEncoder.ar(~order,
+		WhiteNoise.ar(1),
+		MouseX.kr(pi, -pi),
+		MouseY.kr(-pi * 0.5, pi * 0.5 ))*/
+		if(~ambisonicsOrder == 1, {
+			sig = HOAEncoder1.ar(
+				sig,
+				1.0,
+				radius,
+				azimuth,
+				elevation,
+				0.0
+			);
+		});
+		if(~ambisonicsOrder == 5, {
+			sig = HOAEncoder5.ar(
+				sig,
+				1.0,
+				radius,
+				azimuth,
+				elevation,
+				0.0
+			);
+		});
+
+		/*sig = PanB.ar(
+			sig,
+			azimuth,
+			elevation,
+			1.0
+		);*/
+		// PanB uses the wrong output format for the decoder W, X, Y, Z, should be W Y Z X
+		// sig = [sig[0], sig[2], sig[1], sig[3]];
+		Out.ar(out, sig);
+		// Out.ar(send, sig * send_amp);
+	}).add;
+}, {
+	// no ambisonics, just straight through
+	SynthDef(\decoder, { |in = 10, out = 0 |
+		var sig = In.ar(in, ~mixerChannelOutputs.asInteger);
+		Out.ar(out, sig);
+	}).add;
+
+	SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0 |
+		var sig = In.ar(in, 2);
+		sig = sig * \amp.kr(0.5);
+		Out.ar(out, sig);
+		Out.ar(send, sig * send_amp);
+	}).add;
+});
 
 SynthDef(\reverse_sine, {
 	var sig, env, freq = \freq.kr(220);
@@ -246,7 +328,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 
 	~makeMixerChannel = { | name, out, amp = 1 |
 		var bus, synth, group;
-		bus = Bus.audio(s, 2);
+		bus = Bus.audio(s, ~mixerChannelOutputs);
 		group = Group(s);
 		synth = Synth(\mixer_channel, [\in, bus, \out, out], group, \addToTail);
 		(
@@ -275,37 +357,36 @@ SynthDef(\bounce_away, { | freq = 300 |
 		)
 	};
 
+	~decoder = Synth(\decoder, [\in, ~decoderBus]);
+
 	// Set up all the channels
 	// ~revBus = Bus.audio(s, 2);
-	rev_channel = ~makeMixerChannel.("Reverb", 0);
+	rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
 	rev_channel.play_on(\medium_reverb, [\out, rev_channel.bus, \in, rev_channel.bus, \mix, 1.0]);
 	filter_bus = Bus.audio(s, 2);
-	cloud_channel = ~makeMixerChannel.("Clouds", 0);
+	cloud_channel = ~makeMixerChannel.("Clouds", ~decoderBus);
 	cloud_channel.set_send(rev_channel.bus, 0.5);
-	filter_channel = ~makeMixerChannel.("Filter", 0);
+	filter_channel = ~makeMixerChannel.("Filter", ~decoderBus);
 	filter_channel.set_send(rev_channel.bus, 0.2);
 	sine_channel = ~makeMixerChannel.("Sines", filter_bus);
-	sub_channel = ~makeMixerChannel.("Sub", 0);
+	sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
 	sub_channel.set_send(rev_channel.bus, 0.2);
-	rain_channel = ~makeMixerChannel.("Rain", 0);
+	rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
 	rain_channel.set_send(rev_channel.bus, 1.0);
-	default_channel = ~makeMixerChannel.("Default", 0);
+	default_channel = ~makeMixerChannel.("Default", ~decoderBus);
 	default_channel.set_send(rev_channel.bus, 1.0);
-	google_channel = ~makeMixerChannel.("Google", 0);
+	google_channel = ~makeMixerChannel.("Google", ~decoderBus);
 	google_channel.set_send(rev_channel.bus, 1.0);
-	facebook_channel = ~makeMixerChannel.("Facebook", 0);
+	facebook_channel = ~makeMixerChannel.("Facebook", ~decoderBus);
 	facebook_channel.set_send(rev_channel.bus, 1.0);
-	amazon_channel = ~makeMixerChannel.("Amazon", 0);
+	amazon_channel = ~makeMixerChannel.("Amazon", ~decoderBus);
 	amazon_channel.set_send(rev_channel.bus, 1.0);
-	cloudflare_channel = ~makeMixerChannel.("Coudflare", 0);
+	cloudflare_channel = ~makeMixerChannel.("Coudflare", ~decoderBus);
 	cloudflare_channel.set_send(rev_channel.bus, 1.0);
-	youtube_channel = ~makeMixerChannel.("YouTube", 0);
+	youtube_channel = ~makeMixerChannel.("YouTube", ~decoderBus);
 	youtube_channel.set_send(rev_channel.bus, 1.0);
-	tick_channel = ~makeMixerChannel.("Tick", 0);
+	tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
 	tick_channel.set_send(rev_channel.bus, 1.0);
-
-
-
 
 	~startRev.(cloud_channel.bus);
 
@@ -328,24 +409,43 @@ SynthDef(\bounce_away, { | freq = 300 |
 
 	~makeSoundForestGui.([tick_channel, default_channel, google_channel, facebook_channel, amazon_channel, cloudflare_channel, youtube_channel, rev_channel], ~allClouds);
 
+	if(~useAmbisonics, {
+		~decoder = Synth(\decoder, [\in, ~decoderBus, \out, 0]);
+	}, {
+		~decoder = Synth(\no_ambisonics_decoder, [\in, ~decoderBus, \out, 0]);
+	});
+
 	// Create the global stats object (environment)
 
 	~stats = Dictionary[];
-	~stats[\in] = ();
+
+	/*~stats[\in] = ();
 	~stats[\out] = ();
 	~stats[\in].services = Dictionary[];
-	~stats[\out].services = Dictionary[];
+	~stats[\out].services = Dictionary[];*/
+
+	~makeStatDevice = { | device |
+		var statDevice = ();
+		statDevice.services = ();
+		statDevice.bus = Bus.audio(s, 1);
+		statDevice.channel = ~makeMixerChannel.(device.asString, ~decoderBus);
+		// TODO output this bus to a hoa_encoder and send that into the decoder
+		statDevice
+	};
 
 	~makeStatService = { | identifier |
 		var service = ();
 		service.identifier = identifier;
-		service.packets = 0;
+		service.packets = Dictionary[];
+		service.packets.add(\in -> 0);
+		service.packets.add(\out -> 0);
 		service.locations = Dictionary[];
+		service
 	};
 
 	// Adds a packet to the global stats, taking care of creating new services etc.
-	~addPacketToStats = { | isOutgoing, service, remote_ip, remote_location |
-		var inout, statService;
+	~addPacketToStats = { | device, isOutgoing, service, remote_ip, remote_location |
+		var inout, statService, statDevice;
 		// If there is no service name, use the remote_ip as an identifier instead
 		if(service.asString.size < 2) {
 			service = remote_ip;
@@ -356,25 +456,35 @@ SynthDef(\bounce_away, { | freq = 300 |
 			inout = \in;
 		});
 
-		statService = ~stats[inout].services.at(service);
+		statDevice = ~stats[device];
+		if(statDevice == nil, {
+			~stats.put(device, ~makeStatDevice.(device));
+			statDevice = ~stats[device];
+		});
+
+
+		statService = statDevice.services[service];
 		if(statService == nil, {
-			~stats[inout].services.put(service, ~makeStatService.(service));
-			statService = ~stats[inout].services[service];
+			statDevice.services.put(service, ~makeStatService.(service));
+			statService = statDevice.services[service];
 			~addSoundProcessToService.(statService, inout);
 		});
-		~addPacketToService.(statService, remote_location);
+		~addPacketToService.(statService, inout, remote_location);
 	};
 
-	~addPacketToService = { | statService, remote_location |
+	~addPacketToService = { | statService, inout, remote_location |
 		var statLocation;
-		statService.packets = statService.packets + 1;
+		statService.packets[inout] = statService.packets[inout] + 1;
 		// Add to the correct stat location
 		statLocation = statService.locations[remote_location];
 		if(statLocation != nil, {
-			statLocation.packets = statLocation.packets + 1;
+			statLocation.packets[inout] = statLocation.packets[inout] + 1;
 		}, {
 			statService.locations[remote_location] = ();
-			statService.locations[remote_location].packets = 1;
+			statService.locations[remote_location].packets = Dictionary[];
+			statService.locations[remote_location].packets.add(\in -> 0);
+			statService.locations[remote_location].packets.add(\out -> 0);
+			statService.locations[remote_location].packets[inout] = 1;
 		});
 	};
 
@@ -394,18 +504,18 @@ SynthDef(\bounce_away, { | freq = 300 |
 		);
 		service.soundType = soundType;
 		if(inout == \in, {
-			service.tick = { | self |
-				~playSound.(self.soundType, \in, self.packets);
+			service.tick = { | self, channel |
+				~playSound.(self.soundType, \in, self.packets[\in], channel);
 			};
 		}, {
-			service.tick = { | self |
-				~playSound.(self.soundType, \out, self.packets);
+			service.tick = { | self, channel |
+				~playSound.(self.soundType, \out, self.packets[\out], channel);
 			};
 		});
 	};
 
 	//
-	~playSound = { | type, inout, packets |
+	~playSound = { | type, inout, packets, channel |
 		var activity = \none;
 		if(packets > ~highActivityThreshold, {
 			activity = \high;
@@ -418,8 +528,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 				});
 			});
 		});
-		if(activity != \none) { var channel;
-			type.postln;
+		if(activity != \none) {
+			// type.postln;
 			switch(type,
 				\standard, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0, thump_atk = rrand(0.18, 0.21);
@@ -451,19 +561,19 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\out, channel.bus]);
 					}, {
 						channel.play_on(\thump, [
-								\freq, freq,
-								\atk, thump_atk,
-								\rel, 2,
-								\c0, -3,
-								\c1, \sine,
-								\pan, rrand(-0.7, 0.7),
-								\amp, 0.05 * amp,
-								\out, channel.bus]);
-						});
-					},
+							\freq, freq,
+							\atk, thump_atk,
+							\rel, 2,
+							\c0, -3,
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05 * amp,
+							\out, channel.bus]);
+					});
+				},
 				\Google, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
-					channel = google_channel;
+					// channel = google_channel;
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -490,7 +600,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 					}, {
 						channel.play_on(\tick2,
 							[
-								\freq, min(freq * 4, 18000),
+								\freqis, min(freq * 4, 18000),
 								\rq, exprand(0.001, 0.1),channel = default_channel;
 								\out, channel.bus,
 								\amp, exprand(0.01, 0.05) * amp,
@@ -503,7 +613,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\Amazon, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
-					channel = amazon_channel;
+					// channel = amazon_channel;
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -543,7 +653,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\Cloudflare, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
-					channel = cloudflare_channel;
+					// channel = cloudflare_channel;
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -594,7 +704,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\YouTube, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
-					channel = youtube_channel;
+					// channel = youtube_channel;
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -633,7 +743,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\Facebook, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave-2), amp = 0.5, release_coeff = 1.0, thump_atk = rrand(0.18, 0.21);
-					channel = facebook_channel;
+					// channel = facebook_channel;
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -662,14 +772,14 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\out, channel.bus]);
 					}, {
 						channel.play_on(\thump, [
-								\freq, freq,
-								\atk, thump_atk,
-								\rel, 2,
-								\c0, -3,
-								\c1, \sine,
-								\pan, rrand(-0.7, 0.7),
-								\amp, 0.05 * amp,
-								\out, channel.bus]);
+							\freq, freq,
+							\atk, thump_atk,
+							\rel, 2,
+							\c0, -3,
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05 * amp,
+							\out, channel.bus]);
 					});
 				}
 			);
@@ -698,73 +808,73 @@ SynthDef(\bounce_away, { | freq = 300 |
 
 		freq, ip_parts;
 
-		// Post all the data for every packet:
-		// [msg, time, addr, recvPort].postln;
+		// Some packets aren't interesting, such as communication with the router
+		if(local_ip != "192.168.0.1".asSymbol && (local_ip != "192.168.0.255".asSymbol)) {
+			// [msg, time, addr, recvPort].postln;
+			// Convert out to a boolean
+			if(out == \true, { out = true }, { out = false });
 
-		// Convert out to a boolean
-		if(out == \true, { out = true }, { out = false });
+			// Extract all the integers from the remote_ip
+			ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
 
-		// Extract all the integers from the remote_ip
-		ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
-
-		~addPacketToStats.(out, services, remote_ip, remote_location);
-
+			~addPacketToStats.(local_ip.asSymbol, out, services, remote_ip, remote_location);
+		};
 	}, '/package'); // create the OSCFunc
 
 	// A process plays sounds according to the stats collected at a certain regular interval
 	~tickClock = TempoClock(120/60);
 	Routine({
 		loop {
-			var allInServices = ~stats[\in].services.values, allOutServices = ~stats[\out].services.values,
+			var allDevices = ~stats.values,
 			numInPackets = 0, numOutPackets = 0;
 
-			allInServices.do { | service |
-				service.tick();
-				numInPackets = numInPackets + service.packets;
-				service.packets = 0;
-			};
-			allOutServices.do { | service |
-				service.tick();
-				numOutPackets = numOutPackets + service.packets;
-				service.packets = 0;
+			allDevices.do { |statDevice|
+				var allServices = statDevice.services.values;
+				allServices.do { | service |
+					service.tick(statDevice.channel);
+					numInPackets = numInPackets + service.packets[\in];
+					numOutPackets = numOutPackets + service.packets[\out];
+					service.packets[\in] = 0;
+					service.packets[\out] = 0;
+				};
 			};
 
 			/*if(numInPackets > 0) {
-				rain_channel.play_on(\thump, [
-					\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
-					\atk, rrand(0.18, 0.21),
-					\rel, 2,
-					\c0, -3,
-					\c1, \sine,
-					\pan, rrand(-0.7, 0.7),
-					\amp, 0.05,
-					\out, ~rainParams.out]);
-				if(numOutPackets > 10) {
-					sub_channel.play_on(\sub_tam, [
-						\freq, 32,
-						\amp, rrand(0.1, 0.7),
-						\pan, rrand(-0.5, 0.5),
-						\c0, 2,
-						\atk, rrand(1, 3),
-						\rel, rrand(2, 3),
-						\out, sub_channel.bus]);
-				};
+			rain_channel.play_on(\thump, [
+			\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
+			\atk, rrand(0.18, 0.21),
+			\rel, 2,
+			\c0, -3,
+			\c1, \sine,
+			\pan, rrand(-0.7, 0.7),
+			\amp, 0.05,
+			\out, ~rainParams.out]);
+			if(numOutPackets > 10) {
+			sub_channel.play_on(\sub_tam, [
+			\freq, 32,
+			\amp, rrand(0.1, 0.7),
+			\pan, rrand(-0.5, 0.5),
+			\c0, 2,
+			\atk, rrand(1, 3),
+			\rel, rrand(2, 3),
+			\out, sub_channel.bus]);
+			};
 			};
 
 			if(numOutPackets > 0) {
-				rain_channel.play_on(\reverse_sine, [
-					\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
-					\atk, rrand(1.0, 5.0),
-					\rel, rrand(0.1, 4),
-					\c0, rrand(1, 4),
-					\c1, \sine,
-					\pan, rrand(-0.7, 0.7),
-					\amp, 0.05,
-					\out, ~rainParams.out]);
-				if(numOutPackets > 5) {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, 5);
-					sine_channel.play_on(\long_sine, [\freq, freq, \amp, rrand(0.1, 0.4), \pan, rrand(-0.5, 0.5), \out, sine_channel.bus]);
-				};
+			rain_channel.play_on(\reverse_sine, [
+			\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
+			\atk, rrand(1.0, 5.0),
+			\rel, rrand(0.1, 4),
+			\c0, rrand(1, 4),
+			\c1, \sine,
+			\pan, rrand(-0.7, 0.7),
+			\amp, 0.05,
+			\out, ~rainParams.out]);
+			if(numOutPackets > 5) {
+			var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, 5);
+			sine_channel.play_on(\long_sine, [\freq, freq, \amp, rrand(0.1, 0.4), \pan, rrand(-0.5, 0.5), \out, sine_channel.bus]);
+			};
 			};*/
 
 			tick_channel.play_on(\tick2,
@@ -784,3 +894,4 @@ SynthDef(\bounce_away, { | freq = 300 |
 	}).play(~tickClock);
 }.value();
 )
+~stats.keys
