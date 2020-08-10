@@ -2,8 +2,8 @@
 // CONSTANTS AND SETUP
 
 // Routing and mixer channels
-~useAmbisonics = true;
-~ambisonicsOrder = 3;
+~useAmbisonics = true; // Set to false to use a simple stereo output
+~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
 if(~useAmbisonics == true, {
 	~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
 }, {
@@ -98,6 +98,7 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 	Out.ar(out, sig);
 }).add;
 
+// Create different synthdefs for mixer_channels (incl. the encoder) and the decoder depending on the settings above.
 if(~useAmbisonics, {
 	SynthDef(\decoder, { | in = 10, out = 0 |
 		var sig;
@@ -120,11 +121,13 @@ if(~useAmbisonics, {
 	}).add;
 	SynthDef(\mixer_channel, { | in = 10, out = 0 |
 		var sig = In.ar(in, 2),
-		radius = 0.0, azimuth = MouseY.kr(-pi * 0.5, pi * 0.5), elevation = MouseX.kr(pi * 0.5, -pi * 0.5);
+		// For the HOAEncoder* set of UGens, the azimuth is at the very left at pi/2 and the very right at -pi/2.
+		// Going further moves us behind the origin.
+		radius = 0.0, azimuth = MouseX.kr(pi * 1, -pi * 1), elevation = MouseX.kr(pi * 0.5, -pi * 0.5), yes = 1.0;
 		// azimuth = SinOsc.ar(1/4).range(-pi * 0.5, pi * 0.5);
 		// azimuth = Rand(-pi*0.5, pi*0.5);
-
-		radius = 0.0;
+		elevation = 0.0;
+		radius = MouseY.kr(0.0, 1.0);
 		sig = Mix(sig) * \amp.kr(0.5);
 		/*HOAEncoder.ar(~order,
 		WhiteNoise.ar(1),
@@ -137,7 +140,7 @@ if(~useAmbisonics, {
 				radius,
 				azimuth,
 				elevation,
-				0.0
+				yes
 			);
 		});
 		if(~ambisonicsOrder == 3, {
@@ -147,7 +150,7 @@ if(~useAmbisonics, {
 				radius,
 				azimuth,
 				elevation,
-				0.0
+				yes
 			);
 		});
 		if(~ambisonicsOrder == 5, {
@@ -157,7 +160,7 @@ if(~useAmbisonics, {
 				radius,
 				azimuth,
 				elevation,
-				0.0
+				yes
 			);
 		});
 

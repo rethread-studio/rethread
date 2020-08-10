@@ -33,6 +33,13 @@
 	);
 	// PanB uses the wrong output format for the decoder W, X, Y, Z, should be W Y Z X
 	[sig[0], sig[2], sig[1], sig[3]]*/
+	// Test using NFHOAEncoderFor1SourceToOrder1
+	/*NFHOAEncoderFor1SourcesToOrder1.ar(
+		sig,
+		1.0,
+		radius, azimuth, elevation,
+		0.0
+	);*/
 };
 ~hoaSignal.fadeTime = 1;
 )
@@ -55,3 +62,5 @@
 ~decoder.play(0, ~decoderNumChannels, vol: 1.0);
 ~hoaSignal <>> ~decoder;
 )
+
+Platform.systemAppSupportDir
