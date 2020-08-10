@@ -303,61 +303,6 @@ SynthDef(\bounce_away, { | freq = 300 |
 	~s53 = Scale.chromatic('et53');
 	~chord = [0, 14, 31, 44];
 
-	// Helper functions
-	~makeCloud = { |octave, pan = 0| var ev;
-		ev = (
-			octave: octave,
-			rq_max: 0.03,
-			dynamic_amp: 0.5,
-			amp: 0.5,
-			amp_min: 0.25,
-			amp_max: 1.0,
-			del_min: 0.05,
-			del_max: 0.1,
-			atk: (1/10.pow(octave-3)).max(0.001),
-			rel: 0.1,
-			pan: pan,
-			root: 0.midicps,
-			out_bus: 0,
-
-			playATick: {|self|
-				Synth(\tick2,
-					[
-						\freq, ~s53.degreeToFreq(~chord.choose, self.root, self.octave),
-						\rq, exprand(0.001, self.rq_max),
-						\out, self.out_bus,
-						\amp, exprand(self.amp_min, self.amp_max) * self.amp * self.dynamic_amp,
-						\atk, self.atk,
-						\rel, self.rel, //0.01,
-						\pan, rrand(-0.1, 0.1) + self.pan,
-					]
-				);
-				rrand(self.del_min, self.del_max).wait;
-			},
-			growAmp: {|self, growth|
-				self.dynamic_amp = self.dynamic_amp * growth;
-				self.dynamic_amp = max(min(self.dynamic_amp, 1.0), 0.0001);
-			},
-
-		);
-		ev.loopFunc = Task({
-			loop{
-				ev.playATick();
-			};
-		});
-		ev.loopFunc.start;
-		ev
-	};
-
-	~chordDeltasToChord = {
-		var lastNote = 159, chordFreqs;
-		~chord = [lastNote] ++ rrand(2, ~chordDeltas.size*rrand(1, 4).floor).collect{|i|
-			var newNote = lastNote - ~chordDeltas[i % ~chordDeltas.size];
-			lastNote = newNote;
-			newNote;
-		};
-	};
-
 	~makeMixerChannel = { | name, out, amp = 1 |
 		var bus, synth, group, azimuth, elevation;
 		bus = Bus.audio(s, ~mixerChannelOutputs);
@@ -883,44 +828,6 @@ SynthDef(\bounce_away, { | freq = 300 |
 				};
 			};
 
-			/*if(numInPackets > 0) {
-			rain_channel.play_on(\thump, [
-			\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
-			\atk, rrand(0.18, 0.21),
-			\rel, 2,
-			\c0, -3,
-			\c1, \sine,
-			\pan, rrand(-0.7, 0.7),
-			\amp, 0.05,
-			\out, ~rainParams.out]);
-			if(numOutPackets > 10) {
-			sub_channel.play_on(\sub_tam, [
-			\freq, 32,
-			\amp, rrand(0.1, 0.7),
-			\pan, rrand(-0.5, 0.5),
-			\c0, 2,
-			\atk, rrand(1, 3),
-			\rel, rrand(2, 3),
-			\out, sub_channel.bus]);
-			};
-			};
-
-			if(numOutPackets > 0) {
-			rain_channel.play_on(\reverse_sine, [
-			\freq, ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave),
-			\atk, rrand(1.0, 5.0),
-			\rel, rrand(0.1, 4),
-			\c0, rrand(1, 4),
-			\c1, \sine,
-			\pan, rrand(-0.7, 0.7),
-			\amp, 0.05,
-			\out, ~rainParams.out]);
-			if(numOutPackets > 5) {
-			var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, 5);
-			sine_channel.play_on(\long_sine, [\freq, freq, \amp, rrand(0.1, 0.4), \pan, rrand(-0.5, 0.5), \out, sine_channel.bus]);
-			};
-			};*/
-
 			tick_channel.play_on(\tick2,
 				[
 					\freq, rrand(7000, 9000),
@@ -938,4 +845,3 @@ SynthDef(\bounce_away, { | freq = 300 |
 	}).play(~tickClock);
 }.value();
 )
-~stats.keys
