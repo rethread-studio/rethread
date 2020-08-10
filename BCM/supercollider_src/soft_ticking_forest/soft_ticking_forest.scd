@@ -4,6 +4,8 @@
 // Routing and mixer channels
 ~useAmbisonics = true; // Set to false to use a simple stereo output
 ~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
+// If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
+~positionThroughService = true;
 ~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
 if(~useAmbisonics == true, {
 	~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
@@ -522,7 +524,9 @@ SynthDef(\bounce_away, { | freq = 300 |
 			switch(type,
 				\standard, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0, thump_atk = rrand(0.18, 0.21);
-					channel = default_channel;
+					if(~positionThroughService) {
+						channel = default_channel;
+					};
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -562,7 +566,9 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\Google, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
-					// channel = google_channel;
+					if(~positionThroughService) {
+						channel = google_channel;
+					};
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -602,7 +608,9 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\Amazon, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
-					// channel = amazon_channel;
+					if(~positionThroughService) {
+						channel = amazon_channel;
+					};
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -642,7 +650,9 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\Cloudflare, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
-					// channel = cloudflare_channel;
+					if(~positionThroughService) {
+						channel = cloudflare_channel;
+					};
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -693,7 +703,9 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\YouTube, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
-					// channel = youtube_channel;
+					if(~positionThroughService) {
+						channel = youtube_channel;
+					};
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
@@ -732,7 +744,9 @@ SynthDef(\bounce_away, { | freq = 300 |
 				},
 				\Facebook, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave-2), amp = 0.5, release_coeff = 1.0, thump_atk = rrand(0.18, 0.21);
-					// channel = facebook_channel;
+					if(~positionThroughService) {
+						channel = facebook_channel;
+					};
 					switch(activity,
 						\low, {
 							amp = amp * rrand(0.3, 0.7);
