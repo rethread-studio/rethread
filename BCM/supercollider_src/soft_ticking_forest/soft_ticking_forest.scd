@@ -3,6 +3,7 @@
 
 // Routing and mixer channels
 ~useAmbisonics = true; // Set to false to use a simple stereo output
+~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
 ~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
 if(~useAmbisonics == true, {
 	~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
@@ -11,10 +12,21 @@ if(~useAmbisonics == true, {
 });
 ~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
 
+// Ambisonics positioning parameters
+~azimuthPosition = 0.0; // The start position, and later on current position for the next device
+~azimuthStep = (6.1 * pi)/7; // The distance between different devices, a 7 pointed star that's a little bit off so it doesn't quite return to the same spot
+~elevationPosition = 0.0;
+~elevationStep = 0.0;
+
+
 // Sonification activity thresholds
 ~highActivityThreshold = 20;
 ~mediumActivityThreshold = 10;
 ~lowActivityThreshold = 1;
+
+// What latency in seconds to use for scheduling playback on the server
+// If you get "late ..." messages, increase this number
+~latency = 0.2;
 
 
 "../sound_forest_mixer_gui.scd".loadRelative;
@@ -123,11 +135,14 @@ if(~useAmbisonics, {
 		var sig = In.ar(in, 2),
 		// For the HOAEncoder* set of UGens, the azimuth is at the very left at pi/2 and the very right at -pi/2.
 		// Going further moves us behind the origin.
-		radius = 0.0, azimuth = MouseX.kr(pi * 1, -pi * 1), elevation = MouseX.kr(pi * 0.5, -pi * 0.5), yes = 1.0;
+		radius = \radius.kr(0.0), azimuth = \azimuth.kr(0.0), elevation = \elevation.kr(0), yes = \use_radius.kr(1.0);
 		// azimuth = SinOsc.ar(1/4).range(-pi * 0.5, pi * 0.5);
 		// azimuth = Rand(-pi*0.5, pi*0.5);
-		elevation = 0.0;
-		radius = MouseY.kr(0.0, 1.0);
+		// radius = MouseY.kr(0.0, 1.0);
+		if(~controlPositionWithMouse) {
+			azimuth = azimuth + MouseX.kr(pi * 1, -pi * 1);
+			elevation = elevation + MouseY.kr(pi * 0.5, -pi * 0.5);
+		};
 		sig = Mix(sig) * \amp.kr(0.5);
 		/*HOAEncoder.ar(~order,
 		WhiteNoise.ar(1),
@@ -344,15 +359,27 @@ SynthDef(\bounce_away, { | freq = 300 |
 	};
 
 	~makeMixerChannel = { | name, out, amp = 1 |
-		var bus, synth, group;
+		var bus, synth, group, azimuth, elevation;
 		bus = Bus.audio(s, ~mixerChannelOutputs);
 		group = Group(s);
-		synth = Synth(\mixer_channel, [\in, bus, \out, out], group, \addToTail);
+		azimuth = ~azimuthPosition;
+		~azimuthPosition = ~azimuthPosition + ~azimuthStep;
+		if(~azimuthPosition > pi) {
+			~azimuthPosition = ~azimuthPosition - 2pi;
+		};
+		if(~azimuthPosition < -pi) {
+			~azimuthPosition = ~azimuthPosition + 2pi;
+		};
+		elevation = ~elevationPosition;
+		~elevationPosition = ~elevationPosition + ~elevationStep;
+		synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
 		(
 			my_synth: synth,
 			my_group: group,
 			my_amp: amp,
 			my_send_amp: 0.0,
+			azimuth: azimuth,
+			elevation: elevation,
 			bus: bus,
 			name: name,
 			set_amp: {|self, amp|
@@ -369,7 +396,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 			},
 			// Use play on to make sure that the
 			play_on: {|self, synth_name, args|
-				Synth(synth_name, args, self.my_group);
+				s.makeBundle(~latency, {Synth(synth_name, args, self.my_group)} );
 			},
 		)
 	};
