@@ -9,6 +9,7 @@ struct LocalProcessHandler {
     synthesis_engine: SynthesisEngine,
     tick_msg_rx: crossbeam_channel::Receiver<EventMsg>,
     event_msg_rx: crossbeam_channel::Receiver<EventMsg>,
+    trigger_msg_rx: crossbeam_channel::Receiver<usize>,
     sample_rate: usize,
     pub num_textures: usize,
     pub num_single_pitches: usize,
@@ -20,6 +21,7 @@ impl LocalProcessHandler {
         out_port_r: jack::Port<jack::AudioOut>,
         tick_msg_rx: crossbeam_channel::Receiver<EventMsg>,
         event_msg_rx: crossbeam_channel::Receiver<EventMsg>,
+        trigger_msg_rx: crossbeam_channel::Receiver<usize>,
         sample_rate: usize,
     ) -> Self {
         let frequency = 50.0;
@@ -35,6 +37,7 @@ impl LocalProcessHandler {
             synthesis_engine,
             tick_msg_rx,
             event_msg_rx,
+            trigger_msg_rx,
             sample_rate,
             num_textures,
             num_single_pitches,
@@ -70,6 +73,9 @@ impl jack::ProcessHandler for LocalProcessHandler {
         }
         while let Ok(f) = self.tick_msg_rx.try_recv() {
             self.parse_event_msg(f);            
+        }
+        while let Ok(index) = self.trigger_msg_rx.try_recv() {
+            self.synthesis_engine.trigger_trigger(index);
         }
 
         // Get output buffer
@@ -108,7 +114,11 @@ pub struct AudioInterface {
 }
 
 impl AudioInterface {
-    pub fn new(tick_msg_rx: crossbeam_channel::Receiver<EventMsg>, event_msg_rx: crossbeam_channel::Receiver<EventMsg>) -> Self {
+    pub fn new(
+        tick_msg_rx: crossbeam_channel::Receiver<EventMsg>, 
+        event_msg_rx: crossbeam_channel::Receiver<EventMsg>,
+        trigger_msg_rx: crossbeam_channel::Receiver<usize>,
+    ) -> Self {
         // 1. open a client
         let client_name = "rust_jack";
         let (client, _status) =
@@ -137,7 +147,7 @@ impl AudioInterface {
 
         let mut counter = 0;
 
-        let process = LocalProcessHandler::new(out_port_l, out_port_r, tick_msg_rx, event_msg_rx, sample_rate);
+        let process = LocalProcessHandler::new(out_port_l, out_port_r, tick_msg_rx, event_msg_rx, trigger_msg_rx, sample_rate);
         let num_textures = process.num_textures;
         let num_single_pitches = process.num_single_pitches;
 

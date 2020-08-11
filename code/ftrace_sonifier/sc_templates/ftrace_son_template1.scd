@@ -72,6 +72,7 @@ Synth(\kick, [\freq, 60, \pan, -1]); Synth(\kick, [\freq, 33, \pan, 1]);
 )
 
 
+/// PLUCK EXAMPLES
 // excitation signal is WhiteNoise, triggered twice a second with varying OnePole coef
 (
 {Pluck.ar(WhiteNoise.ar(0.1), Impulse.kr(MouseY.kr(50, 1000, 'exponential')), 440.reciprocal, 440.reciprocal, 10,
@@ -85,14 +86,20 @@ Synth(\kick, [\freq, 60, \pan, -1]); Synth(\kick, [\freq, 33, \pan, 1]);
 	numparts = 50;
 	freq = SinOsc.kr(Array.fill(numparts, {Rand(0.05, 0.2)}),
 		Array.fill(numparts, {Rand(0, 1.0)})).range(1000, 3000);
-        LeakDC.ar(
-            Pan2.ar(
-                Pluck.ar(
-                    WhiteNoise.ar(0.1).dup(numparts),
-                    Impulse.kr(Array.fill(numparts, {Rand(10, 12)})),
-                    100.reciprocal, freq.reciprocal, 2, Rand(0.01, 0.2), mul: 1),
-                Array.fill(numparts, {Rand.new(-1.0, 1.0)}))
-            .sum
-            );
-        }.play(s);
+	LeakDC.ar(
+		Pan2.ar(
+			Pluck.ar(
+				WhiteNoise.ar(0.1).dup(numparts),
+				Impulse.kr(Array.fill(numparts, {Rand(10, 12)})),
+				100.reciprocal, freq.reciprocal, 2, Rand(0.01, 0.2), mul: 1),
+			Array.fill(numparts, {Rand.new(-1.0, 1.0)}))
+		.sum
+	);
+}.play(s);
+)
+
+// Comb filters
+(
+{
+}.fork;
 )

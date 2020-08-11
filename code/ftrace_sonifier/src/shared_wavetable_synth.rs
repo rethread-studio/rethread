@@ -12,7 +12,7 @@ use dasp::signal::{NoiseSimplex, Signal};
 pub type Sample = f64;
 
 pub trait LocalSig {
-    fn next(&mut self, resources: &WavetableArena) -> Sample;
+    fn next(&mut self, resources: &mut Resources) -> Sample;
 }
 
 pub struct Wavetable {
@@ -45,19 +45,32 @@ impl Wavetable {
     }
     pub fn multi_sine(wavetable_size: usize, num_harmonics: usize) -> Self {
         let mut wt = Wavetable::new(wavetable_size);
+        wt.fill_sine(num_harmonics, 1.0);
+        wt.add_noise(0.95);
+        wt.normalize();
+        wt
+    }
+    pub fn crazy(wavetable_size: usize) -> Self {
+        let mut wt = Wavetable::new(wavetable_size);
+        wt.fill_sine(16, 1.0);
+        for _ in 0..(random::<usize>() % 3 + 1) {
+            wt.fill_sine(16, (random::<Sample>() * 32.0).floor());
+        }
+        wt.add_noise(1.0 - random::<Sample>()*0.05);
+        wt.normalize();
+        wt
+    }
+    pub fn fill_sine(&mut self, num_harmonics: usize, freq: Sample) {
         for n in 0..num_harmonics {
             let start_phase = random::<f64>() * 2.0 * PI * n as f64;
             let harmonic_amp = match n {
                 0 => 1.0,
                 _ => random::<f64>() * 0.05 + 0.001
             };
-            for i in 0..wavetable_size {
-                wt.buffer[i] += ((i as Sample / wt.size) * PI * 2.0 * (n+1) as f64 + start_phase).sin() * harmonic_amp;
+            for i in 0..self.size as usize {
+                self.buffer[i] += ((i as Sample / self.size) * PI * 2.0 * freq * (n+1) as f64 + start_phase).sin() * harmonic_amp;
             }
         }
-        wt.add_noise(0.95);
-        wt.normalize();
-        wt
     }
     pub fn add_noise(&mut self, probability: f64) {
         for sample in &mut self.buffer {
@@ -125,7 +138,6 @@ pub struct SinglePitch {
 impl SinglePitch {
     pub fn new(freq: Sample, wavetable: WavetableIndex, sample_rate: Sample, decay_time: Sample, pan: Sample) -> Self {
         let duration_in_samples = decay_time * sample_rate;
-        println!("Sensitivity rec: {}", (1.0 / (decay_time * 2.0)) / sample_rate);
         SinglePitch {
             amp: 0.0,
             target_amp: 0.0,
@@ -147,17 +159,18 @@ impl SinglePitch {
     }
 
     #[inline]
-    fn next(&mut self, wavetable_arena: &WavetableArena) -> [Sample; 2] {
-        self.pan.set_pan(self.pan_signal.next(wavetable_arena));
+    fn next(&mut self, resources: &mut Resources) -> [Sample; 2] {
+        self.pan.set_pan(self.pan_signal.next(resources));
         self.lpf.alpha = (0.9 - (self.amp * 9.0).powi(3)).min(1.0); 
         // self.lpf.alpha = 1.0 - self.sensitivity;
         self.amp = self.amp * self.lpf_coeff + self.target_amp * (1.0 - self.lpf_coeff);
         self.target_amp *= self.decay_coeff;
         self.sensitivity = (self.sensitivity + self.sensitivity_recovery).min(1.0);
-        self.pan.next(self.lpf.next(self.oscillator.next(wavetable_arena)) * self.amp)
+        self.pan.next(self.lpf.next(self.oscillator.next(resources)) * self.amp)
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct ExponentialDecay {
     value: Sample,
     target_value: Sample,
@@ -261,8 +274,9 @@ impl LFNoise1 {
 }
 
 impl LocalSig for LFNoise1 {
-    fn next(&mut self, resources: &WavetableArena) -> Sample {
+    fn next(&mut self, resources: &mut Resources) -> Sample {
         if self.reset_counter <= 0 {
+            // TODO: use a real-time safe random number generator
             self.target = random::<f64>() * (self.max - self.min) + self.min;
             self.step = (self.target - self.value) / self.steps_between as f64;
             self.reset_counter = self.steps_between;
@@ -283,7 +297,6 @@ pub struct Oscillator {
     phase: Sample,
     wavetable: WavetableIndex,
     amp: Sample,
-    
 }
 
 impl Oscillator
@@ -311,14 +324,14 @@ impl Oscillator
 }
 impl LocalSig for Oscillator {
     #[inline]
-    fn next(&mut self, wavetable_arena: &WavetableArena) -> Sample {
+    fn next(&mut self, resources: &mut Resources) -> Sample {
         let temp_phase = self.phase;
         self.phase += self.step;
         while self.phase >= 1.0 {
             self.phase -= 1.0;
         }
         // Use the phase to index into the wavetable
-        match wavetable_arena.get(self.wavetable) {
+        match resources.wavetable_arena.get(self.wavetable) {
             Some(wt) => wt.get(temp_phase) * self.amp,
             None => 0.0
         }
@@ -356,8 +369,8 @@ impl TriggeredOscillator {
     }
 
     #[inline]
-    fn next(&mut self, wavetable_arena: &WavetableArena) -> Sample {
-        self.oscillator.next(&wavetable_arena) * self.env.next()
+    fn next(&mut self, resources: &mut Resources) -> Sample {
+        self.oscillator.next(resources) * self.env.next()
     }
 }
 
@@ -413,10 +426,10 @@ impl SynthesisGroup {
 
 impl LocalSig for SynthesisGroup {
     #[inline]
-    fn next(&mut self, wavetable_arena: &WavetableArena) -> Sample {
+    fn next(&mut self, resources: &mut Resources) -> Sample {
         let mut amp = 0.0;
         for osc in &mut self.oscillators {
-            amp += osc.next(wavetable_arena);
+            amp += osc.next(resources);
         }
         amp
     }
@@ -465,10 +478,10 @@ impl TextureGroup {
 
 impl LocalSig for TextureGroup {
     #[inline]
-    fn next(&mut self, wavetable_arena: &WavetableArena) -> Sample {
+    fn next(&mut self, resources: &mut Resources) -> Sample {
         let mut amp = 0.0;
         for osc in &mut self.oscillators {
-            amp += osc.next(wavetable_arena);
+            amp += osc.next(resources);
         }
         // Return a soft clipped amp
         (amp * 2.0).tanh() * 0.125
@@ -522,10 +535,10 @@ impl BassSynthesis {
 
 impl LocalSig for BassSynthesis {
     #[inline]
-    fn next(&mut self, wavetable_arena: &WavetableArena) -> Sample {
+    fn next(&mut self, resources: &mut Resources) -> Sample {
         let mut amp = 0.0;
         for osc in &mut self.oscillators {
-            amp += osc.next(wavetable_arena);
+            amp += osc.next(resources);
         }
         amp
     }
@@ -652,8 +665,8 @@ pub struct WavetableArena {
 
 impl WavetableArena {
     fn new() -> Self {
-        let mut wavetables = Vec::with_capacity(100);
-        for i in 0..100 {
+        let mut wavetables = Vec::with_capacity(200);
+        for i in 0..200 {
             wavetables.push(None);
         }
         WavetableArena {
@@ -674,16 +687,30 @@ impl WavetableArena {
         // TODO: Check that the next free index is within the bounds of the wavetables Vec or else use the indexes that have been freed
         index
     }
+}
 
+pub struct Resources {
+    pub wavetable_arena: WavetableArena,
+    pub busses: Vec<Sample>,
+}
+
+impl Resources {
+    pub fn new(wavetable_arena: WavetableArena) -> Self {
+        Resources {
+            wavetable_arena,
+            busses: vec![0.0; 200]
+        }
+    }
 }
 
 pub struct SynthesisEngine {
-    wavetable_arena: WavetableArena,
+    resources: Resources,
     sample_rate: Sample,
     synthesis_groups: Vec<SynthesisGroup>,
     texture_groups: Vec<TextureGroup>,
     single_pitches: Vec<SinglePitch>,
     bass_synthesis: BassSynthesis,
+    triggers: Vec<TriggeredOscillator>,
     output_frame: [Sample; 2],
 }
 
@@ -693,6 +720,7 @@ impl SynthesisEngine {
         // Add a wavetable to the arena
         let sine_wt = wavetable_arena.add(Wavetable::sine(131072));
         let multi_sine_wt = wavetable_arena.add(Wavetable::multi_sine(131072, 15));
+        
         let mut synthesis_groups = vec![];
         let mid_group = SynthesisGroup::new(
             sine_wt,
@@ -757,8 +785,6 @@ impl SynthesisEngine {
         for freq in chord {
             single_pitches.push(SinglePitch::new(freq, multi_sine_wt, sample_rate, 5.0, random::<f64>() * 2.0 - 1.0));
         }
-        
-        
 
         let bass_synthesis = BassSynthesis::new(
             multi_sine_wt,
@@ -767,13 +793,24 @@ impl SynthesisEngine {
             16,
         );
 
+        println!("Building wavetables...");
+        let mut triggers = Vec::with_capacity(100);
+        for _ in 0..100 {
+            let wt = wavetable_arena.add(Wavetable::crazy(131072));
+            triggers.push(TriggeredOscillator::from_freq(wt, sample_rate, random::<Sample>().powi(2) * 0.0 + 20.0, 0.05));
+        }
+        println!("Wavetables built!");
+
+        let resources = Resources::new(wavetable_arena);
+
         SynthesisEngine {
-            wavetable_arena,
+            resources,
             sample_rate,
             synthesis_groups,
             bass_synthesis,
             single_pitches,
             texture_groups,
+            triggers,
             output_frame: [0.0; 2],
         }
     }
@@ -795,6 +832,10 @@ impl SynthesisEngine {
         self.bass_synthesis.trigger(amp, decay, index);
     }
 
+    pub fn trigger_trigger(&mut self, index: usize) {
+        self.triggers[index].trigger(1.0, random::<Sample>().powi(3));
+    }
+
     pub fn add_energy_to_pitch(&mut self, index: usize, energy: Sample) {
         self.single_pitches[index].add_energy(energy);
     }
@@ -802,18 +843,22 @@ impl SynthesisEngine {
     pub fn next(&mut self) -> [Sample; 2] {
         let mut amp = 0.0;
         self.output_frame = [0.0; 2];
+
+        for (i, trig) in self.triggers.iter_mut().enumerate() {
+            amp += trig.next(&mut self.resources);
+        }
         
         for group in &mut self.synthesis_groups {
-            amp += group.next(&self.wavetable_arena);
+            amp += group.next(&mut self.resources);
         }
-        amp += self.bass_synthesis.next(&self.wavetable_arena);
+        amp += self.bass_synthesis.next(&mut self.resources);
         for texture in &mut self.texture_groups {
-            amp += texture.next(&self.wavetable_arena);
+            amp += texture.next(&mut self.resources);
         }
         self.output_frame[0] += amp;
         self.output_frame[1] += amp;
         for pitch in &mut self.single_pitches {
-            let frame = pitch.next(&self.wavetable_arena);
+            let frame = pitch.next(&mut self.resources);
             self.output_frame[0] += frame[0];
             self.output_frame[1] += frame[1];
         }

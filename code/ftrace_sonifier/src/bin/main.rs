@@ -5,6 +5,7 @@ use nannou::prelude::*;
 use nannou::ui::prelude::*;
 
 use crossbeam_channel::bounded;
+use crossbeam_channel::{Sender, Receiver};
 extern crate jack;
 
 use std::thread;
@@ -36,6 +37,36 @@ struct Ids {
     force_strength: widget::Id,
 }
 
+struct GraphicTrigger {
+    position: Point2,
+    velocity: Vector2,
+    hue: f32,
+    outside: bool,
+    lifetime: f32,
+}
+
+impl GraphicTrigger {
+    pub fn new(position: Point2, velocity: Vector2, hue: f32) -> Self {
+        GraphicTrigger {
+            position,
+            velocity,
+            hue,
+            outside: false,
+            lifetime: 1.0,
+        }
+    }
+    pub fn update(&mut self) {
+        self.position += self.velocity;
+        self.lifetime -= 0.01;
+        if self.position.x > 1.0 || self.position.x < -1.0 || self.position.y > 1.0 || self.position.y < -1.0 {
+            self.outside = true;
+        }
+        if self.lifetime <= 0.0 {
+            self.outside = true;
+        }
+    }
+}
+
 struct Model {
     _window: window::Id,
     ui: Ui,
@@ -46,6 +77,8 @@ struct Model {
     midi_device: MidiDevice,
     shared_state: ArcMutex<SharedState>,
     info_event_stat: RefCell<Option<EventStat>>, // A copy of the event_stat to be visualised
+    graphic_triggers: Vec<GraphicTrigger>,
+    graphic_trigger_rx: Receiver<GraphicTrigger>,
 }
 
 struct OSCModel {
@@ -69,7 +102,11 @@ fn model(app: &App) -> Model {
 
     let (tick_msg_tx, tick_msg_rx) = bounded::<EventMsg>(1_000_000);
 
-    let mut audio_interface = AudioInterface::new(tick_msg_rx, event_msg_rx);
+    let (mut graphic_trigger_tx, graphic_trigger_rx) = bounded::<GraphicTrigger>(1_000_000);
+
+    let (mut trigger_msg_tx, trigger_msg_rx) = bounded::<usize>(1000000);
+
+    let mut audio_interface = AudioInterface::new(tick_msg_rx, event_msg_rx, trigger_msg_rx);
     audio_interface.connect_to_system(2);
 
     let shared_state = Arc::new(Mutex::new(SharedState::new()));
@@ -108,7 +145,16 @@ fn model(app: &App) -> Model {
     thread::spawn(move || {
         loop {
             update_osc(&mut receiver, &mut received_packets);
-            process_packets(&mut received_packets, &mut osc_model, &mut event_type_received, &mut main_map_copy, &mut shared_state_copy, &mut event_msg_tx);
+            process_packets(
+                &mut received_packets, 
+                &mut osc_model, 
+                &mut event_type_received, 
+                &mut main_map_copy, 
+                &mut shared_state_copy, 
+                &mut event_msg_tx, 
+                &mut graphic_trigger_tx,
+                &mut trigger_msg_tx,
+            );
         }
     });
 
@@ -124,6 +170,8 @@ fn model(app: &App) -> Model {
         midi_device,
         shared_state,
         info_event_stat: RefCell::new(None),
+        graphic_triggers: vec![],
+        graphic_trigger_rx,
     };
     model
 }
@@ -193,6 +241,21 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         // }
     }
 
+    // Update GraphicTriggers
+    for gt in &mut model.graphic_triggers {
+        gt.update();
+    }
+
+    // Remove triggers that have disappeared
+    model.graphic_triggers.retain(|gt| !gt.outside );
+
+    // Receive GraphicTriggers
+    while let Ok(gt) = model.graphic_trigger_rx.try_recv() {
+        model.graphic_triggers.push(gt);
+    }
+
+    // 
+
     // println!("fps: {}, points: {}", app.fps(), model.points.len());
 }
 
@@ -249,7 +312,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
             SelectionMode::EventFamily => {
                 event_stat.event_family == local_shared_state.select_family
             }
-        }; 
+        };
         let lightness = if is_selected {
             0.2
         } else {
@@ -336,6 +399,14 @@ fn view(app: &App, model: &Model, frame: Frame) {
             *model.info_event_stat.borrow_mut() = Some(event_stat.clone());
             hover_found = true;
         }
+    }
+
+    // Draw GraphicTriggers
+    for gt in &model.graphic_triggers {
+        draw.ellipse()
+            .color(hsla(gt.hue, 0.5, 0.5, gt.lifetime))
+            .radius(6.0)
+            .x_y(gt.position.x * frame.rect().w(), gt.position.y * frame.rect().h());
     }
 
     if !hover_found {
@@ -470,7 +541,9 @@ fn process_packets(
     event_type_received: &mut HashMap<String, usize>,
     main_map: &mut HashMap<&'static str, ArcMutex<EventStat>>,
     shared_state: &mut ArcMutex<SharedState>,
-    tx: &mut crossbeam_channel::Sender<EventMsg>
+    tx: &mut Sender<EventMsg>,
+    graphic_trigger_tx: &mut Sender<GraphicTrigger>,
+    trigger_msg_tx: &mut Sender<usize>,
 ) {
     // The osc::Packet can be a bundle containing several messages. Therefore we can use into_msgs to get all of them.
     for packet in received_packets {
@@ -523,6 +596,23 @@ fn process_packets(
                                         //     event_stat.last_triggered_timestamp = msg.timestamp;
                                         // }
                                         event_stat.register_occurrence();
+
+                                        // Do trigger
+                                        let triggered;
+                                        {
+                                            let mut locked_shared_state = shared_state.lock().unwrap();
+                                            triggered = locked_shared_state.triggers[event_stat.index].activate();
+                                        }
+                                        if triggered {
+                                            // Send trigger to the sound and audio systems
+                                            let angle = random_f32() * PI * 2.0;
+                                            let speed = 0.003;
+                                            let vel = vec2(angle.cos() * speed, angle.sin() * speed);
+                                            graphic_trigger_tx.send(
+                                                GraphicTrigger::new(event_stat.pos.clone(), vel, 
+                                                event_stat.index as f32 * 73.5732 % 1.0)).unwrap();
+                                            trigger_msg_tx.send(event_stat.index); // Send to sound synthesis
+                                        }
 
                                         if let Some(synthesis_type) = event_stat.synth_texture {
                                             let mut synth_texture = synthesis_type.clone();
@@ -592,6 +682,10 @@ fn start_synthesis_tick(
             {
                 let mut locked_shared_state = shared_state.lock().unwrap();
                 tick_length = locked_shared_state.tick_length;
+                // update triggers
+                for trig in &mut locked_shared_state.triggers {
+                    trig.update();
+                }
             }
 
             let density_decay = 0.99311604842093.powi(tick_length.as_millis() as i32);

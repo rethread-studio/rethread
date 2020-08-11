@@ -15,12 +15,54 @@ pub mod event_stats;
 pub mod midi_input;
 
 #[derive(Clone, Copy)]
+pub struct Trigger {
+    value: f64,
+    trigger_threshold: f64,
+    equilibrium: f64, // The neutral "resting" point for the trigger
+}
+
+impl Trigger {
+    pub fn new() -> Self {
+        Trigger {
+            value: 0.0,
+            trigger_threshold: 1.0,
+            equilibrium: 1.0,
+        }
+    }
+    /// Returns if the trigger has triggered or not
+    pub fn activate(&mut self) -> bool {
+        self.value += 1.0;
+        if self.value >= self.trigger_threshold {
+            self.trigger();
+            true
+        } else {
+            false
+        }
+    }
+    pub fn trigger(&mut self) {
+        self.value = 0.0;
+        // Adjust the equilibrium point towards the trigger threshold
+        self.equilibrium = self.equilibrium * 0.9 + self.trigger_threshold * 0.1;
+        // Increase the threshold to the next trigger (will decrease towards the equilibrium over time)
+        self.trigger_threshold *= 1.5;
+    }
+    pub fn update(&mut self) {
+        // Lower the trigger_threshold slowly over time
+        self.trigger_threshold = self.trigger_threshold * 0.9 + self.equilibrium * 0.1;
+        // Lower the value slowly over time
+        self.value *= 0.99;
+        // Lower the equilibrium very very slowly over time
+        self.equilibrium *= 0.999;
+    }
+}
+
+#[derive(Clone, Copy)]
 pub enum SelectionMode {
     EventFamily,
     Square
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 /// State that is shared between the GUI thread, the OSC processing thread and the MIDI thread
 pub struct SharedState {
     pub focus_point: nannou::geom::Point2,
@@ -41,6 +83,7 @@ pub struct SharedState {
     pub density_approach: event_stats::DensityApproach,
     pub selection_mode: SelectionMode,
     pub select_family: event_stats::EventFamily,
+    pub triggers: Vec<Trigger>
 }
 impl SharedState {
     pub fn new() -> Self {
@@ -63,6 +106,7 @@ impl SharedState {
             density_approach: event_stats::DensityApproach::DensityChange,
             selection_mode: SelectionMode::Square,
             select_family: event_stats::EventFamily::EXCEPTIONS,
+            triggers: vec![Trigger::new(); 100],
         }
     }
     /// Reset settings carried over from midi input
