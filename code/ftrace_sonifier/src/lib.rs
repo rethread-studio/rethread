@@ -9,6 +9,7 @@ pub mod shared_wavetable_synth;
 pub mod dasp_synth;
 
 pub mod audio_interface;
+pub mod load_sound;
 
 pub mod event_stats;
 

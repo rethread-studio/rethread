@@ -2,6 +2,7 @@ use std::f64::consts::PI;
 // use std::f32::consts::PI;
 use nannou::rand::random;
 use dasp::signal::{NoiseSimplex, Signal};
+use crate::load_sound::*;
 
 // Performance: Reusing one wavetable seems to double the performance looking at jack's DSP meter
 
@@ -13,6 +14,87 @@ pub type Sample = f64;
 
 pub trait LocalSig {
     fn next(&mut self, resources: &mut Resources) -> Sample;
+}
+
+/// The Buffer is currently very similar to Wavetable, but they may evolve differently
+pub struct Buffer {
+    buffer: Vec<Sample>,
+    size: Sample,
+    /// The sample rate of the buffer, can be different from the sample rate of the audio server
+    sample_rate: Sample, 
+}
+
+impl Buffer {
+    pub fn new(size: usize, sample_rate: Sample) -> Self {
+        Buffer {
+            buffer: vec![0.0; size],
+            size: size as Sample,
+            sample_rate,
+        }
+    }
+    pub fn from_vec(buffer: Vec<Sample>, sample_rate: Sample) -> Self {
+        let size = buffer.len() as Sample;
+        Buffer {
+            buffer,
+            size,
+            sample_rate
+        }
+    }
+    /// Returns the rate parameter for playing this buffer with the correct speed
+    pub fn buf_rate_scale(&self, server_sample_rate: Sample) -> Sample {
+        let sample_rate_conversion = server_sample_rate / self.sample_rate;
+        1.0 / (self.size * sample_rate_conversion)
+    }
+    /// Linearly interpolate between the value in between to samples
+    #[inline]
+    fn get_linear_interp(&self, index: Sample) -> Sample {
+        let mix = index.fract();
+        let index_u = index as usize;
+        unsafe {
+            *self.buffer.get_unchecked(index_u) * (1.0-mix) + *self.buffer.get_unchecked((index_u + 1) % self.buffer.len()) * mix
+        }
+    }
+    /// Get the sample at the index discarding the fraction with no interpolation
+    #[inline]
+    fn get(&self, index: usize) -> Sample {
+        // self.buffer[index]
+        unsafe{ *self.buffer.get_unchecked(index) }
+    }
+}
+
+/// Reads a sample from a buffer and plays it back
+/// TODO: Support multi-channel buffers
+struct BufReader {
+    buf_index: usize,
+    read_pointer: f64,
+    rate: f64,
+    amp: Sample,
+}
+
+impl BufReader {
+    pub fn new(buf_index: usize, rate: f64, amp: Sample) -> Self {
+        BufReader {
+            buf_index,
+            read_pointer: 0.0,
+            rate,
+            amp,
+        }
+    }
+    pub fn jump_to(&mut self, new_pointer_pos: f64) {
+        self.read_pointer = new_pointer_pos;
+    }
+}
+
+impl LocalSig for BufReader {
+    fn next(&mut self, resources: &mut Resources) -> Sample {
+        let buffer = &resources.buffers[self.buf_index];
+        let sample = buffer.get((self.read_pointer * buffer.size) as usize);
+        self.read_pointer += self.rate;
+        while self.read_pointer > 1.0 {
+            self.read_pointer -= 1.0;
+        }
+        sample * self.amp
+    }
 }
 
 pub struct Wavetable {
@@ -692,13 +774,15 @@ impl WavetableArena {
 pub struct Resources {
     pub wavetable_arena: WavetableArena,
     pub busses: Vec<Sample>,
+    pub buffers: Vec<Buffer>
 }
 
 impl Resources {
     pub fn new(wavetable_arena: WavetableArena) -> Self {
         Resources {
             wavetable_arena,
-            busses: vec![0.0; 200]
+            busses: vec![0.0; 200],
+            buffers: vec![],
         }
     }
 }
@@ -711,6 +795,7 @@ pub struct SynthesisEngine {
     single_pitches: Vec<SinglePitch>,
     bass_synthesis: BassSynthesis,
     triggers: Vec<TriggeredOscillator>,
+    buf_readers: Vec<BufReader>,
     output_frame: [Sample; 2],
 }
 
@@ -793,6 +878,9 @@ impl SynthesisEngine {
             16,
         );
 
+        // Load FLAC file
+        let buffer = load_flac("/home/erik/Musik/flac/530317__martian__horn-doppler-pass-country-lane.flac", sample_rate as usize);
+
         println!("Building wavetables...");
         let mut triggers = Vec::with_capacity(100);
         for _ in 0..100 {
@@ -801,7 +889,11 @@ impl SynthesisEngine {
         }
         println!("Wavetables built!");
 
-        let resources = Resources::new(wavetable_arena);
+        let mut resources = Resources::new(wavetable_arena);
+        resources.buffers.push(buffer);
+
+        let mut buf_readers = Vec::new();
+        buf_readers.push(BufReader::new(0, resources.buffers[0].buf_rate_scale(sample_rate), 0.5));
 
         SynthesisEngine {
             resources,
@@ -811,6 +903,7 @@ impl SynthesisEngine {
             single_pitches,
             texture_groups,
             triggers,
+            buf_readers,
             output_frame: [0.0; 2],
         }
     }
@@ -834,6 +927,9 @@ impl SynthesisEngine {
 
     pub fn trigger_trigger(&mut self, index: usize) {
         self.triggers[index].trigger(1.0, random::<Sample>().powi(3));
+        if index % 10 == 0 {
+            self.buf_readers[0].jump_to(random::<f64>());
+        }
     }
 
     pub fn add_energy_to_pitch(&mut self, index: usize, energy: Sample) {
@@ -854,6 +950,9 @@ impl SynthesisEngine {
         amp += self.bass_synthesis.next(&mut self.resources);
         for texture in &mut self.texture_groups {
             amp += texture.next(&mut self.resources);
+        }
+        for br in &mut self.buf_readers {
+            amp += br.next(&mut self.resources);
         }
         self.output_frame[0] += amp;
         self.output_frame[1] += amp;

@@ -34,10 +34,11 @@ Synth(\kick, [\freq, 60, \pan, -1]); Synth(\kick, [\freq, 33, \pan, 1]);
 )
 
 
-(
+( // Crackle generator
 {
-	var sig, freq = LFNoise1.kr(0.5).range(3000, 8000), trig = Dust.ar(MouseX.kr(50, 1000, 'exponential'));
-	sig = SinOsc.ar(freq) * Decay.ar(trig, MouseY.kr(0.0001, 0.1, 'exponential'));
+	var sig, freq = LFNoise1.kr(0.5).range(3000, 8000), trig = Dust.ar(MouseX.kr(10, 1000, 'exponential'));
+	freq = TRand.ar(3000, 8000, trig);
+	sig = SinOsc.ar(freq) * Decay.ar(trig, MouseY.kr(0.00001, 0.1, 'exponential'));
 	sig = Pan2.ar(sig);
 	Out.ar(\out.kr(0), sig);
 }.play;
