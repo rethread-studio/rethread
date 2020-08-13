@@ -73,6 +73,46 @@ Synth(\kick, [\freq, 60, \pan, -1]); Synth(\kick, [\freq, 33, \pan, 1]);
 )
 
 
+// BASSY BASS
+(
+{
+	var sig, env, freq = MouseX.kr(20, 60, 'exponential');
+	env = Env.linen(2.0, 1.0, 2.5).ar(2);
+	sig = SinOsc.ar(freq) * 0.5;
+	sig = sig + SinOsc.ar(freq * 1.02, 0.0, 0.25);
+	sig = sig + SinOsc.ar(freq * 1.05, 0.0, 0.25);
+	sig = sig + SinOsc.ar(freq * 1.1, 0.0, 0.25);
+	sig = sig + SinOsc.ar(freq * 2.03, 0.0, 0.1);
+	sig = sig * SinOsc.ar(2).range(0.5, 1.0);
+
+	sig = sig * env * 0.5;
+	sig = Pan2.ar(sig);
+	sig
+}.play;
+)
+
+(
+{
+	var sig, env, freq = MouseX.kr(40, 60, 'exponential'), detune = 0.01, unison = 10;
+	env = Env.linen(2.0, 1.0, 2.5).ar(2);
+	sig = DC.ar(0);
+	// sig = Saw.ar(freq) * 0.5;
+	unison.do { | i | var de = freq * detune * (i+1);
+		de.poll;
+		// sig = sig + (SyncSaw.ar(freq, freq + de) * 0.125);
+		sig = sig + (Saw.ar(freq + de) * 0.125); // How to get rid of the phase issues?
+	};
+	// sig = sig + Saw.ar(freq * 2.03, 0.1);
+	sig = LPF.ar(sig, 2000);
+	// sig = sig * SinOsc.ar(2).range(0.5, 1.0);
+
+	sig = sig * env * 0.5;
+	sig = Pan2.ar(sig);
+	sig
+}.play;
+)
+
+
 /// PLUCK EXAMPLES
 // excitation signal is WhiteNoise, triggered twice a second with varying OnePole coef
 (
