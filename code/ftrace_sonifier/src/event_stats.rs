@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use nannou::geom::point::{Point2, pt2};
 type ArcMutex<T> = Arc<Mutex<T>>;
 
-use super::shared_wavetable_synth::Sample;
+use super::dsp::Sample;
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub enum EventFamily{

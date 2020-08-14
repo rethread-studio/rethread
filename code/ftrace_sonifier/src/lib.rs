@@ -1,19 +1,11 @@
 
 use std::f64::consts::PI;
-
-type Sample = f64;
-
-pub mod synth;
-pub mod oscen_synth;
+pub type Sample = f64;
 pub mod shared_wavetable_synth;
-pub mod dasp_synth;
-
 pub mod audio_interface;
-pub mod load_sound;
-
 pub mod event_stats;
-
 pub mod midi_input;
+pub mod dsp;
 
 #[derive(Clone, Copy)]
 pub struct Trigger {
@@ -121,157 +113,5 @@ impl SharedState {
         self.set_synthesis_type_texture = None;
         self.set_synthesis_type_pitch = None;
         self.set_synthesis_type_bass = None;
-    }
-}
-
-#[derive(Copy, Clone)]
-pub struct HighPassFilter {
-    last_sample: Sample
-}
-
-impl HighPassFilter {
-    pub fn new() -> Self {
-        HighPassFilter{ last_sample: 0.0 }
-    }
-
-    pub fn next(&mut self, input: Sample) -> Sample {
-        let value = input - self.last_sample;
-        self.last_sample = input;
-        value
-    }
-}
-
-#[derive(Copy, Clone)]
-pub struct BiquadFilter {
-    input_buffer: [Sample; 2],
-    output_buffer: [Sample; 2],
-    a1: Sample,
-    a2: Sample,
-    b0: Sample,
-    b1: Sample,
-    b2: Sample,
-    ready: bool, // true if the coefficients have been calculated
-}
-
-impl BiquadFilter {
-    pub fn new(sample_rate: f64,  frequency: f64,  q: f64) -> Self {
-        let mut new_filter = BiquadFilter {
-            input_buffer: [0.0; 2],
-            output_buffer: [0.0; 2],
-            a1: 0.0,
-            a2: 0.0,
-            b0: 0.0,
-            b1: 0.0,
-            b2: 0.0,
-            ready: false,
-        };
-        new_filter.calculate_coefficients(sample_rate, frequency, q);
-        new_filter
-    }
-    /// Calculate the filter coefficients based on the given parameters
-    /// Borrows code from the Bela Biquad library, itself based on code by
-    /// Nigel Redmon
-    pub fn calculate_coefficients(&mut self, sample_rate: f64,  frequency: f64,  q: f64) {
-        let k = (PI * frequency / sample_rate).tan();
-        let norm = 1.0 / (1.0 + k / q + k * k);
-        
-        self.b0 = k * k * norm;
-        self.b1 = 2.0 * self.b0;
-        self.b2 = self.b0;
-        self.a1 = 2.0 * (k * k - 1.0) * norm;
-        self.a2 = (1.0 - k / q + k * k) * norm;	
-
-        self.ready = true;
-    }
-    pub fn next(&mut self, input: Sample) -> Sample {
-        if !self.ready {
-            // if we haven't calculated the coefficients the output could be anything
-            return input;
-        }
-        let mut output = self.b0*input + self.b1*self.input_buffer[0] + self.b2*self.input_buffer[1];
-        output -= self.a1*self.output_buffer[0] + self.a2*self.output_buffer[1];
-
-        self.input_buffer[1] = self.input_buffer[0];
-        self.input_buffer[0] = input;
-        self.output_buffer[1] = self.output_buffer[0];
-        self.output_buffer[0] = output;
-        output
-    }
-    /// Resets the history of the filter
-    pub fn reset(&mut self) {
-        self.input_buffer[0] = 0.0;
-        self.input_buffer[1] = 0.0;
-        self.output_buffer[0] = 0.0;
-        self.output_buffer[1] = 0.0;
-    }
-}
-
-pub struct Ramp {
-    value: Sample,
-    increment: Sample,
-    sample_rate: usize,
-    counter: usize,
-}
-
-impl Ramp {
-    pub fn new(start: Sample, sample_rate: usize) -> Self {
-        Ramp {
-            value: start,
-            increment: 0.0,
-            sample_rate: sample_rate,
-            counter: 0,
-        }
-    }
-    pub fn set_value(&mut self, value: Sample) {
-        self.value = value;
-        self.increment = 0.0;
-        self.counter = 0;
-    }
-    pub fn ramp_to(&mut self, end: Sample, duration: f64) {
-        self.counter = (self.sample_rate as f64 * duration) as usize;
-        self.increment = (end - self.value) / self.counter as Sample;
-    }
-    pub fn next(&mut self) -> Sample {
-        if self.counter > 0 {
-            self.value += self.increment;
-            self.counter -= 1;
-        }
-        self.value
-    }
-    pub fn is_finished(&self) -> bool {
-        self.counter <= 0
-    }
-}
-
-/// The EnvelopeFollower uses two lowpass filters on the absolute value of a signal, 
-/// one fast one for attack and one slow filter for release.
-pub struct EnvelopeFollower {
-    last_output: Sample,
-    attack_coeff: Sample,
-    release_coeff: Sample,
-}
-
-impl EnvelopeFollower {
-    pub fn new(sample_rate: f64) -> Self {
-        let attack_time = 0.002;
-        let decay_time = 0.1;
-        EnvelopeFollower {
-            last_output: 0.0,
-            attack_coeff: (-1.0_f64/attack_time).exp().powf(1.0/sample_rate),
-            release_coeff: (-1.0_f64/decay_time).exp().powf(1.0/sample_rate),
-        }
-    }
-    pub fn next(&mut self, input: Sample) -> Sample {
-        let abs_in = input.abs();
-        let value = if abs_in >= self.last_output {
-            // attack
-            self.last_output * self.attack_coeff + (1.0-self.attack_coeff) * abs_in
-        } else {
-            // release
-            self.last_output * self.release_coeff + (1.0-self.release_coeff) * abs_in
-        };
-        
-        self.last_output = value;
-        value
     }
 }

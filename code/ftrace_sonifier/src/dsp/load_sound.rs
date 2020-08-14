@@ -1,6 +1,6 @@
-use crate::shared_wavetable_synth::{Sample, Buffer};
+use super::Sample;
 
-pub fn load_flac(path: &str, sample_rate: usize) -> Buffer {
+pub fn load_flac(path: &str, sample_rate: usize) -> (Vec<Sample>, f64) {
     let mut reader = claxon::FlacReader::open(path).unwrap();
     // Get sample rate
     let stream_info = reader.streaminfo();
@@ -13,5 +13,5 @@ pub fn load_flac(path: &str, sample_rate: usize) -> Buffer {
         .map(|sample| sample.unwrap() as f64 / 2_f64.powi(stream_info.bits_per_sample as i32 - 1))
         .collect();
     
-    Buffer::from_vec(samples, stream_info.sample_rate as f64)
+    (samples, stream_info.sample_rate as f64)
 }

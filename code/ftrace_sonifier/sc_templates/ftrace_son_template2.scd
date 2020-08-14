@@ -21,8 +21,6 @@
 ~buffers.do{ |buf| buf.normalize; };
 )
 
-~buffers[0].normalize
-
 (
 SynthDef(\lastLayer, {
 	var sig, mix = \mix.kr(0.2, 0.02), tones;
@@ -39,15 +37,16 @@ SynthDef(\lastLayer, {
 
 (
 SynthDef(\buf_grain_filter, {arg gate = 1, amp = 0.2, preamp = 1, sndbuf, envbuf = -1, posrate = 1,
-	modtime = 60, rate = 1, out = 0, grainsize = 0.5, hold = 1, noiseAmp = 0.0;
+	modtime = 60, rate = 1, out = 0, grainsize = 0.5, hold = 1, noiseAmp = 0.0, speed = 1.0;
 	var pan, env, freqdev, posmod, grainmod, grainsizemod, trigmod, trigger, sig, bufspeed;
-	pan = LFNoise1.kr(1/2);
+	// pan = LFNoise1.kr(1/2);
+	pan = Rand(-1, 1);
 	env = EnvGen.kr(
 		Env([0, 1, 0], [0.1, 1], \sin, 1),
 		gate,
 		doneAction: 2);
 
-	trigger = Dust.kr(Rand(1, 20));
+	trigger = Dust.kr(\trig_rate.kr(1));
 	// rate = TRand.kr(0.8, 1.2, trigger);
 	bufspeed = 1.0 / (BufDur.ir(sndbuf) * SampleRate.ir);
 
@@ -55,7 +54,7 @@ SynthDef(\buf_grain_filter, {arg gate = 1, amp = 0.2, preamp = 1, sndbuf, envbuf
 	//posmod = Line.kr(0.05, 0.95, posrate);
 	posmod = Phasor.ar(trig: trigger,
 		//rate: 0.00001*(posrate/5),
-		rate: bufspeed ,
+		rate: bufspeed * speed,
 		start: 0.001,
 		end: 0.999,
 		resetPos: TRand.kr(0.001, 0.999, trigger)
@@ -77,9 +76,16 @@ SynthDef(\buf_grain_filter, {arg gate = 1, amp = 0.2, preamp = 1, sndbuf, envbuf
 )
 Synth(\buf_grain_filter, [\sndbuf, ~buffers[0], \grainsize, 0.2, \rate, 1.0]);
 (
-~buffers.do { | buf |
-	Synth(\buf_grain_filter, [\sndbuf, buf, \grainsize, 0.2, \rate, 1.0]);
+~synths = ~buffers.collect { | buf |
+	Synth(\buf_grain_filter, [\sndbuf, buf, \grainsize, 0.2, \rate, 1.0, \speed, 0.2]);
 };
+)
+c = Synth(\buf_grain_filter, [\sndbuf, ~buffers[0], \grainsize, 0.2, \rate, 1.0, \speed, 0.2]);
+c.set(\speed, 0.5, \trig_rate, 1, \grainsize, 0.4)
+~synths.do{ |syn| syn.set(\trig_rate, 4) };
+~synths.do{ |syn| syn.set(\grainsize, 0.5) };
+(
+~synths.do{ |syn| syn.set(\speed, 0.9) };
 )
 ~buffers[0].duration
 2.83e-06 * 48000 * ~buffers[0].duration
