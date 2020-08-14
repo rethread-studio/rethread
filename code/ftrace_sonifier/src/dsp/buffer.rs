@@ -1,6 +1,10 @@
 use super::load_sound::load_flac;
 use super::{Sample, Resources, LocalSig};
 
+use std::f64::consts::PI;
+
+pub type BufferIndex = usize;
+
 /// The Buffer is currently very similar to Wavetable, but they may evolve differently
 pub struct Buffer {
     buffer: Vec<Sample>,
@@ -29,29 +33,14 @@ impl Buffer {
         let (buffer, buf_sample_rate) = load_flac(path, sample_rate);
         Buffer::from_vec(buffer, buf_sample_rate)
     }
-    pub fn load_flac(path: &str, sample_rate: usize) -> Buffer {
-        let mut reader = claxon::FlacReader::open(path).unwrap();
-        // Get sample rate
-        let stream_info = reader.streaminfo();
-        if stream_info.sample_rate as usize != sample_rate {
-            println!("File has a different sample rate than what the audio driver is running at");
-        }
-        let samples: Vec<Sample> = reader.samples()
-            .into_iter()
-            // Convert to float and scale according to the source file bit depth
-            .map(|sample| sample.unwrap() as f64 / 2_f64.powi(stream_info.bits_per_sample as i32 - 1))
-            .collect();
-        
-        Buffer::from_vec(samples, stream_info.sample_rate as f64)
-    }
-    /// Returns the rate parameter for playing this buffer with the correct speed
+    /// Returns the rate parameter for playing this buffer with the correct speed given that the playhead moves between 0 and 1
     pub fn buf_rate_scale(&self, server_sample_rate: Sample) -> Sample {
         let sample_rate_conversion = server_sample_rate / self.sample_rate;
         1.0 / (self.size * sample_rate_conversion)
     }
     /// Linearly interpolate between the value in between to samples
     #[inline]
-    fn get_linear_interp(&self, index: Sample) -> Sample {
+    pub fn get_linear_interp(&self, index: Sample) -> Sample {
         let mix = index.fract();
         let index_u = index as usize;
         unsafe {
@@ -60,9 +49,12 @@ impl Buffer {
     }
     /// Get the sample at the index discarding the fraction with no interpolation
     #[inline]
-    fn get(&self, index: usize) -> Sample {
+    pub fn get(&self, index: usize) -> Sample {
         // self.buffer[index]
         unsafe{ *self.buffer.get_unchecked(index) }
+    }
+    pub fn size(&self) -> Sample {
+        self.size
     }
 }
 

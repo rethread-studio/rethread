@@ -51,6 +51,42 @@ impl Wavetable {
         wt.normalize();
         wt
     }
+    /// Produces a Hann window
+    pub fn hann_window(wavetable_size: usize) -> Self {
+        let mut wt = Wavetable::new(wavetable_size);
+        // This approach was heavily influenced by the SuperCollider Signal implementation
+        wt.fill(0.5);
+        wt.add_sine(1.0, 0.5, -0.5*PI);
+        wt
+    }
+    /// Produces a Hamming window
+    pub fn hamming_window(wavetable_size: usize) -> Self {
+        let mut wt = Wavetable::new(wavetable_size);
+        // This approach was heavily influenced by the SuperCollider Signal implementation
+        wt.fill(0.53836);
+        wt.add_sine(1.0, 0.46164, -0.5*PI);
+        wt
+    }
+    /// Produces a Sine window
+    pub fn sine_window(wavetable_size: usize) -> Self {
+        let mut wt = Wavetable::new(wavetable_size);
+        // This approach was heavily influenced by the SuperCollider Signal implementation
+        wt.add_sine(0.5, 1.0, 0.0);
+        wt
+    }
+    pub fn fill(&mut self, value: Sample) {
+        for sample in &mut self.buffer {
+            *sample = value;
+        }
+    }
+    pub fn add_sine(&mut self, freq: Sample, amplitude: Sample, phase: Sample) {
+        let step = (freq * PI * 2.0) / self.size;
+        let mut phase = phase;
+        for sample in &mut self.buffer {
+            *sample += phase.sin() * amplitude;
+            phase += step;
+        }
+    }
     pub fn fill_sine(&mut self, num_harmonics: usize, freq: Sample) {
         for n in 0..num_harmonics {
             let start_phase = random::<f64>() * 2.0 * PI * n as f64;

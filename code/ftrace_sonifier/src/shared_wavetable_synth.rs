@@ -4,6 +4,7 @@ use nannou::rand::random;
 use dasp::signal::{NoiseSimplex, Signal};
 use super::dsp::prelude::*;
 use super::dsp::basic::*;
+use super::dsp::granular_synthesis::GranularSynthesiser;
 
 pub struct SinglePitch {
     amp: Sample,
@@ -358,6 +359,7 @@ pub struct SynthesisEngine {
     bass_synthesis: BassSynthesis,
     triggers: Vec<TriggeredOscillator>,
     buf_readers: Vec<BufReader>,
+    granular_synths: Vec<GranularSynthesiser>,
     output_frame: [Sample; 2],
 }
 
@@ -441,21 +443,24 @@ impl SynthesisEngine {
         );
 
         // Load FLAC file
-        let buffer = Buffer::from_file_flac("/home/erik/Musik/flac/530317__martian__horn-doppler-pass-country-lane.flac", sample_rate as usize);
+        let buffer = Buffer::from_file_flac("/home/erik/Musik/flac/Margaret_Hamilton_Language_of_control.flac", sample_rate as usize);
 
         println!("Building wavetables...");
         let mut triggers = Vec::with_capacity(100);
-        for _ in 0..100 {
+        for _ in 0..1 {
             let wt = wavetable_arena.add(Wavetable::crazy(131072));
             triggers.push(TriggeredOscillator::from_freq(wt, sample_rate, random::<Sample>().powi(2) * 0.0 + 20.0, 0.05));
         }
         println!("Wavetables built!");
 
-        let mut resources = Resources::new(wavetable_arena);
+        let mut resources = Resources::new(wavetable_arena, sample_rate);
         resources.buffers.push(buffer);
 
         let mut buf_readers = Vec::new();
-        buf_readers.push(BufReader::new(0, resources.buffers[0].buf_rate_scale(sample_rate), 0.5));
+        // buf_readers.push(BufReader::new(0, resources.buffers[0].buf_rate_scale(sample_rate), 0.5));
+
+        let mut granular_synths = Vec::new();
+        granular_synths.push(GranularSynthesiser::new(0, 512, &mut resources));
 
         SynthesisEngine {
             resources,
@@ -466,6 +471,7 @@ impl SynthesisEngine {
             texture_groups,
             triggers,
             buf_readers,
+            granular_synths,
             output_frame: [0.0; 2],
         }
     }
@@ -515,6 +521,9 @@ impl SynthesisEngine {
         }
         for br in &mut self.buf_readers {
             amp += br.next(&mut self.resources);
+        }
+        for gs in &mut self.granular_synths {
+            amp += gs.next(&mut self.resources);
         }
         self.output_frame[0] += amp;
         self.output_frame[1] += amp;

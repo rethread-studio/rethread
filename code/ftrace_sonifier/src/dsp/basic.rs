@@ -16,43 +16,45 @@ pub trait LocalSig {
 pub struct Resources {
     pub wavetable_arena: WavetableArena,
     pub busses: Vec<Sample>,
-    pub buffers: Vec<Buffer>
+    pub buffers: Vec<Buffer>,
+    /// The sample rate of the audio process
+    pub sample_rate: Sample,
 }
 
 impl Resources {
-    pub fn new(wavetable_arena: WavetableArena) -> Self {
+    pub fn new(wavetable_arena: WavetableArena, sample_rate: Sample) -> Self {
         Resources {
             wavetable_arena,
             busses: vec![0.0; 200],
             buffers: vec![],
+            sample_rate,
         }
     }
 }
 
-struct Phase {
-    value: Sample,
-    step: Sample,
+#[derive(Copy, Clone)]
+pub struct Phase {
+    pub value: Sample,
+    pub step: Sample,
 }
 
 impl Phase {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Phase {
             value: 0.0,
             step: 0.0,
         }
     }
-    fn from_freq(freq: Sample, sample_rate: Sample) -> Self {
+    pub fn from_freq(freq: Sample, sample_rate: Sample) -> Self {
         let mut phase = Phase::new();
         phase.set_freq(freq, sample_rate);
         phase
     }
-    fn set_freq(&mut self, freq: Sample, sample_rate: Sample) {
+    pub fn set_freq(&mut self, freq: Sample, sample_rate: Sample) {
         self.step = freq / sample_rate;
     }
-}
-impl LocalSig for Phase {
     #[inline]
-    fn next(&mut self, resources: &mut Resources) -> Sample {
+    pub fn next_raw(&mut self) -> Sample {
         // Use the phase to index into the wavetable
         let out = self.value;
         self.value += self.step;
@@ -60,6 +62,12 @@ impl LocalSig for Phase {
             self.value -= 1.0;
         }
         out
+    }
+}
+impl LocalSig for Phase {
+    #[inline]
+    fn next(&mut self, _resources: &mut Resources) -> Sample {
+        self.next_raw()
     }
 }
 
