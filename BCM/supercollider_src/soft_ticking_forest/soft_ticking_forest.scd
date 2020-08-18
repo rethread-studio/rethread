@@ -1,8 +1,12 @@
 (
-// CONSTANTS AND SETUP
+//// RUN THIS BLOCK TO START EVERYTHING
+
+//////////////////////////////////////////////////////
+/////// CONSTANTS AND SETUP
+/////////////////////////////////////////////////////
 
 // Routing and mixer channels
-~useAmbisonics = true; // Set to false to use a simple stereo output
+~useAmbisonics = false; // Set to false to use a simple stereo output
 ~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
 ~positionThroughService = true;
@@ -27,11 +31,16 @@ if(~useAmbisonics == true, {
 ~lowActivityThreshold = 1;
 
 // What latency in seconds to use for scheduling playback on the server
-// If you get "late ..." messages, increase this number
+// If you get "late ..." messages, increase this number'
 ~latency = 0.2;
 
 
 "../sound_forest_mixer_gui.scd".loadRelative;
+
+//////////////////////////////////////////////////////
+/////// SYNTHDEFS
+/////////////////////////////////////////////////////
+
 SynthDef(\bubbly_filter, { |out|
 	var sig, maxfreq = \maxfreq.kr(2000), minfreq = \minfreq.kr(100), speed = \speed.kr(3), freq, in, delay_pan;
 	speed = LFNoise1.kr(2).range(5, 12);
@@ -69,9 +78,10 @@ SynthDef(\tick2, {
 
 SynthDef(\sub_tam, {
 	// FM synth for a sub bass type sound rev_channel.buswith some noise on top
-	var freq = \freq.kr(32), sig, env, sig1, sig2, sig3, mod1_1, mRatio = \mRatio.kr(2), mod1_2,
-	mod2_1, mod2_2, mod2_1_ratio = 16*6, mod2_2_ratio = SinOsc.ar(freq*Rand(10, 14)).range(1, 16*8) *4, feedback,
-	atk = \atk.kr(05), rel = \rel.kr(5), brightnessRamp, lowcut;
+	var freq = \freq.kr(32), sig, env, sig1, sig2, sig3,
+	mod1_1, mRatio = \mRatio.kr(2), mod1_2, mod2_1, mod2_2,
+	mod2_1_ratio = 16*6, mod2_2_ratio = SinOsc.ar(freq*Rand(10, 14)).range(1, 16*8) *4,
+	feedback, atk = \atk.kr(05), rel = \rel.kr(5), brightnessRamp, lowcut;
 
 	env = Env.perc(atk, rel, 1.0, [\c0.kr(2), \c1.kr(-4)]).ar(2);
 
@@ -138,18 +148,12 @@ if(~useAmbisonics, {
 		// For the HOAEncoder* set of UGens, the azimuth is at the very left at pi/2 and the very right at -pi/2.
 		// Going further moves us behind the origin.
 		radius = \radius.kr(0.0), azimuth = \azimuth.kr(0.0), elevation = \elevation.kr(0), yes = \use_radius.kr(1.0);
-		// azimuth = SinOsc.ar(1/4).range(-pi * 0.5, pi * 0.5);
-		// azimuth = Rand(-pi*0.5, pi*0.5);
 		// radius = MouseY.kr(0.0, 1.0);
 		if(~controlPositionWithMouse) {
 			azimuth = azimuth + MouseX.kr(pi * 1, -pi * 1);
 			elevation = elevation + MouseY.kr(pi * 0.5, -pi * 0.5);
 		};
 		sig = Mix(sig) * \amp.kr(0.5);
-		/*HOAEncoder.ar(~order,
-		WhiteNoise.ar(1),
-		MouseX.kr(pi, -pi),
-		MouseY.kr(-pi * 0.5, pi * 0.5 ))*/
 		if(~ambisonicsOrder == 1, {
 			sig = HOAEncoder1.ar(
 				sig,
@@ -180,20 +184,10 @@ if(~useAmbisonics, {
 				yes
 			);
 		});
-
-		/*sig = PanB.ar(
-			sig,
-			azimuth,
-			elevation,
-			1.0
-		);*/
-		// PanB uses the wrong output format for the decoder W, X, Y, Z, should be W Y Z X
-		// sig = [sig[0], sig[2], sig[1], sig[3]];
 		Out.ar(out, sig);
-		// Out.ar(send, sig * send_amp);
 	}).add;
 }, {
-	// no ambisonics, just straight through
+	// no ambisonics, just straight through as stereo
 	SynthDef(\decoder, { |in = 10, out = 0 |
 		var sig = In.ar(in, ~mixerChannelOutputs.asInteger);
 		Out.ar(out, sig);
@@ -296,15 +290,25 @@ SynthDef(\bounce_away, { | freq = 300 |
 	sig = Pan2.ar(sig, pan) * \amp.kr(0.5);
 	Out.ar(\out.kr(0), sig);
 }).add;
+
+
+//////////////////////////////////////////////////////
+/////// STARTING EVERYTHING
+/////////////////////////////////////////////////////
+
 {
-	var filter_bus, filter, drone, drone_channel, cloud_channel, sine_channel, filter_channel, sub_channel, rain_channel, rev_channel, tick_channel,
+	var filter_bus, filter, drone,
+	drone_channel, cloud_channel, sine_channel, filter_channel, sub_channel,
+	rain_channel, rev_channel, tick_channel,
 	default_channel, google_channel, facebook_channel, amazon_channel, cloudflare_channel, youtube_channel;
 
-	s.newBusAllocators;
+	s.newBusAllocators; // Make sure we don't run out of busses if we restart multiple times
 
-	~s53 = Scale.chromatic('et53');
+	~s53 = Scale.chromatic('et53'); // For decoding 53edo
 	~chord = [0, 14, 31, 44];
+	~octave = 3;
 
+	// Mixer channel factory
 	~makeMixerChannel = { | name, out, amp = 1 |
 		var bus, synth, group, azimuth, elevation;
 		bus = Bus.audio(s, ~mixerChannelOutputs);
@@ -351,15 +355,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 	~decoder = Synth(\decoder, [\in, ~decoderBus]);
 
 	// Set up all the channels
-	// ~revBus = Bus.audio(s, 2);
 	rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
 	rev_channel.play_on(\medium_reverb, [\out, rev_channel.bus, \in, rev_channel.bus, \mix, 1.0]);
-	filter_bus = Bus.audio(s, 2);
-	cloud_channel = ~makeMixerChannel.("Clouds", ~decoderBus);
-	cloud_channel.set_send(rev_channel.bus, 0.5);
-	filter_channel = ~makeMixerChannel.("Filter", ~decoderBus);
-	filter_channel.set_send(rev_channel.bus, 0.2);
-	sine_channel = ~makeMixerChannel.("Sines", filter_bus);
 	sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
 	sub_channel.set_send(rev_channel.bus, 0.2);
 	rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
@@ -378,49 +375,21 @@ SynthDef(\bounce_away, { | freq = 300 |
 	youtube_channel.set_send(rev_channel.bus, 1.0);
 	tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
 	tick_channel.set_send(rev_channel.bus, 1.0);
-
-	~startRev.(cloud_channel.bus);
-
-	filter = filter_channel.play_on(\bubbly_filter, [\speed, 13, \in, filter_bus, \out, filter_channel.bus]);
-
-	// play rain
-	~chordDeltas = [9, 5, 17, 9, 13].reverse;
-	~chord = [ 0, 17, 31, 39, 53, 62, 75, 84, 96, 106] +  53;
-	~rainParams = ();
-	~rainParams.pan = 0;
-	~rainParams.length = 2;
-	~rainParams.delay = 0.2;
-	~rainParams.start_harm = 4.0; // How bright the LPF on the pulse starts relative to freq
-	~rainParams.brightness = 0.5;
-	// ~rainParams.out = 0;
-	~rainParams.out = rain_channel.bus;
-	~rainParams.octave = 3;
-
-	~allClouds = [];
+	tick_channel.set_amp(0.0);
 
 	~makeSoundForestGui.([tick_channel, default_channel, google_channel, facebook_channel, amazon_channel, cloudflare_channel, youtube_channel, rev_channel], ~allClouds);
 
-	if(~useAmbisonics, {
-		~decoder = Synth(\decoder, [\in, ~decoderBus, \out, 0]);
-	}, {
-		~decoder = Synth(\no_ambisonics_decoder, [\in, ~decoderBus, \out, 0]);
-	});
-
 	// Create the global stats object (environment)
-
+	// Stats are structured in the following hierarchy:
+	// ~stats => device(local_ip) => service(remote) -> packets[/in], packets[\out]
+	// Each service is given a sound process with sounds for different levels of activity.
 	~stats = Dictionary[];
-
-	/*~stats[\in] = ();
-	~stats[\out] = ();
-	~stats[\in].services = Dictionary[];
-	~stats[\out].services = Dictionary[];*/
 
 	~makeStatDevice = { | device |
 		var statDevice = ();
 		statDevice.services = ();
 		statDevice.bus = Bus.audio(s, 1);
 		statDevice.channel = ~makeMixerChannel.(device.asString, ~decoderBus);
-		// TODO output this bus to a hoa_encoder and send that into the decoder
 		statDevice
 	};
 
@@ -505,7 +474,12 @@ SynthDef(\bounce_away, { | freq = 300 |
 		});
 	};
 
-	//
+
+	//////////////////////////////////////////////////////
+	/////// SYNTH INSTANTIATION
+	/////////////////////////////////////////////////////
+
+	// Play a certain sound based on a number of parameters
 	~playSound = { | type, inout, packets, channel |
 		var activity = \none;
 		if(packets > ~highActivityThreshold, {
@@ -523,7 +497,11 @@ SynthDef(\bounce_away, { | freq = 300 |
 			// type.postln;
 			switch(type,
 				\standard, {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0, thump_atk = rrand(0.18, 0.21);
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
+					amp = 0.5,
+					release_coeff = 1.0,
+					thump_atk = rrand(0.18, 0.21);
+
 					if(~positionThroughService) {
 						channel = default_channel;
 					};
@@ -565,7 +543,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 					});
 				},
 				\Google, {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
+					amp = 0.5,
+					release_coeff = 1.0;
+
 					if(~positionThroughService) {
 						channel = google_channel;
 					};
@@ -607,7 +588,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 					});
 				},
 				\Amazon, {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
+					amp = 0.5,
+					release_coeff = 1.0;
+
 					if(~positionThroughService) {
 						channel = amazon_channel;
 					};
@@ -649,7 +633,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 					});
 				},
 				\Cloudflare, {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
+					amp = 0.5,
+					release_coeff = 1.0;
+
 					if(~positionThroughService) {
 						channel = cloudflare_channel;
 					};
@@ -702,7 +689,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 					});
 				},
 				\YouTube, {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave), amp = 0.5, release_coeff = 1.0;
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
+					amp = 0.5,
+					release_coeff = 1.0;
+
 					if(~positionThroughService) {
 						channel = youtube_channel;
 					};
@@ -743,7 +733,11 @@ SynthDef(\bounce_away, { | freq = 300 |
 					});
 				},
 				\Facebook, {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~rainParams.octave-2), amp = 0.5, release_coeff = 1.0, thump_atk = rrand(0.18, 0.21);
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave-2),
+					amp = 0.5,
+					release_coeff = 1.0,
+					thump_atk = rrand(0.18, 0.21);
+
 					if(~positionThroughService) {
 						channel = facebook_channel;
 					};
@@ -791,6 +785,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 	};
 
 
+	//////////////////////////////////////////////////////
+	/////// OSC PACKET PARSING
+	/////////////////////////////////////////////////////
+
 	// Receive OSC packets on web traffic
 	~num_packets = 0;
 	~packet_density = 0;
@@ -824,7 +822,12 @@ SynthDef(\bounce_away, { | freq = 300 |
 		};
 	}, '/package'); // create the OSCFunc
 
-	// A process plays sounds according to the stats collected at a certain regular interval
+
+	//////////////////////////////////////////////////////
+	/////// SOUND PROCESS AND ANALYSIS UPDATE LOOP
+	/////////////////////////////////////////////////////
+
+	// An update loop plays sounds according to the stats collected and the waits
 	~tickClock = TempoClock(120/60);
 	Routine({
 		loop {
