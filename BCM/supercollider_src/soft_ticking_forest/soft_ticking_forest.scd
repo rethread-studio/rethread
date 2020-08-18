@@ -1,3 +1,9 @@
+( // For setting up the server on Mac using MADIface XT
+s.options.device = "MADIface XT (23757085)";
+s.options.numOutputBusChannels = 36;
+s.reboot;
+)
+
 (
 //// RUN THIS BLOCK TO START EVERYTHING
 
@@ -128,18 +134,18 @@ if(~useAmbisonics, {
 		var sig;
 		sig = In.ar(in, ~mixerChannelOutputs.asInteger);
 		if(~ambisonicsOrder == 1, {
-			sig = KMHLSDome1h1pNormal6.ar(sig[0], sig[1], sig[2], sig[3], gain:30);
+			sig = KMHLSDome1h1pNormal6.ar(sig[0], sig[1], sig[2], sig[3], gain:-10);
 		});
 		if(~ambisonicsOrder == 3, {
 			sig = KMHLSDome3h3pNormal6.ar(sig[0], sig[1], sig[2], sig[3], sig[4], sig[5], sig[6], sig[7],
-				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15], gain:30);
+				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15], gain:-10);
 		});
 		if(~ambisonicsOrder == 5, {
 			sig = KMHLSDome5h5pNormal6.ar(sig[0], sig[1], sig[2], sig[3], sig[4], sig[5], sig[6], sig[7],
 				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15],
 				sig[16], sig[17], sig[18], sig[19], sig[20], sig[21], sig[22], sig[23],
 				sig[24], sig[25], sig[26], sig[27], sig[28], sig[29], sig[30], sig[31],
-				sig[32], sig[33], sig[34], sig[35], gain:30);
+				sig[32], sig[33], sig[34], sig[35], gain:-10);
 		});
 		Out.ar(out, sig);
 	}).add;
@@ -151,7 +157,7 @@ if(~useAmbisonics, {
 		// radius = MouseY.kr(0.0, 1.0);
 		if(~controlPositionWithMouse) {
 			azimuth = azimuth + MouseX.kr(pi * 1, -pi * 1);
-			elevation = elevation + MouseY.kr(pi * 0.5, -pi * 0.5);
+			elevation = elevation + MouseY.kr(pi * 0.5, 0);
 		};
 		sig = Mix(sig) * \amp.kr(0.5);
 		if(~ambisonicsOrder == 1, {
