@@ -6,6 +6,7 @@ pub mod audio_interface;
 pub mod event_stats;
 pub mod midi_input;
 pub mod dsp;
+pub mod gui;
 
 #[derive(Clone, Copy)]
 pub struct Trigger {
