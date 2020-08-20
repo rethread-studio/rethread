@@ -8,6 +8,7 @@ if (document.location.port) {
 }
 const ws = new WebSocket(protocol + '://' + host)
 
+let total = 0;
 const services = {}
 const servicesLen = {}
 const hosts = {}
@@ -21,6 +22,7 @@ ws.onmessage = (data) => {
     lastPackets.push(json)
     const host = json.remote_host
     const country = json.remote_location
+    
     for (let service of json.services) {
         if (!services[service]) {
             services[service] = {
@@ -30,6 +32,9 @@ ws.onmessage = (data) => {
         }
         services[service].count++
         services[service].len += json.len
+        total += json.len
+        services[service].percent = float(services[service].len) / float(total)
+        console.log(service, services[service].percent)
 
         if (!hostsServices[host]) {
             hostsServices[host] = new Set()

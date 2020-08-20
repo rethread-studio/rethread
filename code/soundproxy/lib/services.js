@@ -50,7 +50,7 @@ module.exports = function (packet) {
     if (hostContains(packet, 'yahoo')) {
         output.add('Yahoo')
     }
-    if (hostContains(packet, 'youtube')) {
+    if (hostContains(packet, 'youtube') || hostContains(packet, 'googlevideo')) {
         output.add('Youtube')
     }
     if (hostContains(packet, 'wordpress')) {
