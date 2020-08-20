@@ -799,6 +799,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 	~num_packets = 0;
 	~packet_density = 0;
 	~sub_tam_last_launch = Date.localtime.rawSeconds;
+	~vis_sender = NetAddr("127.0.0.1", 9771);
 	// Receive packages of web traffic data
 	o = OSCFunc({ arg msg, time, addr, recvPort;
 		var timestamp = msg[1],
@@ -826,6 +827,15 @@ SynthDef(\bounce_away, { | freq = 300 |
 
 			~addPacketToStats.(local_ip.asSymbol, out, services, remote_ip, remote_location);
 		};
+		{
+			var service_or_ip = services;
+			if(service_or_ip.asString == "") {
+				service_or_ip = remote_ip;
+				service_or_ip.postln;
+			};
+		// Send it on to the visualisation program
+		~vis_sender.sendMsg("/bcm-packet", remote_location, len, service_or_ip);
+		}.value();
 	}, '/package'); // create the OSCFunc
 
 
