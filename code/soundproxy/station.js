@@ -2,20 +2,26 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const WebSocket = require("ws");
 const http = require("http");
-const osc = require("osc");
 const cli = require("cli");
 
 const tsharks = require("./lib/sharks");
 const hotspot = require("./lib/hotspot");
+const getIP = require("./lib/ip");
+const osc = require("./lib/osc");
 
 const config = require("config");
-const oscConfig = {...config.get("OSC")}
+const oscConfig = { ...config.get("OSC") };
 
 const options = cli.parse({
   coordinatorURL: ["c", "Coordinator URL", "string"],
   name: ["n", "Station name", "string", "SoundProxy"],
   port: ["p", "Server port", "int", config.get("station.port")],
-  interface: ["i", "Sniffing interface", "string", config.get("station.interface")],
+  interface: [
+    "i",
+    "Sniffing interface",
+    "string",
+    config.get("station.interface"),
+  ],
 });
 
 const app = express();
@@ -45,21 +51,6 @@ wss.on("connection", function (ws, request) {
 const status = {
   muted: false,
 };
-
-const oscValueOrder = [
-  "timestamp",
-  "local_ip",
-  "remote_ip",
-  "out",
-  "local_location",
-  "remote_location",
-  "len",
-  "protocol",
-  "services",
-  "station",
-  "local_mac",
-];
-
 
 function broadcast(data) {
   wss.clients.forEach(function each(client) {
@@ -91,22 +82,7 @@ function broadcastNetworkActivity(data) {
     );
   }
   if (status.osc) {
-    args = [];
-    for (let i of oscValueOrder) {
-      const type = typeof data[i] == "number" ? "i" : "s";
-      args.push({
-        type,
-        value: data[i],
-      });
-    }
-    udpPort.send(
-      {
-        address: oscConfig.address,
-        args,
-      },
-      oscConfig.ip,
-      oscConfig.port
-    );
+    osc.send(data);
   }
 }
 
@@ -127,30 +103,24 @@ async function startSniffing(interface) {
 
 function stopSniffing() {
   if (sniffingChild != null) {
-    sniffingChild.kill(0);
+    sniffingChild.kill(1);
     sniffingChild = null;
   }
   status.sniffing = false;
 }
 
-let udpPort = null;
 function startOSC() {
-  udpPort = new osc.UDPPort({
-    localAddress: "0.0.0.0",
-    localPort: oscConfig.server_port,
-    metadata: true,
-  });
-  udpPort.on("ready", function () {
-    console.log("OSC server on port " + oscConfig.server_port);
+  osc.open(oscConfig.ip, oscConfig.port, oscConfig.address, () => {
+    console.log(
+      `OSC ready to send data to ${oscConfig.ip}:${oscConfig.port}${oscConfig.address}`
+    );
     status.osc = true;
   });
-  udpPort.open();
 }
 
 function stopOSC() {
+  osc.close()
   status.osc = false;
-  udpPort.close();
-  udpPort = null;
 }
 
 let coordinatorWS = null;
@@ -179,6 +149,7 @@ async function callCoordinator(func, args) {
 
 const webSocketActions = {};
 webSocketActions.getStatus = () => status;
+webSocketActions.getAddress = () => `http://${getIP()}:${options.port}`;
 webSocketActions.startOSC = startOSC;
 webSocketActions.stopOSC = stopOSC;
 webSocketActions.stopSniffing = stopSniffing;
@@ -251,7 +222,7 @@ server.listen(options.port, function () {
   console.log(`Start Station ${options.name} on port ${options.port}`);
   connectToCoordinator(coordinatorURL);
   startSniffing(options.interface);
-  startOSC()
+  startOSC();
 
   setInterval(async () => {
     broadcast({

@@ -3,6 +3,7 @@ const sh = require("shelljs");
 const through = require("through");
 const geoip = require("geo-from-ip");
 const getServices = require("./services");
+const getIP = require("./ip");
 
 function repairJsonString(data) {
   return data
@@ -35,8 +36,20 @@ function getLocation(ip) {
   }
 }
 
+function isOut(localIp, json) {
+  if (localIp) {
+    return json.ip_dst[0] == localIp;
+  }
+  return (
+    json.ip_dst[0].indexOf("192.168") == 0 ||
+    json.ip_dst[0].indexOf("130.229") == 0
+  );
+}
+
 module.exports = function (networkInterface, kill, broadcast) {
   return new Promise((resolve, reject) => {
+    let localIp = getIP(networkInterface);
+
     const cmd =
       "tshark -V -N dnN -T ek -i " +
       networkInterface +
@@ -81,10 +94,7 @@ module.exports = function (networkInterface, kill, broadcast) {
             const json = d.layers;
             if (json && json.ip_src) {
               const data = {};
-              if (
-                json.ip_dst[0].indexOf("192.168") == 0 ||
-                json.ip_dst[0].indexOf("130.229") == 0
-              ) {
+              if (isOut(localIp, json)) {
                 data.local_ip = json.ip_dst[0];
                 data.remote_ip = json.ip_src[0];
                 data.local_host = json.ip_dst_host[0];
