@@ -72,6 +72,8 @@ var pointCloud;
 var particlePositions;
 var linesMesh;
 
+let randomParticle = 0;
+
 var maxParticleCount = 50000;
 var particleCount = 0; // The number of active particles
 var particleIndex = 0; // The index of the next particle (can loop around to recycle old particles)
@@ -83,7 +85,8 @@ var effectController = {
   showLines: true,
   minDistance: 150,
   limitConnections: false,
-  maxConnections: 20,
+  numConnections: 3,
+  linesStayingProbability: 0.6,
   particleCount: 0,
 };
 
@@ -101,7 +104,8 @@ function initGUI() {
   });
   gui.add(effectController, "minDistance", 10, 300);
   gui.add(effectController, "limitConnections");
-  gui.add(effectController, "maxConnections", 0, 30, 1);
+  gui.add(effectController, "numConnections", 0, 20, 1);
+  gui.add(effectController, "linesStayingProbability", 0.1, 0.99, 0.001);
   gui
     .add(effectController, "particleCount", 0, maxParticleCount, 1)
     .onChange(function (value) {
@@ -192,6 +196,38 @@ function init() {
   // create the particle system
   pointCloud = new THREE.Points(particles, pMaterial);
   group.add(pointCloud);
+
+
+  // LINE SEGMENTS
+
+  var segments = maxParticleCount;
+
+  positions = new Float32Array(segments * 3);
+  colors = new Float32Array(segments * 3);
+
+  var geometry = new THREE.BufferGeometry();
+
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage)
+  );
+  geometry.setAttribute(
+    "color",
+    new THREE.BufferAttribute(colors, 3).setUsage(THREE.DynamicDrawUsage)
+  );
+
+  geometry.computeBoundingSphere();
+
+  geometry.setDrawRange(0, 0);
+
+  var material = new THREE.LineBasicMaterial({
+    vertexColors: true,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+  });
+
+  linesMesh = new THREE.LineSegments(geometry, material);
+  group.add(linesMesh);
 
 
   //
@@ -292,6 +328,36 @@ function animate() {
     //   }
     // }
   }
+
+  if(Math.random() > effectController.linesStayingProbability) {
+    randomParticle = Math.floor(Math.random() * particleCount);
+  }
+  
+  let alpha = 0.1;
+
+  let particleIndex = randomParticle;
+
+  for(let i = 0; i < effectController.numConnections; i++) {
+    let particle1 = particleIndex;
+    let particle2 = (particleIndex+1) % particleCount;
+    positions[vertexpos++] = particlePositions[particle1 * 3];
+    positions[vertexpos++] = particlePositions[particle1 * 3 + 1];
+    positions[vertexpos++] = particlePositions[particle1 * 3 + 2];
+    positions[vertexpos++] = particlePositions[particle2 * 3];
+    positions[vertexpos++] = particlePositions[particle2 * 3 + 1];
+    positions[vertexpos++] = particlePositions[particle2 * 3 + 2];
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    particleIndex = particle2;
+  }
+
+  linesMesh.geometry.setDrawRange(0, effectController.numConnections * 2);
+  linesMesh.geometry.attributes.position.needsUpdate = true;
+  linesMesh.geometry.attributes.color.needsUpdate = true;
 
   pointCloud.geometry.attributes.position.needsUpdate = true;
 
