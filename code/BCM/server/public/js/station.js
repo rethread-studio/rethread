@@ -40,16 +40,16 @@ angular
     $locationProvider.html5Mode(true);
   })
   .controller("visualizationController", function ($rootScope, $location) {
-    $("#vizualization").show();
+    $("#visualization").show();
   })
   .controller("instructionController", function ($scope, $location) {
-    $("#vizualization").hide();
+    $("#visualization").hide();
     setTimeout(() => {
       $location.url("/visualization");
     }, 5000);
   })
   .controller("homeController", function ($scope) {
-    $("#vizualization").hide();
+    $("#visualization").hide();
   })
   .controller("mainController", function (
     $scope,
@@ -60,30 +60,9 @@ angular
     $scope.wifi = "BCM - SoundProxy";
     $scope.instruction = "Go to Google.com";
 
-    const canvas = document.getElementById("vizualization");
-    canvas.width = document.body.clientWidth;
-    canvas.height = document.body.clientHeight;
-
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#ffffff";
-
     ws.onmessage = (message) => {
       const json = JSON.parse(message.data);
-      if (json.event == "networkActivity") {
-        if (json.data.services.length > 0) {
-          ctx.fillText(
-            json.data.services[0],
-            canvas.width * Math.random(),
-            canvas.height * Math.random()
-          );
-        } else {
-          ctx.fillText(
-            json.data.remote_ip,
-            canvas.width * Math.random(),
-            canvas.height * Math.random()
-          );
-        }
-      } else if (json.event == "alive") {
+      if (json.event == "alive") {
         $scope.$apply(() => {
           if (!json.alive) {
             $location.url("/");

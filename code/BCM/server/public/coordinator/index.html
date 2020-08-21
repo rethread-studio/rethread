@@ -170,23 +170,25 @@
         </div>
       </div>
       <h2>Instructions</h2>
-      <div class="input-group mb-3">
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Instruction"
-          ng-model="instruction"
-        />
-        <div class="input-group-append">
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            ng-click="sendInstruction()"
-          >
-            Send
-          </button>
+      <form ng-submit="sendInstruction()">
+        <div class="input-group mb-3">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Instruction"
+            ng-model="instruction"
+          />
+          <div class="input-group-append">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              ng-click="sendInstruction()"
+            >
+              Send
+            </button>
+          </div>
         </div>
-      </div>
+      </form>
       <h2>Samples</h2>
       <div class="input-group mb-3">
         <select class="form-control" ng-model="sample">
