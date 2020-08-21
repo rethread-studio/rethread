@@ -311,7 +311,11 @@ SynthDef(\bounce_away, { | freq = 300 |
 	s.newBusAllocators; // Make sure we don't run out of busses if we restart multiple times
 
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
-	~chord = [0, 14, 31, 44];
+	~ch1 = [0, 31, 57, 120, 43, 137];
+	~ch2 = [17, 39, 53, 74, 137, 88];
+	~ch3 = [31, 88, 163, 106, 120, 151];
+	~ch4 = [43, 74, 106, 57, 163, 180];
+	~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 	~octave = 3;
 
 	// Mixer channel factory
@@ -487,15 +491,18 @@ SynthDef(\bounce_away, { | freq = 300 |
 
 	// Play a certain sound based on a number of parameters
 	~playSound = { | type, inout, packets, channel |
-		var activity = \none;
+		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 		if(packets > ~highActivityThreshold, {
 			activity = \high;
+			chord = chord;
 		}, {
 			if(packets > ~mediumActivityThreshold, {
 				activity = \medium;
+				chord = chord[0..(chord.size()*2/3 - 1).asInteger]
 			}, {
 				if(packets > ~lowActivityThreshold, {
 					activity = \low;
+					chord = chord[0..(chord.size()/3 - 1).asInteger]
 				});
 			});
 		});
