@@ -1,3 +1,4 @@
+data/samples/*
 config/local.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,linux,macos,windows

@@ -837,7 +837,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		~vis_sender.sendMsg("/bcm-packet", remote_location, len, service_or_ip);
 		}.value();
 		msg.postln;
-	}, '/package', NetAddr("127.0.0.1", 57125), 57130); // create the OSCFunc
+	}, '/package', nil, 57130); // create the OSCFunc
 
 
 	//////////////////////////////////////////////////////
