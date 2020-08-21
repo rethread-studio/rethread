@@ -36,7 +36,7 @@ angular
     $scope.status = { sample: false };
     $scope.stations = {};
     $scope.samples = [];
-    $scope.sample = "Sample 1";
+    $scope.sampleName = "Sample 1";
     $scope.instruction = "";
 
     function getSamples() {
@@ -46,6 +46,22 @@ angular
     }
     getSamples();
 
+    function getStations() {
+      $http.get("/api/stations").then((res) => {
+        if (res) {
+          $scope.stations = res.data;
+          for (let station in $scope.stations) {
+            $scope.stations[station].metrics.since = new Date(
+              $scope.stations[station].metrics.since
+            );
+          }
+        }
+      });
+    }
+
+    getStations();
+    setInterval(getStations, 10000);
+
     function getStatus() {
       for (let station in $scope.stations) {
         $http.get(`/api/station/${station}/status`).then((res) => {
@@ -53,10 +69,15 @@ angular
         });
       }
     }
-    setInterval(getStatus, 10000);
+
+    $scope.loadSample = () => {
+      $scope.stopSample();
+      $http.get("/api/sample/" + $scope.sampleName).then((res) => {
+        $scope.sample = res.data;
+      });
+    };
 
     $scope.playSample = () => {
-      $scope.status.sample = true;
       $http.post("/api/sample/play", { sample: $scope.sample }).then((res) => {
         $scope.status.sample = true;
         getStatus();
@@ -64,7 +85,6 @@ angular
     };
 
     $scope.stopSample = () => {
-      $scope.status.sample = true;
       $http.post("/api/sample/stop").then((res) => {
         $scope.status.sample = false;
         getStatus();
@@ -97,18 +117,15 @@ angular
       });
     };
 
-    $scope.now = () => new Date();
+    $scope.openBrowser = (station) => {
+      $http.post(`/api/station/${station}/openbrowser`).then((res) => {});
+    };
 
-    $http.get("/api/stations").then((res) => {
-      if (res) {
-        $scope.stations = res.data;
-        for (let station in $scope.stations) {
-          $scope.stations[station].metrics.since = new Date(
-            $scope.stations[station].metrics.since
-          );
-        }
-      }
-    });
+    $scope.closeBrowser = (station) => {
+      $http.post(`/api/station/${station}/closebrowser`).then((res) => {});
+    };
+
+    $scope.now = () => new Date();
 
     ws.onmessage = (message) => {
       const json = JSON.parse(message.data);

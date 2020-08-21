@@ -62,7 +62,7 @@ function handleMessage(from, json) {
     });
   }
 }
-async function callStation(station, func, args) {
+async function callStation(station, func, args, expectReturn = true) {
   return new Promise((resolve, reject) => {
     if (!stations[station]) {
       return reject(`Station '${station}' does not exists`);
@@ -84,7 +84,11 @@ async function callStation(station, func, args) {
         return resolve(json.value);
       }
     };
-    stations[station].ws.on("message", cb);
+    if (expectReturn) {
+      stations[station].ws.on("message", cb);
+    } else {
+      return resolve();
+    }
   });
 }
 
@@ -128,18 +132,23 @@ if (fs.existsSync(__dirname + "/data/samples.json")) {
   samples = JSON.parse(fs.readFileSync(__dirname + "/data/samples.json"));
 }
 
-async function sendMessage(m, time) {
+async function sendMessage(m, station, time) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      osc.send(m);
+      if (stations[station]) {
+        stations[station].ws.send(JSON.stringify({}));
+        callStation(station, "playPacket", m, false);
+      } else {
+        osc.send(m);
+      }
       return resolve();
     }, time);
   });
 }
 
 let playingSample = null;
-async function playSample() {
-  if (playingSample == null) {
+async function playSample(sample) {
+  if (playingSample == null || sample == null) {
     return;
   }
   for (let i = 0; playingSample && i < playingSample.messages.length; i++) {
@@ -147,13 +156,23 @@ async function playSample() {
       return;
     }
     const m = playingSample.messages[i];
+    let station = m.station ? m.station : m.speaker;
+    if (sample.stations[station]) {
+      if (sample.stations[station].map) {
+        station = sample.stations[station].map;
+      }
+    }
+    if (!station) {
+      continue;
+    }
     let diff = 10;
     if (i > 0) {
       diff = m.timestamp - playingSample.messages[i - 1].timestamp;
     }
-    await sendMessage(m, diff);
+
+    await sendMessage(m, station, diff);
   }
-  playSample();
+  playSample(sample);
 }
 
 function stopSample() {
@@ -163,6 +182,42 @@ function stopSample() {
 
 app.get("/api/samples", function (req, res) {
   res.json(samples);
+});
+
+app.get("/api/sample/:sample", function (req, res) {
+  const output = {
+    name: req.params.sample,
+    stations: {},
+  };
+  const sample = JSON.parse(
+    fs.readFileSync(__dirname + "/data/samples/" + req.params.sample + ".json")
+  );
+  for (let packet of sample.messages) {
+    let station = packet.station;
+    if (!station) {
+      station = packet.speaker;
+    }
+    if (!output.stations[station]) {
+      output.stations[station] = {
+        name: station,
+        metrics: {
+          in: 0,
+          out: 0,
+          lenIn: 0,
+          lenOut: 0,
+        },
+      };
+    }
+
+    if (packet.out) {
+      output.stations[station].metrics.out++;
+      output.stations[station].metrics.lenOut += packet.len;
+    } else {
+      output.stations[station].metrics.in++;
+      output.stations[station].metrics.lenIn += packet.len;
+    }
+  }
+  res.json(output);
 });
 
 let currentSample = null;
@@ -214,9 +269,13 @@ app.post("/api/sample/play", async function (req, res) {
       }
       try {
         playingSample = JSON.parse(
-          fs.readFileSync(__dirname + "/data/samples/" + data.sample + ".json")
+          fs.readFileSync(
+            __dirname + "/data/samples/" + data.sample.name + ".json"
+          )
         );
-        setTimeout(playSample, 100);
+        setTimeout(() => {
+          playSample(data.sample);
+        }, 100);
       } catch (error) {
         status.play = false;
         console.log(error);
@@ -236,9 +295,12 @@ app.post("/api/instruction", function (req, res) {
   res.json("ok");
 });
 
-app.get("/api/stations", function (req, res) {
+app.get("/api/stations", async function (req, res) {
   const output = {};
   for (let stationId in stations) {
+    const status = await callStation(stationId, "getStatus");
+    stations[stationId].status = status;
+
     output[stationId] = {
       name: stationId,
       address: stations[stationId].address,
@@ -251,12 +313,21 @@ app.get("/api/stations", function (req, res) {
 
 app.get("/api/station/:station/status", async (req, res) => {
   const status = await callStation(req.params.station, "getStatus");
+  stations[req.params.station].status = status;
   res.json({
     name: req.params.station,
     address: stations[req.params.station].address,
     metrics: stations[req.params.station].metrics,
     status: status,
   });
+});
+
+app.post("/api/station/:station/openbrowser", async (req, res) => {
+  res.json(await callStation(req.params.station, "openBrowser"));
+});
+
+app.post("/api/station/:station/closebrowser", async (req, res) => {
+  res.json(await callStation(req.params.station, "closeBrowser"));
 });
 
 app.post("/api/station/:station/toggleosc", async (req, res) => {

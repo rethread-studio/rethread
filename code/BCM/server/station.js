@@ -4,6 +4,7 @@ const WebSocket = require("ws");
 const http = require("http");
 const cli = require("cli");
 
+const browser = require("./lib/browser");
 const tsharks = require("./lib/sharks");
 const hotspot = require("./lib/hotspot");
 const getIP = require("./lib/ip");
@@ -50,6 +51,8 @@ wss.on("connection", function (ws, request) {
 
 const status = {
   muted: false,
+  sniffing: false,
+  osc: false,
 };
 
 function broadcast(data) {
@@ -81,7 +84,7 @@ function broadcastNetworkActivity(data) {
       })
     );
   }
-  if (status.osc) {
+  if (status.osc && !status.muted) {
     osc.send(data);
   }
 }
@@ -97,8 +100,8 @@ async function startSniffing(interface) {
     );
   } catch (error) {
     console.log(error);
-    status.sniffing = false;
   }
+  status.sniffing = false;
 }
 
 function stopSniffing() {
@@ -119,7 +122,7 @@ function startOSC() {
 }
 
 function stopOSC() {
-  osc.close()
+  osc.close();
   status.osc = false;
 }
 
@@ -150,10 +153,21 @@ async function callCoordinator(func, args) {
 const webSocketActions = {};
 webSocketActions.getStatus = () => status;
 webSocketActions.getAddress = () => `http://${getIP()}:${options.port}`;
+
 webSocketActions.startOSC = startOSC;
 webSocketActions.stopOSC = stopOSC;
+
 webSocketActions.stopSniffing = stopSniffing;
 webSocketActions.startSniffing = () => startSniffing(options.interface);
+
+webSocketActions.playPacket = (packet) => {
+  broadcastNetworkActivity(packet);
+};
+
+webSocketActions.openBrowser = () =>
+  browser.open(`http://localhost:${options.port}`);
+webSocketActions.closeBrowser = browser.close;
+
 webSocketActions.setConfig = (args) => {
   config = args;
 };

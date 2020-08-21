@@ -35,6 +35,9 @@ module.exports.open = (ip, port, address, cb) => {
 };
 
 module.exports.close = () => {
+  if (udpPort == null) {
+    return null;
+  }
   udpPort.close();
   udpPort = null;
 };
@@ -53,7 +56,7 @@ module.exports.send = (data) => {
   if (!udpPort) {
     return;
   }
-  
+
   udpPort.send(
     {
       address: targetAddress,

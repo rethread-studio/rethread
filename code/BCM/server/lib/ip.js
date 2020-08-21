@@ -16,6 +16,7 @@ function getIPs() {
   }
   return results;
 }
+
 module.exports = (networkInterface) => {
   const ips = getIPs();
   if (!networkInterface) {

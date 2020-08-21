@@ -167,6 +167,20 @@
           <a class="btn btn-primary" target="__blank" href="{{station.address}}"
             >Station Interface</a
           >
+          <button
+            type="button"
+            class="btn btn-primary"
+            ng-click="openBrowser(station.name)"
+          >
+            Open Browser
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            ng-click="closeBrowser(station.name)"
+          >
+            Close Browser
+          </button>
         </div>
       </div>
       <h2>Instructions</h2>
@@ -191,7 +205,7 @@
       </form>
       <h2>Samples</h2>
       <div class="input-group mb-3">
-        <select class="form-control" ng-model="sample">
+        <select class="form-control" ng-model="sampleName">
           <option
             ng-repeat="sample in samples"
             ng-bind="sample"
@@ -202,21 +216,86 @@
           <button
             class="btn btn-outline-secondary"
             type="button"
-            ng-click="playSample()"
-            ng-if="!status.sample"
+            ng-click="loadSample()"
           >
-            Play
-          </button>
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            ng-click="stopSample()"
-            ng-if="status.sample"
-          >
-            Stop
+            Load
           </button>
         </div>
       </div>
+      <div class="station card mb-3" ng-repeat="station in sample.stations">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-sm">
+              {{station.name}} 
+            </div>
+            <div class="col-sm">
+              <select class="form-control" ng-model="station.map" placeholder="Maps recored station to real station">
+                <option selected value="{{null}}">Virutal station</option>
+                <option
+                  ng-repeat="station in stations"
+                  ng-bind="station.name"
+                  value="{{station.name}}"
+                ></option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card-body row">
+          <div class="col-sm">
+            <div class="row">
+              <div class="col-sm">
+                Packets in:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.in | number}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Packets out:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.out | number}}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm"></div>
+          <div class="col-sm">
+            <div class="row">
+              <div class="col-sm">
+                Data received:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.lenIn | humanSize}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Data sent:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.lenOut | humanSize}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        ng-click="playSample()"
+        ng-if="!status.sample && sample"
+      >
+        Play
+      </button>
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        ng-click="stopSample()"
+        ng-if="status.sample && sample"
+      >
+        Stop
+      </button>
     </div>
     <script
       src="https://code.jquery.com/jquery-3.4.1.min.js"
