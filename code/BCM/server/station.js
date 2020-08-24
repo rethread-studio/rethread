@@ -154,6 +154,10 @@ const webSocketActions = {};
 webSocketActions.getStatus = () => status;
 webSocketActions.getAddress = () => `http://${getIP()}:${options.port}`;
 
+webSocketActions.disconnect = async (mac) => {
+  return hotspot.disconnect(mac);
+};
+
 webSocketActions.startOSC = startOSC;
 webSocketActions.stopOSC = stopOSC;
 
@@ -232,16 +236,22 @@ if (options.coordinatorURL == null) {
   coordinatorURL = options.coordinatorURL;
 }
 
+async function isAlive() {
+  const connectedUsers = await hotspot.connectedUsers(options.interface);
+  callCoordinator("setConnectedUsers", connectedUsers);
+  broadcast({
+    event: "alive",
+    alive: connectedUsers.length > 0,
+  });
+  setTimeout(() => {
+    isAlive()
+  }, 1000)
+}
 server.listen(options.port, function () {
   console.log(`Start Station ${options.name} on port ${options.port}`);
   connectToCoordinator(coordinatorURL);
   startSniffing(options.interface);
   startOSC();
 
-  setInterval(async () => {
-    broadcast({
-      event: "alive",
-      alive: await hotspot.isConnected(options.interface),
-    });
-  }, 1000);
+  isAlive();
 });

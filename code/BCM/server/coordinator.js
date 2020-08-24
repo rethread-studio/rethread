@@ -4,6 +4,7 @@ const http = require("http");
 const config = require("config");
 
 const osc = require("./lib/osc");
+const getIP = require("./lib/ip");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -27,15 +28,20 @@ server.on("upgrade", function (request, socket, head) {
 });
 
 const webSocketActions = {};
-webSocketActions.getConfig = (args) => {
+webSocketActions.getConfig = (from, args) => {
   return config;
 };
+
+webSocketActions.setConnectedUsers = (from, args) => {
+  stations[from].clients = args;
+};
+
 function handleMessage(from, json) {
   if (json.event == "call") {
     let value = null;
     let error = null;
     try {
-      value = webSocketActions[json.method](json.args);
+      value = webSocketActions[json.method](from, json.args);
     } catch (e) {
       error = e.message;
     }
@@ -306,6 +312,7 @@ app.get("/api/stations", async function (req, res) {
       address: stations[stationId].address,
       metrics: stations[stationId].metrics,
       status: stations[stationId].status,
+      clients: stations[stationId].clients,
     };
   }
   res.json(output);
@@ -318,8 +325,13 @@ app.get("/api/station/:station/status", async (req, res) => {
     name: req.params.station,
     address: stations[req.params.station].address,
     metrics: stations[req.params.station].metrics,
+    clients: stations[req.params.station].clients,
     status: status,
   });
+});
+
+app.post("/api/station/:station/disconnect", async (req, res) => {
+  res.json(await callStation(req.params.station, "disconnect", req.body.mac));
 });
 
 app.post("/api/station/:station/openbrowser", async (req, res) => {
@@ -365,7 +377,12 @@ app.post("/api/station/:station/togglesniffing", async (req, res) => {
 
 function start() {
   server.listen(config.get("coordinator.port"), function () {
-    console.log("Start Coordinator on port " + config.get("coordinator.port"));
+    console.log(
+      "Start Coordinator: ws://" +
+        getIP() +
+        ":" +
+        config.get("coordinator.port")
+    );
   });
 }
 

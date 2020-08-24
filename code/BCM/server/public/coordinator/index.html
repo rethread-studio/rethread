@@ -65,6 +65,9 @@
       <div class="station card mb-3" ng-repeat="station in stations">
         <div class="card-header">{{station.name}}</div>
         <div class="card-body row">
+          <div class="col-12">
+            <h3>Metrics</h3>
+          </div>
           <div class="col-sm">
             <div class="row">
               <div class="col-sm">
@@ -137,6 +140,35 @@
                 humanSize}}
               </div>
             </div>
+          </div>
+          <div class="col-12">
+            <h3>Clients</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>IP</th>
+                  <th>Mac</th>
+                  <th>Options</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="client in station.clients">
+                  <td ng-bind="client.name"></td>
+                  <td ng-bind="client.ip"></td>
+                  <td ng-bind="client.mac"></td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      ng-click="disconnect(station.name, client)"
+                    >
+                      Disconnect
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
         <div class="card-footer bg-transparent">
@@ -226,10 +258,14 @@
         <div class="card-header">
           <div class="row">
             <div class="col-sm">
-              {{station.name}} 
+              {{station.name}}
             </div>
             <div class="col-sm">
-              <select class="form-control" ng-model="station.map" placeholder="Maps recored station to real station">
+              <select
+                class="form-control"
+                ng-model="station.map"
+                placeholder="Maps recored station to real station"
+              >
                 <option selected value="{{null}}">Virutal station</option>
                 <option
                   ng-repeat="station in stations"
