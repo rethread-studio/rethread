@@ -6,9 +6,21 @@ import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/cont
 let allPackets = [];
 const statsPerService = new Map();
 const positionPerService = new Map();
+const textPerService = new Map();
+
+let visMode = 'particles';
 
 
+// Load font
+var loader = new THREE.FontLoader();
+var font;
+loader.load( 'assets/fonts/' + 'helvetiker_regular.typeface.json', function ( response ) {
 
+  font = response;
+
+} );
+
+// Receive packets
 let protocol = "ws";
 if (document.location.protocol == "https:") {
   protocol += "s";
@@ -30,7 +42,9 @@ ws.onmessage = (message) => {
 
     for(const service of packet.services) {
       if (!positionPerService.has(service)) {
-        positionPerService.set(service, random3DPosition(500));
+        let servicePos = random3DPosition(500);
+        createText(service, servicePos);
+        positionPerService.set(service, servicePos);
         console.log("new serivce, num: " + positionPerService.size);
       }
       addParticle(positionPerService.get(service));
@@ -62,23 +76,56 @@ function addParticle(vec3) {
   particles.setDrawRange(0, particleCount);
 }
 
-var group;
-var container, stats;
+function createText(text, servicePos) {
+  let geometry = new THREE.TextGeometry( text, {
+		font: font,
+		size: 80,
+		height: 5,
+		curveSegments: 12,
+		bevelEnabled: false,
+  } );
+  let material = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.6 } );
+  let textMesh = new THREE.Mesh( geometry, material );
+  textMesh.position.copy(servicePos);
+  particles_text_meshes.push(textMesh);
+  particles_group.add(textMesh);
+}
+
+var particles_group;
+let particles_rotation = new THREE.Euler();
+let particles_rotation_vel = new THREE.Vector3(0, 0, 0);
+let particles_rotation_counter = 0;
+let particles_text_meshes = [];
 var particlesData = [];
-var camera, scene, renderer;
-var positions, colors;
 var particles;
 var pointCloud;
 var particlePositions;
 var linesMesh;
 
-let randomParticle = 0;
+var container, stats;
+
+var camera, scene, renderer;
+var positions, colors;
+
+let randomParticle = 0; // Used for drawing lines, this is the starting particle
 
 var maxParticleCount = 50000;
 var particleCount = 0; // The number of active particles
 var particleIndex = 0; // The index of the next particle (can loop around to recycle old particles)
 var r = 800;
 var rHalf = r / 2;
+
+
+var rectangles_group;
+var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+var rectangleGeometry = new THREE.PlaneBufferGeometry( 5, 20, 32 );
+var rectangleMeshes = [];
+
+function createRectangle() {
+  var plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
+  rectangles_group.add(plane);
+  rectangleMeshes.push(plane);
+}
 
 var effectController = {
   showDots: true,
@@ -133,8 +180,11 @@ function init() {
 
   scene = new THREE.Scene();
 
-  group = new THREE.Group();
-  scene.add(group);
+  particles_group = new THREE.Group();
+  scene.add(particles_group);
+
+  rectangles_group = new THREE.Group();
+  scene.add(rectangles_group);
 
   // var helper = new THREE.BoxHelper(
   //   new THREE.Mesh(new THREE.BoxBufferGeometry(r, r, r))
@@ -153,7 +203,7 @@ function init() {
     color: 0xffffff,
     size: 1,
     blending: THREE.AdditiveBlending,
-    opacity: 0.2,
+    opacity: 0.5,
     transparent: true,
     sizeAttenuation: false,
   });
@@ -195,7 +245,7 @@ function init() {
 
   // create the particle system
   pointCloud = new THREE.Points(particles, pMaterial);
-  group.add(pointCloud);
+  particles_group.add(pointCloud);
 
 
   // LINE SEGMENTS
@@ -227,7 +277,7 @@ function init() {
   });
 
   linesMesh = new THREE.LineSegments(geometry, material);
-  group.add(linesMesh);
+  particles_group.add(linesMesh);
 
 
   //
@@ -253,123 +303,88 @@ function onWindowResize() {
 }
 
 function animate() {
-  var vertexpos = 0;
-  var colorpos = 0;
-  var numConnected = 0;
+  if(visMode === 'particles') {
 
-  for (var i = 0; i < particleCount; i++) particlesData[i].numConnections = 0;
+    if(Math.random() > 0.9) {
+      particles_rotation_counter = 10;
+      const scale = 0.2;
+      particles_rotation_vel.set(Math.random()* scale, Math.random() * scale, Math.random() * scale);
+    }
 
-  for (var i = 0; i < particleCount; i++) {
-    // get the particle
-    var particleData = particlesData[i];
+    // Update rotation
+    if(particles_rotation_counter > 0) {
+      particles_rotation.x += particles_rotation_vel.x;
+      particles_rotation.y += particles_rotation_vel.y;
+      particles_rotation.z += particles_rotation_vel.z;
+      particles_rotation_counter -= 1;
+    }
+    
 
-    particlePositions[i * 3] += particleData.velocity.x;
-    particlePositions[i * 3 + 1] += particleData.velocity.y;
-    particlePositions[i * 3 + 2] += particleData.velocity.z;
+    var vertexpos = 0;
+    var colorpos = 0;
+    var numConnected = 0;
 
-    // if (
-    //   particlePositions[i * 3 + 1] < -rHalf ||
-    //   particlePositions[i * 3 + 1] > rHalf
-    // )
-    //   particleData.velocity.y = -particleData.velocity.y;
+    for (var i = 0; i < particleCount; i++) particlesData[i].numConnections = 0;
 
-    // if (particlePositions[i * 3] < -rHalf || particlePositions[i * 3] > rHalf)
-    //   particleData.velocity.x = -particleData.velocity.x;
+    for (var i = 0; i < particleCount; i++) {
+      // get the particle
+      var particleData = particlesData[i];
 
-    // if (
-    //   particlePositions[i * 3 + 2] < -rHalf ||
-    //   particlePositions[i * 3 + 2] > rHalf
-    // )
-    //   particleData.velocity.z = -particleData.velocity.z;
+      particlePositions[i * 3] += particleData.velocity.x;
+      particlePositions[i * 3 + 1] += particleData.velocity.y;
+      particlePositions[i * 3 + 2] += particleData.velocity.z;
+    }
 
-    // if (
-    //   effectController.limitConnections &&
-    //   particleData.numConnections >= effectController.maxConnections
-    // )
-    //   continue;
+    if(Math.random() > effectController.linesStayingProbability) {
+      randomParticle = Math.floor(Math.random() * particleCount);
+    }
+    
+    let alpha = 0.1;
 
-    // // Check collision
-    // for (var j = i + 1; j < particleCount; j++) {
-    //   var particleDataB = particlesData[j];
-    //   if (
-    //     effectController.limitConnections &&
-    //     particleDataB.numConnections >= effectController.maxConnections
-    //   )
-    //     continue;
+    let particleIndex = randomParticle;
 
-    //   var dx = particlePositions[i * 3] - particlePositions[j * 3];
-    //   var dy = particlePositions[i * 3 + 1] - particlePositions[j * 3 + 1];
-    //   var dz = particlePositions[i * 3 + 2] - particlePositions[j * 3 + 2];
-    //   var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    for(let i = 0; i < effectController.numConnections; i++) {
+      let particle1 = particleIndex;
+      let particle2 = (particleIndex+1) % particleCount;
+      positions[vertexpos++] = particlePositions[particle1 * 3];
+      positions[vertexpos++] = particlePositions[particle1 * 3 + 1];
+      positions[vertexpos++] = particlePositions[particle1 * 3 + 2];
+      positions[vertexpos++] = particlePositions[particle2 * 3];
+      positions[vertexpos++] = particlePositions[particle2 * 3 + 1];
+      positions[vertexpos++] = particlePositions[particle2 * 3 + 2];
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      particleIndex = particle2;
+    }
 
-    //   if (dist < effectController.minDistance) {
-    //     particleData.numConnections++;
-    //     particleDataB.numConnections++;
+    linesMesh.geometry.setDrawRange(0, effectController.numConnections * 2);
+    linesMesh.geometry.attributes.position.needsUpdate = true;
+    linesMesh.geometry.attributes.color.needsUpdate = true;
 
-    //     var alpha = 1.0 - dist / effectController.minDistance;
+    pointCloud.geometry.attributes.position.needsUpdate = true;
 
-    //     positions[vertexpos++] = particlePositions[i * 3];
-    //     positions[vertexpos++] = particlePositions[i * 3 + 1];
-    //     positions[vertexpos++] = particlePositions[i * 3 + 2];
+    requestAnimationFrame(animate);
 
-    //     positions[vertexpos++] = particlePositions[j * 3];
-    //     positions[vertexpos++] = particlePositions[j * 3 + 1];
-    //     positions[vertexpos++] = particlePositions[j * 3 + 2];
-
-    //     colors[colorpos++] = alpha;
-    //     colors[colorpos++] = alpha;
-    //     colors[colorpos++] = alpha;
-
-    //     colors[colorpos++] = alpha;
-    //     colors[colorpos++] = alpha;
-    //     colors[colorpos++] = alpha;
-
-    //     numConnected++;
-    //   }
-    // }
+    stats.update();
+    render();
   }
-
-  if(Math.random() > effectController.linesStayingProbability) {
-    randomParticle = Math.floor(Math.random() * particleCount);
-  }
-  
-  let alpha = 0.1;
-
-  let particleIndex = randomParticle;
-
-  for(let i = 0; i < effectController.numConnections; i++) {
-    let particle1 = particleIndex;
-    let particle2 = (particleIndex+1) % particleCount;
-    positions[vertexpos++] = particlePositions[particle1 * 3];
-    positions[vertexpos++] = particlePositions[particle1 * 3 + 1];
-    positions[vertexpos++] = particlePositions[particle1 * 3 + 2];
-    positions[vertexpos++] = particlePositions[particle2 * 3];
-    positions[vertexpos++] = particlePositions[particle2 * 3 + 1];
-    positions[vertexpos++] = particlePositions[particle2 * 3 + 2];
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    particleIndex = particle2;
-  }
-
-  linesMesh.geometry.setDrawRange(0, effectController.numConnections * 2);
-  linesMesh.geometry.attributes.position.needsUpdate = true;
-  linesMesh.geometry.attributes.color.needsUpdate = true;
-
-  pointCloud.geometry.attributes.position.needsUpdate = true;
-
-  requestAnimationFrame(animate);
-
-  stats.update();
-  render();
 }
 
 function render() {
   var time = Date.now() * 0.001;
 
-  group.rotation.y = time * 0.1;
+  // TODO: Cancel out the rotation effect on the text
+  let textRotation = particles_rotation.clone();
+  textRotation.x *= -1;
+  textRotation.y *= -1;
+  textRotation.z *= -1;
+  for(let tm of particles_text_meshes) {
+    tm.rotation.copy(textRotation);
+  }
+  particles_group.rotation.copy(particles_rotation);
   renderer.render(scene, camera);
 }
