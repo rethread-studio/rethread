@@ -83,9 +83,11 @@ async function callStation(station, func, args, expectReturn = true) {
         args,
       })
     );
+    let timeoutId = null;
     const cb = (data) => {
       const json = JSON.parse(data);
       if (json.event == "return" && func == json.method) {
+        clearTimeout(timeoutId);
         stations[station].ws.off("message", cb);
         if (json.error) {
           return reject(json.error);
@@ -95,7 +97,7 @@ async function callStation(station, func, args, expectReturn = true) {
     };
     if (expectReturn) {
       stations[station].ws.on("message", cb);
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         reject("Timeout getting answer", 5000);
         stations[station].ws.off("message", cb);
       });
