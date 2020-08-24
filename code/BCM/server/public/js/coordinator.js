@@ -66,9 +66,12 @@ angular
       for (let station in $scope.stations) {
         $http.get(`/api/station/${station}/status`).then((res) => {
           $scope.stations[res.data.name].status = res.data.status;
+          $scope.stations[res.data.name].metrics = res.data.metrics;
+          $scope.stations[res.data.name].client = res.data.client;
         });
       }
     }
+    setInterval(getStations, 3000);
 
     $scope.loadSample = () => {
       $scope.stopSample();
@@ -103,6 +106,14 @@ angular
       $http.post(`/api/station/${station}/toggleosc`).then((res) => {
         $scope.stations[station].status = res.data;
       });
+    };
+
+    $scope.disconnect = (station, client) => {
+      $http
+        .post(`/api/station/${station}/disconnect`, client)
+        .then((res) => {
+          getStatus();
+        });
     };
 
     $scope.toggleSniffing = (station) => {

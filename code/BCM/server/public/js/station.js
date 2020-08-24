@@ -43,13 +43,32 @@ angular
     $("#visualization").show();
   })
   .controller("instructionController", function ($scope, $location) {
-    $("#visualization").hide();
+    $("#visualization").show();
     setTimeout(() => {
-      $location.url("/visualization");
+      //$location.url("/visualization");
     }, 5000);
   })
   .controller("homeController", function ($scope) {
     $("#visualization").hide();
+    const bg = document.getElementById("glishBackground");
+    const count = 30;
+    for (let index = 0; index < count; index++) {
+      const element = document.createElement("div");
+      element.className = "glishBox";
+      bg.appendChild(element);
+    }
+    setInterval(() => {
+      const glishBoxes = document.getElementsByClassName("glishBox");
+      for (let index = 0; index < glishBoxes.length; index++) {
+        const element = glishBoxes[index];
+        element.style.left = Math.floor(Math.random() * 100) + "vw";
+        element.style.top = Math.floor(Math.random() * 100) + "vh";
+
+        element.style.width = Math.floor(Math.random() * 75) + "px";
+        element.style.height = Math.floor(Math.random() * 30) + "px";
+        element.style.opacity = Math.random() * 0.7;
+      }
+    }, 150);
   })
   .controller("mainController", function (
     $scope,
