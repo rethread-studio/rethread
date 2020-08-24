@@ -36,7 +36,7 @@ function getLocation(ip) {
   }
 }
 
-function isOut(localIp, json) {
+function isIn(localIp, json) {
   if (localIp) {
     return json.ip_dst[0] == localIp;
   }
@@ -51,9 +51,10 @@ module.exports = function (networkInterface, kill, broadcast) {
     let localIp = getIP(networkInterface);
 
     const cmd =
-      "tshark -V -N dnN -T ek -i " +
+      "tshark -V -N dnN -l -T ek -i " +
       networkInterface +
       " -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e dns.qry.name -e frame.len -e http.host -e http.response -e frame.protocols -e eth.dst -e eth.src";
+
     try {
       const child = sh.exec(cmd, {
         async: true,
@@ -94,7 +95,7 @@ module.exports = function (networkInterface, kill, broadcast) {
             const json = d.layers;
             if (json && json.ip_src) {
               const data = {};
-              if (isOut(localIp, json)) {
+              if (isIn(localIp, json)) {
                 data.local_ip = json.ip_dst[0];
                 data.remote_ip = json.ip_src[0];
                 data.local_host = json.ip_dst_host[0];
@@ -127,7 +128,6 @@ module.exports = function (networkInterface, kill, broadcast) {
               data.remote_location = getLocation(data.remote_ip);
 
               data.services = getServices(data);
-
               broadcast(data);
               return;
             }

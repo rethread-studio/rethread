@@ -23,7 +23,6 @@ module.exports.connectedUsers = async (interface) => {
   const results = await Promise.all(promises);
   for (let index = 0; index < devices.length; index++) {
     const device = devices[index];
-    console.log(device, results)
     device.alive = results[index].alive;
   }
   return devices.filter((f) => f.alive);
