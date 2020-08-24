@@ -46,9 +46,9 @@ ws.onmessage = (message) => {
         createText(service, servicePos);
         positionPerService.set(service, servicePos);
         console.log("new serivce, num: " + positionPerService.size);
-        // createRectangle();
       }
       addParticle(positionPerService.get(service));
+      createRectangle();
     }
   }
 };
@@ -118,14 +118,20 @@ var rHalf = r / 2;
 
 
 var rectangles_group;
-var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-var rectangleGeometry = new THREE.PlaneBufferGeometry( 5, 20, 32 );
+var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+var rectangleGeometry = new THREE.PlaneBufferGeometry( 20, 80, 4 );
 var rectangleMeshes = [];
+var rectangleLeftEdge = 0; 
 
 function createRectangle() {
   let plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
-  plane.position.x = 1200;
-  plane.position.y = 0;
+  // Convert from screen coordinates to camera coordinates
+  let left = window.innerWidth/2;
+  let top = (Math.random() * 2 - 1) * window.innerHeight;
+  let depth = 0; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
+  plane.position.set( -1 + 2 * left, 1 - 2 * top, depth ).unproject( camera );
+  plane.position.z = 0;
+  rectangleLeftEdge = -plane.position.x;
   rectangles_group.add(plane);
   rectangleMeshes.push(plane);
 }
@@ -206,7 +212,7 @@ function init() {
     color: 0xffffff,
     size: 1,
     blending: THREE.AdditiveBlending,
-    opacity: 0.5,
+    opacity: 0.7,
     transparent: true,
     sizeAttenuation: false,
   });
@@ -230,9 +236,9 @@ function init() {
     // add it to the geometry
     particlesData.push({
       velocity: new THREE.Vector3(
-        -.1 + Math.random() * .2,
-        -.1 + Math.random() * .2,
-        -.1 + Math.random() * .2
+        -.2 + Math.random() * .4,
+        -.2 + Math.random() * .4,
+        -.2 + Math.random() * .4
       ),
       numConnections: 0,
     });
@@ -309,8 +315,9 @@ function animate() {
   if(visMode === 'particles') {
 
     if(Math.random() > 0.99) {
-      particles_rotation_counter = 10;
-      const scale = 0.2;
+      particles_rotation_counter = 8;
+      const scale = 0.1;
+      // TODO: Do a random direction with radius instead
       particles_rotation_vel.set(Math.random()* scale, Math.random() * scale, Math.random() * scale);
     }
 
@@ -343,7 +350,7 @@ function animate() {
       randomParticle = Math.floor(Math.random() * particleCount);
     }
     
-    let alpha = 0.1;
+    let alpha = 0.2;
 
     let particleIndex = randomParticle;
 
@@ -373,8 +380,17 @@ function animate() {
 
     // Update rectangles
     for(let rect of rectangleMeshes) {
-      rect.position.x -= 5;
+      rect.position.x -= 10;
+      if(rect.position.x < rectangleLeftEdge) {
+        // Outside of view, remove it
+        rectangles_group.remove(rect);
+      }
+      // rect.position.y -= 1;
+      // rect.position.z -= 10;
     }
+
+    // Remove rectangles from rectangleMeshes
+    rectangleMeshes = rectangleMeshes.filter(rect => rect.position.x > rectangleLeftEdge);
 
     requestAnimationFrame(animate);
 
