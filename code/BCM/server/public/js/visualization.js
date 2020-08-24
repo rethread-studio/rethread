@@ -42,10 +42,11 @@ ws.onmessage = (message) => {
 
     for(const service of packet.services) {
       if (!positionPerService.has(service)) {
-        let servicePos = random3DPosition(500);
+        let servicePos = random3DPosition(300);
         createText(service, servicePos);
         positionPerService.set(service, servicePos);
         console.log("new serivce, num: " + positionPerService.size);
+        // createRectangle();
       }
       addParticle(positionPerService.get(service));
     }
@@ -122,7 +123,9 @@ var rectangleGeometry = new THREE.PlaneBufferGeometry( 5, 20, 32 );
 var rectangleMeshes = [];
 
 function createRectangle() {
-  var plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
+  let plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
+  plane.position.x = 1200;
+  plane.position.y = 0;
   rectangles_group.add(plane);
   rectangleMeshes.push(plane);
 }
@@ -174,9 +177,9 @@ function init() {
   );
   camera.position.z = 1750;
 
-  var controls = new OrbitControls(camera, container);
-  controls.minDistance = 1000;
-  controls.maxDistance = 3000;
+  // var controls = new OrbitControls(camera, container);
+  // controls.minDistance = 1000;
+  // controls.maxDistance = 3000;
 
   scene = new THREE.Scene();
 
@@ -305,7 +308,7 @@ function onWindowResize() {
 function animate() {
   if(visMode === 'particles') {
 
-    if(Math.random() > 0.9) {
+    if(Math.random() > 0.99) {
       particles_rotation_counter = 10;
       const scale = 0.2;
       particles_rotation_vel.set(Math.random()* scale, Math.random() * scale, Math.random() * scale);
@@ -320,6 +323,7 @@ function animate() {
     }
     
 
+    // Update particles
     var vertexpos = 0;
     var colorpos = 0;
     var numConnected = 0;
@@ -366,6 +370,11 @@ function animate() {
     linesMesh.geometry.attributes.color.needsUpdate = true;
 
     pointCloud.geometry.attributes.position.needsUpdate = true;
+
+    // Update rectangles
+    for(let rect of rectangleMeshes) {
+      rect.position.x -= 5;
+    }
 
     requestAnimationFrame(animate);
 

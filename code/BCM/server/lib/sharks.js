@@ -58,7 +58,7 @@ module.exports = function (networkInterface, kill, broadcast) {
       const child = sh.exec(cmd, {
         async: true,
         silent: true,
-        maxBuffer: 30 * 1024 * 1024 * 1024,
+        maxBuffer: 1024 * 1024 * 1024,
       });
       console.log("Start sniffing on " + networkInterface);
       kill(child);
