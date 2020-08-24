@@ -241,7 +241,6 @@ if (options.coordinatorURL == null) {
 
 async function isAlive() {
   const connectedUsers = await hotspot.connectedUsers(options.interface);
-  console.log(`[${options.name}]`, "Get connected uers", connectedUsers);
   try {
     callCoordinator("setConnectedUsers", connectedUsers);
     broadcast({
