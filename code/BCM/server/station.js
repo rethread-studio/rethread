@@ -129,6 +129,9 @@ function stopOSC() {
 let coordinatorWS = null;
 async function callCoordinator(func, args) {
   return new Promise((resolve, reject) => {
+    if (coordinatorWS == null || coordinatorWS.readyState !== WebSocket.OPEN) {
+      reject("Coordinator is not connected");
+    }
     coordinatorWS.send(
       JSON.stringify({
         event: "call",
@@ -238,14 +241,19 @@ if (options.coordinatorURL == null) {
 
 async function isAlive() {
   const connectedUsers = await hotspot.connectedUsers(options.interface);
-  callCoordinator("setConnectedUsers", connectedUsers);
-  broadcast({
-    event: "alive",
-    alive: connectedUsers.length > 0,
-  });
+  console.log(`[${options.name}]`, "Get connected uers", connectedUsers);
+  try {
+    callCoordinator("setConnectedUsers", connectedUsers);
+    broadcast({
+      event: "alive",
+      alive: connectedUsers.length > 0,
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
   setTimeout(() => {
-    isAlive()
-  }, 1000)
+    isAlive();
+  }, 1000);
 }
 server.listen(options.port, function () {
   console.log(`Start Station ${options.name} on port ${options.port}`);

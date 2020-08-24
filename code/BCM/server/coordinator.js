@@ -70,7 +70,10 @@ function handleMessage(from, json) {
 }
 async function callStation(station, func, args, expectReturn = true) {
   return new Promise((resolve, reject) => {
-    if (!stations[station]) {
+    if (
+      !stations[station] ||
+      stations[station].ws.readyState !== WebSocket.OPEN
+    ) {
       return reject(`Station '${station}' does not exists`);
     }
     stations[station].ws.send(
@@ -92,6 +95,10 @@ async function callStation(station, func, args, expectReturn = true) {
     };
     if (expectReturn) {
       stations[station].ws.on("message", cb);
+      setTimeout(() => {
+        reject("Timeout getting answer", 5000);
+        stations[station].ws.off("message", cb);
+      });
     } else {
       return resolve();
     }

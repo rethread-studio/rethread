@@ -6,12 +6,12 @@ module.exports.open = (url) => {
   if (browser != null) {
     module.exports.close();
   }
-  let chromePath = "chrome";
+  let chromePath = "chromium-browser";
   if ("Darwin" == os.type()) {
     chromePath = "'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'";
   }
 
-  const cmd = `${chromePath} --start-fullscreen --app=${url}`;
+  const cmd = `${chromePath} --noerrdialogs --disable-infobars --kiosk --kiosk=${url}`;
   browser = sh(cmd, {
     async: true,
     silent: true,
