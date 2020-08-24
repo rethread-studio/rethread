@@ -100,7 +100,7 @@ async function callStation(station, func, args, expectReturn = true) {
       timeoutId = setTimeout(() => {
         reject("Timeout getting answer");
         stations[station].ws.off("message", cb);
-      }, 5000gg);
+      }, 5000);
     } else {
       return resolve();
     }
