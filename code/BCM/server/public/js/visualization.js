@@ -7,6 +7,8 @@ let allPackets = [];
 const statsPerService = new Map();
 const positionPerService = new Map();
 const textPerService = new Map();
+const indexPerService = new Map(); // Give the service a number used as an index to a lane
+let activeService = '';
 
 let visMode = 'particles';
 
@@ -42,13 +44,15 @@ ws.onmessage = (message) => {
 
     for(const service of packet.services) {
       if (!positionPerService.has(service)) {
-        let servicePos = random3DPosition(300);
+        let servicePos = random3DPosition(500);
         createText(service, servicePos);
         positionPerService.set(service, servicePos);
         console.log("new serivce, num: " + positionPerService.size);
+        indexPerService.set(service, indexPerService.size);
       }
       addParticle(positionPerService.get(service));
-      createRectangle();
+      createRectangle(service, indexPerService.get(service));
+      activeService = service;
     }
   }
 };
@@ -66,6 +70,7 @@ function addParticle(vec3) {
   particlePositions[i * 3] = vec3.x;
   particlePositions[i * 3 + 1] = vec3.y;
   particlePositions[i * 3 + 2] = vec3.z;
+  particlesData[i].lifetime = 500;
   particleIndex++;
   if(particleIndex >= maxParticleCount) {
     particleIndex = 0;
@@ -77,18 +82,24 @@ function addParticle(vec3) {
   particles.setDrawRange(0, particleCount);
 }
 
-function createText(text, servicePos) {
-  let geometry = new THREE.TextGeometry( text, {
+let textMaterialDefault = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.1 } );
+let textMaterialActive = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent: true, opacity: 0.5 } );
+
+function createText(service, servicePos) {
+  let geometry = new THREE.TextGeometry( service, {
 		font: font,
 		size: 80,
 		height: 5,
 		curveSegments: 12,
 		bevelEnabled: false,
   } );
-  let material = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.6 } );
-  let textMesh = new THREE.Mesh( geometry, material );
+  
+  let textMesh = new THREE.Mesh( geometry, textMaterialDefault );
   textMesh.position.copy(servicePos);
-  particles_text_meshes.push(textMesh);
+  particlesTextObjects.push({
+    mesh: textMesh,
+    service: service,
+  });
   particles_group.add(textMesh);
 }
 
@@ -96,7 +107,7 @@ var particles_group;
 let particles_rotation = new THREE.Euler();
 let particles_rotation_vel = new THREE.Vector3(0, 0, 0);
 let particles_rotation_counter = 0;
-let particles_text_meshes = [];
+let particlesTextObjects = [];
 var particlesData = [];
 var particles;
 var pointCloud;
@@ -118,22 +129,55 @@ var rHalf = r / 2;
 
 
 var rectangles_group;
-var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
-var rectangleGeometry = new THREE.PlaneBufferGeometry( 20, 80, 4 );
-var rectangleMeshes = [];
-var rectangleLeftEdge = 0; 
+var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.FrontSide} );
+var rectangleMaterialActive = new THREE.MeshBasicMaterial( {color: 0xff0000, side: THREE.FrontSide} );
+// var rectangleGeometry = new THREE.PlaneBufferGeometry( 20, 80, 4 );
+var rectangleGeometry = new THREE.BoxGeometry( 20, 80, 40 );
+var rectangleObjects = [];
+var rectangleLeftEdge = 0;
 
-function createRectangle() {
+
+var mouseMesh;
+var mouse = new THREE.Vector2();
+
+window.addEventListener('mousemove', e => {
+  // Update the mouse variable
+  event.preventDefault();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+  var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+  vector.unproject( camera );
+  var dir = vector.sub( camera.position ).normalize();
+  var distance = - camera.position.z / dir.z;
+  var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+  mouseMesh.position.copy(pos);
+});
+
+
+function createRectangle(service, index) {
   let plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
+  let numLanes = indexPerService.size + 1 ;
   // Convert from screen coordinates to camera coordinates
-  let left = window.innerWidth/2;
-  let top = (Math.random() * 2 - 1) * window.innerHeight;
-  let depth = 0; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
-  plane.position.set( -1 + 2 * left, 1 - 2 * top, depth ).unproject( camera );
-  plane.position.z = 0;
+  let left = 1;
+  let top = (2/numLanes) * (index + 1) - 1;
+  let depth = 0.5; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
+  var vector = new THREE.Vector3(left, top, depth);
+  vector.unproject( camera );
+  var dir = vector.sub( camera.position ).normalize();
+  var distance = - camera.position.z / dir.z;
+  var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+  console.log(pos);
+  // plane.position.set( -1 + 2 * left, 1 - 2 * top, depth ).unproject( camera );
+  // plane.position.z = 0;
+  plane.position.copy(pos);
   rectangleLeftEdge = -plane.position.x;
   rectangles_group.add(plane);
-  rectangleMeshes.push(plane);
+  rectangleObjects.push({
+    mesh: plane,
+    vel: new THREE.Vector3(Math.random() * -10 - 5, 0, Math.random()),
+    service: service,
+  });
 }
 
 var effectController = {
@@ -210,11 +254,11 @@ function init() {
 
   var pMaterial = new THREE.PointsMaterial({
     color: 0xffffff,
-    size: 1,
+    size: 10,
     blending: THREE.AdditiveBlending,
     opacity: 0.7,
     transparent: true,
-    sizeAttenuation: false,
+    sizeAttenuation: true,
   });
 
   particles = new THREE.BufferGeometry();
@@ -236,11 +280,12 @@ function init() {
     // add it to the geometry
     particlesData.push({
       velocity: new THREE.Vector3(
-        -.2 + Math.random() * .4,
-        -.2 + Math.random() * .4,
-        -.2 + Math.random() * .4
+        -.4 + Math.random() * .8,
+        -.4 + Math.random() * .8,
+        -.4 + Math.random() * .8
       ),
       numConnections: 0,
+      lifetime: 0,
     });
   }
 
@@ -287,6 +332,10 @@ function init() {
 
   linesMesh = new THREE.LineSegments(geometry, material);
   particles_group.add(linesMesh);
+
+  var mousegeometry = new THREE.BoxGeometry(20, 20, 20);
+  mouseMesh = new THREE.Mesh(mousegeometry, rectangleMaterial);
+  scene.add(mouseMesh);
 
 
   //
@@ -335,7 +384,7 @@ function animate() {
     var colorpos = 0;
     var numConnected = 0;
 
-    for (var i = 0; i < particleCount; i++) particlesData[i].numConnections = 0;
+    // for (var i = 0; i < particleCount; i++) particlesData[i].numConnections = 0;
 
     for (var i = 0; i < particleCount; i++) {
       // get the particle
@@ -344,6 +393,12 @@ function animate() {
       particlePositions[i * 3] += particleData.velocity.x;
       particlePositions[i * 3 + 1] += particleData.velocity.y;
       particlePositions[i * 3 + 2] += particleData.velocity.z;
+
+      if(particleData.lifetime <= 0) {
+        particlePositions[i * 3 + 2] = 2000000; // Hide particle if it's dead
+      } else {
+        particleData.lifetime--;
+      }
     }
 
     if(Math.random() > effectController.linesStayingProbability) {
@@ -379,18 +434,33 @@ function animate() {
     pointCloud.geometry.attributes.position.needsUpdate = true;
 
     // Update rectangles
-    for(let rect of rectangleMeshes) {
-      rect.position.x -= 10;
-      if(rect.position.x < rectangleLeftEdge) {
+    for(let rect of rectangleObjects) {
+      rect.mesh.position.x += rect.vel.x;
+      rect.mesh.position.z += rect.vel.z;
+      if(activeService == rect.service) {
+        rect.mesh.material = rectangleMaterialActive;
+      } else {
+        rect.mesh.material = rectangleMaterial;
+      }
+      if(rect.mesh.position.x < rectangleLeftEdge) {
         // Outside of view, remove it
-        rectangles_group.remove(rect);
+        rectangles_group.remove(rect.mesh);
       }
       // rect.position.y -= 1;
       // rect.position.z -= 10;
     }
 
-    // Remove rectangles from rectangleMeshes
-    rectangleMeshes = rectangleMeshes.filter(rect => rect.position.x > rectangleLeftEdge);
+    // Remove rectangles from rectangleObjects
+    rectangleObjects = rectangleObjects.filter(rect => rect.mesh.position.x > rectangleLeftEdge);
+
+    // Updateing texts
+    for(let text of particlesTextObjects) {
+      if(text.service == activeService) {
+        text.mesh.material = textMaterialActive;
+      } else {
+        text.mesh.material = textMaterialDefault;
+      }
+    }
 
     requestAnimationFrame(animate);
 
@@ -404,11 +474,11 @@ function render() {
 
   // TODO: Cancel out the rotation effect on the text
   let textRotation = particles_rotation.clone();
-  textRotation.x *= -1;
-  textRotation.y *= -1;
-  textRotation.z *= -1;
-  for(let tm of particles_text_meshes) {
-    tm.rotation.copy(textRotation);
+  // textRotation.x *= -1;
+  // textRotation.y *= -1;
+  // textRotation.z *= -1;
+  for(let tm of particlesTextObjects) {
+    tm.mesh.rotation.copy(textRotation);
   }
   particles_group.rotation.copy(particles_rotation);
   renderer.render(scene, camera);
