@@ -2,6 +2,11 @@ import * as THREE from "https://unpkg.com/three@0.119.1/build/three.module.js";
 import Stats from "https://unpkg.com/three@0.119.1/examples/jsm/libs/stats.module.js";
 import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
 import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
+import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/RenderPass.js';
+import { GlitchPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/GlitchPass.js';
+import { ShaderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 let allPackets = [];
 const statsPerService = new Map();
@@ -117,6 +122,7 @@ var linesMesh;
 var container, stats;
 
 var camera, scene, renderer;
+var composer;
 var positions, colors;
 
 let randomParticle = 0; // Used for drawing lines, this is the starting particle
@@ -338,13 +344,26 @@ function init() {
   scene.add(mouseMesh);
 
 
-  //
+  // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
   container.appendChild(renderer.domElement);
+
+  // COMPOSER
+  composer = new EffectComposer( renderer );
+
+  // RENDER PASSES
+  var renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  var pass1 = new GlitchPass();
+  composer.addPass(pass1);
+
+  var bloomPass = new UnrealBloomPass();
+  composer.addPass(bloomPass);
 
   //
   stats = new Stats();
@@ -481,5 +500,6 @@ function render() {
     tm.mesh.rotation.copy(textRotation);
   }
   particles_group.rotation.copy(particles_rotation);
-  renderer.render(scene, camera);
+  // renderer.render(scene, camera);
+  composer.render();
 }
