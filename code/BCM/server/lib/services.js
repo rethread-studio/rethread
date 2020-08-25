@@ -35,6 +35,10 @@ module.exports = function (packet) {
     if (ipInRange(packet, '13.64-107.0-255.0-255') || ipInRange(packet, '40.74-125.0-127.0-255')  || ipInRange(packet, '52.96-115.0-255.0-255')) {
         output.add('Microsoft')
     }
+    
+    if (hostContains(packet, 'instagram')) {
+        output.add('Instagram')
+    }
     if (hostContains(packet, 'apple')) {
         output.add('Apple')
     }
@@ -55,6 +59,9 @@ module.exports = function (packet) {
     }
     if (hostContains(packet, 'wordpress')) {
         output.add('Wordpress')
+    }
+    if (hostContains(packet, 'kth')) {
+        output.add('KTH')
     }
     if (hostContains(packet, 'aws') || hostContains(packet, 'amazon')) {
         output.add('Amazon')
