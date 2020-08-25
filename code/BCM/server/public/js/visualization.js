@@ -87,8 +87,8 @@ function addParticle(vec3) {
   particles.setDrawRange(0, particleCount);
 }
 
-let textMaterialDefault = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.1 } );
-let textMaterialActive = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent: true, opacity: 0.5 } );
+let textMaterialDefault = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.7 } );
+let textMaterialActive = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent: true, opacity: 0.9 } );
 
 function createText(service, servicePos) {
   let geometry = new THREE.TextGeometry( service, {
@@ -96,7 +96,10 @@ function createText(service, servicePos) {
 		size: 80,
 		height: 5,
 		curveSegments: 12,
-		bevelEnabled: false,
+    bevelEnabled: true,
+    bevelSize: 0.1,
+    bevelOffset: 0.1,
+    bevelSegments: 1,
   } );
   
   let textMesh = new THREE.Mesh( geometry, textMaterialDefault );
@@ -123,6 +126,7 @@ var container, stats;
 
 var camera, scene, renderer;
 var composer;
+var bloomPass, renderPass, pass1;
 var positions, colors;
 
 let randomParticle = 0; // Used for drawing lines, this is the starting particle
@@ -194,6 +198,9 @@ var effectController = {
   numConnections: 3,
   linesStayingProbability: 0.6,
   particleCount: 0,
+  bloomPassThreshold: 0.1,
+  bloomPassStrength: 0.7,
+  bloomPassRadius: 0.1,
 };
 
 init();
@@ -212,6 +219,9 @@ function initGUI() {
   gui.add(effectController, "limitConnections");
   gui.add(effectController, "numConnections", 0, 20, 1);
   gui.add(effectController, "linesStayingProbability", 0.1, 0.99, 0.001);
+  gui.add(effectController, "bloomPassThreshold", 0.0, 2.0, 0.001);
+  gui.add(effectController, "bloomPassStrength", 0.0, 2.0, 0.001);
+  gui.add(effectController, "bloomPassRadius", 0.0, 2.0, 0.001);
   gui
     .add(effectController, "particleCount", 0, maxParticleCount, 1)
     .onChange(function (value) {
@@ -356,13 +366,16 @@ function init() {
   composer = new EffectComposer( renderer );
 
   // RENDER PASSES
-  var renderPass = new RenderPass(scene, camera);
+  renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
-  var pass1 = new GlitchPass();
+  pass1 = new GlitchPass();
   composer.addPass(pass1);
 
-  var bloomPass = new UnrealBloomPass();
+  bloomPass = new UnrealBloomPass();
+  // bloomPass.strength = 1.5;
+  // bloomPass.threshold = 1.0;
+  // bloomPass.radius = 1.1;
   composer.addPass(bloomPass);
 
   //
@@ -480,6 +493,11 @@ function animate() {
         text.mesh.material = textMaterialDefault;
       }
     }
+
+    // Update effects parameters
+    bloomPass.threshold = effectController.bloomPassThreshold;
+    bloomPass.strength = effectController.bloomPassStrength;
+    bloomPass.radius = effectController.bloomPassRadius;
 
     requestAnimationFrame(animate);
 
