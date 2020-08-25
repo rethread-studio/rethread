@@ -46,11 +46,12 @@ module.exports.send = (data) => {
   const args = [];
 
   for (let i of oscValueOrder) {
-    const type = typeof data[i] == "number" ? "i" : "s";
-    args.push({
-      type,
-      value: data[i],
-    });
+    let value = data[i];
+    if (i.indexOf("_location") > -1) {
+      value = value.country;
+    }
+    const type = typeof value == "number" ? "i" : "s";
+    args.push({ type, value });
   }
 
   if (!udpPort) {
