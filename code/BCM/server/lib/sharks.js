@@ -53,8 +53,7 @@ module.exports = function (networkInterface, kill, broadcast) {
     const cmd =
       "tshark -V -N dnN -l -T ek -i " +
       networkInterface +
-      " -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e dns.qry.name -e frame.len -e http.host -e http.response -e frame.protocols -e eth.dst -e eth.src";
-
+      " -e frame.time_epoch -e frame.time -e _ws.col.AbsTime -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e dns.qry.name -e frame.len -e http.host -e http.response -e frame.protocols -e eth.dst -e eth.src -e _ws.col.Info -e eth.dst.oui_resolved -e eth.src.oui_resolved  -e http.request.full_uri -e tcp.port";
     try {
       const child = sh.exec(cmd, {
         async: true,
@@ -93,6 +92,7 @@ module.exports = function (networkInterface, kill, broadcast) {
         .on("data", (d) => {
           try {
             const json = d.layers;
+
             if (json && json.ip_src) {
               const data = {};
               if (isIn(localIp, json)) {
@@ -103,6 +103,15 @@ module.exports = function (networkInterface, kill, broadcast) {
                 data.local_mac = json.eth_dst[0];
                 data.remote_mac = json.eth_src[0];
                 data.out = false;
+
+                if (json.eth_src_oui_resolved) {
+                  data.vender = json.eth_src_oui_resolved[0];
+                }
+
+                if (json.tcp_port) {
+                  data.local_port = parseInt(json.tcp_port[1]);
+                  data.remote_port = parseInt(json.tcp_port[0]);
+                }
               } else {
                 data.local_ip = json.ip_src[0];
                 data.remote_ip = json.ip_dst[0];
@@ -111,16 +120,33 @@ module.exports = function (networkInterface, kill, broadcast) {
                 data.local_mac = json.eth_src[0];
                 data.remote_mac = json.eth_dst[0];
                 data.out = true;
+
+                if (json.eth_dst_oui_resolved) {
+                  data.vender = json.eth_dst_oui_resolved[0];
+                }
+
+                if (json.tcp_port) {
+                  data.local_port = parseInt(json.tcp_port[0]);
+                  data.remote_port = parseInt(json.tcp_port[1]);
+                }
               }
-              data.timestamp = parseInt(d.timestamp);
+              data.timestamp = parseFloat(json.frame_time_epoch[0]) * 1000;
               data.len = parseInt(json.frame_len[0]);
               if (json.dns_qry_name) {
                 data.dns_query = json.dns_qry_name[0];
               }
-              if ("eth:ethertype:ip:icmp:data" == json.frame_protocols[0]) {
-                // ignore ping
-                return;
+              if (json._ws_col_Info) {
+                data.info = json._ws_col_Info[0];
+                if (data.info.indexOf("(ping)") > 0) {
+                  // ignore ping
+                  return;
+                }
               }
+
+              if (json.http_request_full_uri) {
+                data.url = json.http_request_full_uri;
+              }
+
               const protocols = json.frame_protocols[0].split(":");
               data.protocol = protocols[protocols.length - 1];
 
