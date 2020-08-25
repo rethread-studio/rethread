@@ -205,6 +205,7 @@ var effectController = {
   bloomPassThreshold: 0.1,
   bloomPassStrength: 0.7,
   bloomPassRadius: 0.1,
+  doRotation: false,
 };
 
 init();
@@ -219,6 +220,7 @@ function initGUI() {
   gui.add(effectController, "showLines").onChange(function (value) {
     linesMesh.visible = value;
   });
+  gui.add(effectController, "doRotation");
   gui.add(effectController, "minDistance", 10, 300);
   gui.add(effectController, "limitConnections");
   gui.add(effectController, "numConnections", 0, 20, 1);
@@ -400,7 +402,7 @@ function animate() {
   let time = Date.now() * 0.001;
   if(visMode === 'particles') {
 
-    if(Math.random() > 0.99) {
+    if(Math.random() > 0.99 && effectController.doRotation) {
       particles_rotation_counter = 8;
       const scale = 0.1;
       // TODO: Do a random direction with radius instead
