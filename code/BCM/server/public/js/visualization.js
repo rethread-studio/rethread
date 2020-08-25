@@ -13,9 +13,11 @@ const statsPerService = new Map();
 const positionPerService = new Map();
 const textPerService = new Map();
 const indexPerService = new Map(); // Give the service a number used as an index to a lane
+const lastRegisteredPerService = new Map();
 let activeService = '';
 
 let visMode = 'particles';
+let showText = true;
 
 
 // Load font
@@ -57,6 +59,8 @@ ws.onmessage = (message) => {
       }
       addParticle(positionPerService.get(service));
       createRectangle(service, indexPerService.get(service));
+      let time = Date.now() * 0.001;
+      lastRegisteredPerService.set(service, time);
       activeService = service;
     }
   }
@@ -93,8 +97,8 @@ let textMaterialActive = new THREE.MeshBasicMaterial( { color: 0xff0000, transpa
 function createText(service, servicePos) {
   let geometry = new THREE.TextGeometry( service, {
 		font: font,
-		size: 80,
-		height: 5,
+		size: 50,
+    height: 0.01,
 		curveSegments: 12,
     bevelEnabled: true,
     bevelSize: 0.1,
@@ -393,6 +397,7 @@ function onWindowResize() {
 }
 
 function animate() {
+  let time = Date.now() * 0.001;
   if(visMode === 'particles') {
 
     if(Math.random() > 0.99) {
@@ -485,12 +490,28 @@ function animate() {
     // Remove rectangles from rectangleObjects
     rectangleObjects = rectangleObjects.filter(rect => rect.mesh.position.x > rectangleLeftEdge);
 
+    // if(Math.random() > 0.995) {
+    //   showText = !showText;
+    // }
+
     // Updateing texts
     for(let text of particlesTextObjects) {
       if(text.service == activeService) {
         text.mesh.material = textMaterialActive;
       } else {
         text.mesh.material = textMaterialDefault;
+      }
+      if(time - lastRegisteredPerService.get(text.service) < 0.2) {
+        text.mesh.visible = true;
+      } else {
+        text.mesh.visible = false;
+      }
+      if(showText) {
+        textMaterialDefault.opacity = 0.6;
+        textMaterialActive.opacity = 0.7;
+      } else {
+        textMaterialDefault.opacity = 0.0;
+        textMaterialActive.opacity = 0.0;
       }
     }
 
