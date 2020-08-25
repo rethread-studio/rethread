@@ -48,13 +48,16 @@ ws.onmessage = (message) => {
     allPackets.push({
       location: packet.location,
     })
+    if(packet.services.length === 0) {
+      packet.services.push(packet.remote_ip)
+      console.log("added service " + packet.remote_ip)
+    }
 
     for(const service of packet.services) {
       if (!positionPerService.has(service)) {
         let servicePos = random3DPosition(500);
         createText(service, servicePos);
         positionPerService.set(service, servicePos);
-        console.log("new serivce, num: " + positionPerService.size);
         indexPerService.set(service, indexPerService.size);
       }
       addParticle(positionPerService.get(service));
@@ -181,7 +184,6 @@ function createRectangle(service, index) {
   var dir = vector.sub( camera.position ).normalize();
   var distance = - camera.position.z / dir.z;
   var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-  console.log(pos);
   // plane.position.set( -1 + 2 * left, 1 - 2 * top, depth ).unproject( camera );
   // plane.position.z = 0;
   plane.position.copy(pos);
