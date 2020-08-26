@@ -70,7 +70,7 @@ const arpGetUsers = async (interface) => {
 
 module.exports.connectedUsers = async (interface) => {
   if (module.exports.isHotspot()) {
-    const clients = listwificlients(interface);
+    const clients = await listwificlients(interface);
     const devices = await arp({
       interface,
     });
