@@ -40,35 +40,19 @@ angular
     $locationProvider.html5Mode(true);
   })
   .controller("visualizationController", function ($rootScope, $location) {
-    $("#visualization").show();
+    $(".currentVisualization").show();
+    $("#welcomeBg").hide();
   })
   .controller("instructionController", function ($scope, $location) {
-    $("#visualization").show();
+    $(".currentVisualization").show();
+    $("#welcomeBg").hide();
     setTimeout(() => {
       //$location.url("/visualization");
     }, 5000);
   })
   .controller("homeController", function ($scope) {
-    $("#visualization").hide();
-    const bg = document.getElementById("glishBackground");
-    const count = 30;
-    for (let index = 0; index < count; index++) {
-      const element = document.createElement("div");
-      element.className = "glishBox";
-      bg.appendChild(element);
-    }
-    setInterval(() => {
-      const glishBoxes = document.getElementsByClassName("glishBox");
-      for (let index = 0; index < glishBoxes.length; index++) {
-        const element = glishBoxes[index];
-        element.style.left = Math.floor(Math.random() * 100) + "vw";
-        element.style.top = Math.floor(Math.random() * 100) + "vh";
-
-        element.style.width = Math.floor(Math.random() * 75) + "px";
-        element.style.height = Math.floor(Math.random() * 30) + "px";
-        element.style.opacity = Math.random() * 0.7;
-      }
-    }, 150);
+    $(".visualization").hide();
+    $("#welcomeBg").show();
   })
   .controller("mainController", function (
     $scope,
@@ -77,7 +61,30 @@ angular
     $location
   ) {
     $scope.wifi = "BCM - SoundProxy";
-    $scope.instruction = "Go to Google.com";
+    $scope.instruction = "";
+
+    const visualizations = [
+      "visualization1",
+      "visualization2",
+      "visualization3",
+    ];
+    let currentVisualization = 1;
+    $("#" + visualizations[currentVisualization]).addClass(
+      "currentVisualization"
+    );
+    setInterval(() => {
+      currentVisualization++;
+      if (currentVisualization == visualizations.length) {
+        currentVisualization = 0;
+      }
+      $(".visualization").hide().removeClass("currentVisualization");
+      $("#" + visualizations[currentVisualization]).addClass(
+        "currentVisualization"
+      );
+      if ($location.url() != "/") {
+        $("#" + visualizations[currentVisualization]).show();
+      }
+    }, 10000);
 
     ws.onmessage = (message) => {
       const json = JSON.parse(message.data);

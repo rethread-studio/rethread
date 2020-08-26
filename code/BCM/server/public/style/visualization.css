@@ -20,3 +20,31 @@ body {
   width: 100%;
   height: 100%;
 }
+
+.glishBox.Amazon {
+  background-color: orange;
+}
+
+.glishBox.Google {
+  background-color: Blue;
+}
+
+.glishBox.Youtube {
+  background-color: red;
+}
+
+.glishBox.Gmail {
+  background-color: rgb(155, 40, 40);
+}
+
+.glishBox.Github {
+  background-color: Blue;
+}
+
+.glishBox.Twitter {
+  background-color: lightblue;
+}
+
+.glishBox.Whatsapp {
+  background-color: green;
+}
