@@ -91,10 +91,6 @@ module.exports.connectedUsers = async (interface) => {
   }
 };
 
-module.exports.c = async (interface) => {
-  return (await module.exports.connectedUsers(interface)).length > 0;
-};
-
 module.exports.disconnect = async (client_mac) => {
   sh.exec(`sudo hostapd_cli deauthenticate ${client_mac}`, { silent: true });
   sh.exec(`sudo hostapd_cli disassociate ${client_mac}`, { silent: true });
