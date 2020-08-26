@@ -50,7 +50,6 @@ ws.onmessage = (message) => {
     })
     if(packet.services.length === 0) {
       packet.services.push(packet.remote_ip)
-      console.log("added service " + packet.remote_ip)
     }
 
     for(const service of packet.services) {
@@ -61,7 +60,6 @@ ws.onmessage = (message) => {
         indexPerService.set(service, indexPerService.size);
       }
       addParticle(positionPerService.get(service));
-      createRectangle(service, indexPerService.get(service));
       let time = Date.now() * 0.001;
       lastRegisteredPerService.set(service, time);
       activeService = service;
@@ -145,57 +143,6 @@ var r = 800;
 var rHalf = r / 2;
 
 
-var rectangles_group;
-var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.FrontSide} );
-var rectangleMaterialActive = new THREE.MeshBasicMaterial( {color: 0xff0000, side: THREE.FrontSide} );
-// var rectangleGeometry = new THREE.PlaneBufferGeometry( 20, 80, 4 );
-var rectangleGeometry = new THREE.BoxGeometry( 20, 80, 40 );
-var rectangleObjects = [];
-var rectangleLeftEdge = 0;
-
-
-var mouseMesh;
-var mouse = new THREE.Vector2();
-
-window.addEventListener('mousemove', e => {
-  // Update the mouse variable
-  event.preventDefault();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
-  var vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
-  vector.unproject( camera );
-  var dir = vector.sub( camera.position ).normalize();
-  var distance = - camera.position.z / dir.z;
-  var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-  mouseMesh.position.copy(pos);
-});
-
-
-function createRectangle(service, index) {
-  let plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
-  let numLanes = indexPerService.size + 1 ;
-  // Convert from screen coordinates to camera coordinates
-  let left = 1;
-  let top = (2/numLanes) * (index + 1) - 1;
-  let depth = 0.5; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
-  var vector = new THREE.Vector3(left, top, depth);
-  vector.unproject( camera );
-  var dir = vector.sub( camera.position ).normalize();
-  var distance = - camera.position.z / dir.z;
-  var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-  // plane.position.set( -1 + 2 * left, 1 - 2 * top, depth ).unproject( camera );
-  // plane.position.z = 0;
-  plane.position.copy(pos);
-  rectangleLeftEdge = -plane.position.x;
-  rectangles_group.add(plane);
-  rectangleObjects.push({
-    mesh: plane,
-    vel: new THREE.Vector3(Math.random() * -10 - 5, 0, Math.random()),
-    service: service,
-  });
-}
-
 var effectController = {
   showDots: true,
   showLines: true,
@@ -260,9 +207,6 @@ function init() {
   particles_group = new THREE.Group();
   scene.add(particles_group);
 
-  rectangles_group = new THREE.Group();
-  scene.add(rectangles_group);
-
   // var helper = new THREE.BoxHelper(
   //   new THREE.Mesh(new THREE.BoxBufferGeometry(r, r, r))
   // );
@@ -302,11 +246,12 @@ function init() {
     particlePositions[i * 3 + 2] = 0;
 
     // add it to the geometry
+    let scale = 60.0;
     particlesData.push({
       velocity: new THREE.Vector3(
-        -.4 + Math.random() * .8,
-        -.4 + Math.random() * .8,
-        -.4 + Math.random() * .8
+        (-.4 + Math.random() * .8) * scale,
+        (-.4 + Math.random() * .8) * scale,
+        (-.4 + Math.random() * .8) * scale
       ),
       numConnections: 0,
       lifetime: 0,
@@ -357,11 +302,6 @@ function init() {
   linesMesh = new THREE.LineSegments(geometry, material);
   particles_group.add(linesMesh);
 
-  var mousegeometry = new THREE.BoxGeometry(20, 20, 20);
-  mouseMesh = new THREE.Mesh(mousegeometry, rectangleMaterial);
-  scene.add(mouseMesh);
-
-
   // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -400,140 +340,122 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+var lastUpdate = 0;
+
 function animate() {
-  let time = Date.now() * 0.001;
-  if(visMode === 'particles') {
+  let now = Date.now() * 0.001;
+  let dt = now - lastUpdate;
 
-    if(Math.random() > 0.99 && effectController.doRotation) {
-      particles_rotation_counter = 8;
-      const scale = 0.1;
-      // TODO: Do a random direction with radius instead
-      particles_rotation_vel.set(Math.random()* scale, Math.random() * scale, Math.random() * scale);
-    }
-
-    // Update rotation
-    if(particles_rotation_counter > 0) {
-      particles_rotation.x += particles_rotation_vel.x;
-      particles_rotation.y += particles_rotation_vel.y;
-      particles_rotation.z += particles_rotation_vel.z;
-      particles_rotation_counter -= 1;
-    }
-    
-
-    // Update particles
-    var vertexpos = 0;
-    var colorpos = 0;
-    var numConnected = 0;
-
-    // for (var i = 0; i < particleCount; i++) particlesData[i].numConnections = 0;
-
-    for (var i = 0; i < particleCount; i++) {
-      // get the particle
-      var particleData = particlesData[i];
-
-      particlePositions[i * 3] += particleData.velocity.x;
-      particlePositions[i * 3 + 1] += particleData.velocity.y;
-      particlePositions[i * 3 + 2] += particleData.velocity.z;
-
-      if(particleData.lifetime <= 0) {
-        particlePositions[i * 3 + 2] = 2000000; // Hide particle if it's dead
-      } else {
-        particleData.lifetime--;
-      }
-    }
-
-    if(Math.random() > effectController.linesStayingProbability) {
-      randomParticle = Math.floor(Math.random() * particleCount);
-    }
-    
-    let alpha = 0.2;
-
-    let particleIndex = randomParticle;
-
-    for(let i = 0; i < effectController.numConnections; i++) {
-      let particle1 = particleIndex;
-      let particle2 = (particleIndex+1) % particleCount;
-      positions[vertexpos++] = particlePositions[particle1 * 3];
-      positions[vertexpos++] = particlePositions[particle1 * 3 + 1];
-      positions[vertexpos++] = particlePositions[particle1 * 3 + 2];
-      positions[vertexpos++] = particlePositions[particle2 * 3];
-      positions[vertexpos++] = particlePositions[particle2 * 3 + 1];
-      positions[vertexpos++] = particlePositions[particle2 * 3 + 2];
-      colors[colorpos++] = alpha;
-      colors[colorpos++] = alpha;
-      colors[colorpos++] = alpha;
-      colors[colorpos++] = alpha;
-      colors[colorpos++] = alpha;
-      colors[colorpos++] = alpha;
-      particleIndex = particle2;
-    }
-
-    linesMesh.geometry.setDrawRange(0, effectController.numConnections * 2);
-    linesMesh.geometry.attributes.position.needsUpdate = true;
-    linesMesh.geometry.attributes.color.needsUpdate = true;
-
-    pointCloud.geometry.attributes.position.needsUpdate = true;
-
-    // Update rectangles
-    for(let rect of rectangleObjects) {
-      rect.mesh.position.x += rect.vel.x;
-      rect.mesh.position.z += rect.vel.z;
-      if(activeService == rect.service) {
-        rect.mesh.material = rectangleMaterialActive;
-      } else {
-        rect.mesh.material = rectangleMaterial;
-      }
-      if(rect.mesh.position.x < rectangleLeftEdge) {
-        // Outside of view, remove it
-        rectangles_group.remove(rect.mesh);
-      }
-      // rect.position.y -= 1;
-      // rect.position.z -= 10;
-    }
-
-    // Remove rectangles from rectangleObjects
-    rectangleObjects = rectangleObjects.filter(rect => rect.mesh.position.x > rectangleLeftEdge);
-
-    // if(Math.random() > 0.995) {
-    //   showText = !showText;
-    // }
-
-    // Updateing texts
-    for(let text of particlesTextObjects) {
-      if(text.service == activeService) {
-        text.mesh.material = textMaterialActive;
-      } else {
-        text.mesh.material = textMaterialDefault;
-      }
-      if(time - lastRegisteredPerService.get(text.service) < 0.2) {
-        text.mesh.visible = true;
-      } else {
-        text.mesh.visible = false;
-      }
-      if(showText) {
-        textMaterialDefault.opacity = 0.6;
-        textMaterialActive.opacity = 0.7;
-      } else {
-        textMaterialDefault.opacity = 0.0;
-        textMaterialActive.opacity = 0.0;
-      }
-    }
-
-    // Update effects parameters
-    bloomPass.threshold = effectController.bloomPassThreshold;
-    bloomPass.strength = effectController.bloomPassStrength;
-    bloomPass.radius = effectController.bloomPassRadius;
-
-    requestAnimationFrame(animate);
-
-    stats.update();
-    render();
+  if(Math.random() > 0.99 && effectController.doRotation) {
+    particles_rotation_counter = 0.5;
+    const scale = 6.0;
+    // TODO: Do a random direction with radius instead
+    particles_rotation_vel.set(Math.random()* scale, Math.random() * scale, Math.random() * scale);
   }
+
+  // Update rotation
+  if(particles_rotation_counter > 0) {
+    particles_rotation.x += particles_rotation_vel.x * dt;
+    particles_rotation.y += particles_rotation_vel.y * dt;
+    particles_rotation.z += particles_rotation_vel.z * dt;
+    particles_rotation_counter -= dt;
+  }
+  
+
+  // Update particles
+  var vertexpos = 0;
+  var colorpos = 0;
+  var numConnected = 0;
+
+  // for (var i = 0; i < particleCount; i++) particlesData[i].numConnections = 0;
+
+  for (var i = 0; i < particleCount; i++) {
+    // get the particle
+    var particleData = particlesData[i];
+
+    particlePositions[i * 3] += particleData.velocity.x * dt;
+    particlePositions[i * 3 + 1] += particleData.velocity.y * dt;
+    particlePositions[i * 3 + 2] += particleData.velocity.z * dt;
+
+    if(particleData.lifetime <= 0) {
+      particlePositions[i * 3 + 2] = 2000000; // Hide particle if it's dead
+    } else {
+      particleData.lifetime--;
+    }
+  }
+
+  if(Math.random() > effectController.linesStayingProbability) {
+    randomParticle = Math.floor(Math.random() * particleCount);
+  }
+  
+  let alpha = 0.2;
+
+  let particleIndex = randomParticle;
+
+  for(let i = 0; i < effectController.numConnections; i++) {
+    let particle1 = particleIndex;
+    let particle2 = (particleIndex+1) % particleCount;
+    positions[vertexpos++] = particlePositions[particle1 * 3];
+    positions[vertexpos++] = particlePositions[particle1 * 3 + 1];
+    positions[vertexpos++] = particlePositions[particle1 * 3 + 2];
+    positions[vertexpos++] = particlePositions[particle2 * 3];
+    positions[vertexpos++] = particlePositions[particle2 * 3 + 1];
+    positions[vertexpos++] = particlePositions[particle2 * 3 + 2];
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    colors[colorpos++] = alpha;
+    particleIndex = particle2;
+  }
+
+  linesMesh.geometry.setDrawRange(0, effectController.numConnections * 2);
+  linesMesh.geometry.attributes.position.needsUpdate = true;
+  linesMesh.geometry.attributes.color.needsUpdate = true;
+
+  pointCloud.geometry.attributes.position.needsUpdate = true;
+
+
+  // if(Math.random() > 0.995) {
+  //   showText = !showText;
+  // }
+
+  // Updateing texts
+  for(let text of particlesTextObjects) {
+    if(text.service == activeService) {
+      text.mesh.material = textMaterialActive;
+    } else {
+      text.mesh.material = textMaterialDefault;
+    }
+    if(now - lastRegisteredPerService.get(text.service) < 0.2) {
+      text.mesh.visible = true;
+    } else {
+      text.mesh.visible = false;
+    }
+    if(showText) {
+      textMaterialDefault.opacity = 0.6;
+      textMaterialActive.opacity = 0.7;
+    } else {
+      textMaterialDefault.opacity = 0.0;
+      textMaterialActive.opacity = 0.0;
+    }
+  }
+
+  // Update effects parameters
+  bloomPass.threshold = effectController.bloomPassThreshold;
+  bloomPass.strength = effectController.bloomPassStrength;
+  bloomPass.radius = effectController.bloomPassRadius;
+
+  requestAnimationFrame(animate);
+
+  stats.update();
+  render();
+  
+  lastUpdate = now;
 }
 
 function render() {
-  var time = Date.now() * 0.001;
-
   // TODO: Cancel out the rotation effect on the text
   let textRotation = particles_rotation.clone();
   // textRotation.x *= -1;
