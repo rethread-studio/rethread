@@ -25,7 +25,7 @@ if (document.location.port) {
 }
 const ws = new WebSocket(protocol + "://" + host);
 
-ws.onmessage = (message) => {
+ws.onmessage = async (message) => {
   const json = JSON.parse(message.data);
   if (json.event == "networkActivity") {
     const packet = json.data;
@@ -38,18 +38,46 @@ ws.onmessage = (message) => {
         country.scale.x += 0.01;
         country.scale.y += 0.01;
         country.scale.z += 0.01;
+        setTimeout(() => {
+          country.scale.x -= 0.01;
+          country.scale.y -= 0.01;
+          country.scale.z -= 0.01;
+        }, 2500);
         country.material.opacity = 1;
+        country.material.color.setHex(0xffffff);
+        await pulseCountry(country);
         break;
       }
     }
   }
 };
 
+async function wait(time) {
+  await new Promise((resolve) => setTimeout(resolve, time));
+}
+async function pulseCountry(country) {
+  if (country.inPuse) {
+    return;
+  }
+  country.inPuse = true;
+  for (let i = 0; i < effectController.nbPulse; i++) {
+    country.scale.x += effectController.pulseIntensity;
+    country.scale.y += effectController.pulseIntensity;
+    country.scale.z += effectController.pulseIntensity;
+    await wait(effectController.pulseInterval);
+    country.scale.x -= effectController.pulseIntensity;
+    country.scale.y -= effectController.pulseIntensity;
+    country.scale.z -= effectController.pulseIntensity;
+    await wait(effectController.pulseInterval);
+  }
+  country.inPuse = false;
+}
+
 var effectController = {
-  bloomPassThreshold: 0.0,
-  bloomPassStrength: 0.38,
-  bloomPassRadius: 0.15,
-  doRotation: false,
+  nbPulse: 4,
+  pulseIntensity: 1.5,
+  pulseInterval: 30,
+  wireframe: false,
 };
 
 let container, stats, composer, camera, scene, controls, countries;
@@ -60,9 +88,10 @@ animate();
 function initGUI() {
   var gui = new GUI();
 
-  gui.add(effectController, "bloomPassThreshold", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassStrength", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassRadius", 0.0, 2.0, 0.001);
+  gui.add(effectController, "nbPulse", 0, 10, 1);
+  gui.add(effectController, "pulseIntensity", 0.0, 20, 0.5);
+  gui.add(effectController, "pulseInterval", 10, 250, 1);
+  gui.add(effectController, "wireframe");
 }
 
 function init() {
@@ -85,7 +114,7 @@ function init() {
       const intersects = raycaster.intersectObjects(countries, false);
       if (intersects.length > 0) {
         const touchedCountry = intersects[0].object;
-        console.log(touchedCountry.geometry.name)
+        console.log(touchedCountry.geometry.name);
       }
     },
     false
@@ -133,6 +162,15 @@ function init() {
   const countryLayers = generateCountries();
   scene.add(countryLayers);
 
+  var geometry = new THREE.SphereGeometry(18, 32, 32);
+  var material = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    transparent: true,
+    opacity: 0.8,
+  });
+  var sphere = new THREE.Mesh(geometry, material);
+  scene.add(sphere);
+
   countries = countryLayers.countries;
 
   scene.fog = new THREE.Fog(0xfafafa, 40, 2000);
@@ -161,6 +199,7 @@ function animate() {
   // }
 
   for (let country of countries) {
+    country.material.wireframe = effectController.wireframe;
   }
 
   requestAnimationFrame(animate);
@@ -184,13 +223,12 @@ function generateCountries() {
     const country = countryShapes[name];
     const geometry = new Map3DGeometry(country, 0.95);
     geometry.name = name;
-    const colour = 0xffffff;
 
     const material = new THREE.MeshPhongMaterial({
-      wireframe: false,
-      color: colour,
+      wireframe: true,
+      color: 0x111111,
       transparent: true,
-      opacity: 0.2,
+      opacity: 0.7,
       shading: THREE.SmoothShading,
     });
     const scale = 20;
