@@ -47,7 +47,7 @@ angular
     $(".currentVisualization").show();
     $("#welcomeBg").hide();
     setTimeout(() => {
-      //$location.url("/visualization");
+      $location.url("/visualization");
     }, 5000);
   })
   .controller("homeController", function ($scope) {
