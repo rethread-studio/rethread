@@ -81,6 +81,7 @@ module.exports.connectedUsers = async (interface) => {
           device.signal = client.signal;
           device.signalMin = client.signalMin;
           device.signalMax = client.signalMax;
+          output.push(device);
         }
       }
     }
