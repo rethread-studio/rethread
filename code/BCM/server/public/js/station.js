@@ -61,7 +61,16 @@ angular
     $location
   ) {
     $scope.wifi = "BCM - SoundProxy";
+    $scope.password = null;
     $scope.instruction = "";
+
+    function getConfig() {
+      $http.get("/api/wifi/config", (res) => {
+        $scope.wifi = res.data.ssid;
+        $scope.password = res.data.wpa_passphrase;
+      });
+    }
+    getConfig();
 
     const visualizations = [
       "visualization1",
