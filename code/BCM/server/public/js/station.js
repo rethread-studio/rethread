@@ -65,7 +65,7 @@ angular
     $scope.instruction = "";
 
     function getConfig() {
-      $http.get("/api/wifi/config", (res) => {
+      $http.get("/api/wifi/config").then((res) => {
         $scope.wifi = res.data.ssid;
         $scope.password = res.data.wpa_passphrase;
       });
