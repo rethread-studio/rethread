@@ -19,7 +19,6 @@
     "forever-monitor": "^3.0.1",
     "geo-from-ip": "^2.0.0",
     "ip-check-range": "^1.0.2",
-    "listwificlients": "0.0.2",
     "osc": "^2.4.1",
     "ping": "^0.2.3",
     "shelljs": "^0.8.4",

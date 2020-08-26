@@ -1,7 +1,6 @@
 const arp = require("./arp");
 const ping = require("ping");
 const sh = require("shelljs");
-const listwificlients = require("listwificlients").default;
 
 module.exports.isHotspot = () => {
   try {
@@ -12,6 +11,39 @@ module.exports.isHotspot = () => {
   }
 };
 
+const listwificlients = async (interface) => {
+  const output = sh.exec(`iw dev ${interface} station dump`, { silent: true });
+  const clients = [];
+  const lines = output.stdout.split("\n");
+  let currentClient = null;
+  for (let line of lines) {
+    if (line.indexOf("Station ") == 0) {
+      if (currentClient != null) {
+        clients.push(currentClient);
+      }
+      const split = line.split(" ");
+
+      currentClient = {
+        mac: split[1],
+        signal: "",
+      };
+    } else if (line.indexOf(":") > -1) {
+      line = line.trim();
+      const split = line.split(":");
+      let value = split[1].trim().split(" ")[0];
+      if (value == "yes") {
+        value = true;
+      } else if (value == "no") {
+        value = false;
+      }
+      currentClient[split[0].replace(" ", "_")] = value;
+    }
+  }
+  if (currentClient != null) {
+    clients.push(currentClient);
+  }
+  return clients;
+};
 const arpGetUsers = async (interface) => {
   const devices = (
     await arp({
@@ -58,7 +90,7 @@ module.exports.connectedUsers = async (interface) => {
   }
 };
 
-module.exports.isConnected = async (interface) => {
+module.exports.c = async (interface) => {
   return (await module.exports.connectedUsers(interface)).length > 0;
 };
 
