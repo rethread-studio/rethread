@@ -1,6 +1,7 @@
 const arp = require("./arp");
 const ping = require("ping");
 const sh = require("shelljs");
+const fs = require("fs");
 
 module.exports.isHotspot = () => {
   try {
@@ -91,9 +92,21 @@ module.exports.connectedUsers = async (interface) => {
   }
 };
 
-module.exports.c = async (interface) => {
-  return (await module.exports.connectedUsers(interface)).length > 0;
-};
+module.exports.getWifiConfig = () => {
+  const path = "/etc/hostapd/hostapd.conf";
+
+  if (fs.existsSync(path)) {
+    const config = {};
+    const content = fs.readFileSync(path);
+    for (let line of content.toString().split("\n")) {
+      if (line.indexOf("=") > -1) {
+        const split = line.split("=");
+        config[split[0]] = split[1];
+      }
+    }
+    return config;
+  }
+}
 
 module.exports.disconnect = async (client_mac) => {
   sh.exec(`sudo hostapd_cli deauthenticate ${client_mac}`, { silent: true });

@@ -27,6 +27,11 @@ const options = cli.parse({
 
 const app = express();
 app.use(bodyParser.json());
+
+app.get("/api/wifi/config", (req, res) => {
+  res.json(hotspot.getWifiConfig());
+});
+
 app.use("/style", express.static("public/style"));
 app.use("/assets", express.static("public/assets"));
 app.use("/js", express.static("public/js"));
