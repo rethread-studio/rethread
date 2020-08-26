@@ -4,7 +4,7 @@ import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.m
 import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
 import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/RenderPass.js';
-import { GlitchPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/GlitchPass.js';
+import { GlitchPass } from './three/postprocessing/CustomGlitchPass.js';
 import { ShaderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/UnrealBloomPass.js';
 
@@ -15,6 +15,8 @@ const textPerService = new Map();
 const indexPerService = new Map(); // Give the service a number used as an index to a lane
 const lastRegisteredPerService = new Map();
 let activeService = '';
+let packetsOverTime = 0;
+let triggerThisFrame = false;
 
 let visMode = 'particles';
 let showText = true;
@@ -52,17 +54,25 @@ ws.onmessage = (message) => {
       packet.services.push(packet.remote_ip)
     }
 
-    for(const service of packet.services) {
-      if (!positionPerService.has(service)) {
-        let servicePos = random3DPosition(500);
-        createText(service, servicePos);
-        positionPerService.set(service, servicePos);
-        indexPerService.set(service, indexPerService.size);
+    packetsOverTime++;
+    if(packetsOverTime > 100) {
+      if(!triggerThisFrame) {
+        glitchPass.triggerActivation();
+        console.log("trigger");
       }
-      addParticle(positionPerService.get(service));
-      let time = Date.now() * 0.001;
-      lastRegisteredPerService.set(service, time);
-      activeService = service;
+    } else {
+      for(const service of packet.services) {
+        if (!positionPerService.has(service)) {
+          let servicePos = random3DPosition(500);
+          createText(service, servicePos);
+          positionPerService.set(service, servicePos);
+          indexPerService.set(service, indexPerService.size);
+        }
+        addParticle(service, positionPerService.get(service), packet.len);
+        let time = Date.now() * 0.001;
+        lastRegisteredPerService.set(service, time);
+        activeService = service;
+      }
     }
   }
 };
@@ -75,12 +85,20 @@ function random3DPosition(magnitude) {
   )
 }
 
-function addParticle(vec3) {
+function addParticle(service, vec3, packetSize) {
   let i = particleIndex;
   particlePositions[i * 3] = vec3.x;
   particlePositions[i * 3 + 1] = vec3.y;
   particlePositions[i * 3 + 2] = vec3.z;
+  particleAlphas[i] = 0.8;
   particlesData[i].lifetime = 500;
+  let scale = 60.0 * 700/packetSize;
+  particlesData[i].velocity = new THREE.Vector3(
+    (-.4 + Math.random() * .8) * scale,
+    (-.4 + Math.random() * .8) * scale,
+    (-.4 + Math.random() * .8) * scale
+  );
+  particlesData[i].service = service;
   particleIndex++;
   if(particleIndex >= maxParticleCount) {
     particleIndex = 0;
@@ -116,6 +134,7 @@ function createText(service, servicePos) {
   particles_group.add(textMesh);
 }
 
+let activeParticleColor = new THREE.Color(0xff0000);
 var particles_group;
 let particles_rotation = new THREE.Euler();
 let particles_rotation_vel = new THREE.Vector3(0, 0, 0);
@@ -131,12 +150,13 @@ var container, stats;
 
 var camera, scene, renderer;
 var composer;
-var bloomPass, renderPass, pass1;
+var bloomPass, renderPass, glitchPass;
 var positions, colors;
+var particleUniforms, particleAlphas, particleColors, particleSizes;
 
 let randomParticle = 0; // Used for drawing lines, this is the starting particle
 
-var maxParticleCount = 50000;
+var maxParticleCount = 10000;
 var particleCount = 0; // The number of active particles
 var particleIndex = 0; // The index of the next particle (can loop around to recycle old particles)
 var r = 800;
@@ -229,8 +249,36 @@ function init() {
     sizeAttenuation: true,
   });
 
+  particleUniforms = {
+
+    // alpha: {value: 1.0}
+
+  };
+
+  var shaderMaterial = new THREE.ShaderMaterial( {
+
+    uniforms: particleUniforms,
+    vertexShader: document.getElementById( 'vertexshader' ).textContent,
+    fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+
+    blending: THREE.AdditiveBlending,
+    depthTest: false,
+    transparent: true,
+    vertexColors: true
+
+  } );
+
+
   particles = new THREE.BufferGeometry();
   particlePositions = new Float32Array(maxParticleCount * 3);
+  particleColors = new Float32Array(maxParticleCount * 3);
+  particleAlphas = new Float32Array(maxParticleCount);
+  particleSizes = new Float32Array(maxParticleCount);
+  
+  
+
+  let col = new THREE.Color();
+  col.setHSL(0.0, 1.0, 1.0);
 
   for (var i = 0; i < maxParticleCount; i++) {
     // var x = Math.random() * r - r / 2;
@@ -244,6 +292,14 @@ function init() {
     particlePositions[i * 3] = 0;
     particlePositions[i * 3 + 1] = 0;
     particlePositions[i * 3 + 2] = 0;
+
+    particleColors[i * 3] = col.r;
+    particleColors[i * 3 + 1] = col.g;
+    particleColors[i * 3 + 2] = col.b;
+
+    particleAlphas[i] = Math.random();
+
+    particleSizes[i] = 20.0;
 
     // add it to the geometry
     let scale = 60.0;
@@ -265,9 +321,22 @@ function init() {
       THREE.DynamicDrawUsage
     )
   );
+  particles.setAttribute(
+    "color",
+    new THREE.BufferAttribute(particleColors, 3).setUsage(
+      THREE.DynamicDrawUsage
+    )
+  );
+  particles.setAttribute(
+    "alpha",
+    new THREE.BufferAttribute(particleAlphas, 1).setUsage(
+      THREE.DynamicDrawUsage
+    )
+  );
+  particles.setAttribute( 'size', new THREE.BufferAttribute( particleSizes, 1 ).setUsage( THREE.DynamicDrawUsage ) );
 
   // create the particle system
-  pointCloud = new THREE.Points(particles, pMaterial);
+  pointCloud = new THREE.Points(particles, shaderMaterial);
   particles_group.add(pointCloud);
 
 
@@ -317,8 +386,8 @@ function init() {
   renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
-  pass1 = new GlitchPass();
-  composer.addPass(pass1);
+  glitchPass = new GlitchPass();
+  composer.addPass(glitchPass);
 
   bloomPass = new UnrealBloomPass();
   // bloomPass.strength = 1.5;
@@ -376,6 +445,16 @@ function animate() {
     particlePositions[i * 3] += particleData.velocity.x * dt;
     particlePositions[i * 3 + 1] += particleData.velocity.y * dt;
     particlePositions[i * 3 + 2] += particleData.velocity.z * dt;
+    particleAlphas[i] *= 1.0 - dt;
+    if(particleData.service == activeService) {
+      particleColors[i * 3] = activeParticleColor.r;
+      particleColors[i * 3 + 1] = activeParticleColor.g;
+      particleColors[i * 3 + 2] = activeParticleColor.b;
+    } else {
+      particleColors[i * 3] = 1.0;
+      particleColors[i * 3 + 1] = 1.0;
+      particleColors[i * 3 + 2] = 1.0;
+    }
 
     if(particleData.lifetime <= 0) {
       particlePositions[i * 3 + 2] = 2000000; // Hide particle if it's dead
@@ -389,32 +468,50 @@ function animate() {
   }
   
   let alpha = 0.2;
-
-  let particleIndex = randomParticle;
-
-  for(let i = 0; i < effectController.numConnections; i++) {
-    let particle1 = particleIndex;
-    let particle2 = (particleIndex+1) % particleCount;
-    positions[vertexpos++] = particlePositions[particle1 * 3];
-    positions[vertexpos++] = particlePositions[particle1 * 3 + 1];
-    positions[vertexpos++] = particlePositions[particle1 * 3 + 2];
-    positions[vertexpos++] = particlePositions[particle2 * 3];
-    positions[vertexpos++] = particlePositions[particle2 * 3 + 1];
-    positions[vertexpos++] = particlePositions[particle2 * 3 + 2];
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    colors[colorpos++] = alpha;
-    particleIndex = particle2;
+  let numConnections = effectController.numConnections;
+  let lineParticleIndex = particleIndex - numConnections * 2;
+  if(lineParticleIndex < 0) {
+    lineParticleIndex += particleCount;
   }
+  
 
+  if(particleCount > 2) {
+    for(let i = 0; i < numConnections; i++) {
+      if(i > particleCount) {
+        // There are no eligible pairs
+        break;
+      }
+      let particle1 = lineParticleIndex;
+      let particle2 = (lineParticleIndex+1) % particleCount;
+      if(particlesData[particle1].lifetime <= 400 
+        || (particlesData[particle2].lifetime <= 400)) {
+        numConnections += 1;
+        lineParticleIndex = particle2;
+        continue;
+      }
+      positions[vertexpos++] = particlePositions[particle1 * 3];
+      positions[vertexpos++] = particlePositions[particle1 * 3 + 1];
+      positions[vertexpos++] = particlePositions[particle1 * 3 + 2];
+      positions[vertexpos++] = particlePositions[particle2 * 3];
+      positions[vertexpos++] = particlePositions[particle2 * 3 + 1];
+      positions[vertexpos++] = particlePositions[particle2 * 3 + 2];
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      colors[colorpos++] = alpha;
+      lineParticleIndex = particle2;
+    }
+  }
+  
   linesMesh.geometry.setDrawRange(0, effectController.numConnections * 2);
   linesMesh.geometry.attributes.position.needsUpdate = true;
   linesMesh.geometry.attributes.color.needsUpdate = true;
 
   pointCloud.geometry.attributes.position.needsUpdate = true;
+  pointCloud.geometry.attributes.alpha.needsUpdate = true;
+  pointCloud.geometry.attributes.color.needsUpdate = true;
 
 
   // if(Math.random() > 0.995) {
@@ -452,6 +549,8 @@ function animate() {
   stats.update();
   render();
   
+  packetsOverTime *= 0.8;
+  triggerThisFrame = false;
   lastUpdate = now;
 }
 

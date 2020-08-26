@@ -245,7 +245,8 @@ async function isAlive() {
     callCoordinator("setConnectedUsers", connectedUsers);
     broadcast({
       event: "alive",
-      alive: connectedUsers.length > 0,
+      // alive: connectedUsers.length > 0,
+      alive: true,
     });
   } catch (error) {
     console.log(error.message);
