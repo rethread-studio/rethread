@@ -80,7 +80,7 @@ var effectController = {
   wireframe: false,
 };
 
-let container, stats, composer, camera, scene, controls, countries;
+let container, stats, composer, renderer, camera, scene, controls, countries;
 
 init();
 animate();
@@ -129,7 +129,7 @@ function init() {
     FAR = 10000;
 
   // set basic attributes
-  const renderer = new THREE.WebGLRenderer({
+  renderer = new THREE.WebGLRenderer({
     antialias: true,
     //powerPreference: "high-performance",
   });
@@ -157,7 +157,14 @@ function init() {
   controls.momentumDampingFactor = 0.5;
   controls.rotateSpeed = 0.6;
 
-  camera.position.z = 100;
+  camera.position.x = 2.6534754104522498;
+  camera.position.y = 106.26062422558277;
+  camera.position.z = -3.4144019567941077;
+
+  camera.rotation.x = -1.602917609731314;
+  camera.rotation.y = 0.02495332740875892;
+  camera.rotation.z = 2.481346522244514;
+  
 
   const countryLayers = generateCountries();
   scene.add(countryLayers);
@@ -191,13 +198,6 @@ function onWindowResize() {
 }
 
 function animate() {
-  // for (let country of countries) {
-  //   const scale = Math.round(10 + Math.random() * 20);
-  //   country.scale.x = scale;
-  //   country.scale.y = scale;
-  //   country.scale.z = scale;
-  // }
-
   for (let country of countries) {
     country.material.wireframe = effectController.wireframe;
   }
