@@ -7,6 +7,7 @@ import { RenderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postpro
 import { GlitchPass } from './three/postprocessing/CustomGlitchPass.js';
 import { ShaderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { SMAAPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js';
 
 let allPackets = [];
 const statsPerService = new Map();
@@ -150,7 +151,7 @@ var container, stats;
 
 var camera, scene, renderer;
 var composer;
-var bloomPass, renderPass, glitchPass;
+var bloomPass, renderPass, glitchPass, smaaPass;
 var positions, colors;
 var particleUniforms, particleAlphas, particleColors, particleSizes;
 
@@ -372,7 +373,7 @@ function init() {
   particles_group.add(linesMesh);
 
   // Renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+  renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.outputEncoding = THREE.sRGBEncoding;
@@ -394,6 +395,10 @@ function init() {
   // bloomPass.threshold = 1.0;
   // bloomPass.radius = 1.1;
   composer.addPass(bloomPass);
+
+  // Anti-aliasing while using EffectComposer requires a dedicated anti-aliasing pass
+  smaaPass = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
+  composer.addPass(smaaPass);
 
   //
   stats = new Stats();
