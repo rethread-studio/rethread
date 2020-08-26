@@ -76,6 +76,7 @@ angular
       "visualization1",
       "visualization2",
       "visualization3",
+      "visualizationGlobe",
     ];
     let currentVisualization = 1;
     $("#" + visualizations[currentVisualization]).addClass(
