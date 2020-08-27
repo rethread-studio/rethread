@@ -250,6 +250,10 @@ async function isAlive() {
   try {
     callCoordinator("setConnectedUsers", connectedUsers);
     const alive = connectedUsers.length > 0;
+    let deviceName = 'BCM-Phone'
+    if (alive) {
+      deviceName = connectedUsers[0].name
+    }
     if (alive == false && wasAlive == true) {
       broadcast({
         event: "reset",
@@ -260,6 +264,7 @@ async function isAlive() {
       event: "alive",
       // alive,
       alive: true,
+      deviceName,
     });
   } catch (error) {
     console.log(error.message);

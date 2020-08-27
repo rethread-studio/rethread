@@ -32,19 +32,34 @@ iframe {
   font-size: 50pt;
   font-weight: bold;
 
-  background-color: rgba(255, 255, 255, 0.3);
   padding: 17px 30px;
-}
 
+  width: 65%;
+  margin: auto;
+}
 .welcome .instruction {
-  width: 100%;
+  width: 50%;
 }
-.welcome .block {
-  background-color: #fdfdfd;
+.block {
+  display: inline-block;
+  position: relative;
+  /* background-color: #fdfdfd; */
   color: #242423;
-
-  line-height: 120px;
-  padding-left: 30px;
+  color: #fdfdfd;
+  line-height: 90px;
+  /* padding-left: 30px; */
   margin: 12px auto;
-  width: 80%;
+}
+.tab {
+  margin-left: 50px;
+}
+.block::after {
+  position: absolute;
+  content: " ";
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0px;
+  box-shadow: 0px 0px 11px 4px red;
+  opacity: 0.5;
 }
