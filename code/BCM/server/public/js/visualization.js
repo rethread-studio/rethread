@@ -59,7 +59,6 @@ ws.onmessage = (message) => {
     if(packetsOverTime > 100) {
       if(!triggerThisFrame) {
         glitchPass.triggerActivation();
-        console.log("trigger");
       }
     } else {
       for(const service of packet.services) {
