@@ -5,7 +5,9 @@ import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.m
 import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
 import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/UnrealBloomPass.js';
 import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.0/dist/tween.esm.js";
+import { SMAAPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js';
 
 const locations = {
   NordAmerica: {
@@ -45,6 +47,12 @@ loader.load(
   (response) => (font = response)
 );
 
+let lightPulseSpeed = 40;
+let opacityBaseLevel = 0.2;
+let countryActiveColor =  '0xff0000';
+let countryActivatedColor = '0xffffff';
+let countryDarkColor = '0x443333';
+
 // Receive packets
 let protocol = "ws";
 if (document.location.protocol == "https:") {
@@ -66,20 +74,28 @@ ws.onmessage = async (message) => {
     }
     for (let country of countries) {
       if (country.geometry.name == location) {
-        country.scale.x += 0.01;
-        country.scale.y += 0.01;
-        country.scale.z += 0.01;
-        setTimeout(() => {
-          country.scale.x -= 0.01;
-          country.scale.y -= 0.01;
-          country.scale.z -= 0.01;
-        }, 2500);
-        country.material.opacity = 1;
-        country.material.color.setHex(0xffffff);
-        await pulseCountry(country);
+        country.userData.scale += 0.002;
+        // setTimeout(() => {
+        //   country.scale.x -= 0.01;
+        //   country.scale.y -= 0.01;
+        //   country.scale.z -= 0.01;
+        // }, 2500);
+        if(country.userData.opacityVel === 0) {
+          country.userData.opacityVel = lightPulseSpeed;
+          country.userData.opacityPhase = 0;
+        }
+        if(country.userData.pulsesLeft < 10) {
+          country.userData.pulsesLeft += 1;
+        }
+        
+        country.userData.activated = true;
+        
+        // country.material.color.setHex(0xffffff);
+        // await pulseCountry(country);
         break;
       }
     }
+    lastCountry = location;
   }
 };
 
@@ -111,7 +127,9 @@ var effectController = {
   wireframe: false,
 };
 
-let container, stats, composer, renderer, camera, scene, controls, countries;
+let container, stats, composer, renderer, camera, scene, controls, countries, bloomPass, smaaPass;
+let lastUpdate = 0;
+let lastCountry = '';
 
 init();
 animate();
@@ -126,7 +144,7 @@ function initGUI() {
 }
 
 function init() {
-  initGUI();
+  // initGUI();
 
   container = document.getElementById("container");
 
@@ -180,6 +198,15 @@ function init() {
   // RENDER PASSES
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
+
+  bloomPass = new UnrealBloomPass();
+  bloomPass.strength = 0.7;
+  bloomPass.threshold = 0.01;
+  bloomPass.radius = 0.2;
+  composer.addPass(bloomPass);
+  // Anti-aliasing while using EffectComposer requires a dedicated anti-aliasing pass
+  smaaPass = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
+  composer.addPass(smaaPass);
 
   controls.minDistance = 50;
   controls.maxDistance = 650;
@@ -244,11 +271,49 @@ function rotate() {
     .start();
 }
 
-setInterval(rotate, 2000);
+setInterval(rotate, 1000);
+
+
 
 function animate() {
+  let now = Date.now() * 0.001;
+  let dt = now - lastUpdate;
+
   for (let country of countries) {
     country.material.wireframe = effectController.wireframe;
+    country.material.opacity += country.userData.opacityVel;
+    if(country.userData.pulsesLeft > 0) {
+      country.material.opacity = Math.sin(country.userData.opacityPhase) * (1 - opacityBaseLevel) + opacityBaseLevel;
+      country.userData.opacityPhase += country.userData.opacityVel * dt;
+      if(country.userData.opacityPhase > Math.PI) {
+        country.userData.opacityPhase = 0;
+        country.userData.pulsesLeft -= 1;
+        if(country.userData.pulsesLeft <= 0) {
+          country.userData.pulsesLeft = 0;
+          country.userData.opacityVel = 0;
+          country.material.opacity = opacityBaseLevel;
+        }
+      }
+    }
+    if(country.userData.activated) {
+      // if(lastCountry == country.geometry.name) {
+      //   country.material.color.setHex(countryActiveColor);
+      // } else {
+        // country.material.color.setHex(countryActivatedColor);
+      // }
+
+      // Update scale
+      country.userData.scale *= 0.98;
+      country.userData.scaleFollower = country.userData.scale * 0.03 + country.userData.scaleFollower * 0.97;
+      // country.scale.x = country.userData.baseScale + country.userData.scaleFollower;
+      // country.scale.y = country.userData.baseScale + country.userData.scaleFollower;
+      // country.scale.z = country.userData.baseScale + country.userData.scaleFollower;
+
+      country.material.color.setRGB(1.0, 1.0 - country.userData.scaleFollower, 1.0 - (country.userData.scaleFollower/1.5));
+    } else {
+      country.material.color.setHex(countryDarkColor);
+    }
+    
   }
 
   TWEEN.update();
@@ -256,11 +321,13 @@ function animate() {
   stats.update();
   controls.update();
   render();
+
+  lastUpdate = now;
 }
 
 function render() {
-  renderer.render(scene, camera);
-  //composer.render();
+  // renderer.render(scene, camera);
+  composer.render();
 }
 
 function generateCountries() {
@@ -276,16 +343,23 @@ function generateCountries() {
 
     const material = new THREE.MeshPhongMaterial({
       wireframe: true,
-      color: 0x111111,
+      color: 0x443333,
       transparent: true,
-      opacity: 0.7,
+      opacity: opacityBaseLevel,
       shading: THREE.SmoothShading,
+      shininess: 50,
     });
-    const scale = 20 + Math.random() / 2;
+    const scale = 20.57236; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;
     mesh.scale.z = scale;
+    mesh.userData.opacityVel = 0;
+    mesh.userData.activated = false;
+    mesh.userData.pulsesLeft = 0;
+    mesh.userData.scale = 0;
+    mesh.userData.baseScale = scale;
+    mesh.userData.scaleFollower = 0;
     layer.add(mesh);
 
     return mesh;
