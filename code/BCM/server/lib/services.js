@@ -29,8 +29,21 @@ function ipInRange(packet, range) {
 }
 module.exports = function (packet) {
     const output = new Set()
-    if (hostContains(packet, 'microsoft')) {
+    if (hostContains(packet, 'duckduckgo')) {
+        output.add('DuckDuckGo')
+    }
+    if (hostContains(packet, 'mozilla')) {
+        output.add('Mozilla')
+    }
+    if (hostContains(packet, 'dropbox')) {
+        output.add('Dropbox')
+    }
+    if (hostContains(packet, 'microsoft') || hostContains(packet, 'msedge.net')) {
         output.add('Microsoft')
+    }
+    if (hostContains(packet, 'office')) {
+        output.add('Microsoft')
+        output.add('Office')
     }
     if (ipInRange(packet, '13.64-107.0-255.0-255') || ipInRange(packet, '40.74-125.0-127.0-255')  || ipInRange(packet, '52.96-115.0-255.0-255')) {
         output.add('Microsoft')
