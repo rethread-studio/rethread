@@ -244,13 +244,21 @@ if (options.coordinatorURL == null) {
   coordinatorURL = options.coordinatorURL;
 }
 
+let wasAlive = false;
 async function isAlive() {
   const connectedUsers = await hotspot.connectedUsers(options.interface);
   try {
     callCoordinator("setConnectedUsers", connectedUsers);
+    const alive = connectedUsers.length > 0;
+    if (alive == false && wasAlive == true) {
+      broadcast({
+        event: "reset",
+      });
+    }
+    wasAlive = alive;
     broadcast({
       event: "alive",
-      // alive: connectedUsers.length > 0,
+      // alive,
       alive: true,
     });
   } catch (error) {
