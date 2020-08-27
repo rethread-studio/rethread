@@ -29,10 +29,7 @@ function getLocation(ip) {
     }
   }
   if (knownIPs[ip]) {
-    return {
-      continent: knownIPs[ip].continent,
-      country: knownIPs[ip].country,
-    };
+    return knownIPs[ip];
   }
 }
 
