@@ -72,7 +72,7 @@ SynthDef(\long_sine, {
 }).add;
 SynthDef(\tick2, {
 	var sig, env, rq = \rq.kr(0.1);
-	env = Env.perc(\atk.kr(0), \rel.kr(0.05)).ar(2);
+	env = Env.perc(\atk.kr(0), \rel.kr(0.05), curve: [\c0.kr(-4), \c1.kr(-4)]).ar(2);
 	sig = Impulse.ar(0);
 	sig = sig * 0.5;
 	// high freq and rq values causes the filter to blow up violently
@@ -846,6 +846,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 	~packet_density = 0;
 	~sub_tam_last_launch = Date.localtime.rawSeconds;
 	~vis_sender = NetAddr("127.0.0.1", 9771);
+	~packetRecPanWidth = 0;
 	// Receive packages of web traffic data
 	o = OSCFunc({ arg msg, time, addr, recvPort;
 		var timestamp = msg[1],
@@ -882,15 +883,20 @@ SynthDef(\bounce_away, { | freq = 300 |
 			// ~vis_sender.sendMsg("/bcm-packet", remote_location, len, service_or_ip);
 		}.value();
 		// msg.postln;
+		if(rrand(0.0, 1.0) > 0.9) {
+			~packetRecPanWidth = rrand(0, 1.0);
+		};
+		// Percussive sound when a packet is received
 		Synth(\tick2,
 			[
 				\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-				\rq, exprand(0.001, 0.1),
+				\rq, exprand(0.0001, 0.1),
 				\out, 0,
-				\amp, rrand(0.002, 0.01),
-				\atk, 0.0001,
-				\rel, 0.01, //0.01,
-				\pan, rrand(-0.1, 0.1),
+				\amp, rrand(0.001, 0.02),
+				\atk, 0.000,
+				\rel, rrand(0.01, 0.05), //0.01,
+				\c1, -12,
+				\pan, rrand(-1*~packetRecPanWidth, ~packetRecPanWidth),
 			]
 		);
 		~num_packets = ~num_packets + 1;
@@ -938,16 +944,28 @@ SynthDef(\bounce_away, { | freq = 300 |
 }.value();
 )
 
-(
-Synth(\tick2,
-	[
-		\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-		\rq, exprand(0.001, 0.1),
-		\out, 0,
-		\amp, rrand(0.005, 0.03),
-		\atk, 0.0001,
-		\rel, 0.01, //0.01,
-		\pan, rrand(-0.1, 0.1),
-	]
-);
+( // Test for percussive sound when packets are received
+{ var panWidth = 0.1;
+	loop {
+		exprand(1, 50).do{
+			if(rrand(0.0, 1.0) > 0.9) {
+				panWidth = rrand(0, 1.0);
+			};
+			Synth(\tick2,
+				[
+					\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
+					\rq, exprand(0.0001, 0.1),
+					\out, 0,
+					\amp, rrand(0.001, 0.02),
+					\atk, 0.000,
+					\rel, rrand(0.01, 0.05), //0.01,
+					\c1, -12,
+					\pan, rrand(-1*panWidth, panWidth),
+				]
+			);
+			100.reciprocal.wait;
+		};
+		0.3.wait;
+	};
+}.fork;
 )
