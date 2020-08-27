@@ -117,6 +117,9 @@ module.exports = function (packet) {
     output.add("Skype");
     output.add("Microsoft");
   }
+  if (hostContains(packet, "azure") || hostContains(packet, "trafficmanager")) {
+    output.add("Microsoft");
+  }
   if (hostContains(packet, "paypal")) {
     output.add("Paypal");
   }
