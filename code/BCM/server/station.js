@@ -263,7 +263,7 @@ async function isAlive() {
     broadcast({
       event: "alive",
       // alive,
-      alive: true,
+      alive: false,
       deviceName,
     });
   } catch (error) {
