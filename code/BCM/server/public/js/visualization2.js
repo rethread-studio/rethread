@@ -54,7 +54,8 @@ ws.onmessage = (message) => {
       if (!indexPerService.has(service)) {
         indexPerService.set(service, indexPerService.size);
       }
-      createRectangle(service, indexPerService.get(service), packet.len);
+      let isOut = packet.out;
+      createRectangle(service, indexPerService.get(service), packet.len, isOut);
       let time = Date.now() * 0.001;
       lastRegisteredPerService.set(service, time);
       activeService = service;
@@ -88,9 +89,10 @@ var rectangles_group;
 var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.FrontSide} );
 var rectangleMaterialActive = new THREE.MeshBasicMaterial( {color: 0xff0000, side: THREE.FrontSide} );
 // var rectangleGeometry = new THREE.PlaneBufferGeometry( 20, 80, 4 );
-var rectangleGeometry = new THREE.BoxGeometry( 20, 80, 40 );
+var rectangleGeometry = new THREE.BoxGeometry( 4, 8, 40 );
 var rectangleObjects = [];
 var rectangleLeftEdge = 0;
+var rectangleRightEdge = 0;
 
 // Test to make sure the coordinate projection to the camera is working
 // window.addEventListener('mousemove', e => {
@@ -108,13 +110,15 @@ var rectangleLeftEdge = 0;
 // });
 
 
-function createRectangle(service, index, packetSize) {
-  console.log("index: " + index + " service: " + service);
+function createRectangle(service, index, packetSize, isOut) {
   let plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
   let numLanes = indexPerService.size + 1 ;
   // Convert from screen coordinates to camera coordinates
   let left = 1;
   let top = (2/numLanes) * (index + 1) - 1;
+  if(isOut) {
+    left = -1;
+  }
   let depth = 0.5; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
   var vector = new THREE.Vector3(left, top, depth);
   vector.unproject( camera );
@@ -124,11 +128,20 @@ function createRectangle(service, index, packetSize) {
   // plane.position.set( -1 + 2 * left, 1 - 2 * top, depth ).unproject( camera );
   // plane.position.z = 0;
   plane.position.copy(pos);
-  rectangleLeftEdge = -plane.position.x * 2;
+  
   rectangles_group.add(plane);
+  let xVel = Math.random() * -240 + (-240000/packetSize) - 180;
+  if(isOut) {
+    xVel *= -1;
+    rectangleLeftEdge = plane.position.x * 2;
+    rectangleRightEdge = -plane.position.x * 2;
+  } else {
+    rectangleLeftEdge = -plane.position.x * 2;
+    rectangleRightEdge = plane.position.x * 2;
+  }
   rectangleObjects.push({
     mesh: plane,
-    vel: new THREE.Vector3(Math.random() * -240 + (-120000/packetSize) - 180, 0, Math.random() * 60 - 120),
+    vel: new THREE.Vector3(xVel, 0, (Math.random() * 12 - 24) * packetSize),
     service: service,
   });
 }
@@ -228,7 +241,7 @@ function animate() {
     } else {
       rect.mesh.material = rectangleMaterial;
     }
-    if(rect.mesh.position.x < rectangleLeftEdge) {
+    if(rect.mesh.position.x < rectangleLeftEdge || rect.mesh.position.x > rectangleRightEdge) {
       // Outside of view, remove it
       rectangles_group.remove(rect.mesh);
     }
@@ -237,7 +250,7 @@ function animate() {
   }
 
   // Remove rectangles from rectangleObjects
-  rectangleObjects = rectangleObjects.filter(rect => rect.mesh.position.x > rectangleLeftEdge);
+  rectangleObjects = rectangleObjects.filter(rect => rect.mesh.position.x > rectangleLeftEdge && rect.mesh.position.x < rectangleRightEdge);
 
   // if(Math.random() > 0.995) {
   //   showText = !showText;

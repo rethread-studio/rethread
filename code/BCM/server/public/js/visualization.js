@@ -47,7 +47,7 @@ ws.onmessage = (message) => {
   const json = JSON.parse(message.data);
   if (json.event == "networkActivity") {
     const packet = json.data;
-    console.log(packet.remote_host);
+    // console.log(packet.remote_host);
     allPackets.push({
       location: packet.location,
     })
