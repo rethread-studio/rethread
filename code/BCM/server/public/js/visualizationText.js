@@ -7,6 +7,7 @@ import { RenderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postpro
 import { GlitchPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/GlitchPass.js';
 import { ShaderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/ShaderPass.js';
 import { UnrealBloomPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/UnrealBloomPass.js';
+import {createGeometry, loadFont } from "./three-bmfont-text-bundle.js";
 
 let allPackets = [];
 const statsPerService = new Map();
@@ -16,16 +17,31 @@ const indexPerService = new Map(); // Give the service a number used as an index
 const lastRegisteredPerService = new Map();
 let activeService = '';
 
+var bmfont;
+var bmTextMaterial;
+// Load bitmap font
+loadFont('fonts/Arial.fnt', function(err, font) {
+  // create a geometry of packed bitmap glyphs, 
+  // word wrapped to 300px and right-aligned
+  bmfont = font;
 
+  
+  // the resulting layout has metrics and bounds
+  // console.log(geometry.layout.height)
+  // console.log(geometry.layout.descender)
+})
 
-// Load font
-var loader = new THREE.FontLoader();
-var font;
-loader.load( 'assets/fonts/' + 'helvetiker_regular.typeface.json', function ( response ) {
+// the texture atlas containing our glyphs
+var textureLoader = new THREE.TextureLoader();
+textureLoader.load('fonts/Arial.png', function (texture) {
+  // we can use a simple ThreeJS material
+  bmTextMaterial = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    color: 0xaaffff
+  })
+});
 
-  font = response;
-
-} );
 
 // Receive packets
 let protocol = "ws";
@@ -42,7 +58,6 @@ ws.onmessage = (message) => {
   const json = JSON.parse(message.data);
   if (json.event == "networkActivity") {
     const packet = json.data;
-    // console.log(packet);
     allPackets.push({
       location: packet.location,
     })
@@ -54,21 +69,13 @@ ws.onmessage = (message) => {
       if (!indexPerService.has(service)) {
         indexPerService.set(service, indexPerService.size);
       }
-      createRectangle(service, indexPerService.get(service), packet.len);
+      createText(service, service);
       let time = Date.now() * 0.001;
       lastRegisteredPerService.set(service, time);
       activeService = service;
     }
   }
 };
-
-function random3DPosition(magnitude) {
-  return new THREE.Vector3(
-    (-1 + Math.random() * 2) * magnitude,
-    (-1 + Math.random() * 2) * magnitude,
-    (-1 + Math.random() * 2) * magnitude,
-  )
-}
 
 
 var container, stats;
@@ -82,15 +89,6 @@ let randomParticle = 0; // Used for drawing lines, this is the starting particle
 
 var r = 800;
 var rHalf = r / 2;
-
-
-var rectangles_group;
-var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.FrontSide} );
-var rectangleMaterialActive = new THREE.MeshBasicMaterial( {color: 0xff0000, side: THREE.FrontSide} );
-// var rectangleGeometry = new THREE.PlaneBufferGeometry( 20, 80, 4 );
-var rectangleGeometry = new THREE.BoxGeometry( 20, 80, 40 );
-var rectangleObjects = [];
-var rectangleLeftEdge = 0;
 
 // Test to make sure the coordinate projection to the camera is working
 // window.addEventListener('mousemove', e => {
@@ -107,53 +105,70 @@ var rectangleLeftEdge = 0;
 //   mouseMesh.position.copy(pos);
 // });
 
+// Load font
+// var loader = new THREE.FontLoader();
+// var font;
+// loader.load( 'assets/fonts/' + 'helvetiker_regular.typeface.json', function ( response ) {
+//   font = response;
+// } );
 
-function createRectangle(service, index, packetSize) {
-  console.log("index: " + index + " service: " + service);
-  let plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
-  let numLanes = indexPerService.size + 1 ;
+// let textMaterialDefault = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.7 } );
+// let textMaterialActive = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent: true, opacity: 0.9 } );
+
+let textObjects = [];
+var text_group;
+
+function createText(text, service) {
+  // let geometry = new THREE.TextGeometry( text, {
+	// 	font: font,
+	// 	size: 20,
+  //   height: 0.01,
+	// 	curveSegments: 12,
+  //   bevelEnabled: true,
+  //   bevelSize: 0.1,
+  //   bevelOffset: 0.1,
+  //   bevelSegments: 1,
+  // } );
+  
+  // let textMesh = new THREE.Mesh( geometry, textMaterialDefault );
+
+  let geometry = createGeometry({
+    width: 300,
+    align: 'right',
+    font: bmfont
+  })
+
+  // change text and other options as desired
+  // the options sepcified in constructor will
+  // be used as defaults
+  geometry.update(text);
+  let textMesh = new THREE.Mesh( geometry, bmTextMaterial );
+
   // Convert from screen coordinates to camera coordinates
-  let left = 1;
-  let top = (2/numLanes) * (index + 1) - 1;
-  let depth = 0.5; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
+  let left = Math.random() * 2 - 1;
+  let top = Math.random() * 2 - 1;
+  let depth = 1; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
   var vector = new THREE.Vector3(left, top, depth);
   vector.unproject( camera );
   var dir = vector.sub( camera.position ).normalize();
   var distance = - camera.position.z / dir.z;
   var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-  // plane.position.set( -1 + 2 * left, 1 - 2 * top, depth ).unproject( camera );
-  // plane.position.z = 0;
-  plane.position.copy(pos);
-  rectangleLeftEdge = -plane.position.x * 2;
-  rectangles_group.add(plane);
-  rectangleObjects.push({
-    mesh: plane,
-    vel: new THREE.Vector3(Math.random() * -240 + (-120000/packetSize) - 180, 0, Math.random() * 60 - 120),
+  textMesh.position.copy(pos);
+  textMesh.position.z = 500;
+  // textMesh.rotation.y = Math.PI * 0.5;
+  textObjects.push({
+    mesh: textMesh,
     service: service,
+    vel: new THREE.Vector3(0, 0, Math.random() * 600 - 1200),
+    lifetime: 5,
   });
+  text_group.add(textMesh);
 }
-
-var effectController = {
-  bloomPassThreshold: 0.0,
-  bloomPassStrength: 0.38,
-  bloomPassRadius: 0.15,
-  doRotation: false,
-};
 
 init();
 animate();
 
-function initGUI() {
-  var gui = new GUI();
-
-
-  gui.add(effectController, "bloomPassThreshold", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassStrength", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassRadius", 0.0, 2.0, 0.001);
-}
-
 function init() {
-  initGUI();
 
   container = document.getElementById("container");
 
@@ -163,7 +178,7 @@ function init() {
     1,
     4000
   );
-  camera.position.z = 1750;
+  camera.position.z = 500;
 
   // var controls = new OrbitControls(camera, container);
   // controls.minDistance = 1000;
@@ -171,8 +186,8 @@ function init() {
 
   scene = new THREE.Scene();
 
-  rectangles_group = new THREE.Group();
-  scene.add(rectangles_group);
+  text_group = new THREE.Group();
+  scene.add(text_group);
 
 
   // Renderer
@@ -218,37 +233,34 @@ var lastUpdate = 0;
 function animate() {
   let now = Date.now() * 0.001;
   let dt = now - lastUpdate;
+
+  console.log(textObjects.length);
  
   // Update rectangles
-  for(let rect of rectangleObjects) {
-    rect.mesh.position.x += rect.vel.x * dt;
-    rect.mesh.position.z += rect.vel.z * dt;
-    if(activeService == rect.service) {
-      rect.mesh.material = rectangleMaterialActive;
+  for(let txt of textObjects) {
+    txt.mesh.position.x += txt.vel.x * dt;
+    txt.mesh.position.y += txt.vel.y * dt;
+    txt.mesh.position.z += txt.vel.z * dt;
+
+    if(activeService == txt.service) {
+      txt.mesh.material = textMaterialActive;
     } else {
-      rect.mesh.material = rectangleMaterial;
+      txt.mesh.material = textMaterialDefault;
     }
-    if(rect.mesh.position.x < rectangleLeftEdge) {
+    txt.lifetime -= dt;
+    if(txt.lifetime < 0) {
       // Outside of view, remove it
-      rectangles_group.remove(rect.mesh);
+      text_group.remove(txt.mesh);
     }
-    // rect.position.y -= 1;
-    // rect.position.z -= 10;
   }
 
   // Remove rectangles from rectangleObjects
-  rectangleObjects = rectangleObjects.filter(rect => rect.mesh.position.x > rectangleLeftEdge);
-
-  // if(Math.random() > 0.995) {
-  //   showText = !showText;
-  // }
-
-
+  // textObjects = textObjects.filter(txt => txt.lifetime < 0);
 
   // Update effects parameters
-  bloomPass.threshold = effectController.bloomPassThreshold;
-  bloomPass.strength = effectController.bloomPassStrength;
-  bloomPass.radius = effectController.bloomPassRadius;
+  bloomPass.threshold = 0;
+  bloomPass.strength = 0.35;
+  bloomPass.radius = 0.15;
 
   requestAnimationFrame(animate);
 
