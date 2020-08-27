@@ -601,7 +601,6 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\amp, 0.05 * amp,
 							\out, channel.bus]);
 					}, {
-						"Google tick".postln;
 						channel.play_on(\tick2,
 							[
 								\freqis, min(freq * 4, 18000),
@@ -661,7 +660,6 @@ SynthDef(\bounce_away, { | freq = 300 |
 								\out, channel.bus]);
 						});
 					}, {
-						"Amazon tick".postln;
 						channel.play_on(\tick2,
 							[
 								\freq, (freq * 4).min(18000),
@@ -708,7 +706,6 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\out, channel.bus]);
 					}, {
 						if(activity == \high, {
-							"Cloudflare tick".postln;
 							/*channel.play_on(\glitchy_rise, [
 							\freq, freq,
 							\atk, 0.1,
@@ -896,6 +893,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 				\pan, rrand(-0.1, 0.1),
 			]
 		);
+		~num_packets = ~num_packets + 1;
+		("num packets: " + ~num_packets).postln;
 	}, '/package', nil, 57130); // create the OSCFunc
 
 
