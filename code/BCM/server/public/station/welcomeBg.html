@@ -16,7 +16,7 @@
       .glishBox {
         position: absolute;
         background-color: white;
-        /* transition: width 0.2s ease, height 0.2s ease; */
+        transition: opacity 1.5s ease, width 0.7s ease, height 0.6s ease, left 1.2s ease, top 1.4s ease, background-color 2.0s ease, box-shadow 2.0s ease;
         box-shadow: 0px 0px 10px 6px #fff
       }
     </style>
@@ -26,24 +26,38 @@
     <div id="glishBackground"></div>
     <script>
       const bg = document.getElementById("glishBackground");
-      const count = 30;
+      const count = 200;
       for (let index = 0; index < count; index++) {
         const element = document.createElement("div");
         element.className = "glishBox";
         bg.appendChild(element);
       }
-      setInterval(() => {
+      function randomize() {
         const glishBoxes = document.getElementsByClassName("glishBox");
         for (let index = 0; index < glishBoxes.length; index++) {
           const element = glishBoxes[index];
-          element.style.left = Math.floor(Math.random() * 100) + "vw";
-          element.style.top = Math.floor(Math.random() * 100) + "vh";
-
-          element.style.width = Math.floor(Math.random() * 75) + "px";
-          element.style.height = Math.floor(Math.random() * 30) + "px";
-          element.style.opacity = Math.random() * 0.7;
+          if(Math.random() > 0.7) {
+            element.style.left = Math.floor(Math.random() * 100) + "vw";
+            element.style.top = Math.floor(Math.random() * 100) + "vh";
+          }
+          if(Math.random() > 0.7) {
+            element.style.width = Math.floor(Math.pow(Math.random(), 2) * 100) + "px";
+            element.style.height = Math.floor(Math.random() * 5) + "px";
+          }
+          if(Math.random() > 0.8) {
+            element.style.opacity = Math.random() * 1.0;
+          }
+          if(Math.random() > 0.1) {
+            element.style.backgroundColor = "white";
+            element.style.boxShadow = "0px 0px 4px 6px white";
+          } else {
+            element.style.backgroundColor = "red";
+            element.style.boxShadow = "0px 0px 4px 6px red";
+          }
         }
-      }, 250);
+        setTimeout(randomize, Math.random() * 200 + 200)
+      }
+      randomize()
     </script>
   </body>
 </html>
