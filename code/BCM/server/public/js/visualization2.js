@@ -47,7 +47,7 @@ ws.onmessage = (message) => {
       location: packet.location,
     })
     if(packet.services.length === 0) {
-      packet.services.push(packet.remote_ip)
+      packet.services.push(packet.remote_host)
     }
 
     for(const service of packet.services) {

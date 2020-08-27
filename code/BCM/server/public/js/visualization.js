@@ -47,12 +47,12 @@ ws.onmessage = (message) => {
   const json = JSON.parse(message.data);
   if (json.event == "networkActivity") {
     const packet = json.data;
-    // console.log(packet);
+    console.log(packet.remote_host);
     allPackets.push({
       location: packet.location,
     })
     if(packet.services.length === 0) {
-      packet.services.push(packet.remote_ip)
+      packet.services.push(packet.remote_host)
     }
 
     packetsOverTime++;
