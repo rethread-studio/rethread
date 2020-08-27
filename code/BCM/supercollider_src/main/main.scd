@@ -861,7 +861,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		speaker = msg[10],
 		local_mac = msg[11],
 
-		freq, ip_parts;
+		freq, ip_parts, rel = 0.0;
 
 		// Some packets aren't interesting, such as communication with the router
 		if(local_ip != "192.168.0.1".asSymbol && (local_ip != "192.168.0.255".asSymbol)) {
@@ -886,19 +886,27 @@ SynthDef(\bounce_away, { | freq = 300 |
 		if(rrand(0.0, 1.0) > 0.9) {
 			~packetRecPanWidth = rrand(0, 1.0);
 		};
+		if(rrand(0.0, 1.0) > 0.995) {
+			rel = rrand(0.2, 1.0);
+		};
+
 		// Percussive sound when a packet is received
-		Synth(\tick2,
+		{
+			rrand(0.0, 0.2).wait;
+			Synth(\tick2,
 			[
 				\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
 				\rq, exprand(0.0001, 0.1),
 				\out, 0,
 				\amp, rrand(0.0001, 0.005),
-				\atk, 0.000,
-				\rel, rrand(0.01, 0.05), //0.01,
+				\atk, rrand(0.000, 0.004),
+				\c0, -10,
+				\rel, rrand(0.01, 0.05) + rel, //0.01,
 				\c1, -12,
 				\pan, rrand(-1*~packetRecPanWidth, ~packetRecPanWidth),
 			]
 		);
+		}.fork;
 		~num_packets = ~num_packets + 1;
 		("num packets: " + ~num_packets).postln;
 	}, '/package', nil, 57130); // create the OSCFunc
