@@ -245,11 +245,16 @@ if (options.coordinatorURL == null) {
 }
 
 let wasAlive = false;
+let isHotspot = hotspot.isHotspot();
 async function isAlive() {
   const connectedUsers = await hotspot.connectedUsers(options.interface);
   try {
     callCoordinator("setConnectedUsers", connectedUsers);
-    const alive = connectedUsers.length > 0;
+    const alive = isHotspot ? connectedUsers.length > 0 : true;
+    let deviceName = "BCM-Phone";
+    if (alive) {
+      deviceName = connectedUsers[0].name;
+    }
     if (alive == false && wasAlive == true) {
       broadcast({
         event: "reset",
@@ -258,8 +263,8 @@ async function isAlive() {
     wasAlive = alive;
     broadcast({
       event: "alive",
-      // alive,
-      alive: true,
+      alive,
+      deviceName,
     });
   } catch (error) {
     console.log(error.message);

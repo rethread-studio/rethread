@@ -56,13 +56,13 @@ angular
   })
   .controller("mainController", function (
     $scope,
-    $rootScope,
     $http,
     $location
   ) {
     $scope.wifi = "BCM - SoundProxy";
     $scope.password = null;
     $scope.instruction = "";
+    $scope.deviceName = "";
 
     function getConfig() {
       $http.get("/api/wifi/config").then((res) => {
@@ -100,6 +100,7 @@ angular
       const json = JSON.parse(message.data);
       if (json.event == "alive") {
         $scope.$apply(() => {
+          $scope.deviceName = json.deviceName;
           if (!json.alive) {
             $location.url("/");
           } else if ($location.url() == "/") {
