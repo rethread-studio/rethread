@@ -11,6 +11,7 @@ body {
   width: 100%;
   color: #fdfdfd;
   background-color: #242423;
+  overflow: hidden;
 }
 
 #visualization {

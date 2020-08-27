@@ -207,7 +207,7 @@ function initGUI() {
 }
 
 function init() {
-  initGUI();
+  // initGUI();
 
   container = document.getElementById("container");
 
