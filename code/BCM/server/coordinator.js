@@ -151,7 +151,6 @@ async function sendMessage(m, station, time) {
   return new Promise((resolve) => {
     setTimeout(() => {
       if (stations[station]) {
-        stations[station].ws.send(JSON.stringify({}));
         callStation(station, "playPacket", m, false);
       } else {
         osc.send(m);

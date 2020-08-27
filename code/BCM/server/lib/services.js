@@ -56,7 +56,7 @@ module.exports = function (packet) {
   if (hostContains(packet, "instagram")) {
     output.add("Instagram");
   }
-  if (hostContains(packet, "apple")) {
+  if (hostContains(packet, "apple") || hostContains(packet, "ios") || hostContains(packet, "itunes")) {
     output.add("Apple");
   }
   if (hostContains(packet, "twitter")) {
