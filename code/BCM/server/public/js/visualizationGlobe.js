@@ -5,6 +5,37 @@ import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.m
 import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
 import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/RenderPass.js";
+import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.0/dist/tween.esm.js";
+
+const locations = {
+  NordAmerica: {
+    x: 45.007262821788274,
+    y: 42.636811843287255,
+    z: 15.719691443279078,
+  },
+  SouthAmerica: {
+    x: 57.877554836810496,
+    y: -11.686766076650507,
+    z: -24.581868820798697,
+  },
+  Africa: {
+    x: -20.10638732410356,
+    y: 7.104283932574123,
+    z: -60.29861083408001,
+  },
+  Europe: {
+    x: -5.914913565619374,
+    y: 37.112113595615455,
+    z: -32.98037025227866,
+  },
+  Asia: { x: -47.827295699164246, y: 42.1859899887746, z: -4.853057254243454 },
+  Oceania: {
+    x: -47.17537192267708,
+    y: -18.70291910473583,
+    z: 38.92743545187653,
+  },
+  top: { x: 2.6451793113733446, y: 103.04016038480927, z: -3.2535889089049363 },
+};
 
 // Load font
 var loader = new THREE.FontLoader();
@@ -157,23 +188,15 @@ function init() {
   controls.momentumDampingFactor = 0.5;
   controls.rotateSpeed = 0.6;
 
-  camera.position.x = 2.6534754104522498;
-  camera.position.y = 106.26062422558277;
-  camera.position.z = -3.4144019567941077;
-
-  camera.rotation.x = -1.602917609731314;
-  camera.rotation.y = 0.02495332740875892;
-  camera.rotation.z = 2.481346522244514;
-  
+  rotate();
 
   const countryLayers = generateCountries();
   scene.add(countryLayers);
 
-  var geometry = new THREE.SphereGeometry(18, 32, 32);
+  var geometry = new THREE.SphereGeometry(20, 42, 42, 42);
   var material = new THREE.MeshBasicMaterial({
     color: 0x000000,
-    transparent: true,
-    opacity: 0.8,
+    transparent: false,
   });
   var sphere = new THREE.Mesh(geometry, material);
   scene.add(sphere);
@@ -197,11 +220,38 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+function rotate() {
+  const keys = Object.keys(locations);
+  const index = Math.floor(Math.random() * keys.length);
+  const location = locations[keys[index]];
+
+  var from = {
+    x: camera.position.x,
+    y: camera.position.y,
+    z: camera.position.z,
+  };
+
+  var tween = new TWEEN.Tween(from)
+    .to(location, 600)
+    .easing(TWEEN.Easing.Linear.None)
+    .onUpdate(function (position) {
+      camera.position.set(position.x, position.y, position.z);
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+    })
+    .onComplete(function () {
+      camera.lookAt(new THREE.Vector3(0, 0, 0));
+    })
+    .start();
+}
+
+setInterval(rotate, 2000);
+
 function animate() {
   for (let country of countries) {
     country.material.wireframe = effectController.wireframe;
   }
 
+  TWEEN.update();
   requestAnimationFrame(animate);
   stats.update();
   controls.update();
@@ -209,8 +259,8 @@ function animate() {
 }
 
 function render() {
-  // renderer.render(scene, camera);
-  composer.render();
+  renderer.render(scene, camera);
+  //composer.render();
 }
 
 function generateCountries() {
@@ -231,7 +281,7 @@ function generateCountries() {
       opacity: 0.7,
       shading: THREE.SmoothShading,
     });
-    const scale = 20;
+    const scale = 20 + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;
