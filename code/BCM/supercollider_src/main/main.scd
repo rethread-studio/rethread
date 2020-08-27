@@ -920,11 +920,12 @@ SynthDef(\bounce_away, { | freq = 300 |
 	~tickClock = TempoClock(120/60);
 	~overallActivity = 0;
 	~maxActivity = 60;
+	~root = 0;
 	Routine({
 		loop {
 			var allDevices = ~stats.values,
 			numInPackets = 0, numOutPackets = 0,
-			numPitchesPerChord;
+			numPitchesPerChord, root;
 
 			allDevices.do { |statDevice|
 				var allServices = statDevice.services.values;
@@ -938,6 +939,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 			};
 
 			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
+			// ("overall: " + ~overallActivity).postln;
 
 			tick_channel.play_on(\tick2,
 				[
@@ -952,8 +954,16 @@ SynthDef(\bounce_away, { | freq = 300 |
 			);
 
 			// Update chord
-			numPitchesPerChord = ~overallActivity.linexp(0, ~maxActivity, 0, ~ch1.size-0.001).asInteger;
+			if(~overallActivity > (~maxActivity * 0.5)) {
+				if(rrand(0.0, 1.0) > 0.98) {
+					~root = [-8, 0, 9, 17, -22].choose;
+				};
+			};
+
+			numPitchesPerChord = (~overallActivity.linexp(0, ~maxActivity, 3.0, ~ch1.size+2.99)-3.0).asInteger;
+			// ("nump: " + numPitchesPerChord).postln;
 			~chord = ~ch1[0..numPitchesPerChord] ++ ~ch2[0..numPitchesPerChord] ++ ~ch3[0..numPitchesPerChord] ++ ~ch4[0..numPitchesPerChord];
+			~chord = ~chord + ~root;
 
 			0.25.wait;
 		};
@@ -961,6 +971,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 }.value();
 )
 
+~ch1[0..0]
 ( // Test for percussive sound when packets are received
 { var panWidth = 0.1;
 	loop {
