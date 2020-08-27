@@ -16,7 +16,7 @@
       .glishBox {
         position: absolute;
         background-color: white;
-        transition: opacity 1.5s ease, width 0.7s ease, height 0.6s ease, left 1.2s ease, top 1.4s ease, background-color 2.0s ease, box-shadow 2.0s ease;
+        transition: opacity 1.5s ease, width 0.7s ease, height 0.6s ease, left 10.2s ease, top 10.4s ease, background-color 2.0s ease, box-shadow 2.0s ease;
         box-shadow: 0px 0px 10px 6px #fff
       }
     </style>
@@ -26,36 +26,64 @@
     <div id="glishBackground"></div>
     <script>
       const bg = document.getElementById("glishBackground");
-      const count = 200;
+      const count = 100;
       for (let index = 0; index < count; index++) {
         const element = document.createElement("div");
         element.className = "glishBox";
         bg.appendChild(element);
       }
+      //init
+      const glishBoxes = document.getElementsByClassName("glishBox");
+      for (let index = 0; index < glishBoxes.length; index++) {
+        const element = glishBoxes[index];
+          element.style.left = Math.floor(Math.random() * 100) + "vw";
+          element.style.top = Math.floor(Math.random() * 100) + "vh";
+      }
+      let fast = false;
       function randomize() {
         const glishBoxes = document.getElementsByClassName("glishBox");
         for (let index = 0; index < glishBoxes.length; index++) {
           const element = glishBoxes[index];
-          if(Math.random() > 0.7) {
+          if(fast) {
+            element.style.transition = "opacity 0.05s ease, width 0.15s ease, height 0.2s ease, left 0.2s ease, top 0.4s ease, background-color 0.05s ease, box-shadow 0.05s ease";
+          } else {
+            element.style.transition = "opacity 1.5s ease, width 2.7s ease, height 2.6s ease, left 10.2s ease, top 10.4s ease, background-color 2.0s ease, box-shadow 2.0s ease";
+          }
+          if(Math.random() > 0.99) {
             element.style.left = Math.floor(Math.random() * 100) + "vw";
             element.style.top = Math.floor(Math.random() * 100) + "vh";
+            if(Math.random() > 0.1) {
+              element.style.transition = "opacity 1.5s ease, width 0.7s ease, height 0.6s ease, left 0s ease, top 0s ease, background-color 2.0s ease, box-shadow 2.0s ease";
+            }
           }
           if(Math.random() > 0.7) {
-            element.style.width = Math.floor(Math.pow(Math.random(), 2) * 100) + "px";
-            element.style.height = Math.floor(Math.random() * 5) + "px";
+            element.style.width = Math.floor(Math.pow(Math.random(), 2) * 40) + "px";
+            element.style.height = Math.floor(Math.random() * 25) + "px";
           }
-          if(Math.random() > 0.8) {
-            element.style.opacity = Math.random() * 1.0;
+          if(Math.random() > 0.9) {
+            if(element.style.opacity == 1.0) {
+              element.style.opacity = 0.0;
+            } else if (element.style.opacity == 0.0) {
+              element.style.opacity = 1.0;
+            }
           }
           if(Math.random() > 0.1) {
             element.style.backgroundColor = "white";
             element.style.boxShadow = "0px 0px 4px 6px white";
           } else {
             element.style.backgroundColor = "red";
-            element.style.boxShadow = "0px 0px 4px 6px red";
+            element.style.boxShadow = "0px 0px 12px 6px red";
           }
         }
-        setTimeout(randomize, Math.random() * 200 + 200)
+        if(Math.random() > 0.7) {
+          fast = ! fast;
+        }
+        if(fast) {
+          setTimeout(randomize, Math.random() * 100 + 20)
+        } else {
+          setTimeout(randomize, Math.random() * 500 + 200)
+        }
+        
       }
       randomize()
     </script>
