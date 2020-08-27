@@ -892,7 +892,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 				\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
 				\rq, exprand(0.0001, 0.1),
 				\out, 0,
-				\amp, rrand(0.001, 0.02),
+				\amp, rrand(0.0001, 0.005),
 				\atk, 0.000,
 				\rel, rrand(0.01, 0.05), //0.01,
 				\c1, -12,
