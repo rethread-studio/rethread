@@ -105,7 +105,10 @@ module.exports = function (networkInterface, kill, broadcast) {
                 data.out = false;
 
                 if (json.eth_src_oui_resolved) {
-                  data.vender = json.eth_src_oui_resolved[0];
+                  data.remote_vender = json.eth_src_oui_resolved[0];
+                }
+                if (json.eth_dst_oui_resolved) {
+                  data.local_vender = json.eth_dst_oui_resolved[0];
                 }
 
                 if (json.tcp_port) {
@@ -122,7 +125,10 @@ module.exports = function (networkInterface, kill, broadcast) {
                 data.out = true;
 
                 if (json.eth_dst_oui_resolved) {
-                  data.vender = json.eth_dst_oui_resolved[0];
+                  data.remote_vender = json.eth_dst_oui_resolved[0];
+                }
+                if (json.eth_src_oui_resolved) {
+                  data.local_vender = json.eth_src_oui_resolved[0];
                 }
 
                 if (json.tcp_port) {
