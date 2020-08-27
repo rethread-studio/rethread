@@ -48,7 +48,7 @@ module.exports = function (networkInterface, kill, broadcast) {
     let localIp = getIP(networkInterface);
 
     const cmd =
-      "tshark -V -N dnN -l -T ek -i " +
+      "tshark -V -N Ndmntv -l -T ek -i " +
       networkInterface +
       " -e frame.time_epoch -e frame.time -e _ws.col.AbsTime -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e dns.qry.name -e frame.len -e http.host -e http.response -e frame.protocols -e eth.dst -e eth.src -e _ws.col.Info -e eth.dst.oui_resolved -e eth.src.oui_resolved  -e http.request.full_uri -e tcp.port";
     try {

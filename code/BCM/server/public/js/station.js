@@ -75,7 +75,7 @@ angular
     const visualizations = [
       "visualization1",
       "visualization2",
-      "visualization3",
+      //"visualization3",
       "visualizationGlobe",
     ];
     let currentVisualization = 1;
