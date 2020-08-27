@@ -47,7 +47,8 @@ module.exports.send = (data) => {
 
   for (let i of oscValueOrder) {
     let value = data[i];
-    if (i.indexOf("_location") > -1) {
+    console.log(value, i);
+    if (i.indexOf("_location") > -1 && value != null) {
       value = value.country;
     }
     const type = typeof value == "number" ? "i" : "s";
