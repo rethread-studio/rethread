@@ -534,15 +534,29 @@ SynthDef(\bounce_away, { | freq = 300 |
 						}
 					);
 					if(inout == \out, {
-						channel.play_on(\reverse_sine, [
-							\freq, freq,
-							\atk, rrand(1.0, 5.0) * release_coeff,
-							\rel, rrand(0.1, 4 * release_coeff),
-							\c0, rrand(1, 4),
-							\c1, \sine,
-							\pan, rrand(-0.7, 0.7),
-							\amp, 0.05 * amp,
-							\out, channel.bus]);
+						if(rrand(0.0, 1.0) > 0.5, {
+							channel.play_on(\tick2,
+								[
+									\freqis, min(freq * 4, 18000),
+									\rq, exprand(0.001, 0.1),
+									\out, channel.bus,
+									\amp, exprand(0.05, 0.2) * amp,
+									\atk, 0.001 * release_coeff,
+									\rel, 0.01, //0.01,
+									\pan, rrand(-0.5, 0.5),
+								]
+							);
+						}, {
+							channel.play_on(\reverse_sine, [
+								\freq, freq,
+								\atk, rrand(1.0, 5.0) * release_coeff,
+								\rel, rrand(0.1, 4 * release_coeff),
+								\c0, rrand(1, 4),
+								\c1, \sine,
+								\pan, rrand(-0.7, 0.7),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
+						});
 					}, {
 						channel.play_on(\thump, [
 							\freq, freq,
@@ -587,13 +601,14 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\amp, 0.05 * amp,
 							\out, channel.bus]);
 					}, {
+						"Google tick".postln;
 						channel.play_on(\tick2,
 							[
 								\freqis, min(freq * 4, 18000),
-								\rq, exprand(0.001, 0.1),channel = default_channel;
+								\rq, exprand(0.001, 0.1),
 								\out, channel.bus,
-								\amp, exprand(0.01, 0.05) * amp,
-								\atk, 0.001 * release_coeff,
+								\amp, exprand(0.1, 0.5) * amp,
+								\atk, 0.01 * release_coeff,
 								\rel, 0.01, //0.01,
 								\pan, rrand(-0.5, 0.5),
 							]
@@ -622,19 +637,34 @@ SynthDef(\bounce_away, { | freq = 300 |
 						}
 					);
 					if(inout == \out, {
-						channel.play_on(\reverse_saw, [
-							\freq, freq,
-							\atk, rrand(1.0, 5.0) * release_coeff,
-							\rel, rrand(0.1, 4 * release_coeff),
-							\c0, rrand(1, 4),
-							\c1, \sine,
-							\pan, rrand(-0.7, 0.7),
-							\amp, 0.05 * amp,
-							\out, channel.bus]);
+						if(activity == \low, {
+							channel.play_on(\tick2,
+								[
+									\freq, freq * 2,
+									\rq, exprand(0.001, 0.1),
+									\out, channel.bus,
+									\amp, exprand(0.03, 0.2) * amp,
+									\atk, 0.01 * release_coeff,
+									\rel, 0.01, //0.01,
+									\pan, rrand(-0.5, 0.5),
+								]
+							);
+						}, {
+							channel.play_on(\reverse_saw, [
+								\freq, freq,
+								\atk, rrand(1.0, 5.0) * release_coeff,
+								\rel, rrand(0.1, 4 * release_coeff),
+								\c0, rrand(1, 4),
+								\c1, \sine,
+								\pan, rrand(-0.7, 0.7),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
+						});
 					}, {
+						"Amazon tick".postln;
 						channel.play_on(\tick2,
 							[
-								\freq, freq * 2,
+								\freq, (freq * 4).min(18000),
 								\rq, exprand(0.001, 0.1),
 								\out, channel.bus,
 								\amp, exprand(0.01, 0.05) * amp,
@@ -678,15 +708,27 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\out, channel.bus]);
 					}, {
 						if(activity == \high, {
-							channel.play_on(\glitchy_rise, [
-								\freq, freq,
-								\atk, 0.1,
-								\rel, rrand(2, 4),
-								\c0, -3,
-								\c1, -6,
-								\pan, rrand(-0.7, 0.7),
-								\amp, 0.05 * amp,
-								\out, channel.bus]);
+							"Cloudflare tick".postln;
+							/*channel.play_on(\glitchy_rise, [
+							\freq, freq,
+							\atk, 0.1,
+							\rel, rrand(2, 4),
+							\c0, -3,
+							\c1, -6,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05 * amp,
+							\out, channel.bus]);*/
+							channel.play_on(\tick2,
+								[
+									\freq, (freq * 4).min(18000),
+									\rq, exprand(0.001, 0.1),
+									\out, channel.bus,
+									\amp, exprand(0.1, 0.5) * amp,
+									\atk, 0.01 * release_coeff,
+									\rel, 0.01, //0.01,
+									\pan, rrand(-0.5, 0.5),
+								]
+							);
 						}, {
 							channel.play_on(\thump, [
 								\freq, freq,
@@ -838,12 +880,22 @@ SynthDef(\bounce_away, { | freq = 300 |
 			var service_or_ip = services;
 			if(service_or_ip.asString == "") {
 				service_or_ip = remote_ip;
-				service_or_ip.postln;
 			};
-		// Send it on to the visualisation program
-		~vis_sender.sendMsg("/bcm-packet", remote_location, len, service_or_ip);
+			// Send it on to the visualisation program
+			// ~vis_sender.sendMsg("/bcm-packet", remote_location, len, service_or_ip);
 		}.value();
-		msg.postln;
+		// msg.postln;
+		Synth(\tick2,
+			[
+				\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
+				\rq, exprand(0.001, 0.1),
+				\out, 0,
+				\amp, rrand(0.002, 0.01),
+				\atk, 0.0001,
+				\rel, 0.01, //0.01,
+				\pan, rrand(-0.1, 0.1),
+			]
+		);
 	}, '/package', nil, 57130); // create the OSCFunc
 
 
@@ -885,4 +937,18 @@ SynthDef(\bounce_away, { | freq = 300 |
 		};
 	}).play(~tickClock);
 }.value();
+)
+
+(
+Synth(\tick2,
+	[
+		\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
+		\rq, exprand(0.001, 0.1),
+		\out, 0,
+		\amp, rrand(0.005, 0.03),
+		\atk, 0.0001,
+		\rel, 0.01, //0.01,
+		\pan, rrand(-0.1, 0.1),
+	]
+);
 )
