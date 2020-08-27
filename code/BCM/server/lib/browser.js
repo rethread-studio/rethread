@@ -8,10 +8,11 @@ module.exports.open = (url) => {
   }
   let chromePath = "chromium-browser";
   if ("Darwin" == os.type()) {
-    chromePath = "'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'";
+    chromePath =
+      "'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'";
   }
 
-  const cmd = `${chromePath} --noerrdialogs --disable-infobars --kiosk --kiosk=${url}`;
+  const cmd = `${chromePath} --noerrdialogs --disable-infobars --kiosk ${url}`;
   browser = sh(cmd, {
     async: true,
     silent: true,
@@ -22,3 +23,5 @@ module.exports.close = () => {
   if (browser) browser.kill(1);
   browser = null;
 };
+
+module.exports.isOpen = () => browser != null;
