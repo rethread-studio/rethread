@@ -898,7 +898,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 				\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
 				\rq, exprand(0.0001, 0.1),
 				\out, 0,
-				\amp, rrand(0.0001, 0.005),
+				\amp, rrand(0.0001, 0.001),
 				\atk, rrand(0.000, 0.004),
 				\c0, -10,
 				\rel, rrand(0.01, 0.05) + rel, //0.01,
@@ -908,7 +908,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		);
 		}.fork;
 		~num_packets = ~num_packets + 1;
-		("num packets: " + ~num_packets).postln;
+		// ("num packets: " + ~num_packets).postln;
 	}, '/package', nil, 57130); // create the OSCFunc
 
 
@@ -918,10 +918,13 @@ SynthDef(\bounce_away, { | freq = 300 |
 
 	// An update loop plays sounds according to the stats collected and the waits
 	~tickClock = TempoClock(120/60);
+	~overallActivity = 0;
+	~maxActivity = 60;
 	Routine({
 		loop {
 			var allDevices = ~stats.values,
-			numInPackets = 0, numOutPackets = 0;
+			numInPackets = 0, numOutPackets = 0,
+			numPitchesPerChord;
 
 			allDevices.do { |statDevice|
 				var allServices = statDevice.services.values;
@@ -934,6 +937,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 				};
 			};
 
+			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
+
 			tick_channel.play_on(\tick2,
 				[
 					\freq, rrand(7000, 9000),
@@ -945,6 +950,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 					\pan, rrand(-0.1, 0.1),
 				]
 			);
+
+			// Update chord
+			numPitchesPerChord = ~overallActivity.linexp(0, ~maxActivity, 0, ~ch1.size-0.001).asInteger;
+			~chord = ~ch1[0..numPitchesPerChord] ++ ~ch2[0..numPitchesPerChord] ++ ~ch3[0..numPitchesPerChord] ++ ~ch4[0..numPitchesPerChord];
 
 			0.25.wait;
 		};
