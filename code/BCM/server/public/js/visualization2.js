@@ -40,7 +40,9 @@ const ws = new WebSocket(protocol + "://" + host);
 
 ws.onmessage = (message) => {
   const json = JSON.parse(message.data);
-  if (json.event == "networkActivity") {
+  if (json.event == "reset") {
+    reset();
+  } else if (json.event == "networkActivity") {
     const packet = json.data;
     // console.log(packet);
     allPackets.push({
@@ -62,6 +64,10 @@ ws.onmessage = (message) => {
     }
   }
 };
+
+function reset() {
+  rectangleObjects = [];
+}
 
 function random3DPosition(magnitude) {
   return new THREE.Vector3(
