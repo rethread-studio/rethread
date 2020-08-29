@@ -252,7 +252,7 @@ async function isAlive() {
     callCoordinator("setConnectedUsers", connectedUsers);
     const alive = isHotspot ? connectedUsers.length > 0 : true;
     let deviceName = "BCM-Phone";
-    if (alive) {
+    if (connectedUsers.length > 0) {
       deviceName = connectedUsers[0].name;
     }
     if (alive == false && wasAlive == true) {
