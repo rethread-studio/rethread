@@ -97,7 +97,10 @@ ws.onmessage = async (message) => {
         break;
       }
     }
-    lastCountry = location;
+    if(location != undefined) {
+      lastCountry = location;
+      console.log(location);
+    }
   }
 };
 
@@ -264,7 +267,34 @@ function onWindowResize() {
 function rotate() {
   const keys = Object.keys(locations);
   const index = Math.floor(Math.random() * keys.length);
-  const location = locations[keys[index]];
+  let location = locations[keys[index]];
+  let rotationDur = 2000;
+
+  console.log("Last country: " + lastCountry);
+  if(lastCountry === 'United States') {
+    // Using the first face for the United States focuses on Hawaii
+    location = locations.NordAmerica;
+  }
+  else if(countryShapes.hasOwnProperty(lastCountry)) {
+    // Find the mesh with that name
+    let mesh;
+    for(let country of countries) {
+      if(country.userData.name == lastCountry) {
+        
+        // Todo project camera position
+        let scale = 30;
+        let pos = country.geometry.faces[0].normal;
+        location.x = pos.x * scale;
+        location.y = pos.y * scale;
+        location.z = pos.z * scale;
+        console.log("Found country " + lastCountry + ", pos: " + JSON.stringify(pos));
+        console.log(country);
+        rotationDur = 500;
+      }
+    }
+  }
+
+  let nextRotation = Math.random() * rotationDur + rotationDur;
 
   var from = {
     x: camera.position.x,
@@ -273,7 +303,7 @@ function rotate() {
   };
 
   var tween = new TWEEN.Tween(from)
-    .to(location, 600)
+    .to(location, rotationDur)
     .easing(TWEEN.Easing.Linear.None)
     .onUpdate(function (position) {
       camera.position.set(position.x, position.y, position.z);
@@ -283,9 +313,11 @@ function rotate() {
       camera.lookAt(new THREE.Vector3(0, 0, 0));
     })
     .start();
+
+    setTimeout(rotate, nextRotation);
 }
 
-setInterval(rotate, 1000);
+setTimeout(rotate, 1000);
 
 function animate() {
   let now = Date.now() * 0.001;
@@ -382,6 +414,7 @@ function generateCountries() {
     mesh.scale.x = scale;
     mesh.scale.y = scale;
     mesh.scale.z = scale;
+    mesh.userData.name = name;
     mesh.userData.opacityVel = 0;
     mesh.userData.activated = false;
     mesh.userData.pulsesLeft = 0;
