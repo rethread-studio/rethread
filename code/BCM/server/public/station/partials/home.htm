@@ -1,22 +1,13 @@
 <main class="welcome">
   <div class="instruction">
-    <div class="block">Connect to WiFi</div>
-    <br />
-
-    <span class="tab"></span>
-    <div class="block"><i class="fa fa-wifi" aria-hidden="true"></i> BCM</div>
-    <br />
-
-    <span class="tab"></span>
-    <div class="block">
-      <i class="fa fa-key" aria-hidden="true"></i> BCM-2020
-    </div>
-    <br />
+    <div class="block">Connect to WiFi</div><br ng-if="wifi"/>
+    
     <span class="tab" ng-if="wifi"></span>
     <div class="block" ng-if="wifi">
       <i class="fa fa-wifi" aria-hidden="true"> {{wifi}}</i>
     </div>
 
+    <br ng-if="password"/>
     <span class="tab" ng-if="password"></span>
     <div class="block" ng-if="password">
       <i class="fa fa-key" aria-hidden="true"></i> {{password}}
