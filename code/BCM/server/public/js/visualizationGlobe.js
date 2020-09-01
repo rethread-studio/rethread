@@ -48,10 +48,10 @@ loader.load(
 );
 
 let lightPulseSpeed = 40;
-let opacityBaseLevel = 0.2;
+let opacityBaseLevel = 0.4;
 let countryActiveColor = "0xff0000";
 let countryActivatedColor = "0xffffff";
-let countryDarkColor = "0x443333";
+let countryDarkColor = "0x665555";
 
 // Receive packets
 let protocol = "ws";
@@ -76,7 +76,7 @@ ws.onmessage = async (message) => {
     }
     for (let country of countries) {
       if (country.geometry.name == location) {
-        country.userData.scale += 0.002;
+        country.userData.scale += 0.003;
         // setTimeout(() => {
         //   country.scale.x -= 0.01;
         //   country.scale.y -= 0.01;
@@ -97,7 +97,7 @@ ws.onmessage = async (message) => {
         break;
       }
     }
-    if(location != undefined) {
+    if (location != undefined) {
       lastCountry = location;
       console.log(location);
     }
@@ -270,25 +270,24 @@ function rotate() {
   let location = locations[keys[index]];
   let rotationDur = 2000;
 
-  console.log("Last country: " + lastCountry);
-  if(lastCountry === 'United States') {
+  // console.log("Last country: " + lastCountry);
+  if(Math.random() > 0.8) {
+    // sometimes randomly just rotate to a random position
+  } else if (lastCountry === 'United States') {
     // Using the first face for the United States focuses on Hawaii
     location = locations.NordAmerica;
-  }
-  else if(countryShapes.hasOwnProperty(lastCountry)) {
+  }else if (countryShapes.hasOwnProperty(lastCountry)) {
     // Find the mesh with that name
     let mesh;
-    for(let country of countries) {
-      if(country.userData.name == lastCountry) {
-        
+    for (let country of countries) {
+      if (country.userData.name == lastCountry) {
+
         // Todo project camera position
         let scale = 30;
         let pos = country.geometry.faces[0].normal;
         location.x = pos.x * scale;
         location.y = pos.y * scale;
         location.z = pos.z * scale;
-        console.log("Found country " + lastCountry + ", pos: " + JSON.stringify(pos));
-        console.log(country);
         rotationDur = 500;
       }
     }
@@ -314,7 +313,7 @@ function rotate() {
     })
     .start();
 
-    setTimeout(rotate, nextRotation);
+  setTimeout(rotate, nextRotation);
 }
 
 setTimeout(rotate, 1000);
@@ -349,17 +348,18 @@ function animate() {
       // }
 
       // Update scale
-      country.userData.scale *= 0.98;
-      country.userData.scaleFollower =
-        country.userData.scale * 0.03 + country.userData.scaleFollower * 0.97;
+      country.userData.scale *= 0.985;
+      country.userData.scaleFollower = country.userData.scale * 0.005 + country.userData.scaleFollower * 0.995;
       // country.scale.x = country.userData.baseScale + country.userData.scaleFollower;
       // country.scale.y = country.userData.baseScale + country.userData.scaleFollower;
       // country.scale.z = country.userData.baseScale + country.userData.scaleFollower;
 
+      const colorScale = 1-Math.pow((1-country.userData.scaleFollower), 2);
+
       country.material.color.setRGB(
         1.0,
-        1.0 - country.userData.scaleFollower,
-        1.0 - country.userData.scaleFollower / 1.5
+        1.0 - colorScale,
+        1.0 - colorScale / 1.5
       );
     } else {
       country.material.color.setHex(countryDarkColor);
@@ -383,10 +383,16 @@ function render() {
 function reset() {
   for (let country of countries) {
     country.material.opacity = opacityBaseLevel;
-    country.material.color.setHex(0x443333);
+    country.material.color.setHex(0xbb4949);
     country.scale.x = country.userData.baseScale;
     country.scale.y = country.userData.baseScale;
     country.scale.z = country.userData.baseScale;
+    country.userData.opacityVel = 0;
+    country.userData.activated = false;
+    country.userData.pulsesLeft = 0;
+    country.userData.scale = 0;
+    country.userData.baseScale = scale;
+    country.userData.scaleFollower = 0;
   }
 }
 
@@ -403,7 +409,7 @@ function generateCountries() {
 
     const material = new THREE.MeshPhongMaterial({
       wireframe: true,
-      color: 0x443333,
+      color: 0xbb4949,
       transparent: true,
       opacity: opacityBaseLevel,
       shading: THREE.SmoothShading,
