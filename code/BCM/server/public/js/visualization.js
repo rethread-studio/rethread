@@ -457,7 +457,7 @@ function animate() {
     particlePositions[i * 3] += particleData.velocity.x * dt;
     particlePositions[i * 3 + 1] += particleData.velocity.y * dt;
     particlePositions[i * 3 + 2] += particleData.velocity.z * dt;
-    particleAlphas[i] *= 1.0 - dt;
+    particleAlphas[i] *= 1.0 - (dt * 0.8);
     if(particleData.service == activeService) {
       particleColors[i * 3] = activeParticleColor.r;
       particleColors[i * 3 + 1] = activeParticleColor.g;
