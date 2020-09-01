@@ -83,6 +83,8 @@ ws.onmessage = (message) => {
 
 function reset() {
   allPackets = [];
+  particleCount = 0;
+  particleIndex = 0;
 }
 
 function random3DPosition(magnitude) {
