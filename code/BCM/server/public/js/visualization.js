@@ -19,6 +19,7 @@ let activeService = '';
 let packetsOverTime = 0;
 let glitchThreshold = 130;
 let triggerThisFrame = false;
+let textDelayPerFrame = 0;
 
 let visMode = 'particles';
 let showText = true;
@@ -125,10 +126,10 @@ let textMaterialActive = new THREE.MeshBasicMaterial( { color: 0xff0000, transpa
 
 function createText(service, servicePos) {
   let geometry = new THREE.TextGeometry( service, {
-		font: font,
-		size: 50,
+    font: font,
+    size: 50,
     height: 0.01,
-		curveSegments: 12,
+    curveSegments: 2,
     bevelEnabled: true,
     bevelSize: 0.1,
     bevelOffset: 0.1,
@@ -140,8 +141,10 @@ function createText(service, servicePos) {
   particlesTextObjects.push({
     mesh: textMesh,
     service: service,
+    lifetime: 0.5,
   });
   particles_group.add(textMesh);
+  textPerService.set(service, textMesh);
 }
 
 let activeParticleColor = new THREE.Color(0xff0000);
@@ -535,22 +538,25 @@ function animate() {
   // Updateing texts
   for(let text of particlesTextObjects) {
     if(text.service == activeService) {
-      text.mesh.material = textMaterialActive;
+      text.mesh.material.color.setHex(0xff0000)
     } else {
-      text.mesh.material = textMaterialDefault;
+      text.mesh.material.color.setHex(0xffffff)
     }
-    if(now - lastRegisteredPerService.get(text.service) < 0.2) {
+    let timeSincePacket = now - lastRegisteredPerService.get(text.service);
+    if(timeSincePacket < text.lifetime) {
+      text.mesh.material.opacity = Math.sin((1.0 - Math.pow(1.0 - (timeSincePacket/text.lifetime), 2.0)) * Math.PI);
       text.mesh.visible = true;
     } else {
       text.mesh.visible = false;
+      text.lifetime = 0;
     }
-    if(showText) {
-      textMaterialDefault.opacity = 0.6;
-      textMaterialActive.opacity = 0.7;
-    } else {
-      textMaterialDefault.opacity = 0.0;
-      textMaterialActive.opacity = 0.0;
-    }
+    // if(showText) {
+    //   textMaterialDefault.opacity = 0.6;
+    //   textMaterialActive.opacity = 0.7;
+    // } else {
+    //   textMaterialDefault.opacity = 0.0;
+    //   textMaterialActive.opacity = 0.0;
+    // }
   }
 
   // Update effects parameters
@@ -566,6 +572,7 @@ function animate() {
   packetsOverTime *= 0.8;
   triggerThisFrame = false;
   lastUpdate = now;
+  textDelayPerFrame = 0;
 }
 
 function render() {

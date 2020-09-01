@@ -132,37 +132,42 @@ function createText(text, service) {
   
   // let textMesh = new THREE.Mesh( geometry, textMaterialDefault );
 
-  let geometry = createGeometry({
-    width: 300,
-    align: 'right',
-    font: bmfont
-  })
-
-  // change text and other options as desired
-  // the options sepcified in constructor will
-  // be used as defaults
-  geometry.update(text);
-  let textMesh = new THREE.Mesh( geometry, bmTextMaterial );
-
-  // Convert from screen coordinates to camera coordinates
-  let left = Math.random() * 2 - 1;
-  let top = Math.random() * 2 - 1;
-  let depth = 1; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
-  var vector = new THREE.Vector3(left, top, depth);
-  vector.unproject( camera );
-  var dir = vector.sub( camera.position ).normalize();
-  var distance = - camera.position.z / dir.z;
-  var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-  textMesh.position.copy(pos);
-  textMesh.position.z = 500;
-  // textMesh.rotation.y = Math.PI * 0.5;
-  textObjects.push({
-    mesh: textMesh,
-    service: service,
-    vel: new THREE.Vector3(0, 0, Math.random() * 600 - 1200),
-    lifetime: 5,
-  });
-  text_group.add(textMesh);
+  if(textPerService.has(service)) {
+    textPerService.get(service).lifetime = 5;
+  } else {
+    let geometry = createGeometry({
+      width: 300,
+      align: 'right',
+      font: bmfont
+    })
+  
+    // change text and other options as desired
+    // the options sepcified in constructor will
+    // be used as defaults
+    geometry.update(text);
+    let textMesh = new THREE.Mesh( geometry, bmTextMaterial );
+  
+    // Convert from screen coordinates to camera coordinates
+    let left = Math.random() * 2 - 1;
+    let top = Math.random() * 2 - 1;
+    let depth = 1; // from -1 to 1, depends how far into the scene you want the object, -1 being very close, 1 being the furthest away the camera can see
+    var vector = new THREE.Vector3(left, top, depth);
+    vector.unproject( camera );
+    var dir = vector.sub( camera.position ).normalize();
+    var distance = - camera.position.z / dir.z;
+    var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+    textMesh.position.copy(pos);
+    textMesh.position.z = 500;
+    // textMesh.rotation.y = Math.PI * 0.5;
+    textObjects.push({
+      mesh: textMesh,
+      service: service,
+      // vel: new THREE.Vector3(0, 0, Math.random() * 600 - 1200),
+      lifetime: 5,
+    });
+    text_group.add(textMesh);
+    textPerService.set(service, textMesh);
+  }
 }
 
 init();
@@ -250,12 +255,10 @@ function animate() {
     txt.lifetime -= dt;
     if(txt.lifetime < 0) {
       // Outside of view, remove it
-      text_group.remove(txt.mesh);
+      // text_group.remove(txt.mesh);
+      txt.mesh.
     }
   }
-
-  // Remove rectangles from rectangleObjects
-  // textObjects = textObjects.filter(txt => txt.lifetime < 0);
 
   // Update effects parameters
   bloomPass.threshold = 0;
