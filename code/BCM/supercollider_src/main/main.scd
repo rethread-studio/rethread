@@ -87,6 +87,18 @@ SynthDef(\tick2, {
 	sig = sig.tanh; // Should never happen, but better to soft clip
 	Out.ar(\out.kr(0), sig);
 }).add;
+SynthDef(\gust, {
+	var sig, env, rq = \rq.kr(0.1), atk = \atk.kr(0.5), rel = \rel.kr(1.5), freq = \freq.kr(1400).min(18000).max(100);
+	env = Env.perc(atk, rel, curve: [\c0.kr(4), \c1.kr(-4)]).ar(2);
+	sig = WhiteNoise.ar(0.005);
+	// high freq and rq values causes the filter to blow up violently
+	sig = RHPF.ar(sig, freq, rq.min(5)) * env * 10 * \amp.kr(1.0);
+	sig = LPF.ar(sig, Rand(freq * 0.5, 20000));
+	sig = Pan2.ar(sig, Line.kr(\pan1.kr(0), \pan2.kr(0), atk + rel));
+	sig = sig.tanh; // Should never happen, but better to soft clip
+
+	Out.ar(\out.kr(0), sig);
+}).add;
 
 SynthDef(\sub_tam, {
 	// FM synth for a sub bass type sound rev_channel.buswith some noise on top
@@ -246,9 +258,9 @@ SynthDef(\reverse_saw, {
 }).add;
 
 SynthDef(\reverse_google, {
-	var sig, env, freq = \freq.kr(220);
+	var sig, env, freq = \freq.kr(220), atk = \atk.kr(2), rel = \rel.kr(0.1);
 
-	env = Env.perc(\atk.kr(2), \rel.kr(0.1), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
+	env = Env.perc(atk, rel, curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
 	sig = Pulse.ar(freq) * env;
 	2.do { |i| var mult = i+2;
 		sig = sig + DPW3Tri.ar(freq * mult * 1.01, // * LFNoise1.kr(7).range(0.98, 1.02),
@@ -256,6 +268,7 @@ SynthDef(\reverse_google, {
 	};
 
 	sig = sig * 0.3 * \amp.kr(0.5) * LFSaw.ar(Rand(1.5, 3)).range(0.2, 1.0).lag(0.01);
+	sig = LPF.ar(sig, Line.kr(18000, freq, atk+rel));
 	sig = Pan2.ar(sig, \pan.kr(0));
 
 	Out.ar(\out.kr(0), sig);
@@ -349,6 +362,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 			elevation: elevation,
 			bus: bus,
 			name: name,
+			my_clock: TempoClock(1, queueSize: 1024),
 			set_amp: {|self, amp|
 				self.my_amp = amp;
 				self.my_synth.set(\amp, amp);
@@ -363,7 +377,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 			},
 			// Use play on to make sure that the
 			play_on: {|self, synth_name, args|
-				s.makeBundle(~latency, {Synth(synth_name, args, self.my_group)} );
+				// s.makeBundle(~latency, {Synth(synth_name, args, self.my_group)} );
+				self.my_clock.sched(~latency, Synth(synth_name, args, self.my_group));
 			},
 		)
 	};
@@ -470,7 +485,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 	// Sound process factory
 	~addSoundProcessToService = { | service, inout |
 		// The tick function is the function for launching sounds that is being called
-		var soundType = \standard;
+		var soundType = [\standard1, \standard2, \standard3].choose;
 		switch(service.identifier,
 			\Google, { soundType = \Google },
 			"Google,Youtube".asSymbol, { soundType = \YouTube},
@@ -517,7 +532,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		if(activity != \none) {
 			// type.postln;
 			switch(type,
-				\standard, {
+				\standard1, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
 					amp = 0.5,
 					release_coeff = 1.0,
@@ -545,7 +560,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 						if(rrand(0.0, 1.0) > 0.5, {
 							channel.play_on(\tick2,
 								[
-									\freq, min(freq * 4, 18000),
+									\freq, rrand(10000, 11000),
 									\rq, exprand(0.001, 0.1),
 									\out, channel.bus,
 									\amp, exprand(0.03, 0.1) * amp,
@@ -577,8 +592,128 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\out, channel.bus]);
 					});
 				},
-				\Google, {
+				\standard2, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
+					amp = 0.5,
+					release_coeff = 1.0,
+					thump_atk = rrand(0.18, 0.21);
+
+					if(~positionThroughService) {
+						channel = default_channel;
+					};
+					switch(activity,
+						\low, {
+							amp = amp * rrand(0.3, 0.7);
+						},
+						\medium, {
+							amp = amp * rrand(0.7, 1.2);
+							thump_atk = rrand(1, 2);
+						},
+						\high, {
+							amp = amp * rrand(1.2, 2.0);
+							freq = freq * (2.pow(rrand(-1, 1.0).round));
+							release_coeff = rrand(0.3, 0.5);
+							thump_atk = rrand(2, 3);
+						}
+					);
+					if(inout == \out, {
+						if(rrand(0.0, 1.0) > 0.5, {
+							var gustFreq = freq;
+							while({gustFreq < 900}, {gustFreq = gustFreq * 2});
+							channel.play_on(\gust,
+								[
+									\freq, min(gustFreq, 4000),
+									\rq, exprand(0.05, 0.2),
+									\out, channel.bus,
+									\amp, exprand(0.03, 0.1) * amp,
+									\atk, rrand(1.0, 3.0) * release_coeff,
+									\rel, rrand(1, 5) * release_coeff, //0.01,
+									\pan1, rrand(-0.5, 0.5),
+									\pan2, rrand(-0.5, 0.5),
+								]
+							);
+						}, {
+							channel.play_on(\long_sine, [
+								\freq, freq,
+								\length, rrand(1.0, 5.0) * release_coeff,
+								\pan, rrand(-0.7, 0.7),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
+						});
+					}, {
+						channel.play_on(\thump, [
+							\freq, freq,
+							\atk, thump_atk,
+							\rel, rrand(2, 3),
+							\c0, -3,
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05 * amp,
+							\out, channel.bus]);
+					});
+				},
+				\standard3, {
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
+					amp = 0.5,
+					release_coeff = 1.0,
+					thump_atk = rrand(0.18, 0.21);
+
+					if(~positionThroughService) {
+						channel = default_channel;
+					};
+					switch(activity,
+						\low, {
+							amp = amp * rrand(0.3, 0.7);
+						},
+						\medium, {
+							amp = amp * rrand(0.7, 1.2);
+							thump_atk = rrand(1, 2);
+						},
+						\high, {
+							amp = amp * rrand(1.2, 2.0);
+							freq = freq * (2.pow(rrand(-1, 1.0).round));
+							release_coeff = rrand(0.3, 0.5);
+							thump_atk = rrand(2, 3);
+						}
+					);
+					if(inout == \out, {
+						if(rrand(0.0, 1.0) > 0.5, {
+							channel.play_on(\tick2,
+								[
+									\freq, rrand(7000, 10000),
+									\rq, exprand(0.001, 0.1),
+									\out, channel.bus,
+									\amp, exprand(0.02, 0.05) * amp,
+									\atk, 0.001 * release_coeff,
+									\rel, 0.01, //0.01,
+									\pan, rrand(-0.5, 0.5),
+								]
+							);
+						}, {
+							channel.play_on(\reverse_sine, [
+								\freq, freq,
+								\atk, rrand(1.0, 5.0) * release_coeff,
+								\rel, rrand(0.1, 4 * release_coeff),
+								\c0, rrand(1, 4),
+								\c1, \sine,
+								\pan, rrand(-0.7, 0.7),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
+						});
+					}, {
+						channel.play_on(\thump, [
+							\freq, freq,
+							\atk, thump_atk,
+							\rel, 2,
+							\c0, -3,
+							\c1, \sine,
+							\pan, rrand(-0.7, 0.7),
+							\amp, 0.05 * amp,
+							\out, channel.bus]);
+					});
+				},
+				\Google, {
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave + 1),
 					amp = 0.5,
 					release_coeff = 1.0;
 
@@ -802,7 +937,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 					});
 				},
 				\Facebook, {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave-2),
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave-1),
 					amp = 0.5,
 					release_coeff = 1.0,
 					thump_atk = rrand(0.18, 0.21);
@@ -908,7 +1043,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		};
 
 		// Percussive sound when a packet is received
-		if(~overallActivity < (~maxActivity * 0.4)) {
+		if(~overallActivity < (~maxActivity * 0.5)) {
 			{
 				rrand(0.0, 0.2).wait;
 				Synth(\tick2,
@@ -973,7 +1108,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 			);
 
 			// Update chord
-			if(~overallActivity > (~maxActivity * 0.3)) {
+			if(~overallActivity > (~maxActivity * 0.5)) {
 				if(rrand(0.0, 1.0) > 0.98) {
 					~root = [-8, 0, 9, 17, -22].choose;
 				};
@@ -1015,4 +1150,18 @@ SynthDef(\bounce_away, { | freq = 300 |
 		0.3.wait;
 	};
 }.fork;
+)
+
+(
+Synth(\gust,
+	[
+		\freq, min(2000, 18000),
+		\rq, exprand(0.05, 0.2),
+		\out, channel.bus,
+		\amp, exprand(0.03, 0.1) * amp,
+		\atk, 0.001 * 0,
+		\rel, 0.01, //0.01,
+		\pan, rrand(-0.5, 0.5),
+	]
+);
 )
