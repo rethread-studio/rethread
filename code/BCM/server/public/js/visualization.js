@@ -17,6 +17,7 @@ const indexPerService = new Map(); // Give the service a number used as an index
 const lastRegisteredPerService = new Map();
 let activeService = '';
 let packetsOverTime = 0;
+let glitchThreshold = 130;
 let triggerThisFrame = false;
 
 let visMode = 'particles';
@@ -58,9 +59,10 @@ ws.onmessage = (message) => {
     }
 
     packetsOverTime++;
-    if(packetsOverTime > 100) {
+    if(packetsOverTime > glitchThreshold) {
       if(!triggerThisFrame) {
-        glitchPass.triggerActivation();
+        glitchPass.triggerActivation(packetsOverTime);
+        triggerThisFrame = true;
       }
     } else {
       for(const service of packet.services) {

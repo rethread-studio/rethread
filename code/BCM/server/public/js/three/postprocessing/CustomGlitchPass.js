@@ -7,7 +7,7 @@ import {
 	UniformsUtils
 } from "https://unpkg.com/three@0.119.1/build/three.module.js";
 import { Pass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/Pass.js";
-import { DigitalGlitch } from "https://unpkg.com/three@0.119.1/examples/jsm/shaders/DigitalGlitch.js";
+import { DigitalGlitch } from "./CustomDigitalGlitch.js";
 
 var GlitchPass = function ( dt_size ) {
 
@@ -48,7 +48,7 @@ GlitchPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 		this.uniforms[ 'seed' ].value = Math.random();//default seeding
 		this.uniforms[ 'byp' ].value = 0;
 
-		if ( this.curF % this.randX == 0 || this.goWild == true ) {
+		if ( this.curF == 0 || this.goWild == true ) {
 
 			this.uniforms[ 'amount' ].value = Math.random() / 30;
 			this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
@@ -56,11 +56,9 @@ GlitchPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 			this.uniforms[ 'seed_y' ].value = MathUtils.randFloat( - 1, 1 );
 			this.uniforms[ 'distortion_x' ].value = MathUtils.randFloat( 0, 1 );
 			this.uniforms[ 'distortion_y' ].value = MathUtils.randFloat( 0, 1 );
-			this.curF = 0;
-			this.generateTrigger();
 			this.curF ++;
 
-		} else if ( this.curF % this.randX < this.randX / 20 ) {
+		} else if ( this.curF < this.randX / 20 ) {
 
 			this.uniforms[ 'amount' ].value = Math.random() / 90;
 			this.uniforms[ 'angle' ].value = MathUtils.randFloat( - Math.PI, Math.PI );
@@ -94,7 +92,7 @@ GlitchPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 
 	generateTrigger: function () {
 
-		this.randX = MathUtils.randInt( 120, 240 );
+		this.randX = MathUtils.randInt( 120, 540 );
 
 	},
 
@@ -116,8 +114,9 @@ GlitchPass.prototype = Object.assign( Object.create( Pass.prototype ), {
 
 	},
 
-	triggerActivation: function() {
+	triggerActivation: function(duration) {
 		this.curF = 0;
+		this.randX = Math.pow(Math.min(duration/300, 1.0), 2) * 500;
 	}
 
 } );
