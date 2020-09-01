@@ -372,7 +372,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 
 	// Set up all the channels
 	rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
-	rev_channel.play_on(\medium_reverb, [\out, rev_channel.bus, \in, rev_channel.bus, \mix, 1.0]);
+	rev_channel.play_on(\medium_reverb, [\out, rev_channel.bus, \in, rev_channel.bus, \mix, 1.0, \amp, 2.0]);
+	rev_channel.set_amp(0.5);
 	sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
 	sub_channel.set_send(rev_channel.bus, 0.2);
 	rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
@@ -406,6 +407,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		statDevice.services = ();
 		statDevice.bus = Bus.audio(s, 1);
 		statDevice.channel = ~makeMixerChannel.(device.asString, ~decoderBus);
+		statDevice.channel.set_send(rev_channel.bus, 1.0);
 		statDevice
 	};
 
@@ -543,7 +545,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 						if(rrand(0.0, 1.0) > 0.5, {
 							channel.play_on(\tick2,
 								[
-									\freqis, min(freq * 4, 18000),
+									\freq, min(freq * 4, 18000),
 									\rq, exprand(0.001, 0.1),
 									\out, channel.bus,
 									\amp, exprand(0.03, 0.1) * amp,
@@ -609,7 +611,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 					}, {
 						channel.play_on(\tick2,
 							[
-								\freqis, min(freq * 4, 18000),
+								\freqis, min(freq * 4, 14000),
 								\rq, exprand(0.001, 0.1),
 								\out, channel.bus,
 								\amp, exprand(0.02, 0.1) * amp,
@@ -779,7 +781,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\amp, 0.1 * amp,
 							\out, channel.bus]);
 					}, {
-						channel.play_on(\bounce_away, [
+						/*channel.play_on(\bounce_away, [
 							\freq, freq*2,
 							\rel, 0.1,
 							\atk, rrand(0.7, 1.0) * release_coeff,
@@ -787,7 +789,16 @@ SynthDef(\bounce_away, { | freq = 300 |
 							\c0, \sine,
 							\pan, rrand(-0.7, 0.7),
 							\amp, 0.1 * amp,
-							\out, channel.bus]);
+							\out, channel.bus]);*/
+						channel.play_on(\thump, [
+								\freq, freq,
+								\atk, 0.3,
+								\rel, 1,
+								\c0, -3,
+								\c1, \sine,
+								\pan, rrand(-0.9, 0.9),
+								\amp, 0.05 * amp,
+								\out, channel.bus]);
 					});
 				},
 				\Facebook, {
@@ -897,22 +908,24 @@ SynthDef(\bounce_away, { | freq = 300 |
 		};
 
 		// Percussive sound when a packet is received
-		{
-			rrand(0.0, 0.2).wait;
-			Synth(\tick2,
-			[
-				\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-				\rq, exprand(0.0001, 0.1),
-				\out, 0,
-				\amp, rrand(0.0001, 0.001),
-				\atk, rrand(0.000, 0.004),
-				\c0, -10,
-				\rel, rrand(0.01, 0.05) + rel, //0.01,
-				\c1, -12,
-				\pan, rrand(-1*~packetRecPanWidth, ~packetRecPanWidth),
-			]
-		);
-		}.fork;
+		if(~overallActivity < (~maxActivity * 0.4)) {
+			{
+				rrand(0.0, 0.2).wait;
+				Synth(\tick2,
+					[
+						\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
+						\rq, exprand(0.0001, 0.1),
+						\out, 0,
+						\amp, rrand(0.0001, 0.001),
+						\atk, rrand(0.000, 0.004),
+						\c0, -10,
+						\rel, rrand(0.01, 0.05) + rel, //0.01,
+						\c1, -12,
+						\pan, rrand(-1*~packetRecPanWidth, ~packetRecPanWidth),
+					]
+				);
+			}.fork;
+		};
 		~num_packets = ~num_packets + 1;
 		// ("num packets: " + ~num_packets).postln;
 	}, '/package', nil, 57130); // create the OSCFunc
@@ -960,7 +973,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 			);
 
 			// Update chord
-			if(~overallActivity > (~maxActivity * 0.5)) {
+			if(~overallActivity > (~maxActivity * 0.3)) {
 				if(rrand(0.0, 1.0) > 0.98) {
 					~root = [-8, 0, 9, 17, -22].choose;
 				};
