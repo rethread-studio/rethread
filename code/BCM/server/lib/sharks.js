@@ -3,7 +3,7 @@ const sh = require("shelljs");
 const through = require("through");
 const geoip = require("geo-from-ip");
 const getServices = require("./services");
-const getIP = require("./ip");
+const hotspot = require("./hotspot");
 
 function repairJsonString(data) {
   return data
@@ -33,9 +33,12 @@ function getLocation(ip) {
   }
 }
 
-function isIn(localIp, json) {
-  if (localIp) {
-    return json.ip_dst[0] == localIp;
+function isIn(clients, json) {
+  for (let client in clients) {
+    return json.ip_dst[0] == client.ip;
+  }
+  if (hotspot.isHotspot()) {
+    return json.ip_dst[0] == "10.3.141.118";
   }
   return (
     json.ip_dst[0].indexOf("192.168") == 0 ||
@@ -45,7 +48,7 @@ function isIn(localIp, json) {
 
 module.exports = function (networkInterface, kill, broadcast) {
   return new Promise((resolve, reject) => {
-    let localIp = getIP(networkInterface);
+    const clients = hotspot.cachedConnectedUsers();
 
     const cmd =
       "tshark -V -N Ndmntv -l -T ek -i " +
@@ -92,7 +95,7 @@ module.exports = function (networkInterface, kill, broadcast) {
 
             if (json && json.ip_src) {
               const data = {};
-              if (isIn(localIp, json)) {
+              if (isIn(clients, json)) {
                 data.local_ip = json.ip_dst[0];
                 data.remote_ip = json.ip_src[0];
                 data.local_host = json.ip_dst_host[0];
