@@ -6,7 +6,6 @@ const hotspot = require("./hotspot");
 
 const knownIPs = {};
 function getLocation(ip) {
-  console.log(Object.keys(knownIPs).length);
   if (!knownIPs[ip]) {
     try {
       knownIPs[ip] = geoip.allData(ip);
