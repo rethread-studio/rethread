@@ -47,7 +47,7 @@ loader.load(
   (response) => (font = response)
 );
 
-let lightPulseSpeed = 40;
+let lightPulseSpeed = 30;
 let opacityBaseLevel = 0.4;
 let countryActiveColor = "0xff0000";
 let countryActivatedColor = "0xffffff";
@@ -86,7 +86,7 @@ ws.onmessage = async (message) => {
           country.userData.opacityVel = lightPulseSpeed;
           country.userData.opacityPhase = 0;
         }
-        if (country.userData.pulsesLeft < 10) {
+        if (country.userData.pulsesLeft < 7) {
           country.userData.pulsesLeft += 1;
         }
 
@@ -99,7 +99,6 @@ ws.onmessage = async (message) => {
     }
     if (location != undefined) {
       lastCountry = location;
-      console.log(location);
     }
   }
 };
@@ -268,7 +267,7 @@ function rotate() {
   const keys = Object.keys(locations);
   const index = Math.floor(Math.random() * keys.length);
   let location = locations[keys[index]];
-  let rotationDur = 2000;
+  let rotationDur = 1000;
 
   // console.log("Last country: " + lastCountry);
   if(Math.random() > 0.8) {
@@ -276,13 +275,13 @@ function rotate() {
   } else if (lastCountry === 'United States') {
     // Using the first face for the United States focuses on Hawaii
     location = locations.NordAmerica;
-  }else if (countryShapes.hasOwnProperty(lastCountry)) {
+  } else if (countryShapes.hasOwnProperty(lastCountry)) {
     // Find the mesh with that name
     let mesh;
     for (let country of countries) {
       if (country.userData.name == lastCountry) {
 
-        // Todo project camera position
+        // project camera position from face normal
         let scale = 30;
         let pos = country.geometry.faces[0].normal;
         location.x = pos.x * scale;
@@ -293,7 +292,7 @@ function rotate() {
     }
   }
 
-  let nextRotation = Math.random() * rotationDur + rotationDur;
+  let nextRotation = Math.random() * rotationDur * 0.5 + rotationDur + 10;
 
   var from = {
     x: camera.position.x,
@@ -306,6 +305,7 @@ function rotate() {
     .easing(TWEEN.Easing.Linear.None)
     .onUpdate(function (position) {
       camera.position.set(position.x, position.y, position.z);
+      
       camera.lookAt(new THREE.Vector3(0, 0, 0));
     })
     .onComplete(function () {
@@ -315,8 +315,6 @@ function rotate() {
 
   setTimeout(rotate, nextRotation);
 }
-
-setTimeout(rotate, 1000);
 
 function animate() {
   let now = Date.now() * 0.001;
