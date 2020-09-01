@@ -1,0 +1,17 @@
+{
+    "coordinator": {
+        "port": 8000
+    },
+    "station": {
+        "interface": "bridge100",
+        "sniffingAutoStart": true,
+        "oscAutoStart": true,
+        "port": 8080
+    },
+    "OSC": {
+        "ip": "130.229.163.238",
+        "port": 57121,
+        "server_port": 57121,
+        "address": "/package"
+    }
+}

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="bcm-dashboard" ng-controller="mainController">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular-animate.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular-touch.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular-route.js"></script>
+
+    <link rel="stylesheet" href="./style/dashboard.css" />
+    <title>BCM - Dashboard</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="collapse bg-dark" id="navbarHeader">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-8 col-md-7 py-4">
+              <h4 class="text-white">BCM</h4>
+              <p class="text-muted"></p>
+            </div>
+            <div class="col-sm-4 offset-md-1 py-4">
+              <h4 class="text-white">Links</h4>
+              <ul class="list-unstyled">
+                <li><a href="#" class="text-white">Github</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="navbar navbar-dark bg-dark shadow-sm">
+        <div class="container d-flex justify-content-between">
+          <a href="#" class="navbar-brand d-flex align-items-center">
+            <strong>BCM - Dashboard</strong>
+          </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-toggle="collapse"
+            data-target="#navbarHeader"
+            aria-controls="navbarHeader"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <h2>Stations</h2>
+      <div class="station card mb-3" ng-repeat="station in stations">
+        <div class="card-header">{{station.name}}</div>
+        <div class="card-body row">
+          <div class="col-12">
+            <h3>Metrics</h3>
+          </div>
+          <div class="col-sm">
+            <div class="row">
+              <div class="col-sm">
+                Packets in:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.in | number}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Packets out:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.out | number}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Packets in/sec:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.in*1000/(now() - station.metrics.since) |
+                number}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Packets out/sec:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.out*1000/(now() - station.metrics.since) |
+                number}}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm"></div>
+          <div class="col-sm">
+            <div class="row">
+              <div class="col-sm">
+                Data received:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.lenIn | humanSize}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Data sent:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.lenOut | humanSize}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Data in/sec:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.lenIn*1000/(now() - station.metrics.since) |
+                humanSize}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Data out/sec:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.lenOut*1000/(now() - station.metrics.since) |
+                humanSize}}
+              </div>
+            </div>
+          </div>
+          <div class="col-12">
+            <h3>Clients</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>IP</th>
+                  <th>Mac</th>
+                  <th>Options</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="client in station.clients">
+                  <td ng-bind="client.name"></td>
+                  <td ng-bind="client.ip"></td>
+                  <td ng-bind="client.mac"></td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      ng-click="disconnect(station.name, client)"
+                    >
+                      Disconnect
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent">
+          <button
+            type="button"
+            class="btn"
+            ng-class="{'btn-danger': station.status.muted, 'btn-success': !station.status.muted}"
+            ng-click="toggleMute(station.name)"
+          >
+            Mute
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            ng-class="{'btn-danger': station.status.sniffing, 'btn-success': !station.status.sniffing}"
+            ng-click="toggleSniffing(station.name)"
+          >
+            Sniffing
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            ng-class="{'btn-danger': station.status.osc, 'btn-success': !station.status.osc}"
+            ng-click="toggleOSC(station.name)"
+          >
+            OSC
+          </button>
+          <a class="btn btn-primary" target="__blank" href="{{station.address}}"
+            >Station Interface</a
+          >
+          <button
+            type="button"
+            class="btn btn-primary"
+            ng-click="openBrowser(station.name)"
+          >
+            Open Browser
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            ng-click="closeBrowser(station.name)"
+          >
+            Close Browser
+          </button>
+        </div>
+      </div>
+      <h2>Instructions</h2>
+      <form ng-submit="sendInstruction()">
+        <div class="input-group mb-3">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Instruction"
+            ng-model="instruction"
+          />
+          <div class="input-group-append">
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              ng-click="sendInstruction()"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      </form>
+      <h2>Samples</h2>
+      <div class="input-group mb-3">
+        <select class="form-control" ng-model="sampleName">
+          <option
+            ng-repeat="sample in samples"
+            ng-bind="sample"
+            value="{{sample}}"
+          ></option>
+        </select>
+        <div class="input-group-append">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            ng-click="loadSample()"
+          >
+            Load
+          </button>
+        </div>
+      </div>
+      <div class="station card mb-3" ng-repeat="station in sample.stations">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-sm">
+              {{station.name}}
+            </div>
+            <div class="col-sm">
+              <select
+                class="form-control"
+                ng-model="station.map"
+                placeholder="Maps recored station to real station"
+              >
+                <option selected value="{{null}}">Virutal station</option>
+                <option
+                  ng-repeat="station in stations"
+                  ng-bind="station.name"
+                  value="{{station.name}}"
+                ></option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card-body row">
+          <div class="col-sm">
+            <div class="row">
+              <div class="col-sm">
+                Packets in:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.in | number}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Packets out:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.out | number}}
+              </div>
+            </div>
+          </div>
+          <div class="col-sm"></div>
+          <div class="col-sm">
+            <div class="row">
+              <div class="col-sm">
+                Data received:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.lenIn | humanSize}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm">
+                Data sent:
+              </div>
+              <div class="col-sm">
+                {{station.metrics.lenOut | humanSize}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        ng-click="playSample()"
+        ng-if="!status.sample && sample"
+      >
+        Play
+      </button>
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        ng-click="stopSample()"
+        ng-if="status.sample && sample"
+      >
+        Stop
+      </button>
+    </div>
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./js/coordinator.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

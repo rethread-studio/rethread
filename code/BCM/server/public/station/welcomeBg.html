@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="./style/visualization.css" />
+    <title>BCM - Welcome</title>
+    <style>
+      #glishBackground {
+        position: absolute;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        background-color: black;
+      }
+      .glishBox {
+        position: absolute;
+        background-color: white;
+        transition: opacity 1.5s ease, width 0.7s ease, height 0.6s ease, left 10.2s ease, top 10.4s ease, background-color 2.0s ease, box-shadow 2.0s ease;
+        box-shadow: 0px 0px 10px 6px #fff;
+        opacity: 0.0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="glishBackground"></div>
+    <script>
+      const bg = document.getElementById("glishBackground");
+      const count = 100;
+      for (let index = 0; index < count; index++) {
+        const element = document.createElement("div");
+        element.className = "glishBox";
+        bg.appendChild(element);
+      }
+      //init
+      const glishBoxes = document.getElementsByClassName("glishBox");
+      for (let index = 0; index < glishBoxes.length; index++) {
+        const element = glishBoxes[index];
+          element.style.left = Math.floor(Math.random() * 100) + "vw";
+          element.style.top = Math.floor(Math.random() * 100) + "vh";
+      }
+      let fast = false;
+      function randomize() {
+        const glishBoxes = document.getElementsByClassName("glishBox");
+        for (let index = 0; index < glishBoxes.length; index++) {
+          const element = glishBoxes[index];
+          if(fast) {
+            element.style.transition = "opacity 0.05s ease, width 0.15s ease, height 0.2s ease, left 0.2s ease, top 0.4s ease, background-color 0.05s ease, box-shadow 0.05s ease";
+          } else {
+            element.style.transition = "opacity 1.5s ease, width 2.7s ease, height 2.6s ease, left 10.2s ease, top 10.4s ease, background-color 2.0s ease, box-shadow 2.0s ease";
+          }
+          if(Math.random() > 0.99) {
+            element.style.left = Math.floor(Math.random() * 100) + "vw";
+            element.style.top = Math.floor(Math.random() * 100) + "vh";
+            if(Math.random() > 0.1) {
+              element.style.transition = "opacity 1.5s ease, width 0.7s ease, height 0.6s ease, left 0s ease, top 0s ease, background-color 2.0s ease, box-shadow 2.0s ease";
+            }
+          }
+          if(Math.random() > 0.7) {
+            element.style.width = Math.floor(Math.pow(Math.random(), 2) * 40) + "px";
+            element.style.height = Math.floor(Math.random() * 25) + "px";
+          }
+          if(Math.random() > 0.9) {
+            if(element.style.opacity == 0.7) {
+              element.style.opacity = 0.0;
+            } else if (element.style.opacity == 0.0) {
+              element.style.opacity = 0.7;
+            }
+          }
+          if(Math.random() > 0.1) {
+            element.style.backgroundColor = "white";
+            element.style.boxShadow = "0px 0px 4px 6px white";
+          } else {
+            element.style.backgroundColor = "red";
+            element.style.boxShadow = "0px 0px 12px 6px red";
+          }
+        }
+        if(Math.random() > 0.7) {
+          fast = ! fast;
+        }
+        if(fast) {
+          setTimeout(randomize, Math.random() * 100 + 20)
+        } else {
+          setTimeout(randomize, Math.random() * 500 + 200)
+        }
+        
+      }
+      randomize()
+    </script>
+  </body>
+</html>
