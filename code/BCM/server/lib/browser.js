@@ -1,4 +1,4 @@
-const sh = require("exec-sh");
+const sh = require("shelljs");
 const os = require("os");
 
 let browser = null;
@@ -13,7 +13,7 @@ module.exports.open = (url) => {
   }
 
   const cmd = `${chromePath} --noerrdialogs --disable-infobars --kiosk ${url}`;
-  browser = sh(cmd, {
+  browser = sh.exec(cmd, {
     async: true,
     silent: true,
   });

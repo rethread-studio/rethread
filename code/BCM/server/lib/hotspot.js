@@ -5,8 +5,7 @@ const fs = require("fs");
 
 module.exports.isHotspot = () => {
   try {
-    const output = sh.which("hostapd");
-    return output != null;
+    return sh.which("hostapd") != null;
   } catch (error) {
     return false;
   }
@@ -46,11 +45,7 @@ const listwificlients = async (interface) => {
   return clients;
 };
 const arpGetUsers = async (interface) => {
-  const devices = (
-    await arp({
-      interface,
-    })
-  ).filter((device) => {
+  const devices = arp({ interface }).filter((device) => {
     return (
       device.ip.split(".")[3] != 1 &&
       device.ip.split(".")[3] != 255 &&
@@ -76,9 +71,7 @@ module.exports.cachedConnectedUsers = () => connectedUsers;
 module.exports.connectedUsers = async (interface) => {
   if (module.exports.isHotspot()) {
     const clients = await listwificlients(interface);
-    const devices = await arp({
-      interface,
-    });
+    const devices = await arp({ interface });
     const output = [];
     for (let client of clients) {
       for (let device of devices) {
@@ -92,10 +85,9 @@ module.exports.connectedUsers = async (interface) => {
     }
     connectedUsers = output;
     return output;
-  } else {
-    connectedUsers = await arpGetUsers(interface);
-    return connectedUsers;
   }
+  connectedUsers = await arpGetUsers(interface);
+  return connectedUsers;
 };
 
 module.exports.getWifiConfig = () => {
