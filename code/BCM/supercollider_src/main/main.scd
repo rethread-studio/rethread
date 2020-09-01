@@ -5,6 +5,11 @@ s.reboot;
 )
 
 (
+s.options.numOutputBusChannels = 36;
+s.reboot;
+)
+
+(
 //// RUN THIS BLOCK TO START EVERYTHING
 
 //////////////////////////////////////////////////////
@@ -22,6 +27,7 @@ if(~useAmbisonics == true, {
 }, {
 	~mixerChannelOutputs = 2;
 });
+~firstOutputBus = 0;
 ~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
 
 // Ambisonics positioning parameters
@@ -362,7 +368,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		)
 	};
 
-	~decoder = Synth(\decoder, [\in, ~decoderBus]);
+	~decoder = Synth(\decoder, [\in, ~decoderBus, \out, ~firstOutputBus]);
 
 	// Set up all the channels
 	rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
@@ -540,7 +546,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 									\freqis, min(freq * 4, 18000),
 									\rq, exprand(0.001, 0.1),
 									\out, channel.bus,
-									\amp, exprand(0.05, 0.2) * amp,
+									\amp, exprand(0.03, 0.1) * amp,
 									\atk, 0.001 * release_coeff,
 									\rel, 0.01, //0.01,
 									\pan, rrand(-0.5, 0.5),
@@ -606,8 +612,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 								\freqis, min(freq * 4, 18000),
 								\rq, exprand(0.001, 0.1),
 								\out, channel.bus,
-								\amp, exprand(0.1, 0.5) * amp,
-								\atk, 0.01 * release_coeff,
+								\amp, exprand(0.02, 0.1) * amp,
+								\atk, 0.5 * release_coeff,
 								\rel, 0.01, //0.01,
 								\pan, rrand(-0.5, 0.5),
 							]
