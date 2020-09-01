@@ -69,6 +69,10 @@ const arpGetUsers = async (interface) => {
   return devices.filter((f) => f.alive);
 };
 
+let connectedUsers = [];
+
+module.exports.cachedConnectedUsers = () => connectedUsers;
+
 module.exports.connectedUsers = async (interface) => {
   if (module.exports.isHotspot()) {
     const clients = await listwificlients(interface);
@@ -86,9 +90,11 @@ module.exports.connectedUsers = async (interface) => {
         }
       }
     }
+    connectedUsers = output;
     return output;
   } else {
-    return await arpGetUsers(interface);
+    connectedUsers = await arpGetUsers(interface);
+    return connectedUsers;
   }
 };
 
@@ -106,7 +112,7 @@ module.exports.getWifiConfig = () => {
     }
     return config;
   }
-}
+};
 
 module.exports.disconnect = async (client_mac) => {
   sh.exec(`sudo hostapd_cli deauthenticate ${client_mac}`, { silent: true });
