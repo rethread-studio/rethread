@@ -94,7 +94,7 @@ angular
       if ($location.url() != "/") {
         $("#" + visualizations[currentVisualization]).show();
       }
-    }, 10000);
+    }, 30000);
 
     ws.onmessage = (message) => {
       const json = JSON.parse(message.data);
