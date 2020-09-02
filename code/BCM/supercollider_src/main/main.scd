@@ -217,9 +217,11 @@ if(~useAmbisonics, {
 		Out.ar(out, sig);
 	}).add;
 
-	SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0 |
+	SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0, activity = 0 |
 		var sig = In.ar(in, 2);
-		sig = sig * \amp.kr(0.5);
+		sig = sig * \amp.kr(0.8);
+		sig = Balance2.ar(sig[0], sig[1], pan);
+		sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
 		Out.ar(out, sig);
 		Out.ar(send, sig * send_amp);
 	}).add;
@@ -352,7 +354,11 @@ SynthDef(\bounce_away, { | freq = 300 |
 		};
 		elevation = ~elevationPosition;
 		~elevationPosition = ~elevationPosition + ~elevationStep;
-		synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
+		if(~useAmbisonics, {
+			synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
+		}, {
+			synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 3.0], group, \addToTail);
+		});
 		(
 			my_synth: synth,
 			my_group: group,
@@ -362,7 +368,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 			elevation: elevation,
 			bus: bus,
 			name: name,
-			my_clock: TempoClock(1, queueSize: 1024),
+			my_clock: TempoClock(1, queueSize: 8192),
 			set_amp: {|self, amp|
 				self.my_amp = amp;
 				self.my_synth.set(\amp, amp);
@@ -374,6 +380,9 @@ SynthDef(\bounce_away, { | freq = 300 |
 			set_send_amp: {|self, send_amp|
 				self.my_send_amp = send_amp;
 				self.my_synth.set(\send_amp, send_amp);
+			},
+			set_activity: {|self, activity|
+				self.my_synth.set(\activity, activity);
 			},
 			// Use play on to make sure that the
 			play_on: {|self, synth_name, args|
@@ -496,15 +505,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 			"Github,Microsoft".asSymbol, { soundType = \GitHub }
 		);
 		service.soundType = soundType;
-		if(inout == \in, {
-			service.tick = { | self, channel |
-				~playSound.(self.soundType, \in, self.packets[\in], channel);
-			};
-		}, {
-			service.tick = { | self, channel |
-				~playSound.(self.soundType, \out, self.packets[\out], channel);
-			};
-		});
+		service.tick = { | self, channel |
+			~playSound.(self.soundType, \in, self.packets[\in], channel);
+			~playSound.(self.soundType, \out, self.packets[\out], channel);
+		};
 	};
 
 
@@ -1046,7 +1050,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		if(~overallActivity < (~maxActivity * 0.5)) {
 			{
 				rrand(0.0, 0.2).wait;
-				Synth(\tick2,
+				tick_channel.play_on(\tick2,
 					[
 						\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
 						\rq, exprand(0.0001, 0.1),
@@ -1082,20 +1086,23 @@ SynthDef(\bounce_away, { | freq = 300 |
 			numPitchesPerChord, root;
 
 			allDevices.do { |statDevice|
-				var allServices = statDevice.services.values;
+				var allServices = statDevice.services.values, totalPacketsForDevice = 0;
 				allServices.do { | service |
 					service.tick(statDevice.channel);
 					numInPackets = numInPackets + service.packets[\in];
 					numOutPackets = numOutPackets + service.packets[\out];
+					totalPacketsForDevice = totalPacketsForDevice + service.packets[\in];
+					totalPacketsForDevice = totalPacketsForDevice + service.packets[\out];
 					service.packets[\in] = 0;
 					service.packets[\out] = 0;
 				};
+				statDevice.channel.set_activity((totalPacketsForDevice/~maxActivity).min(1.0));
 			};
 
 			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
 			// ("overall: " + ~overallActivity).postln;
 
-			tick_channel.play_on(\tick2,
+			/*tick_channel.play_on(\tick2,
 				[
 					\freq, rrand(7000, 9000),
 					\rq, exprand(0.001, 0.1),
@@ -1105,7 +1112,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 					\rel, 0.01, //0.01,
 					\pan, rrand(-0.1, 0.1),
 				]
-			);
+			);*/
 
 			// Update chord
 			if(~overallActivity > (~maxActivity * 0.5)) {
