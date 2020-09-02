@@ -9,7 +9,7 @@ import { UnrealBloomPass } from "https://unpkg.com/three@0.119.1/examples/jsm/po
 import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.0/dist/tween.esm.js";
 import { SMAAPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js";
 
-const locations = {
+let locations = {
   NordAmerica: {
     x: 45.007262821788274,
     y: 42.636811843287255,
@@ -39,6 +39,45 @@ const locations = {
   top: { x: 2.6451793113733446, y: 103.04016038480927, z: -3.2535889089049363 },
 };
 
+function multiplyLocation(loc, scale) {
+  loc.x *= scale;
+  loc.y *= scale,
+  loc.z *= scale;
+}
+
+multiplyLocation(locations.top, 0.6);
+multiplyLocation(locations.Europe, 1.2);
+
+function splitGreatestDistance(from, to) {
+  let dist = Math.abs(from.x - to.x);
+  let axis = 'x';
+  if(Math.abs(from.y - to.y) > dist) {
+    dist = Math.abs(from.y - to.y);
+    axis = 'y';
+  }
+  if(Math.abs(from.z - to.z) > dist) {
+    dist = Math.abs(from.z - to.z);
+    axis = 'z';
+  }
+  if(axis == 'x') {
+    to.x = (from.x - to.x) * 0.5;
+  } else if(axis == 'y') {
+    to.y = (from.y - to.y) * 0.5;
+  } else if(axis == 'z') {
+    to.z = (from.z - to.z) * 0.5;
+  }
+}
+
+function locationDistance(a, b) {
+  return Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2) + Math.pow((b.z - a.z), 2));
+}
+
+
+
+console.log()
+
+const easings = [TWEEN.Easing.Exponential.InOut, TWEEN.Easing.Sinusoidal.InOut, TWEEN.Easing.Circular.InOut, TWEEN.Easing.Linear.None];
+
 // Load font
 var loader = new THREE.FontLoader();
 var font;
@@ -52,6 +91,8 @@ let opacityBaseLevel = 0.4;
 let countryActiveColor = "0xff0000";
 let countryActivatedColor = "0xffffff";
 let countryDarkColor = "0x665555";
+
+let cameraOffset = new THREE.Vector3(0, 0, 0);
 
 // Receive packets
 let protocol = "ws";
@@ -197,6 +238,7 @@ function init() {
   });
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+  camera.position.z = 400;
   controls = new OrbitControls(camera, renderer.domElement);
 
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -263,31 +305,34 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+
+
 function rotate() {
   const keys = Object.keys(locations);
   const index = Math.floor(Math.random() * keys.length);
   let location = locations[keys[index]];
   let rotationDur = 1000;
 
-  // console.log("Last country: " + lastCountry);
-  if(Math.random() > 0.8) {
+  if(Math.random() > 0.9) {
     // sometimes randomly just rotate to a random position
   } else if (lastCountry === 'United States') {
     // Using the first face for the United States focuses on Hawaii
-    location = locations.NordAmerica;
+    location = { ...locations.NordAmerica};
+    rotationDur = 600;
   } else if (countryShapes.hasOwnProperty(lastCountry)) {
     // Find the mesh with that name
     let mesh;
     for (let country of countries) {
       if (country.userData.name == lastCountry) {
-
         // project camera position from face normal
-        let scale = 30;
+        let scale = 60;
         let pos = country.geometry.faces[0].normal;
-        location.x = pos.x * scale;
-        location.y = pos.y * scale;
-        location.z = pos.z * scale;
-        rotationDur = 500;
+        location = {
+          x: pos.x * scale,
+          y: pos.y * scale,
+          z: pos.z * scale,
+        }
+        rotationDur = 600;
       }
     }
   }
@@ -300,21 +345,90 @@ function rotate() {
     z: camera.position.z,
   };
 
-  var tween = new TWEEN.Tween(from)
-    .to(location, rotationDur)
-    .easing(TWEEN.Easing.Linear.None)
-    .onUpdate(function (position) {
-      camera.position.set(position.x, position.y, position.z);
-      
-      camera.lookAt(new THREE.Vector3(0, 0, 0));
-    })
-    .onComplete(function () {
-      camera.lookAt(new THREE.Vector3(0, 0, 0));
-    })
-    .start();
+  let easing = easings[~~(Math.random() * easings.length)];
+
+  if(locationDistance(from, location) > 70) {
+    // if the target location is far away, first move higher not to clip the edges
+    // make sure we first move to a location higher than the goal in order to 
+    let higherLocation = { ...location }; // shallow copy
+    multiplyLocation(higherLocation, 1.3);
+    splitGreatestDistance(from, higherLocation);
+
+    var tween = new TWEEN.Tween(from)
+      .to(higherLocation, rotationDur * 0.5)
+      .easing(easing)
+      .onUpdate(function (position) {
+        camera.position.set(position.x + cameraOffset.x, position.y + cameraOffset.y, position.z + cameraOffset.z);
+        
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+      })
+      .onComplete(function () {
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+        from.x = camera.position.x;
+        from.y = camera.position.y;
+        from.z = camera.position.z;
+
+        var tween = new TWEEN.Tween(from)
+          .to(location, rotationDur * 0.5)
+          .easing(easing)
+          .onUpdate(function (position) {
+            camera.position.set(position.x + cameraOffset.x, position.y + cameraOffset.y, position.z + cameraOffset.z);
+            
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+          })
+          .onComplete(function () {
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+          })
+          .start();
+      })
+      .start();
+  } else {
+    var tween = new TWEEN.Tween(from)
+      .to(location, rotationDur)
+      .easing(easing)
+      .onUpdate(function (position) {
+        camera.position.set(position.x + cameraOffset.x, position.y + cameraOffset.y, position.z + cameraOffset.z);
+        
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+      })
+      .onComplete(function () {
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+      })
+      .start();
+  }
+  
 
   setTimeout(rotate, nextRotation);
 }
+
+// TODO: The camera.position is only updated when rotating leading to glitchy jumps
+function updateCameraOffset() {
+  let nextUpdateTime = Math.random() * 600 + 300;
+  let newOffset = {
+    x: Math.random() * 20 - 10,
+    y: Math.random() * 20 - 10,
+    z: Math.random() * 20 - 10,
+  }
+  let from = {
+    x: cameraOffset.x,
+    y: cameraOffset.y,
+    z: cameraOffset.z,
+  }
+  var tween = new TWEEN.Tween(from)
+      .to(newOffset, nextUpdateTime)
+      .easing(TWEEN.Easing.Sinusoidal.InOut)
+      .onUpdate(function (offset) {
+        cameraOffset.set(offset.x, offset.y, offset.z);
+        console.log(offset);
+      })
+      .onComplete(function () {
+      })
+      .start();
+  setTimeout(updateCameraOffset, nextUpdateTime);
+}
+
+// updateCameraOffset();
 
 function animate() {
   let now = Date.now() * 0.001;
