@@ -57,7 +57,10 @@ ws.onmessage = (message) => {
         indexPerService.set(service, indexPerService.size);
       }
       let isOut = packet.out;
-      createRectangle(service, indexPerService.get(service), packet.len, isOut);
+      if(rectangleObjects.length < 3000) {
+        createRectangle(service, indexPerService.get(service), packet.len, isOut);
+      }
+
       let time = Date.now() * 0.001;
       lastRegisteredPerService.set(service, time);
       activeService = service;
@@ -67,6 +70,9 @@ ws.onmessage = (message) => {
 
 function reset() {
   rectangleObjects = [];
+  scene.remove(rectangles_group);
+  rectangles_group = new THREE.Group();
+  scene.add(rectangles_group);
 }
 
 function random3DPosition(magnitude) {
@@ -90,12 +96,16 @@ let randomParticle = 0; // Used for drawing lines, this is the starting particle
 var r = 800;
 var rHalf = r / 2;
 
+let zSpeedScalar = 0;
+let zSpeedScalarSquared = 0;
+let zSpeedScalarVel = 0;
+
 
 var rectangles_group;
 var rectangleMaterial = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.FrontSide} );
 var rectangleMaterialActive = new THREE.MeshBasicMaterial( {color: 0xff0000, side: THREE.FrontSide} );
 // var rectangleGeometry = new THREE.PlaneBufferGeometry( 20, 80, 4 );
-var rectangleGeometry = new THREE.BoxGeometry( 4, 8, 40 );
+var rectangleGeometry = new THREE.BoxGeometry( 5, 10, 40 );
 var rectangleObjects = [];
 var rectangleLeftEdge = 0;
 var rectangleRightEdge = 0;
@@ -117,11 +127,12 @@ var rectangleRightEdge = 0;
 
 
 function createRectangle(service, index, packetSize, isOut) {
-  let plane = new THREE.Mesh( rectangleGeometry, rectangleMaterial );
+  let material = new THREE.MeshBasicMaterial( {color: 0xffffff, side: THREE.FrontSide, opacity: 0, transparent: true} );
+  let plane = new THREE.Mesh( rectangleGeometry, material );
   let numLanes = indexPerService.size + 1 ;
   // Convert from screen coordinates to camera coordinates
   let left = 1;
-  let top = (2/numLanes) * (index + 1) - 1;
+  let top = ((2/numLanes) * (index + 1) - 1) * 0.8;
   if(isOut) {
     left = -1;
   }
@@ -136,26 +147,30 @@ function createRectangle(service, index, packetSize, isOut) {
   plane.position.copy(pos);
   
   rectangles_group.add(plane);
-  let xVel = Math.random() * -240 + (-240000/packetSize) - 180;
+  let xVel = Math.random() * -180 + (-740000/Math.pow(packetSize, 1.3)) ;
   if(isOut) {
     xVel *= -1;
-    rectangleLeftEdge = plane.position.x * 2;
-    rectangleRightEdge = -plane.position.x * 2;
+    // rectangleLeftEdge = plane.position.x * 6;
+    // rectangleRightEdge = -plane.position.x * 6;
   } else {
-    rectangleLeftEdge = -plane.position.x * 2;
-    rectangleRightEdge = plane.position.x * 2;
+    // rectangleLeftEdge = -plane.position.x * 6;
+    // rectangleRightEdge = plane.position.x * 6;
   }
+  let zVel = (Math.random() * 1.5 - 1.5) * packetSize * zSpeedScalarSquared;
+  let speed = Math.sqrt(Math.pow(xVel, 2) + Math.pow(zVel, 2));
   rectangleObjects.push({
     mesh: plane,
-    vel: new THREE.Vector3(xVel, 0, (Math.random() * 12 - 24) * packetSize),
+    vel: new THREE.Vector3(xVel, 0, zVel),
     service: service,
+    phase: 0.0,
+    phaseSpeed: speed * 0.0015,
   });
 }
 
 var effectController = {
   bloomPassThreshold: 0.0,
-  bloomPassStrength: 0.38,
-  bloomPassRadius: 0.15,
+  bloomPassStrength: 1.0, //1.26
+  bloomPassRadius: 1.5, // 0.8
   doRotation: false,
 };
 
@@ -167,8 +182,8 @@ function initGUI() {
 
 
   gui.add(effectController, "bloomPassThreshold", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassStrength", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassRadius", 0.0, 2.0, 0.001);
+  gui.add(effectController, "bloomPassStrength", 0.0, 20.0, 0.001);
+  gui.add(effectController, "bloomPassRadius", 0.0, 20.0, 0.001);
 }
 
 function init() {
@@ -237,26 +252,38 @@ var lastUpdate = 0;
 function animate() {
   let now = Date.now() * 0.001;
   let dt = now - lastUpdate;
+  if(!dt || lastUpdate == 0) {
+    dt = 0;
+  }
+
+  if(Math.random() > 0.9) zSpeedScalarVel = Math.random() * 0.5 - 0.25;
+  zSpeedScalar += zSpeedScalarVel * dt;
+  zSpeedScalarSquared = Math.pow(zSpeedScalar, 2);
+  
+  if(zSpeedScalar > 1.0) zSpeedScalar = 1.0;
+  if(zSpeedScalar < 0.0) zSpeedScalar = 0.0;
  
   // Update rectangles
   for(let rect of rectangleObjects) {
     rect.mesh.position.x += rect.vel.x * dt;
     rect.mesh.position.z += rect.vel.z * dt;
     if(activeService == rect.service) {
-      rect.mesh.material = rectangleMaterialActive;
+      rect.mesh.material.color.setHex(0xff0000);
     } else {
-      rect.mesh.material = rectangleMaterial;
+      rect.mesh.material.color.setHex(0xffffff);
     }
-    if(rect.mesh.position.x < rectangleLeftEdge || rect.mesh.position.x > rectangleRightEdge) {
+    if(rect.phase >= Math.PI) {
       // Outside of view, remove it
       rectangles_group.remove(rect.mesh);
     }
+    rect.mesh.material.opacity = Math.pow(Math.sin(rect.phase), 2);
+    rect.phase += rect.phaseSpeed * dt;
     // rect.position.y -= 1;
     // rect.position.z -= 10;
   }
 
   // Remove rectangles from rectangleObjects
-  rectangleObjects = rectangleObjects.filter(rect => rect.mesh.position.x > rectangleLeftEdge && rect.mesh.position.x < rectangleRightEdge);
+  rectangleObjects = rectangleObjects.filter(rect => rect.phase <= Math.PI * 1.1);
 
   // if(Math.random() > 0.995) {
   //   showText = !showText;
