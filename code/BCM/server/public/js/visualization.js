@@ -73,6 +73,7 @@ ws.onmessage = (message) => {
           positionPerService.set(service, servicePos);
           indexPerService.set(service, indexPerService.size);
         }
+        updateText(service);
         addParticle(service, positionPerService.get(service), packet.len);
         let time = Date.now() * 0.001;
         lastRegisteredPerService.set(service, time);
@@ -125,6 +126,7 @@ let textMaterialDefault = new THREE.MeshBasicMaterial( { color: 0xffffff, transp
 let textMaterialActive = new THREE.MeshBasicMaterial( { color: 0xff0000, transparent: true, opacity: 0.9 } );
 
 function createText(service, servicePos) {
+  let material = new THREE.MeshBasicMaterial( { color: 0xffffff, transparent: true, opacity: 0.7 } );
   let geometry = new THREE.TextGeometry( service, {
     font: font,
     size: 50,
@@ -136,15 +138,28 @@ function createText(service, servicePos) {
     bevelSegments: 1,
   } );
   
-  let textMesh = new THREE.Mesh( geometry, textMaterialDefault );
+  let textMesh = new THREE.Mesh( geometry, material );
   textMesh.position.copy(servicePos);
-  particlesTextObjects.push({
+  let textObj =  {
     mesh: textMesh,
     service: service,
     lifetime: 0.5,
-  });
+  };
+  particlesTextObjects.push(textObj);
   particles_group.add(textMesh);
-  textPerService.set(service, textMesh);
+  textPerService.set(service, textObj);
+}
+
+function updateText(service) {
+  let text = textPerService.get(service);
+  if(text) {
+    if(text.lifetime < 0.5) {
+      text.lifetime = 0.5;
+    } else if(text.lifetime < 2.0) {
+      text.lifetime *= 1.005;
+    }
+    
+  }
 }
 
 let activeParticleColor = new THREE.Color(0xff0000);
