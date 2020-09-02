@@ -337,7 +337,7 @@ function rotate() {
     }
   }
 
-  let nextRotation = Math.random() * rotationDur * 0.5 + rotationDur + 10;
+  
 
   var from = {
     x: camera.position.x,
@@ -353,6 +353,8 @@ function rotate() {
     let higherLocation = { ...location }; // shallow copy
     multiplyLocation(higherLocation, 1.3);
     splitGreatestDistance(from, higherLocation);
+
+    rotationDur *= 2;
 
     var tween = new TWEEN.Tween(from)
       .to(higherLocation, rotationDur * 0.5)
@@ -398,7 +400,7 @@ function rotate() {
       .start();
   }
   
-
+  let nextRotation = Math.random() * rotationDur * 0.5 + rotationDur + 10;
   setTimeout(rotate, nextRotation);
 }
 
