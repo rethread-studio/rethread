@@ -11,6 +11,40 @@
   <body>
     <div id="container"></div>
 
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+			attribute float size;
+
+      varying vec3 vColor;
+      varying float vAlpha;
+      attribute float alpha;
+
+			void main() {
+
+        vColor = color;
+        vAlpha = alpha;
+
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+				gl_PointSize = size * ( 300.0 / -mvPosition.z );
+
+				gl_Position = projectionMatrix * mvPosition;
+
+			}
+
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentshader">
+      varying vec3 vColor;
+      varying float vAlpha;
+
+			void main() {
+
+				gl_FragColor = vec4( vColor, vAlpha );
+			}
+
+		</script>
+
     <script src="./js/countries.js"></script>
     <script type="module" src="./js/visualizationGlobe.js"></script>
   </body>

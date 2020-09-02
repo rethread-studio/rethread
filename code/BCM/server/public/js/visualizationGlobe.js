@@ -141,8 +141,48 @@ ws.onmessage = async (message) => {
     if (location != undefined) {
       lastCountry = location;
     }
+    addParticle(random3DPosition(300), packet.len);
   }
 };
+
+function addParticle(vec3, packetSize) {
+  let i = particleIndex;
+  particlePositions[i * 3] = vec3.x;
+  particlePositions[i * 3 + 1] = vec3.y;
+  particlePositions[i * 3 + 2] = vec3.z;
+  particleColors[i * 3] = 1.0;
+  particleColors[i * 3 + 1] = Math.max(1.0 - Math.pow(packetSize/700, 2.0), 0);
+  particleColors[i * 3 + 2] = Math.max(1.0 - Math.pow(packetSize/1800, 2.0), 0);
+  particleAlphas[i] = 0.4;
+  particlesData[i].lifetime = 500;
+  let scale = 2.0 * 700/packetSize;
+  particlesData[i].velocity = new THREE.Vector3(
+    (-.4 + Math.random() * .8) * scale,
+    (-.4 + Math.random() * .8) * scale,
+    (-.4 + Math.random() * .8) * scale
+  );
+  particleIndex++;
+  if(particleIndex >= maxParticleCount) {
+    particleIndex = 0;
+  }
+  particleCount++;
+  if(particleCount > maxParticleCount) {
+    particleCount = maxParticleCount;
+  }
+  particles.setDrawRange(0, particleCount);
+}
+
+function random3DPosition(magnitude) {
+  const theta = Math.random() * Math.PI * 2;
+  const v = Math.random();
+  const phi = Math.acos((2*v)-1);
+  const r = magnitude;
+  let x = r * Math.sin(phi) * Math.cos(theta);
+  let y = r * Math.sin(phi) * Math.sin(theta);
+  let z = r * Math.cos(phi);
+  const halfMag = magnitude * 0.5;
+  return new THREE.Vector3(x, y, z)
+}
 
 async function wait(time) {
   await new Promise((resolve) => setTimeout(resolve, time));
@@ -184,6 +224,15 @@ let container,
   smaaPass;
 let lastUpdate = 0;
 let lastCountry = "";
+
+var maxParticleCount = 10000;
+var particleCount = 0; // The number of active particles
+var particleIndex = 0; // The index of the next particle (can loop around to recycle old particles)
+var particlesData = [];
+var particles;
+var pointCloud;
+var particlePositions;
+var particleUniforms, particleAlphas, particleColors, particleSizes;
 
 init();
 animate();
@@ -291,6 +340,90 @@ function init() {
   scene.fog = new THREE.Fog(0xfafafa, 40, 2000);
   const light = new THREE.HemisphereLight(0xffffff, 0x555555, 0.7);
   scene.add(light);
+
+  particleUniforms = {
+
+    // alpha: {value: 1.0}
+
+  };
+
+  var shaderMaterial = new THREE.ShaderMaterial( {
+
+    uniforms: particleUniforms,
+    vertexShader: document.getElementById( 'vertexshader' ).textContent,
+    fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+
+    blending: THREE.AdditiveBlending,
+    depthTest: false,
+    transparent: true,
+    vertexColors: true
+
+  } );
+
+
+  particles = new THREE.BufferGeometry();
+  particlePositions = new Float32Array(maxParticleCount * 3);
+  particleColors = new Float32Array(maxParticleCount * 3);
+  particleAlphas = new Float32Array(maxParticleCount);
+  particleSizes = new Float32Array(maxParticleCount);
+  for (var i = 0; i < maxParticleCount; i++) {
+    // var x = Math.random() * r - r / 2;
+    // var y = Math.random() * r - r / 2;
+    // var z = Math.random() * r - r / 2;
+
+    // particlePositions[i * 3] = x;
+    // particlePositions[i * 3 + 1] = y;
+    // particlePositions[i * 3 + 2] = z;
+
+    particlePositions[i * 3] = 0;
+    particlePositions[i * 3 + 1] = 0;
+    particlePositions[i * 3 + 2] = 0;
+
+    particleColors[i * 3] = 1.0;
+    particleColors[i * 3 + 1] = 1.0;
+    particleColors[i * 3 + 2] = 1.0;
+
+    particleAlphas[i] = Math.random();
+
+    particleSizes[i] = 3.0;
+
+    // add it to the geometry
+    let scale = 60.0;
+    particlesData.push({
+      velocity: new THREE.Vector3(
+        (-.4 + Math.random() * .8) * scale,
+        (-.4 + Math.random() * .8) * scale,
+        (-.4 + Math.random() * .8) * scale
+      ),
+      numConnections: 0,
+      lifetime: 0,
+    });
+  }
+
+  particles.setDrawRange(0, particleCount);
+  particles.setAttribute(
+    "position",
+    new THREE.BufferAttribute(particlePositions, 3).setUsage(
+      THREE.DynamicDrawUsage
+    )
+  );
+  particles.setAttribute(
+    "color",
+    new THREE.BufferAttribute(particleColors, 3).setUsage(
+      THREE.DynamicDrawUsage
+    )
+  );
+  particles.setAttribute(
+    "alpha",
+    new THREE.BufferAttribute(particleAlphas, 1).setUsage(
+      THREE.DynamicDrawUsage
+    )
+  );
+  particles.setAttribute( 'size', new THREE.BufferAttribute( particleSizes, 1 ).setUsage( THREE.DynamicDrawUsage ) );
+
+  // create the particle system
+  pointCloud = new THREE.Points(particles, shaderMaterial);
+  scene.add(pointCloud);
 
   stats = new Stats();
   // container.appendChild(stats.dom);
@@ -479,6 +612,37 @@ function animate() {
       country.material.color.setHex(countryDarkColor);
     }
   }
+
+  // Update particles
+
+  for (var i = 0; i < particleCount; i++) {
+    // get the particle
+    var particleData = particlesData[i];
+
+    particlePositions[i * 3] += particleData.velocity.x * dt;
+    particlePositions[i * 3 + 1] += particleData.velocity.y * dt;
+    particlePositions[i * 3 + 2] += particleData.velocity.z * dt;
+    particleAlphas[i] *= 1.0 - (dt * 0.5);
+    // if(particleData.service == activeService) {
+    //   particleColors[i * 3] = activeParticleColor.r;
+    //   particleColors[i * 3 + 1] = activeParticleColor.g;
+    //   particleColors[i * 3 + 2] = activeParticleColor.b;
+    // } else {
+    //   particleColors[i * 3] = 1.0;
+    //   particleColors[i * 3 + 1] = 1.0;
+    //   particleColors[i * 3 + 2] = 1.0;
+    // }
+
+    if(particleData.lifetime <= 0) {
+      particlePositions[i * 3 + 2] = 2000000; // Hide particle if it's dead
+    } else {
+      particleData.lifetime--;
+    }
+  }
+
+  pointCloud.geometry.attributes.position.needsUpdate = true;
+  pointCloud.geometry.attributes.alpha.needsUpdate = true;
+  pointCloud.geometry.attributes.color.needsUpdate = true;
 
   TWEEN.update();
   requestAnimationFrame(animate);
