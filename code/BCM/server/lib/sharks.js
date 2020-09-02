@@ -1,23 +1,8 @@
 const JSONStream = require("JSONStream");
 const sh = require("shelljs");
-const through = require("through");
 const geoip = require("geo-from-ip");
 const getServices = require("./services");
 const hotspot = require("./hotspot");
-
-function repairJsonString(data) {
-  return data
-    .replace(/Form item: "(.*)" = "(.*)""/, function (
-      match,
-      p1,
-      p2,
-      offset,
-      string
-    ) {
-      return `Form item: \\"${p1}\" = \\"${p2}\\""`;
-    })
-    .replace(/"tcp_flags_tcp_flags_str": ".*?",/, "");
-}
 
 const knownIPs = {};
 function getLocation(ip) {
@@ -71,16 +56,6 @@ module.exports = function (networkInterface, kill, broadcast) {
         stderr += data.toString();
       });
       child.stdout
-        .pipe(
-          through(function write(data) {
-            try {
-              data = repairJsonString(data);
-              this.queue(data);
-            } catch (error) {
-              console.log(error);
-            }
-          })
-        )
         .pipe(
           JSONStream.parse().on("error", (e) => {
             console.log("error", e);
@@ -167,11 +142,9 @@ module.exports = function (networkInterface, kill, broadcast) {
             console.log(error);
           }
         })
-        .on("end", () => {
-          reject(
-            "TShark process finished with the following error:\n" + stderr
-          );
-        });
+        .on("end", () =>
+          reject("TShark process finished with the following error:\n" + stderr)
+        );
     } catch (error) {
       reject(error);
     }

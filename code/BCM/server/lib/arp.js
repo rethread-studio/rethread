@@ -1,4 +1,4 @@
-const sh = require("exec-sh");
+const sh = require("shelljs");
 
 /**
  * Finds all local devices (ip and mac address) connected to the current network.
@@ -14,16 +14,12 @@ module.exports = function findLocalDevices(opts) {
  * Reads the arp table.
  */
 function arpAll(opts) {
-  return new Promise((resolve) => {
-    cmd = "arp -a";
-    if (opts.interface) {
-      cmd += " -i " + opts.interface;
-    }
-    child = sh(cmd, true, function (err, stdout, stderr) {
-      const data = parseAll(stdout);
-      return resolve(data);
-    });
-  });
+  let cmd = "arp -a";
+  if (opts.interface) {
+    cmd += " -i " + opts.interface;
+  }
+  const child = sh.exec(cmd, { silent: true });
+  return parseAll(child.stdout);
 }
 
 /**
@@ -35,28 +31,14 @@ function parseAll(data) {
   }
 
   if (process.platform.includes("linux")) {
-    var rows = data.split("\n");
-    return rows
-      .map(function (row) {
-        return parseLinux(row);
-      })
-      .filter(Boolean);
+    const rows = data.split("\n");
+    return rows.map(parseLinux).filter(Boolean);
   } else if (process.platform.includes("win32")) {
-    var winRows = data.split("\n").splice(1);
-    return winRows
-      .map(function (row) {
-        return parseWin32(row);
-      })
-      .filter(Boolean);
+    const winRows = data.split("\n").splice(1);
+    return winRows.map(parseWin32).filter(Boolean);
   }
 
-  return data
-    .trim()
-    .split("\n")
-    .map(function (row) {
-      return parseRow(row);
-    })
-    .filter(Boolean);
+  return data.trim().split("\n").map(parseRow).filter(Boolean);
 }
 
 /**
@@ -67,13 +49,9 @@ function arpOne(address) {
     return Promise.reject(new Error("Invalid IP address provided."));
   }
 
-  return new Promise((resolve) => {
-    cmd = "arp -n " + address;
-    child = sh(cmd, true, function (err, stdout, stderr) {
-      const data = parseOne(stdout);
-      return resolve(data);
-    });
-  });
+  const cmd = "arp -n " + address;
+  const child = sh.exec(cmd, { silent: true });
+  return parseOne(child.stdout);
 }
 
 /**
@@ -90,7 +68,7 @@ function parseOne(data) {
       return;
     }
     // remove first row (containing "headlines")
-    var rows = data.split("\n").slice(1)[0];
+    const rows = data.split("\n").slice(1)[0];
     return parseLinux(rows, true);
   } else if (process.platform.includes("win32")) {
     return; // currently not supported
@@ -103,18 +81,18 @@ function parseOne(data) {
  */
 function parseRow(row) {
   // Parse name.
-  var nameStart = 0;
-  var nameEnd = row.indexOf("(") - 1;
-  var name = row.slice(nameStart, nameEnd);
+  const nameStart = 0;
+  const nameEnd = row.indexOf("(") - 1;
+  const name = row.slice(nameStart, nameEnd);
 
   // Parse ip.
-  var ipStart = nameEnd + 2;
-  var ipEnd = row.indexOf(")", ipStart);
-  var ipAddress = row.slice(ipStart, ipEnd);
+  const ipStart = nameEnd + 2;
+  const ipEnd = row.indexOf(")", ipStart);
+  const ipAddress = row.slice(ipStart, ipEnd);
   // Parse mac
-  var macStart = row.indexOf(" at ", ipEnd) + 4;
-  var macEnd = row.indexOf(" on ", macStart);
-  var macAddress = row.slice(macStart, macEnd);
+  const macStart = row.indexOf(" at ", ipEnd) + 4;
+  const macEnd = row.indexOf(" on ", macStart);
+  let macAddress = row.slice(macStart, macEnd);
   // Ignore unresolved hosts.
   if (macAddress === "(incomplete)") {
     return;
@@ -133,20 +111,16 @@ function parseRow(row) {
 }
 
 function parseLinux(row, parseOne) {
-  var result = {};
-
   // Ignore unresolved hosts.
   if (row === "" || row.indexOf("incomplete") >= 0) {
     return;
   }
 
-  var chunks = row.split(" ").filter(Boolean);
+  const chunks = row.split(" ").filter(Boolean);
   if (parseOne) {
-    result = prepareOne(chunks);
-  } else {
-    result = prepareAll(chunks);
+    return prepareOne(chunks);
   }
-  return result;
+  return prepareAll(chunks);
 }
 
 function prepareOne(chunks) {
