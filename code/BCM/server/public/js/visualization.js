@@ -51,10 +51,6 @@ ws.onmessage = (message) => {
     reset();
   } else if (json.event == "networkActivity") {
     const packet = json.data;
-    // console.log(packet.remote_host);
-    allPackets.push({
-      location: packet.location,
-    })
     if(packet.services.length === 0) {
       packet.services.push(packet.remote_host)
     }
@@ -254,19 +250,6 @@ function init() {
 
   particles_group = new THREE.Group();
   scene.add(particles_group);
-
-  // var helper = new THREE.BoxHelper(
-  //   new THREE.Mesh(new THREE.BoxBufferGeometry(r, r, r))
-  // );
-  // helper.material.color.setHex(0x101010);
-  // helper.material.blending = THREE.AdditiveBlending;
-  // helper.material.transparent = true;
-  // group.add(helper);
-
-  // var segments = maxParticleCount * maxParticleCount;
-
-  // positions = new Float32Array(segments * 3);
-  // colors = new Float32Array(segments * 3);
 
   var pMaterial = new THREE.PointsMaterial({
     color: 0xffffff,
