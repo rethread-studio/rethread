@@ -77,6 +77,7 @@ angular
       "visualization2",
       //"visualization3",
       "visualizationGlobe",
+      "visualizationSparse",
     ];
     let currentVisualization = 1;
     $("#" + visualizations[currentVisualization]).addClass(
@@ -94,7 +95,7 @@ angular
       if ($location.url() != "/") {
         $("#" + visualizations[currentVisualization]).show();
       }
-    }, 30000);
+    }, 20000);
 
     ws.onmessage = (message) => {
       const json = JSON.parse(message.data);
