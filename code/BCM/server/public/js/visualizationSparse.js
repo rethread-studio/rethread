@@ -248,7 +248,7 @@ function init() {
     let y = Math.floor(i/particlesPerLine);
     particlePositions[i * 3] = x * distanceBetweenParticles + startX;
     particlePositions[i * 3 + 1] = y * distanceBetweenParticles + startX;
-    particlePositions[i * 3 + 2] = 100;
+    particlePositions[i * 3 + 2] = 0;
 
     let hue = 0.0;
     if(Math.random() > 0.8) {
