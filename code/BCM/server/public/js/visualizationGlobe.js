@@ -86,6 +86,7 @@ loader.load(
   (response) => (font = response)
 );
 
+let positionPerService = new Map();
 let lightPulseSpeed = 30;
 let opacityBaseLevel = 0.4;
 let countryActiveColor = "0xff0000";
@@ -130,18 +131,23 @@ ws.onmessage = async (message) => {
         if (country.userData.pulsesLeft < 7) {
           country.userData.pulsesLeft += 1;
         }
-
         country.userData.activated = true;
-
-        // country.material.color.setHex(0xffffff);
-        // await pulseCountry(country);
         break;
       }
     }
     if (location != undefined) {
       lastCountry = location;
     }
-    addParticle(random3DPosition(300), packet.len);
+    for(const service of packet.services) {
+      if (!positionPerService.has(service)) {
+        let servicePos = random3DPosition(300);
+        positionPerService.set(service, servicePos);
+      }
+      let pos = positionPerService.get(service).clone().add(random3DPosition(20));
+      addParticle(pos, packet.len);
+      addParticle(random3DPosition(300), packet.len);
+    }
+    
   }
 };
 
