@@ -119,7 +119,7 @@ var pointCloud;
 var particlePositions;
 var particleUniforms, particleAlphas, particleColors, particleSizes;
 
-var boxRow = 50;
+var boxRow = 51;
 var numBoxes = boxRow * boxRow;
 var boxes = [];
 var box_group;
