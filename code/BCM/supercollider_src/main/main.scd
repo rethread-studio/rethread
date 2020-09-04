@@ -214,7 +214,6 @@ if(~useAmbisonics, {
 	// no ambisonics, just straight through as stereo
 	SynthDef(\decoder, { |in = 10, out = 0 |
 		var sig = In.ar(in, ~mixerChannelOutputs.asInteger);
-		// TODO: Add some dynamics control, compander, limiter
 		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
 		sig = Limiter.ar(sig, 0.95);
 		Out.ar(out, sig);
