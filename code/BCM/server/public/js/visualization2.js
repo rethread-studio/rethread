@@ -164,6 +164,7 @@ function createRectangle(service, index, packetSize, isOut) {
     service: service,
     phase: 0.0,
     phaseSpeed: speed * 0.0015,
+    alive: true,
   });
 }
 
@@ -275,6 +276,7 @@ function animate() {
     if(rect.phase >= Math.PI) {
       // Outside of view, remove it
       rectangles_group.remove(rect.mesh);
+      rect.alive = false;
     }
     rect.mesh.material.opacity = Math.pow(Math.sin(rect.phase), 2);
     rect.phase += rect.phaseSpeed * dt;
@@ -283,7 +285,7 @@ function animate() {
   }
 
   // Remove rectangles from rectangleObjects
-  rectangleObjects = rectangleObjects.filter(rect => rect.phase <= Math.PI * 1.1);
+  rectangleObjects = rectangleObjects.filter(rect => rect.alive);
 
   // if(Math.random() > 0.995) {
   //   showText = !showText;
