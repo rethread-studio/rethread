@@ -72,10 +72,6 @@ function locationDistance(a, b) {
   return Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2) + Math.pow((b.z - a.z), 2));
 }
 
-
-
-console.log()
-
 const easings = [TWEEN.Easing.Exponential.InOut, TWEEN.Easing.Sinusoidal.InOut, TWEEN.Easing.Circular.InOut, TWEEN.Easing.Linear.None];
 
 // Load font
@@ -272,7 +268,7 @@ function init() {
       const intersects = raycaster.intersectObjects(countries, false);
       if (intersects.length > 0) {
         const touchedCountry = intersects[0].object;
-        console.log(touchedCountry.geometry.name);
+        // console.log(touchedCountry.geometry.name);
       }
     },
     false

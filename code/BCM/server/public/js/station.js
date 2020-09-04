@@ -79,11 +79,11 @@ angular
       "visualizationGlobe",
       "visualizationSparse",
     ];
-    let currentVisualization = 1;
+    let currentVisualization = 0;
     $("#" + visualizations[currentVisualization]).addClass(
       "currentVisualization"
     );
-    setInterval(() => {
+    function switchVisualization() {
       currentVisualization++;
       if (currentVisualization == visualizations.length) {
         currentVisualization = 0;
@@ -95,7 +95,10 @@ angular
       if ($location.url() != "/") {
         $("#" + visualizations[currentVisualization]).show();
       }
-    }, 20000);
+      setTimeout(switchVisualization, 20000);
+    }
+
+    setTimeout(switchVisualization, 0); 
 
     ws.onmessage = (message) => {
       const json = JSON.parse(message.data);

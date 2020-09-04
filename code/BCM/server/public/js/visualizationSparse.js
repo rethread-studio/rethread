@@ -414,7 +414,6 @@ function animate() {
       bd.lifetime--;
       boxes[i].material.opacity = Math.sin(bd.phase) - Math.pow(1.0-(bd.lifetime / bd.maxLifetime), 2.0);
       bd.phase += bd.phaseStep*dt;
-      console.log(bd);
     }
   }
 
