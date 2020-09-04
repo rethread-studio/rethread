@@ -82,7 +82,12 @@ ws.onmessage = (message) => {
 function reset() {
   allPackets = [];
   particleCount = 0;
+  particles.setDrawRange(0, particleCount);
   particleIndex = 0;
+  positionPerService.clear();
+  textPerService.clear();
+  indexPerService.clear();
+  lastRegisteredPerService.clear();
 }
 
 function random3DPosition(magnitude) {

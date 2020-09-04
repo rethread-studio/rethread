@@ -79,6 +79,7 @@ function reset() {
   scene.remove(rectangles_group);
   rectangles_group = new THREE.Group();
   scene.add(rectangles_group);
+  particleIndex = 0;
 }
 
 function random3DPosition(magnitude) {

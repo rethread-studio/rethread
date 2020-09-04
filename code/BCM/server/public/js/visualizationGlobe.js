@@ -678,6 +678,9 @@ function reset() {
     country.userData.baseScale = scale;
     country.userData.scaleFollower = 0;
   }
+  positionPerService.clear();
+  particleCount = 0;
+  particles.setDrawRange(0, particleCount);
 }
 
 function generateCountries() {
