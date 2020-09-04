@@ -34,7 +34,7 @@ iframe {
 
   padding: 17px 30px;
 
-  width: 830px;
+  width: 80%;
   margin: auto;
 }
 .welcome .instruction {
@@ -49,6 +49,7 @@ iframe {
   line-height: 90px;
   /* padding-left: 30px; */
   margin: 12px auto;
+  margin-bottom: 1em;
 }
 .tab {
   margin-left: 50px;
