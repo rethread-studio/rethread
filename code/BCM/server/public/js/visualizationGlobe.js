@@ -453,7 +453,7 @@ function rotate() {
   } else if (lastCountry === 'United States') {
     // Using the first face for the United States focuses on Hawaii
     location = { ...locations.NordAmerica};
-    rotationDur = 600;
+    rotationDur = Math.random() * 400 + 700;
   } else if (countryShapes.hasOwnProperty(lastCountry)) {
     // Find the mesh with that name
     let mesh;
@@ -467,7 +467,7 @@ function rotate() {
           y: pos.y * scale,
           z: pos.z * scale,
         }
-        rotationDur = 600;
+        Math.random() * 400 + 700;
       }
     }
   }
