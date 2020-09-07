@@ -134,12 +134,16 @@ fn model(app: &App) -> Model {
 
     let mut gui_panel = GuiContainer::new(vec2(0.0, 0.0));
     let toggle_action = || println!("Toggle!");
-    let mut toggle_box = Box::new(ToggleBox::new("New toggle".to_owned(), 32.0, 300.0, Action::new(Box::new(toggle_action))));
+    let mut toggle_box = Box::new(ToggleBox::new("New toggle".to_owned(), 32.0, 150.0, Action::new(Box::new(toggle_action))));
     // toggle_box.set_bounding_box(toggle_box.bounding_box().align_top_of(gui_panel.bounding_box().clone()));
     gui_panel.add_element(toggle_box);
     for i in 0..10 {
-        let toggle_action = move || println!("Toggle {}!", i);
-        let new_toggle_box = Box::new(ToggleBox::new(format!("New toggle {}", i), 32.0, 300.0, Action::new(Box::new(toggle_action))));
+        let mut toggle = false;
+        let toggle_action = move || {
+            toggle = !toggle;
+            println!("Toggle {} == {:?}!", i, toggle);
+        };
+        let new_toggle_box = Box::new(ToggleBox::new(format!("New toggle {}", i), 32.0, 100.0, Action::new(Box::new(toggle_action))));
         gui_panel.add_element_beneath(new_toggle_box);
     }
 
@@ -195,7 +199,7 @@ fn model(app: &App) -> Model {
     model
 }
 
-fn window_event(_app: &App, model: &mut Model, event: WindowEvent) {
+fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     match event {
         KeyPressed(key) => {
             match key {
@@ -219,7 +223,9 @@ fn window_event(_app: &App, model: &mut Model, event: WindowEvent) {
         }
         KeyReleased(_key) => {}
         MouseMoved(_pos) => {}
-        MousePressed(_button) => {}
+        MousePressed(_button) => {
+            model.gui_panel.click(pt2(app.mouse.x, app.mouse.y));
+        }
         MouseReleased(_button) => {}
         MouseEntered => {}
         MouseExited => {}

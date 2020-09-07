@@ -31,7 +31,7 @@ impl GuiContainer {
         self.adjust_size_to_elements();
     }
     pub fn add_element_beneath(&mut self, mut element: Box<dyn GuiElement>) {
-        let new_bounding_box = element.bounding_box().below(self.elements.last().unwrap().bounding_box().clone());
+        let new_bounding_box = element.bounding_box().below(self.elements.last().unwrap().bounding_box().clone()).align_left_of(self.bounding_box);
         // println!("old: {:?}, new: {:?}", element.bounding_box(), new_bounding_box);
         // println!("xy: {:?}", new_bounding_box.xy());
         element.set_bounding_box(new_bounding_box);
@@ -57,15 +57,13 @@ impl GuiContainer {
                 min_y = elem.bounding_box().bottom();
             }
         }
-        println!("current: {:?}, min: {}, {}, max: {}, {}", self.bounding_box, min_x, min_y, max_x, max_y);
         let mut new_bounding_box = Rect::from_corners(pt2(min_x, min_y), pt2(max_x, max_y));
-        println!("new GuiContainer bounding box: {:?}, xy: {:?}", new_bounding_box, new_bounding_box.xy());
         let diff = self.bounding_box.xy() - new_bounding_box.xy();
-        println!("diff: {:?}", diff);
         
         // Because the boudning box denotes the center and edges of the box and the 
         // elements in the container are to be drawn relative to the container
-        // we need to move all of the elements every time we resize the box.
+        // we need to move all of the elements every time we resize the box. This way
+        // the relationship between the center of the box and the element is maintained.
         for elem in &mut self.elements {
             elem.set_bounding_box(elem.bounding_box().shift_x(diff.x).shift_y(diff.y));
         }
@@ -87,7 +85,7 @@ impl GuiElement for GuiContainer {
             .stroke_color(BLACK)
             .no_fill()
             .stroke_weight(1.0);
-        let new_relative_pos = relative_pos + self.bounding_box.xy(); //pt2(self.bounding_box.x.end, self.bounding_box.y.end);
+        let new_relative_pos = relative_pos + self.bounding_box.xy();
         // println!("GuiContainer relative: {:?}", new_relative_pos);
         for e in &self.elements {
             e.draw(draw, new_relative_pos);
@@ -95,7 +93,8 @@ impl GuiElement for GuiContainer {
     }
     fn click(&mut self, point: Point2) {
         if self.bounding_box.contains(point) {
-            let relative_point = point + self.bounding_box.xy();
+            // Converting from real window (or parent) coordinates to relative to the container
+            let relative_point = point - self.bounding_box.xy();
             for e in &mut self.elements {
                 e.click(relative_point);
             }
@@ -156,6 +155,7 @@ impl GuiElement for ToggleBox {
         if self.bounding_box.contains(point) {
             self.active = !self.active;
             self.symbol.toggle_active();
+            self.action.run();
         }
     }
     fn contains(&self, point: Point2) -> bool {
@@ -165,7 +165,6 @@ impl GuiElement for ToggleBox {
         &self.bounding_box
     }
     fn set_bounding_box(&mut self, bounding_box: Rect) {
-        println!("new Toggle bounding box: {:?}, xy: {:?}", bounding_box, bounding_box.xy());
         self.bounding_box = bounding_box;
         self.symbol.bounding_box = self.symbol.bounding_box.align_left_of(self.bounding_box);
         self.symbol.bounding_box = self.symbol.bounding_box.align_top_of(self.bounding_box);
