@@ -41,12 +41,89 @@
 
 ~chord = [0, 17, 31, 43, 57, 74, 88, 106, 120, 137, 163];
 
-151 + 31roots
-182-159
-74+106
+// thirds
+~chord = [0, 17, 31, 48, 62, 79, 93, 110, 124, 141, 155];
+~chord = [ 0, 14, 31, 45, 62, 76, 93, 107, 124, 138, 155 ];
+~chord = [ 0, 14, 31, 45, 59, 76, 90, 104, 121, 135, 149, 166, 180 ];
+~chord = [ 0, 17, 31, 43, 60, 74, 86, 103, 117, 129, 146, 160, 172 ];
+~chord = [ 0, 17, 31, 48, 65, 79, 96, 113, 127, 144, 161, 175, 192 ];
 
-~playSoft.(~ch1)
-~playMedium.(~ch4)
+~playSoft.(~chord)
+~playMedium.(~chord)
+~playSaw.(~chord)
+
+( var note = 0;
+~chord = [0];
+5.do{ |i|
+	var add = [14, 31] + note;
+	note = add[add.size-1];
+	note.postln;
+	~chord = ~chord ++ add;
+};
+~chord
+)
+// minor 7
+( var note = 0;
+~chord = [0];
+4.do{ |i|
+	var add = [14, 31, 45] + note;
+	note = add[add.size-1];
+	note.postln;
+	~chord = ~chord ++ add;
+};
+~chord
+)
+// harmonic 7
+( var note = 0;
+~chord = [0];
+4.do{ |i|
+	var add = [17, 31, 43] + note;
+	note = add[add.size-1];
+	note.postln;
+	~chord = ~chord ++ add;
+};
+~chord
+)
+// major 7
+( var note = 0;
+~chord = [0];
+4.do{ |i|
+	var add = [17, 31, 48] + note;
+	note = add[add.size-1];
+	note.postln;
+	~chord = ~chord ++ add;
+};
+~chord
+)
+
+// sussy chords
+~chord = [0, 9, 22, 31, 44, 53, 66, 75, 88, 97, 110, 119];
+~chord = [ 0, 9, 22, 31, 40, 53, 62, 71, 84, 93, 102, 115, 124 ];
+~chord = [ 0, 9, 22, 31, 36, 45, 58, 67, 72, 81, 94, 103, 108, 117, 130, 139, 144 ];
+~chord = [ 0, 9, 22, 31, 40, 49, 62, 71, 80, 89, 102, 111, 120 ];
+( var note = 0;
+~chord = [0];
+4.do{ |i|
+	var add = [9, 22, 31] + note;
+	note = add[add.size-1];
+	note.postln;
+	~chord = ~chord ++ add;
+};
+~chord
+)
+( var note = 0;
+~chord = [0];
+3.do{ |i|
+	var add = [9, 22, 31, 40] + note;
+	note = add[add.size-1];
+	note.postln;
+	~chord = ~chord ++ add;
+};
+~chord
+)
+
+~playSoft.(~chord)
+~playMedium.(~chord)
 ~playSaw.(~chord)
 
 (
@@ -72,7 +149,7 @@ SynthDef(\thump, {
 }).add;
 
 SynthDef(\softy, {
-	var sig, env, freq = \freq.kr(220);,
+	var sig, env, freq = \freq.kr(220);
 	env = Env.perc(\atk.kr(0.1), \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
 	sig = Resonz.ar(PinkNoise.ar(mul: env), freq, 0.007, mul: 20);
 	sig = sig * \amp.kr(0.5);
