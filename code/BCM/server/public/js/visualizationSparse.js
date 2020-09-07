@@ -34,52 +34,14 @@ function shuffle(array) {
   return array;
 }
 
-// Receive packets
-let protocol = "ws";
-if (document.location.protocol == "https:") {
-  protocol += "s";
-}
-let host = document.location.hostname;
-if (document.location.port) {
-  host += ":" + document.location.port;
-}
-const ws = new WebSocket(protocol + "://" + host);
-
-ws.onmessage = (message) => {
-  const json = JSON.parse(message.data);
-  if (json.event == "reset") {
-    reset();
-  } else if (json.event == "networkActivity") {
-    const packet = json.data;
-    // console.log(packet);
-    if(packet.services.length === 0) {
-      packet.services.push(packet.remote_host)
-    }
-
-    for(const service of packet.services) {
-      // let identifier = service + packet.location;
-      // if (!indexPerService.has(identifier)) {
-      //   indexPerService.set(identifier, shuffledBoxIndices[particleIndex]);
-      //   particleIndex += 1;
-      //   if(particleIndex >= numBoxes) {
-      //     particleIndex = 0;
-      //   }
-      // }
-      // let isOut = packet.out;
-      // activateParticle(indexPerService.get(identifier))
-
-      activateParticle(shuffledBoxIndices[particleIndex % shuffledBoxIndices.length], shuffledParticleIndices[particleIndex % shuffledParticleIndices.length])
-      particleIndex += 1;
-    }
-  }
-};
-
 function reset() {
   rectangleObjects = [];
   scene.remove(rectangles_group);
   rectangles_group = new THREE.Group();
   scene.add(rectangles_group);
   particleIndex = 0;
+  boxIndex = 0;
+  camera.position.set(0, 0, 1300);
 }
 
 function random3DPosition(magnitude) {
@@ -90,14 +52,17 @@ function random3DPosition(magnitude) {
   )
 }
 
-function activateParticle(boxIndex, pIndex) {
+function activateParticle(pIndex) {
   let i = pIndex;
   // particleAlphas[i] = 0.8;
   if(particlesData[i].lifetime == 0) {
     particlesData[i].phase = 0;
   }
   particlesData[i].lifetime = 500;
-  i = boxIndex;
+}
+
+function activateBox(bIndex) {
+  let i = bIndex;
   if(boxData[i].lifetime == 0) {
     boxData[i].phase = 0;
   }
@@ -111,6 +76,9 @@ var camera, scene, renderer;
 var composer;
 var bloomPass, renderPass, pass1;
 var positions, colors;
+
+var cameraVel = new THREE.Vector3(0, 0, 0);
+var cameraAcc = new THREE.Vector3(0, 0, 0);
 
 let activeParticleColor = new THREE.Color(0xff0000);
 var particles_group;
@@ -139,6 +107,7 @@ for(let i = 0; i < maxParticleCount; i++) {
 }
 shuffledParticleIndices = shuffle(shuffledParticleIndices);
 var particleIndex = 0; // The index of the next particle (can loop around to recycle old particles)
+var boxIndex = 0;
 var r = 800;
 var rHalf = r / 2;
 
@@ -185,7 +154,7 @@ function init() {
     45,
     window.innerWidth / window.innerHeight,
     1,
-    4000
+    6000
   );
   camera.position.z = 1300;
 
@@ -304,10 +273,10 @@ function init() {
   box_group = new THREE.Group();
   scene.add(box_group);
 
-  let distanceBetweenBoxes = 20;
-  startX = (boxRow * distanceBetweenBoxes) / -4;
+  let distanceBetweenBoxes = 18;
+  startX = (boxRow * distanceBetweenBoxes) / -2;
 
-  let size = 3.5;
+  let size = 6.0;
   var geometry = new THREE.BoxGeometry(size, size, size);
   // var geometry = new THREE.CircleGeometry( size, 16 );
   for(let iy = 0; iy < boxRow; iy++) {
@@ -320,9 +289,9 @@ function init() {
       let material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.9 } );
       material.color.copy(col);
       let cube = new THREE.Mesh( geometry, material );
-      cube.position.x = ix * distanceBetweenParticles + startX;
-      cube.position.y = iy * distanceBetweenParticles + startX;
-      cube.position.z = 650;
+      cube.position.x = ix * distanceBetweenBoxes + startX;
+      cube.position.y = iy * distanceBetweenBoxes + startX;
+      cube.position.z = 100;
       boxes.push(cube);
       box_group.add(cube);
       boxData.push({
@@ -422,6 +391,35 @@ function animate() {
   bloomPass.strength = effectController.bloomPassStrength;
   bloomPass.radius = effectController.bloomPassRadius;
 
+  // Update camera
+  cameraVel.add(cameraAcc);
+  cameraVel.clampScalar(-0.1, 0.1);
+  let limit = 50;
+  if(camera.position.x > limit) {
+    cameraAcc.x = Math.abs(cameraAcc.x) * -1;
+  }
+  if(camera.position.x < -limit) {
+    cameraAcc.x = Math.abs(cameraAcc.x);
+  }
+  if(camera.position.y > limit) {
+    cameraAcc.y = Math.abs(cameraAcc.y) * -1;
+  }
+  if(camera.position.y < -limit) {
+    cameraAcc.y = Math.abs(cameraAcc.y);
+  }
+  if(camera.position.z < 1300) {
+    cameraAcc.z = Math.abs(cameraAcc.z);
+  }
+  if(camera.position.z > 1500) {
+    cameraAcc.z = Math.abs(cameraAcc.z) * -1;
+  }
+  camera.position.add(cameraVel);
+  camera.lookAt(0, 0, 0);
+  camera.updateProjectionMatrix();
+  if(Math.random() > 0.96) {
+    cameraAcc.set(Math.random() * 0.02 - 0.01, Math.random() * 0.02 - 0.01, Math.random() * 0.005 - 0.0025);
+  }
+
   requestAnimationFrame(animate);
 
   stats.update();
@@ -436,3 +434,47 @@ function render() {
   // renderer.render(scene, camera);
   composer.render();
 }
+
+
+// Receive packets
+let protocol = "ws";
+if (document.location.protocol == "https:") {
+  protocol += "s";
+}
+let host = document.location.hostname;
+if (document.location.port) {
+  host += ":" + document.location.port;
+}
+const ws = new WebSocket(protocol + "://" + host);
+
+ws.onmessage = (message) => {
+  const json = JSON.parse(message.data);
+  if (json.event == "reset") {
+    reset();
+  } else if (json.event == "networkActivity") {
+    const packet = json.data;
+    if(packet.services.length === 0) {
+      packet.services.push(packet.remote_host)
+    }
+
+    for(const service of packet.services) {
+      // let identifier = service + packet.location;
+      // if (!indexPerService.has(identifier)) {
+      //   indexPerService.set(identifier, shuffledBoxIndices[particleIndex]);
+      //   particleIndex += 1;
+      //   if(particleIndex >= numBoxes) {
+      //     particleIndex = 0;
+      //   }
+      // }
+      // let isOut = packet.out;
+      // activateParticle(indexPerService.get(identifier))
+      if(packet.out) {
+        activateParticle(shuffledParticleIndices[particleIndex % shuffledParticleIndices.length]);
+        particleIndex += 1;
+      } else {
+        activateBox(shuffledBoxIndices[particleIndex % shuffledBoxIndices.length]);
+        boxIndex += 1;
+      }
+    }
+  }
+};
