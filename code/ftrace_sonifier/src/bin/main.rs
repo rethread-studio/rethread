@@ -22,6 +22,7 @@ use ftrace_sonifier::audio_interface::*;
 use ftrace_sonifier::event_stats::*;
 use ftrace_sonifier::midi_input::MidiDevice;
 use ftrace_sonifier::{SharedState, SelectionMode};
+use ftrace_sonifier::gui::*;
 
 const PORT: u16 = 12345;
 
@@ -75,6 +76,7 @@ struct Model {
     family_map: HashMap<EventFamily, ArcMutex<EventStat>>,
     event_to_family_map: HashMap<String, EventFamily>,
     midi_device: MidiDevice,
+    gui_panel: GuiContainer,
     shared_state: ArcMutex<SharedState>,
     info_event_stat: RefCell<Option<EventStat>>, // A copy of the event_stat to be visualised
     graphic_triggers: Vec<GraphicTrigger>,
@@ -129,6 +131,20 @@ fn model(app: &App) -> Model {
         friction: ui.generate_widget_id(),
         force_strength: ui.generate_widget_id(),
     };
+
+    let mut gui_panel = GuiContainer::new(vec2(0.0, 0.0));
+    let toggle_action = || println!("Toggle!");
+    let mut toggle_box = Box::new(ToggleBox::new("New toggle".to_owned(), 32.0, 300.0, Action::new(Box::new(toggle_action))));
+    // toggle_box.set_bounding_box(toggle_box.bounding_box().align_top_of(gui_panel.bounding_box().clone()));
+    gui_panel.add_element(toggle_box);
+    for i in 0..10 {
+        let toggle_action = move || println!("Toggle {}!", i);
+        let new_toggle_box = Box::new(ToggleBox::new(format!("New toggle {}", i), 32.0, 300.0, Action::new(Box::new(toggle_action))));
+        gui_panel.add_element_beneath(new_toggle_box);
+    }
+
+    gui_panel.set_bounding_box(gui_panel.bounding_box().pad(-20.0));
+
     let mut event_type_received: HashMap<String, usize> = HashMap::new();
     let (family_map, event_to_family_map) = init_stats();
     // Model setup (general non-realtime thread state)
@@ -170,6 +186,7 @@ fn model(app: &App) -> Model {
         family_map,
         event_to_family_map,
         midi_device,
+        gui_panel,
         shared_state,
         info_event_stat: RefCell::new(None),
         graphic_triggers: vec![],
@@ -256,7 +273,8 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         model.graphic_triggers.push(gt);
     }
 
-    // 
+    // Update gui
+    model.gui_panel.set_bounding_box(model.gui_panel.bounding_box().align_top_of(app.window_rect()).align_right_of(app.window_rect()));
 
     // println!("fps: {}, points: {}", app.fps(), model.points.len());
 }
@@ -496,8 +514,18 @@ fn view(app: &App, model: &Model, frame: Frame) {
     // How many points have been infected
     // How many points were "isolated" model.isolated_points.len()
     // draw.text()
+
+    // Draw gui panel
+    model.gui_panel.draw(&draw, pt2(0.0, 0.0));
+    draw.rect()
+        .xy(pt2(50.0, -300.0))
+        .w_h(32.0, 32.0)
+        .color(BLACK);
+
     // Write to the window frame.
     draw.to_frame(app, &frame).unwrap();
+
+    
 
     // Draw the state of the `Ui` to the frame.
     model.ui.draw_to_frame(app, &frame).unwrap();

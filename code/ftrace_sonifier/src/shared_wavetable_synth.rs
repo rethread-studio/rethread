@@ -447,7 +447,7 @@ impl SynthesisEngine {
 
         println!("Building wavetables...");
         let mut triggers = Vec::with_capacity(100);
-        for _ in 0..100 {
+        for _ in 0..1 {
             let wt = wavetable_arena.add(Wavetable::crazy(131072));
             triggers.push(TriggeredOscillator::from_freq(wt, sample_rate, random::<Sample>().powi(2) * 0.0 + 20.0, 0.05));
         }
