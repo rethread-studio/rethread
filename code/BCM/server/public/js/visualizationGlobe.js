@@ -90,6 +90,7 @@ let countryActivatedColor = "0xffffff";
 let countryDarkColor = "0x665555";
 
 let cameraOffset = new THREE.Vector3(0, 0, 0);
+let cameraPosition = new THREE.Vector3(45, 42, 15);
 
 // Receive packets
 let protocol = "ws";
@@ -472,12 +473,10 @@ function rotate() {
     }
   }
 
-  
-
   var from = {
-    x: camera.position.x,
-    y: camera.position.y,
-    z: camera.position.z,
+    x: cameraPosition.x,
+    y: cameraPosition.y,
+    z: cameraPosition.z,
   };
 
   let easing = easings[~~(Math.random() * easings.length)];
@@ -495,27 +494,21 @@ function rotate() {
       .to(higherLocation, rotationDur * 0.5)
       .easing(easing)
       .onUpdate(function (position) {
-        camera.position.set(position.x + cameraOffset.x, position.y + cameraOffset.y, position.z + cameraOffset.z);
-        
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        cameraPosition.set(position.x, position.y, position.z);
       })
       .onComplete(function () {
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-        from.x = camera.position.x;
-        from.y = camera.position.y;
-        from.z = camera.position.z;
+        from.x = cameraPosition.x;
+        from.y = cameraPosition.y;
+        from.z = cameraPosition.z;
 
         var tween = new TWEEN.Tween(from)
           .to(location, rotationDur * 0.5)
           .easing(easing)
           .onUpdate(function (position) {
-            camera.position.set(position.x + cameraOffset.x, position.y + cameraOffset.y, position.z + cameraOffset.z);
-            
-            camera.lookAt(new THREE.Vector3(0, 0, 0));
+            cameraPosition.set(position.x, position.y, position.z);
           })
           .onComplete(function () {
-            camera.lookAt(new THREE.Vector3(0, 0, 0));
           })
           .start();
       })
@@ -525,12 +518,9 @@ function rotate() {
       .to(location, rotationDur)
       .easing(easing)
       .onUpdate(function (position) {
-        camera.position.set(position.x + cameraOffset.x, position.y + cameraOffset.y, position.z + cameraOffset.z);
-        
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        cameraPosition.set(position.x, position.y, position.z);
       })
       .onComplete(function () {
-        camera.lookAt(new THREE.Vector3(0, 0, 0));
       })
       .start();
   }
@@ -541,11 +531,11 @@ function rotate() {
 
 // TODO: The camera.position is only updated when rotating leading to glitchy jumps
 function updateCameraOffset() {
-  let nextUpdateTime = Math.random() * 600 + 300;
+  let nextUpdateTime = Math.random() * 1500 + 600;
   let newOffset = {
-    x: Math.random() * 20 - 10,
-    y: Math.random() * 20 - 10,
-    z: Math.random() * 20 - 10,
+    x: Math.random() * 6 - 3,
+    y: Math.random() * 6 - 3,
+    z: Math.random() * 6 - 3,
   }
   let from = {
     x: cameraOffset.x,
@@ -554,18 +544,18 @@ function updateCameraOffset() {
   }
   var tween = new TWEEN.Tween(from)
       .to(newOffset, nextUpdateTime)
-      .easing(TWEEN.Easing.Sinusoidal.InOut)
+      .easing(TWEEN.Easing.Cubic.InOut)
       .onUpdate(function (offset) {
         cameraOffset.set(offset.x, offset.y, offset.z);
-        console.log(offset);
+        // console.log(offset);
       })
       .onComplete(function () {
+        setTimeout(updateCameraOffset, 2);
       })
       .start();
-  setTimeout(updateCameraOffset, nextUpdateTime);
 }
 
-// updateCameraOffset();
+updateCameraOffset();
 
 function animate() {
   let now = Date.now() * 0.001;
@@ -647,6 +637,11 @@ function animate() {
   pointCloud.geometry.attributes.color.needsUpdate = true;
 
   TWEEN.update();
+
+  // Update camera
+  camera.position.set(cameraPosition.x + cameraOffset.x, cameraPosition.y + cameraOffset.y, cameraPosition.z + cameraOffset.z);
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+
   requestAnimationFrame(animate);
   stats.update();
   controls.update();
