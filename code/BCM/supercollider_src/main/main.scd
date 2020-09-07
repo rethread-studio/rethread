@@ -399,7 +399,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 	// Set up all the channels
 	rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
 	rev_channel.play_on(\medium_reverb, [\out, rev_channel.bus, \in, rev_channel.bus, \mix, 1.0, \amp, 2.0]);
-	rev_channel.set_amp(0.5);
+	rev_channel.set_amp(0.3);
 	sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
 	sub_channel.set_send(rev_channel.bus, 0.2);
 	rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
@@ -647,8 +647,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 								\out, channel.bus]);
 						});
 					}, {
+						var thumpFreq = freq;
+						while({thumpFreq < 100}, {thumpFreq = thumpFreq * 2});
 						channel.play_on(\thump, [
-							\freq, freq,
+							\freq, thumpFreq,
 							\atk, thump_atk,
 							\rel, rrand(2, 3),
 							\c0, -3,
@@ -659,7 +661,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 					});
 				},
 				\standard3, {
-					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
+					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave + 1),
 					amp = 0.5,
 					release_coeff = 1.0,
 					thump_atk = rrand(0.18, 0.21);
@@ -981,7 +983,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 						channel.play_on(\thump, [
 							\freq, freq,
 							\atk, thump_atk,
-							\rel, 2,
+							\rel, rrand(0.5, 2),
 							\c0, -3,
 							\c1, \sine,
 							\pan, rrand(-0.7, 0.7),
@@ -1159,18 +1161,4 @@ SynthDef(\bounce_away, { | freq = 300 |
 		0.3.wait;
 	};
 }.fork;
-)
-
-(
-Synth(\gust,
-	[
-		\freq, min(2000, 18000),
-		\rq, exprand(0.05, 0.2),
-		\out, channel.bus,
-		\amp, exprand(0.03, 0.1) * amp,
-		\atk, 0.001 * 0,
-		\rel, 0.01, //0.01,
-		\pan, rrand(-0.5, 0.5),
-	]
-);
 )
