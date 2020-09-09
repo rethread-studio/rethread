@@ -334,10 +334,42 @@ SynthDef(\bounce_away, { | freq = 300 |
 	s.newBusAllocators; // Make sure we don't run out of busses if we restart multiple times
 
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
+	// Rich chord with harmonic 7
 	~ch1 = [0, 31, 57, 120, 43, 137];
 	~ch2 = [17, 39, 53, 74, 137, 88];
 	~ch3 = [31, 88, 163, 106, 120, 151];
 	~ch4 = [43, 74, 106, 57, 163, 180];
+	// suspended quality chord
+	~ch1 = [0, 9, 71, 93, 53, 22];
+	~ch2 = [9, 31, 62, 102, 40, 71];
+	~ch3 = [22, 40, 84, 124, 62, 102];
+	~ch4 = [31, 53, 93, 115, 124, 84];
+	~currentChord = 0;
+	~numChords = 2;
+	~changeChord = { | num = -1 |
+		// if num is -1 then
+		if(num == -1, {
+			~currentChord = (~currentChord + 1) % ~numChords;
+		}, {
+			~currentChord = num % ~numChords;
+		});
+
+		switch(~currentChord,
+			0, {
+				~ch1 = [0, 9, 71, 93, 53, 22];
+				~ch2 = [9, 31, 62, 102, 40, 71];
+				~ch3 = [22, 40, 84, 124, 62, 102];
+				~ch4 = [31, 53, 93, 115, 124, 84];
+			},
+			1, {
+				// Rich chord with harmonic 7
+				~ch1 = [0, 31, 57, 120, 43, 137];
+				~ch2 = [17, 39, 53, 74, 137, 88];
+				~ch3 = [31, 88, 163, 106, 120, 151];
+				~ch4 = [43, 74, 106, 57, 163, 180];
+			}
+		);
+	};
 	~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 	~octave = 3;
 
@@ -1121,7 +1153,14 @@ SynthDef(\bounce_away, { | freq = 300 |
 			// Update chord
 			if(~overallActivity > (~maxActivity * 0.5)) {
 				if(rrand(0.0, 1.0) > 0.98) {
-					~root = [-8, 0, 9, 17, -22].choose;
+					~root = ~root + [-8, 0, 9, 17, -22].choose;
+					~root = ((~root + 22) % 53) - 22; // bring it back into the range -22 - 31
+				};
+			};
+			if(~overallActivity > (~maxActivity * 0.2)) {
+				if(rrand(0.0, 1.0) > 0.99) {
+						// TODO: Maybe change chord depending on activity instead of cycling through?
+					~changeChord.();
 				};
 			};
 
