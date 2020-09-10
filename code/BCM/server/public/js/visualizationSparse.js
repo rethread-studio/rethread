@@ -1,5 +1,5 @@
 import * as THREE from "https://unpkg.com/three@0.119.1/build/three.module.js";
-import Stats from "https://unpkg.com/three@0.119.1/examples/jsm/libs/stats.module.js";
+// import Stats from "https://unpkg.com/three@0.119.1/examples/jsm/libs/stats.module.js";
 import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
 import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from 'https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/RenderPass.js';
@@ -336,7 +336,7 @@ function init() {
   // bloomPass.renderToScreen = true;
 
   //
-  stats = new Stats();
+  // stats = new Stats();
   // container.appendChild(stats.dom);
 
   window.addEventListener("resize", onWindowResize, false);
@@ -426,7 +426,7 @@ function animate() {
 
   requestAnimationFrame(animate);
 
-  stats.update();
+  // stats.update();
   render();
 
   lastUpdate = now;

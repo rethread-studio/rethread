@@ -1,6 +1,6 @@
 import * as THREE from "https://unpkg.com/three@0.119.1/build/three.module.js";
 import Map3DGeometry from "./Map3DGeometry.js";
-import Stats from "https://unpkg.com/three@0.119.1/examples/jsm/libs/stats.module.js";
+// import Stats from "https://unpkg.com/three@0.119.1/examples/jsm/libs/stats.module.js";
 import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
 import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
 import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
@@ -428,7 +428,7 @@ function init() {
   pointCloud = new THREE.Points(particles, shaderMaterial);
   scene.add(pointCloud);
 
-  stats = new Stats();
+  // stats = new Stats();
   // container.appendChild(stats.dom);
 
   window.addEventListener("resize", onWindowResize, false);
@@ -643,7 +643,7 @@ function animate() {
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 
   requestAnimationFrame(animate);
-  stats.update();
+  // stats.update();
   controls.update();
   render();
 
@@ -656,18 +656,20 @@ function render() {
 }
 
 function reset() {
+  const scale = 20.57236;
   for (let country of countries) {
-    country.material.opacity = opacityBaseLevel;
-    country.material.color.setHex(0xbb4949);
-    country.scale.x = country.userData.baseScale;
-    country.scale.y = country.userData.baseScale;
-    country.scale.z = country.userData.baseScale;
     country.userData.opacityVel = 0;
     country.userData.activated = false;
     country.userData.pulsesLeft = 0;
     country.userData.scale = 0;
     country.userData.baseScale = scale;
     country.userData.scaleFollower = 0;
+    country.material.opacity = opacityBaseLevel;
+    country.material.color.setHex(0xbb4949);
+    country.scale.x = country.userData.baseScale;
+    country.scale.y = country.userData.baseScale;
+    country.scale.z = country.userData.baseScale;
+    
   }
   positionPerService.clear();
   particleCount = 0;

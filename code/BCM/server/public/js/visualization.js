@@ -1,5 +1,5 @@
 import * as THREE from "https://unpkg.com/three@0.119.1/build/three.module.js";
-import Stats from "https://unpkg.com/three@0.119.1/examples/jsm/libs/stats.module.js";
+// import Stats from "https://unpkg.com/three@0.119.1/examples/jsm/libs/stats.module.js";
 import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
 import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
 import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
@@ -416,7 +416,7 @@ function init() {
   composer.addPass(smaaPass);
 
   //
-  stats = new Stats();
+  // stats = new Stats();
   // container.appendChild(stats.dom);
 
   window.addEventListener("resize", onWindowResize, false);
@@ -569,7 +569,7 @@ function animate() {
 
   requestAnimationFrame(animate);
 
-  stats.update();
+  // stats.update();
   render();
   
   packetsOverTime *= 0.8;
