@@ -306,11 +306,11 @@ function init() {
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
-  bloomPass = new UnrealBloomPass();
-  bloomPass.strength = 0.7;
-  bloomPass.threshold = 0.01;
-  bloomPass.radius = 0.2;
-  composer.addPass(bloomPass);
+  // bloomPass = new UnrealBloomPass();
+  // bloomPass.strength = 0.7;
+  // bloomPass.threshold = 0.01;
+  // bloomPass.radius = 0.2;
+  // composer.addPass(bloomPass);
   // Anti-aliasing while using EffectComposer requires a dedicated anti-aliasing pass
   smaaPass = new SMAAPass(
     window.innerWidth * renderer.getPixelRatio(),
