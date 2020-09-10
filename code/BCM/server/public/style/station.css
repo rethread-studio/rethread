@@ -29,7 +29,7 @@ iframe {
   /* bring your own prefixes */
   transform: translate(-50%, -50%);
 
-  font-size: 50pt;
+  font-size: 30pt;
   font-weight: bold;
 
   padding: 17px 30px;
@@ -38,7 +38,7 @@ iframe {
   margin: auto;
 }
 .welcome .instruction {
-  width: 575px;
+  width: 381px;
 }
 .block {
   display: inline-block;
