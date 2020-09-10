@@ -230,11 +230,11 @@ function init() {
   // pass1 = new GlitchPass();
   // composer.addPass(pass1);
 
-  bloomPass = new UnrealBloomPass();
+  // bloomPass = new UnrealBloomPass();
   // bloomPass.strength = 1.5;
   // bloomPass.threshold = 1.0;
   // bloomPass.radius = 1.1;
-  composer.addPass(bloomPass);
+  // composer.addPass(bloomPass);
 
   //
   stats = new Stats();
@@ -296,9 +296,9 @@ function animate() {
 
 
   // Update effects parameters
-  bloomPass.threshold = effectController.bloomPassThreshold;
-  bloomPass.strength = effectController.bloomPassStrength;
-  bloomPass.radius = effectController.bloomPassRadius;
+  // bloomPass.threshold = effectController.bloomPassThreshold;
+  // bloomPass.strength = effectController.bloomPassStrength;
+  // bloomPass.radius = effectController.bloomPassRadius;
 
   requestAnimationFrame(animate);
 

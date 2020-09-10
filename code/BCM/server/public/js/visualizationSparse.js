@@ -323,12 +323,11 @@ function init() {
   // pass1 = new GlitchPass();
   // composer.addPass(pass1);
 
-  bloomPass = new UnrealBloomPass();
-  // bloomPass = new BloomPass(1);
-  bloomPass.strength = 1.5;
-  // bloomPass.threshold = 1.0;
-  bloomPass.radius = 1.1;
-  composer.addPass(bloomPass);
+  // bloomPass = new UnrealBloomPass();
+  // bloomPass.strength = 1.5;
+  // bloomPass.threshold = 0.0;
+  // bloomPass.radius = 1.1;
+  // composer.addPass(bloomPass);
   // bloomPass.renderToScreen = true;
 
   //
@@ -387,9 +386,9 @@ function animate() {
   }
 
   // // Update effects parameters
-  bloomPass.threshold = effectController.bloomPassThreshold;
-  bloomPass.strength = effectController.bloomPassStrength;
-  bloomPass.radius = effectController.bloomPassRadius;
+  // bloomPass.threshold = effectController.bloomPassThreshold;
+  // bloomPass.strength = effectController.bloomPassStrength;
+  // bloomPass.radius = effectController.bloomPassRadius;
 
   // Update camera
   cameraVel.add(cameraAcc);

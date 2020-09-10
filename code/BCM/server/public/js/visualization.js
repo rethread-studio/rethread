@@ -405,11 +405,11 @@ function init() {
   glitchPass = new GlitchPass();
   composer.addPass(glitchPass);
 
-  bloomPass = new UnrealBloomPass();
+  // bloomPass = new UnrealBloomPass();
   // bloomPass.strength = 1.5;
   // bloomPass.threshold = 1.0;
   // bloomPass.radius = 1.1;
-  composer.addPass(bloomPass);
+  // composer.addPass(bloomPass);
 
   // Anti-aliasing while using EffectComposer requires a dedicated anti-aliasing pass
   smaaPass = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio());
@@ -563,9 +563,9 @@ function animate() {
   }
 
   // Update effects parameters
-  bloomPass.threshold = effectController.bloomPassThreshold;
-  bloomPass.strength = effectController.bloomPassStrength;
-  bloomPass.radius = effectController.bloomPassRadius;
+  // bloomPass.threshold = effectController.bloomPassThreshold;
+  // bloomPass.strength = effectController.bloomPassStrength;
+  // bloomPass.radius = effectController.bloomPassRadius;
 
   requestAnimationFrame(animate);
 
