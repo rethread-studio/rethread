@@ -601,7 +601,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 									\freq, rrand(10000, 11000),
 									\rq, exprand(0.001, 0.1),
 									\out, channel.bus,
-									\amp, exprand(0.015, 0.05) * amp,
+									\amp, exprand(0.015, 0.05) * amp * ~tickAmp,
 									\atk, 0.001 * release_coeff,
 									\rel, 0.01, //0.01,
 									\pan, rrand(-0.5, 0.5),
@@ -727,7 +727,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 									\freq, rrand(7000, 10000),
 									\rq, exprand(0.001, 0.1),
 									\out, channel.bus,
-									\amp, exprand(0.02, 0.05) * amp,
+									\amp, exprand(0.02, 0.05) * amp * ~tickAmp,
 									\atk, 0.001 * release_coeff,
 									\rel, 0.01, //0.01,
 									\pan, rrand(-0.5, 0.5),
@@ -1099,7 +1099,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 						\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
 						\rq, exprand(0.0001, 0.1),
 						\out, 0,
-						\amp, rrand(0.0001, 0.001),
+						\amp, rrand(0.0001, 0.001) * ~tickAmp,
 						\atk, rrand(0.000, 0.004),
 						\c0, -10,
 						\rel, rrand(0.01, 0.05) + rel, //0.01,
@@ -1124,6 +1124,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 	~maxActivity = 60;
 	~baseRoot = 17;
 	~root = ~baseRoot;
+	~tickAmp = 0.5;
+	~tickAmpTarget = 1.0;
+	~tickAmpStepsLeft = 120;
+	~tickAmpStep = (~tickAmpTarget - ~tickAmp) / ~tickAmpStepsLeft;
 	Routine({
 		loop {
 			var allDevices = ~stats.values,
@@ -1143,6 +1147,15 @@ SynthDef(\bounce_away, { | freq = 300 |
 				};
 				statDevice.channel.set_activity((totalPacketsForDevice/~maxActivity).min(1.0));
 			};
+
+			if(~tickAmpStepsLeft <= 0) {
+				~tickAmpStepsLeft = rrand(30, 240);
+				~tickAmpTarget = exprand(0.05, 1.0);
+				~tickAmpStep = (~tickAmpTarget - ~tickAmp) / ~tickAmpStepsLeft;
+			};
+			~tickAmp = ~tickAmp + ~tickAmpStep;
+			~tickAmpStepsLeft = ~tickAmpStepsLeft - 1;
+
 
 			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
 			// ("overall: " + ~overallActivity).postln;
