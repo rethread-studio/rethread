@@ -291,7 +291,7 @@ function init() {
         hue = Math.random();
       }
       col.setHSL(hue, 1.0, Math.random() * 0.5 + 0.5);
-      let material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.9 } );
+      let material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: false, opacity: 0.9 } );
       material.color.copy(col);
       let cube = new THREE.Mesh( geometry, material );
       cube.position.x = ix * distanceBetweenBoxes + startX;
