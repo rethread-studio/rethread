@@ -601,7 +601,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 									\freq, rrand(10000, 11000),
 									\rq, exprand(0.001, 0.1),
 									\out, channel.bus,
-									\amp, exprand(0.03, 0.1) * amp,
+									\amp, exprand(0.015, 0.05) * amp,
 									\atk, 0.001 * release_coeff,
 									\rel, 0.01, //0.01,
 									\pan, rrand(-0.5, 0.5),
@@ -697,6 +697,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 					amp = 0.5,
 					release_coeff = 1.0,
 					thump_atk = rrand(0.18, 0.21);
+
+					if(rrand(0.0, 1.0) > 0.5) {
+						while({freq < 150}, {freq = freq * 2});
+					};
 
 					if(~positionThroughService) {
 						channel = default_channel;
@@ -982,6 +986,10 @@ SynthDef(\bounce_away, { | freq = 300 |
 					release_coeff = 1.0,
 					thump_atk = rrand(0.18, 0.21);
 
+					if(rrand(0.0, 1.0) > 0.5) {
+						while({freq < 100}, {freq = freq * 2});
+					};
+
 					if(~positionThroughService) {
 						channel = facebook_channel;
 					};
@@ -1114,7 +1122,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 	~tickClock = TempoClock(120/60);
 	~overallActivity = 0;
 	~maxActivity = 60;
-	~root = 0;
+	~baseRoot = 17;
+	~root = ~baseRoot;
 	Routine({
 		loop {
 			var allDevices = ~stats.values,
@@ -1154,7 +1163,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 			if(~overallActivity > (~maxActivity * 0.5)) {
 				if(rrand(0.0, 1.0) > 0.98) {
 					~root = ~root + [-8, 0, 9, 17, -22].choose;
-					~root = ((~root + 22) % 53) - 22; // bring it back into the range -22 - 31
+					~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
+					~root = ~root;
 				};
 			};
 			if(~overallActivity > (~maxActivity * 0.2)) {
@@ -1201,3 +1211,4 @@ SynthDef(\bounce_away, { | freq = 300 |
 	};
 }.fork;
 )
+~root = 22
