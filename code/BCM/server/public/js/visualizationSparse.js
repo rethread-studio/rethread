@@ -88,8 +88,9 @@ var pointCloud;
 var particlePositions;
 var particleUniforms, particleAlphas, particleColors, particleSizes;
 
-var boxRow = 51;
-var numBoxes = boxRow * boxRow;
+var boxRowX = 90;
+var boxRowY = 51;
+var numBoxes = boxRowX * boxRowY;
 var boxes = [];
 var box_group;
 let shuffledBoxIndices = [];
@@ -99,7 +100,9 @@ for(let i = 0; i < numBoxes; i++) {
 shuffledBoxIndices = shuffle(shuffledBoxIndices);
 var boxData = [];
 
-var maxParticleCount = 10000;
+let particlesPerLine = 100;
+let particlesPerLineX = 177;
+var maxParticleCount = particlesPerLine * particlesPerLineX;
 var particleCount = maxParticleCount; // The number of active particles
 let shuffledParticleIndices = [];
 for(let i = 0; i < maxParticleCount; i++) {
@@ -208,16 +211,17 @@ function init() {
   let col = new THREE.Color();
   col.setHSL(1.0, 0.5, 0.5);
 
-  let particlesPerLine = 100;
+  
   let distanceBetweenParticles = 10;
-  let startX = (particlesPerLine * distanceBetweenParticles) / -2;
+  let startX = (particlesPerLineX * distanceBetweenParticles) / -2;
+  let startY = (particlesPerLine * distanceBetweenParticles) / -2;
 
   for (var i = 0; i < maxParticleCount; i++) {
 
-    let x = (i % particlesPerLine);
-    let y = Math.floor(i/particlesPerLine);
+    let x = (i % particlesPerLineX);
+    let y = Math.floor(i/particlesPerLineX);
     particlePositions[i * 3] = x * distanceBetweenParticles + startX;
-    particlePositions[i * 3 + 1] = y * distanceBetweenParticles + startX;
+    particlePositions[i * 3 + 1] = y * distanceBetweenParticles + startY;
     particlePositions[i * 3 + 2] = 0;
 
     let hue = 0.0;
@@ -274,13 +278,14 @@ function init() {
   scene.add(box_group);
 
   let distanceBetweenBoxes = 18;
-  startX = (boxRow * distanceBetweenBoxes) / -2;
+  startX = (boxRowX * distanceBetweenBoxes) / -2;
+  startY = (boxRowY * distanceBetweenBoxes) / -2;
 
   let size = 6.0;
   var geometry = new THREE.BoxGeometry(size, size, size);
   // var geometry = new THREE.CircleGeometry( size, 16 );
-  for(let iy = 0; iy < boxRow; iy++) {
-    for(let ix = 0; ix < boxRow; ix++) {
+  for(let iy = 0; iy < boxRowY; iy++) {
+    for(let ix = 0; ix < boxRowX; ix++) {
       let hue = 0.0;
       if(Math.random() > 0.8) {
         hue = Math.random();
@@ -290,7 +295,7 @@ function init() {
       material.color.copy(col);
       let cube = new THREE.Mesh( geometry, material );
       cube.position.x = ix * distanceBetweenBoxes + startX;
-      cube.position.y = iy * distanceBetweenBoxes + startX;
+      cube.position.y = iy * distanceBetweenBoxes + startY;
       cube.position.z = 100;
       boxes.push(cube);
       box_group.add(cube);
