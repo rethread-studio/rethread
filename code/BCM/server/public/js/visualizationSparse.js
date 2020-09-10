@@ -35,10 +35,6 @@ function shuffle(array) {
 }
 
 function reset() {
-  rectangleObjects = [];
-  scene.remove(rectangles_group);
-  rectangles_group = new THREE.Group();
-  scene.add(rectangles_group);
   particleIndex = 0;
   boxIndex = 0;
   camera.position.set(0, 0, 1300);
@@ -281,7 +277,7 @@ function init() {
   startX = (boxRowX * distanceBetweenBoxes) / -2;
   startY = (boxRowY * distanceBetweenBoxes) / -2;
 
-  let size = 6.0;
+  let size = 8.0;
   var geometry = new THREE.BoxGeometry(size, size, size);
   // var geometry = new THREE.CircleGeometry( size, 16 );
   for(let iy = 0; iy < boxRowY; iy++) {
@@ -291,7 +287,7 @@ function init() {
         hue = Math.random();
       }
       col.setHSL(hue, 1.0, Math.random() * 0.5 + 0.5);
-      let material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: false, opacity: 0.9 } );
+      let material = new THREE.MeshBasicMaterial( { color: 0x00ff00, transparent: true, opacity: 0.9 } );
       material.color.copy(col);
       let cube = new THREE.Mesh( geometry, material );
       cube.position.x = ix * distanceBetweenBoxes + startX;
