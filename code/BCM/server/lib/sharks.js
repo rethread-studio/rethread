@@ -23,7 +23,7 @@ function isIn(clients, json) {
     return json.ip_dst[0] == client.ip;
   }
   if (hotspot.isHotspot()) {
-    return json.ip_dst[0] == "10.3.141.118";
+    return json.ip_dst[0].indexOf("10.3.141.") > -1;
   }
   return (
     json.ip_dst[0].indexOf("192.168") == 0 ||
