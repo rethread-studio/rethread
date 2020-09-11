@@ -73,17 +73,26 @@ module.exports.connectedUsers = async (interface) => {
     const clients = await listwificlients(interface);
     const devices = await arp({ interface });
     const output = [];
-    for (let client of clients) {
+    client: for (let client of clients) {
       for (let device of devices) {
         if (client.mac == device.mac) {
           device.signal = client.signal;
           device.signalMin = client.signalMin;
           device.signalMax = client.signalMax;
           output.push(device);
+          continue client
         }
       }
+      output.push({
+        mac: client.mac,
+        signalMin: client.signalMin,
+        signalMax: client.signalMax,
+        ip: '?',
+        name: '?'
+      });
     }
     connectedUsers = output;
+    console.log(output)
     return output;
   }
   connectedUsers = await arpGetUsers(interface);
