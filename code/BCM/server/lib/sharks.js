@@ -38,7 +38,7 @@ module.exports = function (networkInterface, kill, broadcast) {
     const cmd =
       "tshark -V -N Ndmntv -l -T ek -i " +
       networkInterface +
-      " -e frame.time_epoch -e frame.time -e _ws.col.AbsTime -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e dns.qry.name -e frame.len -e http.host -e http.response -e frame.protocols -e eth.dst -e eth.src -e _ws.col.Info -e eth.dst.oui_resolved -e eth.src.oui_resolved  -e http.request.full_uri -e tcp.port";
+      " -e frame.time_epoch -e frame.number -e frame.time -e _ws.col.AbsTime -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e dns.qry.name -e frame.len -e http.host -e http.response -e frame.protocols -e eth.dst -e eth.src -e _ws.col.Info -e eth.dst.oui_resolved -e eth.src.oui_resolved  -e http.request.full_uri -e tcp.port";
     try {
       const child = sh.exec(cmd, {
         async: true,
@@ -67,8 +67,8 @@ module.exports = function (networkInterface, kill, broadcast) {
         .on("data", (d) => {
           try {
             const json = d.layers;
-
             if (json && json.ip_src) {
+              console.time("frame " + json.frame_number[0])
               const data = {};
               if (isIn(clients, json)) {
                 data.local_ip = json.ip_dst[0];
@@ -136,6 +136,7 @@ module.exports = function (networkInterface, kill, broadcast) {
 
               data.services = getServices(data);
               broadcast(data);
+              console.timeEnd("frame " + json.frame_number[0])
               return;
             }
           } catch (error) {
