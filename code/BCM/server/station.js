@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const WebSocket = require("ws");
+const fastJson = require("fast-json-stringify")
 const http = require("http");
 const cli = require("cli");
 
@@ -61,36 +62,73 @@ const status = {
 };
 
 function broadcast(data) {
+  data = JSON.stringify(data)
   wss.clients.forEach(function each(client) {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(data));
+      client.send();
     }
   });
 }
+const networkActivitySchema = fastJson({
+  title: 'networkActivity Schema',
+  type: 'object',
+  properties: {
+    event: {type: 'string'},
+    data: {
+      type: 'object',
+      properties: {
+        id: {type: 'integer'},
+        timestamp: {type: 'integer'},
+        len: {type: 'integer'},
+        info: {type: 'string'},
+        protocol: {type: 'string'},
+        out: {type: 'boolean'},
+        local_ip: {type: 'string'},
+        remote_ip: {type: 'string'},
+        local_host: {type: 'string'},
+        remote_host: {type: 'string'},
+        local_mac: {type: 'string'},
+        remote_mac: {type: 'string'},
+        local_vender: {type: 'string'},
+        remote_vender: {type: 'string'},
+        local_vender: {type: 'string'},
+        local_location: {
+          type: 'object',
+          properties: {
+            country: {type: 'string'},
+            continent: {type: 'string'},
+          }
+        },
+        remote_location: {
+          type: 'object',
+          properties: {
+            country: {type: 'string'},
+            continent: {type: 'string'},
+          }
+        },
+        services: {type: 'array'},
+        station: {type: 'string'},
+      }
+    }
+  }
+})
 function broadcastNetworkActivity(data) {
   data.station = options.name;
-
+  if (status.osc && !status.muted) {
+    osc.send(data);
+  }
+  const str = networkActivitySchema({
+    event: "networkActivity",
+    data,
+  });
   wss.clients.forEach(function each(client) {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(
-        JSON.stringify({
-          event: "networkActivity",
-          data,
-        })
-      );
+      client.send(str, {binary: false}, () => {});
     }
   });
 
   if (coordinatorWS != null) {
-    coordinatorWS.send(
-      JSON.stringify({
-        event: "networkActivity",
-        data,
-      })
-    );
-  }
-  if (status.osc && !status.muted) {
-    osc.send(data);
+    coordinatorWS.send(str, {binary: false}, () => {});
   }
 }
 

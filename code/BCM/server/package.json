@@ -15,6 +15,7 @@
     "config": "^3.3.1",
     "death": "^1.1.0",
     "express": "^4.17.1",
+    "fast-json-stringify": "^2.2.6",
     "forever-monitor": "^3.0.1",
     "geo-from-ip": "^2.0.0",
     "ip-check-range": "^1.0.2",
@@ -22,5 +23,8 @@
     "ping": "^0.2.3",
     "shelljs": "^0.8.4",
     "ws": "^7.3.1"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.1"
   }
 }

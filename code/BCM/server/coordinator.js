@@ -36,7 +36,10 @@ webSocketActions.setConnectedUsers = (from, args) => {
   stations[from].clients = args;
 };
 
-function handleMessage(from, json) {
+function handleMessage(from, json, raw) {
+  if (!stations[from]) {
+    return;
+  }
   if (json.event == "call") {
     let value = null;
     let error = null;
@@ -63,7 +66,7 @@ function handleMessage(from, json) {
     }
     wss.clients.forEach(function each(client) {
       if (client.readyState === WebSocket.OPEN && !client.stationId) {
-        client.send(JSON.stringify(json));
+        client.send(raw);
       }
     });
   }
@@ -98,8 +101,8 @@ async function callStation(station, func, args, expectReturn = true) {
     if (expectReturn) {
       stations[station].ws.on("message", cb);
       timeoutId = setTimeout(() => {
-        reject("Timeout getting answer");
         stations[station].ws.off("message", cb);
+        reject("Timeout getting answer");
       }, 5000);
     } else {
       return resolve();
@@ -138,7 +141,7 @@ wss.on("connection", async function (ws, request) {
 
   ws.on("message", function (message) {
     const data = JSON.parse(message);
-    handleMessage(ws.stationId, data);
+    handleMessage(ws.stationId, data, message);
   });
 });
 

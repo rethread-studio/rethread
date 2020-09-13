@@ -1,149 +1,100 @@
-const JSONStream = require("JSONStream");
-const sh = require("shelljs");
+const { spawn } = require("child_process");
 const geoip = require("geo-from-ip");
 const getServices = require("./services");
 const hotspot = require("./hotspot");
 
 const knownIPs = {};
-function getLocation(ip) {
-  if (!knownIPs[ip]) {
+function getLocation(ip, data) {
+  let location = knownIPs[ip];
+  if (!location) {
     try {
-      knownIPs[ip] = geoip.allData(ip);
+      location = geoip.allData(ip);
+      knownIPs[ip] = location;
     } catch (error) {
-      console.log(error);
+      console.log(error, data);
     }
   }
-  if (knownIPs[ip]) {
-    return knownIPs[ip];
-  }
+  return {
+    country: location.country,
+    continent: location.continent,
+  };
 }
 
-function isIn(clients, json) {
-  for (let client in clients) {
-    return json.ip_dst[0] == client.ip;
+function isIn(clients, destinationIp) {
+  for (let client of clients) {
+    return destinationIp == client.ip;
   }
   if (hotspot.isHotspot()) {
-    return json.ip_dst[0].indexOf("10.3.141.") > -1;
+    return destinationIp.indexOf("10.3.141.") == 0;
   }
   return (
-    json.ip_dst[0].indexOf("192.168") == 0 ||
-    json.ip_dst[0].indexOf("130.229") == 0
+    destinationIp.indexOf("192.168") == 0 ||
+    destinationIp.indexOf("130.229") == 0
   );
 }
 
 module.exports = function (networkInterface, kill, broadcast) {
   return new Promise((resolve, reject) => {
-    const clients = hotspot.cachedConnectedUsers();
-
-    const cmd =
-      "tshark -V -N Ndmntv -l -T ek -i " +
-      networkInterface +
-      " -e frame.time_epoch -e frame.number -e frame.time -e _ws.col.AbsTime -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e dns.qry.name -e frame.len -e http.host -e http.response -e frame.protocols -e eth.dst -e eth.src -e _ws.col.Info -e eth.dst.oui_resolved -e eth.src.oui_resolved  -e http.request.full_uri -e tcp.port";
+    const cmd = `-B 5 -N Ndmntv -l -T fields -i ${networkInterface} -e frame.time_epoch -e frame.number -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e frame.len -e frame.protocols -e eth.src -e eth.dst -e eth.src.oui_resolved -e eth.dst.oui_resolved -e _ws.col.Info`;
+    console.log(cmd);
     try {
-      const child = sh.exec(cmd, {
-        async: true,
-        silent: true,
-        maxBuffer: 1024 * 1024 * 1024,
-      });
+      const child = spawn("tshark", cmd.split(" "));
       console.log("Start sniffing on " + networkInterface);
       kill(child);
       let stderr = "";
-      child.stderr.on("data", (data) => {
-        str = data.toString();
-        if (str.indexOf("Capturing on") > -1) {
-          return;
-        }
-        stderr += data.toString();
-      });
       child.stdout
-        .pipe(
-          JSONStream.parse().on("error", (e) => {
-            console.log("error", e);
-          })
-        )
         .on("error", (e) => {
           console.log("error", e);
         })
         .on("data", (d) => {
-          try {
-            const json = d.layers;
-            if (json && json.ip_src) {
-              console.time("frame " + json.frame_number[0])
-              const data = {};
-              if (isIn(clients, json)) {
-                data.local_ip = json.ip_dst[0];
-                data.remote_ip = json.ip_src[0];
-                data.local_host = json.ip_dst_host[0];
-                data.remote_host = json.ip_src_host[0];
-                data.local_mac = json.eth_dst[0];
-                data.remote_mac = json.eth_src[0];
-                data.out = false;
+          const clients = hotspot.cachedConnectedUsers();
 
-                if (json.eth_src_oui_resolved) {
-                  data.remote_vender = json.eth_src_oui_resolved[0];
-                }
-                if (json.eth_dst_oui_resolved) {
-                  data.local_vender = json.eth_dst_oui_resolved[0];
-                }
-
-                if (json.tcp_port) {
-                  data.local_port = parseInt(json.tcp_port[1]);
-                  data.remote_port = parseInt(json.tcp_port[0]);
-                }
-              } else {
-                data.local_ip = json.ip_src[0];
-                data.remote_ip = json.ip_dst[0];
-                data.local_host = json.ip_src_host[0];
-                data.remote_host = json.ip_dst_host[0];
-                data.local_mac = json.eth_src[0];
-                data.remote_mac = json.eth_dst[0];
-                data.out = true;
-
-                if (json.eth_dst_oui_resolved) {
-                  data.remote_vender = json.eth_dst_oui_resolved[0];
-                }
-                if (json.eth_src_oui_resolved) {
-                  data.local_vender = json.eth_src_oui_resolved[0];
-                }
-
-                if (json.tcp_port) {
-                  data.local_port = parseInt(json.tcp_port[0]);
-                  data.remote_port = parseInt(json.tcp_port[1]);
-                }
-              }
-              data.timestamp = parseFloat(json.frame_time_epoch[0]) * 1000;
-              data.len = parseInt(json.frame_len[0]);
-              if (json.dns_qry_name) {
-                data.dns_query = json.dns_qry_name[0];
-              }
-              if (json._ws_col_Info) {
-                data.info = json._ws_col_Info[0];
-                if (data.info.indexOf("(ping)") > 0) {
-                  // ignore ping
-                  return;
-                }
-              }
-
-              if (json.http_request_full_uri) {
-                data.url = json.http_request_full_uri;
-              }
-
-              const protocols = json.frame_protocols[0].split(":");
-              data.protocol = protocols[protocols.length - 1];
-
-              data.local_location = getLocation(data.local_ip);
-              data.remote_location = getLocation(data.remote_ip);
-
-              data.services = getServices(data);
-              broadcast(data);
-              console.timeEnd("frame " + json.frame_number[0])
+          d = d.toString();
+          const lines = d.split("\n");
+          for (let line of lines) {
+            if (line.length == 0) {
+              continue;
+            }
+            const values = line.split("\t");
+            const data = {
+              id: parseInt(values[1]),
+              timestamp: Math.round(parseFloat(values[0]) * 1000),
+              len: parseInt(values[6]),
+              info: values[12],
+              protocol: values[7],
+              out: !isIn(clients, values[3]),
+            };
+            if (data.out) {
+              data.local_ip = values[2].split(",")[0];
+              data.remote_ip = values[3].split(",")[0];
+              data.local_host = values[4].split(",")[0];
+              data.remote_host = values[5].split(",")[0];
+              data.local_mac = values[8].split(",")[0];
+              data.remote_mac = values[9].split(",")[0];
+              data.local_vender = values[10];
+              data.remote_vender = values[11];
+            } else {
+              data.local_ip = values[3].split(",")[0];
+              data.remote_ip = values[2].split(",")[0];
+              data.local_host = values[5].split(",")[0];
+              data.remote_host = values[4].split(",")[0];
+              data.local_mac = values[9].split(",")[0];
+              data.remote_mac = values[8].split(",")[0];
+              data.local_vender = values[11];
+              data.remote_vender = values[10];
+            }
+            if (data.local_ip == "") {
               return;
             }
-          } catch (error) {
-            console.log(error);
+
+            data.local_location = getLocation(data.local_ip, data);
+            data.remote_location = getLocation(data.remote_ip, data);
+
+            data.services = getServices(data);
+            broadcast(data);
           }
         })
-        .on("end", () =>
+        .on("close", () =>
           reject("TShark process finished with the following error:\n" + stderr)
         );
     } catch (error) {

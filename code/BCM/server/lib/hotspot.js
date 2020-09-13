@@ -64,9 +64,9 @@ const arpGetUsers = async (interface) => {
   return devices.filter((f) => f.alive);
 };
 
-let connectedUsers = [];
+let cachedUsers = [];
 
-module.exports.cachedConnectedUsers = () => connectedUsers;
+module.exports.cachedConnectedUsers = () => cachedUsers;
 
 module.exports.connectedUsers = async (interface) => {
   if (module.exports.isHotspot()) {
@@ -91,12 +91,11 @@ module.exports.connectedUsers = async (interface) => {
         name: '?'
       });
     }
-    connectedUsers = output;
-    console.log(output)
+    cachedUsers = output;
     return output;
   }
-  connectedUsers = await arpGetUsers(interface);
-  return connectedUsers;
+  cachedUsers = await arpGetUsers(interface);
+  return cachedUsers;
 };
 
 module.exports.getWifiConfig = () => {
