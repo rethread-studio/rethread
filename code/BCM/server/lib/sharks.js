@@ -1,5 +1,7 @@
 const { spawn } = require("child_process");
-const geoip = require("geo-from-ip");
+const countryLookup = require("country-code-lookup");
+const geoip = require("geoip-lite");
+
 const getServices = require("./services");
 const hotspot = require("./hotspot");
 
@@ -8,7 +10,19 @@ function getLocation(ip, data) {
   let location = knownIPs[ip];
   if (!location) {
     try {
-      location = geoip.allData(ip);
+      location = geoip.lookup(ip);
+      if (location != null) {
+        const country = countryLookup.byIso(location.country);
+        location.country = country.country;
+        location.continent = country.continent;
+        location.region = country.region;
+        location.capital = country.capital;
+      } else {
+        location = {
+          country: undefined,
+          continent: undefined,
+        };
+      }
       knownIPs[ip] = location;
     } catch (error) {
       console.log(error, data);
