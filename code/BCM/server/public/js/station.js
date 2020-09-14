@@ -14,6 +14,11 @@ angular
         controller: "instructionController",
         title: "Welcome",
       })
+      .when("/close", {
+        templateUrl: "/partials/close.htm",
+        controller: "closeController",
+        title: "Close",
+      })
       .when("/instruction", {
         templateUrl: "/partials/instruction.htm",
         controller: "instructionController",
@@ -41,6 +46,10 @@ angular
     setTimeout(() => {
       $location.url("/visualization");
     }, 5000);
+  })
+  .controller("closeController", function ($scope) {
+    $(".visualization").hide();
+    $("#welcomeBg").hide();
   })
   .controller("homeController", function ($scope) {
     $(".visualization").hide();
@@ -107,4 +116,14 @@ angular
       }
     };
     ws.addEventListener("message", onmessage)
+    ws.addEventListener("error", () => {
+      $scope.$apply(() => {
+        $location.url("/close");
+      });
+    })
+    ws.addEventListener("open", () => {
+      $scope.$apply(() => {
+        $location.url("/");
+      });
+    })
   });
