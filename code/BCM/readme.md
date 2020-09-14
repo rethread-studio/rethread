@@ -16,5 +16,24 @@ Browser Chance Music utforskar möjligheterna med att använda interaktiv och sp
 Genom att låta deltagare uppleva de dataströmmar som flödar från deras egna enheter hoppas vi att skapa en personlig anknytning och förståelse för det virtuella ogripbara som hela tiden pågår i bakgrunden. Att använda ljud för detta ändamål drar fördel av människans fenomenala hörselsinne som kan bearbeta oerhörda mängder detaljerad information, men ljud har också vissa likheter med den dataström vi vill konkretisera. Liksom virtuella mjukvaruhändelser uppstår ljud i ett material för att sedan snabbt försvinna och lämna plats för nya ljudvågor i ett system av ständig och snabb förändring. Men till skillnad från mjukvaruoperationerna tar sig ljudet fram till öronen och får oss att tänka och känna.
 
 
+## Setting up a test environment
 
+Prerequisites: node.js, npm, SuperCollider, wireshark, tshark.
+Depending on your OS you may need to configure tshark to run without being the super user.
 
+Go to `code/BCM/server` and run
+```
+npm i
+```
+to install all dependencies. Find the name of your network interface, e.g. on modern Linux systems using `ip addr`. To start a local instance of the server, run:
+```
+node station.js -i NETWORK_INTERFACE
+```
+substituting NETWORK_INTERFACE for the name of your network interface, e.g.
+```
+node station.js -i wlp2s0
+```
+
+To see the dashboard, go to http://localhost:8000/, from where you can start the packet sniffing, play back recorded samples of data and open the visualizations.
+
+To start the sonification, open the file `code/BCM/supercollider_src/main/main.scd` and run the main block.
