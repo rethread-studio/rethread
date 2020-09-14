@@ -73,6 +73,9 @@ module.exports = function (networkInterface, kill, broadcast) {
               continue;
             }
             const values = line.split("\t");
+            if (values.length != 13) {
+              continue;
+            }
             const data = {
               id: parseInt(values[1]),
               timestamp: Math.round(parseFloat(values[0]) * 1000),
@@ -101,7 +104,7 @@ module.exports = function (networkInterface, kill, broadcast) {
               data.remote_vender = values[10];
             }
             if (data.local_ip == "") {
-              return;
+              continue;
             }
 
             data.local_location = getLocation(data.local_ip, data);
