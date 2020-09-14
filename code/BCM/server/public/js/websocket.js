@@ -25,13 +25,22 @@ function WebSocketClient() {
     host += ":" + document.location.port;
   }
 
+  const listeners = {};
   const that = this;
   window.parentWebsocket = that;
 
+  let ws = null;
   const init = () => {
     connecting = false;
-    const ws = new WebSocket(protocol + "://" + host);
-    
+    if (ws != null) {
+      for (let event in listeners) {
+        for (let cb of listeners[event]) {
+          ws.removeEventListener(event, cb);
+        }
+      }
+    }
+    ws = new WebSocket(protocol + "://" + host);
+
     ws.onclose = function (e) {
       console.log(
         "Socket is closed. Reconnect will be attempted in 1 second.",
@@ -56,7 +65,22 @@ function WebSocketClient() {
         }
       }
     };
-    that.addEventListener = ws.addEventListener.bind(ws);
+    for (let event in listeners) {
+      for (let cb of listeners[event]) {
+        ws.addEventListener(event, cb);
+      }
+    }
+  };
+  
+  that.addEventListener = (event, cb) => {
+    if (listeners[event] == null) {
+      listeners[event] = [];
+    }
+
+    listeners[event].push(cb);
+    if (ws != null) {
+      ws.addEventListener(event, cb);
+    }
   };
   init();
 }

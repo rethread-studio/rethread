@@ -42,7 +42,6 @@
           const packet = allPackets[index];
           const element = document.createElement("div");
           element.className = "glishBox " + packet.services.join(" ");
-          console.log(element.className);
           bg.appendChild(element);
 
           element.style.left = Math.floor(Math.random() * 100) + "vw";
