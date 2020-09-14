@@ -64,30 +64,38 @@ const arpGetUsers = async (interface) => {
   return devices.filter((f) => f.alive);
 };
 
-let connectedUsers = [];
+let cachedUsers = [];
 
-module.exports.cachedConnectedUsers = () => connectedUsers;
+module.exports.cachedConnectedUsers = () => cachedUsers;
 
 module.exports.connectedUsers = async (interface) => {
   if (module.exports.isHotspot()) {
     const clients = await listwificlients(interface);
     const devices = await arp({ interface });
     const output = [];
-    for (let client of clients) {
+    client: for (let client of clients) {
       for (let device of devices) {
         if (client.mac == device.mac) {
           device.signal = client.signal;
           device.signalMin = client.signalMin;
           device.signalMax = client.signalMax;
           output.push(device);
+          continue client
         }
       }
+      output.push({
+        mac: client.mac,
+        signalMin: client.signalMin,
+        signalMax: client.signalMax,
+        ip: '?',
+        name: '?'
+      });
     }
-    connectedUsers = output;
+    cachedUsers = output;
     return output;
   }
-  connectedUsers = await arpGetUsers(interface);
-  return connectedUsers;
+  cachedUsers = await arpGetUsers(interface);
+  return cachedUsers;
 };
 
 module.exports.getWifiConfig = () => {

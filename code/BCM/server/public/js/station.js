@@ -1,12 +1,4 @@
-let protocol = "ws";
-if (document.location.protocol == "https:") {
-  protocol += "s";
-}
-let host = document.location.hostname;
-if (document.location.port) {
-  host += ":" + document.location.port;
-}
-const ws = new WebSocket(protocol + "://" + host);
+const ws = WebSocketClient();
 
 angular
   .module("bcm", ["ngRoute"])
@@ -54,11 +46,7 @@ angular
     $(".visualization").hide();
     $("#welcomeBg").show();
   })
-  .controller("mainController", function (
-    $scope,
-    $http,
-    $location
-  ) {
+  .controller("mainController", function ($scope, $http, $location) {
     $scope.wifi = "BCM - SoundProxy";
     $scope.password = null;
     $scope.instruction = "";
@@ -98,9 +86,9 @@ angular
       setTimeout(switchVisualization, 20000);
     }
 
-    setTimeout(switchVisualization, 0); 
+    setTimeout(switchVisualization, 0);
 
-    ws.onmessage = (message) => {
+    const onmessage = (message) => {
       const json = JSON.parse(message.data);
       if (json.event == "alive") {
         $scope.$apply(() => {
@@ -118,4 +106,5 @@ angular
         });
       }
     };
+    ws.addEventListener("message", onmessage)
   });

@@ -44,17 +44,9 @@ textureLoader.load('fonts/Arial.png', function (texture) {
 
 
 // Receive packets
-let protocol = "ws";
-if (document.location.protocol == "https:") {
-  protocol += "s";
-}
-let host = document.location.hostname;
-if (document.location.port) {
-  host += ":" + document.location.port;
-}
-const ws = new WebSocket(protocol + "://" + host);
+const ws = WebSocketClient();
 
-ws.onmessage = (message) => {
+const onmessage = (message) => {
   const json = JSON.parse(message.data);
   if (json.event == "networkActivity") {
     const packet = json.data;
@@ -76,6 +68,7 @@ ws.onmessage = (message) => {
     }
   }
 };
+ws.addEventListener("message", onmessage)
 
 
 var container, stats;

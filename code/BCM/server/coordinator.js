@@ -5,6 +5,8 @@ const config = require("config");
 
 const osc = require("./lib/osc");
 const getIP = require("./lib/ip");
+const WSClient = require("./lib/WSClient");
+const WSServer = require("./lib/WSServer");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -17,15 +19,9 @@ app.use("/js", express.static("public/js"));
 app.use("/", express.static("public/coordinator"));
 
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ noServer: true });
+const wss = WSServer(server);
 const stations = {};
 const status = {};
-
-server.on("upgrade", function (request, socket, head) {
-  wss.handleUpgrade(request, socket, head, function (ws) {
-    wss.emit("connection", ws, request);
-  });
-});
 
 const webSocketActions = {};
 webSocketActions.getConfig = (from, args) => {
@@ -36,7 +32,10 @@ webSocketActions.setConnectedUsers = (from, args) => {
   stations[from].clients = args;
 };
 
-function handleMessage(from, json) {
+function handleMessage(from, json, raw) {
+  if (!stations[from]) {
+    return;
+  }
   if (json.event == "call") {
     let value = null;
     let error = null;
@@ -61,11 +60,7 @@ function handleMessage(from, json) {
       stations[from].metrics.in++;
       stations[from].metrics.lenIn += json.data.len;
     }
-    wss.clients.forEach(function each(client) {
-      if (client.readyState === WebSocket.OPEN && !client.stationId) {
-        client.send(JSON.stringify(json));
-      }
-    });
+    wss.broadcast(raw);
   }
 }
 async function callStation(station, func, args, expectReturn = true) {
@@ -98,8 +93,8 @@ async function callStation(station, func, args, expectReturn = true) {
     if (expectReturn) {
       stations[station].ws.on("message", cb);
       timeoutId = setTimeout(() => {
-        reject("Timeout getting answer");
         stations[station].ws.off("message", cb);
+        reject("Timeout getting answer");
       }, 5000);
     } else {
       return resolve();
@@ -112,9 +107,9 @@ wss.on("connection", async function (ws, request) {
   if (ws.stationId) {
     if (stations[ws.stationId]) {
       stations[ws.stationId].ws.close();
-      console.log(`Station '${ws.stationId}' reconnected`);
+      console.log(`[Coordinator] Station '${ws.stationId}' reconnected`);
     } else {
-      console.log(`New station '${ws.stationId}' connected`);
+      console.log(`[Coordinator] New Station '${ws.stationId}' connected`);
     }
     stations[ws.stationId] = {
       ws,
@@ -134,11 +129,20 @@ wss.on("connection", async function (ws, request) {
       ws.stationId,
       "getStatus"
     );
+  } else {
+    console.log(`[Coordinator] new client connected`);
   }
 
   ws.on("message", function (message) {
     const data = JSON.parse(message);
-    handleMessage(ws.stationId, data);
+    handleMessage(ws.stationId, data, message);
+  });
+
+  ws.on("close", () => {
+    if (ws.stationId && stations[ws.stationId]) {
+      console.log(`[Coordinator] Station '${ws.stationId}' disconnected`);
+      stations[ws.stationId].ws.close();
+    }
   });
 });
 
@@ -279,6 +283,9 @@ app.post("/api/sample/play", async function (req, res) {
     const oscConfig = { ...config.get("OSC") };
     osc.open(oscConfig.ip, oscConfig.port, oscConfig.address, async () => {
       for (let station in stations) {
+        if (station.ws.readyState !== WebSocket.OPEN) {
+          continue;
+        }
         await callStation(station, "stopSniffing");
       }
       try {
@@ -304,6 +311,9 @@ app.post("/api/sample/play", async function (req, res) {
 
 app.post("/api/instruction", function (req, res) {
   for (let station in stations) {
+    if (station.ws.readyState !== WebSocket.OPEN) {
+      continue;
+    }
     callStation(station, "instruction", req.body.instruction);
   }
   res.json("ok");
@@ -312,6 +322,9 @@ app.post("/api/instruction", function (req, res) {
 app.get("/api/stations", async function (req, res) {
   const output = {};
   for (let stationId in stations) {
+    if (stations[stationId].ws.readyState !== WebSocket.OPEN) {
+      continue;
+    }
     const status = await callStation(stationId, "getStatus");
     stations[stationId].status = status;
 

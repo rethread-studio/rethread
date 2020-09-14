@@ -93,17 +93,9 @@ let cameraOffset = new THREE.Vector3(0, 0, 0);
 let cameraPosition = new THREE.Vector3(45, 42, 15);
 
 // Receive packets
-let protocol = "ws";
-if (document.location.protocol == "https:") {
-  protocol += "s";
-}
-let host = document.location.hostname;
-if (document.location.port) {
-  host += ":" + document.location.port;
-}
-const ws = new WebSocket(protocol + "://" + host);
+const ws = WebSocketClient();
 
-ws.onmessage = async (message) => {
+const onmessage = async (message) => {
   const json = JSON.parse(message.data);
   if (json.event == "reset") {
     reset();
@@ -147,6 +139,7 @@ ws.onmessage = async (message) => {
     
   }
 };
+ws.addEventListener("message", onmessage)
 
 function addParticle(vec3, packetSize) {
   let i = particleIndex;
