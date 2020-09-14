@@ -1,7 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const WebSocket = require("ws");
-const fastJson = require("fast-json-stringify")
+const fastJson = require("fast-json-stringify");
 const http = require("http");
 const cli = require("cli");
 
@@ -10,6 +9,8 @@ const tsharks = require("./lib/sharks");
 const hotspot = require("./lib/hotspot");
 const getIP = require("./lib/ip");
 const osc = require("./lib/osc");
+const WSClient = require("./lib/WSClient");
+const WSServer = require("./lib/WSServer");
 
 const config = require("config");
 const oscConfig = { ...config.get("OSC") };
@@ -40,13 +41,7 @@ app.use("/", express.static("public/station"));
 app.use("*", express.static("public/station/index.html"));
 
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ noServer: true });
-
-server.on("upgrade", function (request, socket, head) {
-  wss.handleUpgrade(request, socket, head, function (ws) {
-    wss.emit("connection", ws, request);
-  });
-});
+const wss = WSServer(server);
 
 wss.on("connection", function (ws, request) {
   ws.on("message", function (message) {
@@ -61,57 +56,50 @@ const status = {
   osc: false,
 };
 
-function broadcast(data) {
-  data = JSON.stringify(data)
-  wss.clients.forEach(function each(client) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send();
-    }
-  });
-}
 const networkActivitySchema = fastJson({
-  title: 'networkActivity Schema',
-  type: 'object',
+  title: "networkActivity Schema",
+  type: "object",
   properties: {
-    event: {type: 'string'},
+    event: { type: "string" },
     data: {
-      type: 'object',
+      type: "object",
       properties: {
-        id: {type: 'integer'},
-        timestamp: {type: 'integer'},
-        len: {type: 'integer'},
-        info: {type: 'string'},
-        protocol: {type: 'string'},
-        out: {type: 'boolean'},
-        local_ip: {type: 'string'},
-        remote_ip: {type: 'string'},
-        local_host: {type: 'string'},
-        remote_host: {type: 'string'},
-        local_mac: {type: 'string'},
-        remote_mac: {type: 'string'},
-        local_vender: {type: 'string'},
-        remote_vender: {type: 'string'},
-        local_vender: {type: 'string'},
+        id: { type: "integer" },
+        timestamp: { type: "integer" },
+        len: { type: "integer" },
+        info: { type: "string" },
+        protocol: { type: "string" },
+        out: { type: "boolean" },
+        local_ip: { type: "string" },
+        remote_ip: { type: "string" },
+        local_host: { type: "string" },
+        remote_host: { type: "string" },
+        local_mac: { type: "string" },
+        remote_mac: { type: "string" },
+        local_vender: { type: "string" },
+        remote_vender: { type: "string" },
+        local_vender: { type: "string" },
         local_location: {
-          type: 'object',
+          type: "object",
           properties: {
-            country: {type: 'string'},
-            continent: {type: 'string'},
-          }
+            country: { type: "string" },
+            continent: { type: "string" },
+          },
         },
         remote_location: {
-          type: 'object',
+          type: "object",
           properties: {
-            country: {type: 'string'},
-            continent: {type: 'string'},
-          }
+            country: { type: "string" },
+            continent: { type: "string" },
+          },
         },
-        services: {type: 'array'},
-        station: {type: 'string'},
-      }
-    }
-  }
-})
+        services: { type: "array" },
+        station: { type: "string" },
+      },
+    },
+  },
+});
+
 function broadcastNetworkActivity(data) {
   data.station = options.name;
   if (status.osc && !status.muted) {
@@ -121,14 +109,10 @@ function broadcastNetworkActivity(data) {
     event: "networkActivity",
     data,
   });
-  wss.clients.forEach(function each(client) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(str, {binary: false}, () => {});
-    }
-  });
+  wss.broadcast(str);
 
   if (coordinatorWS != null) {
-    coordinatorWS.send(str, {binary: false}, () => {});
+    coordinatorWS.send(str, { binary: false }, () => {});
   }
 }
 
@@ -172,7 +156,7 @@ function stopOSC() {
 let coordinatorWS = null;
 async function callCoordinator(func, args) {
   return new Promise((resolve, reject) => {
-    if (coordinatorWS == null || coordinatorWS.readyState !== WebSocket.OPEN) {
+    if (coordinatorWS == null) {
       reject("Coordinator is not connected");
     }
     coordinatorWS.send(
@@ -183,6 +167,9 @@ async function callCoordinator(func, args) {
       })
     );
     const cb = (data) => {
+      if (data.length == 0) {
+        return;
+      }
       const json = JSON.parse(data);
       if (json.event == "return" && func == json.method) {
         coordinatorWS.off("message", cb);
@@ -210,9 +197,7 @@ webSocketActions.stopOSC = stopOSC;
 webSocketActions.stopSniffing = stopSniffing;
 webSocketActions.startSniffing = () => startSniffing(options.interface);
 
-webSocketActions.playPacket = (packet) => {
-  broadcastNetworkActivity(packet);
-};
+webSocketActions.playPacket = broadcastNetworkActivity;
 
 webSocketActions.openBrowser = () =>
   browser.open(`http://localhost:${options.port}`);
@@ -225,7 +210,7 @@ webSocketActions.mute = () => (status.muted = true);
 webSocketActions.resume = () => (status.muted = false);
 
 webSocketActions.instruction = (args) => {
-  broadcast({
+  wss.broadcast({
     event: "instruction",
     instruction: args,
   });
@@ -251,27 +236,24 @@ function handleMessage(json) {
   }
 }
 function connectToCoordinator(coordinatorURL) {
-  coordinatorWS = new WebSocket(coordinatorURL, {
+  coordinatorWS = new WSClient(coordinatorURL, {
     headers: { "station-id": options.name },
-    perMessageDeflate: false,
   });
-  coordinatorWS.on("open", async () => {
-    console.log("Connected to Coordinator " + coordinatorURL);
+  coordinatorWS.onOpen = async () => {
+    console.log(
+      `[coordinatorWS] [INFO] Connected to Coordinator ${coordinatorURL}`
+    );
     config = await callCoordinator("getConfig");
-  });
-  coordinatorWS.on("message", (data) => {
-    const json = JSON.parse(data);
-    handleMessage(json);
-  });
-  coordinatorWS.on("error", function (err) {
-    console.log("error", err);
-  });
-  coordinatorWS.on("close", function () {
-    console.log("Connection lost with coordinator");
-    setTimeout(() => {
-      connectToCoordinator(coordinatorURL);
-    }, 1000);
-  });
+  };
+  coordinatorWS.onMessage = (data) => handleMessage(JSON.parse(data));
+
+  coordinatorWS.onError = (err) =>
+    console.error(`[coordinatorWS] [ERROR] ${err}`);
+  coordinatorWS.onError = (err) =>
+    console.error(`[coordinatorWS] [ERROR] ${err}`);
+  coordinatorWS.onClose = () => {
+    console.error(`[coordinatorWS] [ERROR] Connection lost with coordinator`);
+  };
 }
 
 let coordinatorURL = options.coordinatorURL;
@@ -294,12 +276,12 @@ async function isAlive() {
       deviceName = connectedUsers[0].name;
     }
     if (alive == false && wasAlive == true) {
-      broadcast({
+      wss.broadcast({
         event: "reset",
       });
     }
     wasAlive = alive;
-    broadcast({
+    wss.broadcast({
       event: "alive",
       alive,
       deviceName,

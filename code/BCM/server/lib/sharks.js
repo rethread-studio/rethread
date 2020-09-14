@@ -11,12 +11,16 @@ function getLocation(ip, data) {
   if (!location) {
     try {
       location = geoip.lookup(ip);
-      if (location != null) {
-        const country = countryLookup.byIso(location.country);
-        location.country = country.country;
-        location.continent = country.continent;
-        location.region = country.region;
-        location.capital = country.capital;
+      if (location != null && location.country != "") {
+        try {
+          const country = countryLookup.byIso(location.country);
+          location.country = country.country;
+          location.continent = country.continent;
+          location.region = country.region;
+          location.capital = country.capital;
+        } catch (error) {
+          console.error(error, location);
+        }
       } else {
         location = {
           country: undefined,
@@ -50,7 +54,6 @@ function isIn(clients, destinationIp) {
 module.exports = function (networkInterface, kill, broadcast) {
   return new Promise((resolve, reject) => {
     const cmd = `-B 5 -N Ndmntv -l -T fields -i ${networkInterface} -e frame.time_epoch -e frame.number -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e frame.len -e frame.protocols -e eth.src -e eth.dst -e eth.src.oui_resolved -e eth.dst.oui_resolved -e _ws.col.Info`;
-    console.log(cmd);
     try {
       const child = spawn("tshark", cmd.split(" "));
       console.log("Start sniffing on " + networkInterface);

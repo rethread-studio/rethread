@@ -10,15 +10,7 @@ import { UnrealBloomPass } from "https://unpkg.com/three@0.119.1/examples/jsm/po
 import { SMAAPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js";
 
 // Receive packets
-let protocol = "ws";
-if (document.location.protocol == "https:") {
-  protocol += "s";
-}
-let host = document.location.hostname;
-if (document.location.port) {
-  host += ":" + document.location.port;
-}
-const ws = new WebSocket(protocol + "://" + host);
+const ws = WebSocketClient();
 
 function to3d(x, y, z, w) {
   return {
@@ -34,7 +26,7 @@ function ipTo(ip) {
   return new THREE.Vector3(coord.x, coord.y, coord.z);
 }
 
-ws.onmessage = (message) => {
+const onmessage = (message) => {
   const json = JSON.parse(message.data);
 
   if (json.event == "networkActivity") {
@@ -42,6 +34,7 @@ ws.onmessage = (message) => {
     const ip = packet.remote_ip;
   }
 };
+ws.addEventListener("message", onmessage)
 
 var container, stats;
 

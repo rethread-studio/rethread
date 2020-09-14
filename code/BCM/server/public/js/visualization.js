@@ -35,17 +35,9 @@ loader.load( 'assets/fonts/' + 'helvetiker_regular.typeface.json', function ( re
 } );
 
 // Receive packets
-let protocol = "ws";
-if (document.location.protocol == "https:") {
-  protocol += "s";
-}
-let host = document.location.hostname;
-if (document.location.port) {
-  host += ":" + document.location.port;
-}
-const ws = new WebSocket(protocol + "://" + host);
+const ws = WebSocketClient();
 
-ws.onmessage = (message) => {
+const onmessage = (message) => {
   const json = JSON.parse(message.data);
   if (json.event == "reset") {
     reset();
@@ -78,6 +70,7 @@ ws.onmessage = (message) => {
     }
   }
 };
+ws.addEventListener("message", onmessage)
 
 function reset() {
   allPackets = [];
