@@ -84,6 +84,9 @@ module.exports = function (networkInterface, kill, broadcast) {
               protocol: values[7],
               out: !isIn(clients, values[3]),
             };
+            if (new Date().getTime() - data.timestamp > 1500) {
+              continue;
+            }
             if (data.out) {
               data.local_ip = values[2].split(",")[0];
               data.remote_ip = values[3].split(",")[0];
