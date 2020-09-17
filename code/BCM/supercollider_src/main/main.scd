@@ -320,6 +320,23 @@ SynthDef(\bounce_away, { | freq = 300 |
 	Out.ar(\out.kr(0), sig);
 }).add;
 
+SynthDef(\service_voice, {
+	var buf = \buf.kr(0), sig, trig, pos, env, atk = ExpRand(0.01, BufDur.kr(buf)/2), rel = ExpRand(0.01, BufDur.kr(buf) - atk);
+	// sig = PlayBuf.ar(1, buf, BufRateScale.kr(buf) * Rand(0.8, 1.2), doneAction: 2);
+	env = EnvGen.kr(Env(
+		levels: [0, 1, 1, 0],
+		times: [atk, BufDur.kr(buf) - atk - rel, rel]
+	));
+	trig = Dust.kr(Rand(15, 45));
+	pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.5));
+	sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, Rand(0.8, 1.2), pos);
+	sig = sig * 0.5 * \amp.kr(0.05) * env;
+	sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];
+	// sig = Pan2.ar(sig, Rand(-0.7, 0.7));
+	Out.ar(\out.kr(0), sig);
+	FreeSelf.kr(pos >= 1);
+}).add;
+
 
 //////////////////////////////////////////////////////
 /////// STARTING EVERYTHING
@@ -372,6 +389,20 @@ SynthDef(\bounce_away, { | freq = 300 |
 	};
 	~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 	~octave = 3;
+
+	// Load buffers with voice recordings of services
+
+	~voiceServices = Environment(know: true);
+	~voiceServices.google = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Google.wav", 0, -1, [0]);
+	~voiceServices.amazon = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Amazon.wav", 0, -1, [0]);
+	~voiceServices.github = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Github.wav", 0, -1, [0]);
+	~voiceServices.facebook = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Facebook.wav", 0, -1, [0]);
+	~voiceServices.instagram = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Instagram.wav", 0, -1, [0]);
+	~voiceServices.microsoft = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Microsoft.wav", 0, -1, [0]);
+	~voiceServices.signal = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Signal.wav", 0, -1, [0]);
+	~voiceServices.slack = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Slack.wav", 0, -1, [0]);
+	~voiceServices.whatsapp = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/WhatsApp.wav", 0, -1, [0]);
+	~voiceServices.youtube = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/YouTube.wav", 0, -1, [0]);
 
 	// Mixer channel factory
 	~makeMixerChannel = { | name, out, amp = 1 |
@@ -532,6 +563,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 		switch(service.identifier,
 			\Google, { soundType = \Google },
 			"Google,Youtube".asSymbol, { soundType = \YouTube},
+			"Youtube,Google".asSymbol, {soundType = \YouTube},
 			\Amazon, { soundType = \Amazon },
 			"Slack,Amazon".asSymbol, { soundType = \Slack},
 			\Facebook, { soundType = \Facebook },
@@ -777,6 +809,8 @@ SynthDef(\bounce_away, { | freq = 300 |
 							release_coeff = rrand(0.3, 0.5);
 						}
 					);
+
+					channel.play_on(\service_voice, [\buf, ~voiceServices.google]);
 					if(inout == \out, {
 						channel.play_on(\reverse_google, [
 							\freq, freq,
@@ -822,6 +856,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 							release_coeff = rrand(0.3, 0.5);
 						}
 					);
+					channel.play_on(\service_voice, [\buf, ~voiceServices.amazon]);
 					if(inout == \out, {
 						if(activity == \low, {
 							channel.play_on(\tick2,
@@ -949,6 +984,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 							release_coeff = rrand(1.5, 2.5);
 						}
 					);
+					channel.play_on(\service_voice, [\buf, ~voiceServices.youtube]);
 					if(inout == \out, {
 						channel.play_on(\bounce_away, [
 							\freq, freq,
@@ -1009,6 +1045,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 							thump_atk = rrand(1.0, 2);
 						}
 					);
+					channel.play_on(\service_voice, [\buf, ~voiceServices.facebook]);
 					if(inout == \out, {
 						channel.play_on(\reverse_google, [
 							\freq, freq,
@@ -1071,6 +1108,7 @@ SynthDef(\bounce_away, { | freq = 300 |
 
 			// Extract all the integers from the remote_ip
 			ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
+			services.postln;
 
 			~addPacketToStats.(local_ip.asSymbol, out, services, remote_ip, remote_location);
 		};
