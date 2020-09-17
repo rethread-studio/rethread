@@ -1,0 +1,67 @@
+
+
+// Performance - Disables FES
+// p5.disableFriendlyErrors = true;
+
+onmessage((event) => {
+    console.log()
+})
+new WebSocketClient()
+
+///////////////////////// GUI Element Global Variables///////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////// Global Variables///////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+// Preload Function
+    function preload() { 
+ 
+    } // End Preload
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+// Setup Function
+    function setup() {
+
+    	var canvasX = 250;
+    	var canvasY = 250;
+
+	    // Create canvas 
+	    canvas = createCanvas(canvasX, canvasY);
+
+	    // Send canvas to CSS class through HTML div
+	    canvas.parent('sketch-holder');
+
+	    // Set canvas framerate
+	    // frameRate(25);
+
+    } // End Setup
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+// Draw Function
+	function draw() {
+
+        // Clear if needed
+        // clear();
+
+        // Set canvas background
+    	// background('#000000');        
+
+    	// Fill color
+    	// fill(250,250,250);
+
+    	// Stroke color
+    	// stroke(55,55,55);
+  
+  		// Stroke weight
+  		// strokeWeight(1);
+
+	} // End Draw
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+// End Script
