@@ -53,6 +53,8 @@ var fr;
 
 var flowfield;
 
+let lastChange = Date.now();
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 // Preload Function
@@ -77,6 +79,13 @@ var flowfield;
 		fr = createP('');
 
 		flowfield = new Array(cols * rows);
+
+		// Calculate window center points
+		for(w of windows) {
+			w.center = createVector(w.x + w.w/2, w.y + w.h/2);
+			w.halfWidthSq = Math.pow(w.w/2, 2);
+			w.halfHeightSq = Math.pow(w.h/2, 2);
+		}
 
 		background('#000000');
 
@@ -104,7 +113,7 @@ var flowfield;
 				var index = x + y * cols;
 				var angle = noise(xoff, yoff, zoff) * TWO_PI * 4;
 				var v = p5.Vector.fromAngle(angle);
-				v.setMag(0.2);
+				v.setMag(0.3);
 				flowfield[index] = v;
 				xoff += inc;
 				// stroke(150, 50);
@@ -117,7 +126,7 @@ var flowfield;
 			}
 			yoff += inc;
 
-			zoff += 0.0003;
+			zoff += 0.0001;
 		}
 		
 		// Update and draw particles
@@ -125,20 +134,30 @@ var flowfield;
 			fill(p.color);
 			noStroke();
 			ellipse(p.pos.x, p.pos.y, 2, 2);
+			p.vel = createVector(centerWindow.center.x, centerWindow.center.y).sub(p.pos).normalize().mult(0.8);
 			let localVel = p.vel.copy().add(getFlowfieldForce(p.pos, flowfield));
+			for(w of windows) {
+				localVel.add(windowForce(w, p.pos));
+			}
 			p.pos.add(localVel);
 		}
 
 		particles = particles.filter(p => !windowContains(centerWindow, p.pos));
 
 		// Draw the windows
-        fill(0, 50);
+        fill(150, 50);
         for(win of windows) {
             rect(win.x, win.y, win.w, win.h);
 		}
+
+		let now = Date.now(); // current time in milliseconds
+		if(now - lastChange > 10000) {
+			centerWindow = windows[Math.floor(Math.random() * windows.length)];
+			lastChange = Date.now();
+		}
 		
-		fill(255, 100, 50, 50);
-		rect(centerWindow.x, centerWindow.y, centerWindow.w, centerWindow.h);
+		// fill(255, 100, 50, 50);
+		// rect(centerWindow.x, centerWindow.y, centerWindow.w, centerWindow.h);
 
 	} // End Draw
 
@@ -147,7 +166,8 @@ var flowfield;
 // Helper functions
 
 function addParticle() {
-	let windowOrigin = windows[Math.floor(Math.random() * windows.length)];
+	let windowIndex = Math.floor(Math.random() * windows.length);
+	let windowOrigin = windows[windowIndex];
 	let pos = createVector(windowOrigin.x + (windowOrigin.w * Math.random()), windowOrigin.y + (windowOrigin.h * Math.random()));
 	// Move towards the center
 	let vel = createVector(canvasX/2, canvasY/2).sub(pos).normalize().mult(0.5);
@@ -155,7 +175,7 @@ function addParticle() {
 	particles.push({
 		pos: pos,
 		vel: vel,
-		color: color(Math.random() * 100, 100, 70, 10),
+		color: color((windowIndex * 523) % 100, 100, 100, 10),
 	})
 }
 
@@ -175,4 +195,23 @@ function windowContains(win, pos) {
 	} else {
 		return false;
 	}
+}
+
+function windowForce(win, pos) {
+	let distX = win.center.x - pos.x;
+	let distY = win.center.y - pos.y;
+	let vel = createVector(0, 0);
+	if(Math.abs(distX) < win.w/2 && Math.abs(distY) < win.h/2) {
+		if(distX < 0) {
+			vel.x = 1;
+		} else {
+			vel.x = -1;
+		}
+		if(distY < 0) {
+			vel.y = 1;
+		} else {
+			vel.y = -1;
+		}
+	}
+	return vel;
 }
