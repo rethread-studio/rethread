@@ -98,7 +98,7 @@ function draw() {
   // clear();
 
   // Set canvas background
-  // background('#000000');
+  //background("#000000");
 
   // Update flow field
   var yoff = 0;
@@ -106,12 +106,27 @@ function draw() {
     var xoff = 0;
     for (var x = 0; x < cols; x++) {
       var index = x + y * cols;
+
+      let inside = false;
+      for (let win of windows) {
+        if (windowContains(win, { x: x * scl, y: y * scl })) {
+          inside = win;
+          break;
+        }
+      }
+
       var angle = noise(xoff, yoff, zoff) * TWO_PI * 4;
+
       var v = p5.Vector.fromAngle(angle);
-      v.setMag(0.3);
+      if (inside && inside != centerWindow) {
+        v.setMag(1);
+      } else {
+				v.setMag(0.3);
+      }
       flowfield[index] = v;
       xoff += inc;
       // stroke(150, 50);
+
       // push();
       // translate(x * scl, y * scl);
       // rotate(v.heading());
@@ -165,6 +180,10 @@ function draw() {
 function addParticle() {
   let windowIndex = Math.floor(Math.random() * windows.length);
   let windowOrigin = windows[windowIndex];
+  while (windowOrigin == centerWindow) {
+    windowIndex = Math.floor(Math.random() * windows.length);
+    windowOrigin = windows[windowIndex];
+  }
   let pos = createVector(
     windowOrigin.x + windowOrigin.w * Math.random(),
     windowOrigin.y + windowOrigin.h * Math.random()
@@ -203,20 +222,21 @@ function windowContains(win, pos) {
   }
 }
 
+const FORCE = 1;
 function windowForce(win, pos) {
   let distX = win.center.x - pos.x;
   let distY = win.center.y - pos.y;
   let vel = createVector(0, 0);
   if (Math.abs(distX) < win.w / 2 && Math.abs(distY) < win.h / 2) {
     if (distX < 0) {
-      vel.x = 1;
+      vel.x = FORCE;
     } else {
-      vel.x = -1;
+      vel.x = -FORCE;
     }
     if (distY < 0) {
-      vel.y = 1;
+      vel.y = FORCE;
     } else {
-      vel.y = -1;
+      vel.y = -FORCE;
     }
   }
   return vel;
