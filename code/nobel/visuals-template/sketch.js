@@ -98,7 +98,7 @@ function draw() {
   // clear();
 
   // Set canvas background
-  //background("#000000");
+  background("rgba(0,0,0,0.03)");
 
   // Update flow field
   var yoff = 0;
@@ -116,6 +116,19 @@ function draw() {
       }
 
       var angle = noise(xoff, yoff, zoff) * TWO_PI * 4;
+      // if (inside && inside != centerWindow) {
+
+      //   const deltaY = Math.abs(inside.center.y - y * scl);
+      //   const deltaX = Math.abs(inside.center.x - x * scl);
+      //   angle = Math.atan2(deltaY, deltaX);
+      //   if (inside.center.y > y * scl && inside.center.x < x * scl) {
+      //     angle *= -1;
+      // 	}
+      // 	if (inside.center.y < y * scl && inside.center.x > x * scl) {
+      //     angle *= -1;
+      // 	}
+      // 	angle += TWO_PI / 2;
+      // }
 
       var v = p5.Vector.fromAngle(angle);
       if (inside && inside != centerWindow) {
@@ -197,7 +210,7 @@ function addParticle() {
   particles.push({
     pos: pos,
     vel: vel,
-    color: color((windowIndex * 523) % 100, 100, 100, 10),
+    color: color((windowIndex * 523) % 100, 100, 100, 25),
   });
 }
 
