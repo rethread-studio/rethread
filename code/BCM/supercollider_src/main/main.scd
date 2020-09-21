@@ -18,6 +18,8 @@ s.reboot;
 
 // Routing and mixer channels
 ~useAmbisonics = false; // Set to false to use a simple stereo output
+~sonifyLive = false;
+~sonifySequencer = true;
 ~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
 ~positionThroughService = true;
@@ -50,7 +52,6 @@ if(~useAmbisonics == true, {
 "../sound_forest_mixer_gui.scd".loadRelative;
 
 "synthdefs.scd".loadRelative; // LOAD SYNTHDEFS
-"sequencer.scd".loadRelative; // LOAD AND INIT SEQUENCER
 
 
 //////////////////////////////////////////////////////
@@ -58,10 +59,7 @@ if(~useAmbisonics == true, {
 /////////////////////////////////////////////////////
 
 {
-	var filter_bus, filter, drone,
-	drone_channel, cloud_channel, sine_channel, filter_channel, sub_channel,
-	rain_channel, rev_channel, tick_channel,
-	default_channel, google_channel, facebook_channel, amazon_channel, cloudflare_channel, youtube_channel;
+	var filter_bus, filter, drone;
 
 	s.newBusAllocators; // Make sure we don't run out of busses if we restart multiple times
 
@@ -178,31 +176,36 @@ if(~useAmbisonics == true, {
 
 	~decoder = Synth(\decoder, [\in, ~decoderBus, \out, ~firstOutputBus]);
 
+	~channels = Environment(know: true);
 	// Set up all the channels
-	rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
-	rev_channel.play_on(\medium_reverb, [\out, rev_channel.bus, \in, rev_channel.bus, \mix, 1.0, \amp, 2.0]);
-	rev_channel.set_amp(0.3);
-	sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
-	sub_channel.set_send(rev_channel.bus, 0.2);
-	rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
-	rain_channel.set_send(rev_channel.bus, 1.0);
-	default_channel = ~makeMixerChannel.("Default", ~decoderBus);
-	default_channel.set_send(rev_channel.bus, 1.0);
-	google_channel = ~makeMixerChannel.("Google", ~decoderBus);
-	google_channel.set_send(rev_channel.bus, 1.0);
-	facebook_channel = ~makeMixerChannel.("Facebook", ~decoderBus);
-	facebook_channel.set_send(rev_channel.bus, 1.0);
-	amazon_channel = ~makeMixerChannel.("Amazon", ~decoderBus);
-	amazon_channel.set_send(rev_channel.bus, 1.0);
-	cloudflare_channel = ~makeMixerChannel.("Coudflare", ~decoderBus);
-	cloudflare_channel.set_send(rev_channel.bus, 1.0);
-	youtube_channel = ~makeMixerChannel.("YouTube", ~decoderBus);
-	youtube_channel.set_send(rev_channel.bus, 1.0);
-	tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
-	tick_channel.set_send(rev_channel.bus, 1.0);
-	tick_channel.set_amp(0.0);
+	~channels.rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
+	~channels.rev_channel.play_on(\medium_reverb, [\out, ~channels.rev_channel.bus, \in, ~channels.rev_channel.bus, \mix, 1.0, \amp, 2.0]);
+	~channels.rev_channel.set_amp(0.3);
+	~channels.sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
+	~channels.sub_channel.set_send(~channels.rev_channel.bus, 0.2);
+	~channels.rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
+	~channels.rain_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.default_channel = ~makeMixerChannel.("Default", ~decoderBus);
+	~channels.default_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.google_channel = ~makeMixerChannel.("Google", ~decoderBus);
+	~channels.google_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.facebook_channel = ~makeMixerChannel.("Facebook", ~decoderBus);
+	~channels.facebook_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.amazon_channel = ~makeMixerChannel.("Amazon", ~decoderBus);
+	~channels.amazon_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.cloudflare_channel = ~makeMixerChannel.("Coudflare", ~decoderBus);
+	~channels.cloudflare_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.microsoft_channel = ~makeMixerChannel.("Microsoft", ~decoderBus);
+	~channels.microsoft_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.youtube_channel = ~makeMixerChannel.("YouTube", ~decoderBus);
+	~channels.youtube_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
+	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.tick_channel.set_amp(0.0);
 
-	~makeSoundForestGui.([tick_channel, default_channel, google_channel, facebook_channel, amazon_channel, cloudflare_channel, youtube_channel, rev_channel], ~allClouds);
+	{
+		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.rev_channel], ~allClouds);
+	}.defer;
 
 	// Create the global stats object (environment)
 	// Stats are structured in the following hierarchy:
@@ -215,7 +218,7 @@ if(~useAmbisonics == true, {
 		statDevice.services = ();
 		statDevice.bus = Bus.audio(s, 1);
 		statDevice.channel = ~makeMixerChannel.(device.asString, ~decoderBus);
-		statDevice.channel.set_send(rev_channel.bus, 1.0);
+		statDevice.channel.set_send(~channels.rev_channel.bus, 1.0);
 		statDevice
 	};
 
@@ -292,10 +295,18 @@ if(~useAmbisonics == true, {
 		);
 		service.soundType = soundType;
 		service.tick = { | self, channel |
-			~playSound.(self.soundType, \in, self.packets[\in], channel);
-			~playSound.(self.soundType, \out, self.packets[\out], channel);
+			if(~sonifyLive, {
+				~playSound.(self.soundType, \in, self.packets[\in], channel);
+				~playSound.(self.soundType, \out, self.packets[\out], channel);
+			});
+			if(~sonifySequencer, {
+				~updateSequencer.(self.soundType, \in, self.packets[\in], channel);
+				~updateSequencer.(self.soundType, \out, self.packets[\out], channel);
+			});
 		};
 	};
+
+	"sequencer.scd".loadRelative; // LOAD AND INIT SEQUENCER
 
 
 	//////////////////////////////////////////////////////
@@ -329,7 +340,7 @@ if(~useAmbisonics == true, {
 					thump_atk = rrand(0.18, 0.21);
 
 					if(~positionThroughService) {
-						channel = default_channel;
+						channel = ~channels.default_channel;
 					};
 					switch(activity,
 						\low, {
@@ -389,7 +400,7 @@ if(~useAmbisonics == true, {
 					thump_atk = rrand(0.18, 0.21);
 
 					if(~positionThroughService) {
-						channel = default_channel;
+						channel = ~channels.default_channel;
 					};
 					switch(activity,
 						\low, {
@@ -455,7 +466,7 @@ if(~useAmbisonics == true, {
 					};
 
 					if(~positionThroughService) {
-						channel = default_channel;
+						channel = ~channels.default_channel;
 					};
 					switch(activity,
 						\low, {
@@ -514,7 +525,7 @@ if(~useAmbisonics == true, {
 					release_coeff = 1.0;
 
 					if(~positionThroughService) {
-						channel = google_channel;
+						channel = ~channels.google_channel;
 					};
 					switch(activity,
 						\low, {
@@ -556,7 +567,7 @@ if(~useAmbisonics == true, {
 					});
 					if(~sequencer.google != true) {
 						// Add to sequencer
-						~addToSequencer.(~sequencer, 0,
+						~addToSequencer.(~sequencer, rrand(0, ~sequencer.numSteps).floor,
 							{
 								channel.play_on(\service_voice, [\buf, ~voiceServices.google]);
 								Synth(\tick2,
@@ -581,7 +592,7 @@ if(~useAmbisonics == true, {
 					release_coeff = 1.0;
 
 					if(~positionThroughService) {
-						channel = amazon_channel;
+						channel = ~channels.amazon_channel;
 					};
 					switch(activity,
 						\low, {
@@ -636,7 +647,7 @@ if(~useAmbisonics == true, {
 					});
 					if(~sequencer.amazon != true) {
 						// Add to sequencer
-						~addToSequencer.(~sequencer, 2,
+						~addToSequencer.(~sequencer, rrand(0, ~sequencer.numSteps).floor,
 							{
 								channel.play_on(\service_voice, [\buf, ~voiceServices.amazon]);
 								Synth(\tick2,
@@ -661,7 +672,7 @@ if(~useAmbisonics == true, {
 					release_coeff = 1.0;
 
 					if(~positionThroughService) {
-						channel = cloudflare_channel;
+						channel = ~channels.cloudflare_channel;
 					};
 					switch(activity,
 						\low, {
@@ -728,7 +739,7 @@ if(~useAmbisonics == true, {
 					release_coeff = 1.0;
 
 					if(~positionThroughService) {
-						channel = cloudflare_channel;
+						channel = ~channels.microsoft_channel;
 					};
 					switch(activity,
 						\low, {
@@ -796,7 +807,7 @@ if(~useAmbisonics == true, {
 					release_coeff = 1.0;
 
 					if(~positionThroughService) {
-						channel = youtube_channel;
+						channel = ~channels.youtube_channel;
 					};
 					switch(activity,
 						\low, {
@@ -843,26 +854,6 @@ if(~useAmbisonics == true, {
 							\amp, 0.05 * amp,
 							\out, channel.bus]);
 					});
-					if(~sequencer.youtube != true) {
-						// Add to sequencer
-						~addToSequencer.(~sequencer, 0,
-							{
-								channel.play_on(\service_voice, [\buf, ~voiceServices.youtube]);
-								Synth(\tick2,
-									[
-										\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-										\rq, exprand(0.0001, 0.1),
-										\out, 0,
-										\amp, rrand(0.001, 0.02),
-										\atk, 0.000,
-										\rel, rrand(0.01, 0.05), //0.01,
-										\c1, -12,
-										\pan, rrand(-1, 1),
-									]
-								);
-						});
-						~sequencer.youtube = true;
-					};
 				},
 				\Facebook, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave-1),
@@ -875,7 +866,7 @@ if(~useAmbisonics == true, {
 					};
 
 					if(~positionThroughService) {
-						channel = facebook_channel;
+						channel = ~channels.facebook_channel;
 					};
 					switch(activity,
 						\low, {
@@ -901,7 +892,7 @@ if(~useAmbisonics == true, {
 							\rel, rrand(0.1, 4 * release_coeff),
 							\c0, rrand(1, 4),
 							\c1, \sine,
-							\pan, rrand(-0.7, 0.7),channel = default_channel;
+							\pan, rrand(-0.7, 0.7),
 							\amp, 0.05 * amp,
 							\out, channel.bus]);
 					}, {
@@ -915,28 +906,13 @@ if(~useAmbisonics == true, {
 							\amp, 0.05 * amp,
 							\out, channel.bus]);
 					});
-					if(~sequencer.facebook != true) {
-						// Add to sequencer
-						~addToSequencer.(~sequencer, 12,
-							{
-								channel.play_on(\service_voice, [\buf, ~voiceServices.facebook]);
-								channel.play_on(\thump, [
-									\freq, freq,
-									\atk, thump_atk,
-									\rel, rrand(0.5, 2),
-									\c0, -3,
-									\c1, \sine,
-									\pan, rrand(-0.7, 0.7),
-									\amp, 0.05 * amp,
-									\out, channel.bus]);
-						});
-						~sequencer.facebook = true;
-					};
 				}
 			);
 
 		};
 	};
+
+	s.sync();
 
 
 	//////////////////////////////////////////////////////
@@ -997,7 +973,7 @@ if(~useAmbisonics == true, {
 		if(~overallActivity < (~maxActivity * 0.5)) {
 			{
 				rrand(0.0, 0.2).wait;
-				tick_channel.play_on(\tick2,
+				~channels.tick_channel.play_on(\tick2,
 					[
 						\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
 						\rq, exprand(0.0001, 0.1),
@@ -1032,6 +1008,7 @@ if(~useAmbisonics == true, {
 	~tickAmpStepsLeft = 120;
 	~tickAmpStep = (~tickAmpTarget - ~tickAmp) / ~tickAmpStepsLeft;
 	~counter = 0;
+	s.sync();
 	Routine({
 		loop {
 			var allDevices = ~stats.values,
@@ -1105,7 +1082,7 @@ if(~useAmbisonics == true, {
 			0.25.wait;
 		};
 	}).play(~tickClock);
-}.value();
+}.fork;
 )
 
 ~ch1[0..0]

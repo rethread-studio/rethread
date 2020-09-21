@@ -29,7 +29,7 @@
 // Many freqneucies are interesting: 1000, 4000, 400, 40
 // Lower frequencies sound better with a coef around 0.5
 {
-	var sig, gen, trig, freq = 800, coef;
+	var sig, gen, trig, freq = 40, coef;
 	trig = Impulse.ar(freq/2);
 	gen = PlayBuf.ar(1, ~services.choose, 1.0, loop: 1);
 	coef = MouseX.kr(-0.5, 0.5);
@@ -44,15 +44,15 @@
 // Many freqneucies are interesting: 1000, 4000, 400, 40
 // Lower frequencies sound better with a coef around 0.5
 {
-	var sig, gen, trig, freq = 400, coef, localin;
+	var sig, gen, trig, freq = 100, coef, localin;
 	trig = Impulse.ar(freq/2);
-	gen = PlayBuf.ar(1, ~buf, 1.0, loop: 1);
+	gen = PlayBuf.ar(1, ~services.choose, 1.0, loop: 1);
 	coef = MouseX.kr(-0.5, 0.5);
 
 	localin = LocalIn.ar(1);
-	sig = CombC.ar(gen, 0.2, freq.reciprocal, MouseY.kr(0.1, 2.0));
-	sig = sig + (localin * 0.5);
-	LocalOut.ar(LPF.ar(sig, freq));
+	sig = gen + (localin * 0.1);
+	sig = CombC.ar(sig, 0.2, freq.reciprocal, MouseY.kr(0.1, 2.0));
+	LocalOut.ar(OnePole.ar(sig, coef) * 0.9 * Decay.ar(Impulse.ar(freq/2), freq.reciprocal));
 	Pan2.ar(sig);
 }.play;
 )
@@ -74,7 +74,11 @@
 	}
 }.fork;
 )
-
+(
+[ 22, 93, 0, 9, 71, 53, 40, 71, 9, 31, 62, 102, 62, 102, 22, 40, 84, 124, 84, 124, 31, 53, 93, 115 ].collect{ |degree|
+	~s53.degreeToFreq(degree, 0.midicps, 3)
+};
+)
 ( // one long voice recording on a string
 {
 	{
@@ -91,34 +95,70 @@
 }.fork;
 )
 
+~chord = [0, 14, 22, 31, 14, 45, 14, 9, 40, 9, 5, 36, 5]
 ( // one string, many voices
+var pitches = ~chord.collect { |degree|
+	~s53.degreeToFreq(degree, 0.midicps, 4)
+};
 SynthDef(\string_with_input, {
-	var sig, gen = In.ar(\in.kr(10), 1), trig = Impulse.kr(0) + Impulse.kr(6.0),
+	var sig, gen = In.ar(\in.kr(10), 1), trig = Impulse.kr(0) + In.kr(\trig.kr(0), 1),
 	// we need to adda tiny number to avoid freq.reciprocal to doa division by 0 on the first sample
 	// there has to be a more elegant way
-	freq = Demand.kr(trig, 0, Dseq(40 * [1, 10, 8, 50, 20, 4, 3, 5], inf)) + 0.00000001,
+	freq = Demand.kr(trig, 0, Dseq(pitches, inf)) + 0.00000001,
 	pluckTrig = Impulse.ar(freq),
 	coef = freq.linexp(40, 4000, 0.5, 0.01);
-	freq.reciprocal.poll;
-	sig = Pluck.ar(gen, pluckTrig, 0.2, freq.reciprocal, MouseY.kr(0.1, 2.0), coef);
-	sig = Pan2.ar(sig);
+
+	gen = (gen * 5).tanh * 0.5;
+	sig = Pluck.ar(gen, pluckTrig, 0.2, freq.reciprocal.lag(0.03), MouseY.kr(0.1, 5.0), coef) * 0.05;
+	sig = sig + Resonz.ar(sig, freq, 0.05, mul: 0.3);
+	sig = Compander.ar(sig, sig, 0.5, 1.0, 1/3);
+	sig = [sig, sig] + [DelayL.ar(sig, 0.1, TRand.kr(0.0001, 0.03, trig)), DelayL.ar(sig, 0.1, TRand.kr(0.0001, 0.03, trig))];
+	sig = (sig * 0.8) + (JPverb.ar(sig, 2) * 0.2);
+	// sig = Pan2.ar(sig);
 	Out.ar(\out.kr(0), sig);
 }).add;
+~triggerBus = Bus.control(s, 1);
+)
+(
+{
+	var trig = Impulse.kr(1.5);
+	Out.kr(~triggerBus, trig);
+}.play;
+)
+(
 {
 	var voiceBus = Bus.audio(s, 1);
 	s.sync();
 
-	Synth(\string_with_input, [\in, voiceBus]);
+	Synth(\string_with_input, [\in, voiceBus, \trig, ~triggerBus]);
 
 	loop {
-		{
-			var sig, bufnum = ~services.choose;
-			sig = PlayBuf.ar(1, bufnum, BufRateScale.ir(bufnum), loop: 0, doneAction: 2);
-			Out.ar(voiceBus, sig);
-		}.play;
-		// [0.125, 0.25, 0.5].choose.wait;
-		0.3.wait;
+		rrand(0, 10).do {
+			{
+				var sig, bufnum = ~services.choose;
+				sig = PlayBuf.ar(1, bufnum, BufRateScale.ir(bufnum), loop: 0, doneAction: 2);
+				Out.ar(voiceBus, sig);
+			}.play;
+			// [0.125, 0.25, 0.5].choose.wait;
+			0.1.wait;
+		};
+		rrand(0.5, 3).wait;
 	}
+}.fork;
+)
+
+(
+{
+	var voiceBus = Bus.audio(s, 1);
+	s.sync();
+
+	Synth(\string_with_input, [\in, voiceBus, \trig, ~triggerBus]);
+
+	{
+		var sig, bufnum = ~ipBuffer;
+		sig = PlayBuf.ar(1, bufnum, BufRateScale.ir(bufnum), loop: 0, doneAction: 2);
+		Out.ar(voiceBus, sig);
+	}.play;
 }.fork;
 )
 
