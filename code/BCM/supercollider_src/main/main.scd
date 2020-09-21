@@ -59,7 +59,7 @@ if(~useAmbisonics == true, {
 /////////////////////////////////////////////////////
 
 {
-	var filter_bus, filter, drone;
+	var filter_bus, filter, drone, voice_path;
 
 	s.newBusAllocators; // Make sure we don't run out of busses if we restart multiple times
 
@@ -108,18 +108,19 @@ if(~useAmbisonics == true, {
 	~octave = 3;
 
 	// Load buffers with voice recordings of services
+	voice_path = "../sounds/BCM_voice/spoken/".resolveRelative;
 
 	~voiceServices = Environment(know: true);
-	~voiceServices.google = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Google.wav", 0, -1, [0]);
-	~voiceServices.amazon = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Amazon.wav", 0, -1, [0]);
-	~voiceServices.github = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Github.wav", 0, -1, [0]);
-	~voiceServices.facebook = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Facebook.wav", 0, -1, [0]);
-	~voiceServices.instagram = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Instagram.wav", 0, -1, [0]);
-	~voiceServices.microsoft = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Microsoft.wav", 0, -1, [0]);
-	~voiceServices.signal = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Signal.wav", 0, -1, [0]);
-	~voiceServices.slack = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/Slack.wav", 0, -1, [0]);
-	~voiceServices.whatsapp = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/WhatsApp.wav", 0, -1, [0]);
-	~voiceServices.youtube = Buffer.readChannel(s,"/home/erik/Musik/BCM_voice/spoken/YouTube.wav", 0, -1, [0]);
+	~voiceServices.google = Buffer.readChannel(s, voice_path ++ "Google.wav", 0, -1, [0]);
+	~voiceServices.amazon = Buffer.readChannel(s, voice_path ++ "Amazon.wav", 0, -1, [0]);
+	~voiceServices.github = Buffer.readChannel(s, voice_path ++ "Github.wav", 0, -1, [0]);
+	~voiceServices.facebook = Buffer.readChannel(s, voice_path ++ "Facebook.wav", 0, -1, [0]);
+	~voiceServices.instagram = Buffer.readChannel(s, voice_path ++ "Instagram.wav", 0, -1, [0]);
+	~voiceServices.microsoft = Buffer.readChannel(s, voice_path ++ "Microsoft.wav", 0, -1, [0]);
+	~voiceServices.signal = Buffer.readChannel(s, voice_path ++ "Signal.wav", 0, -1, [0]);
+	~voiceServices.slack = Buffer.readChannel(s, voice_path ++ "Slack.wav", 0, -1, [0]);
+	~voiceServices.whatsapp = Buffer.readChannel(s, voice_path ++ "WhatsApp.wav", 0, -1, [0]);
+	~voiceServices.youtube = Buffer.readChannel(s, voice_path ++ "YouTube.wav", 0, -1, [0]);
 
 	// Mixer channel factory
 	~makeMixerChannel = { | name, out, amp = 1 |
