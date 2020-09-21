@@ -25,7 +25,13 @@ Go to `code/BCM/server` and run
 ```
 npm i
 ```
-to install all dependencies. Find the name of your network interface, e.g. on modern Linux systems using `ip addr`. To start a local instance of the server, run:
+to install all dependencies.
+
+Download the sound files required separately and place them in `code/BCM/supercollider_src/sounds/`.
+
+## Starting
+
+Find the name of your network interface, e.g. on modern Linux systems using `ip addr`. To start a local instance of the server, run:
 ```
 node station.js -i NETWORK_INTERFACE
 ```
