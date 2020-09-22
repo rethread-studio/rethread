@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cli": "^1.0.1",
     "express": "^4.17.1",
     "geoip-lite": "^1.4.2",
     "ip-check-range": "^1.0.2",

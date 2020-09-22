@@ -1,17 +1,17 @@
 const osc = require("osc");
 
 const oscValueOrder = [
-  "timestamp",
-  "local_ip",
-  "remote_ip",
-  "out",
-  "local_location",
-  "remote_location",
-  "len",
-  "protocol",
+  "fromCache",
+  "ip",
+  "method",
+  "statusCode",
+  "tabId",
+  "timeStamp",
+  "type",
+  "url",
+  "hostname",
   "services",
-  "station",
-  "local_mac",
+  "location",
 ];
 
 let targetIP = null;
@@ -47,10 +47,13 @@ module.exports.send = (data) => {
 
   for (let i of oscValueOrder) {
     let value = data[i];
+    if (i.indexOf("location") > -1 && value != null) {
+      value = value.country;
+    }
     const type = typeof value == "number" ? "i" : "s";
     args.push({ type, value });
   }
-
+  console.log(args);
   if (!udpPort) {
     return;
   }
