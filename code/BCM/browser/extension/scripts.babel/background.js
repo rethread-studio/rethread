@@ -22,14 +22,14 @@ chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
   });
 });
 
-chrome.tabs.onActivated.addListener(async function (tabId) {
-  lastTabId = tabId;
-  broadcast({
-    event: "tab_changed",
-    tab: await sendCurrentUrl(),
-    tab_id: tabId,
-  });
-});
+// chrome.tabs.onActivated.addListener(async function (tabId) {
+//   lastTabId = tabId;
+//   broadcast({
+//     event: "tab_changed",
+//     tab: await sendCurrentUrl(),
+//     tab_id: tabId,
+//   });
+// });
 
 chrome.tabs.onRemoved.addListener(function (tabId) {
   broadcast({
@@ -83,7 +83,7 @@ var exposedHeaders;
 chrome.webRequest.onCompleted.addListener(
   function (event) {
     broadcast({
-      event: "request_conpleted",
+      event: "request_completed",
       request: event,
     });
   },
