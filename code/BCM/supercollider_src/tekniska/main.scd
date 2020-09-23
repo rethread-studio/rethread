@@ -108,7 +108,7 @@ s.waitForBoot({
 			}
 		);
 	};
-	~changeChord.();
+	~changeChord.(0);
 	~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 	~octave = 3;
 
@@ -630,12 +630,12 @@ s.waitForBoot({
 						}, {
 							channel.play_on(\reverse_saw, [
 								\freq, freq,
-								\atk, rrand(1.0, 5.0) * release_coeff,
+								\atk, rrand(1.5, 5.0) * release_coeff,
 								\rel, rrand(0.1, 4 * release_coeff),
-								\c0, rrand(1, 4),
+								\c0, rrand(2, 4),
 								\c1, \sine,
 								\pan, rrand(-0.7, 0.7),
-								\amp, 0.05 * amp,
+								\amp, 0.025 * amp,
 								\out, channel.bus]);
 						});
 					}, {
@@ -976,6 +976,7 @@ s.waitForBoot({
 
 		~addPacketToStats.(\localhost, true, services, ip, location);
 		~registerOverallStats.(ip, location, type);
+		~addPercussiveToSequencer.();
 
 		// msg.postln;
 		if(rrand(0.0, 1.0) > 0.9) {

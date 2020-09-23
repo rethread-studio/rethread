@@ -9,19 +9,20 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 ~newSequencer = { | numSteps |
 	var sequencer = Environment(know: true);
 	sequencer.numSteps = numSteps;
-	sequencer.steps = {[]}!sequencer.numSteps;
+	sequencer.steps = {Dictionary[]}!sequencer.numSteps;
+	sequencer.levels = {Dictionary[]}!sequencer.numSteps;
 	sequencer.currentStep = 0;
 	sequencer
 };
 
-~addToSequencer = { | sequencer, step, function |
+~addToSequencer = { | sequencer, step, key, function |
 	var index = step % sequencer.numSteps;
-	sequencer.steps[index] = sequencer.steps[index].add(function);
+	sequencer.steps[index] = sequencer.steps[index].put(key, function);
 };
 
 ~playSequencer = { | sequencer |
 	var step = sequencer.currentStep;
-	sequencer.steps[step].do { |func|
+	sequencer.steps[step].keysValuesDo { | key, func |
 		func.();
 	};
 	sequencer.currentStep = (sequencer.currentStep + 1) % sequencer.numSteps;
@@ -30,6 +31,95 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 // Run this to init a sequencer or replace the current one with a new one/reset the sequencer
 ~sequencer = ~newSequencer.(32);
 
+~addPercussiveToSequencer = {
+	var stepIndex = rrand(0, ~sequencer.numSteps-1).floor, level, newLevel, step, newFunc;
+	level = ~sequencer.levels[stepIndex][\percussive];
+	if(level == nil) {level = 0 };
+	newLevel = level + 1;
+	~sequencer.levels[stepIndex].put(\percussive, newLevel);
+	newFunc = switch(newLevel,
+		1, {{
+			Synth(\tick2, [
+				\freq, rrand(1000, 1500),
+				\rq, exprand(0.001, 0.1),
+				\out, 0,
+				\amp, exprand(0.015, 0.05) * 0.1,
+				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+			]);
+		}},
+		2, {{
+			Synth(\tick2, [
+				\freq, rrand(2000, 2500),
+				\rq, exprand(0.001, 0.1),
+				\out, 0,
+				\amp, exprand(0.015, 0.05) * 0.1,
+				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+			]);
+		}},
+		3, {{
+			Synth(\tick2, [
+				\freq, rrand(2500, 3000),
+				\rq, exprand(0.001, 0.1),
+				\out, 0,
+				\amp, exprand(0.015, 0.05) * 0.1,
+				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+			]);
+		}},
+		4, {{
+			Synth(\tick2, [
+				\freq, rrand(4000, 6000),
+				\rq, exprand(0.001, 0.1),
+				\out, 0,
+				\amp, exprand(0.015, 0.05) * 0.2,
+				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+			]);
+		}},
+		5, {{
+			Synth(\tick2, [
+				\freq, rrand(8000, 10000),
+				\rq, exprand(0.001, 0.1),
+				\out, 0,
+				\amp, exprand(0.015, 0.05) * 0.4,
+				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+			]);
+		}},
+		6, {{
+			Synth(\tick2, [
+				\freq, rrand(200, 300),
+				\rq, exprand(0.001, 0.1),
+				\out, 0,
+				\amp, exprand(0.015, 0.05) * 0.7,
+				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+			]);
+		}},
+		7, {{
+			Synth(\fm, [\freq, 2000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, 0.01, \rel, 0.01, \amp, rrand(0.02, 0.04)])
+		}},
+		8, {{
+			Synth(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, rrand(0.02, 0.2), \rel, 0.01, \amp, rrand(0.01, 0.03)])
+		}},
+		9, {{
+			Synth(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, rrand(0.02, 0.3), \rel, 0.01, \amp, rrand(0.01, 0.03)])
+		}},
+		10, {{
+			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, 0.22,\sinfreq, rrand(50, 60),\glissf, 0.9,\amp, rrand(0.08, 0.15)]);
+		}},
+		11, {{
+			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.3), \sinfreq, rrand(30, 40),\glissf, 0.9,\amp, rrand(0.12, 0.25)]);
+		}},
+		// default
+		{{
+			Synth(\tick2, [
+				\freq, rrand(10000, 11000),
+				\rq, exprand(0.001, 0.1),
+				\out, 0,
+				\amp, exprand(0.015, 0.05) * 0.5,
+				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+			]);
+		}},
+	);
+	~sequencer.steps[stepIndex].put(\percussive, newFunc);
+};
 
 // SEQUENCER UPDATE FUNCTION
 
@@ -115,7 +205,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 
 				if(~sequencer.google != true) {
 					// Add to sequencer
-					~addToSequencer.(~sequencer, rrand(0, ~sequencer.numSteps).floor,
+					~addToSequencer.(~sequencer, rrand(0, ~sequencer.numSteps).floor, \Google,
 						{
 							channel.play_on(\service_voice, [\buf, ~voiceServices.google]);
 							Synth(\tick2,
@@ -158,7 +248,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				if(~sequencer.amazon != true) {
 					var startStep = rrand(0, ~sequencer.numSteps-1).floor;
 					// Add to sequencer
-					~addToSequencer.(~sequencer, startStep,
+					~addToSequencer.(~sequencer, startStep, \Amazon,
 						{
 							var freq = ~s53.degreeToFreq(~ch3[2], 0.midicps, ~octave + 1), thump_atk = rrand(0.18, 0.21);
 							channel.play_on(\service_voice, [\buf, ~voiceServices.amazon]);
@@ -173,13 +263,13 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 								\out, channel.bus]);
 					});
 					startStep = (startStep+3) % ~sequencer.numSteps;
-					~addToSequencer.(~sequencer, startStep, {
+					~addToSequencer.(~sequencer, startStep, \Amazon, {
 							var freq = ~s53.degreeToFreq(~ch3[3], 0.midicps, ~octave+1), thump_atk = rrand(0.18, 0.21);
 							channel.play_on(\thump, [\freq, freq,\atk, thump_atk, \rel, rrand(0.5, 2), \c0, -3, \c1, \sine,
 								\pan, rrand(-0.7, 0.7), \amp, 0.05 * amp, \out, channel.bus]);
 					});
 					startStep = (startStep+3) % ~sequencer.numSteps;
-					~addToSequencer.(~sequencer, startStep, {
+					~addToSequencer.(~sequencer, startStep, \Amazon, {
 							var freq = ~s53.degreeToFreq(~ch3[2], 0.midicps, ~octave+1), thump_atk = rrand(0.18, 0.21);
 							channel.play_on(\thump, [\freq, freq,\atk, thump_atk, \rel, rrand(0.5, 2), \c0, -3, \c1, \sine,
 								\pan, rrand(-0.7, 0.7), \amp, 0.05 * amp, \out, channel.bus]);
@@ -250,19 +340,19 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 								\out, channel.bus]);
 					});
 					startStep = (startStep+1) % ~sequencer.numSteps;
-					~addToSequencer.(~sequencer, startStep, {
+					~addToSequencer.(~sequencer, startStep, \youtube, {
 							var freq = ~s53.degreeToFreq(~ch2[1], 0.midicps, ~octave+1);
 							channel.play_on(\thump, [\freq, freq,\atk, thump_atk, \rel, rrand(0.5, 2), \c0, -3, \c1, \sine,
 								\pan, rrand(-0.7, 0.7), \amp, 0.05 * amp, \out, channel.bus]);
 					});
 					startStep = (startStep+1) % ~sequencer.numSteps;
-					~addToSequencer.(~sequencer, startStep, {
+					~addToSequencer.(~sequencer, startStep, \youtube, {
 							var freq = ~s53.degreeToFreq(~ch2[2], 0.midicps, ~octave+1);
 							channel.play_on(\thump, [\freq, freq,\atk, thump_atk, \rel, rrand(0.5, 2), \c0, -3, \c1, \sine,
 								\pan, rrand(-0.7, 0.7), \amp, 0.05 * amp, \out, channel.bus]);
 					});
 					startStep = (startStep+1) % ~sequencer.numSteps;
-					~addToSequencer.(~sequencer, startStep, {
+					~addToSequencer.(~sequencer, startStep, \youtube, {
 							var freq = ~s53.degreeToFreq(~ch2[3], 0.midicps, ~octave+1);
 							channel.play_on(\thump, [\freq, freq,\atk, thump_atk, \rel, rrand(0.5, 2), \c0, -3, \c1, \sine,
 								\pan, rrand(-0.7, 0.7), \amp, 0.05 * amp, \out, channel.bus]);
@@ -287,7 +377,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				if(~sequencer.facebook != true) {
 					var startStep = rrand(0, ~sequencer.numSteps).floor;
 					// Add to sequencer
-					~addToSequencer.(~sequencer, startStep,
+					~addToSequencer.(~sequencer, startStep, \facebook,
 						{
 							var freq = ~s53.degreeToFreq(~ch1[0], 0.midicps, ~octave);
 							channel.play_on(\service_voice, [\buf, ~voiceServices.facebook]);
@@ -302,7 +392,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 								\out, channel.bus]);
 					});
 					startStep = (startStep+2) % ~sequencer.numSteps;
-					~addToSequencer.(~sequencer, startStep,
+					~addToSequencer.(~sequencer, startStep, \facebook,
 						{
 							var freq = ~s53.degreeToFreq(~ch1[1], 0.midicps, ~octave);
 							channel.play_on(\thump, [
@@ -316,7 +406,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 								\out, channel.bus]);
 					});
 					startStep = (startStep+2) % ~sequencer.numSteps;
-					~addToSequencer.(~sequencer, startStep,
+					~addToSequencer.(~sequencer, startStep, \facebook,
 						{
 							var freq = ~s53.degreeToFreq(~ch1[2], 0.midicps, ~octave+1);
 							channel.play_on(\thump, [

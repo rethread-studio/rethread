@@ -49,6 +49,53 @@ SynthDef(\gust, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 
+// SynthDefs written by Eli Fieldsteel, https://sccode.org/1-5bA
+//fm synth
+SynthDef(\fm, {
+	arg freq=500, mRatio=1, cRatio=1,
+	index=1, iScale=5, cAtk=4, cRel=(-4),
+	amp=0.2, atk=0.01, rel=3, pan=0,
+	out=0, fx=0, fxsend=(-25);
+	var car, mod, env, iEnv;
+
+	//index of modulation
+	iEnv = EnvGen.kr(
+		Env(
+			[index, index*iScale, index],
+			[atk, rel],
+			[cAtk, cRel]
+		)
+	);
+
+	//amplitude envelope
+	env = EnvGen.kr(Env.perc(atk,rel,curve:[cAtk,cRel]),doneAction:2);
+
+	//modulator/carrier
+	mod = SinOsc.ar(freq * mRatio, mul:freq * mRatio * iEnv);
+	car = SinOsc.ar(freq * cRatio + mod) * env * amp;
+
+	car = Pan2.ar(car, pan);
+
+	//direct out/reverb send
+	Out.ar(out, car);
+	Out.ar(fx, car * fxsend.dbamp);
+}).add;
+
+// SynthDef by Bruno Ruviaro
+// https://sccode.org/1-54H
+SynthDef("kick", {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.9, att = 0.01, rel = 0.45, pan = 0;
+	var env, snd, ramp;
+	env = Env.perc(att, rel, amp).kr(doneAction: 2);
+	ramp = XLine.kr(
+		start: sinfreq,
+		end: sinfreq * glissf,
+		dur: rel
+	);
+	snd = SinOsc.ar(freq: ramp, mul: env);
+	snd = Pan2.ar(snd, pan);
+	Out.ar(out, snd);
+}).add;
+
 SynthDef(\sub_tam, {
 	// FM synth for a sub bass type sound rev_channel.buswith some noise on top
 	var freq = \freq.kr(32), sig, env, sig1, sig2, sig3,
@@ -195,14 +242,17 @@ SynthDef(\reverse_sine, {
 }).add;
 
 SynthDef(\reverse_saw, {
-	var sig, env, freq = \freq.kr(220);
+	var sig, env, freq = \freq.kr(220), atk = \atk.kr(2), cutoffFreq;
 
-	env = Env.perc(\atk.kr(2), \rel.kr(0.1), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
+	env = Env.perc(atk, \rel.kr(0.1), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
 	sig = Saw.ar(freq) * env;
 	2.do { |i| var mult = i+2;
 		sig = sig + Saw.ar(freq * mult * 1.01, // * LFNoise1.kr(7).range(0.98, 1.02),
 			mul: env.pow(mult*mult));
 	};
+
+	cutoffFreq = (freq*0.125 + (freq * env.pow(1.5) * 6)).min(18000);
+	sig = LPF.ar(sig, cutoffFreq, atk);
 
 	sig = sig * 0.3 * \amp.kr(0.5);
 	sig = Pan2.ar(sig, \pan.kr(0));
