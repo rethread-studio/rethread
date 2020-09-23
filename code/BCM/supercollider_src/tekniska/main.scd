@@ -11,58 +11,70 @@ s.reboot;
 )
 
 (
-//// RUN THIS BLOCK TO START EVERYTHING
+s.waitForBoot({
+	//// RUN THIS BLOCK TO START EVERYTHING
 
-//////////////////////////////////////////////////////
-/////// CONSTANTS AND SETUP
-/////////////////////////////////////////////////////
-
-// Routing and mixer channels
-~useAmbisonics = false; // Set to false to use a simple stereo output
-~sonifyLive = false;
-~sonifySequencer = true;
-~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
-// If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
-~positionThroughService = true;
-~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
-if(~useAmbisonics == true, {
-	~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
-}, {
-	~mixerChannelOutputs = 2;
-});
-~firstOutputBus = 0;
-~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
-
-// Ambisonics positioning parameters
-~azimuthPosition = 0.0; // The start position, and later on current position for the next device
-~azimuthStep = (6.1 * pi)/7; // The distance between different devices, a 7 pointed star that's a little bit off so it doesn't quite return to the same spot
-~elevationPosition = 0.0;
-~elevationStep = 0.0;
-
-
-// Sonification activity thresholds
-~highActivityThreshold = 20;
-~mediumActivityThreshold = 10;
-~lowActivityThreshold = 1;
-
-// What latency in seconds to use for scheduling playback on the server
-// If you get "late ..." messages, increase this number'
-~latency = 0.2;
-
-
-"../sound_forest_mixer_gui.scd".loadRelative;
-
-"synthdefs.scd".loadRelative; // LOAD SYNTHDEFS
-
-
-//////////////////////////////////////////////////////
-/////// STARTING EVERYTHING
-/////////////////////////////////////////////////////
-
-{
 	var filter_bus, filter, drone, voice_path;
 
-	s.newBusAllocators; // Make sure we don't run out of busses if we restart multiple times
+	//////////////////////////////////////////////////////
+	/////// CONSTANTS AND SETUP
+	/////////////////////////////////////////////////////
+
+	// Routing and mixer channels
+	~useAmbisonics = false; // Set to false to use a simple stereo output
+	~sonifyLive = true;
+	~sonifySequencer = true;
+	~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
+	// If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
+	~positionThroughService = true;
+	~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
+	if(~useAmbisonics == true, {
+		~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
+	}, {
+		~mixerChannelOutputs = 2;
+	});
+	~firstOutputBus = 0;
+
+	// Sonification activity thresholds
+	~highActivityThreshold = 20;
+	~mediumActivityThreshold = 10;
+	~lowActivityThreshold = 1;
+
+	// reset everything
+	s.freeAll;
+	s.newBusAllocators;
+	Window.closeAll;
+	Buffer.freeAll;
+
+	s.sync;
+
+	~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
+
+	// Ambisonics positioning parameters
+	~azimuthPosition = 0.0; // The start position, and later on current position for the next device
+	// The distance between different devices, a 7 pointed star that's a
+	// little bit off so it doesn't quite return to the same spot
+	~azimuthStep = (6.1 * pi)/7;
+	~elevationPosition = 0.0;
+	~elevationStep = 0.0;
+
+
+	// What latency in seconds to use for scheduling playback on the server
+	// If you get "late ..." messages, increase this number'
+	~latency = 0.2;
+
+
+	"../sound_forest_mixer_gui.scd".loadRelative;
+
+	"synthdefs.scd".loadRelative; // LOAD SYNTHDEFS
+
+	"drone_and_overall_stats.scd".loadRelative;
+
+
+	//////////////////////////////////////////////////////
+	/////// STARTING EVERYTHING
+	/////////////////////////////////////////////////////
+
 
 	//////////////////////////////////////////////////////
 	/////// HARMONIC CONTENT
@@ -830,18 +842,18 @@ if(~useAmbisonics == true, {
 							\out, channel.bus]);
 					}, {
 						/*channel.play_on(\bounce_away, [
-							\freq, freq*2,
-							\rel, 0.1,
-							\atk, rrand(0.7, 1.0) * release_coeff,
-							\c1, 2,
-							\c0, \sine,
-							\pan, rrand(-0.7, 0.7),
-							\amp, 0.1 * amp,
-							\out, channel.bus]);*/
+						\freq, freq*2,
+						\rel, 0.1,
+						\atk, rrand(0.7, 1.0) * release_coeff,
+						\c1, 2,
+						\c0, \sine,
+						\pan, rrand(-0.7, 0.7),
+						\amp, 0.1 * amp,
+						\out, channel.bus]);*/
 						channel.play_on(\thump, [
-								\freq, freq,
-								\atk, 0.3,
-								\rel, 1,
+							\freq, freq,
+							\atk, 0.3,
+							\rel, 1,
 							\c0, -3,
 							\c1, \sine,
 							\pan, rrand(-0.9, 0.9),
@@ -940,15 +952,30 @@ if(~useAmbisonics == true, {
 		if(type == \main_frame) {
 			// Reset sequencer
 			~sequencer = ~newSequencer.(32);
+			~resetCurrentFrame.();
+			"RESET".postln;
+			~channels.default_channel.play_on(\gust,
+				[
+					\freq, rrand(500, 2000),
+					\rq, exprand(0.05, 0.2),
+					\out, ~channels.default_channel.bus,
+					\amp, exprand(0.03, 0.1),
+					\atk, rrand(0.7, 1.5),
+					\rel, rrand(1, 4), //0.01,
+					\pan1, rrand(-0.5, 0.5),
+					\pan2, rrand(-0.5, 0.5),
+				]
+			);
 		};
 
- 		// [msg, time, addr, recvPort].postln;
+		// [msg, time, addr, recvPort].postln;
 		// services.postln;
 		// method.postln;
 		// type.postln;
-
+		// location.postln;
 
 		~addPacketToStats.(\localhost, true, services, ip, location);
+		~registerOverallStats.(ip, location, type);
 
 		// msg.postln;
 		if(rrand(0.0, 1.0) > 0.9) {
@@ -997,6 +1024,12 @@ if(~useAmbisonics == true, {
 	~tickAmpStepsLeft = 120;
 	~tickAmpStep = (~tickAmpTarget - ~tickAmp) / ~tickAmpStepsLeft;
 	~counter = 0;
+
+	// calculate the decay coefficient
+	~timeBetweenUpdateTicks = 0.25 / ~tickClock.tempo; // in seconds
+	~decayTime = 60; // in seconds
+	~decayTimeTicks = ~decayTime/~timeBetweenUpdateTicks;
+	~decayCoeff = (0.001).pow(1.0/~decayTimeTicks); // decay by 60 dB i.e. to within 0.1%
 	s.sync();
 	Routine({
 		loop {
@@ -1030,16 +1063,19 @@ if(~useAmbisonics == true, {
 			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
 			// ("overall: " + ~overallActivity).postln;
 
+			~updateOverallStatsTick.(~decayCoeff); // Bring the overTime stats closer to the current frame
+			~updateDrone.();
+
 			/*tick_channel.play_on(\tick2,
-				[
-					\freq, rrand(7000, 9000),
-					\rq, exprand(0.001, 0.1),
-					\out, tick_channel.bus,
-					\amp, rrand(0.01, 0.05),
-					\atk, 0.0,
-					\rel, 0.01, //0.01,
-					\pan, rrand(-0.1, 0.1),
-				]
+			[
+			\freq, rrand(7000, 9000),
+			\rq, exprand(0.001, 0.1),
+			\out, tick_channel.bus,
+			\amp, rrand(0.01, 0.05),
+			\atk, 0.0,
+			\rel, 0.01, //0.01,
+			\pan, rrand(-0.1, 0.1),
+			]
 			);*/
 
 			// Update chord
@@ -1051,7 +1087,7 @@ if(~useAmbisonics == true, {
 			};
 			if(~overallActivity > (~maxActivity * 0.2)) {
 				if(rrand(0.0, 1.0) > 0.99) {
-						// TODO: Maybe change chord depending on activity instead of cycling through?
+					// TODO: Maybe change chord depending on activity instead of cycling through?
 					~changeChord.();
 				};
 			};
@@ -1070,7 +1106,7 @@ if(~useAmbisonics == true, {
 			0.25.wait;
 		};
 	}).play(~tickClock);
-}.fork;
+});
 )
 
 ~ch1[0..0]

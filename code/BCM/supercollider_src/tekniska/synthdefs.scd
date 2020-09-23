@@ -246,6 +246,18 @@ SynthDef(\softy, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 
+SynthDef(\softy_sustained, {
+	var sig, env, freq = \freq.kr(220), rq = 0.007, ampVariation, atk = \atk.kr(0.1);
+	env = EnvGen.kr(Env.asr(atk, 1.0, \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]),
+		gate: \gate.kr(1), doneAction: 2);
+	rq = LFNoise1.kr(Rand(0.4, 1.5)).range(\minrq.kr(0.005), \maxrq.kr(0.01));
+	sig = Resonz.ar(PinkNoise.ar(mul: env), freq, rq, mul: 20);
+	ampVariation = LFNoise1.kr(LFNoise1.kr(1.5).range(0.3, 2.0)).range(0.1, 1.0);
+	sig = sig * \amp.kr(0.5, atk) * ampVariation;
+	sig = Pan2.ar(sig, \pan.kr(0, Rand(1.0, 3.0)));
+	Out.ar(\out.kr(0), sig);
+}).add;
+
 SynthDef(\glitchy_rise, { | freq = 500, mRatio = 1, pan = 0, height = 2, atk = 0.1, rel = 1.1 |
 	var sig, env, mod, modfreq;
 
@@ -270,14 +282,14 @@ SynthDef(\bounce_away, { | freq = 300 |
 }).add;
 
 SynthDef(\service_voice, {
-	var buf = \buf.kr(0), sig, trig, pos, env, atk = ExpRand(0.01, BufDur.kr(buf)/2), rel = ExpRand(0.01, BufDur.kr(buf) - atk);
+	var buf = \buf.kr(0), sig, trig, pos, env, atk = ExpRand(0.1, BufDur.kr(buf)/2), rel = ExpRand(0.01, BufDur.kr(buf) - atk);
 	// sig = PlayBuf.ar(1, buf, BufRateScale.kr(buf) * Rand(0.8, 1.2), doneAction: 2);
 	env = EnvGen.kr(Env(
 		levels: [0, 1, 1, 0],
 		times: [atk, BufDur.kr(buf) - atk - rel, rel]
 	));
 	trig = Dust.kr(Rand(15, 45));
-	pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.5));
+	pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.2));
 	sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, Rand(0.8, 1.2), pos);
 	sig = sig * 0.5 * \amp.kr(0.05) * env;
 	sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];
