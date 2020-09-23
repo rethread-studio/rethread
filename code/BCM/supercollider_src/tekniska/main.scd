@@ -6,6 +6,7 @@ s.reboot;
 
 (
 s.options.numOutputBusChannels = 36;
+s.options.memSize = 1024 * 128;
 s.reboot;
 )
 
@@ -68,16 +69,6 @@ if(~useAmbisonics == true, {
 	/////////////////////////////////////////////////////
 
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
-	// Rich chord with harmonic 7
-	~ch1 = [120, 43, 0, 31, 57, 137];
-	~ch2 = [88, 74, 17, 39, 53, 137];
-	~ch3 = [106, 151, 31, 88, 163, 120];
-	~ch4 = [57, 163, 43, 74, 106, 180];
-	// suspended quality chord
-	~ch1 = [22, 93, 0, 9, 71, 53];
-	~ch2 = [40, 71, 9, 31, 62, 102];
-	~ch3 = [62, 102, 22, 40, 84, 124];
-	~ch4 = [84, 124, 31, 53, 93, 115];
 	~currentChord = 0;
 	~numChords = 2;
 	~changeChord = { | num = -1 |
@@ -90,20 +81,22 @@ if(~useAmbisonics == true, {
 
 		switch(~currentChord,
 			0, {
-				~ch1 = [22, 93, 0, 9, 71, 53];
+				// suspended quality chord
+				~ch1 = [22, 53, 0, 9, 71, 93];
 				~ch2 = [40, 71, 9, 31, 62, 102];
-				~ch3 = [62, 102, 22, 40, 84, 124];
-				~ch4 = [84, 124, 31, 53, 93, 115];
+				~ch3 = [62, 84, 22, 40, 124, 102];
+				~ch4 = [31, 53, 93, 115, 124, 84];
 			},
 			1, {
 				// Rich chord with harmonic 7
-				~ch1 = [120, 43, 0, 31, 57, 137];
+				~ch1 = [43, 120, 0, 31, 57, 137];
 				~ch2 = [88, 74, 17, 39, 53, 137];
-				~ch3 = [106, 151, 31, 88, 163, 120];
-				~ch4 = [57, 163, 43, 74, 106, 180];
+				~ch3 = [31, 88, 163, 106, 120, 151];
+				~ch4 = [43, 74, 106, 57, 163, 180];
 			}
 		);
 	};
+	~changeChord.();
 	~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 	~octave = 3;
 
@@ -927,41 +920,36 @@ if(~useAmbisonics == true, {
 	~vis_sender = NetAddr("127.0.0.1", 9771);
 	~packetRecPanWidth = 0;
 	// Receive packages of web traffic data
+	// /request_completed OSC packets
 	o = OSCFunc({ arg msg, time, addr, recvPort;
-		var timestamp = msg[1],
-		local_ip = msg[2],
-		remote_ip = msg[3],
-		out = msg[4],
-		local_location = msg[5],
-		remote_location = msg[6],
-		len = msg[7].asFloat,
-		protocol = msg[8],
-		services = msg[9],
-		speaker = msg[10],
-		local_mac = msg[11],
+		var
+		fromCache = msg[1],
+		ip = msg[2],
+		method = msg[3],
+		statusCode = msg[4],
+		tabId = msg[5],
+		timeStamp = msg[6],
+		type = msg[7], // image, ping, xmlhttprequest, script, font, sub_frame, stylesheet, main_frame
+		url = msg[8],
+		hostname = msg[9],
+		services = msg[10],
+		location = msg[11],
 
 		freq, ip_parts, rel = 0.0;
 
-		// Some packets aren't interesting, such as communication with the router
-		if(local_ip != "192.168.0.1".asSymbol && (local_ip != "192.168.0.255".asSymbol)) {
-			// [msg, time, addr, recvPort].postln;
-			// Convert out to a boolean
-			if(out == \true, { out = true }, { out = false });
-
-			// Extract all the integers from the remote_ip
-			ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
-			services.postln;
-
-			~addPacketToStats.(local_ip.asSymbol, out, services, remote_ip, remote_location);
+		if(type == \main_frame) {
+			// Reset sequencer
+			~sequencer = ~newSequencer.(32);
 		};
-		{
-			var service_or_ip = services;
-			if(service_or_ip.asString == "") {
-				service_or_ip = remote_ip;
-			};
-			// Send it on to the visualisation program
-			// ~vis_sender.sendMsg("/bcm-packet", remote_location, len, service_or_ip);
-		}.value();
+
+ 		// [msg, time, addr, recvPort].postln;
+		// services.postln;
+		// method.postln;
+		// type.postln;
+
+
+		~addPacketToStats.(\localhost, true, services, ip, location);
+
 		// msg.postln;
 		if(rrand(0.0, 1.0) > 0.9) {
 			~packetRecPanWidth = rrand(0, 1.0);
@@ -991,7 +979,7 @@ if(~useAmbisonics == true, {
 		};
 		~num_packets = ~num_packets + 1;
 		// ("num packets: " + ~num_packets).postln;
-	}, '/package', nil, 57130); // create the OSCFunc
+	}, '/request_completed', nil, 57130); // create the OSCFunc
 
 
 	//////////////////////////////////////////////////////
@@ -1059,7 +1047,6 @@ if(~useAmbisonics == true, {
 				if(rrand(0.0, 1.0) > 0.98) {
 					~root = ~root + [-8, 0, 9, 17, -22].choose;
 					~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
-					~root = ~root;
 				};
 			};
 			if(~overallActivity > (~maxActivity * 0.2)) {
