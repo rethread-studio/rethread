@@ -31,6 +31,9 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 // Run this to init a sequencer or replace the current one with a new one/reset the sequencer
 ~sequencer = ~newSequencer.(32);
 
+// Fill the sequencer with random percussive sounds.
+// Each time a step is chosen it is "upgraded" to the next level sound meaning that
+// a frame where this function has been called many times will sound different from one where it has been called few times.
 ~addPercussiveToSequencer = {
 	var stepIndex = rrand(0, ~sequencer.numSteps-1).floor, level, newLevel, step, newFunc;
 	level = ~sequencer.levels[stepIndex][\percussive];
@@ -102,20 +105,17 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 			Synth(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, rrand(0.02, 0.3), \rel, 0.01, \amp, rrand(0.01, 0.03)])
 		}},
 		10, {{
-			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, 0.22,\sinfreq, rrand(50, 60),\glissf, 0.9,\amp, rrand(0.08, 0.15)]);
+			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, rrand(100, 120), \glissf, 0.4, \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25)]);
 		}},
 		11, {{
-			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.3), \sinfreq, rrand(30, 40),\glissf, 0.9,\amp, rrand(0.12, 0.25)]);
+			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 1.3), \sinfreq, rrand(230, 300), \glissf, 0.2, \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25)]);
+		}},
+		12, {{
+			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(1.22, 2.3), \sinfreq, rrand(530, 700), \glissf, 0.1, \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25)]);
 		}},
 		// default
 		{{
-			Synth(\tick2, [
-				\freq, rrand(10000, 11000),
-				\rq, exprand(0.001, 0.1),
-				\out, 0,
-				\amp, exprand(0.015, 0.05) * 0.5,
-				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
-			]);
+			Synth(\fm_reverse, [\freq, rrand(3000, 7000), \mRatio, rrand(3, 9), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, rrand(0.01, 0.5), \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03)])
 		}},
 	);
 	~sequencer.steps[stepIndex].put(\percussive, newFunc);

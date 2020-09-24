@@ -81,18 +81,54 @@ SynthDef(\fm, {
 	Out.ar(fx, car * fxsend.dbamp);
 }).add;
 
-// SynthDef by Bruno Ruviaro
-// https://sccode.org/1-54H
-SynthDef("kick", {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.9, att = 0.01, rel = 0.45, pan = 0;
-	var env, snd, ramp;
-	env = Env.perc(att, rel, amp).kr(doneAction: 2);
-	ramp = XLine.kr(
+SynthDef(\fm_reverse, {
+	arg freq=500, mRatio=1, cRatio=1,
+	index=1, iScale=5, cAtk=4, cRel=(-4),
+	amp=0.2, atk=0.01, rel=3, pan=0,
+	out=0, fx=0, fxsend=(-25);
+	var car, mod, env, iEnv;
+
+	//index of modulation
+	iEnv = EnvGen.kr(
+		Env(
+			[index, index*iScale, index],
+			[atk, rel],
+			[cAtk, cRel]
+		)
+	);
+
+	//amplitude envelope
+	env = EnvGen.ar(Env(levels: [0, 1, 0.2, 1, 0], times: [0.001, 0.01, atk, rel], curve: [-4, 4, cAtk, cRel])
+		,doneAction:2);
+
+	//modulator/carrier
+	mod = SinOsc.ar(freq * mRatio, mul:freq * mRatio * iEnv);
+	car = SinOsc.ar(freq * cRatio + mod) * env * amp;
+
+	car = Pan2.ar(car, pan);
+
+	//direct out/reverb send
+	Out.ar(out, car);
+	Out.ar(fx, car * fxsend.dbamp);
+}).add;
+
+SynthDef(\kick, {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.9, glisstime = 0.035, att = 0.01, rel = 0.45, pan = 0;
+	var env, snd, ramp, click, clickAmp, clickAdd = \clickAdd.kr(100), sub, subAmp, wobble = \wobble.kr(0.1);
+	env = Env.perc(att, rel, amp).ar(doneAction: 2);
+	ramp = XLine.ar(
 		start: sinfreq,
 		end: sinfreq * glissf,
-		dur: rel
+		dur: glisstime
 	);
 	snd = SinOsc.ar(freq: ramp, mul: env);
+	clickAmp = EnvGen.ar(Env.perc(0.001, 0.01)) * 0.04;
+	click = LPF.ar(Formant.ar(910 + clickAdd, 4760 + clickAdd, 2110 + clickAdd), Rand(3000, 4500)) * clickAmp;
+
+	snd = snd + click;
 	snd = Pan2.ar(snd, pan);
+	subAmp = EnvGen.ar(Env.perc(att, rel)) * 0.15;
+	sub = SinOsc.ar(sinfreq * glissf * {SinOsc.kr(8).range(1.0-wobble, 1.0+wobble)}!2) * subAmp;
+	snd = snd + sub;
 	Out.ar(out, snd);
 }).add;
 

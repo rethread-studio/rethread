@@ -571,26 +571,6 @@ s.waitForBoot({
 							]
 						);
 					});
-					if(~sequencer.google != true) {
-						// Add to sequencer
-						~addToSequencer.(~sequencer, rrand(0, ~sequencer.numSteps).floor,
-							{
-								channel.play_on(\service_voice, [\buf, ~voiceServices.google]);
-								Synth(\tick2,
-									[
-										\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-										\rq, exprand(0.0001, 0.1),
-										\out, 0,
-										\amp, rrand(0.001, 0.02),
-										\atk, 0.000,
-										\rel, rrand(0.01, 0.05), //0.01,
-										\c1, -12,
-										\pan, rrand(-1, 1),
-									]
-								);
-						});
-						~sequencer.google = true;
-					};
 				},
 				\Amazon, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
@@ -651,26 +631,6 @@ s.waitForBoot({
 							]
 						);
 					});
-					if(~sequencer.amazon != true) {
-						// Add to sequencer
-						~addToSequencer.(~sequencer, rrand(0, ~sequencer.numSteps).floor,
-							{
-								channel.play_on(\service_voice, [\buf, ~voiceServices.amazon]);
-								Synth(\tick2,
-									[
-										\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-										\rq, exprand(0.0001, 0.1),
-										\out, 0,
-										\amp, rrand(0.001, 0.02),
-										\atk, 0.000,
-										\rel, rrand(0.01, 0.05), //0.01,
-										\c1, -12,
-										\pan, rrand(-1, 1),
-									]
-								);
-						});
-						~sequencer.amazon = true;
-					};
 				},
 				\Cloudflare, {
 					var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave),
