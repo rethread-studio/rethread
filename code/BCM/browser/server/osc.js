@@ -42,7 +42,7 @@ module.exports.close = () => {
   udpPort = null;
 };
 
-module.exports.send = (data) => {
+module.exports.send = (data, address) => {
   const args = [];
 
   for (let i of oscValueOrder) {
@@ -58,9 +58,12 @@ module.exports.send = (data) => {
     return;
   }
 
+  if (!address) {
+    address = targetAddress;
+  }
   udpPort.send(
     {
-      address: targetAddress,
+      address,
       args,
     },
     targetIP,

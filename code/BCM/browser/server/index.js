@@ -43,8 +43,8 @@ wss.on("connection", function (ws, request) {
     }
     console.log(message);
     wss.broadcast(message, ws);
-    if (message.event == "request_completed") {
-      osc.send(message.request);
+    if (message.request) {
+      osc.send(message.request, message.event);
     }
   });
 });
