@@ -5,6 +5,9 @@ const oscValueOrder = [
   "ip",
   "method",
   "statusCode",
+  "content_type",
+  "content_length",
+  "requestId",
   "tabId",
   "timeStamp",
   "type",
@@ -56,13 +59,15 @@ module.exports.send = (data, address) => {
     }
     args.push({ type, value });
   }
-  console.log(args);
   if (!udpPort) {
     return;
   }
 
   if (!address) {
     address = targetAddress;
+  }
+  if (address[0] != "/") {
+    address = "/" + address;
   }
   udpPort.send(
     {

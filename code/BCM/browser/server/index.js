@@ -41,11 +41,26 @@ wss.on("connection", function (ws, request) {
         }
       }
     }
-    console.log(message);
-    wss.broadcast(message, ws);
     if (message.request) {
+      if (message.request.responseHeaders) {
+        const headers = {};
+        for (let h of message.request.responseHeaders) {
+          headers[h.name] = h.value;
+        }
+        message.request.responseHeaders = headers;
+        if (message.request.responseHeaders["content-type"]) {
+          message.request.content_type =
+            message.request.responseHeaders["content-type"];
+        }
+        if (message.request.responseHeaders["content-length"]) {
+          message.request.content_length = parseInt(
+            message.request.responseHeaders["content-length"]
+          );
+        }
+      }
       osc.send(message.request, message.event);
     }
+    wss.broadcast(message, ws);
   });
 });
 
