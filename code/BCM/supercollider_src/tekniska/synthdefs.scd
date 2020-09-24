@@ -127,7 +127,7 @@ SynthDef(\kick, {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.9, glisstime =
 	snd = snd + click;
 	snd = Pan2.ar(snd, pan);
 	subAmp = EnvGen.ar(Env.perc(att, rel)) * 0.15;
-	sub = SinOsc.ar(sinfreq * glissf * {SinOsc.kr(8).range(1.0-wobble, 1.0+wobble)}!2) * subAmp;
+	sub = SinOsc.ar(sinfreq * glissf * {SinOsc.kr(8, phase: Rand(0, pi)).range(1.0-wobble, 1.0+wobble)}!2) * subAmp;
 	snd = snd + sub;
 	Out.ar(out, snd);
 }).add;
@@ -333,13 +333,15 @@ SynthDef(\softy, {
 }).add;
 
 SynthDef(\softy_sustained, {
-	var sig, env, freq = \freq.kr(220), rq = 0.007, ampVariation, atk = \atk.kr(0.1);
+	var sig, env, freq = \freq.kr(220), rq = 0.007, ampVariation, atk = \atk.kr(0.1), stutterTrig, stutterAmount = 1-\stutterAmount.kr(1);
 	env = EnvGen.kr(Env.asr(atk, 1.0, \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]),
 		gate: \gate.kr(1), doneAction: 2);
 	rq = LFNoise1.kr(Rand(0.4, 1.5)).range(\minrq.kr(0.005), \maxrq.kr(0.01));
 	sig = Resonz.ar(PinkNoise.ar(mul: env), freq, rq, mul: 20);
 	ampVariation = LFNoise1.kr(LFNoise1.kr(1.5).range(0.3, 2.0)).range(0.1, 1.0);
 	sig = sig * \amp.kr(0.5, atk) * ampVariation;
+	stutterTrig = Dust.kr(\stutterSpeed.kr(4));
+	sig = sig * Demand.kr(stutterTrig, 0, Dseq([stutterAmount, 1], inf));
 	sig = Pan2.ar(sig, \pan.kr(0, Rand(1.0, 3.0)));
 	Out.ar(\out.kr(0), sig);
 }).add;
@@ -370,16 +372,23 @@ SynthDef(\bounce_away, { | freq = 300 |
 SynthDef(\service_voice, {
 	var buf = \buf.kr(0), sig, trig, pos, env, atk = ExpRand(0.1, BufDur.kr(buf)/2), rel = ExpRand(0.01, BufDur.kr(buf) - atk);
 	// sig = PlayBuf.ar(1, buf, BufRateScale.kr(buf) * Rand(0.8, 1.2), doneAction: 2);
-	env = EnvGen.kr(Env(
-		levels: [0, 1, 1, 0],
-		times: [atk, BufDur.kr(buf) - atk - rel, rel]
-	));
-	trig = Dust.kr(Rand(15, 45));
-	pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.2));
-	sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, Rand(0.8, 1.2), pos);
-	sig = sig * 0.5 * \amp.kr(0.05) * env;
-	sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];
+	if(~sonifyVoice == true, {
+		env = EnvGen.kr(Env(
+			levels: [0, 1, 1, 0],
+			times: [atk, BufDur.kr(buf) - atk - rel, rel]
+		));
+		trig = Dust.kr(Rand(15, 45));
+		pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.2));
+		sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, Rand(0.8, 1.2), pos);
+		sig = sig * 0.5 * \amp.kr(0.05) * env;
+		sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];
+		FreeSelf.kr(pos >= 1);
+	}, {
+		// don't play voices
+		// this is an easy way to turn off voices, but not very efficient in terms of computer resources
+		sig = DC.ar(0);
+		FreeSelf.kr(Impulse.kr(0)); // immediately free self
+	});
 	// sig = Pan2.ar(sig, Rand(-0.7, 0.7));
 	Out.ar(\out.kr(0), sig);
-	FreeSelf.kr(pos >= 1);
 }).add;

@@ -22,8 +22,12 @@ s.waitForBoot({
 
 	// Routing and mixer channels
 	~useAmbisonics = false; // Set to false to use a simple stereo output
+
 	~sonifyLive = true;
 	~sonifySequencer = true;
+	~sonifyPercussion = true;
+	~sonifyVoice = false;
+
 	~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
 	// If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
 	~positionThroughService = true;
@@ -174,7 +178,6 @@ s.waitForBoot({
 			},
 			// Use play on to make sure that the
 			play_on: {|self, synth_name, args|
-				// s.makeBundle(~latency, {Synth(synth_name, args, self.my_group)} );
 				self.my_clock.sched(~latency, Synth(synth_name, args, self.my_group));
 			},
 		)
@@ -205,12 +208,14 @@ s.waitForBoot({
 	~channels.microsoft_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.youtube_channel = ~makeMixerChannel.("YouTube", ~decoderBus);
 	~channels.youtube_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.percussion = ~makeMixerChannel.("Percussion", ~decoderBus);
+	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
 	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.tick_channel.set_amp(0.0);
 
 	{
-		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.rev_channel], ~allClouds);
+		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.rev_channel], ~allClouds);
 	}.defer;
 
 	// Create the global stats object (environment)
@@ -241,10 +246,6 @@ s.waitForBoot({
 	// Adds a packet to the global stats, taking care of creating new services etc.
 	~addPacketToStats = { | device, isOutgoing, service, remote_ip, remote_location |
 		var inout, statService, statDevice;
-		// If there is no service name, use the remote_ip as an identifier instead
-		if(service.asString.size < 2) {
-			service = remote_ip;
-		};
 		if(isOutgoing == true, {
 			inout = \out;
 		}, {
@@ -290,6 +291,7 @@ s.waitForBoot({
 		var soundType = [\standard1, \standard2, \standard3].choose;
 		switch(service.identifier,
 			\Google, { soundType = \Google },
+			\Youtube, { soundType = \YouTube },
 			"Google,Youtube".asSymbol, { soundType = \YouTube},
 			"Youtube,Google".asSymbol, {soundType = \YouTube},
 			\Amazon, { soundType = \Amazon },
@@ -297,8 +299,12 @@ s.waitForBoot({
 			\Facebook, { soundType = \Facebook },
 			\Cloudflare, { soundType = \Cloudflare },
 			\Microsoft, { soundType = \Microsoft },
-			"Github,Microsoft".asSymbol, { soundType = \GitHub }
+			"Github,Microsoft".asSymbol, { soundType = \GitHub },
+			"Whatsapp,Facebook".asSymbol, { soundType = \WhatsApp },
+			"Instagram,Facebook".asSymbol, { soundType = \Instagram },
+			\Instagram, { soundType = \Instagram },
 		);
+		// ("Adding sound process " ++ soundType ++ " to service " ++ service).postln;
 		service.soundType = soundType;
 		service.tick = { | self, channel |
 			if(~sonifyLive, {
@@ -322,15 +328,15 @@ s.waitForBoot({
 	// Play a certain sound based on a number of parameters
 	~playSound = { | type, inout, packets, channel |
 		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
-		if(packets > ~highActivityThreshold, {
+		if(packets >= ~highActivityThreshold, {
 			activity = \high;
 			chord = chord;
 		}, {
-			if(packets > ~mediumActivityThreshold, {
+			if(packets >= ~mediumActivityThreshold, {
 				activity = \medium;
 				chord = chord[0..(chord.size()*2/3 - 1).asInteger]
 			}, {
-				if(packets > ~lowActivityThreshold, {
+				if(packets >= ~lowActivityThreshold, {
 					activity = \low;
 					chord = chord[0..(chord.size()/3 - 1).asInteger]
 				});
@@ -872,9 +878,23 @@ s.waitForBoot({
 							\amp, 0.05 * amp,
 							\out, channel.bus]);
 					});
+				},
+				\WhatsApp, {
+					channel.play_on(\service_voice, [\buf, ~voiceServices.whatsapp]);
+				},
+				\Slack, {
+					channel.play_on(\service_voice, [\buf, ~voiceServices.slack]);
+				},
+				\Signal, {
+					channel.play_on(\service_voice, [\buf, ~voiceServices.signal]);
+				},
+				\Instagram, {
+					channel.play_on(\service_voice, [\buf, ~voiceServices.instagram]);
+				},
+				\GitHub, {
+					channel.play_on(\service_voice, [\buf, ~voiceServices.github]);
 				}
 			);
-
 		};
 	};
 
@@ -899,44 +919,35 @@ s.waitForBoot({
 		ip = msg[2],
 		method = msg[3],
 		statusCode = msg[4],
-		tabId = msg[5],
-		timeStamp = msg[6],
-		type = msg[7], // image, ping, xmlhttprequest, script, font, sub_frame, stylesheet, main_frame
-		url = msg[8],
-		hostname = msg[9],
-		services = msg[10],
-		location = msg[11],
+		content_type = msg[5],
+		content_length = msg[6],
+		requestId = msg[7],
+		tabId = msg[8],
+		timeStamp = msg[9],
+		type = msg[10], // image, ping, xmlhttprequest, script, font, sub_frame, stylesheet, main_frame
+		url = msg[11],
+		hostname = msg[12],
+		services = msg[13],
+		location = msg[14],
 
 		freq, ip_parts, rel = 0.0;
 
-		if(type == \main_frame) {
-			// Reset sequencer
-			~sequencer = ~newSequencer.(32);
-			~resetCurrentFrame.();
-			"RESET".postln;
-			~channels.default_channel.play_on(\gust,
-				[
-					\freq, rrand(500, 2000),
-					\rq, exprand(0.05, 0.2),
-					\out, ~channels.default_channel.bus,
-					\amp, exprand(0.03, 0.1),
-					\atk, rrand(0.7, 1.5),
-					\rel, rrand(1, 4), //0.01,
-					\pan1, rrand(-0.5, 0.5),
-					\pan2, rrand(-0.5, 0.5),
-				]
-			);
-		};
-
 		// [msg, time, addr, recvPort].postln;
 		// services.postln;
+		hostname.postln;
 		// method.postln;
 		// type.postln;
 		// location.postln;
 
-		~addPacketToStats.(\localhost, true, services, ip, location);
+		if(services.size < 2) {
+			services = hostname;
+		};
+
+		~addPacketToStats.(\localhost, [true, false].choose, services, ip, location);
 		~registerOverallStats.(ip, location, type);
-		~addPercussiveToSequencer.();
+		if(~sonifyPercussion) {
+			~addPercussiveToSequencer.();
+		};
 
 		// msg.postln;
 		if(rrand(0.0, 1.0) > 0.9) {
@@ -968,6 +979,45 @@ s.waitForBoot({
 		~num_packets = ~num_packets + 1;
 		// ("num packets: " + ~num_packets).postln;
 	}, '/request_completed', nil, 57130); // create the OSCFunc
+
+	p = OSCFunc({ arg msg, time, addr, recvPort;
+		// [msg, time, addr, recvPort].postln;
+		var fromCache = msg[1],
+		ip = msg[2],
+		method = msg[3],
+		statusCode = msg[4],
+		content_type = msg[5],
+		content_length = msg[6],
+		requestId = msg[7],
+		tabId = msg[8],
+		timeStamp = msg[9],
+		type = msg[10],
+		url = msg[11],
+		hostname = msg[12],
+		services = msg[13],
+		location = msg[14];
+
+		if(type == \main_frame) {
+			// Reset sequencer
+			~sequencer = ~newSequencer.(32);
+			~resetCurrentFrame.();
+			"RESET".postln;
+			~channels.default_channel.play_on(\gust,
+				[
+					\freq, rrand(500, 2000),
+					\rq, exprand(0.05, 0.2),
+					\out, ~channels.default_channel.bus,
+					\amp, exprand(0.03, 0.1),
+					\atk, rrand(0.7, 1.5),
+					\rel, rrand(1, 4), //0.01,
+					\pan1, rrand(-0.5, 0.5),
+					\pan2, rrand(-0.5, 0.5),
+				]
+			);
+			~tickClock.tempo = 2;
+		};
+
+	}, '/request_created');
 
 
 	//////////////////////////////////////////////////////
@@ -1062,6 +1112,18 @@ s.waitForBoot({
 			if(~counter % 1 == 0) {
 				~playSequencer.(~sequencer);
 			};
+			if(~overallStats.currentFrame.numRequests > 250 && (~sequencer.numSteps < 64), {
+				// Double the grid
+				~doubleSequencerGrid.(~sequencer);
+				~tickClock.tempo = ~tickClock.tempo * 2;
+				"Doubled The Grid".postln;
+			});
+
+			if(~overallStats.currentFrame.numRequests > 600 && (~sequencer.numSteps < 128), {
+				// Double the grid
+				~doubleSequencerGrid.(~sequencer);
+				"Doubled The Grid Again (without tempo adjustment)".postln;
+			});
 
 			~counter = ~counter + 1;
 			0.25.wait;

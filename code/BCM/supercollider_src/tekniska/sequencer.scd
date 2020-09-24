@@ -28,6 +28,16 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 	sequencer.currentStep = (sequencer.currentStep + 1) % sequencer.numSteps;
 };
 
+/// Add a new step after each step in the sequencer
+~doubleSequencerGrid = { | sequencer |
+	// insert new steps from the back
+	(sequencer.numSteps..1).do{ |i|
+		sequencer.steps = sequencer.steps.insert(i, Dictionary[]);
+		sequencer.levels = sequencer.levels.insert(i, Dictionary[]);
+	};
+	sequencer.numSteps = sequencer.numSteps * 2;
+};
+
 // Run this to init a sequencer or replace the current one with a new one/reset the sequencer
 ~sequencer = ~newSequencer.(32);
 
@@ -42,80 +52,86 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 	~sequencer.levels[stepIndex].put(\percussive, newLevel);
 	newFunc = switch(newLevel,
 		1, {{
-			Synth(\tick2, [
+			~channels.percussion.play_on(\tick2, [
 				\freq, rrand(1000, 1500),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
 				\amp, exprand(0.015, 0.05) * 0.1,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+				\out, ~channels.percussion.bus,
 			]);
 		}},
 		2, {{
-			Synth(\tick2, [
+			~channels.percussion.play_on(\tick2, [
 				\freq, rrand(2000, 2500),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
 				\amp, exprand(0.015, 0.05) * 0.1,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+				\out, ~channels.percussion.bus,
 			]);
 		}},
 		3, {{
-			Synth(\tick2, [
+			~channels.percussion.play_on(\tick2, [
 				\freq, rrand(2500, 3000),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
 				\amp, exprand(0.015, 0.05) * 0.1,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+				\out, ~channels.percussion.bus,
 			]);
 		}},
 		4, {{
-			Synth(\tick2, [
+			~channels.percussion.play_on(\tick2, [
 				\freq, rrand(4000, 6000),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
 				\amp, exprand(0.015, 0.05) * 0.2,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+				\out, ~channels.percussion.bus,
 			]);
 		}},
 		5, {{
-			Synth(\tick2, [
+			~channels.percussion.play_on(\tick2, [
 				\freq, rrand(8000, 10000),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
 				\amp, exprand(0.015, 0.05) * 0.4,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+				\out, ~channels.percussion.bus,
 			]);
 		}},
 		6, {{
-			Synth(\tick2, [
+			~channels.percussion.play_on(\tick2, [
 				\freq, rrand(200, 300),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
 				\amp, exprand(0.015, 0.05) * 0.7,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+				\out, ~channels.percussion.bus,
 			]);
 		}},
 		7, {{
-			Synth(\fm, [\freq, 2000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, 0.01, \rel, 0.01, \amp, rrand(0.02, 0.04)])
+			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, 0.01, \rel, 0.01, \amp, rrand(0.02, 0.04), \out, ~channels.percussion.bus])
 		}},
 		8, {{
-			Synth(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, rrand(0.02, 0.2), \rel, 0.01, \amp, rrand(0.01, 0.03)])
+			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, rrand(0.02, 0.2), \rel, 0.01, \amp, rrand(0.01, 0.03), \out, ~channels.percussion.bus])
 		}},
 		9, {{
-			Synth(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, rrand(0.02, 0.3), \rel, 0.01, \amp, rrand(0.01, 0.03)])
+			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, rrand(0.02, 0.3), \rel, 0.01, \amp, rrand(0.01, 0.03), \out, ~channels.percussion.bus])
 		}},
 		10, {{
-			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, rrand(100, 120), \glissf, 0.4, \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25)]);
+			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, rrand(100, 120), \glissf, 0.4, \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25), \out, ~channels.percussion.bus]);
 		}},
 		11, {{
-			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 1.3), \sinfreq, rrand(230, 300), \glissf, 0.2, \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25)]);
+			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 1.3), \sinfreq, rrand(230, 300), \glissf, 0.2, \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25), \out, ~channels.percussion.bus]);
 		}},
 		12, {{
-			Synth(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(1.22, 2.3), \sinfreq, rrand(530, 700), \glissf, 0.1, \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25)]);
+			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(1.22, 2.3), \sinfreq, rrand(530, 700), \glissf, 0.1, \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25), \out, ~channels.percussion.bus]);
 		}},
 		// default
 		{{
-			Synth(\fm_reverse, [\freq, rrand(3000, 7000), \mRatio, rrand(3, 9), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, rrand(0.01, 0.5), \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03)])
+			~channels.percussion.play_on(\fm_reverse, [\freq, rrand(3000, 7000), \mRatio, rrand(3, 9), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, rrand(0.01, 0.5), \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03), \out, ~channels.percussion.bus])
 		}},
 	);
 	~sequencer.steps[stepIndex].put(\percussive, newFunc);
@@ -126,15 +142,15 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 // Play a certain sound based on a number of parameters
 ~updateSequencer = { | type, inout, packets, channel |
 	var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
-	if(packets > ~highActivityThreshold, {
+	if(packets >= ~highActivityThreshold, {
 		activity = \high;
 		chord = chord;
 	}, {
-		if(packets > ~mediumActivityThreshold, {
+		if(packets >= ~mediumActivityThreshold, {
 			activity = \medium;
 			chord = chord[0..(chord.size()*2/3 - 1).asInteger]
 		}, {
-			if(packets > ~lowActivityThreshold, {
+			if(packets >= ~lowActivityThreshold, {
 				activity = \low;
 				chord = chord[0..(chord.size()/3 - 1).asInteger]
 			});
@@ -420,6 +436,51 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 								\out, channel.bus]);
 					});
 					~sequencer.facebook = true;
+				};
+			},
+			\WhatsApp, {
+				if(~sequencer.whatsapp != true) {
+					var startStep = rrand(0, ~sequencer.numSteps).floor;
+					// Add to sequencer
+					~addToSequencer.(~sequencer, startStep, \whatsapp,
+						{ channel.play_on(\service_voice, [\buf, ~voiceServices.whatsapp]); });
+					~sequencer.whatsapp = true;
+				};
+			},
+			\Slack, {
+				if(~sequencer.slack != true) {
+					var startStep = rrand(0, ~sequencer.numSteps).floor;
+					// Add to sequencer
+					~addToSequencer.(~sequencer, startStep, \slack,
+						{ channel.play_on(\service_voice, [\buf, ~voiceServices.slack]); });
+					~sequencer.slack = true;
+				};
+			},
+			\Signal, {
+				if(~sequencer.signal != true) {
+					var startStep = rrand(0, ~sequencer.numSteps).floor;
+					// Add to sequencer
+					~addToSequencer.(~sequencer, startStep, \signal,
+						{ channel.play_on(\service_voice, [\buf, ~voiceServices.signal]); });
+					~sequencer.signal = true;
+				};
+			},
+			\Instagram, {
+				if(~sequencer.instagram != true) {
+					var startStep = rrand(0, ~sequencer.numSteps).floor;
+					// Add to sequencer
+					~addToSequencer.(~sequencer, startStep, \instagram,
+						{ channel.play_on(\service_voice, [\buf, ~voiceServices.instagram]); });
+					~sequencer.instagram = true;
+				};
+			},
+			\GitHub, {
+				if(~sequencer.github != true) {
+					var startStep = rrand(0, ~sequencer.numSteps).floor;
+					// Add to sequencer
+					~addToSequencer.(~sequencer, startStep, \github,
+						{ channel.play_on(\service_voice, [\buf, ~voiceServices.github]); });
+					~sequencer.github = true;
 				};
 			}
 		);

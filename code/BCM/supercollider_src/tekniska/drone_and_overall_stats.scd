@@ -140,7 +140,7 @@ Time spans of droney sounds:
 	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 4);
 	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
 	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, minrq, 0.1);
-	amp = 0.5;
+	amp = 1.0;
 
 	if(rrand(0.0, 1.0) > 0.9, {
 		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp);
