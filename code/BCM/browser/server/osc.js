@@ -51,6 +51,9 @@ module.exports.send = (data, address) => {
       value = value.country;
     }
     const type = typeof value == "number" ? "i" : "s";
+    if (value == null) {
+      value = "N.A";
+    }
     args.push({ type, value });
   }
   console.log(args);
