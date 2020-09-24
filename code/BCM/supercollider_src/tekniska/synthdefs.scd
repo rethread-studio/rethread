@@ -333,14 +333,18 @@ SynthDef(\softy, {
 }).add;
 
 SynthDef(\softy_sustained, {
-	var sig, env, freq = \freq.kr(220), rq = 0.007, ampVariation, atk = \atk.kr(0.1), stutterTrig, stutterAmount = 1-\stutterAmount.kr(1);
+	var sig, env, freq = \freq.kr(220), rq = 0.007, ampVariation, atk = \atk.kr(0.1), stutterTrig, stutterAmount = 1-\stutterAmount.kr(1),
+	brightSig, brightness = \brightness.kr(0.0);
+	brightness = brightness.pow(2);
 	env = EnvGen.kr(Env.asr(atk, 1.0, \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]),
 		gate: \gate.kr(1), doneAction: 2);
 	rq = LFNoise1.kr(Rand(0.4, 1.5)).range(\minrq.kr(0.005), \maxrq.kr(0.01));
-	sig = Resonz.ar(PinkNoise.ar(mul: env), freq, rq, mul: 20);
+	sig = Resonz.ar(PinkNoise.ar, freq, rq, mul: 20);
+	brightSig = Mix(Pulse.ar(freq * [1, 1.002, 1.004, 1.006], 0.2)) * 0.25;
+	sig = (sig * (1-brightness.pow(2))) + (brightSig * brightness);
 	ampVariation = LFNoise1.kr(LFNoise1.kr(1.5).range(0.3, 2.0)).range(0.1, 1.0);
-	sig = sig * \amp.kr(0.5, atk) * ampVariation;
-	stutterTrig = Dust.kr(\stutterSpeed.kr(4));
+	sig = sig * env * \amp.kr(0.5, atk) * ampVariation;
+	stutterTrig = Dust.kr(\stutterSpeed.kr(8));
 	sig = sig * Demand.kr(stutterTrig, 0, Dseq([stutterAmount, 1], inf));
 	sig = Pan2.ar(sig, \pan.kr(0, Rand(1.0, 3.0)));
 	Out.ar(\out.kr(0), sig);

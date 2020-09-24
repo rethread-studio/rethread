@@ -90,7 +90,7 @@ Time spans of droney sounds:
 /////// DRONE
 /////////////////////////////////////////////////////
 
-~restartBackgroundDrones = { | numOctaves = 3, minrq = 0.005, maxrq = 0.008, amp = 0.5 |
+~restartBackgroundDrones = { | numOctaves = 3, minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0 |
 	var chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 	~droneBackgroundSynths.do{|syn| syn.release};
 	~droneBackgroundSynths = chord.collect{ |degree|
@@ -104,18 +104,22 @@ Time spans of droney sounds:
 			\c1, \sine,
 			\minrq, minrq,
 			\maxrq, maxrq,
+			\brightness, brightness,
+			\stutterAmount, stutterAmount,
 			\pan, rrand(-0.7, 0.7),
 			\amp, 0.05 * amp,
 			\out, 0]);
 	};
 };
 
-~updateBackgroundDrones = { | minrq = 0.005, maxrq = 0.008, amp = 0.5 |
+~updateBackgroundDrones = { | minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0 |
 	var chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 	~droneBackgroundSynths.do{|syn|
 		syn.set(
 			\minrq, minrq,
 			\maxrq, maxrq,
+			\brightness, brightness,
+			\stutterAmount, stutterAmount,
 			\pan, rrand(-0.7, 0.7),
 			\amp, 0.05 * amp,
 		);
@@ -123,7 +127,7 @@ Time spans of droney sounds:
 };
 
 ~updateDrone = {
-	var numOctaves, minrq, maxrq, amp, numScripts;
+	var numOctaves, minrq, maxrq, brightness, stutterAmount, amp, numScripts, numXmlHttpRequests, numSubFrames;
 	// Sometimes update pitches, sometimes just update other parameters
 
 	// numIPaddresses varies between ~5 and ~150
@@ -137,14 +141,22 @@ Time spans of droney sounds:
 	numScripts = ~overallStats.overTime.types[\script];
 	if(numScripts == nil) { numScripts = 0 };
 
+	numXmlHttpRequests = ~overallStats.overTime.types[\xmlhttprequest];
+	if(numXmlHttpRequests == nil) { numXmlHttpRequests = 0 };
+
+	numSubFrames = ~overallStats.overTime.types[\sub_frame];
+	if(numSubFrames == nil) { numSubFrames = 0 };
+
+	brightness = numXmlHttpRequests.linlin(1, 100, 0.0, 1.0);
+	stutterAmount = numSubFrames.linlin(0, 8, 0.0, 1.0);
 	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 4);
 	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
-	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, minrq, 0.1);
+	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, 0.01, minrq);
 	amp = 1.0;
 
 	if(rrand(0.0, 1.0) > 0.9, {
-		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp);
+		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp, brightness, stutterAmount);
 	}, {
-		~updateBackgroundDrones.(minrq, maxrq, amp);
+		~updateBackgroundDrones.(minrq, maxrq, amp, brightness, stutterAmount);
 	});
 };

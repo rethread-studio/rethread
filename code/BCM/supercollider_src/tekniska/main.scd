@@ -20,14 +20,16 @@ s.waitForBoot({
 	/////// CONSTANTS AND SETUP
 	/////////////////////////////////////////////////////
 
-	// Routing and mixer channels
-	~useAmbisonics = false; // Set to false to use a simple stereo output
 
 	~sonifyLive = true;
 	~sonifySequencer = true;
 	~sonifyPercussion = true;
 	~sonifyVoice = false;
 
+	~overTimeStatsDecayTime = 90; // in seconds
+
+	// Routing and mixer channels
+	~useAmbisonics = false; // Set to false to use a simple stereo output
 	~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
 	// If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
 	~positionThroughService = true;
@@ -934,12 +936,12 @@ s.waitForBoot({
 
 		// [msg, time, addr, recvPort].postln;
 		// services.postln;
-		hostname.postln;
+		// hostname.postln;
 		// method.postln;
 		// type.postln;
 		// location.postln;
 
-		if(services.size < 2) {
+		if(services.asString.size < 2) {
 			services = hostname;
 		};
 
@@ -1038,8 +1040,8 @@ s.waitForBoot({
 
 	// calculate the decay coefficient
 	~timeBetweenUpdateTicks = 0.25 / ~tickClock.tempo; // in seconds
-	~decayTime = 60; // in seconds
-	~decayTimeTicks = ~decayTime/~timeBetweenUpdateTicks;
+
+	~decayTimeTicks = ~overTimeStatsDecayTime/~timeBetweenUpdateTicks;
 	~decayCoeff = (0.001).pow(1.0/~decayTimeTicks); // decay by 60 dB i.e. to within 0.1%
 	s.sync();
 	Routine({
