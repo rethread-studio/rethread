@@ -22,9 +22,9 @@ s.waitForBoot({
 
 
 	~sonifyLive = true;
-	~sonifySequencer = true;
-	~sonifyPercussion = true;
-	~sonifyVoice = false;
+	~sonifySequencer = false;
+	~sonifyPercussion = false;
+	~sonifyVoice = true;
 
 	~overTimeStatsDecayTime = 90; // in seconds
 
@@ -945,8 +945,12 @@ s.waitForBoot({
 			services = hostname;
 		};
 
+		if(content_length == 'N.A', {
+			content_length = 0;
+		});
+
 		~addPacketToStats.(\localhost, [true, false].choose, services, ip, location);
-		~registerOverallStats.(ip, location, type);
+		~registerOverallStats.(ip, location, type, content_length);
 		if(~sonifyPercussion) {
 			~addPercussiveToSequencer.();
 		};
