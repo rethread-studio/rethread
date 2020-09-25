@@ -29,3 +29,32 @@ function setup() {
 }
 ```
 ![download](https://user-images.githubusercontent.com/5577568/94275310-19de9580-ff47-11ea-86ab-a8f94983320e.png)
+
+### Second
+
+```js
+function setup() {
+  createCanvas(400, 600);
+  
+  const step = 25;
+  const bg = "#152A84";
+  const fg = "#CDE4CF";
+  
+  
+  background(bg);
+  stroke(fg);
+  strokeWeight(7);
+
+  
+  for (let x=0; x < width; x += step) {
+    for (let y = 0; y < height; y += step) {
+      if(random(1) >= 0.5) {
+        line(x, y, x + step, y + step);
+      } else {
+        line(x+ step, y, x, y + step);
+      }
+    }
+  }
+}
+```
+![download (1)](https://user-images.githubusercontent.com/5577568/94276994-3da2db00-ff49-11ea-9e64-67e619b4e6b1.png)
