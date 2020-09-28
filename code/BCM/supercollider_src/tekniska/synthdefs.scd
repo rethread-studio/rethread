@@ -374,25 +374,20 @@ SynthDef(\bounce_away, { | freq = 300 |
 }).add;
 
 SynthDef(\service_voice, {
-	var buf = \buf.kr(0), sig, trig, pos, env, atk = ExpRand(0.1, BufDur.kr(buf)/2), rel = ExpRand(0.01, BufDur.kr(buf) - atk);
+	var buf = \buf.kr(0), sig, trig, pos, env, atk = ExpRand(0.1, BufDur.kr(buf)/2), rel = ExpRand(0.01, BufDur.kr(buf) - atk), rate;
 	// sig = PlayBuf.ar(1, buf, BufRateScale.kr(buf) * Rand(0.8, 1.2), doneAction: 2);
-	if(~sonifyVoice == true, {
-		env = EnvGen.kr(Env(
-			levels: [0, 1, 1, 0],
-			times: [atk, BufDur.kr(buf) - atk - rel, rel]
-		));
-		trig = Dust.kr(Rand(15, 45));
-		pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.2));
-		sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, Rand(0.8, 1.2), pos);
-		sig = sig * 0.5 * \amp.kr(0.05) * env;
-		sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];
-		FreeSelf.kr(pos >= 1);
-	}, {
-		// don't play voices
-		// this is an easy way to turn off voices, but not very efficient in terms of computer resources
-		sig = DC.ar(0);
-		FreeSelf.kr(Impulse.kr(0)); // immediately free self
-	});
+	env = EnvGen.kr(Env(
+		levels: [0, 1, 1, 0],
+		times: [atk, BufDur.kr(buf) - atk - rel, rel]
+	));
+	trig = Dust.kr(Rand(15, 45));
+	pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.2));
+	rate = Rand(0.8, 1.2)
+	sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, rate, pos);
+	sig = sig * 0.5 * \amp.kr(0.05) * env * 2;
+	sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];
+	FreeSelf.kr(pos >= 1);
+
 	// sig = Pan2.ar(sig, Rand(-0.7, 0.7));
 	Out.ar(\out.kr(0), sig);
 }).add;

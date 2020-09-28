@@ -21,6 +21,9 @@ Time spans of droney sounds:
 	frame.types = Dictionary[];
 	frame.numRequests = 0;
 	frame.frameSize = 0;
+	frame.sameHost = 0;
+	frame.differentHost = 0;
+	frame.originRatio = 1;
 };
 
 ~overallStats = Environment(know: true);
@@ -29,7 +32,7 @@ Time spans of droney sounds:
 ~overallStats.overTime.numIPaddresses = 0;
 
 
-~registerOverallStats = { | ip, location, type, size |
+~registerOverallStats = { | ip, location, type, size, hostname |
 	var frame_ip = ~overallStats.currentFrame.ip_addresses[ip],
 	frame_location = ~overallStats.currentFrame.locations[location],
 	frame_type = ~overallStats.currentFrame.types[type];
@@ -51,7 +54,16 @@ Time spans of droney sounds:
 		~overallStats.currentFrame.types[type] = frame_type + 1;
 	});
 
+	if(hostname == ~overallStats.currentFrame.hostname, {
+		~overallStats.currentFrame.sameHost = ~overallStats.currentFrame.sameHost + 1;
+		// ("same as hostname, num: " + ~overallStats.currentFrame.sameHost).postln;
+	}, {
+		~overallStats.currentFrame.differentHost = ~overallStats.currentFrame.differentHost + 1;
+		// ("different from hostname: " + hostname + " num: " + ~overallStats.currentFrame.differentHost).postln;
+	});
+
 	~overallStats.currentFrame.numRequests = ~overallStats.currentFrame.numRequests + 1;
+	~overallStats.currentFrame.originRatio = ~overallStats.currentFrame.sameHost / ~overallStats.currentFrame.numRequests;
 	~overallStats.currentFrame.frameSize = ~overallStats.currentFrame.frameSize + size;
 };
 
@@ -67,6 +79,10 @@ Time spans of droney sounds:
 	(~overallStats.overTime.numRequests * coeff) + (~overallStats.currentFrame.numRequests * (1-coeff));
 	~overallStats.overTime.frameSize =
 	(~overallStats.overTime.frameSize * coeff) + (~overallStats.currentFrame.frameSize * (1-coeff));
+	~overallStats.overTime.differentHost =
+	(~overallStats.overTime.differentHost * coeff) + (~overallStats.currentFrame.differentHost * (1-coeff));
+	~overallStats.overTime.sameHost =
+	(~overallStats.overTime.sameHost * coeff) + (~overallStats.currentFrame.sameHost * (1-coeff));
 };
 
 ~mixDictionaries = { | origin, destination, coeff |
@@ -94,7 +110,7 @@ Time spans of droney sounds:
 /////// DRONE
 /////////////////////////////////////////////////////
 
-~restartBackgroundDrones = { | numOctaves = 3, minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0 |
+~restartBackgroundDrones = { | numOctaves = 3, minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0, stutterSpeed = 8 |
 	var chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 	~droneBackgroundSynths.do{|syn| syn.release};
 	~droneBackgroundSynths = chord.collect{ |degree|
@@ -110,13 +126,14 @@ Time spans of droney sounds:
 			\maxrq, maxrq,
 			\brightness, brightness,
 			\stutterAmount, stutterAmount,
+			\stutterSpeed, stutterSpeed,
 			\pan, rrand(-0.7, 0.7),
-			\amp, 0.8 * amp,
+			\amp, 0.2 * amp,
 			\out, 0]);
 	};
 };
 
-~updateBackgroundDrones = { | minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0 |
+~updateBackgroundDrones = { | minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0, stutterSpeed = 8 |
 	var chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 	~droneBackgroundSynths.do{|syn|
 		syn.set(
@@ -124,15 +141,16 @@ Time spans of droney sounds:
 			\maxrq, maxrq,
 			\brightness, brightness,
 			\stutterAmount, stutterAmount,
+			\stutterSpeed, stutterSpeed,
 			\pan, rrand(-0.7, 0.7),
-			\amp, 0.05 * amp,
+			\amp, 0.2 * amp,
 		);
 	};
 };
 
 ~backgroundDronesStarted = false;
 ~updateDrone = {
-	var numOctaves, minrq, maxrq, brightness, stutterAmount, amp, numScripts, numXmlHttpRequests, numSubFrames;
+	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames;
 	// Sometimes update pitches, sometimes just update other parameters
 
 	// numIPaddresses varies between ~5 and ~150
@@ -142,7 +160,7 @@ Time spans of droney sounds:
 	// types[\sub_frame] between 0 and 8 (usually 0)
 	// types[\xmlhttprequest] between 0 and ~100, (continues up if you scroll or stay on a page)
 	// ~overallStats.currentFrame.types[\xmlhttprequest].postln;
-	~overallStats.currentFrame.frameSize.postln;
+	// ~overallStats.currentFrame.frameSize.postln;
 
 	numScripts = ~overallStats.overTime.types[\script];
 	if(numScripts == nil) { numScripts = 0 };
@@ -153,17 +171,19 @@ Time spans of droney sounds:
 	numSubFrames = ~overallStats.overTime.types[\sub_frame];
 	if(numSubFrames == nil) { numSubFrames = 0 };
 
-	brightness = numXmlHttpRequests.linlin(1, 100, 0.0, 1.0);
+	// brightness = numXmlHttpRequests.linlin(1, 100, 0.0, 1.0);
+	brightness = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 1.0, 0.0, curve: -6);
 	stutterAmount = numSubFrames.linlin(0, 8, 0.0, 1.0);
-	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 4);
+	stutterSpeed = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 20.0, 2.0, curve: -4);
+	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 4).round(1);
 	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
 	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, 0.01, minrq);
-	amp = ~overallStats.currentFrame.frameSize.linexp(0, 10000000, 0.01, 1.0);
+	amp = ~overallStats.currentFrame.frameSize.linlin(0, 10000000, 0.03, 1.0);
 
 	if(rrand(0.0, 1.0) > 0.97 || (~backgroundDronesStarted == false), {
-		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp, brightness, stutterAmount);
+		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
 		~backgroundDronesStarted = true;
 	}, {
-		~updateBackgroundDrones.(minrq, maxrq, amp, brightness, stutterAmount);
+		~updateBackgroundDrones.(minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
 	});
 };

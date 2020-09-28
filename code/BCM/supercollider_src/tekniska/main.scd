@@ -21,9 +21,9 @@ s.waitForBoot({
 	/////////////////////////////////////////////////////
 
 
-	~sonifyLive = true;
+	~sonifyLive = false;
 	~sonifySequencer = false;
-	~sonifyPercussion = false;
+	~sonifyPercussion = true;
 	~sonifyVoice = true;
 
 	~overTimeStatsDecayTime = 90; // in seconds
@@ -179,8 +179,8 @@ s.waitForBoot({
 				self.my_synth.set(\activity, activity);
 			},
 			// Use play on to make sure that the
-			play_on: {|self, synth_name, args|
-				self.my_clock.sched(~latency, Synth(synth_name, args, self.my_group));
+			play_on: {|self, synth_name, args, latencyOffset = 0|
+				self.my_clock.sched(~latency + latencyOffset, Synth(synth_name, args, self.my_group));
 			},
 		)
 	};
@@ -316,6 +316,10 @@ s.waitForBoot({
 			if(~sonifySequencer, {
 				~updateSequencer.(self.soundType, \in, self.packets[\in], channel);
 				~updateSequencer.(self.soundType, \out, self.packets[\out], channel);
+			});
+			if(~sonifyVoice, {
+				var packets = self.packets[\in] + self.packets[\out];
+				~playVoice.(self.soundType, packets, channel);
 			});
 		};
 	};
@@ -554,8 +558,6 @@ s.waitForBoot({
 							release_coeff = rrand(0.3, 0.5);
 						}
 					);
-
-					channel.play_on(\service_voice, [\buf, ~voiceServices.google]);
 					if(inout == \out, {
 						channel.play_on(\reverse_google, [
 							\freq, freq,
@@ -601,7 +603,6 @@ s.waitForBoot({
 							release_coeff = rrand(0.3, 0.5);
 						}
 					);
-					channel.play_on(\service_voice, [\buf, ~voiceServices.amazon]);
 					if(inout == \out, {
 						if(activity == \low, {
 							channel.play_on(\tick2,
@@ -728,7 +729,6 @@ s.waitForBoot({
 							release_coeff = rrand(0.3, 0.5);
 						}
 					);
-					channel.play_on(\service_voice, [\buf, ~voiceServices.microsoft]);
 					if(inout == \out, {
 						channel.play_on(\softy, [
 							\freq, freq,
@@ -797,7 +797,6 @@ s.waitForBoot({
 							release_coeff = rrand(1.5, 2.5);
 						}
 					);
-					channel.play_on(\service_voice, [\buf, ~voiceServices.youtube]);
 					if(inout == \out, {
 						channel.play_on(\bounce_away, [
 							\freq, freq,
@@ -858,7 +857,6 @@ s.waitForBoot({
 							thump_atk = rrand(1.0, 2);
 						}
 					);
-					channel.play_on(\service_voice, [\buf, ~voiceServices.facebook]);
 					if(inout == \out, {
 						channel.play_on(\reverse_google, [
 							\freq, freq,
@@ -880,6 +878,74 @@ s.waitForBoot({
 							\amp, 0.05 * amp,
 							\out, channel.bus]);
 					});
+				},
+				\WhatsApp, {
+				},
+				\Slack, {
+				},
+				\Signal, {
+				},
+				\Instagram, {
+				},
+				\GitHub, {
+				}
+			);
+		};
+	};
+
+	// Play a certain sound based on a number of parameters
+	~playVoice = { | type, packets, channel |
+		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
+		if(packets >= ~highActivityThreshold, {
+			activity = \high;
+			chord = chord;
+		}, {
+			if(packets >= ~mediumActivityThreshold, {
+				activity = \medium;
+				chord = chord[0..(chord.size()*2/3 - 1).asInteger]
+			}, {
+				if(packets >= ~lowActivityThreshold, {
+					activity = \low;
+					chord = chord[0..(chord.size()/3 - 1).asInteger]
+				});
+			});
+		});
+		if(activity != \none) {
+			switch(type,
+				\Google, {
+					if(~positionThroughService) {
+						channel = ~channels.google_channel;
+					};
+					channel.play_on(\service_voice, [\buf, ~voiceServices.google]);
+				},
+				\Amazon, {
+					if(~positionThroughService) {
+						channel = ~channels.amazon_channel;
+					};
+					channel.play_on(\service_voice, [\buf, ~voiceServices.amazon]);
+				},
+				\Cloudflare, {
+					if(~positionThroughService) {
+						channel = ~channels.cloudflare_channel;
+					};
+				},
+				\Microsoft, {
+					if(~positionThroughService) {
+						channel = ~channels.microsoft_channel;
+					};
+					channel.play_on(\service_voice, [\buf, ~voiceServices.microsoft]);
+				},
+				\YouTube, {
+					if(~positionThroughService) {
+						channel = ~channels.youtube_channel;
+					};
+					channel.play_on(\service_voice, [\buf, ~voiceServices.youtube]);
+				},
+				\Facebook, {
+					if(~positionThroughService) {
+						channel = ~channels.facebook_channel;
+					};
+					channel.play_on(\service_voice, [\buf, ~voiceServices.facebook]);
 				},
 				\WhatsApp, {
 					channel.play_on(\service_voice, [\buf, ~voiceServices.whatsapp]);
@@ -950,10 +1016,8 @@ s.waitForBoot({
 		});
 
 		~addPacketToStats.(\localhost, [true, false].choose, services, ip, location);
-		~registerOverallStats.(ip, location, type, content_length);
-		if(~sonifyPercussion) {
-			~addPercussiveToSequencer.();
-		};
+		~registerOverallStats.(ip, location, type, content_length, hostname);
+		~addPercussiveToSequencer.();
 
 		// msg.postln;
 		if(rrand(0.0, 1.0) > 0.9) {
@@ -1021,6 +1085,8 @@ s.waitForBoot({
 				]
 			);
 			~tickClock.tempo = 2;
+			("url: " + url + " hostname: " + hostname).postln;
+			~overallStats.currentFrame.hostname = hostname;
 		};
 
 	}, '/request_created');
@@ -1118,14 +1184,14 @@ s.waitForBoot({
 			if(~counter % 1 == 0) {
 				~playSequencer.(~sequencer);
 			};
-			if(~overallStats.currentFrame.numRequests > 250 && (~sequencer.numSteps < 64), {
+			if(~overallStats.currentFrame.numRequests > 200 && (~sequencer.numSteps < 64), {
 				// Double the grid
 				~doubleSequencerGrid.(~sequencer);
 				~tickClock.tempo = ~tickClock.tempo * 2;
 				"Doubled The Grid".postln;
 			});
 
-			if(~overallStats.currentFrame.numRequests > 600 && (~sequencer.numSteps < 128), {
+			if(~overallStats.currentFrame.numRequests > 500 && (~sequencer.numSteps < 128), {
 				// Double the grid
 				~doubleSequencerGrid.(~sequencer);
 				"Doubled The Grid Again (without tempo adjustment)".postln;
