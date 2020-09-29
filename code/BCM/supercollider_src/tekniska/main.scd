@@ -21,12 +21,12 @@ s.waitForBoot({
 	/////////////////////////////////////////////////////
 
 
-	~sonifyLive = false;
+	~sonifyLive = true;
 	~sonifySequencer = false;
 	~sonifyPercussion = true;
 	~sonifyVoice = true;
 
-	~overTimeStatsDecayTime = 90; // in seconds
+	~overTimeStatsDecayTime = 40; // in seconds
 
 	// Routing and mixer channels
 	~useAmbisonics = false; // Set to false to use a simple stereo output
@@ -106,11 +106,24 @@ s.waitForBoot({
 				~ch4 = [31, 53, 93, 115, 124, 84];
 			},
 			1, {
+				// suspended major quality chord
+				~ch1 = [0, 9, 75, 88, 119, 132];
+				~ch2 = [9, 31, 97, 110, 132, 141];
+				~ch3 = [22, 53, 88, 110, 141, 154];
+				~ch4 = [31, 44, 97, 119, 132, 163];
+			},
+			2, {
 				// Rich chord with harmonic 7
 				~ch1 = [43, 120, 0, 31, 57, 137];
 				~ch2 = [88, 74, 17, 39, 53, 137];
 				~ch3 = [31, 88, 163, 106, 120, 151];
 				~ch4 = [43, 74, 106, 57, 163, 180];
+			},
+			3, {
+				~ch1 = [0, 22, 36, 45, 81, 94];
+				~ch2 = [9, 36, 58, 94, 103, 108];
+				~ch3 = [36, 45, 67, 81, 117, 139];
+				~ch4 = [31, 58, 94, 117, 130, 144];
 			}
 		);
 	};
@@ -1084,6 +1097,10 @@ s.waitForBoot({
 					\pan2, rrand(-0.5, 0.5),
 				]
 			);
+			// Change root
+			~root = ~root + [-8, 0, 9, 17, -22].choose;
+			~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
+
 			~tickClock.tempo = 2;
 			("url: " + url + " hostname: " + hostname).postln;
 			~overallStats.currentFrame.hostname = hostname;
@@ -1118,7 +1135,7 @@ s.waitForBoot({
 		loop {
 			var allDevices = ~stats.values,
 			numInPackets = 0, numOutPackets = 0,
-			numPitchesPerChord, root;
+			numPitchesPerChord, root, harmonicComplexity = 0, numScripts;
 
 			allDevices.do { |statDevice|
 				var allServices = statDevice.services.values, totalPacketsForDevice = 0;
@@ -1142,11 +1159,16 @@ s.waitForBoot({
 			~tickAmp = ~tickAmp + ~tickAmpStep;
 			~tickAmpStepsLeft = ~tickAmpStepsLeft - 1;
 
-
 			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
 			// ("overall: " + ~overallActivity).postln;
 
 			~updateOverallStatsTick.(~decayCoeff); // Bring the overTime stats closer to the current frame
+
+			numScripts = ~overallStats.overTime.types[\script];
+			if(numScripts == nil) { numScripts = 0 };
+			harmonicComplexity = numScripts.explin(3, 90, -0.4, 3.5).round;
+			~changeChord.(harmonicComplexity);
+
 			~updateDrone.();
 
 			/*tick_channel.play_on(\tick2,
@@ -1162,7 +1184,7 @@ s.waitForBoot({
 			);*/
 
 			// Update chord
-			if(~overallActivity > (~maxActivity * 0.5)) {
+			/*if(~overallActivity > (~maxActivity * 0.5)) {
 				if(rrand(0.0, 1.0) > 0.98) {
 					~root = ~root + [-8, 0, 9, 17, -22].choose;
 					~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
@@ -1173,9 +1195,10 @@ s.waitForBoot({
 					// TODO: Maybe change chord depending on activity instead of cycling through?
 					~changeChord.();
 				};
-			};
+			};*/
 
-			numPitchesPerChord = (~overallActivity.linexp(0, ~maxActivity, 3.0, ~ch1.size+2.99)-3.0).asInteger;
+			// numPitchesPerChord = (~overallActivity.linexp(0, ~maxActivity, 3.0, ~ch1.size+2.99)-3.0).asInteger;
+			numPitchesPerChord = 6;
 			// ("nump: " + numPitchesPerChord).postln;
 			~chord = ~ch1[0..numPitchesPerChord] ++ ~ch2[0..numPitchesPerChord] ++ ~ch3[0..numPitchesPerChord] ++ ~ch4[0..numPitchesPerChord];
 			~chord = ~chord + ~root;
@@ -1203,6 +1226,8 @@ s.waitForBoot({
 	}).play(~tickClock);
 });
 )
+
+~changeChord.(2);
 
 ~ch1[0..0]
 ( // Test for percussive sound when packets are received
