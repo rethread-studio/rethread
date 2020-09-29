@@ -4,14 +4,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style/visualization.css" />
   <title>BCM - Visualization</title>
 </head>
 
 <body>
   <div id="container"></div>
-  <div id="containers"></div>
+  <div id="container-particles">
+    <div id="labels"></div>
+  </div>
   <div id="wrapper"></div>
 
   <script type="x-shader/x-vertex" id="vertexshader">
@@ -45,10 +47,19 @@
       	gl_FragColor = vec4( vColor, vAlpha );
       }
     </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+
+  <script src="./js/d3/d3.v5.js"></script>
+  <script src="./js/three/three.min.js"></script>
+
   <script src="./js/d3/d3.v5.js"></script>
   <script src="./js/serviceViz.js"></script>
+  <script src="./js/ServiceParticle.js"></script>
+
   <script src="./js/countries.js"></script>
   <script src="./js/country-list.js"></script>
+
   <script src="./js/websocket.js"></script>
   <script type="module" src="./js/visualization.js"></script>
 </body>
