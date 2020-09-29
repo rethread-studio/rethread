@@ -8,7 +8,7 @@ class ServiceGenerator {
 
         //GENERAL DIMENSIONS OF THE VIZ
         this.dimensions = {
-            width: width,
+            width: width / 2,
             height: height,
             margin: {
                 top: 15,

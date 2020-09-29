@@ -25,14 +25,16 @@ body {
 #wrapper{
   position: absolute;
   top:0;
-  left:0;
+  right:0;
 }
 
-#container{
-  width: 100%;
+#container-particles{
+  position:absolute !important;
+  width: 50%;
 	height: 100vh;
 	overflow: hidden;
-	position: relative;
+  position: relative;
+  right:0;
 }
 
 #labels {

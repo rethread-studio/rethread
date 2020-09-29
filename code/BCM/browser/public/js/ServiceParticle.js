@@ -1,8 +1,8 @@
 
 class AppViz {
-    constructor(container, options = {}) {
+    constructor(_container, options = {}) {
         //CONTAINER CONFIG
-        this.container = container;
+        this.container = _container;
         //USE options to configure things
         this.options = options;
         this.simplex = new SimplexNoise()
@@ -31,14 +31,14 @@ class AppViz {
         this.renderer.setClearColor(0x000000, 0); // the default
         //RENDERer CONFIGURATION
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(container.offsetWidth, container.offsetHeight, false);
+        this.renderer.setSize(this.container.offsetWidth / 2, this.container.offsetHeight, false);
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
-        container.append(this.renderer.domElement);
+        this.container.append(this.renderer.domElement);
 
         //     //CAMERA CONFIGURATION
         this.camera = new THREE.PerspectiveCamera(
             this.options.fov,
-            container.offsetWidth / container.offsetHeight,
+            this.container.offsetWidth / this.container.offsetHeight,
             0.1,
             10000
         );
