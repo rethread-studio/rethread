@@ -382,7 +382,7 @@ SynthDef(\service_voice, {
 	));
 	trig = Dust.kr(Rand(15, 45));
 	pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.2));
-	rate = Rand(0.8, 1.2)
+	rate = Rand(0.8, 1.2);
 	sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, rate, pos);
 	sig = sig * 0.5 * \amp.kr(0.05) * env * 2;
 	sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];

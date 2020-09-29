@@ -21,7 +21,7 @@ s.waitForBoot({
 	/////////////////////////////////////////////////////
 
 
-	~sonifyLive = false;
+	~sonifyLive = true;
 	~sonifySequencer = false;
 	~sonifyPercussion = true;
 	~sonifyVoice = true;

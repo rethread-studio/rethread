@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="./style/visualization.css" />
-    <title>BCM - Visualization</title>
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <body>
-    <div id="container"></div>
+  <link rel="stylesheet" href="./style/visualization.css" />
+  <title>BCM - Visualization</title>
+</head>
 
-    <script type="x-shader/x-vertex" id="vertexshader">
+<body>
+  <div id="container"></div>
+  <div id="wrapper"></div>
+
+  <script type="x-shader/x-vertex" id="vertexshader">
 
       attribute float size;
 
@@ -33,7 +35,7 @@
       }
     </script>
 
-    <script type="x-shader/x-fragment" id="fragmentshader">
+  <script type="x-shader/x-fragment" id="fragmentshader">
          varying vec3 vColor;
          varying float vAlpha;
 
@@ -42,8 +44,12 @@
       	gl_FragColor = vec4( vColor, vAlpha );
       }
     </script>
+  <script src="./js/d3/d3.v5.js"></script>
+  <script src="./js/serviceViz.js"></script>
+  <script src="./js/countries.js"></script>
+  <script src="./js/country-list.js"></script>
+  <script src="./js/websocket.js"></script>
+  <script type="module" src="./js/visualization.js"></script>
+</body>
 
-    <script src="./js/websocket.js"></script>
-    <script type="module" src="./js/visualization.js"></script>
-  </body>
 </html>
