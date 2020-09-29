@@ -61,7 +61,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				\freq, rrand(1000, 1500),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
-				\amp, exprand(0.015, 0.05) * 0.3,
+				\amp, exprand(0.015, 0.05) * 0.2,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
 				\out, ~channels.percussion.bus,
 			]);
@@ -71,7 +71,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				\freq, rrand(2000, 2500),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
-				\amp, exprand(0.015, 0.05) * 0.3,
+				\amp, exprand(0.015, 0.05) * 0.2,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
 				\out, ~channels.percussion.bus,
 			]);
@@ -81,7 +81,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				\freq, rrand(2500, 3000),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
-				\amp, exprand(0.015, 0.05) * 0.3,
+				\amp, exprand(0.015, 0.05) * 0.2,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
 				\out, ~channels.percussion.bus,
 			]);
@@ -91,7 +91,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				\freq, rrand(4000, 6000),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
-				\amp, exprand(0.015, 0.05) * 0.4,
+				\amp, exprand(0.015, 0.05) * 0.25,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
 				\out, ~channels.percussion.bus,
 			]);
@@ -101,7 +101,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				\freq, rrand(8000, 10000),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
-				\amp, exprand(0.015, 0.05) * 0.7,
+				\amp, exprand(0.015, 0.05) * 0.5,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
 				\out, ~channels.percussion.bus,
 			]);
@@ -111,36 +111,36 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				\freq, rrand(200, 300),
 				\rq, exprand(0.001, 0.1),
 				\out, 0,
-				\amp, exprand(0.015, 0.05) * 0.9,
+				\amp, exprand(0.015, 0.05) * 0.7,
 				\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
 				\out, ~channels.percussion.bus,
 			]);
 		}},
 		7, {{
 			var atk = 0.01;
-			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.02, 0.04), \out, ~channels.percussion.bus], atk * -1)
+			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.02, 0.04) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 		}},
 		8, {{
 			var atk = rrand(0.02, 0.2);
-			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.01, 0.03), \out, ~channels.percussion.bus], atk * -1)
+			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 		}},
 		9, {{
 			var atk = rrand(0.02, 0.3);
-			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.01, 0.03), \out, ~channels.percussion.bus], atk * -1)
+			~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 		}},
 		10, {{
-			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, rrand(100, 120), \glissf, 0.4, \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25) * 0.6, \out, ~channels.percussion.bus]);
+			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, rrand(100, 120), \glissf, 0.4, \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
 		}},
 		11, {{
-			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 1.3), \sinfreq, rrand(230, 300), \glissf, 0.2, \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.6, \out, ~channels.percussion.bus]);
+			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 1.3), \sinfreq, rrand(230, 300), \glissf, 0.2, \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
 		}},
 		12, {{
-			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(1.22, 2.3), \sinfreq, rrand(530, 700), \glissf, 0.1, \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.6, \out, ~channels.percussion.bus]);
+			~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(1.22, 2.3), \sinfreq, rrand(530, 700), \glissf, 0.1, \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
 		}},
 		// default
 		{{
 			var atk = rrand(0.01, 0.5);
-			~channels.percussion.play_on(\fm_reverse, [\freq, rrand(3000, 7000), \mRatio, rrand(3, 9), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, atk, \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03), \out, ~channels.percussion.bus], atk * -1)
+			~channels.percussion.play_on(\fm_reverse, [\freq, rrand(3000, 7000), \mRatio, rrand(3, 9), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, atk, \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 		}},
 	);
 	~sequencer.steps[stepIndex].put(\percussive, newFunc);
@@ -155,7 +155,44 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 		activity = \high;
 		chord = chord;
 	}, {
-		if(packets >= ~mediumActivityThreshold, {
+		if(packets >= ~mediumActivityThreshold, {~updateDrone = {
+	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames;
+	// Sometimes update pitches, sometimes just update other parameters
+
+	// numIPaddresses varies between ~5 and ~150
+	// numRequests between ~10 and ~300
+	// types[\image] between 1 and ~400, can go much higher on scrolling image sites like pinterest
+	// types[\script] between 0 and 90
+	// types[\sub_frame] between 0 and 8 (usually 0)
+	// types[\xmlhttprequest] between 0 and ~100, (continues up if you scroll or stay on a page)
+	// ~overallStats.currentFrame.types[\xmlhttprequest].postln;
+	// ~overallStats.currentFrame.frameSize.postln;
+
+	numScripts = ~overallStats.overTime.types[\script];
+	if(numScripts == nil) { numScripts = 0 };
+
+	numXmlHttpRequests = ~overallStats.overTime.types[\xmlhttprequest];
+	if(numXmlHttpRequests == nil) { numXmlHttpRequests = 0 };
+
+	numSubFrames = ~overallStats.overTime.types[\sub_frame];
+	if(numSubFrames == nil) { numSubFrames = 0 };
+
+	// brightness = numXmlHttpRequests.linlin(1, 100, 0.0, 1.0);
+	brightness = ~overallStats.overTime.originRatio.lincurve(0.001, 1, 1.0, 0.0, curve: -6);
+	stutterAmount = numSubFrames.linlin(0, 8, 0.0, 1.0);
+	stutterSpeed = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 20.0, 2.0, curve: -4);
+	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 4).round(1);
+	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
+	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, 0.01, minrq);
+	amp = ~overallStats.currentFrame.frameSize.linlin(0, 10000000, 0.03, 1.0);
+
+	if(rrand(0.0, 1.0) > 0.97 || (~backgroundDronesStarted == false), {
+		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
+		~backgroundDronesStarted = true;
+	}, {
+		~updateBackgroundDrones.(minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
+	});
+};
 			activity = \medium;
 			chord = chord[0..(chord.size()*2/3 - 1).asInteger]
 		}, {
