@@ -8,7 +8,7 @@ class ServiceGenerator {
 
         //GENERAL DIMENSIONS OF THE VIZ
         this.dimensions = {
-            width: width,
+            width: width / 2,
             height: height,
             margin: {
                 top: 15,
@@ -81,6 +81,7 @@ class ServiceGenerator {
 
     //Adds a new service to the data set if it does not exist
     addService(_service) {
+
         //Add if it does not exist
         if (!this.servicesData.find(s => s.name == _service)) {
             this.servicesData.push(new Service(_service, 0))
@@ -162,7 +163,8 @@ class ServiceGenerator {
             .attr('y', yAccessor)
             .attr('text-anchor', 'start')
             .text(d => d.getName() || '')
-            .style('fill', 'green')
+            .attr('class', 'service-text');
+
     }
 
     drawServices() {
@@ -229,7 +231,7 @@ class ServiceGenerator {
             .attr('y', yAccessor)
             .attr('text-anchor', 'end')
             .text(d => d.getName() || '')
-            .style('fill', 'green')
+            .attr('class', 'service-text');
 
     }
 
