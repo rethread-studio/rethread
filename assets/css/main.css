@@ -143,7 +143,8 @@ html, input, select, textarea {
 body, input, select, textarea {
     /* font-family: Arial, Helvetica, sans-serif; */
     /* font-family: 'Abhaya Libre', serif; */
-    font-family: 'Hind', sans-serif;
+    /* font-family: 'Hind', sans-serif; */
+    font-family: 'Epilogue', sans-serif;
     font-weight: normal;
     line-height: 1.5em;
     letter-spacing: -0.015em;
