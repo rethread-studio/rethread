@@ -70,7 +70,7 @@ body{
   cursor: pointer;     /* change the cursor to a hand when over us */
   font-size: large;
   user-select: none;   /* don't let the text get selected */
-  text-shadow:         /* create a black outline */
+  /* text-shadow:         
     -1px -1px 0 #000,
      0   -1px 0 #000,
      1px -1px 0 #000,
@@ -78,7 +78,7 @@ body{
      1px  1px 0 #000,
      0    1px 0 #000,
     -1px  1px 0 #000,
-    -1px  0   0 #000;
+    -1px  0   0 #000; */
 }
 #labels>div:hover {
   color: red;

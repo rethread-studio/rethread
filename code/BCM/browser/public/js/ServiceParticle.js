@@ -333,6 +333,7 @@ class serviceParticle {
         this.scene.add(this.shape);
 
         this.elem = document.createElement('div');
+        this.elem.classList.add("service-label");
         this.methEl = document.createElement('div');
         this.elem.textContent = this.type;
         this.methEl.textContent = this.method;
