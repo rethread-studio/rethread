@@ -1138,10 +1138,15 @@ s.waitForBoot({
 		location = msg[14];
 
 		if(type == \main_frame) {
+			var freq;
 			// Reset sequencer
 			~sequencer = ~newSequencer.(32);
 			~resetCurrentFrame.();
 			"RESET".postln;
+			// Change root
+			~root = ~root + [-8, 9, 17, -22].choose;
+			~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
+			// Play start of main frame sounds
 			~channels.default_channel.play_on(\gust,
 				[
 					\freq, rrand(500, 2000),
@@ -1154,9 +1159,35 @@ s.waitForBoot({
 					\pan2, rrand(-0.5, 0.5),
 				]
 			);
-			// Change root
-			~root = ~root + [-8, 0, 9, 17, -22].choose;
-			~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
+			freq = ~s53.degreeToFreq(~root, 0.midicps, 3);
+			~channels.default_channel.play_on(\thump, [
+				\freq, freq,
+				\atk, 0.6,
+				\rel, 2,
+				\c0, -3,
+				\c1, \sine,
+				\pan, 0.0,
+				\amp, 0.1,
+				\out, ~channels.default_channel.bus]);
+			~channels.default_channel.play_on(\thump, [
+				\freq, freq * 2,
+				\atk, 0.6,
+				\rel, 2,
+				\c0, -3,
+				\c1, \sine,
+				\pan, -0.3,
+				\amp, 0.1,
+				\out, ~channels.default_channel.bus]);
+			~channels.default_channel.play_on(\thump, [
+				\freq, freq * 4,
+				\atk, 0.6,
+				\rel, 2,
+				\c0, -3,
+				\c1, \sine,
+				\pan, 0.3,
+				\amp, 0.1,
+				\out, ~channels.default_channel.bus]);
+
 
 			~newMainFrameTime = Date.localtime.rawSeconds;
 
@@ -1261,8 +1292,8 @@ s.waitForBoot({
 
 			// Update sequencer
 			if(~counter % 1 == 0) {
-				if(~overallActivity < 0.5) {
-					~adjustPercussionLevels.(~sequencer, 0.992); // linear decrease in percussion levels
+				if(~overallActivity < 0.7) {
+					~adjustPercussionLevels.(~sequencer, 0.98); // linear decrease in percussion levels
 				};
 				~updatePercussionInSequencer.(~sequencer);
 				~playSequencer.(~sequencer);

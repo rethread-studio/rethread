@@ -115,7 +115,7 @@ Time spans of droney sounds:
 	~droneBackgroundSynths.do{|syn| syn.release};
 	~droneBackgroundSynths = chord.collect{ |degree|
 		var octave = rrand(-1, numOctaves).floor,
-		freq = ~s53.degreeToFreq(degree, 0.midicps, ~octave+octave);
+		freq = ~s53.degreeToFreq(degree + ~root, 0.midicps, ~octave+octave);
 		Synth(\softy_sustained, [
 			\freq, freq,
 			\atk, rrand(0.6, 2),
