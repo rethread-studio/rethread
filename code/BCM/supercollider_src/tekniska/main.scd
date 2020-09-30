@@ -90,7 +90,7 @@ s.waitForBoot({
 
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
 	~currentChord = 0;
-	~numChords = 2;
+	~numChords = 4;
 	~changeChord = { | num = -1 |
 		// if num is -1 then
 		if(num == -1, {
@@ -228,6 +228,7 @@ s.waitForBoot({
 	~channels.percussion = ~makeMixerChannel.("Percussion", ~decoderBus);
 	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.voice = ~makeMixerChannel.("Voice", ~decoderBus);
+	~channels.voice.set_amp(0.65);
 	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.drone = ~makeMixerChannel.("Drone", ~decoderBus);
 	~channels.drone.set_send(~channels.rev_channel.bus, 0.15);
@@ -1179,12 +1180,8 @@ s.waitForBoot({
 
 			~updateOverallStatsTick.(~decayCoeff); // Bring the overTime stats closer to the current frame
 
-			numScripts = ~overallStats.overTime.types[\script];
-			if(numScripts == nil) { numScripts = 0 };
-			harmonicComplexity = numScripts.explin(3, 90, -0.4, 3.5).round;
-			~changeChord.(harmonicComplexity);
 
-			~updateDrone.();
+			~updateDrone.(timeSinceMainFrame);
 
 			/*tick_channel.play_on(\tick2,
 			[

@@ -61,7 +61,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 	sequencer.numSteps.do { | stepIndex |
 		var level = sequencer.levels[stepIndex][\percussive], newLevel;
 		if(level == nil) {level = 0.0 };
-		if(level > 1.0, { // don't decrease levels under 1.0 i.e. keep a ticking
+		if(level > 0.0, {
 			newLevel = level * offset;
 			if(newLevel < 0, { newLevel = 0.0 });
 			sequencer.levels[stepIndex].put(\percussive, newLevel);

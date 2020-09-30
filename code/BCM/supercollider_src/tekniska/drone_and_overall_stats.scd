@@ -114,7 +114,7 @@ Time spans of droney sounds:
 	var chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 	~droneBackgroundSynths.do{|syn| syn.release};
 	~droneBackgroundSynths = chord.collect{ |degree|
-		var octave = rrand(4-numOctaves, 4).floor,
+		var octave = rrand(-1, numOctaves).floor,
 		freq = ~s53.degreeToFreq(degree, 0.midicps, ~octave+octave);
 		Synth(\softy_sustained, [
 			\freq, freq,
@@ -149,8 +149,9 @@ Time spans of droney sounds:
 };
 
 ~backgroundDronesStarted = false;
-~updateDrone = {
-	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames;
+~lastHarmonicComplexity = 0;
+~updateDrone = { | timeSinceMainFrame |
+	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames,harmonicComplexity;
 	// Sometimes update pitches, sometimes just update other parameters
 
 	// numIPaddresses varies between ~5 and ~150
@@ -162,28 +163,37 @@ Time spans of droney sounds:
 	// ~overallStats.currentFrame.types[\xmlhttprequest].postln;
 	// ~overallStats.currentFrame.frameSize.postln;
 
-	numScripts = ~overallStats.overTime.types[\script];
+	numScripts = ~overallStats.currentFrame.types[\script];
 	if(numScripts == nil) { numScripts = 0 };
 
 	numXmlHttpRequests = ~overallStats.overTime.types[\xmlhttprequest];
 	if(numXmlHttpRequests == nil) { numXmlHttpRequests = 0 };
 
-	numSubFrames = ~overallStats.overTime.types[\sub_frame];
+	numSubFrames = ~overallStats.currentFrame.types[\sub_frame];
 	if(numSubFrames == nil) { numSubFrames = 0 };
 
 	// brightness = numXmlHttpRequests.linlin(1, 100, 0.0, 1.0);
-	brightness = ~overallStats.overTime.originRatio.lincurve(0.001, 1, 1.0, 0.0, curve: -6);
-	stutterAmount = numSubFrames.linlin(0, 8, 0.0, 1.0);
+	brightness = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 0.3, 0.0, curve: -6);
+	stutterAmount = numSubFrames.linlin(0, 8, 0.0, 0.7);
 	stutterSpeed = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 20.0, 2.0, curve: -4);
 	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 5).round(1);
 	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
 	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, 0.01, minrq);
-	amp = ~overallStats.currentFrame.frameSize.linlin(0, 10000000, 0.2, 1.0);
+	// amp = ~overallStats.currentFrame.frameSize.linlin(0, 10000000, 0.2, 1.0);
+	amp = ((1-timeSinceMainFrame.linlin(0, 15, 0, 1)).pow(4) * pi).sin();
 
-	if(rrand(0.0, 1.0) > 0.97 || (~backgroundDronesStarted == false), {
+	// set chord
+
+	harmonicComplexity = numScripts.explin(3, 90, -0.4, ~numChords-0.51).round;
+	// ("harmonic complexity: " + harmonicComplexity).postln;
+	~changeChord.(harmonicComplexity);
+
+	if(rrand(0.0, 1.0) > 0.92 || (~backgroundDronesStarted == false) || (~lastHarmonicComplexity != harmonicComplexity), {
 		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
 		~backgroundDronesStarted = true;
 	}, {
 		~updateBackgroundDrones.(minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
 	});
+
+	~lastHarmonicComplexity = harmonicComplexity;
 };

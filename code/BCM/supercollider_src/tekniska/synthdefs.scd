@@ -278,7 +278,7 @@ SynthDef(\softy_sustained, {
 	brightSig = Mix(Pulse.ar(freq * [1, 1.002, 1.004, 1.006], 0.2)) * 0.25;
 	sig = (sig * (1-brightness.pow(2))) + (brightSig * brightness);
 	ampVariation = LFNoise1.kr(LFNoise1.kr(1.5).range(0.3, 2.0)).range(0.1, 1.0);
-	sig = sig * env * \amp.kr(0.5, atk) * ampVariation;
+	sig = sig * env * \amp.kr(0.5, atk * 5) * ampVariation;
 	stutterTrig = Dust.kr(\stutterSpeed.kr(8));
 	sig = sig * Demand.kr(stutterTrig, 0, Dseq([stutterAmount, 1], inf));
 	sig = Pan2.ar(sig, \pan.kr(0, Rand(1.0, 3.0)));
