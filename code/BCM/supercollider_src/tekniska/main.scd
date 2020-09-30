@@ -10,6 +10,8 @@ s.options.memSize = 1024 * 128;
 s.reboot;
 )
 
+~decoder.set(\extraAmp, 1.0) // Set amplification
+
 (
 s.waitForBoot({
 	//// RUN THIS BLOCK TO START EVERYTHING
@@ -227,12 +229,14 @@ s.waitForBoot({
 	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.voice = ~makeMixerChannel.("Voice", ~decoderBus);
 	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
+	~channels.drone = ~makeMixerChannel.("Drone", ~decoderBus);
+	~channels.drone.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
 	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.tick_channel.set_amp(0.0);
 
 	{
-		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice, ~channels.rev_channel], ~allClouds);
+		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice, ~channels.drone, ~channels.rev_channel], ~allClouds);
 	}.defer;
 
 	// Create the global stats object (environment)

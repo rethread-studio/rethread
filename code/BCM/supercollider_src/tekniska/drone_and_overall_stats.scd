@@ -129,7 +129,7 @@ Time spans of droney sounds:
 			\stutterSpeed, stutterSpeed,
 			\pan, rrand(-0.7, 0.7),
 			\amp, 0.2 * amp,
-			\out, 0]);
+			\out, ~channels.drone.bus]);
 	};
 };
 
