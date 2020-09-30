@@ -569,7 +569,7 @@ function init() {
     powerPreference: "high-performance",
   });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth / 2, window.innerHeight);
+  renderer.setSize(window.innerWidth / 2, 1220);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
   container.appendChild(renderer.domElement);
