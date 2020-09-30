@@ -12,12 +12,14 @@ body {
   color: #fdfdfd;
 
   /* GREY */
-  /* background-color: #333647; */
+  background-color: #333647;
   /* BLUE */
-  background-color: #ee4035;
-  background-color: #19206b;
+  /* background-color: #ee4035; */
+  /* background-color: #19206b; */
   /* background-color: #a2dce7; */
+  margin-top:470px;
   overflow: hidden;
+  transition: all 0.5s ease;
   /* margin-top: 21.7%; */
 }
 

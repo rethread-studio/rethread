@@ -31,7 +31,9 @@ class AppViz {
         this.renderer.setClearColor(0x000000, 0); // the default
         //RENDERer CONFIGURATION
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        // this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
         this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
+
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.container.append(this.renderer.domElement);
 

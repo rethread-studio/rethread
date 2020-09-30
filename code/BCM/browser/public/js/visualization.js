@@ -147,7 +147,7 @@ const onmessage = (message) => {
 
     //Get the information from the request
     const packet = json.request;
-    console.log(packet)
+
     // //CHECK if it has any packages
     //if it does not have, include the host name as a service
     if (packet.services.length === 0) {
