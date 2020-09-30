@@ -180,9 +180,16 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 
 
 // no ambisonics, just straight through as stereo
-SynthDef(\decoder, { |in = 10, out = 0 |
-	var sig = In.ar(in, ~mixerChannelOutputs.asInteger);
-	sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
+SynthDef(\decoder, { |in = 10, out = 0,
+	cRatio = 0.33, // compressior ratio, 1/3 == 3:1
+	cThresh = 0.3, // compressor threshold
+	cAtk = 0.007, // compressor attack
+	cRel = 0.05 // compressor release
+	|
+
+	var sig = In.ar(in, ~mixerChannelOutputs.asInteger) * \preCompAmp.kr(1.0);
+	sig = Compander.ar(sig, sig, cThresh, 1.0, cRatio, cAtk, cRel);
+	sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3); // soft mastering compressor
 	sig = Limiter.ar(sig * \extraAmp.kr(1.0), 0.95);
 	Out.ar(out, sig);
 }).add;

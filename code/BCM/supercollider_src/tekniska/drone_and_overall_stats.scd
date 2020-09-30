@@ -180,7 +180,7 @@ Time spans of droney sounds:
 	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
 	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, 0.01, minrq);
 	// amp = ~overallStats.currentFrame.frameSize.linlin(0, 10000000, 0.2, 1.0);
-	amp = ((1-timeSinceMainFrame.linlin(0, 15, 0, 1)).pow(4) * pi).sin();
+	amp = ((1-timeSinceMainFrame.linlin(0, 15, 0, 1)).pow(4) * pi).sin() * 0.7;
 
 	// set chord
 

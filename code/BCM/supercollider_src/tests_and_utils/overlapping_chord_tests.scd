@@ -7,13 +7,13 @@
 ~revBus = Bus.audio(s, 2);
 ~rev = Synth(\medium_reverb,  [\in, ~revBus]);
 )
-31 + 53 + 31
+31 + 31
 // EXTREMT KONSONANTA ACKORD
 ( // mycket kvinter
-~ch1 = [0, 17, 31, 53, 84, 106];
-~ch2 = [9, 31, 48, 84, 115];
+~ch1 = [0, 31, 53, 84, 106];
+~ch2 = [9, 31, 62, 84, 115];
 ~ch3 = [0, 31, 53, 62, 84, 106];
-~ch4 = [0, 31, 53, 70, 84, 106];
+~ch4 = [0, 31, 53, 84, 106, 137];
 ~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 )
 
@@ -33,7 +33,7 @@
 ~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 )
 
-~playSoft.(~chord)
+~playSoft.(~ch2)
 ~playMedium.(~chord)
 ~playSaw.(~ch4)
 

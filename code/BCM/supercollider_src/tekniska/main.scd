@@ -10,8 +10,11 @@ s.options.memSize = 1024 * 128;
 s.reboot;
 )
 
+// Control the main bus while it is running
 ~decoder.set(\extraAmp, 1.0) // Set amplification
+~decoder.set(\cRatio, 1/2.5, \cThresh, 0.06, \cAtk, 0.012, \cRel, 0.08, \preCompAmp, 4.0); // change compression settings on the master bus
 
+-12.dbamp
 (
 s.waitForBoot({
 	//// RUN THIS BLOCK TO START EVERYTHING
@@ -28,10 +31,7 @@ s.waitForBoot({
 	~sonifyPercussion = true;
 	~sonifyVoice = true;
 
-	~overTimeStatsDecayTime = 40; // in seconds~ch1 = [0, 31, 53, 84, 106];
-~ch2 = [9, 31, 62, 84, 115];
-~ch3 = [0, 31, 53, 62, 84, 106];
-~ch4 = [0, 31, 53, 84, 106, 137];
+	~overTimeStatsDecayTime = 40; // in seconds.
 
 	// Routing and mixer channels
 	~useAmbisonics = false; // Set to false to use a simple stereo output
@@ -160,7 +160,7 @@ s.waitForBoot({
 
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
 	~currentChord = 0;
-	~numChords = 7;
+	~numChords = ~allChordFunctions.size;
 	~changeChord = { | num = -1 |
 		// if num is -1 then
 		num = num.asInteger;
