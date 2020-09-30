@@ -118,7 +118,7 @@ Time spans of droney sounds:
 		freq = ~s53.degreeToFreq(degree, 0.midicps, ~octave+octave);
 		Synth(\softy_sustained, [
 			\freq, freq,
-			\atk, rrand(1, 4),
+			\atk, rrand(0.6, 2),
 			\rel, rrand(1, 3),
 			\c0, 2,
 			\c1, \sine,
@@ -173,7 +173,7 @@ Time spans of droney sounds:
 	if(numSubFrames == nil) { numSubFrames = 0 };
 
 	// brightness = numXmlHttpRequests.linlin(1, 100, 0.0, 1.0);
-	brightness = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 0.3, 0.0, curve: -6);
+	brightness = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 0.6, 0.0, curve: -6);
 	stutterAmount = numSubFrames.linlin(0, 8, 0.0, 0.7);
 	stutterSpeed = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 20.0, 2.0, curve: -4);
 	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 5).round(1);
@@ -185,7 +185,7 @@ Time spans of droney sounds:
 	// set chord
 
 	harmonicComplexity = numScripts.explin(3, 90, -0.4, ~numChords-0.51).round;
-	// ("harmonic complexity: " + harmonicComplexity).postln;
+	("harmonic complexity: " + harmonicComplexity).postln;
 	~changeChord.(harmonicComplexity);
 
 	if(rrand(0.0, 1.0) > 0.92 || (~backgroundDronesStarted == false) || (~lastHarmonicComplexity != harmonicComplexity), {
