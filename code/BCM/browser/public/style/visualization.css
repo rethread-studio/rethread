@@ -10,8 +10,15 @@ body {
   height: 100%;
   width: 100%;
   color: #fdfdfd;
-  background-color: #333647;
+
+  /* GREY */
+  /* background-color: #333647; */
+  /* BLUE */
+  background-color: #ee4035;
+  background-color: #19206b;
+  /* background-color: #a2dce7; */
   overflow: hidden;
+  /* margin-top: 21.7%; */
 }
 
 #visualization {

@@ -1,0 +1,32 @@
+h1, h2{
+    font-family: 'Roboto', sans-serif;
+}
+
+p{
+    font-family: 'Roboto', sans-serif;
+}
+
+
+.container{
+    display: flex;
+    flex-flow: column;
+    width: 75%;
+    margin: 5% auto;
+}
+
+
+.spacer{
+    height:20px
+}
+
+.spacer-m{
+    height:40px
+}
+
+.space-l{
+    height:60px
+}
+
+.spacer-xl{
+    height:80px
+}
