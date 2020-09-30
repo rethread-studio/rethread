@@ -9,6 +9,14 @@
 )
 31 + 53 + 31
 // EXTREMT KONSONANTA ACKORD
+( // mycket kvinter
+~ch1 = [0, 17, 31, 53, 84, 106];
+~ch2 = [9, 31, 48, 84, 115];
+~ch3 = [0, 31, 53, 62, 84, 106];
+~ch4 = [0, 31, 53, 70, 84, 106];
+~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
+)
+
 ( // dur med mycket kvinter
 ~ch1 = [0, 17, 31, 53, 84, 106];
 ~ch2 = [9, 31, 48, 84, 115];
@@ -17,7 +25,6 @@
 ~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 )
 
-31 + 14
 ( // moll med mycket kvinter
 ~ch1 = [0, 14, 31, 53, 84, 106];
 ~ch2 = [9, 31, 45, 84, 115];
@@ -25,6 +32,10 @@
 ~ch4 = [0, 31, 53, 67, 84, 106];
 ~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 )
+
+~playSoft.(~chord)
+~playMedium.(~chord)
+~playSaw.(~ch4)
 
 (
 ~ch1 = [0, 17, 31, 43];

@@ -28,7 +28,10 @@ s.waitForBoot({
 	~sonifyPercussion = true;
 	~sonifyVoice = true;
 
-	~overTimeStatsDecayTime = 40; // in seconds
+	~overTimeStatsDecayTime = 40; // in seconds~ch1 = [0, 31, 53, 84, 106];
+~ch2 = [9, 31, 62, 84, 115];
+~ch3 = [0, 31, 53, 62, 84, 106];
+~ch4 = [0, 31, 53, 84, 106, 137];
 
 	// Routing and mixer channels
 	~useAmbisonics = false; // Set to false to use a simple stereo output
@@ -90,13 +93,19 @@ s.waitForBoot({
 
 	// chords divided into 4 chords in increasing harmonic complexity
 	~allChordFunctions = [
-		{
+		{ // fifths
+			~ch1 = [0, 31, 53, 84, 106];
+			~ch2 = [9, 31, 62, 84, 115];
+			~ch3 = [0, 31, 53, 62, 84, 106];
+			~ch4 = [0, 31, 53, 84, 106, 137];
+		},
+		{ // major
 			~ch1 = [0, 17, 31, 53, 84, 106];
 			~ch2 = [9, 31, 48, 84, 115];
 			~ch3 = [0, 31, 53, 62, 84, 106];
 			~ch4 = [0, 31, 53, 70, 84, 106];
 		},
-		{
+		{ // minor
 			~ch1 = [0, 14, 31, 53, 84, 106];
 			~ch2 = [9, 31, 45, 84, 115];
 			~ch3 = [0, 31, 53, 62, 84, 106];
