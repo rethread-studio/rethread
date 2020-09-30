@@ -130,7 +130,7 @@ const containerViz = document.getElementById("container-particles");
 const myApp = new AppViz(containerViz, options);
 myApp.init();
 // SERVICE VIZ 
-const serviceViz = new ServiceGenerator(1220, window.innerWidth);
+// const serviceViz = new ServiceGenerator(1220, window.innerWidth);
 
 const testColors = ["#333647", "#ee4035", "#19206b", "#a2dce7", "#f1df04"];
 let colorPos = 0;
@@ -152,7 +152,7 @@ const onmessage = (message) => {
 
   } else if (json.event == "request_completed") {
     //ADD INITIATOR
-    if (json.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
+    // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
     myApp.addGeometry(json.request.method, json.request.type, json.request.requestId);
 
 
@@ -199,7 +199,7 @@ const onmessage = (message) => {
       //Process each of the services in the packet
       for (const service of packet.services) {
         //ADD SERVICE TO TEXT
-        serviceViz.addService(service)
+        // serviceViz.addService(service)
         // ADD A NEW 3D SERVICE
         myApp.addService(service, json.request.type, json.request.requestId);
 
