@@ -147,7 +147,16 @@ const onmessage = (message) => {
 
     //Get the information from the request
     const packet = json.request;
+    const testColors = ["#333647", "#ee4035", "#19206b", "#a2dce7", "#f1df04"];
+    let colorPos = 0;
+    document.body.style.backgroundColor = testColors[0];
+    function changeColor() {
+      console.log(colorPos)
+      colorPos = colorPos + 1 > testColors.length ? 0 : colorPos + 1;
+      document.body.style.backgroundColor = testColors[colorPos];
+    }
 
+    setInterval(changeColor, 5000)
     // //CHECK if it has any packages
     //if it does not have, include the host name as a service
     if (packet.services.length === 0) {
