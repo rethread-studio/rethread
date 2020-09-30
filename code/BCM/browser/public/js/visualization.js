@@ -60,7 +60,7 @@ let locations = {
 function multiplyLocation(loc, scale) {
   loc.x *= scale;
   loc.y *= scale,
-  loc.z *= scale;
+    loc.z *= scale;
 }
 
 multiplyLocation(locations.top, 0.6);
@@ -69,19 +69,19 @@ multiplyLocation(locations.Europe, 1.2);
 function splitGreatestDistance(from, to) {
   let dist = Math.abs(from.x - to.x);
   let axis = 'x';
-  if(Math.abs(from.y - to.y) > dist) {
+  if (Math.abs(from.y - to.y) > dist) {
     dist = Math.abs(from.y - to.y);
     axis = 'y';
   }
-  if(Math.abs(from.z - to.z) > dist) {
+  if (Math.abs(from.z - to.z) > dist) {
     dist = Math.abs(from.z - to.z);
     axis = 'z';
   }
-  if(axis == 'x') {
+  if (axis == 'x') {
     to.x = (from.x - to.x) * 0.5;
-  } else if(axis == 'y') {
+  } else if (axis == 'y') {
     to.y = (from.y - to.y) * 0.5;
-  } else if(axis == 'z') {
+  } else if (axis == 'z') {
     to.z = (from.z - to.z) * 0.5;
   }
 }
@@ -105,9 +105,30 @@ let lastCountry = "";
 
 // END GLOBE SETUP
 
+
+
+//SERVICE PARTICLE VIZ OPTIONS
+const options = {
+
+  length: 400,
+  fov: 90,
+
+  colors: {
+    roadColor: 0x080808,
+    islandColor: 0x0a0a0a,
+    background: 0x000000,
+    shoulderLines: 0x131318,
+    brokenLines: 0x131318,
+  }
+}
+
+
 // Receive packets
 const ws = WebSocketClient();
 
+const containerViz = document.getElementById("container-particles");
+const myApp = new AppViz(containerViz, options);
+myApp.init();
 // SERVICE VIZ 
 const serviceViz = new ServiceGenerator(window.innerHeight, window.innerWidth);
 
@@ -115,13 +136,15 @@ const serviceViz = new ServiceGenerator(window.innerHeight, window.innerWidth);
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
 
-  // console.log(json)
   //REQUEST CREATED
   if (json.event == "request_created") {
-    //ADD INITIATOR
-    if (json.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
 
   } else if (json.event == "request_completed") {
+    //ADD INITIATOR
+    if (json.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
+    myApp.addGeometry(json.request.method, json.request.type, json.request.requestId);
+
+
     //Get the information from the request
     const packet = json.request;
     console.log(packet)
@@ -131,7 +154,7 @@ const onmessage = (message) => {
       packet.services.push(packet.hostname);
     }
     let location = countryList.name(packet.location.country);
-    console.log("location: " + location);
+
     // if (!location) {
     //   location = packet.local_location.country;
     // }
@@ -164,7 +187,11 @@ const onmessage = (message) => {
     } else {
       //Process each of the services in the packet
       for (const service of packet.services) {
+        //ADD SERVICE TO TEXT
         serviceViz.addService(service)
+        // ADD A NEW 3D SERVICE
+        myApp.addService(service, json.request.type, json.request.requestId);
+
         //if the service does not exist
         if (!positionPerService.has(service)) {
           //create a text to display
@@ -529,10 +556,11 @@ function init() {
   // Renderer
   renderer = new THREE.WebGLRenderer({
     antialias: false,
+    alpha: true,
     powerPreference: "high-performance",
   });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth / 2, window.innerHeight);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
   container.appendChild(renderer.domElement);
@@ -585,7 +613,7 @@ function rotateGlobe() {
     z: 0,
   }
 
-  
+
   if (countryShapes.hasOwnProperty(lastCountry)) {
     // Find the mesh with that name
     let mesh;
@@ -601,8 +629,8 @@ function rotateGlobe() {
         console.log("geometry, pos and rot")
         console.log(country.geometry)
         console.log(pos);
-        let rotX  = circleRotation(new THREE.Vector3(1, 0, 0), pos);
-        let rotY  = circleRotation(new THREE.Vector3(0, 1, 0), pos);
+        let rotX = circleRotation(new THREE.Vector3(1, 0, 0), pos);
+        let rotY = circleRotation(new THREE.Vector3(0, 1, 0), pos);
         newRotation.x = rotX * -1;
         newRotation.y = rotY;
         // newRotation.x = pos.x;
@@ -632,7 +660,7 @@ function rotateGlobe() {
     .onComplete(function () {
     })
     .start();
-  
+
   let nextRotation = Math.random() * rotationDur * 0.5 + rotationDur + 10;
   setTimeout(rotateGlobe, nextRotation);
 }
@@ -644,7 +672,7 @@ var lastUpdate = 0;
 function animate() {
   let now = Date.now() * 0.001;
   let dt = now - lastUpdate;
-  if(dt !== dt) {
+  if (dt !== dt) {
     dt = 0;
   }
 
@@ -681,7 +709,7 @@ function animate() {
       // country.scale.y = country.userData.baseScale + country.userData.scaleFollower;
       // country.scale.z = country.userData.baseScale + country.userData.scaleFollower;
 
-      const colorScale = 1-Math.pow((1-country.userData.scaleFollower), 2);
+      const colorScale = 1 - Math.pow((1 - country.userData.scaleFollower), 2);
 
       country.material.color.setRGB(
         1.0,
