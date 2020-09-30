@@ -32,7 +32,7 @@ s.waitForBoot({
 	~useAmbisonics = false; // Set to false to use a simple stereo output
 	~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
 	// If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
-	~positionThroughService = true;
+	~positionThroughService = false;
 	~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
 	if(~useAmbisonics == true, {
 		~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
@@ -225,12 +225,14 @@ s.waitForBoot({
 	~channels.youtube_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.percussion = ~makeMixerChannel.("Percussion", ~decoderBus);
 	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
+	~channels.voice = ~makeMixerChannel.("Voice", ~decoderBus);
+	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
 	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.tick_channel.set_amp(0.0);
 
 	{
-		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.rev_channel], ~allClouds);
+		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice, ~channels.rev_channel], ~allClouds);
 	}.defer;
 
 	// Create the global stats object (environment)
@@ -908,7 +910,7 @@ s.waitForBoot({
 
 	// Play a certain sound based on a number of parameters
 	~playVoice = { | type, packets, channel |
-		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
+		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose, bufnum = nil;
 		if(packets >= ~highActivityThreshold, {
 			activity = \high;
 			chord = chord;
@@ -923,19 +925,20 @@ s.waitForBoot({
 				});
 			});
 		});
+		channel = ~channels.voice;
 		if(activity != \none) {
 			switch(type,
 				\Google, {
 					if(~positionThroughService) {
 						channel = ~channels.google_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.google]);
+					bufnum = ~voiceServices.google;
 				},
 				\Amazon, {
 					if(~positionThroughService) {
 						channel = ~channels.amazon_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.amazon]);
+					bufnum = ~voiceServices.amazon;
 				},
 				\Cloudflare, {
 					if(~positionThroughService) {
@@ -946,36 +949,40 @@ s.waitForBoot({
 					if(~positionThroughService) {
 						channel = ~channels.microsoft_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.microsoft]);
+					bufnum = ~voiceServices.microsoft;
 				},
 				\YouTube, {
 					if(~positionThroughService) {
 						channel = ~channels.youtube_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.youtube]);
+					bufnum = ~voiceServices.youtube;
 				},
 				\Facebook, {
 					if(~positionThroughService) {
 						channel = ~channels.facebook_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.facebook]);
+					bufnum = ~voiceServices.facebook;
 				},
 				\WhatsApp, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.whatsapp]);
+					bufnum = ~voiceServices.whatsapp;
 				},
 				\Slack, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.slack]);
+					bufnum = ~voiceServices.slack;
 				},
 				\Signal, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.signal]);
+					bufnum = ~voiceServices.signal;
 				},
 				\Instagram, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.instagram]);
+					bufnum = ~voiceServices.instagram;
 				},
 				\GitHub, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.github]);
+					bufnum = ~voiceServices.github;
 				}
 			);
+		};
+
+		if(bufnum != nil) {
+			channel.play_on(\service_voice, [\buf, bufnum, \out, channel.bus]);
 		};
 	};
 
