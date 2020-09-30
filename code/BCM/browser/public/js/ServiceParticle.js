@@ -32,7 +32,7 @@ class AppViz {
         //RENDERer CONFIGURATION
         this.renderer.setPixelRatio(window.devicePixelRatio);
         // this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
-        this.renderer.setSize(3840, 1220, false);
+        this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
 
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.container.append(this.renderer.domElement);
@@ -40,7 +40,7 @@ class AppViz {
         //     //CAMERA CONFIGURATION
         this.camera = new THREE.PerspectiveCamera(
             this.options.fov,
-            3840 / 1220,
+            this.container.offsetWidth / this.container.offsetHeight,
             0.1,
             10000
         );
