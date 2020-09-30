@@ -1,9 +1,12 @@
 import * as THREE from "https://unpkg.com/three@0.119.1/build/three.module.js";
+import Map3DGeometry from "./Map3DGeometry.js";
 import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
 import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
+import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
 import { RenderPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/RenderPass.js";
 import { GlitchPass } from "./three/postprocessing/CustomGlitchPass.js";
 import { SMAAPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js";
+import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.0/dist/tween.esm.js";
 
 const positionPerService = new Map();
 const textPerService = new Map();
@@ -23,33 +26,184 @@ loader.load("fonts/" + "helvetiker_regular.typeface.json", function (
   font = response;
 });
 
+// GLOBE SETUP
+let locations = {
+  NordAmerica: {
+    x: 45.007262821788274,
+    y: 42.636811843287255,
+    z: 15.719691443279078,
+  },
+  SouthAmerica: {
+    x: 57.877554836810496,
+    y: -11.686766076650507,
+    z: -24.581868820798697,
+  },
+  Africa: {
+    x: -20.10638732410356,
+    y: 7.104283932574123,
+    z: -60.29861083408001,
+  },
+  Europe: {
+    x: -5.914913565619374,
+    y: 37.112113595615455,
+    z: -32.98037025227866,
+  },
+  Asia: { x: -47.827295699164246, y: 42.1859899887746, z: -4.853057254243454 },
+  Oceania: {
+    x: -47.17537192267708,
+    y: -18.70291910473583,
+    z: 38.92743545187653,
+  },
+  top: { x: 2.6451793113733446, y: 103.04016038480927, z: -3.2535889089049363 },
+};
+
+function multiplyLocation(loc, scale) {
+  loc.x *= scale;
+  loc.y *= scale,
+    loc.z *= scale;
+}
+
+multiplyLocation(locations.top, 0.6);
+multiplyLocation(locations.Europe, 1.2);
+
+function splitGreatestDistance(from, to) {
+  let dist = Math.abs(from.x - to.x);
+  let axis = 'x';
+  if (Math.abs(from.y - to.y) > dist) {
+    dist = Math.abs(from.y - to.y);
+    axis = 'y';
+  }
+  if (Math.abs(from.z - to.z) > dist) {
+    dist = Math.abs(from.z - to.z);
+    axis = 'z';
+  }
+  if (axis == 'x') {
+    to.x = (from.x - to.x) * 0.5;
+  } else if (axis == 'y') {
+    to.y = (from.y - to.y) * 0.5;
+  } else if (axis == 'z') {
+    to.z = (from.z - to.z) * 0.5;
+  }
+}
+
+function locationDistance(a, b) {
+  return Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2) + Math.pow((b.z - a.z), 2));
+}
+
+const easings = [TWEEN.Easing.Exponential.InOut, TWEEN.Easing.Sinusoidal.InOut, TWEEN.Easing.Circular.InOut, TWEEN.Easing.Linear.None];
+
+let lightPulseSpeed = 30;
+let opacityBaseLevel = 0.3;
+let countryDarkColor = "0x665555";
+
+let cameraPosition = new THREE.Vector3(45, 42, 15);
+let globeRotation = new THREE.Vector3(0, 0, 0);
+
+let countries;
+let countryLayers;
+let lastCountry = "";
+
+// END GLOBE SETUP
+
+
+
+//SERVICE PARTICLE VIZ OPTIONS
+const options = {
+
+  length: 400,
+  fov: 90,
+
+  colors: {
+    roadColor: 0x080808,
+    islandColor: 0x0a0a0a,
+    background: 0x000000,
+    shoulderLines: 0x131318,
+    brokenLines: 0x131318,
+  }
+}
+
+
 // Receive packets
 const ws = WebSocketClient();
 
+const containerViz = document.getElementById("container-particles");
+const myApp = new AppViz(containerViz, options);
+myApp.init();
+// SERVICE VIZ 
+const serviceViz = new ServiceGenerator(window.innerHeight, window.innerWidth);
+
+//READ THE SOCKET FOR ACTIVITY
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
-  if (json.event == "request_completed") {
+
+  //REQUEST CREATED
+  if (json.event == "request_created") {
+
+  } else if (json.event == "request_completed") {
+    //ADD INITIATOR
+    if (json.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
+    myApp.addGeometry(json.request.method, json.request.type, json.request.requestId);
+
+
+    //Get the information from the request
     const packet = json.request;
+    console.log(packet)
+    // //CHECK if it has any packages
+    //if it does not have, include the host name as a service
     if (packet.services.length === 0) {
       packet.services.push(packet.hostname);
     }
+    let location = countryList.name(packet.location.country);
 
+    // if (!location) {
+    //   location = packet.local_location.country;
+    // }
+    for (let c of countries) {
+      if (c.geometry.name == location) {
+        c.userData.scale += 0.003;
+        if (c.userData.opacityVel === 0) {
+          c.userData.opacityVel = lightPulseSpeed;
+          c.userData.opacityPhase = 0;
+        }
+        if (c.userData.pulsesLeft < 7) {
+          c.userData.pulsesLeft += 1;
+        }
+        c.userData.activated = true;
+        break;
+      }
+    }
+    if (location != undefined) {
+      lastCountry = location;
+    }
+
+    //Increment the counter for packetsOverTime
     packetsOverTime++;
+    //If it goes over the glitchThreshold trigger glitch
     if (packetsOverTime > glitchThreshold) {
       if (!triggerThisFrame) {
         glitchPass.triggerActivation(packetsOverTime);
         triggerThisFrame = true;
       }
     } else {
+      //Process each of the services in the packet
       for (const service of packet.services) {
+        //ADD SERVICE TO TEXT
+        serviceViz.addService(service)
+        // ADD A NEW 3D SERVICE
+        myApp.addService(service, json.request.type, json.request.requestId);
+
+        //if the service does not exist
         if (!positionPerService.has(service)) {
+          //create a text to display
           let servicePos = random3DPosition(500);
           createText(service, servicePos);
           positionPerService.set(service, servicePos);
           indexPerService.set(service, indexPerService.size);
         }
+        //add the text and particles
         updateText(service);
         addParticle(service, positionPerService.get(service), packet.len);
+        //
         let time = Date.now() * 0.001;
         lastRegisteredPerService.set(service, time);
         activeService = service;
@@ -57,8 +211,12 @@ const onmessage = (message) => {
     }
   }
 };
+
+//LISTEN to new messages with the function created
 ws.addEventListener("message", onmessage);
 
+
+//RESET ALL CONFIGURATION
 function reset() {
   allPackets = [];
   particleCount = 0;
@@ -70,6 +228,7 @@ function reset() {
   lastRegisteredPerService.clear();
 }
 
+//CREATE a random position
 function random3DPosition(magnitude) {
   return new THREE.Vector3(
     (-1 + Math.random() * 2) * magnitude,
@@ -78,6 +237,8 @@ function random3DPosition(magnitude) {
   );
 }
 
+//ADD PARTICLE:
+//set the position for a group of particles according to the service
 function addParticle(service, vec3, packetSize) {
   let i = particleIndex;
   particlePositions[i * 3] = vec3.x;
@@ -103,6 +264,8 @@ function addParticle(service, vec3, packetSize) {
   particles.setDrawRange(0, particleCount);
 }
 
+
+//NOT USED
 let textMaterialDefault = new THREE.MeshBasicMaterial({
   color: 0xffffff,
   transparent: true,
@@ -114,7 +277,11 @@ let textMaterialActive = new THREE.MeshBasicMaterial({
   opacity: 0.9,
 });
 
+//Create a 3d text
+// take the service and its position
+// 
 function createText(service, servicePos) {
+
   let material = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
@@ -143,6 +310,7 @@ function createText(service, servicePos) {
   textPerService.set(service, textObj);
 }
 
+//Update the life time of the text
 function updateText(service) {
   let text = textPerService.get(service);
   if (text) {
@@ -242,6 +410,19 @@ function init() {
   // controls.maxDistance = 3000;
 
   scene = new THREE.Scene();
+
+  // GLOBE
+  countryLayers = generateCountries();
+  scene.add(countryLayers);
+  countryLayers.position.set(0, 0, 1690);
+
+  countries = countryLayers.countries;
+
+  scene.fog = new THREE.Fog(0xfafafa, 40, 2000);
+  const light = new THREE.HemisphereLight(0xffffff, 0x555555, 0.7);
+  scene.add(light);
+
+  // END GLOBE
 
   particles_group = new THREE.Group();
   scene.add(particles_group);
@@ -375,10 +556,11 @@ function init() {
   // Renderer
   renderer = new THREE.WebGLRenderer({
     antialias: false,
+    alpha: true,
     powerPreference: "high-performance",
   });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth / 2, window.innerHeight);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
   container.appendChild(renderer.domElement);
@@ -420,11 +602,124 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+function rotateGlobe() {
+  const keys = Object.keys(locations);
+  const index = Math.floor(Math.random() * keys.length);
+  let location = locations[keys[index]];
+  let rotationDur = 1000;
+  let newRotation = {
+    x: 0,
+    y: 0,
+    z: 0,
+  }
+
+
+  if (countryShapes.hasOwnProperty(lastCountry)) {
+    // Find the mesh with that name
+    let mesh;
+    for (let country of countries) {
+      if (country.userData.name == lastCountry) {
+        // project camera position from face normal
+        let scale = 60;
+        let faceIndex = 0;
+        if (lastCountry === 'United States') {
+          faceIndex = 2;
+        }
+        let pos = country.geometry.faces[faceIndex].normal;
+        console.log("geometry, pos and rot")
+        console.log(country.geometry)
+        console.log(pos);
+        let rotX = circleRotation(new THREE.Vector3(1, 0, 0), pos);
+        let rotY = circleRotation(new THREE.Vector3(0, 1, 0), pos);
+        newRotation.x = rotX * -1;
+        newRotation.y = rotY;
+        // newRotation.x = pos.x;
+        // newRotation.y = pos.y;
+        // newRotation.z = pos.z;
+        console.log("rotX: " + rotX + "rotY: " + rotY);
+      }
+    }
+  } else {
+    // newRotation.x = Math.random() * Math.PI * 2 - Math.PI;
+  }
+
+  var from = {
+    x: globeRotation.x,
+    y: globeRotation.y,
+    z: globeRotation.z,
+  };
+
+  let easing = easings[~~(Math.random() * easings.length)];
+
+  var tween = new TWEEN.Tween(from)
+    .to(newRotation, rotationDur)
+    .easing(easing)
+    .onUpdate(function (position) {
+      globeRotation.set(position.x, position.y, position.z);
+    })
+    .onComplete(function () {
+    })
+    .start();
+
+  let nextRotation = Math.random() * rotationDur * 0.5 + rotationDur + 10;
+  setTimeout(rotateGlobe, nextRotation);
+}
+
+// rotateGlobe();
+
 var lastUpdate = 0;
 
 function animate() {
   let now = Date.now() * 0.001;
   let dt = now - lastUpdate;
+  if (dt !== dt) {
+    dt = 0;
+  }
+
+  // Update Globe
+  for (let country of countries) {
+    country.material.wireframe = effectController.wireframe;
+    country.material.opacity += country.userData.opacityVel;
+    if (country.userData.pulsesLeft > 0) {
+      country.material.opacity =
+        Math.sin(country.userData.opacityPhase) * (1 - opacityBaseLevel) +
+        opacityBaseLevel;
+      country.userData.opacityPhase += country.userData.opacityVel * dt;
+      if (country.userData.opacityPhase > Math.PI) {
+        country.userData.opacityPhase = 0;
+        country.userData.pulsesLeft -= 1;
+        if (country.userData.pulsesLeft <= 0) {
+          country.userData.pulsesLeft = 0;
+          country.userData.opacityVel = 0;
+          country.material.opacity = opacityBaseLevel;
+        }
+      }
+    }
+    if (country.userData.activated) {
+      // if(lastCountry == country.geometry.name) {
+      //   country.material.color.setHex(countryActiveColor);
+      // } else {
+      // country.material.color.setHex(countryActivatedColor);
+      // }
+
+      // Update scale
+      country.userData.scale *= 0.985;
+      country.userData.scaleFollower = country.userData.scale * 0.005 + country.userData.scaleFollower * 0.995;
+      // country.scale.x = country.userData.baseScale + country.userData.scaleFollower;
+      // country.scale.y = country.userData.baseScale + country.userData.scaleFollower;
+      // country.scale.z = country.userData.baseScale + country.userData.scaleFollower;
+
+      const colorScale = 1 - Math.pow((1 - country.userData.scaleFollower), 2);
+
+      country.material.color.setRGB(
+        1.0,
+        1.0 - colorScale,
+        1.0 - colorScale / 1.5
+      );
+    } else {
+      country.material.color.setHex(countryDarkColor);
+    }
+  }
 
   if (Math.random() > 0.99 && effectController.doRotation) {
     particles_rotation_counter = 0.5;
@@ -558,6 +853,16 @@ function animate() {
     // }
   }
 
+  TWEEN.update();
+
+  // Update camera
+  // camera.position.set(cameraPosition.x + cameraOffset.x, cameraPosition.y + cameraOffset.y, cameraPosition.z + cameraOffset.z);
+  // camera.lookAt(new THREE.Vector3(0, 0, 0));
+  // countryLayers.rotation.copy(globeRotation);
+  globeRotation.x = Math.sin(now * 0.3) * 0.6 + 0.2;
+  globeRotation.y += dt * 0.5;
+  countryLayers.rotation.set(globeRotation.x, globeRotation.y, globeRotation.z);
+
   // Update effects parameters
   // bloomPass.threshold = effectController.bloomPassThreshold;
   // bloomPass.strength = effectController.bloomPassStrength;
@@ -585,4 +890,56 @@ function render() {
   particles_group.rotation.copy(particles_rotation);
   // renderer.render(scene, camera);
   composer.render();
+}
+
+function generateCountries() {
+  var layer = new THREE.Object3D();
+  var factor = 1;
+
+  layer.scale.set(factor, factor, factor);
+
+  var polygons = Object.keys(countryShapes).map(function (name) {
+    const country = countryShapes[name];
+    const geometry = new Map3DGeometry(country, 0.95);
+    geometry.name = name;
+
+    const material = new THREE.MeshPhongMaterial({
+      wireframe: true,
+      color: 0xbb4949,
+      transparent: true,
+      opacity: opacityBaseLevel,
+      shading: THREE.SmoothShading,
+      shininess: 50,
+    });
+    const scale = 20.57236; // + Math.random() / 2;
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.scale.x = scale;
+    mesh.scale.y = scale;
+    mesh.scale.z = scale;
+    mesh.userData.name = name;
+    mesh.userData.opacityVel = 0;
+    mesh.userData.activated = false;
+    mesh.userData.pulsesLeft = 0;
+    mesh.userData.scale = 0;
+    mesh.userData.baseScale = scale;
+    mesh.userData.scaleFollower = 0;
+    layer.add(mesh);
+
+    return mesh;
+  });
+  layer.getGeometryByName = function (name) {
+    return polygons[Object.keys(countryShapes).indexOf(name)];
+  };
+
+  layer.getGeometryByIndex = function (index) {
+    return polygons[index];
+  };
+  layer.countries = polygons;
+  return layer;
+}
+
+function circleRotation(vec1, vec2) {
+  let cross = vec1.clone().cross(vec2);
+  let dot = vec1.clone().dot(vec2);
+  return Math.atan2(cross.length(), dot);
 }
