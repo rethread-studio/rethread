@@ -23,7 +23,7 @@ s.waitForBoot({
 	/////////////////////////////////////////////////////
 
 
-	~sonifyLive = true;
+	~sonifyLive = false;
 	~sonifySequencer = false;
 	~sonifyPercussion = true;
 	~sonifyVoice = true;
@@ -1001,6 +1001,7 @@ s.waitForBoot({
 	~num_packets = 0;
 	~packet_density = 0;
 	~sub_tam_last_launch = Date.localtime.rawSeconds;
+	~newMainFrameTime = Date.localtime.rawSeconds;
 	~vis_sender = NetAddr("127.0.0.1", 9771);
 	~packetRecPanWidth = 0;
 	// Receive packages of web traffic data
@@ -1112,6 +1113,8 @@ s.waitForBoot({
 			~root = ~root + [-8, 0, 9, 17, -22].choose;
 			~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
 
+			~newMainFrameTime = Date.localtime.rawSeconds;
+
 			~tickClock.tempo = 2;
 			("url: " + url + " hostname: " + hostname).postln;
 			~overallStats.currentFrame.hostname = hostname;
@@ -1146,7 +1149,8 @@ s.waitForBoot({
 		loop {
 			var allDevices = ~stats.values,
 			numInPackets = 0, numOutPackets = 0,
-			numPitchesPerChord, root, harmonicComplexity = 0, numScripts;
+			numPitchesPerChord, root, harmonicComplexity = 0, numScripts, now = Date.localtime.rawSeconds,
+			timeSinceMainFrame = now - ~newMainFrameTime;
 
 			allDevices.do { |statDevice|
 				var allServices = statDevice.services.values, totalPacketsForDevice = 0;
@@ -1170,7 +1174,7 @@ s.waitForBoot({
 			~tickAmp = ~tickAmp + ~tickAmpStep;
 			~tickAmpStepsLeft = ~tickAmpStepsLeft - 1;
 
-			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
+			~overallActivity = ~overallActivity * 0.9 + ((numInPackets + numOutPackets) * 0.1);
 			// ("overall: " + ~overallActivity).postln;
 
 			~updateOverallStatsTick.(~decayCoeff); // Bring the overTime stats closer to the current frame
@@ -1216,9 +1220,13 @@ s.waitForBoot({
 
 			// Update sequencer
 			if(~counter % 1 == 0) {
+				if(~overallActivity < 0.5) {
+					~adjustPercussionLevels.(~sequencer, 0.992); // linear decrease in percussion levels
+				};
+				~updatePercussionInSequencer.(~sequencer);
 				~playSequencer.(~sequencer);
 			};
-			if(~overallStats.currentFrame.numRequests > 200 && (~sequencer.numSteps < 64), {
+			/*if(~overallStats.currentFrame.numRequests > 200 && (~sequencer.numSteps < 64), {
 				// Double the grid
 				~doubleSequencerGrid.(~sequencer);
 				~tickClock.tempo = ~tickClock.tempo * 2;
@@ -1229,7 +1237,7 @@ s.waitForBoot({
 				// Double the grid
 				~doubleSequencerGrid.(~sequencer);
 				"Doubled The Grid Again (without tempo adjustment)".postln;
-			});
+			});*/
 
 			~counter = ~counter + 1;
 			0.25.wait;
