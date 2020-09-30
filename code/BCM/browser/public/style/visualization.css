@@ -24,7 +24,7 @@ body {
 }
 
 body{
-  padding-top:470px;
+  /* padding-top:470px; */
 }
 
 #visualization {
@@ -120,5 +120,5 @@ body{
 }
 
 .service-text{
-  font-size: 50px;
+  font-size: 26px;
 }

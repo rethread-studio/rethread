@@ -88,14 +88,14 @@ class AppViz {
             this.services[i].update();
             if (this.services[i].status == "REMOVE") servicesRemove.push(this.services[i].getName())
         }
-        //REMOVE OBJECTS
-        // if (servicesRemove.length != 0) {
-        //     this.services = this.services.filter(p => {
-        //         const remove = !servicesRemove.includes(p.getName());
-        //         if (remove == false) p.removeElement()
-        //         return remove;
-        //     })
-        // }
+        // REMOVE OBJECTS
+        if (servicesRemove.length != 0) {
+            this.services = this.services.filter(p => {
+                const remove = !servicesRemove.includes(p.getName());
+                if (remove == false) p.removeElement()
+                return remove;
+            })
+        }
 
         requestAnimationFrame(this.render);
     }
