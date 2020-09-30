@@ -132,7 +132,7 @@ myApp.init();
 // SERVICE VIZ 
 // const serviceViz = new ServiceGenerator(1220, window.innerWidth);
 
-const testColors = ["#333647", "#19206b", "#a2dce7"];
+const testColors = ["#a2dce7"];
 let colorPos = 0;
 document.body.style.backgroundColor = testColors[0];
 function changeColor() {
