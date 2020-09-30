@@ -24,7 +24,7 @@ body {
 }
 
 body{
-  padding-top:470px;
+  /* padding-top:470px; */
 }
 
 #visualization {
@@ -51,7 +51,8 @@ body{
 }
 
 #labels {
-  font-size: 22px;
+  font-size: 26px;
+  font-weight: bold;
   position: absolute;  /* let us position ourself inside the container */
   left: 0;             /* make our position the top left of the container */
   top: 0;
@@ -68,7 +69,7 @@ body{
   left: 0;             /* make their default position the top left of the container */
   top: 0;
   cursor: pointer;     /* change the cursor to a hand when over us */
-  font-size: large;
+  /* font-size: large; */
   user-select: none;   /* don't let the text get selected */
   /* text-shadow:         
     -1px -1px 0 #000,
@@ -116,4 +117,8 @@ body{
   /* fill:#56b3cb; */
   fill:white;
   font-family: 'Roboto', sans-serif;
+}
+
+.service-text{
+  font-size: 50px;
 }

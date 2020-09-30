@@ -89,13 +89,13 @@ class AppViz {
             if (this.services[i].status == "REMOVE") servicesRemove.push(this.services[i].getName())
         }
         //REMOVE OBJECTS
-        if (servicesRemove.length != 0) {
-            this.services = this.services.filter(p => {
-                const remove = !servicesRemove.includes(p.getName());
-                if (remove == false) p.removeElement()
-                return remove;
-            })
-        }
+        // if (servicesRemove.length != 0) {
+        //     this.services = this.services.filter(p => {
+        //         const remove = !servicesRemove.includes(p.getName());
+        //         if (remove == false) p.removeElement()
+        //         return remove;
+        //     })
+        // }
 
         requestAnimationFrame(this.render);
     }
@@ -333,7 +333,7 @@ class serviceParticle {
         this.scene.add(this.shape);
 
         this.elem = document.createElement('div');
-        this.elem.classList.add("service-label");
+        this.elem.classList.add("service-text");
         this.methEl = document.createElement('div');
         this.elem.textContent = this.type;
         this.methEl.textContent = this.method;
