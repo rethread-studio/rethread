@@ -17,6 +17,18 @@ let packetsOverTime = 0;
 let glitchThreshold = 130;
 let triggerThisFrame = false;
 
+
+const testColors = ["#333647", "#ee4035", "#19206b", "#a2dce7", "#f1df04"];
+let colorPos = 0;
+document.body.style.backgroundColor = testColors[0];
+function changeColor() {
+  console.log(colorPos)
+  colorPos = colorPos + 1 > testColors.length ? 0 : colorPos + 1;
+  document.body.style.backgroundColor = testColors[colorPos];
+}
+
+setInterval(changeColor, 5000)
+
 // Load font
 var loader = new THREE.FontLoader();
 var font;

@@ -31,14 +31,16 @@ class AppViz {
         this.renderer.setClearColor(0x000000, 0); // the default
         //RENDERer CONFIGURATION
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
+        // this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
+        this.renderer.setSize(3840, 1220, false);
+
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.container.append(this.renderer.domElement);
 
         //     //CAMERA CONFIGURATION
         this.camera = new THREE.PerspectiveCamera(
             this.options.fov,
-            this.container.offsetWidth / this.container.offsetHeight,
+            3840 / 1220,
             0.1,
             10000
         );
