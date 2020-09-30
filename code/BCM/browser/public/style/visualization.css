@@ -51,7 +51,7 @@ body{
 }
 
 #labels {
-  font-size: 12px;
+  font-size: 22px;
   position: absolute;  /* let us position ourself inside the container */
   left: 0;             /* make our position the top left of the container */
   top: 0;
