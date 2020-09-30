@@ -130,7 +130,18 @@ const containerViz = document.getElementById("container-particles");
 const myApp = new AppViz(containerViz, options);
 myApp.init();
 // SERVICE VIZ 
-const serviceViz = new ServiceGenerator(window.innerHeight, window.innerWidth);
+const serviceViz = new ServiceGenerator(1220, window.innerWidth);
+
+const testColors = ["#333647", "#ee4035", "#19206b", "#a2dce7", "#f1df04"];
+let colorPos = 0;
+document.body.style.backgroundColor = testColors[0];
+function changeColor() {
+  console.log(colorPos)
+  colorPos = colorPos + 1 > testColors.length ? 0 : colorPos + 1;
+  document.body.style.backgroundColor = testColors[colorPos];
+}
+
+setInterval(changeColor, 5000)
 
 //READ THE SOCKET FOR ACTIVITY
 const onmessage = (message) => {
@@ -147,17 +158,8 @@ const onmessage = (message) => {
 
     //Get the information from the request
     const packet = json.request;
-    const testColors = ["#333647", "#ee4035", "#19206b", "#a2dce7", "#f1df04"];
-    let colorPos = 0;
-    document.body.style.backgroundColor = testColors[0];
-    function changeColor() {
-      console.log(colorPos)
-      colorPos = colorPos + 1 > testColors.length ? 0 : colorPos + 1;
-      document.body.style.backgroundColor = testColors[colorPos];
-    }
 
-    setInterval(changeColor, 5000)
-    // //CHECK if it has any packages
+    // //CHECK if it has any packaggites
     //if it does not have, include the host name as a service
     if (packet.services.length === 0) {
       packet.services.push(packet.hostname);
@@ -408,7 +410,7 @@ function init() {
 
   camera = new THREE.PerspectiveCamera(
     45,
-    window.innerWidth / window.innerHeight,
+    window.innerWidth / 1220,
     1,
     4000
   );
@@ -569,7 +571,7 @@ function init() {
     powerPreference: "high-performance",
   });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth / 2, window.innerHeight);
+  renderer.setSize(window.innerWidth / 2, 1220);
   renderer.outputEncoding = THREE.sRGBEncoding;
 
   container.appendChild(renderer.domElement);
@@ -593,7 +595,7 @@ function init() {
   // Anti-aliasing while using EffectComposer requires a dedicated anti-aliasing pass
   smaaPass = new SMAAPass(
     window.innerWidth * renderer.getPixelRatio(),
-    window.innerHeight * renderer.getPixelRatio()
+    1220 * renderer.getPixelRatio()
   );
   composer.addPass(smaaPass);
 
@@ -605,10 +607,10 @@ function init() {
 }
 
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = window.innerWidth / 1220;
   camera.updateProjectionMatrix();
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth / 2, 1220);
 }
 
 function rotateGlobe() {
