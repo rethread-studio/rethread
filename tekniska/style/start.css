@@ -1,0 +1,32 @@
+@font-face {
+    font-family: 'neueBit';
+    src: url('./../fonts/NeueBit-Bold.woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+html, body {
+    height: 100%;
+    max-height: 100%;
+    background-color: #a2dce7;
+  }
+
+  .center{
+    display: flex;           /* establish flex container */
+    flex-direction: column;  /* make main axis vertical */
+    justify-content: center; /* center items vertically, in this case */
+    align-items: center;     /* center items horizontally, in this case */
+    height: 100%;
+}
+
+
+a{
+    font-size:190px;
+    font-family: 'neueBit';
+    padding: 80px;
+    border-radius: 15px;
+    border: 10px solid black;
+    color:black;
+    text-decoration: none;
+    text-align: center;
+}
