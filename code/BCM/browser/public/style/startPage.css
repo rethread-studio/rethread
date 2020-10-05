@@ -177,6 +177,8 @@ p{
 }
 
 .item a{
+    font-size: 32px;
+    font-family: 'neueBit';
     color: black;
     
 }
