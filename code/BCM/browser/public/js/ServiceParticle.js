@@ -31,8 +31,11 @@ class AppViz {
         this.renderer.setClearColor(0x000000, 0); // the default
         //RENDERer CONFIGURATION
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        // this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
-        this.renderer.setSize(this.container.offsetWidth, 1220, false);
+        if (this.options.installation) {
+            this.renderer.setSize(this.container.offsetWidth, 1220, false);
+        } else {
+            this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
+        }
 
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.container.append(this.renderer.domElement);
@@ -40,10 +43,11 @@ class AppViz {
         //     //CAMERA CONFIGURATION
         this.camera = new THREE.PerspectiveCamera(
             this.options.fov,
-            this.container.offsetWidth / 1220,
+            this.options.installation ? this.container.offsetWidth / 1220 : this.container.offsetWidth / this.container.offsetHeight,
             0.1,
             10000
         );
+
         this.camera.position.z = -5;
         this.camera.position.y = -4;
         this.camera.position.x = -4;
@@ -399,7 +403,6 @@ class serviceParticle {
 
         let textMesh = new THREE.Mesh(geometry, material);
         textMesh.position.copy(pos);
-        console.log(pos)
         textMesh.position.z = 30;
         // console.log(textMesh.position)
         textMesh.quaternion.copy(this.camera.quaternion);

@@ -9,6 +9,8 @@
 
 body{
     font-family: 'Roboto', sans-serif;
+    background-color: #a2dce7;
+
 }
 h1, h2{
     font-family: 'Roboto', sans-serif;
@@ -62,6 +64,16 @@ p{
     border-radius: 5px;
 }
 
+#container-particles{
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: -10;
+      /* overflow: hidden; */
+}
+
 
 .flex-col{
     display: flex;
@@ -89,13 +101,13 @@ p{
 }
 
 .lang-se{
-    color: gray;
+    color: black;
 }
 
 .divider {
     width: 10px;
     margin: 30px  24px;
-    background: gray;
+    background: black;
   }
 
   .item{
@@ -134,6 +146,7 @@ p{
 
 .btn-dice{
     background-image: url(./../img/dice.jpg);
+    background-color: white;
 }
 .btn-dn{
     background-image: url(./../img/dn.png);
@@ -159,5 +172,6 @@ p{
 .btn-challenge{
     background-image: url(./../img/challenge.png);
     background-size: 180px;
+    background-color: white;
 
 }

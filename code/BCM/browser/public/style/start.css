@@ -8,6 +8,7 @@
 html, body {
     height: 100%;
     max-height: 100%;
+    background-color: #a2dce7;
   }
 
   .center{
@@ -18,15 +19,14 @@ html, body {
     height: 100%;
 }
 
-button{
+
+a{
     font-size:190px;
     font-family: 'neueBit';
     padding: 80px;
     border-radius: 15px;
     border: 10px solid black;
-}
-
-a{
     color:black;
     text-decoration: none;
+    text-align: center;
 }

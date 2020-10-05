@@ -1,0 +1,12 @@
+h1{
+    font-size: 160px;
+}
+
+
+.list{
+    font-size: 32px;
+    list-style-type: none;
+}
+.list li{
+    margin-bottom: 20px;
+}
