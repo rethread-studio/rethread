@@ -14,9 +14,9 @@ body {
   /* GREY */
   /* background-color: #333647; */
   /* BLUE */
-  /* background-color: #ee4035; */
-  /* background-color: #19206b; */
-  /* background-color: #a2dce7; */
+  background-color: #ee4035;
+  background-color: #19206b;
+  background-color: #a2dce7;
 
   overflow: hidden;
   transition: all 0.5s ease;

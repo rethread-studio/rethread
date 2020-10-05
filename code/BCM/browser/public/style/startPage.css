@@ -1,32 +1,163 @@
+
+  
+@font-face {
+    font-family: 'neueBit';
+    src: url('./../fonts/NeueBit-Bold.woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body{
+    font-family: 'Roboto', sans-serif;
+}
 h1, h2{
     font-family: 'Roboto', sans-serif;
+    font-family: 'neueBit';
+}
+
+span{
+    font-size:28px;
+    font-family: 'neueBit';
+}
+
+h1{
+    font-size: 240px;
+    margin:0;
 }
 
 p{
+
     font-family: 'Roboto', sans-serif;
+    font-size:24px;
 }
 
+.credits{
+    line-height: 24px;
+    font-size: 14px;;
+
+}
+
+.credits a{
+    font-size:24px;
+    font-family: 'neueBit';
+    /* text-decoration: none; */
+    color: black;
+}
+.credits .divider{
+    background: none ;
+}
+
+.header{
+    display: flex;
+    flex-flow: column;
+}
 
 .container{
     display: flex;
     flex-flow: column;
-    width: 75%;
+    width: 60%;
     margin: 5% auto;
+    background:transparent;
+    padding: 50px;
+    border-radius: 5px;
 }
 
 
+.flex-col{
+    display: flex;
+}
+
 .spacer{
-    height:20px
+    height:20px;
 }
 
 .spacer-m{
-    height:40px
+    height:40px;
 }
 
-.space-l{
-    height:60px
+.spacer-l{
+    height:60px;
 }
 
 .spacer-xl{
-    height:80px
+    height:80px;
+}
+
+.spacerW{
+    width:100px;
+    display: block;
+}
+
+.lang-se{
+    color: gray;
+}
+
+.divider {
+    width: 10px;
+    margin: 30px  24px;
+    background: gray;
+  }
+
+  .item{
+    flex: 0 1 auto;
+    line-height: 32px;
+  }
+
+  .item.h{
+      width: 45%;
+  }
+
+  .divider.h{
+      width:2px
+  }
+  .btn-container{
+      display: flex;
+      flex-wrap: wrap;
+
+  }
+
+  .links-btn{
+    flex-basis: 150px;
+    flex-grow: 1;
+    text-align: center;
+    min-height: 100px;
+    /* background-color: gray; */
+    margin: 10px;
+    border-radius: 5px;
+
+    background-size: 150px;
+    background-repeat: no-repeat;
+    background-position: center;
+
+
+  }
+
+.btn-dice{
+    background-image: url(./../img/dice.jpg);
+}
+.btn-dn{
+    background-image: url(./../img/dn.png);
+    /* background-size: 0px; */
+}
+
+.btn-svt{
+    background-image: url(./../img/svt.png);
+    /* background-size: 90px; */
+
+}
+.btn-tekniska{
+    background-image: url(./../img/tekniska.png);
+    background-size: 140px;
+        background-color: black;
+
+}
+
+.btn-google{
+    background-image: url(./../img/google.png);
+    background-size: 80px;
+}
+.btn-challenge{
+    background-image: url(./../img/challenge.png);
+    background-size: 180px;
+
 }
