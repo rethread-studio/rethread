@@ -208,20 +208,22 @@ const onmessage = (message) => {
         myApp.addService(service, json.request.type, json.request.requestId);
 
         //if the service does not exist
-        if (!positionPerService.has(service)) {
+        const country = getCountryName(packet.location.country);
+        console.log(country, packet.location.country)
+        if (!positionPerService.has(country)) {
           //create a text to display
           let servicePos = random3DPosition(500);
-          createText(service, servicePos);
-          positionPerService.set(service, servicePos);
-          indexPerService.set(service, indexPerService.size);
+          createText(country, servicePos);
+          positionPerService.set(country, servicePos);
+          indexPerService.set(country, indexPerService.size);
         }
         //add the text and particles
-        updateText(service);
-        addParticle(service, positionPerService.get(service), packet.len);
+        updateText(country);
+        addParticle(country, positionPerService.get(country), packet.len);
         //
         let time = Date.now() * 0.001;
-        lastRegisteredPerService.set(service, time);
-        activeService = service;
+        lastRegisteredPerService.set(country, time);
+        activeService = country;
       }
     }
   }
