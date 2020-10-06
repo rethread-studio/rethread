@@ -105,13 +105,13 @@ let lastCountry = "";
 
 // END GLOBE SETUP
 
-
-
 //SERVICE PARTICLE VIZ OPTIONS
 const options = {
 
   length: 400,
   fov: 90,
+
+  installation: false,
 
   colors: {
     roadColor: 0x080808,
@@ -119,8 +119,21 @@ const options = {
     background: 0x000000,
     shoulderLines: 0x131318,
     brokenLines: 0x131318,
-  }
+  },
+  backgroundColors: ["#a2dce7", "#19206b", "#333647"]
 }
+
+document.body.style.paddingTop = options.installation ? '470px' : 0;
+
+let colorPos = 0;
+document.body.style.backgroundColor = options.backgroundColors[0];
+function changeColor() {
+  console.log(colorPos)
+  colorPos = colorPos + 1 > options.backgroundColors.length ? 0 : colorPos + 1;
+  document.body.style.backgroundColor = options.backgroundColors[colorPos];
+}
+
+// setInterval(changeColor, 5000)
 
 
 // Receive packets
@@ -132,16 +145,7 @@ myApp.init();
 // SERVICE VIZ 
 // const serviceViz = new ServiceGenerator(1220, window.innerWidth);
 
-const testColors = ["#a2dce7", "#19206b", "#333647"];
-let colorPos = 0;
-document.body.style.backgroundColor = testColors[0];
-function changeColor() {
-  console.log(colorPos)
-  colorPos = colorPos + 1 > testColors.length ? 0 : colorPos + 1;
-  document.body.style.backgroundColor = testColors[colorPos];
-}
 
-setInterval(changeColor, 5000)
 
 //READ THE SOCKET FOR ACTIVITY
 const onmessage = (message) => {

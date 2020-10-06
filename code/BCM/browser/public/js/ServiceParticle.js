@@ -48,9 +48,9 @@ class AppViz {
             10000
         );
 
-        this.camera.position.z = -5;
-        this.camera.position.y = -4;
-        this.camera.position.x = -4;
+        this.camera.position.z = -10;
+        this.camera.position.y = 0;
+        this.camera.position.x = 0;
         // this.camera.rotateX(-0.4);
         this.camera.lookAt(new THREE.Vector3());
 

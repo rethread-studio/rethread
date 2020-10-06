@@ -1,9 +1,4 @@
-@font-face {
-    font-family: 'neueBit';
-    src: url('./../fonts/NeueBit-Bold.woff');
-    font-weight: normal;
-    font-style: normal;
-}
+
 
 html, body {
     height: 100%;

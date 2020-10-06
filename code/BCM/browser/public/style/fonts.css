@@ -1,0 +1,25 @@
+@font-face {
+    font-family: 'neueBit';
+    src: url('./../fonts/NeueBit-Bold.woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("./../fonts/Roboto-Regular.woff2");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Roboto";
+    src: url("./../fonts/Roboto-Medium.woff2");
+    font-weight: 600;
+    font-style: medium;
+}
+@font-face {
+    font-family: "Roboto";
+    src: url("./../fonts/Roboto-Bold.woff2");
+    font-weight: 700;
+    font-style: normal;
+}

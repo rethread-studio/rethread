@@ -9,4 +9,10 @@ h1{
 }
 .list li{
     margin-bottom: 20px;
+    margin-bottom: 50px;
+    /* font-weight: 600; */
+}
+
+.list.en{
+    color:rgb(65, 65, 65);
 }
