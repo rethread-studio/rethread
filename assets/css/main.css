@@ -1,6 +1,10 @@
 @import url(fontawesome-all.min.css);
-
-
+/* The font Neue Bit Bold is licensed for use only on the rethread.art website. */
+@font-face {
+    font-family: 'NeueBit-Bold';
+    src: url('/assets/webfonts/NeueBit-Bold/NeueBit-Bold.woff') format('woff');
+    font-weight: bold;
+}
 /*
 Fractal by HTML5 UP
 html5up.net | @ajlkn
@@ -23,7 +27,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
     width: 100%;
     height: 350px;
     z-index: 0;
-    left no-repeat;
+    left: no-repeat;
 }
 
 article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
@@ -143,7 +147,8 @@ html, input, select, textarea {
 body, input, select, textarea {
     /* font-family: Arial, Helvetica, sans-serif; */
     /* font-family: 'Abhaya Libre', serif; */
-    font-family: 'Hind', sans-serif;
+    /* font-family: 'Hind', sans-serif; */
+    font-family: 'Epilogue', sans-serif;
     font-weight: normal;
     line-height: 1.5em;
     letter-spacing: -0.015em;
@@ -176,12 +181,15 @@ p {
 
 h1, h2, h3, h4, h5, h6 {
     /* font-family: 'Space Mono', monospace; */
-    font-family: 'SpaceGrotesk';
-    /* font-weight: normal; */
-    font-weight: bold;
+    /* font-family: 'SpaceGrotesk'; */
+    /* font-family: 'Epilogue'; */
+    font-family: 'NeueBit-Bold';
+    font-weight: normal;
+    /* font-weight: bold; */
     line-height: 1em;
     margin: 0 0 1em 0;
     letter-spacing: -0.0125em;
+
 }
 
 h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
@@ -197,17 +205,17 @@ h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
 }
 
 h2 {
-    font-size: 1.75em;
+    font-size: 3em;
     line-height: 1.5em;
 }
 
 h3 {
-    font-size: 1.5em;
+    font-size: 2.3em;
     line-height: 1.5em;
 }
 
 h4 {
-    font-size: 1.1em;
+    font-size: 2.0em;
     line-height: 1.5em;
 }
 
@@ -1864,6 +1872,7 @@ input[type="checkbox"]:focus+label:before, input[type="radio"]:focus+label:befor
 
 .icon {
     color: #e0e0e0;
+    font-size: 70%; /* Compensate for the NeueBit-Bold font which is small */
 }
 
 /* Image */

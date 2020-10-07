@@ -10,6 +10,11 @@ s.options.memSize = 1024 * 128;
 s.reboot;
 )
 
+// Control the main bus while it is running
+~decoder.set(\extraAmp, 1.0) // Set amplification
+~decoder.set(\cRatio, 1/2.5, \cThresh, 0.06, \cAtk, 0.012, \cRel, 0.08, \preCompAmp, 4.0); // change compression settings on the master bus
+
+-12.dbamp
 (
 s.waitForBoot({
 	//// RUN THIS BLOCK TO START EVERYTHING
@@ -21,18 +26,18 @@ s.waitForBoot({
 	/////////////////////////////////////////////////////
 
 
-	~sonifyLive = true;
+	~sonifyLive = false;
 	~sonifySequencer = false;
 	~sonifyPercussion = true;
 	~sonifyVoice = true;
 
-	~overTimeStatsDecayTime = 40; // in seconds
+	~overTimeStatsDecayTime = 40; // in seconds.
 
 	// Routing and mixer channels
 	~useAmbisonics = false; // Set to false to use a simple stereo output
 	~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
 	// If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
-	~positionThroughService = true;
+	~positionThroughService = false;
 	~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
 	if(~useAmbisonics == true, {
 		~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
@@ -86,47 +91,88 @@ s.waitForBoot({
 	/////// HARMONIC CONTENT
 	/////////////////////////////////////////////////////
 
+	// chords divided into 4 chords in increasing harmonic complexity
+	~allChordFunctions = [
+		{ // fifths
+			~ch1 = [0, 31, 53, 84, 106];
+			~ch2 = [9, 31, 62, 84, 115];
+			~ch3 = [0, 31, 53, 62, 84, 106];
+			~ch4 = [0, 31, 53, 84, 106, 137];
+		},
+		{ // major
+			~ch1 = [0, 17, 31, 53, 84, 106];
+			~ch2 = [9, 31, 48, 84, 115];
+			~ch3 = [0, 31, 53, 62, 84, 106];
+			~ch4 = [0, 31, 53, 70, 84, 106];
+		},
+		{ // minor
+			~ch1 = [0, 14, 31, 53, 84, 106];
+			~ch2 = [9, 31, 45, 84, 115];
+			~ch3 = [0, 31, 53, 62, 84, 106];
+			~ch4 = [0, 31, 53, 67, 84, 106];
+		},
+		{
+			// suspended quality chord
+			~ch1 = [22, 53, 0, 9, 71, 93];
+			~ch2 = [40, 71, 9, 31, 62, 102];
+			~ch3 = [62, 84, 22, 40, 124, 102];
+			~ch4 = [31, 53, 93, 115, 124, 84];
+		},
+		{
+			// suspended major quality chord
+			~ch1 = [0, 9, 75, 88, 119, 132];
+			~ch2 = [9, 31, 97, 110, 132, 141];
+			~ch3 = [22, 53, 88, 110, 141, 154];
+			~ch4 = [31, 44, 97, 119, 132, 163];
+		},
+		{
+			// Rich chord with harmonic 7
+			~ch1 = [43, 120, 0, 31, 57, 137];
+			~ch2 = [88, 74, 17, 39, 53, 137];
+			~ch3 = [31, 88, 163, 106, 120, 151];
+			~ch4 = [43, 74, 106, 57, 163, 180];
+		},
+		{
+			~ch1 = [0, 22, 36, 45, 81, 94];
+			~ch2 = [9, 36, 58, 94, 103, 108];
+			~ch3 = [36, 45, 67, 81, 117, 139];
+			~ch4 = [31, 58, 94, 117, 130, 144];
+		},
+		{
+			~ch1 = [0, 9, 31, 40, 71, 102];
+			~ch2 = [0, 13, 18, 44, 75, 106];
+			~ch3 = [9, 18, 31, 49, 80, 111];
+			~ch4 = [18, 31, 44, 62, 93, 124];
+		},
+		{
+			~ch1 = [0, 3, 14, 31, 45, 67, 96];
+			~ch2 = [0, 5, 31, 65, 93, 98];
+			~ch3 = [14, 31, 36, 76, 98, 107];
+			~ch4 = [31, 34, 45, 62, 98, 124];
+		},
+		{
+			~ch1 = [0, 5, 17, 31, 45, 67, 98];
+			~ch2 = [17, 22, 36, 62, 93, 110];
+			~ch3 = [31, 36, 48, 93, 110, 115];
+			~ch4 = [22, 53, 62, 79, 98, 124];
+		},
+	];
+
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
 	~currentChord = 0;
-	~numChords = 2;
+	~numChords = ~allChordFunctions.size;
 	~changeChord = { | num = -1 |
 		// if num is -1 then
+		num = num.asInteger;
 		if(num == -1, {
 			~currentChord = (~currentChord + 1) % ~numChords;
 		}, {
 			~currentChord = num % ~numChords;
 		});
 
-		switch(~currentChord,
-			0, {
-				// suspended quality chord
-				~ch1 = [22, 53, 0, 9, 71, 93];
-				~ch2 = [40, 71, 9, 31, 62, 102];
-				~ch3 = [62, 84, 22, 40, 124, 102];
-				~ch4 = [31, 53, 93, 115, 124, 84];
-			},
-			1, {
-				// suspended major quality chord
-				~ch1 = [0, 9, 75, 88, 119, 132];
-				~ch2 = [9, 31, 97, 110, 132, 141];
-				~ch3 = [22, 53, 88, 110, 141, 154];
-				~ch4 = [31, 44, 97, 119, 132, 163];
-			},
-			2, {
-				// Rich chord with harmonic 7
-				~ch1 = [43, 120, 0, 31, 57, 137];
-				~ch2 = [88, 74, 17, 39, 53, 137];
-				~ch3 = [31, 88, 163, 106, 120, 151];
-				~ch4 = [43, 74, 106, 57, 163, 180];
-			},
-			3, {
-				~ch1 = [0, 22, 36, 45, 81, 94];
-				~ch2 = [9, 36, 58, 94, 103, 108];
-				~ch3 = [36, 45, 67, 81, 117, 139];
-				~ch4 = [31, 58, 94, 117, 130, 144];
-			}
-		);
+		~allChordFunctions[~currentChord].();
 	};
+
 	~changeChord.(0);
 	~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 	~octave = 3;
@@ -225,12 +271,17 @@ s.waitForBoot({
 	~channels.youtube_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.percussion = ~makeMixerChannel.("Percussion", ~decoderBus);
 	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
+	~channels.voice = ~makeMixerChannel.("Voice", ~decoderBus);
+	~channels.voice.set_amp(0.65);
+	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
+	~channels.drone = ~makeMixerChannel.("Drone", ~decoderBus);
+	~channels.drone.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
 	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.tick_channel.set_amp(0.0);
 
 	{
-		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.rev_channel], ~allClouds);
+		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice, ~channels.drone, ~channels.rev_channel], ~allClouds);
 	}.defer;
 
 	// Create the global stats object (environment)
@@ -908,7 +959,7 @@ s.waitForBoot({
 
 	// Play a certain sound based on a number of parameters
 	~playVoice = { | type, packets, channel |
-		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
+		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose, bufnum = nil;
 		if(packets >= ~highActivityThreshold, {
 			activity = \high;
 			chord = chord;
@@ -923,19 +974,20 @@ s.waitForBoot({
 				});
 			});
 		});
+		channel = ~channels.voice;
 		if(activity != \none) {
 			switch(type,
 				\Google, {
 					if(~positionThroughService) {
 						channel = ~channels.google_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.google]);
+					bufnum = ~voiceServices.google;
 				},
 				\Amazon, {
 					if(~positionThroughService) {
 						channel = ~channels.amazon_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.amazon]);
+					bufnum = ~voiceServices.amazon;
 				},
 				\Cloudflare, {
 					if(~positionThroughService) {
@@ -946,36 +998,40 @@ s.waitForBoot({
 					if(~positionThroughService) {
 						channel = ~channels.microsoft_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.microsoft]);
+					bufnum = ~voiceServices.microsoft;
 				},
 				\YouTube, {
 					if(~positionThroughService) {
 						channel = ~channels.youtube_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.youtube]);
+					bufnum = ~voiceServices.youtube;
 				},
 				\Facebook, {
 					if(~positionThroughService) {
 						channel = ~channels.facebook_channel;
 					};
-					channel.play_on(\service_voice, [\buf, ~voiceServices.facebook]);
+					bufnum = ~voiceServices.facebook;
 				},
 				\WhatsApp, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.whatsapp]);
+					bufnum = ~voiceServices.whatsapp;
 				},
 				\Slack, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.slack]);
+					bufnum = ~voiceServices.slack;
 				},
 				\Signal, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.signal]);
+					bufnum = ~voiceServices.signal;
 				},
 				\Instagram, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.instagram]);
+					bufnum = ~voiceServices.instagram;
 				},
 				\GitHub, {
-					channel.play_on(\service_voice, [\buf, ~voiceServices.github]);
+					bufnum = ~voiceServices.github;
 				}
 			);
+		};
+
+		if(bufnum != nil) {
+			channel.play_on(\service_voice, [\buf, bufnum, \out, channel.bus]);
 		};
 	};
 
@@ -990,6 +1046,7 @@ s.waitForBoot({
 	~num_packets = 0;
 	~packet_density = 0;
 	~sub_tam_last_launch = Date.localtime.rawSeconds;
+	~newMainFrameTime = Date.localtime.rawSeconds;
 	~vis_sender = NetAddr("127.0.0.1", 9771);
 	~packetRecPanWidth = 0;
 	// Receive packages of web traffic data
@@ -1081,10 +1138,15 @@ s.waitForBoot({
 		location = msg[14];
 
 		if(type == \main_frame) {
+			var freq;
 			// Reset sequencer
 			~sequencer = ~newSequencer.(32);
 			~resetCurrentFrame.();
 			"RESET".postln;
+			// Change root
+			~root = ~root + [-8, 9, 17, -22].choose;
+			~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
+			// Play start of main frame sounds
 			~channels.default_channel.play_on(\gust,
 				[
 					\freq, rrand(500, 2000),
@@ -1097,9 +1159,37 @@ s.waitForBoot({
 					\pan2, rrand(-0.5, 0.5),
 				]
 			);
-			// Change root
-			~root = ~root + [-8, 0, 9, 17, -22].choose;
-			~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
+			freq = ~s53.degreeToFreq(~root, 0.midicps, 3);
+			~channels.default_channel.play_on(\thump, [
+				\freq, freq,
+				\atk, 0.6,
+				\rel, 2,
+				\c0, -3,
+				\c1, \sine,
+				\pan, 0.0,
+				\amp, 0.1,
+				\out, ~channels.default_channel.bus]);
+			~channels.default_channel.play_on(\thump, [
+				\freq, freq * 2,
+				\atk, 0.6,
+				\rel, 2,
+				\c0, -3,
+				\c1, \sine,
+				\pan, -0.3,
+				\amp, 0.1,
+				\out, ~channels.default_channel.bus]);
+			~channels.default_channel.play_on(\thump, [
+				\freq, freq * 4,
+				\atk, 0.6,
+				\rel, 2,
+				\c0, -3,
+				\c1, \sine,
+				\pan, 0.3,
+				\amp, 0.1,
+				\out, ~channels.default_channel.bus]);
+
+
+			~newMainFrameTime = Date.localtime.rawSeconds;
 
 			~tickClock.tempo = 2;
 			("url: " + url + " hostname: " + hostname).postln;
@@ -1135,7 +1225,8 @@ s.waitForBoot({
 		loop {
 			var allDevices = ~stats.values,
 			numInPackets = 0, numOutPackets = 0,
-			numPitchesPerChord, root, harmonicComplexity = 0, numScripts;
+			numPitchesPerChord, root, harmonicComplexity = 0, numScripts, now = Date.localtime.rawSeconds,
+			timeSinceMainFrame = now - ~newMainFrameTime;
 
 			allDevices.do { |statDevice|
 				var allServices = statDevice.services.values, totalPacketsForDevice = 0;
@@ -1159,17 +1250,13 @@ s.waitForBoot({
 			~tickAmp = ~tickAmp + ~tickAmpStep;
 			~tickAmpStepsLeft = ~tickAmpStepsLeft - 1;
 
-			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
+			~overallActivity = ~overallActivity * 0.9 + ((numInPackets + numOutPackets) * 0.1);
 			// ("overall: " + ~overallActivity).postln;
 
 			~updateOverallStatsTick.(~decayCoeff); // Bring the overTime stats closer to the current frame
 
-			numScripts = ~overallStats.overTime.types[\script];
-			if(numScripts == nil) { numScripts = 0 };
-			harmonicComplexity = numScripts.explin(3, 90, -0.4, 3.5).round;
-			~changeChord.(harmonicComplexity);
 
-			~updateDrone.();
+			~updateDrone.(timeSinceMainFrame);
 
 			/*tick_channel.play_on(\tick2,
 			[
@@ -1205,9 +1292,13 @@ s.waitForBoot({
 
 			// Update sequencer
 			if(~counter % 1 == 0) {
+				if(~overallActivity < 0.7) {
+					~adjustPercussionLevels.(~sequencer, 0.98); // linear decrease in percussion levels
+				};
+				~updatePercussionInSequencer.(~sequencer);
 				~playSequencer.(~sequencer);
 			};
-			if(~overallStats.currentFrame.numRequests > 200 && (~sequencer.numSteps < 64), {
+			/*if(~overallStats.currentFrame.numRequests > 200 && (~sequencer.numSteps < 64), {
 				// Double the grid
 				~doubleSequencerGrid.(~sequencer);
 				~tickClock.tempo = ~tickClock.tempo * 2;
@@ -1218,7 +1309,7 @@ s.waitForBoot({
 				// Double the grid
 				~doubleSequencerGrid.(~sequencer);
 				"Doubled The Grid Again (without tempo adjustment)".postln;
-			});
+			});*/
 
 			~counter = ~counter + 1;
 			0.25.wait;

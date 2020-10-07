@@ -19,9 +19,11 @@
 		<link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
 	<style>
 		/* @import url('https://fonts.googleapis.com/css?family=Abhaya+Libre|Space+Mono&display=swap'); */
-		@import url('https://fonts.googleapis.com/css?family=Hind:300,400,500,600,700&display=swap');
+		/* @import url('https://fonts.googleapis.com/css?family=Hind:300,400,500,600,700&display=swap'); */
 
-		@font-face {
+		@import url('https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+		/* @font-face {
 			font-family: 'SpaceGrotesk';
 			src: url('assets/webfonts/SpaceGrotesk-Bold.woff') format('woff');
 			font-weight: bold;
@@ -30,6 +32,13 @@
 		@font-face {
 			font-family: 'SpaceGrotesk';
 			src: url('assets/webfonts/SpaceGrotesk-Regular.woff') format('woff');
+		} */
+
+		/* The font Neue Bit Bold is licensed for use only on the rethread.art website. */
+		@font-face {
+			font-family: 'NeueBit-Bold';
+			src: url('assets/webfonts/NeueBit-Bold/NeueBit-Bold.woff') format('woff');
+			font-weight: bold;
 		}
 	</style>
 </head>
@@ -37,9 +46,9 @@
 <body class="is-preload">
 
 	<!-- Header -->
-	<header id="header">
+	<header id="header" style="background-image: url(images/gradient.jpg); background-size: cover;">
 		<div class="content" style="z-index:1;">
-			<h1><a href="#">re|thread ✨</a></h1>
+			<h1><a href="#" style="font-family: 'NeueBit-Bold'; font-size:3em">re|thread ✨</a></h1>
 			<!-- <p>software art at KTH</p> -->
 			<!-- <ul class="actions">
 						<li><a href="#" class="button primary icon solid fa-download">Download</a></li>
@@ -106,12 +115,26 @@
 		<div class="inner alt">
 			<h2>Projects / experiments</h2>
 			<section class="spotlight">
-				<div class="image"><a href="./projects/bcm.html"><img src="images/bcm/bcm_sq.jpg" alt="" /></a>
+				<div class="image"><a href="./projects/bcm.html"><img src="images/pellow/pellow_sq.jpg" alt="Pellow" /></a>
+				</div>
+				<div class="content">
+					<h3><a href="./projects/pellow.html">Pellow</a>
+						<span class="icon solid fa-hand-paper"></span> <span class="icon solid fa-dice-d20"></span>
+						<span class="icon solid fa-music"></span> <span class="icon solid fa-desktop"></span></h3>
+						<p>
+							Pellow is an interactive installation that reveals what happens under the hood of a browser when
+							you visit web pages.
+						</p>
+						<p>Opening on October 26 2020 at Tekniska museet, Stockholm, Sweden </p>
+				</div>
+			</section>
+			<section class="spotlight">
+				<div class="image"><a href="./projects/bcm.html"><img src="images/bcm/bcm_sq.jpg" alt="Browser Chance Music" /></a>
 				</div>
 				<div class="content">
 					<h3><a href="./projects/bcm.html">Browser Chance Music</a>
-						</span><span class="icon solid fa-hand-paper"> <span class="icon solid fa-dice-d20"></span>
-							<span class="icon solid fa-music"> <span class="icon solid fa-desktop"></span></h3>
+						<span class="icon solid fa-hand-paper"></span> <span class="icon solid fa-dice-d20"></span>
+						<span class="icon solid fa-music"></span> <span class="icon solid fa-desktop"></span></h3>
 					<p>BCM creates a space for a radically different relationship between user and software. Evanescent
 						and imperceptible internet activity emanating from a smartphone is revealed through immersive
 						sounds and visuals.</p>
@@ -125,7 +148,7 @@
 				</div>
 				<div class="content">
 					<h3><a href="https://nadiacw.com/softwear/">softwear</a>
-						</span><span class="icon solid fa-hand-paper"> <span class="icon solid fa-dice-d20"></span></h3>
+						<span class="icon solid fa-hand-paper"></span> <span class="icon solid fa-dice-d20"></span></h3>
 					<p>A work in progress about the intersections between software and knitting: check out the <a
 							href="https://nadiacw.com/softwear/">Softwear blog</a></p>
 				</div>
@@ -136,7 +159,7 @@
 				</div>
 				<div class="content">
 					<h3><a href="./projects/browser-fingerprinting.html">session x01 - browser fingerprinting</a>
-						</span><span class="icon solid fa-music"> <span class="icon solid fa-desktop"></span></h3>
+						<span class="icon solid fa-music"></span> <span class="icon solid fa-desktop"></span></h3>
 					<p>Online exhibition on browser fingerprinting. Are you unique on the internet? What’s left of you
 						when you leave a web page? How entangled are
 						you and your device? Is your browser in the artwork or is the artwork in your browser?</p>
@@ -149,8 +172,9 @@
 				</div>
 				<div class="content">
 					<h3><a href="https://rethread.art/code/software-in-times-of-corona/">software in times of corona</a>
-						</span> <span class="icon solid fa-desktop"></span></h3>
-					<p>A small gallery of visual responses to the question: "How is software shaping your experience during the covid-19 crisis?"</p>
+						<span class="icon solid fa-desktop"></span></h3>
+					<p>A small gallery of visual responses to the question: "How is software shaping your experience
+						during the covid-19 crisis?"</p>
 				</div>
 			</section>
 
@@ -160,8 +184,8 @@
 				</div>
 				<div class="content">
 					<h3><a href="./projects/retraces_of_search.html">re|Traces of Search</a>
-						<span class="icon solid fa-hand-paper"></span> <span class="icon solid fa-music"> <span
-								class="icon solid fa-desktop"></span> <span class="icon solid fa-dice-d20"></span></h3>
+						<span class="icon solid fa-hand-paper"></span> <span class="icon solid fa-music"></span> <span
+							class="icon solid fa-desktop"></span> <span class="icon solid fa-dice-d20"></span></h3>
 					<p>The audiovisual software art installation ’re|Traces of Search’ probes human-software
 						relationships by
 						examining in detail a specific and situated action: searching on the web. </p>
@@ -171,8 +195,8 @@
 				<div class="image"><a href="./projects/retrash.html"><img src="images/retrash_sq.JPG" alt="" /></a>
 				</div>
 				<div class="content">
-					<h3><a href="./projects/retrash.html">re|trash</a> <span class="icon solid fa-hand-paper">
-						</span><span class="icon solid fa-music"> <span class="icon solid fa-desktop"></span> <span
+					<h3><a href="./projects/retrash.html">re|trash</a> <span class="icon solid fa-hand-paper"></span>
+							<span class="icon solid fa-music"></span> <span class="icon solid fa-desktop"></span> <span
 								class="icon solid fa-dice-d20"></span></h3>
 					<p>A playful installation for children with old computer parts and generative sound and visuals.</p>
 				</div>
@@ -189,9 +213,9 @@
 			<section class="spotlight">
 				<div class="image"><a href="./projects/ci-poetry.html"><img src="images/ci1.JPG" alt="" /></a></div>
 				<div class="content">
-					<h3><a href="./projects/ci-poetry.html">ci-poetry</a> <span class="icon solid fa-hand-paper">
-						</span><span class="icon solid fa-music">
-						</span><span class="icon solid fa-dice-d20"> </span></h3>
+					<h3><a href="./projects/ci-poetry.html">ci-poetry</a> <span class="icon solid fa-hand-paper"></span>
+							<span class="icon solid fa-music"></span>
+							<span class="icon solid fa-dice-d20"> </span></h3>
 					<p>The interactive installation ci-poetry simulates the concept of collaborative coding or <a
 							href="https://en.wikipedia.org/wiki/Continuous_integration">continuous
 							integration (CI)</a> through generative poetry creation. The installation has been designed
@@ -206,7 +230,7 @@
 							src="images/ci-hackathon-thumb_sq.jpg" alt="" /></a></div>
 				<div class="content">
 					<h3><a href="https://hackathon.castor.kth.se/2019/">ci art hackathon 2019</a> <span
-							class="icon solid fa-music"> <span class="icon solid fa-desktop"></span></h3>
+							class="icon solid fa-music"></span> <span class="icon solid fa-desktop"></span></h3>
 					<p>Passionate and creative software students, software developers, artists,
 						designers and curious citizens participated in the first ever performance
 						of software art based on continuous integration data. During this hackathon,
@@ -237,13 +261,13 @@
             </section> -->
 			<section class="special">
 				<ul class="icons labeled">
-					<li><span class="icon solid fa-hand-paper"><span class="label">tangible interaction</span></span>
+					<li><span class="icon solid fa-hand-paper"></span><span class="label">tangible interaction</span>
 					</li>
-					<li><span class="icon solid fa-music"><span class="label">sound</span></span>
+					<li><span class="icon solid fa-music"></span><span class="label">sound</span>
 					</li>
-					<li><span class="icon solid fa-desktop"><span class="label">screen-based</span></span>
+					<li><span class="icon solid fa-desktop"></span><span class="label">screen-based</span>
 					</li>
-					<li><span class="icon solid fa-dice-d20"><span class="label">installation</span></span>
+					<li><span class="icon solid fa-dice-d20"></span><span class="label">installation</span>
 					</li>
 				</ul>
 			</section>
@@ -259,11 +283,12 @@
 				<!-- <div class="image"><a href="./projects/retrash.html"><img src="images/retrash_sq.JPG" alt="" /></a></div> -->
 				<div class="content">
 					<h3>Visualia - September 2020</h3>
-					<p>re|thread will take part in the <a href="https://nava.community/visualia/">Visualia</a> AV event
-						organised by <a href="https://nava.community/">Nordic Audiovisual Artists (NAVA)</a> in
-						September 2020 with the BCM project as a smaller and more intimate installation setup.</p>
+					<p>re|thread took part in the <a href="https://nava.community/visualia/">Visualia</a> AV event
+						organised by <a href="https://nava.community/">Nordic Audiovisual Artists (NAVA)</a> 11-12
+						September 2020 with the Browser Chance Music project as a smaller and more intimate installation
+						setup.</p>
 
-					<p><a href="./projects/bcm.html">More about the BCM project here</a>.</p>
+					<p><a href="./projects/bcm.html">More about the Browser Chance Music project here</a>.</p>
 
 				</div>
 				<div class="gallery-container">
@@ -324,7 +349,7 @@
 				<!-- <div class="image"><a href="./projects/retrash.html"><img src="images/retrash_sq.JPG" alt="" /></a></div> -->
 				<div class="content">
 					<table style="width:100%; border: none; background-color: none;">
-						<tr>
+						<tr style="font-family: 'NeueBit-Bold'; font-size: 2em">
 							<th>Erik</th>
 							<th>Nadia</th>
 							<th>Thomas</th>
@@ -728,7 +753,8 @@ print 'It took ' + i + ' iterations to sort the deck.';</code></pre>
 	<script src="assets/js/util.js"></script>
 	<script src="assets/js/main.js"></script>
 
-	<script src="header_files/sketch_header.js"></script>
+	<!-- p5 sketch as a header -->
+	<!-- <script src="header_files/sketch_header.js"></script> -->
 </body>
 
 </html>

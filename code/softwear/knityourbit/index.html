@@ -1,0 +1,52 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta name="author" content="Nadia Campo Woytuk">
+
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lexend+Peta&display=swap');
+
+    body {
+      font-family: 'Lexend Peta', sans-serif;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div>
+    message: <input type="text" id="message" value="test">
+    <button id="knitIt" onclick="knitIt()">Knit it!</button>
+  </div>
+  <div>
+    <p>The message in binary is: <span id="binaryText"></span></p>
+    <p>knit <span style="background-color: #6495ED; color: white;">0</span> , purl <span style="background-color: #4400ff; color: white">1</span></p>
+    <p>Cast on <span id="stitches">8</span> stitches</p>
+  </div>
+
+  <div>
+    <table id="pattern">
+      <tbody>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div>
+    <p>Borders? <input type="checkbox" id="borders"></p>
+    <p><a href="https://www.rapidtables.com/code/text/ascii-table.html" target="_blank">Binary / ASCII table</a></p>
+  </div>
+
+
+</body>
+
+</html>
+
+<script src="knityourbit.js"></script>
