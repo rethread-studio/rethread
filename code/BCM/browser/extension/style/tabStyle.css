@@ -1,0 +1,28 @@
+#pellowHomeButton {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  z-index: 99999;
+  background: red;
+  height: 100px;
+  width: 100px;
+  margin-right: 15px;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+body.pellowOpen {
+  overflow: hidden;
+}
+
+iframe#pellowHome {
+  background-color: #a2dce7;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 99998;
+  width: 100%;
+  height: 100%;
+}
