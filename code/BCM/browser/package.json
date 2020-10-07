@@ -6,6 +6,7 @@
   },
   "scripts": {
     "postinstall": "gulp",
+    "dev": "gulp watch",
     "start": "node server/index",
     "geo": "node ./node_modules/geoip-lite/scripts/updatedb.js"
   },
