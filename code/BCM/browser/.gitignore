@@ -7,4 +7,4 @@ extension/bower_components
 test/bower_components
 package
 extension/scripts
-
+.DS_Store
