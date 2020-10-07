@@ -1,4 +1,4 @@
-let lastTabId = -1;
+let lastTab = null;
 
 const ws = new WebSocketClient();
 
@@ -14,19 +14,19 @@ function sendCurrentUrl() {
 }
 
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
-  lastTabId = tabId;
+  lastTab = await sendCurrentUrl();
   broadcast({
     event: "tab_changed",
-    tab: await sendCurrentUrl(),
+    tab: lastTab,
     tab_id: tabId,
   });
 });
 
 // chrome.tabs.onActivated.addListener(async function (tabId) {
-//   lastTabId = tabId;
+//   lastTab = await sendCurrentUrl();
 //   broadcast({
 //     event: "tab_changed",
-//     tab: await sendCurrentUrl(),
+//     tab: lastTab,
 //     tab_id: tabId,
 //   });
 // });
@@ -46,7 +46,8 @@ chrome.windows.onRemoved.addListener(function (tabId) {
 });
 
 chrome.webRequest.onBeforeRequest.addListener(
-  function (event) {
+  async function (event) {
+    lastTab = await sendCurrentUrl();
     if (event.requestBody && event.requestBody.raw) {
       let formData = event.requestBody.raw;
       var res = "";
@@ -67,24 +68,29 @@ chrome.webRequest.onBeforeRequest.addListener(
       }
       event.requestBody = res;
     }
+    event.activeTab = event.tabId == lastTab.id;
     broadcast({
       event: "request_created",
       request: event,
+      current_tab: lastTab,
     });
     return { cancel: false };
   },
   { urls: ["<all_urls>"] },
-  ["blocking", "requestBody"]
+  ["requestBody"]
 );
 
 var accessControlRequestHeaders;
 var exposedHeaders;
 
 chrome.webRequest.onCompleted.addListener(
-  function (event) {
+  async function (event) {
+    lastTab = await sendCurrentUrl();
+    event.activeTab = event.tabId == lastTab.id;
     broadcast({
       event: "request_completed",
       request: event,
+      current_tab: lastTab,
     });
   },
   { urls: ["<all_urls>"] },

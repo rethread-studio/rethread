@@ -15,8 +15,15 @@
       "scripts/background.js"
     ]
   },
-  "content_scripts": [],
-  "web_accessible_resources": [],
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "js": ["scripts/inject.js"],
+      "matches": ["<all_urls>"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": ["style/tabStyle.css"],
   "permissions": ["tabs", "webRequest", "webRequestBlocking", "<all_urls>"],
   "browser_action": {
     "default_icon": {
