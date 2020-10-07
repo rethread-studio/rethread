@@ -17,6 +17,8 @@ let packetsOverTime = 0;
 let glitchThreshold = 130;
 let triggerThisFrame = false;
 
+let initiator = "";
+
 // Load font
 var loader = new THREE.FontLoader();
 var font;
@@ -122,13 +124,13 @@ const options = {
   },
   backgroundColors: ["#a2dce7", "#19206b", "#333647"]
 }
-
+//modify styles if to match installation settings
 document.body.style.paddingTop = options.installation ? '470px' : 0;
 
 let colorPos = 0;
 document.body.style.backgroundColor = options.backgroundColors[0];
+
 function changeColor() {
-  console.log(colorPos)
   colorPos = colorPos + 1 > options.backgroundColors.length ? 0 : colorPos + 1;
   document.body.style.backgroundColor = options.backgroundColors[colorPos];
 }
@@ -151,6 +153,12 @@ myApp.init();
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
 
+  if (initiator != json.request.initiator) {
+    initiator = json.request.initiator;
+    // changeColor();
+    //To do: RESET VISUALS
+    console.log(json.request)
+  }
   //REQUEST CREATED
   if (json.event == "request_created") {
 
@@ -209,7 +217,7 @@ const onmessage = (message) => {
 
         //if the service does not exist
         const country = getCountryName(packet.location.country);
-        console.log(country, packet.location.country)
+
         if (!positionPerService.has(country)) {
           //create a text to display
           let servicePos = random3DPosition(500);

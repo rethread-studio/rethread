@@ -14,13 +14,39 @@ body {
   /* GREY */
   /* background-color: #333647; */
   /* BLUE */
-  background-color: #ee4035;
+  /* background-color: #ee4035;
   background-color: #19206b;
-  background-color: #a2dce7;
+  background-color: #a2dce7; */
 
   overflow: hidden;
   transition: all 0.5s ease;
+
+  background: linear-gradient(230deg, #373B44, #4286f4);
+    background-size: 300% 300%;
+    /* background: -webkit-linear-gradient(to right, #4286f4, #373B44);  Chrome 10-25, Safari 5.1-6 */
+  /* background: linear-gradient(to right, #4286f4, #373B44); W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
+
   /* margin-top: 21.7%; */
+  -webkit-animation: GradientAnimation 15s ease infinite;
+  -moz-animation: GradientAnimation 15s ease infinite;
+  animation: GradientAnimation 15s ease infinite;
+}
+
+@-webkit-keyframes GradientAnimation {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@-moz-keyframes GradientAnimation {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@keyframes GradientAnimation {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
 }
 
 /* body{
