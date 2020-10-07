@@ -17,6 +17,8 @@ let packetsOverTime = 0;
 let glitchThreshold = 130;
 let triggerThisFrame = false;
 
+let initiator = "";
+
 // Load font
 var loader = new THREE.FontLoader();
 var font;
@@ -122,13 +124,13 @@ const options = {
   },
   backgroundColors: ["#a2dce7", "#19206b", "#333647"]
 }
-
+//modify styles if to match installation settings
 document.body.style.paddingTop = options.installation ? '470px' : 0;
 
 let colorPos = 0;
 document.body.style.backgroundColor = options.backgroundColors[0];
+
 function changeColor() {
-  console.log(colorPos)
   colorPos = colorPos + 1 > options.backgroundColors.length ? 0 : colorPos + 1;
   document.body.style.backgroundColor = options.backgroundColors[colorPos];
 }
@@ -151,8 +153,21 @@ myApp.init();
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
 
+  //Per request we want to add three elements
+  //INITIALIZAR
+  //SERVICE
+  //EVENT
+
   //REQUEST CREATED
   if (json.event == "request_created") {
+
+    //Add a new initiator 
+    if (initiator != json.request.initiator) {
+      initiator = json.request.initiator;
+      // changeColor();
+      //To do: RESET VISUALS
+      // console.log(json.request)
+    }
 
   } else if (json.event == "request_completed") {
     //ADD INITIATOR
@@ -162,7 +177,7 @@ const onmessage = (message) => {
 
     //Get the information from the request
     const packet = json.request;
-
+    console.log(packet)
     // //CHECK if it has any packaggites
     //if it does not have, include the host name as a service
     if (packet.services.length === 0) {
@@ -208,20 +223,22 @@ const onmessage = (message) => {
         myApp.addService(service, json.request.type, json.request.requestId);
 
         //if the service does not exist
-        if (!positionPerService.has(service)) {
+        const country = getCountryName(packet.location.country);
+
+        if (!positionPerService.has(country)) {
           //create a text to display
           let servicePos = random3DPosition(500);
-          createText(service, servicePos);
-          positionPerService.set(service, servicePos);
-          indexPerService.set(service, indexPerService.size);
+          createText(country, servicePos);
+          positionPerService.set(country, servicePos);
+          indexPerService.set(country, indexPerService.size);
         }
         //add the text and particles
-        updateText(service);
-        addParticle(service, positionPerService.get(service), packet.len);
+        updateText(country);
+        addParticle(country, positionPerService.get(country), packet.len);
         //
         let time = Date.now() * 0.001;
-        lastRegisteredPerService.set(service, time);
-        activeService = service;
+        lastRegisteredPerService.set(country, time);
+        activeService = country;
       }
     }
   }
