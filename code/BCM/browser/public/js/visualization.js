@@ -153,14 +153,21 @@ myApp.init();
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
 
-  if (initiator != json.request.initiator) {
-    initiator = json.request.initiator;
-    // changeColor();
-    //To do: RESET VISUALS
-    console.log(json.request)
-  }
+  //Per request we want to add three elements
+  //INITIALIZAR
+  //SERVICE
+  //EVENT
+
   //REQUEST CREATED
   if (json.event == "request_created") {
+
+    //Add a new initiator 
+    if (initiator != json.request.initiator) {
+      initiator = json.request.initiator;
+      // changeColor();
+      //To do: RESET VISUALS
+      // console.log(json.request)
+    }
 
   } else if (json.event == "request_completed") {
     //ADD INITIATOR
@@ -170,7 +177,7 @@ const onmessage = (message) => {
 
     //Get the information from the request
     const packet = json.request;
-
+    console.log(packet)
     // //CHECK if it has any packaggites
     //if it does not have, include the host name as a service
     if (packet.services.length === 0) {

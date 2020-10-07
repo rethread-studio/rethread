@@ -28,6 +28,9 @@ class AppViz {
             antialias: false,
             alpha: true
         });
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+        console.log(THREE.PCFSoftShadowMap)
         this.renderer.setClearColor(0x000000, 0); // the default
         //RENDERer CONFIGURATION
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -61,8 +64,12 @@ class AppViz {
         //ADD LIGHTS
         // Add directional light
         this.light1 = new THREE.DirectionalLight('teal', 0.5);
-        this.light1.position.set(4, 4, 4)
+        this.light1.position.set(5, 0, 5)
         this.scene.add(this.light1);
+
+        this.light2 = new THREE.DirectionalLight('teal', 0.5);
+        this.light2.position.set(-5, 0, 5)
+        this.scene.add(this.light2);
 
         //RENDERer LOOP
         requestAnimationFrame(this.render);
@@ -181,7 +188,10 @@ class packageParticle {
         this.geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
         this.material = new THREE.MeshBasicMaterial({ color: 0xf9e20d });
         this.shape = new THREE.Mesh(this.geometry, this.material);
+        this.shape.castShadow = true;
+        this.shape.recieveShadow = true;
 
+        //position of the shape 
         const randomPos = this.random3DPosition(10);
         this.shape.position.copy(randomPos)
         const sparkle = this.totesRando(0.003, 0.5);
@@ -318,9 +328,11 @@ class serviceParticle {
     init() {
 
         // const adjustedSize = Math.abs(this.simplex.noise3D(1, 1, 1) * 0.5);
-        this.geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        this.geometry = new THREE.BoxGeometry(0.7, 0.7, 0.7);
         this.material = new THREE.MeshBasicMaterial({ color: 0xee4035 });
         this.shape = new THREE.Mesh(this.geometry, this.material);
+        this.shape.castShadow = true;
+        this.shape.recieveShadow = true;
 
         const randomPos = this.random3DPosition(2);
         this.shape.position.copy(randomPos)

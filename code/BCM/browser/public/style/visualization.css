@@ -16,21 +16,51 @@ body {
   /* BLUE */
   /* background-color: #ee4035;
   background-color: #19206b;
-  background-color: #a2dce7; */
+  */
 
+  /* background-color: #a2dce7;  */
+
+/*    
   overflow: hidden;
   transition: all 0.5s ease;
 
   background: linear-gradient(230deg, #373B44, #4286f4);
-    background-size: 300% 300%;
+  background-size: 300% 300%; */
+
+
+  /* background-blend-mode: multiply;
+    background-position: 50% 50%;
+    background-size: cover; */
+
+
+  /* background: url(./../img/bg/bg2.png) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover; */
+
+/* ANIMATION TEST */
+ 
     /* background: -webkit-linear-gradient(to right, #4286f4, #373B44);  Chrome 10-25, Safari 5.1-6 */
   /* background: linear-gradient(to right, #4286f4, #373B44); W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   
 
   /* margin-top: 21.7%; */
-  -webkit-animation: GradientAnimation 15s ease infinite;
+  /* -webkit-animation: GradientAnimation 15s ease infinite;
   -moz-animation: GradientAnimation 15s ease infinite;
-  animation: GradientAnimation 15s ease infinite;
+  animation: GradientAnimation 15s ease infinite; */
+}
+
+/* Style the video: 100% width and height to cover the entire window */
+#myVideo {
+
+  
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+  z-index: -10;
 }
 
 @-webkit-keyframes GradientAnimation {
