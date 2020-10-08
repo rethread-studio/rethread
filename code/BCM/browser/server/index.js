@@ -27,6 +27,7 @@ wss.on("connection", function (ws, request) {
   ws.on("message", function (message) {
     message = JSON.parse(message);
     if (message.request) {
+      lastRequestTime = new Date().getTime();
       if (message.request.url) {
         message.request.hostname = URL.parse(message.request.url).hostname;
         message.request.services = services(message.request);
@@ -40,6 +41,14 @@ wss.on("connection", function (ws, request) {
           );
         }
       }
+    }
+    if (message.event == "idle") {
+      osc.send(message.action, message.event);
+      console.log(message.action);
+    }
+    if (message.event == "home") {
+      console.log(message);
+      osc.send(message.action, message.event);
     }
     if (message.request) {
       if (message.request.responseHeaders) {
@@ -58,7 +67,9 @@ wss.on("connection", function (ws, request) {
           );
         }
       }
-      osc.send(message.request, message.event);
+      if (message.request.activeTab) {
+        osc.send(message.request, message.event);
+      }
     }
     wss.broadcast(message, ws);
   });

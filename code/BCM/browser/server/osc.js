@@ -1,6 +1,8 @@
 const osc = require("osc");
 
-const oscValueOrder = [
+const oscValueOrder = {};
+
+oscValueOrder["request_completed"] = [
   "fromCache",
   "ip",
   "method",
@@ -16,6 +18,9 @@ const oscValueOrder = [
   "services",
   "location",
 ];
+oscValueOrder["request_created"] = oscValueOrder["request_completed"];
+oscValueOrder["home"] = ["action"];
+oscValueOrder["idle"] = ["action"];
 
 let targetIP = null;
 let targetPort = null;
@@ -48,7 +53,7 @@ module.exports.close = () => {
 module.exports.send = (data, address) => {
   const args = [];
 
-  for (let i of oscValueOrder) {
+  for (let i of oscValueOrder[address]) {
     let value = data[i];
     if (i.indexOf("location") > -1 && value != null) {
       value = value.country;
