@@ -15,6 +15,7 @@ function sendCurrentUrl() {
 
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
   lastTab = await sendCurrentUrl();
+  chrome.tabs.reload(lastTab.id);
   broadcast({
     event: "tab_changed",
     tab: lastTab,
@@ -138,8 +139,7 @@ function action() {
 chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
   if (data.type == "action") {
     action();
-  }
-  if (data.type == "home") {
+  } else if (data.type == "home") {
     broadcast({
       event: "home",
       action: data.action,
