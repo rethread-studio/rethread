@@ -1198,6 +1198,22 @@ s.waitForBoot({
 
 	}, '/request_created');
 
+	q = OSCFunc({ arg msg, time, addr, recvPort;
+		[msg, time, addr, recvPort].postln;
+		if(msg[1] == 'active') {
+		};
+		if(msg[1] == 'inactive') {
+		};
+	}, '/idle');
+
+	r = OSCFunc({ arg msg, time, addr, recvPort;
+		[msg, time, addr, recvPort].postln;
+		if(msg[1] == 'active') {
+		};
+		if(msg[1] == 'inactive') {
+		};
+	}, '/home');
+
 
 	//////////////////////////////////////////////////////
 	/////// SOUND PROCESS AND ANALYSIS UPDATE LOOP

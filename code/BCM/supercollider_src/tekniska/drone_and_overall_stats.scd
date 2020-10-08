@@ -185,7 +185,7 @@ Time spans of droney sounds:
 	// set chord
 
 	harmonicComplexity = numScripts.explin(3, 90, -0.4, ~numChords-0.51).round;
-	("harmonic complexity: " + harmonicComplexity).postln;
+	// ("harmonic complexity: " + harmonicComplexity).postln;
 	~changeChord.(harmonicComplexity);
 
 	if(rrand(0.0, 1.0) > 0.92 || (~backgroundDronesStarted == false) || (~lastHarmonicComplexity != harmonicComplexity), {
