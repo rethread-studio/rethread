@@ -51,12 +51,18 @@ function closeHome() {
   var iframe = document.getElementById("pellowHome");
   if (iframe) {
     document.documentElement.removeChild(iframe);
-  }
-  var button = document.getElementById("pellowHomeButton");
-  button.innerText = "Home";
-  document.body.className = document.body.className.replace(" pellowOpen", "");
+    var button = document.getElementById("pellowHomeButton");
+    button.innerText = "Home";
+    document.body.className = document.body.className.replace(
+      " pellowOpen",
+      ""
+    );
 
-  chrome.runtime.sendMessage({ type: "home", action: "close" }, function () {});
+    chrome.runtime.sendMessage(
+      { type: "home", action: "close" },
+      function () {}
+    );
+  }
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
