@@ -65,7 +65,9 @@ wss.on("connection", function (ws, request) {
           );
         }
       }
-      osc.send(message.request, message.event);
+      if (message.request.activeTab) {
+        osc.send(message.request, message.event);
+      }
     }
     wss.broadcast(message, ws);
   });
