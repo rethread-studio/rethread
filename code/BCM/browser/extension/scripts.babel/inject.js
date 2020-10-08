@@ -30,9 +30,6 @@ function createButton() {
     }
     return false;
   };
-  if (document.body) {
-    document.documentElement.appendChild(button);
-  }
   document.documentElement.appendChild(button);
 }
 
@@ -46,6 +43,8 @@ function displayHome() {
   var button = document.getElementById("pellowHomeButton");
   button.innerText = "close";
   document.body.className += " pellowOpen";
+
+  chrome.runtime.sendMessage({ type: "home", action: "open" }, function () {});
 }
 
 function closeHome() {
@@ -56,6 +55,8 @@ function closeHome() {
   var button = document.getElementById("pellowHomeButton");
   button.innerText = "Home";
   document.body.className = document.body.className.replace(" pellowOpen", "");
+
+  chrome.runtime.sendMessage({ type: "home", action: "close" }, function () {});
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -65,7 +66,16 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   }
 });
 if (!isIFrame) {
+  injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
   createButton();
   // injectScript(chrome.extension.getURL("scripts/error_logging.js"), "head");
-  injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
+
+  function action() {
+    chrome.runtime.sendMessage({ type: "action" }, function () {});
+  }
+  window.addEventListener("click", action);
+  window.addEventListener("touchstart", action);
+  window.addEventListener("scroll", action);
+  window.addEventListener("mousemove", action);
+  window.addEventListener("keydown", action);
 }

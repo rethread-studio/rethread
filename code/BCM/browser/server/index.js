@@ -27,6 +27,7 @@ wss.on("connection", function (ws, request) {
   ws.on("message", function (message) {
     message = JSON.parse(message);
     if (message.request) {
+      lastRequestTime = new Date().getTime();
       if (message.request.url) {
         message.request.hostname = URL.parse(message.request.url).hostname;
         message.request.services = services(message.request);
@@ -40,6 +41,12 @@ wss.on("connection", function (ws, request) {
           );
         }
       }
+    }
+    if (message.event == "idle") {
+      console.log(message.action);
+    }
+    if (message.event == "home") {
+      console.log(message);
     }
     if (message.request) {
       if (message.request.responseHeaders) {

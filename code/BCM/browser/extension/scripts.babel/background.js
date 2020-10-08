@@ -97,17 +97,55 @@ chrome.webRequest.onCompleted.addListener(
   ["responseHeaders", "extraHeaders"]
 );
 
-chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
-  if (data.type != "error") {
-    return true;
-  }
-  console.log(data, sender);
-  errors[sender.tab.id].push(data.error);
-
-  chrome.browserAction.setBadgeText({
-    tabId: sender.tab.id,
-    text: errors[sender.tab.id].length + "",
+async function inactive() {
+  chrome.tabs.getAllInWindow(null, (tabs) => {
+    tabs = tabs.filter((tab) => tab.id > -1);
+    const indexes = [];
+    for (let tab of tabs) {
+      console.log(tab);
+      if (tab != tabs[0]) {
+        indexes.push(tab.id);
+      }
+    }
+    chrome.tabs.update(tabs[0].id, {
+      url: "http://localhost:8873/button.html",
+    });
+    chrome.tabs.remove(indexes);
   });
-  //chrome.storage.local.set({error: error});
+}
+
+var actionTimeout = null;
+var isInactive = false;
+function action() {
+  clearTimeout(actionTimeout);
+  if (isInactive) {
+    broadcast({
+      event: "idle",
+      action: "active",
+    });
+  }
+  isInactive = false;
+  actionTimeout = setTimeout(function () {
+    isInactive = true;
+    // inactive();
+    broadcast({
+      event: "idle",
+      action: "inactive",
+    });
+  }, 60000);
+}
+
+chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
+  if (data.type == "action") {
+    action();
+  }
+  if (data.type == "home") {
+    broadcast({
+      event: "home",
+      action: data.action,
+    });
+  } else {
+    console.log(data);
+  }
   return true;
 });
