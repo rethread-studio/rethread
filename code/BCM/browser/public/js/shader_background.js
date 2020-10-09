@@ -25,6 +25,7 @@ function backgroundFragShader() {
     uniform float iTime;
     uniform vec3 iResolution;
     uniform vec3 leftColor;
+    uniform float brightness;
   
     // Based on work by @patriciogv - 2015
   // http://patriciogonzalezvivo.com
@@ -134,8 +135,8 @@ function backgroundFragShader() {
     //              clamp(length(r.x),0.0,1.0));
 
     time *= 0.1;
-    vec3 randomColor = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.5+.5, sin(time*.038426384)*.5+.5) * (sin(time * 0.04) * 0.3 + 0.7);
-    vec3 randomColor2 = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.45+.45, sin(time*.038426384)*.45+.45) * (sin(time * 0.05) * 0.2 + 0.8);
+    vec3 randomColor = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.4+.55, sin(time*.038426384)*.5+.5);// * (sin(time * 0.04) * 0.3 + 0.7);
+    vec3 randomColor2 = vec3(sin(time*0.05)*.45+.55, sin(time*0.02473623)*.45+.5, sin(time*.038426384)*.5+.5);// * (sin(time * 0.05) * 0.2 + 0.8);
 
     float colorMix = tri(time*0.01)*.5 + .5;
 
@@ -155,7 +156,7 @@ function backgroundFragShader() {
     //                 leftColor,
     //                 clamp((f*f)*1.5,0.4,1.0));
   
-      gl_FragColor = vec4(pow(f, 0.5)*1.0*color, 1.0);
+      gl_FragColor = vec4(pow(f, 0.5)*1.0*color*brightness, 1.0);
     //   gl_FragColor = vec4(vec3(colorMix), 1.0);
   }
     `;
@@ -178,8 +179,14 @@ function setup() {
     
 function draw() {
     // 'r' is the size of the image in Mandelbrot-space
-    backgroundShader.setUniform("iResolution", [width, height]);
+    backgroundShader.setUniform("iResolution", [width*2, height]);
     backgroundShader.setUniform("iTime", millis()/1000.0);
+    let brightness = Math.min(window.smoothActivity*0.005 + 0.5, 1.2);
+    if (window.idle == true) {
+        brightness = 0.2;
+    }
+    // console.log(brightness);
+    backgroundShader.setUniform("brightness", brightness);
     quad(-1, -1, 1, -1, 1, 1, -1, 1);
 }
 
