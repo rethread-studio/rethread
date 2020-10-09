@@ -124,7 +124,7 @@ const options = {
     service: 0x0a0a0a,
     package: 0x000000,
   },
-  showLabels: true,
+  showLabels: false,
   lightHelpers: false,
   angleStep: 30,
 
@@ -163,12 +163,12 @@ const onmessage = (message) => {
 
   // console.log(json)
 
-  if(currentUrl != json.current_tab.url) {
+  if (currentUrl != json.current_tab.url) {
     const packet = json.request;
     // New page was loaded
-    myApp.addURL(packet.url, packet.requestId)
     numRequests = 0;
     currentUrl = json.current_tab.url;
+    myApp.addURL(currentUrl, packet.requestId)
   }
 
   if (json.event == "request_created") {
@@ -182,7 +182,7 @@ const onmessage = (message) => {
       //ADD URL when they navigate one tab
       // Doesn't work anymore for all urls
       if (packet.type == "main_frame") {
-        
+
       }
     }
 
@@ -199,9 +199,7 @@ const onmessage = (message) => {
     }
     let location = packet.location != null && packet.location != undefined ? countryList.name(packet.location.country) : "";
 
-    // if (!location) {
-    //   location = packet.local_location.country;
-    // }
+
     for (let c of countries) {
       if (c.geometry.name == location) {
         c.userData.scale += 0.003;
@@ -233,7 +231,6 @@ const onmessage = (message) => {
       //Process each of the services in the packet
       for (const service of packet.services) {
         //ADD SERVICE TO TEXT
-        // serviceViz.addService(service)
         // ADD A NEW 3D SERVICE
         myApp.addService(service, json.request.type, json.request.requestId);
 
@@ -261,15 +258,15 @@ const onmessage = (message) => {
     myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0]);
 
 
-  } else if (json.event == "home") {
+  } else if (json.event == "home" && json.action == "open") {
     getChallenge();
   }
   else if (json.event == "idle") {
     console.log("idle");
     console.log(json);
-    if(json.action == "inactive") {
+    if (json.action == "inactive") {
       window.idle = true;
-    } else if(json.action == "active") {
+    } else if (json.action == "active") {
       window.idle = false;
     }
   }
@@ -942,7 +939,7 @@ function animate() {
   // console.log("numRequests: " + numRequests + " packetsOverTime: " + packetsOverTime);
   window.activity = numRequests * 0.1 + (packetsOverTime * 10);
   const activityCoeff = 2.0 * dt;
-  window.smoothActivity = window.smoothActivity * (1-activityCoeff) + window.activity * activityCoeff;
+  window.smoothActivity = window.smoothActivity * (1 - activityCoeff) + window.activity * activityCoeff;
 
   packetsOverTime *= 0.95;
   triggerThisFrame = false;

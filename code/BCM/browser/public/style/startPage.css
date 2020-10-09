@@ -50,14 +50,22 @@ p{
     flex-flow: column;
 }
 
+.col-4{
+    width: 80%;
+    margin-right: 80px;
+    
+}
+.categories{
+    display: flex;
+    flex-flow: row;
+}
+
 .container{ 
     display: flex;
-    flex-flow: column;
-    width: 60%;
-    margin: 5% auto;
+    flex-flow: row;
     background:transparent;
     padding: 50px;
-    border-radius: 5px;
+    
 }
 
 #container-particles{
