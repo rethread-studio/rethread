@@ -54,8 +54,11 @@ function typeMessage(message) {
     captionLength = 0;
     captionLength_en = 0;
     clearTimeout(erasetimeout);
+    clearTimeout(typeTiemout);
     type();
 }
+
+
 
 function type() {
     captionEl.innerHTML = caption_se.substr(0, captionLength++);
@@ -63,20 +66,25 @@ function type() {
     if (captionLength < caption_se.length + 1 && captionLength_en < caption_en.length + 1) {
         typeTiemout = setTimeout('type()', speed);
     } else {
-        clearTimeout(typeTiemout);
-        erasetimeout = setTimeout(() => { erase(); }, 4000);
+        console.log('out')
 
+        erasetimeout = setTimeout(eraseMessage, speed);
+        console.log(erasetimeout)
+        clearTimeout(typeTiemout);
     }
 }
 
 
 
-function erase() {
+function eraseMessage() {
     captionEl.innerHTML = caption_se.substr(0, captionLength--);
     eParagraph.innerHTML = caption_en.substr(0, captionLength_en--);
+    console.log('delete')
     if (captionLength >= 0 && captionLength_en >= 0) {
-        erasetimeout = setTimeout('erase()', speed);
+        console.log('in meesage still delete')
+        erasetimeout = setTimeout(erasetimeout, speed);
     } else {
+        console.log('erase message gone')
         clearTimeout(typeTiemout);
         clearTimeout(erasetimeout);
         captionLength = 0;
@@ -93,5 +101,6 @@ function erase() {
 // }
 // typeMessage(message)
 
-setInterval(getChallenge, 30000);
+// setInterval(getChallenge, 10000);
 
+// getChallenge()

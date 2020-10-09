@@ -135,12 +135,6 @@ document.body.style.paddingTop = options.installation ? '470px' : 0;
 //modify styles if to match installation settings
 document.getElementsByClassName('message')[0].style.top = options.installation ? "470px" : 0;
 
-function changeColor() {
-  colorPos = colorPos + 1 > options.backgroundColors.length ? 0 : colorPos + 1;
-  document.body.style.backgroundColor = options.backgroundColors[colorPos];
-}
-
-// setInterval(changeColor, 5000)
 
 
 // Receive packets
@@ -157,12 +151,12 @@ myApp.init();
 //READ THE SOCKET FOR ACTIVITY
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
-
   //Per request we want to add three elements
   //INITIALIZAR
   //SERVICE
   //EVENT
   //REQUEST CREATED
+  console.log(json.event)
   if (json.event == "request_created") {
 
     //Add a new initiator 

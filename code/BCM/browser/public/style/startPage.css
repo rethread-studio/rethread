@@ -50,7 +50,7 @@ p{
     flex-flow: column;
 }
 
-.container{
+.container{ 
     display: flex;
     flex-flow: column;
     width: 60%;
@@ -313,3 +313,20 @@ p{
     background-image: url(./../img/more.wasp.png);
     background-size: 120px;
 }
+
+
+background-shader{
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline;
+    margin-left: auto; 
+    margin-right: auto; 
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  canvas {
+    position: absolute;
+    top: 0;
+  }
