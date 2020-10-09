@@ -39,6 +39,44 @@ body {
   -o-background-size: cover;
   background-size: cover; */
 
+
+}
+
+.gradient{
+ background-size: 300% 300% !important; 
+}
+
+.gradient.purple{
+  background: #ad5389;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #3c1053, #ad5389);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #3c1053, #ad5389); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
+}
+
+.gradient.red{
+  background: #DA4453;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #89216B, #DA4453);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #89216B, #DA4453); 
+  
+}
+
+.gradient.light{
+  background: #FC5C7D;  
+  background: -webkit-linear-gradient(to right, #6A82FB, #FC5C7D);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #6A82FB, #FC5C7D); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
+.gradient.dark{
+  background: #23074d;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to right, #cc5333, #23074d);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
+
+.gradientAnimation{
+  
 /* ANIMATION TEST */
  
     /* background: -webkit-linear-gradient(to right, #4286f4, #373B44);  Chrome 10-25, Safari 5.1-6 */
@@ -46,9 +84,9 @@ body {
   
 
   /* margin-top: 21.7%; */
-  /* -webkit-animation: GradientAnimation 15s ease infinite;
+  -webkit-animation: GradientAnimation 15s ease infinite;
   -moz-animation: GradientAnimation 15s ease infinite;
-  animation: GradientAnimation 15s ease infinite; */
+  animation: GradientAnimation 15s ease infinite; 
 }
 
 /* Style the video: 100% width and height to cover the entire window */
@@ -107,14 +145,14 @@ body {
 }
 
 #labels {
-  font-size: 26px;
+  /* font-size: 48px; */
   font-weight: bold;
   position: absolute;  /* let us position ourself inside the container */
   left: 0;             /* make our position the top left of the container */
   top: 0;
   color: white;
   opacity: 1;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'neueBit', sans-serif;
 
   /* text-transform: uppercase; */
 
@@ -136,10 +174,11 @@ body {
      0    1px 0 #000,
     -1px  1px 0 #000,
     -1px  0   0 #000; */
+    font-size: 32px;
+    font-family: 'neueBit', sans-serif;
+    color:#bd949e;
 }
-#labels>div:hover {
-  color: red;
-}
+
 
 .glishBox.Amazon {
   background-color: orange;
@@ -178,4 +217,28 @@ body {
 .service-text{
   font-size: 26px;
   word-spacing: 4px;
+}
+
+
+.message{
+  position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.output {
+  text-align:center;
+  font-family: 'Roboto', monospace;
+  color:white;
+} 
+.output h1 {
+  font-size:64px;
+}
+
+.output p{
+  font-size: 24px;
 }

@@ -19,7 +19,10 @@ h1{
     font-size: 240px;
     margin:0;
 }
-
+h2{
+    font-size: 48px;
+    margin:0;
+}
 p{
 
     font-family: 'Roboto', sans-serif;
@@ -78,6 +81,9 @@ p{
 
 .spacer-m{
     height:40px;
+}
+.spacer-l{
+    height:60px;
 }
 
 .spacer-l{
@@ -165,7 +171,10 @@ p{
 .btn-challenge{
     background-image: url(./../img/challenge.png);
     background-size: 180px;
-    background-color: white;
+    height: 90px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #ad5389;
 
 }
 
@@ -174,4 +183,133 @@ p{
     font-family: 'neueBit';
     color: black;
     
+}
+
+.btn-googleMap{
+    background-image: url(./../img/map.google.png);
+    background-size: 80px;
+    
+}
+
+.btn-mapOpen{
+    background-image: url(./../img/map.openMap.png);
+    background-size: 80px;
+  
+}
+
+.btn-mapBin{
+    background-image: url(./../img/map.bing.png);
+    background-size: 190px;
+  
+}
+
+.btn-natSweden{
+    background-image: url(./../img/flag.sweden.png);
+    background-size: 190px;
+}
+
+.btn-natRussia{
+    background-image: url(./../img/flag.russia.png);
+    background-size: 190px;
+}
+.btn-natAfrica{
+    background-image: url(./../img/flag.southAfrica.png);
+    background-size: 190px;
+}
+.btn-natCuba{
+    background-image: url(./../img/flag.cuba.png);
+    background-size: 190px;
+}
+.btn-natNigeria{
+    background-image: url(./../img/flag.nigeria.png);
+    background-size: 190px;
+}
+.btn-natKorea{
+    background-image: url(./../img/flag.korea.png);
+    background-size: 190px;
+}
+
+.btn-servYoutube{
+    background-image: url(./../img/google.youtube.png);
+    background-size: 190px;
+}
+
+.btn-newsDN{
+    background-image: url(./../img/dnlogo.png);
+    background-size: 190px;
+}
+.btn-newsAfton{
+    background-image: url(./../img/news.afton.png);
+    background-size: 190px;
+}
+.btn-newsBBC{
+    background-image: url(./../img/news.bbc.png);
+    background-size: 190px;
+}
+.btn-newsNPR{
+    background-image: url(./../img/new.npr.png);
+    background-size: 190px;
+}
+
+.btn-comLego{
+    background-image: url(./../img/comercial.lego.png);
+    background-size: 190px;
+}
+.btn-comIkea{
+    background-image: url(./../img/commercial.ikea.png);
+    background-size: 190px;
+}
+.btn-comAmazon{
+    background-image: url(./../img/commercial.amazon.png);
+    background-size: 190px;
+}
+
+.btn-searchGoogle{
+    background-image: url(./../img/google.png);
+    background-size: 90px;
+}
+.btn-searchDuck{
+    background-image: url(./../img/search.duck.png);
+    background-size: 90px;
+}
+.btn-searchWiki{
+    background-image: url(./../img/search.wiki.png);
+    background-size: 90px;
+}
+
+
+.btn-sosTik{
+    background-image: url(./../img/social.tiktok.svg);
+    background-size: 90px;
+}
+
+.btn-sosInst{
+    background-image: url(./../img/social.insta.png);
+    background-size: 90px;
+}
+.btn-sosTwit{
+    background-image: url(./../img/social.twitter.png);
+    background-size: 90px;
+}
+.btn-sosFace{
+    background-image: url(./../img/social.facebook.png);
+    background-size: 90px;
+}
+
+.btn-moreCastor{
+    background-image: url(./../img/more.castor.png);
+    background-size: 90px;
+}
+
+.btn-moreReth{
+    background-image: url(./../img/more.rethArt.png);
+    background-size: 150px;
+}
+.btn-moreKTH{
+    background-image: url(./../img/more.kth.png);
+    background-size: 90px;
+}
+.btn-moreWasp{
+    background-image: url(./../img/more.wasp.png);
+    background-size: 120px;
 }

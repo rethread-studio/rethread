@@ -9,7 +9,7 @@
   <title>BCM - Visualization</title>
 </head>
 
-<body>
+<body class=" gradient dark gradientAnimation">
 
   <!-- The video -->
   <!-- <video autoplay muted loop id="myVideo">
@@ -21,6 +21,13 @@
   </div>
   <div id="container"></div>
   <div id="wrapper"></div>
+
+  <div class="message">
+    <div class="output" id="output">
+      <h1 id="message-se" class="cursor"></h1>
+      <p id="message-en"></p>
+    </div>
+  </div>
 
   <script type="x-shader/x-vertex" id="vertexshader">
 
@@ -65,8 +72,12 @@
   <script src="./js/countries.js"></script>
   <script src="./js/country-list.js"></script>
 
+  <script src="./js/message.js"></script>
+
   <script src="./js/websocket.js"></script>
   <script type="module" src="./js/visualization.js"></script>
+
+  <!-- <script src="./js/servicesTest.js"></script> -->
 </body>
 
 </html>
