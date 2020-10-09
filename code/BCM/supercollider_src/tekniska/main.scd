@@ -251,6 +251,8 @@ s.waitForBoot({
 	~channels.rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
 	~channels.rev_channel.play_on(\medium_reverb, [\out, ~channels.rev_channel.bus, \in, ~channels.rev_channel.bus, \mix, 1.0, \amp, 2.0]);
 	~channels.rev_channel.set_amp(0.3);
+	~channels.long_rev = ~makeMixerChannel.("Long rev", ~decoderBus);
+	~channels.long_rev.play_on(\long_reverb, [\out, ~channels.rev_channel.bus, \in, ~channels.rev_channel.bus, \mix, 1.0, \amp, 2.0, \rt, 10.0]);
 	~channels.sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
 	~channels.sub_channel.set_send(~channels.rev_channel.bus, 0.2);
 	~channels.rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
@@ -275,7 +277,7 @@ s.waitForBoot({
 	~channels.voice.set_amp(0.65);
 	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.drone = ~makeMixerChannel.("Drone", ~decoderBus);
-	~channels.drone.set_send(~channels.rev_channel.bus, 0.15);
+	~channels.drone.set_send(~channels.long_rev.bus, 1.0);
 	~channels.tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
 	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.tick_channel.set_amp(0.0);
@@ -1037,6 +1039,64 @@ s.waitForBoot({
 
 	s.sync();
 
+	~newPageLoadEvent = { | url, hostname |
+		var freq;
+		// Reset sequencer
+		~sequencer = ~newSequencer.(32);
+		~resetCurrentFrame.();
+		// Change root
+		~root = ~root + [-8, 9, 17, -22].choose;
+		~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
+		// Play start of main frame sounds
+		~channels.default_channel.play_on(\gust,
+			[
+				\freq, rrand(500, 2000),
+				\rq, exprand(0.05, 0.2),
+				\out, ~channels.default_channel.bus,
+				\amp, exprand(0.03, 0.1),
+				\atk, rrand(0.7, 1.5),
+				\rel, rrand(1, 4), //0.01,
+				\pan1, rrand(-0.5, 0.5),
+				\pan2, rrand(-0.5, 0.5),
+			]
+		);
+		freq = ~s53.degreeToFreq(~root, 0.midicps, 3);
+		~channels.default_channel.play_on(\thump, [
+			\freq, freq,
+			\atk, 0.6,
+			\rel, 2,
+			\c0, -3,
+			\c1, \sine,
+			\pan, 0.0,
+			\amp, 0.1,
+			\out, ~channels.default_channel.bus]);
+		~channels.default_channel.play_on(\thump, [
+			\freq, freq * 2,
+			\atk, 0.6,
+			\rel, 2,
+			\c0, -3,
+			\c1, \sine,
+			\pan, -0.3,
+			\amp, 0.1,
+			\out, ~channels.default_channel.bus]);
+		~channels.default_channel.play_on(\thump, [
+			\freq, freq * 4,
+			\atk, 0.6,
+			\rel, 2,
+			\c0, -3,
+			\c1, \sine,
+			\pan, 0.3,
+			\amp, 0.1,
+			\out, ~channels.default_channel.bus]);
+
+
+		~newMainFrameTime = Date.localtime.rawSeconds;
+
+		~tickClock.tempo = 2;
+		("url: " + url + " hostname: " + hostname).postln;
+		~overallStats.currentFrame.hostname = hostname;
+	};
+
 
 	//////////////////////////////////////////////////////
 	/////// OSC PACKET PARSING
@@ -1049,6 +1109,7 @@ s.waitForBoot({
 	~newMainFrameTime = Date.localtime.rawSeconds;
 	~vis_sender = NetAddr("127.0.0.1", 9771);
 	~packetRecPanWidth = 0;
+	~currentTabUrl = "";
 	// Receive packages of web traffic data
 	// /request_completed OSC packets
 	o = OSCFunc({ arg msg, time, addr, recvPort;
@@ -1067,8 +1128,20 @@ s.waitForBoot({
 		hostname = msg[12],
 		services = msg[13],
 		location = msg[14],
+		tab_url = msg[15],
 
 		freq, ip_parts, rel = 0.0;
+
+		if(~currentTabUrl != tab_url) {
+			("RESET" + tab_url).postln;
+			~currentTabUrl = tab_url;
+			~newPageLoadEvent.(url, hostname);
+		};
+
+		// The first request is seldom the correct main hostname
+		if(url == ~currentTabUrl) {
+			~overallStats.currentFrame.hostname = hostname;
+		};
 
 		// [msg, time, addr, recvPort].postln;
 		// services.postln;
@@ -1135,64 +1208,16 @@ s.waitForBoot({
 		url = msg[11],
 		hostname = msg[12],
 		services = msg[13],
-		location = msg[14];
+		location = msg[14],
+		tab_url = msg[15];
 
-		if(type == \main_frame) {
-			var freq;
-			// Reset sequencer
-			~sequencer = ~newSequencer.(32);
-			~resetCurrentFrame.();
-			"RESET".postln;
-			// Change root
-			~root = ~root + [-8, 9, 17, -22].choose;
-			~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
-			// Play start of main frame sounds
-			~channels.default_channel.play_on(\gust,
-				[
-					\freq, rrand(500, 2000),
-					\rq, exprand(0.05, 0.2),
-					\out, ~channels.default_channel.bus,
-					\amp, exprand(0.03, 0.1),
-					\atk, rrand(0.7, 1.5),
-					\rel, rrand(1, 4), //0.01,
-					\pan1, rrand(-0.5, 0.5),
-					\pan2, rrand(-0.5, 0.5),
-				]
-			);
-			freq = ~s53.degreeToFreq(~root, 0.midicps, 3);
-			~channels.default_channel.play_on(\thump, [
-				\freq, freq,
-				\atk, 0.6,
-				\rel, 2,
-				\c0, -3,
-				\c1, \sine,
-				\pan, 0.0,
-				\amp, 0.1,
-				\out, ~channels.default_channel.bus]);
-			~channels.default_channel.play_on(\thump, [
-				\freq, freq * 2,
-				\atk, 0.6,
-				\rel, 2,
-				\c0, -3,
-				\c1, \sine,
-				\pan, -0.3,
-				\amp, 0.1,
-				\out, ~channels.default_channel.bus]);
-			~channels.default_channel.play_on(\thump, [
-				\freq, freq * 4,
-				\atk, 0.6,
-				\rel, 2,
-				\c0, -3,
-				\c1, \sine,
-				\pan, 0.3,
-				\amp, 0.1,
-				\out, ~channels.default_channel.bus]);
-
-
-			~newMainFrameTime = Date.localtime.rawSeconds;
-
-			~tickClock.tempo = 2;
-			("url: " + url + " hostname: " + hostname).postln;
+		if(~currentTabUrl != tab_url) {
+			("RESET" + tab_url).postln;
+			~currentTabUrl = tab_url;
+			~newPageLoadEvent.(url, hostname);
+		};
+		// The first request is seldom the correct main hostname
+		if(url == ~currentTabUrl) {
 			~overallStats.currentFrame.hostname = hostname;
 		};
 
@@ -1201,8 +1226,10 @@ s.waitForBoot({
 	q = OSCFunc({ arg msg, time, addr, recvPort;
 		[msg, time, addr, recvPort].postln;
 		if(msg[1] == 'active') {
+			~stopIdleMusic.()
 		};
 		if(msg[1] == 'inactive') {
+			~startIdleMusic.()
 		};
 	}, '/idle');
 

@@ -112,7 +112,10 @@ Time spans of droney sounds:
 
 ~restartBackgroundDrones = { | numOctaves = 3, minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0, stutterSpeed = 8 |
 	var chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
-	~droneBackgroundSynths.do{|syn| syn.release};
+	// if(~backgroundDronesStarted == false, {
+	~droneBackgroundSynths.do{|syn|
+		syn.release
+	};
 	~droneBackgroundSynths = chord.collect{ |degree|
 		var octave = rrand(-1, numOctaves).floor,
 		freq = ~s53.degreeToFreq(degree + ~root, 0.midicps, ~octave+octave);
@@ -128,9 +131,26 @@ Time spans of droney sounds:
 			\stutterAmount, stutterAmount,
 			\stutterSpeed, stutterSpeed,
 			\pan, rrand(-0.7, 0.7),
-			\amp, 0.2 * amp,
-			\out, ~channels.drone.bus]);
-	};
+				\amp, 0.2 * amp,
+				\out, ~channels.drone.bus]);
+		};
+	/*}, {
+		~droneBackgroundSynths.do{|syn, i|
+			var octave = rrand(-1, numOctaves).floor,
+			freq = ~s53.degreeToFreq(chord[i] + ~root, 0.midicps, ~octave+octave);
+			syn.set(
+				\freq, freq,
+				\minrq, minrq,
+				\maxrq, maxrq,
+				\brightness, brightness,
+				\stutterAmount, stutterAmount,
+				\stutterSpeed, stutterSpeed,
+				\pan, rrand(-0.7, 0.7),
+				\amp, 0.2 * amp,
+			);
+		};
+
+	});*/
 };
 
 ~updateBackgroundDrones = { | minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0, stutterSpeed = 8 |

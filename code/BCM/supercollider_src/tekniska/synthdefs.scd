@@ -163,15 +163,28 @@ SynthDef(\sub_tam, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 
-SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
+SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 	var sig, wet;
 
 	sig = In.ar(\in.kr(10), 2);
 	mix = mix.lag(\mixLag.kr(10));
 
-	wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
+	wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
 	wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);
 	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.9));
+
+	sig = (sig * (1-mix)) + (wet*mix);
+	sig = Limiter.ar(sig, 0.95);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\long_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
+	var sig, wet;
+
+	sig = In.ar(\in.kr(10), 2);
+	mix = mix.lag(\mixLag.kr(10));
+
+	wet = JPverb.ar(sig, rt, 0.2, 4.5, 0.8);
 
 	sig = (sig * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
@@ -275,7 +288,7 @@ SynthDef(\softy, {
 }).add;
 
 SynthDef(\softy_sustained, {
-	var sig, env, freq = \freq.kr(220), rq = 0.007, ampVariation, atk = \atk.kr(0.1), stutterTrig, stutterAmount = 1-\stutterAmount.kr(1),
+	var sig, env, freq = \freq.kr(220, 0.02), rq = 0.007, ampVariation, atk = \atk.kr(0.1), stutterTrig, stutterAmount = 1-\stutterAmount.kr(1),
 	brightSig, brightness = \brightness.kr(0.0);
 	brightness = brightness.pow(2);
 	env = EnvGen.kr(Env.asr(atk, 1.0, \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]),
