@@ -149,7 +149,7 @@ class AppViz {
         const s = this.getService(service);
         //ADD A PACKAGE TO THE SERVICE
         //if it exists add more time to live
-        // s.updateTime();
+        s.updateTime();
         s.addPackagesNum();
         //if it exists add to size
         //add the figure 
@@ -215,7 +215,7 @@ class AppViz {
 
 
     stepRadius() {
-        this.radius += 0.05;
+        this.radius += 0.2;
     }
 
     stepAnglePos() {
@@ -251,7 +251,7 @@ class PackageParticle {
         this.type = type;
         //GET OR POST
         this.method = method;
-        this.direction = this.method == "GET" ? 1 : -1;
+        this.direction = this.method == "GET" ? -1 : 1;
         this.font = font;
         this.camera = camera;
         this.text;
@@ -259,14 +259,15 @@ class PackageParticle {
         this.elem;
         this.tempV = new THREE.Vector3();
         this.renderer = renderer;
-        this.timeStamp = Date.now() + (1 * 1000);
+        this.timeStamp = Date.now() + (3 * 1000);
         this.status = 'ACTIVE'
         this.requestId = requestId;
         this.showLabel = showLabel;
         this.servicePos = position.servicePos
-        this.angle = position.angle;
-        this.radius = position.radius
+        this.angle = Math.random() * Math.PI * 2;//position.angle;
+        this.radius = 0;//position.radius
         this.posZ = position.servicePos.z
+        this.speed = Math.random() / 100;
         //get the position setup
     }
 
@@ -294,7 +295,7 @@ class PackageParticle {
     init() {
 
         // const adjustedSize = Math.abs(this.simplex.noise3D(1, 1, 1) * 0.5);
-        this.geometry = new THREE.OctahedronGeometry(0.3, 0);
+        this.geometry = new THREE.OctahedronGeometry(0.1, 0);
         this.material = new THREE.MeshPhongMaterial({ color: 0xf9e20d });
         this.shape = new THREE.Mesh(this.geometry, this.material);
 
@@ -302,16 +303,16 @@ class PackageParticle {
         //position of the shape 
         const randomPos = this.random3DPosition(10);
         this.shape.position.copy(this.servicePos)
-        const sparkle = this.totesRando(0.003, 0.5);
-        TweenMax.to(this.shape.scale, 1, {
-            duration: 10,
-            x: sparkle,
-            y: sparkle,
-            z: sparkle,
-            repeat: -1,
-            yoyo: true,
-            delay: randomPos.z * 0.1
-        });
+        // const sparkle = this.totesRando(0.003, 0.5);
+        // TweenMax.to(this.shape.scale, 1, {
+        //     duration: 10,
+        //     x: sparkle,
+        //     y: sparkle,
+        //     z: sparkle,
+        //     repeat: -1,
+        //     yoyo: true,
+        //     delay: randomPos.z * 0.1
+        // });
         this.scene.add(this.shape);
 
         //TEXT 
@@ -337,15 +338,15 @@ class PackageParticle {
     //code for getting position
     getCircularPosition(angle, radius, posZ) {
         return new THREE.Vector3(
-            radius * Math.sin(angle),
-            radius * Math.cos(angle),
+            radius * Math.sin(angle) + this.servicePos.x,
+            radius * Math.cos(angle) + this.servicePos.y,
             posZ
         );
     }
 
     update() {
 
-        this.radius += (0.05 * this.direction);
+        this.radius += (this.speed * this.direction);
         // this.angle += 0.05;
         this.shape.position.copy(this.getCircularPosition(this.angle, this.radius, this.posZ))
         // = this.shape.position.x + (0.05 * this.direction);
@@ -426,11 +427,12 @@ class serviceParticle {
         this.zPos = zPos;
         this.showLabel = showLabel;
         this.packagesNum = 0;
+        this.speed = 0.004;//Math.random() / 100;
         // this.packages = [];
     }
 
     updateTime() {
-        this.timeStamp = Math.min(this.timeStamp + 500);
+        this.timeStamp = this.timeStamp + 50;
     }
 
     addPackagesNum() {
@@ -522,10 +524,10 @@ class serviceParticle {
         if (this.showLabel) this.updateText();
         //CHECK STATE
         if (Date.now() > this.timeStamp) this.status = "REMOVE"
-        this.radius += 0.005;
+        this.radius += this.speed;
         this.shape.position.copy(this.getCircularPosition(this.anglePos))
-        this.shape.rotateX(-0.01)
-        this.shape.rotateY(0.01)
+        // this.shape.rotateX(-0.01)
+        // this.shape.rotateY(0.01)
         // this.shape.rotateZ(0.01)
 
     }
@@ -692,7 +694,7 @@ class urlParticle {
         this.tempV.project(this.camera);
 
         // convert the normalized position to CSS coordinates
-        const x = (this.tempV.x * .5 + .5) * canvas.clientWidth;
+        const x = (this.tempVnpm.x * .5 + .5) * canvas.clientWidth;
         const y = (this.tempV.y * -.5 + .5) * canvas.clientHeight;
         // move the elem to that position
         this.elem.style.transform = `translate(10%, -50%) translate(${x}px,${y}px)`;

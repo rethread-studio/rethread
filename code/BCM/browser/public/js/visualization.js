@@ -120,7 +120,7 @@ const options = {
     service: 0x0a0a0a,
     package: 0x000000,
   },
-  showLabels: true,
+  showLabels: false,
   lightHelpers: false,
   angleStep: 30,
 
@@ -184,9 +184,7 @@ const onmessage = (message) => {
     }
     let location = packet.location != null && packet.location != undefined ? countryList.name(packet.location.country) : "";
 
-    // if (!location) {
-    //   location = packet.local_location.country;
-    // }
+
     for (let c of countries) {
       if (c.geometry.name == location) {
         c.userData.scale += 0.003;
@@ -217,7 +215,6 @@ const onmessage = (message) => {
       //Process each of the services in the packet
       for (const service of packet.services) {
         //ADD SERVICE TO TEXT
-        // serviceViz.addService(service)
         // ADD A NEW 3D SERVICE
         myApp.addService(service, json.request.type, json.request.requestId);
 
@@ -245,7 +242,7 @@ const onmessage = (message) => {
     myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0]);
 
 
-  } else if (json.event == "home") {
+  } else if (json.event == "home" && json.action == "open") {
     getChallenge();
   }
 };

@@ -92,14 +92,3 @@ function eraseMessage() {
     //     caption_en = '';
     // }
 }
-
-
-// const message = {
-//     se: "Det äar en experiment för alt",
-//     en: "This is an experimetn for all"
-// }
-// typeMessage(message)
-
-// setInterval(getChallenge, 10000);
-
-// getChallenge()
