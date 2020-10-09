@@ -132,7 +132,8 @@ const options = {
 }
 //modify styles if to match installation settings
 document.body.style.paddingTop = options.installation ? '470px' : 0;
-
+//modify styles if to match installation settings
+document.getElementsByClassName('message')[0].style.top = options.installation ? "470px" : 0;
 
 function changeColor() {
   colorPos = colorPos + 1 > options.backgroundColors.length ? 0 : colorPos + 1;
@@ -172,19 +173,8 @@ const onmessage = (message) => {
 
       //ADD URL when they navigate one tab
       if (packet.type == "main_frame") {
-
-
         myApp.addURL(packet.url, packet.requestId)
-
-        // const message = {
-        //   se: "Det äar en experiment för alt",
-        //   en: "This is an experimetn for all"
-        // }
-        // typeMessage(message)
-
-        //add
       }
-      //To do: RESET VISUALS
     }
 
   } else if (json.event == "request_completed") {

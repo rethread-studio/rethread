@@ -21,6 +21,16 @@ const challenges = [
     },
 ]
 
+let challengePos = 0;
+const sendChallenge = 5000;
+const challengeTime = Date.now();
+const clicks = 0;
+
+function getChallenge() {
+    challengePos = challengePos + 1 >= challenges.length ? 0 : challengePos + 1;
+    typeMessage(challenges[challengePos])
+}
+
 
 
 
@@ -82,3 +92,6 @@ function erase() {
 //     en: "This is an experimetn for all"
 // }
 // typeMessage(message)
+
+setInterval(getChallenge, 30000);
+
