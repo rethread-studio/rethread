@@ -176,11 +176,11 @@ const onmessage = (message) => {
 
         myApp.addURL(packet.url, packet.requestId)
 
-        const message = {
-          se: "Det äar en experiment för alt",
-          en: "This is an experimetn for all"
-        }
-        typeMessage(message)
+        // const message = {
+        //   se: "Det äar en experiment för alt",
+        //   en: "This is an experimetn for all"
+        // }
+        // typeMessage(message)
 
         //add
       }

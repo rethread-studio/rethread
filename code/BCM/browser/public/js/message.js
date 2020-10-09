@@ -1,8 +1,24 @@
 const challenges = [
     {
-        se: "",
-
-    }
+        se: "🌍 Kan du ansluta till en webbsida som aktiveras på kartan Afrika, Ryssland eller Sverige?",
+        en: "Can you connect to a webpage that activates in the map Africa, Russia, or Sweden?"
+    },
+    {
+        se: "🟠 Kan du hitta en webbsida som bara visar en enda röd punkt?",
+        en: "Can you find a website that shows only one red dot?"
+    },
+    {
+        se: "🔎 Hitta en webbplats med så många punkter som möjligt!",
+        en: "Find a website that activates as many dots as possible!"
+    },
+    {
+        se: "🎵 Hitta en webbplats med så mycket ljud som möjligt!",
+        en: "Find a website with as much sound as possible!"
+    },
+    {
+        se: "🤔 Besök din favoritwebbplats. Hur många andra sidor besöker du på samma gång?",
+        en: "Visit your favorite website. How many other websites do you visit at the same time?"
+    },
 ]
 
 
