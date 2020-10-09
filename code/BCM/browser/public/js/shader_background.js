@@ -94,6 +94,11 @@ function backgroundFragShader() {
       }
       return v;
   }
+
+  float tri(in float m) {
+      float x = mod(m, 2.0) - 1.0;
+      return 1.0 - abs(x);
+  }
   
   void main() {
       vec2 st = (gl_FragCoord.xy/iResolution.x)-.5;
@@ -128,8 +133,17 @@ function backgroundFragShader() {
     //               vec3(0.6784, 0.8627, 0.902),
     //              clamp(length(r.x),0.0,1.0));
 
-    vec3 randomColor = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.5+.5, sin(time*.038426384)*.5+.5) * (sin(time * 0.004) * 0.3 + 0.7);
-    vec3 randomColor2 = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.3+.3, sin(time*.038426384)*.4+.4) * (sin(time * 0.005) * 0.2 + 0.8);
+    // vec3 randomColor = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.5+.5, sin(time*.038426384)*.5+.5) * (sin(time * 0.004) * 0.3 + 0.7);
+    // vec3 randomColor2 = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.3+.3, sin(time*.038426384)*.4+.4) * (sin(time * 0.005) * 0.2 + 0.8);
+
+    float colorMix = tri(time*0.01)*.5 + .5;
+
+    vec3 randomColor2 = mix(vec3(0.416, 0.51, 0.984), vec3(0.8, 0.325, 0.2), clamp(colorMix*2.0, 0.0, 1.0));
+    randomColor2 = mix(randomColor2, vec3(0.235, 0.063, 0.325), clamp(colorMix*4.0-2.0, 0.0, 1.0));
+    randomColor2 = mix(randomColor2, vec3(0.537, 0.129, 0.42), clamp(colorMix*4.0-3.0, 0.0, 1.0));
+    vec3 randomColor = mix(vec3(0.988, 0.361, 0.490), vec3(0.137, 0.027, 0.302), clamp(colorMix*2.0, 0.0, 1.0));
+    randomColor = mix(randomColor, vec3(0.678, 0.325, 0.537), clamp(colorMix*4.0-2.0, 0.0, 1.0));
+    randomColor = mix(randomColor, vec3(0.855, 0.267, 0.325), clamp(colorMix*4.0-3.0, 0.0, 1.0));
 
     color = mix(randomColor2, randomColor, clamp(uv.x+.5, 0.,1.));
 
@@ -141,6 +155,7 @@ function backgroundFragShader() {
     //                 clamp((f*f)*1.5,0.4,1.0));
   
       gl_FragColor = vec4(pow(f, 0.5)*1.0*color, 1.0);
+    //   gl_FragColor = vec4(vec3(colorMix), 1.0);
   }
     `;
 }
