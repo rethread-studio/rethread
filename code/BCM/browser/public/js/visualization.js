@@ -161,9 +161,7 @@ const onmessage = (message) => {
   //EVENT
   //REQUEST CREATED
 
-  
-
-  console.log(json)
+  // console.log(json)
 
   if(currentUrl != json.current_tab.url) {
     const packet = json.request;
