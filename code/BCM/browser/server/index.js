@@ -43,12 +43,13 @@ wss.on("connection", function (ws, request) {
       }
     }
     if (message.event == "idle") {
-      osc.send(message, message.event);
       console.log(message.action);
     }
     if (message.event == "home") {
-      console.log(message);
       osc.send(message, message.event);
+    }
+    if (message.current_tab) {
+      message.request.tab_url = message.current_tab.url
     }
     if (message.request) {
       if (message.request.responseHeaders) {
