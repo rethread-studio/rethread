@@ -15,6 +15,7 @@ function sendCurrentUrl() {
 
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
   lastTab = await sendCurrentUrl();
+  chrome.tabs.reload(lastTab.id);
   broadcast({
     event: "tab_changed",
     tab: lastTab,
@@ -47,6 +48,12 @@ chrome.windows.onRemoved.addListener(function (tabId) {
 
 chrome.webRequest.onBeforeRequest.addListener(
   async function (event) {
+    if (event.initiator == null || event.initiator.indexOf("chrome-extension") == 0) {
+      return;
+    }
+    if (event.type == "main_frame") {
+      ga("send", "pageview", event.url);
+    }
     lastTab = await sendCurrentUrl();
     if (event.requestBody && event.requestBody.raw) {
       let formData = event.requestBody.raw;
@@ -69,6 +76,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       event.requestBody = res;
     }
     event.activeTab = event.tabId == lastTab.id;
+    ga("send", "event", "request_created", event.type, event.url);
     broadcast({
       event: "request_created",
       request: event,
@@ -85,8 +93,12 @@ var exposedHeaders;
 
 chrome.webRequest.onCompleted.addListener(
   async function (event) {
+    if (event.initiator == null || event.initiator.indexOf("chrome-extension") == 0) {
+      return;
+    }
     lastTab = await sendCurrentUrl();
     event.activeTab = event.tabId == lastTab.id;
+    ga("send", "event", "request_completed", event.type, event.url);
     broadcast({
       event: "request_completed",
       request: event,
@@ -97,17 +109,61 @@ chrome.webRequest.onCompleted.addListener(
   ["responseHeaders", "extraHeaders"]
 );
 
-chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
-  if (data.type != "error") {
-    return true;
-  }
-  console.log(data, sender);
-  errors[sender.tab.id].push(data.error);
-
-  chrome.browserAction.setBadgeText({
-    tabId: sender.tab.id,
-    text: errors[sender.tab.id].length + "",
+async function inactive() {
+  chrome.tabs.getAllInWindow(null, (tabs) => {
+    tabs = tabs.filter((tab) => tab.id > -1);
+    const indexes = [];
+    for (let tab of tabs) {
+      console.log(tab);
+      if (tab != tabs[0]) {
+        indexes.push(tab.id);
+      }
+    }
+    chrome.tabs.update(tabs[0].id, {
+      url: "http://localhost:8873/button.html",
+    });
+    chrome.tabs.remove(indexes);
   });
-  //chrome.storage.local.set({error: error});
+}
+
+ga("create", "UA-5954162-29", "auto");
+ga("set", "checkProtocolTask", null);
+
+var actionTimeout = null;
+var isInactive = false;
+function action() {
+  clearTimeout(actionTimeout);
+  if (isInactive) {
+    broadcast({
+      event: "idle",
+      action: "active",
+    });
+    ga("send", "event", "idle", "active");
+  }
+  isInactive = false;
+  actionTimeout = setTimeout(function () {
+    isInactive = true;
+    // inactive();
+    broadcast({
+      event: "idle",
+      action: "inactive",
+    });
+    ga("send", "pageview", "home");
+    ga("send", "event", "idle", "inactive");
+  }, 60000);
+}
+
+chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
+  if (data.type == "action") {
+    action();
+  } else if (data.type == "home") {
+    ga("send", "pageview", "/home");
+    broadcast({
+      event: "home",
+      action: data.action,
+    });
+  } else {
+    console.log(data);
+  }
   return true;
 });

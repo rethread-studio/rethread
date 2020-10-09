@@ -11,6 +11,7 @@
   "background": {
     "scripts": [
       "scripts/chromereload.js",
+      "scripts/analytics.js",
       "scripts/websocket.js",
       "scripts/background.js"
     ]
