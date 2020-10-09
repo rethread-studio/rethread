@@ -104,7 +104,7 @@ function backgroundFragShader() {
       vec2 st = (gl_FragCoord.xy/iResolution.x)-.5;
       // vec2 st = - 1.0 + 2.0 * vUv;
       vec2 uv = st;
-      st*=10.;
+      st*=5.;// * pow(abs(uv.x), 0.1);
       //
       //st += st * abs(sin(time*0.1)*3.0);
       vec3 color = vec3(0.0);
@@ -118,7 +118,7 @@ function backgroundFragShader() {
       r.x = fbm( st * rotate(time * -0.033) + 10.0*q + vec2(1.7,9.2)+ 0.10*time );
       r.y = fbm( st * rotate(time * 0.005) + 1.0*q + vec2(8.3,2.8)+ 0.016*time);
   
-      //float f = fbm(st+ (r*3.2));
+    //   float f = fbm(st+ (r*3.2));
       float f = max(pow(r.y*q.y * q.x, 0.1), 0.1);
   
     //   color = mix(vec3(0.4824, 0.651, 0.6863),
@@ -133,17 +133,18 @@ function backgroundFragShader() {
     //               vec3(0.6784, 0.8627, 0.902),
     //              clamp(length(r.x),0.0,1.0));
 
-    // vec3 randomColor = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.5+.5, sin(time*.038426384)*.5+.5) * (sin(time * 0.004) * 0.3 + 0.7);
-    // vec3 randomColor2 = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.3+.3, sin(time*.038426384)*.4+.4) * (sin(time * 0.005) * 0.2 + 0.8);
+    time *= 0.1;
+    vec3 randomColor = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.5+.5, sin(time*.038426384)*.5+.5) * (sin(time * 0.04) * 0.3 + 0.7);
+    vec3 randomColor2 = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.45+.45, sin(time*.038426384)*.45+.45) * (sin(time * 0.05) * 0.2 + 0.8);
 
     float colorMix = tri(time*0.01)*.5 + .5;
 
-    vec3 randomColor2 = mix(vec3(0.416, 0.51, 0.984), vec3(0.8, 0.325, 0.2), clamp(colorMix*2.0, 0.0, 1.0));
-    randomColor2 = mix(randomColor2, vec3(0.235, 0.063, 0.325), clamp(colorMix*4.0-2.0, 0.0, 1.0));
-    randomColor2 = mix(randomColor2, vec3(0.537, 0.129, 0.42), clamp(colorMix*4.0-3.0, 0.0, 1.0));
-    vec3 randomColor = mix(vec3(0.988, 0.361, 0.490), vec3(0.137, 0.027, 0.302), clamp(colorMix*2.0, 0.0, 1.0));
-    randomColor = mix(randomColor, vec3(0.678, 0.325, 0.537), clamp(colorMix*4.0-2.0, 0.0, 1.0));
-    randomColor = mix(randomColor, vec3(0.855, 0.267, 0.325), clamp(colorMix*4.0-3.0, 0.0, 1.0));
+    // vec3 randomColor2 = mix(vec3(0.416, 0.51, 0.984), vec3(0.8, 0.325, 0.2), clamp(colorMix*2.0, 0.0, 1.0));
+    // randomColor2 = mix(randomColor2, vec3(0.235, 0.063, 0.325), clamp(colorMix*4.0-2.0, 0.0, 1.0));
+    // randomColor2 = mix(randomColor2, vec3(0.537, 0.129, 0.42), clamp(colorMix*4.0-3.0, 0.0, 1.0));
+    // vec3 randomColor = mix(vec3(0.988, 0.361, 0.490), vec3(0.137, 0.027, 0.302), clamp(colorMix*2.0, 0.0, 1.0));
+    // randomColor = mix(randomColor, vec3(0.678, 0.325, 0.537), clamp(colorMix*4.0-2.0, 0.0, 1.0));
+    // randomColor = mix(randomColor, vec3(0.855, 0.267, 0.325), clamp(colorMix*4.0-3.0, 0.0, 1.0));
 
     color = mix(randomColor2, randomColor, clamp(uv.x+.5, 0.,1.));
 
