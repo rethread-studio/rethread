@@ -116,19 +116,24 @@ const options = {
   installation: false,
 
   colors: {
-    roadColor: 0x080808,
-    islandColor: 0x0a0a0a,
-    background: 0x000000,
-    shoulderLines: 0x131318,
-    brokenLines: 0x131318,
+    url: 0xee4035,
+    service: 0x0a0a0a,
+    package: 0x000000,
   },
-  backgroundColors: ["#a2dce7", "#19206b", "#333647"]
+  showLabels: true,
+  lightHelpers: false,
+  angleStep: 30,
+
+  countries: {
+    color: 0xFFFFFF,
+    transparent: false,
+    opacityBaseLevel: 0.5
+  }
 }
 //modify styles if to match installation settings
 document.body.style.paddingTop = options.installation ? '470px' : 0;
-
-let colorPos = 0;
-document.body.style.backgroundColor = options.backgroundColors[0];
+//modify styles if to match installation settings
+document.getElementsByClassName('message')[0].style.top = options.installation ? "470px" : 0;
 
 function changeColor() {
   colorPos = colorPos + 1 > options.backgroundColors.length ? 0 : colorPos + 1;
@@ -157,7 +162,6 @@ const onmessage = (message) => {
   //INITIALIZAR
   //SERVICE
   //EVENT
-
   //REQUEST CREATED
   if (json.event == "request_created") {
 
@@ -165,25 +169,26 @@ const onmessage = (message) => {
     if (initiator != json.request.initiator) {
       initiator = json.request.initiator;
       // changeColor();
-      //To do: RESET VISUALS
-      // console.log(json.request)
+      const packet = json.request;
+
+      //ADD URL when they navigate one tab
+      if (packet.type == "main_frame") {
+        myApp.addURL(packet.url, packet.requestId)
+      }
     }
 
   } else if (json.event == "request_completed") {
     //ADD INITIATOR
-    // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
-    myApp.addGeometry(json.request.method, json.request.type, json.request.requestId);
-
 
     //Get the information from the request
     const packet = json.request;
-    console.log(packet)
+
     // //CHECK if it has any packaggites
     //if it does not have, include the host name as a service
     if (packet.services.length === 0) {
       packet.services.push(packet.hostname);
     }
-    let location = countryList.name(packet.location.country);
+    let location = packet.location != null && packet.location != undefined ? countryList.name(packet.location.country) : "";
 
     // if (!location) {
     //   location = packet.local_location.country;
@@ -223,7 +228,7 @@ const onmessage = (message) => {
         myApp.addService(service, json.request.type, json.request.requestId);
 
         //if the service does not exist
-        const country = getCountryName(packet.location.country);
+        const country = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
 
         if (!positionPerService.has(country)) {
           //create a text to display
@@ -241,6 +246,11 @@ const onmessage = (message) => {
         activeService = country;
       }
     }
+    // console.log(json.request)
+    // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
+    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0]);
+
+
   }
 };
 
@@ -265,7 +275,7 @@ function random3DPosition(magnitude) {
   return new THREE.Vector3(
     (-1 + Math.random() * 2) * magnitude,
     (-1 + Math.random() * 2) * magnitude,
-    (-1 + Math.random() * 2) * magnitude
+    (1 + Math.random() * 1) * magnitude
   );
 }
 
@@ -322,7 +332,7 @@ function createText(service, servicePos) {
   let geometry = new THREE.TextGeometry(service, {
     font: font,
     size: 50,
-    height: 0.01,
+    height: 0.001,
     curveSegments: 2,
     bevelEnabled: true,
     bevelSize: 0.1,
@@ -453,6 +463,11 @@ function init() {
   scene.fog = new THREE.Fog(0xfafafa, 40, 2000);
   const light = new THREE.HemisphereLight(0xffffff, 0x555555, 0.7);
   scene.add(light);
+
+  if (options.lightHelpers) {
+    let helper = new THREE.HemisphereLightHelper(light, 5);
+    scene.add(helper);
+  }
 
   // END GLOBE
 
@@ -658,9 +673,7 @@ function rotateGlobe() {
           faceIndex = 2;
         }
         let pos = country.geometry.faces[faceIndex].normal;
-        console.log("geometry, pos and rot")
-        console.log(country.geometry)
-        console.log(pos);
+
         let rotX = circleRotation(new THREE.Vector3(1, 0, 0), pos);
         let rotY = circleRotation(new THREE.Vector3(0, 1, 0), pos);
         newRotation.x = rotX * -1;
@@ -668,7 +681,7 @@ function rotateGlobe() {
         // newRotation.x = pos.x;
         // newRotation.y = pos.y;
         // newRotation.z = pos.z;
-        console.log("rotX: " + rotX + "rotY: " + rotY);
+
       }
     }
   } else {
@@ -932,18 +945,18 @@ function generateCountries() {
 
   var polygons = Object.keys(countryShapes).map(function (name) {
     const country = countryShapes[name];
-    const geometry = new Map3DGeometry(country, 0.95);
+    const geometry = new Map3DGeometry(country, 0.99);
     geometry.name = name;
 
     const material = new THREE.MeshPhongMaterial({
       wireframe: true,
-      color: 0xbb4949,
-      transparent: true,
-      opacity: opacityBaseLevel,
+      color: options.countries.color,
+      transparent: options.countries.transparent,
+      opacity: options.countries.opacityBaseLevel,
       shading: THREE.SmoothShading,
       shininess: 50,
     });
-    const scale = 20.57236; // + Math.random() / 2;
+    const scale = 18; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;
@@ -955,6 +968,7 @@ function generateCountries() {
     mesh.userData.scale = 0;
     mesh.userData.baseScale = scale;
     mesh.userData.scaleFollower = 0;
+
     layer.add(mesh);
 
     return mesh;
