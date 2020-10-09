@@ -54,36 +54,43 @@ function typeMessage(message) {
     captionLength = 0;
     captionLength_en = 0;
     clearTimeout(erasetimeout);
+    clearTimeout(typeTiemout);
     type();
 }
+
+
 
 function type() {
     captionEl.innerHTML = caption_se.substr(0, captionLength++);
     eParagraph.innerHTML = caption_en.substr(0, captionLength_en++);
-    if (captionLength < caption_se.length + 1 && captionLength_en < caption_en.length + 1) {
-        typeTiemout = setTimeout('type()', speed);
+    if (captionLength < caption_se.length || captionLength_en < caption_en.length + 1) {
+        typeTiemout = setTimeout(type, speed);
     } else {
-        clearTimeout(typeTiemout);
-        erasetimeout = setTimeout(() => { erase(); }, 4000);
+        erasetimeout = setTimeout(eraseMessage, 3000);
 
+        clearTimeout(typeTiemout);
     }
 }
 
 
 
-function erase() {
-    captionEl.innerHTML = caption_se.substr(0, captionLength--);
-    eParagraph.innerHTML = caption_en.substr(0, captionLength_en--);
-    if (captionLength >= 0 && captionLength_en >= 0) {
-        erasetimeout = setTimeout('erase()', speed);
-    } else {
-        clearTimeout(typeTiemout);
-        clearTimeout(erasetimeout);
-        captionLength = 0;
-        caption_se = '';
-        captionLength_en = 0;
-        caption_en = '';
-    }
+function eraseMessage() {
+    captionEl.innerHTML = "";
+    eParagraph.innerHTML = "";
+    // captionEl.innerHTML = caption_se.substr(0, captionLength--);
+    // eParagraph.innerHTML = caption_en.substr(0, captionLength_en--);
+    // console.log('delete')
+    // if (captionLength >= 0 || captionLength_en >= 0) {
+    //     erasetimeout = setTimeout(erasetimeout, speed);
+    // } else {
+    //     console.log('erase message gone')
+    //     clearTimeout(typeTiemout);
+    //     clearTimeout(erasetimeout);
+    //     captionLength = 0;
+    //     caption_se = '';
+    //     captionLength_en = 0;
+    //     caption_en = '';
+    // }
 }
 
 
@@ -93,5 +100,6 @@ function erase() {
 // }
 // typeMessage(message)
 
-setInterval(getChallenge, 30000);
+// setInterval(getChallenge, 10000);
 
+// getChallenge()
