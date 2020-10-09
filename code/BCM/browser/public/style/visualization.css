@@ -176,7 +176,8 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
     -1px  0   0 #000; */
     font-size: 32px;
     font-family: 'neueBit', sans-serif;
-    color:#bd949e;
+    color:white;
+    opacity:0.5;
 }
 
 
