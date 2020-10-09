@@ -14,6 +14,10 @@ const indexPerService = new Map(); // Give the service a number used as an index
 const lastRegisteredPerService = new Map();
 let activeService = "";
 let packetsOverTime = 0;
+window.smoothActivity = 0;
+window.idle = false;
+let currentUrl = "";
+let numRequests = 0;
 let glitchThreshold = 130;
 let triggerThisFrame = false;
 
@@ -157,6 +161,16 @@ const onmessage = (message) => {
   //EVENT
   //REQUEST CREATED
 
+  // console.log(json)
+
+  if (currentUrl != json.current_tab.url) {
+    const packet = json.request;
+    // New page was loaded
+    numRequests = 0;
+    currentUrl = json.current_tab.url;
+    myApp.addURL(currentUrl, packet.requestId)
+  }
+
   if (json.event == "request_created") {
 
     //Add a new initiator 
@@ -166,8 +180,9 @@ const onmessage = (message) => {
       const packet = json.request;
 
       //ADD URL when they navigate one tab
+      // Doesn't work anymore for all urls
       if (packet.type == "main_frame") {
-        myApp.addURL(packet.url, packet.requestId)
+
       }
     }
 
@@ -205,6 +220,7 @@ const onmessage = (message) => {
 
     //Increment the counter for packetsOverTime
     packetsOverTime++;
+    numRequests++;
     //If it goes over the glitchThreshold trigger glitch
     if (packetsOverTime > glitchThreshold) {
       if (!triggerThisFrame) {
@@ -244,6 +260,15 @@ const onmessage = (message) => {
 
   } else if (json.event == "home" && json.action == "open") {
     getChallenge();
+  }
+  else if (json.event == "idle") {
+    console.log("idle");
+    console.log(json);
+    if (json.action == "inactive") {
+      window.idle = true;
+    } else if (json.action == "active") {
+      window.idle = false;
+    }
   }
 };
 
@@ -911,7 +936,12 @@ function animate() {
   // stats.update();
   render();
 
-  packetsOverTime *= 0.8;
+  // console.log("numRequests: " + numRequests + " packetsOverTime: " + packetsOverTime);
+  window.activity = numRequests * 0.1 + (packetsOverTime * 10);
+  const activityCoeff = 2.0 * dt;
+  window.smoothActivity = window.smoothActivity * (1 - activityCoeff) + window.activity * activityCoeff;
+
+  packetsOverTime *= 0.95;
   triggerThisFrame = false;
   lastUpdate = now;
 }

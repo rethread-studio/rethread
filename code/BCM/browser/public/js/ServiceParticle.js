@@ -694,7 +694,7 @@ class urlParticle {
         this.tempV.project(this.camera);
 
         // convert the normalized position to CSS coordinates
-        const x = (this.tempVnpm.x * .5 + .5) * canvas.clientWidth;
+        const x = (this.tempV.x * .5 + .5) * canvas.clientWidth;
         const y = (this.tempV.y * -.5 + .5) * canvas.clientHeight;
         // move the elem to that position
         this.elem.style.transform = `translate(10%, -50%) translate(${x}px,${y}px)`;

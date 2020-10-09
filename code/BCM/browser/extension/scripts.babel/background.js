@@ -48,8 +48,13 @@ chrome.windows.onRemoved.addListener(function (tabId) {
 
 chrome.webRequest.onBeforeRequest.addListener(
   async function (event) {
-    if (event.initiator == null || event.initiator.indexOf("chrome-extension") == 0) {
-      return;
+    if (
+      event.initiator == null &&
+      event.initiator.indexOf("chrome-extension") == 0
+    ) {
+      return {
+        cancel: false,
+      };
     }
     if (event.type == "main_frame") {
       ga("send", "pageview", event.url);
@@ -93,7 +98,10 @@ var exposedHeaders;
 
 chrome.webRequest.onCompleted.addListener(
   async function (event) {
-    if (event.initiator == null || event.initiator.indexOf("chrome-extension") == 0) {
+    if (
+      event.initiator == null ||
+      event.initiator.indexOf("chrome-extension") == 0
+    ) {
       return;
     }
     lastTab = await sendCurrentUrl();

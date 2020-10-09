@@ -17,6 +17,7 @@ oscValueOrder["request_completed"] = [
   "hostname",
   "services",
   "location",
+  "tab_url"
 ];
 oscValueOrder["request_created"] = oscValueOrder["request_completed"];
 oscValueOrder["home"] = ["action"];
