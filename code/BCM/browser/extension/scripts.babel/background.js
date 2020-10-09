@@ -48,6 +48,12 @@ chrome.windows.onRemoved.addListener(function (tabId) {
 
 chrome.webRequest.onBeforeRequest.addListener(
   async function (event) {
+    if (event.initiator == null || event.initiator.indexOf("chrome-extension") == 0) {
+      return;
+    }
+    if (event.type == "main_frame") {
+      ga("send", "pageview", event.url);
+    }
     lastTab = await sendCurrentUrl();
     if (event.requestBody && event.requestBody.raw) {
       let formData = event.requestBody.raw;
@@ -70,6 +76,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       event.requestBody = res;
     }
     event.activeTab = event.tabId == lastTab.id;
+    ga("send", "event", "request_created", event.type, event.url);
     broadcast({
       event: "request_created",
       request: event,
@@ -86,8 +93,12 @@ var exposedHeaders;
 
 chrome.webRequest.onCompleted.addListener(
   async function (event) {
+    if (event.initiator == null || event.initiator.indexOf("chrome-extension") == 0) {
+      return;
+    }
     lastTab = await sendCurrentUrl();
     event.activeTab = event.tabId == lastTab.id;
+    ga("send", "event", "request_completed", event.type, event.url);
     broadcast({
       event: "request_completed",
       request: event,
@@ -115,6 +126,9 @@ async function inactive() {
   });
 }
 
+ga("create", "UA-5954162-29", "auto");
+ga("set", "checkProtocolTask", null);
+
 var actionTimeout = null;
 var isInactive = false;
 function action() {
@@ -124,6 +138,7 @@ function action() {
       event: "idle",
       action: "active",
     });
+    ga("send", "event", "idle", "active");
   }
   isInactive = false;
   actionTimeout = setTimeout(function () {
@@ -133,6 +148,8 @@ function action() {
       event: "idle",
       action: "inactive",
     });
+    ga("send", "pageview", "home");
+    ga("send", "event", "idle", "inactive");
   }, 60000);
 }
 
@@ -140,6 +157,7 @@ chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
   if (data.type == "action") {
     action();
   } else if (data.type == "home") {
+    ga("send", "pageview", "/home");
     broadcast({
       event: "home",
       action: data.action,
