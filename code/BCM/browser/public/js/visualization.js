@@ -156,7 +156,7 @@ const onmessage = (message) => {
   //SERVICE
   //EVENT
   //REQUEST CREATED
-  console.log(json.event)
+
   if (json.event == "request_created") {
 
     //Add a new initiator 
@@ -245,6 +245,8 @@ const onmessage = (message) => {
     myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0]);
 
 
+  } else if (json.event == "home") {
+    getChallenge();
   }
 };
 
