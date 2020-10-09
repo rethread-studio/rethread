@@ -3568,3 +3568,13 @@ body.is-preload #header .image img {
         padding: 3em 1.5em 1em 1.5em;
     }
 }
+
+.small-text {
+    font-size: 0.85em;
+}
+
+.tiny-text {
+    font-size: 0.6em;
+    width: 100%;
+    text-align: center;
+}
