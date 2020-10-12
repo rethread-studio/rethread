@@ -100,6 +100,11 @@ p{
     flex-direction: column;
 }
 
+.flex-row{
+    display: flex;
+    flex-direction: row;
+}
+
 .spacer{
     height:20px;
 }
@@ -361,4 +366,8 @@ background-shader{
   canvas {
     position: absolute;
     top: 0;
+  }
+
+  .pad{
+      padding: 50px;
   }
