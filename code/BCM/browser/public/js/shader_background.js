@@ -105,7 +105,7 @@ function backgroundFragShader() {
       vec2 st = (gl_FragCoord.xy/iResolution.x)-.5;
       // vec2 st = - 1.0 + 2.0 * vUv;
       vec2 uv = st;
-      st*=5.;// * pow(abs(uv.x), 0.1);
+      st*=10.;// * pow(abs(uv.x), 0.1);
       //
       //st += st * abs(sin(time*0.1)*3.0);
       vec3 color = vec3(0.0);
@@ -156,7 +156,7 @@ function backgroundFragShader() {
     //                 leftColor,
     //                 clamp((f*f)*1.5,0.4,1.0));
   
-      gl_FragColor = vec4(pow(f, 0.5)*1.0*color*brightness, 1.0);
+      gl_FragColor = vec4(pow(f, 0.9)*1.0*color*brightness, 1.0);
     //   gl_FragColor = vec4(vec3(colorMix), 1.0);
   }
     `;
