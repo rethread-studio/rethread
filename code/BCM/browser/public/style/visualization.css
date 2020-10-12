@@ -89,17 +89,6 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
   animation: GradientAnimation 15s ease infinite; 
 }
 
-/* Style the video: 100% width and height to cover the entire window */
-#myVideo {
-
-  
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  min-width: 100%;
-  min-height: 100%;
-  z-index: -10;
-}
 
 @-webkit-keyframes GradientAnimation {
   0%{background-position:0% 50%}
