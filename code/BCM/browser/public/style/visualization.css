@@ -148,11 +148,7 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
 }
 
 #labels>div {
-  position: absolute;  /* let us position them inside the container */
-  left: 0;             /* make their default position the top left of the container */
-  top: 0;
-  cursor: pointer;     /* change the cursor to a hand when over us */
-  /* font-size: large; */
+  
   user-select: none;   /* don't let the text get selected */
   /* text-shadow:         
     -1px -1px 0 #000,
@@ -163,10 +159,11 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
      0    1px 0 #000,
     -1px  1px 0 #000,
     -1px  0   0 #000; */
-    font-size: 32px;
+    font-size: 28px;
     font-family: 'neueBit', sans-serif;
     color:white;
-    opacity:0.5;
+    max-width: 200px;
+    z-index: 900;
 }
 
 

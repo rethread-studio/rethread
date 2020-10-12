@@ -167,7 +167,8 @@ const onmessage = (message) => {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
-    currentUrl = json.current_tab.url;
+    currentUrl = json.current_tab.title;
+    console.log(json.current_tab)
     myApp.addURL(currentUrl, packet.requestId)
   }
 
@@ -239,7 +240,7 @@ const onmessage = (message) => {
 
         if (!positionPerService.has(country)) {
           //create a text to display
-          let servicePos = random3DPosition(500);
+          let servicePos = random3DPosition(18);
           createText(country, servicePos);
           positionPerService.set(country, servicePos);
           indexPerService.set(country, indexPerService.size);
@@ -291,10 +292,14 @@ function reset() {
 //CREATE a random position
 function random3DPosition(magnitude) {
   return new THREE.Vector3(
-    (-1 + Math.random() * 2) * magnitude,
-    (-1 + Math.random() * 2) * magnitude,
-    (1 + Math.random() * 1) * magnitude
+    getRandomArbitrary(-magnitude, magnitude),
+    getRandomArbitrary(-magnitude * 2, magnitude),
+    25
   );
+}
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
 //ADD PARTICLE:
@@ -332,7 +337,7 @@ let textMaterialDefault = new THREE.MeshBasicMaterial({
   opacity: 0.7,
 });
 let textMaterialActive = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
+  color: 0xE5463C,
   transparent: true,
   opacity: 0.9,
 });
@@ -345,16 +350,16 @@ function createText(service, servicePos) {
   let material = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.2,
   });
   let geometry = new THREE.TextGeometry(service, {
     font: font,
-    size: 50,
-    height: 0.001,
-    curveSegments: 2,
-    bevelEnabled: true,
-    bevelSize: 0.1,
-    bevelOffset: 0.1,
+    size: 3,
+    height: 1,
+    curveSegments: 12,
+    bevelEnabled: false,
+    bevelSize: 0,
+    bevelOffset: 0,
     bevelSegments: 1,
   });
 
@@ -382,7 +387,7 @@ function updateText(service) {
   }
 }
 
-let activeParticleColor = new THREE.Color(0xff0000);
+let activeParticleColor = new THREE.Color(0xE5463C);
 var particles_group;
 let particles_rotation = new THREE.Euler();
 let particles_rotation_vel = new THREE.Vector3(0, 0, 0);
@@ -463,7 +468,7 @@ function init() {
     1,
     4000
   );
-  camera.position.z = 1750;
+  camera.position.z = 80;
 
   // var controls = new OrbitControls(camera, container);
   // controls.minDistance = 1000;
@@ -474,7 +479,7 @@ function init() {
   // GLOBE
   countryLayers = generateCountries();
   scene.add(countryLayers);
-  countryLayers.position.set(0, 0, 1690);
+  countryLayers.position.set(0, 0, 0);
 
   countries = countryLayers.countries;
 
@@ -893,7 +898,7 @@ function animate() {
   // Updateing texts
   for (let text of particlesTextObjects) {
     if (text.service == activeService) {
-      text.mesh.material.color.setHex(0xff0000);
+      text.mesh.material.color.setHex(0xE5463C);
     } else {
       text.mesh.material.color.setHex(0xffffff);
     }
@@ -979,7 +984,7 @@ function generateCountries() {
       shading: THREE.SmoothShading,
       shininess: 50,
     });
-    const scale = 18; // + Math.random() / 2;
+    const scale = 25; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;

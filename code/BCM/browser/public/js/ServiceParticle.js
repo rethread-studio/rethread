@@ -697,7 +697,7 @@ class urlParticle {
         const x = (this.tempV.x * .5 + .5) * canvas.clientWidth;
         const y = (this.tempV.y * -.5 + .5) * canvas.clientHeight;
         // move the elem to that position
-        this.elem.style.transform = `translate(10%, -50%) translate(${x}px,${y}px)`;
+        this.elem.style.transform = `translate(30%, -50%) translate(${x}px,${y}px)`;
     }
 
     createText(inText, pos) {
