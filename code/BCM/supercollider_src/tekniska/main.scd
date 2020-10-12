@@ -161,6 +161,7 @@ s.waitForBoot({
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
 	~currentChord = 0;
 	~numChords = ~allChordFunctions.size;
+	~numChords = 5;
 	~changeChord = { | num = -1 |
 		// if num is -1 then
 		num = num.asInteger;
@@ -252,7 +253,7 @@ s.waitForBoot({
 	~channels.rev_channel.play_on(\medium_reverb, [\out, ~channels.rev_channel.bus, \in, ~channels.rev_channel.bus, \mix, 1.0, \amp, 2.0]);
 	~channels.rev_channel.set_amp(0.3);
 	~channels.long_rev = ~makeMixerChannel.("Long rev", ~decoderBus);
-	~channels.long_rev.play_on(\long_reverb, [\out, ~channels.rev_channel.bus, \in, ~channels.rev_channel.bus, \mix, 1.0, \amp, 2.0, \rt, 10.0]);
+	~channels.long_rev.play_on(\infiniteReverb, [\out, ~channels.long_rev.bus, \in, ~channels.long_rev.bus, \fedback, 0.98, \amp, 2.0]);
 	~channels.sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
 	~channels.sub_channel.set_send(~channels.rev_channel.bus, 0.2);
 	~channels.rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
@@ -283,7 +284,7 @@ s.waitForBoot({
 	~channels.tick_channel.set_amp(0.0);
 
 	{
-		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice, ~channels.drone, ~channels.rev_channel], ~allClouds);
+		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice, ~channels.drone, ~channels.rev_channel, ~channels.long_rev], ~allClouds);
 	}.defer;
 
 	// Create the global stats object (environment)
@@ -1044,6 +1045,7 @@ s.waitForBoot({
 		// Reset sequencer
 		~sequencer = ~newSequencer.(32);
 		~resetCurrentFrame.();
+		~droneAmpPhase = 0;
 		// Change root
 		~root = ~root + [-8, 9, 17, -22].choose;
 		~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
@@ -1332,6 +1334,20 @@ s.waitForBoot({
 			// ("nump: " + numPitchesPerChord).postln;
 			~chord = ~ch1[0..numPitchesPerChord] ++ ~ch2[0..numPitchesPerChord] ++ ~ch3[0..numPitchesPerChord] ++ ~ch4[0..numPitchesPerChord];
 			~chord = ~chord + ~root;
+
+			// tempo = 2 per second * 4 = 8 updates per second
+			// 1/(15*8) = 0.008333
+
+			if(~overallActivity > 2.0, {
+				// ~droneAmpPhase = ~droneAmpPhase - 0.004;
+				~droneAmpPhase = ~droneAmpPhase + (~overallActivity * 0.02);
+				while({~droneAmpPhase > 1.0 }, { ~droneAmpPhase = ~droneAmpPhase - 1.0; });
+			}, {
+				~droneAmpPhase = ~droneAmpPhase + 0.0083;
+				~droneAmpPhase = ~droneAmpPhase.min(1.0);
+			});
+			~droneAmpPhase = ~droneAmpPhase.max(0);
+			// ~droneAmpPhase.postln;
 
 			// Update sequencer
 			if(~counter % 1 == 0) {

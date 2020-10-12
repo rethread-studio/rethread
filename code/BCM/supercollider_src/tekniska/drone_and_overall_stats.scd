@@ -122,7 +122,8 @@ Time spans of droney sounds:
 		Synth(\softy_sustained, [
 			\freq, freq,
 			\atk, rrand(0.6, 2),
-			\rel, rrand(1, 3),
+			// \rel, rrand(1, 3),
+			\rel, 0.1,
 			\c0, 2,
 			\c1, \sine,
 			\minrq, minrq,
@@ -131,16 +132,16 @@ Time spans of droney sounds:
 			\stutterAmount, stutterAmount,
 			\stutterSpeed, stutterSpeed,
 			\pan, rrand(-0.7, 0.7),
-				\amp, 0.2 * amp,
-				\out, ~channels.drone.bus]);
-		};
+			\amp, 0.2 * amp,
+			\out, ~channels.drone.bus]);
+	};
 	/*}, {
-		~droneBackgroundSynths.do{|syn, i|
-			var octave = rrand(-1, numOctaves).floor,
-			freq = ~s53.degreeToFreq(chord[i] + ~root, 0.midicps, ~octave+octave);
-			syn.set(
-				\freq, freq,
-				\minrq, minrq,
+	~droneBackgroundSynths.do{|syn, i|
+	var octave = rrand(-1, numOctaves).floor,
+	freq = ~s53.degreeToFreq(chord[i] + ~root, 0.midicps, ~octave+octave);
+	syn.set(
+	\freq, freq,
+	\minrq, minrq,
 				\maxrq, maxrq,
 				\brightness, brightness,
 				\stutterAmount, stutterAmount,
@@ -170,6 +171,7 @@ Time spans of droney sounds:
 
 ~backgroundDronesStarted = false;
 ~lastHarmonicComplexity = 0;
+~droneAmpPhase = 0;
 ~updateDrone = { | timeSinceMainFrame |
 	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames,harmonicComplexity;
 	// Sometimes update pitches, sometimes just update other parameters
@@ -200,7 +202,8 @@ Time spans of droney sounds:
 	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
 	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, 0.01, minrq);
 	// amp = ~overallStats.currentFrame.frameSize.linlin(0, 10000000, 0.2, 1.0);
-	amp = ((1-timeSinceMainFrame.linlin(0, 15, 0, 1)).pow(4) * pi).sin() * 0.7;
+	// amp = ((1-timeSinceMainFrame.linlin(0, 15, 0, 1)).pow(4) * pi).sin() * 0.7;
+	amp = ((1-~droneAmpPhase).pow(4) * pi).sin() * 0.7;
 
 	// set chord
 
