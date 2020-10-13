@@ -170,18 +170,17 @@ myApp.init();
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
   //Per request we want to add three elements
-  //INITIALIZAR
-  //SERVICE
-  //EVENT
-  //REQUEST CREATED
 
 
 
+  //MANAGE MAIN URL 
   if (currentUrl != json.current_tab.url) {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
-    currentUrl = json.current_tab.url;
+    const url = new URL(json.current_tab.url);
+
+    currentUrl = url.hostname;
 
     myApp.addURL(currentUrl, packet.requestId)
     myApp.resetParticles();

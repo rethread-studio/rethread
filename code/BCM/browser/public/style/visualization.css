@@ -172,6 +172,7 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
 
 .url-text{
  font-size: 38px;
+ z-index: 0 !important;
  
 }
 

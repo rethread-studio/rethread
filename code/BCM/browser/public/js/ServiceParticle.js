@@ -239,7 +239,6 @@ class AppViz {
             const newURL = new urlParticle(this.scene, name, name, this.font, this.camera, this.renderer, timeStamp)
             newURL.init();
             this.urlElement = newURL;
-
         } else {
             this.urlElement.setLabel(name)
         }
@@ -765,7 +764,7 @@ class urlParticle {
 
     setLabel(name) {
         this.type = name
-        this.elem.textContent = this.type;
+        this.elem.textContent = name;
     }
 
     updateText() {
