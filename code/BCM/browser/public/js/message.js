@@ -29,6 +29,7 @@ const clicks = 0;
 function getChallenge() {
     challengePos = challengePos + 1 >= challenges.length ? 0 : challengePos + 1;
     typeMessage(challenges[challengePos])
+    document.getElementById('message').classList.add("visible");
 }
 
 
@@ -66,7 +67,7 @@ function type() {
     if (captionLength < caption_se.length || captionLength_en < caption_en.length + 1) {
         typeTiemout = setTimeout(type, speed);
     } else {
-        erasetimeout = setTimeout(eraseMessage, 3000);
+        erasetimeout = setTimeout(eraseMessage, 9000);
 
         clearTimeout(typeTiemout);
     }
@@ -77,18 +78,20 @@ function type() {
 function eraseMessage() {
     captionEl.innerHTML = "";
     eParagraph.innerHTML = "";
-    // captionEl.innerHTML = caption_se.substr(0, captionLength--);
-    // eParagraph.innerHTML = caption_en.substr(0, captionLength_en--);
-    // console.log('delete')
-    // if (captionLength >= 0 || captionLength_en >= 0) {
-    //     erasetimeout = setTimeout(erasetimeout, speed);
-    // } else {
-    //     console.log('erase message gone')
-    //     clearTimeout(typeTiemout);
-    //     clearTimeout(erasetimeout);
-    //     captionLength = 0;
-    //     caption_se = '';
-    //     captionLength_en = 0;
-    //     caption_en = '';
-    // }
+    document.getElementById('message').classList.remove("visible");
+}
+
+document.addEventListener("keyup", function (event) {
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.keyCode === 13) {
+        getChallenge()
+    }
+});
+
+function testMessage() {
+
+    captionEl.innerHTML = challenges[0].se
+    eParagraph.innerHTML = challenges[0].en
+    document.getElementById('message').classList.add("visible");
+
 }

@@ -124,7 +124,7 @@ const options = {
     service: 0x0a0a0a,
     package: 0x000000,
   },
-  showLabels: false,
+  showLabels: true,
   lightHelpers: false,
   angleStep: 30,
 
@@ -132,6 +132,20 @@ const options = {
     color: 0xFFFFFF,
     transparent: false,
     opacityBaseLevel: 0.5
+  },
+  packagesColor: {
+    websocket: 0xF28527,
+    xmlhttprequest: 0x4F9E39,
+    font: 0xC7382C,
+    ping: 0x8E68BA,
+    stylesheet: 0xD67BBF,
+    image: 0xBEBD3A,
+    script: 0x51BBCE,
+    sub_frame: 0xAECDE1,
+    media: 0xBBDD93,
+    other: 0xFFFEA6,
+    main_frame: 0xD1352B,
+    default: 0xf9e20d
   }
 }
 //modify styles if to match installation settings
@@ -168,8 +182,9 @@ const onmessage = (message) => {
     // New page was loaded
     numRequests = 0;
     currentUrl = json.current_tab.title;
-    console.log(json.current_tab)
+
     myApp.addURL(currentUrl, packet.requestId)
+    myApp.resetCounter()
   }
 
   if (json.event == "request_created") {
@@ -256,17 +271,18 @@ const onmessage = (message) => {
     }
     // console.log(json.request)
     // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
-    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0]);
+    const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
+
+    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0], packColor);
 
 
   } else if (json.event == "home" && json.action == "open") {
     getChallenge();
-  }
-  else if (json.event == "idle") {
-    console.log("idle");
-    console.log(json);
+  } else if (json.event == "idle") {
+
     if (json.action == "inactive") {
       window.idle = true;
+      getChallenge()
     } else if (json.action == "active") {
       window.idle = false;
     }
