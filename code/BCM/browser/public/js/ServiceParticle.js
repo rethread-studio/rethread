@@ -210,16 +210,19 @@ class AppViz {
     //remove all packages and all services
     //reset the counters
     resetParticles() {
-        this.packages = this.packages.map(p => {
-            p.changeStatus()
-            return p
-        });
-        this.services = this.services.map(s => {
-            s.changeStatus()
-            return s
-        });
+        for (let i = 0; i < this.packages.length; i++) {
+            this.packages[i].setOut();
+        }
+
+        for (let j = 0; j < this.services.length; j++) {
+            this.services[j].setOut();
+        }
 
         this.resetCounter()
+
+        this.anglePos = 0;
+
+        this.radius = 2;
     }
     //code for getting position
     getCircularPosition(angle, radius, posZ) {
@@ -387,6 +390,20 @@ class PackageParticle {
         //CHECK STATE
         if (Date.now() > this.timeStamp) this.changeStatus();
 
+
+    }
+
+    setOut() {
+        this.status = "TWEENOUT";
+        this.timeStamp = Date.now() + 300;
+        // //ADD TWEEN
+        TweenMax.to(this.shape.scale, {
+            duration: 0.3,
+            x: 0,
+            y: 0,
+            z: 0,
+            ease: "expo",
+        });
 
     }
 
@@ -605,6 +622,20 @@ class serviceParticle {
             this.methEl.textContent = this.method;
             this.labelContainerElem.appendChild(this.elem);
         }
+    }
+
+    setOut() {
+        this.status = "TWEENOUT";
+        this.timeStamp = Date.now() + 300;
+        // //ADD TWEEN
+        TweenMax.to(this.shape.scale, {
+            duration: 0.3,
+            x: 0,
+            y: 0,
+            z: 0,
+            ease: "expo",
+        });
+
     }
 
     changeStatus() {

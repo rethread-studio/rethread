@@ -180,9 +180,9 @@ const onmessage = (message) => {
     numRequests = 0;
     const url = new URL(json.current_tab.url);
 
-    currentUrl = url.hostname;
+    currentUrl = json.current_tab.url;
 
-    myApp.addURL(currentUrl, packet.requestId)
+    myApp.addURL(url.hostname, packet.requestId)
     myApp.resetParticles();
 
   }
