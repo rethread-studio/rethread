@@ -153,6 +153,7 @@ class AppViz {
         //if it exists add more time to live
         s.updateTime();
         s.addPackagesNum();
+
         //if it exists add to size
         //add the figure 
         //change the position of the package related to the service
@@ -204,6 +205,21 @@ class AppViz {
     resetCounter() {
         this.numServices = 0;
         this.numPackages = 0;
+    }
+
+    //remove all packages and all services
+    //reset the counters
+    resetParticles() {
+        this.packages = this.packages.map(p => {
+            p.changeStatus()
+            return p
+        });
+        this.services = this.services.map(s => {
+            s.changeStatus()
+            return s
+        });
+
+        this.resetCounter()
     }
     //code for getting position
     getCircularPosition(angle, radius, posZ) {
@@ -479,6 +495,7 @@ class serviceParticle {
     }
 
     addPackagesNum() {
+
         this.packagesNum++;
         const scale = this.shape.scale;
         const step = 0.0001;
@@ -496,6 +513,9 @@ class serviceParticle {
         return Math.floor(Math.random() * (1 + max - min) + min)
     }
 
+    addPackageCounter() {
+        this.numPackages++;
+    }
     // //CREATE a random position
     random3DPosition(magnitude) {
         return new THREE.Vector3(
@@ -574,7 +594,18 @@ class serviceParticle {
         this.radius += this.speed;
         this.shape.position.copy(this.getCircularPosition(this.anglePos))
 
-
+        //check if it has enough packages to display label
+        if (this.packagesNum > 3 && !this.showLabel) {
+            //change showlabel status
+            this.showLabel = true;
+            //add div
+            this.elem = document.createElement('div');
+            this.elem.classList.add("service-text");
+            this.methEl = document.createElement('div');
+            this.elem.textContent = this.type;
+            this.methEl.textContent = this.method;
+            this.labelContainerElem.appendChild(this.elem);
+        }
     }
 
     changeStatus() {
@@ -701,7 +732,7 @@ class urlParticle {
         this.scene.add(this.shape);
 
         this.elem = document.createElement('div');
-        this.elem.classList.add("service-text");
+        this.elem.classList.add("url-text");
         this.methEl = document.createElement('div');
         this.elem.textContent = this.type;
         this.methEl.textContent = this.method;

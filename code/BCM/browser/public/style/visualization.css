@@ -163,11 +163,21 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
      0    1px 0 #000,
     -1px  1px 0 #000,
     -1px  0   0 #000; */
-    font-size: 28px;
+    
     font-family: 'neueBit', sans-serif;
     color:white;
-    max-width: 200px;
+   
     z-index: 900;
+}
+
+.url-text{
+ font-size: 38px;
+ 
+}
+
+.service-text{
+  font-size: 22px;
+  opacity: 0.4;
 }
 
 

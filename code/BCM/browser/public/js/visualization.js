@@ -175,16 +175,17 @@ const onmessage = (message) => {
   //EVENT
   //REQUEST CREATED
 
-  // console.log(json)
+
 
   if (currentUrl != json.current_tab.url) {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
-    currentUrl = json.current_tab.title;
+    currentUrl = json.current_tab.url;
 
     myApp.addURL(currentUrl, packet.requestId)
-    myApp.resetCounter()
+    myApp.resetParticles();
+
   }
 
   if (json.event == "request_created") {
@@ -269,7 +270,7 @@ const onmessage = (message) => {
         activeService = country;
       }
     }
-    // console.log(json.request)
+
     // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
     const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
 
@@ -957,7 +958,7 @@ function animate() {
   // stats.update();
   render();
 
-  // console.log("numRequests: " + numRequests + " packetsOverTime: " + packetsOverTime);
+
   window.activity = numRequests * 0.1 + (packetsOverTime * 10);
   const activityCoeff = 2.0 * dt;
   window.smoothActivity = window.smoothActivity * (1 - activityCoeff) + window.activity * activityCoeff;
