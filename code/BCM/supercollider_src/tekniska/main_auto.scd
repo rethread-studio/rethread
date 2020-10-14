@@ -1339,9 +1339,9 @@ s.waitForBoot({
 			// ~droneAmpPhase.postln;
 
 			// Update sequencer
-			if(~counter % 1 == 0) {
+			if(~counter % 2 == 0) {
 				if(~overallActivity < 0.7) {
-					~adjustPercussionLevels.(~sequencer, 0.98); // linear decrease in percussion levels
+					~adjustPercussionLevels.(~sequencer, 0.96); // linear decrease in percussion levels
 				};
 				~updatePercussionInSequencer.(~sequencer);
 				~playSequencer.(~sequencer);
