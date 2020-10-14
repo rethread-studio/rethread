@@ -37,7 +37,7 @@ function displayHome() {
   closeHome();
   var iframe = document.createElement("iframe");
   iframe.id = "pellowHome";
-  iframe.src = "http://localhost:8873/startPage.html";
+  iframe.src = `http://${SERVER}:${PORT}/startPage.html`;
   document.documentElement.appendChild(iframe);
 
   var button = document.getElementById("pellowHomeButton");

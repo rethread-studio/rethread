@@ -12,6 +12,7 @@
     "scripts": [
       "scripts/chromereload.js",
       "scripts/analytics.js",
+      "scripts/config.js",
       "scripts/websocket.js",
       "scripts/background.js"
     ]
@@ -19,16 +20,12 @@
   "content_scripts": [
     {
       "all_frames": true,
-      "js": ["scripts/inject.js"],
+      "js": ["scripts/config.js", "scripts/inject.js"],
       "matches": ["<all_urls>"],
       "run_at": "document_start"
     }
   ],
-  "web_accessible_resources": [
-    "style/*",
-    "fonts/*",
-    "img/*"
-  ],
+  "web_accessible_resources": ["style/*", "fonts/*", "img/*"],
   "permissions": ["tabs", "webRequest", "webRequestBlocking", "<all_urls>"],
   "browser_action": {
     "default_icon": {

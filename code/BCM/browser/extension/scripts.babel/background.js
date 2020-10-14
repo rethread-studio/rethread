@@ -128,7 +128,7 @@ async function inactive() {
       }
     }
     chrome.tabs.update(tabs[0].id, {
-      url: "http://localhost:8873/button.html",
+      url: `http://${SERVER}:${PORT}/button.html`,
     });
     chrome.tabs.remove(indexes);
   });
