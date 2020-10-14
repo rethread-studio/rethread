@@ -242,7 +242,7 @@ s.waitForBoot({
 	~channels.rev_channel.play_on(\medium_reverb, [\out, ~channels.rev_channel.bus, \in, ~channels.rev_channel.bus, \mix, 1.0, \amp, 2.0]);
 	~channels.rev_channel.set_amp(0.3);
 	~channels.long_rev = ~makeMixerChannel.("Long rev", ~decoderBus);
-	~channels.long_rev.play_on(\infiniteReverb, [\out, ~channels.long_rev.bus, \in, ~channels.long_rev.bus, \fedback, 0.98, \amp, 2.0]);
+	~channels.long_rev.play_on(\infiniteReverb, [\out, ~channels.long_rev.bus, \in, ~channels.long_rev.bus, \feedback, 0.62, \amp, 1.5]);
 	~channels.sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
 	~channels.sub_channel.set_send(~channels.rev_channel.bus, 0.2);
 	~channels.rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);

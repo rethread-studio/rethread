@@ -169,9 +169,9 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 	sig = In.ar(\in.kr(10), 2);
 	mix = mix.lag(\mixLag.kr(10));
 
-	wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
-	wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);
-	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.9));
+	/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
+	wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
+	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
 
 	sig = (sig * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
@@ -210,18 +210,20 @@ SynthDef(\long_reverb, {
 	Out.ar(\out.kr(0), snd);
 }).add;
 
-SynthDef(\infiniteReverb,  { | feedback = 1, inAmp = 1, out = 0, in = 10, inChan = 0, inputSelect = 0, cutoff = 10000, feedbackCutoff = 5000, feedbackLPFmix = 0.2|
+SynthDef(\infiniteReverb,  { | feedback = 1, inAmp = 1, out = 0, in = 10, inChan = 0, inputSelect = 0, cutoff = 14000, feedbackCutoff = 600, feedbackLPFmix = 0.5|
 	var sig, local, fx, inSig, top, noiseTrig, noisett, noise, distsig, toFeedSig;
 
 	inSig = In.ar(in,2) * inAmp.lag(0.01);
 	sig = HPF.ar(inSig, 50);
-	local = LocalIn.ar(2)+sig;
+	local = LocalIn.ar(2);
+	local = local+sig;
+
 
 	// lower the feedback if there is acoustic feedback from the speakers or the signal just gets too loud
 	// If the amplitude crosses the threshold, reduce feeback by 20%
-	feedback = feedback * Select.kr(K2A.ar(Amplitude.ar(Mix(local)) > 0.35), [1, 0.7]);
+	// feedback = feedback * Select.kr(K2A.ar(Amplitude.ar(Mix(local)) > 0.65), [1, 0.7]);
 
-	//apply reverb
+	// apply reverb
 	// AllpassN gives constant frequency reproduction while AllpassL makes the high register 3000< trail off
 	15.do{local = AllpassN.ar(local, 0.06, Rand(0.001, 0.06), 1);};
 	// effects within the feedback loop
@@ -230,13 +232,13 @@ SynthDef(\infiniteReverb,  { | feedback = 1, inAmp = 1, out = 0, in = 10, inChan
 	//complete feedback loop -- send audio back to LocalIn
 	LocalOut.ar(toFeedSig*feedback);
 	// sig = Pan2.ar(local);
+	sig = local;
 
 	sig = LPF.ar(sig, cutoff);
 	sig = GVerb.ar(sig, 100);
 	//non-feedback output to speakers
 	Out.ar(out, LPF.ar(Limiter.ar(sig, 0.99), cutoff));
-}
-).add;
+}).add;
 
 
 // no ambisonics, just straight through as stereo
