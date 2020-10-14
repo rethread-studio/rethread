@@ -5,7 +5,6 @@ class AppViz {
         this.container = _container;
         //USE options to configure things
         this.options = options;
-        this.simplex = new SimplexNoise()
         this.packages = [];
         this.services = [];
         this.urls = [];
@@ -21,6 +20,7 @@ class AppViz {
         this.packagesNames = []
         this.numServices = 0;
         this.numPackages = 0;
+        this.reportNumber = 0;
     }
 
     init() {
@@ -139,6 +139,69 @@ class AppViz {
 
         requestAnimationFrame(this.render);
     }
+    getImageNum() {
+        // this.packages = [];
+        // this.services = [];
+        let numImages = 0;
+        for (let i = 0; i <= this.packages.length; i++) {
+            if (this.packages[i] != undefined) {
+                if (this.packages[i].type == "image") numImages++;
+            }
+
+        }
+        return numImages;
+    }
+
+    getNumCountries() {
+        let c_arr = [];
+        for (let i = 0; i <= this.packages.length; i++) {
+            if (this.packages[i] != undefined) {
+                if (!c_arr.includes(this.packages[i].country)) c_arr.push(this.packages[i].country)
+            }
+        }
+
+        return c_arr.length;
+    }
+
+    publishReport() {
+        this.reportNumber = this.reportNumber > 3 ? 0 : this.reportNumber + 1;
+
+        switch (this.reportNumber) {
+            case 0:
+                return {
+                    en: `You visit ${this.urlElement.getName()}, but your browser communicates with ${this.numServices} other machines`,
+                    se: `You visit ${this.urlElement.getName()}, but your browser communicates with ${this.numServices} other machines`
+                }
+            case 1:
+
+                return {
+                    en: `The ${this.urlElement.getName()} webpage is as large as a <PPP>-pages book`,
+                    se: `The ${this.urlElement.getName()} webpage is as large as a <PPP>-pages book`
+                };
+            case 2:
+                const numImage = this.getImageNum()
+                return {
+                    en: `There are ${numImage} images in ${this.urlElement.getName()}`,
+                    se: `There are ${numImage} images in ${this.urlElement.getName()}`
+                };
+
+            case 3:
+
+                const numCountries = this.getNumCountries();
+                return {
+                    en: `Your browser communicated with ${numCountries} countries for you to access ${this.urlElement.getName()}`,
+                    se: `Your browser communicated with ${numCountries} countries for you to access ${this.urlElement.getName()}`
+                };
+
+            default:
+                return {
+                    en: `You connected to ${this.urlElement.getName()} and used ${this.numServices} Services which used ${this.numPackages} packages`,
+                    se: `Du embendade till ${this.urlElement.getName()} och det embendade ${this.numServices} Services att embendade ${this.numPackages} packages`,
+                };
+        }
+    }
+
+
 
     removePackage(requestId, arr) {
 
@@ -146,7 +209,8 @@ class AppViz {
     }
 
 
-    addPackage(method, type, timeStamp, service, packColor) {
+    addPackage(method, type, timeStamp, service, packColor, country) {
+        this.numPackages = this.numPackages + 1;
         //FIND THE SERVICE
         const s = this.getService(service);
         //ADD A PACKAGE TO THE SERVICE
@@ -177,12 +241,16 @@ class AppViz {
             this.options.showLabels,
             position,
             s.randomDelay,
-            packColor);
+            packColor,
+            country
+        );
         newPackage.init();
         this.packages.push(newPackage);
     }
 
     addService(name, type, timeStamp) {
+
+
         if (!this.services.find(i => i.getName() == name)) {
             const showLabel = this.showServices.includes(name)
             const newService = new serviceParticle(this.scene, name, name, this.font, this.camera, this.renderer, timeStamp, this.anglePos, this.zPos, showLabel, this.radius)
@@ -193,6 +261,7 @@ class AppViz {
             this.stepRadius();
             this.servCounter++;
 
+            this.numServices = this.numServices + 1;
 
         }
         if (this.servCounter >= this.maxServices) {
@@ -281,7 +350,7 @@ class AppViz {
 
 class PackageParticle {
 
-    constructor(scene, method, type, font, camera, renderer, requestId, showLabel, position, delay, color) {
+    constructor(scene, method, type, font, camera, renderer, requestId, showLabel, position, delay, color, country) {
         this.scene = scene;
         this.type = type;
         //GET OR POST
@@ -304,9 +373,8 @@ class PackageParticle {
         this.posZ = position.servicePos.z
         this.speed = this.totesRando(5, 15) / 1000;
         this.randomDelay = delay;
-        this.color = color
-
-
+        this.color = color;
+        this.country = country;
         //get the position setup
     }
     totesRando(max, min) {
@@ -336,7 +404,7 @@ class PackageParticle {
 
     init() {
 
-        // const adjustedSize = Math.abs(this.simplex.noise3D(1, 1, 1) * 0.5);
+
         let randomSize = this.totesRando(10, 15) / 100
         this.geometry = new THREE.OctahedronGeometry(0.1, 0);
         this.material = new THREE.MeshPhongMaterial({ color: this.color });
@@ -529,9 +597,6 @@ class serviceParticle {
         return Math.floor(Math.random() * (1 + max - min) + min)
     }
 
-    addPackageCounter() {
-        this.numPackages++;
-    }
     // //CREATE a random position
     random3DPosition(magnitude) {
         return new THREE.Vector3(
@@ -552,7 +617,7 @@ class serviceParticle {
 
 
     init() {
-        // const adjustedSize = Math.abs(this.simplex.noise3D(1, 1, 1) * 0.5);
+
         this.geometry = new THREE.DodecahedronBufferGeometry(0.4);
         this.material = new THREE.MeshPhongMaterial({ color: 0x6A82FB });
         this.shape = new THREE.Mesh(this.geometry, this.material);
@@ -754,7 +819,7 @@ class urlParticle {
 
     init() {
 
-        // const adjustedSize = Math.abs(this.simplex.noise3D(1, 1, 1) * 0.5);
+
         this.geometry = new THREE.DodecahedronBufferGeometry(0.4);
         this.material = new THREE.MeshPhongMaterial({ color: 0xee4035 });
         this.shape = new THREE.Mesh(this.geometry, this.material);

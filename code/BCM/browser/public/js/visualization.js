@@ -172,9 +172,8 @@ const onmessage = (message) => {
   //Per request we want to add three elements
 
 
-
   //MANAGE MAIN URL 
-  if (currentUrl != json.current_tab.url) {
+  if (currentUrl != json.current_tab.url && json.current_tab.url != null && json.current_tab.url != undefined) {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
@@ -184,6 +183,11 @@ const onmessage = (message) => {
 
     myApp.addURL(url.hostname, packet.requestId)
     myApp.resetParticles();
+
+
+    //SEND A REPORT MESSAGE AFTER 5 SECCONDS
+
+    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 2000);
 
   }
 
@@ -273,7 +277,8 @@ const onmessage = (message) => {
     // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
     const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
 
-    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0], packColor);
+    const pkg_country = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
+    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0], packColor, pkg_country);
 
 
   } else if (json.event == "home" && json.action == "open") {

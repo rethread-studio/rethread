@@ -36,8 +36,8 @@ function getChallenge() {
 
 
 
-const captionEl = document.getElementById("message-se"), //Header element
-    eParagraph = document.getElementById("message-en"); //Subheader element
+const captionEl = document.getElementById('message-se'), //Header element
+    eParagraph = document.getElementById('message-en'); //Subheader element
 
 let captionLength = 0;
 let captionLength_en = 0;
@@ -73,6 +73,23 @@ function type() {
     }
 }
 
+function sendReport(report) {
+
+    const inMesage = document.getElementById("innerMessage")
+    const popSe = document.getElementById("popUp-se")
+    const popEn = document.getElementById("pupUp-en")
+
+    inMesage.classList.add("inScreen");
+    popSe.innerHTML = String(report.se);
+    popEn.innerHTML = String(report.en);
+
+    setTimeout(deleteReport, 4000);
+}
+
+function deleteReport() {
+    const inMesage = document.getElementById("innerMessage")
+    inMesage.classList.remove("inScreen");
+}
 
 
 function eraseMessage() {
@@ -86,6 +103,7 @@ document.addEventListener("keyup", function (event) {
     if (event.keyCode === 13) {
         getChallenge()
     }
+
 });
 
 function testMessage() {
@@ -95,3 +113,5 @@ function testMessage() {
     document.getElementById('message').classList.add("visible");
 
 }
+
+
