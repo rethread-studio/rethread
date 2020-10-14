@@ -44,6 +44,7 @@ wss.on("connection", function (ws, request) {
     }
     if (message.event == "idle") {
       console.log(message.action);
+      osc.send(message, message.event);
     }
     if (message.event == "home") {
       osc.send(message, message.event);
