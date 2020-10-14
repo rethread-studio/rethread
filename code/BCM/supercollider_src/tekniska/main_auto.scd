@@ -1034,7 +1034,7 @@ s.waitForBoot({
 	s.sync();
 
 	~newPageLoadEvent = { | url, hostname |
-		var freq, amp = 0.7;
+		var freq, amp = 0.5;
 		// Reset sequencer
 		~sequencer = ~newSequencer.(32);
 		~resetCurrentFrame.();
