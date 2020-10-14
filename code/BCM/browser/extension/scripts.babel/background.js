@@ -15,7 +15,7 @@ function sendCurrentUrl() {
 
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
   lastTab = await sendCurrentUrl();
-  chrome.tabs.reload(lastTab.id);
+  chrome.tabs.reload(tabId);
   broadcast({
     event: "tab_changed",
     tab: lastTab,
@@ -49,7 +49,7 @@ chrome.windows.onRemoved.addListener(function (tabId) {
 chrome.webRequest.onBeforeRequest.addListener(
   async function (event) {
     if (
-      event.initiator == null &&
+      event.initiator == null ||
       event.initiator.indexOf("chrome-extension") == 0
     ) {
       return {
@@ -122,15 +122,12 @@ async function inactive() {
     tabs = tabs.filter((tab) => tab.id > -1);
     const indexes = [];
     for (let tab of tabs) {
-      console.log(tab);
-      if (tab != tabs[0]) {
-        indexes.push(tab.id);
-      }
+      indexes.push(tab.id);
     }
-    chrome.tabs.update(tabs[0].id, {
-      url: `http://${SERVER}:${PORT}/button.html`,
+    chrome.tabs.create({
+      url: chrome.extension.getURL("button.html"),
     });
-    chrome.tabs.remove(indexes);
+    // chrome.tabs.remove(indexes);
   });
 }
 
@@ -151,7 +148,7 @@ function action() {
   isInactive = false;
   actionTimeout = setTimeout(function () {
     isInactive = true;
-    // inactive();
+    inactive();
     broadcast({
       event: "idle",
       action: "inactive",

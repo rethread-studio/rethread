@@ -25,7 +25,7 @@
       "run_at": "document_start"
     }
   ],
-  "web_accessible_resources": ["style/*", "fonts/*", "img/*"],
+  "web_accessible_resources": ["style/*", "fonts/*", "img/*", "startPage.html", "button.html"],
   "permissions": ["tabs", "webRequest", "webRequestBlocking", "<all_urls>"],
   "browser_action": {
     "default_icon": {
