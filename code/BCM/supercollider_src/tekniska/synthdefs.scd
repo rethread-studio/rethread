@@ -331,7 +331,7 @@ SynthDef(\thump, {
 SynthDef(\softy, {
 	var sig, env, freq = \freq.kr(220);
 	env = Env.perc(\atk.kr(0.1), \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
-	sig = Resonz.ar(PinkNoise.ar(mul: env), freq, 0.007, mul: 20);
+	sig = Resonz.ar(PinkNoise.ar(mul: env), freq.max(20).min(18000), 0.007, mul: 20);
 	sig = sig * \amp.kr(0.5);
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);

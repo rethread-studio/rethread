@@ -57,6 +57,9 @@ s.waitForBoot({
 	~elevationPosition = 0.0;
 	~elevationStep = 0.0;
 
+	~idle = false;
+	~home = false;
+
 
 	// What latency in seconds to use for scheduling playback on the server
 	// If you get "late ..." messages, increase this number'
@@ -68,6 +71,7 @@ s.waitForBoot({
 	"synthdefs.scd".loadRelative; // LOAD SYNTHDEFS
 
 	"drone_and_overall_stats.scd".loadRelative;
+	"idle.scd".loadRelative;
 
 
 	//////////////////////////////////////////////////////
@@ -1123,64 +1127,67 @@ s.waitForBoot({
 
 		freq, ip_parts, rel = 0.0;
 
-		if(~currentTabUrl != tab_url) {
-			("RESET" + tab_url).postln;
-			~currentTabUrl = tab_url;
-			~newPageLoadEvent.(url, hostname);
+		if(~idle == false && (~home == false)) {
+
+			if(~currentTabUrl != tab_url) {
+				("RESET" + tab_url).postln;
+				~currentTabUrl = tab_url;
+				~newPageLoadEvent.(url, hostname);
+			};
+
+			// The first request is seldom the correct main hostname
+			if(url == ~currentTabUrl) {
+				~overallStats.currentFrame.hostname = hostname;
+			};
+
+			// [msg, time, addr, recvPort].postln;
+			// services.postln;
+			// hostname.postln;
+			// method.postln;
+			// type.postln;
+			// location.postln;
+
+			if(services.asString.size < 2) {
+				services = hostname;
+			};
+
+			if(content_length == 'N.A', {
+				content_length = 0;
+			});
+
+			~addPacketToStats.(\localhost, [true, false].choose, services, ip, location);
+			~registerOverallStats.(ip, location, type, content_length, hostname);
+			~addPercussiveToSequencer.();
+
+			// msg.postln;
+			if(rrand(0.0, 1.0) > 0.9) {
+				~packetRecPanWidth = rrand(0, 1.0);
+			};
+			if(rrand(0.0, 1.0) > 0.995) {
+				rel = rrand(0.2, 1.0);
+			};
+
+			// Percussive sound when a packet is received
+			if(~overallActivity < (~maxActivity * 0.5)) {
+				{
+					rrand(0.0, 0.2).wait;
+					~channels.tick_channel.play_on(\tick2,
+						[
+							\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
+							\rq, exprand(0.0001, 0.1),
+							\out, ~channels.tick_channel.bus,
+							\amp, rrand(0.0001, 0.001) * ~tickAmp,
+							\atk, rrand(0.000, 0.004),
+							\c0, -10,
+							\rel, rrand(0.01, 0.05) + rel, //0.01,
+							\c1, -12,
+							\pan, rrand(-1*~packetRecPanWidth, ~packetRecPanWidth),
+						]
+					);
+				}.fork;
+			};
+			~num_packets = ~num_packets + 1;
 		};
-
-		// The first request is seldom the correct main hostname
-		if(url == ~currentTabUrl) {
-			~overallStats.currentFrame.hostname = hostname;
-		};
-
-		// [msg, time, addr, recvPort].postln;
-		// services.postln;
-		// hostname.postln;
-		// method.postln;
-		// type.postln;
-		// location.postln;
-
-		if(services.asString.size < 2) {
-			services = hostname;
-		};
-
-		if(content_length == 'N.A', {
-			content_length = 0;
-		});
-
-		~addPacketToStats.(\localhost, [true, false].choose, services, ip, location);
-		~registerOverallStats.(ip, location, type, content_length, hostname);
-		~addPercussiveToSequencer.();
-
-		// msg.postln;
-		if(rrand(0.0, 1.0) > 0.9) {
-			~packetRecPanWidth = rrand(0, 1.0);
-		};
-		if(rrand(0.0, 1.0) > 0.995) {
-			rel = rrand(0.2, 1.0);
-		};
-
-		// Percussive sound when a packet is received
-		if(~overallActivity < (~maxActivity * 0.5)) {
-			{
-				rrand(0.0, 0.2).wait;
-				~channels.tick_channel.play_on(\tick2,
-					[
-						\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-						\rq, exprand(0.0001, 0.1),
-						\out, ~channels.tick_channel.bus,
-						\amp, rrand(0.0001, 0.001) * ~tickAmp,
-						\atk, rrand(0.000, 0.004),
-						\c0, -10,
-						\rel, rrand(0.01, 0.05) + rel, //0.01,
-						\c1, -12,
-						\pan, rrand(-1*~packetRecPanWidth, ~packetRecPanWidth),
-					]
-				);
-			}.fork;
-		};
-		~num_packets = ~num_packets + 1;
 		// ("num packets: " + ~num_packets).postln;
 	}, '/request_completed', nil, 57130); // create the OSCFunc
 
@@ -1202,7 +1209,7 @@ s.waitForBoot({
 		location = msg[14],
 		tab_url = msg[15];
 
-		if(~currentTabUrl != tab_url) {
+		if(~currentTabUrl != tab_url && (~home == false)) {
 			("RESET" + tab_url).postln;
 			~currentTabUrl = tab_url;
 			~newPageLoadEvent.(url, hostname);
@@ -1226,9 +1233,11 @@ s.waitForBoot({
 
 	r = OSCFunc({ arg msg, time, addr, recvPort;
 		[msg, time, addr, recvPort].postln;
-		if(msg[1] == 'active') {
+		if(msg[1] == 'open') {
+			~home = true;
 		};
-		if(msg[1] == 'inactive') {
+		if(msg[1] == 'close') {
+			~home = false;
 		};
 	}, '/home');
 
@@ -1339,7 +1348,7 @@ s.waitForBoot({
 			// ~droneAmpPhase.postln;
 
 			// Update sequencer
-			if(~counter % 2 == 0) {
+			if(~counter % 2 == 0 && (~idle == false)) {
 				if(~overallActivity < 0.7) {
 					~adjustPercussionLevels.(~sequencer, 0.96); // linear decrease in percussion levels
 				};
