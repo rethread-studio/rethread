@@ -164,33 +164,28 @@ class AppViz {
     }
 
     publishReport() {
-        this.reportNumber = this.reportNumber > 3 ? 0 : this.reportNumber + 1;
+        this.reportNumber = this.reportNumber > 2 ? 0 : this.reportNumber + 1;
 
         switch (this.reportNumber) {
             case 0:
                 return {
-                    en: `You visit ${this.urlElement.getName()}, but your browser communicates with ${this.numServices} other machines`,
-                    se: `You visit ${this.urlElement.getName()}, but your browser communicates with ${this.numServices} other machines`
+                    se: `Du besöker ${this.urlElement.getName()}, men din webbläsare kommunicerar med ${this.numServices} andra webbplatser.`,
+                    en: `You visit ${this.urlElement.getName()}, but your browser communicates with ${this.numServices} other machines`
                 }
-            case 1:
 
-                return {
-                    en: `The ${this.urlElement.getName()} webpage is as large as a <PPP>-pages book`,
-                    se: `The ${this.urlElement.getName()} webpage is as large as a <PPP>-pages book`
-                };
-            case 2:
+            case 1:
                 const numImage = this.getImageNum()
                 return {
                     en: `There are ${numImage} images in ${this.urlElement.getName()}`,
-                    se: `There are ${numImage} images in ${this.urlElement.getName()}`
+                    se: `Det finns ${numImage} bilder på sidan ${this.urlElement.getName()}.`
                 };
 
-            case 3:
+            case 2:
 
                 const numCountries = this.getNumCountries();
                 return {
                     en: `Your browser communicated with ${numCountries} countries for you to access ${this.urlElement.getName()}`,
-                    se: `Your browser communicated with ${numCountries} countries for you to access ${this.urlElement.getName()}`
+                    se: `Din webbläsare kommunicerade med ${numCountries} länder för att hämta allt material på ${this.urlElement.getName()}.`
                 };
 
             default:
@@ -198,6 +193,13 @@ class AppViz {
                     en: `You connected to ${this.urlElement.getName()} and used ${this.numServices} Services which used ${this.numPackages} packages`,
                     se: `Du embendade till ${this.urlElement.getName()} och det embendade ${this.numServices} Services att embendade ${this.numPackages} packages`,
                 };
+
+            // case 1:
+
+            // return {
+            //     en: `The ${this.urlElement.getName()} webpage is as large as a <PPP>-pages book`,
+            //     se: `Webbsidan ${this.urlElement.getName()} är lika stor som en bok på <PPP>`
+            // };
         }
     }
 
@@ -231,7 +233,8 @@ class AppViz {
         if (!this.packagesNames.includes(type)) this.packagesNames.push(type)
 
 
-        const newPackage = new PackageParticle(this.scene,
+        const newPackage = new PackageParticle(
+            this.scene,
             method,
             type,
             this.font,
@@ -376,7 +379,42 @@ class PackageParticle {
         this.color = color;
         this.country = country;
         //get the position setup
+
+        //to move a particle toward the URL 
+        this.location = new THREE.Vector3(position.servicePos.x, position.servicePos.y, position.servicePos.z);
+        this.velocity = new THREE.Vector3(this.speed, this.speed, 0);
+        this.acceleration = new THREE.Vector3(0, 0, 0);
+        this.maxSpeed = new THREE.Vector3(0.05, 0.05, 0);
+        this.maxForce = new THREE.Vector3(0.005, 0.005, 0)
     }
+
+    init() {
+
+
+        let randomSize = this.totesRando(10, 15) / 100
+        this.geometry = new THREE.OctahedronGeometry(0.15, 0);
+        this.material = new THREE.MeshPhongMaterial({ color: this.color });
+        this.shape = new THREE.Mesh(this.geometry, this.material);
+
+
+        //position of the shape 
+        const randomPos = this.random3DPosition(10);
+        this.shape.position.copy(this.servicePos)
+        // const sparkle = this.totesRando(0.003, 0.5);
+        this.shape.scale.set(0, 0, 0);
+        TweenMax.to(this.shape.scale, {
+            duration: 0.5,
+            x: 1,
+            y: 1,
+            z: 1,
+            yoyo: true,
+            delay: this.randomDelay
+        });
+        this.scene.add(this.shape);
+
+
+    }
+
     totesRando(max, min) {
         return Math.floor(Math.random() * (1 + max - min) + min)
     }
@@ -400,35 +438,6 @@ class PackageParticle {
         );
     }
 
-
-
-    init() {
-
-
-        let randomSize = this.totesRando(10, 15) / 100
-        this.geometry = new THREE.OctahedronGeometry(0.1, 0);
-        this.material = new THREE.MeshPhongMaterial({ color: this.color });
-        this.shape = new THREE.Mesh(this.geometry, this.material);
-
-
-        //position of the shape 
-        const randomPos = this.random3DPosition(10);
-        this.shape.position.copy(this.servicePos)
-        // const sparkle = this.totesRando(0.003, 0.5);
-        this.shape.scale.set(0, 0, 0);
-        TweenMax.to(this.shape.scale, {
-            duration: 0.5,
-            x: 1,
-            y: 1,
-            z: 1,
-            yoyo: true,
-            delay: this.randomDelay
-        });
-        this.scene.add(this.shape);
-
-
-    }
-
     removeElement() {
         // this.labelContainerElem.removeChild(this.elem);
 
@@ -450,15 +459,48 @@ class PackageParticle {
 
     update() {
 
+        // this.seek();
+        // // //update velocity
+        // this.velocity.add(this.acceleration);
+        // //limit speed
+        // this.velocity.min(this.maxSpeed)
+        // this.location.add(this.velocity)
+        // this.acceleration.multiply(new THREE.Vector3())
+
+        // this.shape.position.copy(this.location)
+
+        //old movement
         this.radius += (this.speed * this.direction);
-        // this.angle += 0.05;
         this.shape.position.copy(this.getCircularPosition(this.angle, this.radius, this.posZ))
-        // = this.shape.position.x + (0.05 * this.direction);
-        // this.updateText();
+
         //CHECK STATE
         if (Date.now() > this.timeStamp) this.changeStatus();
 
 
+    }
+
+    seek() {
+
+        const target = new THREE.Vector3(-10, 10, 0)
+
+        let desired = target.sub(this.location);  // A vector pointing from the position to the target
+        desired.normalize();
+        desired.multiply(this.maxSpeed)
+
+        // // Steering = Desired minus velocity
+        let steer = desired.sub(this.velocity);
+
+        steer.min(this.maxForce);  // Limit to maximum steering force
+
+        this.applyForce(steer);
+    }
+
+
+    applyForce(force) {
+        // We could add mass here if we want A = F / M
+        console.log(this.acceleration)
+        this.acceleration.add(force);
+        console.log(this.acceleration)
     }
 
     setOut() {
@@ -479,7 +521,8 @@ class PackageParticle {
 
         if (this.status == 'WAIT') {
             this.status = "ACTIVE"
-            this.timeStamp = Date.now() + this.totesRando(1, 4) * 1000
+            // this.timeStamp = Date.now() + this.totesRando(1, 4) * 1000
+            this.timeStamp = Date.now() + 2 * 1000
         } else if (this.status == 'ACTIVE') {
             this.status = "TWEENOUT";
             this.timeStamp = Date.now() + 300;
