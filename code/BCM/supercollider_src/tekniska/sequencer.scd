@@ -80,7 +80,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 			0, {{}},
 			1, {{
 				~channels.percussion.play_on(\tick2, [
-					\freq, rrand(1000, 1500),
+					\freq, rrand(1000, 5500),
 					\rq, exprand(0.001, 0.1),
 					\out, 0,
 					\amp, exprand(0.015, 0.05) * 0.2,
@@ -94,7 +94,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 					\rq, exprand(0.001, 0.1),
 					\out, 0,
 					\amp, exprand(0.015, 0.05) * 0.2,
-					\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+					\atk, 0.001, \rel, 0.01, \pan, rrand(-1, -0.5),
 					\out, ~channels.percussion.bus,
 				]);
 			}},
@@ -104,7 +104,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 					\rq, exprand(0.001, 0.1),
 					\out, 0,
 					\amp, exprand(0.015, 0.05) * 0.2,
-					\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+					\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.0),
 					\out, ~channels.percussion.bus,
 				]);
 			}},
@@ -114,7 +114,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 					\rq, exprand(0.001, 0.1),
 					\out, 0,
 					\amp, exprand(0.015, 0.05) * 0.25,
-					\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+					\atk, 0.001, \rel, 0.01, \pan, rrand(0.0, 0.5),
 					\out, ~channels.percussion.bus,
 				]);
 			}},
@@ -124,13 +124,13 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 					\rq, exprand(0.001, 0.1),
 					\out, 0,
 					\amp, exprand(0.015, 0.05) * 0.5,
-					\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
+					\atk, 0.001, \rel, 0.01, \pan, rrand(0.5, 1.0),
 					\out, ~channels.percussion.bus,
 				]);
 			}},
 			6, {{
 				~channels.percussion.play_on(\tick2, [
-					\freq, rrand(200, 300),
+					\freq, rrand(10000, 12000),
 					\rq, exprand(0.001, 0.1),
 					\out, 0,
 					\amp, exprand(0.015, 0.05) * 0.7,

@@ -234,6 +234,7 @@ s.waitForBoot({
 	};
 
 	~decoder = Synth(\decoder, [\in, ~decoderBus, \out, ~firstOutputBus]);
+	~decoder.set(\cRatio, 1/2.5, \cThresh, 0.5, \cAtk, 0.012, \cRel, 0.08, \preCompAmp, 2.0);
 
 	~channels = Environment(know: true);
 	// Set up all the channels
@@ -1029,7 +1030,7 @@ s.waitForBoot({
 	s.sync();
 
 	~newPageLoadEvent = { | url, hostname |
-		var freq;
+		var freq, amp = 0.7;
 		// Reset sequencer
 		~sequencer = ~newSequencer.(32);
 		~resetCurrentFrame.();
@@ -1058,7 +1059,7 @@ s.waitForBoot({
 			\c0, -3,
 			\c1, \sine,
 			\pan, 0.0,
-			\amp, 0.1,
+			\amp, 0.1 * amp,
 			\out, ~channels.default_channel.bus]);
 		~channels.default_channel.play_on(\thump, [
 			\freq, freq * 2,
@@ -1067,7 +1068,7 @@ s.waitForBoot({
 			\c0, -3,
 			\c1, \sine,
 			\pan, -0.3,
-			\amp, 0.1,
+			\amp, 0.1 * amp,
 			\out, ~channels.default_channel.bus]);
 		~channels.default_channel.play_on(\thump, [
 			\freq, freq * 4,
@@ -1076,7 +1077,7 @@ s.waitForBoot({
 			\c0, -3,
 			\c1, \sine,
 			\pan, 0.3,
-			\amp, 0.1,
+			\amp, 0.1 * amp,
 			\out, ~channels.default_channel.bus]);
 
 
@@ -1168,7 +1169,7 @@ s.waitForBoot({
 					[
 						\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
 						\rq, exprand(0.0001, 0.1),
-						\out, 0,
+						\out, ~channels.tick_channel.bus,
 						\amp, rrand(0.0001, 0.001) * ~tickAmp,
 						\atk, rrand(0.000, 0.004),
 						\c0, -10,
@@ -1328,7 +1329,7 @@ s.waitForBoot({
 
 			if(~overallActivity > 2.0, {
 				// ~droneAmpPhase = ~droneAmpPhase - 0.004;
-				~droneAmpPhase = ~droneAmpPhase + (~overallActivity * 0.02);
+				~droneAmpPhase = ~droneAmpPhase + (~overallActivity * 0.03);
 				while({~droneAmpPhase > 1.0 }, { ~droneAmpPhase = ~droneAmpPhase - 1.0; });
 			}, {
 				~droneAmpPhase = ~droneAmpPhase + 0.0083;

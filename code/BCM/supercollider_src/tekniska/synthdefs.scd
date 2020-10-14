@@ -175,6 +175,7 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 
 	sig = (sig * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
+	sig = LeakDC.ar(sig);
 	Out.ar(out, sig);
 }).add;
 
@@ -257,7 +258,8 @@ SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0,
 	var sig = In.ar(in, 2);
 	sig = sig * \amp.kr(0.8);
 	sig = Balance2.ar(sig[0], sig[1], pan);
-	sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
+	// sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
+	sig = LeakDC.ar(sig);
 	Out.ar(out, sig);
 	Out.ar(send, sig * send_amp);
 }).add;
@@ -348,6 +350,7 @@ SynthDef(\softy_sustained, {
 	stutterTrig = Dust.kr(\stutterSpeed.kr(8));
 	sig = sig * Demand.kr(stutterTrig, 0, Dseq([stutterAmount, 1], inf));
 	sig = Pan2.ar(sig, \pan.kr(0, Rand(1.0, 3.0)));
+	sig = LeakDC.ar(sig);
 	Out.ar(\out.kr(0), sig);
 }).add;
 
