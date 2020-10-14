@@ -1209,7 +1209,7 @@ s.waitForBoot({
 		location = msg[14],
 		tab_url = msg[15];
 
-		if(~currentTabUrl != tab_url && (~home == false)) {
+		if(~currentTabUrl != tab_url) {
 			("RESET" + tab_url).postln;
 			~currentTabUrl = tab_url;
 			~newPageLoadEvent.(url, hostname);
