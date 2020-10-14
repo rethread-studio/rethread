@@ -151,13 +151,16 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 			}},
 			10, {{
-				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, rrand(100, 120), \glissf, 0.4, \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
+				var freq = ~s53.degreeToFreq(~root, 0.midicps, 3);
+				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.15, 0.3), \sinfreq, freq, \glissf, rrand(0.4, 0.6), \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25) * 0.3, \out, ~channels.percussion.bus]);
 			}},
 			11, {{
-				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 1.3), \sinfreq, rrand(230, 300), \glissf, 0.2, \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
+				var freq = ~s53.degreeToFreq(~root, 0.midicps, 5);
+				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, freq, \glissf, rrand(0.15, 0.35), \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.3, \out, ~channels.percussion.bus]);
 			}},
 			12, {{
-				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(1.22, 2.3), \sinfreq, rrand(530, 700), \glissf, 0.1, \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
+				var freq = ~s53.degreeToFreq(~root, 0.midicps, 6);
+				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.5, 0.8), \sinfreq, freq, \glissf, rrand(1/12, 1/6), \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.3, \out, ~channels.percussion.bus]);
 			}},
 			// default
 			{{
