@@ -18,16 +18,21 @@
 	~idleChordChange = Routine({
 		loop {
 			var chord;
-			// Change root
-			~root = ~root + [-8, 9, 17, -22].choose;
-			~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
-			// Change chord
-			~changeChord.(rrand(0, 2));
+			if(rrand(0.0, 1.0) > 0.7) {
+				// Change root
+				~root = ~root + [-8, 9, 17, -22].choose;
+				~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
+			};
+
+			if(rrand(0.0, 1.0) > 0.7) {
+				// Change chord
+				~changeChord.(rrand(0, 2));
+			};
 			chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 			chord = chord.collect{ |degree| ~s53.degreeToFreq(degree + ~root, 0.midicps, ~octave) };
 			// Set the Pdef to play the new chord
 			Pbindef(\thumps, \freq, Pxrand(chord, inf));
-			[8, 12, 16].choose.wait;
+			[12, 16, 24].choose.wait;
 		};
 	}).play(idleClock);
 
