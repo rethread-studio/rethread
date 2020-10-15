@@ -124,7 +124,7 @@ const options = {
     service: 0x0a0a0a,
     package: 0x000000,
   },
-  showLabels: false,
+  showLabels: true,
   lightHelpers: false,
   angleStep: 30,
 
@@ -132,6 +132,20 @@ const options = {
     color: 0xFFFFFF,
     transparent: false,
     opacityBaseLevel: 0.5
+  },
+  packagesColor: {
+    websocket: 0xF28527,
+    xmlhttprequest: 0x4F9E39,
+    font: 0xC7382C,
+    ping: 0x8E68BA,
+    stylesheet: 0xD67BBF,
+    image: 0xBEBD3A,
+    script: 0x51BBCE,
+    sub_frame: 0xAECDE1,
+    media: 0xBBDD93,
+    other: 0xFFFEA6,
+    main_frame: 0xD1352B,
+    default: 0xf9e20d
   }
 }
 //modify styles if to match installation settings
@@ -156,19 +170,25 @@ myApp.init();
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
   //Per request we want to add three elements
-  //INITIALIZAR
-  //SERVICE
-  //EVENT
-  //REQUEST CREATED
 
-  // console.log(json)
 
-  if (currentUrl != json.current_tab.url) {
+  //MANAGE MAIN URL 
+  if (currentUrl != json.current_tab.url && json.current_tab.url != null && json.current_tab.url != undefined) {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
+    const url = new URL(json.current_tab.url);
+
     currentUrl = json.current_tab.url;
-    myApp.addURL(currentUrl, packet.requestId)
+
+    myApp.addURL(url.hostname, packet.requestId)
+    myApp.resetParticles();
+
+
+    //SEND A REPORT MESSAGE AFTER 5 SECCONDS
+
+    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 2000);
+
   }
 
   if (json.event == "request_created") {
@@ -239,7 +259,7 @@ const onmessage = (message) => {
 
         if (!positionPerService.has(country)) {
           //create a text to display
-          let servicePos = random3DPosition(500);
+          let servicePos = random3DPosition(18);
           createText(country, servicePos);
           positionPerService.set(country, servicePos);
           indexPerService.set(country, indexPerService.size);
@@ -253,19 +273,21 @@ const onmessage = (message) => {
         activeService = country;
       }
     }
-    // console.log(json.request)
+
     // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
-    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0]);
+    const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
+
+    const pkg_country = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
+    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0], packColor, pkg_country);
 
 
   } else if (json.event == "home" && json.action == "open") {
     getChallenge();
-  }
-  else if (json.event == "idle") {
-    console.log("idle");
-    console.log(json);
+  } else if (json.event == "idle") {
+
     if (json.action == "inactive") {
       window.idle = true;
+      getChallenge()
     } else if (json.action == "active") {
       window.idle = false;
     }
@@ -291,10 +313,14 @@ function reset() {
 //CREATE a random position
 function random3DPosition(magnitude) {
   return new THREE.Vector3(
-    (-1 + Math.random() * 2) * magnitude,
-    (-1 + Math.random() * 2) * magnitude,
-    (1 + Math.random() * 1) * magnitude
+    getRandomArbitrary(-magnitude, magnitude),
+    getRandomArbitrary(-magnitude * 2, magnitude),
+    25
   );
+}
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
 //ADD PARTICLE:
@@ -332,7 +358,7 @@ let textMaterialDefault = new THREE.MeshBasicMaterial({
   opacity: 0.7,
 });
 let textMaterialActive = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
+  color: 0xE5463C,
   transparent: true,
   opacity: 0.9,
 });
@@ -345,16 +371,16 @@ function createText(service, servicePos) {
   let material = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.2,
   });
   let geometry = new THREE.TextGeometry(service, {
     font: font,
-    size: 50,
-    height: 0.001,
-    curveSegments: 2,
-    bevelEnabled: true,
-    bevelSize: 0.1,
-    bevelOffset: 0.1,
+    size: 3,
+    height: 1,
+    curveSegments: 12,
+    bevelEnabled: false,
+    bevelSize: 0,
+    bevelOffset: 0,
     bevelSegments: 1,
   });
 
@@ -382,7 +408,7 @@ function updateText(service) {
   }
 }
 
-let activeParticleColor = new THREE.Color(0xff0000);
+let activeParticleColor = new THREE.Color(0xE5463C);
 var particles_group;
 let particles_rotation = new THREE.Euler();
 let particles_rotation_vel = new THREE.Vector3(0, 0, 0);
@@ -463,7 +489,7 @@ function init() {
     1,
     4000
   );
-  camera.position.z = 1750;
+  camera.position.z = 80;
 
   // var controls = new OrbitControls(camera, container);
   // controls.minDistance = 1000;
@@ -474,7 +500,7 @@ function init() {
   // GLOBE
   countryLayers = generateCountries();
   scene.add(countryLayers);
-  countryLayers.position.set(0, 0, 1690);
+  countryLayers.position.set(0, 0, 0);
 
   countries = countryLayers.countries;
 
@@ -893,7 +919,7 @@ function animate() {
   // Updateing texts
   for (let text of particlesTextObjects) {
     if (text.service == activeService) {
-      text.mesh.material.color.setHex(0xff0000);
+      text.mesh.material.color.setHex(0xE5463C);
     } else {
       text.mesh.material.color.setHex(0xffffff);
     }
@@ -936,7 +962,7 @@ function animate() {
   // stats.update();
   render();
 
-  // console.log("numRequests: " + numRequests + " packetsOverTime: " + packetsOverTime);
+
   window.activity = numRequests * 0.1 + (packetsOverTime * 10);
   const activityCoeff = 2.0 * dt;
   window.smoothActivity = window.smoothActivity * (1 - activityCoeff) + window.activity * activityCoeff;
@@ -979,7 +1005,7 @@ function generateCountries() {
       shading: THREE.SmoothShading,
       shininess: 50,
     });
-    const scale = 18; // + Math.random() / 2;
+    const scale = 25; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;
