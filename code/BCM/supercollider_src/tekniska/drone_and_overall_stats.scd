@@ -172,7 +172,7 @@ Time spans of droney sounds:
 
 ~backgroundDronesStarted = false;
 ~lastHarmonicComplexity = 0;
-~droneAmpPhase = 0;
+~droneAmpPhase = 1;
 ~updateDrone = { | timeSinceMainFrame |
 	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames, harmonicComplexity,
 	sameness;

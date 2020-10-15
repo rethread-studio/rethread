@@ -3,7 +3,7 @@ function WebSocketClient() {
     return new WebSocketClient();
   }
 
-  const host = `ws://${SERVER}:8873`;
+  const host = `ws://${bcm_config.server}:${bcm_config.port}`;
 
   const listeners = {};
   const that = this;
@@ -25,7 +25,9 @@ function WebSocketClient() {
         "Socket is closed. Reconnect will be attempted in 1 second.",
         e.reason
       );
-      setTimeout(init, 1000);
+      if (that.isClosed != true) {
+        setTimeout(init, 1000);
+      }
     };
 
     ws.onerror = function (err) {
@@ -69,5 +71,13 @@ function WebSocketClient() {
       ws.send(message);
     }
   };
+
+  that.close = function () {
+    that.isClosed = true;
+    if (ws != null) {
+      ws.close();
+    }
+  };
+
   init();
 }

@@ -121,12 +121,12 @@ SynthDef(\kick, {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.9, glisstime =
 		dur: glisstime
 	);
 	snd = SinOsc.ar(freq: ramp, mul: env);
-	clickAmp = EnvGen.ar(Env.perc(0.001, 0.01)) * 0.04;
+	clickAmp = EnvGen.ar(Env.perc(0.001, 0.01)) * 0.1 * amp;
 	click = LPF.ar(Formant.ar(910 + clickAdd, 4760 + clickAdd, 2110 + clickAdd), Rand(3000, 4500)) * clickAmp;
 
 	snd = snd + click;
 	snd = Pan2.ar(snd, pan);
-	subAmp = EnvGen.ar(Env.perc(att, rel)) * 0.15;
+	subAmp = EnvGen.ar(Env.perc(att, rel)) * 0.25 * amp;
 	sub = SinOsc.ar(sinfreq * glissf * {SinOsc.kr(8, phase: Rand(0, pi)).range(1.0-wobble, 1.0+wobble)}!2) * subAmp;
 	snd = snd + sub;
 	Out.ar(out, snd);

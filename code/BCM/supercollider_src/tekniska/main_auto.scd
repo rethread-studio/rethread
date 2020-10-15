@@ -272,12 +272,21 @@ s.waitForBoot({
 	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.drone = ~makeMixerChannel.("Drone", ~decoderBus);
 	~channels.drone.set_send(~channels.long_rev.bus, 1.0);
+
+	~channels.idle_channel = ~makeMixerChannel.("Idle", ~decoderBus);
+	~channels.idle_channel.set_send(~channels.rev_channel.bus, 0.2);
+	~channels.idle_channel.set_amp(0.6);
+	~channels.idle_rev = ~makeMixerChannel.("Idle", ~channels.idle_channel.bus);
+	~channels.idle_rev.set_send(~channels.long_rev.bus, 0.05);
+
 	~channels.tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
 	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.tick_channel.set_amp(0.0);
 
 	{
-		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel, ~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice, ~channels.drone, ~channels.rev_channel, ~channels.long_rev], ~allClouds);
+		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel,
+			~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice,
+			~channels.drone, ~channels.idle_channel, ~channels.rev_channel, ~channels.long_rev], ~allClouds);
 	}.defer;
 
 	// Create the global stats object (environment)
@@ -1234,7 +1243,7 @@ s.waitForBoot({
 	r = OSCFunc({ arg msg, time, addr, recvPort;
 		[msg, time, addr, recvPort].postln;
 		if(msg[1] == 'open') {
-			~home = true;
+			// ~home = true;
 		};
 		if(msg[1] == 'close') {
 			~home = false;
@@ -1372,4 +1381,8 @@ s.waitForBoot({
 			0.25.wait;
 		};
 	}).play(~tickClock);
+
+	s.sync;
+
+	~startIdleMusic.();
 });
