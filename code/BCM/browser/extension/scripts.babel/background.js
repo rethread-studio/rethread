@@ -1,10 +1,28 @@
 let lastTab = null;
 
-const ws = new WebSocketClient();
+chrome.storage.local.get(bcm_config, function (items) {
+  bcm_config = items;
+  ws = new WebSocketClient();
+});
+
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  chrome.storage.local.get(bcm_config, function (items) {
+    bcm_config = items;
+    if (ws) {
+      ws.close();
+    }
+    ws = new WebSocketClient();
+  });
+});
+
+let ws = null;
 
 function broadcast(event) {
-  ws.send(event);
+  if (ws) {
+    ws.send(event);
+  }
 }
+
 function sendCurrentUrl() {
   return new Promise((resolve) => {
     chrome.tabs.getSelected(null, function (tab) {
@@ -15,7 +33,9 @@ function sendCurrentUrl() {
 
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
   lastTab = await sendCurrentUrl();
-  chrome.tabs.reload(tabId);
+  if (bcm_config.reload) {
+    chrome.tabs.reload(tabId);
+  }
   broadcast({
     event: "tab_changed",
     tab: lastTab,
@@ -127,7 +147,31 @@ async function inactive() {
     chrome.tabs.create({
       url: chrome.extension.getURL("button.html"),
     });
-    // chrome.tabs.remove(indexes);
+    if (bcm_config.closeTabs) {
+      chrome.tabs.remove(indexes);
+    }
+    if (bcm_config.cache) {
+      chrome.browsingData.remove(
+        {},
+        {
+          appcache: true,
+          cache: true,
+          cacheStorage: true,
+          cookies: true,
+          downloads: true,
+          fileSystems: true,
+          formData: true,
+          history: true,
+          indexedDB: true,
+          localStorage: true,
+          pluginData: true,
+          passwords: true,
+          serviceWorkers: true,
+          webSQL: true,
+        },
+        function () {}
+      );
+    }
   });
 }
 
