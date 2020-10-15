@@ -1,5 +1,5 @@
 bcm_config = {
-  server: "locahost",
+  server: "localhost",
   port: 8873,
   cache: false,
   closeTabs: false,
