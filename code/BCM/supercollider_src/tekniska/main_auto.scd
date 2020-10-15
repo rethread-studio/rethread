@@ -1381,4 +1381,8 @@ s.waitForBoot({
 			0.25.wait;
 		};
 	}).play(~tickClock);
+
+	s.sync;
+
+	~startIdleMusic.();
 });
