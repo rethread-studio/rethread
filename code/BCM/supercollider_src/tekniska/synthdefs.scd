@@ -169,16 +169,17 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 	sig = In.ar(\in.kr(10), 2);
 	mix = mix.lag(\mixLag.kr(10));
 
-	wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
-	wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);
-	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.9));
+	/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
+	wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
+	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
 
 	sig = (sig * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
+	sig = LeakDC.ar(sig);
 	Out.ar(out, sig);
 }).add;
 
-SynthDef(\long_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
+/*SynthDef(\long_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 	var sig, wet;
 
 	sig = In.ar(\in.kr(10), 2);
@@ -189,6 +190,54 @@ SynthDef(\long_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 	sig = (sig * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
 	Out.ar(out, sig);
+}).add;*/
+
+SynthDef(\long_reverb, {
+	var snd, wet;
+	snd = In.ar(\in.kr(0), 2);
+	wet = snd.sum;
+	// wet = PitchShift.ar(snd, 0.2, 2);
+	wet = DelayN.ar(wet, 0.25, 0.25);
+	wet = GVerb.ar(wet, 200, \rt.kr(2));
+	wet = HPF.ar(wet, 100) * -3.dbamp;
+	wet = LPF.ar(wet, 7000);
+	snd = snd + (wet * \wetness.kr(0.1));
+	// Add a little bit of tape flutter
+	snd = DelayC.ar(snd, 0.2, LFNoise2.kr(1).range(0, 0.005));
+
+	//snd = (snd * Demand.kr(Dust.kr(5), 1, Dseq([1, 0], inf))) + (snd*0.5);
+
+	Out.ar(\out.kr(0), snd);
+}).add;
+
+SynthDef(\infiniteReverb,  { | feedback = 1, inAmp = 1, out = 0, in = 10, inChan = 0, inputSelect = 0, cutoff = 14000, feedbackCutoff = 600, feedbackLPFmix = 0.5|
+	var sig, local, fx, inSig, top, noiseTrig, noisett, noise, distsig, toFeedSig;
+
+	inSig = In.ar(in,2) * inAmp.lag(0.01);
+	sig = HPF.ar(inSig, 50);
+	local = LocalIn.ar(2);
+	local = local+sig;
+
+
+	// lower the feedback if there is acoustic feedback from the speakers or the signal just gets too loud
+	// If the amplitude crosses the threshold, reduce feeback by 20%
+	// feedback = feedback * Select.kr(K2A.ar(Amplitude.ar(Mix(local)) > 0.65), [1, 0.7]);
+
+	// apply reverb
+	// AllpassN gives constant frequency reproduction while AllpassL makes the high register 3000< trail off
+	15.do{local = AllpassN.ar(local, 0.06, Rand(0.001, 0.06), 1);};
+	// effects within the feedback loop
+	toFeedSig = (local * (1-feedbackLPFmix)) + (LPF.ar(local, feedbackCutoff) * feedbackLPFmix);
+
+	//complete feedback loop -- send audio back to LocalIn
+	LocalOut.ar(toFeedSig*feedback);
+	// sig = Pan2.ar(local);
+	sig = local;
+
+	sig = LPF.ar(sig, cutoff);
+	sig = GVerb.ar(sig, 100);
+	//non-feedback output to speakers
+	Out.ar(out, LPF.ar(Limiter.ar(sig, 0.99), cutoff));
 }).add;
 
 
@@ -211,7 +260,8 @@ SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0,
 	var sig = In.ar(in, 2);
 	sig = sig * \amp.kr(0.8);
 	sig = Balance2.ar(sig[0], sig[1], pan);
-	sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
+	// sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
+	sig = LeakDC.ar(sig);
 	Out.ar(out, sig);
 	Out.ar(send, sig * send_amp);
 }).add;
@@ -281,7 +331,7 @@ SynthDef(\thump, {
 SynthDef(\softy, {
 	var sig, env, freq = \freq.kr(220);
 	env = Env.perc(\atk.kr(0.1), \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
-	sig = Resonz.ar(PinkNoise.ar(mul: env), freq, 0.007, mul: 20);
+	sig = Resonz.ar(PinkNoise.ar(mul: env), freq.max(20).min(18000), 0.007, mul: 20);
 	sig = sig * \amp.kr(0.5);
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
@@ -294,7 +344,7 @@ SynthDef(\softy_sustained, {
 	env = EnvGen.kr(Env.asr(atk, 1.0, \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]),
 		gate: \gate.kr(1), doneAction: 2);
 	rq = LFNoise1.kr(Rand(0.4, 1.5)).range(\minrq.kr(0.005), \maxrq.kr(0.01));
-	sig = Resonz.ar(PinkNoise.ar, freq, rq, mul: 20);
+	sig = Resonz.ar(PinkNoise.ar, freq.max(20).min(18000), rq, mul: 20);
 	brightSig = Mix(Pulse.ar(freq * [1, 1.002, 1.004, 1.006], 0.2)) * 0.25;
 	sig = (sig * (1-brightness.pow(2))) + (brightSig * brightness);
 	ampVariation = LFNoise1.kr(LFNoise1.kr(1.5).range(0.3, 2.0)).range(0.1, 1.0);
@@ -302,6 +352,7 @@ SynthDef(\softy_sustained, {
 	stutterTrig = Dust.kr(\stutterSpeed.kr(8));
 	sig = sig * Demand.kr(stutterTrig, 0, Dseq([stutterAmount, 1], inf));
 	sig = Pan2.ar(sig, \pan.kr(0, Rand(1.0, 3.0)));
+	sig = LeakDC.ar(sig);
 	Out.ar(\out.kr(0), sig);
 }).add;
 

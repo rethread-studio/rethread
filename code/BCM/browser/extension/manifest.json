@@ -12,6 +12,7 @@
     "scripts": [
       "scripts/chromereload.js",
       "scripts/analytics.js",
+      "scripts/config.js",
       "scripts/websocket.js",
       "scripts/background.js"
     ]
@@ -19,12 +20,12 @@
   "content_scripts": [
     {
       "all_frames": true,
-      "js": ["scripts/inject.js"],
+      "js": ["scripts/config.js", "scripts/inject.js"],
       "matches": ["<all_urls>"],
       "run_at": "document_start"
     }
   ],
-  "web_accessible_resources": ["style/tabStyle.css"],
+  "web_accessible_resources": ["style/*", "fonts/*", "img/*", "startPage.html", "button.html"],
   "permissions": ["tabs", "webRequest", "webRequestBlocking", "<all_urls>"],
   "browser_action": {
     "default_icon": {
@@ -33,5 +34,8 @@
     },
     "default_title": "BCM",
     "default_popup": "popup.html"
+  },
+  "chrome_url_overrides": {
+    "newtab": "startPage.html"
   }
 }

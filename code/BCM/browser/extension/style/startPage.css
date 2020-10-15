@@ -1,0 +1,418 @@
+
+.gradient{
+    background-size: 300% 300% !important; 
+   }
+
+.gradient.dark{
+    background: #23074d;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #cc5333, #23074d);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
+  }
+
+  .gradient.light{
+    background: #FC5C7D;  
+    background: -webkit-linear-gradient(to right, #6A82FB, #FC5C7D);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to right, #6A82FB, #FC5C7D); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
+  }
+  
+  
+  .gradientAnimation{
+    
+    -webkit-animation: GradientAnimation 15s ease infinite;
+    -moz-animation: GradientAnimation 15s ease infinite;
+    animation: GradientAnimation 15s ease infinite; 
+  }
+  
+  
+  @-webkit-keyframes GradientAnimation {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+  }
+  @-moz-keyframes GradientAnimation {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+  }
+  @keyframes GradientAnimation {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+  }
+  
+
+
+
+body{
+    font-family: 'Roboto', sans-serif;
+    background-color: #a2dce7;
+    color:white;
+    margin: 0;
+}
+h1, h2{
+    font-family: 'Roboto', sans-serif;
+    font-family: 'neueBit';
+}
+
+span{
+    font-size:28px;
+    font-family: 'neueBit';
+}
+
+h1{
+    font-size: 190px;
+    margin:0;
+}
+h2{
+    font-size: 28px;
+    margin:0;
+}
+p{
+
+    font-family: 'Roboto', sans-serif;
+    font-size:16px;
+    line-height: 22px;
+}
+
+
+
+.credits{
+    line-height: 24px;
+    font-size: 12px;;
+
+}
+
+.credits a{
+    font-size:24px;
+    font-family: 'neueBit';
+    /* text-decoration: none; */
+    color: white;
+}
+.credits .divider{
+    background: none ;
+}
+
+.header{
+    display: flex;
+    flex-flow: column;
+}
+
+.col-4{
+    width: 380px;
+    margin-right: 80px;
+    
+}
+.categories{
+    display: flex;
+    flex-flow: row;
+    padding-top: 160px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.container{ 
+    display: flex;
+    flex-flow: row;
+    background:transparent;
+    padding: 50px;
+    
+}
+
+.group{
+    width: 200px;
+    margin-right: 30px;
+    margin-bottom: 30px;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    border-radius: 10px;
+}
+
+#container-particles{
+    position: absolute;
+    height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: -10;
+      /* overflow: hidden; */
+}
+
+
+.flex-col{
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-row{
+    display: flex;
+    flex-direction: row;
+}
+
+.spacer{
+    height:20px;
+}
+
+.spacer-m{
+    height:40px;
+}
+.spacer-l{
+    height:60px;
+}
+
+.spacer-l{
+    height:60px;
+}
+
+.spacer-xl{
+    height:80px;
+}
+
+.spacerW{
+    width:100px;
+    display: block;
+}
+
+
+
+footer .lang-se{
+    margin-bottom:30px;
+    
+}
+
+
+
+.divider {
+    width: 10px;
+    margin: 30px  24px;
+    background: white;
+  }
+
+  .item{
+    flex: 0 1 auto;
+    line-height: 32px;
+    min-height: 250px;
+    margin-bottom: 30px;
+  }
+
+  .item.h{
+      width: 45%;
+  }
+
+  .divider.h{
+      width:2px
+  }
+  .btn-container{
+      display: flex;
+      flex-wrap: wrap;
+
+  }
+
+  .links-btn{
+      
+    flex-grow: 1;
+    text-align: center;
+    min-height: 70px;
+    margin: 10px;
+    border-radius: 5px;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 80px;
+    max-width: 80px;
+    background-size: contain ;
+  }
+
+.btn-dice{
+    background-image: url(./../img/dice.jpg);
+    background-color: white;
+}
+.btn-dn{
+    background-image: url(./../img/dnlogo.png);
+    /* background-size: 0px; */
+}
+
+.btn-svt{
+    background-image: url(./../img/svt.png);
+    /* background-size: 90px; */
+
+}
+.btn-tekniska{
+    background-image: url(./../img/tekniska.png);
+    
+        background-color: black;
+
+}
+
+.btn-google{
+    background-image: url(./../img/google.png);
+    
+}
+.btn-challenge{
+    background-image: url(./../img/challenge.png);
+    
+    height: 90px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #ad5389;
+
+}
+
+.item a{
+    font-size: 32px;
+    font-family: 'neueBit';
+    color: white;
+    
+}
+
+.btn-googleMap{
+    background-image: url(./../img/map.google.png);
+   
+    
+}
+
+.btn-mapOpen{
+    background-image: url(./../img/map.openMap.png);
+    
+  
+}
+
+.btn-mapBin{
+    background-image: url(./../img/map.bing.png);
+    
+  
+}
+
+.btn-natSweden{
+    background-image: url(./../img/flag.sweden.png);
+    
+}
+
+.btn-natRussia{
+    background-image: url(./../img/flag.russia.png);
+    
+}
+.btn-natAfrica{
+    background-image: url(./../img/flag.southAfrica.png);
+    
+}
+.btn-natCuba{
+    background-image: url(./../img/flag.cuba.png);
+    
+}
+.btn-natNigeria{
+    background-image: url(./../img/flag.nigeria.png);
+    
+}
+.btn-natKorea{
+    background-image: url(./../img/flag.korea.png);
+    
+}
+
+.btn-servYoutube{
+    background-image: url(./../img/google.youtube.png);
+    
+}
+
+.btn-newsDN{
+    background-image: url(./../img/dnlogo.png);
+    
+}
+.btn-newsAfton{
+    background-image: url(./../img/news.afton.png);
+    
+}
+.btn-newsBBC{
+    background-image: url(./../img/news.bbc.png);
+    
+}
+.btn-newsNPR{
+    background-image: url(./../img/new.npr.png);
+    
+}
+
+.btn-comLego{
+    background-image: url(./../img/comercial.lego.png);
+    
+}
+.btn-comIkea{
+    background-image: url(./../img/commercial.ikea.png);
+    
+}
+.btn-comAmazon{
+    background-image: url(./../img/commercial.amazon.png);
+    
+}
+
+.btn-searchGoogle{
+    background-image: url(./../img/google.png);
+    
+}
+.btn-searchDuck{
+    background-image: url(./../img/search.duck.png);
+    
+}
+.btn-searchWiki{
+    background-image: url(./../img/search.wiki.png);
+    
+}
+
+
+.btn-sosTik{
+    background-image: url(./../img/social.tiktok.svg);
+    
+}
+
+.btn-sosInst{
+    background-image: url(./../img/social.insta.png);
+    
+}
+.btn-sosTwit{
+    background-image: url(./../img/social.twitter.png);
+    
+}
+.btn-sosFace{
+    background-image: url(./../img/social.facebook.png);
+    
+}
+
+.btn-moreCastor{
+    background-image: url(./../img/more.castor.png);
+    
+}
+
+.btn-moreReth{
+    background-image: url(./../img/more.rethArt.png);
+    
+}
+.btn-moreKTH{
+    background-image: url(./../img/more.kth.png);
+    
+}
+.btn-moreWasp{
+    background-image: url(./../img/more.wasp.png);
+    
+}
+
+
+background-shader{
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline;
+    margin-left: auto; 
+    margin-right: auto; 
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  canvas {
+    position: absolute;
+    top: 0;
+  }
+
+  .pad{
+      padding: 50px;
+      display: flex;
+     
+  }

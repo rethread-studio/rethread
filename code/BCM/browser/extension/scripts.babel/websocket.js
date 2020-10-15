@@ -3,7 +3,7 @@ function WebSocketClient() {
     return new WebSocketClient();
   }
 
-  const host = "ws://localhost:8873";
+  const host = `ws://${SERVER}:8873`;
 
   const listeners = {};
   const that = this;
