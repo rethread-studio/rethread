@@ -281,9 +281,14 @@ const onmessage = (message) => {
     myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0], packColor, pkg_country);
 
 
-  } else if (json.event == "home" && json.action == "open") {
+  }
+
+  if (json.event == "home" && json.action == "open") {
     getChallenge();
-  } else if (json.event == "idle") {
+
+  }
+
+  if (json.event == "idle") {
 
     if (json.action == "inactive") {
       window.idle = true;

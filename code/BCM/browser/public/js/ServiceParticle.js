@@ -260,7 +260,7 @@ class AppViz {
             newService.init();
             this.services.push(newService);
             this.stepAnglePos();
-            this.stepZPos()
+
             this.stepRadius();
             this.servCounter++;
 
@@ -330,7 +330,7 @@ class AppViz {
     }
 
     resetZPos() {
-        this.zPos = 10;
+        this.zPos = 0;
     }
 
     resetRadius() {
@@ -374,31 +374,35 @@ class PackageParticle {
         this.angle = Math.random() * Math.PI * 2;//position.angle;
         this.radius = 0;//position.radius
         this.posZ = position.servicePos.z
-        this.speed = this.totesRando(5, 15) / 1000;
+        this.speed = this.totesRando(1, 9) / 100;
         this.randomDelay = delay;
         this.color = color;
         this.country = country;
         //get the position setup
+        this.rotation = this.totesRando(1, 9) / 1000;
 
         //to move a particle toward the URL 
         this.location = new THREE.Vector3(position.servicePos.x, position.servicePos.y, position.servicePos.z);
         this.velocity = new THREE.Vector3(this.speed, this.speed, 0);
         this.acceleration = new THREE.Vector3(0, 0, 0);
-        this.maxSpeed = new THREE.Vector3(0.05, 0.05, 0);
-        this.maxForce = new THREE.Vector3(0.005, 0.005, 0)
+        this.maxSpeed = new THREE.Vector3(this.speed, this.speed, 0);
+        this.maxForce = new THREE.Vector3(0.00005, 0.00005, 0)
+
+        this.target = new THREE.Vector3(0, 0, -0.20);
+
+        this.size = this.totesRando(10, 20) / 100;
     }
 
     init() {
 
 
-        let randomSize = this.totesRando(10, 15) / 100
-        this.geometry = new THREE.OctahedronGeometry(0.15, 0);
+        let randomSize = this.totesRando(10, 15) / 1000
+        this.geometry = new THREE.OctahedronGeometry(this.size, 0);
         this.material = new THREE.MeshPhongMaterial({ color: this.color });
         this.shape = new THREE.Mesh(this.geometry, this.material);
 
 
-        //position of the shape 
-        const randomPos = this.random3DPosition(10);
+        //position of the shape
         this.shape.position.copy(this.servicePos)
         // const sparkle = this.totesRando(0.003, 0.5);
         this.shape.scale.set(0, 0, 0);
@@ -434,7 +438,7 @@ class PackageParticle {
         return new THREE.Vector3(
             (-1 + Math.random() * 2) * magnitude,
             (-1 + Math.random() * 2) * magnitude,
-            (-1 + Math.random() * 2) * 5
+            0
         );
     }
 
@@ -458,36 +462,46 @@ class PackageParticle {
     }
 
     update() {
+        const dist = this.shape.position.distanceTo(this.target)
 
-        // this.seek();
-        // // //update velocity
-        // this.velocity.add(this.acceleration);
-        // //limit speed
-        // this.velocity.min(this.maxSpeed)
-        // this.location.add(this.velocity)
-        // this.acceleration.multiply(new THREE.Vector3())
+        this.seek();
+        //update velocity
 
-        // this.shape.position.copy(this.location)
+        this.velocity.add(this.acceleration);
+        //limit speed
+        this.velocity.min(this.maxSpeed)
+        this.location.add(this.velocity)
+
+        this.acceleration.multiply(new THREE.Vector3())
+
+        this.shape.position.copy(this.location)
+        this.shape.rotateX(this.rotation)
+        this.shape.rotateY(this.rotation)
+        this.shape.rotateZ(this.rotation)
+
 
         //old movement
-        this.radius += (this.speed * this.direction);
-        this.shape.position.copy(this.getCircularPosition(this.angle, this.radius, this.posZ))
+        // this.radius += (this.speed * this.direction);
+        // this.shape.position.copy(this.getCircularPosition(this.angle, this.radius, this.posZ))
 
         //CHECK STATE
-        if (Date.now() > this.timeStamp) this.changeStatus();
+
+        if (Date.now() > this.timeStamp || dist < 0.5) this.changeStatus();
 
 
     }
 
     seek() {
 
-        const target = new THREE.Vector3(-10, 10, 0)
 
-        let desired = target.sub(this.location);  // A vector pointing from the position to the target
+
+        let desired = this.target.sub(this.location);  // A vector pointing from the position to the target
         desired.normalize();
         desired.multiply(this.maxSpeed)
 
-        // // Steering = Desired minus velocity
+        desired.setZ(0);
+
+        // Steering = Desired minus velocity
         let steer = desired.sub(this.velocity);
 
         steer.min(this.maxForce);  // Limit to maximum steering force
@@ -498,9 +512,9 @@ class PackageParticle {
 
     applyForce(force) {
         // We could add mass here if we want A = F / M
-        console.log(this.acceleration)
+
         this.acceleration.add(force);
-        console.log(this.acceleration)
+
     }
 
     setOut() {
@@ -522,7 +536,7 @@ class PackageParticle {
         if (this.status == 'WAIT') {
             this.status = "ACTIVE"
             // this.timeStamp = Date.now() + this.totesRando(1, 4) * 1000
-            this.timeStamp = Date.now() + 2 * 1000
+            this.timeStamp = Date.now() + 5 * 1000
         } else if (this.status == 'ACTIVE') {
             this.status = "TWEENOUT";
             this.timeStamp = Date.now() + 300;
@@ -613,6 +627,7 @@ class serviceParticle {
         this.packagesNum = 0;
         this.speed = this.totesRando(3, 10) / 1000;
         this.randomDelay = this.totesRando(1, 8) / 10;
+        this.rotation = this.totesRando(1, 9) / 1000;
 
         // this.packages = [];
     }
@@ -645,7 +660,7 @@ class serviceParticle {
         return new THREE.Vector3(
             (-1 + Math.random() * 2) * magnitude,
             (-1 + Math.random() * 2) * magnitude,
-            (-1 + Math.random() * 2) * 5
+            0
         );
     }
 
@@ -661,7 +676,7 @@ class serviceParticle {
 
     init() {
 
-        this.geometry = new THREE.DodecahedronBufferGeometry(0.4);
+        this.geometry = new THREE.DodecahedronBufferGeometry(0.3);
         this.material = new THREE.MeshPhongMaterial({ color: 0x6A82FB });
         this.shape = new THREE.Mesh(this.geometry, this.material);
         this.shape.castShadow = true;
@@ -717,6 +732,10 @@ class serviceParticle {
         }
         this.radius += this.speed;
         this.shape.position.copy(this.getCircularPosition(this.anglePos))
+
+        this.shape.rotateX(this.rotation)
+        this.shape.rotateY(this.rotation)
+        this.shape.rotateZ(this.rotation)
 
         //check if it has enough packages to display label
         if (this.packagesNum > 3 && !this.showLabel) {
