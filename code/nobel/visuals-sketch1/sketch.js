@@ -1,6 +1,8 @@
 // Get p5 autocompletions
 /// <reference path="node_modules/@types/p5/global.d.ts" />
 
+let SINGLE_COLOR = true;
+
 // Performance - Disables FES
 // p5.disableFriendlyErrors = true;
 
@@ -77,10 +79,14 @@ let lastChange = Date.now();
 
 let lastCountry = "";
 
+let myFont;
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 // Preload Function
-function preload() {} // End Preload
+function preload() {
+  myFont = loadFont('assets/fonts/InconsolataSemiExpanded-Light.ttf');
+} // End Preload
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -111,6 +117,7 @@ function setup() {
   textFont('sans');
   textSize(24);
   textAlign(CENTER, CENTER);
+  textFont(myFont);
 
   // Set canvas framerate
   // frameRate(25);
@@ -124,7 +131,7 @@ function draw() {
   // clear();
 
   // Set canvas background
-  background("rgba(255,255,255,0.1)");
+  background("rgba(0,0,0,0.1)");
 
   // Update flow field
   var yoff = 0;
@@ -225,15 +232,20 @@ function draw() {
   }
 
   // Draw text
-  fill(0, 0, 0, 100);
-  text("Last country:", width/2, 52);
+  colorMode(HSL, 100);
+  fill(75, 100, 100, 100);
+  text("LAST COUNTRY:", width/2, 48);
   // lastCountry = "Hong Kong (China)";
   if(lastCountry.length >= 13) {
     textSize(37 - lastCountry.length);
   }
-  text(lastCountry.toUpperCase(), width/2, 135);
+  text(lastCountry.toUpperCase(), width/2, 130);
   textSize(24);
-  text('STOCKHOLM', width/2, 301); 
+  text('STOCKHOLM', width/2, 297);
+
+  if(Math.random() > 0.997) {
+    SINGLE_COLOR = !SINGLE_COLOR;
+  }
 
   // fill(255, 100, 50, 50);
   // rect(centerWindow.x, centerWindow.y, centerWindow.w, centerWindow.h);
@@ -256,11 +268,20 @@ function addParticle(len) {
     .sub(pos)
     .normalize()
     .mult(0.5);
-  colorMode(HSB, 100);
+  colorMode(RGB, 100);
+  let weight = Math.max(Math.min(Math.pow(len/1000, 0.4)/4, 1.0), 0.0);
+  let red = Math.max(1 - weight, 0);
+  let blue = Math.max(weight, 0);
+  let green = 0.1;
+  if(SINGLE_COLOR) {
+    red = 0;
+    blue = 0.5;
+    green = 1
+  }
   particles.push({
     pos: pos,
     vel: vel,
-    color: color(len/1000 % 100, 80, 100, 100),
+    color: color(red * 100, green * 100, blue * 100, 100),
     size: Math.max(Math.pow(len/1000, 0.4), 2),
     trails: [],
   });
