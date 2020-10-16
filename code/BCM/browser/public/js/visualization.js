@@ -161,6 +161,11 @@ const ws = WebSocketClient();
 const containerViz = document.getElementById("container-particles");
 const myApp = new AppViz(containerViz, options);
 myApp.init();
+window.addEventListener("resize", appResize, false);
+
+function appResize() {
+  myApp.onWindowResize();
+}
 // SERVICE VIZ 
 // const serviceViz = new ServiceGenerator(1220, window.innerWidth);
 
@@ -492,11 +497,11 @@ function init() {
 
   camera = new THREE.PerspectiveCamera(
     45,
-    window.innerWidth / 1220,
+    options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight,
     1,
     4000
   );
-  camera.position.z = 80;
+  camera.position.z = 100;
 
   // var controls = new OrbitControls(camera, container);
   // controls.minDistance = 1000;
@@ -512,6 +517,7 @@ function init() {
   countries = countryLayers.countries;
 
   scene.fog = new THREE.Fog(0xfafafa, 40, 2000);
+
   const light = new THREE.HemisphereLight(0xffffff, 0x555555, 0.7);
   scene.add(light);
 
@@ -658,7 +664,13 @@ function init() {
     powerPreference: "high-performance",
   });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth / 2, 1220);
+
+  if (options.installation) {
+    renderer.setSize(window.innerWidth / 2, 1220, false);
+  } else {
+    renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+  }
+
   renderer.outputEncoding = THREE.sRGBEncoding;
 
   container.appendChild(renderer.domElement);
@@ -694,10 +706,16 @@ function init() {
 }
 
 function onWindowResize() {
-  camera.aspect = window.innerWidth / 1220;
+  const aspectRatio = options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
+  camera.aspect = aspectRatio;
   camera.updateProjectionMatrix();
 
-  renderer.setSize(window.innerWidth / 2, 1220);
+  if (options.installation) {
+    renderer.setSize(window.innerWidth / 2, 1220, false);
+  } else {
+    console.log(window.innerHeight)
+    renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+  }
 }
 
 function rotateGlobe() {

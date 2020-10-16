@@ -45,19 +45,24 @@ class AppViz {
         this.renderer.setClearColor(0x000000, 0); // the default
         //RENDERer CONFIGURATION
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        if (this.options.installation) {
-            this.renderer.setSize(this.container.offsetWidth, 1220, false);
-        } else {
-            this.renderer.setSize(this.container.offsetWidth, this.container.offsetHeight, false);
-        }
+
+        const height = this.options.installation ? 1220 : window.innerHeight;
+
+        this.renderer.setSize(window.innerWidth / 2, height, false);
 
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.container.append(this.renderer.domElement);
 
         //     //CAMERA CONFIGURATION
+        // this.camera = new THREE.PerspectiveCamera(
+        //     this.options.fov,
+        //     this.options.installation ? this.container.offsetWidth / 1220 : this.container.offsetWidth / this.container.offsetHeight,
+        //     0.1,
+        //     10000
+        // );
         this.camera = new THREE.PerspectiveCamera(
             this.options.fov,
-            this.options.installation ? this.container.offsetWidth / 1220 : this.container.offsetWidth / this.container.offsetHeight,
+            this.options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight,
             0.1,
             10000
         );
@@ -67,6 +72,8 @@ class AppViz {
         this.camera.position.x = 0;
         // this.camera.rotateX(-0.4);
         this.camera.lookAt(new THREE.Vector3());
+
+        this.camera.updateProjectionMatrix();
 
         //ADDD SCENE
         this.scene = new THREE.Scene();
@@ -94,6 +101,18 @@ class AppViz {
 
         //RENDERer LOOP
         requestAnimationFrame(this.render);
+
+    }
+
+    onWindowResize() {
+        const aspectRatio = this.options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
+        this.camera.aspect = aspectRatio;
+        this.camera.updateProjectionMatrix();
+
+        const height = this.options.installation ? 1220 : window.innerHeight;
+
+        this.renderer.setSize(window.innerWidth / 2, height, false);
+
     }
 
     render() {

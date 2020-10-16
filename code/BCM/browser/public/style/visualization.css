@@ -125,11 +125,11 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
 }
 
 #container-particles{
-  position:absolute !important;
+  position:absolute;
   width: 50%;
-	height: 100vh;
-	overflow: hidden;
-  position: relative;
+	height: 100%;
+	/* overflow: hidden; */
+
   right:0;
 }
 
@@ -270,7 +270,8 @@ background-shader{
 }
 canvas {
   position: absolute;
-  top: 0;
+  height: 100%;
+  
 }
 
 #popMessage{
