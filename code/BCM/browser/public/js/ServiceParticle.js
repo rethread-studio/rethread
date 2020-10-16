@@ -12,7 +12,7 @@ class AppViz {
         this.camera;
         this.anglePos = 0;
         this.zPos = 0;
-        this.radius = 2;
+        this.radius = 1;
         this.maxServices = 30;
         this.servCounter = 0;
         this.urlElement = null;
@@ -46,9 +46,12 @@ class AppViz {
         //RENDERer CONFIGURATION
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
-        const height = this.options.installation ? 1220 : window.innerHeight;
-
-        this.renderer.setSize(window.innerWidth / 2, height, false);
+        if (this.options.installation) {
+            this.renderer.setSize(window.innerWidth / 2, 1220, false);
+        } else {
+            console.log(window.innerHeight)
+            this.renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+        }
 
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.container.append(this.renderer.domElement);
@@ -313,7 +316,7 @@ class AppViz {
 
         this.anglePos = 0;
 
-        this.radius = 2;
+        this.radius = 1;
     }
     //code for getting position
     getCircularPosition(angle, radius, posZ) {
@@ -353,7 +356,7 @@ class AppViz {
     }
 
     resetRadius() {
-        this.radius = 4;
+        this.radius = 1;
     }
 
     stepZPos() {
@@ -741,6 +744,7 @@ class serviceParticle {
 
     update() {
 
+        const dist = this.shape.position.distanceTo(new THREE.Vector3(0, 0, 0))
 
         // this.shape.position.x = this.shape.position.x + (0.005 * this.direction);
         if (this.showLabel) this.updateText();
@@ -749,7 +753,7 @@ class serviceParticle {
 
             this.changeStatus();
         }
-        this.radius += this.speed;
+        this.radius += dist > 8 ? 0 : this.speed;
         this.shape.position.copy(this.getCircularPosition(this.anglePos))
 
         this.shape.rotateX(this.rotation)
