@@ -173,7 +173,7 @@ const onmessage = (message) => {
 
 
   //MANAGE MAIN URL 
-  if (currentUrl != json.current_tab.url && json.current_tab.url != null && json.current_tab.url != undefined) {
+  if (json.current_tab != undefined && json.current_tab != null && currentUrl != json.current_tab.url && json.current_tab.url != null && json.current_tab.url != undefined) {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
@@ -286,6 +286,8 @@ const onmessage = (message) => {
   if (json.event == "home" && json.action == "open") {
     getChallenge();
 
+  } else if (json.event == "home" && json.action == "close") {
+    eraseMessage();
   }
 
   if (json.event == "idle") {
