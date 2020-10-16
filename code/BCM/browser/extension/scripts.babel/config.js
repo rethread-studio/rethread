@@ -4,4 +4,5 @@ bcm_config = {
   cache: false,
   closeTabs: false,
   reload: false,
+  idle: 60,
 };
