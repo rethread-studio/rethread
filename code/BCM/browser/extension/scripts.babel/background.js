@@ -179,7 +179,7 @@ ga("create", "UA-5954162-29", "auto");
 ga("set", "checkProtocolTask", null);
 
 var actionTimeout = null;
-var isInactive = false;
+var isInactive = true;
 function action() {
   clearTimeout(actionTimeout);
   if (isInactive) {

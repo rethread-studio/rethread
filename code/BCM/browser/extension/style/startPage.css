@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "neueBit";
+  src: url("./../fonts/NeueBit-Bold.woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 .gradient {
   background-size: 300% 300% !important;
 }
@@ -78,13 +85,13 @@ body {
 }
 h1,
 h2 {
-  font-family: "Roboto", sans-serif;
-  font-family: "neueBit";
+  font-family: "neueBit", "serif";
 }
 
 span {
-  font-size: 28px;
-  font-family: "neueBit";
+  font-family: "neueBit", sans-serif;
+  font-size: 10px;
+  font-size-adjust: 0.5;
 }
 
 h1 {
@@ -92,7 +99,8 @@ h1 {
   margin: 0;
 }
 h2 {
-  font-size: 28px;
+  font-size: 20px;
+  /* text-size-adjust: 50%; */
   margin: 0;
 }
 p {
