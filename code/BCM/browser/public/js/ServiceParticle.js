@@ -390,7 +390,7 @@ class PackageParticle {
 
         this.target = new THREE.Vector3(0, 0, -0.20);
 
-        this.size = this.totesRando(10, 20) / 100;
+        this.size = this.totesRando(5, 15) / 100;
     }
 
     init() {
