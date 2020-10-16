@@ -65,12 +65,6 @@ function closeHome() {
   }
 }
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  if (request.requested == "createDiv") {
-    //Code to create the div
-    sendResponse({ confirmation: "Successfully created div" });
-  }
-});
 if (!isIFrame) {
   injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
   createButton();

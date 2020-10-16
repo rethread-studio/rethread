@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>BCM Extension Options</title>
+  </head>
+  <body>
+    <label>
+      Server IP
+      <input type="text" placeholer="localhost" id="server" />
+    </label>
+
+    <label>
+      Server port
+      <input type="text" placeholer="8873" id="port" />
+    </label>
+
+    <label>
+      <input type="checkbox" id="reload" />
+      Reload the page on focus
+    </label><br>
+
+    <label>
+      <input type="checkbox" id="cache" />
+      Clear cache
+    </label><br>
+
+    <label>
+      <input type="checkbox" id="close_tabs" />
+      Close tabs for idle
+    </label><br>
+
+    <div id="status"></div>
+    <button id="save">Save</button>
+
+    <script src="scripts/config.js"></script>
+    <script src="scripts/options.js"></script>
+  </body>
+</html>

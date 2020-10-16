@@ -1,2 +1,7 @@
-SERVER = "130.237.224.46"
-PORT = 8873
+bcm_config = {
+  server: "localhost",
+  port: 8873,
+  cache: false,
+  closeTabs: false,
+  reload: false,
+};
