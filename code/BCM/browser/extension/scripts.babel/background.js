@@ -201,6 +201,7 @@ function action() {
     ga("send", "event", "idle", "inactive");
   }, 60000);
 }
+action();
 
 chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
   if (data.type == "action") {
