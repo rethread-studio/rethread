@@ -199,7 +199,7 @@ function action() {
     });
     ga("send", "pageview", "home");
     ga("send", "event", "idle", "inactive");
-  }, 60000);
+  }, bcm_config.idle * 1000);
 }
 action();
 
