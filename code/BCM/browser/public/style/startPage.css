@@ -68,6 +68,7 @@ h1{
 h2{
     font-size: 28px;
     margin:0;
+    min-height: 40px;
 }
 p{
 
@@ -107,7 +108,7 @@ p{
 .categories{
     display: flex;
     flex-flow: row;
-    padding-top: 160px;
+    
     width: 100%;
     flex-wrap: wrap;
 }
@@ -127,6 +128,7 @@ p{
     background-color: rgba(0, 0, 0, 0.2);
     padding: 30px;
     border-radius: 10px;
+    min-height: 240px;
 }
 
 #container-particles{
@@ -206,13 +208,14 @@ footer .lang-se{
   .btn-container{
       display: flex;
       flex-wrap: wrap;
+      min-height: 180px;
 
   }
 
   .links-btn{
       
     flex-grow: 1;
-    text-align: center;
+    
     min-height: 70px;
     margin: 10px;
     border-radius: 5px;
@@ -220,7 +223,9 @@ footer .lang-se{
     background-position: center;
     width: 80px;
     max-width: 80px;
+    min-width: 80px;
     background-size: contain ;
+    height: 70px;
   }
 
 .btn-dice{

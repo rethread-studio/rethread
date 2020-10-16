@@ -371,7 +371,7 @@ class PackageParticle {
 
     init() {
 
-        this.geometry = new THREE.DodecahedronBufferGeometry(0.4);
+        this.geometry = new THREE.OctahedronGeometry(0.3, 0);
         this.material = new THREE.MeshPhongMaterial({ color: this.color });
         this.shape = new THREE.Mesh(this.geometry, this.material);
         this.shape.position.copy(new THREE.Vector3(this.pos, 0, 0))
