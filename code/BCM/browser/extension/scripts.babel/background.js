@@ -179,7 +179,7 @@ ga("create", "UA-5954162-29", "auto");
 ga("set", "checkProtocolTask", null);
 
 var actionTimeout = null;
-var isInactive = false;
+var isInactive = true;
 function action() {
   clearTimeout(actionTimeout);
   if (isInactive) {
@@ -199,8 +199,9 @@ function action() {
     });
     ga("send", "pageview", "home");
     ga("send", "event", "idle", "inactive");
-  }, 60000);
+  }, bcm_config.idle * 1000);
 }
+action();
 
 chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
   if (data.type == "action") {

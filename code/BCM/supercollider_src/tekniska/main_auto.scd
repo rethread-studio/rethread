@@ -1136,6 +1136,12 @@ s.waitForBoot({
 
 		freq, ip_parts, rel = 0.0;
 
+		if(~idle == true) {
+			// Sometimes the idle deactivation message fails to send
+			// so we deactivate the idle state whenever there is activity
+			~stopIdleMusic.()
+		};
+
 		if(~idle == false && (~home == false)) {
 
 			if(~currentTabUrl != tab_url) {

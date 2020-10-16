@@ -4,7 +4,8 @@ function save_options() {
   var closeTabs = document.getElementById("close_tabs").checked;
   var reload = document.getElementById("reload").checked;
   const server = document.getElementById("server").value.trim();
-  const port = document.getElementById("port").value.trim();
+  const port = parseInt(document.getElementById("port").value.trim());
+  const idle = parseInt(document.getElementById("idle").value.trim());
   chrome.storage.local.set(
     {
       server,
@@ -12,6 +13,7 @@ function save_options() {
       cache,
       closeTabs,
       reload,
+      idle,
     },
     function () {
       // Update status to let user know options were saved.
@@ -34,6 +36,7 @@ function restore_options() {
     document.getElementById("cache").value = items.cache;
     document.getElementById("close_tabs").checked = items.closeTabs;
     document.getElementById("reload").checked = items.reload;
+    document.getElementById("idle").value = items.idle;
   });
 }
 document.addEventListener("DOMContentLoaded", restore_options);
