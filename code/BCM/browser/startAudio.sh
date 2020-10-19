@@ -18,6 +18,7 @@ done &
 while :; do 
   echo "Start SC" >> $SC_LOG;
   killall jackd;
+  killall scsynth;  
   sleep 5;
   cd /home/thomas/git/rethread/code/BCM/supercollider_src/tekniska/;
   sclang -r -D main_auto.scd >> $SC_LOG 2>&1;
