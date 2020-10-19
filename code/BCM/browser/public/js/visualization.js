@@ -188,6 +188,7 @@ const onmessage = (message) => {
 
     myApp.addURL(url.hostname, packet.requestId)
     myApp.resetParticles();
+    myApp.isActive(false)
 
 
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
@@ -295,16 +296,22 @@ const onmessage = (message) => {
     eraseMessage();
   }
 
-  if (json.event == "idle") {
 
+  if (json.event == "idle") {
     if (json.action == "inactive") {
+      //CHANGE STATE OF APP
+      //ADD BLACK AND WHITE BG
+
       window.idle = true;
       getChallenge()
     } else if (json.action == "active") {
+      //RETORE TO NORMAL
       window.idle = false;
     }
   }
 };
+
+
 
 //LISTEN to new messages with the function created
 ws.addEventListener("message", onmessage);
