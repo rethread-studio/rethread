@@ -281,7 +281,8 @@ class AppViz {
             position,
             s.randomDelay,
             packColor,
-            country
+            country,
+            this.idle
         );
         newPackage.init();
         this.packages.push(newPackage);
@@ -402,7 +403,7 @@ class AppViz {
 
 class PackageParticle {
 
-    constructor(scene, method, type, font, camera, renderer, requestId, showLabel, position, delay, color, country) {
+    constructor(scene, method, type, font, camera, renderer, requestId, showLabel, position, delay, color, country, idle) {
         this.scene = scene;
         this.type = type;
         //GET OR POST
@@ -430,6 +431,8 @@ class PackageParticle {
         //get the position setup
         this.rotation = this.totesRando(1, 9) / 1000;
 
+        this.idle = idle;
+
         //to move a particle toward the URL 
         this.location = new THREE.Vector3(position.servicePos.x, position.servicePos.y, position.servicePos.z);
         this.velocity = new THREE.Vector3(this.speed, this.speed, 0);
@@ -444,10 +447,9 @@ class PackageParticle {
 
     init() {
 
-
-        let randomSize = this.totesRando(10, 15) / 1000
         this.geometry = new THREE.OctahedronGeometry(this.size, 0);
-        this.material = new THREE.MeshPhongMaterial({ color: this.color });
+        const newcolor = this.idle ? this.color : 0xD0D0D0;
+        this.material = new THREE.MeshPhongMaterial({ color: newcolor });
         this.shape = new THREE.Mesh(this.geometry, this.material);
 
 
