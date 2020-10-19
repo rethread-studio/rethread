@@ -15,5 +15,5 @@ echo "Start Pellow Audio";
 ./startAudio.sh;
 
 echo "Start Pellow Visualization";
-sleep 4;
+sleep 10;
 chromium-browser --ignore-gpu-blacklist --enable-gpu-rasterization --enable-native-gpu-memory-buffers --password-store=basic --kiosk http://localhost:8873;
