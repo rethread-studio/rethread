@@ -188,7 +188,7 @@ const onmessage = (message) => {
 
     myApp.addURL(url.hostname, packet.requestId)
     myApp.resetParticles();
-    myApp.isActive(false)
+    myApp.isIdle(false)
 
 
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS

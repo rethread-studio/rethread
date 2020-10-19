@@ -21,7 +21,7 @@ class AppViz {
         this.numServices = 0;
         this.numPackages = 0;
         this.reportNumber = 0;
-        this.active = true;
+        this.idle = true;
     }
 
     init() {
@@ -109,13 +109,14 @@ class AppViz {
     }
 
 
-    isActive(inStatus) {
+    isIdle(inStatus) {
         //change app status and all inner items
-        this.active = inStatus;
+        this.idle = inStatus;
 
         //URL
-        this.urlElement.isActive(this.active)
+        this.urlElement.isIdle(this.idle)
         //All new services
+
         //all new packages
 
     }
@@ -291,7 +292,20 @@ class AppViz {
 
         if (!this.services.find(i => i.getName() == name)) {
             const showLabel = this.showServices.includes(name)
-            const newService = new serviceParticle(this.scene, name, name, this.font, this.camera, this.renderer, timeStamp, this.anglePos, this.zPos, showLabel, this.radius)
+            const newService = new serviceParticle(
+                this.scene,
+                name,
+                name,
+                this.font,
+                this.camera,
+                this.renderer,
+                timeStamp,
+                this.anglePos,
+                this.zPos,
+                showLabel,
+                this.radius,
+                this.idle
+            )
             newService.init();
             this.services.push(newService);
             this.stepAnglePos();
@@ -639,7 +653,7 @@ class PackageParticle {
 
 class serviceParticle {
 
-    constructor(scene, method, type, font, camera, renderer, requestId, anglePos, zPos, showLabel, radius) {
+    constructor(scene, method, type, font, camera, renderer, requestId, anglePos, zPos, showLabel, radius, idle) {
         this.scene = scene;
         this.type = type;
         //GET OR POST
@@ -663,6 +677,7 @@ class serviceParticle {
         this.speed = this.totesRando(3, 10) / 1000;
         this.randomDelay = this.totesRando(1, 8) / 10;
         this.rotation = this.totesRando(1, 9) / 1000;
+        this.idle = idle
 
         // this.packages = [];
     }
@@ -710,9 +725,9 @@ class serviceParticle {
 
 
     init() {
-
+        const newColor = this.idle ? 0x6A82FB : 0xA9A9A9;
         this.geometry = new THREE.DodecahedronBufferGeometry(0.3);
-        this.material = new THREE.MeshPhongMaterial({ color: 0x6A82FB });
+        this.material = new THREE.MeshPhongMaterial({ color: newColor });
         this.shape = new THREE.Mesh(this.geometry, this.material);
         this.shape.castShadow = true;
         this.shape.recieveShadow = true;
@@ -890,7 +905,7 @@ class urlParticle {
         this.timeStamp = Date.now() + (5 * 1000);
         this.status = 'ACTIVE'
         this.requestId = requestId;
-        this.active = true;
+        this.idle = true;
 
     }
 
@@ -906,15 +921,15 @@ class urlParticle {
         return Math.floor(Math.random() * (1 + max - min) + min)
     }
 
-    isActive(inStatus) {
-        this.active = inStatus;
+    isIdle(inStatus) {
+        this.idle = inStatus;
         //change its color
         this.changeColor();
     }
 
     changeColor() {
         //red or gray
-        const newColor = this.active ? 0xee4035 : 0x909090;
+        const newColor = this.idle ? 0xee4035 : 0x909090;
         this.shape.material.color.setHex(newColor);
     }
 
