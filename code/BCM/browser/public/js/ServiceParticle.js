@@ -116,9 +116,15 @@ class AppViz {
         this.resetParticles()
         //URL
         this.urlElement.isIdle(this.idle)
-        //All new services
+        //change the app background
+        if (this.idle) {
+            document.body.classList.remove("dark");
+            document.body.classList.add("gray");
+        } else {
+            document.body.classList.remove("gray");
+            document.body.classList.add("dark");
+        }
 
-        //all new packages
 
     }
 

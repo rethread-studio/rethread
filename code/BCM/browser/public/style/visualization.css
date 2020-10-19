@@ -74,6 +74,11 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
 
 }
 
+.gradient.gray{
+  background-color: #485461;
+  background: linear-gradient(315deg, #485461 0%, #28313b 74%);
+}
+
 
 .gradientAnimation{
   
