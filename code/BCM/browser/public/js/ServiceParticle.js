@@ -21,7 +21,7 @@ class AppViz {
         this.numServices = 0;
         this.numPackages = 0;
         this.reportNumber = 0;
-        this.idle = true;
+        this.idle = false;
     }
 
     init() {
@@ -112,7 +112,8 @@ class AppViz {
     isIdle(inStatus) {
         //change app status and all inner items
         this.idle = inStatus;
-
+        //clean all items
+        this.resetParticles()
         //URL
         this.urlElement.isIdle(this.idle)
         //All new services
@@ -448,7 +449,7 @@ class PackageParticle {
     init() {
 
         this.geometry = new THREE.OctahedronGeometry(this.size, 0);
-        const newcolor = this.idle ? this.color : 0xD0D0D0;
+        const newcolor = !this.idle ? this.color : 0xD0D0D0;
         this.material = new THREE.MeshPhongMaterial({ color: newcolor });
         this.shape = new THREE.Mesh(this.geometry, this.material);
 
@@ -727,7 +728,7 @@ class serviceParticle {
 
 
     init() {
-        const newColor = this.idle ? 0x6A82FB : 0xA9A9A9;
+        const newColor = !this.idle ? 0x6A82FB : 0xA9A9A9;
         this.geometry = new THREE.DodecahedronBufferGeometry(0.3);
         this.material = new THREE.MeshPhongMaterial({ color: newColor });
         this.shape = new THREE.Mesh(this.geometry, this.material);
@@ -907,7 +908,7 @@ class urlParticle {
         this.timeStamp = Date.now() + (5 * 1000);
         this.status = 'ACTIVE'
         this.requestId = requestId;
-        this.idle = true;
+        this.idle = false;
 
     }
 
@@ -931,7 +932,7 @@ class urlParticle {
 
     changeColor() {
         //red or gray
-        const newColor = this.idle ? 0xee4035 : 0x909090;
+        const newColor = !this.idle ? 0xee4035 : 0x909090;
         this.shape.material.color.setHex(newColor);
     }
 

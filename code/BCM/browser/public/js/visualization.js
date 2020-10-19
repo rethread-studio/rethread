@@ -188,8 +188,6 @@ const onmessage = (message) => {
 
     myApp.addURL(url.hostname, packet.requestId)
     myApp.resetParticles();
-    myApp.isIdle(false)
-
 
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
@@ -300,6 +298,7 @@ const onmessage = (message) => {
   if (json.event == "idle") {
     if (json.action == "inactive") {
       //CHANGE STATE OF APP
+      myApp.isIdle(true);
       //ADD BLACK AND WHITE BG
 
       window.idle = true;
@@ -307,10 +306,22 @@ const onmessage = (message) => {
     } else if (json.action == "active") {
       //RETORE TO NORMAL
       window.idle = false;
+      myApp.isIdle(false);
     }
   }
 };
 
+
+
+document.addEventListener("keyup", function (event) {
+  // on up arrow
+  if (event.keyCode === 38) {
+    myApp.isIdle(false);
+  } else if (event.keyCode == 40) {
+    myApp.isIdle(true);
+  }
+
+});
 
 
 //LISTEN to new messages with the function created
