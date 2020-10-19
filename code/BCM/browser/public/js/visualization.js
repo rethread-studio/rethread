@@ -299,8 +299,6 @@ const onmessage = (message) => {
     if (json.action == "inactive") {
       //CHANGE STATE OF APP
       myApp.isIdle(true);
-      //ADD BLACK AND WHITE BG
-
       window.idle = true;
       getChallenge()
     } else if (json.action == "active") {
@@ -313,19 +311,12 @@ const onmessage = (message) => {
 
 
 
-document.addEventListener("keyup", function (event) {
-  // on up arrow
-  if (event.keyCode === 38) {
-    myApp.isIdle(false);
-  } else if (event.keyCode == 40) {
-    myApp.isIdle(true);
-  }
 
-});
 
 
 //LISTEN to new messages with the function created
 ws.addEventListener("message", onmessage);
+
 
 
 //RESET ALL CONFIGURATION
@@ -962,7 +953,8 @@ function animate() {
   // Updateing texts
   for (let text of particlesTextObjects) {
     if (text.service == activeService) {
-      text.mesh.material.color.setHex(0xE5463C);
+      const newColor = window.idle ? 0xD0D0D0 : 0xE5463C;
+      text.mesh.material.color.setHex(newColor);
     } else {
       text.mesh.material.color.setHex(0xffffff);
     }
