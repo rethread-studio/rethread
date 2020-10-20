@@ -75,6 +75,11 @@ background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, F
 
 }
 
+.gradient.gray{
+  background-color: #485461;
+background: linear-gradient(to right, #485461 0%, #28313b 74%);
+}
+
 
 .gradientAnimation{
   
@@ -318,4 +323,83 @@ canvas {
 	overflow: hidden;
   position: relative;
   left:0;
+}
+
+#iddleMessage {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+#iddleMessage.invisible{
+  display: none;
+}
+#iddleButton{
+  border: 10px solid white;
+    color:white;
+    text-decoration: none;
+    text-align: center;
+    animation: sizeAnimation 5s ease infinite;
+    padding: 50px;
+    z-index: 999;
+}
+
+
+
+#iddleButton h1{
+  font-family: 'neueBit';
+    font-size: 120px;
+    margin: 0;
+}
+
+#iddleButton p{
+  
+    font-size: 48px;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+  
+}
+
+@-webkit-keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}
+@-moz-keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}
+@keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}
+
+.blur{
+  filter: blur(2px);
+}
+
+.blur-m{
+  filter: blur(4px);
+}
+
+.flex.center{
+  display: flex;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  justify-content: center;
+  text-align: center;
+  padding-top: 200px;
+
+}
+
+.flex.center h1{
+  font-size: 218px;
+  font-family: 'neueBit';
+  /* font-family: 'Roboto', sans-serif; */
 }
