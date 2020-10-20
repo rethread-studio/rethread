@@ -105,11 +105,11 @@ function backgroundFragShader() {
       vec2 st = (gl_FragCoord.xy/iResolution.x)-.5;
       // vec2 st = - 1.0 + 2.0 * vUv;
       vec2 uv = st;
-      st*=10.;// * pow(abs(uv.x), 0.1);
+      st*=.05;// * pow(abs(uv.x), 0.1);
       //
       //st += st * abs(sin(time*0.1)*3.0);
       vec3 color = vec3(0.0);
-      float time = iTime * 7.;
+      float time = iTime * .1;
   
       vec2 q = vec2(0.);
       q.x = fbm( st * rotate(time * -0.003));
@@ -119,8 +119,8 @@ function backgroundFragShader() {
       r.x = fbm( st * rotate(time * -0.033) + 10.0*q + vec2(1.7,9.2)+ 0.10*time );
       r.y = fbm( st * rotate(time * 0.005) + 1.0*q + vec2(8.3,2.8)+ 0.016*time);
   
-    //   float f = fbm(st+ (r*3.2));
-      float f = max(pow(r.y*q.y * q.x, 0.1), 0.1);
+      float f = fbm(st+ (r*3.2));
+      // float f = max(pow(r.y*q.y * q.x, 0.1), 0.1);
   
     //   color = mix(vec3(0.4824, 0.651, 0.6863),
     //               vec3(0.635, 0.8627, 0.9559),
@@ -156,7 +156,7 @@ function backgroundFragShader() {
     //                 leftColor,
     //                 clamp((f*f)*1.5,0.4,1.0));
   
-      gl_FragColor = vec4(pow(f, 0.9)*1.0*color*brightness, 1.0);
+      gl_FragColor = vec4(pow(f + length(q) + length(r.x), 5.)*.2*color*brightness, 1.0);
     //   gl_FragColor = vec4(vec3(colorMix), 1.0);
   }
     `;
