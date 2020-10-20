@@ -150,12 +150,13 @@ class Legend {
         //ADD LIGHTS
         // Add directional light
         this.light1 = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.light1.position.set(30, 20, -100);
+        this.light1.position.set(2, 0, -50);
+        this.light1.lookAt(new THREE.Vector3(3, 0, 0))
         this.scene.add(this.light1);
 
 
         this.light2 = new THREE.DirectionalLight(0xffffff, 0.5);
-        this.light2.position.set(30, -20, -100);
+        this.light2.position.set(-2, 0, -50);
         this.scene.add(this.light2);
 
         if (this.options.lightHelpers) {
@@ -164,6 +165,9 @@ class Legend {
             let helper2 = new THREE.DirectionalLightHelper(this.light2, 5);
             this.scene.add(helper2);
         }
+
+        this.light = new THREE.AmbientLight(0x404040); // soft white light
+        this.scene.add(this.light);
 
         //RENDERer LOOP
         requestAnimationFrame(this.render);

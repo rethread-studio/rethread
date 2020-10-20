@@ -386,3 +386,20 @@ canvas {
 .blur-m{
   filter: blur(4px);
 }
+
+.flex.center{
+  display: flex;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  justify-content: center;
+  text-align: center;
+  padding-top: 200px;
+
+}
+
+.flex.center h1{
+  font-size: 218px;
+  font-family: 'neueBit';
+  /* font-family: 'Roboto', sans-serif; */
+}
