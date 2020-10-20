@@ -33,6 +33,9 @@
     "style/*",
     "fonts/*",
     "img/*",
+    "scripts/three.min.js",
+    "scripts/legend.js",
+    "legend.html",
     "startPage.html",
     "button.html"
   ],
