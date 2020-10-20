@@ -297,21 +297,48 @@ const onmessage = (message) => {
 
   if (json.event == "idle") {
     if (json.action == "inactive") {
-      //CHANGE STATE OF APP
-      myApp.isIdle(true);
-      window.idle = true;
-      getChallenge()
+      setElementsToIdle(true)
     } else if (json.action == "active") {
       //RETORE TO NORMAL
       window.idle = false;
-      myApp.isIdle(false);
+      setElementsToIdle(false)
     }
   }
 };
 
+function setElementsToIdle(isIdle) {
+  if (isIdle) {
+    //CHANGE STATE OF APP
+    myApp.isIdle(true);
+    //show iddle message
+    document.getElementById('iddleMessage').classList.remove("invisible");
+    //add blur to the background elements
+    document.getElementById('popMessage').classList.add('blur-m');
+    document.getElementById('container-particles').classList.add('blur');
+    document.getElementById('container').querySelector("canvas").classList.add('blur-m');
+  } else {
+    //RETORE TO NORMAL
+    myApp.isIdle(false);
+    //Remove iddle message
+    document.getElementById('iddleMessage').classList.add("invisible");
+    //remove blut to background elements
+    document.getElementById('popMessage').classList.remove('blur-m');
+    document.getElementById('container-particles').classList.remove('blur');
+    document.getElementById('container').querySelector("canvas").classList.remove('blur-m');
+  }
+}
 
 
 
+document.addEventListener("keyup", function (event) {
+  // on up arrow
+  if (event.keyCode === 38) {
+    setElementsToIdle(true)
+  } else if (event.keyCode == 40) {
+    setElementsToIdle(false)
+  }
+
+});
 
 
 //LISTEN to new messages with the function created
