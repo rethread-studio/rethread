@@ -304,8 +304,10 @@ const onmessage = (message) => {
       setElementsToIdle(false)
     }
   }
+
 };
 
+let packageInterval;
 function setElementsToIdle(isIdle) {
   if (isIdle) {
     //CHANGE STATE OF APP
@@ -316,6 +318,9 @@ function setElementsToIdle(isIdle) {
     document.getElementById('popMessage').classList.add('blur-m');
     document.getElementById('container-particles').classList.add('blur');
     document.getElementById('container').querySelector("canvas").classList.add('blur-m');
+    //add repetitive random message
+    //onmessage
+    packageInterval = setInterval(setRandomMessage, 500);
   } else {
     //RETORE TO NORMAL
     myApp.isIdle(false);
@@ -325,20 +330,79 @@ function setElementsToIdle(isIdle) {
     document.getElementById('popMessage').classList.remove('blur-m');
     document.getElementById('container-particles').classList.remove('blur');
     document.getElementById('container').querySelector("canvas").classList.remove('blur-m');
+    //remove repetitive random message
+    if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
+  }
+}
+
+
+function setRandomMessage() {
+
+  const json = createRandomMessage();
+  for (const service of json.request.services) {
+    myApp.addService(service, json.request.type, json.request.requestId);
+  }
+  const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
+  const pkg_country = json.request.location != null && json.request.location != undefined ? getCountryName(json.request.location.country) : "";
+  myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0], packColor, pkg_country);
+
+}
+
+
+function createRandomMessage() {
+  return {
+    current_tab: {
+      active: true,
+      audible: false,
+      autoDiscardable: true,
+      discarded: false,
+      highlighted: true,
+      id: -1,
+      incognito: false,
+      index: 0,
+      pinned: false,
+      selected: true,
+      status: "complete",
+      tittle: "Pellow",
+      url: "reThread.com/Pellow",
+    },
+    event: "request_completed",
+    request: {
+      activeTab: true,
+      content_length: 0,
+      content_type: "text/html; charset=UTF-8",
+      framId: 0,
+      fromCache: false,
+      hostname: "www.reTread.com/pellow",
+      initiator: "https://www.reTread.com/pellow",
+      ip: "127.0.0",
+      location: {
+        country: "SE"
+      },
+      method: "GET",
+      parentFrameId: -1,
+      requestId: "1480550",
+      services: ["Pellow", "Tekniska", "Rethread", "Google", "Youtube", "Slack", "KTH"],
+      statusCode: 204,
+      statusLine: "HTTP/1.1 204",
+      tabId: 6450,
+      tab_url: "devtools://devtools/bundled/devtools_app.html?remoteBase=https://chrome-devtools-frontend.appspot.com/serve_file/@c69c33933bfc72a159aceb4aeca939eb0087416c/&can_dock=true&dockSide=undocked",
+      timeStamp: 1603181883439.465,
+      type: "image",
+    }
   }
 }
 
 
 
-document.addEventListener("keyup", function (event) {
-  // on up arrow
-  if (event.keyCode === 38) {
-    setElementsToIdle(true)
-  } else if (event.keyCode == 40) {
-    setElementsToIdle(false)
-  }
-
-});
+// document.addEventListener("keyup", function (event) {
+//   // on up arrow
+//   if (event.keyCode === 38) {
+//     setElementsToIdle(true)
+//   } else if (event.keyCode == 40) {
+//     setElementsToIdle(false)
+//   }
+// });
 
 
 //LISTEN to new messages with the function created
