@@ -3,7 +3,7 @@
 export DISPLAY=:0.0
 
 echo "Update Pellow";
-cd $HOME/git/rethread/;
+cd "$HOME/git/rethread/";
 git pull;
 
 echo "Start Pellow Server";
