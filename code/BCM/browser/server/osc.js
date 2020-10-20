@@ -17,7 +17,7 @@ oscValueOrder["request_completed"] = [
   "hostname",
   "services",
   "location",
-  "tab_url"
+  "tab_url",
 ];
 oscValueOrder["request_created"] = oscValueOrder["request_completed"];
 oscValueOrder["home"] = ["action"];
@@ -75,12 +75,16 @@ module.exports.send = (data, address) => {
   if (address[0] != "/") {
     address = "/" + address;
   }
-  udpPort.send(
-    {
-      address,
-      args,
-    },
-    targetIP,
-    targetPort
-  );
+  try {
+    udpPort.send(
+      {
+        address,
+        args,
+      },
+      targetIP,
+      targetPort
+    );
+  } catch (error) {
+    console.error("[OSC] unable to send message", error)
+  }
 };
