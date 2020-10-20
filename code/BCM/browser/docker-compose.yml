@@ -3,7 +3,7 @@ services:
   pellow:
     build: .
     restart: on-failure
-    command: nodemon "server/index.js"
+    command: nodemon "server/index.js -h 172.17.0.1"
     volumes:
       - .:/app
     ports:
