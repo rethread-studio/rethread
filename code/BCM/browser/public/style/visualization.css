@@ -455,11 +455,22 @@ canvas {
   padding: 30px 40px;
 }
 
+.flex.center .title span{
+  font-size: 22px;
+  display: block;
+  opacity: 0.5;
+}
+
 .flex.center .title{
   text-align: right;
   font-family: 'Roboto', sans-serif;
   font-size: 32px;
   width: 80px;
+}
+
+.flex.center .imageContainer span{
+  font-size: 18px;
+  font-family: 'Roboto', sans-serif;
 }
 
 .flex.center .imgLegend{
