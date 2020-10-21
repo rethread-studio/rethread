@@ -21,6 +21,7 @@ class AppViz {
         this.numServices = 0;
         this.numPackages = 0;
         this.reportNumber = 0;
+        this.idle = false;
     }
 
     init() {
@@ -49,7 +50,7 @@ class AppViz {
         if (this.options.installation) {
             this.renderer.setSize(window.innerWidth / 2, 1220, false);
         } else {
-            console.log(window.innerHeight)
+
             this.renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
         }
 
@@ -104,6 +105,26 @@ class AppViz {
 
         //RENDERer LOOP
         requestAnimationFrame(this.render);
+
+    }
+
+
+    isIdle(inStatus) {
+        //change app status and all inner items
+        this.idle = inStatus;
+        //clean all items
+        this.resetParticles()
+        //URL
+        this.urlElement.isIdle(this.idle)
+        //change the app background
+        if (this.idle) {
+            document.body.classList.remove("dark");
+            document.body.classList.add("gray");
+        } else {
+            document.body.classList.remove("gray");
+            document.body.classList.add("dark");
+        }
+
 
     }
 
@@ -267,7 +288,8 @@ class AppViz {
             position,
             s.randomDelay,
             packColor,
-            country
+            country,
+            this.idle
         );
         newPackage.init();
         this.packages.push(newPackage);
@@ -278,7 +300,20 @@ class AppViz {
 
         if (!this.services.find(i => i.getName() == name)) {
             const showLabel = this.showServices.includes(name)
-            const newService = new serviceParticle(this.scene, name, name, this.font, this.camera, this.renderer, timeStamp, this.anglePos, this.zPos, showLabel, this.radius)
+            const newService = new serviceParticle(
+                this.scene,
+                name,
+                name,
+                this.font,
+                this.camera,
+                this.renderer,
+                timeStamp,
+                this.anglePos,
+                this.zPos,
+                showLabel,
+                this.radius,
+                this.idle
+            )
             newService.init();
             this.services.push(newService);
             this.stepAnglePos();
@@ -375,7 +410,7 @@ class AppViz {
 
 class PackageParticle {
 
-    constructor(scene, method, type, font, camera, renderer, requestId, showLabel, position, delay, color, country) {
+    constructor(scene, method, type, font, camera, renderer, requestId, showLabel, position, delay, color, country, idle) {
         this.scene = scene;
         this.type = type;
         //GET OR POST
@@ -403,6 +438,8 @@ class PackageParticle {
         //get the position setup
         this.rotation = this.totesRando(1, 9) / 1000;
 
+        this.idle = idle;
+
         //to move a particle toward the URL 
         this.location = new THREE.Vector3(position.servicePos.x, position.servicePos.y, position.servicePos.z);
         this.velocity = new THREE.Vector3(this.speed, this.speed, 0);
@@ -412,15 +449,14 @@ class PackageParticle {
 
         this.target = new THREE.Vector3(0, 0, -0.20);
 
-        this.size = this.totesRando(5, 15) / 100;
+        this.size = this.totesRando(5, 8) / 100;
     }
 
     init() {
 
-
-        let randomSize = this.totesRando(10, 15) / 1000
         this.geometry = new THREE.OctahedronGeometry(this.size, 0);
-        this.material = new THREE.MeshPhongMaterial({ color: this.color });
+        const newcolor = !this.idle ? this.color : 0xD0D0D0;
+        this.material = new THREE.MeshPhongMaterial({ color: newcolor });
         this.shape = new THREE.Mesh(this.geometry, this.material);
 
 
@@ -626,7 +662,7 @@ class PackageParticle {
 
 class serviceParticle {
 
-    constructor(scene, method, type, font, camera, renderer, requestId, anglePos, zPos, showLabel, radius) {
+    constructor(scene, method, type, font, camera, renderer, requestId, anglePos, zPos, showLabel, radius, idle) {
         this.scene = scene;
         this.type = type;
         //GET OR POST
@@ -650,6 +686,7 @@ class serviceParticle {
         this.speed = this.totesRando(3, 10) / 1000;
         this.randomDelay = this.totesRando(1, 8) / 10;
         this.rotation = this.totesRando(1, 9) / 1000;
+        this.idle = idle
 
         // this.packages = [];
     }
@@ -697,9 +734,9 @@ class serviceParticle {
 
 
     init() {
-
+        const newColor = !this.idle ? 0x6A82FB : 0xA9A9A9;
         this.geometry = new THREE.DodecahedronBufferGeometry(0.3);
-        this.material = new THREE.MeshPhongMaterial({ color: 0x6A82FB });
+        this.material = new THREE.MeshPhongMaterial({ color: newColor });
         this.shape = new THREE.Mesh(this.geometry, this.material);
         this.shape.castShadow = true;
         this.shape.recieveShadow = true;
@@ -877,6 +914,7 @@ class urlParticle {
         this.timeStamp = Date.now() + (5 * 1000);
         this.status = 'ACTIVE'
         this.requestId = requestId;
+        this.idle = false;
 
     }
 
@@ -890,6 +928,18 @@ class urlParticle {
 
     totesRando(max, min) {
         return Math.floor(Math.random() * (1 + max - min) + min)
+    }
+
+    isIdle(inStatus) {
+        this.idle = inStatus;
+        //change its color
+        this.changeColor();
+    }
+
+    changeColor() {
+        //red or gray
+        const newColor = !this.idle ? 0xee4035 : 0x909090;
+        this.shape.material.color.setHex(newColor);
     }
 
 

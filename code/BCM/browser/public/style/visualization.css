@@ -9,6 +9,7 @@ body {
   margin: 0;
   height: 100%;
   width: 100%;
+  overflow: hidden;
   color: #fdfdfd;
   cursor: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7), auto;
 
@@ -73,6 +74,11 @@ body {
 background: -webkit-linear-gradient(to right, #cc5333, #23074d);  /* Chrome 10-25, Safari 5.1-6 */
 background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
+}
+
+.gradient.gray{
+  background-color: #485461;
+background: linear-gradient(to right, #485461 0%, #28313b 74%);
 }
 
 
@@ -318,4 +324,118 @@ canvas {
 	overflow: hidden;
   position: relative;
   left:0;
+}
+
+#iddleMessage {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+#iddleMessage.invisible{
+  display: none;
+}
+#iddleButton{
+  border: 10px solid white;
+    color:white;
+    text-decoration: none;
+    text-align: center;
+    animation: sizeAnimation 5s ease infinite;
+    padding: 50px;
+    z-index: 999;
+}
+
+
+
+#iddleButton h1{
+  font-family: 'neueBit';
+    font-size: 120px;
+    margin: 0;
+}
+
+#iddleButton p{
+  
+    font-size: 48px;
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+  
+}
+
+@-webkit-keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}
+@-moz-keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}
+@keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}
+
+.blur{
+  filter: blur(2px);
+}
+
+.blur-m{
+  filter: blur(4px);
+}
+
+.flex.center{
+  display: flex;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  /* justify-content: center; */
+  text-align: center;
+  /* padding-top: 200px; */
+  flex-direction: column;
+
+}
+
+.flex.center h1{
+  font-size: 218px;
+  font-family: 'neueBit';
+  margin-bottom: 50px;
+  /* font-family: 'Roboto', sans-serif; */
+}
+
+.flex.center h3{
+  font-family: 'Roboto', sans-serif;
+  font-size: 28px;
+  /* width: 100px; */
+}
+
+.flex.center .group{
+  /* text-align: right; */
+  min-height: 120px;
+  display: flex;
+  justify-content: center;
+}
+
+.flex.center canvas{
+  height: 100px;
+}
+
+.flex.column{
+  display:flex;
+  flex-direction: column;
+  margin-left: 20px;
+}
+
+.flex.column img{
+  margin-bottom: 10px;
+  width: auto;
+}
+
+.flex.column span{
+  font-family: 'Roboto', sans-serif;
+  font-size: 22px;
 }

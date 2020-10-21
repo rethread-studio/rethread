@@ -10,7 +10,7 @@ const services = require("./services");
 const osc = require("./osc");
 
 const options = cli.parse({
-  oscAddress: ["h", "OSC address", "string", "127.0.0.1"],
+  oscAddress: ["a", "OSC address", "string", "127.0.0.1"],
   oscPort: ["p", "OSC port", "int", 57130],
 });
 
