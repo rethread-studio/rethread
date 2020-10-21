@@ -22,72 +22,80 @@ const optionsLegends = {
             type: "URL",
             subType: "",
             color: 0xF28527,
+            group: "Web page URL",
         },
         {
             type: "Service",
             subType: "",
             color: 0xF28527,
+            group: "Service",
         },
         {
 
             type: "package",
             subType: "ping",
             color: 0x8E68BA,
+            group: "Network utility",
         },
         {
             type: "package",
             subType: "websocket",
             color: 0xF28527,
+            group: "Network utility",
         },
         {
             type: "package",
             subType: "xmlhttprequest",
             color: 0x4F9E39,
+            group: "Network utility",
         },
         {
             type: "package",
             subType: "font",
             color: 0xC7382C,
+            group: "Style",
         },
         {
             type: "package",
             subType: "stylesheet",
             color: 0xD67BBF,
+            group: "Style",
         },
         {
             type: "package",
             subType: "image",
             color: 0xBEBD3A,
+            group: "Media",
         },
         {
             type: "package",
             subType: "script",
             color: 0x51BBCE,
+            group: "Functionality",
         },
         {
             type: "package",
             subType: "sub_frame",
             color: 0xAECDE1,
+            group: "Documents",
         },
         {
             type: "package",
             subType: "media",
             color: 0xBBDD93,
-        },
-        {
-            type: "package",
-            subType: "other",
-            color: 0xFFFEA6,
+            group: "Media",
         },
         {
             type: "package",
             subType: "main_frame",
             color: 0xD1352B,
+            group: "Documents",
         },
         {
             type: "default",
             subType: "",
             color: 0xf9e20d,
+            group: "",
         },
     ]
 
@@ -95,6 +103,9 @@ const optionsLegends = {
 //modify styles if to match installation settings
 document.body.style.paddingTop = optionsLegends.installation ? '470px' : 0;
 //modify styles if to match installation settings
+
+
+
 
 class Legend {
     constructor(_container, options = {}) {
@@ -176,7 +187,7 @@ class Legend {
     render() {
         this.renderer.render(this.scene, this.camera);
 
-        const packRemove = []
+
         //UPDATE OBJECTS
         for (let i = 0; i < this.elements.length; i++) {
             this.elements[i].update();
@@ -418,6 +429,7 @@ class PackageParticle {
 const containerViz = document.getElementById("container-legend");
 const legend = new Legend(containerViz, optionsLegends);
 legend.init()
+
 
 for (let i = 0; i <= optionsLegends.legendItems.length - 1; i++) {
     const item = optionsLegends.legendItems[i];
