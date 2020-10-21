@@ -398,14 +398,14 @@ function createRandomMessage() {
 
 
 
-document.addEventListener("keyup", function (event) {
-  // on up arrow
-  if (event.keyCode === 38) {
-    setElementsToIdle(true)
-  } else if (event.keyCode == 40) {
-    setElementsToIdle(false)
-  }
-});
+// document.addEventListener("keyup", function (event) {
+//   // on up arrow
+//   if (event.keyCode === 38) {
+//     setElementsToIdle(true)
+//   } else if (event.keyCode == 40) {
+//     setElementsToIdle(false)
+//   }
+// });
 
 //LISTEN to new messages with the function created
 ws.addEventListener("message", onmessage);
