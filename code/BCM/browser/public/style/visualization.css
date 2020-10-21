@@ -85,6 +85,13 @@ background: linear-gradient(to right, #0ABFBC, #FC354C); /* W3C, IE 10+/ Edge, F
 
 }
 
+.gradient.blue{
+  background: #36D1DC;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #5B86E5, #36D1DC);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
+}
+
 
 
 .gradient.red{
@@ -102,9 +109,9 @@ background: linear-gradient(to right, #0ABFBC, #FC354C); /* W3C, IE 10+/ Edge, F
 }
 
 .gradient.dark{
-  background: #23074d;  /* fallback for old browsers */
-background: -webkit-linear-gradient(to right, #cc5333, #23074d);  /* Chrome 10-25, Safari 5.1-6 */
-background: linear-gradient(to right, #cc5333, #23074d); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: #36D1DC;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to right, #5B86E5, #36D1DC);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
 }
 
@@ -216,8 +223,8 @@ background: linear-gradient(to right, #485461 0%, #28313b 74%);
 }
 
 .service-text{
-  font-size: 22px;
-  opacity: 0.4;
+  font-size: 24px;
+  opacity: 0.6;
 }
 
 
@@ -336,7 +343,7 @@ canvas {
 }
 
 #innerMessage.inScreen{
-  opacity: 0.5;
+  opacity: 0.9;
   /* transform: transslateY(0px); */
 }
 
