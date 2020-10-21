@@ -1,20 +1,20 @@
 #pellowHomeButton {
   position: fixed;
-  right: 0;
-  bottom: 0;
-  z-index: 99999;
+  right: 15px;
+  bottom: 15px;
+  z-index: 2147483647;
   background: #a2dce7;
   height: 100px;
   width: 100px;
-  margin-right: 15px;
-  margin-bottom: 15px;
+  margin-right: 0;
+  margin-bottom: 0;
   cursor: pointer;
   border-radius: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: solid 5px #2b0d10;
-  font-family: 'Roboto', monospace;
+  font-family: "Roboto", monospace;
   font-size: 26px;
   border-bottom-right-radius: 0%;
   color: #2b0d10;
@@ -22,7 +22,32 @@
     0 5.9px 4.2px rgba(0, 0, 0, 0.054), 0 12.6px 9.5px rgba(0, 0, 0, 0.061),
     0 25px 20px rgba(0, 0, 0, 0.1);
 }
- 
+
+#pellowLegendButton {
+  position: fixed;
+  left: 15px;
+  bottom: 15px;
+  z-index: 2147483647;
+  background: #a2dce7;
+  height: 100px;
+  width: 100px;
+  margin-right: 0;
+  margin-bottom: 0;
+  cursor: pointer;
+  border-radius: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: solid 5px #2b0d10;
+  font-family: "Roboto", monospace;
+  font-size: 22px;
+  border-bottom-left-radius: 0%;
+  color: #2b0d10;
+  box-shadow: 0 2.1px 1.3px rgba(0, 0, 0, 0.044),
+    0 5.9px 4.2px rgba(0, 0, 0, 0.054), 0 12.6px 9.5px rgba(0, 0, 0, 0.061),
+    0 25px 20px rgba(0, 0, 0, 0.1);
+}
+
 body.pellowOpen {
   overflow: hidden;
 }
@@ -34,7 +59,20 @@ iframe#pellowHome {
   right: 0;
   top: 0;
   bottom: 0;
-  z-index: 99998;
+  z-index: 2147483646;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+iframe#pellowLegend {
+  background-color: #a2dce7;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 2147483646;
   width: 100%;
   height: 100%;
   border: 0;

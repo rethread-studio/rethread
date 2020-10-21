@@ -12,26 +12,49 @@
     "scripts": [
       "scripts/chromereload.js",
       "scripts/analytics.js",
+      "scripts/config.js",
       "scripts/websocket.js",
       "scripts/background.js"
     ]
   },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
   "content_scripts": [
     {
       "all_frames": true,
-      "js": ["scripts/inject.js"],
+      "js": ["scripts/config.js", "scripts/inject.js"],
       "matches": ["<all_urls>"],
       "run_at": "document_start"
     }
   ],
-  "web_accessible_resources": ["style/tabStyle.css"],
-  "permissions": ["tabs", "webRequest", "webRequestBlocking", "<all_urls>"],
+  "web_accessible_resources": [
+    "style/*",
+    "fonts/*",
+    "img/*",
+    "scripts/three.min.js",
+    "scripts/legend.js",
+    "legend.html",
+    "startPage.html",
+    "button.html"
+  ],
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "browsingData",
+    "storage",
+    "<all_urls>"
+  ],
   "browser_action": {
     "default_icon": {
       "19": "images/icon-19.png",
       "38": "images/icon-38.png"
     },
-    "default_title": "BCM",
-    "default_popup": "popup.html"
+    "default_title": "BCM"
+  },
+  "chrome_url_overrides": {
+    "newtab": "startPage.html"
   }
 }

@@ -110,15 +110,16 @@ Time spans of droney sounds:
 /////// DRONE
 /////////////////////////////////////////////////////
 
-~restartBackgroundDrones = { | numOctaves = 3, minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0, stutterSpeed = 8 |
+~restartBackgroundDrones = { | numOctaves = 3, minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0, stutterSpeed = 8, sameness = 0.7 |
 	var chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 	// if(~backgroundDronesStarted == false, {
 	~droneBackgroundSynths.do{|syn|
 		syn.release
 	};
 	~droneBackgroundSynths = chord.collect{ |degree|
-		var octave = rrand(-1, numOctaves).floor,
+		var octave = 3 + rrand(numOctaves * -0.5, numOctaves*0.5).round,
 		freq = ~s53.degreeToFreq(degree + ~root, 0.midicps, ~octave+octave);
+		while({freq > 7000}, {freq = freq * 0.5});
 		Synth(\softy_sustained, [
 			\freq, freq,
 			\atk, rrand(0.6, 2),
@@ -131,7 +132,7 @@ Time spans of droney sounds:
 			\brightness, brightness,
 			\stutterAmount, stutterAmount,
 			\stutterSpeed, stutterSpeed,
-			\pan, rrand(-0.7, 0.7),
+			\pan, rrand((1-sameness)*(-1), 1-sameness),
 			\amp, 0.2 * amp,
 			\out, ~channels.drone.bus]);
 	};
@@ -154,7 +155,7 @@ Time spans of droney sounds:
 	});*/
 };
 
-~updateBackgroundDrones = { | minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0, stutterSpeed = 8 |
+~updateBackgroundDrones = { | minrq = 0.005, maxrq = 0.008, amp = 0.5, brightness = 0, stutterAmount = 0, stutterSpeed = 8, sameness = 0.7 |
 	var chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
 	~droneBackgroundSynths.do{|syn|
 		syn.set(
@@ -163,7 +164,7 @@ Time spans of droney sounds:
 			\brightness, brightness,
 			\stutterAmount, stutterAmount,
 			\stutterSpeed, stutterSpeed,
-			\pan, rrand(-0.7, 0.7),
+			\pan, rrand((1-sameness)*(-1), 1-sameness),
 			\amp, 0.2 * amp,
 		);
 	};
@@ -171,9 +172,10 @@ Time spans of droney sounds:
 
 ~backgroundDronesStarted = false;
 ~lastHarmonicComplexity = 0;
-~droneAmpPhase = 0;
+~droneAmpPhase = 1;
 ~updateDrone = { | timeSinceMainFrame |
-	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames,harmonicComplexity;
+	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames, harmonicComplexity,
+	sameness;
 	// Sometimes update pitches, sometimes just update other parameters
 
 	// numIPaddresses varies between ~5 and ~150
@@ -195,15 +197,18 @@ Time spans of droney sounds:
 	if(numSubFrames == nil) { numSubFrames = 0 };
 
 	// brightness = numXmlHttpRequests.linlin(1, 100, 0.0, 1.0);
-	brightness = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 0.6, 0.0, curve: -6);
-	stutterAmount = numSubFrames.linlin(0, 8, 0.0, 0.7);
-	stutterSpeed = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 20.0, 2.0, curve: -4);
-	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 5).round(1);
+	sameness = 1-(1 - ~overallStats.currentFrame.originRatio).pow(5);
+	brightness = sameness.lincurve(0.00, 1, 0.8, 0.0, curve: -6);
+	stutterAmount = sameness.linlin(0, 1, 1.0, 0.0);
+	stutterSpeed = sameness.lincurve(0.00, 1, 20.0, 2.0, curve: -4);
+	// ("brightness: " + brightness + " stutterAmount: " + stutterAmount + " stutterSpeed: " + stutterSpeed).postln;
+	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 4).round(1);
+	numOctaves = 5;
 	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
 	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, 0.01, minrq);
 	// amp = ~overallStats.currentFrame.frameSize.linlin(0, 10000000, 0.2, 1.0);
 	// amp = ((1-timeSinceMainFrame.linlin(0, 15, 0, 1)).pow(4) * pi).sin() * 0.7;
-	amp = ((1-~droneAmpPhase).pow(4) * pi).sin() * 0.7;
+	amp = ((1-~droneAmpPhase).pow(4) * pi).sin() * 0.2;
 
 	// set chord
 
@@ -212,10 +217,10 @@ Time spans of droney sounds:
 	~changeChord.(harmonicComplexity);
 
 	if(rrand(0.0, 1.0) > 0.92 || (~backgroundDronesStarted == false) || (~lastHarmonicComplexity != harmonicComplexity), {
-		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
+		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed, sameness);
 		~backgroundDronesStarted = true;
 	}, {
-		~updateBackgroundDrones.(minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
+		~updateBackgroundDrones.(minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed, sameness);
 	});
 
 	~lastHarmonicComplexity = harmonicComplexity;

@@ -9,21 +9,33 @@
   <title>BCM - Visualization</title>
 </head>
 
-<body class=" gradient dark gradientAnimation">
+<body class="gradient blue gradientAnimation ">
 
-  <div id="background-shader">
-
-  </div>
+  <div id="background-shader"></div>
+  <div id="container"></div>
+  <div id="wrapper"></div>
   <div id="container-particles">
     <div id="labels"></div>
   </div>
-  <div id="container"></div>
-  <div id="wrapper"></div>
 
-  <div class="message">
+  <div class="message gradient blue gradientAnimation" id='message'>
     <div class="output" id="output">
       <h1 id="message-se" class="cursor"></h1>
       <p id="message-en"></p>
+    </div>
+  </div>
+
+  <div id="popMessage">
+    <div class="" id="innerMessage">
+      <h1 id="popUp-se">Du connected to 9gag.com and used 18 Services which used 52</h1>
+      <p id="pupUp-en">Du embendade till 9gag.com och det embendade 18 Services att embendade 52</p>
+    </div>
+  </div>
+
+  <div class="invisible" id="iddleMessage">
+    <div class="gradient blue gradientAnimation" id="iddleButton">
+      <h1>Tryck på skärmen för att starta</h1>
+      <p>Touch the screen to start</p>
     </div>
   </div>
 
@@ -60,9 +72,10 @@
     </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script> -->
+  <script src="./js/p5.min.js"></script>
 
-  <script src="./js/d3/d3.v5.js"></script>
+
   <script src="./js/three/three.min.js"></script>
 
   <script src="./js/shader_background.js"></script>

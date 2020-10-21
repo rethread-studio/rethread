@@ -111,6 +111,7 @@ let lastCountry = "";
 
 // END GLOBE SETUP
 
+let packageInterval;
 //SERVICE PARTICLE VIZ OPTIONS
 const options = {
 
@@ -124,7 +125,7 @@ const options = {
     service: 0x0a0a0a,
     package: 0x000000,
   },
-  showLabels: false,
+  showLabels: true,
   lightHelpers: false,
   angleStep: 30,
 
@@ -132,6 +133,20 @@ const options = {
     color: 0xFFFFFF,
     transparent: false,
     opacityBaseLevel: 0.5
+  },
+  packagesColor: {
+    websocket: 0xF28527,
+    xmlhttprequest: 0x4F9E39,
+    font: 0xC7382C,
+    ping: 0x8E68BA,
+    stylesheet: 0xD67BBF,
+    image: 0xBEBD3A,
+    script: 0x51BBCE,
+    sub_frame: 0xAECDE1,
+    media: 0xBBDD93,
+    other: 0xFFFEA6,
+    main_frame: 0xD1352B,
+    default: 0xf9e20d
   }
 }
 //modify styles if to match installation settings
@@ -147,6 +162,11 @@ const ws = WebSocketClient();
 const containerViz = document.getElementById("container-particles");
 const myApp = new AppViz(containerViz, options);
 myApp.init();
+window.addEventListener("resize", appResize, false);
+
+function appResize() {
+  myApp.onWindowResize();
+}
 // SERVICE VIZ 
 // const serviceViz = new ServiceGenerator(1220, window.innerWidth);
 
@@ -156,19 +176,24 @@ myApp.init();
 const onmessage = (message) => {
   const json = JSON.parse(message.data);
   //Per request we want to add three elements
-  //INITIALIZAR
-  //SERVICE
-  //EVENT
-  //REQUEST CREATED
 
-  // console.log(json)
 
-  if (currentUrl != json.current_tab.url) {
+  //MANAGE MAIN URL 
+  if (json.current_tab != undefined && json.current_tab != null && currentUrl != json.current_tab.url && json.current_tab.url != null && json.current_tab.url != undefined) {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
+    const url = new URL(json.current_tab.url);
+
     currentUrl = json.current_tab.url;
-    myApp.addURL(currentUrl, packet.requestId)
+
+    myApp.addURL(url.hostname, packet.requestId)
+    myApp.resetParticles();
+    if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
+    //SEND A REPORT MESSAGE AFTER 5 SECCONDS
+
+    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 2000);
+
   }
 
   if (json.event == "request_created") {
@@ -239,7 +264,7 @@ const onmessage = (message) => {
 
         if (!positionPerService.has(country)) {
           //create a text to display
-          let servicePos = random3DPosition(500);
+          let servicePos = random3DPosition(20);
           createText(country, servicePos);
           positionPerService.set(country, servicePos);
           indexPerService.set(country, indexPerService.size);
@@ -253,27 +278,139 @@ const onmessage = (message) => {
         activeService = country;
       }
     }
-    // console.log(json.request)
+
     // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
-    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0]);
+    const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
+
+    const pkg_country = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
+    myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0], packColor, pkg_country);
 
 
-  } else if (json.event == "home" && json.action == "open") {
-    getChallenge();
   }
-  else if (json.event == "idle") {
-    console.log("idle");
-    console.log(json);
+
+  if (json.event == "home" && json.action == "open") {
+    getChallenge();
+
+  } else if (json.event == "home" && json.action == "close") {
+    eraseMessage();
+  }
+
+
+  if (json.event == "idle") {
     if (json.action == "inactive") {
-      window.idle = true;
+      setElementsToIdle(true)
     } else if (json.action == "active") {
+      //RETORE TO NORMAL
       window.idle = false;
+      setElementsToIdle(false)
     }
   }
+
 };
+
+
+function setElementsToIdle(isIdle) {
+  if (isIdle) {
+    //CHANGE STATE OF APP
+    myApp.isIdle(true);
+    //show iddle message
+    document.getElementById('iddleMessage').classList.remove("invisible");
+    //add blur to the background elements
+    document.getElementById('popMessage').classList.add('blur-m');
+    document.getElementById('container-particles').classList.add('blur');
+    document.getElementById('container').querySelector("canvas").classList.add('blur-m');
+    //add repetitive random message
+    //onmessage
+    packageInterval = setInterval(setRandomMessage, 500);
+  } else {
+    //RETORE TO NORMAL
+    myApp.isIdle(false);
+    //Remove iddle message
+    document.getElementById('iddleMessage').classList.add("invisible");
+    //remove blut to background elements
+    document.getElementById('popMessage').classList.remove('blur-m');
+    document.getElementById('container-particles').classList.remove('blur');
+    document.getElementById('container').querySelector("canvas").classList.remove('blur-m');
+    //remove repetitive random message
+    if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
+  }
+}
+
+
+function setRandomMessage() {
+
+  //create random message
+  const json = createRandomMessage();
+  //push the message to the APP
+  for (const service of json.request.services) {
+    myApp.addService(service, json.request.type, json.request.requestId);
+  }
+  const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
+  const pkg_country = json.request.location != null && json.request.location != undefined ? getCountryName(json.request.location.country) : "";
+  myApp.addPackage(json.request.method, json.request.type, json.request.requestId, json.request.services[0], packColor, pkg_country);
+
+}
+
+
+function createRandomMessage() {
+  return {
+    current_tab: {
+      active: true,
+      audible: false,
+      autoDiscardable: true,
+      discarded: false,
+      highlighted: true,
+      id: -1,
+      incognito: false,
+      index: 0,
+      pinned: false,
+      selected: true,
+      status: "complete",
+      tittle: "Pellow",
+      url: "reThread.com/Pellow",
+    },
+    event: "request_completed",
+    request: {
+      activeTab: true,
+      content_length: 0,
+      content_type: "text/html; charset=UTF-8",
+      framId: 0,
+      fromCache: false,
+      hostname: "www.reTread.com/pellow",
+      initiator: "https://www.reTread.com/pellow",
+      ip: "127.0.0",
+      location: {
+        country: "SE"
+      },
+      method: "GET",
+      parentFrameId: -1,
+      requestId: "1480550",
+      services: ["Pellow", "Tekniska", "Rethread", "Google", "Youtube", "Slack", "KTH"],
+      statusCode: 204,
+      statusLine: "HTTP/1.1 204",
+      tabId: 6450,
+      tab_url: "devtools://devtools/bundled/devtools_app.html?remoteBase=https://chrome-devtools-frontend.appspot.com/serve_file/@c69c33933bfc72a159aceb4aeca939eb0087416c/&can_dock=true&dockSide=undocked",
+      timeStamp: 1603181883439.465,
+      type: "image",
+    }
+  }
+}
+
+
+
+
+// document.addEventListener("keyup", function (event) {
+//   // on up arrow
+//   if (event.keyCode === 38) {
+//     setElementsToIdle(true)
+//   } else if (event.keyCode == 40) {
+//     setElementsToIdle(false)
+//   }
+// });
 
 //LISTEN to new messages with the function created
 ws.addEventListener("message", onmessage);
+
 
 
 //RESET ALL CONFIGURATION
@@ -291,10 +428,14 @@ function reset() {
 //CREATE a random position
 function random3DPosition(magnitude) {
   return new THREE.Vector3(
-    (-1 + Math.random() * 2) * magnitude,
-    (-1 + Math.random() * 2) * magnitude,
-    (1 + Math.random() * 1) * magnitude
+    -10 + getRandomArbitrary(-10, 10),
+    getRandomArbitrary(-magnitude, magnitude),
+    25
   );
+}
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
 //ADD PARTICLE:
@@ -332,7 +473,7 @@ let textMaterialDefault = new THREE.MeshBasicMaterial({
   opacity: 0.7,
 });
 let textMaterialActive = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
+  color: 0xE5463C,
   transparent: true,
   opacity: 0.9,
 });
@@ -345,16 +486,16 @@ function createText(service, servicePos) {
   let material = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
-    opacity: 0.7,
+    opacity: 0.2,
   });
   let geometry = new THREE.TextGeometry(service, {
     font: font,
-    size: 50,
-    height: 0.001,
-    curveSegments: 2,
-    bevelEnabled: true,
-    bevelSize: 0.1,
-    bevelOffset: 0.1,
+    size: 3,
+    height: 1,
+    curveSegments: 12,
+    bevelEnabled: false,
+    bevelSize: 0,
+    bevelOffset: 0,
     bevelSegments: 1,
   });
 
@@ -382,7 +523,7 @@ function updateText(service) {
   }
 }
 
-let activeParticleColor = new THREE.Color(0xff0000);
+let activeParticleColor = new THREE.Color(0xE5463C);
 var particles_group;
 let particles_rotation = new THREE.Euler();
 let particles_rotation_vel = new THREE.Vector3(0, 0, 0);
@@ -459,11 +600,11 @@ function init() {
 
   camera = new THREE.PerspectiveCamera(
     45,
-    window.innerWidth / 1220,
+    options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight,
     1,
     4000
   );
-  camera.position.z = 1750;
+  camera.position.z = 100;
 
   // var controls = new OrbitControls(camera, container);
   // controls.minDistance = 1000;
@@ -474,11 +615,12 @@ function init() {
   // GLOBE
   countryLayers = generateCountries();
   scene.add(countryLayers);
-  countryLayers.position.set(0, 0, 1690);
+  countryLayers.position.set(0, 0, 0);
 
   countries = countryLayers.countries;
 
   scene.fog = new THREE.Fog(0xfafafa, 40, 2000);
+
   const light = new THREE.HemisphereLight(0xffffff, 0x555555, 0.7);
   scene.add(light);
 
@@ -625,7 +767,13 @@ function init() {
     powerPreference: "high-performance",
   });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth / 2, 1220);
+
+  if (options.installation) {
+    renderer.setSize(window.innerWidth / 2, 1220, false);
+  } else {
+    renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+  }
+
   renderer.outputEncoding = THREE.sRGBEncoding;
 
   container.appendChild(renderer.domElement);
@@ -661,10 +809,16 @@ function init() {
 }
 
 function onWindowResize() {
-  camera.aspect = window.innerWidth / 1220;
+  const aspectRatio = options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
+  camera.aspect = aspectRatio;
   camera.updateProjectionMatrix();
 
-  renderer.setSize(window.innerWidth / 2, 1220);
+  if (options.installation) {
+    renderer.setSize(window.innerWidth / 2, 1220, false);
+  } else {
+
+    renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+  }
 }
 
 function rotateGlobe() {
@@ -893,7 +1047,8 @@ function animate() {
   // Updateing texts
   for (let text of particlesTextObjects) {
     if (text.service == activeService) {
-      text.mesh.material.color.setHex(0xff0000);
+      const newColor = window.idle ? 0xD0D0D0 : 0xE5463C;
+      text.mesh.material.color.setHex(newColor);
     } else {
       text.mesh.material.color.setHex(0xffffff);
     }
@@ -936,7 +1091,7 @@ function animate() {
   // stats.update();
   render();
 
-  // console.log("numRequests: " + numRequests + " packetsOverTime: " + packetsOverTime);
+
   window.activity = numRequests * 0.1 + (packetsOverTime * 10);
   const activityCoeff = 2.0 * dt;
   window.smoothActivity = window.smoothActivity * (1 - activityCoeff) + window.activity * activityCoeff;
@@ -979,7 +1134,7 @@ function generateCountries() {
       shading: THREE.SmoothShading,
       shininess: 50,
     });
-    const scale = 18; // + Math.random() / 2;
+    const scale = 25; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;

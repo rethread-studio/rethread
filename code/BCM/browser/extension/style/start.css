@@ -1,0 +1,87 @@
+
+.gradient{
+  background-size: 300% 300% !important; 
+ }
+
+.gradient.dark{
+  background: #36D1DC;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #5B86E5, #36D1DC);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
+}
+
+.gradient.light{
+  background: #36D1DC;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #5B86E5, #36D1DC);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
+}
+
+
+.gradientAnimation{
+  
+  -webkit-animation: GradientAnimation 15s ease infinite;
+  -moz-animation: GradientAnimation 15s ease infinite;
+  animation: GradientAnimation 15s ease infinite; 
+}
+
+
+@-webkit-keyframes GradientAnimation {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@-moz-keyframes GradientAnimation {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@keyframes GradientAnimation {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+
+html, body {
+    height: 100%;
+    color:white;
+  }
+
+  .center{
+    display: flex;           /* establish flex container */
+    flex-direction: column;  /* make main axis vertical */
+    justify-content: center; /* center items vertically, in this case */
+    align-items: center;     /* center items horizontally, in this case */
+    height: 100%;
+}
+
+
+a{
+    font-size:190px;
+    font-family: 'neueBit';
+    padding: 80px;
+    
+    border: 10px solid white;
+    color:white;
+    text-decoration: none;
+    text-align: center;
+    animation: sizeAnimation 5s ease infinite;
+    
+}
+
+@-webkit-keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}
+@-moz-keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}
+@keyframes sizeAnimation {
+  0%{border: 10px solid white}
+  50%{border: 25px solid white}
+  100%{border: 10px solid white}
+}

@@ -1,10 +1,28 @@
 let lastTab = null;
 
-const ws = new WebSocketClient();
+chrome.storage.local.get(bcm_config, function (items) {
+  bcm_config = items;
+  ws = new WebSocketClient();
+});
+
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+  chrome.storage.local.get(bcm_config, function (items) {
+    bcm_config = items;
+    if (ws) {
+      ws.close();
+    }
+    ws = new WebSocketClient();
+  });
+});
+
+let ws = null;
 
 function broadcast(event) {
-  ws.send(event);
+  if (ws) {
+    ws.send(event);
+  }
 }
+
 function sendCurrentUrl() {
   return new Promise((resolve) => {
     chrome.tabs.getSelected(null, function (tab) {
@@ -15,7 +33,9 @@ function sendCurrentUrl() {
 
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
   lastTab = await sendCurrentUrl();
-  chrome.tabs.reload(lastTab.id);
+  if (bcm_config.reload) {
+    chrome.tabs.reload(tabId);
+  }
   broadcast({
     event: "tab_changed",
     tab: lastTab,
@@ -49,8 +69,10 @@ chrome.windows.onRemoved.addListener(function (tabId) {
 chrome.webRequest.onBeforeRequest.addListener(
   async function (event) {
     if (
-      event.initiator == null &&
-      event.initiator.indexOf("chrome-extension") == 0
+      event.initiator == null ||
+      event.initiator.indexOf("chrome-extension") == 0 ||
+      event.url.indexOf("chrome-extension") == 0  ||
+      event.url.indexOf("127.0.0.1") != -1
     ) {
       return {
         cancel: false,
@@ -100,7 +122,9 @@ chrome.webRequest.onCompleted.addListener(
   async function (event) {
     if (
       event.initiator == null ||
-      event.initiator.indexOf("chrome-extension") == 0
+      event.initiator.indexOf("chrome-extension") == 0 ||
+      event.url.indexOf("chrome-extension") == 0 ||
+      event.url.indexOf("127.0.0.1") != -1
     ) {
       return;
     }
@@ -122,15 +146,36 @@ async function inactive() {
     tabs = tabs.filter((tab) => tab.id > -1);
     const indexes = [];
     for (let tab of tabs) {
-      console.log(tab);
-      if (tab != tabs[0]) {
-        indexes.push(tab.id);
-      }
+      indexes.push(tab.id);
     }
-    chrome.tabs.update(tabs[0].id, {
-      url: "http://localhost:8873/button.html",
+    chrome.tabs.create({
+      url: chrome.extension.getURL("button.html"),
     });
-    chrome.tabs.remove(indexes);
+    if (bcm_config.closeTabs) {
+      chrome.tabs.remove(indexes);
+    }
+    if (bcm_config.cache) {
+      chrome.browsingData.remove(
+        {},
+        {
+          appcache: true,
+          cache: true,
+          cacheStorage: true,
+          cookies: true,
+          downloads: true,
+          fileSystems: true,
+          formData: true,
+          history: true,
+          indexedDB: true,
+          localStorage: true,
+          pluginData: true,
+          passwords: true,
+          serviceWorkers: true,
+          webSQL: true,
+        },
+        function () {}
+      );
+    }
   });
 }
 
@@ -138,7 +183,12 @@ ga("create", "UA-5954162-29", "auto");
 ga("set", "checkProtocolTask", null);
 
 var actionTimeout = null;
-var isInactive = false;
+var isInactive = true;
+inactive();
+broadcast({
+  event: "idle",
+  action: "active",
+});
 function action() {
   clearTimeout(actionTimeout);
   if (isInactive) {
@@ -151,15 +201,16 @@ function action() {
   isInactive = false;
   actionTimeout = setTimeout(function () {
     isInactive = true;
-    // inactive();
+    inactive();
     broadcast({
       event: "idle",
       action: "inactive",
     });
     ga("send", "pageview", "home");
     ga("send", "event", "idle", "inactive");
-  }, 60000);
+  }, bcm_config.idle * 1000);
 }
+action();
 
 chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
   if (data.type == "action") {

@@ -24,8 +24,8 @@ function backgroundFragShader() {
     return varying + `  
     uniform float iTime;
     uniform vec3 iResolution;
-    uniform vec3 leftColor;
     uniform float brightness;
+    uniform float activity;
   
     // Based on work by @patriciogv - 2015
   // http://patriciogonzalezvivo.com
@@ -105,11 +105,11 @@ function backgroundFragShader() {
       vec2 st = (gl_FragCoord.xy/iResolution.x)-.5;
       // vec2 st = - 1.0 + 2.0 * vUv;
       vec2 uv = st;
-      st*=10.;// * pow(abs(uv.x), 0.1);
+      st*=.05;// * pow(abs(uv.x), 0.1);
       //
       //st += st * abs(sin(time*0.1)*3.0);
       vec3 color = vec3(0.0);
-      float time = iTime * 7.;
+      float time = iTime * .1;
   
       vec2 q = vec2(0.);
       q.x = fbm( st * rotate(time * -0.003));
@@ -119,8 +119,8 @@ function backgroundFragShader() {
       r.x = fbm( st * rotate(time * -0.033) + 10.0*q + vec2(1.7,9.2)+ 0.10*time );
       r.y = fbm( st * rotate(time * 0.005) + 1.0*q + vec2(8.3,2.8)+ 0.016*time);
   
-    //   float f = fbm(st+ (r*3.2));
-      float f = max(pow(r.y*q.y * q.x, 0.1), 0.1);
+      float f = fbm(st+ (r*3.2));
+      // float f = max(pow(r.y*q.y * q.x, 0.1), 0.1);
   
     //   color = mix(vec3(0.4824, 0.651, 0.6863),
     //               vec3(0.635, 0.8627, 0.9559),
@@ -135,10 +135,10 @@ function backgroundFragShader() {
     //              clamp(length(r.x),0.0,1.0));
 
     time *= 0.1;
-    vec3 randomColor = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.4+.55, sin(time*.038426384)*.5+.5);// * (sin(time * 0.04) * 0.3 + 0.7);
-    vec3 randomColor2 = vec3(sin(time*0.05)*.45+.55, sin(time*0.02473623)*.45+.5, sin(time*.038426384)*.5+.5);// * (sin(time * 0.05) * 0.2 + 0.8);
+    // vec3 randomColor = vec3(sin(time*0.05)*.5+.5, sin(time*0.02473623)*.4+.55, sin(time*.038426384)*.5+.5);// * (sin(time * 0.04) * 0.3 + 0.7);
+    // vec3 randomColor2 = vec3(sin(time*0.05)*.45+.55, sin(time*0.02473623)*.45+.5, sin(time*.038426384)*.5+.5);// * (sin(time * 0.05) * 0.2 + 0.8);
 
-    float colorMix = tri(time*0.01)*.5 + .5;
+    // float colorMix = tri(time*0.01)*.5 + .5;
 
     // vec3 randomColor2 = mix(vec3(0.416, 0.51, 0.984), vec3(0.8, 0.325, 0.2), clamp(colorMix*2.0, 0.0, 1.0));
     // randomColor2 = mix(randomColor2, vec3(0.235, 0.063, 0.325), clamp(colorMix*4.0-2.0, 0.0, 1.0));
@@ -147,8 +147,13 @@ function backgroundFragShader() {
     // randomColor = mix(randomColor, vec3(0.678, 0.325, 0.537), clamp(colorMix*4.0-2.0, 0.0, 1.0));
     // randomColor = mix(randomColor, vec3(0.855, 0.267, 0.325), clamp(colorMix*4.0-3.0, 0.0, 1.0));
 
-    color = mix(randomColor2, randomColor, clamp(uv.x+.5, 0.,1.));
+    // color = mix(randomColor2, randomColor, clamp(uv.x+.5, 0.,1.));
 
+
+    vec3 leftColor = mix(vec3(0.21, 0.82, 0.863), vec3(0.667, 0.314, 0.243), activity);
+    vec3 rightColor = mix(vec3(0.357, 0.525, 0.898), vec3(0.667, 0.314, 0.243), activity);
+    color = mix(rightColor, leftColor, clamp(uv.x+.1, 0.,1.));
+    
     // color = mix(color,
     //                   randomColor * 1.05,
     //                   clamp(length(q),0.0,1.0));
@@ -156,7 +161,7 @@ function backgroundFragShader() {
     //                 leftColor,
     //                 clamp((f*f)*1.5,0.4,1.0));
   
-      gl_FragColor = vec4(pow(f, 0.9)*1.0*color*brightness, 1.0);
+      gl_FragColor = vec4(pow(f + length(q) + length(r.x), 1.5)*.7*color, 1.0);
     //   gl_FragColor = vec4(vec3(colorMix), 1.0);
   }
     `;
@@ -175,18 +180,22 @@ function setup() {
     backgroundShader.setUniform("iResolution", [width, height]);
     backgroundShader.setUniform("iTime", millis()/1000.0);
     backgroundShader.setUniform("leftColor", [0.5, 0.6, 0.9]);
+    backgroundShader.setUniform("activity", 0.0);
 }
     
 function draw() {
     // 'r' is the size of the image in Mandelbrot-space
     backgroundShader.setUniform("iResolution", [width*2, height]);
     backgroundShader.setUniform("iTime", millis()/1000.0);
-    let brightness = Math.min(window.smoothActivity*0.005 + 0.5, 1.2);
+    let brightness = Math.min(window.smoothActivity*0.008 + 1.0, 2.5);
     if (window.idle == true) {
-        brightness = 0.2;
+        brightness = 0.3;
     }
+    brightness = 0.7;
     // console.log(brightness);
     backgroundShader.setUniform("brightness", brightness);
+    let activity = Math.min(window.smoothActivity*0.004, 1.0);
+    backgroundShader.setUniform("activity", activity);
     quad(-1, -1, 1, -1, 1, 1, -1, 1);
 }
 
