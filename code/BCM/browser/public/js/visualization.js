@@ -111,6 +111,7 @@ let lastCountry = "";
 
 // END GLOBE SETUP
 
+let packageInterval;
 //SERVICE PARTICLE VIZ OPTIONS
 const options = {
 
@@ -188,7 +189,7 @@ const onmessage = (message) => {
 
     myApp.addURL(url.hostname, packet.requestId)
     myApp.resetParticles();
-
+    if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
     erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 2000);
@@ -307,7 +308,7 @@ const onmessage = (message) => {
 
 };
 
-let packageInterval;
+
 function setElementsToIdle(isIdle) {
   if (isIdle) {
     //CHANGE STATE OF APP
@@ -815,7 +816,7 @@ function onWindowResize() {
   if (options.installation) {
     renderer.setSize(window.innerWidth / 2, 1220, false);
   } else {
-    console.log(window.innerHeight)
+
     renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
   }
 }
