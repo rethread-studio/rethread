@@ -105,7 +105,7 @@ function backgroundFragShader() {
       vec2 st = (gl_FragCoord.xy/iResolution.x)-.5;
       // vec2 st = - 1.0 + 2.0 * vUv;
       vec2 uv = st;
-      st*=.05;// * pow(abs(uv.x), 0.1);
+      st*=.08;// * pow(abs(uv.x), 0.1);
       //
       //st += st * abs(sin(time*0.1)*3.0);
       vec3 color = vec3(0.0);
@@ -181,9 +181,9 @@ function draw() {
     // 'r' is the size of the image in Mandelbrot-space
     backgroundShader.setUniform("iResolution", [width*2, height]);
     backgroundShader.setUniform("iTime", millis()/1000.0);
-    let brightness = Math.min(window.smoothActivity*0.005 + 0.5, 1.2);
+    let brightness = Math.min(window.smoothActivity*0.008 + 1.0, 2.5);
     if (window.idle == true) {
-        brightness = 0.2;
+        brightness = 0.3;
     }
     // console.log(brightness);
     backgroundShader.setUniform("brightness", brightness);
