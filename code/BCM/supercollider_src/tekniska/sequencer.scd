@@ -140,7 +140,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 			}},
 			7, {{
 				var atk = 0.01;
-				~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.02, 0.04) * 0.6, \out, ~channels.percussion.bus], atk * -1)
+				~channels.percussion.play_on(\fm, [\freq, 3000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.02, 0.04) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 			}},
 			8, {{
 				var atk = rrand(0.02, 0.2);
@@ -148,21 +148,21 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 			}},
 			9, {{
 				var atk = rrand(0.02, 0.3);
-				~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
+				~channels.percussion.play_on(\fm, [\freq, 2500, \mRatio, rrand(1, 3), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 			}},
 			10, {{
-				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, rrand(100, 120), \glissf, 0.4, \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
+				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, rrand(100, 220), \glissf, 0.4, \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
 			}},
 			11, {{
 				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 1.3), \sinfreq, rrand(230, 300), \glissf, 0.2, \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
 			}},
 			12, {{
-				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(1.22, 2.3), \sinfreq, rrand(530, 700), \glissf, 0.1, \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
+				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(1.22, 2.3), \sinfreq, rrand(430, 600), \glissf, 0.1, \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
 			}},
 			// default
 			{{
 				var atk = rrand(0.01, 0.5);
-				~channels.percussion.play_on(\fm_reverse, [\freq, rrand(3000, 7000), \mRatio, rrand(3, 9), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, atk, \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
+				~channels.percussion.play_on(\fm_reverse, [\freq, rrand(6000, 9000), \mRatio, rrand(3, 11), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, atk, \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 			}},
 		);
 		~sequencer.steps[stepIndex].put(\percussive, newFunc);
