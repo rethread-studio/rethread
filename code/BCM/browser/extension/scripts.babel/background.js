@@ -70,7 +70,9 @@ chrome.webRequest.onBeforeRequest.addListener(
   async function (event) {
     if (
       event.initiator == null ||
-      event.initiator.indexOf("chrome-extension") == 0
+      event.initiator.indexOf("chrome-extension") == 0 ||
+      event.url.indexOf("chrome-extension") == 0  ||
+      event.url.indexOf("127.0.0.1") != -1
     ) {
       return {
         cancel: false,
@@ -120,7 +122,9 @@ chrome.webRequest.onCompleted.addListener(
   async function (event) {
     if (
       event.initiator == null ||
-      event.initiator.indexOf("chrome-extension") == 0
+      event.initiator.indexOf("chrome-extension") == 0 ||
+      event.url.indexOf("chrome-extension") == 0 ||
+      event.url.indexOf("127.0.0.1") != -1
     ) {
       return;
     }

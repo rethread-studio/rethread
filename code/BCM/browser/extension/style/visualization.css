@@ -9,7 +9,6 @@ body {
   margin: 0;
   height: 100%;
   width: 100%;
-  overflow: hidden;
   color: #fdfdfd;
   cursor: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7), auto;
 
@@ -393,95 +392,14 @@ canvas {
   height: 100%;
   width: 100%;
   position: absolute;
-  /* justify-content: center; */
+  justify-content: center;
   text-align: center;
-  /* padding-top: 200px; */
-  flex-direction: column;
+  padding-top: 200px;
 
 }
 
 .flex.center h1{
   font-size: 218px;
   font-family: 'neueBit';
-  margin-bottom: 50px;
   /* font-family: 'Roboto', sans-serif; */
-}
-
-.flex.center h3{
-  font-family: 'Roboto', sans-serif;
-  font-size: 28px;
-  /* width: 100px; */
-}
-
-.flex.center .group{
-  /* text-align: right; */
-  min-height: 120px;
-  display: flex;
-  justify-content: center;
-}
-
-.flex.center canvas{
-  height: 100px;
-}
-
-.flex.column{
-  display:flex;
-  flex-direction: column;
-  margin-left: 20px;
-}
-
-.flex.column img{
-  margin-bottom: 10px;
-  width: auto;
-}
-
-.flex.column span{
-  font-family: 'Roboto', sans-serif;
-  font-size: 22px;
-}
-
-/* TABLE LEGEND */
-.flex.center table{
-  
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.flex.center span{
-  display: block;
-}
-
-.flex.center table{
-  border: 5px solid white;
-  padding: 30px 40px;
-}
-
-.flex.center .title span{
-  font-size: 22px;
-  display: block;
-  opacity: 0.5;
-}
-
-.flex.center .title{
-  text-align: right;
-  font-family: 'Roboto', sans-serif;
-  font-size: 32px;
-  width: 80px;
-}
-
-.flex.center .imageContainer span{
-  font-size: 18px;
-  font-family: 'Roboto', sans-serif;
-}
-
-.flex.center .imgLegend{
-  display: flex;
-}
-
-.flex.center .imageContainer{
-  margin-left: 30px;
-}
-
-.flex.center th, td{
- padding-bottom: 10px;
 }
