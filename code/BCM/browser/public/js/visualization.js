@@ -338,7 +338,9 @@ function setElementsToIdle(isIdle) {
 
 function setRandomMessage() {
 
+  //create random message
   const json = createRandomMessage();
+  //push the message to the APP
   for (const service of json.request.services) {
     myApp.addService(service, json.request.type, json.request.requestId);
   }
@@ -395,6 +397,7 @@ function createRandomMessage() {
 
 
 
+
 // document.addEventListener("keyup", function (event) {
 //   // on up arrow
 //   if (event.keyCode === 38) {
@@ -403,7 +406,6 @@ function createRandomMessage() {
 //     setElementsToIdle(false)
 //   }
 // });
-
 
 //LISTEN to new messages with the function created
 ws.addEventListener("message", onmessage);

@@ -392,14 +392,63 @@ canvas {
   height: 100%;
   width: 100%;
   position: absolute;
-  justify-content: center;
+  /* justify-content: center; */
   text-align: center;
-  padding-top: 200px;
+  /* padding-top: 200px; */
+  flex-direction: column;
 
 }
-
 .flex.center h1{
   font-size: 218px;
   font-family: 'neueBit';
+  margin-bottom: 50px;
   /* font-family: 'Roboto', sans-serif; */
+}
+
+
+
+/* TABLE LEGEND */
+.flex.center table{
+  
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.flex.center span{
+display: block;
+}
+
+.flex.center table{
+border: 5px solid white;
+padding: 30px 40px;
+}
+
+.flex.center .title span{
+font-size: 22px;
+display: block;
+opacity: 0.5;
+}
+
+.flex.center .title{
+text-align: right;
+font-family: 'Roboto', sans-serif;
+font-size: 32px;
+width: 80px;
+}
+
+.flex.center .imageContainer span{
+font-size: 18px;
+font-family: 'Roboto', sans-serif;
+}
+
+.flex.center .imgLegend{
+display: flex;
+}
+
+.flex.center .imageContainer{
+margin-left: 30px;
+}
+
+.flex.center th, td{
+padding-bottom: 10px;
 }

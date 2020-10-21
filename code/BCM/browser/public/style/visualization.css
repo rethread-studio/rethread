@@ -393,14 +393,49 @@ canvas {
   height: 100%;
   width: 100%;
   position: absolute;
-  justify-content: center;
+  /* justify-content: center; */
   text-align: center;
-  padding-top: 200px;
+  /* padding-top: 200px; */
+  flex-direction: column;
 
 }
 
 .flex.center h1{
   font-size: 218px;
   font-family: 'neueBit';
+  margin-bottom: 50px;
   /* font-family: 'Roboto', sans-serif; */
+}
+
+.flex.center h3{
+  font-family: 'Roboto', sans-serif;
+  font-size: 28px;
+  /* width: 100px; */
+}
+
+.flex.center .group{
+  /* text-align: right; */
+  min-height: 120px;
+  display: flex;
+  justify-content: center;
+}
+
+.flex.center canvas{
+  height: 100px;
+}
+
+.flex.column{
+  display:flex;
+  flex-direction: column;
+  margin-left: 20px;
+}
+
+.flex.column img{
+  margin-bottom: 10px;
+  width: auto;
+}
+
+.flex.column span{
+  font-family: 'Roboto', sans-serif;
+  font-size: 22px;
 }
