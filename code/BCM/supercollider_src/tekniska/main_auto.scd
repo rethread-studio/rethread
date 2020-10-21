@@ -238,55 +238,60 @@ s.waitForBoot({
 	};
 
 	~decoder = Synth(\decoder, [\in, ~decoderBus, \out, ~firstOutputBus]);
-	~decoder.set(\cRatio, 1/2.5, \cThresh, 0.5, \cAtk, 0.012, \cRel, 0.08, \preCompAmp, 2.0);
+	~decoder.set(\cRatio, 1/2.5, \cThresh, 0.5, \cAtk, 0.012, \cRel, 0.08, \preCompAmp, 2.0, \extraAmp, 4.0);
 
 	~channels = Environment(know: true);
 	// Set up all the channels
-	~channels.rev_channel = ~makeMixerChannel.("Reverb", ~decoderBus);
+	~channels.main = ~makeMixerChannel.("Main", ~decoderBus);
+	~channels.main.set_amp(0.25);
+
+	~channels.rev_channel = ~makeMixerChannel.("Reverb", ~channels.main.bus);
 	~channels.rev_channel.play_on(\medium_reverb, [\out, ~channels.rev_channel.bus, \in, ~channels.rev_channel.bus, \mix, 1.0, \amp, 2.0]);
 	~channels.rev_channel.set_amp(0.3);
-	~channels.long_rev = ~makeMixerChannel.("Long rev", ~decoderBus);
+	~channels.long_rev = ~makeMixerChannel.("Long rev", ~channels.main.bus);
 	~channels.long_rev.play_on(\infiniteReverb, [\out, ~channels.long_rev.bus, \in, ~channels.long_rev.bus, \feedback, 0.62, \amp, 1.5]);
-	~channels.sub_channel = ~makeMixerChannel.("Sub", ~decoderBus);
+	~channels.sub_channel = ~makeMixerChannel.("Sub", ~channels.main.bus);
 	~channels.sub_channel.set_send(~channels.rev_channel.bus, 0.2);
-	~channels.rain_channel = ~makeMixerChannel.("Rain", ~decoderBus);
+	~channels.rain_channel = ~makeMixerChannel.("Rain", ~channels.main.bus);
 	~channels.rain_channel.set_send(~channels.rev_channel.bus, 1.0);
-	~channels.default_channel = ~makeMixerChannel.("Default", ~decoderBus);
+	~channels.default_channel = ~makeMixerChannel.("Default", ~channels.main.bus);
 	~channels.default_channel.set_send(~channels.rev_channel.bus, 1.0);
-	~channels.google_channel = ~makeMixerChannel.("Google", ~decoderBus);
+	~channels.google_channel = ~makeMixerChannel.("Google", ~channels.main.bus);
 	~channels.google_channel.set_send(~channels.rev_channel.bus, 1.0);
-	~channels.facebook_channel = ~makeMixerChannel.("Facebook", ~decoderBus);
+	~channels.facebook_channel = ~makeMixerChannel.("Facebook", ~channels.main.bus);
 	~channels.facebook_channel.set_send(~channels.rev_channel.bus, 1.0);
-	~channels.amazon_channel = ~makeMixerChannel.("Amazon", ~decoderBus);
+	~channels.amazon_channel = ~makeMixerChannel.("Amazon", ~channels.main.bus);
 	~channels.amazon_channel.set_send(~channels.rev_channel.bus, 1.0);
-	~channels.cloudflare_channel = ~makeMixerChannel.("Coudflare", ~decoderBus);
+	~channels.cloudflare_channel = ~makeMixerChannel.("Coudflare", ~channels.main.bus);
 	~channels.cloudflare_channel.set_send(~channels.rev_channel.bus, 1.0);
-	~channels.microsoft_channel = ~makeMixerChannel.("Microsoft", ~decoderBus);
+	~channels.microsoft_channel = ~makeMixerChannel.("Microsoft", ~channels.main.bus);
 	~channels.microsoft_channel.set_send(~channels.rev_channel.bus, 1.0);
-	~channels.youtube_channel = ~makeMixerChannel.("YouTube", ~decoderBus);
+	~channels.youtube_channel = ~makeMixerChannel.("YouTube", ~channels.main.bus);
 	~channels.youtube_channel.set_send(~channels.rev_channel.bus, 1.0);
-	~channels.percussion = ~makeMixerChannel.("Percussion", ~decoderBus);
+	~channels.percussion = ~makeMixerChannel.("Percussion", ~channels.main.bus);
 	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
-	~channels.voice = ~makeMixerChannel.("Voice", ~decoderBus);
+	~channels.voice = ~makeMixerChannel.("Voice", ~channels.main.bus);
 	~channels.voice.set_amp(0.65);
 	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
-	~channels.drone = ~makeMixerChannel.("Drone", ~decoderBus);
+	~channels.drone = ~makeMixerChannel.("Drone", ~channels.main.bus);
 	~channels.drone.set_send(~channels.long_rev.bus, 1.0);
 
-	~channels.idle_channel = ~makeMixerChannel.("Idle", ~decoderBus);
+	~channels.idle_channel = ~makeMixerChannel.("Idle", ~channels.main.bus);
 	~channels.idle_channel.set_send(~channels.rev_channel.bus, 0.2);
 	~channels.idle_channel.set_amp(0.6);
-	~channels.idle_rev = ~makeMixerChannel.("Idle", ~channels.idle_channel.bus);
+	~channels.idle_rev = ~makeMixerChannel.("Idle_pitches", ~channels.main.bus);
 	~channels.idle_rev.set_send(~channels.long_rev.bus, 0.05);
 
-	~channels.tick_channel = ~makeMixerChannel.("Tick", ~decoderBus);
+	~channels.tick_channel = ~makeMixerChannel.("Tick", ~channels.main.bus);
 	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.tick_channel.set_amp(0.0);
+
+
 
 	{
 		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel,
 			~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice,
-			~channels.drone, ~channels.idle_channel, ~channels.rev_channel, ~channels.long_rev], ~allClouds);
+			~channels.drone, ~channels.idle_rev, ~channels.idle_channel, ~channels.rev_channel, ~channels.long_rev, ~channels.main], ~allClouds);
 	}.defer;
 
 	// Create the global stats object (environment)
