@@ -184,6 +184,10 @@ ga("set", "checkProtocolTask", null);
 
 var actionTimeout = null;
 var isInactive = true;
+broadcast({
+  event: "idle",
+  action: "active",
+});
 function action() {
   clearTimeout(actionTimeout);
   if (isInactive) {
