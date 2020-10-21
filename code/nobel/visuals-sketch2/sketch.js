@@ -6,6 +6,13 @@ let SINGLE_COLOR = true;
 // Performance - Disables FES
 // p5.disableFriendlyErrors = true;
 
+let continentActivity = {
+  africa: 0,
+  eurasia: 0,
+  oceania: 0,
+  americas: 0,
+};
+
 let num = 0;
 new WebSocketClient().onmessage = (data) => {
   if(num < 10) {
@@ -13,12 +20,25 @@ new WebSocketClient().onmessage = (data) => {
     console.log(JSON.parse(data.data));
   }
   let internalData = JSON.parse(data.data);
+  let continent;
   if(internalData.remote_location.country != "Sweden"
   && internalData.remote_location.country != undefined) {
     lastCountry = internalData.remote_location.country;
+    continent = internalData.remote_location.continent;
   } else if(internalData.local_location.country != "Sweden"
   && internalData.local_location.country != undefined) {
     lastCountry = internalData.local_location.country;
+    continent = internalData.local_location.continent;
+  }
+
+  if(continent == "Europe" || continent == "Asia") {
+    continentActivity.eurasia += 1;
+  } else if(continent == "Americas") {
+    continentActivity.americas += 1;
+  } else if(continent == "Oceania") {
+    continentActivity.oceania += 1;
+  } else if(continent == "Africa") {
+    continentActivity.africa += 1;
   }
   
     
@@ -111,6 +131,11 @@ function backgroundFragShader() {
     uniform vec3 iResolution;
     uniform vec3 leftColor;
     uniform float brightness;
+
+    uniform float eurasia;
+    uniform float africa;
+    uniform float americas;
+    uniform float oceania;
   
   mat2 rotate(float a){
       float c=cos(a),s=sin(a);
@@ -135,10 +160,18 @@ function backgroundFragShader() {
       vec2 st = (gl_FragCoord.xy/iResolution.xy)-.5;
       float t = iTime;
       float pct = 0.;
-      pct += band(sin(t)*20.+20., vec2(0., 0.36), st);
-      pct += band(sin(t*0.8 + 0.2343)*20.+20., vec2(0., 0.13), st);
-      pct += band(sin(t*0.7 + .63)*20.+20., vec2(0., -0.101), st);
-      pct += band(sin(t*0.68 + 2.582)*20.+20., vec2(0., -0.333), st);
+
+      // Random brightness
+      // pct += band(sin(t)*20.+20., vec2(0., 0.36), st);
+      // pct += band(sin(t*0.8 + 0.2343)*20.+20., vec2(0., 0.13), st);
+      // pct += band(sin(t*0.7 + .63)*20.+20., vec2(0., -0.101), st);
+      // pct += band(sin(t*0.68 + 2.582)*20.+20., vec2(0., -0.333), st);
+
+      // brightness from data
+      pct += band(eurasia, vec2(0., 0.36), st);
+      pct += band(africa, vec2(0., 0.13), st);
+      pct += band(americas, vec2(0., -0.101), st);
+      pct += band(oceania, vec2(0., -0.333), st);
 
       vec3 col = vec3(1.0, 0.3, 0.2) * pct;
 
@@ -216,15 +249,19 @@ function draw() {
   // Set canvas background
   // background("rgba(0,0,0,0.1)");
 
+  let continentActivityCoeff = 0.95;
+  continentActivity.eurasia = Math.min(continentActivity.eurasia * continentActivityCoeff, 200);
+  continentActivity.africa = Math.min(continentActivity.africa * continentActivityCoeff, 200);
+  continentActivity.americas = Math.min(continentActivity.americas * continentActivityCoeff, 200);
+  continentActivity.oceania = Math.min(continentActivity.oceania * continentActivityCoeff, 200);
+
   // Draw shader
   backgroundShader.setUniform("iResolution", [width, height]);
   backgroundShader.setUniform("iTime", millis()/1000.0);
-  let brightness = Math.min(window.smoothActivity*0.005 + 0.5, 1.2);
-  if (window.idle == true) {
-      brightness = 0.2;
-  }
-  // console.log(brightness);
-  backgroundShader.setUniform("brightness", 1.0);
+  backgroundShader.setUniform("eurasia", continentActivity.eurasia);
+  backgroundShader.setUniform("africa", continentActivity.africa);
+  backgroundShader.setUniform("oceania", continentActivity.oceania);
+  backgroundShader.setUniform("americas", continentActivity.americas);
   shaderGraphics.shader(backgroundShader);
   shaderGraphics.rect(0, 0, width, height);
   // shaderGraphics.quad(-1, -1, 1, -1, 1, 1, -1, 1);
