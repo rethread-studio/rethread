@@ -21,14 +21,14 @@ function createButton(id, text, onclick) {
   button.id = id;
   button.innerText = text;
   button.onclick = onclick;
-  document.documentElement.appendChild(button);
+  document.body.appendChild(button);
 }
 function displayLegend() {
   closeHome();
   var iframe = document.createElement("iframe");
   iframe.id = "pellowLegend";
   iframe.src = chrome.extension.getURL("legend.html");
-  document.documentElement.appendChild(iframe);
+  document.body.appendChild(iframe);
 
   var button = document.getElementById("pellowLegendButton");
   button.innerText = "close";
@@ -81,28 +81,29 @@ function closeHome() {
 }
 
 if (!isIFrame) {
-  injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
-  createButton("pellowHomeButton", "Home", function (event) {
-    event.preventDefault();
-    var iframe = document.getElementById("pellowHome");
-    if (iframe) {
-      closeHome();
-    } else {
-      displayHome();
-    }
-    return false;
+  window.addEventListener("DOMContentLoaded", () => {
+    injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
+    createButton("pellowHomeButton", "Home", function (event) {
+      event.preventDefault();
+      var iframe = document.getElementById("pellowHome");
+      if (iframe) {
+        closeHome();
+      } else {
+        displayHome();
+      }
+      return false;
+    });
+    createButton("pellowLegendButton", "Legend", function (event) {
+      event.preventDefault();
+      var iframe = document.getElementById("pellowLegend");
+      if (iframe) {
+        closeLegend();
+      } else {
+        displayLegend();
+      }
+      return false;
+    });
   });
-  createButton("pellowLegendButton", "Legend", function (event) {
-    event.preventDefault();
-    var iframe = document.getElementById("pellowLegend");
-    if (iframe) {
-      closeLegend();
-    } else {
-      displayLegend();
-    }
-    return false;
-  });
-  // injectScript(chrome.extension.getURL("scripts/error_logging.js"), "head");
 
   function action() {
     chrome.runtime.sendMessage({ type: "action" }, function () {});
