@@ -263,7 +263,7 @@ const onmessage = (message) => {
 
         if (!positionPerService.has(country)) {
           //create a text to display
-          let servicePos = random3DPosition(14);
+          let servicePos = random3DPosition(20);
           createText(country, servicePos);
           positionPerService.set(country, servicePos);
           indexPerService.set(country, indexPerService.size);
@@ -427,7 +427,7 @@ function reset() {
 //CREATE a random position
 function random3DPosition(magnitude) {
   return new THREE.Vector3(
-    getRandomArbitrary(-magnitude, magnitude),
+    -10 + getRandomArbitrary(-10, 10),
     getRandomArbitrary(-magnitude, magnitude),
     25
   );
