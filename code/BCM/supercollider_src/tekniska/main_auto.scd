@@ -270,6 +270,8 @@ s.waitForBoot({
 	~channels.youtube_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.percussion = ~makeMixerChannel.("Percussion", ~channels.main.bus);
 	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
+	~channels.kick_channel = ~makeMixerChannel.("Kick drum", ~channels.percussion.bus);
+	~channels.kick_channel.set_amp(0.72);
 	~channels.voice = ~makeMixerChannel.("Voice", ~channels.main.bus);
 	~channels.voice.set_amp(0.65);
 	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
@@ -290,7 +292,7 @@ s.waitForBoot({
 
 	{
 		~makeSoundForestGui.([~channels.tick_channel, ~channels.default_channel, ~channels.google_channel, ~channels.facebook_channel,
-			~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.percussion, ~channels.voice,
+			~channels.amazon_channel, ~channels.cloudflare_channel, ~channels.youtube_channel, ~channels.kick_channel, ~channels.percussion, ~channels.voice,
 			~channels.drone, ~channels.idle_rev, ~channels.idle_channel, ~channels.rev_channel, ~channels.long_rev, ~channels.main], ~allClouds);
 	}.defer;
 

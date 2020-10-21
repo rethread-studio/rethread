@@ -190,17 +190,17 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 			10, {{
 				var freq = ~s53.degreeToFreq(~root, 0.midicps, 3), numNotes = exprand(1, 2).round, waitTime = 0.5/numNotes;
 				numNotes.do {
-					~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.15, 0.3), \sinfreq, freq, \glissf, rrand(0.4, 0.6), \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
+					~channels.kick_channel.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.15, 0.3), \sinfreq, freq, \glissf, rrand(0.4, 0.6), \glisstime, 0.035, \clickAdd, rrand(-700, -400), \amp, rrand(0.12, 0.25) * 0.55, \out, ~channels.kick_channel.bus]);
 					waitTime.wait;
 				};
 			}},
 			11, {{
 				var freq = ~s53.degreeToFreq(~root, 0.midicps, 5);
-				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, freq, \glissf, rrand(0.15, 0.35), \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.4, \out, ~channels.percussion.bus]);
+				~channels.kick_channel.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.22, 0.5), \sinfreq, freq, \glissf, rrand(0.15, 0.35), \glisstime, 0.035, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.55, \out, ~channels.kick_channel.bus]);
 			}},
 			12, {{
 				var freq = ~s53.degreeToFreq(~root, 0.midicps, 6);
-				~channels.percussion.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.5, 0.8), \sinfreq, freq, \glissf, rrand(1/12, 1/6), \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.5, \out, ~channels.percussion.bus]);
+				~channels.kick_channel.play_on(\kick, [\att, rrand(0.001, 0.01),\rel, rrand(0.5, 0.8), \sinfreq, freq, \glissf, rrand(1/12, 1/6), \glisstime, 0.035, \wobble, 0.5, \clickAdd, rrand(-700, 400), \amp, rrand(0.12, 0.25) * 0.7, \out, ~channels.kick_channel.bus]);
 			}},
 			// default
 			{{
