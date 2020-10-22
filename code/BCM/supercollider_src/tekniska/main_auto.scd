@@ -268,6 +268,8 @@ s.waitForBoot({
 	~channels.microsoft_channel.set_send(~channels.rev_channel.bus, 1.0);
 	~channels.youtube_channel = ~makeMixerChannel.("YouTube", ~channels.main.bus);
 	~channels.youtube_channel.set_send(~channels.rev_channel.bus, 1.0);
+	~channels.tick_rev = ~makeMixerChannel.("Tick rev", ~channels.rev_channel.bus);
+	~channels.tick_rev.set_amp(0.5);
 	~channels.percussion = ~makeMixerChannel.("Percussion", ~channels.main.bus);
 	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.kick_channel = ~makeMixerChannel.("Kick drum", ~channels.percussion.bus);
