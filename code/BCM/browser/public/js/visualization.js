@@ -150,7 +150,7 @@ const options = {
   }
 }
 //modify styles if to match installation settings
-document.body.style.paddingTop = options.installation ? '470px' : 0;
+// document.body.style.paddingTop = options.installation ? '470px' : 0;
 //modify styles if to match installation settings
 document.getElementsByClassName('message')[0].style.top = options.installation ? "470px" : 0;
 
@@ -1134,7 +1134,7 @@ function generateCountries() {
       shading: THREE.SmoothShading,
       shininess: 50,
     });
-    const scale = 25; // + Math.random() / 2;
+    const scale = 18; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;
