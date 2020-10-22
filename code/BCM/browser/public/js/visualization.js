@@ -152,7 +152,7 @@ const options = {
 //modify styles if to match installation settings
 // document.body.style.paddingTop = options.installation ? '470px' : 0;
 //modify styles if to match installation settings
-document.getElementsByClassName('message')[0].style.top = options.installation ? "470px" : 0;
+// document.getElementsByClassName('message')[0].style.top = options.installation ? "470px" : 0;
 
 
 
