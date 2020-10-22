@@ -1134,7 +1134,7 @@ function generateCountries() {
       shading: THREE.SmoothShading,
       shininess: 50,
     });
-    const scale = 25; // + Math.random() / 2;
+    const scale = 18; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;
