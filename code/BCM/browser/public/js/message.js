@@ -44,7 +44,7 @@ let captionLength_en = 0;
 let caption_se = '';
 let caption_en = '';
 
-const speed = 50;
+const speed = 20;
 
 let erasetimeout;
 let typeTiemout;
