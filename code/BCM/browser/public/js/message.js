@@ -83,7 +83,7 @@ function sendReport(report) {
     popSe.innerHTML = String(report.se);
     popEn.innerHTML = String(report.en);
 
-    setTimeout(deleteReport, 4000);
+    setTimeout(deleteReport, 8000);
 }
 
 function deleteReport() {

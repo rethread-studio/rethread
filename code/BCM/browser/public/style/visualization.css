@@ -350,14 +350,14 @@ canvas {
 }
 
 #innerMessage{
-  transition: all 1s ease;
-  margin-bottom: 10%;
+  /* transition: all 1s ease; */
+  margin-bottom: 15%;
   /* transform: translateY(50px); */
-    opacity:0;
+    opacity: 0;
 }
 
 #innerMessage.inScreen{
-  opacity: 0.9;
+  opacity: 1;
   /* transform: transslateY(0px); */
 }
 
