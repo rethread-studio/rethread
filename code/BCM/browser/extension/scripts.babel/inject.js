@@ -38,7 +38,7 @@ function displayLegend() {
 function closeLegend() {
   var iframe = document.getElementById("pellowLegend");
   if (iframe) {
-    document.documentElement.removeChild(iframe);
+    document.body.removeChild(iframe);
     var button = document.getElementById("pellowLegendButton");
     button.innerText = "Legend";
     document.body.className = document.body.className.replace(
