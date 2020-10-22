@@ -31,10 +31,13 @@ SynthDef(\tick2, {
 	sig = Impulse.ar(0);
 	sig = sig * 0.5;
 	// high freq and rq values causes the filter to blow up violently
-	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(20), rq.min(5)) * env;
+	// raised the minimum freq for the filter to raise the ticks a bit.
+	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(7000), rq.min(5)) * env;
 	sig = Pan2.ar(sig, \pan.kr(0)) * \amp.kr(1.0) * 10;
 	sig = sig.tanh; // Should never happen, but better to soft clip
 	Out.ar(\out.kr(0), sig);
+	// added a reverb send to spatialize the ticks a bit
+	Out.ar(fx, sig * 0.4);
 }).add;
 SynthDef(\gust, {
 	var sig, env, rq = \rq.kr(0.1), atk = \atk.kr(0.5), rel = \rel.kr(1.5), freq = \freq.kr(1400).min(18000).max(100);
@@ -112,7 +115,7 @@ SynthDef(\fm_reverse, {
 	Out.ar(fx, car * fxsend.dbamp);
 }).add;
 
-SynthDef(\kick, {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.9, glisstime = 0.035, att = 0.01, rel = 0.45, pan = 0;
+SynthDef(\kick, {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.8, glisstime = 0.035, att = 0.01, rel = 0.45, pan = 0;
 	var env, snd, ramp, click, clickAmp, clickAdd = \clickAdd.kr(100), sub, subAmp, wobble = \wobble.kr(0.1);
 	env = Env.perc(att, rel, amp).ar(doneAction: 2);
 	ramp = XLine.ar(

@@ -168,12 +168,8 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 				};
 			}},
 			7, {{
-				var atk = 0.01, numNotes = exprand(1, 4).round, waitTime = 0.5/numNotes, amp = rrand(0.02, 0.04) * 0.6;
-				numNotes.do {
-					~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, amp, \out, ~channels.percussion.bus], atk * -1);
-					amp = amp * 1.3;
-					waitTime.wait;
-				};
+				var atk = 0.01;
+				~channels.percussion.play_on(\fm, [\freq, 2000, \mRatio, 1, \cRatio, rrand(2, 16), \index, 2.4, \iScale, rrand(1, 10), \atk, atk, \rel, 0.01, \amp, rrand(0.02, 0.04) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 			}},
 			8, {{
 				var atk = rrand(0.02, 0.2), numNotes = exprand(1, 4).round, waitTime = 0.5/numNotes, amp = rrand(0.01, 0.03) * 0.6;
@@ -205,7 +201,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 			// default
 			{{
 				var atk = rrand(0.01, 0.5);
-				~channels.percussion.play_on(\fm_reverse, [\freq, rrand(3000, 7000), \mRatio, rrand(3, 9), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, atk, \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
+				~channels.percussion.play_on(\fm_reverse, [\freq, rrand(6000, 9000), \mRatio, rrand(3, 11), \cRatio, rrand(2, 16), \index, rrand(4, 8), \iScale, rrand(2, 5), \atk, atk, \rel, exprand(0.005, 0.2), \amp, rrand(0.01, 0.03) * 0.6, \out, ~channels.percussion.bus], atk * -1)
 			}},
 		);
 		~sequencer.steps[stepIndex].put(\percussive, newFunc);

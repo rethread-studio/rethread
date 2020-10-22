@@ -3,7 +3,7 @@ const optionsLegends = {
   length: 400,
   fov: 90,
 
-  installation: false,
+  installation: true,
 
   colors: {
     url: 0xee4035,
