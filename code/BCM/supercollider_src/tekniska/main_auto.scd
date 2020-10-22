@@ -247,7 +247,7 @@ s.waitForBoot({
 
 	~channels.rev_channel = ~makeMixerChannel.("Reverb", ~channels.main.bus);
 	~channels.rev_channel.play_on(\medium_reverb, [\out, ~channels.rev_channel.bus, \in, ~channels.rev_channel.bus, \mix, 1.0, \amp, 2.0]);
-	~channels.rev_channel.set_amp(0.3);
+	~channels.rev_channel.set_amp(-14.dbamp);
 	~channels.long_rev = ~makeMixerChannel.("Long rev", ~channels.main.bus);
 	~channels.long_rev.play_on(\infiniteReverb, [\out, ~channels.long_rev.bus, \in, ~channels.long_rev.bus, \feedback, 0.62, \amp, 1.5]);
 	~channels.sub_channel = ~makeMixerChannel.("Sub", ~channels.main.bus);
@@ -271,11 +271,12 @@ s.waitForBoot({
 	~channels.percussion = ~makeMixerChannel.("Percussion", ~channels.main.bus);
 	~channels.percussion.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.kick_channel = ~makeMixerChannel.("Kick drum", ~channels.percussion.bus);
-	~channels.kick_channel.set_amp(0.72);
+	~channels.kick_channel.set_amp(-2.2.dbamp);
 	~channels.voice = ~makeMixerChannel.("Voice", ~channels.main.bus);
-	~channels.voice.set_amp(0.65);
+	~channels.voice.set_amp(-5.1.dbamp);
 	~channels.voice.set_send(~channels.rev_channel.bus, 0.15);
 	~channels.drone = ~makeMixerChannel.("Drone", ~channels.main.bus);
+	~channels.drone.set_amp(-4.4.dbamp);
 	~channels.drone.set_send(~channels.long_rev.bus, 1.0);
 
 	~channels.idle_channel = ~makeMixerChannel.("Idle", ~channels.main.bus);
