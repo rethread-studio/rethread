@@ -264,7 +264,7 @@ const onmessage = (message) => {
 
         if (!positionPerService.has(country)) {
           //create a text to display
-          let servicePos = random3DPosition(20);
+          let servicePos = random3DPosition(10);
           createText(country, servicePos);
           positionPerService.set(country, servicePos);
           indexPerService.set(country, indexPerService.size);
