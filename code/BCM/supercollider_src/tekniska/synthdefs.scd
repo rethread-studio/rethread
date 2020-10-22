@@ -32,12 +32,12 @@ SynthDef(\tick2, {
 	sig = sig * 0.5;
 	// high freq and rq values causes the filter to blow up violently
 	// raised the minimum freq for the filter to raise the ticks a bit.
-	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(7000), rq.min(5)) * env;
+	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(2000), rq.min(5)) * env;
 	sig = Pan2.ar(sig, \pan.kr(0)) * \amp.kr(1.0) * 10;
 	sig = sig.tanh; // Should never happen, but better to soft clip
 	Out.ar(\out.kr(0), sig);
 	// added a reverb send to spatialize the ticks a bit
-	Out.ar(fx, sig * 0.4);
+	Out.ar(\fx_out.kr(0), sig * \fx_amp.kr(0));
 }).add;
 SynthDef(\gust, {
 	var sig, env, rq = \rq.kr(0.1), atk = \atk.kr(0.5), rel = \rel.kr(1.5), freq = \freq.kr(1400).min(18000).max(100);
@@ -255,7 +255,7 @@ SynthDef(\decoder, { |in = 10, out = 0,
 	var sig = In.ar(in, ~mixerChannelOutputs.asInteger) * \preCompAmp.kr(1.0);
 	sig = Compander.ar(sig, sig, cThresh, 1.0, cRatio, cAtk, cRel);
 	sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3); // soft mastering compressor
-	sig = LPF.ar(sig, \lpf.kr(50));
+	sig = HPF.ar(sig, \hpf.kr(20));
 	sig = Limiter.ar(sig * \extraAmp.kr(1.0), 0.95);
 	Out.ar(out, sig);
 }).add;
