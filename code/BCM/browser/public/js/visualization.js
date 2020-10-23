@@ -150,9 +150,9 @@ const options = {
   }
 }
 //modify styles if to match installation settings
-document.body.style.paddingTop = options.installation ? '470px' : 0;
+// document.body.style.paddingTop = options.installation ? '470px' : 0;
 //modify styles if to match installation settings
-document.getElementsByClassName('message')[0].style.top = options.installation ? "470px" : 0;
+// document.getElementsByClassName('message')[0].style.top = options.installation ? "470px" : 0;
 
 
 
@@ -264,7 +264,7 @@ const onmessage = (message) => {
 
         if (!positionPerService.has(country)) {
           //create a text to display
-          let servicePos = random3DPosition(20);
+          let servicePos = random3DPosition(10);
           createText(country, servicePos);
           positionPerService.set(country, servicePos);
           indexPerService.set(country, indexPerService.size);
@@ -1134,7 +1134,7 @@ function generateCountries() {
       shading: THREE.SmoothShading,
       shininess: 50,
     });
-    const scale = 25; // + Math.random() / 2;
+    const scale = 18; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;

@@ -12,7 +12,7 @@ body {
   overflow: hidden;
   color: #fdfdfd;
   cursor: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7), auto;
-
+  transition: all 1s ease;
   /* GREY */
   /* background-color: #333647; */
   /* BLUE */
@@ -117,7 +117,7 @@ background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, F
 
 .gradient.gray{
   background-color: #485461;
-background: linear-gradient(to right, #485461 0%, #28313b 74%);
+  background: linear-gradient(to right, #485461 0%, #28313b 74%);
 }
 
 
@@ -130,30 +130,44 @@ background: linear-gradient(to right, #485461 0%, #28313b 74%);
   
 
   /* margin-top: 21.7%; */
-  -webkit-animation: GradientAnimation 15s ease infinite;
-  -moz-animation: GradientAnimation 15s ease infinite;
-  animation: GradientAnimation 15s ease infinite; 
+  -webkit-animation: GradientAnimation 60s ease infinite;
+  -moz-animation: GradientAnimation 60s ease infinite;
+  animation: GradientAnimation 60s ease infinite; 
 }
 
 
 @-webkit-keyframes GradientAnimation {
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
+  0%{background-position:10% 50%}
+  50%{background-position:90% 50%}
+  100%{background-position:10% 50%}
 }
 @-moz-keyframes GradientAnimation {
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
+  0%{background-position:10% 50%}
+  50%{background-position:90% 50%}
+  100%{background-position:10% 50%}
 }
 @keyframes GradientAnimation {
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
+  0%{background-position:10% 50%}
+  50%{background-position:90% 50%}
+  100%{background-position:10% 50%}
 }
 
+.bgBlue{
+  background: #36D1DC; 
+}
+.bgRed{
+  background: #DA4453;
+}
+.bgImage{
+  
+  background-image: url("../img/bg/bg7.png");
+  background-blend-mode: multiply;
+  background-position: 50% 50%;
+  background-size: cover;
+  width: 100%;
+}
 /* body{
-  padding-top:470px;
+  padding-top:  470px;
 } */
 
 #visualization {
@@ -172,7 +186,7 @@ background: linear-gradient(to right, #485461 0%, #28313b 74%);
 
 #container-particles{
   position:absolute;
-  width: 50%;
+  width: 60%;
 	height: 100%;
 	/* overflow: hidden; */
 
@@ -294,7 +308,7 @@ background: linear-gradient(to right, #485461 0%, #28313b 74%);
   color:white;
 } 
 .output h1 {
-  font-size:148px;
+  font-size:90px;
   margin-bottom: 0;
 }
 
@@ -336,14 +350,14 @@ canvas {
 }
 
 #innerMessage{
-  transition: all 1s ease;
-  margin-bottom: 10%;
+  /* transition: all 1s ease; */
+  margin-bottom: 15%;
   /* transform: translateY(50px); */
-    opacity:0;
+    opacity: 0;
 }
 
 #innerMessage.inScreen{
-  opacity: 0.9;
+  opacity: 1;
   /* transform: transslateY(0px); */
 }
 

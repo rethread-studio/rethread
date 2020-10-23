@@ -255,6 +255,7 @@ SynthDef(\decoder, { |in = 10, out = 0,
 	var sig = In.ar(in, ~mixerChannelOutputs.asInteger) * \preCompAmp.kr(1.0);
 	sig = Compander.ar(sig, sig, cThresh, 1.0, cRatio, cAtk, cRel);
 	sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3); // soft mastering compressor
+	sig = HPF.ar(sig, \hpf.kr(20));
 	sig = Limiter.ar(sig * \extraAmp.kr(1.0), 0.95);
 	Out.ar(out, sig);
 }).add;

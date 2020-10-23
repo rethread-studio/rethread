@@ -90,7 +90,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 						\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
 						\out, ~channels.percussion.bus,
 						\fx_out, ~channels.tick_rev.bus,
-						\fx_amp, 0.4,
+						\fx_amp, 1.0,
 					]);
 					amp = amp * 1.3;
 					waitTime.wait;
@@ -107,7 +107,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 						\atk, 0.001, \rel, 0.01, \pan, rrand(-1, -0.5),
 						\out, ~channels.percussion.bus,
 						\fx_out, ~channels.tick_rev.bus,
-						\fx_amp, 0.4,
+						\fx_amp, 1.0,
 					]);
 					amp = amp * 1.3;
 					waitTime.wait;
@@ -124,7 +124,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 						\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.0),
 						\out, ~channels.percussion.bus,
 						\fx_out, ~channels.tick_rev.bus,
-						\fx_amp, 0.4,
+						\fx_amp, 1.0,
 					]);
 					amp = amp * 1.5;
 					waitTime.wait;
@@ -141,7 +141,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 						\atk, 0.001, \rel, 0.01, \pan, rrand(0.0, 0.5),
 						\out, ~channels.percussion.bus,
 						\fx_out, ~channels.tick_rev.bus,
-						\fx_amp, 0.4,
+						\fx_amp, 1.0,
 					]);
 					waitTime.wait;
 				};
@@ -157,7 +157,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 						\atk, 0.001, \rel, 0.01, \pan, rrand(0.5, 1.0),
 						\out, ~channels.percussion.bus,
 						\fx_out, ~channels.tick_rev.bus,
-						\fx_amp, 0.4,
+						\fx_amp, 1.0,
 					]);
 					amp = amp * 1.5;
 					waitTime.wait;
@@ -174,7 +174,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 						\atk, 0.001, \rel, 0.01, \pan, rrand(-0.5, 0.5),
 						\out, ~channels.percussion.bus,
 						\fx_out, ~channels.tick_rev.bus,
-						\fx_amp, 0.4,
+						\fx_amp, 1.0,
 					]);
 					amp = amp * 1.5;
 					waitTime.wait;

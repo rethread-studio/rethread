@@ -44,7 +44,7 @@ let captionLength_en = 0;
 let caption_se = '';
 let caption_en = '';
 
-const speed = 100;
+const speed = 20;
 
 let erasetimeout;
 let typeTiemout;
@@ -67,7 +67,7 @@ function type() {
     if (captionLength < caption_se.length || captionLength_en < caption_en.length + 1) {
         typeTiemout = setTimeout(type, speed);
     } else {
-        erasetimeout = setTimeout(eraseMessage, 9000);
+        // erasetimeout = setTimeout(eraseMessage, 9000);
 
         clearTimeout(typeTiemout);
     }
@@ -83,7 +83,7 @@ function sendReport(report) {
     popSe.innerHTML = String(report.se);
     popEn.innerHTML = String(report.en);
 
-    setTimeout(deleteReport, 4000);
+    setTimeout(deleteReport, 8000);
 }
 
 function deleteReport() {
