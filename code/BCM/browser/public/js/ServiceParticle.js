@@ -233,8 +233,8 @@ class AppViz {
 
             default:
                 return {
-                    en: `You connected to ${this.urlElement.getName()} and used ${this.numServices} Services which used ${this.numPackages} packages`,
-                    se: `Du embendade till ${this.urlElement.getName()} och det embendade ${this.numServices} Services att embendade ${this.numPackages} packages`,
+                    en: `You connected to ${this.urlElement.getName()} which used ${this.numServices} services through ${this.numPackages} data packages.`,
+                    se: `Du anslöt till ${this.urlElement.getName()} som använde ${this.numServices} olika tjänster genom ${this.numPackages} datapaket.`,
                 };
 
             // case 1:
