@@ -12,7 +12,7 @@ s.reboot;
 
 // Control the main bus while it is running
 ~decoder.set(\extraAmp, 1.0) // Set amplification
-~decoder.set(\lpf, 100); // Set lowpass filter cutoff frequency
+~decoder.set(\hpf, 25); // Set lowpass filter cutoff frequency
 ~decoder.set(\cRatio, 1/2.5, \cThresh, 0.06, \cAtk, 0.012, \cRel, 0.08, \preCompAmp, 4.0); // change compression settings on the master bus
 
 -12.dbamp

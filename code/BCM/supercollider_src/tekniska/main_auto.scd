@@ -285,9 +285,10 @@ s.waitForBoot({
 
 	~channels.idle_channel = ~makeMixerChannel.("Idle", ~channels.main.bus);
 	~channels.idle_channel.set_send(~channels.rev_channel.bus, 0.2);
-	~channels.idle_channel.set_amp(0.6);
+	~channels.idle_channel.set_amp(-5.2.dbamp);
 	~channels.idle_rev = ~makeMixerChannel.("Idle_pitches", ~channels.main.bus);
 	~channels.idle_rev.set_send(~channels.long_rev.bus, 0.05);
+	~channels.idle_rev.set_amp(-3.9.dbamp);
 
 	~channels.tick_channel = ~makeMixerChannel.("Tick", ~channels.main.bus);
 	~channels.tick_channel.set_send(~channels.rev_channel.bus, 1.0);
