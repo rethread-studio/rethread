@@ -5,4 +5,5 @@ bcm_config = {
   closeTabs: false,
   reload: false,
   idle: 60,
+  analytics: false
 };

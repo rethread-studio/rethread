@@ -3,6 +3,7 @@ function save_options() {
   var cache = document.getElementById("cache").checked;
   var closeTabs = document.getElementById("close_tabs").checked;
   var reload = document.getElementById("reload").checked;
+  var analytics = document.getElementById("analytics").checked;
   const server = document.getElementById("server").value.trim();
   const port = parseInt(document.getElementById("port").value.trim());
   const idle = parseInt(document.getElementById("idle").value.trim());
@@ -14,6 +15,7 @@ function save_options() {
       closeTabs,
       reload,
       idle,
+      analytics,
     },
     function () {
       // Update status to let user know options were saved.
@@ -36,6 +38,7 @@ function restore_options() {
     document.getElementById("cache").value = items.cache;
     document.getElementById("close_tabs").checked = items.closeTabs;
     document.getElementById("reload").checked = items.reload;
+    document.getElementById("analytics").checked = items.analytics;
     document.getElementById("idle").value = items.idle;
   });
 }

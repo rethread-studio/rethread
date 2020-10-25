@@ -78,7 +78,7 @@ chrome.webRequest.onBeforeRequest.addListener(
         cancel: false,
       };
     }
-    if (event.type == "main_frame") {
+    if (bcm_config.analytics) {
       ga("send", "pageview", event.url);
     }
     lastTab = await sendCurrentUrl();
@@ -103,7 +103,9 @@ chrome.webRequest.onBeforeRequest.addListener(
       event.requestBody = res;
     }
     event.activeTab = event.tabId == lastTab.id;
-    ga("send", "event", "request_created", event.type, event.url);
+    if (bcm_config.analytics) {
+      ga("send", "event", "request_created", event.type, event.url);
+    }
     broadcast({
       event: "request_created",
       request: event,
@@ -130,7 +132,9 @@ chrome.webRequest.onCompleted.addListener(
     }
     lastTab = await sendCurrentUrl();
     event.activeTab = event.tabId == lastTab.id;
-    ga("send", "event", "request_completed", event.type, event.url);
+    if (bcm_config.analytics) {
+      ga("send", "event", "request_completed", event.type, event.url);
+    }
     broadcast({
       event: "request_completed",
       request: event,
@@ -196,7 +200,9 @@ function action() {
       event: "idle",
       action: "active",
     });
-    ga("send", "event", "idle", "active");
+    if (bcm_config.analytics) {
+      ga("send", "event", "idle", "active");
+    }
   }
   isInactive = false;
   actionTimeout = setTimeout(function () {
@@ -206,8 +212,10 @@ function action() {
       event: "idle",
       action: "inactive",
     });
-    ga("send", "pageview", "home");
-    ga("send", "event", "idle", "inactive");
+    if (bcm_config.analytics) {
+      ga("send", "pageview", "/home");
+      ga("send", "event", "idle", "inactive");
+    }
   }, bcm_config.idle * 1000);
 }
 action();
@@ -216,7 +224,9 @@ chrome.runtime.onMessage.addListener(function (data, sender, sendResponse) {
   if (data.type == "action") {
     action();
   } else if (data.type == "home") {
-    ga("send", "pageview", "/home");
+    if (bcm_config.analytics) {
+      ga("send", "pageview", "/home");
+    }
     broadcast({
       event: "home",
       action: data.action,
