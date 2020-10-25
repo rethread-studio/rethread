@@ -224,6 +224,12 @@ footer .lang-se {
   min-width: 80px;
   background-size: contain;
   height: 70px;
+  border-radius: 10px;
+}
+
+.links-btn.large{
+  min-width: 180px;
+ 
 }
 
 .btn-dice {
@@ -297,6 +303,22 @@ footer .lang-se {
 
 .btn-servYoutube {
   background-image: url(./../img/google.youtube.png);
+}
+
+.btn-daily{
+  background-image: url(./../img/video.dailyMotion.jpg); 
+}
+
+.btn-internet{
+  background-image: url(./../img/video.internetArchive.png); 
+}
+
+.btn-twitch{
+  background-image: url(./../img/video.twitch.png); 
+}
+
+.btn-ted{
+  background-image: url(./../img/video.ted.png); 
 }
 
 .btn-newsDN {
