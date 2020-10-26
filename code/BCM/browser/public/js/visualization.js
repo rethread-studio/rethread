@@ -183,8 +183,12 @@ const onmessage = (message) => {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
-    for (let c of countries) {
-      c.userData.activated = false;
+    for (let mesh of countries) {
+      mesh.userData.opacityVel = 0;
+      mesh.userData.activated = false;
+      mesh.userData.pulsesLeft = 0;
+      mesh.userData.scale = 0;
+      mesh.userData.scaleFollower = 0;
     }
     const url = new URL(json.current_tab.url);
 
