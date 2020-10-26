@@ -183,7 +183,7 @@ const onmessage = (message) => {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
-    reset();
+    // reset();
     const url = new URL(json.current_tab.url);
 
     currentUrl = json.current_tab.url;
