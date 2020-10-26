@@ -194,11 +194,10 @@ const onmessage = (message) => {
     myApp.resetParticles();
     if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
 
-    //clean all countries
-    for (let c of countries) {
-      c.material.opacity = 0.5;
-      c.userData.activated = false;
-    }
+
+
+
+
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
     erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 2000);
