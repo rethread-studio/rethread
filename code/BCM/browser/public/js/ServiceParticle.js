@@ -330,12 +330,12 @@ class AppViz {
             this.resetRadius();
         }
 
-        if (this.packagesNum > 50) {
-            console.log(this.packagesNum, this.services.length, "put red")
+        if (this.numPackages > 50) {
+            console.log(this.numPackages, this.services.length, "put red")
             document.body.classList.remove("bgBlue");
             document.body.classList.add('bgRed');
         } else {
-            console.log(this.packagesNum, this.services.length, "put blue")
+            console.log(this.numPackages, this.services.length, "put blue")
             document.body.classList.remove("bgRed");
             document.body.classList.add('bgBlue');
         }
