@@ -80,30 +80,34 @@ function closeHome() {
   }
 }
 
-if (!isIFrame) {
-  window.addEventListener("DOMContentLoaded", () => {
-    injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
-    createButton("pellowHomeButton", "Home", function (event) {
-      event.preventDefault();
-      var iframe = document.getElementById("pellowHome");
-      if (iframe) {
-        closeHome();
-      } else {
-        displayHome();
-      }
-      return false;
-    });
-    createButton("pellowLegendButton", "Legend", function (event) {
-      event.preventDefault();
-      var iframe = document.getElementById("pellowLegend");
-      if (iframe) {
-        closeLegend();
-      } else {
-        displayLegend();
-      }
-      return false;
-    });
+var initTimeout = null;
+function init() {
+  clearTimeout(initTimeout);
+  injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
+  createButton("pellowHomeButton", "Home", function (event) {
+    event.preventDefault();
+    var iframe = document.getElementById("pellowHome");
+    if (iframe) {
+      closeHome();
+    } else {
+      displayHome();
+    }
+    return false;
   });
+  createButton("pellowLegendButton", "Legend", function (event) {
+    event.preventDefault();
+    var iframe = document.getElementById("pellowLegend");
+    if (iframe) {
+      closeLegend();
+    } else {
+      displayLegend();
+    }
+    return false;
+  });
+}
+if (!isIFrame) {
+  window.addEventListener("DOMContentLoaded", init);
+  initTimeout = setTimeout(init, 2000);
 
   function action() {
     chrome.runtime.sendMessage({ type: "action" }, function () {});
