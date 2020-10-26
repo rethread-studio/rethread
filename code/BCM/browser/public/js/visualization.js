@@ -183,7 +183,9 @@ const onmessage = (message) => {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
-    // reset();
+    for (let c of countries) {
+      c.userData.activated = false;
+    }
     const url = new URL(json.current_tab.url);
 
     currentUrl = json.current_tab.url;
