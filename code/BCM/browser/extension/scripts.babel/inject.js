@@ -59,7 +59,7 @@ function displayHome() {
   button.innerText = "close";
   document.body.className += " pellowOpen";
 
-  chrome.runtime.sendMessage({ type: "home", action: "open" }, function () {});
+  // chrome.runtime.sendMessage({ type: "home", action: "open" }, function () {});
 }
 
 function closeHome() {

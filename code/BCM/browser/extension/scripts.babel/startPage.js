@@ -9,6 +9,12 @@ window.addEventListener("scroll", action);
 window.addEventListener("mousemove", action);
 window.addEventListener("keydown", action);
 
+chrome.runtime.sendMessage({ type: "home", action: "open" }, function () {});
+
+window.addEventListener('beforeunload', function(event) {
+  chrome.runtime.sendMessage({ type: "home", action: "close" }, function () {});
+});
+
 window.addEventListener("DOMContentLoaded", () => {
   var elements = document.getElementsByTagName("a");
   for (var i = 0, len = elements.length; i < len; i++) {
