@@ -331,11 +331,11 @@ class AppViz {
         }
 
         if (this.packagesNum > 50) {
-            console.log(this.services.length, "put red")
+            console.log(this.packagesNum, this.services.length, "put red")
             document.body.classList.remove("bgBlue");
             document.body.classList.add('bgRed');
         } else {
-            console.log(this.services.length, "put blue")
+            console.log(this.packagesNum, this.services.length, "put blue")
             document.body.classList.remove("bgRed");
             document.body.classList.add('bgBlue');
         }
