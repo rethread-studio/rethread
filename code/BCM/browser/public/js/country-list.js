@@ -184,7 +184,7 @@
     { code: 'QA', name: 'Qatar' },
     { code: 'RE', name: 'Réunion' },
     { code: 'RO', name: 'Romania' },
-    { code: 'RU', name: 'Russian Federation' },
+    { code: 'RU', name: 'Russia' },
     { code: 'RW', name: 'Rwanda' },
     { code: 'BL', name: 'Saint Barthélemy' },
     { code: 'SH', name: 'Saint Helena, Ascension and Tristan da Cunha' },
@@ -272,11 +272,11 @@
 
   // define the lookups
 
-  list.name = function name (code) {
+  list.name = function name(code) {
     return nameLookup[code.toUpperCase()]
   }
 
-  list.code = function code (name) {
+  list.code = function code(name) {
     return codeLookup[name.toLowerCase()]
   }
 
