@@ -332,14 +332,12 @@ class AppViz {
             this.resetRadius();
         }
 
-        if (this.services.length > 9) {
-
-            document.body.classList.remove("bgBlue");
-            document.body.classList.add('bgRed');
+        if (this.numPackages > 70) {
+            document.body.classList.remove("blue");
+            document.body.classList.add('red');
         } else {
-
-            document.body.classList.remove("bgRed");
-            document.body.classList.add('bgBlue');
+            document.body.classList.remove("red");
+            document.body.classList.add('blue');
         }
     }
 

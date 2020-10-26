@@ -190,6 +190,13 @@ const onmessage = (message) => {
       mesh.userData.scale = 0;
       mesh.userData.scaleFollower = 0;
     }
+
+    if (json.current_tab.url.indexOf("chrome-extension") == 0) {
+      return;
+    }
+    // disable idle when a new request arrives
+    window.idle = false;
+    setElementsToIdle(false);
     let url = new URL(json.current_tab.url);
 
     if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
