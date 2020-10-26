@@ -122,7 +122,7 @@ class AppViz {
             document.body.classList.add("gray");
         } else {
             document.body.classList.remove("gray");
-            document.body.classList.add("dark");
+            document.body.classList.add("blue");
         }
 
 
@@ -332,12 +332,12 @@ class AppViz {
 
         if (this.numPackages > 50) {
             console.log(this.numPackages, this.services.length, "put red")
-            document.body.classList.remove("bgBlue");
-            document.body.classList.add('bgRed');
+            document.body.classList.remove("blue");
+            document.body.classList.add('red');
         } else {
             console.log(this.numPackages, this.services.length, "put blue")
-            document.body.classList.remove("bgRed");
-            document.body.classList.add('bgBlue');
+            document.body.classList.remove("red");
+            document.body.classList.add('blue');
         }
     }
 
