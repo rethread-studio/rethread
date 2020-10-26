@@ -183,6 +183,13 @@ const onmessage = (message) => {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
+    for (let mesh of countries) {
+      mesh.userData.opacityVel = 0;
+      mesh.userData.activated = false;
+      mesh.userData.pulsesLeft = 0;
+      mesh.userData.scale = 0;
+      mesh.userData.scaleFollower = 0;
+    }
     let url = new URL(json.current_tab.url);
 
     if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
