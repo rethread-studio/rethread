@@ -330,7 +330,7 @@ class AppViz {
             this.resetRadius();
         }
 
-        if (this.services.length > 9) {
+        if (this.packages.length > 50) {
             console.log(this.services.length, "put red")
             document.body.classList.remove("bgBlue");
             document.body.classList.add('bgRed');
