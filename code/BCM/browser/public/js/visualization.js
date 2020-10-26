@@ -193,6 +193,8 @@ const onmessage = (message) => {
     if (json.current_tab.url.indexOf("chrome-extension") == 0) {
       return;
     }
+    window.idle = false;
+    setElementsToIdle(false);
     const url = new URL(json.current_tab.url);
 
     currentUrl = json.current_tab.url;
