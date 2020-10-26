@@ -326,6 +326,7 @@ const onmessage = (message) => {
 
 function setElementsToIdle(isIdle) {
   if (isIdle) {
+    eraseMessage();
     //CHANGE STATE OF APP
     myApp.isIdle(true);
     //show iddle message
