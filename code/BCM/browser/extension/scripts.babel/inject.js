@@ -83,6 +83,7 @@ function closeHome() {
 var initTimeout = null;
 function init() {
   clearTimeout(initTimeout);
+  document.addEventListener('contextmenu', event => event.preventDefault());
   injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
   createButton("pellowHomeButton", "Home", function (event) {
     event.preventDefault();
