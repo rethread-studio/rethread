@@ -190,6 +190,9 @@ const onmessage = (message) => {
       mesh.userData.scale = 0;
       mesh.userData.scaleFollower = 0;
     }
+    if (json.current_tab.url.indexOf("chrome-extension") == 0) {
+      return;
+    }
     const url = new URL(json.current_tab.url);
 
     currentUrl = json.current_tab.url;
