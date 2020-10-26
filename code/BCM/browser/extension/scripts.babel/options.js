@@ -35,7 +35,7 @@ function restore_options() {
   chrome.storage.local.get(bcm_config, function (items) {
     document.getElementById("server").value = items.server;
     document.getElementById("port").value = items.port;
-    document.getElementById("cache").value = items.cache;
+    document.getElementById("cache").checked = items.cache;
     document.getElementById("close_tabs").checked = items.closeTabs;
     document.getElementById("reload").checked = items.reload;
     document.getElementById("analytics").checked = items.analytics;
