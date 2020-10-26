@@ -183,13 +183,22 @@ const onmessage = (message) => {
     const packet = json.request;
     // New page was loaded
     numRequests = 0;
-    const url = new URL(json.current_tab.url);
+    let url = new URL(json.current_tab.url);
+
+    if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
 
     currentUrl = json.current_tab.url;
 
     myApp.addURL(url.hostname, packet.requestId)
+
     myApp.resetParticles();
     if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
+
+    //clean all countries
+    for (let c of countries) {
+      c.material.opacity = 0.5;
+      c.userData.activated = false;
+    }
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
     erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 2000);
@@ -212,7 +221,7 @@ const onmessage = (message) => {
     }
 
   } else if (json.event == "request_completed") {
-    //ADD INITIATOR
+
 
     //Get the information from the request
     const packet = json.request;
@@ -399,14 +408,14 @@ function createRandomMessage() {
 
 
 
-// document.addEventListener("keyup", function (event) {
-//   // on up arrow
-//   if (event.keyCode === 38) {
-//     setElementsToIdle(true)
-//   } else if (event.keyCode == 40) {
-//     setElementsToIdle(false)
-//   }
-// });
+document.addEventListener("keyup", function (event) {
+  // on up arrow
+  if (event.keyCode === 38) {
+    setElementsToIdle(true)
+  } else if (event.keyCode == 40) {
+    setElementsToIdle(false)
+  }
+});
 
 //LISTEN to new messages with the function created
 ws.addEventListener("message", onmessage);
