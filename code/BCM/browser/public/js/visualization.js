@@ -194,7 +194,7 @@ const onmessage = (message) => {
       return;
     }
     window.idle = false;
-    setElementsToIdle(false);
+    setElementsToIdle(false)
     const url = new URL(json.current_tab.url);
 
     currentUrl = json.current_tab.url;

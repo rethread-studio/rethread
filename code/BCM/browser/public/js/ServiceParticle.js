@@ -115,7 +115,9 @@ class AppViz {
         //clean all items
         this.resetParticles()
         //URL
-        this.urlElement.isIdle(this.idle)
+        if (this.urlElement) {
+            this.urlElement.isIdle(this.idle)
+        }
         //change the app background
         if (this.idle) {
             document.body.classList.remove("dark");
