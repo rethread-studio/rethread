@@ -4,8 +4,8 @@ const challenges = [
         en: "Can you connect to a webpage that activates in the map Africa, Russia, or Sweden?"
     },
     {
-        se: "🟠 Kan du hitta en webbsida som bara visar en enda röd punkt?",
-        en: "Can you find a website that shows only one red dot?"
+        se: "🔵 Kan du hitta en webbsida som bara visar en enda blå punkt?",
+        en: "Can you find a website that shows only one blue dot?"
     },
     {
         se: "🔎 Hitta en webbplats med så många punkter som möjligt!",
