@@ -332,7 +332,6 @@ class AppViz {
             this.resetRadius();
         }
 
-<<<<<<< HEAD
         if (this.services.length > 9) {
 
             document.body.classList.remove("bgBlue");
@@ -341,16 +340,6 @@ class AppViz {
 
             document.body.classList.remove("bgRed");
             document.body.classList.add('bgBlue');
-=======
-        if (this.numPackages > 50) {
-            console.log(this.numPackages, this.services.length, "put red")
-            document.body.classList.remove("blue");
-            document.body.classList.add('red');
-        } else {
-            console.log(this.numPackages, this.services.length, "put blue")
-            document.body.classList.remove("red");
-            document.body.classList.add('blue');
->>>>>>> c39a2b6349e4c8af50f52b8d62a3dfad80f3f718
         }
     }
 

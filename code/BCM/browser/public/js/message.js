@@ -62,15 +62,8 @@ function typeMessage(message) {
 
 
 function type() {
-    captionEl.innerHTML = caption_se.substr(0, captionLength++);
-    eParagraph.innerHTML = caption_en.substr(0, captionLength_en++);
-    if (captionLength < caption_se.length || captionLength_en < caption_en.length + 1) {
-        typeTiemout = setTimeout(type, speed);
-    } else {
-        // erasetimeout = setTimeout(eraseMessage, 9000);
-
-        clearTimeout(typeTiemout);
-    }
+    captionEl.innerHTML = caption_se;
+    eParagraph.innerHTML = caption_en;
 }
 
 function sendReport(report) {
