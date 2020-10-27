@@ -21,10 +21,14 @@ const challenges = [
     },
 ]
 
-let challengePos = 0;
+let challengePos = 3;
 const sendChallenge = 5000;
 const challengeTime = Date.now();
 const clicks = 0;
+
+function resetChallengePos() {
+    challengePos = 3;
+}
 
 function getChallenge() {
     challengePos = challengePos + 1 >= challenges.length ? 0 : challengePos + 1;

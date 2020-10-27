@@ -214,7 +214,7 @@ const onmessage = (message) => {
 
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
-    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 2000);
+    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 3500);
 
   }
 
@@ -336,6 +336,7 @@ function setElementsToIdle(isIdle) {
     eraseMessage();
     //CHANGE STATE OF APP
     myApp.isIdle(true);
+    resetChallengePos();
     //show iddle message
     document.getElementById('iddleMessage').classList.remove("invisible");
     //add blur to the background elements
