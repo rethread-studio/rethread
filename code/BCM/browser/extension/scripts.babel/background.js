@@ -71,7 +71,7 @@ chrome.webRequest.onBeforeRequest.addListener(
     if (
       event.initiator == null ||
       event.initiator.indexOf("chrome-extension") == 0 ||
-      event.url.indexOf("chrome-extension") == 0  ||
+      event.url.indexOf("chrome-extension") == 0 ||
       event.url.indexOf("127.0.0.1") != -1
     ) {
       return {
@@ -188,11 +188,14 @@ ga("set", "checkProtocolTask", null);
 
 var actionTimeout = null;
 var isInactive = true;
-inactive();
-broadcast({
-  event: "idle",
-  action: "inactive",
-});
+setTimeout(function () {
+  inactive();
+  isInactive = true;
+  broadcast({
+    event: "idle",
+    action: "inactive",
+  });
+}, 150);
 function action() {
   clearTimeout(actionTimeout);
   if (isInactive) {
