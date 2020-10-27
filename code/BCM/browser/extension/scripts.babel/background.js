@@ -191,7 +191,7 @@ var isInactive = true;
 inactive();
 broadcast({
   event: "idle",
-  action: "active",
+  action: "inactive",
 });
 function action() {
   clearTimeout(actionTimeout);
