@@ -28,7 +28,8 @@ function displayLegend() {
   var iframe = document.createElement("iframe");
   iframe.id = "pellowLegend";
   iframe.src = chrome.extension.getURL("legend.html");
-  document.body.appendChild(iframe);
+  var parent = document.body || document.documentElement;
+  parent.appendChild(iframe);
 
   var button = document.getElementById("pellowLegendButton");
   button.innerText = "close";
@@ -53,7 +54,8 @@ function displayHome() {
   var iframe = document.createElement("iframe");
   iframe.id = "pellowHome";
   iframe.src = chrome.extension.getURL("startPage.html");
-  document.documentElement.appendChild(iframe);
+  var parent = document.body || document.documentElement;
+  parent.appendChild(iframe);
 
   var button = document.getElementById("pellowHomeButton");
   button.innerText = "close";
