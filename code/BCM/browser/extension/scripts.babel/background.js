@@ -31,7 +31,12 @@ function sendCurrentUrl() {
   });
 }
 
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  action();
+});
+
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
+  action();
   lastTab = await sendCurrentUrl();
   if (bcm_config.reload) {
     chrome.tabs.reload(tabId);
@@ -53,6 +58,7 @@ chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
 // });
 
 chrome.tabs.onRemoved.addListener(function (tabId) {
+  action();
   broadcast({
     event: "tab_closed",
     tab_id: tabId,
@@ -60,6 +66,7 @@ chrome.tabs.onRemoved.addListener(function (tabId) {
 });
 
 chrome.windows.onRemoved.addListener(function (tabId) {
+  action();
   broadcast({
     event: "window_closed",
     tab_id: tabId,
