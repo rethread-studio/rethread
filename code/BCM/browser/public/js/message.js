@@ -17,8 +17,8 @@ const challenges = [
         en: "Find a website that activates as many dots as possible!"
     },
     {
-        se: "🎵 Hitta en webbplats med så mycket ljud som möjligt!",
-        en: "Find a website with as much sound as possible!"
+        se: "🎵 Hitta en sida som genererar så mycket ljud som möjligt i rummet!",
+        en: "Find a page that generates the most sound in the room"
     },
 
 ]
