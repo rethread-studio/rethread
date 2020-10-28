@@ -32,12 +32,16 @@ function sendCurrentUrl() {
 }
 
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  action();
+  if (tab.url.indexOf("chrome-extension") == -1) {
+    action();
+  }
 });
 
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
-  action();
   lastTab = await sendCurrentUrl();
+  if (lastTab.url.indexOf("chrome-extension") == -1) {
+    action();
+  }
   if (bcm_config.reload) {
     chrome.tabs.reload(tabId);
   }
