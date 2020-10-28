@@ -62,7 +62,6 @@ chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
 // });
 
 chrome.tabs.onRemoved.addListener(function (tabId) {
-  action();
   broadcast({
     event: "tab_closed",
     tab_id: tabId,
@@ -70,7 +69,6 @@ chrome.tabs.onRemoved.addListener(function (tabId) {
 });
 
 chrome.windows.onRemoved.addListener(function (tabId) {
-  action();
   broadcast({
     event: "window_closed",
     tab_id: tabId,
