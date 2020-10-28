@@ -214,7 +214,7 @@ const onmessage = (message) => {
 
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
-    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 3500);
+    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 5000);
 
   }
 
