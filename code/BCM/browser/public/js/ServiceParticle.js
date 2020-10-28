@@ -22,6 +22,8 @@ class AppViz {
         this.numPackages = 0;
         this.reportNumber = 0;
         this.idle = false;
+        this.numImages = 0;
+        this.numCountries = 0;
     }
 
     init() {
@@ -219,7 +221,7 @@ class AppViz {
                 }
 
             case 1:
-                const numImage = this.getImageNum()
+                const numImage = this.numImages;//this.getImageNum()
                 return {
                     en: `There are ${numImage} images in ${this.urlElement.getName()}`,
                     se: `Det finns ${numImage} bilder på sidan ${this.urlElement.getName()}.`
@@ -276,7 +278,7 @@ class AppViz {
             angle: s.anglePos
         }
         if (!this.packagesNames.includes(type)) this.packagesNames.push(type)
-
+        if (type == "image") this.numImages++;
 
         const newPackage = new PackageParticle(
             this.scene,
@@ -344,6 +346,8 @@ class AppViz {
     resetCounter() {
         this.numServices = 0;
         this.numPackages = 0;
+        this.numImages = 0;
+        this.numCountries = 0;
     }
 
     //remove all packages and all services

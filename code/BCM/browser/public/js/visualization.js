@@ -208,10 +208,8 @@ const onmessage = (message) => {
     myApp.resetParticles();
     if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
 
-
-
-
-
+    //REMOVE REPORT IF ACTIVE
+    eraseMessage();
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
     erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 5000);
