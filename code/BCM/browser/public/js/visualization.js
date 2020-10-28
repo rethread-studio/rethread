@@ -1,12 +1,12 @@
-import * as THREE from "https://unpkg.com/three@0.119.1/build/three.module.js";
+import * as THREE from "./three/build/three.module.js";
 import Map3DGeometry from "./Map3DGeometry.js";
-import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
-import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
-import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
-import { RenderPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/RenderPass.js";
+// import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
+import { EffectComposer } from "./three/examples/jsm/postprocessing/EffectComposer.js";
+// import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
+import { RenderPass } from "./three/examples/jsm/postprocessing/RenderPass.js";
 import { GlitchPass } from "./three/postprocessing/CustomGlitchPass.js";
-import { SMAAPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js";
-import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.0/dist/tween.esm.js";
+// import { SMAAPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js";
+// import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.0/dist/tween.esm.js";
 
 const positionPerService = new Map();
 const textPerService = new Map();
@@ -96,7 +96,7 @@ function locationDistance(a, b) {
   return Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2) + Math.pow((b.z - a.z), 2));
 }
 
-const easings = [TWEEN.Easing.Exponential.InOut, TWEEN.Easing.Sinusoidal.InOut, TWEEN.Easing.Circular.InOut, TWEEN.Easing.Linear.None];
+// const easings = [TWEEN.Easing.Exponential.InOut, TWEEN.Easing.Sinusoidal.InOut, TWEEN.Easing.Circular.InOut, TWEEN.Easing.Linear.None];
 
 let lightPulseSpeed = 30;
 let opacityBaseLevel = 0.3;
@@ -590,30 +590,30 @@ var effectController = {
 init();
 animate();
 
-function initGUI() {
-  var gui = new GUI();
+// function initGUI() {
+//   var gui = new GUI();
 
-  gui.add(effectController, "showDots").onChange(function (value) {
-    pointCloud.visible = value;
-  });
-  gui.add(effectController, "showLines").onChange(function (value) {
-    linesMesh.visible = value;
-  });
-  gui.add(effectController, "doRotation");
-  gui.add(effectController, "minDistance", 10, 300);
-  gui.add(effectController, "limitConnections");
-  gui.add(effectController, "numConnections", 0, 20, 1);
-  gui.add(effectController, "linesStayingProbability", 0.1, 0.99, 0.001);
-  gui.add(effectController, "bloomPassThreshold", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassStrength", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassRadius", 0.0, 2.0, 0.001);
-  gui
-    .add(effectController, "particleCount", 0, maxParticleCount, 1)
-    .onChange(function (value) {
-      particleCount = parseInt(value);
-      particles.setDrawRange(0, particleCount);
-    });
-}
+//   gui.add(effectController, "showDots").onChange(function (value) {
+//     pointCloud.visible = value;
+//   });
+//   gui.add(effectController, "showLines").onChange(function (value) {
+//     linesMesh.visible = value;
+//   });
+//   gui.add(effectController, "doRotation");
+//   gui.add(effectController, "minDistance", 10, 300);
+//   gui.add(effectController, "limitConnections");
+//   gui.add(effectController, "numConnections", 0, 20, 1);
+//   gui.add(effectController, "linesStayingProbability", 0.1, 0.99, 0.001);
+//   gui.add(effectController, "bloomPassThreshold", 0.0, 2.0, 0.001);
+//   gui.add(effectController, "bloomPassStrength", 0.0, 2.0, 0.001);
+//   gui.add(effectController, "bloomPassRadius", 0.0, 2.0, 0.001);
+//   gui
+//     .add(effectController, "particleCount", 0, maxParticleCount, 1)
+//     .onChange(function (value) {
+//       particleCount = parseInt(value);
+//       particles.setDrawRange(0, particleCount);
+//     });
+// }
 
 function init() {
   // initGUI();
@@ -817,11 +817,11 @@ function init() {
   // composer.addPass(bloomPass);
 
   // Anti-aliasing while using EffectComposer requires a dedicated anti-aliasing pass
-  smaaPass = new SMAAPass(
-    window.innerWidth * renderer.getPixelRatio(),
-    1220 * renderer.getPixelRatio()
-  );
-  composer.addPass(smaaPass);
+  // smaaPass = new SMAAPass(
+  //   window.innerWidth * renderer.getPixelRatio(),
+  //   1220 * renderer.getPixelRatio()
+  // );
+  // composer.addPass(smaaPass);
 
   //
   // stats = new Stats();
@@ -888,17 +888,17 @@ function rotateGlobe() {
     z: globeRotation.z,
   };
 
-  let easing = easings[~~(Math.random() * easings.length)];
+  // let easing = easings[~~(Math.random() * easings.length)];
 
-  var tween = new TWEEN.Tween(from)
-    .to(newRotation, rotationDur)
-    .easing(easing)
-    .onUpdate(function (position) {
-      globeRotation.set(position.x, position.y, position.z);
-    })
-    .onComplete(function () {
-    })
-    .start();
+  // var tween = new TWEEN.Tween(from)
+  //   .to(newRotation, rotationDur)
+  //   .easing(easing)
+  //   .onUpdate(function (position) {
+  //     globeRotation.set(position.x, position.y, position.z);
+  //   })
+  //   .onComplete(function () {
+  //   })
+  //   .start();
 
   let nextRotation = Math.random() * rotationDur * 0.5 + rotationDur + 10;
   setTimeout(rotateGlobe, nextRotation);
@@ -1093,7 +1093,7 @@ function animate() {
     // }
   }
 
-  TWEEN.update();
+  // TWEEN.update();
 
   // Update camera
   // camera.position.set(cameraPosition.x + cameraOffset.x, cameraPosition.y + cameraOffset.y, cameraPosition.z + cameraOffset.z);
