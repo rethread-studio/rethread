@@ -791,9 +791,9 @@ function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
 
   if (options.installation) {
-    renderer.setSize(window.innerWidth / 2, 1220, false);
+    renderer.setSize(window.innerWidth / 2, 1220, true);
   } else {
-    renderer.setSize(window.innerWidth / 2, 1220, false);
+    renderer.setSize(window.innerWidth / 2, 1220, true);
 
   }
 
