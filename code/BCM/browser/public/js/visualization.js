@@ -354,7 +354,7 @@ function setElementsToIdle(isIdle) {
     document.getElementById('container-particles').classList.remove('blur');
     document.getElementById('container').querySelector("canvas").classList.remove('blur-m');
     //remove repetitive random message
-    // if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
+    if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
   }
 }
 
