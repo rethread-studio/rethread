@@ -215,6 +215,13 @@ class AppViz {
 
         switch (this.reportNumber) {
             case 0:
+
+                if (this.numServices == 0) {
+                    return {
+                        en: ``,
+                        se: ``
+                    }
+                }
                 return {
                     se: `Du besöker ${this.urlElement.getName()}, men din webbläsare kommunicerar med ${this.numServices} andra webbplatser.`,
                     en: `You visit ${this.urlElement.getName()}, but your browser communicates with ${this.numServices} other machines`
@@ -222,20 +229,37 @@ class AppViz {
 
             case 1:
                 const numImage = this.numImages;//this.getImageNum()
+                if (numImage == 0) {
+                    return {
+                        en: ``,
+                        se: ``
+                    }
+                }
                 return {
                     en: `There are ${numImage} images in ${this.urlElement.getName()}`,
                     se: `Det finns ${numImage} bilder på sidan ${this.urlElement.getName()}.`
                 };
 
             case 2:
-
                 const numCountries = this.getNumCountries();
+                if (numCountries == 0) {
+                    return {
+                        en: ``,
+                        se: ``
+                    }
+                }
                 return {
                     en: `Your browser communicated with ${numCountries} countries for you to access ${this.urlElement.getName()}`,
                     se: `Din webbläsare kommunicerade med ${numCountries} länder för att hämta allt material på ${this.urlElement.getName()}.`
                 };
 
             default:
+                if (this.numServices == 0) {
+                    return {
+                        en: ``,
+                        se: ``
+                    }
+                }
                 return {
                     en: `You connected to ${this.urlElement.getName()} which used ${this.numServices} services through ${this.numPackages} data packages.`,
                     se: `Du anslöt till ${this.urlElement.getName()} som använde ${this.numServices} olika tjänster genom ${this.numPackages} datapaket.`,
