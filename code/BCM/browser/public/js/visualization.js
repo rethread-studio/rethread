@@ -343,7 +343,7 @@ function setElementsToIdle(isIdle) {
     document.getElementById('container').querySelector("canvas").classList.add('blur-m');
     //add repetitive random message
     //onmessage
-    packageInterval = setInterval(setRandomMessage, 500);
+    // packageInterval = setInterval(setRandomMessage, 500);
   } else {
     //RETORE TO NORMAL
     myApp.isIdle(false);
@@ -354,7 +354,7 @@ function setElementsToIdle(isIdle) {
     document.getElementById('container-particles').classList.remove('blur');
     document.getElementById('container').querySelector("canvas").classList.remove('blur-m');
     //remove repetitive random message
-    if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
+    // if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
   }
 }
 
