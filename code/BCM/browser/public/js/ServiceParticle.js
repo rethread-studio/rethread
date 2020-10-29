@@ -53,7 +53,7 @@ class AppViz {
             this.renderer.setSize(window.innerWidth / 2, 1220, false);
         } else {
 
-            this.renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+            this.renderer.setSize(window.innerWidth / 2, 1220, false);
         }
 
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);

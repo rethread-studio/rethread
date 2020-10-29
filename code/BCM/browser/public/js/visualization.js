@@ -343,7 +343,7 @@ function setElementsToIdle(isIdle) {
     document.getElementById('container').querySelector("canvas").classList.add('blur-m');
     //add repetitive random message
     //onmessage
-    packageInterval = setInterval(setRandomMessage, 500);
+    // packageInterval = setInterval(setRandomMessage, 500); 
   } else {
     //RETORE TO NORMAL
     myApp.isIdle(false);
@@ -793,7 +793,8 @@ function init() {
   if (options.installation) {
     renderer.setSize(window.innerWidth / 2, 1220, false);
   } else {
-    renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+    renderer.setSize(window.innerWidth / 2, 1220, false);
+
   }
 
   renderer.outputEncoding = THREE.sRGBEncoding;
