@@ -794,6 +794,7 @@ function init() {
     renderer.setSize(window.innerWidth / 2, 1220, false);
   } else {
     renderer.setSize(window.innerWidth / 2, 1220, false);
+
   }
 
   renderer.outputEncoding = THREE.sRGBEncoding;
