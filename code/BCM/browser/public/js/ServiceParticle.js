@@ -73,7 +73,7 @@ class AppViz {
             10000
         );
 
-        this.camera.position.z = -10;
+        this.camera.position.z = -7;
         this.camera.position.y = 0;
         this.camera.position.x = 0;
         // this.camera.rotateX(-0.4);
