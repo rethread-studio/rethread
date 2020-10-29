@@ -343,7 +343,7 @@ function setElementsToIdle(isIdle) {
     document.getElementById('container').querySelector("canvas").classList.add('blur-m');
     //add repetitive random message
     //onmessage
-    packageInterval = setInterval(setRandomMessage, 500);
+    // packageInterval = setInterval(setRandomMessage, 500); 
   } else {
     //RETORE TO NORMAL
     myApp.isIdle(false);
