@@ -50,11 +50,12 @@ class AppViz {
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
         if (this.options.installation) {
-            this.renderer.setSize(window.innerWidth / 2, 1220, false);
+            this.renderer.setSize(window.innerWidth / 2, 1220, true);
         } else {
 
-            this.renderer.setSize(window.innerWidth / 2, 1220, false);
+            this.renderer.setSize(window.innerWidth / 2, 1220, true);
         }
+
 
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.container.append(this.renderer.domElement);
