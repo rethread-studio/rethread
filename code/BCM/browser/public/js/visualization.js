@@ -242,7 +242,7 @@ const onmessage = (message) => {
     if (packet.services.length === 0) {
       packet.services.push(packet.hostname);
     }
-    let location = packet.location != null && packet.location != undefined ? countryList.name(packet.location.country) : "";
+    let location = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
 
 
     for (let c of countries) {
