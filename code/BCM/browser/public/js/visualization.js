@@ -626,7 +626,7 @@ function init() {
     1,
     4000
   );
-  camera.position.z = 100;
+  camera.position.z = 65;
 
   // var controls = new OrbitControls(camera, container);
   // controls.minDistance = 1000;
