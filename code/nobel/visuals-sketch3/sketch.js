@@ -4,50 +4,7 @@
 // Performance - Disables FES
 // p5.disableFriendlyErrors = true;
 
-let particles = new Map();
-let particlePosX = 0;
-let particlePosY = 0;
-let positionSeed = Math.random() * 748236.0;
-positionSeed = 1;
-var clearScreen = false;
-let positionMode = 0; // 0 = linear position, 1 = sine curved position
-let averageLen = 0;
-let step = 1;
-let pixelSize = 1;
 
-function addParticle(len) {
-  averageLen = averageLen* 0.9 + len*0.1;
-  if(len > 1) {
-    let posString = "" + particlePosX + "," + particlePosY;
-    particles.set(posString, {
-      x: particlePosX,
-      y: particlePosY,
-      hue: 1, //Math.pow( 1.0 - (len / 20000.0), 5.0) * 100,
-      lightness: (Math.pow( 1.0 - (averageLen / 20000.0), 3.0)) * 100,
-    })
-    particlePosX += step;
-    if(particlePosX >= canvasX) {
-      particlePosX = 0;
-      particlePosY += step;
-    }
-    if(particlePosY >= canvasY) {
-      particlePosY = 0;
-      particles.clear();
-      positionSeed = Math.random() * 748236.0;
-      positionMode = Math.floor(Math.random() * 2);
-      positionMode = (positionMode + 1) % 2;
-      clearScreen = true;
-      console.log("Reset");
-    }
-  }
-  
-  // if(particles.size > 10000) {
-  //   particlePosY = 0;
-  //   particlePosX = 0;
-  //   particles.clear();
-  //   // positionSeed = Math.random() * 748236.0;
-  // }
-}
 
 let num = 0;
 new WebSocketClient().onmessage = (data) => {
@@ -125,6 +82,46 @@ let lastCountry = "";
 
 let myFont;
 
+let particles = new Map();
+let particlePosX = 0;
+let particlePosY = canvasY-1;
+let positionSeed = Math.random() * 748236.0;
+positionSeed = 1;
+var clearScreen = false;
+let positionMode = 0; // 0 = linear position, 1 = sine curved position
+let averageLen = 0;
+let step = 2;
+let pixelSize = 1;
+
+function addParticle(len) {
+  averageLen = averageLen* 0.9 + len*0.1;
+  if(len > 1) {
+    let posString = "" + particlePosX + "," + particlePosY;
+    particles.set(posString, {
+      x: particlePosX,
+      y: particlePosY,
+      hue: 1, //Math.pow( 1.0 - (len / 20000.0), 5.0) * 100,
+      lightness: (Math.pow( 1.0 - (averageLen / 20000.0), 3.0)) * 100,
+    })
+    particlePosX += step;
+    if(particlePosX >= canvasX) {
+      particlePosX = 0;
+      particlePosY -= step;
+    }
+    if(particlePosY < 0) {
+      particlePosY = canvasY-1;
+      particles.clear();
+      positionSeed = Math.random() * 748236.0;
+      positionMode = Math.floor(Math.random() * 2);
+      positionMode = (positionMode + 1) % 2;
+      clearScreen = true;
+      console.log("Reset");
+    }
+  }
+}
+
+let pg, pg2;
+
 // Preload Function
 function preload() {
   myFont = loadFont('assets/fonts/InconsolataSemiExpanded-Light.ttf');
@@ -159,6 +156,11 @@ function setup() {
     console.log("center: " + ((center/height)-0.5));
   }
 
+  pg = createGraphics(canvasX, canvasY);
+  pg2 = createGraphics(canvasX, canvasY);
+  pg.clear();
+  pg2.clear();
+
   background("#000000");
 
   textFont('sans');
@@ -176,19 +178,25 @@ function setup() {
 function draw() {
   // Clear if needed
   // clear();
+  background("rgba(0,0,0,1.0)");
 
   // Set canvas background
   if(clearScreen) {
-    background("rgba(0,0,0,1.0)");
+    pg.clear();
+    pg.background("rgba(0,0,0,1.0)");
+    pg2.clear();
+    pg2.background("rgba(0,0,0,1.0)");
     clearScreen = false;
   }
   
 
-  colorMode(HSL, 100);
-  fill(30, 60, 50, 100);
-  noStroke();
+  pg.colorMode(HSL, 100);
+  pg.noStroke();
+  pg2.colorMode(HSL, 100);
+  pg2.noStroke();
   for (let [key, particle] of particles) {
-    fill(particle.hue, 60, particle.lightness, 100);
+    pg.fill(particle.hue, 60, particle.lightness, 100);
+    pg2.fill(particle.hue, 60, particle.lightness, 100);
     let pixel;
     if(positionMode == 0) {
       pixel = ((particle.x + particle.y * canvasX) * positionSeed) % numPixels;
@@ -198,13 +206,24 @@ function draw() {
     // console.log("pixel: " + pixel)
     let y = pixel / canvasX;
     let x = pixel % canvasX;
-    rect(x, y, pixelSize, pixelSize);
+    pg.rect(x, y, pixelSize, pixelSize);
+    pg2.rect(x, canvasY-1-y, pixelSize, pixelSize);
   }
 
   particles.clear();
 
+  if(positionMode == 0 && positionSeed == 1) {
+    image(pg, 0, -particlePosY + canvasY/2, canvasX, canvasY);
+    image(pg2, 0, particlePosY - canvasY/2, canvasX, canvasY);
+  } else {
+    image(pg, 0, 0, canvasX, canvasY);
+  }
+  
+  // image(pg2, 0, particlePosY - canvasY/2, canvasX, canvasY);
+
   // Draw the windows
   fill(50, 100);
+  noStroke();
   for (win of windows) {
     rect(win.x, win.y, win.w, win.h);
   }
