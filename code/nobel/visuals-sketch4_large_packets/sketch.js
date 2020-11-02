@@ -168,7 +168,7 @@ function draw() {
     clearScreen = false;
   }
 
-  background("rgba(0,0,0,0.5)");
+  background("rgba(0,0,0,0.0)");
   
 
   colorMode(HSL, 100);

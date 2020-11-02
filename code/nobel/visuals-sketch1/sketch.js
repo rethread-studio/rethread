@@ -20,9 +20,11 @@ new WebSocketClient().onmessage = (data) => {
   && internalData.local_location.country != undefined) {
     lastCountry = internalData.local_location.country;
   }
+
+  if(internalData.len > 100 && particles.length < 1000) {
+    addParticle(internalData.len);
+  }
   
-    
-  addParticle(internalData.len);
   num++;
 };
 ///////////////////////// GUI Element Global Variables///////////////////////////////////////
@@ -198,15 +200,15 @@ function draw() {
     noStroke();
     fill(p.color);
     ellipse(p.pos.x, p.pos.y, p.size, p.size);
-    p.vel = createVector(centerWindow.center.x, centerWindow.center.y)
-      .sub(p.pos)
-      .normalize()
-      .mult(0.8);
+    // p.vel = createVector(centerWindow.center.x, centerWindow.center.y)
+    //   .sub(p.pos)
+    //   .normalize()
+    //   .mult(0.8);
     p.vel = createVector(0, 1);
     let localVel = p.vel.copy().add(getFlowfieldForce(p.pos, flowfield));
-    for (w of windows) {
-      localVel.add(windowForce(w, p.pos));
-    }
+    // for (w of windows) {
+    //   localVel.add(windowForce(w, p.pos));
+    // }
     if(frameCount % 10 == 0) {
       p.trails.unshift(createVector(p.pos.x, p.pos.y)) // insert position at the beginning of the array
     }

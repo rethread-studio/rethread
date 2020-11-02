@@ -90,7 +90,7 @@ positionSeed = 1;
 var clearScreen = false;
 let positionMode = 0; // 0 = linear position, 1 = sine curved position
 let averageLen = 0;
-let step = 2;
+let step = 1;
 let pixelSize = 1;
 
 function addParticle(len) {
