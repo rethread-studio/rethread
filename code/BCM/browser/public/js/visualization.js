@@ -1,12 +1,12 @@
-import * as THREE from "https://unpkg.com/three@0.119.1/build/three.module.js";
+import * as THREE from "./three/build/three.module.js";
 import Map3DGeometry from "./Map3DGeometry.js";
-import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
-import { EffectComposer } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/EffectComposer.js";
-import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
-import { RenderPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/RenderPass.js";
+// import { GUI } from "https://unpkg.com/three@0.119.1/examples/jsm/libs/dat.gui.module.js";
+import { EffectComposer } from "./three/examples/jsm/postprocessing/EffectComposer.js";
+// import { OrbitControls } from "https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js";
+import { RenderPass } from "./three/examples/jsm/postprocessing/RenderPass.js";
 import { GlitchPass } from "./three/postprocessing/CustomGlitchPass.js";
-import { SMAAPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js";
-import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.0/dist/tween.esm.js";
+// import { SMAAPass } from "https://unpkg.com/three@0.119.1/examples/jsm/postprocessing/SMAAPass.js";
+// import TWEEN from "https://unpkg.com/@tweenjs/tween.js@18.6.0/dist/tween.esm.js";
 
 const positionPerService = new Map();
 const textPerService = new Map();
@@ -96,7 +96,7 @@ function locationDistance(a, b) {
   return Math.sqrt(Math.pow((b.x - a.x), 2) + Math.pow((b.y - a.y), 2) + Math.pow((b.z - a.z), 2));
 }
 
-const easings = [TWEEN.Easing.Exponential.InOut, TWEEN.Easing.Sinusoidal.InOut, TWEEN.Easing.Circular.InOut, TWEEN.Easing.Linear.None];
+// const easings = [TWEEN.Easing.Exponential.InOut, TWEEN.Easing.Sinusoidal.InOut, TWEEN.Easing.Circular.InOut, TWEEN.Easing.Linear.None];
 
 let lightPulseSpeed = 30;
 let opacityBaseLevel = 0.3;
@@ -190,6 +190,13 @@ const onmessage = (message) => {
       mesh.userData.scale = 0;
       mesh.userData.scaleFollower = 0;
     }
+
+    if (json.current_tab.url.indexOf("chrome-extension") == 0) {
+      return;
+    }
+    // disable idle when a new request arrives
+    window.idle = false;
+    setElementsToIdle(false);
     let url = new URL(json.current_tab.url);
 
     if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
@@ -201,13 +208,11 @@ const onmessage = (message) => {
     myApp.resetParticles();
     if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
 
-
-
-
-
+    //REMOVE REPORT IF ACTIVE
+    eraseMessage();
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
-    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 2000);
+    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 5000);
 
   }
 
@@ -237,7 +242,7 @@ const onmessage = (message) => {
     if (packet.services.length === 0) {
       packet.services.push(packet.hostname);
     }
-    let location = packet.location != null && packet.location != undefined ? countryList.name(packet.location.country) : "";
+    let location = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
 
 
     for (let c of countries) {
@@ -329,6 +334,7 @@ function setElementsToIdle(isIdle) {
     eraseMessage();
     //CHANGE STATE OF APP
     myApp.isIdle(true);
+    resetChallengePos();
     //show iddle message
     document.getElementById('iddleMessage').classList.remove("invisible");
     //add blur to the background elements
@@ -337,7 +343,7 @@ function setElementsToIdle(isIdle) {
     document.getElementById('container').querySelector("canvas").classList.add('blur-m');
     //add repetitive random message
     //onmessage
-    packageInterval = setInterval(setRandomMessage, 500);
+    // packageInterval = setInterval(setRandomMessage, 500); 
   } else {
     //RETORE TO NORMAL
     myApp.isIdle(false);
@@ -348,7 +354,7 @@ function setElementsToIdle(isIdle) {
     document.getElementById('container-particles').classList.remove('blur');
     document.getElementById('container').querySelector("canvas").classList.remove('blur-m');
     //remove repetitive random message
-    if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
+    // if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
   }
 }
 
@@ -584,30 +590,30 @@ var effectController = {
 init();
 animate();
 
-function initGUI() {
-  var gui = new GUI();
+// function initGUI() {
+//   var gui = new GUI();
 
-  gui.add(effectController, "showDots").onChange(function (value) {
-    pointCloud.visible = value;
-  });
-  gui.add(effectController, "showLines").onChange(function (value) {
-    linesMesh.visible = value;
-  });
-  gui.add(effectController, "doRotation");
-  gui.add(effectController, "minDistance", 10, 300);
-  gui.add(effectController, "limitConnections");
-  gui.add(effectController, "numConnections", 0, 20, 1);
-  gui.add(effectController, "linesStayingProbability", 0.1, 0.99, 0.001);
-  gui.add(effectController, "bloomPassThreshold", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassStrength", 0.0, 2.0, 0.001);
-  gui.add(effectController, "bloomPassRadius", 0.0, 2.0, 0.001);
-  gui
-    .add(effectController, "particleCount", 0, maxParticleCount, 1)
-    .onChange(function (value) {
-      particleCount = parseInt(value);
-      particles.setDrawRange(0, particleCount);
-    });
-}
+//   gui.add(effectController, "showDots").onChange(function (value) {
+//     pointCloud.visible = value;
+//   });
+//   gui.add(effectController, "showLines").onChange(function (value) {
+//     linesMesh.visible = value;
+//   });
+//   gui.add(effectController, "doRotation");
+//   gui.add(effectController, "minDistance", 10, 300);
+//   gui.add(effectController, "limitConnections");
+//   gui.add(effectController, "numConnections", 0, 20, 1);
+//   gui.add(effectController, "linesStayingProbability", 0.1, 0.99, 0.001);
+//   gui.add(effectController, "bloomPassThreshold", 0.0, 2.0, 0.001);
+//   gui.add(effectController, "bloomPassStrength", 0.0, 2.0, 0.001);
+//   gui.add(effectController, "bloomPassRadius", 0.0, 2.0, 0.001);
+//   gui
+//     .add(effectController, "particleCount", 0, maxParticleCount, 1)
+//     .onChange(function (value) {
+//       particleCount = parseInt(value);
+//       particles.setDrawRange(0, particleCount);
+//     });
+// }
 
 function init() {
   // initGUI();
@@ -620,7 +626,7 @@ function init() {
     1,
     4000
   );
-  camera.position.z = 100;
+  camera.position.z = 65;
 
   // var controls = new OrbitControls(camera, container);
   // controls.minDistance = 1000;
@@ -785,9 +791,10 @@ function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
 
   if (options.installation) {
-    renderer.setSize(window.innerWidth / 2, 1220, false);
+    renderer.setSize(window.innerWidth / 2, 1220, true);
   } else {
-    renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+    renderer.setSize(window.innerWidth / 2, 1220, true);
+
   }
 
   renderer.outputEncoding = THREE.sRGBEncoding;
@@ -811,11 +818,11 @@ function init() {
   // composer.addPass(bloomPass);
 
   // Anti-aliasing while using EffectComposer requires a dedicated anti-aliasing pass
-  smaaPass = new SMAAPass(
-    window.innerWidth * renderer.getPixelRatio(),
-    1220 * renderer.getPixelRatio()
-  );
-  composer.addPass(smaaPass);
+  // smaaPass = new SMAAPass(
+  //   window.innerWidth * renderer.getPixelRatio(),
+  //   1220 * renderer.getPixelRatio()
+  // );
+  // composer.addPass(smaaPass);
 
   //
   // stats = new Stats();
@@ -882,17 +889,17 @@ function rotateGlobe() {
     z: globeRotation.z,
   };
 
-  let easing = easings[~~(Math.random() * easings.length)];
+  // let easing = easings[~~(Math.random() * easings.length)];
 
-  var tween = new TWEEN.Tween(from)
-    .to(newRotation, rotationDur)
-    .easing(easing)
-    .onUpdate(function (position) {
-      globeRotation.set(position.x, position.y, position.z);
-    })
-    .onComplete(function () {
-    })
-    .start();
+  // var tween = new TWEEN.Tween(from)
+  //   .to(newRotation, rotationDur)
+  //   .easing(easing)
+  //   .onUpdate(function (position) {
+  //     globeRotation.set(position.x, position.y, position.z);
+  //   })
+  //   .onComplete(function () {
+  //   })
+  //   .start();
 
   let nextRotation = Math.random() * rotationDur * 0.5 + rotationDur + 10;
   setTimeout(rotateGlobe, nextRotation);
@@ -1087,7 +1094,7 @@ function animate() {
     // }
   }
 
-  TWEEN.update();
+  // TWEEN.update();
 
   // Update camera
   // camera.position.set(cameraPosition.x + cameraOffset.x, cameraPosition.y + cameraOffset.y, cameraPosition.z + cameraOffset.z);

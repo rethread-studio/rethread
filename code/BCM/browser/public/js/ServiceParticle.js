@@ -22,6 +22,8 @@ class AppViz {
         this.numPackages = 0;
         this.reportNumber = 0;
         this.idle = false;
+        this.numImages = 0;
+        this.numCountries = 0;
     }
 
     init() {
@@ -48,11 +50,12 @@ class AppViz {
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
         if (this.options.installation) {
-            this.renderer.setSize(window.innerWidth / 2, 1220, false);
+            this.renderer.setSize(window.innerWidth / 2, 1220, true);
         } else {
 
-            this.renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
+            this.renderer.setSize(window.innerWidth / 2, 1220, true);
         }
+
 
         // this.composer = new POSTPROCESSING.EffectComposer(this.renderer);
         this.container.append(this.renderer.domElement);
@@ -71,7 +74,7 @@ class AppViz {
             10000
         );
 
-        this.camera.position.z = -10;
+        this.camera.position.z = -7;
         this.camera.position.y = 0;
         this.camera.position.x = 0;
         // this.camera.rotateX(-0.4);
@@ -213,27 +216,51 @@ class AppViz {
 
         switch (this.reportNumber) {
             case 0:
+
+                if (this.numServices == 0) {
+                    return {
+                        en: ``,
+                        se: ``
+                    }
+                }
                 return {
                     se: `Du besöker ${this.urlElement.getName()}, men din webbläsare kommunicerar med ${this.numServices} andra webbplatser.`,
                     en: `You visit ${this.urlElement.getName()}, but your browser communicates with ${this.numServices} other machines`
                 }
 
             case 1:
-                const numImage = this.getImageNum()
+                const numImage = this.numImages;//this.getImageNum()
+                if (numImage == 0) {
+                    return {
+                        en: ``,
+                        se: ``
+                    }
+                }
                 return {
                     en: `There are ${numImage} images in ${this.urlElement.getName()}`,
                     se: `Det finns ${numImage} bilder på sidan ${this.urlElement.getName()}.`
                 };
 
             case 2:
-
                 const numCountries = this.getNumCountries();
+                if (numCountries == 0) {
+                    return {
+                        en: ``,
+                        se: ``
+                    }
+                }
                 return {
                     en: `Your browser communicated with ${numCountries} countries for you to access ${this.urlElement.getName()}`,
                     se: `Din webbläsare kommunicerade med ${numCountries} länder för att hämta allt material på ${this.urlElement.getName()}.`
                 };
 
             default:
+                if (this.numServices == 0) {
+                    return {
+                        en: ``,
+                        se: ``
+                    }
+                }
                 return {
                     en: `You connected to ${this.urlElement.getName()} which used ${this.numServices} services through ${this.numPackages} data packages.`,
                     se: `Du anslöt till ${this.urlElement.getName()} som använde ${this.numServices} olika tjänster genom ${this.numPackages} datapaket.`,
@@ -276,7 +303,7 @@ class AppViz {
             angle: s.anglePos
         }
         if (!this.packagesNames.includes(type)) this.packagesNames.push(type)
-
+        if (type == "image") this.numImages++;
 
         const newPackage = new PackageParticle(
             this.scene,
@@ -332,20 +359,20 @@ class AppViz {
             this.resetRadius();
         }
 
-        if (this.services.length > 9) {
-
-            document.body.classList.remove("bgBlue");
-            document.body.classList.add('bgRed');
+        if (this.numPackages > 70) {
+            document.body.classList.remove("blue");
+            document.body.classList.add('red');
         } else {
-
-            document.body.classList.remove("bgRed");
-            document.body.classList.add('bgBlue');
+            document.body.classList.remove("red");
+            document.body.classList.add('blue');
         }
     }
 
     resetCounter() {
         this.numServices = 0;
         this.numPackages = 0;
+        this.numImages = 0;
+        this.numCountries = 0;
     }
 
     //remove all packages and all services

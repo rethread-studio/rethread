@@ -11,7 +11,7 @@
 //   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
-import * as THREE from "https://unpkg.com/three@0.119.1/build/three.module.js";
+import * as THREE from "./three/build/three.module.js";
 
 function Map3DGeometry(data, innerRadius) {
   if (

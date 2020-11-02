@@ -1,6 +1,7 @@
 function action() {
   chrome.runtime.sendMessage({ type: "action" }, function () {});
 }
+window.addEventListener("DOMContentLoaded", action);
 window.addEventListener("load", action);
 window.document.addEventListener("load", action);
 window.addEventListener("click", action);
