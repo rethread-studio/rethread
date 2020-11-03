@@ -31,8 +31,17 @@ function sendCurrentUrl() {
   });
 }
 
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+  if (tab.url.indexOf("chrome-extension") == -1) {
+    action();
+  }
+});
+
 chrome.tabs.onSelectionChanged.addListener(async (tabId) => {
   lastTab = await sendCurrentUrl();
+  if (lastTab.url.indexOf("chrome-extension") == -1) {
+    action();
+  }
   if (bcm_config.reload) {
     chrome.tabs.reload(tabId);
   }
@@ -71,7 +80,7 @@ chrome.webRequest.onBeforeRequest.addListener(
     if (
       event.initiator == null ||
       event.initiator.indexOf("chrome-extension") == 0 ||
-      event.url.indexOf("chrome-extension") == 0  ||
+      event.url.indexOf("chrome-extension") == 0 ||
       event.url.indexOf("127.0.0.1") != -1
     ) {
       return {
@@ -188,11 +197,14 @@ ga("set", "checkProtocolTask", null);
 
 var actionTimeout = null;
 var isInactive = true;
-inactive();
-broadcast({
-  event: "idle",
-  action: "active",
-});
+setTimeout(function () {
+  inactive();
+  isInactive = true;
+  broadcast({
+    event: "idle",
+    action: "inactive",
+  });
+}, 150);
 function action() {
   clearTimeout(actionTimeout);
   if (isInactive) {

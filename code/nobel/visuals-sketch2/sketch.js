@@ -42,7 +42,9 @@ new WebSocketClient().onmessage = (data) => {
   }
   
     
-  addParticle(internalData.len);
+  if(internalData.len > 100 && particles.length < 1000) {
+    addParticle(internalData.len);
+  }
   num++;
 };
 ///////////////////////// GUI Element Global Variables///////////////////////////////////////
@@ -175,6 +177,8 @@ function backgroundFragShader() {
 
       vec3 col = vec3(1.0, 0.3, 0.2) * pct;
 
+      // col = vec3(st.x, st.y, 0.);
+
       gl_FragColor = vec4(col, 1.0);
   }
     `;
@@ -249,14 +253,15 @@ function draw() {
   // Set canvas background
   // background("rgba(0,0,0,0.1)");
 
-  let continentActivityCoeff = 0.95;
+  let continentActivityCoeff = 0.85;
   continentActivity.eurasia = Math.min(continentActivity.eurasia * continentActivityCoeff, 200);
   continentActivity.africa = Math.min(continentActivity.africa * continentActivityCoeff, 200);
   continentActivity.americas = Math.min(continentActivity.americas * continentActivityCoeff, 200);
   continentActivity.oceania = Math.min(continentActivity.oceania * continentActivityCoeff, 200);
 
   // Draw shader
-  backgroundShader.setUniform("iResolution", [width, height]);
+  let density = displayDensity();
+  backgroundShader.setUniform("iResolution", [width*density, height*density]);
   backgroundShader.setUniform("iTime", millis()/1000.0);
   backgroundShader.setUniform("eurasia", continentActivity.eurasia);
   backgroundShader.setUniform("africa", continentActivity.africa);
@@ -340,9 +345,9 @@ function draw() {
       .mult(0.8);
     p.vel = createVector(0, 1);
     let localVel = p.vel.copy().add(getFlowfieldForce(p.pos, flowfield));
-    for (w of windows) {
-      localVel.add(windowForce(w, p.pos));
-    }
+    // for (w of windows) {
+    //   localVel.add(windowForce(w, p.pos));
+    // }
     if(frameCount % 10 == 0) {
       p.trails.unshift(createVector(p.pos.x, p.pos.y)) // insert position at the beginning of the array
     }
