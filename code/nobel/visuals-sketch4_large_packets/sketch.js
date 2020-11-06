@@ -20,14 +20,15 @@ let pixelSize = 1;
 let droplets = [];
 
 function addDroplet(len, baseHue, out) {
+  let hue = baseHue + Math.min(len/50000, 10);
   droplets.push({
     x: Math.random() * canvasX,
     y: Math.random() * canvasY,
     size: 2,
     maxSize: Math.min(len/2000, 200.0),
-    saturation: Math.random() * 50 + 40,
-    lightness: 50,
-    hue: baseHue + Math.min(len/50000, 10),
+    saturation: Math.random() * 50 + 40 + hue,
+    lightness: 50 + (hue * 2),
+    hue: hue,
     out: out
   })
   // if(len < 50000) {
@@ -129,7 +130,7 @@ function switchPacketDirection() {
     if(doOutPackets) {
       doOutPackets = false;
       displayText = "INCOMING";
-      baseHueColor = 50;
+      baseHueColor = 0;
     } else {
       doOutPackets = true;
       displayText = "OUTGOING";
@@ -207,7 +208,7 @@ function draw() {
   }
 
   // background("rgba(1.0,1.0,1.0,0.00)");
-  background(0, 0, 100, 3);
+  background(Math.random() * 15, 100, 80, 4);
   
 
   colorMode(HSL, 100);
@@ -221,7 +222,7 @@ function draw() {
     }
     circle(drop.x, drop.y, dropSize);
     drop.size += 1.0;
-    drop.lightness *= 0.98;
+    drop.lightness -= (10 -drop.hue) * 0.1;
     let size = drop.size;
     // while(size > 30) {
     //   size -= 30;
