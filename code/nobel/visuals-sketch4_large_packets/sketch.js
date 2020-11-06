@@ -4,6 +4,8 @@
 // Performance - Disables FES
 // p5.disableFriendlyErrors = true;
 
+/// There is stuttering some light stuttering every few seconds, probably because of GC
+
 let particles = new Map();
 let particlePosX = 0;
 let particlePosY = 0;
@@ -17,19 +19,20 @@ let pixelSize = 1;
 
 let droplets = [];
 
-function addDroplet(len) {
+function addDroplet(len, baseHue, out) {
   droplets.push({
     x: Math.random() * canvasX,
     y: Math.random() * canvasY,
     size: 2,
-    maxSize: len/2000,
+    maxSize: Math.min(len/2000, 200.0),
     saturation: Math.random() * 50 + 40,
     lightness: 50,
-    hue: 50 + Math.min(len/50000, 10),
+    hue: baseHue + Math.min(len/50000, 10),
+    out: out
   })
-  if(len < 50000) {
-    droplets[droplets.length-1].hue = 5;
-  }
+  // if(len < 50000) {
+  //   droplets[droplets.length-1].hue = 5;
+  // }
 }
 
 let num = 0;
@@ -49,8 +52,8 @@ new WebSocketClient().onmessage = (data) => {
     lastCountry = internalData.local_location.country;
     continent = internalData.local_location.continent;
   }
-  if(internalData.len > 2) {
-    addDroplet(internalData.len);
+  if(internalData.len > 0 && internalData.out == doOutPackets) {
+    addDroplet(internalData.len, baseHueColor, internalData.out);
   }
   
   num++;
@@ -105,10 +108,38 @@ var fr;
 var flowfield;
 
 let lastChange = Date.now();
+let lastNow = 0;
 
 let lastCountry = "";
 
+let displayText = "";
+let displayTextSize = 24;
+let displayTextSizeGrowth = 8;
+
 let myFont;
+
+let doOutPackets = true;
+let baseHueColor = 50;
+
+function switchPacketDirection() {
+  console.log("Switching direction");
+  clearScreen = true;
+  displayTextSize = 24;
+  droplets = [];
+    if(doOutPackets) {
+      doOutPackets = false;
+      displayText = "INCOMING";
+      baseHueColor = 50;
+    } else {
+      doOutPackets = true;
+      displayText = "OUTGOING";
+      baseHueColor = 0;
+    }
+    setTimeout(()=>{displayText = ""}, 2000);
+    setTimeout(switchPacketDirection, 10000);
+}
+
+switchPacketDirection();
 
 // Preload Function
 function preload() {
@@ -144,7 +175,7 @@ function setup() {
     console.log("center: " + ((center/height)-0.5));
   }
 
-  background("#000000");
+  background("#FFFFFF");
 
   textFont('sans');
   textSize(24);
@@ -159,16 +190,24 @@ function setup() {
 
 // Draw Function
 function draw() {
+
+  let now = Date.now(); // current time in milliseconds
+  if(lastNow == 0) {
+    lastNow = now;
+  }
+  let dt = now - lastNow;
+
   // Clear if needed
   // clear();
 
   // Set canvas background
   if(clearScreen) {
-    background("rgba(0,0,0,1.0)");
+    background("rgba(1.0,1.0,1.0,1.0)");
     clearScreen = false;
   }
 
-  background("rgba(0,0,0,0.0)");
+  // background("rgba(1.0,1.0,1.0,0.00)");
+  background(0, 0, 100, 3);
   
 
   colorMode(HSL, 100);
@@ -176,7 +215,11 @@ function draw() {
     
     stroke(drop.hue, drop.saturation, 25 + drop.lightness, (1.0 - drop.size/drop.maxSize) * 100);
     noFill();
-    circle(drop.x, drop.y, drop.size);
+    let dropSize = drop.size;
+    if(drop.out == false) {
+      dropSize = drop.maxSize - dropSize;
+    }
+    circle(drop.x, drop.y, dropSize);
     drop.size += 1.0;
     drop.lightness *= 0.98;
     let size = drop.size;
@@ -195,28 +238,25 @@ function draw() {
     rect(win.x, win.y, win.w, win.h);
   }
 
-  let now = Date.now(); // current time in milliseconds
-  if (now - lastChange > 10000) {
-    centerWindow = windows[Math.floor(Math.random() * windows.length)];
-    lastChange = Date.now();
-  }
-
   
   // positionSeed += 0.001;
   // Draw text
   colorMode(HSL, 100);
-  fill(75, 100, 100, 100);
+  fill(75, 100, 0, 100);
+  textSize(displayTextSize);
+  displayTextSize += displayTextSizeGrowth * (dt/1000.0);
   // lastCountry = "Hong Kong (China)";
   // if(lastCountry.length >= 13) {
   //   textSize(37 - lastCountry.length);
   // }
-  // text(lastCountry.toUpperCase(), width/2, 130);
+  text(displayText, width/2, 130);
   // textSize(24);
   // text('OCEANIA', width/2, 297);
 
   // fill(255, 100, 50, 50);
   // rect(centerWindow.x, centerWindow.y, centerWindow.w, centerWindow.h);
   // console.log("num packets: " + num + " elements in particles: " + particles.size);
+  lastNow = now;
 } // End Draw
 
 /////////////////////////////////////////////////////////////////////////////////////////////

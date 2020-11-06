@@ -1,0 +1,19 @@
+/*////////////////////////////////////////////////////////////////////*/
+
+.canvasClass{
+  position: absolute; 
+
+  left: 0px; 
+  right: 0;
+  top: 0px;
+  bottom: 0;
+}
+
+canvas {
+  display: block;
+  height: 100%!important;
+  width: inherit!important;
+  margin: auto;
+}
+
+/*/ ///////////////////////////////////////////////////////////////////*/
