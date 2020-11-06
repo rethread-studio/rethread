@@ -44,18 +44,17 @@ class TextObject {
       backgroundAlphaChange *= -1;
       console.log("Change direction");
       this.crossedHalfWay = true;
+      particleDir = (particleDir + 1) % particleDirections.length;
     }
     if(this.countdown <= 0) {
       this.currentState = 1 - this.currentState;
       if(this.currentState == 0) {
         this.countdown = this.timeOff[this.currentTextIndex];
         this.fullCountdownTime = this.timeOff[this.currentTextIndex];
-        console.log("off: " + this.countdown);
       } else if(this.currentState == 1) {
         this.currentTextIndex = (this.currentTextIndex + 1) % this.texts.length;
         this.countdown = this.timeOn[this.currentTextIndex];
         this.fullCountdownTime = this.timeOn[this.currentTextIndex];
-        console.log("on: " + this.countdown);
         this.textSize = 16;
         this.textGrowth = 24.0 / 5000;
         this.crossedHalfWay = false;
@@ -219,19 +218,38 @@ let zoom = 1;
 let backgroundAlpha = 0;
 let backgroundAlphaChange = 0.01;
 
+let particleDirections = ['down', 'right', 'left', 'up'];
+let particleDir = 0;
+
 let textObjects = [];
 
 function addParticle(len) {
   averageLen = averageLen* 0.9 + len*0.1;
   if(len > 1) {
+    let lightness = (Math.pow( 1.0 - (averageLen / 20000.0), 3.0));
+    let x, y;
+    switch(particleDirections[particleDir]) {
+      case 'right':
+        x = -10; y = Math.random() * canvasY * subsampling;
+        break;
+      case 'left':
+        x = canvasX*subsampling + 10; y = Math.random() * canvasY * subsampling;
+        break;
+      case 'up':
+        y = canvasY*subsampling + 10; x = Math.random() * canvasX * subsampling;
+        break;
+      case 'down':
+        y = -10; x = Math.random() * canvasX * subsampling;
+        break;
+    } 
     particles.push({
-      x: -10,
-      y: Math.random() * canvasY * subsampling,
-      vel: createVector(Math.random() * 10 + 5, 0),
+      x: x,
+      y: y,
+      vel: Math.random() * 10 + 5,
       size: Math.min(Math.max(len/10000, 1), 8.0),
-      hue: 1, //Math.pow( 1.0 - (len / 20000.0), 5.0) * 100,
+      hue: Math.pow(lightness, 2.0) * 15, //Math.pow( 1.0 - (len / 20000.0), 5.0) * 100,
       saturation: 100,
-      lightness: (Math.pow( 1.0 - (averageLen / 20000.0), 3.0)) * 100,
+      lightness: lightness * 90 + 10,
     })
   }
 }
@@ -346,11 +364,38 @@ function draw() {
   for(let p of particles) {
     pg.fill(p.hue, p.saturation, p.lightness);
     pg.ellipse(p.x, p.y, p.size, p.size);
-    p.x += p.vel.x;
-    p.y += p.vel.y;
+    switch(particleDirections[particleDir]) {
+      case 'right':
+        p.x += p.vel;
+        break;
+      case 'left':
+        p.x -= p.vel;
+        break;
+      case 'up':
+        p.y -= p.vel;
+        break;
+      case 'down':
+        p.y += p.vel;
+        break;
+      default:
+
+    }
   }
 
-  particles = particles.filter((p) => p.x < (canvasX * subsampling))
+  switch(particleDirections[particleDir]) {
+    case 'right':
+      particles = particles.filter((p) => p.x < (canvasX * subsampling))
+      break;
+    case 'left':
+      particles = particles.filter((p) => p.x > 0)
+      break;
+    case 'up':
+      particles = particles.filter((p) => p.y > 0)
+      break;
+    case 'down':
+      particles = particles.filter((p) => p.y < (canvasY * subsampling))
+      break;
+  } 
 
   tint(0, 100, 100, Math.pow(backgroundAlpha, 2) * 100);
   image(pg, 0, 0, canvasX, canvasY);
