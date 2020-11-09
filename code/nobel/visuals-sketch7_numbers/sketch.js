@@ -32,9 +32,18 @@ class TextObject {
   draw() {
     if(this.currentState == 1) {
       const lines = [48, 130, 214, 297];
-      let y = lines[this.line];
+      const texts = this.texts[this.currentTextIndex];
       textSize(this.textSize);
-      text(this.texts[this.currentTextIndex], width/2, y);
+      if (typeof texts === 'string' || texts instanceof String) {
+        let y = lines[this.line];
+        text(texts, width/2, y);
+      } else if(Array.isArray(texts)) {
+        for(let i = 0; i < texts.length; i++) {
+          let y = lines[this.line + i];
+          text(texts[i], width/2, y);
+        }
+      }
+      
     }
   }
   update(dt) {
@@ -44,7 +53,9 @@ class TextObject {
       backgroundAlphaChange *= -1;
       console.log("Change direction");
       this.crossedHalfWay = true;
-      particleDir = (particleDir + 1) % particleDirections.length;
+      if(backgroundAlphaChange > 0) {
+        particleDir = (particleDir + 1) % particleDirections.length;
+      }
     }
     if(this.countdown <= 0) {
       this.currentState = 1 - this.currentState;
@@ -219,14 +230,14 @@ let backgroundAlpha = 0;
 let backgroundAlphaChange = 0.01;
 
 let particleDirections = ['down', 'right', 'left', 'up'];
-let particleDir = 0;
+let particleDir = 3;
 
 let textObjects = [];
 
 function addParticle(len) {
   averageLen = averageLen* 0.9 + len*0.1;
   if(len > 1) {
-    let lightness = (Math.pow( 1.0 - (averageLen / 20000.0), 3.0));
+    let lightness = (1.0 - Math.pow( 1.0 - (averageLen / 20000.0), 3.0));
     let x, y;
     switch(particleDirections[particleDir]) {
       case 'right':
@@ -246,10 +257,10 @@ function addParticle(len) {
       x: x,
       y: y,
       vel: Math.random() * 10 + 5,
-      size: Math.min(Math.max(len/10000, 1), 8.0),
+      size: Math.min(Math.max(len/10000, 1), 8.0) + 1.0,
       hue: Math.pow(lightness, 2.0) * 15, //Math.pow( 1.0 - (len / 20000.0), 5.0) * 100,
       saturation: 100,
-      lightness: lightness * 90 + 10,
+      lightness: lightness * 70 + 10,
     })
   }
 }
@@ -259,7 +270,7 @@ let canvasRotation = 0;
 
 // Preload Function
 function preload() {
-  myFont = loadFont('assets/fonts/InconsolataSemiExpanded-Light.ttf');
+  myFont = loadFont('assets/fonts/Anton-Regular.ttf');
 } // End Preload
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -310,7 +321,7 @@ function setup() {
   textAlign(CENTER, CENTER);
   textFont(myFont);
 
-  textObjects.push(new TextObject(["INTERNET PACKETS", "0", "INCOMING", "0", "OUTGOING", "0", "DATA SIZE", "0"], 1, [4000, 10000, 4000, 10000, 4000, 10000, 4000, 10000], [200, 200, 500, 500, 500, 500,500, 500]));
+  textObjects.push(new TextObject(["INTERNET PACKETS", "0", ["INTO", "STOCKHOLM"], "0", ["OUT FROM", "STOCKHOLM"], "0", "DATA SIZE", "0"], 1, [4000, 10000, 4000, 10000, 4000, 10000, 4000, 10000], [500, 500, 500, 500, 500, 500,500, 500]));
 
   // Set canvas framerate
   // frameRate(25);
@@ -359,7 +370,10 @@ function draw() {
   // Draw particles to Graphics
   pg.noStroke();
   pg.colorMode(HSL, 100);
-  pg.fill(0, 100, 100, 5);
+  // let backgroundHue = rollingNumPackets / 100.0 - 2.0;
+  let backgroundHue = Math.min((rollingTotalLen / 1000000.0 - 2.0) * 8.0, 20.0);
+  // console.log(backgroundHue);
+  pg.fill(backgroundHue, 100, 85, 50);
   pg.rect(0, 0, canvasX * subsampling, canvasY * subsampling);
   for(let p of particles) {
     pg.fill(p.hue, p.saturation, p.lightness);
@@ -410,11 +424,11 @@ function draw() {
   let totalLen = formatBytes(rollingTotalLen);
   // text(totalLen, width/2, 130);
   // text(Math.round(rollingNumPackets), width/2, 48);
-  textObjects[0].setVariant(1, metrics.numPackets);
-  textObjects[0].setVariant(3, metrics.numInPackets);
-  textObjects[0].setVariant(5, metrics.numOutPackets);
+  textObjects[0].setVariant(1, metrics.numPackets.toString());
+  textObjects[0].setVariant(3, metrics.numInPackets.toString());
+  textObjects[0].setVariant(5, metrics.numOutPackets.toString());
 
-  textObjects[0].setVariant(7, metrics.totalLen);
+  textObjects[0].setVariant(7, metrics.totalLen.toString());
 
 
   let ratioThatAreHTTP = metrics.ports.get(80)/metrics.numPackets;

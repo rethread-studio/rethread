@@ -56,9 +56,71 @@ new WebSocketClient().onmessage = (data) => {
   if(internalData.len > 0 && internalData.out == doOutPackets) {
     addDroplet(internalData.len, baseHueColor, internalData.out);
   }
+
+  registerMetric(internalData, lastCountry, continent);
   
   num++;
 };
+
+
+let metrics = {
+  countries: new Map(),
+  continents: new Map(),
+  ports: new Map(),
+  numPackets: 0,
+  numInPackets: 0,
+  numOutPackets: 0,
+  totalLen: 0,
+};
+
+let metricsPerUpdate = {
+  numPackets: 0.0,
+  numInPackets: 0.0,
+  numOutPackets: 0.0,
+  totalLen: 0.0,
+}
+
+// a number of datapoints, every datapoint having a timestamp
+let metricsDatapoints = {
+  numPackets: [],
+  totalLen: [],
+}
+
+function registerMetric(d, country, continent) {
+  metrics.numPackets += 1;
+  metrics.totalLen += d.len;
+  metricsPerUpdate.numPackets += 1;
+  metricsPerUpdate.totalLen += d.len;
+  if(d.out) {
+    metrics.numOutPackets += 1;
+    metricsPerUpdate.numOutPackets += 1;
+  } else {
+    metrics.numInPackets += 1;
+    metricsPerUpdate.numInPackets += 1;
+  }
+  if(metrics.countries.has(country)) {
+    metrics.countries.set(country, metrics.countries.get(country));
+  } else {
+    metrics.countries.set(country, 1);
+  }
+  if(metrics.continents.has(continent)) {
+    metrics.continents.set(continent, metrics.continents.get(continent));
+  } else {
+    metrics.continents.set(continent, 1);
+  }
+  let port = d.remove_port;
+  if(metrics.ports.has(port)) {
+    metrics.ports.set(port, metrics.ports.get(port)+1);
+  } else {
+    metrics.ports.set(port, 1);
+  }
+  port = d.local_port;
+  if(metrics.ports.has(port)) {
+    metrics.ports.set(port, metrics.ports.get(port)+1);
+  } else {
+    metrics.ports.set(port, 1);
+  }
+}
 ///////////////////////// GUI Element Global Variables///////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,9 +183,16 @@ let myFont;
 
 let doOutPackets = true;
 let baseHueColor = 50;
+let backgroundAlpha = 5;
+let textDuration = 2000;
+let directionDuration = 10000;
+let backgroundPhase = 0.0;
+let increaseBackgroundPhase = false;
 
 function switchPacketDirection() {
   console.log("Switching direction");
+  increaseBackgroundPhase = false;
+  backgroundPhase = 0.0;
   clearScreen = true;
   displayTextSize = 24;
   droplets = [];
@@ -136,15 +205,15 @@ function switchPacketDirection() {
       displayText = "OUTGOING";
       baseHueColor = 0;
     }
-    setTimeout(()=>{displayText = ""}, 2000);
-    setTimeout(switchPacketDirection, 10000);
+    setTimeout(()=>{displayText = ""; increaseBackgroundPhase = true;}, textDuration);
+    setTimeout(switchPacketDirection, directionDuration);
 }
 
 switchPacketDirection();
 
 // Preload Function
 function preload() {
-  myFont = loadFont('assets/fonts/InconsolataSemiExpanded-Light.ttf');
+  myFont = loadFont('assets/fonts/impact.ttf');
 } // End Preload
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -198,6 +267,34 @@ function draw() {
   }
   let dt = now - lastNow;
 
+  if(increaseBackgroundPhase) {
+    let duration = directionDuration - textDuration;
+    backgroundPhase += (Math.PI * 2) / duration * dt;
+  }
+
+  // Update metrics
+
+  metricsDatapoints.numPackets = metricsDatapoints.numPackets.filter((e) => {return now - e.ts < 1000; });
+  metricsDatapoints.totalLen = metricsDatapoints.totalLen.filter((e) => {return now - e.ts < 1000; });
+
+  metricsDatapoints.numPackets.push({value: metricsPerUpdate.numPackets, ts: now});
+  metricsDatapoints.totalLen.push({value: metricsPerUpdate.totalLen, ts: now});
+
+  metricsPerUpdate.totalLen = 0;
+  metricsPerUpdate.numInPackets = 0;
+  metricsPerUpdate.numOutPackets = 0;
+  metricsPerUpdate.numPackets = 0;
+
+  // let rollingNumPackets = metricsDatapoints.numPackets.reduce((a, b) => { return a + b.value; }, 0);
+  let rollingTotalLen = metricsDatapoints.totalLen.reduce((a, b) => { return a + b.value; }, 0);
+
+  let rollingNumPackets = 0;
+  for(let d of metricsDatapoints.numPackets) {
+    rollingNumPackets += d.value;
+  }
+  
+  
+
   // Clear if needed
   // clear();
 
@@ -208,7 +305,10 @@ function draw() {
   }
 
   // background("rgba(1.0,1.0,1.0,0.00)");
-  background(Math.random() * 15, 100, 80, 4);
+  backgroundAlpha = Math.pow(Math.cos(backgroundPhase) * 0.5 + 0.5, 4.0) * 20.0;
+  let backgroundHue = Math.min((rollingTotalLen / 1000000.0 - 2.0) * 8.0, 20.0);
+  background(backgroundHue, 100, 80, backgroundAlpha);
+  
   
 
   colorMode(HSL, 100);
