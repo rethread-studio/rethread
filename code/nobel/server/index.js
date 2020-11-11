@@ -12,7 +12,7 @@ const services = require("./services");
 const app = express();
 app.use(bodyParser.json());
 
-const visualPath = "../visuals-sketch2";
+let visualPath = "../visuals-sketch2";
 if (process.argv.length > 2) {
   visualPath = process.argv[3];
 }
