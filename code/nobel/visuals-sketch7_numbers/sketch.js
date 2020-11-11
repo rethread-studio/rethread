@@ -31,9 +31,9 @@ class TextObject {
   }
   draw() {
     if(this.currentState == 1) {
-      const lines = [48, 130, 214, 297];
+      const lines = [48 * subsampling, 130 * subsampling, 214 * subsampling, 297 * subsampling];
       const texts = this.texts[this.currentTextIndex];
-      textSize(this.textSize);
+      textSize(this.textSize * subsampling);
       if (typeof texts === 'string' || texts instanceof String) {
         let y = lines[this.line];
         text(texts, width/2, y);
@@ -162,6 +162,10 @@ new WebSocketClient().onmessage = (data) => {
 
 ///////////////////////// Global Variables///////////////////////////////////////
 
+var subsampling = 4;
+var canvasX = 208 * subsampling;
+var canvasY = 360 * subsampling;
+
 let windows = [];
 windows.push({ x: 2, y: 0, w: 36, h: 35 });
 windows.push({ x: 86, y: 0, w: 36, h: 35 });
@@ -189,13 +193,7 @@ let columns = [];
 columns.push({x: 38, y: 0, w: 48, h: 360});
 columns.push({x: 122, y: 0, w: 48, h: 360});
 
-const MAX_PARTICLE_COUNT = 250;
-
-var canvasX = 208;
-var canvasY = 360;
 var numPixels = canvasX * canvasY;
-var subsampling = 1;
-var skySize = canvasY * subsampling;
 
 var inc = 0.15;
 var scl = 10;
@@ -215,7 +213,9 @@ let lastCountry = "";
 let myFont;
 let imgMask;
 
+const MAX_NUM_PARTICLES = 1000;
 let particles = [];
+let particleIndex = 0;
 let particlePosX = 0;
 let particlePosY = canvasY-1;
 let positionSeed = Math.random() * 748236.0;
@@ -241,29 +241,56 @@ function addParticle(len) {
     let x, y;
     switch(particleDirections[particleDir]) {
       case 'right':
-        x = -10; y = Math.random() * canvasY * subsampling;
+        x = -10; y = Math.random() * canvasY;
         break;
       case 'left':
-        x = canvasX*subsampling + 10; y = Math.random() * canvasY * subsampling;
+        x = canvasX*subsampling + 10; y = Math.random() * canvasY;
         break;
       case 'up':
-        y = canvasY*subsampling + 10; x = Math.random() * canvasX * subsampling;
+        y = canvasY*subsampling + 10; x = Math.random() * canvasX;
         break;
       case 'down':
-        y = -10; x = Math.random() * canvasX * subsampling;
+        y = -10; x = Math.random() * canvasX;
         break;
-    } 
+    }
+    pa = particles[particleIndex];
+    particleIndex += 1;
+    if(particleIndex >= particles.length) {
+      particleIndex = 0;
+    }
+    pa.x = x;
+    pa.y = y;
+    pa.vel = (Math.random() * 10 + 5) * subsampling;
+    pa.size = (Math.min(Math.max(len/10000, 1), 8.0) + 1.0) * subsampling;
+    pa.hue = Math.pow(lightness, 2.0) * 15; //Math.pow( 1.0 - (len / 20000.0), 5.0) * 100;
+    pa.saturation = 100;
+    pa.lightness = lightness * 70 + 10;
+    // particles.push({
+    //   x: x,
+    //   y: y,
+    //   vel: (Math.random() * 10 + 5) * subsampling,
+    //   size: (Math.min(Math.max(len/10000, 1), 8.0) + 1.0) * subsampling,
+    //   hue: Math.pow(lightness, 2.0) * 15, //Math.pow( 1.0 - (len / 20000.0), 5.0) * 100,
+    //   saturation: 100,
+    //   lightness: lightness * 70 + 10,
+    // })
+  }
+}
+
+function initParticles() {
+  for(let i = 0; i < MAX_NUM_PARTICLES; i++) {
     particles.push({
-      x: x,
-      y: y,
-      vel: Math.random() * 10 + 5,
-      size: Math.min(Math.max(len/10000, 1), 8.0) + 1.0,
-      hue: Math.pow(lightness, 2.0) * 15, //Math.pow( 1.0 - (len / 20000.0), 5.0) * 100,
-      saturation: 100,
-      lightness: lightness * 70 + 10,
+      x: 0,
+      y: 0,
+      vel: 0,
+      size: 0,
+      hue: 0, 
+      saturation: 0,
+      lightness: 0,
     })
   }
 }
+initParticles();
 
 let pg;
 let canvasRotation = 0;
@@ -301,6 +328,7 @@ function setup() {
 
   // Calculate window center points
   for (w of windows) {
+    w.x *= subsampling; w.y *= subsampling; w.w *= subsampling; w.h *= subsampling;
     w.center = createVector(w.x + w.w / 2, w.y + w.h / 2);
     w.halfWidthSq = Math.pow(w.w / 2, 2);
     w.halfHeightSq = Math.pow(w.h / 2, 2);
@@ -311,7 +339,7 @@ function setup() {
     console.log("center: " + ((center/height)-0.5));
   }
 
-  pg = createGraphics(canvasX * subsampling, canvasY * subsampling);
+  pg = createGraphics(canvasX, canvasY);
   pg.clear();
 
   background("#000000");
@@ -371,48 +399,67 @@ function draw() {
   pg.noStroke();
   pg.colorMode(HSL, 100);
   // let backgroundHue = rollingNumPackets / 100.0 - 2.0;
-  let backgroundHue = Math.min((rollingTotalLen / 1000000.0 - 2.0) * 8.0, 20.0);
+  let backgroundHue = Math.min((rollingTotalLen / 1000000.0 - 2.0) * 3.0, 9.0);
   // console.log(backgroundHue);
-  pg.fill(backgroundHue, 100, 85, 50);
-  pg.rect(0, 0, canvasX * subsampling, canvasY * subsampling);
+  pg.fill(backgroundHue, 100, backgroundHue * 4.0, 50);
+  pg.rect(0, 0, canvasX, canvasY);
   for(let p of particles) {
     pg.fill(p.hue, p.saturation, p.lightness);
     pg.ellipse(p.x, p.y, p.size, p.size);
     switch(particleDirections[particleDir]) {
       case 'right':
         p.x += p.vel;
+        if(p.x >= canvasX) {
+          p.vel = 0;
+          p.size = 0;
+        }
         break;
       case 'left':
         p.x -= p.vel;
+        if(p.x < 0) {
+          p.vel = 0;
+          p.size = 0;
+        }
         break;
       case 'up':
         p.y -= p.vel;
+        if(p.y < 0) {
+          p.vel = 0;
+          p.size = 0;
+        }
         break;
       case 'down':
         p.y += p.vel;
+        if(p.y > canvasY) {
+          p.vel = 0;
+          p.size = 0;
+        }
         break;
       default:
 
     }
   }
 
-  switch(particleDirections[particleDir]) {
-    case 'right':
-      particles = particles.filter((p) => p.x < (canvasX * subsampling))
-      break;
-    case 'left':
-      particles = particles.filter((p) => p.x > 0)
-      break;
-    case 'up':
-      particles = particles.filter((p) => p.y > 0)
-      break;
-    case 'down':
-      particles = particles.filter((p) => p.y < (canvasY * subsampling))
-      break;
-  } 
+  // switch(particleDirections[particleDir]) {
+  //   case 'right':
+  //     particles = particles.filter((p) => p.x < (canvasX))
+  //     break;
+  //   case 'left':
+  //     particles = particles.filter((p) => p.x > 0)
+  //     break;
+  //   case 'up':
+  //     particles = particles.filter((p) => p.y > 0)
+  //     break;
+  //   case 'down':
+  //     particles = particles.filter((p) => p.y < (canvasY))
+  //     break;
+  // } 
 
-  tint(0, 100, 100, Math.pow(backgroundAlpha, 2) * 100);
+
+  drawingContext.globalAlpha = Math.pow(backgroundAlpha, 2);
+  // tint(0, 100, 100, Math.pow(backgroundAlpha, 2) * 100);
   image(pg, 0, 0, canvasX, canvasY);
+  drawingContext.globalAlpha = 1.0;
 
   backgroundAlpha += backgroundAlphaChange;
   // if(backgroundAlpha >= 100 || backgroundAlpha <= 0) {
@@ -420,7 +467,7 @@ function draw() {
   // }
   backgroundAlpha = Math.max(Math.min(backgroundAlpha, 1.0), 0);
 
-  fill(75, 100, 0, 100);
+  fill(75, 0, Math.pow(backgroundAlpha, 2) * 100, 100);
   let totalLen = formatBytes(rollingTotalLen);
   // text(totalLen, width/2, 130);
   // text(Math.round(rollingNumPackets), width/2, 48);
@@ -447,7 +494,15 @@ function draw() {
   fill(50, 100);
   noStroke();
   for (win of windows) {
+    fill(0, 100);
     rect(win.x, win.y, win.w, win.h);
+    let inset = 4;
+    fill(15, 100);
+    rect(win.x + inset, win.y + inset, win.w - (inset*2), win.h - (inset*2));
+    fill(30, 100);
+    let crossSize = 10;
+    rect(win.x + win.w/2 - (crossSize/2), win.y + inset, crossSize, win.h - (inset*2));
+    // rect(win.x, win.y + win.h/2 - (crossSize/2), win.w, crossSize);
   }
 
   // let numCallsPerSecond = 1.0/(dt*0.001);
@@ -460,6 +515,7 @@ function draw() {
   
   lastNow = now;
   // console.log("num packets: " + num + " elements in particles: " + particles.size);
+  // console.log("fps: " + frameRate());
 } // End Draw
 
 /////////////////////////////////////////////////////////////////////////////////////////////

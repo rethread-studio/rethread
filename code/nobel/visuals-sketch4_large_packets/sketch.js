@@ -6,6 +6,10 @@
 
 /// There is stuttering some light stuttering every few seconds, probably because of GC
 
+var subsampling = 4;
+var canvasX = 208 * subsampling;
+var canvasY = 360 * subsampling;
+
 let particles = new Map();
 let particlePosX = 0;
 let particlePosY = 0;
@@ -24,8 +28,8 @@ function addDroplet(len, baseHue, out) {
   droplets.push({
     x: Math.random() * canvasX,
     y: Math.random() * canvasY,
-    size: 2,
-    maxSize: Math.min(len/2000, 200.0),
+    size: 2*subsampling,
+    maxSize: Math.min(len/2000, 200.0) * subsampling,
     saturation: Math.random() * 50 + 40 + hue,
     lightness: 50 + (hue * 2),
     hue: hue,
@@ -156,8 +160,6 @@ columns.push({x: 122, y: 0, w: 48, h: 360});
 
 const MAX_PARTICLE_COUNT = 250;
 
-var canvasX = 208;
-var canvasY = 360;
 var numPixels = canvasX * canvasY;
 
 var inc = 0.15;
@@ -185,7 +187,7 @@ let doOutPackets = true;
 let baseHueColor = 50;
 let backgroundAlpha = 5;
 let textDuration = 2000;
-let directionDuration = 10000;
+let directionDuration = 15000;
 let backgroundPhase = 0.0;
 let increaseBackgroundPhase = false;
 
@@ -213,7 +215,7 @@ switchPacketDirection();
 
 // Preload Function
 function preload() {
-  myFont = loadFont('assets/fonts/impact.ttf');
+  myFont = loadFont('assets/fonts/Anton-Regular.ttf');
 } // End Preload
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -235,6 +237,7 @@ function setup() {
 
   // Calculate window center points
   for (w of windows) {
+    w.x *= subsampling; w.y *= subsampling; w.w *= subsampling; w.h *= subsampling;
     w.center = createVector(w.x + w.w / 2, w.y + w.h / 2);
     w.halfWidthSq = Math.pow(w.w / 2, 2);
     w.halfHeightSq = Math.pow(w.h / 2, 2);
@@ -248,7 +251,7 @@ function setup() {
   background("#FFFFFF");
 
   textFont('sans');
-  textSize(24);
+  textSize(24 * subsampling);
   textAlign(CENTER, CENTER);
   textFont(myFont);
 
@@ -305,23 +308,23 @@ function draw() {
   }
 
   // background("rgba(1.0,1.0,1.0,0.00)");
-  backgroundAlpha = Math.pow(Math.cos(backgroundPhase) * 0.5 + 0.5, 4.0) * 20.0;
-  let backgroundHue = Math.min((rollingTotalLen / 1000000.0 - 2.0) * 8.0, 20.0);
-  background(backgroundHue, 100, 80, backgroundAlpha);
+  backgroundAlpha = Math.pow(Math.cos(backgroundPhase) * 0.5 + 0.5, 6.0) * 20.0;
+  let backgroundHue = Math.min((rollingTotalLen / 1000000.0 - 2.0) * 3.0, 9.0);
+  background(backgroundHue, 100, backgroundHue * 4, backgroundAlpha);
   
   
 
   colorMode(HSL, 100);
+  strokeWeight(subsampling);
+  noFill();
   for(let drop of droplets) {
-    
     stroke(drop.hue, drop.saturation, 25 + drop.lightness, (1.0 - drop.size/drop.maxSize) * 100);
-    noFill();
     let dropSize = drop.size;
     if(drop.out == false) {
       dropSize = drop.maxSize - dropSize;
     }
     circle(drop.x, drop.y, dropSize);
-    drop.size += 1.0;
+    drop.size += subsampling;
     drop.lightness -= (10 -drop.hue) * 0.1;
     let size = drop.size;
     // while(size > 30) {
@@ -336,21 +339,29 @@ function draw() {
   fill(50, 100);
   noStroke();
   for (win of windows) {
+    fill(0, 100);
     rect(win.x, win.y, win.w, win.h);
+    let inset = subsampling;
+    fill(15, 100);
+    rect(win.x + inset, win.y + inset, win.w - (inset*2), win.h - (inset*2));
+    fill(30, 100);
+    let crossSize = 2*subsampling;
+    rect(win.x + win.w/2 - (crossSize/2), win.y + inset, crossSize, win.h - (inset*2));
+    // rect(win.x, win.y + win.h/2 - (crossSize/2), win.w, crossSize);
   }
 
   
   // positionSeed += 0.001;
   // Draw text
   colorMode(HSL, 100);
-  fill(75, 100, 0, 100);
-  textSize(displayTextSize);
+  fill(75, 100, 100, 100);
+  textSize(displayTextSize * subsampling);
   displayTextSize += displayTextSizeGrowth * (dt/1000.0);
   // lastCountry = "Hong Kong (China)";
   // if(lastCountry.length >= 13) {
   //   textSize(37 - lastCountry.length);
   // }
-  text(displayText, width/2, 130);
+  text(displayText, width/2, 130*subsampling);
   // textSize(24);
   // text('OCEANIA', width/2, 297);
 

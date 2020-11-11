@@ -21,10 +21,10 @@ class Edge {
       this.activity = 0;
     }
   }
-  draw(p1, p2) {
-    stroke(this.activity * 15, 70, this.activity * 90, 100);
-    strokeWeight(subsampling);
-    line(p1.x, p1.y, p2.x, p2.y);
+  draw(g, p1, p2) {
+    g.stroke(this.activity * 15, 70, this.activity * 90, 100);
+    g.strokeWeight(subsampling);
+    g.line(p1.x, p1.y, p2.x, p2.y);
   }
 }
 
@@ -60,35 +60,35 @@ class Node {
       c.update(dt);
     }
   }
-  drawNodes() {
-    fill(this.activity * 15, 70, this.activity * 90, 100);
-    noStroke();
+  drawNodes(g) {
+    g.fill(this.activity * 15, 70, (1.0-Math.pow(1.0-this.activity, 2.0)) * 80, 100);
+    g.noStroke();
     if(this.isWindow == false) {
-      ellipse(this.pos.x + this.offsetPos.x, this.pos.y + this.offsetPos.y, 15, 15);
+      g.ellipse(this.pos.x + this.offsetPos.x, this.pos.y + this.offsetPos.y, 15, 15);
     } else {
       let w = windows[this.windowIndex];
       let size = 8*subsampling*this.activity;
-      rect(w.x-size, w.y-size, w.w + size + size, w.h + size + size);
+      g.rect(w.x-size, w.y-size, w.w + size + size, w.h + size + size);
       if(this.selected) {
         let size = 8*subsampling;
-        stroke(0, 70, 0, 100);
-        strokeWeight(subsampling * 8);
-        noFill();
-        rect(w.x-size, w.y-size, w.w + size + size, w.h + size + size);
+        g.stroke(0, 70, 0, 100);
+        g.strokeWeight(subsampling * 4);
+        g.noFill();
+        g.rect(w.x-size, w.y-size, w.w + size + size, w.h + size + size);
       }
     }
     
     for(let c of this.connections) {
-      c.drawNodes();
+      c.drawNodes(g);
     }
   }
-  drawEdges() {
+  drawEdges(g) {
     let pos = this.pos;
     if(this.isWindow == false) {
       pos = this.pos.copy().add(this.offsetPos);
     }
     for(let c of this.connections) {
-      c.drawEdges(pos);
+      c.drawEdges(g, pos);
     }
   }
   hasPort(port) {
@@ -134,16 +134,16 @@ class Connection {
     this.node.update(dt);
     this.edge.update(dt);
   }
-  drawNodes() {
-    this.node.drawNodes();
+  drawNodes(g) {
+    this.node.drawNodes(g);
   }
-  drawEdges(sourceNodePos) {
+  drawEdges(g, sourceNodePos) {
     let pos = this.node.pos;
     if(this.node.isWindow == false) {
       pos = this.node.pos.copy().add(this.node.offsetPos);
     }
-    this.edge.draw(sourceNodePos, pos);
-    this.node.drawEdges();
+    this.edge.draw(g, sourceNodePos, pos);
+    this.node.drawEdges(g);
   }
   registerPort(port, previousPos) {
     this.edge.activity = Math.min(this.edge.activity + 0.2, 1.0);
@@ -267,6 +267,9 @@ let zoom = 1;
 let backgroundAlpha = 0;
 let backgroundAlphaChange = 0.01;
 
+let drawMistyShader = false;
+let mistyShader;
+
 let originNode;
 let labeledNodes = [];
 
@@ -284,7 +287,7 @@ let fallingText = {
     this.y += this.vel * dt;
     this.textSize += this.textSizeGrowth * dt;
     if(this.y > canvasY) {
-      this.textSize = 36;
+      this.textSize = 48;
       this.y = 0;
       this.nodeIndex = (this.nodeIndex + 1) % labeledNodes.length;
       this.setNewNode(labeledNodes[this.nodeIndex]);
@@ -298,19 +301,20 @@ let fallingText = {
     this.node.selected = true;
     this.string = this.node.label;
   },
-  draw: function() {
+  draw: function(g) {
     if(this.node != undefined) {
-      fill(this.node.activity * 15, 70, this.node.activity * 90, 100);
-      noStroke();
+      g.fill(this.node.activity * 15, 70, this.node.activity * 90, 100);
+      g.noStroke();
     }
     
-    textSize(this.textSize);
-    text(this.string, this.x, this.y);
+    g.textSize(this.textSize);
+    g.text(this.string, this.x, this.y);
   }
 };
 
 
 let pg;
+let textPg;
 let canvasRotation = 0;
 
 // Preload Function
@@ -350,6 +354,8 @@ function setup() {
     console.log("center: " + ((center/height)-0.5));
   }
 
+  pg = createGraphics(canvasX, canvasY);
+  textPg = createGraphics(canvasX, canvasY);
 
   background("#000000");
 
@@ -357,6 +363,8 @@ function setup() {
   textSize(24);
   textAlign(CENTER, CENTER);
   textFont(myFont);
+  textPg.textAlign(CENTER, CENTER);
+  textPg.textFont(myFont);
 
   const lines = [48 * subsampling, 130 * subsampling, 214 * subsampling, 297 * subsampling];
   let allPorts = [443, 80, 23, 53, 9001, 22, 993, 9000, 6881, 1194, 4500, 3478, 123, 389, 3306, 25];
@@ -411,7 +419,7 @@ function setup() {
   rightBottomNode2.createConnection(torNode);
 
   labeledNodes = [openVPNNode, telnetNode, sshNode, httpsNode, httpNode, ntpNode, natTraversalNode, dnsNode, ldapNode, imapsNode, smtpNode, mysqlNode,bittorrentNode, torNode];
-  console.log("has 80: " + originNode.hasPort(80));
+  // console.log("has 80: " + originNode.hasPort(80));
   // Set canvas framerate
   // frameRate(25);
 } // End Setup
@@ -455,6 +463,8 @@ function draw() {
   // for(let i = 0; i < 100; i++) {
   //   addParticle(Math.pow(Math.random(), 2) * 20000);
   // }
+  colorMode(HSL, 100);
+  background(0, 100, 100, 100);
 
   backgroundAlpha += backgroundAlphaChange;
   // if(backgroundAlpha >= 100 || backgroundAlpha <= 0) {
@@ -462,7 +472,7 @@ function draw() {
   // }
   backgroundAlpha = Math.max(Math.min(backgroundAlpha, 1.0), 0);
   let backgroundHue = Math.min((rollingTotalLen / 1000000.0 - 2.0) * 8.0, 20.0) + hueOffset;
-  background(backgroundHue, 100, 80, 2);
+  pg.background(backgroundHue, 100, 80, 2);
 
   fill(75, 100, 0, 100);
   let totalLen = formatBytes(rollingTotalLen);
@@ -471,19 +481,33 @@ function draw() {
   let ratioThatAreHTTP = metrics.ports.get(80)/metrics.numPackets;
   let ratioThatAreHTTPS = metrics.ports.get(443)/metrics.numPackets;
 
-  colorMode(HSL, 100);
-  originNode.update(dt);
-  originNode.drawEdges();
-  originNode.drawNodes();
 
+  pg.colorMode(HSL, 100);
+  originNode.update(dt);
+  originNode.drawEdges(pg);
+  originNode.drawNodes(pg);
+
+  textPg.colorMode(HSL, 100);
+  textPg.clear();
   fallingText.update(dt*0.001);
-  fallingText.draw();
+  fallingText.draw(textPg);
+
+  image(pg, 0, 0);
+  image(textPg, 0, 0);
 
   // Draw the windows
   fill(50, 100);
   noStroke();
   for (win of windows) {
+    fill(0, 100);
     rect(win.x, win.y, win.w, win.h);
+    let inset = 4;
+    fill(15, 100);
+    rect(win.x + inset, win.y + inset, win.w - (inset*2), win.h - (inset*2));
+    fill(30, 100);
+    let crossSize = 10;
+    rect(win.x + win.w/2 - (crossSize/2), win.y + inset, crossSize, win.h - (inset*2));
+    // rect(win.x, win.y + win.h/2 - (crossSize/2), win.w, crossSize);
   }
 
   
