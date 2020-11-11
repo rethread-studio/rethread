@@ -337,8 +337,8 @@ let labeledNodes = [];
 let fallingText = {
   node: undefined,
   nodeIndex: -1,
-  textSize: 48,
-  textSizeGrowth: 100,
+  textSize: 13*subsampling,
+  textSizeGrowth: 20*subsampling,
   x: canvasX/2,
   y: canvasY+1,
   vel: canvasY/3.0,
@@ -347,10 +347,12 @@ let fallingText = {
     this.y += this.vel * dt;
     this.textSize += this.textSizeGrowth * dt;
     if(this.y > canvasY * 1.3) {
-      this.textSize = 52;
+      this.textSize = 11*subsampling;
       this.y = 0;
-      this.nodeIndex = (this.nodeIndex + 1) % labeledNodes.length;
+      // this.nodeIndex = (this.nodeIndex + 1) % labeledNodes.length;
+      this.nodeIndex = Math.floor(Math.random() * labeledNodes.length);
       this.setNewNode(labeledNodes[this.nodeIndex]);
+      this.vel = canvasY/(2.0 * Math.random() + 2.0);
     }
   },
   setNewNode: function(newNode) {
@@ -363,7 +365,7 @@ let fallingText = {
   },
   draw: function(g) {
     if(this.node != undefined) {
-      g.fill(this.node.activity * 15, 70, this.node.activity * 90, 100);
+      g.fill(this.node.activity * 15, 90, this.node.activity * 90 + 100, (1.0 - (this.y/canvasY))*100.0);
       g.noStroke();
     }
     
@@ -376,7 +378,6 @@ let fallingText = {
         g.text(texts[i], this.x, this.y + (this.textSize * i * 1.5));
       }
     }
-    
   }
 };
 
@@ -739,7 +740,6 @@ new WebSocketClient().onmessage = (data) => {
       originNode.passParticleOn(new ConnectionParticle(internalData.remove_port));
     }
   }
-  
-  
+
   num++;
 };

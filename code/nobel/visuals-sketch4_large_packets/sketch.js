@@ -24,12 +24,12 @@ let pixelSize = 1;
 let droplets = [];
 
 function addDroplet(len, baseHue, out) {
-  let hue = baseHue + Math.min(len/50000, 10);
+  let hue = baseHue + Math.min(len / 50000, 10);
   droplets.push({
     x: Math.random() * canvasX,
     y: Math.random() * canvasY,
-    size: 2*subsampling,
-    maxSize: Math.min(len/2000, 200.0) * subsampling,
+    size: 2 * subsampling,
+    maxSize: Math.min(len / 2000, 200.0) * subsampling,
     saturation: Math.random() * 50 + 40 + hue,
     lightness: 50 + (hue * 2),
     hue: hue,
@@ -42,27 +42,27 @@ function addDroplet(len, baseHue, out) {
 
 let num = 0;
 new WebSocketClient().onmessage = (data) => {
-  if(num < 10) {
+  if (num < 10) {
     console.log(data)
     console.log(JSON.parse(data.data));
   }
   let internalData = JSON.parse(data.data);
   let continent;
-  if(internalData.remote_location.country != "Sweden"
-  && internalData.remote_location.country != undefined) {
+  if (internalData.remote_location.country != "Sweden" &&
+    internalData.remote_location.country != undefined) {
     lastCountry = internalData.remote_location.country;
     continent = internalData.remote_location.continent;
-  } else if(internalData.local_location.country != "Sweden"
-  && internalData.local_location.country != undefined) {
+  } else if (internalData.local_location.country != "Sweden" &&
+    internalData.local_location.country != undefined) {
     lastCountry = internalData.local_location.country;
     continent = internalData.local_location.continent;
   }
-  if(internalData.len > 0 && internalData.out == doOutPackets) {
+  if (internalData.len > 0 && internalData.out == doOutPackets) {
     addDroplet(internalData.len, baseHueColor, internalData.out);
   }
 
   registerMetric(internalData, lastCountry, continent);
-  
+
   num++;
 };
 
@@ -95,32 +95,32 @@ function registerMetric(d, country, continent) {
   metrics.totalLen += d.len;
   metricsPerUpdate.numPackets += 1;
   metricsPerUpdate.totalLen += d.len;
-  if(d.out) {
+  if (d.out) {
     metrics.numOutPackets += 1;
     metricsPerUpdate.numOutPackets += 1;
   } else {
     metrics.numInPackets += 1;
     metricsPerUpdate.numInPackets += 1;
   }
-  if(metrics.countries.has(country)) {
+  if (metrics.countries.has(country)) {
     metrics.countries.set(country, metrics.countries.get(country));
   } else {
     metrics.countries.set(country, 1);
   }
-  if(metrics.continents.has(continent)) {
+  if (metrics.continents.has(continent)) {
     metrics.continents.set(continent, metrics.continents.get(continent));
   } else {
     metrics.continents.set(continent, 1);
   }
   let port = d.remove_port;
-  if(metrics.ports.has(port)) {
-    metrics.ports.set(port, metrics.ports.get(port)+1);
+  if (metrics.ports.has(port)) {
+    metrics.ports.set(port, metrics.ports.get(port) + 1);
   } else {
     metrics.ports.set(port, 1);
   }
   port = d.local_port;
-  if(metrics.ports.has(port)) {
-    metrics.ports.set(port, metrics.ports.get(port)+1);
+  if (metrics.ports.has(port)) {
+    metrics.ports.set(port, metrics.ports.get(port) + 1);
   } else {
     metrics.ports.set(port, 1);
   }
@@ -132,31 +132,116 @@ function registerMetric(d, country, continent) {
 ///////////////////////// Global Variables///////////////////////////////////////
 
 let windows = [];
-windows.push({ x: 2, y: 0, w: 36, h: 35 });
-windows.push({ x: 86, y: 0, w: 36, h: 35 });
-windows.push({ x: 170, y: 0, w: 36, h: 35 });
+windows.push({
+  x: 2,
+  y: 0,
+  w: 36,
+  h: 35
+});
+windows.push({
+  x: 86,
+  y: 0,
+  w: 36,
+  h: 35
+});
+windows.push({
+  x: 170,
+  y: 0,
+  w: 36,
+  h: 35
+});
 
-windows.push({ x: 2, y: 66, w: 36, h: 49 });
-windows.push({ x: 86, y: 66, w: 36, h: 49 });
-windows.push({ x: 170, y: 66, w: 36, h: 49 });
+windows.push({
+  x: 2,
+  y: 66,
+  w: 36,
+  h: 49
+});
+windows.push({
+  x: 86,
+  y: 66,
+  w: 36,
+  h: 49
+});
+windows.push({
+  x: 170,
+  y: 66,
+  w: 36,
+  h: 49
+});
 
-windows.push({ x: 2, y: 150, w: 36, h: 49 });
-windows.push({ x: 86, y: 150, w: 36, h: 49 });
-windows.push({ x: 170, y: 150, w: 36, h: 49 });
+windows.push({
+  x: 2,
+  y: 150,
+  w: 36,
+  h: 49
+});
+windows.push({
+  x: 86,
+  y: 150,
+  w: 36,
+  h: 49
+});
+windows.push({
+  x: 170,
+  y: 150,
+  w: 36,
+  h: 49
+});
 
-windows.push({ x: 2, y: 234, w: 36, h: 49 });
-windows.push({ x: 86, y: 234, w: 36, h: 49 });
-windows.push({ x: 170, y: 234, w: 36, h: 49 });
+windows.push({
+  x: 2,
+  y: 234,
+  w: 36,
+  h: 49
+});
+windows.push({
+  x: 86,
+  y: 234,
+  w: 36,
+  h: 49
+});
+windows.push({
+  x: 170,
+  y: 234,
+  w: 36,
+  h: 49
+});
 
-windows.push({ x: 2, y: 316, w: 36, h: 44 });
-windows.push({ x: 86, y: 316, w: 36, h: 44 });
-windows.push({ x: 170, y: 316, w: 36, h: 44 });
+windows.push({
+  x: 2,
+  y: 316,
+  w: 36,
+  h: 44
+});
+windows.push({
+  x: 86,
+  y: 316,
+  w: 36,
+  h: 44
+});
+windows.push({
+  x: 170,
+  y: 316,
+  w: 36,
+  h: 44
+});
 
 let centerWindow = windows[7];
 
 let columns = [];
-columns.push({x: 38, y: 0, w: 48, h: 360});
-columns.push({x: 122, y: 0, w: 48, h: 360});
+columns.push({
+  x: 38,
+  y: 0,
+  w: 48,
+  h: 360
+});
+columns.push({
+  x: 122,
+  y: 0,
+  w: 48,
+  h: 360
+});
 
 const MAX_PARTICLE_COUNT = 250;
 
@@ -198,17 +283,20 @@ function switchPacketDirection() {
   clearScreen = true;
   displayTextSize = 24;
   droplets = [];
-    if(doOutPackets) {
-      doOutPackets = false;
-      displayText = "INCOMING";
-      baseHueColor = 0;
-    } else {
-      doOutPackets = true;
-      displayText = "OUTGOING";
-      baseHueColor = 0;
-    }
-    setTimeout(()=>{displayText = ""; increaseBackgroundPhase = true;}, textDuration);
-    setTimeout(switchPacketDirection, directionDuration);
+  if (doOutPackets) {
+    doOutPackets = false;
+    displayText = "INCOMING";
+    baseHueColor = 0;
+  } else {
+    doOutPackets = true;
+    displayText = "OUTGOING";
+    baseHueColor = 0;
+  }
+  setTimeout(() => {
+    displayText = "";
+    increaseBackgroundPhase = true;
+  }, textDuration);
+  setTimeout(switchPacketDirection, directionDuration);
 }
 
 switchPacketDirection();
@@ -237,15 +325,18 @@ function setup() {
 
   // Calculate window center points
   for (w of windows) {
-    w.x *= subsampling; w.y *= subsampling; w.w *= subsampling; w.h *= subsampling;
+    w.x *= subsampling;
+    w.y *= subsampling;
+    w.w *= subsampling;
+    w.h *= subsampling;
     w.center = createVector(w.x + w.w / 2, w.y + w.h / 2);
     w.halfWidthSq = Math.pow(w.w / 2, 2);
     w.halfHeightSq = Math.pow(w.h / 2, 2);
   }
 
-  for(let i = 0; i < windows.length-2; i++) {
-    let center = (windows[i].center.y + windows[i+1].center.y)/2;
-    console.log("center: " + ((center/height)-0.5));
+  for (let i = 0; i < windows.length - 2; i++) {
+    let center = (windows[i].center.y + windows[i + 1].center.y) / 2;
+    console.log("center: " + ((center / height) - 0.5));
   }
 
   background("#FFFFFF");
@@ -265,23 +356,33 @@ function setup() {
 function draw() {
 
   let now = Date.now(); // current time in milliseconds
-  if(lastNow == 0) {
+  if (lastNow == 0) {
     lastNow = now;
   }
   let dt = now - lastNow;
 
-  if(increaseBackgroundPhase) {
+  if (increaseBackgroundPhase) {
     let duration = directionDuration - textDuration;
     backgroundPhase += (Math.PI * 2) / duration * dt;
   }
 
   // Update metrics
 
-  metricsDatapoints.numPackets = metricsDatapoints.numPackets.filter((e) => {return now - e.ts < 1000; });
-  metricsDatapoints.totalLen = metricsDatapoints.totalLen.filter((e) => {return now - e.ts < 1000; });
+  metricsDatapoints.numPackets = metricsDatapoints.numPackets.filter((e) => {
+    return now - e.ts < 1000;
+  });
+  metricsDatapoints.totalLen = metricsDatapoints.totalLen.filter((e) => {
+    return now - e.ts < 1000;
+  });
 
-  metricsDatapoints.numPackets.push({value: metricsPerUpdate.numPackets, ts: now});
-  metricsDatapoints.totalLen.push({value: metricsPerUpdate.totalLen, ts: now});
+  metricsDatapoints.numPackets.push({
+    value: metricsPerUpdate.numPackets,
+    ts: now
+  });
+  metricsDatapoints.totalLen.push({
+    value: metricsPerUpdate.totalLen,
+    ts: now
+  });
 
   metricsPerUpdate.totalLen = 0;
   metricsPerUpdate.numInPackets = 0;
@@ -289,20 +390,22 @@ function draw() {
   metricsPerUpdate.numPackets = 0;
 
   // let rollingNumPackets = metricsDatapoints.numPackets.reduce((a, b) => { return a + b.value; }, 0);
-  let rollingTotalLen = metricsDatapoints.totalLen.reduce((a, b) => { return a + b.value; }, 0);
+  let rollingTotalLen = metricsDatapoints.totalLen.reduce((a, b) => {
+    return a + b.value;
+  }, 0);
 
   let rollingNumPackets = 0;
-  for(let d of metricsDatapoints.numPackets) {
+  for (let d of metricsDatapoints.numPackets) {
     rollingNumPackets += d.value;
   }
-  
-  
+
+
 
   // Clear if needed
   // clear();
 
   // Set canvas background
-  if(clearScreen) {
+  if (clearScreen) {
     background("rgba(1.0,1.0,1.0,1.0)");
     clearScreen = false;
   }
@@ -311,21 +414,21 @@ function draw() {
   backgroundAlpha = Math.pow(Math.cos(backgroundPhase) * 0.5 + 0.5, 6.0) * 20.0;
   let backgroundHue = Math.min((rollingTotalLen / 1000000.0 - 2.0) * 3.0, 9.0);
   background(backgroundHue, 100, backgroundHue * 4, backgroundAlpha);
-  
-  
+
+
 
   colorMode(HSL, 100);
   strokeWeight(subsampling);
   noFill();
-  for(let drop of droplets) {
-    stroke(drop.hue, drop.saturation, 25 + drop.lightness, (1.0 - drop.size/drop.maxSize) * 100);
+  for (let drop of droplets) {
+    stroke(drop.hue, drop.saturation, 25 + drop.lightness, (1.0 - drop.size / drop.maxSize) * 100);
     let dropSize = drop.size;
-    if(drop.out == false) {
+    if (drop.out == false) {
       dropSize = drop.maxSize - dropSize;
     }
     circle(drop.x, drop.y, dropSize);
     drop.size += subsampling;
-    drop.lightness -= (10 -drop.hue) * 0.1;
+    drop.lightness -= (10 - drop.hue) * 0.1;
     let size = drop.size;
     // while(size > 30) {
     //   size -= 30;
@@ -335,6 +438,27 @@ function draw() {
 
   droplets = droplets.filter((d) => d.size < d.maxSize);
 
+
+
+
+  // positionSeed += 0.001;
+  // Draw text
+  colorMode(HSL, 100);
+  fill(75, 100, 100, 100);
+  textSize(displayTextSize * subsampling);
+  displayTextSize += displayTextSizeGrowth * (dt / 1000.0);
+  // lastCountry = "Hong Kong (China)";
+  // if(lastCountry.length >= 13) {
+  //   textSize(37 - lastCountry.length);
+  // }
+  text(displayText, width / 2, 130 * subsampling);
+  // textSize(24);
+  // text('OCEANIA', width/2, 297);
+
+  // fill(255, 100, 50, 50);
+  // rect(centerWindow.x, centerWindow.y, centerWindow.w, centerWindow.h);
+  // console.log("num packets: " + num + " elements in particles: " + particles.size);
+
   // Draw the windows
   fill(50, 100);
   noStroke();
@@ -343,31 +467,14 @@ function draw() {
     rect(win.x, win.y, win.w, win.h);
     let inset = subsampling;
     fill(15, 100);
-    rect(win.x + inset, win.y + inset, win.w - (inset*2), win.h - (inset*2));
+    rect(win.x + inset, win.y + inset, win.w - (inset * 2), win.h - (inset * 2));
     fill(30, 100);
-    let crossSize = 2*subsampling;
-    rect(win.x + win.w/2 - (crossSize/2), win.y + inset, crossSize, win.h - (inset*2));
+    let crossSize = 2 * subsampling;
+    rect(win.x + win.w / 2 - (crossSize / 2), win.y + inset, crossSize, win.h - (inset * 2));
     // rect(win.x, win.y + win.h/2 - (crossSize/2), win.w, crossSize);
   }
 
-  
-  // positionSeed += 0.001;
-  // Draw text
-  colorMode(HSL, 100);
-  fill(75, 100, 100, 100);
-  textSize(displayTextSize * subsampling);
-  displayTextSize += displayTextSizeGrowth * (dt/1000.0);
-  // lastCountry = "Hong Kong (China)";
-  // if(lastCountry.length >= 13) {
-  //   textSize(37 - lastCountry.length);
-  // }
-  text(displayText, width/2, 130*subsampling);
-  // textSize(24);
-  // text('OCEANIA', width/2, 297);
 
-  // fill(255, 100, 50, 50);
-  // rect(centerWindow.x, centerWindow.y, centerWindow.w, centerWindow.h);
-  // console.log("num packets: " + num + " elements in particles: " + particles.size);
   lastNow = now;
 } // End Draw
 
@@ -397,6 +504,7 @@ function windowContains(win, pos) {
 }
 
 const FORCE = 10;
+
 function windowForce(win, pos) {
   let distX = win.center.x - pos.x;
   let distY = win.center.y - pos.y;
