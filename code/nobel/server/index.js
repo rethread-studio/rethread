@@ -4,7 +4,7 @@ const countryLookup = require("country-code-lookup");
 const http = require("http");
 const express = require("express");
 const bodyParser = require("body-parser");
-const reload = require('reload');
+const reload = require("reload");
 
 const WSServer = require("./WSServer");
 const services = require("./services");
@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 let visualPath = "../visuals-sketch2";
 if (process.argv.length > 2) {
-  visualPath = process.argv[3];
+  visualPath = process.argv[2];
 }
 app.use("/", express.static(visualPath));
 
@@ -25,9 +25,23 @@ wss.on("connection", function (ws, request) {
   ws.on("message", function (message) {});
 });
 
-server.listen(1189, function () {
-  console.log(`Netflow server on port 1189`);
-});
+// Reload code here
+reload(app)
+  .then(function (reloadReturned) {
+    watch.watchTree(visualPath, function (f, curr, prev) {
+      // Fire server-side reload event
+      reloadReturned.reload();
+    });
+    server.listen(1189, function () {
+      console.log(`Netflow server on port 1189`);
+    });
+  })
+  .catch(function (err) {
+    console.error(
+      "Reload could not start, could not start server/sample app",
+      err
+    );
+  });
 
 const knownIPs = {};
 function getLocation(ip) {
