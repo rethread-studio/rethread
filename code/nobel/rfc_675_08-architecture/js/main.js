@@ -141,7 +141,8 @@ let metricsDatapoints = {
 let scenes = new Map();
 
 // scenes.set("default_scene", new Scene());
-scenes.set("numbers", new NumbersScene());
+// scenes.set("numbers", new NumbersScene());
+scenes.set("drops", new DropsScene());
 
 /// P5 functions
 

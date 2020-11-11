@@ -111,7 +111,7 @@ class NumbersScene extends Scene {
             to.draw();
             if (to.update(dt) == 1) {
                 this.backgroundAlphaChange *= -1;
-                console.log("Change direction, this.backgroundAlphaChange: " + this.backgroundAlphaChange);
+                // console.log("Change direction, this.backgroundAlphaChange: " + this.backgroundAlphaChange);
                 if (this.backgroundAlphaChange > 0) {
                     this.particleDir = (this.particleDir + 1) % this.particleDirections.length;
                 }
