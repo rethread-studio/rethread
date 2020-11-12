@@ -213,7 +213,7 @@ function draw() {
             playhead.scoreIndex += 1;
             if(playhead.scoreIndex < playhead.score.length) {
                 playhead.fadingInSceneName = playhead.score[playhead.scoreIndex].name;
-                playhead.fadingInScene = scenes.get(playhead.currentSceneName);
+                playhead.fadingInScene = scenes.get(playhead.fadingInSceneName);
                 playhead.fadingInScene.reset(playhead.score[playhead.scoreIndex].sections);
             } else {
                 playhead.fadingInScene = undefined;
@@ -275,7 +275,9 @@ function draw() {
         playhead.currentScene.draw(dt);
     } else if(playhead.state == "crossfade") {
         playhead.currentScene.draw(dt);
-        playhead.fadingInScene.draw(dt);
+        if(playhead.fadingInScene != undefined) {
+            playhead.fadingInScene.draw(dt);
+        }
     } else if(playhead.state == "end of score") {
         
     }
