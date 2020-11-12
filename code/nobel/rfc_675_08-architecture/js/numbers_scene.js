@@ -118,8 +118,9 @@ class NumbersScene extends Scene {
             }
         }
     }
-    reset() {
+    reset(sections) {
         // This is called to reset the state of the Scene
+        this.sections = sections;
     }
     registerPacket(internalData) {
         this.addParticle(internalData.len);
@@ -169,6 +170,15 @@ class NumbersScene extends Scene {
             //   lightness: lightness * 70 + 10,
             // })
         }
+    }
+    fadeIn(duration) {
+        // Called when the previous scene is starting to fade out
+    }
+    fadeOut(duration) {
+        // Called from within the Scene when the "fade out" section starts
+    }
+    play() {
+        // Called when this Scene becomes the current Scene (after the crossfade)
     }
 }
 

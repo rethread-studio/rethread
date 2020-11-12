@@ -65,15 +65,15 @@ class DropsScene extends Scene {
         this.displayTextSize += this.displayTextSizeGrowth * dt;
         text(this.displayText, width / 2, 130 * subsampling);
     }
-    reset() {
+    reset(sections) {
         // This is called to reset the state of the Scene
+        this.sections = sections;
     }
     registerPacket(internalData) {
         if (internalData.len > 0 && internalData.out == this.doOutPackets) {
             this.addDroplet(internalData.len, this.baseHueColor, internalData.out);
         }
     }
-
 
     addDroplet(len, baseHue, out) {
         let hue = baseHue + Math.min(len / 50000, 10);
@@ -114,5 +114,14 @@ class DropsScene extends Scene {
     hideText() {
         this.displayText = "";
         this.increaseBackgroundPhase = true;
+    }
+    fadeIn(duration) {
+        // Called when the previous scene is starting to fade out
+    }
+    fadeOut(duration) {
+        // Called from within the Scene when the "fade out" section starts
+    }
+    play() {
+        // Called when this Scene becomes the current Scene (after teh crossfade)
     }
 }

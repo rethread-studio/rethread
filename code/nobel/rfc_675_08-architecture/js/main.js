@@ -140,9 +140,20 @@ let metricsDatapoints = {
 // Stores scenes in a Map to retrieve them easily by name
 let scenes = new Map();
 
-// scenes.set("default_scene", new Scene());
-// scenes.set("numbers", new NumbersScene());
+scenes.set("default_scene", new Scene());
+scenes.set("numbers", new NumbersScene());
 scenes.set("drops", new DropsScene());
+
+let currentScene;
+let playhead = {
+    scoreIndex: 0,
+    state: "before start", // "before start", "playing", "crossfade", "end of score"
+    currentScene: undefined,
+    currentSceneName: "",
+    fadingInScene: undefined,
+    fadingInSceneName: undefined,
+    score: score,
+};
 
 /// P5 functions
 
@@ -176,16 +187,55 @@ function setup() {
     for (let scene of scenes.values()) {
         scene.setup();
     }
-}
+} // End setup
 
 
 function draw() {
 
+    // Update time
     let now = Date.now() * 0.001; // current time in seconds
     if (lastNow == 0) {
         lastNow = now;
     }
     let dt = now - lastNow;
+
+    // Update score
+    if(playhead.state == "before start") {
+        playhead.currentSceneName = playhead.score[playhead.scoreIndex].name;
+        playhead.currentScene = scenes.get(playhead.currentSceneName);
+        playhead.currentScene.reset(playhead.score[playhead.scoreIndex].sections);
+        playhead.currentScene.play();
+        playhead.countdown = playhead.score[playhead.scoreIndex].totalDuration;
+        playhead.state = "playing";
+    } else if(playhead.state == "playing") {
+        playhead.countdown -= dt;
+        if(playhead.countdown <= playhead.score[playhead.scoreIndex].fadeOutDuration) {
+            playhead.scoreIndex += 1;
+            if(playhead.scoreIndex < playhead.score.length) {
+                playhead.fadingInSceneName = playhead.score[playhead.scoreIndex].name;
+                playhead.fadingInScene = scenes.get(playhead.currentSceneName);
+                playhead.fadingInScene.reset(playhead.score[playhead.scoreIndex].sections);
+            } else {
+                playhead.fadingInScene = undefined;
+                playhead.fadingInSceneName = "";
+            }
+            playhead.state = "crossfade";
+        }
+    } else if(playhead.state == "crossfade") {
+        playhead.countdown -= dt;
+        if(playhead.countdown <= 0) {
+            if(playhead.fadingInScene != undefined) {
+                playhead.fadingInScene.play();
+                playhead.currentScene = playhead.fadingInScene;
+                playhead.currentSceneName = playhead.fadingInSceneName;
+                playhead.state = "playing";
+            } else {
+                playhead.state = "end of score";
+            }
+        }
+    } else if(playhead.state == "end of score") {
+        
+    }
 
     // Update metrics
     metricsDatapoints.numPackets = metricsDatapoints.numPackets.filter((e) => {
@@ -218,8 +268,16 @@ function draw() {
         metrics.rollingNumPackets += d.value;
     }
 
-    for (let scene of scenes.values()) {
-        scene.draw(dt);
+    // Draw the scene(s)
+    if(playhead.state == "before start") {
+        
+    } else if(playhead.state == "playing") {
+        playhead.currentScene.draw(dt);
+    } else if(playhead.state == "crossfade") {
+        playhead.currentScene.draw(dt);
+        playhead.fadingInScene.draw(dt);
+    } else if(playhead.state == "end of score") {
+        
     }
 
     // Draw the windows
@@ -238,7 +296,7 @@ function draw() {
     }
 
     lastNow = now; // Set the timestamp for this update to get time between frames
-}
+} // End draw
 
 
 // WEBSOCKET RECEIVE PACKETS
