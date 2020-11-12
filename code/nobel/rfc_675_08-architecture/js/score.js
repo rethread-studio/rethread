@@ -16,16 +16,18 @@ var score = [
 {
     name: "drops",
     sections: [
-        {name: "in", duration: 30},
-        {name: "out", duration: 30},
-        {name: "fade out", duration: 10}
+        {name: "in", duration: 1},
+        {name: "out", duration: 1},
+        {name: "fade out", duration: 1}
     ]
 },
 {
     name: "numbers",
     sections: [
-        {name: "incoming", duration: 30},
-        {name: "outgoing", duration: 30},
+        {name: "all", duration: 10},
+        {name: "in", duration: 10},
+        {name: "out", duration: 10},
+        {name: "size", duration: 10},
         {name: "fade out", duration: 10}
     ]
 },

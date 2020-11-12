@@ -215,6 +215,7 @@ function draw() {
                 playhead.fadingInSceneName = playhead.score[playhead.scoreIndex].name;
                 playhead.fadingInScene = scenes.get(playhead.fadingInSceneName);
                 playhead.fadingInScene.reset(playhead.score[playhead.scoreIndex].sections);
+                playhead.fadingInScene.fadeIn(playhead.countdown);
             } else {
                 playhead.fadingInScene = undefined;
                 playhead.fadingInSceneName = "";
@@ -228,6 +229,7 @@ function draw() {
                 playhead.fadingInScene.play();
                 playhead.currentScene = playhead.fadingInScene;
                 playhead.currentSceneName = playhead.fadingInSceneName;
+                playhead.countdown = playhead.score[playhead.scoreIndex].totalDuration;
                 playhead.state = "playing";
             } else {
                 playhead.state = "end of score";
@@ -307,9 +309,15 @@ new WebSocketClient().onmessage = (data) => {
     let internalData = JSON.parse(data.data);
     // Send the data to the current scene or to all of them?
 
-    for (let scene of scenes.values()) {
-        scene.registerPacket(internalData);
+    if(playhead.state == "playing") {
+        playhead.currentScene.registerPacket(internalData);
+    } else if(playhead.state == "crossfade") {
+        playhead.currentScene.registerPacket(internalData);
+        if(playhead.fadingInScene != undefined) {
+            playhead.fadingInScene.registerPacket(internalData);
+        }
     }
+    
 
     let continent;
     let country;

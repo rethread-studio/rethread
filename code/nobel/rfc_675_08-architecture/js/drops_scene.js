@@ -30,7 +30,6 @@ class DropsScene extends Scene {
     draw(dt) {
         // Update state and draw. dt is the time since last frame in seconds.
 
-        // Update playhead
         if(this.playhead.state == "before start") {
             return;
         } else if(this.playhead.state == "fade in") {
@@ -52,47 +51,47 @@ class DropsScene extends Scene {
                     }
                 }
             }
-        }
-
-        if (this.increaseBackgroundPhase) {
-            let duration = this.directionDuration - this.textDuration;
-            this.backgroundPhase += (Math.PI * 2) / duration * dt;
-        }
-
-        if (this.clearScreen) {
-            background("rgba(1.0,1.0,1.0,1.0)");
-            this.clearScreen = false;
-        }
-
-        // background("rgba(1.0,1.0,1.0,0.00)");
-        this.backgroundAlpha = Math.pow(Math.cos(this.backgroundPhase) * 0.5 + 0.5, 6.0) * 20.0;
-        let backgroundHue = Math.min((metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0, 9.0);
-        background(backgroundHue, 100, backgroundHue * 4, this.backgroundAlpha);
-
-        colorMode(HSL, 100);
-        strokeWeight(subsampling);
-        noFill();
-        for (let drop of this.droplets) {
-            stroke(drop.hue, drop.saturation, 25 + drop.lightness, (1.0 - drop.size / drop.maxSize) * 100);
-            let dropSize = drop.size;
-            if (drop.out == false) {
-                dropSize = drop.maxSize - dropSize;
+        
+            if (this.increaseBackgroundPhase) {
+                let duration = this.directionDuration - this.textDuration;
+                this.backgroundPhase += (Math.PI * 2) / duration * dt;
             }
-            circle(drop.x, drop.y, dropSize);
-            drop.size += subsampling;
-            drop.lightness -= (10 - drop.hue) * 0.1;
+
+            if (this.clearScreen) {
+                background("rgba(1.0,1.0,1.0,1.0)");
+                this.clearScreen = false;
+            }
+
+            // background("rgba(1.0,1.0,1.0,0.00)");
+            this.backgroundAlpha = Math.pow(Math.cos(this.backgroundPhase) * 0.5 + 0.5, 6.0) * 20.0;
+            let backgroundHue = Math.min((metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0, 9.0);
+            background(backgroundHue, 100, backgroundHue * 4, this.backgroundAlpha);
+
+            colorMode(HSL, 100);
+            strokeWeight(subsampling);
+            noFill();
+            for (let drop of this.droplets) {
+                stroke(drop.hue, drop.saturation, 25 + drop.lightness, (1.0 - drop.size / drop.maxSize) * 100);
+                let dropSize = drop.size;
+                if (drop.out == false) {
+                    dropSize = drop.maxSize - dropSize;
+                }
+                circle(drop.x, drop.y, dropSize);
+                drop.size += subsampling;
+                drop.lightness -= (10 - drop.hue) * 0.1;
+            }
+
+            this.droplets = this.droplets.filter((d) => d.size < d.maxSize);
+
+            // Draw text
+            colorMode(HSL, 100);
+            fill(75, 100, 100, 100);
+            textFont(antonFont);
+            textAlign(CENTER, CENTER);
+            textSize(this.displayTextSize * subsampling);
+            this.displayTextSize += this.displayTextSizeGrowth * dt;
+            text(this.displayText, width / 2, 130 * subsampling);
         }
-
-        this.droplets = this.droplets.filter((d) => d.size < d.maxSize);
-
-        // Draw text
-        colorMode(HSL, 100);
-        fill(75, 100, 100, 100);
-        textFont(antonFont);
-        textAlign(CENTER, CENTER);
-        textSize(this.displayTextSize * subsampling);
-        this.displayTextSize += this.displayTextSizeGrowth * dt;
-        text(this.displayText, width / 2, 130 * subsampling);
     }
     reset(sections) {
         // This is called to reset the state of the Scene
@@ -152,9 +151,11 @@ class DropsScene extends Scene {
         // Called when the previous scene is starting to fade out
         this.playhead.state = "fade in";
         this.playhead.countdown = duration;
+        console.log("Fade in drops");
     }
     fadeOut(duration) {
         // Called from within the Scene when the "fade out" section starts
+        this.playhead.state = "fade out";
         console.log("Fade out drops");
     }
     play() {
