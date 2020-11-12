@@ -1,0 +1,30 @@
+/*////////////////////////////////////////////////////////////////////*/
+
+.canvasClass{
+  position: absolute; 
+
+  left: 0px; 
+  right: 0;
+  top: 0px;
+  bottom: 0;
+  z-index: 10;
+}
+
+.shaderClass{
+  position: absolute; 
+
+  left: 0px; 
+  right: 0;
+  top: 0px;
+  bottom: 0;
+  z-index: 1;
+}
+
+canvas {
+  display: block;
+  height: 100%!important;
+  width: inherit!important;
+  margin: auto;
+}
+
+/*/ ///////////////////////////////////////////////////////////////////*/
