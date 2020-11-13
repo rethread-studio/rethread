@@ -16,7 +16,7 @@ class Scene {
     reset(sections) {
         // This is called to reset the state of the Scene before it is started
     }
-    registerPacket(internalData) {
+    registerPacket(internalData, country, continent) {
 
     }
     fadeIn(duration) {

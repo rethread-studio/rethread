@@ -13,18 +13,24 @@
 
 // Fade out is not a section, it is instead triggered
 var score = [
-{
-    name: "drops",
-    sections: [
-        {name: "in", duration: 1},
-        {name: "out", duration: 1},
-        {name: "fade out", duration: 1}
-    ]
-},
+// {
+//     name: "drops",
+//     sections: [
+//         {name: "in", duration: 10, region: "Sweden"},
+//         {name: "out", duration: 10, region: "Sweden"},
+//         {name: "in", duration: 10, region: "Europe"},
+//         {name: "out", duration: 10, region: "Europe"},
+//         {name: "in", duration: 10, region: "none"},
+//         {name: "out", duration: 10, region: "none"},
+//         {name: "fade out", duration: 1}
+//     ]
+// },
 {
     name: "numbers",
     sections: [
-        {name: "all", duration: 10},
+        {name: "all", duration: 10, region: "Sweden"},
+        {name: "all", duration: 10, region: "Europe"},
+        {name: "all", duration: 10, region: "none"},
         {name: "in", duration: 10},
         {name: "out", duration: 10},
         {name: "size", duration: 10},
