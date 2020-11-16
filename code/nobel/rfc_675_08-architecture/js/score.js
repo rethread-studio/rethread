@@ -13,34 +13,34 @@
 
 // Fade out is not a section, it is instead triggered
 var score = [
-  {
-    name: "ports",
-    sections: [
-      { name: "packets", duration: 20 },
-      { name: "network", duration: 20 },
-      { name: "fade out", duration: 5 },
-    ],
-  },
-  // {
+  //   {
+  //     name: "ports",
+  //     sections: [
+  //       { name: "packets", duration: 20 },
+  //       { name: "network", duration: 20 },
+  //       { name: "fade out", duration: 5 },
+  //     ],
+  //   },
+  //   {
   //     name: "drops",
   //     sections: [
-  //         {name: "in", duration: 10, region: "Sweden"},
-  //         {name: "out", duration: 10, region: "Sweden"},
-  //         {name: "in", duration: 10, region: "Europe"},
-  //         {name: "out", duration: 10, region: "Europe"},
-  //         {name: "in", duration: 10, region: "none"},
-  //         {name: "out", duration: 10, region: "none"},
-  //         {name: "fade out", duration: 1}
-  //     ]
-  // },
+  //       { name: "in", duration: 10, region: "Sweden" },
+  //       { name: "out", duration: 10, region: "Sweden" },
+  //       { name: "in", duration: 10, region: "Europe" },
+  //       { name: "out", duration: 10, region: "Europe" },
+  //       { name: "in", duration: 10, region: "none" },
+  //       { name: "out", duration: 10, region: "none" },
+  //       { name: "fade out", duration: 1 },
+  //     ],
+  //   },
   {
     name: "numbers",
     sections: [
-      { name: "all", duration: 10, region: "Sweden" },
-      { name: "all", duration: 10, region: "Europe" },
-      { name: "all", duration: 10, region: "none" },
-      { name: "in", duration: 10 },
-      { name: "out", duration: 10 },
+      //   { name: "all", duration: 10, region: "Sweden" },
+      //   { name: "all", duration: 10, region: "Europe" },
+      //   { name: "all", duration: 10, region: "none" },
+      //   { name: "in", duration: 10 },
+      //   { name: "out", duration: 10 },
       { name: "size", duration: 10 },
       { name: "fade out", duration: 10 },
     ],

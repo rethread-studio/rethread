@@ -17,8 +17,8 @@ class NumbersScene extends Scene {
       });
     }
     this.averageLen = 0;
-    this.particleDirections = ["down", "right", "left", "up"];
-    this.particleDir = 3;
+    this.currentParticleDir = "down";
+    this.nextParticleDir = "down";
     this.backgroundAlphaChange = 0.6;
     this.backgroundAlpha = 0;
     this.regionRestriction = "none";
@@ -28,6 +28,7 @@ class NumbersScene extends Scene {
       countdown: 0,
       state: "before start", // "playing", "fade in", "end of movement"
     };
+    this.fadeOutDirectionTime = 1.0;
   }
   preload() {
     // This function is called from the p5 preload function. Use it
@@ -97,6 +98,7 @@ class NumbersScene extends Scene {
               dur * 0.3,
               dur * 0.7
             );
+            this.nextParticleDir = "down";
           } else if (this.sections[this.playhead.sectionIndex].name == "in") {
             let dur = this.sections[this.playhead.sectionIndex].duration;
             this.textObject.setNewIteration(
@@ -104,6 +106,7 @@ class NumbersScene extends Scene {
               dur * 0.3,
               dur * 0.7
             );
+            this.nextParticleDir = "right";
           } else if (this.sections[this.playhead.sectionIndex].name == "out") {
             let dur = this.sections[this.playhead.sectionIndex].duration;
             this.textObject.setNewIteration(
@@ -111,6 +114,7 @@ class NumbersScene extends Scene {
               dur * 0.3,
               dur * 0.7
             );
+            this.nextParticleDir = "left";
           } else if (this.sections[this.playhead.sectionIndex].name == "size") {
             let dur = this.sections[this.playhead.sectionIndex].duration;
             this.textObject.setNewIteration(
@@ -118,6 +122,7 @@ class NumbersScene extends Scene {
               dur * 0.3,
               dur * 0.7
             );
+            this.nextParticleDir = "up";
           }
 
           if ("region" in this.sections[this.playhead.sectionIndex]) {
@@ -151,7 +156,7 @@ class NumbersScene extends Scene {
       for (let p of this.particles) {
         this.pg.fill(p.hue, p.saturation, p.lightness);
         this.pg.ellipse(p.x, p.y, p.size, p.size);
-        switch (this.particleDirections[this.particleDir]) {
+        switch (this.currentParticleDir) {
           case "right":
             p.x += p.vel;
             if (p.x >= canvasX) {
@@ -235,10 +240,8 @@ class NumbersScene extends Scene {
       this.textObject.draw();
       if (this.textObject.update(dt) == 1) {
         this.backgroundAlphaChange *= -1;
-        // console.log("Change direction, this.backgroundAlphaChange: " + this.backgroundAlphaChange);
         if (this.backgroundAlphaChange > 0) {
-          this.particleDir =
-            (this.particleDir + 1) % this.particleDirections.length;
+          this.currentParticleDir = this.nextParticleDir;
         }
       }
     } else if (this.playhead.state == "fade out") {
@@ -253,39 +256,44 @@ class NumbersScene extends Scene {
       this.pg.fill(backgroundHue, 100, backgroundHue * 4.0, 50);
       this.pg.rect(0, 0, canvasX, canvasY);
       for (let p of this.particles) {
-        this.pg.fill(p.hue, p.saturation, p.lightness);
-        this.pg.ellipse(p.x, p.y, p.size, p.size);
-        switch (this.particleDirections[this.particleDir]) {
+        if (
+          p.x > -10 &&
+          p.x < canvasX + 10 &&
+          p.y > -10 &&
+          p.y < canvasY + 10
+        ) {
+          this.pg.fill(p.hue, p.saturation, p.lightness);
+          this.pg.ellipse(p.x, p.y, p.size, p.size);
+        }
+
+        switch (this.currentParticleDir) {
           case "right":
             p.x += p.vel;
-            if (p.x >= canvasX) {
-              p.vel = 0;
-              p.size = 0;
-            }
+
             break;
           case "left":
             p.x -= p.vel;
-            if (p.x < 0) {
-              p.vel = 0;
-              p.size = 0;
-            }
+
             break;
           case "up":
             p.y -= p.vel;
-            if (p.y < 0) {
-              p.vel = 0;
-              p.size = 0;
-            }
+
             break;
           case "down":
             p.y += p.vel;
-            if (p.y > canvasY) {
-              p.vel = 0;
-              p.size = 0;
-            }
+
             break;
           default:
         }
+      }
+
+      this.fadeOutDirectionCountdown -= dt;
+      if (this.fadeOutDirectionCountdown <= 0.0) {
+        this.fadeOutDirectionCountdown = this.fadeOutDirectionTime;
+        this.fadeOutDirectionTime = Math.random() * 0.7 + 0.2;
+        this.currentParticleDir = this.nextParticleDir;
+        const dirs = ["down", "right", "up", "left"];
+        this.nextParticleDir = dirs[Math.floor(Math.random() * dirs.length)];
       }
 
       drawingContext.globalAlpha = Math.pow(this.backgroundAlpha, 2);
@@ -298,7 +306,7 @@ class NumbersScene extends Scene {
     this.sections = sections;
   }
   registerPacket(internalData, country, continent) {
-    if (this.playhead.state != "fade out") {
+    if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
       if (this.regionRestriction == "none") {
         this.addParticle(internalData.len);
       } else if (
@@ -314,17 +322,17 @@ class NumbersScene extends Scene {
     if (len > 1) {
       let lightness = 1.0 - Math.pow(1.0 - this.averageLen / 20000.0, 3.0);
       let x, y;
-      switch (this.particleDirections[this.particleDir]) {
+      switch (this.currentParticleDir) {
         case "right":
           x = -10;
           y = Math.random() * canvasY;
           break;
         case "left":
-          x = canvasX * subsampling + 10;
+          x = canvasX + 10;
           y = Math.random() * canvasY;
           break;
         case "up":
-          y = canvasY * subsampling + 10;
+          y = canvasY + 10;
           x = Math.random() * canvasX;
           break;
         case "down":
@@ -365,6 +373,9 @@ class NumbersScene extends Scene {
   fadeOut(duration) {
     // Called from within the Scene when the "fade out" section starts
     this.playhead.state = "fade out";
+    this.currentParticleDir = "down";
+    this.nextParticleDir = "right";
+    this.fadeOutDirectionCountdown = this.fadeOutDirectionTime;
     console.log("Fade out numbers");
   }
   play() {
