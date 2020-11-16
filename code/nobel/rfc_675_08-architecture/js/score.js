@@ -13,42 +13,58 @@
 
 // Fade out is not a section, it is instead triggered
 var score = [
-  //   {
-  //     name: "ports",
-  //     sections: [
-  //       { name: "packets", duration: 20 },
-  //       { name: "network", duration: 20 },
-  //       { name: "fade out", duration: 5 },
-  //     ],
-  //   },
-  //   {
-  //     name: "drops",
-  //     sections: [
-  //       { name: "in", duration: 10, region: "Sweden" },
-  //       { name: "out", duration: 10, region: "Sweden" },
-  //       { name: "in", duration: 10, region: "Europe" },
-  //       { name: "out", duration: 10, region: "Europe" },
-  //       { name: "in", duration: 10, region: "none" },
-  //       { name: "out", duration: 10, region: "none" },
-  //       { name: "fade out", duration: 1 },
-  //     ],
-  //   },
+  {
+    name: "drops",
+    sections: [
+      { name: "in", duration: 10, region: "Sweden" },
+      { name: "out", duration: 10, region: "Sweden" },
+      { name: "in", duration: 10, region: "Europe" },
+      { name: "out", duration: 10, region: "Europe" },
+      { name: "in", duration: 10, region: "none" },
+      { name: "out", duration: 10, region: "none" },
+      { name: "fade out", duration: 1 },
+    ],
+  },
   {
     name: "numbers",
     sections: [
-      //   { name: "all", duration: 10, region: "Sweden" },
-      //   { name: "all", duration: 10, region: "Europe" },
-      //   { name: "all", duration: 10, region: "none" },
-      //   { name: "in", duration: 10 },
-      //   { name: "out", duration: 10 },
-      { name: "size", duration: 10 },
+      { name: "all", duration: 10, region: "Sweden" },
+      { name: "all", duration: 10, region: "Europe" },
+      { name: "all", duration: 10, region: "none" },
+      { name: "in", duration: 10 },
+      { name: "out", duration: 10 },
+      { name: "size", duration: 10, region: "Sweden" },
+      { name: "size", duration: 10, region: "Europe" },
+      { name: "size", duration: 10, region: "none" },
       { name: "fade out", duration: 10 },
+    ],
+  },
+  {
+    name: "ports",
+    sections: [
+      { name: "network", duration: 10, pullBackCoeff: 10.0 },
+      { name: "packets", duration: 20 },
+      { name: "network", duration: 2, pullBackCoeff: 1000.0 },
+      { name: "network", duration: 2, pullBackCoeff: 1.0 },
+      { name: "network", duration: 1, pullBackCoeff: 100.0 },
+      { name: "network", duration: 1, pullBackCoeff: 1.0 },
+      { name: "network", duration: 0.5, pullBackCoeff: 100.0 },
+      { name: "network", duration: 20 },
+      { name: "packets", duration: 10, pullBackCoeff: 0.1 },
+      { name: "network", duration: 5, pullBackCoeff: 0.05 },
+      { name: "packets", duration: 4, pullBackCoeff: 0.01 },
+      { name: "network", duration: 4, pullBackCoeff: 0.005 },
+      { name: "network", duration: 0.5, pullBackCoeff: 1000.0 },
+      { name: "packets", duration: 4, pullBackCoeff: 0.002 },
+      { name: "network", duration: 1, pullBackCoeff: 0.0 },
+      { name: "packets", duration: 1, pullBackCoeff: 0.0 },
+      { name: "fade out", duration: 5 },
     ],
   },
 ];
 
 // Process the score to generate all of the non-explicit values
-
+let scoreDuration = 0;
 for (let mvt of score) {
   let totalDuration = 0;
   let fadeOutDuration = 0;
@@ -60,4 +76,8 @@ for (let mvt of score) {
   }
   mvt.totalDuration = totalDuration;
   mvt.fadeOutDuration = fadeOutDuration;
+  scoreDuration += totalDuration;
 }
+console.log(
+  "Score duration: " + scoreDuration + "s = " + scoreDuration / 60 + "min"
+);

@@ -5,6 +5,7 @@ class PortsScene extends Scene {
     this.drawNetwork = false;
     this.drawParticles = true;
     this.sections = [];
+    this.pullBackCoeff = 1.0;
     this.playhead = {
       sectionIndex: 0,
       countdown: 0,
@@ -71,6 +72,14 @@ class PortsScene extends Scene {
             this.drawParticles = false;
             console.log("Network section");
           }
+
+          if ("pullBackCoeff" in this.sections[this.playhead.sectionIndex]) {
+            this.pullBackCoeff = this.sections[
+              this.playhead.sectionIndex
+            ].pullBackCoeff;
+          } else {
+            this.pullBackCoeff = 1.0;
+          }
         }
       }
     }
@@ -87,7 +96,7 @@ class PortsScene extends Scene {
       fill(75, 100, 0, 100);
 
       this.pg.colorMode(HSL, 100);
-      this.originNode.update(dt);
+      this.originNode.update(dt, this.pullBackCoeff);
       this.originNode.drawEdges(
         this.pg,
         this.fallingText.node,
@@ -501,20 +510,24 @@ class Node {
       );
     }
   }
-  update(dt) {
+  update(dt, pullBackCoeff) {
     this.activity -= this.falloff * dt;
     if (this.activity < 0) {
       this.activity = 0;
     }
     if (this.isWindow == false) {
-      let pullBack = this.offsetPos.copy().mult(-1).normalize(); // mult of 0.001 keeps it in check
+      let pullBack = this.offsetPos
+        .copy()
+        .mult(-1)
+        .normalize()
+        .mult(pullBackCoeff); // mult of 0.001 keeps it in check
       this.vel.add(pullBack);
       this.offsetPos.add(this.vel.copy().mult(dt));
     } else {
       windows[this.windowIndex].activity = Math.pow(this.activity, 2.0);
     }
     for (let c of this.connections) {
-      c.update(dt, this.pos);
+      c.update(dt, this.pos, pullBackCoeff);
     }
   }
   drawNodes(g, selectedHue) {
@@ -637,7 +650,7 @@ class Connection {
     this.particles.push(particle);
     // this.node.registerPort(particle.port, previousNodePos);
   }
-  update(dt, previousNodePos) {
+  update(dt, previousNodePos, pullBackCoeff) {
     for (let p of this.particles) {
       p.update(dt);
       if (p.pos >= 1.0) {
@@ -646,7 +659,7 @@ class Connection {
       }
     }
     this.particles = this.particles.filter((p) => p.connectionId == this.id);
-    this.node.update(dt);
+    this.node.update(dt, pullBackCoeff);
     this.edge.update(dt);
   }
   drawNodes(g, selectedHue) {
