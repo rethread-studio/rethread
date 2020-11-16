@@ -283,7 +283,7 @@ new WebSocketClient().onmessage = (data) => {
   //ADD PACKAGES NUMBER
   if (dashBoard != null && isInCountries(internalData.remote_location.country, selectedRegion)) {
     dashBoard.addSize(internalData.len);
-    dashBoard.addPackage()
+    dashBoard.addPackage(1);
     countryManager.addPackage(internalData.remote_location.country)
   };
 

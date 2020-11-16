@@ -33,15 +33,15 @@ class DashBoard {
     display() {
         this.writeTittle();
         this.writePackages();
-        this.writeSize();
+        // this.writeSize();
         if (this.showTick) this.writeLocation();
         this.drawTick();
     }
 
 
 
-    addPackage() {
-        this.packages++;
+    addPackage(num) {
+        this.packages += num;
     }
 
     addSize(_quantity) {
@@ -77,7 +77,7 @@ class DashBoard {
         textSize(this.fontSize.number);
         textAlign(LEFT);
         textFont(this.font);
-        text("PKG " + this.packages, this.positions.row.r3, this.positions.col.c2 + this.positions.padding.top);
+        text(this.packages, this.positions.row.r3, this.positions.col.c2 + this.positions.padding.top);
     }
 
     //Write the size
