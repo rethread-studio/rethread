@@ -1,6 +1,6 @@
 class Country {
 
-    constructor(x, y, colorPallete, goalPos) {
+    constructor(x, y, colorPallete, goalPos, refPoint, name) {
         this.colorPallete = colorPallete;
         this.acceleration = createVector(0, 0);
         this.velocity = createVector(2, 0);
@@ -8,13 +8,28 @@ class Country {
         this.countryName = name;
 
         this.r = 1.0; // Half the width of veihcle's back side
-        this.maxspeed = random(0.002, 1)//random(0.00001, 0.004); //
+        this.maxspeed = random(0.5, 1)//random(0.0005, 0.5)//random(0.00001, 0.004); //
         this.maxforce = 0.1;
 
         this.goalPos = createVector(goalPos.x, goalPos.y);;
 
         this.size = 2;
         this.state = "MOVE";
+        this.packages = 0;
+        this.bigPacket = 1;
+        this.refPoint = refPoint;
+    }
+
+    addPackage(num) {
+        this.packages += num;
+    }
+
+    getPackagesNumb() {
+        return this.packages;
+    }
+
+    getBigPacket() {
+        return this.bigPacket;
     }
 
     getPosition() {
@@ -24,7 +39,7 @@ class Country {
 
     addVelocity() {
         this.maxspeed = this.maxspeed + 0.0005;
-        this.size = min(12, this.size + 0.2);
+        this.size = min(40, this.size + 0.2);
     }
     /////////////////////////////
     follow(p) {
@@ -125,6 +140,7 @@ class Country {
                 this.acceleration.mult(0);
                 if (this.position.dist(this.goalPos) < 5) {
                     this.state = "REMOVE";
+                    //REMOVE POINT 
                 }
 
                 break;

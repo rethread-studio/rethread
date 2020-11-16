@@ -1,6 +1,6 @@
 class Package {
 
-    constructor(x, y, colorPallete, country, path) {
+    constructor(x, y, colorPallete, country, path, name) {
         this.colorPallete = colorPallete;
         this.acceleration = createVector(0, 0);
         this.velocity = createVector(2, 0);
@@ -8,14 +8,15 @@ class Package {
         this.countryName = name;
 
         this.r = 3.0; // Half the width of veihcle's back side
-        this.maxspeed = random(0.5, 1.5); //
+        this.maxspeed = random(2, 3); //
         this.maxforce = 0.1;
         this.country = country;
         this.goalPos = country.getPosition();
 
         this.size = random(1, 4);
         this.state = "MOVE";
-        this.path = path
+        this.path = path;
+        this.alpha = 100;
     }
 
 
@@ -109,15 +110,30 @@ class Package {
 
         switch (this.state) {
             case "MOVE":
+
                 this.velocity.add(this.acceleration);
                 this.velocity.limit(this.maxspeed);
                 this.position.add(this.velocity);
                 this.acceleration.mult(0);
                 this.goalPos = this.country.getPosition();
-                if (this.position.dist(this.goalPos) < 5) {
+
+                if (this.position.dist(this.goalPos) < 10) {
                     this.state = "REMOVE";
                     this.country.addVelocity();
-                    // console.log(this.country)
+                }
+
+                break;
+            case "VANISH":
+
+                this.velocity.add(this.acceleration);
+                this.velocity.limit(this.maxspeed);
+                this.position.add(this.velocity);
+                this.acceleration.mult(0);
+                this.goalPos = this.country.getPosition();
+                this.alpha -= 5;
+
+                if (this.alph < 0) {
+                    this.state = "REMOVE";
                 }
 
                 break;
@@ -146,11 +162,11 @@ class Package {
 
 
         //DRAW COUNTRY
-        if (this.state == "MOVE") {
+        if (this.state == "MOVE" || this.state == "VANISH") {
 
             this.theta = this.velocity.heading() + PI / 2;
-            let { r, g, b } = this.colorPallete.red;
-            fill(r, g, b);
+            let { r, g, b } = this.colorPallete.lightBlue;
+            fill(r, g, b, this.alpha);
             noStroke()
             push();
             translate(this.position.x, this.position.y);

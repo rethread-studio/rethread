@@ -67,12 +67,12 @@ const colorPallete = {
   black: {
     r: 0,
     g: 0,
-    b: 0
+    b: 0,
   },
   green: {
     r: 125,
     g: 250,
-    b: 183
+    b: 183,
   },
   red: {
     r: 201,
@@ -157,6 +157,7 @@ let focusLocation = {
   oceanica: "OC"
 }
 
+
 ///////////////////////// GUI Element Global Variables///////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,14 +210,13 @@ const fontURL = 'assets/fonts/Anton-Regular.ttf';
 
 const test_country = [
   "Sweden",
-  "Belgium",
-  "France",
+  "Norway",
   "Netherlands",
-  "Spain"
+  "United States",
 
 ]
 
-let selectedRegion = test_country;
+let selectedRegion = eu_countries;
 let focusRegion = focusLocation.europe;
 
 // let selectedRegion = ame_countries;
@@ -281,10 +281,12 @@ new WebSocketClient().onmessage = (data) => {
   }
   // if (internalData.remote_location.country == "France") console.log("viva la france")
   //ADD PACKAGES NUMBER
-  if (dashBoard != null && isInCountries(internalData.remote_location.country, selectedRegion)) {
+
+  if (dashBoard != null && internalData.out == true && isInCountries(internalData.local_location.country, selectedRegion)) {
+
     dashBoard.addSize(internalData.len);
-    dashBoard.addPackage(1);
-    countryManager.addPackage(internalData.remote_location.country)
+    // dashBoard.addPackage(1);
+    countryManager.addPackage(internalData.local_location.country)
   };
 
   // addParticle(internalData.len);
@@ -307,7 +309,7 @@ function setup() {
   //CREATE DASHBOARD
   dashBoard = new DashBoard(fontURL, colorPallete, positions, focusRegion, fontSize)
   //CRATE COUNTRY MANAGE
-  countryManager = new CountryManager(selectedRegion, fontURL, fontSize, positions, colorPallete);
+  countryManager = new CountryManager(selectedRegion, fontURL, fontSize, positions, colorPallete, dashBoard);
 
   // Calculate window center points
   for (w of windows) {
@@ -371,13 +373,13 @@ function draw() {
 
   // // Draw the shader to main canvas
   // image(shaderGraphics, 0, 0, width, height);
-
-  //UPDATE DASHBOARD
-  dashBoard.updateData();
-  dashBoard.display();
   //UPDATE COUNTRY MANAGER
   countryManager.updateData();
   countryManager.display();
+  //UPDATE DASHBOARD
+  dashBoard.updateData();
+  dashBoard.display();
+
 
   // Draw the windows
   fill(50, 100);

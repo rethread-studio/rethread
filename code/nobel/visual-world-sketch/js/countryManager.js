@@ -3,9 +3,10 @@
 class CountryManager {
 
 
-    constructor(_countries, _font, fontSize, positions, colorPallete) {
+    constructor(_countries, _font, fontSize, positions, colorPallete, dashBoard) {
         //list of countries to show
         this.countries = _countries;
+        this.dashBoard = dashBoard;
 
         this.fontURL = _font;
         this.font = loadFont(_font);
@@ -13,9 +14,27 @@ class CountryManager {
         this.colPosPositions = positions;
         this.colorPallete = colorPallete;
         //initial positons and ending positions
+        this.offsetX = 2;
+        this.endPoint =
+        {
+            x: this.colPosPositions.row.r3,
+            y: this.colPosPositions.col.c2 + 10
+        }
         this.positions = {
             P0: {
                 used: false,
+                points: [
+                    {
+                        x: 54 - this.offsetX,
+                        y: 314
+                    },
+                    {
+                        x: 54,
+                        y: this.colPosPositions.col.c2 + 10
+                    }
+                    ,
+                    this.endPoint
+                ],
                 init: {
                     x: 54,
                     y: 314
@@ -27,6 +46,17 @@ class CountryManager {
             },
             P1: {
                 used: false,
+                points: [
+                    {
+                        x: 80 - this.offsetX,
+                        y: this.colPosPositions.col.c5
+                    },
+                    {
+                        x: 80,
+                        y: this.colPosPositions.col.c2 + 10
+                    },
+                    this.endPoint
+                ],
                 init: {
                     x: 80,
                     y: this.colPosPositions.col.c5
@@ -38,6 +68,17 @@ class CountryManager {
             },
             P2: {
                 used: false,
+                points: [
+                    {
+                        x: 140 - this.offsetX,
+                        y: this.colPosPositions.col.c5
+                    },
+                    {
+                        x: 140,
+                        y: this.colPosPositions.col.c2 + 10
+                    },
+                    this.endPoint
+                ],
                 init: {
                     x: 140,
                     y: this.colPosPositions.col.c5
@@ -49,6 +90,17 @@ class CountryManager {
             },
             P3: {
                 used: false,
+                points: [
+                    {
+                        x: 160 - this.offsetX,
+                        y: this.colPosPositions.col.c5
+                    },
+                    {
+                        x: 160,
+                        y: this.colPosPositions.col.c2 + 10
+                    },
+                    this.endPoint
+                ],
                 init: {
                     x: 160,
                     y: this.colPosPositions.col.c5
@@ -60,6 +112,17 @@ class CountryManager {
             },
             P4: {
                 used: false,
+                points: [
+                    {
+                        x: 54 - this.offsetX,
+                        y: this.colPosPositions.col.c1 - 15
+                    },
+                    {
+                        x: 54,
+                        y: this.colPosPositions.col.c2 + 10
+                    },
+                    this.endPoint
+                ],
                 init: {
                     x: 54,
                     y: this.colPosPositions.col.c1 - 15
@@ -71,6 +134,17 @@ class CountryManager {
             },
             P5: {
                 used: false,
+                points: [
+                    {
+                        x: 80 - this.offsetX,
+                        y: this.colPosPositions.col.c1 - 15
+                    },
+                    {
+                        x: 80,
+                        y: this.colPosPositions.col.c2 + 10
+                    },
+                    this.endPoint
+                ],
                 init: {
                     x: 80,
                     y: this.colPosPositions.col.c1 - 15
@@ -82,6 +156,17 @@ class CountryManager {
             },
             P6: {
                 used: false,
+                points: [
+                    {
+                        x: 140 - this.offsetX,
+                        y: this.colPosPositions.col.c1 - 15
+                    },
+                    {
+                        x: 140,
+                        y: this.colPosPositions.col.c2 + 10
+                    },
+                    this.endPoint
+                ],
                 init: {
                     x: 140,
                     y: this.colPosPositions.col.c1 - 15
@@ -93,6 +178,17 @@ class CountryManager {
             },
             P7: {
                 used: false,
+                points: [
+                    {
+                        x: 160 - this.offsetX,
+                        y: this.colPosPositions.col.c1 - 15
+                    },
+                    {
+                        x: 160,
+                        y: this.colPosPositions.col.c2 + 10
+                    },
+                    this.endPoint
+                ],
                 init: {
                     x: 160,
                     y: this.colPosPositions.col.c1 - 15
@@ -104,9 +200,155 @@ class CountryManager {
             },///ADD NO THE LATERAL ONES
             P8: {
                 used: false,
+                points: [
+                    {
+                        x: this.colPosPositions.row.r3 + 15 - this.offsetX,
+                        y: this.colPosPositions.col.c1 + 10,
+                    },
+                    {
+                        x: this.colPosPositions.row.r3 - 23,
+                        y: this.colPosPositions.col.c1 + 15
+                    },
+                    {
+                        x: this.colPosPositions.row.r3 - 20,
+                        y: this.colPosPositions.col.c2 + 8
+                    },
+                    this.endPoint
+                ],
                 init: {
                     x: this.colPosPositions.row.r3 + 15,
-                    y: this.colPosPositions.col.c1
+                    y: this.colPosPositions.col.c1 + 7
+                },
+                end: {
+                    x: this.colPosPositions.row.r3 - 10,
+                    y: this.colPosPositions.col.c2
+                }
+            },
+            P9: {
+                used: false,
+                points: [
+                    {
+                        x: this.colPosPositions.row.r1,
+                        y: this.colPosPositions.col.c1 + 10,
+                    },
+                    {
+                        x: this.colPosPositions.row.r2 - 23,
+                        y: this.colPosPositions.col.c1 + 15
+                    },
+                    {
+                        x: this.colPosPositions.row.r2 - 20,
+                        y: this.colPosPositions.col.c2 + 8
+                    },
+                    this.endPoint
+                ],
+                init: {
+                    x: this.colPosPositions.row.r1,
+                    y: this.colPosPositions.col.c1 + 7
+                },
+                end: {
+                    x: this.colPosPositions.row.r3 - 10,
+                    y: this.colPosPositions.col.c2
+                }
+            },
+            P10: {
+                used: false,
+                points: [
+                    {
+                        x: this.colPosPositions.row.r1,
+                        y: this.colPosPositions.col.c3 + 10,
+                    },
+                    {
+                        x: this.colPosPositions.row.r2 - 23,
+                        y: this.colPosPositions.col.c3 - 15
+                    },
+                    {
+                        x: this.colPosPositions.row.r2 - 20,
+                        y: this.colPosPositions.col.c2 + 8
+                    },
+                    this.endPoint
+                ],
+                init: {
+                    x: this.colPosPositions.row.r1,
+                    y: this.colPosPositions.col.c3 + 10,
+                },
+                end: {
+                    x: this.colPosPositions.row.r3 - 10,
+                    y: this.colPosPositions.col.c2
+                }
+            },
+            P11: {
+                used: false,
+                points: [
+                    {
+                        x: this.colPosPositions.row.r1,
+                        y: this.colPosPositions.col.c4 + 10,
+                    },
+                    {
+                        x: this.colPosPositions.row.r2 - 23,
+                        y: this.colPosPositions.col.c4 - 15
+                    },
+                    {
+                        x: this.colPosPositions.row.r2 - 20,
+                        y: this.colPosPositions.col.c2 + 8
+                    },
+                    this.endPoint
+                ],
+                init: {
+                    x: this.colPosPositions.row.r1,
+                    y: this.colPosPositions.col.c4 + 10,
+                },
+                end: {
+                    x: this.colPosPositions.row.r3 - 10,
+                    y: this.colPosPositions.col.c2
+                }
+            },
+
+            P12: {
+                used: false,
+                points: [
+                    {
+                        x: this.colPosPositions.row.r3 + 15 - this.offsetX,
+                        y: this.colPosPositions.col.c3 + 10,
+                    },
+                    {
+                        x: this.colPosPositions.row.r3 - 30,
+                        y: this.colPosPositions.col.c3 - 15
+                    },
+                    {
+                        x: this.colPosPositions.row.r3 - 20,
+                        y: this.colPosPositions.col.c2 + 12
+                    },
+                    this.endPoint
+                ],
+                init: {
+                    x: this.colPosPositions.row.r3 + 15 - this.offsetX,
+                    y: this.colPosPositions.col.c3 + 10,
+                },
+                end: {
+                    x: this.colPosPositions.row.r3 - 10,
+                    y: this.colPosPositions.col.c2
+                }
+            },
+            P13: {
+                used: false,
+                points: [
+                    {
+                        x: this.colPosPositions.row.r3,
+                        y: this.colPosPositions.col.c4 + 10,
+                    },
+                    {
+                        x: this.colPosPositions.row.r3 - 28,
+                        y: this.colPosPositions.col.c4 - 15
+                    },
+                    {
+                        x: this.colPosPositions.row.r3 - 20,
+                        y: this.colPosPositions.col.c2 + 15
+                    },
+                    this.endPoint
+                ],
+                init: {
+                    x: this.colPosPositions.row.r3 + 15 - this.offsetX,
+                    y: this.colPosPositions.col.c4 + 10,
                 },
                 end: {
                     x: this.colPosPositions.row.r3 - 10,
@@ -117,18 +359,20 @@ class CountryManager {
         //countries to render
         this.toRender = [];
         this.packages = [];
-        this.maxCountries = 9;//26;
-        this.maxPackages = 400;
+        this.maxCountries = 14//14;//26;
+        this.activeSpot = 14;
+        this.maxPackages = 200;
         this.currentPos = 0;
-        console.log("hey", this.countries.length, this.maxPackages)
+
         for (let i = 0; i < this.maxCountries && i < this.countries.length; i++) {
-            console.log("hola")
+
             this.addCountry(this.countries[this.currentPos]);
             this.currentPos++;
         }
 
 
         this.showPath = false;
+
     }
 
     //UPDATE ALL THE DATA
@@ -137,13 +381,15 @@ class CountryManager {
     }
 
     addPackage(name) {
-        // console.log(this.getCountry(name))
+
         if (this.getCountry(name) != undefined) {
             const country = this.getCountry(name)
-            if (country != undefined) {
+
+            if (country.country != undefined) country.country.addPackage(1);
+
+            if (country != undefined && country.country.getPackagesNumb() % country.country.getBigPacket() == 0) {
                 const { x, y } = country.pos.init;
-                // console.log(x, y, this.colorPallete, country.country, country.path)
-                const pack = new Package(x, y, this.colorPallete, country.country, country.path)
+                const pack = new Package(x, y, this.colorPallete, country.country, country.path, name)
                 this.packages.push(pack)
             }
 
@@ -176,7 +422,7 @@ class CountryManager {
     //render objecte
     renderObject(object) {
 
-        let { r, g, b } = colorPallete.red;
+        let { r, g, b } = colorPallete.green;
         fill(r, g, b);
         textFont('sans');
         textSize(this.fontSize.countries);
@@ -193,32 +439,38 @@ class CountryManager {
 
     //ADD a new country to show
     addCountry(coutryName) {
-        const place = this.currentPos % this.maxCountries;
+        const freeKey = this.getFreePosition()
+        if (freeKey == null) return;
+        const position = this.positions[freeKey];
 
-        // const position = this.getFreePosition();
-        // if (position == null) return;
-        // console.log(position)
+
         //ADDS A PATH
         const path = new Path();
-        path.addPoint(this.positions["P" + place].init.x - 1, this.positions["P" + place].init.y);
-        path.addPoint(this.positions["P" + place].end.x, this.positions["P" + place].end.y);
+        //DRAW PATH WITH MULTIPLE POINTS
+        const points = this.positions[freeKey].points;
+        for (let i = 0; i < points.length; i++) {
+            path.addPoint(points[i].x, points[i].y);
+        }
+        // path.addPoint(this.positions["P" + place].init.x - 1, this.positions["P" + place].init.y);
+        // path.addPoint(this.positions["P" + place].end.x, this.positions["P" + place].end.y);
         //ADDS A COUNTRY ELEM
-        const country = new Country(this.positions["P" + place].init.x, this.positions["P" + place].init.y, this.colorPallete, this.positions["P" + place].end)
+        const country = new Country(points[0].x, points[0].y, this.colorPallete, points[points.length - 1], position, coutryName)
         //ADD TEXT
         const name = coutryName;
         const IsoName = getCountryName(name);
 
         const newCountry = {
             pos: {
-                init: this.positions["P" + place].init,
-                end: this.positions["P" + place].end
+                init: this.positions[freeKey].init,
+                end: this.positions[freeKey].end
             },
             path: path,
             country: country,
             name: {
                 name: name,
                 iso: IsoName,
-            }
+            },
+            point: position
         }
         this.toRender.push(newCountry);
     }
@@ -237,6 +489,7 @@ class CountryManager {
         }
 
         for (let j = 0; j < count; j++) {
+
             this.currentPos += 1;
             const pos = this.currentPos % (this.countries.length)
             this.addCountry(this.countries[pos])
@@ -246,7 +499,18 @@ class CountryManager {
     // remove X country from display
     removecountry(name) {
         const index = this.toRender.findIndex(country => country.name.name == name);
+        this.toRender[index].country.refPoint.used = false;
+        for (let i = 0; i < this.packages.length; i++) {
+            if (this.packages[i].countryName == this.toRender[index].country.countryName) {
+                this.packages[i].state = "VANISH";
+            }
+        }
+        //ADD PACKAGES TO DASHBOARD
+        // console.log(this.toRender[index].country.packages);
+        this.dashBoard.addPackage(this.toRender[index].country.packages);
+        // this.packages = this.packages.filter(pack => pack.countryName == this.toRender[index].country.countryName);
         this.toRender.splice(index, 1);
+        //REMOVE THE ITEMS
     }
 
     getCountry(name) {
@@ -258,7 +522,7 @@ class CountryManager {
         for (const key in this.positions) {
             if (this.positions[key].used == false) {
                 this.positions[key].used = true;
-                return this.positions[key];
+                return key;
             }
         }
         return null;
