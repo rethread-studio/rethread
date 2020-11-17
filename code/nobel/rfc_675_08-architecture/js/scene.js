@@ -28,4 +28,8 @@ class Scene {
     play() {
         // Called when this Scene becomes the current Scene (after teh crossfade)
     }
+    zIndex() {
+        // Return the z index of the scene when in a transition. The higher z index is drawn on top of the lower one.
+        return 0;
+    }
 }

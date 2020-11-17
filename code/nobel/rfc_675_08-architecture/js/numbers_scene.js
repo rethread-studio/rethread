@@ -73,6 +73,7 @@ class NumbersScene extends Scene {
           0
         )
       );
+      console.log("Numbers fade in state");
       // Will pass from the "fade in" state by play() being called externally
     } else if (this.playhead.state == "playing") {
       this.playhead.countdown -= dt;

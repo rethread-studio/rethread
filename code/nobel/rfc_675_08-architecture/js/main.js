@@ -3,11 +3,12 @@ p5.disableFriendlyErrors = true;
 // GLOBAL GENERAL STATE
 
 var drawFPS = true;
+var fps = 0;
 
 // This section contains state that is shared between many or all scenes
 // or is used by the main functions within this file
 
-var subsampling = 4;
+var subsampling = 2;
 var canvasX = 208 * subsampling;
 var canvasY = 360 * subsampling;
 
@@ -195,6 +196,9 @@ function setup() {
     w.activity = 0;
   }
 
+  textAlign(CENTER, CENTER);
+  textFont(antonFont);
+
   for (let scene of scenes.values()) {
     scene.setup();
   }
@@ -301,9 +305,16 @@ function draw() {
   } else if (playhead.state == "playing") {
     playhead.currentScene.draw(dt);
   } else if (playhead.state == "crossfade") {
-    playhead.currentScene.draw(dt);
-    if (playhead.fadingInScene != undefined) {
-      playhead.fadingInScene.draw(dt);
+    if(playhead.currentScene.zIndex() > playhead.fadingInScene.zIndex()) {
+      if (playhead.fadingInScene != undefined) {
+        playhead.fadingInScene.draw(dt);
+      }
+      playhead.currentScene.draw(dt);
+    } else {
+      playhead.currentScene.draw(dt);
+      if (playhead.fadingInScene != undefined) {
+        playhead.fadingInScene.draw(dt);
+      }
     }
   } else if (playhead.state == "end of score") {
   }
@@ -331,9 +342,13 @@ function draw() {
   lastNow = now; // Set the timestamp for this update to get time between frames
 
   if (drawFPS) {
-    textSize(48);
+    textSize(12*subsampling);
+    textAlign(CENTER, CENTER);
     fill(30, 100, 50, 100);
-    text(frameRate().toFixed(1), canvasX / 3, windows[13].center.y);
+    let thisFps = frameRate();
+    fps = (fps* 0.95) + (thisFps * 0.05);
+    text(thisFps.toFixed(1), windows[12].center.x, windows[12].center.y);
+    text(fps.toFixed(1), windows[13].center.x, windows[13].center.y);
   }
 } // End draw
 
