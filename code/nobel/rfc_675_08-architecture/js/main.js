@@ -153,6 +153,7 @@ scenes.set("default_scene", new Scene());
 scenes.set("numbers", new NumbersScene());
 scenes.set("drops", new DropsScene());
 scenes.set("ports", new PortsScene());
+scenes.set("intro", new IntroScene());
 
 let currentScene;
 let playhead = {

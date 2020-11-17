@@ -1,6 +1,8 @@
 // Get p5 autocompletions
 /// <reference path="node_modules/@types/p5/global.d.ts" />
 
+
+
 const colorPallete = {
   black: {
     r: 0,
@@ -202,8 +204,7 @@ void main() {
 }
 `;
 
-function backgroundFragShader() {
-  return `  
+const backgroundFragShader = `  
     precision mediump float;
 
 varying vec2 vTexCoord;
@@ -219,7 +220,7 @@ void main() {
   gl_FragColor = vec4(color ,1.0);
 }
     `;
-}
+
 let backgroundShader;
 let shaderGraphics;
 let noise
@@ -266,7 +267,7 @@ function setup() {
   //SHADER CONFIG
   shaderGraphics = createGraphics(canvasSize.width, canvasSize.height, WEBGL);
   shaderGraphics.noStroke();
-  backgroundShader = shaderGraphics.createShader(vertexShader, backgroundFragShader());
+  backgroundShader = shaderGraphics.createShader(vertexShader, backgroundFragShader);
 
 } // End Setup
 
