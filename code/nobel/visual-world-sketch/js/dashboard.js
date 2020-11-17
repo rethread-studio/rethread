@@ -93,13 +93,15 @@ class DashBoard {
 
     //Write the size
     writeLocation() {
-        const { r, g, b } = this.colorPallete.green;
+        const { r, g, b } = this.colorPallete.red;
         fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
         textAlign(RIGHT);
         textFont(this.font);
-        text(this.focuLocation, this.positions.row.r1 - 10, this.positions.col.c2 + this.positions.padding.top);
+        text("LIVE", this.positions.row.r1 - 10, this.positions.col.c2 + this.positions.padding.top);
+        circle(this.positions.row.r1 - 31, this.positions.col.c2 + this.positions.padding.top, 7);
+        text(this.focuLocation, this.positions.row.r1 - 10, this.positions.col.c2 + (this.positions.padding.top * 2) + 4);
     }
 
     //DRAW THE TICK

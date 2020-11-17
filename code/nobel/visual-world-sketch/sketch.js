@@ -61,7 +61,23 @@ const ame_countries = [
   "Belize",
 ]
 
-
+const asian_countries = [
+  "Afghanistan",
+  "Bangladesh",
+  "China",
+  "India",
+  "Iran",
+  "Israel",
+  "Japan",
+  "Korea (North)",
+  "Philippines",
+  "Russia",
+  "Saudi Arabia",
+  "Korea (South)",
+  "Taiwan",
+  "Thailand",
+  "Viet Nam"
+]
 
 const colorPallete = {
   black: {
