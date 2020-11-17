@@ -44,11 +44,6 @@ const colorPallete = {
   }
 }
 
-
-// Performance - Disables FES
-// p5.disableFriendlyErrors = true;
-
-
 const positions = {
   row: {
     r1: 38,
@@ -84,6 +79,7 @@ let focusLocation = {
   africa: "AF",
   oceanica: "OC"
 }
+
 
 ///////////////////////// GUI Element Global Variables///////////////////////////////////////
 
@@ -124,16 +120,111 @@ const canvasSize = {
   height: 360,
 }
 
-
 let myFont;
 
 const fontURL = 'assets/fonts/Anton-Regular.ttf';
 
+//LOGOS
 let visualIntro;
 let logoKTH;
 let logoNobel;
 let logoRethart;
+
+////////////////////////////////////////////////////////////////////////////////////
+// SHADER
 /////////////////////////////////////////////////////////////////////////////////////////////
+
+const vertexShader = `
+
+// Get the position attribute of the geometry
+attribute vec3 aPosition;
+
+// Get the texture coordinate attribute from the geometry
+attribute vec2 aTexCoord;
+
+// Get the vertex normal attribute from the geometry
+attribute vec3 aNormal;
+
+// When we use 3d geometry, we need to also use some builtin variables that p5 provides
+// Most 3d engines will provide these variables for you. They are 4x4 matrices that define
+// the camera position / rotation, and the geometry position / rotation / scale
+// There are actually 3 matrices, but two of them have already been combined into a single one
+// This pre combination is an optimization trick so that the vertex shader doesn't have to do as much work
+
+// uProjectionMatrix is used to convert the 3d world coordinates into screen coordinates 
+uniform mat4 uProjectionMatrix;
+
+// uModelViewMatrix is a combination of the model matrix and the view matrix
+// The model matrix defines the object position / rotation / scale
+// Multiplying uModelMatrix * vec4(aPosition, 1.0) would move the object into it's world position
+
+// The view matrix defines attributes about the camera, such as focal length and camera position
+// Multiplying uModelViewMatrix * vec4(aPosition, 1.0) would move the object into its world position in front of the camera
+uniform mat4 uModelViewMatrix;
+
+// Get the framecount uniform
+uniform float uFrameCount;
+
+// Get the noise texture
+uniform sampler2D uNoiseTexture;
+
+varying vec2 vTexCoord;
+varying vec3 vNoise;
+
+
+void main() {
+
+  // Sample the noise texture
+  // We will shift the texture coordinates over time to make the noise move
+  float tile = 2.0;
+  float speed = 0.002;
+  vec4 noise = texture2D(uNoiseTexture, fract(aTexCoord * tile + uFrameCount * speed));
+
+  // Send the noise color to the fragment shader
+  vNoise = noise.rgb;
+
+  // copy the position data into a vec4, using 1.0 as the w component
+  vec4 positionVec4 = vec4(aPosition, 1.0);
+
+  // Amplitude will determine the amount of the displacement
+  float amplitude = 1.0;
+
+  // add the noise to the position, and multiply by the normal to move along it. 
+  positionVec4.xyz += (noise.rgb - 0.5 ) * aNormal * amplitude;
+
+  // Move our vertex positions into screen space
+  // The order of multiplication is always projection * view * model * position
+  // In this case model and view have been combined so we just do projection * modelView * position
+  gl_Position = uProjectionMatrix * uModelViewMatrix * positionVec4;
+
+  // Send the texture coordinates to the fragment shader
+  vTexCoord = aTexCoord;
+}
+`;
+
+function backgroundFragShader() {
+  return `  
+    precision mediump float;
+
+varying vec2 vTexCoord;
+
+// Get the normal from the vertex shader
+varying vec3 vNoise;
+
+void main() {
+  
+  vec3 color = vNoise;
+  
+  // Lets just draw the texcoords to the screen
+  gl_FragColor = vec4(color ,1.0);
+}
+    `;
+}
+let backgroundShader;
+let shaderGraphics;
+let noise
+
+
 
 // Preload Function
 function preload() {
@@ -141,6 +232,8 @@ function preload() {
   logoKTH = loadImage('./assets/img/kth_logo.png');
   logoNobel = loadImage('./assets/img/nobel_logo.png');
   logoRethart = loadImage('./assets/img/rethread_logo.png');
+  noise = loadImage('./assets/img/noise.png');
+
 } // End Preload
 
 
@@ -148,18 +241,9 @@ function preload() {
 let num = 0;
 new WebSocketClient().onmessage = (data) => {
   if (num < 10) {
-    // console.log(data)
-    // console.log(JSON.parse(data.data));
+
   }
   let internalData = JSON.parse(data.data);
-
-
-  // if (internalData.remote_location.country == "France") console.log("viva la france")
-  //ADD PACKAGES NUMBER
-
-
-  // addParticle(internalData.len);
-  // num++;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -168,8 +252,6 @@ new WebSocketClient().onmessage = (data) => {
 function setup() {
   //PIXEL DENSITY TO REMOVE
   pixelDensity(15.0);
-
-  preload();
 
   visualIntro = new VisualIntro(myFont, positions, fontSize, colorPallete, logoKTH, logoNobel, logoRethart)
   // Create canvas
@@ -185,19 +267,15 @@ function setup() {
     w.halfHeightSq = Math.pow(w.h / 2, 2);
   }
 
-  for (let i = 0; i < windows.length - 2; i++) {
-    let center = (windows[i].center.y + windows[i + 1].center.y) / 2;
-    // console.log("center: " + ((center / height) - 0.5));
-  }
-
-  // background("#000000");
-
   textFont('sans');
   textSize(28);
   textAlign(CENTER, CENTER);
   textFont(myFont);
 
-
+  //SHADER CONFIG
+  shaderGraphics = createGraphics(canvasSize.width, canvasSize.height, WEBGL);
+  shaderGraphics.noStroke();
+  backgroundShader = shaderGraphics.createShader(vertexShader, backgroundFragShader());
 
 } // End Setup
 
@@ -205,8 +283,32 @@ function setup() {
 
 // Draw Function
 function draw() {
-  clear();
-  // background("rgba(0,0,0,1)");
+
+  //DRAW SHADER
+  shaderGraphics.background(0);
+  // shader() sets the active shader with our shader
+  shaderGraphics.shader(backgroundShader);
+
+  // Send the frameCount to the shader
+  backgroundShader.setUniform("uFrameCount", frameCount);
+  backgroundShader.setUniform("uNoiseTexture", noise);
+
+  // shaderGraphics.translate(0, -2)
+  // Rotate our geometry on the X and Y axes
+  shaderGraphics.rotateX(0.01);
+  shaderGraphics.rotateY(0.005);
+
+  // Draw some geometry to the screen
+  // We're going to tessellate the sphere a bit so we have some more geometry to work with
+  shaderGraphics.sphere(canvasSize.width / 3, 200, 100);
+
+
+
+  // Draw the shader to main canvas
+  image(shaderGraphics, 0, 0, canvasSize.width, canvasSize.height);
+
+  // Draw text
+  colorMode(RGB, 100);
 
   visualIntro.updateData();
   visualIntro.display();
@@ -216,23 +318,6 @@ function draw() {
   for (win of windows) {
     rect(win.x, win.y, win.w, win.h);
   }
-
-
-
-  // Draw text
-  colorMode(RGB, 100);
-  // fill(100, 100, 100, 100);
-  // // text("EURASIA", width / 2, 48);
-  // text("STOCKHOLM", width / 2, 129);
-  // noStroke();
-  // fill(100, 100, 100, 100);
-  // rect(32, 121, 2, 24);
-
-
-
-
-
-
 
 } // End Draw
 
