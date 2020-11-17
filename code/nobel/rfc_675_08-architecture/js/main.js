@@ -335,6 +335,7 @@ function draw() {
 
   if (drawFPS) {
     textSize(12*subsampling);
+    textAlign(CENTER, CENTER);
     fill(30, 100, 50, 100);
     let thisFps = frameRate();
     fps = (fps* 0.95) + (thisFps * 0.05);
