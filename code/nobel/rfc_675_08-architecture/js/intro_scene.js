@@ -248,15 +248,16 @@ class IntroScene extends Scene {
             progression = (Math.cos(progression * Math.PI) * 0.5+0.5); // Smoother motion
 
             // lerp between current progression and previous one
-            this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * progression);
+            this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * 1.3 * progression);
             
             this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
             this.backgroundAlpha = 1.0;
             this.shaderAlpha = 1.0;
-            if(progression > 0.6) {
+
+            if(progression > 0.8) {
                 // When the blob covers the screen we want it to start fading out with the new scene in the background
                 this.backgroundAlpha = 0.0;
-                this.shaderAlpha = (1.0 - Math.pow((progression-0.6)/0.4, 4.0));
+                this.shaderAlpha = (1.0 - Math.pow((progression-0.8)/0.2, 4.0));
             }
             // Will pass from the "fade in" state by play() being called externally
         } else if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
@@ -282,15 +283,15 @@ class IntroScene extends Scene {
             let progression = 1.0 - (this.playhead.countdown / this.playhead.totalDuration);
             progression = 1.0 - (Math.cos(progression * Math.PI) * 0.5+0.5); // Smoother motion
             // lerp between current progression and previous one
-            this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * progression);
+            this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * 1.3 * progression);
             
             this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
             this.backgroundAlpha = 1.0;
             this.shaderAlpha = 1.0;
-            if(progression > 0.6) {
+            if(progression > 0.8) {
                 // When the blob covers the screen we want it to start fading out with the new scene in the background
                 this.backgroundAlpha = 0.0;
-                this.shaderAlpha = (1.0 - Math.pow((progression-0.6)/0.4, 4.0));
+                this.shaderAlpha = (1.0 - Math.pow((progression-0.8)/0.2, 4.0));
             }
         }
         if (this.playhead.state == "playing" || this.playhead.state == "fade out" || this.playhead.state == "fade in") {

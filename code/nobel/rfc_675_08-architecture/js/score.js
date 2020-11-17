@@ -30,7 +30,35 @@ var score = [
   {
     name: "intro",
     sections: [
-      { name: "transition", duration: 5, region: "Sweden" },
+      { name: "transition", duration: 1 },
+      { name: "fade out", duration: 7 },
+    ],
+  },
+  {
+    name: "numbers",
+    sections: [
+      { name: "all", duration: 10, region: "Sweden" },
+      { name: "fade out", duration: 10 },
+    ],
+  },
+  {
+    name: "intro",
+    sections: [
+      { name: "transition", duration: 1},
+      { name: "fade out", duration: 7 },
+    ],
+  },
+  {
+    name: "ports",
+    sections: [
+      { name: "network", duration: 10, pullBackCoeff: 10.0 },
+      { name: "fade out", duration: 5 },
+    ],
+  },
+  {
+    name: "intro",
+    sections: [
+      { name: "transition", duration: 1},
       { name: "fade out", duration: 7 },
     ],
   },

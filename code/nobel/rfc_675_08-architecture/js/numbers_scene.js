@@ -73,7 +73,6 @@ class NumbersScene extends Scene {
           0
         )
       );
-      console.log("Numbers fade in state");
       // Will pass from the "fade in" state by play() being called externally
     } else if (this.playhead.state == "playing") {
       this.playhead.countdown -= dt;
@@ -160,31 +159,15 @@ class NumbersScene extends Scene {
         switch (this.currentParticleDir) {
           case "right":
             p.x += p.vel;
-            if (p.x >= canvasX) {
-              p.vel = 0;
-              p.size = 0;
-            }
             break;
           case "left":
             p.x -= p.vel;
-            if (p.x < 0) {
-              p.vel = 0;
-              p.size = 0;
-            }
             break;
           case "up":
             p.y -= p.vel;
-            if (p.y < 0) {
-              p.vel = 0;
-              p.size = 0;
-            }
             break;
           case "down":
             p.y += p.vel;
-            if (p.y > canvasY) {
-              p.vel = 0;
-              p.size = 0;
-            }
             break;
           default:
         }

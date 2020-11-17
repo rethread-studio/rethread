@@ -83,7 +83,7 @@ class PortsScene extends Scene {
         }
       }
     }
-    if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
+    if (this.playhead.state == "playing" || this.playhead.state == "fade out" || this.playhead.state == "fade in") {
       colorMode(HSL, 100);
 
       let backgroundHue = Math.min(
@@ -450,6 +450,8 @@ class PortsScene extends Scene {
   }
   fadeIn(duration) {
     // Called when the previous scene is starting to fade out
+    this.playhead.state = "fade in";
+    this.playhead.countdown = duration;
   }
   fadeOut(duration) {
     // Called from within the Scene when the "fade out" section starts
