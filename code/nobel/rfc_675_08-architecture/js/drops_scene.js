@@ -78,16 +78,24 @@ class DropsScene extends Scene {
       }
 
       // background("rgba(1.0,1.0,1.0,0.00)");
-      this.backgroundAlpha =
-        Math.pow(Math.cos(this.backgroundPhase) * 0.5 + 0.5, 6.0) * 20.0;
+      let curve = Math.pow(Math.cos(this.backgroundPhase) * 0.5 + 0.5, 6.0);
+      this.backgroundAlpha = curve * 20.0;
       let backgroundHue = Math.min(
         (metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0,
         9.0
       );
+      let backgroundTransitionLightness = 0;
+      if (this.backgroundPhase > Math.PI) {
+        backgroundTransitionLightness = Math.pow(curve, 3.0) * 100.0;
+      } else {
+        backgroundTransitionLightness =
+          Math.pow(this.playhead.countdown / this.directionDuration, 10.0) *
+          100.0;
+      }
       this.pg.background(
         backgroundHue,
         100,
-        backgroundHue * 4,
+        backgroundHue * 4 + 10 + backgroundTransitionLightness,
         this.backgroundAlpha
       );
 
@@ -95,19 +103,27 @@ class DropsScene extends Scene {
       this.pg.strokeWeight(subsampling);
       this.pg.noFill();
       for (let drop of this.droplets) {
-        this.pg.stroke(
-          drop.hue,
-          drop.saturation,
-          25 + drop.lightness,
-          (1.0 - drop.size / drop.maxSize) * 100
-        );
         let dropSize = drop.size;
+        let alpha;
         if (drop.out == false) {
           dropSize = drop.maxSize - dropSize;
+          alpha = (drop.size / drop.maxSize) * 100;
+        } else {
+          alpha = (drop.size / drop.maxSize) * 100;
         }
+        let l =
+          drop.lightness * 0.5 +
+          drop.lightness * (drop.size / drop.maxSize) * 0.5;
+
+        if (drop.size > drop.maxSize) {
+          // Drop will only be drawn one frame, use the lightness of the drop
+          l = drop.lightness;
+        }
+        this.pg.stroke(drop.hue, drop.saturation, 25 + l, alpha);
+
         this.pg.circle(drop.x, drop.y, dropSize);
         drop.size += subsampling;
-        drop.lightness -= (10 - drop.hue) * 0.1;
+        // drop.lightness -= (10 - drop.hue) * 0.1;
       }
 
       this.droplets = this.droplets.filter((d) => d.size < d.maxSize);
@@ -161,14 +177,25 @@ class DropsScene extends Scene {
   }
 
   addDroplet(len, baseHue, out) {
-    let hue = baseHue + Math.min(len / 50000, 10);
+    let hue = baseHue + ((len / 30000) % 10);
+    if (len > 400000) {
+      hue = (hue + 48.0) % 100;
+    }
+    let maxSize = Math.min(len / 2000, 200.0) * subsampling;
+    let lightness = Math.min(
+      Math.min(len / 50000.0, 25) + Math.random() * 50 - hue,
+      75
+    );
+    if (maxSize < 3 * subsampling) {
+      lightness = 10;
+    }
     this.droplets.push({
       x: Math.random() * canvasX,
       y: Math.random() * canvasY,
       size: 2 * subsampling,
-      maxSize: Math.min(len / 2000, 200.0) * subsampling,
-      saturation: Math.random() * 50 + 40 + hue,
-      lightness: 50 + hue * 2,
+      maxSize: maxSize,
+      saturation: Math.random() * 50 + 50,
+      lightness: lightness,
       hue: hue,
       out: out,
     });

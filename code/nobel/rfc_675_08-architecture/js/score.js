@@ -16,12 +16,12 @@ var score = [
   {
     name: "drops",
     sections: [
-      { name: "in", duration: 10, region: "Sweden" },
-      { name: "out", duration: 10, region: "Sweden" },
-      { name: "in", duration: 10, region: "Europe" },
-      { name: "out", duration: 10, region: "Europe" },
-      { name: "in", duration: 10, region: "none" },
-      { name: "out", duration: 10, region: "none" },
+      { name: "in", duration: 20, region: "Sweden" },
+      { name: "out", duration: 20, region: "Sweden" },
+      { name: "in", duration: 20, region: "Europe" },
+      { name: "out", duration: 20, region: "Europe" },
+      { name: "in", duration: 20, region: "none" },
+      { name: "out", duration: 20, region: "none" },
       { name: "fade out", duration: 1 },
     ],
   },
