@@ -196,7 +196,18 @@ function setup() {
   }
 } // End setup
 
+let isStarted = false;
+function BroadSignPlay() {
+  isStarted = true;
+}
+if (typeof BroadSignObject === 'undefined') {
+	BroadSignPlay();
+}
+
 function draw() {
+  if (!isStarted) {
+    return;
+  }
   // Update time
   now = Date.now() * 0.001; // current time in seconds
   if (lastNow == 0) {
