@@ -237,15 +237,6 @@ function preload() {
 } // End Preload
 
 
-//WEB SOCKET ----------------------------------------------------------------------
-let num = 0;
-new WebSocketClient().onmessage = (data) => {
-  if (num < 10) {
-
-  }
-  let internalData = JSON.parse(data.data);
-};
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 // Setup Function
