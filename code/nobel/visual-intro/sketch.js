@@ -283,9 +283,11 @@ function setup() {
 
 // Draw Function
 function draw() {
-
+  background(0);
+  // clear();
   //DRAW SHADER
-  shaderGraphics.background(0);
+  // shaderGraphics.background(0);
+  shaderGraphics.clear();
   // shader() sets the active shader with our shader
   shaderGraphics.shader(backgroundShader);
 
@@ -293,7 +295,7 @@ function draw() {
   backgroundShader.setUniform("uFrameCount", frameCount);
   backgroundShader.setUniform("uNoiseTexture", noise);
 
-  // shaderGraphics.translate(0, -2)
+  shaderGraphics.translate(0, 0)
   // Rotate our geometry on the X and Y axes
   shaderGraphics.rotateX(0.01);
   shaderGraphics.rotateY(0.005);
@@ -301,8 +303,6 @@ function draw() {
   // Draw some geometry to the screen
   // We're going to tessellate the sphere a bit so we have some more geometry to work with
   shaderGraphics.sphere(canvasSize.width / 3, 200, 100);
-
-
 
   // Draw the shader to main canvas
   image(shaderGraphics, 0, 0, canvasSize.width, canvasSize.height);
@@ -320,7 +320,3 @@ function draw() {
   }
 
 } // End Draw
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-// Helper functions
