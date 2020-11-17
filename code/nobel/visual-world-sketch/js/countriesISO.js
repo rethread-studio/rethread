@@ -724,7 +724,7 @@ const countyList = [
         "code": "RO"
     },
     {
-        "name": "Russian Federation",
+        "name": "Russia",
         "code": "RU"
     },
     {
@@ -852,7 +852,7 @@ const countyList = [
         "code": "SY"
     },
     {
-        "name": "Taiwan, Province of China",
+        "name": "Taiwan",
         "code": "TW"
     },
     {

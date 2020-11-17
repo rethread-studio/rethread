@@ -1,21 +1,22 @@
 class Package {
 
-    constructor(x, y, colorPallete, country, path) {
+    constructor(x, y, colorPallete, country, path, name) {
         this.colorPallete = colorPallete;
         this.acceleration = createVector(0, 0);
         this.velocity = createVector(2, 0);
         this.position = createVector(x, y);
         this.countryName = name;
 
-        this.r = 3.0; // Half the width of veihcle's back side
-        this.maxspeed = random(0.5, 1.5); //
+        this.r = random(0.2, 2); // Half the width of veihcle's back side
+        this.maxspeed = random(2, 3); //
         this.maxforce = 0.1;
         this.country = country;
         this.goalPos = country.getPosition();
 
         this.size = random(1, 4);
-        this.state = "MOVE";
-        this.path = path
+        this.state = "APPEAR";
+        this.path = path;
+        this.alpha = 0;
     }
 
 
@@ -107,17 +108,49 @@ class Package {
     ////////////////////////////////
     update() {
 
+
         switch (this.state) {
-            case "MOVE":
+            case "APPEAR":
                 this.velocity.add(this.acceleration);
                 this.velocity.limit(this.maxspeed);
                 this.position.add(this.velocity);
                 this.acceleration.mult(0);
                 this.goalPos = this.country.getPosition();
-                if (this.position.dist(this.goalPos) < 5) {
+                this.alpha += 10;
+                if (this.alpha > 100) {
+                    this.state = "MOVE";
+                    this.alpha = 100;
+                }
+
+
+                break;
+            case "MOVE":
+
+                this.velocity.add(this.acceleration);
+                this.velocity.limit(this.maxspeed);
+                this.position.add(this.velocity);
+                this.acceleration.mult(0);
+                this.goalPos = this.country.getPosition();
+                if (this.position.dist(this.goalPos) < 25) {
+                    this.state = "VANISH";
+                    this.country.addVelocity();
+                } else if (this.position.dist(this.goalPos) < 10) {
                     this.state = "REMOVE";
                     this.country.addVelocity();
-                    // console.log(this.country)
+                }
+
+                break;
+            case "VANISH":
+
+                this.velocity.add(this.acceleration);
+                this.velocity.limit(this.maxspeed);
+                this.position.add(this.velocity);
+                this.acceleration.mult(0);
+                this.goalPos = this.country.getPosition();
+                this.alpha -= 5;
+
+                if (this.alpha < 0) {
+                    this.state = "REMOVE";
                 }
 
                 break;
@@ -146,21 +179,21 @@ class Package {
 
 
         //DRAW COUNTRY
-        if (this.state == "MOVE") {
+        if (this.state == "MOVE" || this.state == "VANISH") {
 
             this.theta = this.velocity.heading() + PI / 2;
-            let { r, g, b } = this.colorPallete.red;
-            fill(r, g, b);
+            let { r, g, b } = this.colorPallete.lightBlue;
+            fill(r, g, b, this.alpha);
             noStroke()
             push();
             translate(this.position.x, this.position.y);
-            circle(0, 0, this.size);
-            // rotate(this.theta);
-            // beginShape();
-            // vertex(0, -this.r * 2); // Arrow pointing upp
-            // vertex(-this.r, this.r * 2); // Lower left corner
-            // vertex(this.r, this.r * 2); // Lower right corner
-            // endShape(CLOSE);
+            // circle(0, 0, this.size);
+            rotate(this.theta);
+            beginShape();
+            vertex(0, -this.r); // Arrow pointing upp
+            vertex(-this.r, this.r); // Lower left corner
+            vertex(this.r, this.r); // Lower right corner
+            endShape(CLOSE);
             pop();
         }
 

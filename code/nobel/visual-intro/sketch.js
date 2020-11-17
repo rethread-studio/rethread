@@ -1,8 +1,6 @@
 // Get p5 autocompletions
 /// <reference path="node_modules/@types/p5/global.d.ts" />
 
-
-
 const colorPallete = {
   black: {
     r: 0,
@@ -75,7 +73,8 @@ const positions = {
 const fontSize = {
   tittle: 28,
   number: 8,
-  countries: 12
+  countries: 12,
+  rfc: 16,
 }
 
 let focusLocation = {
@@ -131,11 +130,17 @@ let myFont;
 const fontURL = 'assets/fonts/Anton-Regular.ttf';
 
 let visualIntro;
+let logoKTH;
+let logoNobel;
+let logoRethart;
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 // Preload Function
 function preload() {
   myFont = loadFont(fontURL);
+  logoKTH = loadImage('./assets/img/kth_logo.png');
+  logoNobel = loadImage('./assets/img/nobel_logo.png');
+  logoRethart = loadImage('./assets/img/rethread_logo.png');
 } // End Preload
 
 
@@ -166,7 +171,7 @@ function setup() {
 
   preload();
 
-  visualIntro = new VisualIntro(myFont, positions, fontSize, colorPallete)
+  visualIntro = new VisualIntro(myFont, positions, fontSize, colorPallete, logoKTH, logoNobel, logoRethart)
   // Create canvas
   canvas = createCanvas(canvasSize.width, canvasSize.height);
   // Send canvas to CSS class through HTML div

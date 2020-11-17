@@ -5,7 +5,7 @@
 class VisualIntro {
 
 
-    constructor(font, positions, fontSize, colorPallete) {
+    constructor(font, positions, fontSize, colorPallete, logoKTH, logoNobel, logoRethart) {
 
         this.font = font;
         this.positions = positions;
@@ -17,6 +17,9 @@ class VisualIntro {
         this.showTick = true;
         this.tickCounter = 0;
         this.tickLimiter = 3;
+        this.logoKTH = logoKTH;
+        this.logoNobel = logoNobel;
+        this.logoRethart = logoRethart;
 
         this.message = [
             {
@@ -67,6 +70,7 @@ class VisualIntro {
         this.writeText();
         this.drawTick();
         this.drawDecorations();
+        this.drawImages();
 
     }
 
@@ -91,12 +95,12 @@ class VisualIntro {
         textSize(this.fontSize.tittle);
         textAlign(LEFT, TOP);
         textFont(this.font);
-        text("STOCKHOLM'S", this.positions.row.r1, this.positions.col.c2 - 2);
-        text("INTERNET IN", this.positions.row.r1, this.positions.col.c3 - 2);
-        text("REAL TIME", this.positions.row.r1, this.positions.col.c4 - 2);
-        textAlign(RIGHT, TOP);
-        textSize(this.fontSize.tittle);
-        text("RFC 675:08", this.positions.row.r3 + 12, this.positions.col.c1 - 4);
+        text("STOCKHOLM'S", this.positions.row.r1, this.positions.col.c1 - 4);
+        text("INTERNET IN", this.positions.row.r1, this.positions.col.c2 - 2);
+        text("REAL TIME", this.positions.row.r1, this.positions.col.c3 - 2);
+        textAlign(LEFT, TOP);
+        textSize(this.fontSize.rfc);
+        text("RFC 675:08", this.positions.row.r1, this.positions.col.c4 + 4);
 
     }
 
@@ -105,22 +109,26 @@ class VisualIntro {
     drawTick() {
         if (this.showTick) {
 
+            const posX = 10;
+            const { top, bottom } = this.message[this.messagePos];
+
             noStroke();
-            const { r, g, b } = colorPallete.white;
+            let { r, g, b } = colorPallete.white;
             fill(r, g, b, 100);
-            rect(30, 121, 4, 24);
+            rect(this.positions.row.r1 - 7, this.positions.col.c1 + 4, 4, 24);
 
             textFont('sans');
             textSize(this.fontSize.number);
             textAlign(RIGHT, TOP);
             textFont(this.font);
-            const posX = 10;
-            const { top, bottom } = this.message[this.messagePos];
-            text(top, this.positions.row.r1 - posX, this.positions.col.c2 + 3);
-            text(bottom, this.positions.row.r1 - posX, this.positions.col.c2 + 18);
+
+
+            fill(colorPallete.red.r, colorPallete.red.g, colorPallete.red.b, 100);
+            text(bottom, this.positions.row.r1 - posX, this.positions.col.c1 + 18);
+            text("LIVE", this.positions.row.r1 - posX, this.positions.col.c1 + 3);
+            circle(this.positions.row.r1 - 28, this.positions.col.c1 + 8, 7)
+            // text(top, this.positions.row.r1 - posX, this.positions.col.c1 + 3);
         }
-
-
     }
 
     drawDecorations() {
@@ -139,6 +147,16 @@ class VisualIntro {
             line(x2 + padding, y, x2 - padding, y);
         }
 
+    }
+
+    drawImages() {
+        const imgSize = {
+            x: 40,
+            y: 40
+        }
+        image(this.logoNobel, this.positions.row.r1 + 4, this.positions.col.c5 + 3, imgSize.x, imgSize.y);
+        image(this.logoKTH, this.positions.row.r3 - 44, this.positions.col.c5 + 3, imgSize.x, imgSize.y);
+        image(this.logoRethart, this.positions.row.r3 - 47, this.positions.col.c4 + 11);
     }
 
 }
