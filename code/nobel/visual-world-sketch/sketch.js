@@ -282,7 +282,7 @@ new WebSocketClient().onmessage = (data) => {
   // if (internalData.remote_location.country == "France") console.log("viva la france")
   //ADD PACKAGES NUMBER
 
-  if (dashBoard != null && internalData.out == true && isInCountries(internalData.local_location.country, selectedRegion)) {
+  if (dashBoard != null && internalData.out == false && isInCountries(internalData.local_location.country, selectedRegion)) {
 
     dashBoard.addSize(internalData.len);
     // dashBoard.addPackage(1);

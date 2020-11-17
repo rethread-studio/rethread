@@ -7,16 +7,16 @@ class Package {
         this.position = createVector(x, y);
         this.countryName = name;
 
-        this.r = 3.0; // Half the width of veihcle's back side
+        this.r = random(0.2, 2); // Half the width of veihcle's back side
         this.maxspeed = random(2, 3); //
         this.maxforce = 0.1;
         this.country = country;
         this.goalPos = country.getPosition();
 
         this.size = random(1, 4);
-        this.state = "MOVE";
+        this.state = "APPEAR";
         this.path = path;
-        this.alpha = 100;
+        this.alpha = 0;
     }
 
 
@@ -108,7 +108,22 @@ class Package {
     ////////////////////////////////
     update() {
 
+
         switch (this.state) {
+            case "APPEAR":
+                this.velocity.add(this.acceleration);
+                this.velocity.limit(this.maxspeed);
+                this.position.add(this.velocity);
+                this.acceleration.mult(0);
+                this.goalPos = this.country.getPosition();
+                this.alpha += 10;
+                if (this.alpha > 100) {
+                    this.state = "MOVE";
+                    this.alpha = 100;
+                }
+
+
+                break;
             case "MOVE":
 
                 this.velocity.add(this.acceleration);
@@ -116,8 +131,10 @@ class Package {
                 this.position.add(this.velocity);
                 this.acceleration.mult(0);
                 this.goalPos = this.country.getPosition();
-
-                if (this.position.dist(this.goalPos) < 10) {
+                if (this.position.dist(this.goalPos) < 25) {
+                    this.state = "VANISH";
+                    this.country.addVelocity();
+                } else if (this.position.dist(this.goalPos) < 10) {
                     this.state = "REMOVE";
                     this.country.addVelocity();
                 }
@@ -132,7 +149,7 @@ class Package {
                 this.goalPos = this.country.getPosition();
                 this.alpha -= 5;
 
-                if (this.alph < 0) {
+                if (this.alpha < 0) {
                     this.state = "REMOVE";
                 }
 
@@ -170,13 +187,13 @@ class Package {
             noStroke()
             push();
             translate(this.position.x, this.position.y);
-            circle(0, 0, this.size);
-            // rotate(this.theta);
-            // beginShape();
-            // vertex(0, -this.r * 2); // Arrow pointing upp
-            // vertex(-this.r, this.r * 2); // Lower left corner
-            // vertex(this.r, this.r * 2); // Lower right corner
-            // endShape(CLOSE);
+            // circle(0, 0, this.size);
+            rotate(this.theta);
+            beginShape();
+            vertex(0, -this.r); // Arrow pointing upp
+            vertex(-this.r, this.r); // Lower left corner
+            vertex(this.r, this.r); // Lower right corner
+            endShape(CLOSE);
             pop();
         }
 

@@ -423,7 +423,7 @@ class CountryManager {
     renderObject(object) {
 
         let { r, g, b } = colorPallete.green;
-        fill(r, g, b);
+        fill(r, g, b, object.country.textAlpha);
         textFont('sans');
         textSize(this.fontSize.countries);
         textAlign(RIGHT, TOP);

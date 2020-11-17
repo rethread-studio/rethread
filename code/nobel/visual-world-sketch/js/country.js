@@ -18,10 +18,16 @@ class Country {
         this.packages = 0;
         this.bigPacket = 1;
         this.refPoint = refPoint;
+        this.textAlpha = 100;
+    }
+
+    addTextAlpha(num) {
+        this.textAlpha = max(100, this.textAlpha + num);
     }
 
     addPackage(num) {
         this.packages += num;
+        this.addTextAlpha(num);
     }
 
     getPackagesNumb() {
@@ -38,7 +44,7 @@ class Country {
 
 
     addVelocity() {
-        this.maxspeed = this.maxspeed + 0.0005;
+        this.maxspeed = this.maxspeed - 0.5 < 0.4 ? 0.4 : this.maxspeed - 0.5;
         this.size = min(40, this.size + 0.2);
     }
     /////////////////////////////
@@ -138,6 +144,7 @@ class Country {
                 this.velocity.limit(this.maxspeed);
                 this.position.add(this.velocity);
                 this.acceleration.mult(0);
+                this.textAlpha = this.textAlpha - 20 < 0 ? 0 : this.textAlpha - 1;
                 if (this.position.dist(this.goalPos) < 5) {
                     this.state = "REMOVE";
                     //REMOVE POINT 
