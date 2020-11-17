@@ -304,10 +304,10 @@ function draw() {
   } else if (playhead.state == "playing") {
     playhead.currentScene.draw(dt);
   } else if (playhead.state == "crossfade") {
-    playhead.currentScene.draw(dt);
     if (playhead.fadingInScene != undefined) {
       playhead.fadingInScene.draw(dt);
     }
+    playhead.currentScene.draw(dt);
   } else if (playhead.state == "end of score") {
   }
 

@@ -91,6 +91,18 @@ class IntroScene extends Scene {
             height: 360 * subsampling,
         }
 
+        this.standardBlobSize = canvasX/3;
+        this.blobSize = this.standardBlobSize;
+        this.shaderAlpha = 1.0;
+        this.sceneAlpha = 1.0;
+        this.backgroundAlpha = 1.0;
+        this.playhead = {
+            sectionIndex: 0,
+            countdown: 0,
+            state: "before start", // "playing", "fade in", "end of movement"
+        };
+        this.sections = [];
+
         this.myFont;
 
         this.fontURL = './assets/fonts/Anton-Regular.ttf';
@@ -227,50 +239,116 @@ class IntroScene extends Scene {
     }
     draw(dt) {
         // Update state and draw. dt is the time since last frame in seconds.
-        background(0);
-        // clear();
-        //DRAW SHADER
-        // shaderGraphics.background(0);
-        this.shaderGraphics.clear();
-        // shader() sets the active shader with our shader
-        this.shaderGraphics.shader(this.backgroundShader);
 
-        // Send the frameCount to the shader
-        this.backgroundShader.setUniform("uFrameCount", frameCount);
-        this.backgroundShader.setUniform("uNoiseTexture", this.noise);
+        if (this.playhead.state == "before start") {
+                return;
+        } else if (this.playhead.state == "fade in") {
+            this.playhead.countdown -= dt;
+            // Will pass from the "fade in" state by play() being called externally
+        } else if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
+            this.playhead.countdown -= dt;
+            if (this.playhead.countdown <= 0) {
+                this.playhead.sectionIndex += 1;
+                if (this.playhead.sectionIndex < this.sections.length) {
+                    this.playhead.countdown = this.sections[
+                        this.playhead.sectionIndex
+                    ].duration;
+                    if (this.sections[this.playhead.sectionIndex].name == "fade out") {
+                        this.fadeOut(this.sections[this.playhead.sectionIndex].duration);
+                    } else {
+                        this.blobSize = this.standardBlobSize;
+                        this.shaderAlpha = 1.0;
+                        this.sceneAlpha = 1.0;
+                        this.backgroundAlpha = 1.0;
+                    }
+                }
+            }
+        }
+        if (this.playhead.state == "fade out") {
+            let progression = 1.0 - (this.playhead.countdown / this.playhead.totalDuration);
+            progression = 1.0 - (Math.cos(progression * Math.PI) * 0.5+0.5); // Smoother motion
+            // lerp between current progression and previous one
+            this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * progression);
+            this.shaderAlpha = 1.0;
+            if(progression > 0.6) {
+                
+            }
+            
+            this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
+            this.backgroundAlpha = 1.0;
+            if(progression > 0.6) {
+                // When the blob covers the screen we want it to start fading out with the new scene in the background
+                this.backgroundAlpha = 0.0;
+                this.shaderAlpha = (1.0 - Math.pow((progression-0.6)/0.4, 4.0));
+            }
+        }
+        if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
+            background(0, 0, 0, this.backgroundAlpha * 100);
+            // clear();
+            //DRAW SHADER
+            // shaderGraphics.background(0);
+            this.shaderGraphics.clear();
+            // shader() sets the active shader with our shader
+            this.shaderGraphics.shader(this.backgroundShader);
 
-        this.shaderGraphics.translate(0, 0)
-        // Rotate our geometry on the X and Y axes
-        this.shaderGraphics.rotateX(0.01);
-        this.shaderGraphics.rotateY(0.005);
+            // Send the frameCount to the shader
+            this.backgroundShader.setUniform("uFrameCount", frameCount);
+            this.backgroundShader.setUniform("uNoiseTexture", this.noise);
 
-        // Draw some geometry to the screen
-        // We're going to tessellate the sphere a bit so we have some more geometry to work with
-        this.shaderGraphics.sphere(canvasX / 3, 200, 100);
+            this.shaderGraphics.translate(0, 0)
+            // Rotate our geometry on the X and Y axes
+            this.shaderGraphics.rotateX(0.01);
+            this.shaderGraphics.rotateY(0.005);
 
-        // Draw the shader to main canvas
-        image(this.shaderGraphics, 0, 0, canvasX, canvasY);
+            // Draw some geometry to the screen
+            // We're going to tessellate the sphere a bit so we have some more geometry to work with
+            this.shaderGraphics.sphere(this.blobSize, 200, 100);
 
-        // Draw text
-        colorMode(RGB, 100);
+            // Draw the shader to main canvas
+            drawingContext.globalAlpha = this.shaderAlpha;
+            image(this.shaderGraphics, 0, 0, canvasX, canvasY);
 
-        this.visualIntro.updateData();
-        this.visualIntro.display();
+            // Draw text
+            colorMode(RGB, 100);
+
+            drawingContext.globalAlpha = this.sceneAlpha;
+            this.visualIntro.updateData();
+            this.visualIntro.display();
+            drawingContext.globalAlpha = 1.0;
+        }
     }
     reset(sections) {
         // This is called to reset the state of the Scene before it is started
+        this.sections = sections;
+        this.playhead = {
+            sectionIndex: 0,
+            countdown: 0,
+            state: "before start", // "playing", "fade in", "end of movement"
+        };
+      
+        console.log("Reset ports");
     }
     registerPacket(internalData, country, continent) {
 
     }
     fadeIn(duration) {
         // Called when the previous scene is starting to fade out
+        this.playhead.state = "fade in";
+        this.countdown = duration;
+        this.playhead.totalDuration = duration;
     }
     fadeOut(duration) {
         // Called from within the Scene when the "fade out" section starts
+        this.playhead.state = "fade out";
+        this.playhead.countdown = duration;
+        this.playhead.totalDuration = duration;
     }
     play() {
         // Called when this Scene becomes the current Scene (after teh crossfade)
+        this.playhead.sectionIndex = -1;
+        this.playhead.state = "playing";
+        this.playhead.countdown = 0;
+        console.log("Play intro");
     }
 }
 

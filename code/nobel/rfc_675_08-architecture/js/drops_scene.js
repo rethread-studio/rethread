@@ -66,6 +66,9 @@ class DropsScene extends Scene {
           }
         }
       }
+    }
+
+    if (this.playhead.state == "playing" || this.playhead.state == "fade in") {
 
       if (this.increaseBackgroundPhase) {
         let duration = this.directionDuration - this.textDuration;
@@ -85,7 +88,10 @@ class DropsScene extends Scene {
         9.0
       );
       let backgroundTransitionLightness = 0;
-      if (this.backgroundPhase > Math.PI) {
+      if(this.playhead.state == "fade in") {
+        backgroundTransitionLightness = Math.pow(1.0 - (this.playhead.countdown / this.directionDuration), 3.0) * 100.0;
+      }
+      else if (this.backgroundPhase > Math.PI) {
         backgroundTransitionLightness = Math.pow(curve, 3.0) * 100.0;
       } else {
         backgroundTransitionLightness =
@@ -98,6 +104,8 @@ class DropsScene extends Scene {
         backgroundHue * 4 + 10 + backgroundTransitionLightness,
         this.backgroundAlpha
       );
+
+      console.log("backgroundTransitionLightness: " + backgroundTransitionLightness + ", backgroundAlpha: " + this.backgroundAlpha)
 
       this.pg.colorMode(HSL, 100);
       this.pg.strokeWeight(subsampling);
@@ -228,6 +236,10 @@ class DropsScene extends Scene {
     // Called when the previous scene is starting to fade out
     this.playhead.state = "fade in";
     this.playhead.countdown = duration;
+    // Trick the background into fading to white
+    this.directionDuration = duration;
+    this.backgroundPhase = 0;
+    this.clearScreen = true;
     console.log("Fade in drops");
   }
   fadeOut(duration) {
