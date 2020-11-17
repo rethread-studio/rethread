@@ -2,6 +2,8 @@ p5.disableFriendlyErrors = true;
 
 // GLOBAL GENERAL STATE
 
+var drawFPS = true;
+
 // This section contains state that is shared between many or all scenes
 // or is used by the main functions within this file
 
@@ -197,7 +199,18 @@ function setup() {
   }
 } // End setup
 
+let isStarted = false;
+function BroadSignPlay() {
+  isStarted = true;
+}
+if (typeof BroadSignObject === 'undefined') {
+	BroadSignPlay();
+}
+
 function draw() {
+  if (!isStarted) {
+    return;
+  }
   // Update time
   now = Date.now() * 0.001; // current time in seconds
   if (lastNow == 0) {
@@ -315,6 +328,12 @@ function draw() {
   }
 
   lastNow = now; // Set the timestamp for this update to get time between frames
+
+  if (drawFPS) {
+    textSize(48);
+    fill(30, 100, 50, 100);
+    text(frameRate().toFixed(1), canvasX / 3, windows[13].center.y);
+  }
 } // End draw
 
 // WEBSOCKET RECEIVE PACKETS
