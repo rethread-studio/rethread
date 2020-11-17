@@ -23,6 +23,20 @@ var score = [
   {
     name: "drops",
     sections: [
+      { name: "in", duration: 5, region: "Sweden" },
+      { name: "fade out", duration: 7 },
+    ],
+  },
+  {
+    name: "intro",
+    sections: [
+      { name: "transition", duration: 5, region: "Sweden" },
+      { name: "fade out", duration: 7 },
+    ],
+  },
+  {
+    name: "drops",
+    sections: [
       { name: "in", duration: 20, region: "Sweden" },
       { name: "out", duration: 20, region: "Sweden" },
       { name: "in", duration: 20, region: "Europe" },

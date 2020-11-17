@@ -105,8 +105,6 @@ class DropsScene extends Scene {
         this.backgroundAlpha
       );
 
-      console.log("backgroundTransitionLightness: " + backgroundTransitionLightness + ", backgroundAlpha: " + this.backgroundAlpha)
-
       this.pg.colorMode(HSL, 100);
       this.pg.strokeWeight(subsampling);
       this.pg.noFill();

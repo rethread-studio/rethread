@@ -244,6 +244,20 @@ class IntroScene extends Scene {
                 return;
         } else if (this.playhead.state == "fade in") {
             this.playhead.countdown -= dt;
+            let progression = this.playhead.countdown / this.playhead.totalDuration;
+            progression = (Math.cos(progression * Math.PI) * 0.5+0.5); // Smoother motion
+
+            // lerp between current progression and previous one
+            this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * progression);
+            
+            this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
+            this.backgroundAlpha = 1.0;
+            this.shaderAlpha = 1.0;
+            if(progression > 0.6) {
+                // When the blob covers the screen we want it to start fading out with the new scene in the background
+                this.backgroundAlpha = 0.0;
+                this.shaderAlpha = (1.0 - Math.pow((progression-0.6)/0.4, 4.0));
+            }
             // Will pass from the "fade in" state by play() being called externally
         } else if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
             this.playhead.countdown -= dt;
@@ -269,20 +283,17 @@ class IntroScene extends Scene {
             progression = 1.0 - (Math.cos(progression * Math.PI) * 0.5+0.5); // Smoother motion
             // lerp between current progression and previous one
             this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * progression);
-            this.shaderAlpha = 1.0;
-            if(progression > 0.6) {
-                
-            }
             
             this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
             this.backgroundAlpha = 1.0;
+            this.shaderAlpha = 1.0;
             if(progression > 0.6) {
                 // When the blob covers the screen we want it to start fading out with the new scene in the background
                 this.backgroundAlpha = 0.0;
                 this.shaderAlpha = (1.0 - Math.pow((progression-0.6)/0.4, 4.0));
             }
         }
-        if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
+        if (this.playhead.state == "playing" || this.playhead.state == "fade out" || this.playhead.state == "fade in") {
             background(0, 0, 0, this.backgroundAlpha * 100);
             // clear();
             //DRAW SHADER
@@ -349,6 +360,10 @@ class IntroScene extends Scene {
         this.playhead.state = "playing";
         this.playhead.countdown = 0;
         console.log("Play intro");
+    }
+    zIndex() {
+        // Return the z index of the scene when in a transition. The higher z index is drawn on top of the lower one.
+        return 10;
     }
 }
 
