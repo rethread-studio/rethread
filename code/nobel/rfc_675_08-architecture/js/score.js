@@ -13,32 +13,32 @@
 
 // Fade out is not a section, it is instead triggered
 var score = [
-  {
-    name: "drops",
-    sections: [
-      { name: "in", duration: 20, region: "Sweden" },
-      { name: "out", duration: 20, region: "Sweden" },
-      { name: "in", duration: 20, region: "Europe" },
-      { name: "out", duration: 20, region: "Europe" },
-      { name: "in", duration: 20, region: "none" },
-      { name: "out", duration: 20, region: "none" },
-      { name: "fade out", duration: 1 },
-    ],
-  },
-  {
-    name: "numbers",
-    sections: [
-      { name: "all", duration: 10, region: "Sweden" },
-      { name: "all", duration: 10, region: "Europe" },
-      { name: "all", duration: 10, region: "none" },
-      { name: "in", duration: 10 },
-      { name: "out", duration: 10 },
-      { name: "size", duration: 10, region: "Sweden" },
-      { name: "size", duration: 10, region: "Europe" },
-      { name: "size", duration: 10, region: "none" },
-      { name: "fade out", duration: 10 },
-    ],
-  },
+  // {
+  //   name: "drops",
+  //   sections: [
+  //     { name: "in", duration: 20, region: "Sweden" },
+  //     { name: "out", duration: 20, region: "Sweden" },
+  //     { name: "in", duration: 20, region: "Europe" },
+  //     { name: "out", duration: 20, region: "Europe" },
+  //     { name: "in", duration: 20, region: "none" },
+  //     { name: "out", duration: 20, region: "none" },
+  //     { name: "fade out", duration: 1 },
+  //   ],
+  // },
+  // {
+  //   name: "numbers",
+  //   sections: [
+  //     { name: "all", duration: 10, region: "Sweden" },
+  //     { name: "all", duration: 10, region: "Europe" },
+  //     { name: "all", duration: 10, region: "none" },
+  //     { name: "in", duration: 10 },
+  //     { name: "out", duration: 10 },
+  //     { name: "size", duration: 10, region: "Sweden" },
+  //     { name: "size", duration: 10, region: "Europe" },
+  //     { name: "size", duration: 10, region: "none" },
+  //     { name: "fade out", duration: 10 },
+  //   ],
+  // },
   {
     name: "ports",
     sections: [
