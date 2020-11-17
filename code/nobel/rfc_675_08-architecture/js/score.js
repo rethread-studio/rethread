@@ -14,6 +14,13 @@
 // Fade out is not a section, it is instead triggered
 var score = [
   {
+    name: "world",
+    sections: [
+      { name: "in", duration: 10, region: "Sweden" },
+      { name: "fade out", duration: 1 },
+    ],
+  },
+  {
     name: "intro",
     sections: [
       { name: "in", duration: 10, region: "Sweden" },

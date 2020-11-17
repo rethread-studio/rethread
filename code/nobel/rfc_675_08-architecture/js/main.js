@@ -153,6 +153,7 @@ scenes.set("numbers", new NumbersScene());
 scenes.set("drops", new DropsScene());
 scenes.set("ports", new PortsScene());
 scenes.set("intro", new IntroScene());
+scenes.set("world", new WorldScene());
 
 let currentScene;
 let playhead = {
@@ -204,7 +205,7 @@ function BroadSignPlay() {
   isStarted = true;
 }
 if (typeof BroadSignObject === 'undefined') {
-	BroadSignPlay();
+  BroadSignPlay();
 }
 
 function draw() {
