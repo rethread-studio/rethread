@@ -122,7 +122,7 @@ const colorPallete = {
   }
 }
 
-let SINGLE_COLOR = true;
+
 
 // Performance - Disables FES
 // p5.disableFriendlyErrors = true;
@@ -217,8 +217,6 @@ const canvasSize = {
 }
 var canvasX = 208;
 var canvasY = 360;
-
-let lastChange = Date.now();
 
 
 let myFont;
@@ -404,11 +402,7 @@ function draw() {
     rect(win.x, win.y, win.w, win.h);
   }
 
-  let now = Date.now(); // current time in milliseconds
-  if (now - lastChange > 10000) {
-    centerWindow = windows[Math.floor(Math.random() * windows.length)];
-    lastChange = Date.now();
-  }
+
 
   // Draw text
   colorMode(RGB, 100);
@@ -422,9 +416,6 @@ function draw() {
 
 
 
-  if (Math.random() > 0.997) {
-    SINGLE_COLOR = !SINGLE_COLOR;
-  }
 
   // fill(255, 100, 50, 50);
   // rect(centerWindow.x, centerWindow.y, centerWindow.w, centerWindow.h);
