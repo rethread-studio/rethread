@@ -12,6 +12,8 @@ var canvasY = 360 * subsampling;
 let antonFont; // The main font we are using (we only need one instance of it in memory)
 
 let lastNow = 0;
+let firstNow = 0;
+var now = 0;
 
 let drawWindows = true; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
 let windows = [];
@@ -147,6 +149,7 @@ let scenes = new Map();
 scenes.set("default_scene", new Scene());
 scenes.set("numbers", new NumbersScene());
 scenes.set("drops", new DropsScene());
+scenes.set("ports", new PortsScene());
 
 let currentScene;
 let playhead = {
@@ -185,6 +188,7 @@ function setup() {
     w.center = createVector(w.x + w.w / 2, w.y + w.h / 2);
     w.halfWidthSq = Math.pow(w.w / 2, 2);
     w.halfHeightSq = Math.pow(w.h / 2, 2);
+    w.activity = 0;
   }
 
   for (let scene of scenes.values()) {
@@ -194,9 +198,12 @@ function setup() {
 
 function draw() {
   // Update time
-  let now = Date.now() * 0.001; // current time in seconds
+  now = Date.now() * 0.001; // current time in seconds
   if (lastNow == 0) {
     lastNow = now;
+  }
+  if (firstNow == 0) {
+    firstNow = now;
   }
   let dt = now - lastNow;
 

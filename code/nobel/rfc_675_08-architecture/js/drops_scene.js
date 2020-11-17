@@ -27,6 +27,7 @@ class DropsScene extends Scene {
     // This function is called from the p5 steup function. Use it to init
     // all the state that requires p5 to be loaded (such as instantiating
     // p5 types like p5.Vector or createGraphics).
+    this.pg = createGraphics(canvasX, canvasY);
   }
   draw(dt) {
     // Update state and draw. dt is the time since last frame in seconds.
@@ -72,7 +73,7 @@ class DropsScene extends Scene {
       }
 
       if (this.clearScreen) {
-        background("rgba(1.0,1.0,1.0,1.0)");
+        this.pg.background("rgba(1.0,1.0,1.0,1.0)");
         this.clearScreen = false;
       }
 
@@ -83,13 +84,18 @@ class DropsScene extends Scene {
         (metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0,
         9.0
       );
-      background(backgroundHue, 100, backgroundHue * 4, this.backgroundAlpha);
+      this.pg.background(
+        backgroundHue,
+        100,
+        backgroundHue * 4,
+        this.backgroundAlpha
+      );
 
-      colorMode(HSL, 100);
-      strokeWeight(subsampling);
-      noFill();
+      this.pg.colorMode(HSL, 100);
+      this.pg.strokeWeight(subsampling);
+      this.pg.noFill();
       for (let drop of this.droplets) {
-        stroke(
+        this.pg.stroke(
           drop.hue,
           drop.saturation,
           25 + drop.lightness,
@@ -99,12 +105,15 @@ class DropsScene extends Scene {
         if (drop.out == false) {
           dropSize = drop.maxSize - dropSize;
         }
-        circle(drop.x, drop.y, dropSize);
+        this.pg.circle(drop.x, drop.y, dropSize);
         drop.size += subsampling;
         drop.lightness -= (10 - drop.hue) * 0.1;
       }
 
       this.droplets = this.droplets.filter((d) => d.size < d.maxSize);
+
+      // clear();
+      image(this.pg, 0, 0);
 
       // Draw text
       colorMode(HSL, 100);

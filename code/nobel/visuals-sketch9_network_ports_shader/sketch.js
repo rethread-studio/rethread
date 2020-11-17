@@ -8,8 +8,9 @@
 
 /// NODES AND EDGES
 
-let selectedHue = 0;
+let selectedHue = 50;
 let drawNetwork = false;
+let drawParticles = false;
 
 class Edge {
   constructor() {
@@ -58,11 +59,11 @@ class Node {
       this.activity = 0;
     }
     if (this.isWindow == false) {
-      let pullBack = this.offsetPos.copy().mult(-1).normalize().mult(0.001);
+      let pullBack = this.offsetPos.copy().mult(-1).normalize().mult(0.001); // mult of 0.001 keeps it in check
       this.vel.add(pullBack);
       this.offsetPos.add(this.vel.copy().mult(dt));
     } else {
-      windows[this.windowIndex].activity = this.activity;
+      windows[this.windowIndex].activity = Math.pow(this.activity, 2.0);
     }
     for (let c of this.connections) {
       c.update(dt, this.pos);
@@ -77,19 +78,19 @@ class Node {
     );
     g.noStroke();
     if (this.isWindow == false && drawNetwork) {
-      g.ellipse(
-        this.pos.x + this.offsetPos.x,
-        this.pos.y + this.offsetPos.y,
-        10 * subsampling,
-        10 * subsampling
-      );
+      // g.ellipse(
+      //   this.pos.x + this.offsetPos.x,
+      //   this.pos.y + this.offsetPos.y,
+      //   10 * subsampling,
+      //   10 * subsampling
+      // );
     } else {
       let w = windows[this.windowIndex];
       let size = 8 * subsampling * this.activity;
       // g.rect(w.x-size, w.y-size, w.w + size + size, w.h + size + size);
       if (this.selected) {
-        let size = 8 * subsampling;
-        g.stroke(selectedHue, 100, 50, 100);
+        let size = 2 * subsampling;
+        g.stroke(selectedHue + 2, 50, 60, 100);
         g.strokeWeight(subsampling * 4);
         g.noFill();
         g.rect(w.x - size, w.y - size, w.w + size + size, w.h + size + size);
@@ -215,16 +216,17 @@ class Connection {
   }
   registerPort(port, previousPos) {
     this.edge.activity = Math.min(this.edge.activity + 0.2, 1.0);
-    this.node.registerPort(port, previousPos);
+    // this.node.registerPort(port, previousPos);
   }
 }
 
 class ConnectionParticle {
-  constructor(port) {
+  constructor(port, doDraw) {
     this.port = port;
     this.pos = 0;
     this.speed = 1.0;
     this.connectionId = 0;
+    this.doDraw = doDraw;
   }
   moveToConection(connection) {
     this.pos = 0;
@@ -234,16 +236,22 @@ class ConnectionParticle {
     this.pos += this.speed * dt * 0.001;
   }
   draw(g, p1, p2) {
-    if (fallingText.node != undefined && fallingText.node.hasPort(this.port)) {
-      g.fill(selectedHue, 100, 55, 100);
-    } else {
-      g.fill(9, 100, 90, 100);
-    }
+    if (this.doDraw) {
+      if (
+        fallingText.node != undefined &&
+        fallingText.node.hasPort(this.port)
+      ) {
+        g.fill(selectedHue + 2, 50, 60, 100);
+        // g.fill(selectedHue, 100, 55, 100);
+      } else {
+        g.fill(2, 100, 55, 100);
+      }
 
-    g.noStroke();
-    let x = p1.x + (p2.x - p1.x) * this.pos;
-    let y = p1.y + (p2.y - p1.y) * this.pos;
-    g.ellipse(x, y, 4 * subsampling, 4 * subsampling);
+      g.noStroke();
+      let x = p1.x + (p2.x - p1.x) * this.pos;
+      let y = p1.y + (p2.y - p1.y) * this.pos;
+      g.ellipse(x, y, 4 * subsampling, 4 * subsampling);
+    }
   }
 }
 
@@ -345,6 +353,7 @@ columns.push({ x: 122, y: 0, w: 48, h: 360 });
 
 let lastChange = Date.now();
 let lastNow = 0;
+let firstNow = 0;
 
 let lastCountry = "";
 
@@ -364,6 +373,13 @@ let lightsShader;
 
 let originNode;
 let labeledNodes = [];
+
+const lines = [
+  48 * subsampling,
+  130 * subsampling,
+  214 * subsampling,
+  297 * subsampling,
+];
 
 let fallingText = {
   node: undefined,
@@ -397,10 +413,10 @@ let fallingText = {
   draw: function (g) {
     if (this.node != undefined) {
       g.fill(
-        this.node.activity * 15 + selectedHue,
-        90,
-        this.node.activity * 90 + 100,
-        (1.0 - this.y / canvasY) * 100.0
+        selectedHue + 2,
+        50,
+        this.node.activity * 50 + 50,
+        (1.0 - Math.pow(this.y / canvasY, 2.0)) * 100.0
       );
       g.noStroke();
     }
@@ -411,7 +427,7 @@ let fallingText = {
       g.text(this.string, this.x, this.y);
     } else if (Array.isArray(texts)) {
       for (let i = 0; i < texts.length; i++) {
-        g.text(texts[i], this.x, this.y + this.textSize * i * 1.5);
+        g.text(texts[i], this.x, lines[i + 1]); // this.y + this.textSize * i * 1.5);
       }
     }
   },
@@ -492,12 +508,6 @@ function setup() {
   textPg.textAlign(CENTER, CENTER);
   textPg.textFont(myFont);
 
-  const lines = [
-    48 * subsampling,
-    130 * subsampling,
-    214 * subsampling,
-    297 * subsampling,
-  ];
   let allPorts = [
     443,
     80,
@@ -720,6 +730,9 @@ function draw() {
   if (lastNow == 0) {
     lastNow = now;
   }
+  if (firstNow == 0) {
+    firstNow = now;
+  }
   let dt = now - lastNow;
 
   // Update metrics
@@ -771,7 +784,13 @@ function draw() {
       (rollingTotalLen / 1000000.0 - 2.0) * 3.0,
       9.0
     );
-    pg.background(backgroundHue, 100, pow(backgroundHue, 3.0) * 0.1, 5);
+    // pg.background(
+    //   9.0 - backgroundHue,
+    //   100,
+    //   100 - pow(backgroundHue, 3.0) * 0.03,
+    //   6
+    // );
+    pg.background(0, 0, 100 - pow(backgroundHue, 3.0) * 0.5, 6);
 
     fill(75, 100, 0, 100);
     let totalLen = formatBytes(rollingTotalLen);
@@ -785,7 +804,7 @@ function draw() {
     originNode.drawNodes(pg);
 
     lightsShader.setUniform("iResolution", [canvasX, canvasY]);
-    lightsShader.setUniform("iTime", now * 0.001);
+    lightsShader.setUniform("iTime", (now - firstNow) * 0.001);
     lightsShader.setUniform("windows1", [
       windows[0].activity,
       windows[1].activity,
@@ -877,6 +896,15 @@ function draw() {
   // metricsPerUpdate.numInPackets *= coeff;
   // metricsPerUpdate.numOutPackets *= coeff;
   // metricsPerUpdate.numPackets *= coeff;
+
+  // if (Math.random() > 0.95) {
+  //   drawNetwork = true;
+  // } else {
+  //   drawNetwork = false;
+  // }
+  if (Math.random() > 0.9) {
+    drawParticles = !drawParticles;
+  }
 
   lastNow = now;
   // console.log("num packets: " + num + " elements in particles: " + particles.size);
@@ -977,13 +1005,13 @@ new WebSocketClient().onmessage = (data) => {
     if (originNode.hasPort(internalData.local_port)) {
       // originNode.registerPort(internalData.local_port);
       originNode.passParticleOn(
-        new ConnectionParticle(internalData.local_port)
+        new ConnectionParticle(internalData.local_port, drawParticles)
       );
     }
     if (originNode.hasPort(internalData.remove_port)) {
       // originNode.registerPort(internalData.remove_port);
       originNode.passParticleOn(
-        new ConnectionParticle(internalData.remove_port)
+        new ConnectionParticle(internalData.remove_port, drawParticles)
       );
     }
   }
