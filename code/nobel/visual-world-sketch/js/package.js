@@ -7,7 +7,7 @@ class Package {
         this.position = createVector(x, y);
         this.countryName = name;
 
-        this.r = random(0.2, 2); // Half the width of veihcle's back side
+        this.r = random(2, 5); // Half the width of veihcle's back side
         this.maxspeed = random(2, 3); //
         this.maxforce = 0.1;
         this.country = country;

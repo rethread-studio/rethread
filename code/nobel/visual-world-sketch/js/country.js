@@ -13,7 +13,7 @@ class Country {
 
         this.goalPos = createVector(goalPos.x, goalPos.y);;
 
-        this.size = 2;
+        this.size = 5;
         this.state = "MOVE";
         this.packages = 0;
         this.bigPacket = 1;
