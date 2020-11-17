@@ -1,7 +1,8 @@
 
 
-class WorldScene {
+class WorldScene extends Scene {
     constructor() {
+        super();
         //LIST OF COUNTRIES IN EUROPEAN UNION
         this.eu_countries = [
             "Sweden",

@@ -17,7 +17,7 @@ var score = [
     name: "world",
     sections: [
       { name: "in", duration: 10, region: "Sweden" },
-      { name: "fade out", duration: 1 },
+      { name: "fade out", duration: 7 },
     ],
   },
   {
