@@ -69,7 +69,6 @@ class DropsScene extends Scene {
     }
 
     if (this.playhead.state == "playing" || this.playhead.state == "fade in") {
-
       if (this.increaseBackgroundPhase) {
         let duration = this.directionDuration - this.textDuration;
         this.backgroundPhase += ((Math.PI * 2) / duration) * dt;
@@ -88,10 +87,13 @@ class DropsScene extends Scene {
         9.0
       );
       let backgroundTransitionLightness = 0;
-      if(this.playhead.state == "fade in") {
-        backgroundTransitionLightness = Math.pow(1.0 - (this.playhead.countdown / this.directionDuration), 3.0) * 100.0;
-      }
-      else if (this.backgroundPhase > Math.PI) {
+      if (this.playhead.state == "fade in") {
+        backgroundTransitionLightness =
+          Math.pow(
+            1.0 - this.playhead.countdown / this.directionDuration,
+            3.0
+          ) * 100.0;
+      } else if (this.backgroundPhase > Math.PI) {
         backgroundTransitionLightness = Math.pow(curve, 3.0) * 100.0;
       } else {
         backgroundTransitionLightness =
@@ -163,6 +165,17 @@ class DropsScene extends Scene {
   }
   reset(sections) {
     // This is called to reset the state of the Scene
+    this.droplets = [];
+    this.doOutPackets = true;
+    this.backgroundAlpha = 5;
+    this.textDuration = 2000;
+    this.directionDuration = 15000;
+    this.backgroundPhase = 0.0;
+    this.increaseBackgroundPhase = false;
+    this.displayText = "";
+    this.displayTextSize = 24;
+    this.displayTextSizeGrowth = 8;
+    this.regionRestriction = "none";
     this.sections = sections;
     this.playhead = {
       sectionIndex: 0,

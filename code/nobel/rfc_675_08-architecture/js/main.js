@@ -18,7 +18,7 @@ let lastNow = 0;
 let firstNow = 0;
 var now = 0;
 
-let drawWindows = true; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
+let drawWindows = false; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
 let windows = [];
 windows.push({
   x: 2,
@@ -165,6 +165,14 @@ let playhead = {
   fadingInScene: undefined,
   fadingInSceneName: undefined,
   score: score,
+  reset: function () {
+    this.scoreIndex = 0;
+    this.state = "before start";
+    this.currentScene = undefined;
+    this.currentSceneName = "";
+    this.fadingInScene = undefined;
+    this.fadingInSceneName = undefined;
+  },
 };
 
 /// P5 functions
@@ -207,8 +215,9 @@ function setup() {
 let isStarted = false;
 function BroadSignPlay() {
   isStarted = true;
+  playhead.reset();
 }
-if (typeof BroadSignObject === 'undefined') {
+if (typeof BroadSignObject === "undefined") {
   BroadSignPlay();
 }
 
@@ -240,6 +249,10 @@ function draw() {
       playhead.countdown <= playhead.score[playhead.scoreIndex].fadeOutDuration
     ) {
       playhead.scoreIndex += 1;
+      if (playhead.scoreIndex >= playhead.score.length) {
+        // Loop around
+        playhead.scoreIndex = 0;
+      }
       if (playhead.scoreIndex < playhead.score.length) {
         playhead.fadingInSceneName = playhead.score[playhead.scoreIndex].name;
         playhead.fadingInScene = scenes.get(playhead.fadingInSceneName);
@@ -266,7 +279,11 @@ function draw() {
         playhead.state = "end of score";
       }
     }
-  } else if (playhead.state == "end of score") {
+  }
+
+  if (playhead.state == "end of score") {
+    // Reset the playhead to ths start to loop
+    playhead.reset();
   }
 
   // Update metrics
@@ -305,48 +322,55 @@ function draw() {
   } else if (playhead.state == "playing") {
     playhead.currentScene.draw(dt);
   } else if (playhead.state == "crossfade") {
-    if(playhead.currentScene.zIndex() > playhead.fadingInScene.zIndex()) {
-      if (playhead.fadingInScene != undefined) {
-        playhead.fadingInScene.draw(dt);
+    if (playhead.fadingInScene != undefined) {
+      if (playhead.currentScene.zIndex() > playhead.fadingInScene.zIndex()) {
+        if (playhead.fadingInScene != undefined) {
+          playhead.fadingInScene.draw(dt);
+        }
+        playhead.currentScene.draw(dt);
+      } else {
+        playhead.currentScene.draw(dt);
+        if (playhead.fadingInScene != undefined) {
+          playhead.fadingInScene.draw(dt);
+        }
       }
-      playhead.currentScene.draw(dt);
     } else {
       playhead.currentScene.draw(dt);
-      if (playhead.fadingInScene != undefined) {
-        playhead.fadingInScene.draw(dt);
-      }
     }
   } else if (playhead.state == "end of score") {
   }
 
   // Draw the windows
-  colorMode(HSL, 100);
-  fill(50, 100);
-  noStroke();
-  for (win of windows) {
-    fill(0, 100);
-    rect(win.x, win.y, win.w, win.h);
-    let inset = subsampling;
-    fill(15, 100);
-    rect(win.x + inset, win.y + inset, win.w - inset * 2, win.h - inset * 2);
-    fill(30, 100);
-    let crossSize = 2 * subsampling;
-    rect(
-      win.x + win.w / 2 - crossSize / 2,
-      win.y + inset,
-      crossSize,
-      win.h - inset * 2
-    );
+  if (drawWindows) {
+    colorMode(HSL, 100);
+    fill(50, 100);
+    noStroke();
+    for (win of windows) {
+      fill(0, 100);
+      rect(win.x, win.y, win.w, win.h);
+      let inset = subsampling;
+      fill(15, 100);
+      rect(win.x + inset, win.y + inset, win.w - inset * 2, win.h - inset * 2);
+      fill(30, 100);
+      let crossSize = 2 * subsampling;
+      rect(
+        win.x + win.w / 2 - crossSize / 2,
+        win.y + inset,
+        crossSize,
+        win.h - inset * 2
+      );
+    }
   }
 
   lastNow = now; // Set the timestamp for this update to get time between frames
 
   if (drawFPS) {
-    textSize(12*subsampling);
+    textSize(12 * subsampling);
     textAlign(CENTER, CENTER);
     fill(30, 100, 50, 100);
+    noStroke();
     let thisFps = frameRate();
-    fps = (fps* 0.95) + (thisFps * 0.05);
+    fps = fps * 0.95 + thisFps * 0.05;
     text(thisFps.toFixed(1), windows[12].center.x, windows[12].center.y);
     text(fps.toFixed(1), windows[13].center.x, windows[13].center.y);
   }

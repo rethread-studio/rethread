@@ -220,6 +220,7 @@ class NumbersScene extends Scene {
       textSize(24);
       textAlign(CENTER, CENTER);
       textFont(antonFont);
+      colorMode(HSL, 100);
       fill(75, 0, Math.pow(this.backgroundAlpha, 2) * 100, 100);
       this.textObject.draw();
       if (this.textObject.update(dt) == 1) {
@@ -288,6 +289,13 @@ class NumbersScene extends Scene {
   reset(sections) {
     // This is called to reset the state of the Scene
     this.sections = sections;
+    this.averageLen = 0;
+    this.currentParticleDir = "down";
+    this.nextParticleDir = "down";
+    this.backgroundAlphaChange = 0.6;
+    this.backgroundAlpha = 0;
+    this.regionRestriction = "none";
+    this.particleIndex = 0;
   }
   registerPacket(internalData, country, continent) {
     if (this.playhead.state == "playing" || this.playhead.state == "fade out") {

@@ -14,6 +14,13 @@
 // Fade out is not a section, it is instead triggered
 var score = [
   {
+    name: "intro",
+    sections: [
+      { name: "in", duration: 3 },
+      { name: "fade out", duration: 7 },
+    ],
+  },
+  {
     name: "world",
     sections: [
       { name: "in", duration: 10, region: "Sweden" },
@@ -30,7 +37,7 @@ var score = [
   {
     name: "drops",
     sections: [
-      { name: "in", duration: 5, region: "Sweden" },
+      { name: "in", duration: 10, region: "Sweden" },
       { name: "fade out", duration: 7 },
     ],
   },
@@ -51,7 +58,7 @@ var score = [
   {
     name: "intro",
     sections: [
-      { name: "transition", duration: 1},
+      { name: "transition", duration: 1 },
       { name: "fade out", duration: 7 },
     ],
   },
@@ -65,7 +72,7 @@ var score = [
   {
     name: "intro",
     sections: [
-      { name: "transition", duration: 1},
+      { name: "transition", duration: 1 },
       { name: "fade out", duration: 7 },
     ],
   },
@@ -82,6 +89,13 @@ var score = [
     ],
   },
   {
+    name: "intro",
+    sections: [
+      { name: "transition", duration: 1 },
+      { name: "fade out", duration: 7 },
+    ],
+  },
+  {
     name: "numbers",
     sections: [
       { name: "all", duration: 10, region: "Sweden" },
@@ -92,7 +106,14 @@ var score = [
       { name: "size", duration: 10, region: "Sweden" },
       { name: "size", duration: 10, region: "Europe" },
       { name: "size", duration: 10, region: "none" },
-      { name: "fade out", duration: 10 },
+      { name: "fade out", duration: 7 },
+    ],
+  },
+  {
+    name: "intro",
+    sections: [
+      { name: "transition", duration: 1 },
+      { name: "fade out", duration: 7 },
     ],
   },
   {
@@ -115,6 +136,13 @@ var score = [
       { name: "network", duration: 1, pullBackCoeff: 0.0 },
       { name: "packets", duration: 1, pullBackCoeff: 0.0 },
       { name: "fade out", duration: 5 },
+    ],
+  },
+  {
+    name: "intro",
+    sections: [
+      { name: "transition", duration: 1 },
+      { name: "fade out", duration: 7 },
     ],
   },
 ];

@@ -64,13 +64,11 @@ class PortsScene extends Scene {
           ) {
             this.drawNetwork = false;
             this.drawParticles = true;
-            console.log("Packets sections");
           } else if (
             this.sections[this.playhead.sectionIndex].name == "network"
           ) {
             this.drawNetwork = true;
             this.drawParticles = false;
-            console.log("Network section");
           }
 
           if ("pullBackCoeff" in this.sections[this.playhead.sectionIndex]) {
@@ -83,7 +81,11 @@ class PortsScene extends Scene {
         }
       }
     }
-    if (this.playhead.state == "playing" || this.playhead.state == "fade out" || this.playhead.state == "fade in") {
+    if (
+      this.playhead.state == "playing" ||
+      this.playhead.state == "fade out" ||
+      this.playhead.state == "fade in"
+    ) {
       colorMode(HSL, 100);
 
       let backgroundHue = Math.min(
@@ -154,6 +156,10 @@ class PortsScene extends Scene {
   }
   reset(sections) {
     // This is called to reset the state of the Scene before it is started
+    this.selectedHue = 50;
+    this.drawNetwork = false;
+    this.drawParticles = true;
+    this.pullBackCoeff = 1.0;
     this.sections = sections;
     let allPorts = [
       443,
