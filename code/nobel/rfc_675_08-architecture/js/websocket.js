@@ -20,7 +20,7 @@ function WebSocketClient() {
   if (document.location.protocol == "https:") {
     protocol += "s";
   }
-  let host = "130.237.222.185:1189";
+  let host = "nobel.durieux.me:1189";
 
   const listeners = {};
   const that = this;
@@ -40,10 +40,10 @@ function WebSocketClient() {
 
     ws.onclose = function (e) {
       console.log(
-        "Socket is closed. Reconnect will be attempted in 1 second.",
+        "Socket is closed. Reconnect will be attempted in 0.5 second.",
         e.reason
       );
-      setTimeout(init, 1000);
+      setTimeout(init, 500);
     };
 
     ws.onerror = function (err) {
