@@ -2,13 +2,13 @@ p5.disableFriendlyErrors = true;
 
 // GLOBAL GENERAL STATE
 
-var drawFPS = true;
+var drawFPS = false;
 var fps = 0;
 
 // This section contains state that is shared between many or all scenes
 // or is used by the main functions within this file
 
-var subsampling = 2;
+var subsampling = 8;
 var canvasX = 208 * subsampling;
 var canvasY = 360 * subsampling;
 

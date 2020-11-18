@@ -217,12 +217,8 @@ class NumbersScene extends Scene {
         this.textObject.setNumber(totalLen.toString());
       }
 
-      textSize(24);
-      textAlign(CENTER, CENTER);
-      textFont(antonFont);
-      colorMode(HSL, 100);
-      fill(75, 0, Math.pow(this.backgroundAlpha, 2) * 100, 100);
-      this.textObject.draw();
+      let textBrightness = Math.pow(this.backgroundAlpha, 2);
+      this.textObject.draw(textBrightness);
       if (this.textObject.update(dt) == 1) {
         this.backgroundAlphaChange *= -1;
         if (this.backgroundAlphaChange > 0) {
@@ -414,8 +410,17 @@ class TextObject {
   setNumber(text) {
     this.number = text;
   }
-  draw() {
+  draw(textBrightness) {
     if (this.currentState == 1) {
+      textAlign(CENTER, CENTER);
+      textFont(antonFont);
+      colorMode(HSL, 100);
+      // Make this textobject based
+      let textPhase = this.countdown / this.fullCountdownTime;
+      let textAlpha =
+        1.0 - Math.min(Math.pow(Math.cos(textPhase * Math.PI * 2.0), 3.5), 1.0);
+      fill(75, 0, textBrightness * 100, textAlpha * 100);
+      noStroke();
       const lines = [
         48 * subsampling,
         130 * subsampling,
