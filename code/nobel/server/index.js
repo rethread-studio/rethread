@@ -14,7 +14,7 @@ const services = require("./services");
 const app = express();
 app.use(bodyParser.json());
 
-let visualPath = "../visuals-sketch2";
+let visualPath = "../rfc_675_08-architecture";
 if (process.argv.length > 2) {
   visualPath = process.argv[2];
 }
