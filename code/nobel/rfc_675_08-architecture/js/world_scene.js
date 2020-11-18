@@ -303,7 +303,7 @@ class DashBoard {
     //WRITE THE TITTLE
     //write tittle centered
     writeTittle() {
-        const { r, g, b } = this.colorPallete.green;
+        const { r, g, b } = this.colorPallete.white;
         fill(r, g, b);
         textFont('sans');
         textSize(this.fontSize.tittle);
@@ -344,7 +344,7 @@ class DashBoard {
         textFont(this.font);
         text("LIVE", this.positions.row.r1 - 10 * subsampling, this.positions.col.c2 + this.positions.padding.top);
         circle(this.positions.row.r1 - 31 * subsampling, this.positions.col.c2 + this.positions.padding.top, 7 * subsampling);
-        text(this.focuLocation, this.positions.row.r1 - 10 * subsampling, this.positions.col.c2 + ((this.positions.padding.top * 2) * subsampling) + 4 * subsampling);
+        text(this.focuLocation, this.positions.row.r1 - 10 * subsampling, this.positions.col.c2 + this.positions.padding.top * 2 + 4 * subsampling);
     }
 
     //DRAW THE TICK
