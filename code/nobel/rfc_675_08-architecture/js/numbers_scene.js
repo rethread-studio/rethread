@@ -19,7 +19,8 @@ class NumbersScene extends Scene {
     this.averageLen = 0;
     this.currentParticleDir = "down";
     this.nextParticleDir = "down";
-    this.backgroundAlphaChange = 0.6;
+    this.backgroundAlphaChangeSpeed = 0.9;
+    this.backgroundAlphaChange = this.backgroundAlphaChangeSpeed;
     this.backgroundAlpha = 0;
     this.regionRestriction = "none";
     this.sections = [];
@@ -85,7 +86,7 @@ class NumbersScene extends Scene {
           this.playhead.countdown = this.sections[
             this.playhead.sectionIndex
           ].duration;
-          this.textDuration = this.directionDuration * 0.2;
+          this.textDuration = this.directionDuration * 0.12;
 
           resetMetrics(); // We want fresh numbers per region for example
 
@@ -123,6 +124,12 @@ class NumbersScene extends Scene {
               dur * 0.7
             );
             this.nextParticleDir = "up";
+          } else if (
+            this.sections[this.playhead.sectionIndex].name == "multinumbers"
+          ) {
+            let dur = this.sections[this.playhead.sectionIndex].duration;
+            this.textObject.setNewIteration(["NUMBERS"], dur * 0.3, dur * 0.7);
+            this.nextParticleDir = "up";
           }
 
           if ("region" in this.sections[this.playhead.sectionIndex]) {
@@ -146,30 +153,39 @@ class NumbersScene extends Scene {
       this.pg.noStroke();
       this.pg.colorMode(HSL, 100);
       // let backgroundHue = rollingNumPackets / 100.0 - 2.0;
-      let backgroundHue = Math.min(
-        (metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0,
-        9.0
-      );
+      let backgroundHue =
+        Math.min((metrics.rollingTotalLen / 1000000.0 - 2.0) * 2.0, 7.0) - 2.0;
       // console.log(backgroundHue);
-      this.pg.fill(backgroundHue, 100, backgroundHue * 4.0, 50);
+      this.pg.fill(
+        backgroundHue,
+        100 - backgroundHue * 3,
+        7 + backgroundHue * 3.0,
+        50
+      );
       this.pg.rect(0, 0, canvasX, canvasY);
       for (let p of this.particles) {
-        this.pg.fill(p.hue, p.saturation, p.lightness);
-        this.pg.ellipse(p.x, p.y, p.size, p.size);
-        switch (this.currentParticleDir) {
-          case "right":
-            p.x += p.vel;
-            break;
-          case "left":
-            p.x -= p.vel;
-            break;
-          case "up":
-            p.y -= p.vel;
-            break;
-          case "down":
-            p.y += p.vel;
-            break;
-          default:
+        if (p.activated) {
+          this.pg.fill(p.hue, p.saturation, p.lightness);
+          this.pg.ellipse(p.x, p.y, p.size, p.size);
+          switch (this.currentParticleDir) {
+            case "right":
+              p.x += p.vel;
+              if (p.x > canvasX * 1.1) p.activated = false;
+              break;
+            case "left":
+              p.x -= p.vel;
+              if (p.x < canvasX * -0.1) p.activated = false;
+              break;
+            case "up":
+              p.y -= p.vel;
+              if (p.y < canvasY * -0.1) p.activated = false;
+              break;
+            case "down":
+              p.y += p.vel;
+              if (p.y > canvasY * 1.1) p.activated = false;
+              break;
+            default:
+          }
         }
       }
 
@@ -215,12 +231,23 @@ class NumbersScene extends Scene {
         this.textObject.setNumber(outPackets.toString());
       } else if (this.sections[this.playhead.sectionIndex].name == "size") {
         this.textObject.setNumber(totalLen.toString());
+      } else if (
+        this.sections[this.playhead.sectionIndex].name == "multinumbers"
+      ) {
+        this.textObject.setNumber([
+          inPackets.toString(),
+          outPackets.toString(),
+          numPackets.toString(),
+          totalLen.toString(),
+        ]);
       }
 
-      let textBrightness = Math.pow(this.backgroundAlpha, 2);
+      let textBrightness = Math.pow(this.backgroundAlpha, 2.0);
       this.textObject.draw(textBrightness);
-      if (this.textObject.update(dt) == 1) {
-        this.backgroundAlphaChange *= -1;
+      let updateResult = this.textObject.update(dt);
+      if (updateResult == 1 || updateResult == -1) {
+        this.backgroundAlphaChange =
+          this.backgroundAlphaChangeSpeed * updateResult;
         if (this.backgroundAlphaChange > 0) {
           this.currentParticleDir = this.nextParticleDir;
         }
@@ -288,7 +315,7 @@ class NumbersScene extends Scene {
     this.averageLen = 0;
     this.currentParticleDir = "down";
     this.nextParticleDir = "down";
-    this.backgroundAlphaChange = 0.6;
+    this.backgroundAlphaChange = 0;
     this.backgroundAlpha = 0;
     this.regionRestriction = "none";
     this.particleIndex = 0;
@@ -335,11 +362,12 @@ class NumbersScene extends Scene {
       }
       pa.x = x;
       pa.y = y;
-      pa.vel = (Math.random() * 10 + 5) * subsampling;
+      pa.vel = (Math.random() * 10 + 5) * subsampling * 1.0;
       pa.size = (Math.min(Math.max(len / 10000, 1), 8.0) + 1.0) * subsampling;
       pa.hue = Math.pow(lightness, 2.0) * 15;
       pa.saturation = 100;
       pa.lightness = lightness * 70 + 10;
+      pa.activated = true;
       // particles.push({
       //   x: x,
       //   y: y,
@@ -371,6 +399,8 @@ class NumbersScene extends Scene {
     this.playhead.sectionIndex = -1;
     this.playhead.state = "playing";
     this.playhead.countdown = 0;
+    textAlign(CENTER, CENTER);
+    textFont(antonFont);
     resetMetrics();
     console.log("Play numbers");
   }
@@ -412,14 +442,16 @@ class TextObject {
   }
   draw(textBrightness) {
     if (this.currentState == 1) {
-      textAlign(CENTER, CENTER);
-      textFont(antonFont);
       colorMode(HSL, 100);
       // Make this textobject based
       let textPhase = this.countdown / this.fullCountdownTime;
       let textAlpha =
-        1.0 - Math.min(Math.pow(Math.cos(textPhase * Math.PI * 2.0), 3.5), 1.0);
-      fill(75, 0, textBrightness * 100, textAlpha * 100);
+        1.0 -
+        Math.min(
+          Math.pow(Math.cos(textPhase * Math.PI * 2.0) * 0.5 + 0.5, 12.0),
+          1.0
+        );
+      fill(0, 0, textBrightness * 100, textAlpha * 100);
       noStroke();
       const lines = [
         48 * subsampling,
@@ -438,8 +470,14 @@ class TextObject {
         let y = lines[this.line];
         text(texts, width / 2, y);
       } else if (Array.isArray(texts)) {
+        let startLine = 1;
+        if (texts.length < 4) {
+          startLine = 1;
+        } else {
+          startLine = 0;
+        }
         for (let i = 0; i < texts.length; i++) {
-          let y = lines[this.line + i];
+          let y = lines[startLine + i];
           text(texts[i], width / 2, y);
         }
       }
@@ -455,7 +493,8 @@ class TextObject {
       this.crossedHalfWay == false
     ) {
       this.crossedHalfWay = true;
-      return 1;
+      if (this.drawLabel == true) return -1;
+      else return 1;
     }
     if (this.countdown <= 0) {
       this.currentState = 1 - this.currentState;
