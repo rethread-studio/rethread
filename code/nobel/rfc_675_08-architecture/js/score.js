@@ -13,48 +13,48 @@
 
 // Fade out is not a section, it is instead triggered
 var score = [
-  {
-    name: "intro",
-    sections: [
-      { name: "in", duration: 3 },
-      { name: "fade out", duration: 7 },
-    ],
-  },
-  {
-    name: "world",
-    sections: [
-      { name: "in", duration: 10, region: "Sweden" },
-      { name: "fade out", duration: 7 },
-    ],
-  },
-  {
-    name: "intro",
-    sections: [
-      { name: "in", duration: 1, region: "Sweden" },
-      { name: "fade out", duration: 7 },
-    ],
-  },
-  {
-    name: "drops",
-    sections: [
-      { name: "in", duration: 10, region: "Sweden" },
-      { name: "fade out", duration: 7 },
-    ],
-  },
-  {
-    name: "intro",
-    sections: [
-      { name: "transition", duration: 1 },
-      { name: "fade out", duration: 7 },
-    ],
-  },
-  {
-    name: "numbers",
-    sections: [
-      { name: "all", duration: 10, region: "Sweden" },
-      { name: "fade out", duration: 10 },
-    ],
-  },
+  // {
+  //   name: "intro",
+  //   sections: [
+  //     { name: "in", duration: 3 },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
+  // {
+  //   name: "world",
+  //   sections: [
+  //     { name: "in", duration: 10, region: "Sweden" },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
+  // {
+  //   name: "intro",
+  //   sections: [
+  //     { name: "in", duration: 1, region: "Sweden" },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
+  // {
+  //   name: "drops",
+  //   sections: [
+  //     { name: "in", duration: 10, region: "Sweden" },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
+  // {
+  //   name: "intro",
+  //   sections: [
+  //     { name: "transition", duration: 1 },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
+  // {
+  //   name: "numbers",
+  //   sections: [
+  //     { name: "all", duration: 10, region: "Sweden" },
+  //     { name: "fade out", duration: 10 },
+  //   ],
+  // },
   {
     name: "intro",
     sections: [
@@ -98,15 +98,47 @@ var score = [
   {
     name: "numbers",
     sections: [
-      { name: "all", duration: 10, region: "Sweden" },
-      { name: "all", duration: 10, region: "Europe" },
-      { name: "all", duration: 10, region: "none" },
-      { name: "in", duration: 10 },
-      { name: "out", duration: 10 },
-      { name: "size", duration: 10, region: "Sweden" },
-      { name: "size", duration: 10, region: "Europe" },
-      { name: "size", duration: 10, region: "none" },
-      { name: "fade out", duration: 7 },
+      { name: "all", duration: 10, region: "Sweden", speed: 0.5 },
+      { name: "all", duration: 13, region: "Europe", speed: 0.8 },
+      { name: "all", duration: 18, region: "The World", speed: 1.1 },
+      {
+        name: "in",
+        duration: 14,
+        region: "The World",
+        textLimit: 8,
+        speed: 1.0,
+      },
+      {
+        name: "out",
+        duration: 18,
+        region: "The World",
+        textLimit: 4,
+        speed: 1.5,
+      },
+      {
+        name: "size",
+        duration: 20,
+        startTextLimit: 4,
+        endTextLimit: 2,
+        startSpeed: 0.4,
+        endSpeed: 1.5,
+      },
+      {
+        name: "multinumbers",
+        duration: 15,
+        region: "none",
+        textLimit: 0,
+        startSpeed: 1.5,
+        endSpeed: 1.2,
+      },
+      {
+        name: "pre fade out",
+        textLimit: 0,
+        duration: 5,
+        startSpeed: 1.5,
+        endSpeed: 0.4,
+      },
+      { name: "fade out", duration: 20 },
     ],
   },
   {
@@ -126,15 +158,18 @@ var score = [
       { name: "network", duration: 1, pullBackCoeff: 100.0 },
       { name: "network", duration: 1, pullBackCoeff: 1.0 },
       { name: "network", duration: 0.5, pullBackCoeff: 100.0 },
-      { name: "network", duration: 20 },
-      { name: "packets", duration: 10, pullBackCoeff: 0.1 },
+      { name: "network", duration: 10 },
+      { name: "packets", duration: 8, pullBackCoeff: 0.1 },
       { name: "network", duration: 5, pullBackCoeff: 0.05 },
       { name: "packets", duration: 4, pullBackCoeff: 0.01 },
       { name: "network", duration: 4, pullBackCoeff: 0.005 },
       { name: "network", duration: 0.5, pullBackCoeff: 1000.0 },
       { name: "packets", duration: 4, pullBackCoeff: 0.002 },
-      { name: "network", duration: 1, pullBackCoeff: 0.0 },
+      { name: "network", duration: 1, pullBackCoeff: 100.0 },
       { name: "packets", duration: 1, pullBackCoeff: 0.0 },
+      { name: "network", duration: 0.5, pullBackCoeff: 1000.0 },
+      { name: "packets", duration: 0.5, pullBackCoeff: 0.0 },
+      { name: "network", duration: 0.5, pullBackCoeff: 1000.0 },
       { name: "fade out", duration: 5 },
     ],
   },

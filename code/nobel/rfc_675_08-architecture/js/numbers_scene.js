@@ -14,19 +14,35 @@ class NumbersScene extends Scene {
         hue: 0,
         saturation: 0,
         lightness: 0,
+        len: 0,
+        activated: false,
       });
     }
+    this.particleSpeed = 1.0;
+    this.particleStartSpeed = 1.0;
+    this.particleEndSpeed = 1.0;
+    this.particleNextStartSpeed = 1.0;
+    this.particleNextEndSpeed = 1.0;
+
     this.averageLen = 0;
     this.currentParticleDir = "down";
     this.nextParticleDir = "down";
     this.backgroundAlphaChangeSpeed = 0.9;
     this.backgroundAlphaChange = this.backgroundAlphaChangeSpeed;
     this.backgroundAlpha = 0;
+
+    this.particleAsTextLimit = 100;
+    this.particleAsTextStartLimit = 100;
+    this.nextParticleAsTextStartLimit = 100;
+    this.particleAsTextEndLimit = 100;
+    this.nextParticleAsTextEndLimit = 100;
+
     this.regionRestriction = "none";
     this.sections = [];
     this.playhead = {
       sectionIndex: 0,
       countdown: 0,
+      dropsTimeCountdown: 0,
       state: "before start", // "playing", "fade in", "end of movement"
     };
     this.fadeOutDirectionTime = 1.0;
@@ -76,6 +92,7 @@ class NumbersScene extends Scene {
       );
       // Will pass from the "fade in" state by play() being called externally
     } else if (this.playhead.state == "playing") {
+      this.playhead.dropsTimeCountdown -= dt;
       this.playhead.countdown -= dt;
       if (this.playhead.countdown <= 0) {
         this.playhead.sectionIndex += 1;
@@ -86,51 +103,10 @@ class NumbersScene extends Scene {
           this.playhead.countdown = this.sections[
             this.playhead.sectionIndex
           ].duration;
-          this.textDuration = this.directionDuration * 0.12;
+          this.textDuration = this.directionDuration * 0.2;
+          this.dropsDuration = this.directionDuration - this.textDuration;
 
           resetMetrics(); // We want fresh numbers per region for example
-
-          if (this.sections[this.playhead.sectionIndex].name == "fade out") {
-            this.fadeOut();
-          } else if (this.sections[this.playhead.sectionIndex].name == "all") {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
-            this.textObject.setNewIteration(
-              ["INTERNET PACKETS"],
-              dur * 0.3,
-              dur * 0.7
-            );
-            this.nextParticleDir = "down";
-          } else if (this.sections[this.playhead.sectionIndex].name == "in") {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
-            this.textObject.setNewIteration(
-              ["INTO", "STOCKHOLM"],
-              dur * 0.3,
-              dur * 0.7
-            );
-            this.nextParticleDir = "right";
-          } else if (this.sections[this.playhead.sectionIndex].name == "out") {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
-            this.textObject.setNewIteration(
-              ["OUT OF", "STOCKHOLM"],
-              dur * 0.3,
-              dur * 0.7
-            );
-            this.nextParticleDir = "left";
-          } else if (this.sections[this.playhead.sectionIndex].name == "size") {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
-            this.textObject.setNewIteration(
-              ["DATA SIZE"],
-              dur * 0.3,
-              dur * 0.7
-            );
-            this.nextParticleDir = "up";
-          } else if (
-            this.sections[this.playhead.sectionIndex].name == "multinumbers"
-          ) {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
-            this.textObject.setNewIteration(["NUMBERS"], dur * 0.3, dur * 0.7);
-            this.nextParticleDir = "up";
-          }
 
           if ("region" in this.sections[this.playhead.sectionIndex]) {
             this.regionRestriction = this.sections[
@@ -139,15 +115,118 @@ class NumbersScene extends Scene {
           } else {
             this.regionRestriction = "none";
           }
-          if (this.regionRestriction == "none") {
-            this.textObject.label.push("The World");
+
+          if ("textLimit" in this.sections[this.playhead.sectionIndex]) {
+            this.nextParticleAsTextStartLimit = this.sections[
+              this.playhead.sectionIndex
+            ].textLimit;
+            this.nextParticleAsTextEndLimit = this.nextParticleAsTextStartLimit;
           } else {
-            this.textObject.label.push(this.regionRestriction);
+            this.nextParticleAsTextStartLimit = 100;
+            this.nextParticleAsTextEndLimit = this.nextParticleAsTextStartLimit;
+          }
+
+          if ("startTextLimit" in this.sections[this.playhead.sectionIndex]) {
+            this.nextParticleAsTextStartLimit = this.sections[
+              this.playhead.sectionIndex
+            ].startTextLimit;
+          }
+          if ("endTextLimit" in this.sections[this.playhead.sectionIndex]) {
+            this.nextParticleAsTextEndLimit = this.sections[
+              this.playhead.sectionIndex
+            ].endTextLimit;
+          }
+
+          if ("speed" in this.sections[this.playhead.sectionIndex]) {
+            this.particleNextStartSpeed = this.sections[
+              this.playhead.sectionIndex
+            ].speed;
+            this.particleNextEndSpeed = this.particleNextStartSpeed;
+          } else {
+            this.particleNextStartSpeed = 1.0;
+            this.particleNextEndSpeed = this.particleNextStartSpeed;
+          }
+
+          if ("startSpeed" in this.sections[this.playhead.sectionIndex]) {
+            this.particleNextStartSpeed = this.sections[
+              this.playhead.sectionIndex
+            ].startSpeed;
+          }
+          if ("endSpeed" in this.sections[this.playhead.sectionIndex]) {
+            this.particleNextEndSpeed = this.sections[
+              this.playhead.sectionIndex
+            ].endSpeed;
+          }
+
+          if (
+            this.sections[this.playhead.sectionIndex].name == "fade out" ||
+            this.sections[this.playhead.sectionIndex].name == "pre fade out"
+          ) {
+            this.fadeOut();
+          } else if (this.sections[this.playhead.sectionIndex].name == "all") {
+            let dur = this.sections[this.playhead.sectionIndex].duration;
+            this.textObject.setNewIteration(
+              ["PACKETS OF", "INTERNET", "ACTIVITY"],
+              dur * 0.2,
+              dur * 0.8
+            );
+            this.nextParticleDir = "down";
+          } else if (this.sections[this.playhead.sectionIndex].name == "in") {
+            let dur = this.sections[this.playhead.sectionIndex].duration;
+            this.textObject.setNewIteration(
+              ["INTO", "STOCKHOLM", "FROM"],
+              dur * 0.2,
+              dur * 0.8
+            );
+            this.nextParticleDir = "right";
+          } else if (this.sections[this.playhead.sectionIndex].name == "out") {
+            let dur = this.sections[this.playhead.sectionIndex].duration;
+            this.textObject.setNewIteration(
+              ["OUT OF", "STOCKHOLM", "TO"],
+              dur * 0.2,
+              dur * 0.8
+            );
+            this.nextParticleDir = "left";
+          } else if (this.sections[this.playhead.sectionIndex].name == "size") {
+            let dur = this.sections[this.playhead.sectionIndex].duration;
+            this.textObject.setNewIteration(
+              ["COUNTING", "BITS AND", "PIECES"],
+              dur * 0.2,
+              dur * 0.8
+            );
+            this.nextParticleDir = "up";
+          } else if (
+            this.sections[this.playhead.sectionIndex].name == "multinumbers"
+          ) {
+            let dur = this.sections[this.playhead.sectionIndex].duration;
+            this.textObject.setNewIteration(
+              ["COMMUNICATION", "IN", "NUMBERS"],
+              dur * 0.2,
+              dur * 0.8
+            );
+            this.nextParticleDir = "up";
+          }
+
+          if (this.regionRestriction != "none") {
+            this.textObject.label.push(this.regionRestriction.toUpperCase());
           }
         }
       }
 
       background("rgba(1.0,1.0,1.0,1.0)");
+
+      let dropProgress =
+        1.0 -
+        Math.max(this.playhead.dropsTimeCountdown / this.dropsDuration, 0.0);
+      this.particleAsTextLimit =
+        this.particleAsTextStartLimit +
+        dropProgress *
+          (this.particleAsTextEndLimit - this.particleAsTextStartLimit);
+
+      this.particleSpeed =
+        this.particleStartSpeed +
+        dropProgress * (this.particleEndSpeed - this.particleStartSpeed);
+      // console.log(this.particleAsTextLimit);
 
       // Draw particles to Graphics
       this.pg.noStroke();
@@ -156,32 +235,39 @@ class NumbersScene extends Scene {
       let backgroundHue =
         Math.min((metrics.rollingTotalLen / 1000000.0 - 2.0) * 2.0, 7.0) - 2.0;
       // console.log(backgroundHue);
-      this.pg.fill(
-        backgroundHue,
-        100 - backgroundHue * 3,
-        7 + backgroundHue * 3.0,
-        50
-      );
-      this.pg.rect(0, 0, canvasX, canvasY);
+      // this.pg.fill(
+      //   backgroundHue,
+      //   100 - backgroundHue * 3,
+      //   7 + backgroundHue * 3.0,
+      //   50
+      // );
+      // this.pg.rect(0, 0, canvasX, canvasY);
+      this.pg.background(0, 0, 0, 50);
       for (let p of this.particles) {
         if (p.activated) {
-          this.pg.fill(p.hue, p.saturation, p.lightness);
-          this.pg.ellipse(p.x, p.y, p.size, p.size);
+          this.pg.fill(p.hue, p.saturation, p.lightness + 10, 100);
+          if (p.size > subsampling * this.particleAsTextLimit) {
+            this.pg.textSize(p.size * 2);
+            this.pg.text(p.len, p.x, p.y);
+          } else {
+            this.pg.ellipse(p.x, p.y, p.size, p.size);
+          }
+
           switch (this.currentParticleDir) {
             case "right":
-              p.x += p.vel;
+              p.x += p.vel * this.particleSpeed;
               if (p.x > canvasX * 1.1) p.activated = false;
               break;
             case "left":
-              p.x -= p.vel;
+              p.x -= p.vel * this.particleSpeed;
               if (p.x < canvasX * -0.1) p.activated = false;
               break;
             case "up":
-              p.y -= p.vel;
+              p.y -= p.vel * this.particleSpeed;
               if (p.y < canvasY * -0.1) p.activated = false;
               break;
             case "down":
-              p.y += p.vel;
+              p.y += p.vel * this.particleSpeed;
               if (p.y > canvasY * 1.1) p.activated = false;
               break;
             default:
@@ -200,7 +286,10 @@ class NumbersScene extends Scene {
         inPackets = 0,
         outPackets = 0,
         totalLen = 0;
-      if (this.regionRestriction == "none") {
+      if (
+        this.regionRestriction == "none" ||
+        this.regionRestriction == "The World"
+      ) {
         numPackets = metrics.numPackets;
         inPackets = metrics.numInPackets;
         outPackets = metrics.numOutPackets;
@@ -250,19 +339,35 @@ class NumbersScene extends Scene {
           this.backgroundAlphaChangeSpeed * updateResult;
         if (this.backgroundAlphaChange > 0) {
           this.currentParticleDir = this.nextParticleDir;
+          this.particleSpeed = this.nextParticleSpeed;
+          this.particleAsTextStartLimit = this.nextParticleAsTextStartLimit;
+          this.particleAsTextEndLimit = this.nextParticleAsTextEndLimit;
+          this.particleAsTextLimit = this.particleAsTextStartLimit;
+          this.particleStartSpeed = this.particleNextStartSpeed;
+          this.particleEndSpeed = this.particleNextEndSpeed;
+          this.particleSpeed = this.particleStartSpeed;
+          this.playhead.dropsTimeCountdown = this.playhead.countdown;
+          this.dropsDuration = this.playhead.countdown;
         }
       }
     } else if (this.playhead.state == "fade out") {
-      this.pg.noStroke();
+      this.playhead.dropsTimeCountdown -= dt;
+      this.playhead.countdown -= dt;
+
+      let dropProgress =
+        1.0 -
+        Math.max(this.playhead.dropsTimeCountdown / this.dropsDuration, 0.0);
+      this.particleAsTextLimit =
+        this.particleAsTextStartLimit +
+        dropProgress *
+          (this.particleAsTextEndLimit - this.particleAsTextStartLimit);
+
+      this.particleSpeed =
+        this.particleStartSpeed +
+        dropProgress * (this.particleEndSpeed - this.particleStartSpeed);
+
       this.pg.colorMode(HSL, 100);
-      // let backgroundHue = rollingNumPackets / 100.0 - 2.0;
-      let backgroundHue = Math.min(
-        (metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0,
-        9.0
-      );
-      // console.log(backgroundHue);
-      this.pg.fill(backgroundHue, 100, backgroundHue * 4.0, 50);
-      this.pg.rect(0, 0, canvasX, canvasY);
+      this.pg.background(0, 0, 0, 50);
       for (let p of this.particles) {
         if (
           p.x > -10 &&
@@ -276,19 +381,19 @@ class NumbersScene extends Scene {
 
         switch (this.currentParticleDir) {
           case "right":
-            p.x += p.vel;
+            p.x += p.vel * this.particleSpeed;
 
             break;
           case "left":
-            p.x -= p.vel;
+            p.x -= p.vel * this.particleSpeed;
 
             break;
           case "up":
-            p.y -= p.vel;
+            p.y -= p.vel * this.particleSpeed;
 
             break;
           case "down":
-            p.y += p.vel;
+            p.y += p.vel * this.particleSpeed;
 
             break;
           default:
@@ -319,10 +424,18 @@ class NumbersScene extends Scene {
     this.backgroundAlpha = 0;
     this.regionRestriction = "none";
     this.particleIndex = 0;
+    this.particleAsTextStartLimit = 100;
+    this.nextParticleAsTextStartLimit = 100;
+    this.particleAsTextEndLimit = 100;
+    this.nextParticleAsTextEndLimit = 100;
+    this.particleSpeed = 1.0;
   }
   registerPacket(internalData, country, continent) {
     if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
-      if (this.regionRestriction == "none") {
+      if (
+        this.regionRestriction == "none" ||
+        this.regionRestriction == "The World"
+      ) {
         this.addParticle(internalData.len);
       } else if (
         (this.regionRestriction == "Sweden" && country == "Sweden") ||
@@ -364,6 +477,7 @@ class NumbersScene extends Scene {
       pa.y = y;
       pa.vel = (Math.random() * 10 + 5) * subsampling * 1.0;
       pa.size = (Math.min(Math.max(len / 10000, 1), 8.0) + 1.0) * subsampling;
+      pa.len = len;
       pa.hue = Math.pow(lightness, 2.0) * 15;
       pa.saturation = 100;
       pa.lightness = lightness * 70 + 10;
@@ -392,6 +506,15 @@ class NumbersScene extends Scene {
     this.currentParticleDir = "down";
     this.nextParticleDir = "right";
     this.fadeOutDirectionCountdown = this.fadeOutDirectionTime;
+    this.particleSpeed = this.nextParticleSpeed;
+    this.particleAsTextStartLimit = this.nextParticleAsTextStartLimit;
+    this.particleAsTextEndLimit = this.nextParticleAsTextEndLimit;
+    this.particleAsTextLimit = this.particleAsTextStartLimit;
+    this.particleStartSpeed = this.particleNextStartSpeed;
+    this.particleEndSpeed = this.particleNextEndSpeed;
+    this.particleSpeed = this.particleStartSpeed;
+    this.playhead.dropsTimeCountdown = this.playhead.countdown;
+    this.dropsDuration = this.playhead.countdown;
     console.log("Fade out numbers");
   }
   play() {
@@ -423,7 +546,7 @@ class TextObject {
     this.countdown = timeLabel;
     this.fullCountdownTime = timeLabel;
     this.textSize = 16.0;
-    this.textGrowth = 24.0 / 5.0;
+    this.textGrowth = 24.0;
     this.crossedHalfWay = false;
   }
   setNewIteration(label, timeLabel, timeNumber) {
@@ -485,7 +608,8 @@ class TextObject {
   }
 
   update(dt) {
-    this.textSize += this.textGrowth * dt;
+    this.textSize +=
+      Math.min(this.textGrowth / this.fullCountdownTime, 24.0 / 5.0) * dt;
     this.countdown -= dt;
     if (
       this.countdown / this.fullCountdownTime <= 0.8 &&
@@ -506,7 +630,7 @@ class TextObject {
         this.countdown = this.timeNumber;
         this.fullCountdownTime = this.timeNumber;
         this.textSize = 16.0;
-        this.textGrowth = 24.0 / 5.0;
+        this.textGrowth = 24.0;
         this.crossedHalfWay = false;
       }
     }

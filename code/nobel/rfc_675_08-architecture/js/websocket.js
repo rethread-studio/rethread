@@ -68,7 +68,7 @@ function WebSocketClient() {
       }
     }
   };
-  
+
   that.addEventListener = (event, cb) => {
     if (listeners[event] == null) {
       listeners[event] = [];
