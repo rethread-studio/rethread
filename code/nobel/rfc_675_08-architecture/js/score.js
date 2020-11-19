@@ -20,20 +20,21 @@ var score = [
   //     { name: "fade out", duration: 7 },
   //   ],
   // },
-  // {
-  //   name: "world",
-  //   sections: [
-  //     { name: "in", duration: 10, region: "Sweden" },
-  //     { name: "fade out", duration: 7 },
-  //   ],
-  // },
-  // {
-  //   name: "intro",
-  //   sections: [
-  //     { name: "in", duration: 1, region: "Sweden" },
-  //     { name: "fade out", duration: 7 },
-  //   ],
-  // },
+  {
+    name: "world",
+    sections: [
+      { name: "in", duration: 10, region: "Sweden" },
+      { name: "in", duration: 10, region: "Sweden" },
+      { name: "fade out", duration: 7 },
+    ],
+  },
+  {
+    name: "intro",
+    sections: [
+      { name: "in", duration: 1, region: "Sweden" },
+      { name: "fade out", duration: 7 },
+    ],
+  },
   // {
   //   name: "drops",
   //   sections: [
@@ -55,27 +56,27 @@ var score = [
   //     { name: "fade out", duration: 10 },
   //   ],
   // },
-  {
-    name: "intro",
-    sections: [
-      { name: "transition", duration: 1 },
-      { name: "fade out", duration: 7 },
-    ],
-  },
-  {
-    name: "ports",
-    sections: [
-      { name: "network", duration: 10, pullBackCoeff: 10.0 },
-      { name: "fade out", duration: 5 },
-    ],
-  },
-  {
-    name: "intro",
-    sections: [
-      { name: "transition", duration: 1 },
-      { name: "fade out", duration: 7 },
-    ],
-  },
+  // {
+  //   name: "intro",
+  //   sections: [
+  //     { name: "transition", duration: 1 },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
+  // {
+  //   name: "ports",
+  //   sections: [
+  //     { name: "network", duration: 10, pullBackCoeff: 10.0 },
+  //     { name: "fade out", duration: 5 },
+  //   ],
+  // },
+  // {
+  //   name: "intro",
+  //   sections: [
+  //     { name: "transition", duration: 1 },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
   {
     name: "drops",
     sections: [

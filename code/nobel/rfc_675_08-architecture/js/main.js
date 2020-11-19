@@ -8,7 +8,7 @@ var fps = 0;
 // This section contains state that is shared between many or all scenes
 // or is used by the main functions within this file
 
-var subsampling = 8;
+var subsampling = 1;
 var canvasX = 208 * subsampling;
 var canvasY = 360 * subsampling;
 
