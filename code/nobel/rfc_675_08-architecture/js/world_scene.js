@@ -1345,17 +1345,18 @@ class Package {
             noStroke()
             push();
             translate(this.position.x, this.position.y);
-            // circle(0, 0, this.size);
             rotate(this.theta);
             let size = this.beatType ? sin(Date.now() / this.beat) * this.r : cos(Date.now() / this.beat) * this.r
             const limitSize = 2 * subsampling;
             size = abs(size)
+            size = size < limitSize ? limitSize : size;
+            circle(0, 0, size);
             // size = size < limitSize ? limitSize : size;
-            beginShape();
-            vertex(0, -size); // Arrow pointing upp
-            vertex(-size, size); // Lower left corner
-            vertex(size, size); // Lower right corner
-            endShape(CLOSE);
+            // beginShape();
+            // vertex(0, -size); // Arrow pointing upp
+            // vertex(-size, size); // Lower left corner
+            // vertex(size, size); // Lower right corner
+            // endShape(CLOSE);
             pop();
         }
 
