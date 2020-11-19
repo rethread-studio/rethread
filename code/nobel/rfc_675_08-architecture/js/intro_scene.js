@@ -199,6 +199,7 @@ class IntroScene extends Scene {
   }
   `;
 
+<<<<<<< HEAD
     this.backgroundShader;
     this.shaderGraphics;
     this.noise;
@@ -285,9 +286,136 @@ class IntroScene extends Scene {
             this.sceneAlpha = 1.0;
             this.backgroundAlpha = 1.0;
           }
+=======
+        this.backgroundShader;
+        this.shaderGraphics;
+        this.noise
+
+    }
+    preload() {
+        // This function is called from the p5 preload function. Use it 
+        // to load assets such as fonts and shaders.
+        this.myFont = loadFont(this.fontURL);
+        this.logoKTH = loadImage('./assets/img/kth_logo.png');
+        this.logoNobel = loadImage('./assets/img/nobel_logo.png');
+        this.logoRethart = loadImage('./assets/img/rethread_logo.png');
+        this.noise = loadImage('./assets/img/noise.png');
+    }
+    setup() {
+        // This function is called from the p5 setup function. Use it to init
+        // all the state that requires p5 to be loaded (such as instantiating
+        // p5 types like p5.Vector or createGraphics).
+        //PIXEL DENSITY TO REMOVE
+        // pixelDensity(15.0);
+
+        this.visualIntro = new VisualIntro(this.myFont, this.positions, this.fontSize, this.colorPallete, this.logoKTH, this.logoNobel, this.logoRethart)
+        textFont('sans');
+        textSize(28 * subsampling);
+        textAlign(CENTER, CENTER);
+        textFont(this.myFont);
+
+        //SHADER CONFIG
+        this.shaderGraphics = createGraphics(canvasX, canvasY, WEBGL);
+        this.shaderGraphics.noStroke();
+        this.backgroundShader = this.shaderGraphics.createShader(this.vertexShader, this.backgroundFragShader);
+
+
+    }
+    draw(dt) {
+        // Update state and draw. dt is the time since last frame in seconds.
+
+        if (this.playhead.state == "before start") {
+            return;
+        } else if (this.playhead.state == "fade in") {
+            this.playhead.countdown -= dt;
+            let progression = this.playhead.countdown / this.playhead.totalDuration;
+            progression = (Math.cos(progression * Math.PI) * 0.5 + 0.5); // Smoother motion
+
+            // lerp between current progression and previous one
+            this.blobSize = (this.standardBlobSize * (1.0 - progression)) + (canvasX * 1.3 * progression);
+
+            this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
+            this.backgroundAlpha = 1.0;
+            this.shaderAlpha = 1.0;
+
+            if (progression > 0.8) {
+                // When the blob covers the screen we want it to start fading out with the new scene in the background
+                this.backgroundAlpha = 0.0;
+                this.shaderAlpha = (1.0 - Math.pow((progression - 0.8) / 0.2, 4.0));
+            }
+            // Will pass from the "fade in" state by play() being called externally
+        } else if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
+            this.playhead.countdown -= dt;
+            if (this.playhead.countdown <= 0) {
+                this.playhead.sectionIndex += 1;
+                if (this.playhead.sectionIndex < this.sections.length) {
+                    this.playhead.countdown = this.sections[
+                        this.playhead.sectionIndex
+                    ].duration;
+                    if (this.sections[this.playhead.sectionIndex].name == "fade out") {
+                        this.fadeOut(this.sections[this.playhead.sectionIndex].duration);
+                    } else {
+                        this.blobSize = this.standardBlobSize;
+                        this.shaderAlpha = 1.0;
+                        this.sceneAlpha = 1.0;
+                        this.backgroundAlpha = 1.0;
+                    }
+                }
+            }
+        }
+        if (this.playhead.state == "fade out") {
+            let progression = 1.0 - (this.playhead.countdown / this.playhead.totalDuration);
+            progression = 1.0 - (Math.cos(progression * Math.PI) * 0.5 + 0.5); // Smoother motion
+            // lerp between current progression and previous one
+            this.blobSize = (this.standardBlobSize * (1.0 - progression)) + (canvasX * 1.3 * progression);
+
+            this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
+            this.backgroundAlpha = 1.0;
+            this.shaderAlpha = 1.0;
+            if (progression > 0.8) {
+                // When the blob covers the screen we want it to start fading out with the new scene in the background
+                this.backgroundAlpha = 0.0;
+                this.shaderAlpha = (1.0 - Math.pow((progression - 0.8) / 0.2, 4.0));
+            }
+        }
+        if (this.playhead.state == "playing" || this.playhead.state == "fade out" || this.playhead.state == "fade in") {
+            background(0, 0, 0, this.backgroundAlpha * 100);
+            // clear();
+            //DRAW SHADER
+            // shaderGraphics.background(0);
+            this.shaderGraphics.clear();
+            // shader() sets the active shader with our shader
+            this.shaderGraphics.shader(this.backgroundShader);
+
+            // Send the frameCount to the shader
+            this.backgroundShader.setUniform("uFrameCount", frameCount);
+            this.backgroundShader.setUniform("uNoiseTexture", this.noise);
+
+            this.shaderGraphics.translate(0, 0)
+            // Rotate our geometry on the X and Y axes
+            this.shaderGraphics.rotateX(0.01);
+            this.shaderGraphics.rotateY(0.005);
+
+            // Draw some geometry to the screen
+            // We're going to tessellate the sphere a bit so we have some more geometry to work with
+            this.shaderGraphics.sphere(this.blobSize, 200, 100);
+
+            // Draw the shader to main canvas
+            drawingContext.globalAlpha = this.shaderAlpha;
+            image(this.shaderGraphics, 0, 0, canvasX, canvasY);
+
+            // Draw text
+            colorMode(RGB, 100);
+
+            drawingContext.globalAlpha = this.sceneAlpha;
+            this.visualIntro.updateData();
+            this.visualIntro.display();
+            drawingContext.globalAlpha = 1.0;
+>>>>>>> 649fa10f1f3c9739eb910525eb5140af2e53ec91
         }
       }
     }
+<<<<<<< HEAD
     if (this.playhead.state == "fade out") {
       let progression =
         1.0 - this.playhead.countdown / this.playhead.totalDuration;
@@ -305,6 +433,40 @@ class IntroScene extends Scene {
         this.backgroundAlpha = 0.0;
         this.shaderAlpha = 1.0 - Math.pow((progression - 0.8) / 0.2, 4.0);
       }
+=======
+    reset(sections) {
+        // This is called to reset the state of the Scene before it is started
+        this.sections = sections;
+        this.playhead = {
+            sectionIndex: 0,
+            countdown: 0,
+            state: "before start", // "playing", "fade in", "end of movement"
+        };
+
+        console.log("Reset ports");
+    }
+    registerPacket(internalData, country, continent) {
+
+    }
+    fadeIn(duration) {
+        // Called when the previous scene is starting to fade out
+        this.playhead.state = "fade in";
+        this.countdown = duration;
+        this.playhead.totalDuration = duration;
+    }
+    fadeOut(duration) {
+        // Called from within the Scene when the "fade out" section starts
+        this.playhead.state = "fade out";
+        this.playhead.countdown = duration;
+        this.playhead.totalDuration = duration;
+    }
+    play() {
+        // Called when this Scene becomes the current Scene (after teh crossfade)
+        this.playhead.sectionIndex = -1;
+        this.playhead.state = "playing";
+        this.playhead.countdown = 0;
+        console.log("Play intro");
+>>>>>>> 649fa10f1f3c9739eb910525eb5140af2e53ec91
     }
     if (
       this.playhead.state == "playing" ||
@@ -437,10 +599,102 @@ class VisualIntro {
     this.messagePos = 0;
   }
 
+<<<<<<< HEAD
   //UPDATE ALL THE DATA
   updateData() {
     this.updateTickTime();
   }
+=======
+    constructor(font, positions, fontSize, colorPallete, logoKTH, logoNobel, logoRethart) {
+        this.font = font;
+        this.positions = positions;
+        this.fontSize = fontSize;
+        this.colorPallete = colorPallete;
+
+        this.tick = 500;
+        this.time = Date.now() + this.tick;
+        this.showTick = true;
+        this.tickCounter = 0;
+        this.tickLimiter = 3;
+        this.logoKTH = logoKTH;
+        this.logoNobel = logoNobel;
+        this.logoRethart = logoRethart;
+
+        this.message = [
+            {
+                top: "TO",
+                bottom: "EU"
+            },
+            {
+                top: "TO",
+                bottom: "AMERICA"
+            },
+            {
+                top: "TO",
+                bottom: "ASIA"
+            },
+            {
+                top: "TO",
+                bottom: "AFRICA"
+            },
+            {
+                top: "TO",
+                bottom: "OCEANIA"
+            },
+        ]
+
+        this.crossPoints = [
+
+            this.positions.row.r1 + 25 * subsampling
+
+            ,
+
+            this.positions.row.r3 - 25 * subsampling
+
+            ,
+        ]
+        this.messagePos = 0;
+        this.liveSign = new LiveSign("", antonFont, true);
+    }
+
+    //UPDATE ALL THE DATA
+    updateData() {
+        // this.updateTickTime();
+        this.liveSign.updateTickTime();
+    }
+
+
+    //RENDER ALL THE ELEMENTS
+    display() {
+
+
+        this.writeText();
+        this.drawDecorations();
+        this.drawImages();
+        this.liveSign.draw();
+        // this.drawTick();
+
+    }
+
+
+    writeText() {
+
+        const { r, g, b } = this.colorPallete.white;
+        fill(r, g, b);
+        textFont('sans');
+        textSize(this.fontSize.tittle);
+        textAlign(LEFT, TOP);
+        textFont(antonFont);
+        text("STOCKHOLM'S", this.positions.row.r1, this.positions.col.c1 - 4 * subsampling);
+        text("INTERNET IN", this.positions.row.r1, this.positions.col.c2 - 2 * subsampling);
+        text("REAL TIME", this.positions.row.r1, this.positions.col.c3 - 2 * subsampling);
+        textAlign(LEFT, TOP);
+        textSize(this.fontSize.rfc);
+        text("RFC 675:08", this.positions.row.r1, this.positions.col.c4 + 4 * subsampling);
+
+    }
+
+>>>>>>> 649fa10f1f3c9739eb910525eb5140af2e53ec91
 
   //RENDER ALL THE ELEMENTS
   display() {
@@ -450,6 +704,7 @@ class VisualIntro {
     this.drawImages();
   }
 
+<<<<<<< HEAD
   //updates if time is greater that this.time
   updateTickTime() {
     if (Date.now() > this.time) {
@@ -496,6 +751,23 @@ class VisualIntro {
       this.positions.col.c4 + 4 * subsampling
     );
   }
+=======
+    drawDecorations() {
+        for (let i = 0; i < 7; i++) {
+            const { r, g, b } = this.showTick ? this.colorPallete.white : this.colorPallete.orange;
+            stroke(r, g, b);
+            strokeWeight(1 * subsampling);
+            const x = this.crossPoints[0];
+            const y = ((i * 80) + 20) * subsampling;
+            const padding = 3 * subsampling;
+            line(x, y - padding, x, y + padding);
+            line(x + padding, y, x - padding, y);
+
+            const x2 = this.crossPoints[1];
+            line(x2, y - padding, x2, y + padding);
+            line(x2 + padding, y, x2 - padding, y);
+        }
+>>>>>>> 649fa10f1f3c9739eb910525eb5140af2e53ec91
 
   //DRAW THE TICK
   //showstick then draw or not

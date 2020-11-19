@@ -46,6 +46,7 @@ class NumbersScene extends Scene {
       state: "before start", // "playing", "fade in", "end of movement"
     };
     this.fadeOutDirectionTime = 1.0;
+    this.liveSign;
   }
   preload() {
     // This function is called from the p5 preload function. Use it
@@ -55,6 +56,7 @@ class NumbersScene extends Scene {
     // This function is called from the p5 steup function. Use it to init
     // all the state that requires p5 to be loaded (such as instantiating
     // p5 types like p5.Vector or createGraphics).
+    this.liveSign = new LiveSign("", antonFont, false);
     this.pg = createGraphics(canvasX, canvasY);
     this.pg.clear();
     this.textObject = new TextObject(
@@ -413,6 +415,8 @@ class NumbersScene extends Scene {
       image(this.pg, 0, 0, canvasX, canvasY);
       drawingContext.globalAlpha = 1.0;
     }
+    this.liveSign.updateTickTime();
+    this.liveSign.draw();
   }
   reset(sections) {
     // This is called to reset the state of the Scene

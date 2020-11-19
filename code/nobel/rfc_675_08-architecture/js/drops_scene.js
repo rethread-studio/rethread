@@ -18,6 +18,7 @@ class DropsScene extends Scene {
       countdown: 0,
       state: "before start", // "playing", "fade in", "end of movement"
     };
+    this.liveSign;
   }
   preload() {
     // This function is called from the p5 preload function. Use it
@@ -28,6 +29,7 @@ class DropsScene extends Scene {
     // all the state that requires p5 to be loaded (such as instantiating
     // p5 types like p5.Vector or createGraphics).
     this.pg = createGraphics(canvasX, canvasY);
+    this.liveSign = new LiveSign("", antonFont);
   }
   draw(dt) {
     // Update state and draw. dt is the time since last frame in seconds.
@@ -38,6 +40,7 @@ class DropsScene extends Scene {
       this.playhead.countdown -= dt;
       // Will pass from the "fade in" state by play() being called externally
     } else if (this.playhead.state == "playing") {
+
       this.playhead.countdown -= dt;
       if (this.playhead.countdown <= 0) {
         this.playhead.sectionIndex += 1;
@@ -162,6 +165,8 @@ class DropsScene extends Scene {
       //     console.log("Europe ratio: " + metrics.continents.get("Europe")/metrics.numPackets);
       // }
     }
+    this.liveSign.updateTickTime();
+    this.liveSign.draw();
   }
   reset(sections) {
     // This is called to reset the state of the Scene

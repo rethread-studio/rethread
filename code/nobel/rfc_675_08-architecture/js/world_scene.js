@@ -185,7 +185,7 @@ class WorldScene extends Scene {
 
         this.selectedRegion = this.eu_countries;
         this.focusRegion = this.focusLocation.europe;
-
+        this.liveSign;
 
     }
     preload() {
@@ -200,7 +200,7 @@ class WorldScene extends Scene {
         this.dashBoard = new DashBoard(antonFont, this.colorPallete, this.positions, this.focusRegion, this.fontSize)
         //CRATE COUNTRY MANAGE
         this.countryManager = new CountryManager(this.selectedRegion, antonFont, this.fontSize, this.positions, this.colorPallete, this.dashBoard);
-
+        this.liveSign = new LiveSign("", antonFont, false)
     }
     draw(dt) {
         // Update state and draw. dt is the time since last frame in seconds.
@@ -213,6 +213,9 @@ class WorldScene extends Scene {
         //UPDATE DASHBOARD
         this.dashBoard.updateData();
         this.dashBoard.display();
+
+        this.liveSign.updateTickTime();
+        this.liveSign.draw();
     }
     reset(sections) {
         // This is called to reset the state of the Scene before it is started
@@ -263,13 +266,15 @@ class DashBoard {
         this.positions = positions;
         this.focuLocation = location;
 
+
     }
 
 
     //update all the data and states
     updateData() {
 
-        this.updateTickTime();
+        // this.updateTickTime();
+
     }
 
     //RENDER ALL THE ELEMENTS 
@@ -277,8 +282,8 @@ class DashBoard {
         this.writeTittle();
         this.writePackages();
         // this.writeSize();
-        if (this.showTick) this.writeLocation();
-        this.drawTick();
+        // if (this.showTick) this.writeLocation();
+        // this.drawTick();
     }
 
 
@@ -303,7 +308,7 @@ class DashBoard {
     //WRITE THE TITTLE
     //write tittle centered
     writeTittle() {
-        const { r, g, b } = this.colorPallete.green;
+        const { r, g, b } = this.colorPallete.white;
         fill(r, g, b);
         textFont('sans');
         textSize(this.fontSize.tittle);
@@ -344,7 +349,7 @@ class DashBoard {
         textFont(this.font);
         text("LIVE", this.positions.row.r1 - 10 * subsampling, this.positions.col.c2 + this.positions.padding.top);
         circle(this.positions.row.r1 - 31 * subsampling, this.positions.col.c2 + this.positions.padding.top, 7 * subsampling);
-        text(this.focuLocation, this.positions.row.r1 - 10 * subsampling, this.positions.col.c2 + ((this.positions.padding.top * 2) * subsampling) + 4 * subsampling);
+        text(this.focuLocation, this.positions.row.r1 - 10 * subsampling, this.positions.col.c2 + this.positions.padding.top * 2 + 4 * subsampling);
     }
 
     //DRAW THE TICK
@@ -765,6 +770,7 @@ class CountryManager {
 
     //RENDER ALL THE ELEMENTS
     display() {
+        this.drawMesh();
         //RENDER COUNTRY
         const toRemove = [];
         for (let i = 0; i < this.toRender.length; i++) {
@@ -781,10 +787,27 @@ class CountryManager {
         }
         if (this.packages.length > this.maxPackages) this.cleanPackages();
 
+
     }
+    //draw a line connecting all country points
+    drawMesh() {
+        stroke('rgba(255,255,255,0.5)');
+        strokeWeight(2 * subsampling);
+        for (let i = 0; i < this.toRender.length; i++) {
+            const obj1 = this.toRender[i].country.getPosition();
+            // const obj2 = this.toRender[i].country.goalPos;
+            // line(obj1.x, 0, obj1.x, canvasY);
+            line(0, obj1.y, canvasX, obj1.y);
+            // line(obj1.x, obj1.y, obj2.x, obj2.y);
+            // console.log(obj1)
+            // for (let j = i; j < this.toRender.length; j++) {
+            //     const obj2 = this.toRender[j].country.getPosition();
+            //     line(obj1.x, obj1.y, obj2.x, obj2.y);
+            // }
+        }
+        noStroke();
 
-
-
+    }
 
     //render objecte
     renderObject(object) {
@@ -951,6 +974,8 @@ class Country {
         this.bigPacket = 1;
         this.refPoint = refPoint;
         this.textAlpha = 100;
+        this.beat = random(100, 500);
+        this.beatType = Math.random() <= 0.5;
     }
 
     addTextAlpha(num) {
@@ -1115,7 +1140,9 @@ class Country {
             noStroke()
             push();
             translate(this.position.x, this.position.y);
-            circle(0, 0, this.size);
+            const size = this.beatType ? sin(Date.now() / this.beat) * this.size : cos(Date.now() / this.beat) * this.size
+            const limitSize = 8 * subsampling;
+            circle(0, 0, size < limitSize ? limitSize : size);
             // rotate(this.theta);
             // beginShape();
             // vertex(0, -this.r * 2); // Arrow pointing upp
@@ -1137,16 +1164,17 @@ class Package {
         this.position = createVector(x, y);
         this.countryName = name;
 
-        this.r = random(1, 2.5) * subsampling; // Half the width of veihcle's back side
+        this.r = random(1, 8) * subsampling; // Half the width of veihcle's back side
         this.maxspeed = random(2, 3) * subsampling; //
         this.maxforce = 0.1 * subsampling;
         this.country = country;
         this.goalPos = country.getPosition();
 
-        this.size = random(1, 4) * subsampling;
+        this.size = random(2, 5) * subsampling;
         this.state = "APPEAR";
         this.path = path;
         this.alpha = 0;
+        this.beat = 500;//random(200, 800);
     }
 
 
@@ -1247,9 +1275,9 @@ class Package {
                 this.acceleration.mult(0);
                 this.goalPos = this.country.getPosition();
                 this.alpha += 10;
-                if (this.alpha > 100) {
+                if (this.alpha > 80) {
                     this.state = "MOVE";
-                    this.alpha = 100;
+                    this.alpha = 80;
                 }
 
 
@@ -1312,18 +1340,23 @@ class Package {
         if (this.state == "MOVE" || this.state == "VANISH") {
 
             this.theta = this.velocity.heading() + PI / 2;
-            let { r, g, b } = this.colorPallete.lightBlue;
+            let { r, g, b } = this.colorPallete.white;
             fill(r, g, b, this.alpha);
             noStroke()
             push();
             translate(this.position.x, this.position.y);
-            // circle(0, 0, this.size);
             rotate(this.theta);
-            beginShape();
-            vertex(0, -this.r); // Arrow pointing upp
-            vertex(-this.r, this.r); // Lower left corner
-            vertex(this.r, this.r); // Lower right corner
-            endShape(CLOSE);
+            let size = this.beatType ? sin(Date.now() / this.beat) * this.r : cos(Date.now() / this.beat) * this.r
+            const limitSize = 2 * subsampling;
+            size = abs(size)
+            size = size < limitSize ? limitSize : size;
+            circle(0, 0, size);
+            // size = size < limitSize ? limitSize : size;
+            // beginShape();
+            // vertex(0, -size); // Arrow pointing upp
+            // vertex(-size, size); // Lower left corner
+            // vertex(size, size); // Lower right corner
+            // endShape(CLOSE);
             pop();
         }
 
