@@ -593,6 +593,7 @@ class TextObject {
         texts = this.number;
       }
       textSize(this.textSize * subsampling);
+      textAlign(CENTER, CENTER);
       if (typeof texts === "string" || texts instanceof String) {
         let y = lines[this.line];
         text(texts, width / 2, y);
