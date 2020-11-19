@@ -40,7 +40,6 @@ class DropsScene extends Scene {
       this.playhead.countdown -= dt;
       // Will pass from the "fade in" state by play() being called externally
     } else if (this.playhead.state == "playing") {
-
       this.playhead.countdown -= dt;
       if (this.playhead.countdown <= 0) {
         this.playhead.sectionIndex += 1;
@@ -120,7 +119,7 @@ class DropsScene extends Scene {
           dropSize = drop.maxSize - dropSize;
           alpha = (drop.size / drop.maxSize) * 100;
         } else {
-          alpha = (drop.size / drop.maxSize) * 100;
+          alpha = (1.0 - drop.size / drop.maxSize) * 100;
         }
         let l =
           drop.lightness * 0.5 +
