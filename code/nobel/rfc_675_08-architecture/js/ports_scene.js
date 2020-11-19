@@ -11,6 +11,7 @@ class PortsScene extends Scene {
       countdown: 0,
       state: "before start", // "playing", "fade in", "end of movement"
     };
+    this.liveSign;
   }
   preload() {
     // This function is called from the p5 preload function. Use it
@@ -40,6 +41,7 @@ class PortsScene extends Scene {
       214 * subsampling,
       297 * subsampling,
     ];
+    this.liveSign = new LiveSign("", antonFont, false);
   }
   draw(dt) {
     // Update state and draw. dt is the time since last frame in seconds.
@@ -152,6 +154,8 @@ class PortsScene extends Scene {
       image(this.pg, 0, 0);
       image(this.shaderCanvas, 0, 0);
       image(this.textPg, 0, 0);
+      this.liveSign.updateTickTime();
+      this.liveSign.draw();
     }
   }
   reset(sections) {

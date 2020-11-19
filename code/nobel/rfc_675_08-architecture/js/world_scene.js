@@ -185,7 +185,7 @@ class WorldScene extends Scene {
 
         this.selectedRegion = this.eu_countries;
         this.focusRegion = this.focusLocation.europe;
-
+        this.liveSign;
 
     }
     preload() {
@@ -200,7 +200,7 @@ class WorldScene extends Scene {
         this.dashBoard = new DashBoard(antonFont, this.colorPallete, this.positions, this.focusRegion, this.fontSize)
         //CRATE COUNTRY MANAGE
         this.countryManager = new CountryManager(this.selectedRegion, antonFont, this.fontSize, this.positions, this.colorPallete, this.dashBoard);
-
+        this.liveSign = new LiveSign("", antonFont, false)
     }
     draw(dt) {
         // Update state and draw. dt is the time since last frame in seconds.
@@ -213,6 +213,9 @@ class WorldScene extends Scene {
         //UPDATE DASHBOARD
         this.dashBoard.updateData();
         this.dashBoard.display();
+
+        this.liveSign.updateTickTime();
+        this.liveSign.draw();
     }
     reset(sections) {
         // This is called to reset the state of the Scene before it is started
@@ -263,13 +266,14 @@ class DashBoard {
         this.positions = positions;
         this.focuLocation = location;
 
+
     }
 
 
     //update all the data and states
     updateData() {
 
-        this.updateTickTime();
+        // this.updateTickTime();
     }
 
     //RENDER ALL THE ELEMENTS 
@@ -277,8 +281,8 @@ class DashBoard {
         this.writeTittle();
         this.writePackages();
         // this.writeSize();
-        if (this.showTick) this.writeLocation();
-        this.drawTick();
+        // if (this.showTick) this.writeLocation();
+        // this.drawTick();
     }
 
 

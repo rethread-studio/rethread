@@ -91,7 +91,7 @@ class IntroScene extends Scene {
             height: 360 * subsampling,
         }
 
-        this.standardBlobSize = canvasX/3;
+        this.standardBlobSize = canvasX / 3;
         this.blobSize = this.standardBlobSize;
         this.shaderAlpha = 1.0;
         this.sceneAlpha = 1.0;
@@ -241,23 +241,23 @@ class IntroScene extends Scene {
         // Update state and draw. dt is the time since last frame in seconds.
 
         if (this.playhead.state == "before start") {
-                return;
+            return;
         } else if (this.playhead.state == "fade in") {
             this.playhead.countdown -= dt;
             let progression = this.playhead.countdown / this.playhead.totalDuration;
-            progression = (Math.cos(progression * Math.PI) * 0.5+0.5); // Smoother motion
+            progression = (Math.cos(progression * Math.PI) * 0.5 + 0.5); // Smoother motion
 
             // lerp between current progression and previous one
-            this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * 1.3 * progression);
-            
+            this.blobSize = (this.standardBlobSize * (1.0 - progression)) + (canvasX * 1.3 * progression);
+
             this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
             this.backgroundAlpha = 1.0;
             this.shaderAlpha = 1.0;
 
-            if(progression > 0.8) {
+            if (progression > 0.8) {
                 // When the blob covers the screen we want it to start fading out with the new scene in the background
                 this.backgroundAlpha = 0.0;
-                this.shaderAlpha = (1.0 - Math.pow((progression-0.8)/0.2, 4.0));
+                this.shaderAlpha = (1.0 - Math.pow((progression - 0.8) / 0.2, 4.0));
             }
             // Will pass from the "fade in" state by play() being called externally
         } else if (this.playhead.state == "playing" || this.playhead.state == "fade out") {
@@ -281,17 +281,17 @@ class IntroScene extends Scene {
         }
         if (this.playhead.state == "fade out") {
             let progression = 1.0 - (this.playhead.countdown / this.playhead.totalDuration);
-            progression = 1.0 - (Math.cos(progression * Math.PI) * 0.5+0.5); // Smoother motion
+            progression = 1.0 - (Math.cos(progression * Math.PI) * 0.5 + 0.5); // Smoother motion
             // lerp between current progression and previous one
-            this.blobSize = (this.standardBlobSize * (1.0-progression)) + (canvasX * 1.3 * progression);
-            
+            this.blobSize = (this.standardBlobSize * (1.0 - progression)) + (canvasX * 1.3 * progression);
+
             this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
             this.backgroundAlpha = 1.0;
             this.shaderAlpha = 1.0;
-            if(progression > 0.8) {
+            if (progression > 0.8) {
                 // When the blob covers the screen we want it to start fading out with the new scene in the background
                 this.backgroundAlpha = 0.0;
-                this.shaderAlpha = (1.0 - Math.pow((progression-0.8)/0.2, 4.0));
+                this.shaderAlpha = (1.0 - Math.pow((progression - 0.8) / 0.2, 4.0));
             }
         }
         if (this.playhead.state == "playing" || this.playhead.state == "fade out" || this.playhead.state == "fade in") {
@@ -337,7 +337,7 @@ class IntroScene extends Scene {
             countdown: 0,
             state: "before start", // "playing", "fade in", "end of movement"
         };
-      
+
         console.log("Reset ports");
     }
     registerPacket(internalData, country, continent) {
@@ -419,11 +419,13 @@ class VisualIntro {
             ,
         ]
         this.messagePos = 0;
+        this.liveSign = new LiveSign("", antonFont, true);
     }
 
     //UPDATE ALL THE DATA
     updateData() {
-        this.updateTickTime();
+        // this.updateTickTime();
+        this.liveSign.updateTickTime();
     }
 
 
@@ -432,24 +434,13 @@ class VisualIntro {
 
 
         this.writeText();
-        this.drawTick();
         this.drawDecorations();
         this.drawImages();
+        this.liveSign.draw();
+        // this.drawTick();
 
     }
 
-    //updates if time is greater that this.time
-    updateTickTime() {
-        if (Date.now() > this.time) {
-            this.showTick = !this.showTick;
-            this.time = Date.now() + this.tick;
-            this.tickCounter++;
-            this.messagePos = this.tickCounter % this.tickLimiter == 0 ? (this.messagePos + 1) >= this.message.length ? 0 : (this.messagePos + 1) : this.messagePos;
-        }
-
-
-
-    }
 
     writeText() {
 
@@ -468,32 +459,7 @@ class VisualIntro {
 
     }
 
-    //DRAW THE TICK
-    //showstick then draw or not
-    drawTick() {
-        if (this.showTick) {
 
-            const posX = 10 * subsampling;
-            const { top, bottom } = this.message[this.messagePos];
-
-            noStroke();
-            let { r, g, b } = this.colorPallete.white;
-            fill(r, g, b, 100);
-            rect(this.positions.row.r1 - (7 * subsampling), this.positions.col.c1 + (4 * subsampling), (4 * subsampling), (24 * subsampling));
-
-            textFont('sans');
-            textSize(this.fontSize.number);
-            textAlign(RIGHT, TOP);
-            textFont(antonFont);
-
-
-            fill(this.colorPallete.red.r, this.colorPallete.red.g, this.colorPallete.red.b, 100);
-            text(bottom, this.positions.row.r1 - posX, this.positions.col.c1 + (18 * subsampling));
-            text("LIVE", this.positions.row.r1 - posX, this.positions.col.c1 + 3);
-            circle(this.positions.row.r1 - (28 * subsampling), this.positions.col.c1 + (8 * subsampling), 7 * subsampling)
-            // text(top, this.positions.row.r1 - posX, this.positions.col.c1 + 3);
-        }
-    }
 
     drawDecorations() {
         for (let i = 0; i < 7; i++) {
