@@ -8,7 +8,7 @@ var fps = 0;
 // This section contains state that is shared between many or all scenes
 // or is used by the main functions within this file
 
-var subsampling = 8;
+var subsampling = 1;
 var canvasX = 208 * subsampling;
 var canvasY = 360 * subsampling;
 
@@ -254,6 +254,22 @@ function draw() {
         playhead.scoreIndex = 0;
       }
       if (playhead.scoreIndex < playhead.score.length) {
+        if (playhead.score[playhead.scoreIndex].name == "settings") {
+          // Change some settings
+          if ("subsampling" in playhead.score[playhead.scoreIndex]) {
+            subsampling = playhead.score[playhead.scoreIndex].subsampling;
+            console.log("Set subsampling to " + subsampling);
+            canvasX = 208 * subsampling;
+            canvasY = 360 * subsampling;
+            // Recreate every canvas
+            resizeCanvas(canvasX, canvasY, true);
+            for (let scene of scenes.values()) {
+              scene.setup();
+            }
+          }
+          playhead.scoreIndex += 1;
+        }
+
         playhead.fadingInSceneName = playhead.score[playhead.scoreIndex].name;
         playhead.fadingInScene = scenes.get(playhead.fadingInSceneName);
         playhead.fadingInScene.reset(
