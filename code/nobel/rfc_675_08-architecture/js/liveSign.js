@@ -130,7 +130,8 @@ class LiveSign extends Scene {
     writeLocation() {
         noStroke();
         const { r, g, b } = this.colorPallete.red;
-        fill(r, g, b, 100);
+        fill(30, 100, 50, 100);
+        // fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
         textAlign(RIGHT, TOP);

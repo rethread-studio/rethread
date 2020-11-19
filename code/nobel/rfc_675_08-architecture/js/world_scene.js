@@ -3,6 +3,13 @@
 class WorldScene extends Scene {
     constructor() {
         super();
+        this.sections = [];
+        this.playhead = {
+            sectionIndex: 0,
+            countdown: 0,
+            state: "before start", // "playing", "fade in", "end of movement"
+        };
+
         //LIST OF COUNTRIES IN EUROPEAN UNION
         this.eu_countries = [
             "Sweden",
@@ -124,17 +131,56 @@ class WorldScene extends Scene {
             }
         }
 
+        this.test_countries = [
+            "Sweden",
+            "Norway",
+            "Netherlands",
+            "United States",
 
+        ]
 
-        // Performance - Disables FES
-        // p5.disableFriendlyErrors = true;
+        this.afr_countries = [];
+        this.oce_countries = [];
 
-        this.continentActivity = {
-            africa: 0,
-            eurasia: 0,
-            oceania: 0,
-            americas: 0,
-        };
+        this.sweden_countries = [
+            "Sweden",
+        ]
+
+        this.focusLocation = {
+            EU: {
+                label: "EUROPE",
+                countryArray: this.eu_countries,
+            },
+            AME: {
+                label: "AMERICA",
+                countryArray: this.ame_countries,
+            },
+            AS: {
+                label: "ASIA",
+                countryArray: this.asian_countries,
+            },
+            AF: {
+                label: "AFRICA",
+                countryArray: this.afr_countries,
+            },
+            OC: {
+                label: "OCEANIA",
+                countryArray: this.oce_countries,
+            },
+            WORLD: {
+                label: "WORLD",
+                countryArray: this.world_countries,
+            },
+            SWEDEN: {
+                label: "SWEDEN",
+                countryArray: this.sweden_countries,
+            },
+            SELECTED: {
+                label: "",
+                countryArray: this.test_countries,
+            }
+        }
+
 
         this.positions = {
             row: {
@@ -167,25 +213,23 @@ class WorldScene extends Scene {
         this.dashBoard;
         this.countryManager;
 
-        this.focusLocation = {
-            europe: "EU",
-            america: "AME",
-            asia: "AS",
-            africa: "AF",
-            oceanica: "OC"
-        }
 
-        this.test_country = [
-            "Sweden",
-            "Norway",
-            "Netherlands",
-            "United States",
 
-        ]
 
-        this.selectedRegion = this.eu_countries;
-        this.focusRegion = this.focusLocation.europe;
+
+        this.focusRegion = this.focusLocation.SWEDEN.label;
+        this.selectedRegion = this.focusLocation[this.focusRegion].countryArray;
         this.liveSign;
+        this.crossPoints = [
+
+            this.positions.row.r1 + 25 * subsampling
+
+            ,
+
+            this.positions.row.r3 - 25 * subsampling
+
+            ,
+        ]
 
     }
     preload() {
@@ -207,17 +251,85 @@ class WorldScene extends Scene {
         // Set canvas background
         background("rgba(0,0,0,1)");
 
-        //UPDATE COUNTRY MANAGER
-        this.countryManager.updateData();
-        this.countryManager.display();
-        //UPDATE DASHBOARD
-        this.dashBoard.updateData();
-        this.dashBoard.display();
+        switch (this.playhead.state) {
 
-        this.liveSign.updateTickTime();
-        this.liveSign.draw();
+            case "fade in":
+                this.drawDecorations();
+                //UPDATE DASHBOARD
+                this.dashBoard.updateData();
+                this.dashBoard.display();
+
+                this.liveSign.updateTickTime();
+                this.liveSign.draw();
+
+                break;
+            case "before start":
+
+                break;
+            case "playing":
+                this.playhead.countdown -= dt;
+                if (this.playhead.countdown <= 0) {
+                    this.playhead.sectionIndex += 1;
+                    if (this.playhead.sectionIndex < this.sections.length) {
+                        this.playhead.countdown = this.sections[
+                            this.playhead.sectionIndex
+                        ].duration;
+                    }
+                }
+
+
+                //CHECK IF THE SECTION HAS CHANGED
+                const currentSection = this.sections[this.playhead.sectionIndex].name;
+                if (this.focusRegion != currentSection) {
+                    console.log("the section has changed", this.focusRegion, currentSection);
+                    this.focusRegion = currentSection;
+                    this.selectedRegion = this.focusLocation[this.focusRegion].countryArray;
+                    this.countryManager.changeCountries(this.selectedRegion);
+                    this.dashBoard.changeLocation(this.focusLocation[this.focusRegion].label)
+                }
+
+                this.drawDecorations();
+                //UPDATE COUNTRY MANAGER
+                this.countryManager.updateData();
+                this.countryManager.display();
+                //UPDATE DASHBOARD
+                this.dashBoard.updateData();
+                this.dashBoard.display();
+
+                this.liveSign.updateTickTime();
+                this.liveSign.draw();
+                break;
+
+            default:
+                break;
+        }
+
+
+
+
+
+    }
+
+    drawDecorations() {
+
+        for (let i = 0; i < 7; i++) {
+            const { r, g, b } = this.colorPallete.white;
+            stroke(r, g, b);
+            strokeWeight(1 * subsampling);
+            const x = this.crossPoints[0];
+            const y = ((i * 80) + 20) * subsampling;
+            const padding = 3 * subsampling;
+            line(x, y - padding, x, y + padding);
+            line(x + padding, y, x - padding, y);
+
+            const x2 = this.crossPoints[1];
+            line(x2, y - padding, x2, y + padding);
+            line(x2 + padding, y, x2 - padding, y);
+        }
+
     }
     reset(sections) {
+        this.sections = sections;
         // This is called to reset the state of the Scene before it is started
     }
     registerPacket(internalData, country, continent) {
@@ -230,12 +342,19 @@ class WorldScene extends Scene {
     }
     fadeIn(duration) {
         // Called when the previous scene is starting to fade out
+        // Called when the previous scene is starting to fade out
+        this.playhead.state = "fade in";
+        this.playhead.countdown = duration;
     }
     fadeOut(duration) {
         // Called from within the Scene when the "fade out" section starts
+        this.playhead.state = "fade out";
     }
     play() {
         // Called when this Scene becomes the current Scene (after teh crossfade)
+        this.playhead.sectionIndex = -1;
+        this.playhead.state = "playing";
+        this.playhead.countdown = 0;
     }
 
 
@@ -253,7 +372,7 @@ class DashBoard {
     constructor(_font, colorPallete, positions, location, fontSize) {
         this.packages = 0;
         this.size = 0;
-
+        this.counter = 0;
         this.tick = 400;
         this.time = Date.now() + this.tick;
         this.showTick = true;
@@ -279,8 +398,10 @@ class DashBoard {
 
     //RENDER ALL THE ELEMENTS 
     display() {
+        this.counter++;
         this.writeTittle();
         this.writePackages();
+        this.writeLocation();
         // this.writeSize();
         // if (this.showTick) this.writeLocation();
         // this.drawTick();
@@ -294,6 +415,7 @@ class DashBoard {
 
     addSize(_quantity) {
         this.size += _quantity;
+
     }
 
     //update the status of ShowTick 
@@ -308,6 +430,7 @@ class DashBoard {
     //WRITE THE TITTLE
     //write tittle centered
     writeTittle() {
+        noStroke();
         const { r, g, b } = this.colorPallete.white;
         fill(r, g, b);
         textFont('sans');
@@ -325,7 +448,8 @@ class DashBoard {
         textSize(this.fontSize.number);
         textAlign(LEFT);
         textFont(this.font);
-        text(this.packages, this.positions.row.r3, this.positions.col.c2 + this.positions.padding.top);
+        this.counter = this.counter > this.packages ? this.packages : this.counter;
+        text(this.counter, this.positions.row.r3, this.positions.col.c2 + this.positions.padding.top);
     }
 
     //Write the size
@@ -341,15 +465,16 @@ class DashBoard {
 
     //Write the size
     writeLocation() {
+        noStroke();
         const { r, g, b } = this.colorPallete.red;
         fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
         textAlign(RIGHT);
         textFont(this.font);
-        text("LIVE", this.positions.row.r1 - 10 * subsampling, this.positions.col.c2 + this.positions.padding.top);
-        circle(this.positions.row.r1 - 31 * subsampling, this.positions.col.c2 + this.positions.padding.top, 7 * subsampling);
-        text(this.focuLocation, this.positions.row.r1 - 10 * subsampling, this.positions.col.c2 + this.positions.padding.top * 2 + 4 * subsampling);
+        text("FROM", this.positions.row.r1, this.positions.col.c2 + this.positions.padding.top);
+        // circle(this.positions.row.r1 - 31 * subsampling, this.positions.col.c2 + this.positions.padding.top, 7 * subsampling);
+        text(this.focuLocation, this.positions.row.r1, this.positions.col.c2 + this.positions.padding.top * 2 + 4 * subsampling);
     }
 
     //DRAW THE TICK
@@ -799,7 +924,7 @@ class CountryManager {
             // line(obj1.x, 0, obj1.x, canvasY);
             line(0, obj1.y, canvasX, obj1.y);
             // line(obj1.x, obj1.y, obj2.x, obj2.y);
-            // console.log(obj1)
+
             // for (let j = i; j < this.toRender.length; j++) {
             //     const obj2 = this.toRender[j].country.getPosition();
             //     line(obj1.x, obj1.y, obj2.x, obj2.y);
@@ -819,6 +944,7 @@ class CountryManager {
         textAlign(RIGHT, TOP);
         textFont(this.font);
         text(object.name.iso, object.pos.init.x, object.pos.init.y);
+
 
 
         if (this.showPath) object.path.display();
@@ -896,7 +1022,7 @@ class CountryManager {
             }
         }
         //ADD PACKAGES TO DASHBOARD
-        // console.log(this.toRender[index].country.packages);
+
         this.dashBoard.addPackage(this.toRender[index].country.packages);
         // this.packages = this.packages.filter(pack => pack.countryName == this.toRender[index].country.countryName);
         this.toRender.splice(index, 1);
@@ -919,7 +1045,35 @@ class CountryManager {
     }
 
     //change all the countries list
-    changeCountries() {
+    changeCountries(_countries) {
+
+        //change current countries state
+        for (let i = 0; i < this.toRender.length; i++) {
+            this.toRender[i].country.state = "REMOVE";
+            this.toRender[i].country.textAlpha = 0;
+            const object = this.toRender[i];
+
+            let { r, g, b } = this.colorPallete.black;
+            fill(r, g, b);
+            textFont('sans');
+            textSize(this.fontSize.countries);
+            textAlign(RIGHT, TOP);
+            textFont(this.font);
+            text(object.name.iso, object.pos.init.x, object.pos.init.y);
+            // if (this.toRender[i].country.state == "REMOVE") toRemove.push(this.toRender[i].name.name);
+        }
+        clear();
+
+        //add new countries
+        this.countries = _countries;
+        this.currentPos = 0;
+        for (let i = 0; i < this.maxCountries && i < this.countries.length; i++) {
+
+            if (this.countries[this.currentPos] != undefined) {
+                this.addCountry(this.countries[this.currentPos]);
+                this.currentPos++;
+            }
+        }
 
     }
 }
@@ -1110,7 +1264,7 @@ class Country {
                 break;
 
             case "STOP":
-                // console.log("stop")
+
                 break;
 
             default:
@@ -1314,7 +1468,7 @@ class Package {
                 break;
 
             case "STOP":
-                // console.log("stop")
+
                 break;
 
             default:

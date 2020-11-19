@@ -63,6 +63,15 @@ var score = [
     ],
   },
   {
+    name: "world",
+    sections: [
+      { name: "SWEDEN", duration: 8 },
+      { name: "EU", duration: 10 },
+      { name: "AME", duration: 10 },
+      { name: "AS", duration: 10 },
+    ],
+  },
+  {
     name: "ports",
     sections: [
       { name: "network", duration: 10, pullBackCoeff: 10.0 },
