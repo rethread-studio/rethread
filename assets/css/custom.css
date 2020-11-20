@@ -29,3 +29,19 @@
 .gallery-container span,img,div {
     margin: 0.5em;
 }
+
+.flex-row{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.flex-row h4{
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fot-github{
+    font-size: 46px;
+}
