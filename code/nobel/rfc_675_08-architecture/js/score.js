@@ -23,17 +23,10 @@ var score = [
   {
     name: "world",
     sections: [
-      { name: "SWEDEN", duration: 8 },
-      { name: "EU", duration: 10 },
-      { name: "AME", duration: 10 },
-      { name: "AS", duration: 10 },
-    ],
-  },
-  {
-    name: "ports",
-    sections: [
-      { name: "in", duration: 10, region: "Sweden" },
-      { name: "in", duration: 10, region: "Sweden" },
+      { name: "SWEDEN", duration: 12 },
+      { name: "EU", duration: 12 },
+      { name: "AME", duration: 12 },
+      { name: "AS", duration: 12 },
       { name: "fade out", duration: 7 },
     ],
   },
@@ -53,7 +46,7 @@ var score = [
       { name: "out", duration: 16, region: "Europe" },
       { name: "in", duration: 20, region: "none" },
       { name: "out", duration: 20, region: "none" },
-      { name: "fade out", duration: 1 },
+      { name: "fade out", duration: 7 },
     ],
   },
   {
@@ -102,7 +95,7 @@ var score = [
       {
         name: "pre fade out",
         textLimit: 0,
-        duration: 5,
+        duration: 3,
         startSpeed: 1.5,
         endSpeed: 0.4,
       },
@@ -123,9 +116,9 @@ var score = [
       { name: "packets", duration: 20 },
       { name: "network", duration: 2, pullBackCoeff: 1000.0 },
       { name: "network", duration: 2, pullBackCoeff: 1.0 },
-      { name: "network", duration: 1, pullBackCoeff: 100.0 },
+      { name: "network", duration: 1, pullBackCoeff: 10.0 },
       { name: "network", duration: 1, pullBackCoeff: 1.0 },
-      { name: "network", duration: 0.5, pullBackCoeff: 100.0 },
+      { name: "network", duration: 0.5, pullBackCoeff: 50.0 },
       { name: "network", duration: 10 },
       { name: "packets", duration: 4, pullBackCoeff: 0.1 },
       { name: "network", duration: 3, pullBackCoeff: 0.05 },
