@@ -30,6 +30,12 @@ class DropsScene extends Scene {
     // p5 types like p5.Vector or createGraphics).
     this.pg = createGraphics(canvasX, canvasY);
     this.liveSign = new LiveSign("", antonFont);
+    this.lines = [
+      48 * subsampling,
+      130 * subsampling,
+      214 * subsampling,
+      297 * subsampling,
+    ];
   }
   draw(dt) {
     // Update state and draw. dt is the time since last frame in seconds.
@@ -57,7 +63,7 @@ class DropsScene extends Scene {
           } else {
             this.regionRestriction = "none";
           }
-          this.textDuration = this.directionDuration * 0.2;
+          this.textDuration = Math.max(this.directionDuration * 0.2, 3.5);
 
           if (this.sections[this.playhead.sectionIndex].name == "fade out") {
             this.fadeOut();
@@ -148,15 +154,32 @@ class DropsScene extends Scene {
       textAlign(CENTER, CENTER);
       textSize(this.displayTextSize * subsampling);
       this.displayTextSize += this.displayTextSizeGrowth * dt;
-      text(this.displayText, width / 2, 130 * subsampling);
-      let regionText = "The World";
+      let regionText = "THE WORLD";
       if (this.regionRestriction != "none") {
-        regionText = this.regionRestriction;
+        regionText = this.regionRestriction.toUpperCase();
       }
       if (this.displayText == "") {
         regionText = "";
       }
-      text(regionText, width / 2, 297 * subsampling);
+      let texts = this.displayText;
+      if (typeof texts === "string" || texts instanceof String) {
+        let y = this.lines[1];
+        text(texts, width / 2, y);
+        text(regionText, width / 2, 297 * subsampling);
+      } else if (Array.isArray(texts)) {
+        let startLine = 1;
+        if (texts.length < 3) {
+          startLine = 1;
+        } else {
+          startLine = 0;
+        }
+        for (let i = 0; i < texts.length; i++) {
+          let y = this.lines[startLine + i];
+          text(texts[i], width / 2, y);
+        }
+        let y = this.lines[startLine + texts.length];
+        text(regionText, width / 2, y);
+      }
 
       // if(this.regionRestriction == "Sweden") {
       //     console.log("Sweden ratio: " + metrics.countries.get("Sweden")/metrics.numPackets);
@@ -178,7 +201,7 @@ class DropsScene extends Scene {
     this.increaseBackgroundPhase = false;
     this.displayText = "";
     this.displayTextSize = 24;
-    this.displayTextSizeGrowth = 8;
+    this.displayTextSizeGrowth = 4;
     this.regionRestriction = "none";
     this.sections = sections;
     this.playhead = {
@@ -232,11 +255,11 @@ class DropsScene extends Scene {
     this.droplets = [];
     if (direction == "in") {
       this.doOutPackets = false;
-      this.displayText = "INCOMING";
+      this.displayText = ["MESSAGES", "COMING", "FROM"];
       this.baseHueColor = 0;
     } else if (direction == "out") {
       this.doOutPackets = true;
-      this.displayText = "OUTGOING";
+      this.displayText = ["MESSAGES", "TRAVELLING", "OUT TOWARDS"];
       this.baseHueColor = 0;
     }
     // TODO: Make sure these timeouts are removed when disabling the scene
