@@ -4,6 +4,7 @@ class PortsScene extends Scene {
     this.selectedHue = 50;
     this.drawNetwork = false;
     this.drawParticles = true;
+    this.drawShader = true;
     this.sections = [];
     this.pullBackCoeff = 1.0;
     this.playhead = {
@@ -80,6 +81,13 @@ class PortsScene extends Scene {
           } else {
             this.pullBackCoeff = 1.0;
           }
+          if ("drawShader" in this.sections[this.playhead.sectionIndex]) {
+            this.drawShader = this.sections[
+              this.playhead.sectionIndex
+            ].drawShader;
+          } else {
+            this.drawShader = true;
+          }
         }
       }
     }
@@ -108,52 +116,53 @@ class PortsScene extends Scene {
         this.drawNetwork
       );
       this.originNode.drawNodes(this.pg, this.selectedHue);
+      image(this.pg, 0, 0);
 
-      let pixelDensity = displayDensity();
-      this.lightsShader.setUniform("iResolution", [
-        canvasX * pixelDensity,
-        canvasY * pixelDensity,
-      ]);
-      this.lightsShader.setUniform("iTime", (now - firstNow) * 0.001);
-      this.lightsShader.setUniform("windows1", [
-        windows[0].activity,
-        windows[1].activity,
-        windows[2].activity,
-      ]);
-      this.lightsShader.setUniform("windows2", [
-        windows[3].activity,
-        windows[4].activity,
-        windows[5].activity,
-      ]);
-      this.lightsShader.setUniform("windows3", [
-        windows[6].activity,
-        windows[7].activity,
-        windows[8].activity,
-      ]);
-      this.lightsShader.setUniform("windows4", [
-        windows[9].activity,
-        windows[10].activity,
-        windows[11].activity,
-      ]);
-      this.lightsShader.setUniform("windows5", [
-        windows[12].activity,
-        windows[13].activity,
-        windows[14].activity,
-      ]);
-      this.shaderCanvas.clear();
-      this.shaderCanvas.shader(this.lightsShader);
-      this.shaderCanvas.quad(-1, -1, 1, -1, 1, 1, -1, 1);
-      image(this.shaderCanvas, 0, 0);
-
+      if(this.drawShader) {
+        let pixelDensity = displayDensity();
+        this.lightsShader.setUniform("iResolution", [
+          canvasX * pixelDensity,
+          canvasY * pixelDensity,
+        ]);
+        this.lightsShader.setUniform("iTime", (now - firstNow) * 0.001);
+        this.lightsShader.setUniform("windows1", [
+          windows[0].activity,
+          windows[1].activity,
+          windows[2].activity,
+        ]);
+        this.lightsShader.setUniform("windows2", [
+          windows[3].activity,
+          windows[4].activity,
+          windows[5].activity,
+        ]);
+        this.lightsShader.setUniform("windows3", [
+          windows[6].activity,
+          windows[7].activity,
+          windows[8].activity,
+        ]);
+        this.lightsShader.setUniform("windows4", [
+          windows[9].activity,
+          windows[10].activity,
+          windows[11].activity,
+        ]);
+        this.lightsShader.setUniform("windows5", [
+          windows[12].activity,
+          windows[13].activity,
+          windows[14].activity,
+        ]);
+        this.shaderCanvas.clear();
+        this.shaderCanvas.shader(this.lightsShader);
+        this.shaderCanvas.quad(-1, -1, 1, -1, 1, 1, -1, 1);
+        image(this.shaderCanvas, 0, 0);
+      }
+      
       this.textPg.colorMode(HSL, 100);
       this.textPg.noStroke();
       this.textPg.clear();
       this.fallingText.update(dt, this.labeledNodes);
       this.fallingText.draw(this.textPg, this.selectedHue);
-
-      image(this.pg, 0, 0);
-      image(this.shaderCanvas, 0, 0);
       image(this.textPg, 0, 0);
+
       this.liveSign.updateTickTime();
       this.liveSign.draw();
     }
