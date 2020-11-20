@@ -172,16 +172,9 @@ var score = [
   {
     name: "ports",
     sections: [
-      { name: "network", duration: 10, pullBackCoeff: 10.0 },
-      { name: "packets", duration: 10, pullBackCoeff: 10.0 },
+      { name: "network", duration: 5, pullBackCoeff: 10.0 },
+      { name: "packets", duration: 5, pullBackCoeff: 10.0 },
       { name: "fade out", duration: 5 },
-    ],
-  },
-  {
-    name: "intro",
-    sections: [
-      { name: "transition", duration: 1 },
-      { name: "fade out", duration: 7 },
     ],
   },
 ];
