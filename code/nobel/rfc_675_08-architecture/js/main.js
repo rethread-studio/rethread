@@ -2,7 +2,7 @@ p5.disableFriendlyErrors = true;
 
 // GLOBAL GENERAL STATE
 
-var drawFPS = false;
+var drawFPS = true;
 var fps = 0;
 
 // This section contains state that is shared between many or all scenes
