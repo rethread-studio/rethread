@@ -275,18 +275,21 @@ class WorldScene extends Scene {
                             this.playhead.sectionIndex
                         ].duration;
                     }
+                    //CHECK IF THE SECTION HAS CHANGED
+                    if(this.sections[this.playhead.sectionIndex].name == "fade out") {
+                        this.fadeOut(this.sections[this.playhead.sectionIndex].duration);
+                    } else {
+                        const currentSection = this.sections[this.playhead.sectionIndex].name;
+                        if (this.focusRegion != currentSection) {
+                            console.log("the section has changed", this.focusRegion, currentSection);
+                            this.focusRegion = currentSection;
+                            this.selectedRegion = this.focusLocation[this.focusRegion].countryArray;
+                            this.countryManager.changeCountries(this.selectedRegion);
+                            this.dashBoard.changeLocation(this.focusLocation[this.focusRegion].label)
+                        }
+                    }
                 }
-
-
-                //CHECK IF THE SECTION HAS CHANGED
-                const currentSection = this.sections[this.playhead.sectionIndex].name;
-                if (this.focusRegion != currentSection) {
-                    console.log("the section has changed", this.focusRegion, currentSection);
-                    this.focusRegion = currentSection;
-                    this.selectedRegion = this.focusLocation[this.focusRegion].countryArray;
-                    this.countryManager.changeCountries(this.selectedRegion);
-                    this.dashBoard.changeLocation(this.focusLocation[this.focusRegion].label)
-                }
+                
 
                 this.drawDecorations();
                 //UPDATE COUNTRY MANAGER
