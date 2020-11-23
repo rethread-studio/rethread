@@ -1,11 +1,4 @@
 
-@font-face {
-    font-family: 'Anton-Regular';
-    src: url('/assets/webfonts/NeueBit-Bold/Anton-Regular.tttf') format('tttf');
-    font-weight: bold;
-}
-@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
-
 /* Filling a container with a YouTube iframe embed */
 .video-container {
     position: relative;
@@ -54,6 +47,3 @@
     font-size: 46px;
 }
 
-h3{
-    font-family: 'Anton', sans-serif;
-}

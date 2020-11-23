@@ -6,8 +6,14 @@
     font-weight: bold;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+@font-face {
+    font-family: 'Anton';
+    src: url('/assets/webfonts/Anton-Regular.ttf') format('truetype');
+}
 
+/* @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap'); */
+
+/* @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap'); */
 
 /*
 Fractal by HTML5 UP
@@ -3581,4 +3587,8 @@ body.is-preload #header .image img {
     font-size: 0.6em;
     width: 100%;
     text-align: center;
+}
+
+body#RFC h3{
+    font-family: 'Anton';
 }
