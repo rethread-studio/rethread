@@ -13,6 +13,7 @@
 
 // Fade out is not a section, it is instead triggered
 var score = [
+
   {
     name: "intro",
     sections: [
@@ -175,6 +176,13 @@ var score = [
       { name: "network", duration: 5, pullBackCoeff: 10.0 },
       { name: "packets", duration: 5, pullBackCoeff: 10.0 },
       { name: "fade out", duration: 5 },
+    ],
+  },
+  {
+    name: "outro",
+    sections: [
+      { name: "in", duration: 4 },
+      { name: "fade out", duration: 7 },
     ],
   },
 ];

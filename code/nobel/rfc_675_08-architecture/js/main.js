@@ -155,6 +155,7 @@ scenes.set("drops", new DropsScene());
 scenes.set("ports", new PortsScene());
 scenes.set("intro", new IntroScene());
 scenes.set("world", new WorldScene());
+scenes.set("outro", new OutroScene());
 
 let currentScene;
 let playhead = {
