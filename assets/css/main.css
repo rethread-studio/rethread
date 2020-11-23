@@ -5,6 +5,10 @@
     src: url('/assets/webfonts/NeueBit-Bold/NeueBit-Bold.woff') format('woff');
     font-weight: bold;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
+
 /*
 Fractal by HTML5 UP
 html5up.net | @ajlkn
