@@ -14,36 +14,41 @@
 // Fade out is not a section, it is instead triggered
 var score = [
 
-  {
-    name: "intro",
-    sections: [
-      { name: "in", duration: 3 },
-      { name: "fade out", duration: 7 },
-    ],
-  },
-  {
-    name: "world",
-    sections: [
-      { name: "SWEDEN", duration: 12 },
-      { name: "EU", duration: 12 },
-      { name: "AME", duration: 12 },
-      { name: "AS", duration: 12 },
-      { name: "fade out", duration: 7 },
-    ],
-  },
-  {
-    name: "intro",
-    sections: [
-      { name: "transition", duration: 1 },
-      { name: "fade out", duration: 7 },
-    ],
-  },
+  // {
+  //   name: "intro",
+  //   sections: [
+  //     { name: "in", duration: 3 },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
+  // {
+  //   name: "world",
+  //   sections: [
+  //     { name: "SWEDEN", duration: 12 },
+  //     { name: "EU", duration: 12 },
+  //     { name: "AME", duration: 12 },
+  //     { name: "AS", duration: 12 },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
+  // {
+  //   name: "intro",
+  //   sections: [
+  //     { name: "transition", duration: 1 },
+  //     { name: "fade out", duration: 7 },
+  //   ],
+  // },
   {
     name: "ports",
     sections: [
-      { name: "network", duration: 10, pullBackCoeff: 10.0 },
-      { name: "packets", duration: 20 },
+      { name: "network", duration: 5, pullBackCoeff: 10.0 },
+      { name: "add nodes", maxDistance: 60, minDistance: 50},
+      { name: "packets", duration: 5 },
+      { name: "network", duration: 5, pullBackCoeff: 10.0 },
+      { name: "add nodes", maxDistance: 80, minDistance: 75},
+      { name: "packets", duration: 10 },
       { name: "network", duration: 2, pullBackCoeff: 1000.0, drawShader: false },
+      
       { name: "network", duration: 2, pullBackCoeff: 1.0 },
       { name: "network", duration: 1, pullBackCoeff: 10.0 },
       { name: "network", duration: 1, pullBackCoeff: 1.0 },

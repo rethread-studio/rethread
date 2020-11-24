@@ -4,15 +4,17 @@ class PortsScene extends Scene {
     this.selectedHue = 50;
     this.drawNetwork = false;
     this.drawParticles = true;
-    this.drawShader = true;
+    this.drawShader = false;
     this.sections = [];
     this.pullBackCoeff = 1.0;
+    this.findAllPortsIndex = 0;
     this.playhead = {
       sectionIndex: 0,
       countdown: 0,
       state: "before start", // "playing", "fade in", "end of movement"
     };
     this.liveSign;
+    this.allNodes = new Set();
   }
   preload() {
     // This function is called from the p5 preload function. Use it
@@ -57,6 +59,23 @@ class PortsScene extends Scene {
       if (this.playhead.countdown <= 0) {
         this.playhead.sectionIndex += 1;
         if (this.playhead.sectionIndex < this.sections.length) {
+          if(this.sections[this.playhead.sectionIndex].name == "add nodes") {
+            let maxDistance = 0;
+            if ("maxDistance" in this.sections[this.playhead.sectionIndex]) {
+              maxDistance = this.sections[
+                this.playhead.sectionIndex
+              ].maxDistance;
+            }
+            let minDistance = 0;
+            if ("minDistance" in this.sections[this.playhead.sectionIndex]) {
+              minDistance = this.sections[
+                this.playhead.sectionIndex
+              ].minDistance;
+            }
+            console.log("adding nodes with " + maxDistance + ", " + minDistance)
+            this.addNodesBetweenNodes(maxDistance * subsampling, minDistance * subsampling);
+            this.playhead.sectionIndex += 1;
+          }
           this.playhead.countdown = this.sections[
             this.playhead.sectionIndex
           ].duration;
@@ -86,7 +105,7 @@ class PortsScene extends Scene {
               this.playhead.sectionIndex
             ].drawShader;
           } else {
-            this.drawShader = true;
+            this.drawShader = false;
           }
         }
       }
@@ -102,20 +121,34 @@ class PortsScene extends Scene {
         (metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0,
         9.0
       );
-
-      this.pg.background(0, 0, 100 - pow(backgroundHue, 3.0) * 0.5, 6);
+      let backgroundBrightness = 100 - pow(backgroundHue, 3.0) * 0.5;
+      this.pg.background(0, 0, backgroundBrightness, 8);
 
       fill(75, 100, 0, 100);
 
       this.pg.colorMode(HSL, 100);
-      this.originNode.update(dt, this.pullBackCoeff);
-      this.originNode.drawEdges(
-        this.pg,
-        this.fallingText.node,
-        this.selectedHue,
-        this.drawNetwork
-      );
-      this.originNode.drawNodes(this.pg, this.selectedHue);
+      for(let n of this.allNodes) {
+        n.update(dt, this.pullBackCoeff);
+      }
+      for(let n of this.allNodes) {
+        n.drawEdges(
+          this.pg,
+          this.fallingText.node,
+          this.selectedHue,
+          this.drawNetwork
+        );
+      }
+      for(let n of this.allNodes) {
+        n.drawNodes(this.pg, this.selectedHue);
+      }
+      // this.originNode.update(dt, this.pullBackCoeff);
+      // this.originNode.drawEdges(
+      //   this.pg,
+      //   this.fallingText.node,
+      //   this.selectedHue,
+      //   this.drawNetwork
+      // );
+      // this.originNode.drawNodes(this.pg, this.selectedHue);
       image(this.pg, 0, 0);
 
       if(this.drawShader) {
@@ -160,7 +193,7 @@ class PortsScene extends Scene {
       this.textPg.noStroke();
       this.textPg.clear();
       this.fallingText.update(dt, this.labeledNodes);
-      this.fallingText.draw(this.textPg, this.selectedHue);
+      this.fallingText.draw(this.textPg, this.selectedHue, backgroundBrightness);
       image(this.textPg, 0, 0);
 
       this.liveSign.updateTickTime();
@@ -195,8 +228,8 @@ class PortsScene extends Scene {
     this.originNode = new Node(
       "ALL PACKETS",
       allPorts,
-      createVector(0, 0),
-      true,
+      createVector(windows[7].center.x, windows[7].center.y),
+      false,
       7
     );
 
@@ -384,12 +417,31 @@ class PortsScene extends Scene {
       bittorrentNode,
       torNode,
     ];
+    this.allNodes.add(rightBottomNode2)
+    this.allNodes.add(rightBottomNode1)
+    this.allNodes.add(leftBottomNode2)
+    this.allNodes.add(leftBottomNode1)
+    this.allNodes.add(rightTopNode1)
+    this.allNodes.add(rightTopNode2)
+    this.allNodes.add(leftTopNode1)
+    this.allNodes.add(leftTopNode2)
+    this.allNodes.add(this.originNode)
+    for(let n of this.labeledNodes) {
+      this.allNodes.add(n)
+    }
+
+    // this.addNodesBetweenNodes(60 * subsampling, 50 * subsampling);
+    // this.addNodesBetweenNodes(80 * subsampling, 75 * subsampling);
+    // this.addNodesBetweenNodes(70 * subsampling, 20 * subsampling);
+    // this.addNodesBetweenNodes(200 * subsampling, 150 * subsampling);
+    // this.addNodesBetweenNodes(100 * subsampling, 99 * subsampling);
 
     this.fallingText = {
       node: undefined,
       nodeIndex: -1,
-      textSize: 13 * subsampling,
-      textSizeGrowth: 20 * subsampling,
+      textSize: 16 * subsampling,
+      textSizeGrowth: 2 * subsampling,
+      fastChangeSpeed: true,
       x: canvasX / 2,
       y: canvasY + 1,
       vel: canvasY / 3.0,
@@ -404,12 +456,26 @@ class PortsScene extends Scene {
         this.y += this.vel * dt;
         this.textSize += this.textSizeGrowth * dt;
         if (this.y > canvasY * 1.3) {
-          this.textSize = 11 * subsampling;
+          this.textSize = 16 * subsampling;
           this.y = 0;
           // this.nodeIndex = (this.nodeIndex + 1) % labeledNodes.length;
-          this.nodeIndex = Math.floor(Math.random() * labeledNodes.length);
+          let newNodeIndex = this.nodeIndex;
+          while(newNodeIndex == this.nodeIndex) {
+            newNodeIndex = Math.floor(Math.random() * labeledNodes.length);
+          }
+          this.nodeIndex = newNodeIndex;
           this.setNewNode(labeledNodes[this.nodeIndex]);
-          this.vel = canvasY / (2.0 * Math.random() + 2.0);
+          if(this.fastChangeSpeed) {
+            this.vel = canvasY / (0.125);
+          } else {
+            this.vel = canvasY / (0.25);
+          }
+          if(Math.random() > 0.95) {
+            this.vel = canvasY / 2.0;
+          }
+          if(Math.random() > 0.99) {
+            this.fastChangeSpeed = !this.fastChangeSpeed;
+          }
         }
       },
       setNewNode: function (newNode) {
@@ -420,13 +486,13 @@ class PortsScene extends Scene {
         this.node.selected = true;
         this.string = this.node.label;
       },
-      draw: function (g, selectedHue) {
+      draw: function (g, selectedHue, backgroundBrightness) {
         if (this.node != undefined) {
           g.fill(
             selectedHue + 2,
-            50,
-            this.node.activity * 50 + 50,
-            (1.0 - Math.pow(this.y / canvasY, 2.0)) * 100.0
+            100,
+            100 - backgroundBrightness,//this.node.activity * 25 + 50,
+            (1.0 - Math.pow(this.y / canvasY, 8.0)) * 100.0
           );
           g.noStroke();
         }
@@ -466,6 +532,60 @@ class PortsScene extends Scene {
         );
       }
     }
+  }
+  addNodesBetweenNodes(maxDistance, minDistance) {
+    let newNodes = [];
+    for(let currentNode of this.allNodes) {
+      for(let comparisonNode of this.allNodes) {
+        if(currentNode === comparisonNode 
+          || (currentNode.isWindow && comparisonNode.isWindow)) {
+          continue;
+        }
+        let distance = dist(currentNode.pos.x, currentNode.pos.y, comparisonNode.pos.x, comparisonNode.pos.y);
+        if(distance < maxDistance && distance > minDistance) {
+          // Create a new node between these nodes if they are not connected
+          if(!currentNode.isConnected(comparisonNode) && !comparisonNode.isConnected(currentNode)) {
+            // Figure out what direction particles should flow
+            let flowOrigin = undefined;
+            let flowDestination = undefined;
+            if(currentNode.isWindow) {
+              flowDestination = currentNode;
+              flowOrigin = comparisonNode;
+            } else if(comparisonNode.isWindow) {
+              flowDestination = comparisonNode;
+              flowOrigin = currentNode;
+            }
+            let t = Math.random() * 0.5 + 0.25;
+            let position = createVector(currentNode.pos.x + t*(comparisonNode.pos.x-currentNode.pos.x), currentNode.pos.y + t*(comparisonNode.pos.y-currentNode.pos.y));
+            let offset = createVector(Math.random() * minDistance * 2 - minDistance, Math.random() * minDistance * 2 - minDistance);
+            position.add(offset);
+            let newNode = new Node(
+              [],
+              [],
+              position,
+              false,
+              -1
+            );
+            if(flowOrigin != undefined) {
+              flowOrigin.createConnection(newNode);
+              newNode.createConnection(flowDestination);
+            } else {
+              // Connect both ways
+              currentNode.createConnection(newNode);
+              newNode.createConnection(comparisonNode);
+              comparisonNode.createConnection(newNode);
+              newNode.createConnection(currentNode);
+            }
+            newNodes.push(newNode);
+          }
+        }
+      }
+    }
+    for(let n of newNodes) {
+      this.allNodes.add(n);
+    }
+    this.originNode.findAllConnectedPorts(0, this.findAllPortsIndex); // Go through the network finding all ports a node is connected to
+    this.findAllPortsIndex += 1;
   }
   fadeIn(duration) {
     // Called when the previous scene is starting to fade out
@@ -523,6 +643,7 @@ class Node {
     this.falloff = 0.45;
     this.connections = [];
     this.selected = false;
+    this.foundPortsIndex = -1;
 
     if (isWindow == true) {
       this.pos = createVector(
@@ -559,29 +680,38 @@ class Node {
       100
     );
     g.noStroke();
-    if (this.isWindow == false && this.drawNetwork) {
+    if (this.isWindow == false) {
       // g.ellipse(
       //   this.pos.x + this.offsetPos.x,
       //   this.pos.y + this.offsetPos.y,
       //   10 * subsampling,
       //   10 * subsampling
       // );
+      // g.textSize(12);
+      // g.stroke(0, 100, 100, 100);
+      // g.noFill();
+      // let y = this.pos.y;
+      // for(let p of this.ports) {
+      //   g.text(p, this.pos.x, y);
+      //   y += 12;
+      // }
+      
     } else if (this.isWindow) {
       let w = windows[this.windowIndex];
       let size = 8 * subsampling * this.activity;
       // g.rect(w.x-size, w.y-size, w.w + size + size, w.h + size + size);
       if (this.selected) {
-        let size = 2 * subsampling;
+        let size = 4 * subsampling;
         g.stroke(selectedHue + 2, 50, 60, 100);
-        g.strokeWeight(subsampling * 4);
+        g.strokeWeight(subsampling * 8);
         g.noFill();
         g.rect(w.x - size, w.y - size, w.w + size + size, w.h + size + size);
       }
     }
 
-    for (let c of this.connections) {
-      c.drawNodes(g, selectedHue);
-    }
+    // for (let c of this.connections) {
+      // c.drawNodes(g, selectedHue);
+    // }
   }
   drawEdges(g, selectedNode, selectedHue, drawNetwork) {
     let pos = this.pos;
@@ -619,8 +749,9 @@ class Node {
           Math.random() * 20.02 - 10.01
         )
       );
+      pull.mult(0.1);
       this.vel.add(pull);
-      this.vel.limit(50);
+      this.vel.limit(30);
     }
     for (let c of this.connections) {
       if (c.hasPort(port)) {
@@ -635,17 +766,58 @@ class Node {
     );
     this.connections.push(connection);
   }
+  isConnected(destinationNode) {
+    let result = false;
+    for(let c of this.connections) {
+      if (c.node === destinationNode) {
+        result = true;
+      }
+    }
+    return result;
+  }
+  findAllConnectedPorts(depthLevel, findAllPortsIndex) {
+    // Find all of the ports this node is connected to
+    if(depthLevel > 30) {
+      // Break out if we have gone to far into a loop
+      console.log("Find ports loop")
+      return [];
+    }
+    if(this.foundPortsIndex == findAllPortsIndex) {
+      // This node has already been gone through, return the prots
+      return this.ports;
+    }
+    if(this.isWindow) {
+      console.log("Returning window ports " + this.ports)
+      return this.ports;
+    } else {
+      let allPorts = new Set();
+      for(let c of this.connections) {
+        let connectionPorts = c.node.findAllConnectedPorts(depthLevel + 1);
+        for(let p of connectionPorts) {
+          allPorts.add(p);
+        }
+      }
+      this.ports = allPorts;
+      this.foundPortsIndex = findAllPortsIndex;
+      return allPorts;
+    }
+    
+  }
   passParticleOn(particle) {
     let matchFound = false;
+    let matchingConnections = [];
     for (let c of this.connections) {
       if (c.hasPort(particle.port)) {
-        c.addParticle(particle, this.pos);
+        
         matchFound = true;
-        break;
+        matchingConnections.push(c);
       }
     }
     if (matchFound == false) {
       particle.connectionId = -1;
+    } else {
+      let connection = matchingConnections[Math.floor(Math.random() * matchingConnections.length)];
+      connection.addParticle(particle, this.pos);
     }
   }
 }
@@ -680,7 +852,7 @@ class Connection {
       }
     }
     this.particles = this.particles.filter((p) => p.connectionId == this.id);
-    this.node.update(dt, pullBackCoeff);
+    // this.node.update(dt, pullBackCoeff);
     this.edge.update(dt);
   }
   drawNodes(g, selectedHue) {
@@ -706,7 +878,7 @@ class Connection {
     for (let p of this.particles) {
       p.draw(g, sourceNodePos, pos, selectedNode, selectedHue);
     }
-    this.node.drawEdges(g, selectedNode, selectedHue, drawNetwork);
+    // this.node.drawEdges(g, selectedNode, selectedHue, drawNetwork);
   }
   registerPort(port, previousPos) {
     this.edge.activity = Math.min(this.edge.activity + 0.2, 1.0);

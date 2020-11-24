@@ -18,7 +18,7 @@ let lastNow = 0;
 let firstNow = 0;
 var now = 0;
 
-let drawWindows = false; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
+let drawWindows = true; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
 let windows = [];
 windows.push({
   x: 2,
