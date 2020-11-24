@@ -106,6 +106,9 @@ class NumbersScene extends Scene {
             this.playhead.sectionIndex
           ].duration;
           this.textDuration = this.directionDuration * 0.2;
+          if(this.textDuration < 4.0) {
+            this.textDuration = 4.0;
+          }
           this.dropsDuration = this.directionDuration - this.textDuration;
 
           resetMetrics(); // We want fresh numbers per region for example
@@ -166,52 +169,52 @@ class NumbersScene extends Scene {
           ) {
             this.fadeOut();
           } else if (this.sections[this.playhead.sectionIndex].name == "all") {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
             this.textObject.setNewIteration(
               ["PACKETS OF", "INTERNET", "ACTIVITY"],
-              dur * 0.2,
-              dur * 0.8
+              this.regionRestriction,
+              this.textDuration,
+              this.dropsDuration
             );
             this.nextParticleDir = "down";
           } else if (this.sections[this.playhead.sectionIndex].name == "in") {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
             this.textObject.setNewIteration(
               ["INTO", "STOCKHOLM", "FROM"],
-              dur * 0.2,
-              dur * 0.8
+              this.regionRestriction,
+              this.textDuration,
+              this.dropsDuration
             );
             this.nextParticleDir = "right";
           } else if (this.sections[this.playhead.sectionIndex].name == "out") {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
             this.textObject.setNewIteration(
               ["OUT OF", "STOCKHOLM", "TO"],
-              dur * 0.2,
-              dur * 0.8
+              this.regionRestriction,
+              this.textDuration,
+              this.dropsDuration
             );
             this.nextParticleDir = "left";
           } else if (this.sections[this.playhead.sectionIndex].name == "size") {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
             this.textObject.setNewIteration(
               ["COUNTING", "BITS AND", "PIECES"],
-              dur * 0.2,
-              dur * 0.8
+              this.regionRestriction,
+              this.textDuration,
+              this.dropsDuration
             );
             this.nextParticleDir = "up";
           } else if (
             this.sections[this.playhead.sectionIndex].name == "multinumbers"
           ) {
-            let dur = this.sections[this.playhead.sectionIndex].duration;
             this.textObject.setNewIteration(
               ["COMMUNICATION", "IN", "NUMBERS"],
-              dur * 0.2,
-              dur * 0.8
+              this.regionRestriction,
+              this.textDuration,
+              this.dropsDuration
             );
             this.nextParticleDir = "up";
           }
 
-          if (this.regionRestriction != "none") {
-            this.textObject.label.push(this.regionRestriction.toUpperCase());
-          }
+          // if (this.regionRestriction != "none") {
+          //   this.textObject.label.push(this.regionRestriction.toUpperCase());
+          // }
         }
       }
 
@@ -378,7 +381,12 @@ class NumbersScene extends Scene {
           p.y < canvasY + 10
         ) {
           this.pg.fill(p.hue, p.saturation, p.lightness);
-          this.pg.ellipse(p.x, p.y, p.size, p.size);
+          if (p.size > subsampling * this.particleAsTextLimit) {
+            this.pg.textSize(p.size * 2);
+            this.pg.text(p.len, p.x, p.y);
+          } else {
+            this.pg.ellipse(p.x, p.y, p.size, p.size);
+          }
         }
 
         switch (this.currentParticleDir) {
@@ -538,13 +546,14 @@ class TextObject {
     this.height = height;
     this.width = width;
     this.label = label;
+    this.region = "REGION";
     this.number = "";
-    this.line = line;
+    this.line = 2;
     this.timeLabel = timeLabel;
     this.timeNumber = timeNumber;
     this.blinking = false;
     this.currentTextIndex = 0;
-    this.textTimeGap = 0.7;
+    this.textTimeGap = 0.1;
     this.drawLabel = true;
     this.currentState = 1; // 1 = text, 0 = off
     this.countdown = timeLabel;
@@ -553,11 +562,18 @@ class TextObject {
     this.textGrowth = 24.0;
     this.crossedHalfWay = false;
   }
-  setNewIteration(label, timeLabel, timeNumber) {
+  setNewIteration(label, region, timeLabel, timeNumber) {
     this.label = label;
-    this.timeLabel = timeLabel - this.textTimeGap;
+    this.region = region.toUpperCase();
+    this.timeLabel = (timeLabel/2) - this.textTimeGap;
+    this.timeRegion = (timeLabel/2) - this.textTimeGap;
+    if(this.region = "NONE") {
+      this.timeLabel = timeLabel - this.textTimeGap;
+      this.timeRegion = 0;
+    }
     this.timeNumber = timeNumber - this.textTimeGap;
     this.drawLabel = true;
+    this.drawRegion = false;
     this.currentState = 1;
     this.textSize = 16.0;
     this.countdown = this.timeLabel;
@@ -589,6 +605,8 @@ class TextObject {
       let texts;
       if (this.drawLabel) {
         texts = this.label;
+      } else if(this.drawRegion) {
+        texts = this.region;
       } else {
         texts = this.number;
       }
@@ -617,7 +635,7 @@ class TextObject {
       Math.min(this.textGrowth / this.fullCountdownTime, 24.0 / 5.0) * dt;
     this.countdown -= dt;
     if (
-      this.countdown / this.fullCountdownTime <= 0.8 &&
+      this.countdown / this.fullCountdownTime <= 0.9 &&
       this.currentState == 1 &&
       this.crossedHalfWay == false
     ) {
@@ -632,6 +650,13 @@ class TextObject {
         this.fullCountdownTime = this.textTimeGap;
       } else if (this.currentState == 1 && this.drawLabel) {
         this.drawLabel = false;
+        this.drawRegion = true;
+        this.fullCountdownTime = this.timeRegion;
+        this.countdown = this.timeRegion;
+        this.textSize = 16.0;
+        this.textGrowth = 24.0;
+      } else if (this.currentState == 1 && this.drawRegion) {
+        this.drawRegion = false;
         this.countdown = this.timeNumber;
         this.fullCountdownTime = this.timeNumber;
         this.textSize = 16.0;
