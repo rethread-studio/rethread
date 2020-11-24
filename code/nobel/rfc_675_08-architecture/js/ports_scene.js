@@ -72,7 +72,7 @@ class PortsScene extends Scene {
                 this.playhead.sectionIndex
               ].minDistance;
             }
-            console.log("adding nodes with " + maxDistance + ", " + minDistance)
+            // console.log("adding nodes with " + maxDistance + ", " + minDistance)
             this.addNodesBetweenNodes(maxDistance * subsampling, minDistance * subsampling);
             this.playhead.sectionIndex += 1;
           }
@@ -779,7 +779,7 @@ class Node {
     // Find all of the ports this node is connected to
     if(depthLevel > 30) {
       // Break out if we have gone to far into a loop
-      console.log("Find ports loop")
+      // console.log("Find ports loop")
       return [];
     }
     if(this.foundPortsIndex == findAllPortsIndex) {
@@ -787,7 +787,7 @@ class Node {
       return this.ports;
     }
     if(this.isWindow) {
-      console.log("Returning window ports " + this.ports)
+      // console.log("Returning window ports " + this.ports)
       return this.ports;
     } else {
       let allPorts = new Set();
