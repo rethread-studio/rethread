@@ -156,9 +156,11 @@ for (let mvt of score) {
   let totalDuration = 0;
   let fadeOutDuration = 0;
   for (let section of mvt.sections) {
-    totalDuration += section.duration;
-    if (section.name == "fade out") {
-      fadeOutDuration = section.duration;
+    if("duration" in section) {
+      totalDuration += section.duration;
+      if (section.name == "fade out") {
+        fadeOutDuration = section.duration;
+      }
     }
   }
   mvt.totalDuration = totalDuration;
