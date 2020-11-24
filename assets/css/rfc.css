@@ -3,19 +3,55 @@
     position: relative;
     overflow: hidden;
 }
-
-#header-p5 h1{
-   
+body#RFC h1{
+    font-size: 5em;
+    margin-bottom: 30px;
 }
+
+body#RFC h3,h1,h2,h4{
+    font-family: 'Anton';
+}
+
+#header-P5 {
+    /* background-color: #6a71f7; */
+    background-color: black;
+    color: #d1e5f9;
+    padding: 4.5em 0 2.5em 0;
+    -moz-align-items: center;
+    -webkit-align-items: center;
+    -ms-align-items: center;
+    align-items: center;
+    display: -moz-flex;
+    display: -webkit-flex;
+    display: -ms-flex;
+    display: flex;
+    -moz-justify-content: center;
+    -webkit-justify-content: center;
+    -ms-justify-content: center;
+    justify-content: center;
+    /* background-image: url("images/overlay.png"), url("images/pattern-size1.svg"); */
+    background-position: top left, center center;
+    background-attachment: fixed, fixed;
+    background-size: auto, cover;
+    height: 50vw;
+    width: 100%;
+    /* min-height: 35em; */
+}
+
+
 .canvasClass{
     position: absolute;    
     width: 100%;
     height: 50vw;
 }
-.sketch-holder{
-   
+
+
+#google-map{
+    margin-left: 20px;
 }
 
-.canvasClass.p5Canvas{
-  
+
+body#RFC .spotlight .image{
+    width: 60%;
+    height: auto;
 }
