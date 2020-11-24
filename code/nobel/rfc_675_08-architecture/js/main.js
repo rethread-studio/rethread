@@ -1,9 +1,10 @@
 p5.disableFriendlyErrors = true;
 
 // GLOBAL GENERAL STATE
-
-var drawFPS = true;
+let drawWindows = false; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
+var drawFPS = false;
 var fps = 0;
+var doGlitch = true;
 
 // This section contains state that is shared between many or all scenes
 // or is used by the main functions within this file
@@ -18,7 +19,6 @@ let lastNow = 0;
 let firstNow = 0;
 var now = 0;
 
-let drawWindows = true; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
 let windows = [];
 windows.push({
   x: 2,
@@ -176,6 +176,10 @@ let playhead = {
   },
 };
 
+var allSceneImages = [];
+var glitchProb = 0.99;
+var glitchAlpha = 0.3;
+
 /// P5 functions
 
 function preload() {
@@ -183,6 +187,21 @@ function preload() {
   for (let scene of scenes.values()) {
     scene.preload();
   }
+  allSceneImages.push(loadImage("assets/img/scenes/numbers1.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/numbers2.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/numbers3.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/numbers4.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/numbers5.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/numbers6.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/ports1.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/ports2.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/ports3.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/ports4.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/world1.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/world2.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/drops1.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/drops2.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/drops3.png"))
 } // End Preload
 
 function setup() {
@@ -334,10 +353,21 @@ function draw() {
     metrics.rollingNumPackets += d.value;
   }
 
+  if(Math.random() > 0.995) {
+    glitchProb = [0.85, 0.9, 0.97, 0.96, 0.98, 0.99, 0.995][Math.floor(Math.random() * 7)];
+  }
+
   // Draw the scene(s)
   if (playhead.state == "before start") {
   } else if (playhead.state == "playing") {
     playhead.currentScene.draw(dt);
+
+    if(doGlitch && Math.random() > glitchProb) {
+      let img = allSceneImages[Math.floor(Math.random() * allSceneImages.length)];
+      drawingContext.globalAlpha = glitchAlpha;
+      image(img, 0, 0);
+      drawingContext.globalAlpha = 1.0;
+    }
   } else if (playhead.state == "crossfade") {
     if (playhead.fadingInScene != undefined) {
       if (playhead.currentScene.zIndex() > playhead.fadingInScene.zIndex()) {
