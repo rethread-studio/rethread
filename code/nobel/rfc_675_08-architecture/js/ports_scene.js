@@ -121,8 +121,8 @@ class PortsScene extends Scene {
         (metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0,
         9.0
       );
-
-      this.pg.background(0, 0, 100 - pow(backgroundHue, 3.0) * 0.5, 8);
+      let backgroundBrightness = 100 - pow(backgroundHue, 3.0) * 0.5;
+      this.pg.background(0, 0, backgroundBrightness, 8);
 
       fill(75, 100, 0, 100);
 
@@ -193,7 +193,7 @@ class PortsScene extends Scene {
       this.textPg.noStroke();
       this.textPg.clear();
       this.fallingText.update(dt, this.labeledNodes);
-      this.fallingText.draw(this.textPg, this.selectedHue);
+      this.fallingText.draw(this.textPg, this.selectedHue, backgroundBrightness);
       image(this.textPg, 0, 0);
 
       this.liveSign.updateTickTime();
@@ -486,12 +486,12 @@ class PortsScene extends Scene {
         this.node.selected = true;
         this.string = this.node.label;
       },
-      draw: function (g, selectedHue) {
+      draw: function (g, selectedHue, backgroundBrightness) {
         if (this.node != undefined) {
           g.fill(
             selectedHue + 2,
-            50,
-            this.node.activity * 50 + 50,
+            100,
+            100 - backgroundBrightness,//this.node.activity * 25 + 50,
             (1.0 - Math.pow(this.y / canvasY, 8.0)) * 100.0
           );
           g.noStroke();
@@ -701,9 +701,9 @@ class Node {
       let size = 8 * subsampling * this.activity;
       // g.rect(w.x-size, w.y-size, w.w + size + size, w.h + size + size);
       if (this.selected) {
-        let size = 2 * subsampling;
+        let size = 4 * subsampling;
         g.stroke(selectedHue + 2, 50, 60, 100);
-        g.strokeWeight(subsampling * 4);
+        g.strokeWeight(subsampling * 8);
         g.noFill();
         g.rect(w.x - size, w.y - size, w.w + size + size, w.h + size + size);
       }
