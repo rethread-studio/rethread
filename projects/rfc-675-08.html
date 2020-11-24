@@ -84,13 +84,22 @@
 			<section id="two" class="wrapper">
 
 				<div class="inner alt">
-
+					<h1>Real-time Internet visualization in 7 movements</h1>
 					<section class="spotlight">
-						<div class="content">
-							<h1>Real-time Internet visualization in 7 movements</h1>
+
+						<!-- DRAW SCORE -->
+						<div id="location" class="wrapper-d3">
+							<div class="tooltip" id="tooltipLocation">
+								<img src="../images/rfc.jpg" alt="">
+								<div class="tooltip-value">
+									Name: <span id="name">Test</span>
+								</div>
+								<div class="tooltip-value">
+									Duration: <span id="duration">Test</span>
+								</div>
+							</div>
 						</div>
-						<div class="image"><img src="../../images/rfc.jpg" alt="RFC 675:08" />
-						</div>
+						<!-- END SCORE -->
 						<div class="content">
 							<h3>Location
 								<span class="icon solid fa-globe-americas"></span> <span
@@ -103,8 +112,19 @@
 						</div>
 					</section>
 					<section class="spotlight">
-						<div class="image"><img src="../images/rfc.jpg" alt="RFC 675:08" />
+						<!-- DRAW SCORE -->
+						<div id="speed" class="wrapper-d3">
+							<div class="tooltip" id="tooltipSpeed">
+								<img src="../images/rfc.jpg" alt="">
+								<div class="tooltip-value">
+									Name: <span id="name">Test</span>
+								</div>
+								<div class="tooltip-value">
+									Duration: <span id="duration">Test</span>
+								</div>
+							</div>
 						</div>
+						<!-- END SCORE -->
 						<div class="content">
 							<h3>Speed and frequency
 								<span class="icon solid fa-tachometer-alt"></span>
@@ -121,8 +141,19 @@
 						</div>
 					</section>
 					<section class="spotlight">
-						<div class="image"><img src="../images/rfc.jpg" alt="RFC 675:08" />
+						<!-- DRAW SCORE -->
+						<div id="size" class="wrapper-d3">
+							<div class="tooltip" id="tooltipSize">
+								<img src="../images/rfc.jpg" alt="">
+								<div class="tooltip-value">
+									Name: <span id="name">Test</span>
+								</div>
+								<div class="tooltip-value">
+									Duration: <span id="duration">Test</span>
+								</div>
+							</div>
 						</div>
+						<!-- END SCORE -->
 						<div class="content">
 							<h3>Size
 								<span class="icon solid fa-ruler-horizontal"></span>
@@ -136,8 +167,19 @@
 						</div>
 					</section>
 					<section class="spotlight">
-						<div class="image"><img src="../images/rfc.jpg" alt="RFC 675:08" />
+						<!-- DRAW SCORE -->
+						<div id="protocol" class="wrapper-d3">
+							<div class="tooltip" id="tooltipProtocol">
+								<img src="../images/rfc.jpg" alt="">
+								<div class="tooltip-value">
+									Name: <span id="name">Test</span>
+								</div>
+								<div class="tooltip-value">
+									Duration: <span id="duration">Test</span>
+								</div>
+							</div>
 						</div>
+						<!-- END SCORE -->
 						<div class="content">
 							<h3>Protocols
 								<span class="icon solid fa-network-wired"></span>
@@ -208,6 +250,8 @@
 	<script src="/assets/js/breakpoints.min.js"></script>
 	<script src="/assets/js/util.js"></script>
 	<script src="/assets/js/main.js"></script>
+	<script src="/assets/js/d3/d3.min.js"></script>
+	<script src="/assets/js/score.js"></script>
 	<script src="/assets/js/p5/p5.js"></script>
 	<script src="/assets/js/blob.js" type="text/javascript"></script>
 </body>
