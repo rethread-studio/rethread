@@ -460,7 +460,9 @@ class NumbersScene extends Scene {
   addParticle(len) {
     this.averageLen = this.averageLen * 0.9 + len * 0.1;
     if (len > 1) {
-      let lightness = 1.0 - Math.pow(1.0 - this.averageLen / 20000.0, 3.0);
+      // let lightness = 1.0 - Math.pow(1.0 - this.averageLen / 20000.0, 3.0);
+      let hueOffset = (1.0 - Math.pow(1.0 - Math.min(metrics.rollingTotalLen / 9000000.0, 1.0), 3.0)) * 30;
+      let lightness = 1.0 - Math.pow(1.0 - Math.min(len/30000, 1.0), 3.0);
       let x, y;
       switch (this.currentParticleDir) {
         case "right":
@@ -490,7 +492,10 @@ class NumbersScene extends Scene {
       pa.vel = (Math.random() * 10 + 5) * subsampling * 1.0;
       pa.size = (Math.min(Math.max(len / 10000, 1), 8.0) + 1.0) * subsampling;
       pa.len = len;
-      pa.hue = Math.pow(lightness, 2.0) * 15;
+      pa.hue = Math.pow(lightness, 3.0) * hueOffset;
+      if(pa.hue > 17) {
+        pa.hue += hueOffset;
+      }
       pa.saturation = 100;
       pa.lightness = lightness * 70 + 10;
       pa.activated = true;
@@ -548,7 +553,7 @@ class TextObject {
     this.label = label;
     this.region = "REGION";
     this.number = "";
-    this.line = 2;
+    this.line = 1;
     this.timeLabel = timeLabel;
     this.timeNumber = timeNumber;
     this.blinking = false;
