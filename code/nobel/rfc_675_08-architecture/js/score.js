@@ -14,30 +14,30 @@
 // Fade out is not a section, it is instead triggered
 var score = [
 
-  // {
-  //   name: "intro",
-  //   sections: [
-  //     { name: "in", duration: 3 },
-  //     { name: "fade out", duration: 4 },
-  //   ],
-  // },
-  // {
-  //   name: "world",
-  //   sections: [
-  //     { name: "SWEDEN", duration: 12 },
-  //     { name: "EU", duration: 12 },
-  //     { name: "AME", duration: 12 },
-  //     { name: "AS", duration: 12 },
-  //     { name: "fade out", duration: 4 },
-  //   ],
-  // },
-  // {
-  //   name: "intro",
-  //   sections: [
-  //     { name: "transition", duration: 1 },
-  //     { name: "fade out", duration: 4 },
-  //   ],
-  // },
+  {
+    name: "intro",
+    sections: [
+      { name: "in", duration: 3 },
+      { name: "fade out", duration: 4 },
+    ],
+  },
+  {
+    name: "world",
+    sections: [
+      { name: "SWEDEN", duration: 12 },
+      { name: "EU", duration: 12 },
+      { name: "AME", duration: 12 },
+      { name: "AS", duration: 12 },
+      { name: "fade out", duration: 4 },
+    ],
+  },
+  {
+    name: "intro",
+    sections: [
+      { name: "transition", duration: 1 },
+      { name: "fade out", duration: 4 },
+    ],
+  },
   {
     name: "numbers",
     sections: [
