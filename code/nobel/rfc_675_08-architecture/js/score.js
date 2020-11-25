@@ -115,13 +115,13 @@ var score = [
     name: "ports",
     sections: [
       { name: "network", duration: 5, pullBackCoeff: 10.0 },
-      { name: "add nodes", maxDistance: 60, minDistance: 50},
+      { name: "add nodes", maxDistance: 60, minDistance: 50 },
       { name: "packets", duration: 5 },
       { name: "network", duration: 5, pullBackCoeff: 10.0 },
-      { name: "add nodes", maxDistance: 80, minDistance: 75},
+      { name: "add nodes", maxDistance: 80, minDistance: 75 },
       { name: "packets", duration: 10 },
       { name: "network", duration: 2, pullBackCoeff: 1000.0, drawShader: false },
-      
+
       { name: "network", duration: 2, pullBackCoeff: 1.0 },
       { name: "network", duration: 1, pullBackCoeff: 10.0 },
       { name: "network", duration: 1, pullBackCoeff: 1.0 },
