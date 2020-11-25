@@ -1,0 +1,16 @@
+{
+  "name": "ws_osc_relay",
+  "version": "1.0.0",
+  "description": "Relays data from a websocket server to any OSC host",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik Natanael Gustafsson <erik@eriknatanael.com> (https://eriknatanael.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "cli": "^1.0.1",
+    "osc": "^2.4.1",
+    "ws": "^7.3.1"
+  }
+}
