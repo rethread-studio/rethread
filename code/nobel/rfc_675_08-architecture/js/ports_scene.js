@@ -225,6 +225,8 @@ class PortsScene extends Scene {
       3306,
       25,
     ];
+    this.labeledNodes = [];
+    this.allNodes = new Set();
     this.originNode = new Node(
       "ALL PACKETS",
       allPorts,
