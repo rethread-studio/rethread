@@ -227,13 +227,20 @@ class DropsScene extends Scene {
     if (len > 400000) {
       hue = (hue + 48.0) % 100;
     }
-    let maxSize = Math.min(len / 2000, 200.0) * subsampling;
+    let maxSize = (1.0 - Math.pow(1.0 - Math.min(len / 200000, 1.0), 3.0)) * 200.0 * subsampling;
+
     let lightness = Math.min(
       Math.min(len / 50000.0, 25) + Math.random() * 50 - hue,
       75
     );
     if (maxSize < 3 * subsampling) {
-      lightness = 10;
+      let smallWeight = (1.0 - Math.pow(1.0 - Math.min(len / 2000, 1.0), 4.0));
+      lightness = 40 + smallWeight * 10.0;
+      hue = 1.0 + smallWeight * 20;
+      if(hue > 10) {
+        hue += 40;
+      }
+      maxSize = 3 * subsampling;
     }
     this.droplets.push({
       x: Math.random() * canvasX,
@@ -259,7 +266,7 @@ class DropsScene extends Scene {
       this.baseHueColor = 0;
     } else if (direction == "out") {
       this.doOutPackets = true;
-      this.displayText = ["MESSAGES", "TRAVELLING", "OUT TOWARDS"];
+      this.displayText = ["MESSAGES", "TRAVELLING", "OUT INTO"];
       this.baseHueColor = 0;
     }
     // TODO: Make sure these timeouts are removed when disabling the scene
