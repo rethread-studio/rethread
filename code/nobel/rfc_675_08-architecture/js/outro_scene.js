@@ -107,6 +107,8 @@ class OutroScene extends Scene {
 
         //LOGOS
         this.logoRethart;
+        this.logoKTH;
+        this.logoNobel;
 
         ////////////////////////////////////////////////////////////////////////////////////
         // SHADER
@@ -207,6 +209,8 @@ class OutroScene extends Scene {
         this.myFont = loadFont(this.fontURL);
         this.logoRethart = loadImage("./assets/img/re_thread_big.png");
         this.noise = loadImage("./assets/img/noise.png");
+        this.logoKTH = loadImage("./assets/img/kth_logo.png");
+        this.logoNobel = loadImage("./assets/img/nobel_logo.png");
     }
     setup() {
         // This function is called from the p5 setup function. Use it to init
@@ -220,7 +224,9 @@ class OutroScene extends Scene {
             this.positions,
             this.fontSize,
             this.colorPallete,
-            this.logoRethart
+            this.logoRethart,
+            this.logoKTH,
+            this.logoNobel
         );
         textFont("sans");
         textSize(28 * subsampling);
@@ -386,13 +392,17 @@ class VisualOutro {
         positions,
         fontSize,
         colorPallete,
-        logoRethart
+        logoRethart,
+        logoKTH,
+        logoNobel
     ) {
         this.font = font;
         this.positions = positions;
         this.fontSize = fontSize;
         this.colorPallete = colorPallete;
         this.logoRethart = logoRethart;
+        this.logoKTH = logoKTH;
+        this.logoNobel = logoNobel;
 
 
         this.crossPoints = [
@@ -462,10 +472,29 @@ class VisualOutro {
     }
 
     drawLogo() {
+        const imgSize = {
+            x: 40,
+            y: 40,
+        };
 
         const width = this.logoRethart.width / 2.5;
         const height = this.logoRethart.height / 2.5;
         image(this.logoRethart, canvasX / 2 - (width / 2), this.positions.col.c2 - 3 * subsampling, width, height);
+
+        image(
+            this.logoKTH,
+            this.positions.row.r3 - 44 * subsampling,
+            this.positions.col.c5 + 3 * subsampling,
+            imgSize.x * subsampling,
+            imgSize.y * subsampling
+        );
+        image(
+            this.logoNobel,
+            this.positions.row.r1 + 4 * subsampling,
+            this.positions.col.c5 + 3,
+            imgSize.x * subsampling,
+            imgSize.y * subsampling
+        );
     }
 
 }
