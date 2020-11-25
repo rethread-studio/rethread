@@ -567,7 +567,7 @@ class TextObject {
     this.region = region.toUpperCase();
     this.timeLabel = (timeLabel/2) - this.textTimeGap;
     this.timeRegion = (timeLabel/2) - this.textTimeGap;
-    if(this.region = "NONE") {
+    if(this.region == "NONE") {
       this.timeLabel = timeLabel - this.textTimeGap;
       this.timeRegion = 0;
     }
