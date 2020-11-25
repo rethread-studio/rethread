@@ -362,7 +362,7 @@ function draw() {
   } else if (playhead.state == "playing") {
     playhead.currentScene.draw(dt);
 
-    if(doGlitch && Math.random() > glitchProb) {
+    if (doGlitch && Math.random() > glitchProb) {
       let img = allSceneImages[Math.floor(Math.random() * allSceneImages.length)];
       drawingContext.globalAlpha = glitchAlpha;
       image(img, 0, 0);

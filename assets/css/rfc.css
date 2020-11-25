@@ -8,7 +8,7 @@ body#RFC h1{
     margin-bottom: 30px;
 }
 
-body#RFC h3,h1,h2,h4{
+body#RFC h3,h1,h2,h4, h5{
     font-family: 'Anton';
 }
 
@@ -103,11 +103,18 @@ body#RFC #movements h1{
     font-size: 4.3em;
 }
 
+body#RFC  h5{
+    font-size: 2em;
+    margin-bottom: 10px;
+    margin-top: 5px;
+
+}
+
 body#RFC #movements img{
    
         width: 40%;
         height: auto;
-        border-radius: 180px;
+        border-radius: 50%;
         margin-left: 30px;
     
 }
