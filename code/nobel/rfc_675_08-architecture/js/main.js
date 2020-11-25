@@ -178,7 +178,7 @@ let playhead = {
 
 var allSceneImages = [];
 var glitchProb = 0.99;
-var glitchAlpha = 0.3;
+var glitchAlpha = 0.2;
 
 /// P5 functions
 
@@ -353,8 +353,8 @@ function draw() {
     metrics.rollingNumPackets += d.value;
   }
 
-  if(Math.random() > 0.995) {
-    glitchProb = [0.85, 0.9, 0.97, 0.96, 0.98, 0.99, 0.995][Math.floor(Math.random() * 7)];
+  if(Math.random() > 0.997) {
+    glitchProb = [0.85, 0.9, 0.97, 0.96, 0.98, 0.99, 0.995, 0.999, 1.0][Math.floor(Math.random() * 9)];
   }
 
   // Draw the scene(s)
