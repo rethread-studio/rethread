@@ -98,3 +98,16 @@ body#RFC .spotlight .image{
     stroke: #333333;
     stroke-width: 1;
 }
+
+body#RFC #movements h1{
+    font-size: 4.3em;
+}
+
+body#RFC #movements img{
+   
+        width: 40%;
+        height: auto;
+        border-radius: 180px;
+        margin-left: 30px;
+    
+}
