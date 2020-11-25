@@ -353,7 +353,7 @@ function draw() {
     metrics.rollingNumPackets += d.value;
   }
 
-  if(Math.random() > 0.997) {
+  if (Math.random() > 0.997) {
     glitchProb = [0.85, 0.9, 0.97, 0.96, 0.98, 0.99, 0.995, 0.999, 1.0][Math.floor(Math.random() * 9)];
   }
 
@@ -362,7 +362,7 @@ function draw() {
   } else if (playhead.state == "playing") {
     playhead.currentScene.draw(dt);
 
-    if(doGlitch && Math.random() > glitchProb) {
+    if (doGlitch && Math.random() > glitchProb) {
       let img = allSceneImages[Math.floor(Math.random() * allSceneImages.length)];
       drawingContext.globalAlpha = glitchAlpha;
       image(img, 0, 0);

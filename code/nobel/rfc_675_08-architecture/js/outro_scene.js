@@ -109,6 +109,8 @@ class OutroScene extends Scene {
         this.logoRethart;
         this.logoKTH;
         this.logoNobel;
+        this.waspLogo;
+        this.bahnLogo;
 
         ////////////////////////////////////////////////////////////////////////////////////
         // SHADER
@@ -211,6 +213,9 @@ class OutroScene extends Scene {
         this.noise = loadImage("./assets/img/noise.png");
         this.logoKTH = loadImage("./assets/img/kth_logo.png");
         this.logoNobel = loadImage("./assets/img/nobel_logo.png");
+        this.waspLogo = loadImage("./assets/img/wasp_logo.png");
+        this.bahnLogo = loadImage("./assets/img/bahn_logo.png");
+
     }
     setup() {
         // This function is called from the p5 setup function. Use it to init
@@ -226,7 +231,9 @@ class OutroScene extends Scene {
             this.colorPallete,
             this.logoRethart,
             this.logoKTH,
-            this.logoNobel
+            this.logoNobel,
+            this.waspLogo,
+            this.bahnLogo
         );
         textFont("sans");
         textSize(28 * subsampling);
@@ -394,7 +401,9 @@ class VisualOutro {
         colorPallete,
         logoRethart,
         logoKTH,
-        logoNobel
+        logoNobel,
+        waspoLogo,
+        bahnLogo
     ) {
         this.font = font;
         this.positions = positions;
@@ -403,6 +412,8 @@ class VisualOutro {
         this.logoRethart = logoRethart;
         this.logoKTH = logoKTH;
         this.logoNobel = logoNobel;
+        this.waspLogo = waspoLogo,
+            this.bahnLogo = bahnLogo
 
 
         this.crossPoints = [
@@ -495,6 +506,23 @@ class VisualOutro {
             imgSize.x * subsampling,
             imgSize.y * subsampling
         );
+
+        image(
+            this.waspLogo,
+            this.positions.row.r2 + 22 * subsampling,
+            this.positions.col.c4 + 10 * subsampling,
+            80,
+            8.84
+        );
+        image(
+            this.bahnLogo,
+            this.positions.row.r1 + 4 * subsampling,
+            this.positions.col.c4 - 2 * subsampling,
+            42.5,
+            24.5
+
+        );
+
     }
 
 }
