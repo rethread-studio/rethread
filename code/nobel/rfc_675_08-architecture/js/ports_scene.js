@@ -107,6 +107,18 @@ class PortsScene extends Scene {
           } else {
             this.drawShader = false;
           }
+          if ("randomVelAmount" in this.sections[this.playhead.sectionIndex]) {
+            this.randomVelAmount = this.sections[
+              this.playhead.sectionIndex
+            ].randomVelAmount;
+          } else {
+            this.randomVelAmount = 1.0;
+          }
+          for(let n in this.allNodes) {
+            n.randomVelAmount = this.randomVelAmount;
+            // n.vel.x = 0.0;
+            // n.vel.y = 0.0;
+          }
         }
       }
     }
@@ -646,6 +658,7 @@ class Node {
     this.connections = [];
     this.selected = false;
     this.foundPortsIndex = -1;
+    this.randomVelAmount = 1.0;
 
     if (isWindow == true) {
       this.pos = createVector(
@@ -664,8 +677,9 @@ class Node {
         .copy()
         .mult(-1)
         .normalize()
-        .mult(pullBackCoeff); // mult of 0.001 keeps it in check
+        .mult(pullBackCoeff);
       this.vel.add(pullBack);
+      this.vel.limit(100);
       this.offsetPos.add(this.vel.copy().mult(dt));
     } else {
       windows[this.windowIndex].activity = Math.pow(this.activity, 2.0);
@@ -747,13 +761,12 @@ class Node {
         .mult(Math.max(Math.random() * -50.0 - distSqFromOriginal * 0.01, 0.0));
       pull.add(
         createVector(
-          Math.random() * 20.02 - 10.01,
-          Math.random() * 20.02 - 10.01
-        )
+          Math.random() * 10.02 - 5.01,
+          Math.random() * 10.02 - 5.01
+        ).mult(this.randomVelAmount)
       );
       pull.mult(0.1);
       this.vel.add(pull);
-      this.vel.limit(30);
     }
     for (let c of this.connections) {
       if (c.hasPort(port)) {
