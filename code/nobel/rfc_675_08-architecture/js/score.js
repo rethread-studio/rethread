@@ -18,24 +18,24 @@ var score = [
     name: "intro",
     sections: [
       { name: "in", duration: 3 },
-      { name: "fade out", duration: 4 },
+      { name: "fade out", duration: 1.5 },
     ],
   },
   {
     name: "world",
     sections: [
-      { name: "SWEDEN", duration: 12 },
-      { name: "EU", duration: 12 },
-      { name: "AME", duration: 12 },
-      { name: "AS", duration: 12 },
-      { name: "fade out", duration: 4 },
+      { name: "SWEDEN", duration: 20 },
+      { name: "EU", duration: 25 },
+      { name: "AME", duration: 28 },
+      { name: "AS", duration: 30 },
+      { name: "fade out", duration: 2 },
     ],
   },
   {
     name: "intro",
     sections: [
-      { name: "transition", duration: 1 },
-      { name: "fade out", duration: 4 },
+      { name: "transition", duration: 2.5 },
+      { name: "fade out", duration: 2 },
     ],
   },
   {
@@ -68,7 +68,7 @@ var score = [
       },
       {
         name: "multinumbers",
-        duration: 20,
+        duration: 30,
         region: "none",
         textLimit: 2,
         startSpeed: 1.5,
@@ -82,14 +82,14 @@ var score = [
         startSpeed: 1.5,
         endSpeed: 0.4,
       },
-      { name: "fade out", duration: 30 },
+      { name: "fade out", duration: 10 },
     ],
   },
   {
     name: "intro",
     sections: [
       { name: "in", duration: 3 },
-      { name: "fade out", duration: 4 },
+      { name: "fade out", duration: 2 },
     ],
   },
   {
@@ -108,7 +108,7 @@ var score = [
     name: "intro",
     sections: [
       { name: "transition", duration: 3 },
-      { name: "fade out", duration: 4 },
+      { name: "fade out", duration: 1 },
     ],
   },
   {
@@ -152,7 +152,7 @@ var score = [
       { name: "network", duration: 0.5, pullBackCoeff: 1000.0 },
       { name: "packets", duration: 2.0, pullBackCoeff: 0.0 },
       { name: "network", duration: 0.5, pullBackCoeff: 1000.0 },
-      { name: "fade out", duration: 3 },
+      { name: "fade out", duration: 1.5 },
     ],
   },
   {

@@ -76,7 +76,7 @@ class DropsScene extends Scene {
       }
     }
 
-    if (this.playhead.state == "playing" || this.playhead.state == "fade in") {
+    if (this.playhead.state == "playing" || this.playhead.state == "fade in" || this.playhead.state == "fade out") {
       if (this.increaseBackgroundPhase) {
         let duration = this.directionDuration - this.textDuration;
         this.backgroundPhase += ((Math.PI * 2) / duration) * dt;
