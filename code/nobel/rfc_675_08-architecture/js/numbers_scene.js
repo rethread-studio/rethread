@@ -16,6 +16,7 @@ class NumbersScene extends Scene {
         lightness: 0,
         len: 0,
         activated: false,
+        individualDirection: "up",
       });
     }
     this.particleSpeed = 1.0;
@@ -27,6 +28,8 @@ class NumbersScene extends Scene {
     this.averageLen = 0;
     this.currentParticleDir = "down";
     this.nextParticleDir = "down";
+    this.nextIndividualParticleDirection = false;
+    this.individualParticleDirection = false;
     this.backgroundAlphaChangeSpeed = 0.9;
     this.backgroundAlphaChange = this.backgroundAlphaChangeSpeed;
     this.backgroundAlpha = 0;
@@ -176,6 +179,7 @@ class NumbersScene extends Scene {
               this.dropsDuration
             );
             this.nextParticleDir = "down";
+            this.nextIndividualParticleDirection = false;
           } else if (this.sections[this.playhead.sectionIndex].name == "in") {
             this.textObject.setNewIteration(
               ["INTO", "STOCKHOLM", "FROM"],
@@ -184,6 +188,7 @@ class NumbersScene extends Scene {
               this.dropsDuration
             );
             this.nextParticleDir = "right";
+            this.nextIndividualParticleDirection = false;
           } else if (this.sections[this.playhead.sectionIndex].name == "out") {
             this.textObject.setNewIteration(
               ["OUT OF", "STOCKHOLM", "TO"],
@@ -192,24 +197,27 @@ class NumbersScene extends Scene {
               this.dropsDuration
             );
             this.nextParticleDir = "left";
+            this.nextIndividualParticleDirection = false;
           } else if (this.sections[this.playhead.sectionIndex].name == "size") {
             this.textObject.setNewIteration(
-              ["COUNTING", "BITS AND", "PIECES"],
+              ["COUNTING", "ALL OF THE", "BITS AND", "PIECES"],
               this.regionRestriction,
               this.textDuration,
               this.dropsDuration
             );
             this.nextParticleDir = "up";
+            this.nextIndividualParticleDirection = false;
           } else if (
             this.sections[this.playhead.sectionIndex].name == "multinumbers"
           ) {
+            let dropsDuration = this.dropsDuration * 0.5;
             this.textObject.setNewIteration(
               ["COMMUNICATION", "IN", "NUMBERS"],
               this.regionRestriction,
               this.textDuration,
-              this.dropsDuration
+              dropsDuration
             );
-            this.nextParticleDir = "up";
+            this.nextIndividualParticleDirection = true;
           }
 
           // if (this.regionRestriction != "none") {
@@ -258,7 +266,11 @@ class NumbersScene extends Scene {
             this.pg.ellipse(p.x, p.y, p.size, p.size);
           }
 
-          switch (this.currentParticleDir) {
+          let particleDir = this.currentParticleDir;
+          if(this.individualParticleDirection) {
+            particleDir = p.individualDirection;
+          }
+          switch (particleDir) {
             case "right":
               p.x += p.vel * this.particleSpeed;
               if (p.x > canvasX * 1.1) p.activated = false;
@@ -351,6 +363,7 @@ class NumbersScene extends Scene {
           this.particleStartSpeed = this.particleNextStartSpeed;
           this.particleEndSpeed = this.particleNextEndSpeed;
           this.particleSpeed = this.particleStartSpeed;
+          this.individualParticleDirection = this.nextIndividualParticleDirection;
           this.playhead.dropsTimeCountdown = this.playhead.countdown;
           this.dropsDuration = this.playhead.countdown;
         }
@@ -413,7 +426,8 @@ class NumbersScene extends Scene {
       this.fadeOutDirectionCountdown -= dt;
       if (this.fadeOutDirectionCountdown <= 0.0) {
         this.fadeOutDirectionCountdown = this.fadeOutDirectionTime;
-        this.fadeOutDirectionTime = Math.random() * 0.7 + 0.2;
+        let directionSpeed = Math.pow((1.0 / this.particleSpeed), 2.0) * 0.2;
+        this.fadeOutDirectionTime = Math.random() * directionSpeed + directionSpeed*0.4;
         this.currentParticleDir = this.nextParticleDir;
         const dirs = ["down", "right", "up", "left"];
         this.nextParticleDir = dirs[Math.floor(Math.random() * dirs.length)];
@@ -464,7 +478,18 @@ class NumbersScene extends Scene {
       let hueOffset = (1.0 - Math.pow(1.0 - Math.min(metrics.rollingTotalLen / 9000000.0, 1.0), 3.0)) * 30;
       let lightness = 1.0 - Math.pow(1.0 - Math.min(len/30000, 1.0), 3.0);
       let x, y;
-      switch (this.currentParticleDir) {
+      let pa = this.particles[this.particleIndex];
+      this.particleIndex += 1;
+      if (this.particleIndex >= this.particles.length) {
+        this.particleIndex = 0;
+      }
+      let dir = this.currentParticleDir;
+      if(this.individualParticleDirection) {
+        let dirs = ["up", "left", "right", "down"];
+        pa.individualDirection = dirs[Math.floor(Math.random() * dirs.length)];
+        dir = pa.individualDirection;
+      }
+      switch (dir) {
         case "right":
           x = -10;
           y = Math.random() * canvasY;
@@ -482,11 +507,7 @@ class NumbersScene extends Scene {
           x = Math.random() * canvasX;
           break;
       }
-      let pa = this.particles[this.particleIndex];
-      this.particleIndex += 1;
-      if (this.particleIndex >= this.particles.length) {
-        this.particleIndex = 0;
-      }
+      
       pa.x = x;
       pa.y = y;
       pa.vel = (Math.random() * 10 + 5) * subsampling * 1.0;
@@ -499,6 +520,7 @@ class NumbersScene extends Scene {
       pa.saturation = 100;
       pa.lightness = lightness * 70 + 10;
       pa.activated = true;
+      
       // particles.push({
       //   x: x,
       //   y: y,

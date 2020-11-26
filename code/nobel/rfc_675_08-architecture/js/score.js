@@ -41,15 +41,13 @@ var score = [
   {
     name: "numbers",
     sections: [
-      { name: "all", duration: 10, region: "Sweden", speed: 0.5 },
-      { name: "all", duration: 13, region: "Europe", speed: 0.8 },
-      { name: "all", duration: 18, region: "The World", speed: 1.1 },
       {
         name: "in",
-        duration: 14,
+        duration: 18,
         region: "The World",
         textLimit: 8,
-        speed: 1.0,
+        startSpeed: 0.9,
+        endSpeed: 1.2,
       },
       {
         name: "out",
@@ -57,6 +55,8 @@ var score = [
         region: "The World",
         textLimit: 4,
         speed: 1.5,
+        startSpeed: 1.4,
+        endSpeed: 1.7,
       },
       {
         name: "size",
@@ -64,11 +64,11 @@ var score = [
         startTextLimit: 4,
         endTextLimit: 2.5,
         startSpeed: 0.4,
-        endSpeed: 1.5,
+        endSpeed: 2.0,
       },
       {
         name: "multinumbers",
-        duration: 15,
+        duration: 20,
         region: "none",
         textLimit: 2,
         startSpeed: 1.5,
@@ -78,11 +78,11 @@ var score = [
         name: "pre fade out",
         startTextLimit: 2,
         endTextLimit: 9,
-        duration: 3,
+        duration: 10,
         startSpeed: 1.5,
         endSpeed: 0.4,
       },
-      { name: "fade out", duration: 20 },
+      { name: "fade out", duration: 30 },
     ],
   },
   {
@@ -96,10 +96,10 @@ var score = [
     name: "drops",
     sections: [
       { name: "in", duration: 12, region: "Sweden" },
-      { name: "out", duration: 12, region: "Sweden" },
       { name: "in", duration: 16, region: "Europe" },
-      { name: "out", duration: 16, region: "Europe" },
       { name: "in", duration: 20, region: "none" },
+      { name: "out", duration: 12, region: "Sweden" },
+      { name: "out", duration: 16, region: "Europe" },
       { name: "out", duration: 20, region: "none" },
       { name: "fade out", duration: 4 },
     ],
