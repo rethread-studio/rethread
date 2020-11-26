@@ -90,7 +90,7 @@ class DropsScene extends Scene {
       // background("rgba(1.0,1.0,1.0,0.00)");
       let curve = Math.pow(Math.cos(this.backgroundPhase) * 0.5 + 0.5, 6.0);
       this.backgroundAlpha = curve * 20.0;
-      let backgroundHue = Math.min(
+      let backgroundHue = this.baseHueColor + Math.min(
         (metrics.rollingTotalLen / 1000000.0 - 2.0) * 3.0,
         9.0
       );
@@ -225,7 +225,7 @@ class DropsScene extends Scene {
   addDroplet(len, baseHue, out) {
     let hue = baseHue + ((len / 30000) % 10);
     if (len > 400000) {
-      hue = (hue + 48.0) % 100;
+      hue = (hue + 54.0) % 100;
     }
     let maxSize = (1.0 - Math.pow(1.0 - Math.min(len / 200000, 1.0), 3.0)) * 200.0 * subsampling;
 
@@ -238,7 +238,7 @@ class DropsScene extends Scene {
       lightness = 40 + smallWeight * 10.0;
       hue = 1.0 + smallWeight * 20;
       if(hue > 10) {
-        hue += 40;
+        hue += 43;
       }
       maxSize = 3 * subsampling;
     }
@@ -263,11 +263,11 @@ class DropsScene extends Scene {
     if (direction == "in") {
       this.doOutPackets = false;
       this.displayText = ["MESSAGES", "COMING", "FROM"];
-      this.baseHueColor = 0;
+      this.baseHueColor = 2;
     } else if (direction == "out") {
       this.doOutPackets = true;
       this.displayText = ["MESSAGES", "TRAVELLING", "OUT INTO"];
-      this.baseHueColor = 0;
+      this.baseHueColor = -4;
     }
     // TODO: Make sure these timeouts are removed when disabling the scene
     setTimeout(this.hideText.bind(this), this.textDuration * 1000);
