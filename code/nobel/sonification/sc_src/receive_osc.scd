@@ -1,7 +1,10 @@
+
+f = File.new("osc_log.txt".resolveRelative, "w");
 o = OSCFunc({ arg msg, time, addr, recvPort;
 	var len = msg[1].asInteger, out = msg[2] == 1, country = msg[3], continent = msg[4];
 	// [msg, time, addr, recvPort].postln;
-	// ("len: " + len + "out: " + out + " country: " + country + "continent: " + continent).postln;
+	("len: " + len + "out: " + out + " country: " + country + "continent: " + continent).postln;
+	// f.write("len: " + len + "out: " + out + " country: " + country + "continent: " + continent + "\n");
 	Synth(\tick2,
 		[
 			\freq, rrand(10000, 11000),

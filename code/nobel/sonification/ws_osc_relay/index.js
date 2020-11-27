@@ -26,8 +26,8 @@ function connectToServer() {
     client.on('message', (data) => {
         let internalData = JSON.parse(data);
         // console.log(internalData);
-        let continent;
-        let country;
+        let continent = "";
+        let country = "";
         if (
           internalData.remote_location.country != "Sweden" &&
           internalData.remote_location.country != undefined
@@ -62,7 +62,7 @@ function heartbeat(ws) {
   // Delay should be equal to the interval at which your server
   // sends out pings plus a conservative assumption of the latency.
   ws.pingTimeout = setTimeout(() => {
-    ws.terminate();
+    ws.close();
   }, 30000 + 1000);
 }
 
