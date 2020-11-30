@@ -10,10 +10,13 @@ o = OSCFunc({ arg msg, time, addr, recvPort;
 			\freq, rrand(10000, 11000),
 			\rq, exprand(0.001, 0.1),
 			\out, 0,
-			\amp, exprand(0.015, 0.05),
+			\amp, exprand(0.015, 0.05) * 0.2,
 			\atk, 0.001,
 			\rel, 0.01, //0.01,
 			\pan, rrand(-0.5, 0.5),
 		]
 	);
 }, '/data');
+
+
+o = OSCFunc({ arg msg, time, addr, recvPort; msg.postln; }, '/data');

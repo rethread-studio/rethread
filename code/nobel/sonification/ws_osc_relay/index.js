@@ -9,11 +9,15 @@ const options = cli.parse({
 
 let client;
 
+var doLog = true;
+
+var allCountries = new Set();
+var allContinents = new Set();
+
 function connectToServer() {
     client = new WebSocket('ws://nobel.durieux.me:1189');
     client.on('open', () => {
-        console.log("Connected to server");
-        // client.send("Vote receiver connected");
+        console.log("Connected to server via websocket");
         heartbeat(client);
     });
 
@@ -43,6 +47,18 @@ function connectToServer() {
         args.push({ type: "i", value: internalData.out })
         args.push({ type: "s", value: country })
         args.push({ type: "s", value: continent })
+
+        if(!allCountries.has(country)) {
+          console.log(country);
+          allCountries.add(country);
+        }
+        if(!allContinents.has(continent)) {
+          console.log(continent);
+          allContinents.add(continent);
+        }
+        if(doLog) {
+          // console.log(args);
+        }
         udpPort.send(
             {
               address: "/data",
@@ -70,11 +86,17 @@ connectToServer();
 
 // OSC
 
-const serverPort = 50000 + Math.round(Math.random() * 1000);
+const serverPort = 51000;
 let udpPort = new osc.UDPPort({
 localAddress: "0.0.0.0",
 localPort: serverPort,
 metadata: true,
 });
-udpPort.on("ready", () => {});
+udpPort.on("ready", () => {
+  console.log("Connected via OSC")
+});
 udpPort.open();
+udpPort.on("close", () => {
+  doLog = false;
+  console.log("OSC connection closed")
+})

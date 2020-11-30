@@ -1,0 +1,45 @@
+*** Welcome to SuperCollider 3.11.2. *** For help type ctrl-c ctrl-h (Emacs) or :SChelp (vim) or ctrl-U (sced/gedit).
+[New Thread 0x7fff52ffd700 (LWP 148540)]
+[New Thread 0x7fff7cff9700 (LWP 148541)]
+[Detaching after fork from child process 148542]
+qt5ct: palette support is disabled
+[New Thread 0x7fff53fff700 (LWP 148543)]
+Booting server 'localhost' on address 127.0.0.1:57110.
+sc3> Faust: supercollider.cpp: sc_api_version = 3
+Faust: FaustGreyholeRaw numControls=7
+Faust: supercollider.cpp: sc_api_version = 3
+Faust: FaustJPverbRaw numControls=11
+no more csLADSPA plugins
+Found 435 LADSPA plugins
+JackDriver: client name is 'SuperCollider'
+SC_AudioDriver: sample rate = 48000.000000, driver's block size = 1024
+JackDriver: connected  system:capture_1 to SuperCollider:in_1
+JackDriver: connected  system:capture_2 to SuperCollider:in_2
+JackDriver: connected  SuperCollider:out_1 to system:playback_1
+JackDriver: connected  SuperCollider:out_2 to system:playback_2
+SuperCollider 3 server ready.
+JackDriver: max output latency 42.7 ms
+Requested notification messages from server 'localhost'
+localhost: server process's maxLogins (1) matches with my options.
+localhost: keeping clientID (0) as confirmed by server process.
+Shared memory server interface initialized
+[Thread 0x7fffbf7fe700 (LWP 148276) exited]
+[Thread 0x7fffa17fa700 (LWP 148290) exited]
+[Thread 0x7fffa27fc700 (LWP 148288) exited]
+
+Thread 2 "sclang" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fffe45bc700 (LWP 148267)]
+0x00005555556f3253 in getsym ()
+(gdb) where
+#0  0x00005555556f3253 in getsym ()
+#1  0x000055555566e412 in ConvertOSCMessage(int, char*) ()
+#2  0x000055555566eb0d in ProcessOSCPacket(OSC_Packet*, int, double) ()
+#3  0x0000555555755b58 in SC_UdpInPort::handleReceivedUDP(boost::system::error_code const&, unsigned long) ()
+#4  0x0000555555759d7f in boost::asio::detail::reactive_socket_recvfrom_op<boost::asio::mutable_buffers_1, boost::asio::ip::basic_endpoint<boost::asio::ip::udp>, boost::_bi::bind_t<void, boost::_mfi::mf2<void, SC_UdpInPort, boost::system::error_code const&, unsigned long>, boost::_bi::list3<boost::_bi::value<SC_UdpInPort*>, boost::arg<1> (*)(), boost::arg<2> (*)()> > >::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) ()
+#5  0x00005555555f2287 in boost::asio::detail::epoll_reactor::descriptor_state::do_complete(void*, boost::asio::detail::scheduler_operation*, boost::system::error_code const&, unsigned long) ()
+#6  0x00005555555f2d6d in boost::asio::detail::scheduler::run(boost::system::error_code&) ()
+#7  0x0000555555756004 in asioFunction() ()
+#8  0x00007ffff6528d84 in  () at /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#9  0x00007ffff7f71609 in start_thread (arg=<optimized out>) at pthread_create.c:477
+#10 0x00007ffff6218293 in clone () at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95
+(gdb) 
