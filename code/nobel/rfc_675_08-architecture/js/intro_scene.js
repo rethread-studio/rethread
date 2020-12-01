@@ -370,8 +370,8 @@ class IntroScene extends Scene {
                 this.shaderGraphics.translate(0, 0);
             } else {
                 this.shaderGraphics.translate(this.blobOffset.x * this.blobSize, this.blobOffset.y * this.blobSize);
-                this.blobOffset.x = subsampling * 1.18 * (Math.pow(noise(this.playhead.countdown * 14.0) - 0.5, 3.0));
-                this.blobOffset.y = subsampling * 0.14 * (noise(this.playhead.countdown * 1.0) - 0.5);
+                this.blobOffset.x = subsampling * 1.38 * (Math.pow(noise(this.playhead.countdown * 16.0) - 0.5, 3.0));
+                this.blobOffset.y = subsampling * 0.2 * (noise(this.playhead.countdown * 1.0) - 0.5);
             }
             // Rotate our geometry on the X and Y axes
             this.shaderGraphics.rotateX(0.01);
