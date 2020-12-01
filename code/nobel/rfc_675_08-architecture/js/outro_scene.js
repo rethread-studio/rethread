@@ -1,3 +1,10 @@
+function smootherstep(edge0, edge1, x) {
+    // Scale, and clamp x to 0..1 range
+    x = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+    // Evaluate polynomial
+    return x * x * x * (x * (x * 6 - 15) + 10);
+  }
+
 class OutroScene extends Scene {
     constructor() {
         console.log("outro")
@@ -259,18 +266,19 @@ class OutroScene extends Scene {
             progression = Math.cos(progression * Math.PI) * 0.5 + 0.5; // Smoother motion
 
             // lerp between current progression and previous one
+            let sizeProgression = smootherstep(0.0, 1.0, progression);
             this.blobSize =
-                this.standardBlobSize * (1.0 - progression) +
-                canvasX * 1.3 * progression;
+                this.standardBlobSize * (1.0 - sizeProgression) +
+                canvasX * 1.1 * sizeProgression;
 
             this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
             this.backgroundAlpha = 1.0;
             this.shaderAlpha = 1.0;
 
-            if (progression > 0.8) {
+            if (progression > 0.7) {
                 // When the blob covers the screen we want it to start fading out with the new scene in the background
                 this.backgroundAlpha = 0.0;
-                this.shaderAlpha = 1.0 - Math.pow((progression - 0.8) / 0.2, 4.0);
+                this.shaderAlpha = 1.0 - Math.pow((progression - 0.7) / 0.3, 4.0);
             }
             // Will pass from the "fade in" state by play() being called externally
         } else if (
@@ -300,17 +308,19 @@ class OutroScene extends Scene {
                 1.0 - this.playhead.countdown / this.playhead.totalDuration;
             progression = 1.0 - (Math.cos(progression * Math.PI) * 0.5 + 0.5); // Smoother motion
             // lerp between current progression and previous one
+            // let sizeProgression = generalSmoothStep(3, )
+            let sizeProgression = smootherstep(0.0, 1.0, progression);
             this.blobSize =
-                this.standardBlobSize * (1.0 - progression) +
-                canvasX * 1.3 * progression;
+                this.standardBlobSize * (1.0 - sizeProgression) +
+                canvasX * 1.1 * sizeProgression;
 
             this.sceneAlpha = Math.max(1.0 - Math.pow(progression, 0.5) * 3.0, 0.0);
             this.backgroundAlpha = 1.0;
             this.shaderAlpha = 1.0;
-            if (progression > 0.8) {
+            if (progression > 0.6) {
                 // When the blob covers the screen we want it to start fading out with the new scene in the background
                 this.backgroundAlpha = 0.0;
-                this.shaderAlpha = 1.0 - Math.pow((progression - 0.8) / 0.2, 4.0);
+                this.shaderAlpha = 1.0 - Math.pow((progression - 0.6) / 0.4, 4.0);
             }
         }
         if (
