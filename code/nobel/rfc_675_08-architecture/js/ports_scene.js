@@ -485,10 +485,10 @@ class PortsScene extends Scene {
           } else {
             this.vel = canvasY / (0.25);
           }
-          if(Math.random() > 0.95) {
-            this.vel = canvasY / 2.0;
+          if(Math.random() > 0.9) {
+            this.vel = canvasY / (Math.random() + 1.0);
           }
-          if(Math.random() > 0.99) {
+          if(Math.random() > 0.7) {
             this.fastChangeSpeed = !this.fastChangeSpeed;
           }
         }
