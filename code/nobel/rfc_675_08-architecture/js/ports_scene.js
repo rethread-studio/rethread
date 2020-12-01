@@ -246,6 +246,7 @@ class PortsScene extends Scene {
       false,
       7
     );
+    this.originNode.isOrigin = true;
 
     let leftTopNode1 = new Node(
       "",
@@ -484,10 +485,10 @@ class PortsScene extends Scene {
           } else {
             this.vel = canvasY / (0.25);
           }
-          if(Math.random() > 0.95) {
-            this.vel = canvasY / 2.0;
+          if(Math.random() > 0.9) {
+            this.vel = canvasY / (Math.random() + 1.0);
           }
-          if(Math.random() > 0.99) {
+          if(Math.random() > 0.7) {
             this.fastChangeSpeed = !this.fastChangeSpeed;
           }
         }
@@ -652,6 +653,7 @@ class Node {
     this.offsetPos = createVector(0, 0);
     this.vel = createVector(0, 0);
     this.isWindow = isWindow;
+    this.isOrigin = false;
     this.windowIndex = windowIndex;
     this.activity = 0.0;
     this.falloff = 0.45;
@@ -672,7 +674,7 @@ class Node {
     if (this.activity < 0) {
       this.activity = 0;
     }
-    if (this.isWindow == false) {
+    if (this.isWindow == false && this.isOrigin == false) {
       let pullBack = this.offsetPos
         .copy()
         .mult(-1)
