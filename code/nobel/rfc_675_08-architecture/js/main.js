@@ -295,6 +295,9 @@ function draw() {
         playhead.fadingInScene.reset(
           playhead.score[playhead.scoreIndex].sections
         );
+        if("vibrating" in playhead.score[playhead.scoreIndex]) {
+          playhead.fadingInScene.vibrating = playhead.score[playhead.scoreIndex].vibrating;
+        }
         playhead.fadingInScene.fadeIn(playhead.countdown);
       } else {
         playhead.fadingInScene = undefined;

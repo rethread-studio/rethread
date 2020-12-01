@@ -87,9 +87,10 @@ var score = [
   {
     name: "intro",
     sections: [
-      { name: "in", duration: 3 },
+      { name: "intro", duration: 3 },
       { name: "fade out", duration: 2 },
     ],
+    vibrating: true,
   },
   {
     name: "drops",
@@ -166,7 +167,7 @@ var score = [
       { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 1000.0 },
       { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
       { name: "network", duration: 3.2, pullBackCoeff: 0.0, randomVelAmount: 3000.0 },
-      { name: "fade out", duration: 1.5 },
+      { name: "fade out", duration: 2.0 },
     ],
   },
   {
