@@ -135,6 +135,7 @@ class IntroScene extends Scene {
             state: "before start", // "playing", "fade in", "end of movement"
         };
         this.sections = [];
+        this.vibrating = false;
 
         this.myFont;
 
@@ -276,6 +277,8 @@ class IntroScene extends Scene {
             this.vertexShader,
             this.backgroundFragShader
         );
+
+        this.blobOffset = createVector(0, 0);
     }
     draw(dt) {
         // Update state and draw. dt is the time since last frame in seconds.
@@ -362,7 +365,14 @@ class IntroScene extends Scene {
             this.backgroundShader.setUniform("uFrameCount", frameCount);
             this.backgroundShader.setUniform("uNoiseTexture", this.noise);
 
-            this.shaderGraphics.translate(0, 0);
+            this.shaderGraphics.push();
+            if(this.vibrating == false) {
+                this.shaderGraphics.translate(0, 0);
+            } else {
+                this.shaderGraphics.translate(this.blobOffset.x * this.blobSize, this.blobOffset.y * this.blobSize);
+                this.blobOffset.x = subsampling * 1.38 * (Math.pow(noise(this.playhead.countdown * 16.0) - 0.5, 3.0));
+                this.blobOffset.y = subsampling * 0.2 * (noise(this.playhead.countdown * 1.0) - 0.5);
+            }
             // Rotate our geometry on the X and Y axes
             this.shaderGraphics.rotateX(0.01);
             this.shaderGraphics.rotateY(0.005);
@@ -370,6 +380,7 @@ class IntroScene extends Scene {
             // Draw some geometry to the screen
             // We're going to tessellate the sphere a bit so we have some more geometry to work with
             this.shaderGraphics.sphere(this.blobSize, 200, 100);
+            this.shaderGraphics.pop();
 
             // Draw the shader to main canvas
             drawingContext.globalAlpha = this.shaderAlpha;
@@ -392,6 +403,7 @@ class IntroScene extends Scene {
             countdown: 0,
             state: "before start", // "playing", "fade in", "end of movement"
         };
+        this.vibrating = false;
 
         console.log("Reset intro");
     }

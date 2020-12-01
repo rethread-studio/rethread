@@ -210,9 +210,12 @@ class NumbersScene extends Scene {
           } else if (
             this.sections[this.playhead.sectionIndex].name == "multinumbers"
           ) {
+            this.textDuration = 1.0;
+            this.dropsDuration = this.directionDuration - this.textDuration;
             let dropsDuration = this.dropsDuration * 0.5;
             this.textObject.setNewIteration(
-              ["COMMUNICATION", "IN", "NUMBERS"],
+              // ["COMMUNICATION", "IN", "NUMBERS"],
+              [""],
               this.regionRestriction,
               this.textDuration,
               dropsDuration
