@@ -125,9 +125,9 @@ class WorldScene extends Scene {
                 b: 179
             },
             white: {
-                r: 100,
-                g: 100,
-                b: 100
+                r: 255,
+                g: 255,
+                b: 255
             }
         }
 
@@ -237,6 +237,7 @@ class WorldScene extends Scene {
         // to load assets such as fonts and shaders.
     }
     setup() {
+
         // This function is called from the p5 setup function. Use it to init
         // all the state that requires p5 to be loaded (such as instantiating
         // p5 types like p5.Vector or createGraphics).
@@ -247,6 +248,7 @@ class WorldScene extends Scene {
         this.liveSign = new LiveSign("", antonFont, false)
     }
     draw(dt) {
+        colorMode(RGB, 255, 255, 255, 100);
         // Update state and draw. dt is the time since last frame in seconds.
         // Set canvas background
         background("rgba(0,0,0,1)");
@@ -276,7 +278,7 @@ class WorldScene extends Scene {
                         ].duration;
                     }
                     //CHECK IF THE SECTION HAS CHANGED
-                    if(this.sections[this.playhead.sectionIndex].name == "fade out") {
+                    if (this.sections[this.playhead.sectionIndex].name == "fade out") {
                         this.fadeOut(this.sections[this.playhead.sectionIndex].duration);
                     } else {
                         const currentSection = this.sections[this.playhead.sectionIndex].name;
@@ -289,7 +291,7 @@ class WorldScene extends Scene {
                         }
                     }
                 }
-                
+
 
                 this.drawDecorations();
                 //UPDATE COUNTRY MANAGER
@@ -317,7 +319,7 @@ class WorldScene extends Scene {
 
         for (let i = 0; i < 7; i++) {
             const { r, g, b } = this.colorPallete.white;
-            stroke(r, g, b);
+            stroke(r, g, b, 100);
             strokeWeight(1 * subsampling);
             const x = this.crossPoints[0];
             const y = ((i * 80) + 20) * subsampling;
@@ -435,7 +437,8 @@ class DashBoard {
     writeTittle() {
         noStroke();
         const { r, g, b } = this.colorPallete.white;
-        fill(r, g, b);
+        console.log(r, g, b)
+        fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.tittle);
         textAlign(CENTER, CENTER);
@@ -458,7 +461,7 @@ class DashBoard {
     //Write the size
     writeSize() {
         const { r, g, b } = this.colorPallete.red;
-        fill(r, g, b);
+        fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
         textAlign(LEFT);
@@ -1057,7 +1060,7 @@ class CountryManager {
             const object = this.toRender[i];
 
             let { r, g, b } = this.colorPallete.black;
-            fill(r, g, b);
+            fill(r, g, b, 100);
             textFont('sans');
             textSize(this.fontSize.countries);
             textAlign(RIGHT, TOP);
@@ -1293,7 +1296,7 @@ class Country {
         if (this.state == "MOVE") {
             this.theta = this.velocity.heading() + PI / 2;
             let { r, g, b } = this.colorPallete.red;
-            fill(r, g, b);
+            fill(r, g, b, 100);
             noStroke()
             push();
             translate(this.position.x, this.position.y);
