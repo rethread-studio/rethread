@@ -356,7 +356,7 @@ function draw() {
     metrics.rollingNumPackets += d.value;
   }
 
-  if(Math.random() > 0.99) {
+  if (Math.random() > 0.99) {
     glitchProb = [0.9, 0.97, 0.96, 0.98, 0.99, 0.995, 0.999, 1.0][Math.floor(Math.random() * 8)];
   }
 

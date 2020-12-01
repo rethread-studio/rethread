@@ -100,9 +100,9 @@ class WorldScene extends Scene {
                 b: 183,
             },
             red: {
-                r: 201,
-                g: 44,
-                b: 43
+                r: 255,
+                g: 47,
+                b: 46
             },
             orange: {
                 r: 225,
@@ -125,9 +125,14 @@ class WorldScene extends Scene {
                 b: 179
             },
             white: {
-                r: 100,
-                g: 100,
-                b: 100
+                r: 255,
+                g: 255,
+                b: 255
+            },
+            brightGreen: {
+                r: 197,
+                g: 255,
+                b: 0,
             }
         }
 
@@ -204,9 +209,9 @@ class WorldScene extends Scene {
         }
 
         this.fontSize = {
-            tittle: 28 * subsampling,
-            number: 10 * subsampling,
-            countries: 12 * subsampling,
+            tittle: 36 * subsampling,
+            number: 16 * subsampling,
+            countries: 18 * subsampling,
         }
 
 
@@ -237,6 +242,7 @@ class WorldScene extends Scene {
         // to load assets such as fonts and shaders.
     }
     setup() {
+
         // This function is called from the p5 setup function. Use it to init
         // all the state that requires p5 to be loaded (such as instantiating
         // p5 types like p5.Vector or createGraphics).
@@ -247,9 +253,11 @@ class WorldScene extends Scene {
         this.liveSign = new LiveSign("", antonFont, false)
     }
     draw(dt) {
+        colorMode(RGB, 255, 255, 255, 100);
         // Update state and draw. dt is the time since last frame in seconds.
         // Set canvas background
-        background("rgba(0,0,0,1)");
+
+        background("rgba(0,0,0,.1)");
 
         switch (this.playhead.state) {
 
@@ -276,7 +284,7 @@ class WorldScene extends Scene {
                         ].duration;
                     }
                     //CHECK IF THE SECTION HAS CHANGED
-                    if(this.sections[this.playhead.sectionIndex].name == "fade out") {
+                    if (this.sections[this.playhead.sectionIndex].name == "fade out") {
                         this.fadeOut(this.sections[this.playhead.sectionIndex].duration);
                     } else {
                         const currentSection = this.sections[this.playhead.sectionIndex].name;
@@ -289,7 +297,7 @@ class WorldScene extends Scene {
                         }
                     }
                 }
-                
+
 
                 this.drawDecorations();
                 //UPDATE COUNTRY MANAGER
@@ -317,7 +325,7 @@ class WorldScene extends Scene {
 
         for (let i = 0; i < 7; i++) {
             const { r, g, b } = this.colorPallete.white;
-            stroke(r, g, b);
+            stroke(r, g, b, 100);
             strokeWeight(1 * subsampling);
             const x = this.crossPoints[0];
             const y = ((i * 80) + 20) * subsampling;
@@ -435,30 +443,30 @@ class DashBoard {
     writeTittle() {
         noStroke();
         const { r, g, b } = this.colorPallete.white;
-        fill(r, g, b);
+        fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.tittle);
         textAlign(CENTER, CENTER);
         textFont(this.font);
-        text("STOCKHOLM", canvasX / 2, 129 * subsampling);
+        text("TO STOCKHOLM", canvasX / 2, 129 * subsampling);
     }
 
     //Write the number of packages
     writePackages() {
-        const { r, g, b } = this.colorPallete.red;
+        const { r, g, b } = this.colorPallete.white;
         fill(r, g, b, 100);
         textFont('sans');
-        textSize(this.fontSize.number);
-        textAlign(LEFT);
+        textSize(this.fontSize.tittle);
+        textAlign(CENTER);
         textFont(this.font);
         this.counter = this.counter > this.packages ? this.packages : this.counter;
-        text(this.counter, this.positions.row.r3, this.positions.col.c2 + this.positions.padding.top);
+        if (this.counter != 0) text(this.counter, canvasX / 2, this.positions.col.c3 + this.positions.padding.top + 3 * subsampling);
     }
 
     //Write the size
     writeSize() {
-        const { r, g, b } = this.colorPallete.red;
-        fill(r, g, b);
+        const { r, g, b } = this.colorPallete.white;
+        fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
         textAlign(LEFT);
@@ -469,15 +477,15 @@ class DashBoard {
     //Write the size
     writeLocation() {
         noStroke();
-        const { r, g, b } = this.colorPallete.red;
+        const { r, g, b } = this.colorPallete.white;
         fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
-        textAlign(RIGHT);
+        textAlign(CENTER);
         textFont(this.font);
-        text("FROM", this.positions.row.r1, this.positions.col.c2 + this.positions.padding.top);
-        // circle(this.positions.row.r1 - 31 * subsampling, this.positions.col.c2 + this.positions.padding.top, 7 * subsampling);
-        text(this.focuLocation, this.positions.row.r1, this.positions.col.c2 + this.positions.padding.top * 2 + 4 * subsampling);
+        text("FROM", canvasX / 2, this.positions.col.c1 + this.positions.padding.top - 4 * subsampling);
+        // circle(canvasX/2 - 31 * subsampling, this.positions.col.c1 + this.positions.padding.top, 7 * subsampling);
+        text(this.focuLocation, canvasX / 2, this.positions.col.c1 + this.positions.padding.top * 2 + 4 * subsampling);
     }
 
     //DRAW THE TICK
@@ -532,8 +540,7 @@ class CountryManager {
                         x: 54 * subsampling,
                         y: this.colPosPositions.col.c2 + 10 * subsampling
                     }
-                    ,
-                    this.endPoint
+
                 ],
                 init: {
                     x: 54 * subsampling,
@@ -554,8 +561,7 @@ class CountryManager {
                     {
                         x: 80 * subsampling,
                         y: this.colPosPositions.col.c2 + 10 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: 80 * subsampling,
@@ -576,8 +582,7 @@ class CountryManager {
                     {
                         x: 140 * subsampling,
                         y: this.colPosPositions.col.c2 + 10 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: 140 * subsampling,
@@ -598,8 +603,7 @@ class CountryManager {
                     {
                         x: 160 * subsampling,
                         y: this.colPosPositions.col.c2 + 10 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: 160 * subsampling,
@@ -620,8 +624,7 @@ class CountryManager {
                     {
                         x: 54 * subsampling,
                         y: this.colPosPositions.col.c2 + 10 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: 54 * subsampling,
@@ -642,8 +645,7 @@ class CountryManager {
                     {
                         x: 80 * subsampling,
                         y: this.colPosPositions.col.c2 + 10 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: 80 * subsampling,
@@ -664,8 +666,7 @@ class CountryManager {
                     {
                         x: 140 * subsampling,
                         y: this.colPosPositions.col.c2 + 10 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: 140 * subsampling,
@@ -686,8 +687,7 @@ class CountryManager {
                     {
                         x: 160 * subsampling,
                         y: this.colPosPositions.col.c2 + 10 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: 160 * subsampling,
@@ -712,8 +712,7 @@ class CountryManager {
                     {
                         x: this.colPosPositions.row.r3 - 20 * subsampling,
                         y: this.colPosPositions.col.c2 + 8 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: this.colPosPositions.row.r3 + 15 * subsampling,
@@ -738,8 +737,7 @@ class CountryManager {
                     {
                         x: this.colPosPositions.row.r2 - 20 * subsampling,
                         y: this.colPosPositions.col.c2 + 8 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: this.colPosPositions.row.r1,
@@ -764,8 +762,7 @@ class CountryManager {
                     {
                         x: this.colPosPositions.row.r2 - 20 * subsampling,
                         y: this.colPosPositions.col.c2 + 8 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: this.colPosPositions.row.r1,
@@ -790,8 +787,7 @@ class CountryManager {
                     {
                         x: this.colPosPositions.row.r2 - 20 * subsampling,
                         y: this.colPosPositions.col.c2 + 8 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: this.colPosPositions.row.r1,
@@ -817,8 +813,7 @@ class CountryManager {
                     {
                         x: this.colPosPositions.row.r3 - 20 * subsampling,
                         y: this.colPosPositions.col.c2 + 12 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: this.colPosPositions.row.r3 + (15 * subsampling) - this.offsetX,
@@ -843,8 +838,7 @@ class CountryManager {
                     {
                         x: this.colPosPositions.row.r3 - 20 * subsampling,
                         y: this.colPosPositions.col.c2 + 15 * subsampling
-                    },
-                    this.endPoint
+                    }
                 ],
                 init: {
                     x: this.colPosPositions.row.r3 + (15 * subsampling) - this.offsetX,
@@ -889,8 +883,26 @@ class CountryManager {
 
             if (country != undefined && country.country.getPackagesNumb() % country.country.getBigPacket() == 0) {
                 const { x, y } = country.pos.init;
-                const pack = new Package(x, y, this.colorPallete, country.country, country.path, name)
+                const countryPos = country.country.getPosition()
+                const closeToTarget = false;//countryPos.y - country.pos.end.y < 8;
+                // if (!closeToTarget) {
+
+
+                const newPath = new Path();
+                const randomX = random(canvasX)
+
+                const goalPoint = closeToTarget ? { x: 500, y: 129 } : { x: randomX - 10, y: country.pos.end.y };
+
+                newPath.addPoint(randomX, y - 10);
+                newPath.addPoint(goalPoint.x, goalPoint.y);
+
+                const goalPos = createVector(goalPoint.x, goalPoint.y)
+
+                const pInit = closeToTarget ? countryPos.x : randomX;
+
+                const pack = new Package(pInit, countryPos.y, this.colorPallete, country.country, newPath, name, goalPos, closeToTarget)
                 this.packages.push(pack)
+                // }
             }
 
         }
@@ -919,13 +931,25 @@ class CountryManager {
     }
     //draw a line connecting all country points
     drawMesh() {
-        stroke('rgba(255,255,255,0.5)');
+        // stroke('rgba(255,255,255,0.5)');
+        noStroke();
+        let { r, g, b } = this.colorPallete.red;
+        let { r1, g1, b1 } = this.colorPallete.brightGreen;
+        const c1 = color(this.colorPallete.red.r, this.colorPallete.red.g, this.colorPallete.red.b, 90);
+        const c2 = color(this.colorPallete.brightGreen.r, this.colorPallete.brightGreen.g, this.colorPallete.brightGreen.b, .5);
+
         strokeWeight(2 * subsampling);
         for (let i = 0; i < this.toRender.length; i++) {
             const obj1 = this.toRender[i].country.getPosition();
+            const initPoint = this.toRender[i].country.refPoint.init;
             // const obj2 = this.toRender[i].country.goalPos;
             // line(obj1.x, 0, obj1.x, canvasY);
-            line(0, obj1.y, canvasX, obj1.y);
+
+            let inter = map(obj1.y, 129 * subsampling, initPoint.y, 0, 1);
+            let c = lerpColor(c1, c2, inter);
+            fill(c);
+            rect(0, 129 * subsampling, canvasX, obj1.y - (129 * subsampling))
+            // line(0, obj1.y, canvasX, obj1.y);
             // line(obj1.x, obj1.y, obj2.x, obj2.y);
 
             // for (let j = i; j < this.toRender.length; j++) {
@@ -933,14 +957,14 @@ class CountryManager {
             //     line(obj1.x, obj1.y, obj2.x, obj2.y);
             // }
         }
-        noStroke();
+
 
     }
 
     //render objecte
     renderObject(object) {
 
-        let { r, g, b } = this.colorPallete.green;
+        let { r, g, b } = this.colorPallete.brightGreen;
         fill(r, g, b, object.country.textAlpha);
         textFont('sans');
         textSize(this.fontSize.countries);
@@ -1057,7 +1081,7 @@ class CountryManager {
             const object = this.toRender[i];
 
             let { r, g, b } = this.colorPallete.black;
-            fill(r, g, b);
+            fill(r, g, b, 100);
             textFont('sans');
             textSize(this.fontSize.countries);
             textAlign(RIGHT, TOP);
@@ -1120,10 +1144,10 @@ class Country {
         this.countryName = name;
 
         this.r = 1.0; // Half the width of veihcle's back side
-        this.maxspeed = random(0.5, 1) * subsampling//random(0.0005, 0.5)//random(0.00001, 0.004); //
+        this.maxspeed = random(0.5, 2) * subsampling//random(0.0005, 0.5)//random(0.00001, 0.004); //
         this.maxforce = 0.1 * subsampling;
 
-        this.goalPos = createVector(goalPos.x, goalPos.y);;
+        this.goalPos = createVector(goalPos.x, goalPos.y);
 
         this.size = 5 * subsampling;
         this.state = "MOVE";
@@ -1292,13 +1316,14 @@ class Country {
         //DRAW COUNTRY
         if (this.state == "MOVE") {
             this.theta = this.velocity.heading() + PI / 2;
-            let { r, g, b } = this.colorPallete.red;
-            fill(r, g, b);
+            let { r, g, b } = this.colorPallete.black;
+            fill(r, g, b, 100);
             noStroke()
             push();
             translate(this.position.x, this.position.y);
             const size = this.beatType ? sin(Date.now() / this.beat) * this.size : cos(Date.now() / this.beat) * this.size
             const limitSize = 8 * subsampling;
+
             circle(0, 0, size < limitSize ? limitSize : size);
             // rotate(this.theta);
             // beginShape();
@@ -1314,20 +1339,22 @@ class Country {
 
 class Package {
 
-    constructor(x, y, colorPallete, country, path, name) {
+    constructor(x, y, colorPallete, country, path, name, goalPos, closeToTarget) {
         this.colorPallete = colorPallete;
         this.acceleration = createVector(0, 0);
-        this.velocity = createVector(2, 0);
+
+        this.velocity = closeToTarget ? createVector(3, 0) : createVector(0, 0);
+        this.initPos = createVector(x, y);
         this.position = createVector(x, y);
         this.countryName = name;
 
-        this.r = random(1, 8) * subsampling; // Half the width of veihcle's back side
-        this.maxspeed = random(2, 3) * subsampling; //
+        this.r = closeToTarget ? random(2, 5) * subsampling : random(2, 10) * subsampling; // Half the width of veihcle's back side
+        this.maxspeed = closeToTarget ? random(0.5, 5) * subsampling : random(1, 5) * subsampling; //
         this.maxforce = 0.1 * subsampling;
         this.country = country;
-        this.goalPos = country.getPosition();
+        this.goalPos = goalPos;
 
-        this.size = random(2, 5) * subsampling;
+        this.size = random(20, 30) * subsampling;
         this.state = "APPEAR";
         this.path = path;
         this.alpha = 0;
@@ -1430,7 +1457,7 @@ class Package {
                 this.velocity.limit(this.maxspeed);
                 this.position.add(this.velocity);
                 this.acceleration.mult(0);
-                this.goalPos = this.country.getPosition();
+                // this.goalPos = this.country.getPosition();
                 this.alpha += 10;
                 if (this.alpha > 80) {
                     this.state = "MOVE";
@@ -1445,8 +1472,9 @@ class Package {
                 this.velocity.limit(this.maxspeed);
                 this.position.add(this.velocity);
                 this.acceleration.mult(0);
-                this.goalPos = this.country.getPosition();
-                if (this.position.dist(this.goalPos) < 25 * subsampling) {
+                // this.goalPos = this.country.getPosition();
+                // console.log(this.goalPos)
+                if (this.position.dist(this.goalPos) < 10 * subsampling) {
                     this.state = "VANISH";
                     this.country.addVelocity();
                 } else if (this.position.dist(this.goalPos) < 10 * subsampling) {
@@ -1497,9 +1525,16 @@ class Package {
         if (this.state == "MOVE" || this.state == "VANISH") {
 
             this.theta = this.velocity.heading() + PI / 2;
-            let { r, g, b } = this.colorPallete.white;
-            fill(r, g, b, this.alpha);
-            noStroke()
+            // let { r, g, b } = this.colorPallete.white;
+            const c1 = color(this.colorPallete.red.r, this.colorPallete.red.g, this.colorPallete.red.b, 100);
+            const c2 = color(this.colorPallete.brightGreen.r, this.colorPallete.brightGreen.g, this.colorPallete.brightGreen.b, 50);
+            let inter = map(this.position.y, 129 * subsampling, this.initPos.y, 0, 1);
+            let c = lerpColor(c1, c2, inter);
+            fill(c);
+            stroke(this.colorPallete.white.r, this.colorPallete.white.g, this.colorPallete.white.b, 90);
+            strokeWeight(0.5);
+            // fill(r, g, b, 100);
+            // noStroke()
             push();
             translate(this.position.x, this.position.y);
             rotate(this.theta);
@@ -1507,7 +1542,8 @@ class Package {
             const limitSize = 2 * subsampling;
             size = abs(size)
             size = size < limitSize ? limitSize : size;
-            circle(0, 0, size);
+            rect(0, 0, this.r, this.r)
+            // circle(0, 0, size);
             // size = size < limitSize ? limitSize : size;
             // beginShape();
             // vertex(0, -size); // Arrow pointing upp
