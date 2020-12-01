@@ -67,22 +67,26 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 }).add;
 
 SynthDef(\ping, {
-	var sig, env, freq = \freq.kr(440), atk = \atk.kr(0.1), rel = \rel.kr(2), panPos, delayL, delayR;
+	var sig, env, freq = \freq.kr(440), atk = \atk.kr(0.1), rel = \rel.kr(2), panPos, azimPos, angle, elevation = 0;
 	// env = Env.perc(atk, rel, curve: [\c0.kr(4), \c1.kr(-4)]).ar(2);
 	env = Env( levels: [0, 1, 0.001, 1, 0], times: [atk, rel/2, rel/2, 0.02],
-		curve: [2, 2, 1, 0]).ar(2);
+		curve: [2, -2, 1, 0]).ar(2);
 	freq = freq * SinOsc.kr(LFNoise1.kr(2).range(2.0, 8.5)).range(0.999, 1.001);
 	// Något noisigare än sinusvåg?
 	sig = Resonz.ar(PinkNoise.ar(), freq, 0.001) * 100;
 	sig = sig + SinOsc.ar(freq, mul: 0.5);
 	sig = sig + Pulse.ar(freq, mul: 0.02);
-	sig = LPF.ar(sig, 3000);
-	panPos = Line.kr(\startPan.kr(-1), \endPan.kr(1), atk+rel);
-	sig = Pan2.ar(sig, panPos);
-	// Because of dynamic delay timings we need a dynamically crossfading delay.
-	delayL = (panPos * (-1)).max(0.0) * 0.05;
-	delayR = (panPos * (-1)).max(0.0) * 0.05;
-	sig = [DelayL.ar(sig[0], 0.2, delayL), DelayL.ar(sig[1], 0.2, delayR)];
+	sig = LPF.ar(sig, 5000);
+	// panPos = Line.kr(\startPan.kr(-1), \endPan.kr(1), atk+rel);
+	angle = pi/2;
+	azimPos = Line.kr(\startPan.kr(-1) * (-pi), \endPan.kr(1) * (-pi), atk+rel);
+	// ------------------------------------------------------------
+    // encode
+	sig = FoaEncode.ar(sig, ~foaEncoder);
+
+    // ------------------------------------------------------------
+    // transform
+	sig = FoaTransform.ar(sig, 'push', angle, azimPos);
 	sig = sig * env * \amp.kr(0.5);
 	Out.ar(\out.kr(0), sig);
 }).add;
@@ -96,7 +100,13 @@ SynthDef(\morse, {
 	// sig = Resonz.ar(PinkNoise.ar(), freq, 0.001) * 100;
 	sig = SinOsc.ar(freq, mul: 1.0);
 	sig = sig * env * \amp.kr(0.5);
-	sig = Pan2.ar(sig, \pan.kr(0));
+	// sig = Pan2.ar(sig, \pan.kr(0));
+	// encode
+    sig = FoaEncode.ar(sig, ~foaEncoder);
+
+    // ------------------------------------------------------------
+    // transform
+	sig = FoaTransform.ar(sig, 'push', pi/2, \pan.kr(0) * pi);
 	Out.ar(\out.kr(0), sig);
 }).add;
 
@@ -121,6 +131,13 @@ SynthDef(\write_noise2, {
 	pos = Line.ar(pos, pos + (duration * SampleRate.ir), duration, doneAction: 2);
 	oldData = BufRd.ar(1, buf, pos) * 0.1;
 	BufWr.ar(sig + oldData, buf, pos);
+}).add;
+
+SynthDef(\decoder, { | in = 10, out = 0 |
+	var sig;
+	sig = In.ar(in, 4);
+	sig = FoaDecode.ar(sig, ~foaDecoder);
+	Out.ar(out, sig);
 }).add;
 
 SynthDef(\loop_buffer, {
