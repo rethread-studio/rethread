@@ -100,9 +100,9 @@ class WorldScene extends Scene {
                 b: 183,
             },
             red: {
-                r: 201,
-                g: 44,
-                b: 43
+                r: 255,
+                g: 47,
+                b: 46
             },
             orange: {
                 r: 225,
@@ -128,6 +128,11 @@ class WorldScene extends Scene {
                 r: 255,
                 g: 255,
                 b: 255
+            },
+            brightGreen: {
+                r: 197,
+                g: 255,
+                b: 0,
             }
         }
 
@@ -206,7 +211,7 @@ class WorldScene extends Scene {
         this.fontSize = {
             tittle: 28 * subsampling,
             number: 10 * subsampling,
-            countries: 12 * subsampling,
+            countries: 16 * subsampling,
         }
 
 
@@ -437,7 +442,6 @@ class DashBoard {
     writeTittle() {
         noStroke();
         const { r, g, b } = this.colorPallete.white;
-        console.log(r, g, b)
         fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.tittle);
@@ -448,7 +452,7 @@ class DashBoard {
 
     //Write the number of packages
     writePackages() {
-        const { r, g, b } = this.colorPallete.red;
+        const { r, g, b } = this.colorPallete.white;
         fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
@@ -460,7 +464,7 @@ class DashBoard {
 
     //Write the size
     writeSize() {
-        const { r, g, b } = this.colorPallete.red;
+        const { r, g, b } = this.colorPallete.white;
         fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
@@ -472,7 +476,7 @@ class DashBoard {
     //Write the size
     writeLocation() {
         noStroke();
-        const { r, g, b } = this.colorPallete.red;
+        const { r, g, b } = this.colorPallete.white;
         fill(r, g, b, 100);
         textFont('sans');
         textSize(this.fontSize.number);
@@ -922,13 +926,25 @@ class CountryManager {
     }
     //draw a line connecting all country points
     drawMesh() {
-        stroke('rgba(255,255,255,0.5)');
+        // stroke('rgba(255,255,255,0.5)');
+        noStroke();
+        let { r, g, b } = this.colorPallete.red;
+        let { r1, g1, b1 } = this.colorPallete.brightGreen;
+        const c1 = color(this.colorPallete.red.r, this.colorPallete.red.g, this.colorPallete.red.b, 90);
+        const c2 = color(this.colorPallete.brightGreen.r, this.colorPallete.brightGreen.g, this.colorPallete.brightGreen.b, .5);
+
         strokeWeight(2 * subsampling);
         for (let i = 0; i < this.toRender.length; i++) {
             const obj1 = this.toRender[i].country.getPosition();
+            const initPoint = this.toRender[i].country.refPoint.init;
             // const obj2 = this.toRender[i].country.goalPos;
             // line(obj1.x, 0, obj1.x, canvasY);
-            line(0, obj1.y, canvasX, obj1.y);
+
+            let inter = map(obj1.y, 129 * subsampling, initPoint.y, 0, 1);
+            let c = lerpColor(c1, c2, inter);
+            fill(c);
+            rect(0, 129 * subsampling, canvasX, obj1.y - (129 * subsampling))
+            // line(0, obj1.y, canvasX, obj1.y);
             // line(obj1.x, obj1.y, obj2.x, obj2.y);
 
             // for (let j = i; j < this.toRender.length; j++) {
@@ -936,14 +952,14 @@ class CountryManager {
             //     line(obj1.x, obj1.y, obj2.x, obj2.y);
             // }
         }
-        noStroke();
+
 
     }
 
     //render objecte
     renderObject(object) {
 
-        let { r, g, b } = this.colorPallete.green;
+        let { r, g, b } = this.colorPallete.brightGreen;
         fill(r, g, b, object.country.textAlpha);
         textFont('sans');
         textSize(this.fontSize.countries);
@@ -1501,7 +1517,7 @@ class Package {
 
             this.theta = this.velocity.heading() + PI / 2;
             let { r, g, b } = this.colorPallete.white;
-            fill(r, g, b, this.alpha);
+            fill(r, g, b, 100);
             noStroke()
             push();
             translate(this.position.x, this.position.y);
