@@ -964,13 +964,13 @@ class CountryManager {
     //render objecte
     renderObject(object) {
 
-        let { r, g, b } = this.colorPallete.brightGreen;
-        fill(r, g, b, object.country.textAlpha);
-        textFont('sans');
-        textSize(this.fontSize.countries);
-        textAlign(RIGHT, TOP);
-        textFont(this.font);
-        text(object.name.iso, object.pos.init.x, object.pos.init.y);
+        // let { r, g, b } = this.colorPallete.brightGreen;
+        // fill(r, g, b, object.country.textAlpha);
+        // textFont('sans');
+        // textSize(this.fontSize.countries);
+        // textAlign(RIGHT, TOP);
+        // textFont(this.font);
+        // text(object.name.iso, object.pos.init.x, object.pos.init.y);
 
 
 
@@ -997,7 +997,7 @@ class CountryManager {
         // path.addPoint(this.positions["P" + place].init.x - 1, this.positions["P" + place].init.y);
         // path.addPoint(this.positions["P" + place].end.x, this.positions["P" + place].end.y);
         //ADDS A COUNTRY ELEM
-        const country = new Country(points[0].x, points[0].y, this.colorPallete, points[points.length - 1], position, coutryName)
+        const country = new Country(points[0].x, points[0].y, this.colorPallete, points[points.length - 1], position, coutryName, this.font)
         //ADD TEXT
         const name = coutryName;
         const IsoName = getCountryName(name);
@@ -1136,11 +1136,12 @@ class Path {
 
 class Country {
 
-    constructor(x, y, colorPallete, goalPos, refPoint, name) {
+    constructor(x, y, colorPallete, goalPos, refPoint, name, font) {
         this.colorPallete = colorPallete;
         this.acceleration = createVector(0, 0);
         this.velocity = createVector(2, 0);
         this.position = createVector(x, y);
+        this.initPos = createVector(x, y);
         this.countryName = name;
 
         this.r = 1.0; // Half the width of veihcle's back side
@@ -1157,6 +1158,8 @@ class Country {
         this.textAlpha = 100;
         this.beat = random(100, 500);
         this.beatType = Math.random() <= 0.5;
+        this.font = font;
+
     }
 
     addTextAlpha(num) {
@@ -1319,19 +1322,36 @@ class Country {
             let { r, g, b } = this.colorPallete.black;
             fill(r, g, b, 100);
             noStroke()
-            push();
-            translate(this.position.x, this.position.y);
-            const size = this.beatType ? sin(Date.now() / this.beat) * this.size : cos(Date.now() / this.beat) * this.size
-            const limitSize = 8 * subsampling;
+            if (this.packages != 0) {
+                push();
+                translate(this.position.x, this.position.y);
+                // const size = this.beatType ? sin(Date.now() / this.beat) * this.size : cos(Date.now() / this.beat) * this.size
+                // const limitSize = 8 * subsampling;
 
-            circle(0, 0, size < limitSize ? limitSize : size);
-            // rotate(this.theta);
-            // beginShape();
-            // vertex(0, -this.r * 2); // Arrow pointing upp
-            // vertex(-this.r, this.r * 2); // Lower left corner
-            // vertex(this.r, this.r * 2); // Lower right corner
-            // endShape(CLOSE);
-            pop();
+                // circle(0, 0, size < limitSize ? limitSize : size);
+                // rotate(this.theta);
+                // beginShape();
+                // vertex(0, -this.r * 2); // Arrow pointing upp
+                // vertex(-this.r, this.r * 2); // Lower left corner
+                // vertex(this.r, this.r * 2); // Lower right corner
+                // endShape(CLOSE);
+                noStroke();
+                // const { r, g, b } = this.colorPallete.black;
+                const c1 = color(this.colorPallete.red.r, this.colorPallete.red.g, this.colorPallete.red.b, 100);
+                const c2 = color(this.colorPallete.black.r, this.colorPallete.black.g, this.colorPallete.black.b, 100);
+
+                let inter = map(this.position.y, 129 * subsampling, this.initPos.y, 0, 1);
+                let c = lerpColor(c1, c2, inter);
+                fill(c);
+                textFont('sans');
+                textSize(12 * subsampling);
+                textAlign(CENTER, CENTER);
+                textFont(this.font);
+                text(this.countryName.toUpperCase(), 0, -5 * subsampling);
+
+                pop();
+            }
+
         }
 
     }

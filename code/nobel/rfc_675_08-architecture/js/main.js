@@ -1,7 +1,7 @@
 p5.disableFriendlyErrors = true;
 
 // GLOBAL GENERAL STATE
-let drawWindows = false; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
+let drawWindows = true; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
 var drawFPS = false;
 var fps = 0;
 var doGlitch = true;
@@ -295,7 +295,7 @@ function draw() {
         playhead.fadingInScene.reset(
           playhead.score[playhead.scoreIndex].sections
         );
-        if("vibrating" in playhead.score[playhead.scoreIndex]) {
+        if ("vibrating" in playhead.score[playhead.scoreIndex]) {
           playhead.fadingInScene.vibrating = playhead.score[playhead.scoreIndex].vibrating;
         }
         playhead.fadingInScene.fadeIn(playhead.countdown);
