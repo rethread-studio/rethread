@@ -3,7 +3,18 @@
 s.waitForBoot({
 	~startTime = ~now.();
 
+	// Load ambisonics stuff
+	~foaDecoder = FoaDecoderKernel.newUHJ;
+	~decodeBus = Bus.audio(s, 4);
+	~foaEncoder = FoaEncoderMatrix.newOmni;
+
+	s.sync;
+
 	"synthdefs.scd".loadRelative;
+
+	s.sync;
+
+	~decoder = Synth(\decoder, [\in, ~decodeBus]);
 
 	~revBus = Bus.audio(s, 2);
 	~rev = Synth(\medium_reverb, [\in, ~revBus, \out, 0, \mix, 0.15, \rt, 2.0]);
