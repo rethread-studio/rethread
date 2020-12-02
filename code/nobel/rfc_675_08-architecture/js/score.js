@@ -13,7 +13,13 @@
 
 // Fade out is not a section, it is instead triggered
 var score = [
-
+  // {
+  //   name: "title", // only used to create the title images, do not uncomment in prod
+  //   sections: [
+  //     { name: "in", duration: 10, direction: "in" },
+  //     { name: "fade out", duration: 1.5, direction: "in" },
+  //   ],
+  // },
   {
     name: "intro",
     sections: [

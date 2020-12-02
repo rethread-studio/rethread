@@ -156,6 +156,11 @@ scenes.set("ports", new PortsScene());
 scenes.set("intro", new IntroScene());
 scenes.set("world", new WorldScene());
 scenes.set("outro", new OutroScene());
+scenes.set("title", new TitleScene());
+
+var sceneTitles = new Map();
+var delayBeforeTitle = 0.0;
+var titleDuration = 3.0;
 
 let currentScene;
 let playhead = {
@@ -209,6 +214,11 @@ function preload() {
   allSceneImages.push(loadImage("assets/img/scenes/drops1.png"))
   allSceneImages.push(loadImage("assets/img/scenes/drops2.png"))
   allSceneImages.push(loadImage("assets/img/scenes/drops3.png"))
+
+  sceneTitles.set("world", loadImage("assets/img/titles/world.png"))
+  sceneTitles.set("numbers", loadImage("assets/img/titles/numbers.png"))
+  sceneTitles.set("ports", loadImage("assets/img/titles/ports.png"))
+  sceneTitles.set("drops", loadImage("assets/img/titles/drops.png"))
   
 } // End Preload
 
@@ -237,6 +247,11 @@ function setup() {
 
   for (let scene of scenes.values()) {
     scene.setup();
+  }
+
+  // Add the title duration to the total duration of each scene
+  for(let mvt in playhead.score) {
+    mvt.totalDuration += titleDuration;
   }
 } // End setup
 
@@ -287,21 +302,21 @@ function draw() {
         playhead.scoreIndex = 0;
       }
       if (playhead.scoreIndex < playhead.score.length) {
-        if (playhead.score[playhead.scoreIndex].name == "settings") {
-          // Change some settings
-          if ("subsampling" in playhead.score[playhead.scoreIndex]) {
-            subsampling = playhead.score[playhead.scoreIndex].subsampling;
-            console.log("Set subsampling to " + subsampling);
-            canvasX = 208 * subsampling;
-            canvasY = 360 * subsampling;
-            // Recreate every canvas
-            resizeCanvas(canvasX, canvasY, true);
-            for (let scene of scenes.values()) {
-              scene.setup();
-            }
-          }
-          playhead.scoreIndex += 1;
-        }
+        // if (playhead.score[playhead.scoreIndex].name == "settings") {
+        //   // Change some settings
+        //   if ("subsampling" in playhead.score[playhead.scoreIndex]) {
+        //     subsampling = playhead.score[playhead.scoreIndex].subsampling;
+        //     console.log("Set subsampling to " + subsampling);
+        //     canvasX = 208 * subsampling;
+        //     canvasY = 360 * subsampling;
+        //     // Recreate every canvas
+        //     resizeCanvas(canvasX, canvasY, true);
+        //     for (let scene of scenes.values()) {
+        //       scene.setup();
+        //     }
+        //   }
+        //   playhead.scoreIndex += 1;
+        // }
 
         playhead.fadingInSceneName = playhead.score[playhead.scoreIndex].name;
         playhead.fadingInScene = scenes.get(playhead.fadingInSceneName);
@@ -376,16 +391,32 @@ function draw() {
   // Draw the scene(s)
   if (playhead.state == "before start") {
   } else if (playhead.state == "playing") {
-    playhead.currentScene.draw(dt);
-
-    if (doGlitch 
-      && playhead.currentSceneName != "intro"
-      && Math.random() > glitchProb
+    let timeFromStartOfSection = playhead.score[playhead.scoreIndex].totalDuration - playhead.countdown;
+    if( timeFromStartOfSection > delayBeforeTitle
+      && timeFromStartOfSection < delayBeforeTitle + titleDuration
+      && sceneTitles.has(playhead.currentSceneName)
     ) {
-      let img = allSceneImages[Math.floor(Math.random() * glitchMaxIndex)];
-      drawingContext.globalAlpha = glitchAlpha;
-      image(img, 0, 0);
+      let titleImg = sceneTitles.get(playhead.currentSceneName);
+      let alpha = ((timeFromStartOfSection - delayBeforeTitle)/titleDuration) * 2;
+      
+      drawingContext.globalAlpha = alpha;
+      image(titleImg, 0, 0);
+      drawingContext.globalAlpha = Math.pow(Math.cos(alpha * Math.PI) * 0.5 + 0.5, 4.0);
+      colorMode(HSL, 100);
+      background(0, 100, 100);
       drawingContext.globalAlpha = 1.0;
+    } else {
+      playhead.currentScene.draw(dt);
+
+      if (doGlitch 
+        && playhead.currentSceneName != "intro"
+        && Math.random() > glitchProb
+      ) {
+        let img = allSceneImages[Math.floor(Math.random() * glitchMaxIndex)];
+        drawingContext.globalAlpha = glitchAlpha;
+        image(img, 0, 0);
+        drawingContext.globalAlpha = 1.0;
+      }
     }
   } else if (playhead.state == "crossfade") {
     if (playhead.fadingInScene != undefined) {
