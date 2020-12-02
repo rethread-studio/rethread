@@ -1045,7 +1045,7 @@ class CountryManager {
     }
 
     cleanCountriesCounter() {
-        this.countriesCounter.splice(0, this.countriesCounter.length - 1)
+        this.countriesCounter.splice(0, this.countriesCounter.length)
     }
 
     //UPDATE ALL THE DATA
@@ -1062,8 +1062,10 @@ class CountryManager {
         if (this.getCountry(name) != undefined) {
             const country = this.getCountry(name)
             if (!this.countriesCounter.includes(name)) {
+
                 this.countriesCounter.push(name)
                 this.dashBoard.setNumCountries(this.countriesCounter.length)
+
             }
 
             if (country.country != undefined) country.country.addPackage(1);
