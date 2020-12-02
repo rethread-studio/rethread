@@ -393,8 +393,10 @@ class WorldScene extends Scene {
                             this.selectedRegion = this.focusLocation[this.focusRegion].countryArray;
                             this.countryManager.changeCountries(this.selectedRegion);
                             this.countryManager.changeDirection(this.sections[this.playhead.sectionIndex].direction)
+                            this.countryManager.cleanCountriesCounter()
                             this.dashBoard.changeLocation(this.focusLocation[this.focusRegion].label)
                             this.dashBoard.updateInitTime(this.playhead.countdown)
+                            this.dashBoard.cleanNumCountries();
                             this.dashBoard.changeDirection(this.sections[this.playhead.sectionIndex].direction)
                             this.dashBoard.showMessage(true);
                         }
@@ -507,6 +509,14 @@ class DashBoard {
         this.direction = "in";
         this.displayMessage = true;
         this.showBackground = true;
+        this.numCountries = 0;
+    }
+
+    setNumCountries(num) {
+        this.numCountries = num;
+    }
+    cleanNumCountries() {
+        this.numCountries = 0;
     }
     changeDirection(dir) {
         this.direction = dir;
@@ -614,6 +624,9 @@ class DashBoard {
         textFont(this.font);
         this.counter = this.counter > this.packages ? this.packages : this.counter;
         if (this.counter != 0) text(this.counter, canvasX / 2, this.positions.col.c3 + this.positions.padding.top + 3 * subsampling);
+
+        if (this.numCountries != 0) text(this.numCountries, canvasX / 2, this.positions.col.c4 + this.positions.padding.top + 3 * subsampling);
+
     }
 
     //Write the size
@@ -684,6 +697,7 @@ class CountryManager {
         this.colorPallete = colorPallete;
         //initial positons and ending positions
         this.offsetX = 2 * subsampling;
+        this.countriesCounter = []
         this.endPoint =
         {
             x: this.colPosPositions.row.r3,
@@ -1030,6 +1044,10 @@ class CountryManager {
 
     }
 
+    cleanCountriesCounter() {
+        this.countriesCounter.splice(0, this.countriesCounter.length - 1)
+    }
+
     //UPDATE ALL THE DATA
     updateData() {
 
@@ -1043,6 +1061,10 @@ class CountryManager {
 
         if (this.getCountry(name) != undefined) {
             const country = this.getCountry(name)
+            if (!this.countriesCounter.includes(name)) {
+                this.countriesCounter.push(name)
+                this.dashBoard.setNumCountries(this.countriesCounter.length)
+            }
 
             if (country.country != undefined) country.country.addPackage(1);
 
@@ -1145,8 +1167,10 @@ class CountryManager {
         object.country.display();
     }
 
+
     //ADD a new country to show
     addCountry(coutryName) {
+
         const freeKey = this.getFreePosition()
         if (freeKey == null) return;
         const position = this.positions[freeKey];
