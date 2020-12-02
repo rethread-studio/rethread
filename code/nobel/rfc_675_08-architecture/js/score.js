@@ -34,9 +34,7 @@ var score = [
       { name: "AME", duration: 15, direction: "out" },
       { name: "OC", duration: 10, direction: "out" },
       { name: "AF", duration: 10, direction: "out" },
-      // { name: "AME", duration: 28, direction: "in" },
-      // { name: "AS", duration: 30, direction: "in" },
-      // { name: "fade out", duration: 2, direction: "in" },
+
       { name: "fade out", duration: 1 },
     ],
   },
