@@ -39,6 +39,7 @@ class WorldScene extends Scene {
             "Slovakia",
             "Slovenia",
             "Spain",
+            "United Kingdom"
         ]
 
         this.ame_countries = [
@@ -86,6 +87,97 @@ class WorldScene extends Scene {
             "Taiwan",
             "Thailand",
             "Viet Nam"
+        ]
+        this.afr_countries = [
+            "Algeria",
+            "Angola",
+            "Benin",
+            "Botswana",
+            "Burkina Faso",
+            "Burundi",
+            "Cape Verde",
+            "Cameroon",
+            "Central African Republic",
+            "Chad",
+            "Comoros",
+            "Congo",
+            "Cote d'Ivoire",
+            "Djibouti",
+            "Egypt",
+            "Equatorial Guinea",
+            "Eritrea",
+            "Eswatini",
+            "Ethiopia",
+            "Gabon",
+            "Gambia",
+            "Ghana",
+            "Guinea",
+            "Guinea-Bissau",
+            "Kenya",
+            "Lesotho",
+            "Liberia",
+            "Libya",
+            "Madagasar",
+            "Malawi",
+            "Mali",
+            "Mauritania",
+            "Mauritius",
+            "Morocco",
+            "Mozambique",
+            "Namibia",
+            "Niger",
+            "Nigeria",
+            "Rwanda",
+            "Sao Tome and Principe",
+            "Senegal",
+            "Seychelles",
+            "Sierra Leone",
+            "Somalia",
+            "South Africa",
+            "South Sudan",
+            "Sudan",
+            "Tanzania",
+            "Togo",
+            "Tunisia",
+            "Uganda",
+            "Zambia",
+            "Zimbabwe"
+        ]
+
+        this.oce_countries = [
+            "Australia",
+            "Papua New Guinea",
+            "New Zealand",
+            "Fiji",
+            "Solomon Islands",
+            "Vanautu",
+            "New Caledonia",
+            "French Plynesia",
+            "Samoa",
+            "Guam",
+            "Kiribati",
+            "Federated States of Micronesia",
+            "Tonga",
+            "American Samoa",
+            "Northern Mariana Islands",
+            "Marshall Islands",
+            "Palau",
+            "Cook Islands",
+            "Walls and Futuna",
+            "Tuvalu",
+            "Nauru",
+            "Norfolk Island",
+            "Niue",
+            "Tokelau",
+            "Pitcairn Islands"
+        ]
+
+        this.world_countries = [
+            ...this.eu_countries,
+            ...this.ame_countries,
+            ...this.asian_countries,
+            ...this.afr_countries,
+            ...this.oce_countries
         ]
 
         this.colorPallete = {
@@ -141,11 +233,13 @@ class WorldScene extends Scene {
             "Norway",
             "Netherlands",
             "United States",
+            "France",
+            "Belgium",
+            "Colombias"
 
         ]
 
-        this.afr_countries = [];
-        this.oce_countries = [];
+
 
         this.sweden_countries = [
             "Sweden",
@@ -247,8 +341,8 @@ class WorldScene extends Scene {
         // all the state that requires p5 to be loaded (such as instantiating
         // p5 types like p5.Vector or createGraphics).
         //CREATE DASHBOARD
-        this.dashBoard = new DashBoard(antonFont, this.colorPallete, this.positions, this.focusRegion, this.fontSize)
-        //CRATE COUNTRY MANAGE
+
+        this.dashBoard = new DashBoard(antonFont, this.colorPallete, this.positions, this.focusRegion, this.fontSize, this.playhead)
         this.countryManager = new CountryManager(this.selectedRegion, antonFont, this.fontSize, this.positions, this.colorPallete, this.dashBoard);
         this.liveSign = new LiveSign("", antonFont, false)
     }
@@ -258,7 +352,6 @@ class WorldScene extends Scene {
         // Set canvas background
 
         background("rgba(0,0,0,.1)");
-
         switch (this.playhead.state) {
 
             case "fade in":
@@ -266,12 +359,16 @@ class WorldScene extends Scene {
                 //UPDATE DASHBOARD
                 this.dashBoard.updateData();
                 this.dashBoard.display();
+                this.dashBoard.changeDirection(this.sections[this.playhead.sectionIndex].direction)
 
                 this.liveSign.updateTickTime();
                 this.liveSign.draw();
 
                 break;
+
             case "before start":
+
+                break;
 
                 break;
             case "playing":
@@ -286,14 +383,20 @@ class WorldScene extends Scene {
                     //CHECK IF THE SECTION HAS CHANGED
                     if (this.sections[this.playhead.sectionIndex].name == "fade out") {
                         this.fadeOut(this.sections[this.playhead.sectionIndex].duration);
+
                     } else {
                         const currentSection = this.sections[this.playhead.sectionIndex].name;
-                        if (this.focusRegion != currentSection) {
-                            console.log("the section has changed", this.focusRegion, currentSection);
+                        if (this.focusRegion != currentSection && this.currentSection != "MESSAGE") {
+                            const currentSection = this.sections[this.playhead.sectionIndex].name;
+                            console.log("the section has changed", this.focusRegion, currentSection, this.sections[this.playhead.sectionIndex]);
                             this.focusRegion = currentSection;
                             this.selectedRegion = this.focusLocation[this.focusRegion].countryArray;
                             this.countryManager.changeCountries(this.selectedRegion);
+                            this.countryManager.changeDirection(this.sections[this.playhead.sectionIndex].direction)
                             this.dashBoard.changeLocation(this.focusLocation[this.focusRegion].label)
+                            this.dashBoard.updateInitTime(this.playhead.countdown)
+                            this.dashBoard.changeDirection(this.sections[this.playhead.sectionIndex].direction)
+                            this.dashBoard.showMessage(true);
                         }
                     }
                 }
@@ -312,6 +415,7 @@ class WorldScene extends Scene {
                 break;
 
             default:
+
                 break;
         }
 
@@ -344,7 +448,9 @@ class WorldScene extends Scene {
         // This is called to reset the state of the Scene before it is started
     }
     registerPacket(internalData, country, continent) {
-        if (this.dashBoard != null && internalData.out == true && this.isInCountries(internalData.local_location.country, this.selectedRegion)) {
+
+        const out = this.sections[this.playhead.sectionIndex].direction == "out";
+        if (this.dashBoard != null && internalData.out == out && this.isInCountries(internalData.local_location.country, this.selectedRegion)) {
 
             this.dashBoard.addSize(internalData.len);
             // dashBoard.addPackage(1);
@@ -380,11 +486,11 @@ class WorldScene extends Scene {
 //SHOWS THE MAIN TEXT AND ITS INFO
 class DashBoard {
 
-    constructor(_font, colorPallete, positions, location, fontSize) {
+    constructor(_font, colorPallete, positions, location, fontSize, playhead) {
         this.packages = 0;
         this.size = 0;
         this.counter = 0;
-        this.tick = 400;
+        this.tick = 2000;
         this.time = Date.now() + this.tick;
         this.showTick = true;
 
@@ -396,9 +502,27 @@ class DashBoard {
         this.positions = positions;
         this.focuLocation = location;
 
-
+        this.playhead = playhead
+        this.initTime = 0;
+        this.direction = "in";
+        this.displayMessage = true;
+        this.showBackground = true;
+    }
+    changeDirection(dir) {
+        this.direction = dir;
+    }
+    updateInitTime(time) {
+        this.initTime = time;
     }
 
+    showBackground(show) {
+        this.showBackground = show;
+    }
+    showMessage(show) {
+        this.showBackground = show;
+        this.displayMessage = show;
+        this.time = Date.now() + this.tick;
+    }
 
     //update all the data and states
     updateData() {
@@ -409,13 +533,24 @@ class DashBoard {
 
     //RENDER ALL THE ELEMENTS 
     display() {
-        this.counter++;
-        this.writeTittle();
-        this.writePackages();
-        this.writeLocation();
+
+
+        if (this.displayMessage) {
+            if (this.showBackground) {
+                fill(0, 0, 0, 80);
+                rect(0, 0, canvasX, canvasY)
+                this.updateTickTime();
+            }
+            if (this.initTime == 0 && this.playhead.countdown > 0) this.initTime = this.playhead.countdown
+            this.counter += 10;
+            this.writeTittle();
+            this.writePackages();
+            this.writeLocation();
+        }
+
         // this.writeSize();
-        // if (this.showTick) this.writeLocation();
-        // this.drawTick();
+
+
     }
 
 
@@ -433,30 +568,48 @@ class DashBoard {
     //updates if time is greater that this.time
     updateTickTime() {
         if (Date.now() > this.time) {
-            this.showTick = !this.showTick;
-            this.time = Date.now() + this.tick;
+            this.showBackground = !this.showBackground;
+            // this.displayMessage = !this.displayMessage;
         }
     }
 
     //WRITE THE TITTLE
     //write tittle centered
     writeTittle() {
+        // this.playhead
+        const c1 = this.fontSize.tittle;
+        const c2 = 20;
+        const count = this.playhead.countdown > this.initTime ? this.initTime : this.playhead.countdown;
+
+        let inter = map(count, this.initTime, 0, 0, 1);
+
+        let c = lerp(c2, c1, inter);
+
         noStroke();
         const { r, g, b } = this.colorPallete.white;
         fill(r, g, b, 100);
         textFont('sans');
-        textSize(this.fontSize.tittle);
+        textSize(c);
         textAlign(CENTER, CENTER);
         textFont(this.font);
-        text("TO STOCKHOLM", canvasX / 2, 129 * subsampling);
+        const dirVal = this.direction == "out" ? "TO" : "FROM";
+        text(dirVal + " " + this.focuLocation, canvasX / 2, 129 * subsampling);
     }
 
     //Write the number of packages
     writePackages() {
+        // this.playhead
+        const c1 = this.fontSize.tittle;
+        const c2 = 20;
+        const count = this.playhead.countdown > this.initTime ? this.initTime : this.playhead.countdown;
+
+        let inter = map(count, this.initTime, 0, 0, 1);
+
+        let c = lerp(c2, c1, inter);
         const { r, g, b } = this.colorPallete.white;
         fill(r, g, b, 100);
         textFont('sans');
-        textSize(this.fontSize.tittle);
+        textSize(c);
         textAlign(CENTER);
         textFont(this.font);
         this.counter = this.counter > this.packages ? this.packages : this.counter;
@@ -476,16 +629,24 @@ class DashBoard {
 
     //Write the size
     writeLocation() {
+        // this.playhead
+        const c1 = this.fontSize.tittle - 4;
+        const c2 = 10;
+        const count = this.playhead.countdown > this.initTime ? this.initTime : this.playhead.countdown;
+        let inter = map(count, this.initTime, 0, 0, 1);
+
+        let c = lerp(c2, c1, inter);
         noStroke();
         const { r, g, b } = this.colorPallete.white;
         fill(r, g, b, 100);
         textFont('sans');
-        textSize(this.fontSize.number);
+        textSize(c);
         textAlign(CENTER);
         textFont(this.font);
-        text("FROM", canvasX / 2, this.positions.col.c1 + this.positions.padding.top - 4 * subsampling);
+        const dirVal = this.direction == "in" ? "TO" : "FROM";
+        // text(dirVal, canvasX / 2, this.positions.col.c1 + this.positions.padding.top - 4 * subsampling);
         // circle(canvasX/2 - 31 * subsampling, this.positions.col.c1 + this.positions.padding.top, 7 * subsampling);
-        text(this.focuLocation, canvasX / 2, this.positions.col.c1 + this.positions.padding.top * 2 + 4 * subsampling);
+        text(dirVal + " " + "STOCKHOLM", canvasX / 2, this.positions.col.c1 + this.positions.padding.top * 2 + 4 * subsampling);
     }
 
     //DRAW THE TICK
@@ -511,11 +672,11 @@ class DashBoard {
 class CountryManager {
 
 
-    constructor(_countries, _font, fontSize, positions, colorPallete, dashBoard) {
+    constructor(_countries, _font, fontSize, positions, colorPallete, dashBoard, direction) {
         //list of countries to show
         this.countries = _countries;
         this.dashBoard = dashBoard;
-
+        this.direction = "in"
         this.fontURL = _font;
         this.font = _font;
         this.fontSize = fontSize;
@@ -874,6 +1035,10 @@ class CountryManager {
 
     }
 
+    changeDirection(dir) {
+        this.direction = dir;
+    }
+
     addPackage(name) {
 
         if (this.getCountry(name) != undefined) {
@@ -911,13 +1076,7 @@ class CountryManager {
     //RENDER ALL THE ELEMENTS
     display() {
         this.drawMesh();
-        //RENDER COUNTRY
-        const toRemove = [];
-        for (let i = 0; i < this.toRender.length; i++) {
-            this.renderObject(this.toRender[i]);
-            if (this.toRender[i].country.state == "REMOVE") toRemove.push(this.toRender[i].name.name);
-        }
-        this.removeItems(toRemove);
+
 
         //RENDER PACKAGES
         for (let j = 0; j < this.packages.length; j++) {
@@ -926,7 +1085,13 @@ class CountryManager {
             this.packages[j].display();
         }
         if (this.packages.length > this.maxPackages) this.cleanPackages();
-
+        //RENDER COUNTRY
+        const toRemove = [];
+        for (let i = 0; i < this.toRender.length; i++) {
+            this.renderObject(this.toRender[i]);
+            if (this.toRender[i].country.state == "REMOVE") toRemove.push(this.toRender[i].name.name);
+        }
+        this.removeItems(toRemove);
 
     }
     //draw a line connecting all country points
@@ -994,6 +1159,7 @@ class CountryManager {
         for (let i = 0; i < points.length; i++) {
             path.addPoint(points[i].x, points[i].y);
         }
+
         // path.addPoint(this.positions["P" + place].init.x - 1, this.positions["P" + place].init.y);
         // path.addPoint(this.positions["P" + place].end.x, this.positions["P" + place].end.y);
         //ADDS A COUNTRY ELEM
@@ -1318,9 +1484,7 @@ class Country {
 
         //DRAW COUNTRY
         if (this.state == "MOVE") {
-            this.theta = this.velocity.heading() + PI / 2;
-            let { r, g, b } = this.colorPallete.black;
-            fill(r, g, b, 100);
+
             noStroke()
             if (this.packages != 0) {
                 push();
@@ -1493,7 +1657,7 @@ class Package {
                 this.position.add(this.velocity);
                 this.acceleration.mult(0);
                 // this.goalPos = this.country.getPosition();
-                // console.log(this.goalPos)
+
                 if (this.position.dist(this.goalPos) < 10 * subsampling) {
                     this.state = "VANISH";
                     this.country.addVelocity();
@@ -1562,7 +1726,7 @@ class Package {
             const limitSize = 2 * subsampling;
             size = abs(size)
             size = size < limitSize ? limitSize : size;
-            rect(0, 0, this.r, this.r)
+            rect(0, 0, this.r / 4, this.r * 2)
             // circle(0, 0, size);
             // size = size < limitSize ? limitSize : size;
             // beginShape();
