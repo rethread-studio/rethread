@@ -179,6 +179,7 @@ let playhead = {
 var allSceneImages = [];
 var glitchProb = 0.99;
 var glitchAlpha = 0.2;
+var glitchMaxIndex = 2;
 
 /// P5 functions
 
@@ -187,6 +188,14 @@ function preload() {
   for (let scene of scenes.values()) {
     scene.preload();
   }
+  allSceneImages.push(loadImage("assets/img/scenes/blob1.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/blob2.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/blob3.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/blob4.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/blob5.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/world1.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/world2.png"))
+  allSceneImages.push(loadImage("assets/img/scenes/world3.png"))
   allSceneImages.push(loadImage("assets/img/scenes/numbers1.png"))
   allSceneImages.push(loadImage("assets/img/scenes/numbers2.png"))
   allSceneImages.push(loadImage("assets/img/scenes/numbers3.png"))
@@ -197,11 +206,10 @@ function preload() {
   allSceneImages.push(loadImage("assets/img/scenes/ports2.png"))
   allSceneImages.push(loadImage("assets/img/scenes/ports3.png"))
   allSceneImages.push(loadImage("assets/img/scenes/ports4.png"))
-  allSceneImages.push(loadImage("assets/img/scenes/world1.png"))
-  allSceneImages.push(loadImage("assets/img/scenes/world2.png"))
   allSceneImages.push(loadImage("assets/img/scenes/drops1.png"))
   allSceneImages.push(loadImage("assets/img/scenes/drops2.png"))
   allSceneImages.push(loadImage("assets/img/scenes/drops3.png"))
+  
 } // End Preload
 
 function setup() {
@@ -254,6 +262,11 @@ function draw() {
     firstNow = now;
   }
   let dt = now - lastNow;
+
+  glitchMaxIndex += dt*0.04;
+  if(glitchMaxIndex > allSceneImages.length) {
+    glitchMaxIndex = allSceneImages.length;
+  }
 
   // Update score
   if (playhead.state == "before start") {
@@ -365,8 +378,11 @@ function draw() {
   } else if (playhead.state == "playing") {
     playhead.currentScene.draw(dt);
 
-    if (doGlitch && Math.random() > glitchProb) {
-      let img = allSceneImages[Math.floor(Math.random() * allSceneImages.length)];
+    if (doGlitch 
+      && playhead.currentSceneName != "intro"
+      && Math.random() > glitchProb
+    ) {
+      let img = allSceneImages[Math.floor(Math.random() * glitchMaxIndex)];
       drawingContext.globalAlpha = glitchAlpha;
       image(img, 0, 0);
       drawingContext.globalAlpha = 1.0;

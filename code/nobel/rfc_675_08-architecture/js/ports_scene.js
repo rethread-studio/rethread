@@ -114,6 +114,16 @@ class PortsScene extends Scene {
           } else {
             this.randomVelAmount = 1.0;
           }
+          if ("textActive" in this.sections[this.playhead.sectionIndex]) {
+            this.fallingText.activated = this.sections[
+              this.playhead.sectionIndex
+            ].textActive;
+            if(this.fallingText.activated == false) {
+              this.fallingText.setNewNode(undefined);
+            }
+          } else {
+            this.fallingText.activated = true;
+          }
           for(let n in this.allNodes) {
             n.randomVelAmount = this.randomVelAmount;
             // n.vel.x = 0.0;
@@ -457,6 +467,7 @@ class PortsScene extends Scene {
       textSize: 16 * subsampling,
       textSizeGrowth: 2 * subsampling,
       fastChangeSpeed: true,
+      activated: true,
       x: canvasX / 2,
       y: canvasY + 1,
       vel: canvasY / 3.0,
@@ -470,7 +481,7 @@ class PortsScene extends Scene {
       update: function (dt, labeledNodes) {
         this.y += this.vel * dt;
         this.textSize += this.textSizeGrowth * dt;
-        if (this.y > canvasY * 1.3) {
+        if (this.y > canvasY * 1.3 && this.activated) {
           this.textSize = 16 * subsampling;
           this.y = 0;
           // this.nodeIndex = (this.nodeIndex + 1) % labeledNodes.length;
@@ -498,8 +509,12 @@ class PortsScene extends Scene {
           this.node.selected = false;
         }
         this.node = newNode;
-        this.node.selected = true;
-        this.string = this.node.label;
+        if(this.node != undefined) {
+          this.node.selected = true;
+          this.string = this.node.label;
+        } else {
+          this.string = "";
+        }
       },
       draw: function (g, selectedHue, backgroundBrightness) {
         if (this.node != undefined) {
