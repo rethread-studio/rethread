@@ -24,10 +24,11 @@ var score = [
   {
     name: "world",
     sections: [
-      { name: "SWEDEN", duration: 20 },
+      { name: "SWEDEN", duration: 25 },
       { name: "EU", duration: 25 },
       { name: "AME", duration: 28 },
       { name: "AS", duration: 30 },
+      { name: "end section", duration: 20 }, // placeholder for summary text
       { name: "fade out", duration: 2 },
     ],
   },
@@ -43,7 +44,7 @@ var score = [
     sections: [
       {
         name: "in",
-        duration: 18,
+        duration: 20,
         region: "The World",
         textLimit: 100,
         startSpeed: 0.9,
@@ -51,7 +52,7 @@ var score = [
       },
       {
         name: "out",
-        duration: 18,
+        duration: 20,
         region: "The World",
         textLimit: 100,
         speed: 1.5,
@@ -98,10 +99,10 @@ var score = [
     sections: [
       { name: "in", duration: 12, region: "Sweden" },
       { name: "in", duration: 16, region: "Europe" },
-      { name: "in", duration: 20, region: "none" },
+      { name: "in", duration: 23, region: "none" },
       { name: "out", duration: 12, region: "Sweden" },
       { name: "out", duration: 16, region: "Europe" },
-      { name: "out", duration: 20, region: "none" },
+      { name: "out", duration: 25.5, region: "none" },
       { name: "fade out", duration: 4 },
     ],
   },
@@ -115,16 +116,26 @@ var score = [
   {
     name: "ports",
     sections: [
-      { name: "network", duration: 5, pullBackCoeff: 10.0 },
+      { name: "network", duration: 13, pullBackCoeff: 10.0, textActive: true },
       { name: "add nodes", maxDistance: 60, minDistance: 50 },
-      { name: "packets", duration: 5, pullBackCoeff: 10.0 },
-      { name: "network", duration: 5, pullBackCoeff: 10.0 },
-      { name: "add nodes", maxDistance: 80, minDistance: 75 },
-      { name: "packets", duration: 1, pullBackCoeff: 10.0 },
+      { name: "packets", duration: 5, pullBackCoeff: 10.0, textActive: false },
+      { name: "network", duration: 5, pullBackCoeff: 10.0, textActive: false },
       { name: "network", duration: 0.3, pullBackCoeff: 40.0 },
       { name: "packets", duration: 1 },
       { name: "network", duration: 0.3, pullBackCoeff: 60.0 },
       { name: "packets", duration: 2 },
+      { name: "network", duration: 0.3, pullBackCoeff: 70.0 },
+      { name: "packets", duration: 0.3 },
+      { name: "network", duration: 0.3, pullBackCoeff: 100.0 },
+      { name: "network", duration: 2, pullBackCoeff: 0.5, textActive: false },
+      { name: "network", duration: 2, pullBackCoeff: 1.0, textActive: false },
+      { name: "network", duration: 2.5, pullBackCoeff: 50.0, textActive: false },
+      { name: "add nodes", maxDistance: 80, minDistance: 75 },
+      { name: "packets", duration: 1, pullBackCoeff: 10.0, textActive: false },
+      { name: "network", duration: 0.3, pullBackCoeff: 40.0 },
+      { name: "packets", duration: 1 },
+      { name: "network", duration: 0.3, pullBackCoeff: 60.0 },
+      { name: "packets", duration: 8 },
       { name: "network", duration: 0.3, pullBackCoeff: 70.0 },
       { name: "packets", duration: 0.3 },
       { name: "network", duration: 0.3, pullBackCoeff: 100.0 },
@@ -134,7 +145,7 @@ var score = [
       { name: "network", duration: 0.2, pullBackCoeff: 300.0 },
       { name: "packets", duration: 0.2 },
       { name: "network", duration: 0.2, pullBackCoeff: 400.0 },
-      { name: "packets", duration: 5 },
+      { name: "packets", duration: 9 },
       { name: "network", duration: 2, pullBackCoeff: 400.0 },
 
       { name: "network", duration: 4, pullBackCoeff: 30.0, randomVelAmount: 0.1 },
@@ -142,9 +153,9 @@ var score = [
       { name: "network", duration: 1, pullBackCoeff: 1.0 },
       { name: "network", duration: 0.5, pullBackCoeff: 50.0 },
       { name: "network", duration: 10, drawShader: false },
-      { name: "packets", duration: 4, pullBackCoeff: 1, drawShader: false },
-      { name: "network", duration: 3, pullBackCoeff: 0.5, drawShader: false },
-      { name: "packets", duration: 1, pullBackCoeff: 10.0, drawShader: false },
+      { name: "packets", duration: 4, pullBackCoeff: 1, drawShader: false, textActive: false },
+      { name: "network", duration: 3, pullBackCoeff: 0.5, drawShader: false, textActive: false },
+      { name: "packets", duration: 1, pullBackCoeff: 10.0, drawShader: false, textActive: false },
       { name: "network", duration: 1, pullBackCoeff: 0.5, drawShader: false },
       { name: "network", duration: 0.5, pullBackCoeff: 600.0, drawShader: false },
       { name: "packets", duration: 2, pullBackCoeff: 0.002 },
@@ -163,11 +174,10 @@ var score = [
       { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
       { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 300.0 },
       { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
-      { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 300.0 },
-      { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
-      { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 1000.0 },
-      { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
+      { name: "packets", duration: 0.2, pullBackCoeff: 1.0, randomVelAmount: 1000.0 },
       { name: "network", duration: 3.2, pullBackCoeff: 0.0, randomVelAmount: 3000.0 },
+      { name: "packets", duration: 5, pullBackCoeff: 60.0, textActive: false },
+      { name: "network", duration: 5, pullBackCoeff: 60.0, textActive: false },
       { name: "fade out", duration: 2.0 },
     ],
   },
@@ -175,7 +185,7 @@ var score = [
     name: "outro",
     sections: [
       { name: "in", duration: 4 },
-      { name: "fade out", duration: 7 },
+      { name: "fade out", duration: 1.5 },
     ],
   },
 ];
@@ -196,6 +206,10 @@ for (let mvt of score) {
   mvt.totalDuration = totalDuration;
   mvt.fadeOutDuration = fadeOutDuration;
   scoreDuration += totalDuration;
+  console.log("movement " + mvt.name + ": " + totalDuration + "s = " + totalDuration/60 + "min");
+  console.log(
+    "Score duration: " + scoreDuration + "s = " + scoreDuration / 60 + "min"
+  );
 }
 console.log(
   "Score duration: " + scoreDuration + "s = " + scoreDuration / 60 + "min"
