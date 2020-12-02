@@ -225,7 +225,7 @@ class WorldScene extends Scene {
                 r: 197,
                 g: 255,
                 b: 0,
-            }
+            },
         }
 
         this.test_countries = [
@@ -646,7 +646,7 @@ class DashBoard {
         const dirVal = this.direction == "in" ? "TO" : "FROM";
         // text(dirVal, canvasX / 2, this.positions.col.c1 + this.positions.padding.top - 4 * subsampling);
         // circle(canvasX/2 - 31 * subsampling, this.positions.col.c1 + this.positions.padding.top, 7 * subsampling);
-        text(dirVal + " " + "STOCKHOLM", canvasX / 2, this.positions.col.c1 + this.positions.padding.top * 2 + 4 * subsampling);
+        text(dirVal + " " + "STOCKHOLM", canvasX / 2, this.positions.col.c1 + 13 * subsampling);
     }
 
     //DRAW THE TICK
@@ -695,7 +695,7 @@ class CountryManager {
                 points: [
                     {
                         x: 54 * subsampling - this.offsetX,
-                        y: 314 * subsampling
+                        y: 0
                     },
                     {
                         x: 54 * subsampling,
@@ -705,7 +705,7 @@ class CountryManager {
                 ],
                 init: {
                     x: 54 * subsampling,
-                    y: 314 * subsampling
+                    y: 0
                 },
                 end: {
                     x: 54 * subsampling,
@@ -717,7 +717,7 @@ class CountryManager {
                 points: [
                     {
                         x: 80 * subsampling - this.offsetX,
-                        y: this.colPosPositions.col.c5
+                        y: canvasY
                     },
                     {
                         x: 80 * subsampling,
@@ -726,7 +726,7 @@ class CountryManager {
                 ],
                 init: {
                     x: 80 * subsampling,
-                    y: this.colPosPositions.col.c5
+                    y: canvasY
                 },
                 end: {
                     x: 80 * subsampling,
@@ -738,7 +738,7 @@ class CountryManager {
                 points: [
                     {
                         x: 140 * subsampling - this.offsetX,
-                        y: this.colPosPositions.col.c5
+                        y: canvasY
                     },
                     {
                         x: 140 * subsampling,
@@ -747,7 +747,7 @@ class CountryManager {
                 ],
                 init: {
                     x: 140 * subsampling,
-                    y: this.colPosPositions.col.c5
+                    y: canvasY
                 },
                 end: {
                     x: 140 * subsampling,
@@ -759,7 +759,7 @@ class CountryManager {
                 points: [
                     {
                         x: 160 * subsampling - this.offsetX,
-                        y: this.colPosPositions.col.c5
+                        y: canvasY
                     },
                     {
                         x: 160 * subsampling,
@@ -768,7 +768,7 @@ class CountryManager {
                 ],
                 init: {
                     x: 160 * subsampling,
-                    y: this.colPosPositions.col.c5
+                    y: canvasY
                 },
                 end: {
                     x: 160 * subsampling,
@@ -780,7 +780,7 @@ class CountryManager {
                 points: [
                     {
                         x: 54 * subsampling - this.offsetX,
-                        y: this.colPosPositions.col.c1 - 15 * subsampling
+                        y: 0
                     },
                     {
                         x: 54 * subsampling,
@@ -789,7 +789,7 @@ class CountryManager {
                 ],
                 init: {
                     x: 54 * subsampling,
-                    y: this.colPosPositions.col.c1 - 15 * subsampling
+                    y: 0
                 },
                 end: {
                     x: 54 * subsampling,
@@ -801,7 +801,7 @@ class CountryManager {
                 points: [
                     {
                         x: 80 * subsampling - this.offsetX,
-                        y: this.colPosPositions.col.c1 - 15 * subsampling
+                        y: 0
                     },
                     {
                         x: 80 * subsampling,
@@ -810,7 +810,7 @@ class CountryManager {
                 ],
                 init: {
                     x: 80 * subsampling,
-                    y: this.colPosPositions.col.c1 - 15 * subsampling
+                    y: 0
                 },
                 end: {
                     x: 80 * subsampling,
@@ -822,7 +822,7 @@ class CountryManager {
                 points: [
                     {
                         x: 140 * subsampling - this.offsetX,
-                        y: this.colPosPositions.col.c1 - 15 * subsampling
+                        y: 0
                     },
                     {
                         x: 140 * subsampling,
@@ -831,7 +831,7 @@ class CountryManager {
                 ],
                 init: {
                     x: 140 * subsampling,
-                    y: this.colPosPositions.col.c1 - 15 * subsampling
+                    y: 0
                 },
                 end: {
                     x: 140 * subsampling,
@@ -843,7 +843,7 @@ class CountryManager {
                 points: [
                     {
                         x: 160 * subsampling - this.offsetX,
-                        y: this.colPosPositions.col.c1 - 15 * subsampling
+                        y: 0
                     },
                     {
                         x: 160 * subsampling,
@@ -852,7 +852,7 @@ class CountryManager {
                 ],
                 init: {
                     x: 160 * subsampling,
-                    y: this.colPosPositions.col.c1 - 15 * subsampling
+                    y: 0
                 },
                 end: {
                     x: 160 * subsampling,
@@ -864,7 +864,7 @@ class CountryManager {
                 points: [
                     {
                         x: this.colPosPositions.row.r3 + (15 * subsampling) - this.offsetX,
-                        y: this.colPosPositions.col.c1 + 10 * subsampling,
+                        y: 0
                     },
                     {
                         x: this.colPosPositions.row.r3 - 23 * subsampling,
@@ -877,7 +877,7 @@ class CountryManager {
                 ],
                 init: {
                     x: this.colPosPositions.row.r3 + 15 * subsampling,
-                    y: this.colPosPositions.col.c1 + 7 * subsampling
+                    y: 0
                 },
                 end: {
                     x: this.colPosPositions.row.r3 - 10 * subsampling,
@@ -889,7 +889,7 @@ class CountryManager {
                 points: [
                     {
                         x: this.colPosPositions.row.r1,
-                        y: this.colPosPositions.col.c1 + 10 * subsampling,
+                        y: 0
                     },
                     {
                         x: this.colPosPositions.row.r2 - 23 * subsampling,
@@ -902,7 +902,7 @@ class CountryManager {
                 ],
                 init: {
                     x: this.colPosPositions.row.r1,
-                    y: this.colPosPositions.col.c1 + 7 * subsampling
+                    y: 0
                 },
                 end: {
                     x: this.colPosPositions.row.r3 - 10 * subsampling,
@@ -914,7 +914,7 @@ class CountryManager {
                 points: [
                     {
                         x: this.colPosPositions.row.r1,
-                        y: this.colPosPositions.col.c3 + 10 * subsampling,
+                        y: canvasY,
                     },
                     {
                         x: this.colPosPositions.row.r2 - 23 * subsampling,
@@ -927,7 +927,7 @@ class CountryManager {
                 ],
                 init: {
                     x: this.colPosPositions.row.r1,
-                    y: this.colPosPositions.col.c3 + 10 * subsampling,
+                    y: canvasY
                 },
                 end: {
                     x: this.colPosPositions.row.r3 - 10 * subsampling,
@@ -939,7 +939,7 @@ class CountryManager {
                 points: [
                     {
                         x: this.colPosPositions.row.r1,
-                        y: this.colPosPositions.col.c4 + 10 * subsampling,
+                        y: canvasY
                     },
                     {
                         x: this.colPosPositions.row.r2 - 23 * subsampling,
@@ -952,7 +952,7 @@ class CountryManager {
                 ],
                 init: {
                     x: this.colPosPositions.row.r1,
-                    y: this.colPosPositions.col.c4 + 10 * subsampling,
+                    y: canvasY
                 },
                 end: {
                     x: this.colPosPositions.row.r3 - 10 * subsampling,
@@ -965,7 +965,7 @@ class CountryManager {
                 points: [
                     {
                         x: this.colPosPositions.row.r3 + (15 * subsampling) - this.offsetX,
-                        y: this.colPosPositions.col.c3 + 10 * subsampling,
+                        y: canvasY,
                     },
                     {
                         x: this.colPosPositions.row.r3 - 30 * subsampling,
@@ -978,7 +978,7 @@ class CountryManager {
                 ],
                 init: {
                     x: this.colPosPositions.row.r3 + (15 * subsampling) - this.offsetX,
-                    y: this.colPosPositions.col.c3 + 10 * subsampling,
+                    y: canvasY,
                 },
                 end: {
                     x: this.colPosPositions.row.r3 - 10 * subsampling,
@@ -990,7 +990,7 @@ class CountryManager {
                 points: [
                     {
                         x: this.colPosPositions.row.r3,
-                        y: this.colPosPositions.col.c4 + 10 * subsampling,
+                        y: canvasY,
                     },
                     {
                         x: this.colPosPositions.row.r3 - 28 * subsampling,
@@ -1003,7 +1003,7 @@ class CountryManager {
                 ],
                 init: {
                     x: this.colPosPositions.row.r3 + (15 * subsampling) - this.offsetX,
-                    y: this.colPosPositions.col.c4 + 10 * subsampling,
+                    y: canvasY,
                 },
                 end: {
                     x: this.colPosPositions.row.r3 - 10 * subsampling,
