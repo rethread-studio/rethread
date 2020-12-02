@@ -1741,8 +1741,8 @@ class Package {
             let inter = map(this.position.y, 129 * subsampling, this.initPos.y, 0, 1);
             let c = lerpColor(c1, c2, inter);
             fill(c);
-            stroke(this.colorPallete.white.r, this.colorPallete.white.g, this.colorPallete.white.b, 90);
-            strokeWeight(0.5);
+            // stroke(this.colorPallete.white.r, this.colorPallete.white.g, this.colorPallete.white.b, 90);
+            // strokeWeight(0.5);
             // fill(r, g, b, 100);
             // noStroke()
             push();
@@ -1752,7 +1752,7 @@ class Package {
             const limitSize = 2 * subsampling;
             size = abs(size)
             size = size < limitSize ? limitSize : size;
-            rect(0, 0, this.r / 4, this.r * 2)
+            rect(0, 0, this.r / 2, this.r * 2)
             // circle(0, 0, size);
             // size = size < limitSize ? limitSize : size;
             // beginShape();
