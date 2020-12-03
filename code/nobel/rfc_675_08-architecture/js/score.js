@@ -31,15 +31,17 @@ var score = [
     name: "world",
     sections: [
       { name: "SWEDEN", duration: 15, direction: "in" },
-      { name: "EU", duration: 18, direction: "in" },
-      { name: "AME", duration: 18, direction: "in" },
+      { name: "EU", duration: 14, direction: "in" },
+      { name: "AME", duration: 14, direction: "in" },
+      { name: "AS", duration: 11, direction: "in" },
       { name: "OC", duration: 10, direction: "in" },
-      { name: "AF", duration: 10, direction: "in" },
+      { name: "AF", duration: 11, direction: "in" },
       { name: "SWEDEN", duration: 10, direction: "out" },
-      { name: "EU", duration: 18, direction: "out" },
-      { name: "AME", duration: 15, direction: "out" },
-      { name: "OC", duration: 10, direction: "out" },
-      { name: "AF", duration: 10, direction: "out" },
+      { name: "EU", duration: 11, direction: "out" },
+      { name: "AS", duration: 11, direction: "in" },
+      { name: "AME", duration: 11, direction: "out" },
+      { name: "OC", duration: 11, direction: "out" },
+      { name: "AF", duration: 11, direction: "out" },
 
       { name: "fade out", duration: 1 },
     ],
@@ -218,7 +220,7 @@ for (let mvt of score) {
   mvt.totalDuration = totalDuration;
   mvt.fadeOutDuration = fadeOutDuration;
   scoreDuration += totalDuration;
-  console.log("movement " + mvt.name + ": " + totalDuration + "s = " + totalDuration/60 + "min");
+  console.log("movement " + mvt.name + ": " + totalDuration + "s = " + totalDuration / 60 + "min");
   console.log(
     "Score duration: " + scoreDuration + "s = " + scoreDuration / 60 + "min"
   );
