@@ -652,8 +652,8 @@ class DashBoard {
         textFont(this.font);
         this.counter = this.counter > this.packages ? this.packages : this.counter;
         if (this.counter != 0) text(this.counter, canvasX / 2, this.positions.col.c3 + this.positions.padding.top + 3 * subsampling);
-
-        if (this.numCountries != 0) text(this.numCountries, canvasX / 2, this.positions.col.c4 + this.positions.padding.top + 3 * subsampling);
+        const message = this.numCountries == 1 ? " COUNTRY" : " COUNTRIES"
+        if (this.numCountries != 0) text(this.numCountries + message, canvasX / 2, this.positions.col.c4 + this.positions.padding.top + 3 * subsampling);
 
     }
 
@@ -671,8 +671,8 @@ class DashBoard {
     //Write the size
     writeLocation() {
         // this.playhead
-        const c1 = this.fontSize.tittle - 4;
-        const c2 = 10;
+        const c1 = this.fontSize.tittle;
+        const c2 = 20;
         const count = this.playhead.countdown > this.initTime ? this.initTime : this.playhead.countdown;
         let inter = map(count, this.initTime, 0, 0, 1);
 
