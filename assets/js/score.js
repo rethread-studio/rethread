@@ -86,13 +86,6 @@ function drawScore(score, _wrapper, _color, timeInit, _tooltip) {
         .x(function (d, i) { return d.x; }) // set the x values for the line generator
         .y(function (d) { return yScale(d.y) }) // set the y values for the line generator 
 
-    //AXIS GENERATOR
-    // const yAxisGenerator = d3.axisLeft()
-    //     .scale(yScale);
-    // const yAxis = bounds.append("g")
-    //     .call(yAxisGenerator)
-    //     .style("transform", `translateX(${dimension.margin.left + 20}px)`)
-
     bounds.append("path")
         .datum(data) // 10. Binds data to the line 
         .attr("class", "line") // Assign a class for styling 
@@ -158,90 +151,82 @@ function drawScore(score, _wrapper, _color, timeInit, _tooltip) {
         })
         .on("mouseleave", onMouseLeave)
 
-
-    // const rects = bounds.selectAll('rect')
-    //     .data(data)
-    //     .enter()
-    //     .append("rect")
-    // const rectsAttr = rects
-    //     .attr("x", (d) => d.x)
-    //     .attr("y", (d) => yScale(d.y))
-    //     .attr("width", 4)
-    //     .attr("height", (d) => d.y + yScale(d.duration))
-    //     .style("fill", function (d) { "#333333"; })
-    // .attr("cx", function (d) { return randomX() })
-    // .attr("cy", function (d) { return yScale(d.y) + r; })
-    // .attr("r", function (d) { return r })
-    // .style("fill", function (d) { "#333333"; })
 }
 
 const world = {
     name: "world",
     sections: [
-        { name: "SWEDEN", duration: 12 },
-        { name: "EU", duration: 12 },
-        { name: "AME", duration: 40 },
-        { name: "AS", duration: 20 },
+        { name: "Sweden packages in", duration: 15, direction: "in" },
+        { name: "Europe packages in", duration: 18, direction: "in" },
+        { name: "America packages in", duration: 18, direction: "in" },
+        { name: "Oceania packages in", duration: 10, direction: "in" },
+        { name: "Africa packages in", duration: 10, direction: "in" },
+        { name: "Sweden packages out", duration: 10, direction: "out" },
+        { name: "Europe packages out", duration: 18, direction: "out" },
+        { name: "America packages out", duration: 15, direction: "out" },
+        { name: "Oceania packages out", duration: 10, direction: "out" },
+        { name: "Africa packages out", duration: 10, direction: "out" },
+        { name: "Fade out", duration: 1 },
     ],
 };
 
 const numbers = {
     name: "numbers",
     sections: [
-        { name: "all", duration: 10, region: "Sweden", speed: 0.5 },
-        { name: "all", duration: 13, region: "Europe", speed: 0.8 },
-        { name: "all", duration: 18, region: "The World", speed: 1.1 },
         {
-            name: "in",
-            duration: 14,
-            region: "The World",
-            textLimit: 8,
-            speed: 1.0,
-        },
-        {
-            name: "out",
-            duration: 18,
-            region: "The World",
-            textLimit: 4,
-            speed: 1.5,
-        },
-        {
-            name: "size",
+            name: "The World in",
             duration: 20,
-            startTextLimit: 4,
-            endTextLimit: 2.5,
-            startSpeed: 0.4,
-            endSpeed: 1.5,
+            region: "The World",
+            textLimit: 100,
+            startSpeed: 0.9,
+            endSpeed: 1.2,
         },
         {
-            name: "multinumbers",
-            duration: 15,
+            name: "The World out",
+            duration: 20,
+            region: "The World",
+            textLimit: 100,
+            speed: 1.5,
+            startSpeed: 1.4,
+            endSpeed: 1.7,
+        },
+        {
+            name: "Size",
+            duration: 20,
+            startTextLimit: 9,
+            endTextLimit: 3.5,
+            startSpeed: 0.4,
+            endSpeed: 2.0,
+        },
+        {
+            name: "Multinumbers",
+            duration: 30,
             region: "none",
             textLimit: 2,
             startSpeed: 1.5,
             endSpeed: 1.2,
         },
         {
-            name: "pre fade out",
+            name: "Pre fade out",
             startTextLimit: 2,
             endTextLimit: 9,
-            duration: 3,
+            duration: 10,
             startSpeed: 1.5,
             endSpeed: 0.4,
         },
-        { name: "fade out", duration: 20 },
+        { name: "Fade out", duration: 10 },
     ],
 };
 
 const drops = {
     name: "drops",
     sections: [
-        { name: "in", duration: 12, region: "Sweden" },
-        { name: "out", duration: 12, region: "Sweden" },
-        { name: "in", duration: 16, region: "Europe" },
-        { name: "out", duration: 16, region: "Europe" },
-        { name: "in", duration: 20, region: "none" },
-        { name: "out", duration: 20, region: "none" },
+        { name: "Sweden in", duration: 12, region: "Sweden" },
+        { name: "Europe in", duration: 16, region: "Europe" },
+        { name: "in", duration: 23, region: "none" },
+        { name: "Sweden out", duration: 12, region: "Sweden" },
+        { name: "Europe out", duration: 16, region: "Europe" },
+        { name: "out", duration: 24.5, region: "none" },
         { name: "fade out", duration: 4 },
     ],
 }
@@ -249,28 +234,69 @@ const drops = {
 const protocol = {
     name: "ports",
     sections: [
-        { name: "network", duration: 5, pullBackCoeff: 10.0 },
-        { name: "packets", duration: 5 },
-        { name: "network", duration: 5, pullBackCoeff: 10.0 },
-        { name: "packets", duration: 10 },
-        { name: "network", duration: 2, pullBackCoeff: 1000.0, drawShader: false },
+        { name: "network", duration: 12, pullBackCoeff: 10.0, textActive: true },
 
-        { name: "network", duration: 2, pullBackCoeff: 1.0 },
-        { name: "network", duration: 1, pullBackCoeff: 10.0 },
+        { name: "packets", duration: 5, pullBackCoeff: 10.0, textActive: false },
+        { name: "network", duration: 5, pullBackCoeff: 10.0, textActive: false },
+        { name: "network", duration: 0.3, pullBackCoeff: 40.0 },
+        { name: "packets", duration: 1 },
+        { name: "network", duration: 0.3, pullBackCoeff: 60.0 },
+        { name: "packets", duration: 2 },
+        { name: "network", duration: 0.3, pullBackCoeff: 70.0 },
+        { name: "packets", duration: 0.3 },
+        { name: "network", duration: 0.3, pullBackCoeff: 100.0 },
+        { name: "network", duration: 2, pullBackCoeff: 0.5, textActive: false },
+        { name: "network", duration: 2, pullBackCoeff: 1.0, textActive: false },
+        { name: "network", duration: 2.5, pullBackCoeff: 50.0, textActive: false },
+
+        { name: "packets", duration: 1, pullBackCoeff: 10.0, textActive: false },
+        { name: "network", duration: 0.3, pullBackCoeff: 40.0 },
+        { name: "packets", duration: 1 },
+        { name: "network", duration: 0.3, pullBackCoeff: 60.0 },
+        { name: "packets", duration: 8 },
+        { name: "network", duration: 0.3, pullBackCoeff: 70.0 },
+        { name: "packets", duration: 0.3 },
+        { name: "network", duration: 0.3, pullBackCoeff: 100.0 },
+        { name: "packets", duration: 0.3 },
+        { name: "network", duration: 0.3, pullBackCoeff: 200.0 },
+        { name: "packets", duration: 0.2 },
+        { name: "network", duration: 0.2, pullBackCoeff: 300.0 },
+        { name: "packets", duration: 0.2 },
+        { name: "network", duration: 0.2, pullBackCoeff: 400.0 },
+        { name: "packets", duration: 7 },
+        { name: "network", duration: 2, pullBackCoeff: 400.0 },
+
+        { name: "network", duration: 3, pullBackCoeff: 30.0, randomVelAmount: 0.1 },
+        { name: "network", duration: 1, pullBackCoeff: 3.0, randomVelAmount: 3.0 },
         { name: "network", duration: 1, pullBackCoeff: 1.0 },
         { name: "network", duration: 0.5, pullBackCoeff: 50.0 },
         { name: "network", duration: 10, drawShader: false },
-        { name: "packets", duration: 4, pullBackCoeff: 0.1, drawShader: false },
-        { name: "network", duration: 3, pullBackCoeff: 0.05, drawShader: false },
-        { name: "packets", duration: 1, pullBackCoeff: 0.01, drawShader: false },
-        { name: "network", duration: 1, pullBackCoeff: 0.005, drawShader: false },
-        { name: "network", duration: 0.5, pullBackCoeff: 1000.0, drawShader: false },
+        { name: "packets", duration: 4, pullBackCoeff: 1, drawShader: false, textActive: false },
+        { name: "network", duration: 3, pullBackCoeff: 0.5, drawShader: false, textActive: false },
+        { name: "packets", duration: 1, pullBackCoeff: 10.0, drawShader: false, textActive: false },
+        { name: "network", duration: 1, pullBackCoeff: 0.5, drawShader: false },
+        { name: "network", duration: 0.5, pullBackCoeff: 600.0, drawShader: false },
         { name: "packets", duration: 2, pullBackCoeff: 0.002 },
+        { name: "packets", duration: 0.2, pullBackCoeff: 600.0, drawShader: false },
         { name: "network", duration: 1, pullBackCoeff: 100.0 },
         { name: "packets", duration: 1, pullBackCoeff: 1.0 },
-        { name: "network", duration: 0.5, pullBackCoeff: 1000.0 },
-        { name: "packets", duration: 0.5, pullBackCoeff: 0.0 },
-        { name: "network", duration: 0.5, pullBackCoeff: 1000.0 },
+        { name: "network", duration: 0.5, pullBackCoeff: 200.0, randomVelAmount: 30.0 },
+        { name: "packets", duration: 2.0, pullBackCoeff: 1.0 },
+        { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 30.0 },
+        { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
+        { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 30.0 },
+        { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
+        { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 30.0 },
+        { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
+        { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 300.0 },
+        { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
+        { name: "network", duration: 0.2, pullBackCoeff: 0.0, randomVelAmount: 300.0 },
+        { name: "packets", duration: 0.2, pullBackCoeff: 1.0 },
+        { name: "packets", duration: 0.2, pullBackCoeff: 1.0, randomVelAmount: 1000.0 },
+        { name: "network", duration: 3.2, pullBackCoeff: 0.0, randomVelAmount: 3000.0 },
+        { name: "packets", duration: 5, pullBackCoeff: 60.0, textActive: false },
+        { name: "network", duration: 5, pullBackCoeff: 60.0, textActive: false },
+        { name: "fade out", duration: 2.0 },
     ],
 }
 
