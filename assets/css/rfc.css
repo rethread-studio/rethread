@@ -156,3 +156,31 @@ body#RFC #movements img{
     fill:#1a0016;
 }
 
+@media screen and (max-width: 480px) {
+
+    body#RFC .content{
+        padding: 10px 50px;
+    }
+    body#RFC h1{
+        font-size: 2em!important;
+        margin-bottom: 30px;
+    }
+
+    body#RFC span{
+        font-size: 1em!important;
+        /* margin-bottom: 30px; */
+    }
+
+    .mainTittle{
+        font-size: 20px;
+    }
+}
+
+@media screen and (max-width: 736px) {
+
+}
+
+@media screen and (max-width: 736px) and (orientation: portrait) {
+
+
+}
