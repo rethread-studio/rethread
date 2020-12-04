@@ -425,6 +425,7 @@ class WorldScene extends Scene {
                             this.dashBoard.changeLocation(this.focusLocation[this.focusRegion].label)
                             this.dashBoard.updateInitTime(this.playhead.countdown)
                             this.dashBoard.cleanNumCountries();
+                            this.dashBoard.cleanPackagesNum();
                             this.dashBoard.changeDirection(this.sections[this.playhead.sectionIndex].direction)
                             this.dashBoard.showMessage(true);
                         }
@@ -520,7 +521,7 @@ class DashBoard {
         this.packages = 0;
         this.size = 0;
         this.counter = 0;
-        this.tick = 2500;
+        this.tick = 3000;
         this.time = Date.now() + this.tick;
         this.showTick = true;
 
@@ -592,7 +593,9 @@ class DashBoard {
     }
 
 
-
+    cleanPackagesNum() {
+        this.packages = 0;
+    }
     addPackage(num) {
         this.packages += num;
     }
@@ -1565,7 +1568,7 @@ class Country {
                 let c = lerpColor(c1, c2, inter);
                 fill(c);
                 textFont('sans');
-                textSize(12 * subsampling);//this.fontSize.countries
+                textSize(16 * subsampling);//this.fontSize.countries
                 textAlign(CENTER, CENTER);
                 textFont(this.font);
                 text(this.countryName.toUpperCase(), 0, -5 * subsampling);
@@ -1786,10 +1789,13 @@ class Package {
             rect(0, 0, this.r / 2, this.r * 2)
             // circle(0, 0, size);
             // size = size < limitSize ? limitSize : size;
+            // const displacement = 10;
             // beginShape();
-            // vertex(0, -size); // Arrow pointing upp
-            // vertex(-size, size); // Lower left corner
-            // vertex(size, size); // Lower right corner
+            // vertex(0, 0); // Arrow pointing upp
+            // vertex(0, size);
+            // vertex(size / 2, (size + displacement)); // Lower left corner
+            // vertex(size / 2, displacement); // Lower right corner
+            // vertex(0, 0);
             // endShape(CLOSE);
             pop();
         }
