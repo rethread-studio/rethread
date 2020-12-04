@@ -31,13 +31,13 @@ var score = [
     name: "world",
     sections: [
       { name: "SWEDEN", duration: 8, direction: "in" },
-      { name: "EU", duration: 20, direction: "in" },
+      { name: "EU", duration: 18, direction: "in" },
       { name: "AME", duration: 15, direction: "in" },
       { name: "AS", duration: 15, direction: "in" },
       { name: "OC", duration: 7, direction: "in" },
       { name: "AF", duration: 7, direction: "in" },
       { name: "SWEDEN", duration: 12, direction: "out" },
-      { name: "EU", duration: 20, direction: "out" },
+      { name: "EU", duration: 18, direction: "out" },
       { name: "AS", duration: 15, direction: "in" },
       { name: "AME", duration: 12, direction: "out" },
       { name: "OC", duration: 7, direction: "out" },
@@ -75,7 +75,7 @@ var score = [
       },
       {
         name: "size",
-        duration: 20,
+        duration: 19.5,
         startTextLimit: 9,
         endTextLimit: 3.5,
         startSpeed: 0.4,
@@ -83,7 +83,7 @@ var score = [
       },
       {
         name: "multinumbers",
-        duration: 30,
+        duration: 29.5,
         region: "none",
         textLimit: 2,
         startSpeed: 1.5,
@@ -113,10 +113,10 @@ var score = [
     sections: [
       { name: "in", duration: 12, region: "Sweden" },
       { name: "in", duration: 16, region: "Europe" },
-      { name: "in", duration: 23, region: "none" },
+      { name: "in", duration: 20, region: "none" },
       { name: "out", duration: 12, region: "Sweden" },
       { name: "out", duration: 16, region: "Europe" },
-      { name: "out", duration: 24.5, region: "none" },
+      { name: "out", duration: 22, region: "none" },
       { name: "fade out", duration: 4 },
     ],
   },
@@ -130,7 +130,7 @@ var score = [
   {
     name: "ports",
     sections: [
-      { name: "network", duration: 12, pullBackCoeff: 10.0, textActive: true },
+      { name: "network", duration: 11.5, pullBackCoeff: 10.0, textActive: true },
       { name: "add nodes", maxDistance: 60, minDistance: 50 },
       { name: "packets", duration: 5, pullBackCoeff: 10.0, textActive: false },
       { name: "network", duration: 5, pullBackCoeff: 10.0, textActive: false },
