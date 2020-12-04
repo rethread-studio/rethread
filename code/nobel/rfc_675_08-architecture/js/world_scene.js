@@ -1109,7 +1109,8 @@ class CountryManager {
                 const newPath = new Path();
                 const randomX = random(canvasX)
 
-                const goalPoint = closeToTarget ? { x: 500, y: 129 } : { x: randomX - 10, y: country.pos.end.y };
+                const goalY = y > canvasY / 2 ? -100 : canvasY + 100;
+                const goalPoint = closeToTarget ? { x: 500, y: goalY } : { x: randomX - 10, y: goalY };
 
                 newPath.addPoint(randomX, y - 10);
                 newPath.addPoint(goalPoint.x, goalPoint.y);
