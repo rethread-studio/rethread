@@ -331,9 +331,9 @@ class WorldScene extends Scene {
         }
 
         this.fontSize = {
-            tittle: 36 * subsampling,
+            tittle: 28 * subsampling,
             number: 16 * subsampling,
-            countries: 18 * subsampling,
+            countries: 24 * subsampling,
         }
 
 
@@ -520,7 +520,7 @@ class DashBoard {
         this.packages = 0;
         this.size = 0;
         this.counter = 0;
-        this.tick = 2000;
+        this.tick = 2500;
         this.time = Date.now() + this.tick;
         this.showTick = true;
 
@@ -573,17 +573,17 @@ class DashBoard {
     display() {
 
 
+        if (this.initTime == 0 && this.playhead.countdown > 0) this.initTime = this.playhead.countdown
+        this.counter += 10;
         if (this.displayMessage) {
             if (this.showBackground) {
                 fill(0, 0, 0, 80);
                 rect(0, 0, canvasX, canvasY)
                 this.updateTickTime();
+                this.writeTittle();
+                this.writeLocation();
             }
-            if (this.initTime == 0 && this.playhead.countdown > 0) this.initTime = this.playhead.countdown
-            this.counter += 10;
-            this.writeTittle();
             this.writePackages();
-            this.writeLocation();
         }
 
         // this.writeSize();
@@ -651,9 +651,10 @@ class DashBoard {
         textAlign(CENTER);
         textFont(this.font);
         this.counter = this.counter > this.packages ? this.packages : this.counter;
-        if (this.counter != 0) text(this.counter, canvasX / 2, this.positions.col.c3 + this.positions.padding.top + 3 * subsampling);
+        const extraSpace = this.showBackground ? this.positions.padding.top : 0
+        if (this.counter != 0) text(this.counter, canvasX / 2, this.positions.col.c3 + extraSpace);
         const message = this.numCountries == 1 ? " COUNTRY" : " COUNTRIES"
-        if (this.numCountries != 0) text(this.numCountries + message, canvasX / 2, this.positions.col.c4 + this.positions.padding.top + 3 * subsampling);
+        if (this.numCountries != 0) text(this.numCountries + message, canvasX / 2, this.positions.col.c4 + extraSpace);
 
     }
 
@@ -1217,7 +1218,7 @@ class CountryManager {
         // path.addPoint(this.positions["P" + place].init.x - 1, this.positions["P" + place].init.y);
         // path.addPoint(this.positions["P" + place].end.x, this.positions["P" + place].end.y);
         //ADDS A COUNTRY ELEM
-        const country = new Country(points[0].x, points[0].y, this.colorPallete, points[points.length - 1], position, coutryName, this.font)
+        const country = new Country(points[0].x, points[0].y, this.colorPallete, points[points.length - 1], position, coutryName, this.font, this.fontSize)
         //ADD TEXT
         const name = coutryName;
         const IsoName = getCountryName(name);
@@ -1356,13 +1357,14 @@ class Path {
 
 class Country {
 
-    constructor(x, y, colorPallete, goalPos, refPoint, name, font) {
+    constructor(x, y, colorPallete, goalPos, refPoint, name, font, fontSize) {
         this.colorPallete = colorPallete;
         this.acceleration = createVector(0, 0);
         this.velocity = createVector(2, 0);
         this.position = createVector(x, y);
         this.initPos = createVector(x, y);
         this.countryName = name;
+        this.fontSize = fontSize
 
         this.r = 1.0; // Half the width of veihcle's back side
         this.maxspeed = random(0.5, 2) * subsampling//random(0.0005, 0.5)//random(0.00001, 0.004); //
@@ -1562,7 +1564,7 @@ class Country {
                 let c = lerpColor(c1, c2, inter);
                 fill(c);
                 textFont('sans');
-                textSize(12 * subsampling);
+                textSize(12 * subsampling);//this.fontSize.countries
                 textAlign(CENTER, CENTER);
                 textFont(this.font);
                 text(this.countryName.toUpperCase(), 0, -5 * subsampling);

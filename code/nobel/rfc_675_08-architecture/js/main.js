@@ -1,7 +1,7 @@
 p5.disableFriendlyErrors = true;
 
 // GLOBAL GENERAL STATE
-let drawWindows = false; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
+let drawWindows = true; // Set this to false for the real event, we don't need to waste GPU resources on drawing the windows when they're real
 var drawFPS = false;
 var fps = 0;
 var doGlitch = true;
@@ -219,7 +219,7 @@ function preload() {
   sceneTitles.set("numbers", loadImage("assets/img/titles/numbers.png"))
   sceneTitles.set("ports", loadImage("assets/img/titles/ports.png"))
   sceneTitles.set("drops", loadImage("assets/img/titles/drops.png"))
-  
+
 } // End Preload
 
 function setup() {
@@ -250,7 +250,7 @@ function setup() {
   }
 
   // Add the title duration to the total duration of each scene
-  for(let mvt in playhead.score) {
+  for (let mvt in playhead.score) {
     mvt.totalDuration += titleDuration;
   }
 } // End setup
@@ -278,8 +278,8 @@ function draw() {
   }
   let dt = now - lastNow;
 
-  glitchMaxIndex += dt*0.04;
-  if(glitchMaxIndex > allSceneImages.length) {
+  glitchMaxIndex += dt * 0.04;
+  if (glitchMaxIndex > allSceneImages.length) {
     glitchMaxIndex = allSceneImages.length;
   }
 
@@ -392,13 +392,13 @@ function draw() {
   if (playhead.state == "before start") {
   } else if (playhead.state == "playing") {
     let timeFromStartOfSection = playhead.score[playhead.scoreIndex].totalDuration - playhead.countdown;
-    if( timeFromStartOfSection > delayBeforeTitle
+    if (timeFromStartOfSection > delayBeforeTitle
       && timeFromStartOfSection < delayBeforeTitle + titleDuration
       && sceneTitles.has(playhead.currentSceneName)
     ) {
       let titleImg = sceneTitles.get(playhead.currentSceneName);
-      let alpha = ((timeFromStartOfSection - delayBeforeTitle)/titleDuration) * 2;
-      
+      let alpha = ((timeFromStartOfSection - delayBeforeTitle) / titleDuration) * 2;
+
       drawingContext.globalAlpha = alpha;
       image(titleImg, 0, 0);
       drawingContext.globalAlpha = Math.pow(Math.cos(alpha * Math.PI) * 0.5 + 0.5, 4.0);
@@ -408,7 +408,7 @@ function draw() {
     } else {
       playhead.currentScene.draw(dt);
 
-      if (doGlitch 
+      if (doGlitch
         && playhead.currentSceneName != "intro"
         && Math.random() > glitchProb
       ) {
