@@ -422,7 +422,17 @@ function draw() {
     if (playhead.fadingInScene != undefined) {
       if (playhead.currentScene.zIndex() > playhead.fadingInScene.zIndex()) {
         if (playhead.fadingInScene != undefined) {
-          playhead.fadingInScene.draw(dt);
+          if(sceneTitles.has(playhead.fadingInSceneName)) {
+            let fadeProgress = 1.0 - (playhead.countdown / playhead.score[playhead.scoreIndex].fadeOutDuration);
+            let titleImg = sceneTitles.get(playhead.fadingInSceneName);
+            image(titleImg, 0, 0);
+            drawingContext.globalAlpha = Math.pow(fadeProgress, 4.0);
+            colorMode(HSL, 100);
+            background(0, 100, 100);
+            drawingContext.globalAlpha = 1.0;
+          } else {
+            playhead.fadingInScene.draw(dt);
+          }
         }
         playhead.currentScene.draw(dt);
       } else {
