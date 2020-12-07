@@ -1,15 +1,22 @@
 
 f = File.new("osc_log.txt".resolveRelative, "w");
+~continents = Set[];
 o = OSCFunc({ arg msg, time, addr, recvPort;
 	var len = msg[1].asInteger,
 	out = msg[2] == 1,
 	local_port = msg[3],
 	remote_port = msg[4],
-	country = msg[5],
-	continent = msg[6];
+	continent = msg[5],
+	country = msg[6];
 	~allPackets.add(msg);
 	// [msg, time, addr, recvPort].postln;
 	// f.write("len: " + len + "out: " + out + " country: " + country + "continent: " + continent + "\n");
+	// ("len: " + len + "out: " + out + " country: " + country + "continent: " + continent).postln;
+	if(~continents.includes(continent) == false, {
+		~continents.add(continent);
+		continent.postln;
+	});
+
 	/*Synth(\tick2,
 		[
 			\freq, rrand(10000, 11000),
@@ -22,8 +29,9 @@ o = OSCFunc({ arg msg, time, addr, recvPort;
 		]
 	);*/
 	~capacitors.do{|cap|
-		cap.registerPacket();
+		cap.registerPacket(country, continent);
 	};
+	~metrics.registerMetric(out, country, continent);
 	// Synth(\write_noise, [\bufnum, ~noiseBuf, \len, len, \time, ~now.() - ~startTime]);
 	Synth(\write_noise2, [\bufnum, ~noiseBuf, \len, len, \time, ~now.() - ~startTime, \minFreq, ~glitchMinFreq, \maxFreq, ~glitchMaxFreq, \rangeCurve, ~glitchRangeCurve]);
 }, '/data');
