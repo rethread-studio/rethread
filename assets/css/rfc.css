@@ -63,6 +63,11 @@ body#RFC .spotlight .image{
     margin: 0 20px;
 }
 
+.no-margin{
+    margin:10px 0;
+}
+
+
 .tooltip{
     opacity: 0;
     position: absolute;
@@ -117,4 +122,65 @@ body#RFC #movements img{
         border-radius: 50%;
         margin-left: 30px;
     
+}
+.dayDate path{
+    stroke:none;
+}
+.dayDate line{
+    stroke:none;
+}
+
+.dayDate text{
+    font-size:16px;
+}
+
+
+
+.titleDate{
+    font-size:20px;
+    font-weight: 500;
+    fill:black;
+}
+
+.titleNumber{
+    font-size:20px;
+    font-weight: 500;
+    fill:black;
+}
+
+.mainTittle{
+    font-size: 30px;
+}
+
+.triangle{
+    fill:#1a0016;
+}
+
+@media screen and (max-width: 480px) {
+
+    body#RFC .content{
+        padding: 10px 50px;
+    }
+    body#RFC h1{
+        font-size: 2em!important;
+        margin-bottom: 30px;
+    }
+
+    body#RFC span{
+        font-size: 1em!important;
+        /* margin-bottom: 30px; */
+    }
+
+    .mainTittle{
+        font-size: 20px;
+    }
+}
+
+@media screen and (max-width: 736px) {
+
+}
+
+@media screen and (max-width: 736px) and (orientation: portrait) {
+
+
 }

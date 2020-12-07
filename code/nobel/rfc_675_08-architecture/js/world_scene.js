@@ -86,7 +86,35 @@ class WorldScene extends Scene {
             "Korea (South)",
             "Taiwan",
             "Thailand",
-            "Viet Nam"
+            "Viet Nam",
+            "Armenia",
+            "Azerbaijan",
+            "Bahrain",
+            "Bangladesh",
+            "Bhutan",
+            "Brunei",
+            "Cambodia",
+            "China",
+            "Cyprus",
+            "Georgia",
+            "Jordan",
+            "Kazakhstan",
+            "Kuwait",
+            "Kyrgyztan",
+            "Laos",
+            "Lebanon",
+            "Malaysia",
+            "Maldvives",
+            "Mongolia",
+            "Myanmar",
+            "Nepal",
+            "Oman",
+            "Pakistan",
+            "Palestine",
+            "Qatar",
+            "Singapore",
+            "Sri Lanka",
+            "Syria"
         ]
         this.afr_countries = [
             "Algeria",
@@ -303,9 +331,9 @@ class WorldScene extends Scene {
         }
 
         this.fontSize = {
-            tittle: 36 * subsampling,
+            tittle: 28 * subsampling,
             number: 16 * subsampling,
-            countries: 18 * subsampling,
+            countries: 24 * subsampling,
         }
 
 
@@ -397,6 +425,7 @@ class WorldScene extends Scene {
                             this.dashBoard.changeLocation(this.focusLocation[this.focusRegion].label)
                             this.dashBoard.updateInitTime(this.playhead.countdown)
                             this.dashBoard.cleanNumCountries();
+                            this.dashBoard.cleanPackagesNum();
                             this.dashBoard.changeDirection(this.sections[this.playhead.sectionIndex].direction)
                             this.dashBoard.showMessage(true);
                         }
@@ -492,7 +521,7 @@ class DashBoard {
         this.packages = 0;
         this.size = 0;
         this.counter = 0;
-        this.tick = 2000;
+        this.tick = 3000;
         this.time = Date.now() + this.tick;
         this.showTick = true;
 
@@ -545,17 +574,17 @@ class DashBoard {
     display() {
 
 
+        if (this.initTime == 0 && this.playhead.countdown > 0) this.initTime = this.playhead.countdown
+        this.counter += 10;
         if (this.displayMessage) {
             if (this.showBackground) {
                 fill(0, 0, 0, 80);
                 rect(0, 0, canvasX, canvasY)
                 this.updateTickTime();
+                this.writeTittle();
+                this.writeLocation();
             }
-            if (this.initTime == 0 && this.playhead.countdown > 0) this.initTime = this.playhead.countdown
-            this.counter += 10;
-            this.writeTittle();
             this.writePackages();
-            this.writeLocation();
         }
 
         // this.writeSize();
@@ -564,7 +593,9 @@ class DashBoard {
     }
 
 
-
+    cleanPackagesNum() {
+        this.packages = 0;
+    }
     addPackage(num) {
         this.packages += num;
     }
@@ -623,9 +654,10 @@ class DashBoard {
         textAlign(CENTER);
         textFont(this.font);
         this.counter = this.counter > this.packages ? this.packages : this.counter;
-        if (this.counter != 0) text(this.counter, canvasX / 2, this.positions.col.c3 + this.positions.padding.top + 3 * subsampling);
-
-        if (this.numCountries != 0) text(this.numCountries, canvasX / 2, this.positions.col.c4 + this.positions.padding.top + 3 * subsampling);
+        const extraSpace = this.showBackground ? this.positions.padding.top : 0
+        if (this.counter != 0) text(this.counter, canvasX / 2, this.positions.col.c3 + extraSpace);
+        const message = this.numCountries == 1 ? " COUNTRY" : " COUNTRIES"
+        if (this.numCountries != 0) text(this.numCountries + message, canvasX / 2, this.positions.col.c4 + extraSpace);
 
     }
 
@@ -643,8 +675,8 @@ class DashBoard {
     //Write the size
     writeLocation() {
         // this.playhead
-        const c1 = this.fontSize.tittle - 4;
-        const c2 = 10;
+        const c1 = this.fontSize.tittle;
+        const c2 = 20;
         const count = this.playhead.countdown > this.initTime ? this.initTime : this.playhead.countdown;
         let inter = map(count, this.initTime, 0, 0, 1);
 
@@ -1080,7 +1112,8 @@ class CountryManager {
                 const newPath = new Path();
                 const randomX = random(canvasX)
 
-                const goalPoint = closeToTarget ? { x: 500, y: 129 } : { x: randomX - 10, y: country.pos.end.y };
+                const goalY = y > canvasY / 2 ? -100 : canvasY + 100;
+                const goalPoint = closeToTarget ? { x: 500, y: goalY } : { x: randomX - 10, y: goalY };
 
                 newPath.addPoint(randomX, y - 10);
                 newPath.addPoint(goalPoint.x, goalPoint.y);
@@ -1189,7 +1222,7 @@ class CountryManager {
         // path.addPoint(this.positions["P" + place].init.x - 1, this.positions["P" + place].init.y);
         // path.addPoint(this.positions["P" + place].end.x, this.positions["P" + place].end.y);
         //ADDS A COUNTRY ELEM
-        const country = new Country(points[0].x, points[0].y, this.colorPallete, points[points.length - 1], position, coutryName, this.font)
+        const country = new Country(points[0].x, points[0].y, this.colorPallete, points[points.length - 1], position, coutryName, this.font, this.fontSize)
         //ADD TEXT
         const name = coutryName;
         const IsoName = getCountryName(name);
@@ -1328,13 +1361,14 @@ class Path {
 
 class Country {
 
-    constructor(x, y, colorPallete, goalPos, refPoint, name, font) {
+    constructor(x, y, colorPallete, goalPos, refPoint, name, font, fontSize) {
         this.colorPallete = colorPallete;
         this.acceleration = createVector(0, 0);
         this.velocity = createVector(2, 0);
         this.position = createVector(x, y);
         this.initPos = createVector(x, y);
         this.countryName = name;
+        this.fontSize = fontSize
 
         this.r = 1.0; // Half the width of veihcle's back side
         this.maxspeed = random(0.5, 2) * subsampling//random(0.0005, 0.5)//random(0.00001, 0.004); //
@@ -1534,7 +1568,7 @@ class Country {
                 let c = lerpColor(c1, c2, inter);
                 fill(c);
                 textFont('sans');
-                textSize(12 * subsampling);
+                textSize(16 * subsampling);//this.fontSize.countries
                 textAlign(CENTER, CENTER);
                 textFont(this.font);
                 text(this.countryName.toUpperCase(), 0, -5 * subsampling);
@@ -1741,8 +1775,8 @@ class Package {
             let inter = map(this.position.y, 129 * subsampling, this.initPos.y, 0, 1);
             let c = lerpColor(c1, c2, inter);
             fill(c);
-            stroke(this.colorPallete.white.r, this.colorPallete.white.g, this.colorPallete.white.b, 90);
-            strokeWeight(0.5);
+            // stroke(this.colorPallete.white.r, this.colorPallete.white.g, this.colorPallete.white.b, 90);
+            // strokeWeight(0.5);
             // fill(r, g, b, 100);
             // noStroke()
             push();
@@ -1752,13 +1786,16 @@ class Package {
             const limitSize = 2 * subsampling;
             size = abs(size)
             size = size < limitSize ? limitSize : size;
-            rect(0, 0, this.r / 4, this.r * 2)
+            rect(0, 0, this.r / 2, this.r * 2)
             // circle(0, 0, size);
             // size = size < limitSize ? limitSize : size;
+            // const displacement = 10;
             // beginShape();
-            // vertex(0, -size); // Arrow pointing upp
-            // vertex(-size, size); // Lower left corner
-            // vertex(size, size); // Lower right corner
+            // vertex(0, 0); // Arrow pointing upp
+            // vertex(0, size);
+            // vertex(size / 2, (size + displacement)); // Lower left corner
+            // vertex(size / 2, displacement); // Lower right corner
+            // vertex(0, 0);
             // endShape(CLOSE);
             pop();
         }

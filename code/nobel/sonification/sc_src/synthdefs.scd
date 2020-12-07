@@ -8,7 +8,7 @@ SynthDef(\long_sine, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 SynthDef(\tick2, {
-	var sig, env, rq = \rq.kr(0.1);
+	var sig, env, rq = \rq.kr(0.05);
 	env = Env.perc(\atk.kr(0), \rel.kr(0.05), curve: [\c0.kr(-4), \c1.kr(-4)]).ar(2);
 	sig = Impulse.ar(0);
 	sig = sig * 0.5;
@@ -36,7 +36,7 @@ SynthDef(\thump, {
 	var sig, env, freq = \freq.kr(220);
 	env = Env.perc(\atk.kr(0.1), \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
 	sig = Resonz.ar(PinkNoise.ar(mul: env.pow(100) * 20), freq, 0.007, mul: 20);
-	sig = sig * \amp.kr(0.5);
+	sig = sig * \amp.kr(0.5) * env;
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
 }).add;
@@ -110,6 +110,39 @@ SynthDef(\morse, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 
+SynthDef(\glissPing, {
+	var sig, env, startFreq = \startFreq.kr(440), endFreq = \endFreq.kr(440), atk = \atk.kr(0.1), rel = \rel.kr(2), panPos, azimPos, angle, elevation = 0, freq, glissTimeRatio = Rand(0.3, 0.7), unison = 4, detune = 1.008;
+	// env = Env.perc(atk, rel, curve: [\c0.kr(4), \c1.kr(-4)]).ar(2);
+	rel = rel * 0.5; // The envelopes use rel * 2 so this makes it easier to set the rel to the duration of the whole synthdef
+	env = Env( levels: [0, 1, 0.04, 0.5, 1, 0], times: [atk, rel*0.7, rel*0.3 - atk, atk, rel],
+		curve: [2, -2, 1, -2, -2]).ar(2);
+	freq = Env(
+		levels: [startFreq, startFreq, endFreq, endFreq],
+		times: [atk + (rel*(1.0 - glissTimeRatio)), rel*glissTimeRatio, rel],
+		curve: [0, -1, 0]
+	).ar();
+	freq = freq * ({SinOsc.kr(LFNoise1.kr(2).range(2.0, 8.5)).range(1.0/detune, detune)}!unison);
+	// Något noisigare än sinusvåg?
+	sig = Resonz.ar(PinkNoise.ar(), freq, 0.001) * 100;
+	sig = sig + SinOsc.ar(freq, mul: 0.5);
+	// sig = sig + (Pulse.ar(freq, mul: 0.005) * LFNoise1.ar(2).range(0.0, 1.0));
+	sig = sig + (Saw.ar(freq, mul: \sawAmp.kr(0.01)) * LFNoise1.ar(2.5).range(0.0, 1.0));
+	sig = Mix(sig)/unison;
+	sig = LPF.ar(sig, freq * 4);
+	// panPos = Line.kr(\startPan.kr(-1), \endPan.kr(1), atk+rel);
+	angle = pi/2;
+	azimPos = Line.kr(\startPan.kr(-1) * (-pi), \endPan.kr(1) * (-pi), atk+rel+rel);
+	// ------------------------------------------------------------
+    // encode
+	sig = FoaEncode.ar(sig, ~foaEncoder);
+
+    // ------------------------------------------------------------
+    // transform
+	sig = FoaTransform.ar(sig, 'push', angle, azimPos);
+	sig = sig * env * \amp.kr(0.5);
+	Out.ar(\out.kr(0), sig);
+}).add;
+
 SynthDef(\write_noise, {
 	var sig, len = \len.kr(1), time = \time.kr(0), buf = \bufnum.kr(0),
 	freq = (1.0 - (len/1000000).min(1.0)).pow(40.0) * 10000 + 2, pos = (time*SampleRate.ir) % BufFrames.kr(buf),
@@ -141,12 +174,116 @@ SynthDef(\decoder, { | in = 10, out = 0 |
 }).add;
 
 SynthDef(\loop_buffer, {
-	var sig, buf = \bufnum.kr(0), pos;
+	var sig, buf = \bufnum.kr(0), pos, windspeed, gust, squall, amp;
 	pos = Phasor.ar(0, 1.0, 0, BufFrames.kr(buf));
 	sig = BufRd.ar(1, buf, pos);
 	sig = LeakDC.ar(sig);
-	sig = (sig * 5).tanh * 0.25;
-	sig = Limiter.ar(sig) * \amp.kr(0.5);
+	sig = (sig * 2).tanh * 0.5;
+	sig = Limiter.ar(sig);
+
+	amp = Lag2.kr(\amp.kr(0.5), \ampLag.kr(0.5));
+	amp = amp * 0.7;
+	gust = LFNoise1.ar(0.5) * 0.4;
+	gust = gust * ((amp + 0.5).pow(2) - 0.125);
+
+	// fig 41.8
+	// squall = HPF.ar(LPF.ar(WhiteNoise.ar(), 3), 0) * 20;
+	squall = LFNoise1.ar(5) * 0.25;
+	squall = squall * ((amp.max(0.2) - 0.2) * 3).pow(2);
+
+	windspeed = gust + squall + amp;
+	windspeed = windspeed.clip(0, 1);
+
+	sig = sig * windspeed;
+
+	// sig = sig * LFNoise2.kr(LFNoise1.kr(1).range(0.3, 1.0)).range(0.5, 1.0);
+	sig = LPF.ar(sig, Lag2.kr(\lpfCutoff.kr(10000), \lpfLag.kr(5.0)));
 	sig = Pan2.ar(sig);
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+// transcribed from Designing Sound chapter on wind
+SynthDef(\wind, {
+	var sine, gust, squall, windspeed, noise, freq = \freq.kr(400), pan = \pan.kr(0),
+	sweptNoise, bp1, bp2, sig, leaves, delayedWindLeaves, howl, delayedWindHowl;
+	// sine = SinOsc.ar(0.1, 0, 0.25, 0.25); // sine between 0 and 0.5
+	// sine = LFNoise1.kr(1).range(0.0, 0.5);
+	sine = \activity.kr(0.0, \activityLag.kr(0.5));
+
+	// fig 41.7
+	// Maybe this would be better represented by something like a LFNoise1 or LFNoise2
+	// gust = HPF.ar(LPF.ar(WhiteNoise.ar(), 0.5), 0.0) * 50;
+	gust = LFNoise1.ar(0.5) * 0.5;
+	gust = gust * ((sine + 0.5).pow(2) - 0.125);
+
+	// fig 41.8
+	// squall = HPF.ar(LPF.ar(WhiteNoise.ar(), 3), 0) * 20;
+	squall = LFNoise1.ar(3) * 0.5;
+	squall = squall * ((sine.max(0.4) - 0.4) * 8).pow(2);
+
+	windspeed = gust + squall + sine;
+	windspeed = windspeed.clip(0, 1);
+
+
+	noise = WhiteNoise.ar();
+
+	// Unsure of whether the pd rzero~ has it's argument *=-1 or not, both sound good but different
+	sweptNoise = OneZero.ar(BPF.ar(noise, 800, 1) * windspeed, -1*(windspeed*0.6).clip(0, 0.099));
+	sweptNoise = sweptNoise * 0.2;
+	sweptNoise = Pan2.ar(sweptNoise);
+
+	bp1 = DelayL.ar(windspeed, 0.5, LFNoise1.kr(0.5).range(0.01, 0.5));
+	// 0.016 ~ 1/60 i.e. a q value of 60
+	bp1 = BPF.ar(noise, (bp1*(freq*0.1)) + freq, 0.016) * (bp1 + 0.12).pow(2);
+	bp1 = Pan2.ar(bp1 * 1.2, -0.4);
+
+	bp2 = DelayL.ar(windspeed, 0.5, LFNoise1.kr(0.5).range(0.01, 0.5));
+	// 0.016 ~ 1/60 i.e. a q value of 60
+	bp2 = BPF.ar(noise, (bp2*(freq*0.2)) + freq, 0.016) * bp2.pow(2);
+	bp2 = Pan2.ar(bp2 * 2, 0.2);
+
+	// tree leaves
+	/*delayedWindLeaves = LPF.ar(DelayN.ar(windspeed, 2, 2), 0.1);
+	leaves = 1 - (delayedWindLeaves * 0.4 + 0.3);
+	leaves = (noise.max(leaves) - leaves) * leaves;
+	leaves = LPF.ar(HPF.ar(leaves, 200), 4000);
+	leaves = leaves * delayedWindLeaves * 1.2;
+	leaves = Pan2.ar(leaves);*/
+
+	// howling wind
+	// delayedWindHowl = DelayN.ar(windspeed, 1, 0.1);
+	// delayedWindHowl = delayedWindHowl.clip(0.35, 0.6) - 0.35;
+	// delayedWindHowl = delayedWindHowl * pi * 2;
+	// howl = LPF.ar(delayedWindHowl.sin(), 0.5);
+	// howl = BPF.ar(noise, freq, 1/40) * howl * 2 * SinOsc.ar(howl*freq*0.5 + 30);
+	// Pan2.ar(howl, 0.8);
+
+	sig = (bp1 + bp2 + sweptNoise);
+	sig = LPF.ar(sig, \lpf_cutoff.kr(500, 4));
+	sig = Pan2.ar(sig * \amp.kr(1.0), pan);
+	// more stereo separation
+	sig = [DelayN.ar(sig[0], 0.1, (pan*0.01*(-1)).max(0)), DelayN.ar(sig[0], 0.1, (pan*0.01).max(0))];
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\speedOutput, {
+	var sig;
+	sig = In.ar(\in.kr(10), 2);
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\speedNoiseSwitchMono, {
+	var sig, sr = [18, 130, 199, 1000, 1583, 1900, 12500];
+	sr = Demand.kr(\t_switch.kr(0) + Impulse.kr(0), 0, Dxrand(sr, inf));
+	sig = Decimator.ar(PinkNoise.ar(), sr, 3);
+	sig = sig * \amp.kr(0.5);
+	sig = sig!2;
+	Out.ar(\out.kr(0), sig);
+}).add;
+SynthDef(\speedNoiseSwitchStereo, {
+	var sig, sr = [18, 130, 199, 1000, 1583, 1900, 12500];
+	sr = Demand.kr(\t_switch.kr(0) + Impulse.kr(0), 0, Dxrand(sr, inf));
+	sig = Decimator.ar({PinkNoise.ar()}!2, sr, 3);
+	sig = sig * \amp.kr(0.5);
 	Out.ar(\out.kr(0), sig);
 }).add;
