@@ -23,14 +23,14 @@ var score = [
   {
     name: "intro",
     sections: [
-      { name: "in", duration: 3, direction: "in" },
+      { name: "in", duration: 6, direction: "in" },
       { name: "fade out", duration: 1.5, direction: "in" },
     ],
   },
   {
     name: "world",
     sections: [
-      { name: "SWEDEN", duration: 15, direction: "in" },
+      { name: "SWEDEN", duration: 10, direction: "in" },
       { name: "EU", duration: 18, direction: "in" },
       { name: "AME", duration: 18, direction: "in" },
       { name: "OC", duration: 10, direction: "in" },
@@ -196,7 +196,7 @@ var score = [
   {
     name: "outro",
     sections: [
-      { name: "in", duration: 4 },
+      { name: "in", duration: 10 }, // The outro shouldn't fade out
       { name: "fade out", duration: 1.5 },
     ],
   },
