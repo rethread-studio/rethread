@@ -30,11 +30,7 @@ var score = [
   {
     name: "world",
     sections: [
-<<<<<<< HEAD
-      { name: "SWEDEN", duration: 10, direction: "in" },
-=======
       { name: "SWEDEN", duration: 8, direction: "in" },
->>>>>>> 81cc0ce8ebf0274298d58d391dfdc750b0b3094d
       { name: "EU", duration: 18, direction: "in" },
       { name: "AME", duration: 15, direction: "in" },
       { name: "AS", duration: 15, direction: "in" },
