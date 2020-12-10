@@ -8,7 +8,7 @@
 		trigFunc: trigFunc,
 		filter: nil,
 		filterValue: nil,
-		registerPacket: { | self, country, continent |
+		registerPacket: { | self, country, continent, port1, port2 |
 			var doRegisterPacket = false;
 			if(self.filter == nil, {
 				doRegisterPacket = true;
@@ -23,7 +23,14 @@
 						if(continent == self.filterValue) {
 							doRegisterPacket = true;
 						};
-					}
+					},
+					\port, {
+						if(port1 == self.filterValue
+							|| (port2 == self.filterValue)
+						) {
+							doRegisterPacket = true;
+						};
+					},
 				);
 			});
 			if(doRegisterPacket == true, {
@@ -45,20 +52,36 @@
 	)
 };
 
-~clearCapacitors = {
-	~capacitors = List[];
+~clearCapacitors = { | type = \default |
+	if(type == \default, {
+		~capacitors = Environment.new(know: true);
+		~capacitors.dict = Dictionary[];
+		~capacitors.addToDict = { | self, capacitor, key = \default |
+			var list = self.dict.at(key);
+			if(list == nil, {
+				list = List[];
+				list.add(capacitor);
+				self.dict.put(key, list);
+			}, {
+				list.add(capacitor);
+			});
+		};
+	}, {
+		~capacitors.dict.put(type, List[]);
+	});
+
 };
 
 ~addTestCapacitors = {
 	// Create capacitors
-	~capacitors.add(~makeCapacitor.(500, {
+	~capacitors.addToDict(~makeCapacitor.(500, {
 		Synth(\thump, [\freq, [200, 400, 300, 500, 600, 700].choose, \out, ~revBus]);
 	}));
-	~capacitors.add(~makeCapacitor.(1000, {
+	~capacitors.addToDict(~makeCapacitor.(1000, {
 		Synth(\softy, [\freq, [200, 400, 300, 500, 600, 700].choose, \rel, rrand(2, 5), \out, ~revBus]);
 	}));
 
-	~capacitors.add(~makeCapacitor.(100, {
+	~capacitors.addToDict(~makeCapacitor.(100, {
 		Synth(\tick2,
 			[
 				\freq, rrand(5000, 6000),
@@ -71,7 +94,7 @@
 			]
 		);
 	}));
-	~capacitors.add(~makeCapacitor.(50, {
+	~capacitors.addToDict(~makeCapacitor.(50, {
 		Synth(\tick2,
 			[
 				\freq, rrand(2500, 3500),
@@ -84,7 +107,7 @@
 			]
 		);
 	}));
-	~capacitors.add(~makeCapacitor.(200, {
+	~capacitors.addToDict(~makeCapacitor.(200, {
 		Synth(\tick2,
 			[
 				\freq, rrand(10000, 11000),

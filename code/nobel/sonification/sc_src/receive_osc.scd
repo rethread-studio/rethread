@@ -28,8 +28,13 @@ o = OSCFunc({ arg msg, time, addr, recvPort;
 			\pan, rrand(-0.5, 0.5),
 		]
 	);*/
-	~capacitors.do{|cap|
-		cap.registerPacket(country, continent);
+	~capacitors.dict.values.do{|list|
+		list.do{|cap|
+			cap.registerPacket(country, continent, local_port, remote_port);
+		};
+	};
+	~sonificationFunctions.do{ | func |
+		func.(len, out, local_port, remote_port, country, continent);
 	};
 	~metrics.registerMetric(out, country, continent);
 	// Synth(\write_noise, [\bufnum, ~noiseBuf, \len, len, \time, ~now.() - ~startTime]);

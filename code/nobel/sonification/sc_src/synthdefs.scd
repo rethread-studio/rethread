@@ -1,9 +1,9 @@
 SynthDef(\long_sine, {
-	var sig, env, freq = \freq.kr(220);
+	var sig, env, freq = \freq.kr(220), length = \length.kr(5), pan = \pan.kr(0);
 
-	env = Env.sine(\length.kr(5)).kr(2);
+	env = Env.sine(length).kr(2);
 	sig = SinOsc.ar(freq) * \amp.kr(0.2) * env * 0.1;
-	sig = Pan2.ar(sig, \pan.kr(0));
+	sig = Pan2.ar(sig, Line.kr(pan, pan.neg, length));
 
 	Out.ar(\out.kr(0), sig);
 }).add;
@@ -33,11 +33,11 @@ SynthDef(\gust, {
 
 
 SynthDef(\thump, {
-	var sig, env, freq = \freq.kr(220);
-	env = Env.perc(\atk.kr(0.1), \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
+	var sig, env, freq = \freq.kr(220), pan = \pan.kr(0), rel = \rel.kr(29);
+	env = Env.perc(\atk.kr(0.1), rel, curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
 	sig = Resonz.ar(PinkNoise.ar(mul: env.pow(100) * 20), freq, 0.007, mul: 20);
 	sig = sig * \amp.kr(0.5) * env;
-	sig = Pan2.ar(sig, \pan.kr(0));
+	sig = Pan2.ar(sig, Line.kr(pan, pan.neg, rel));
 	Out.ar(\out.kr(0), sig);
 }).add;
 
@@ -45,7 +45,7 @@ SynthDef(\softy, {
 	var sig, env, freq = \freq.kr(220);
 	env = Env.perc(\atk.kr(0.1), \rel.kr(2), curve: [\c0.kr(\cub), \c1.kr(\sine)]).kr(2);
 	sig = Resonz.ar(PinkNoise.ar(mul: env), freq, 0.007, mul: 20);
-	sig = sig * \amp.kr(0.5);
+	sig = sig * \amp.kr(0.5) * env;
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
 }).add;
@@ -56,9 +56,9 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 	sig = In.ar(\in.kr(10), 2);
 	mix = mix.lag(\mixLag.kr(10));
 
-	/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
-	wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
-	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
+	wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
+	// wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);
+	// wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
 
 	sig = (sig * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
@@ -194,7 +194,7 @@ SynthDef(\loop_buffer, {
 	windspeed = gust + squall + amp;
 	windspeed = windspeed.clip(0, 1);
 
-	sig = sig * windspeed;
+	sig = sig * windspeed * amp;
 
 	// sig = sig * LFNoise2.kr(LFNoise1.kr(1).range(0.3, 1.0)).range(0.5, 1.0);
 	sig = LPF.ar(sig, Lag2.kr(\lpfCutoff.kr(10000), \lpfLag.kr(5.0)));
@@ -285,5 +285,58 @@ SynthDef(\speedNoiseSwitchStereo, {
 	sr = Demand.kr(\t_switch.kr(0) + Impulse.kr(0), 0, Dxrand(sr, inf));
 	sig = Decimator.ar({PinkNoise.ar()}!2, sr, 3);
 	sig = sig * \amp.kr(0.5);
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\tickChannel, {
+	var sig = In.ar(\in.kr(10), 2);
+	sig = LPF.ar(sig, \lpfCutoff.kr(7000));
+
+	Out.ar(\out.kr(0), sig);
+	Out.ar(\revOut.kr(12), sig * \revSend.kr(0.2));
+}).add;
+
+// by rwentk from https://sccode.org/1-4Rh
+SynthDef(\StereoModDelay, { arg
+    //Chorus delay with EQ in the feedback loop
+    //for that vintage tape echo mood
+
+	bufferL,
+	bufferR,
+	time = 1.5,
+	fb = 0.8,
+	modRate = 5.5,
+	modDepth = 0.0005,
+	eqFc = 800,
+	eqQ = 3;
+
+	var signal, tapPhase, tap, tapPhaseL, tapPhaseR, tapL, tapR;
+	var timeMod, eqMod;
+
+	//Drop the input slightly to avoid clicky clipping
+	signal = 0.7*In.ar(\in.kr(18), 2);
+    signal = signal + LocalIn.ar(2);
+
+    timeMod = LFDNoise3.ar(modRate, modDepth);
+    eqMod = LFDNoise3.kr(1, 400);
+
+	tapPhaseL = DelTapWr.ar(bufferL, signal[0]);
+	tapL = DelTapRd.ar(bufferL, tapPhaseL, time+LFDNoise3.ar(modRate, modDepth), 2);
+	tapL = BBandPass.ar(tapL, eqFc+eqMod, eqQ);
+
+	tapPhaseR = DelTapWr.ar(bufferR, signal[1]);
+	tapR = DelTapRd.ar(bufferR, tapPhaseR, time+LFDNoise3.ar(modRate, modDepth), 2);
+	tapR = BBandPass.ar(tapR, eqFc+eqMod, eqQ);
+
+	//Restore the output level
+	Out.ar(0,[1.2*tapL, 1.2*tapR]);
+	LocalOut.ar(fb*[tapR, tapL]);
+}).add;
+
+SynthDef(\beep, {
+	var freq = \freq.kr(3000),
+	env = Env.perc(0, \length.kr(0.1)).ar(2),
+	sig = Pulse.ar(freq) * 0.1 * \amp.kr(1.0);
+	sig = sig!2;
 	Out.ar(\out.kr(0), sig);
 }).add;

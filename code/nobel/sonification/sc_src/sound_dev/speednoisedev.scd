@@ -28,3 +28,39 @@ SynthDef(\speedNoiseSwitchStereo, {
 a = Synth(\speedNoiseSwitchMono)
 a = Synth(\speedNoiseSwitchStereo)
 a.set(\t_switch, 1);
+
+(
+SynthDef(\beep, {
+	var freq = \freq.kr(3000),
+	env = Env.perc(0, \length.kr(0.1)).ar(2),
+	sig = Pulse.ar(freq) * 0.1 * \amp.kr(1.0);
+	sig = sig!2;
+	Out.ar(\out.kr(0), sig);
+}).play;
+)
+
+Synth(\beep, [\freq, 10000])
+Synth(\beep, [\freq, 10000, \length, 0.4])
+Synth(\beep, [\freq, 3000])
+
+(
+~highBeeps = 0;
+~lowBeeps = 0;
+~playBeeps = {
+	if(~highBeeps > 8, {
+		Synth(\beep, [\freq, 10000, \length, 0.4]);
+		~highBeeps = ~highBeeps - 32;
+	}, {
+		if(~highBeeps > 2, {
+			Synth(\beep, [\freq, 10000]);
+			~highBeeps = ~highBeeps - 4;
+		});
+	});
+
+	if(~lowBeeps > 8, {
+		Synth(\beep, [\freq, 3000]);
+		~lowBeeps = ~lowBeeps - 8;
+	}, {
+	});
+};
+)

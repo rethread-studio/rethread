@@ -80,10 +80,10 @@ s.waitForBoot({
 
 	s.sync();
 
+	~capacitors = List[];
 	"capacitor.scd".loadRelative;
-	~clearCapacitors.(); // Create a standard ~capacitors environment proto-object
 
-	~sonificationFunctionclearCapacitorss = List[];
+	~sonificationFunctions = List[];
 
 	~allPackets = List[];
 
@@ -171,19 +171,16 @@ s.waitForBoot({
 	~switchBassSource.(\saw);
 	~startShortBassSineBursts.();
 	// ======================================= WORLD
-	~startGlissMovementDuringWorld.(); // This will not wait internally
-	122.wait;
+	~startGlissMovementDuringWorld.(); // This will wait internally
+	~stopBassRev.(5.0);
+	~startBassNote.(1.0, 3.0);
+	~stopShortBassSineBursts.();
 
-	// Fade in a bit early
-	~glitchSynth.set(\ampLag, 4);
+	~glitchSynth.set(\ampLag, 3);
 	s.sync();
 	~glitchSynth.set(\amp, 1.0, \lpfCutoff, 1000);
-	~startBassNote.(1.0, 6.0);
-	4.wait;
-
-	~stopShortBassSineBursts.();
 	3.wait;
-	~glitchSynth.set(\ampLag, 15.0);
+	~glitchSynth.set(\ampLag, 7.0);
 	s.sync();
 	~glitchSynth.set(\amp, 0.01, \lpfCutoff, 3000);
 	~startBassReverb.(4.0);
@@ -193,16 +190,8 @@ s.waitForBoot({
 	~setBassNote.(~root);
 	// ======================================= NUMBERS
 	// TODO: Suddenly stop for a bar between sections
-	~beepOutBus = ~tapeBus;
-	~beepAmp = 0.2;
-	~playBeeps.();
-	~tickChannel.set(\lpfCutoff, 2000);
 	~startSpeedProcesses.();
-	10.wait;
-	~stopBeeps.();
-	~beepOutBus = ~revBus;
-	~beepAmp = 0.4;
-	9.wait;
+	19.wait;
 	~stopSpeedProceses.();
 	1.wait;
 	~startSpeedRandomCutoff.();
@@ -210,9 +199,7 @@ s.waitForBoot({
 	~startSpeedProcess1.();
 	~root = ~root + 22;
 	~setBassNote.(~root);
-	10.wait;
-	~playBeeps.();
-	10.wait;
+	20.wait;
 	// ~stopSpeedProceses.();
 	~startSpeedDecimatorNoise.(\speedNoiseSwitchMono, 40);
 	~root = ~root + 22;
@@ -230,17 +217,11 @@ s.waitForBoot({
 	2.wait;
 	~stopSpeedDecimatorNoise.();
 	~startSpeedDecimatorNoise.(\speedNoiseSwitchStereo, 90);
-	~addAdditionalBeepCapacitors.();
 	9.wait;
 	~stopSpeedDecimatorNoise.();
 	~root = ~root + 22;
 	~setBassNote.(~root);
-	10.wait;
-	~addWebBeepCapacitors.();
-	~beepOutBus = ~revBus;
-	7.wait;
-	~beepOutBus = ~tapeBus;
-	9.5.wait;
+	26.5.wait;
 	~root = ~root + 17;
 	~setBassNote.(~root);
 	~startBassNote.(0.8, 7.0);
@@ -248,7 +229,6 @@ s.waitForBoot({
 	3.wait;
 	~stopSpeedRandomCutoff.();
 	~stopSpeedProceses.();
-
 	2.wait;
 	// Fade out 10s
 	~glitchSynth.set(\ampLag, 5.0);
@@ -259,25 +239,15 @@ s.waitForBoot({
 	s.sync();
 	~glitchSynth.set(\amp, 0.6, \lpfCutoff, 3000);
 	5.wait;
-	~stopBeeps.();
 	// =================================== TRANSITION 3 + 2 s
 	~glitchSynth.set(\ampLag, 3.0);
 	s.sync();
 	~glitchSynth.set(\amp, 0.7, \lpfCutoff, 900);
 	3.wait;
 	~glitchSynth.set(\ampLag, 2.0);
-	s.sync();
-	~glitchSynth.set(\amp, 0.01, \lpfCutoff, 2000);
-	// ======================================= DROPS
-	~startDropsMovement.();
-
-
-	~startBassNote.(0.0, 10.0);
-	~glitchSynth.set(\ampLag, 10.0);
-	s.sync();
-	5.wait;
+	s.sync(); it;
 	~glitchSynth.set(\amp, 0.00, \lpfCutoff, 3000);
 }.fork;
 )
 
-~tickChannel.set(\lpfCutoff, 600);
+~tickChannel.set(\lpfCutoff, 7000);

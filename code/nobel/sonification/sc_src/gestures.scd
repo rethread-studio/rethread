@@ -45,19 +45,19 @@
 // -9 + 53 + 53 + 53
 ~octave = 5;
 ~activeChord = ~chordSweden;
-~root = 12;
 ~glissChordIndex = 0;
 ~glissGesture = { | duration, out = true |
 	{
 		var startFreq = ~s53.degreeToFreq(~stockholmPitch + ~root, 0.midicps, ~octave),
 		endFreq = ~s53.degreeToFreq(~activeChord[~glissChordIndex] + ~root, 0.midicps, ~octave),
 		endPan = rrand(0.4, 1.0) * [1, -1].choose,
-		centerPan = rrand(-0.2, 0.2);
+		centerPan = rrand(-0.2, 0.2),
+		amp = rrand(0.4, 0.9);
 		// out = [true, false].choose;
 		if(out, {
-			Synth(\glissPing, [\startFreq, startFreq, \endFreq, endFreq, \atk, 0.01, \rel, duration, \startPan, centerPan, \endPan, endPan + centerPan, \out, ~decodeBus]);
+			Synth(\glissPing, [\startFreq, startFreq, \endFreq, endFreq, \atk, 0.01, \rel, duration, \startPan, centerPan, \endPan, endPan + centerPan, \out, ~decodeBus, \amp, amp]);
 		}, {
-			Synth(\glissPing, [\startFreq, endFreq, \endFreq, startFreq, \atk, 0.01, \rel, 2, \startPan, endPan + centerPan, \endPan, centerPan, \out, ~decodeBus]);
+			Synth(\glissPing, [\startFreq, endFreq, \endFreq, startFreq, \atk, 0.2, \rel, duration, \startPan, endPan + centerPan, \endPan, centerPan, \out, ~decodeBus, \amp, amp]);
 		});
 		~glissChordIndex = ~glissChordIndex + 1;
 		if(~glissChordIndex >= ~activeChord.size) {
