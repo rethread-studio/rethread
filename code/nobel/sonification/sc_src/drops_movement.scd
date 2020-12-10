@@ -18,7 +18,7 @@
 					if(len < 100000, {
 						Synth(\thump, [\freq, freq, \out, ~tapeBus, \rel, 2, \amp, rrand(0.02, 0.035),\pan, rrand(-1.0, 1.0)]);
 					}, {
-						if(len < 300000, {
+						if(len < 250000, {
 							Synth(\softy, [\freq, freq, \out, ~revBus, \rel, len/100000, \pan, rrand(-0.3, 0.3)]);
 						}, {
 							var pan = rrand(0.7, 1.0) * [1, -1].choose;

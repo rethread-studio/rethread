@@ -46,13 +46,13 @@
 ~octave = 5;
 ~activeChord = ~chordSweden;
 ~glissChordIndex = 0;
-~glissGesture = { | duration, out = true |
+~glissGesture = { | duration, out = true, ampMod = 1.0 |
 	{
 		var startFreq = ~s53.degreeToFreq(~stockholmPitch + ~root, 0.midicps, ~octave),
 		endFreq = ~s53.degreeToFreq(~activeChord[~glissChordIndex] + ~root, 0.midicps, ~octave),
 		endPan = rrand(0.4, 1.0) * [1, -1].choose,
 		centerPan = rrand(-0.2, 0.2),
-		amp = rrand(0.4, 0.9);
+		amp = rrand(0.4, 0.9) * ampMod * 0.8;
 		// out = [true, false].choose;
 		if(out, {
 			Synth(\glissPing, [\startFreq, startFreq, \endFreq, endFreq, \atk, 0.01, \rel, duration, \startPan, centerPan, \endPan, endPan + centerPan, \out, ~decodeBus, \amp, amp]);

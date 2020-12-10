@@ -167,12 +167,12 @@ s.waitForBoot({
 	~glitchSynth.set(\amp, 0.04, \lpfCutoff, 3000);
 	~startBassReverb.(4.0);
 	2.5.wait;
-	~startBassNote.(0.7, 40.0);
+	~startBassNote.(0.55, 40.0);
 	~switchBassSource.(\saw);
 	~startShortBassSineBursts.();
 	// ======================================= WORLD
 	~startGlissMovementDuringWorld.(); // This will not wait internally
-	122.wait;
+	139.wait;
 
 	// Fade in a bit early
 	~glitchSynth.set(\ampLag, 4);
@@ -182,12 +182,13 @@ s.waitForBoot({
 	4.wait;
 
 	~stopShortBassSineBursts.();
-	3.wait;
+	3.5.wait;
 	~glitchSynth.set(\ampLag, 15.0);
 	s.sync();
 	~glitchSynth.set(\amp, 0.01, \lpfCutoff, 3000);
 	~startBassReverb.(4.0);
 	~startBassNote.(0.0, 6.0);
+	// ======================================
 	1.0.wait;
 	~root = ~root + 22;
 	~setBassNote.(~root);
@@ -270,13 +271,60 @@ s.waitForBoot({
 	~glitchSynth.set(\amp, 0.01, \lpfCutoff, 2000);
 	// ======================================= DROPS
 	~startDropsMovement.();
+	~glitchSynth.set(\ampLag, 4.0);
+	s.sync();
+	~glitchSynth.set(\amp, 0.5);
+	4.wait;
+	// ======================================= TRANSITION
 
+	~glitchSynth.set(\ampLag, 2.0);
+	s.sync();
+	~glitchSynth.set(\amp, 0.1);
+	2.wait;
+
+	~glitchSynth.set(\ampLag, 2.0);
+	s.sync();
+	~glitchSynth.set(\amp, 0.2);
+	2.wait;
+
+	~glitchSynth.set(\ampLag, 10.0);
+	s.sync();
+	~glitchSynth.set(\amp, 0.01);
+	// ======================================= PORTS 103.5 s
+
+	~startSpeedDecimatorNoise.(\speedNoiseSwitchStereo, 100);
+	~beepOutBus = ~tapeBus;
+	~beepAmp = 0.2;
+	~playBeeps.();
+	~glitchSynth.set(\ampLag, 15.0);
+	s.sync();
+	~glitchSynth.set(\amp, 0.2);
+	10.wait;
+	~stopSpeedDecimatorNoise.();
+	~beepAmp = 0.5;
+	~addWebBeepCapacitors.();
+	10.wait;
+	~beepAmp = 1.0;
+	5.wait;
+	~beepAmp = 0.5;
+	~glissMovement.(\Africa, 20, 0.6, true, false);
+	5.wait;
+	~glitchSynth.set(\ampLag, 35.0);
+	s.sync();
+	~glitchSynth.set(\amp, 0.4);
+	10.wait;
+	~startSpeedDecimatorNoise.(\speedNoiseSwitchStereo, 30);
+	5.wait;
+	~stopSpeedDecimatorNoise.();
+	5.wait;
+	53.5.wait;
 
 	~startBassNote.(0.0, 10.0);
 	~glitchSynth.set(\ampLag, 10.0);
 	s.sync();
 	5.wait;
 	~glitchSynth.set(\amp, 0.00, \lpfCutoff, 3000);
+	~stopBeeps.();
 }.fork;
 )
 

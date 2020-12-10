@@ -7,7 +7,7 @@
 		\atk, 0.01,
 		\rel, 0.2,
 		\amp, 0.5,
-		\dur, Pseq([2, {1/16}!4].flatten, inf),
+		\dur, Pseq([1.5, {1/16}!4].flatten, inf),
 	));
 
 	Pdef(\tick2, Pbind(
