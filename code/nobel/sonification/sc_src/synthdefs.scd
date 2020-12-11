@@ -290,7 +290,7 @@ SynthDef(\speedNoiseSwitchStereo, {
 
 SynthDef(\tickChannel, {
 	var sig = In.ar(\in.kr(10), 2);
-	sig = LPF.ar(sig, \lpfCutoff.kr(7000));
+	sig = LPF.ar(sig, \lpfCutoff.kr(7000)) * \amp.kr(1.0);
 
 	Out.ar(\out.kr(0), sig);
 	Out.ar(\revOut.kr(12), sig * \revSend.kr(0.2));

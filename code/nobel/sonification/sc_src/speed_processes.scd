@@ -80,7 +80,6 @@
 	~lowBeeps = 0;
 	~beepUpdateProcess = Routine({
 		loop {
-			("beep loop " + ~highBeeps + ", " + ~lowBeeps).postln;
 			if(~highBeeps > 8, {
 				Synth(\beep, [\freq, 10000, \length, 0.4, \out, ~beepOutBus, \amp, ~beepAmp]);
 				~highBeeps = ~highBeeps - 32;
@@ -167,7 +166,8 @@
 	Pdef(\tick6).stop;
 	Pdef(\tick7).stop;
 };
-
+~speedDecimatorAmp = 0.15;
+~speedDecimatorOut = 0;
 ~startSpeedDecimatorNoise = { | variant = \speedNoiseSwitchMono, limit = 90 |
 	~speedDecimatorOn = false;
 	if(~speedDecimatorNoiseUpdateLoop != nil) {
@@ -181,7 +181,7 @@
 					if(~speedDecimatorSynth != nil) {
 						~speedDecimatorSynth.free;
 					};
-					~speedDecimatorSynth = Synth(variant, [\amp, 0.2]);
+					~speedDecimatorSynth = Synth(variant, [\amp, ~speedDecimatorAmp, \out, ~speedDecimatorOut]);
 					~decimatorNoiseModulator = Routine({
 						var activity = ((~metrics.numPacketsNow - limit) / 40).clip(0, 1);
 						~speedDecimatorSynth.set(\t_switch, 1);
@@ -199,6 +199,14 @@
 			0.01.wait;
 		}
 	}).play;
+};
+
+~setSpeedDecimator = { | amp, out |
+	~speedDecimatorAmp = amp;
+	~speedDecimatorOut = out;
+	if(~speedDecimatorSynth != nil) {
+		~speedDecimatorSynth.set(\amp, amp, \out, out);
+	};
 };
 
 ~stopSpeedDecimatorNoise = {

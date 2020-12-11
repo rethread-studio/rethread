@@ -120,7 +120,10 @@ s.waitForBoot({
 
 	// =========================================================== START BASS
 	~setBassNote.(~root);
+	~setBassFilterMax.(0.0);
 	~startBassNote.(0.0, 0.1);
+
+	~setSpeedDecimator.(0.15, ~revBus);
 
 	~rev = Synth(\medium_reverb, [\in, ~revBus, \out, 0, \mix, 0.25, \rt, 2.5], addAction: 'addToTail');
 });
@@ -171,16 +174,17 @@ s.waitForBoot({
 	~switchBassSource.(\saw);
 	~startShortBassSineBursts.();
 	// ======================================= WORLD
+	4.wait;
 	~startGlissMovementDuringWorld.(); // This will not wait internally
-	139.wait;
+	135.wait;
 
 	// Fade in a bit early
 	~glitchSynth.set(\ampLag, 4);
 	s.sync();
 	~glitchSynth.set(\amp, 1.0, \lpfCutoff, 1000);
 	~startBassNote.(1.0, 6.0);
-	4.wait;
-
+	3.wait;
+	// ====================================== Transition
 	~stopShortBassSineBursts.();
 	3.5.wait;
 	~glitchSynth.set(\ampLag, 15.0);
@@ -188,7 +192,7 @@ s.waitForBoot({
 	~glitchSynth.set(\amp, 0.01, \lpfCutoff, 3000);
 	~startBassReverb.(4.0);
 	~startBassNote.(0.0, 6.0);
-	// ======================================
+
 	1.0.wait;
 	~root = ~root + 22;
 	~setBassNote.(~root);
@@ -197,13 +201,14 @@ s.waitForBoot({
 	~beepOutBus = ~tapeBus;
 	~beepAmp = 0.2;
 	~playBeeps.();
+	7.wait;
 	~tickChannel.set(\lpfCutoff, 2000);
 	~startSpeedProcesses.();
-	10.wait;
+	8.wait;
 	~stopBeeps.();
 	~beepOutBus = ~revBus;
 	~beepAmp = 0.4;
-	9.wait;
+	11.wait;
 	~stopSpeedProceses.();
 	1.wait;
 	~startSpeedRandomCutoff.();
@@ -211,14 +216,19 @@ s.waitForBoot({
 	~startSpeedProcess1.();
 	~root = ~root + 22;
 	~setBassNote.(~root);
-	10.wait;
+	8.wait;
 	~playBeeps.();
-	10.wait;
+	9.wait;
 	// ~stopSpeedProceses.();
 	~startSpeedDecimatorNoise.(\speedNoiseSwitchMono, 40);
 	~root = ~root + 22;
 	~setBassNote.(~root);
-	5.wait;
+	~startBassNote.(0.2, 0.5);
+	1.wait;
+	~startBassNote.(0.0, 0.5);
+	~stopSpeedDecimatorNoise.();
+	~startSpeedDecimatorNoise.(\speedNoiseSwitchMono, 20);
+	6.wait;
 	~root = ~root + 22;
 	~setBassNote.(~root);
 	~stopSpeedDecimatorNoise.();
@@ -236,15 +246,25 @@ s.waitForBoot({
 	~stopSpeedDecimatorNoise.();
 	~root = ~root + 22;
 	~setBassNote.(~root);
-	10.wait;
+	7.wait;
 	~addWebBeepCapacitors.();
 	~beepOutBus = ~revBus;
-	7.wait;
+	6.wait;
+	~startSpeedDecimatorNoise.(\speedNoiseSwitchStereo, 30);
+	6.wait;
 	~beepOutBus = ~tapeBus;
-	9.5.wait;
+	~stopSpeedDecimatorNoise.();
+	~setSpeedDecimator.(0.15, ~tapeBus);
+	~startSpeedDecimatorNoise.(\speedNoiseSwitchMono, 70);
+	2.wait;
+	~stopSpeedDecimatorNoise.();
+	~startSpeedDecimatorNoise.(\speedNoiseSwitchStereo, 95);
+	7.5.wait;
+
+	~stopSpeedDecimatorNoise.();
 	~root = ~root + 17;
 	~setBassNote.(~root);
-	~startBassNote.(0.8, 7.0);
+	~startBassNote.(0.2, 5.0);
 	~startBassReverb.(4.0);
 	3.wait;
 	~stopSpeedRandomCutoff.();
@@ -255,6 +275,7 @@ s.waitForBoot({
 	~glitchSynth.set(\ampLag, 5.0);
 	s.sync();
 	~glitchSynth.set(\amp, 0.8, \lpfCutoff, 300);
+	~startBassNote.(0.7, 10.0);
 	5.0.wait;
 	~glitchSynth.set(\ampLag, 5.0);
 	s.sync();
@@ -263,12 +284,15 @@ s.waitForBoot({
 	~stopBeeps.();
 	// =================================== TRANSITION 3 + 2 s
 	~glitchSynth.set(\ampLag, 3.0);
+	~setBassFilterMax.(3.0);
 	s.sync();
 	~glitchSynth.set(\amp, 0.7, \lpfCutoff, 900);
 	3.wait;
-	~glitchSynth.set(\ampLag, 2.0);
+	~glitchSynth.set(\ampLag, 7.0);
 	s.sync();
 	~glitchSynth.set(\amp, 0.01, \lpfCutoff, 2000);
+	~setBassFilterMax.(0.0);
+	2.0.wait;
 	// ======================================= DROPS
 	~startDropsMovement.();
 	~glitchSynth.set(\ampLag, 4.0);
@@ -284,7 +308,7 @@ s.waitForBoot({
 
 	~glitchSynth.set(\ampLag, 2.0);
 	s.sync();
-	~glitchSynth.set(\amp, 0.2);
+	~glitchSynth.set(\amp, 0.5);
 	2.wait;
 
 	~glitchSynth.set(\ampLag, 10.0);
@@ -292,38 +316,76 @@ s.waitForBoot({
 	~glitchSynth.set(\amp, 0.01);
 	// ======================================= PORTS 103.5 s
 
+	~setSpeedDecimator.(0.10, ~tapeBus);
 	~startSpeedDecimatorNoise.(\speedNoiseSwitchStereo, 100);
 	~beepOutBus = ~tapeBus;
-	~beepAmp = 0.2;
+	~beepAmp = 0.35;
 	~playBeeps.();
 	~glitchSynth.set(\ampLag, 15.0);
 	s.sync();
-	~glitchSynth.set(\amp, 0.2);
+	~glitchSynth.set(\amp, 0.4);
 	10.wait;
 	~stopSpeedDecimatorNoise.();
 	~beepAmp = 0.5;
 	~addWebBeepCapacitors.();
 	10.wait;
-	~beepAmp = 1.0;
+	~beepAmp = 0.8;
 	5.wait;
 	~beepAmp = 0.5;
-	~glissMovement.(\Africa, 20, 0.6, true, false);
+	~glissMovement.(\Africa, 10, 0.6, true, false);
 	5.wait;
+	~glissMovement.(\Asia, 10, 0.4, true, false);
 	~glitchSynth.set(\ampLag, 35.0);
 	s.sync();
-	~glitchSynth.set(\amp, 0.4);
-	10.wait;
+	~glitchSynth.set(\amp, 0.6);
+	5.wait;
+	~glissMovement.(\Europe, 10, 0.5, true, false);
+	5.wait;
+	~setBassFilterMax.(0.0);
+	~startBassNote.(0.3, 1.0);
 	~startSpeedDecimatorNoise.(\speedNoiseSwitchStereo, 30);
 	5.wait;
 	~stopSpeedDecimatorNoise.();
+	8.do({
+		~root = (~root + 3) % 53;
+		~setBassNote.(~root);
+		0.5.wait;
+	});
+	1.wait;
+	~beepAmp = 0.7;
+	~setBassFilterMax.(7.0);
+	~startBassNote.(0.5, 3.0);
 	5.wait;
-	53.5.wait;
+	~beepAmp = 0.5;
+	~setBassFilterMax.(2.0);
+	5.wait;
+	~root = (~root + 3) % 53;
+	~setBassNote.(~root);
+	~glissMovement.(\Oceania, 20, 0.8, true, false);
+	~startSpeedDecimatorNoise.(\speedNoiseSwitchStereo, 60);
+	2.wait;
+	~stopSpeedDecimatorNoise.();
+	~setBassFilterMax.(4.0);
+	8.do({
+		~root = (~root + 3) % 53;
+		~setBassNote.(~root);
+		0.5.wait;
+	});
+	7.wait;
+	~glissMovement.(\Americas, 9, 0.5, true, false);
+	7.wait;
+	~glissMovement.(\Sweden, 7, 0.3, true, false);
+	~setBassFilterMax.(10.0);
+	10.wait;
+	~glissMovement.(\Sweden, 10, 0.2, true, false);
+	~glitchSynth.set(\amp, 0.8);
+	8.5.wait;
 
 	~startBassNote.(0.0, 10.0);
 	~glitchSynth.set(\ampLag, 10.0);
 	s.sync();
-	5.wait;
 	~glitchSynth.set(\amp, 0.00, \lpfCutoff, 3000);
+	5.wait;
 	~stopBeeps.();
 }.fork;
 )

@@ -10,16 +10,18 @@
 		if(doPlay) {
 			var degree = ~activeChord[~chordIndex] + ~root, freq = ~s53.degreeToFreq(degree, 0.midicps, ~octave);
 			if(len > 100 && (len < 1000), {
-				Synth(\tick2, [\freq, freq*2, \out, ~revBus, \rq, 0.1, \atk, 0.005, \amp, len/5000, \pan, rrand(-1, 1)]);
+				var pan = ((~now.() * 0.5).frac * 2.0) - 1.0;
+				Synth(\tick2, [\freq, freq*2, \out, ~revBus, \rq, 0.1, \atk, 0.005, \amp, len/10000, \pan, (pan + rrand(-0.1, 0.1)).clip(-1, 1)]);
 			}, {
 				if(len < 1000, {
-					Synth(\tick2, [\freq, freq*2, \out, ~tapeBus, \rq, 0.001, \atk, 0.01, \amp, len/200000, \pan, rrand(-1, 1)]);
+					var pan = ((~now.() * 0.23824).frac * 2.0) - 1.0;
+					Synth(\tick2, [\freq, freq*2, \out, ~tapeBus, \rq, 0.001, \atk, 0.01, \amp, len/200000, \pan, (pan + rrand(-0.1, 0.1)).clip(-1, 1)]);
 				}, {
 					if(len < 100000, {
 						Synth(\thump, [\freq, freq, \out, ~tapeBus, \rel, 2, \amp, rrand(0.02, 0.035),\pan, rrand(-1.0, 1.0)]);
 					}, {
-						if(len < 250000, {
-							Synth(\softy, [\freq, freq, \out, ~revBus, \rel, len/100000, \pan, rrand(-0.3, 0.3)]);
+						if(len < 220000, {
+							Synth(\softy, [\freq, freq, \out, ~revBus, \rel, len/70000, \pan, rrand(-0.3, 0.3)]);
 						}, {
 							var pan = rrand(0.7, 1.0) * [1, -1].choose;
 							Synth(\long_sine, [\freq, freq, \out, ~tapeBus, \amp, 1.0, \pan, pan]);
@@ -51,8 +53,8 @@
 ~activeChord = ~chordOceania
 ~activeChord = ~chordAfrica*/
 
-
 ~startDropsMovement = {
+	3.wait;
 	~root = (~root + 31) % 53;
 	~setBassNote.(~root);
 	~switchBassSource.(\saw);
@@ -74,21 +76,20 @@
 	~setChord.(~chordAsia);
 	12.wait;
 	~startBassNote.(0.01, 9.0);
-	4.wait;
+	6.wait;
 	~sonificationFunctions.clear();
-	4.wait;
 
+	2.wait;
 	~root = (~root + 43) % 53;
 	~setBassNote.(~root);
-
 	~startBassNote.(0.2, 3.0);
 	~setChord.(~chordSweden);
 	~addSonificationFunction.(\Sweden);
 	2.wait;
 	~startBassNote.(0.1, 1.0);
 	3.wait;
-	~root = (~root + 43) % 53;
-	~setBassNote.(~root);
+/*	~root = (~root + 43) % 53;
+	~setBassNote.(~root);*/
 	5.wait;
 	~startBassNote.(0.01, 2.0);
 	~sonificationFunctions.clear();
@@ -113,7 +114,6 @@
 	~sonificationFunctions.clear();
 	~root = (~root + 31) % 53;
 	~setBassNote.(~root);
-	3.wait;
 }
 
 

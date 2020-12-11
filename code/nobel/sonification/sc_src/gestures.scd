@@ -52,7 +52,7 @@
 		endFreq = ~s53.degreeToFreq(~activeChord[~glissChordIndex] + ~root, 0.midicps, ~octave),
 		endPan = rrand(0.4, 1.0) * [1, -1].choose,
 		centerPan = rrand(-0.2, 0.2),
-		amp = rrand(0.4, 0.9) * ampMod * 0.8;
+		amp = rrand(0.4, 0.9) * ampMod * 0.6;
 		// out = [true, false].choose;
 		if(out, {
 			Synth(\glissPing, [\startFreq, startFreq, \endFreq, endFreq, \atk, 0.01, \rel, duration, \startPan, centerPan, \endPan, endPan + centerPan, \out, ~decodeBus, \amp, amp]);

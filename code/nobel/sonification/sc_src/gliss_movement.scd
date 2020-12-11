@@ -45,16 +45,20 @@
 	~activeChord = ~activeChord.scramble;
 	~capacitors.addToDict(capacitor, \gliss);
 	("Started gliss for region " ++ region).postln;
-	if(doWait) {
-	totalDuration.wait;
-	};
-	~clearCapacitors.(\gliss);
+	if(doWait, {
+		totalDuration.wait;
+		~clearCapacitors.(\gliss);
+	}, {
+		{
+			totalDuration.wait;
+			~clearCapacitors.(\gliss);
+		}.fork;
+	});
 };
 ~startGlissMovementDuringWorld = {
 	{
 		~glissFadeOutTime = 1.0;
-		1.wait;
-		~glissMovement.(\Sweden, 7, 0.5, false);
+		~glissMovement.(\Sweden, 8, 0.5, false);
 		~glissMovement.(\Europe, 18, 0.6, false);
 		~glissMovement.(\Americas, 15, 0.8, false);
 		~glissMovement.(\Asia, 15, 0.5, false);

@@ -6,11 +6,15 @@
 	Ndef(\bassFreq, { rootFreq });
 };
 
+~setBassFilterMax = { | filterMax = 0.0 |
+	Ndef(\bassFilterMax, { filterMax });
+};
+
 ~startBassNote = { | amp = 1.0, fadeTime = 1.0 |
 	~switchBassSource.(\saw);
 	Ndef(\bassNote).fadeTime = fadeTime;
 	Ndef(\bassNote, {
-		var sig, env, freq = Ndef.kr(\bassFreq), maxFreqRatio = LFNoise1.kr(0.5).range(2.0, 4.0);
+		var sig, env, freq = Ndef.kr(\bassFreq), maxFreqRatio = LFNoise1.kr(0.5).range(2.0, 4.0) + Ndef(\bassFilterMax).kr;
 		sig = Ndef.ar(\bassSource);
 		sig = Mix(sig);
 		sig = LPF.ar(sig, SinOsc.ar(LFNoise1.kr(5).range(3, 5)).range(freq*0.8, freq*maxFreqRatio)) * amp;
