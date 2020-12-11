@@ -230,44 +230,7 @@ The sequencer holds functions (closures/lambdas) that start sounds. Each step is
 		activity = \high;
 		chord = chord;
 	}, {
-		if(packets >= ~mediumActivityThreshold, {~updateDrone = {
-	var numOctaves, minrq, maxrq, brightness, stutterAmount, stutterSpeed, amp, numScripts, numXmlHttpRequests, numSubFrames;
-	// Sometimes update pitches, sometimes just update other parameters
-
-	// numIPaddresses varies between ~5 and ~150
-	// numRequests between ~10 and ~300
-	// types[\image] between 1 and ~400, can go much higher on scrolling image sites like pinterest
-	// types[\script] between 0 and 90
-	// types[\sub_frame] between 0 and 8 (usually 0)
-	// types[\xmlhttprequest] between 0 and ~100, (continues up if you scroll or stay on a page)
-	// ~overallStats.currentFrame.types[\xmlhttprequest].postln;
-	// ~overallStats.currentFrame.frameSize.postln;
-
-	numScripts = ~overallStats.overTime.types[\script];
-	if(numScripts == nil) { numScripts = 0 };
-
-	numXmlHttpRequests = ~overallStats.overTime.types[\xmlhttprequest];
-	if(numXmlHttpRequests == nil) { numXmlHttpRequests = 0 };
-
-	numSubFrames = ~overallStats.overTime.types[\sub_frame];
-	if(numSubFrames == nil) { numSubFrames = 0 };
-
-	// brightness = numXmlHttpRequests.linlin(1, 100, 0.0, 1.0);
-	brightness = ~overallStats.overTime.originRatio.lincurve(0.001, 1, 1.0, 0.0, curve: -6);
-	stutterAmount = numSubFrames.linlin(0, 8, 0.0, 1.0);
-	stutterSpeed = ~overallStats.currentFrame.originRatio.lincurve(0.001, 1, 20.0, 2.0, curve: -4);
-	numOctaves = ~overallStats.overTime.numIPaddresses.explin(5, 150, 1, 4).round(1);
-	minrq = numScripts.linlin(0, 90, 0.001, 0.04);
-	maxrq = ~overallStats.overTime.numRequests.linlin(10, 300, 0.01, minrq);
-	amp = ~overallStats.currentFrame.frameSize.linlin(0, 10000000, 0.03, 1.0);
-
-	if(rrand(0.0, 1.0) > 0.97 || (~backgroundDronesStarted == false), {
-		~restartBackgroundDrones.(numOctaves, minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
-		~backgroundDronesStarted = true;
-	}, {
-		~updateBackgroundDrones.(minrq, maxrq, amp, brightness, stutterAmount, stutterSpeed);
-	});
-};
+		if(packets >= ~mediumActivityThreshold, {
 			activity = \medium;
 			chord = chord[0..(chord.size()*2/3 - 1).asInteger]
 		}, {
