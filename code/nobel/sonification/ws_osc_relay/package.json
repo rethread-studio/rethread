@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "cli": "^1.0.1",
+    "death": "^1.1.0",
     "osc": "^2.4.1",
     "ws": "^7.3.1"
   }
