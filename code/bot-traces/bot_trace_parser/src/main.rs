@@ -23,17 +23,61 @@ fn model(app: &App) -> Model {
         .unwrap();
 
     let mut profiles = vec![];
-    let paths = [
-        "/home/erik/code/kth/request-bot-files/20200124/bing01-12-2020_16_06/profile.json",
-        "/home/erik/code/kth/request-bot-files/20200124/bing01-13-2020_11_45/profile.json",
-        "/home/erik/code/kth/request-bot-files/20200124/bing01-14-2020_15_32/profile.json",
-        "/home/erik/code/kth/request-bot-files/20200124/bing01-15-2020_14_00/profile.json",
-        "/home/erik/code/kth/request-bot-files/20200124/bing01-16-2020_13_34/profile.json",
-        "/home/erik/code/kth/request-bot-files/20200124/bing01-17-2020_14_10/profile.json",
-        "/home/erik/code/kth/request-bot-files/20200124/bing01-19-2020_20_01/profile.json",
+    let root_path = "/home/erik/code/kth/request-bot-files/20200124/";
+    let bing_paths = [
+        "bing01-12-2020_16_06/",
+        "bing01-13-2020_11_45/",
+        "bing01-14-2020_15_32/",
+        "bing01-15-2020_14_00/",
+        "bing01-16-2020_13_34/",
+        "bing01-17-2020_14_10/",
+        "bing01-19-2020_20_01/",
     ];
-    for p in &paths {
-        let mut data = fs::read_to_string(p).unwrap();
+
+    let duckduckgo_paths = [
+        "duckduck01-12-2020_16_06/",
+        "duckduck01-13-2020_11_45/",
+        "duckduck01-14-2020_15_32/",
+        "duckduck01-15-2020_14_00/",
+        "duckduck01-16-2020_13_34/",
+        "duckduck01-17-2020_14_10/",
+        "duckduck01-19-2020_20_01/",
+    ];
+
+    let google_paths = [
+        "google01-12-2020_15_42/",
+        "google01-12-2020_16_06/",
+        "google01-13-2020_11_45/",
+        "google01-14-2020_15_32/",
+        "google01-15-2020_14_00/",
+        "google01-16-2020_13_34/",
+        "google01-17-2020_14_10/",
+        "google01-19-2020_20_01/",
+    ];
+
+    let wikipedia_paths = [
+        "wikipedia01-12-2020_16_06/",
+        "wikipedia01-13-2020_11_45/",
+        "wikipedia01-14-2020_15_32/",
+        "wikipedia01-15-2020_14_00/",
+        "wikipedia01-16-2020_13_34/",
+        "wikipedia01-17-2020_14_10/",
+        "wikipedia01-19-2020_20_01/",
+    ];
+
+    let yahoo_paths = [
+        "yahoo01-12-2020_16_06/",
+        "yahoo01-13-2020_11_45/",
+        "yahoo01-14-2020_15_32/",
+        "yahoo01-15-2020_14_00/",
+        "yahoo01-16-2020_13_34/",
+        "yahoo01-17-2020_14_10/",
+        "yahoo01-19-2020_20_01/",
+    ];
+
+    for p in &yahoo_paths {
+        let full_path = format!("{}{}profile.json", root_path, p);
+        let mut data = fs::read_to_string(full_path).unwrap();
         let profile: Profile = serde_json::from_str(&data).unwrap();
         profiles.push(profile);
     }
@@ -65,7 +109,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let win = app.window_rect();
 
     const x_scale: f32 = 4.0;
-    const y_scale: f32 = 2.0;
+    const y_scale: f32 = 1.0;
 
     let tree_separation = win.w() / (model.depth_trees.len()) as f32;
 
