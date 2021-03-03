@@ -67,9 +67,9 @@ impl FunctionCall {
         depth: i32,
         nodes: &Vec<FunctionCall>,
     ) {
-        depth_tree.push(self.to_tree_node(depth));
         if let Some(children) = &self.children {
             for child_id in children {
+                depth_tree.push(self.to_tree_node(depth));
                 // Find the FunctionCall with that id
                 let child_index = nodes.binary_search_by_key(&child_id, |probe| &probe.id);
                 // Call add_depth_tree on it
