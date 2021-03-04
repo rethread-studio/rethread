@@ -177,8 +177,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         let radius = (d_tree[i].depth + 1) as f32 * radius_scale
                             + (index as f32 * tree_separation * model.separation_ratio);
                         let col = match model.color_mode {
-                            ColorMode::Script => hsl(d_tree[i].script_id as f32 * 0.0426, 0.8, 0.4),
-                            ColorMode::Profile => hsl(index as f32 * 0.038573, 0.7, 0.3),
+                            ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                            ColorMode::Profile => profile_color(index as f32),
                         };
                         draw.line()
                             .stroke_weight(2.0)
@@ -208,8 +208,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         let start_radius = d_tree[i].depth as f32 * radius_scale;
                         let radius = (d_tree[i].depth + 1) as f32 * radius_scale;
                         let col = match model.color_mode {
-                            ColorMode::Script => hsl(d_tree[i].script_id as f32 * 0.0426, 0.8, 0.4),
-                            ColorMode::Profile => hsl(index as f32 * 0.038573, 0.7, 0.3),
+                            ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                            ColorMode::Profile => profile_color(index as f32),
                         };
                         draw.line()
                             .stroke_weight(2.0)
@@ -238,8 +238,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             + (d_tree[i].depth as f32 * x_scale
                                 + (index as f32 * tree_separation * model.separation_ratio));
                         let col = match model.color_mode {
-                            ColorMode::Script => hsl(d_tree[i].script_id as f32 * 0.0426, 0.8, 0.4),
-                            ColorMode::Profile => hsl(index as f32 * 0.038573, 0.7, 0.3),
+                            ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                            ColorMode::Profile => profile_color(index as f32),
                         };
                         draw.rect().color(col).x_y(x, y).w_h(x_scale, y_scale);
                     }
@@ -261,10 +261,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             - (d_tree[i].depth as f32 * y_scale
                                 + (index as f32 * tree_separation * model.separation_ratio));
                         let col = match model.color_mode {
-                            ColorMode::Script => {
-                                hsl(d_tree[i].script_id as f32 * 0.0426, 0.7, 0.45)
-                            }
-                            ColorMode::Profile => hsl(index as f32 * 0.048573, 0.7, 0.3),
+                            ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                            ColorMode::Profile => profile_color(index as f32),
                         };
                         draw.rect()
                             .color(col)
@@ -278,6 +276,14 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     // Write to the window frame.
     draw.to_frame(app, &frame).unwrap();
+}
+
+fn script_color(id: f32) -> Hsl {
+    hsl(id as f32 * 0.0226, 0.8, 0.45)
+}
+
+fn profile_color(index: f32) -> Hsl {
+    hsl(index * 0.048573, 0.8, 0.45)
 }
 
 fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
