@@ -148,7 +148,7 @@ fn load_profiles(model: &mut Model) {
 }
 
 fn update(_app: &App, model: &mut Model, _update: Update) {
-    model.index += 1;
+    model.index += 10;
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {
@@ -180,8 +180,9 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             ColorMode::Script => script_color(d_tree[i].script_id as f32),
                             ColorMode::Profile => profile_color(index as f32),
                         };
+                        let weight = d_tree[i].ticks as f32;
                         draw.line()
-                            .stroke_weight(2.0)
+                            .stroke_weight(weight)
                             .start(pt2(angle.cos() * start_radius, angle.sin() * start_radius))
                             .end(pt2(angle.cos() * radius, angle.sin() * radius))
                             .color(col);
@@ -211,8 +212,9 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             ColorMode::Script => script_color(d_tree[i].script_id as f32),
                             ColorMode::Profile => profile_color(index as f32),
                         };
+                        let weight = d_tree[i].ticks as f32;
                         draw.line()
-                            .stroke_weight(2.0)
+                            .stroke_weight(weight)
                             .start(
                                 pt2(angle.cos() * start_radius, angle.sin() * start_radius)
                                     + offset,
@@ -332,9 +334,15 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
         MouseMoved(pos) => {
             model.separation_ratio = (pos.x + app.window_rect().w() / 2.0) / app.window_rect().w();
         }
-        MousePressed(_button) => {
-            model.index = 0;
-        }
+        MousePressed(button) => match button {
+            MouseButton::Left => {
+                model.index = 0;
+            }
+            MouseButton::Right => {
+                model.index = 99999;
+            }
+            _ => (),
+        },
         MouseReleased(_button) => {}
         MouseEntered => {}
         MouseExited => {}
