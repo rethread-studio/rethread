@@ -181,10 +181,22 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             ColorMode::Profile => profile_color(index as f32),
                         };
                         let weight = d_tree[i].ticks as f32;
+                        let weight = weight;
+                        let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
+                        let end = pt2(angle.cos() * radius, angle.sin() * radius);
+                        // Draw a transparent circle representing the time spent
+                        let mut transparent_col = col.clone();
+                        transparent_col.alpha = 0.01 * weight;
+                        draw.ellipse()
+                            .radius(weight.max(0.0))
+                            .xy(start)
+                            .stroke_weight(0.0)
+                            .color(transparent_col);
+                        // Draw the line representing the function call
                         draw.line()
-                            .stroke_weight(weight)
-                            .start(pt2(angle.cos() * start_radius, angle.sin() * start_radius))
-                            .end(pt2(angle.cos() * radius, angle.sin() * radius))
+                            .stroke_weight(1.0)
+                            .start(start)
+                            .end(end)
                             .color(col);
                     }
                 }
@@ -213,13 +225,24 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             ColorMode::Profile => profile_color(index as f32),
                         };
                         let weight = d_tree[i].ticks as f32;
+                        let weight = weight.max(0.0);
+
+                        let start =
+                            pt2(angle.cos() * start_radius, angle.sin() * start_radius) + offset;
+                        let end = pt2(angle.cos() * radius, angle.sin() * radius) + offset;
+                        // Draw a transparent circle representing the time spent
+                        let mut transparent_col = col.clone();
+                        transparent_col.alpha = 0.01 * weight;
+                        draw.ellipse()
+                            .radius(weight)
+                            .stroke_weight(0.0)
+                            .xy(start)
+                            .color(transparent_col);
+                        // Draw the line representing the function call
                         draw.line()
-                            .stroke_weight(weight)
-                            .start(
-                                pt2(angle.cos() * start_radius, angle.sin() * start_radius)
-                                    + offset,
-                            )
-                            .end(pt2(angle.cos() * radius, angle.sin() * radius) + offset)
+                            .stroke_weight(1.0)
+                            .start(start)
+                            .end(end)
                             .color(col);
                     }
                 }
@@ -243,6 +266,15 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             ColorMode::Script => script_color(d_tree[i].script_id as f32),
                             ColorMode::Profile => profile_color(index as f32),
                         };
+                        let weight = d_tree[i].ticks as f32;
+                        // Draw a transparent circle representing the time spent
+                        let mut transparent_col = col.clone();
+                        transparent_col.alpha = 0.01 * weight;
+                        draw.ellipse()
+                            .radius(weight)
+                            .stroke_weight(0.0)
+                            .xy(pt2(x, y))
+                            .color(transparent_col);
                         draw.rect().color(col).x_y(x, y).w_h(x_scale, y_scale);
                     }
                 }
@@ -266,6 +298,15 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             ColorMode::Script => script_color(d_tree[i].script_id as f32),
                             ColorMode::Profile => profile_color(index as f32),
                         };
+                        let weight = d_tree[i].ticks as f32;
+                        // Draw a transparent circle representing the time spent
+                        let mut transparent_col = col.clone();
+                        transparent_col.alpha = 0.01 * weight;
+                        draw.ellipse()
+                            .radius(weight)
+                            .stroke_weight(0.0)
+                            .xy(pt2(x, y))
+                            .color(transparent_col);
                         draw.rect()
                             .color(col)
                             .x_y(x, y)
@@ -280,12 +321,12 @@ fn view(app: &App, model: &Model, frame: Frame) {
     draw.to_frame(app, &frame).unwrap();
 }
 
-fn script_color(id: f32) -> Hsl {
-    hsl(id as f32 * 0.0226, 0.8, 0.45)
+fn script_color(id: f32) -> Hsla {
+    hsla(id as f32 * 0.0226, 0.8, 0.45, 1.0)
 }
 
-fn profile_color(index: f32) -> Hsl {
-    hsl(index * 0.048573, 0.8, 0.45)
+fn profile_color(index: f32) -> Hsla {
+    hsla(index * 0.048573, 0.8, 0.45, 1.0)
 }
 
 fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
