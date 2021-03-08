@@ -18,8 +18,8 @@ s.reboot;
 
 // Routing and mixer channels
 ~useAmbisonics = false; // Set to false to use a simple stereo output
-~sonifyLive = false;
-~sonifySequencer = true;
+~sonifyLive = true;
+~sonifySequencer = false;
 ~controlPositionWithMouse = true; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
 ~positionThroughService = true;
