@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use nannou::prelude::*;
 use std::{convert::TryInto, fs};
 mod profile;
-use profile::{Profile, TreeNode};
+use profile::{GraphData, Profile, TreeNode};
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -23,7 +23,7 @@ enum DrawMode {
 struct Model {
     profile_group: usize,
     profiles: Vec<Profile>,
-    depth_trees: Vec<Vec<TreeNode>>,
+    graph_datas: Vec<GraphData>,
     deepest_tree_depth: u32,
     longest_tree: u32,
     index: usize,
@@ -45,7 +45,7 @@ fn model(app: &App) -> Model {
     let mut model = Model {
         profile_group: 0,
         profiles: vec![],
-        depth_trees: vec![],
+        graph_datas: vec![],
         deepest_tree_depth: 0,
         longest_tree: 0,
         index: 0,
@@ -122,18 +122,18 @@ fn load_profiles(model: &mut Model) {
         profiles.push(profile);
     }
 
-    let mut depth_trees = vec![];
+    let mut graph_datas = vec![];
     for profile in &profiles {
-        depth_trees.push(profile.generate_depth_tree());
+        graph_datas.push(profile.generate_graph_data());
     }
 
     let mut deepest_tree_depth = 0;
     let mut longest_tree = 0;
-    for d_tree in &depth_trees {
-        if d_tree.len() > longest_tree {
-            longest_tree = d_tree.len();
+    for gd in &graph_datas {
+        if gd.depth_tree.len() > longest_tree {
+            longest_tree = gd.depth_tree.len();
         }
-        for node in d_tree {
+        for node in &gd.depth_tree {
             if node.depth > deepest_tree_depth {
                 deepest_tree_depth = node.depth;
             }
@@ -142,7 +142,7 @@ fn load_profiles(model: &mut Model) {
 
     model.num_profiles = profiles.len().try_into().unwrap();
     model.profiles = profiles;
-    model.depth_trees = depth_trees;
+    model.graph_datas = graph_datas;
     model.longest_tree = longest_tree.try_into().unwrap();
     model.deepest_tree_depth = deepest_tree_depth.try_into().unwrap();
 }
@@ -170,7 +170,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
             let tree_separation = radius_scale * model.deepest_tree_depth as f32;
             for i in 0..model.index {
                 let angle = i as f32 * angle_scale;
-                for (index, d_tree) in model.depth_trees.iter().enumerate() {
+                for (index, gd) in model.graph_datas.iter().enumerate() {
+                    let d_tree = &gd.depth_tree;
                     if i < d_tree.len() && index < model.num_profiles as usize {
                         let start_radius = d_tree[i].depth as f32 * radius_scale
                             + (index as f32 * tree_separation * model.separation_ratio);
@@ -205,7 +206,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
         DrawMode::FlowerGrid => {
             let angle_scale: f32 = PI * 2.0 / model.longest_tree as f32;
             let radius_scale: f32 = win.h() / ((model.deepest_tree_depth + 1) as f32 * 4.0);
-            for (index, d_tree) in model.depth_trees.iter().enumerate() {
+            for (index, gd) in model.graph_datas.iter().enumerate() {
+                let d_tree = &gd.depth_tree;
                 let offset_angle = (index as f32 / model.num_profiles as f32) * PI * 2.0;
                 let offset_radius = match index {
                     0 => 0.0,
@@ -257,7 +259,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
             let tree_separation = win.w() / model.num_profiles as f32;
             for i in 0..model.index {
                 let y = win.top() - (i as f32 * y_scale);
-                for (index, d_tree) in model.depth_trees.iter().enumerate() {
+                for (index, gd) in model.graph_datas.iter().enumerate() {
+                    let d_tree = &gd.depth_tree;
                     if i < d_tree.len() && index < model.num_profiles as usize {
                         let x = win.left()
                             + (d_tree[i].depth as f32 * x_scale
@@ -289,7 +292,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
             let tree_separation = win.h() / model.num_profiles as f32;
             for i in 0..model.index {
                 let x = win.left() + (i as f32 * x_scale);
-                for (index, d_tree) in model.depth_trees.iter().enumerate() {
+                for (index, gd) in model.graph_datas.iter().enumerate() {
+                    let d_tree = &gd.depth_tree;
                     if i < d_tree.len() && index < model.num_profiles as usize {
                         let y = win.top()
                             - (d_tree[i].depth as f32 * y_scale
