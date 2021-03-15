@@ -172,6 +172,7 @@ impl GraphData {
             ];
             let packet = (osc_addr, args);
             sender.send(packet).ok();
+            std::thread::sleep(std::time::Duration::from_millis(1));
             for fd in sd.function_data.values() {
                 let osc_addr = "/function_data".to_string();
                 let args = vec![
@@ -180,6 +181,7 @@ impl GraphData {
                     osc::Type::Int(fd.calls_from_function as i32),
                 ];
                 let packet = (osc_addr, args);
+                std::thread::sleep(std::time::Duration::from_millis(1));
                 sender.send(packet).ok();
             }
             let osc_addr = "/end_of_script_data".to_string();
