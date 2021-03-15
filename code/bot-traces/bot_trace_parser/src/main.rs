@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use nannou::prelude::*;
+use nannou_osc as osc;
 use std::{convert::TryInto, fs};
 mod profile;
 use profile::{GraphData, Profile, TreeNode};
@@ -11,6 +12,7 @@ fn main() {
 enum ColorMode {
     Script,
     Profile,
+    Selected,
 }
 
 enum DrawMode {
@@ -23,6 +25,7 @@ enum DrawMode {
 struct Model {
     profile_group: usize,
     profiles: Vec<Profile>,
+    selected_profile: usize,
     graph_datas: Vec<GraphData>,
     deepest_tree_depth: u32,
     longest_tree: u32,
@@ -31,6 +34,7 @@ struct Model {
     num_profiles: u32,
     draw_mode: DrawMode,
     color_mode: ColorMode,
+    sender: osc::Sender<osc::Connected>,
 }
 
 fn model(app: &App) -> Model {
@@ -41,6 +45,15 @@ fn model(app: &App) -> Model {
         .size(1920, 1080)
         .build()
         .unwrap();
+
+    // Set up osc sender
+    let port = 57120;
+    let target_addr = format!("{}:{}", "127.0.0.1", port);
+
+    let sender = osc::sender()
+        .expect("Could not bind to default socket")
+        .connect(target_addr)
+        .expect("Could not connect to socket at address");
 
     let mut model = Model {
         profile_group: 0,
@@ -53,6 +66,8 @@ fn model(app: &App) -> Model {
         num_profiles: 7,
         draw_mode: DrawMode::Polar,
         color_mode: ColorMode::Profile,
+        sender,
+        selected_profile: 0,
     };
 
     load_profiles(&mut model);
@@ -180,6 +195,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         let col = match model.color_mode {
                             ColorMode::Script => script_color(d_tree[i].script_id as f32),
                             ColorMode::Profile => profile_color(index as f32),
+                            ColorMode::Selected => selected_color(index, model.selected_profile),
                         };
                         let weight = d_tree[i].ticks as f32;
                         let weight = weight;
@@ -225,6 +241,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         let col = match model.color_mode {
                             ColorMode::Script => script_color(d_tree[i].script_id as f32),
                             ColorMode::Profile => profile_color(index as f32),
+                            ColorMode::Selected => selected_color(index, model.selected_profile),
                         };
                         let weight = d_tree[i].ticks as f32;
                         let weight = weight.max(0.0);
@@ -268,6 +285,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         let col = match model.color_mode {
                             ColorMode::Script => script_color(d_tree[i].script_id as f32),
                             ColorMode::Profile => profile_color(index as f32),
+                            ColorMode::Selected => selected_color(index, model.selected_profile),
                         };
                         let weight = d_tree[i].ticks as f32;
                         // Draw a transparent circle representing the time spent
@@ -301,6 +319,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         let col = match model.color_mode {
                             ColorMode::Script => script_color(d_tree[i].script_id as f32),
                             ColorMode::Profile => profile_color(index as f32),
+                            ColorMode::Selected => selected_color(index, model.selected_profile),
                         };
                         let weight = d_tree[i].ticks as f32;
                         // Draw a transparent circle representing the time spent
@@ -333,6 +352,14 @@ fn profile_color(index: f32) -> Hsla {
     hsla(index * 0.048573, 0.8, 0.45, 1.0)
 }
 
+fn selected_color(index: usize, selected: usize) -> Hsla {
+    if index == selected {
+        hsla(0.048573, 0.8, 0.45, 1.0)
+    } else {
+        hsla(0.7, 0.8, 0.45, 1.0)
+    }
+}
+
 fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     match event {
         KeyPressed(key) => match key {
@@ -355,23 +382,40 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             Key::Up => {
                 model.profile_group += 1;
                 load_profiles(model);
+                model.selected_profile = 0;
             }
             Key::Down => {
                 if model.profile_group > 0 {
                     model.profile_group -= 1;
                     load_profiles(model);
+                    model.selected_profile = 0;
                 }
+            }
+            Key::A => {
+                if model.selected_profile > 0 {
+                    model.selected_profile -= 1;
+                } else {
+                    model.selected_profile = model.graph_datas.len() - 1;
+                }
+            }
+            Key::D => {
+                model.selected_profile = (model.selected_profile + 1) % model.graph_datas.len();
             }
             Key::C => {
                 model.color_mode = match model.color_mode {
                     ColorMode::Script => ColorMode::Profile,
-                    ColorMode::Profile => ColorMode::Script,
+                    ColorMode::Profile => ColorMode::Selected,
+                    ColorMode::Selected => ColorMode::Script,
                 }
             }
             Key::S => {
                 // Capture the frame!
                 let file_path = captured_frame_path(app);
                 app.main_window().capture_frame(file_path);
+            }
+            Key::T => {
+                // Send graph data via osc
+                model.graph_datas[model.selected_profile].send_script_data_osc(&model.sender);
             }
             _ => (),
         },

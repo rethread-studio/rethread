@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-
+use nannou_osc as osc;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct Profile {
@@ -56,6 +56,7 @@ impl Profile {
         // Traverse the call graph recursively
         self.nodes[0].add_graph_data(&mut graph_data, &self.nodes);
         // TODO: Fetch the source code of the scripts and count the number of functions in them
+        graph_data.update_metrics();
         // Traverse again to create the depth tree
         let depth_tree = self.generate_depth_tree();
         graph_data.depth_tree = depth_tree;
@@ -149,6 +150,44 @@ impl GraphData {
             .entry(script_id.clone())
             .or_insert(ScriptData::new(&script_id))
     }
+    /// Updates the variables that depend only on other data in the
+    /// GraphData. Also updates all ScriptData in the GraphData
+    fn update_metrics(&mut self) {
+        for script in self.script_data.values_mut() {
+            script.update_metrics();
+        }
+    }
+
+    pub fn send_script_data_osc(&self, sender: &osc::Sender<osc::Connected>) {
+        let osc_addr = "/graph_data".to_string();
+        sender.send((osc_addr, vec![])).ok();
+        for sd in self.script_data.values() {
+            let osc_addr = "/script_data".to_string();
+            let args = vec![
+                osc::Type::Int(sd.id),
+                osc::Type::Int(sd.ticks_in_script),
+                osc::Type::Int(sd.num_functions as i32),
+                osc::Type::Int(sd.num_called_functions as i32),
+                osc::Type::Int(sd.total_function_calls as i32),
+            ];
+            let packet = (osc_addr, args);
+            sender.send(packet).ok();
+            for fd in sd.function_data.values() {
+                let osc_addr = "/function_data".to_string();
+                let args = vec![
+                    osc::Type::Int(fd.ticks_in_function),
+                    osc::Type::Int(fd.calls_to_function as i32),
+                    osc::Type::Int(fd.calls_from_function as i32),
+                ];
+                let packet = (osc_addr, args);
+                sender.send(packet).ok();
+            }
+            let osc_addr = "/end_of_script_data".to_string();
+            sender.send((osc_addr, vec![])).ok();
+        }
+        let osc_addr = "/end_of_graph_data".to_string();
+        sender.send((osc_addr, vec![])).ok();
+    }
 }
 
 pub struct TreeNode {
@@ -203,6 +242,11 @@ impl ScriptData {
             .entry(name)
             .or_insert_with(FunctionData::new);
         function.calls_from_function += children;
+    }
+    /// Updates the variables that depend only on other data in the ScriptData
+    pub fn update_metrics(&mut self) {
+        self.num_called_functions = self.function_data.len() as u32;
+        self.num_functions = self.num_called_functions; // TODO: Get actual number from source code
     }
 }
 
