@@ -21,6 +21,7 @@
 };
 ~createFunctionData = { | ticks, calls_to, calls_from |
 	var fd = Environment.new(know: true);
+	("calls_to: " ++ calls_to).postln;
 	fd.ticks = ticks;
 	fd.calls_to = calls_to;
 	fd.calls_from = calls_from;
@@ -54,9 +55,9 @@ OSCFunc({ arg msg, time, addr, recvPort;
 
 OSCFunc({ arg msg, time, addr, recvPort;
 	// Must sort according to all the parameters to get a deterministic order
-	~currentlyReceivingScriptData.functions.sort({|a, b| a.ticks > b.ticks });
-	~currentlyReceivingScriptData.functions.sort({|a, b| a.calls_from > b.calls_from });
-	~currentlyReceivingScriptData.functions.sort({|a, b| a.calls_to > b.calls_to });
+	~currentlyReceivingScriptData.functions.sort({|a, b| a.ticks < b.ticks });
+	~currentlyReceivingScriptData.functions.sort({|a, b| a.calls_from < b.calls_from });
+	~currentlyReceivingScriptData.functions.sort({|a, b| a.calls_to < b.calls_to });
 	~currentlyReceivingGraphData.scripts.add(~currentlyReceivingScriptData);
 }, '/end_of_script_data', nil, 57120);
 OSCFunc({ arg msg, time, addr, recvPort;
@@ -81,11 +82,11 @@ OSCFunc({ arg msg, time, addr, recvPort;
 	gd.scripts.do{ |script, i|
 		var symbol = ("script_node"++i++"#").asSymbol;
 		Ndef(symbol, {
-			var sig, freq = 50 + (script.num_called_functions * i);
-			sig = SinOsc.ar(freq);
+			var sig, freq = 100 + (script.num_called_functions);
+			sig = SinOsc.ar(freq, 0.0, 0.1);
 
 			script.functions.do{|fd, i|
-				sig = sig + (SinOsc.ar(freq * (i+1)) * (fd.ticks+1)/total_ticks);
+				sig = sig + (SinOsc.ar(freq * (i+1), 0.0, 0.01) * (fd.ticks+1)/total_ticks);
 				num_amplitudes = num_amplitudes + 1;
 				if(fd.calls_from > 1, {
 					if(fd.calls_from > 10, {
@@ -93,31 +94,33 @@ OSCFunc({ arg msg, time, addr, recvPort;
 						sig = sig + PitchShift.ar(sig, 0.2, pitch_ratio, 0.01, 0.01);
 						num_amplitudes = num_amplitudes + 1;
 					}, {
-						var delay_time = freq / fd.calls_from;
+						var delay_time = (freq / fd.calls_from).reciprocal;
 						// Comb filter
-						sig = sig + CombC.ar(sig, 0.2, delay_time, 1.0);
+						sig = sig + CombC.ar(sig, 0.2, delay_time, 0.1);
 						num_amplitudes = num_amplitudes + 1;
-					});
-				}, {
-					if(fd.calls_to > 20, {
-						sig = sig * Demand.ar(Dust.ar(fd.calls_to * 0.5), 0.0, Dseq([0.2, 1], inf));
-						sig = sig + (SinOsc.ar(freq * (i+1)) * (fd.ticks+1)/total_ticks);
-						num_amplitudes = num_amplitudes + 1;
-					}, {
-						// Tremolo
-						sig = sig * SinOsc.ar(fd.calls_to, 0.0, 1.0/(fd.calls_from+1));
+						// sig = LPF.ar(sig, SinOsc.ar((
 					});
 				});
-			};
-			sig.postln;
-			num_amplitudes.postln;
-			// soft clip and amplitude adjustment
-			// sig = sig/num_amplitudes;
-			sig = sig.tanh * (1/gd.scripts.size);
-			// sig = sig.tanh * ((script.ticks+1)/total_ticks);
-			Pan2.ar(sig, (-1).pow(i+1) * ((i)/gd.scripts.size));
-		}).play;
-	};
+				if(fd.calls_to > 10, {
+					var loc_freq = (freq * fd.calls_to) + SinOsc.ar(freq, 0.0, freq/fd.ticks);
+					"demand".postln;
+					sig = sig * Demand.ar(Dust.ar(fd.calls_to * 0.5), 0.0, Dseq([0.2, 1], inf));
+					sig = sig + (SinOsc.ar(freq * (i+1), 0.0, 0.01) * (fd.ticks+1)/total_ticks);
+					num_amplitudes = num_amplitudes + 1;
+				}, {
+					// Tremolo
+					sig = sig + (sig * SinOsc.ar(5/fd.calls_to));
+					num_amplitudes = num_amplitudes + 1;
+				});
+		};
+		num_amplitudes.postln;
+		// soft clip and amplitude adjustment
+		sig = sig/num_amplitudes;
+		sig = sig.tanh * (1/gd.scripts.size);
+		// sig = sig.tanh * ((script.ticks+1)/total_ticks);
+		Pan2.ar(sig, (-1).pow(i+1) * ((i)/gd.scripts.size));
+	}).play;
+};
 };
 
 )
