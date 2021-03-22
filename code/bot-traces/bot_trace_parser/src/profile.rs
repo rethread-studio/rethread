@@ -135,6 +135,7 @@ impl FunctionCall {
 pub struct GraphData {
     pub script_data: HashMap<String, ScriptData>,
     pub depth_tree: Vec<TreeNode>,
+    pub indentation_profile: Option<Vec<u32>>,
 }
 
 impl GraphData {
@@ -142,7 +143,16 @@ impl GraphData {
         GraphData {
             script_data: HashMap::new(),
             depth_tree: vec![],
+            indentation_profile: None,
         }
+    }
+
+    pub fn add_indentation_profile(&mut self, data: String) {
+        let indentation_profile = data
+            .split(',')
+            .map(|n| n.parse::<u32>().unwrap())
+            .collect::<Vec<u32>>();
+        self.indentation_profile = Some(indentation_profile);
     }
 
     pub fn get_script_data(&mut self, script_id: String) -> &mut ScriptData {

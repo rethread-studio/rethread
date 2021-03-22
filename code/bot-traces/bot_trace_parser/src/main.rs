@@ -1,7 +1,11 @@
 use chrono::{DateTime, Utc};
 use nannou::prelude::*;
 use nannou_osc as osc;
-use std::{convert::TryInto, fs};
+use std::{
+    convert::TryInto,
+    fs,
+    path::{Path, PathBuf},
+};
 mod profile;
 use profile::{GraphData, Profile, TreeNode};
 
@@ -20,6 +24,7 @@ enum DrawMode {
     Polar,
     Horizontal,
     FlowerGrid,
+    FlowerGridIndentation,
 }
 
 struct Model {
@@ -29,6 +34,8 @@ struct Model {
     graph_datas: Vec<GraphData>,
     deepest_tree_depth: u32,
     longest_tree: u32,
+    deepest_indentation: u32,
+    longest_indentation: u32,
     index: usize,
     separation_ratio: f32,
     num_profiles: u32,
@@ -61,6 +68,8 @@ fn model(app: &App) -> Model {
         graph_datas: vec![],
         deepest_tree_depth: 0,
         longest_tree: 0,
+        deepest_indentation: 0,
+        longest_indentation: 0,
         index: 0,
         separation_ratio: 1.0,
         num_profiles: 7,
@@ -76,7 +85,7 @@ fn model(app: &App) -> Model {
 
 fn load_profiles(model: &mut Model) {
     let mut profiles = vec![];
-    let root_path = "/home/erik/code/kth/request-bot-files/20200124/";
+    let root_path = PathBuf::from("/home/erik/code/kth/request-bot-files/20200124/");
     let path_groups = [
         vec![
             "bing01-12-2020_16_06/",
@@ -130,20 +139,27 @@ fn load_profiles(model: &mut Model) {
         model.profile_group -= path_groups.len()
     }
 
-    for p in &path_groups[model.profile_group] {
-        let full_path = format!("{}{}profile.json", root_path, p);
-        let data = fs::read_to_string(full_path).unwrap();
-        let profile: Profile = serde_json::from_str(&data).unwrap();
-        profiles.push(profile);
-    }
-
     let mut graph_datas = vec![];
-    for profile in &profiles {
-        graph_datas.push(profile.generate_graph_data());
+    for p in &path_groups[model.profile_group] {
+        let mut folder_path = root_path.clone();
+        folder_path.push(p);
+        folder_path.push("profile.json");
+        let data = fs::read_to_string(&folder_path).unwrap();
+        let profile: Profile = serde_json::from_str(&data).unwrap();
+        folder_path.pop();
+        folder_path.push("indent_profile.csv");
+        let indentation_profile =
+            fs::read_to_string(folder_path).expect("indent_profile.csv could not be loaded");
+        let mut graph_data = profile.generate_graph_data();
+        graph_data.add_indentation_profile(indentation_profile);
+        graph_datas.push(graph_data);
+        profiles.push(profile);
     }
 
     let mut deepest_tree_depth = 0;
     let mut longest_tree = 0;
+    let mut deepest_indentation = 0;
+    let mut longest_indentation = 0;
     for gd in &graph_datas {
         if gd.depth_tree.len() > longest_tree {
             longest_tree = gd.depth_tree.len();
@@ -153,13 +169,30 @@ fn load_profiles(model: &mut Model) {
                 deepest_tree_depth = node.depth;
             }
         }
+        if let Some(indentation_profile) = &gd.indentation_profile {
+            if indentation_profile.len() > longest_indentation {
+                longest_indentation = indentation_profile.len();
+            }
+            for v in indentation_profile {
+                if *v > deepest_indentation {
+                    deepest_indentation = *v;
+                }
+            }
+        }
     }
+
+    println!(
+        "deepest_indentation: {}, longest_indentation: {}",
+        deepest_indentation, longest_indentation
+    );
 
     model.num_profiles = profiles.len().try_into().unwrap();
     model.profiles = profiles;
     model.graph_datas = graph_datas;
     model.longest_tree = longest_tree.try_into().unwrap();
     model.deepest_tree_depth = deepest_tree_depth.try_into().unwrap();
+    model.longest_indentation = longest_indentation.try_into().unwrap();
+    model.deepest_indentation = deepest_indentation;
 }
 
 fn update(_app: &App, model: &mut Model, _update: Update) {
@@ -267,6 +300,47 @@ fn view(app: &App, model: &Model, frame: Frame) {
                 }
             }
         }
+        DrawMode::FlowerGridIndentation => {
+            let angle_scale: f32 = PI * 2.0 / model.longest_indentation as f32;
+            let radius_scale: f32 = win.h() / ((model.deepest_indentation + 1) as f32 * 4.0);
+            for (index, gd) in model.graph_datas.iter().enumerate() {
+                if let Some(indent_profile) = &gd.indentation_profile {
+                    let offset_angle = (index as f32 / model.num_profiles as f32) * PI * 2.0;
+                    let offset_radius = match index {
+                        0 => 0.0,
+                        _ => radius_scale * model.deepest_indentation as f32 * 1.5,
+                    };
+                    let offset = pt2(
+                        offset_angle.cos() * offset_radius,
+                        offset_angle.sin() * offset_radius,
+                    );
+                    for i in 0..indent_profile.len() {
+                        let angle = i as f32 * angle_scale;
+                        if i < indent_profile.len() {
+                            let start_radius = indent_profile[i] as f32 * radius_scale;
+                            let radius = (indent_profile[i] + 1) as f32 * radius_scale;
+                            let col = match model.color_mode {
+                                ColorMode::Script => script_color(indent_profile[i] as f32),
+                                ColorMode::Profile => profile_color(index as f32),
+                                ColorMode::Selected => {
+                                    selected_color(index, model.selected_profile)
+                                }
+                            };
+
+                            let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius)
+                                + offset;
+                            let end = pt2(angle.cos() * radius, angle.sin() * radius) + offset;
+                            // Draw the line representing the indentation level
+                            draw.line()
+                                .stroke_weight(1.0)
+                                .start(start)
+                                .end(end)
+                                .color(col);
+                        }
+                    }
+                }
+            }
+        }
         DrawMode::Vertical => {
             let x_scale: f32 = win.w()
                 / ((model.num_profiles as f32 * model.separation_ratio + 1.0)
@@ -368,15 +442,17 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     DrawMode::Vertical => DrawMode::Polar,
                     DrawMode::Polar => DrawMode::Horizontal,
                     DrawMode::Horizontal => DrawMode::FlowerGrid,
-                    DrawMode::FlowerGrid => DrawMode::Vertical,
+                    DrawMode::FlowerGrid => DrawMode::FlowerGridIndentation,
+                    DrawMode::FlowerGridIndentation => DrawMode::Vertical,
                 }
             }
             Key::Right => {
                 model.draw_mode = match model.draw_mode {
-                    DrawMode::Vertical => DrawMode::FlowerGrid,
+                    DrawMode::Vertical => DrawMode::FlowerGridIndentation,
                     DrawMode::Polar => DrawMode::Vertical,
                     DrawMode::Horizontal => DrawMode::Polar,
                     DrawMode::FlowerGrid => DrawMode::Horizontal,
+                    DrawMode::FlowerGridIndentation => DrawMode::FlowerGrid,
                 }
             }
             Key::Up => {
