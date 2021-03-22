@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 rfd = "0.2.1"
+clap = "2.33.3"
