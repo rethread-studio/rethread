@@ -25,6 +25,7 @@ enum DrawMode {
     Horizontal,
     FlowerGrid,
     FlowerGridIndentation,
+    FlowerIndentation,
 }
 
 struct Model {
@@ -49,7 +50,7 @@ fn model(app: &App) -> Model {
         .new_window()
         .view(view)
         .event(window_event)
-        .size(1920, 1080)
+        .size(1080, 1080)
         .build()
         .unwrap();
 
@@ -303,6 +304,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
         DrawMode::FlowerGridIndentation => {
             let angle_scale: f32 = PI * 2.0 / model.longest_indentation as f32;
             let radius_scale: f32 = win.h() / ((model.deepest_indentation + 1) as f32 * 4.0);
+
+            // If there are too many lines to be drawn on the screen, don't draw them all
+            let graph_width = radius_scale * model.deepest_indentation as f32 * 1.5;
+            let res_decimator = (1.0 / (angle_scale * graph_width)) as usize;
+            println!("res_decimator: {}", res_decimator);
             for (index, gd) in model.graph_datas.iter().enumerate() {
                 if let Some(indent_profile) = &gd.indentation_profile {
                     let offset_angle = (index as f32 / model.num_profiles as f32) * PI * 2.0;
@@ -314,28 +320,64 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         offset_angle.cos() * offset_radius,
                         offset_angle.sin() * offset_radius,
                     );
+
                     for i in 0..indent_profile.len() {
+                        if i % res_decimator == 0 {
+                            let angle = i as f32 * angle_scale;
+                            if i < indent_profile.len() {
+                                let start_radius = indent_profile[i] as f32 * radius_scale;
+                                let radius = (indent_profile[i] + 1) as f32 * radius_scale;
+                                let col = match model.color_mode {
+                                    ColorMode::Script => script_color(indent_profile[i] as f32),
+                                    ColorMode::Profile => profile_color(index as f32),
+                                    ColorMode::Selected => {
+                                        selected_color(index, model.selected_profile)
+                                    }
+                                };
+
+                                let start =
+                                    pt2(angle.cos() * start_radius, angle.sin() * start_radius)
+                                        + offset;
+                                let end = pt2(angle.cos() * radius, angle.sin() * radius) + offset;
+                                // Draw the line representing the indentation level
+                                draw.line()
+                                    .stroke_weight(1.0)
+                                    .start(start)
+                                    .end(end)
+                                    .color(col);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        DrawMode::FlowerIndentation => {
+            let gd = &model.graph_datas[model.selected_profile];
+            let index = model.selected_profile;
+            let deep_indent = model.deepest_indentation as f32;
+
+            let max_radius = win.h() * 0.5;
+            if let Some(indent_profile) = &gd.indentation_profile {
+                let angle_scale: f32 = PI * 2.0 / indent_profile.len() as f32;
+                for i in 0..indent_profile.len() {
+                    if true {
+                        //if i % res_decimator == 0 {
                         let angle = i as f32 * angle_scale;
                         if i < indent_profile.len() {
-                            let start_radius = indent_profile[i] as f32 * radius_scale;
-                            let radius = (indent_profile[i] + 1) as f32 * radius_scale;
+                            // let radius = (indent_profile[i] + 1) as f32 * radius_scale;
+                            let radius =
+                                (indent_profile[i] as f32 / deep_indent).powf(0.33) * max_radius;
                             let col = match model.color_mode {
-                                ColorMode::Script => script_color(indent_profile[i] as f32),
+                                ColorMode::Script => script_color(indent_profile[i] as f32 * 0.01),
                                 ColorMode::Profile => profile_color(index as f32),
                                 ColorMode::Selected => {
                                     selected_color(index, model.selected_profile)
                                 }
                             };
 
-                            let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius)
-                                + offset;
-                            let end = pt2(angle.cos() * radius, angle.sin() * radius) + offset;
+                            let start = pt2(angle.cos() * radius, angle.sin() * radius);
                             // Draw the line representing the indentation level
-                            draw.line()
-                                .stroke_weight(1.0)
-                                .start(start)
-                                .end(end)
-                                .color(col);
+                            draw.rect().xy(start).w_h(1.0, 1.0).color(col);
                         }
                     }
                 }
@@ -443,16 +485,18 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     DrawMode::Polar => DrawMode::Horizontal,
                     DrawMode::Horizontal => DrawMode::FlowerGrid,
                     DrawMode::FlowerGrid => DrawMode::FlowerGridIndentation,
-                    DrawMode::FlowerGridIndentation => DrawMode::Vertical,
+                    DrawMode::FlowerGridIndentation => DrawMode::FlowerIndentation,
+                    DrawMode::FlowerIndentation => DrawMode::Vertical,
                 }
             }
             Key::Right => {
                 model.draw_mode = match model.draw_mode {
-                    DrawMode::Vertical => DrawMode::FlowerGridIndentation,
+                    DrawMode::Vertical => DrawMode::FlowerIndentation,
                     DrawMode::Polar => DrawMode::Vertical,
                     DrawMode::Horizontal => DrawMode::Polar,
                     DrawMode::FlowerGrid => DrawMode::Horizontal,
                     DrawMode::FlowerGridIndentation => DrawMode::FlowerGrid,
+                    DrawMode::FlowerIndentation => DrawMode::FlowerGridIndentation,
                 }
             }
             Key::Up => {
