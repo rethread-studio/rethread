@@ -1,0 +1,14 @@
+{
+  "name": "html_tree_generator",
+  "version": "1.0.0",
+  "description": "Generate a JSON file with the tree structure of an HTML document",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik Natanael Gustafsson <erik@eriknatanael.com> (https://eriknatanael.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.5"
+  }
+}
