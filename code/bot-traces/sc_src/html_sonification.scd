@@ -18,7 +18,7 @@ printTag.(~html);
 
 // Generate audio graph from tree
 (
-var parseNode, parseDiv, parseContent, sineNode, fmChildren, additiveChildren, amChildren, sawNode;
+var parseNode, parseDiv, parseContent, sineNode, fmChildren, additiveChildren, amChildren, stutterChildren, lpfChildren, sawNode;
 // recursive function to parse the html tree into a signal graph
 parseNode = { | node, sig, context |
 	context.indent = context.indent + 1;
@@ -28,7 +28,12 @@ parseNode = { | node, sig, context |
 			switch(node["tag"],
 				"section", {sig = amChildren.(node, sig, context);},
 				"span", {sig = fmChildren.(node, sig, context);},
-				"div", {sig = additiveChildren.(node, sig, context);},
+				"div", {sig = lpfChildren.(node, sig, context);},
+				"nav", {sig = stutterChildren.(node, sig, context);},
+				"article", {sig = stutterChildren.(node, sig, context);},
+				"main", {sig = lpfChildren.(node, sig, context);},
+				"header", {sig = stutterChildren.(node, sig, context);},
+				"footer", {sig = lpfChildren.(node, sig, context);},
 				// default function
 				{ sig = additiveChildren.(node, sig, context); }
 			);
@@ -43,9 +48,15 @@ parseNode = { | node, sig, context |
 				"h2", {sig = sineNode.(node, context)},
 				"h3", {sig = sineNode.(node, context)},
 				"h3", {sig = sineNode.(node, context)},
+				"h4", {sig = sineNode.(node, context)},
+				"h5", {sig = sineNode.(node, context)},
+				"h6", {sig = sineNode.(node, context)},
 				"img", {sig = sawNode.(node, context)},
 				"audio", {sig = sineNode.(node, context)},
 				"video", {sig = sawNode.(node, context)},
+				"button", {sig = sineNode.(node, context)},
+				"embed", {sig = sawNode.(node, context)},
+				"iframe", {sig = lpfChildren.(node, sig, context);},
 				// default function
 				{ sig = additiveChildren.(node, sig, context); }
 			);
@@ -96,6 +107,24 @@ sawNode = { | node, context |
 
 	sig
 };
+
+sweepNode = { | node, context |
+	var startfreq = context.freq, endfreq, newContext, sig, freqEnv, sweepTime = 1/node["total_children"].asFloat;
+
+	// Keep freq under maxfreq
+	while({startfreq > context.max_freq}, {startfreq = startfreq * 2/3});
+	endfreq = (context.freq * (node["total_children"].asFloat + 1)).min(100000);
+	("sweep" + startfreq).postln;
+	freqEnv = Env([startfreq, endfreq, startfreq], times: [sweepTime, sweepTime], releaseNode: 1, loopNode: 0).ar();
+	sig = SinOsc.ar(freqEnv, mul: 0.1);
+	newContext = context.deepCopy;
+	newContext.freq = startfreq;
+	sig = additiveChildren.(node, sig, context);
+
+	// sig = sig * LFTri.ar((node["total_children"].asFloat + 1) + ((context.indent + 1) / 16));
+
+	sig
+};
 // Add together all of the child nodes
 additiveChildren = { | node, sig, context |
 	// "additive".postln;
@@ -113,6 +142,21 @@ additiveChildren = { | node, sig, context |
 		};
 	};
 	sig
+};
+
+stutterChildren = { | node, sig, context |
+	// "additive".postln;
+	var childSig = additiveChildren.(node, sig, context), stutterFreq = context.freq;
+	while({stutterFreq > 15}, {stutterFreq = stutterFreq * (4/7) });
+	childSig = childSig * Demand.ar(Dust.ar(stutterFreq), 0, Dseq([0, 1], inf));
+	sig + childSig
+};
+lpfChildren = { | node, sig, context |
+	// "additive".postln;
+	var childSig = additiveChildren.(node, sig, context), lpfFreq = context.freq;
+	while({lpfFreq > 4}, {lpfFreq = lpfFreq * (4/7) });
+	childSig = LPF.ar(childSig, SinOsc.ar(lpfFreq).range(context.freq, context.freq*2));
+	sig + childSig
 };
 // parse a div, fm synthesis
 // maybe a div isn't the best structural element since it seems to have gone out of fashion
@@ -167,8 +211,9 @@ SynthDef(\html_graph, {
 	sig = LeakDC.ar(sig);
 	envFollower = PeakFollower.ar(sig, 0.99999999);
 	sig = sig / (envFollower * 0.1);
+	sig = JPverb.ar(sig, damp: 0.5);
 	// sig = sig + SinOsc.ar(context.freq, mul: 0.1);
-	SendTrig.kr(Impulse.kr(10), 0, envFollower);
+	// SendTrig.kr(Impulse.kr(10), 0, envFollower);
 	sig = sig * Line.kr(0, 1, 2);
 	sig = Pan2.ar(sig * 0.01);
 	sig = Limiter.ar(sig, 0.9, 0.02);
