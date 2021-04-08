@@ -18,10 +18,11 @@ printTag.(~html);
 
 // Generate audio graph from tree
 (
-var parseNode, parseDiv, parseContent, sineNode, fmChildren, additiveChildren, amChildren, stutterChildren, lpfChildren, sawNode, sweepNode, fallNode;
+var parseNode, parseDiv, parseContent, sineNode, fmChildren, additiveChildren, amChildren, stutterChildren, lpfChildren, sawNode, sweepNode, fallNode, getTimeEnv;
 // recursive function to parse the html tree into a signal graph
 parseNode = { | node, sig, context |
 	context.indent = context.indent + 1;
+	context.node_number = context.node_number + 1;
 	// node["tag"].postln;
 	switch(node["category"],
 		"structure", {
@@ -75,6 +76,15 @@ parseNode = { | node, sig, context |
 	context.indent = context.indent - 1;
 	sig
 };
+// create an envelope based on the node and the context
+getTimeEnv = { | node, context |
+	var atk, rel, del;
+	atk = context.max_duration / (context.indent * 10);
+	rel = context.max_duration / (context.node_number.pow(1/4));
+	del = 0; //((context.max_duration - (atk + rel)) / 2).max(0);
+	("atk: " + atk + " rel: " + rel + " del: " + del).postln;
+	DelayL.ar(Env.perc(atk, rel).ar(), del, del);
+};
 sineNode = { | node, context |
 	var freq, newContext, sig, childSig;
 	// freq = context.freq * (node["total_children"].asFloat + 1);
@@ -88,7 +98,7 @@ sineNode = { | node, context |
 
 	context.indent.do{" ".post;};
 	("sine" + freq).postln;
-	sig = SinOsc.ar(freq + (childSig * freq), Rand(0, pi), mul: 0.1);
+	sig = SinOsc.ar(freq + (childSig * freq), Rand(0, pi), mul: 0.1) * getTimeEnv.(node, context);
 	sig = sig * SinOsc.ar((node["total_children"].asFloat + 1) + ((context.indent + 1) / 16), mul: 0.5, add: 0.5);
 
 	sig + childSig
@@ -100,7 +110,7 @@ sawNode = { | node, context |
 	// while({freq > context.max_freq}, {freq = freq * 0.5});
 	freq = freq / 2.pow((freq/context.max_freq).floor.max(0));
 	("saw" + freq).postln;
-	sig = Saw.ar(freq, mul: 0.1);
+	sig = Saw.ar(freq, mul: 0.1) * getTimeEnv.(node, context);
 	newContext = context.deepCopy;
 	newContext.freq = freq;
 	sig = additiveChildren.(node, sig, context);
@@ -121,7 +131,7 @@ sweepNode = { | node, context |
 	endfreq = (context.freq * (node["total_children"].asFloat + 2)).min(100000);
 	("sweep" + startfreq + "end: " + endfreq + "time: " + sweepTime).postln;
 	freqEnv = Env([startfreq, endfreq, startfreq, endfreq], times: [sweepTime, sweepTime, sweepTime], releaseNode: 2, loopNode: 0).ar();
-	sig = SinOsc.ar(freqEnv, mul: 0.1);
+	sig = SinOsc.ar(freqEnv, mul: 0.1) * getTimeEnv.(node, context);
 	newContext = context.deepCopy;
 	newContext.freq = startfreq;
 	sig = additiveChildren.(node, sig, context);
@@ -141,7 +151,7 @@ fallNode = { | node, context |
 	endfreq = (context.freq / (context.indent + 1)).max(20);
 	("fall" + startfreq + "end: " + endfreq + "time: " + sweepTime).postln;
 	freqEnv = Env([startfreq, endfreq, startfreq, endfreq], times: [sweepTime, sweepTime, sweepTime], releaseNode: 2, loopNode: 0).ar();
-	sig = DPW3Tri.ar(freqEnv, mul: 0.1);
+	sig = DPW3Tri.ar(freqEnv, mul: 0.1) * getTimeEnv.(node, context);
 	newContext = context.deepCopy;
 	newContext.freq = startfreq;
 	sig = additiveChildren.(node, sig, context);
@@ -231,13 +241,17 @@ amChildren = { | node, sig, context |
 
 Ndef.clear;
 Ndef(\html_graph).fadeTime = 0.03;
-SynthDef(\html_graph, {
+Ndef(\html_graph, {
 	var sig = DC.ar(0.0), context = IdentityDictionary(know: true), envFollower;
-	context.indent = 0;
-	context.freq = ~html["total_children"].asFloat * 2;
+	context.indent = 0; // the depth of the current node
+	context.node_number = 0; // the number of the node in a depth first pass
+	// context.freq = ~html["total_children"].asFloat * 2;
+	context.freq = 500 * (Demand.ar(Impulse.ar(12), 0, Dseq([1, 5/4, 3/2, 4/3, 7/4, 16/9, 9/8, 15/16], inf))).lag(0.02);
+	context.freq = context.freq.max(20);
 	// context.freq = MouseX.kr(50, 2000, \exponential);
-	context.max_freq = 5000;
-	context.max_duration = 1.5;
+	// context.max_freq = 5000;
+	context.max_freq = (~html["total_children"].asFloat * 4).min(20000);
+	context.max_duration = 12;
 	sig = parseNode.(~html, sig, context);
 	sig = LeakDC.ar(sig);
 	envFollower = PeakFollower.ar(sig, 0.99999999);
