@@ -1,4 +1,4 @@
-
+// 0 = bing, 1 = duckduckgo, 2 = google, 3 = wikipedia, 4 = yahoo
 (
 var root_path = "/home/erik/code/kth/request-bot-files/20200124/",
 path_groups = [
@@ -52,7 +52,7 @@ path_groups = [
 
 // Function to load the indentation data into a buffer, scaled to values that make sense for audio
 ~loadIndentationToBuffer = { | path |
-	var data, digits, numbers, max_num = 0, average, sum = 0, buf;
+	var data, digits, numbers, average, sum = 0, buf;
 	// load csv file
 	~data = File.readAllString(path ++ "indent_profile.csv");
 	("data from " + path + "was read").postln;
@@ -60,36 +60,56 @@ path_groups = [
 	("data was split into " + digits.size + "numbers").postln;
 	numbers = digits.collect({ | num |
 		var n = num.asInteger;
-		if(n > max_num, { max_num = n; });
 		n
 	});
 	("data was converted to integers").postln;
-	numbers = numbers.collect({ | num |
+	numbers
+};
+~applyNormalizationAndDCBlocking = { | list, max_num |
+	var average, sum = 0, buf;
+
+	list = list.collect({ | num |
 		var n = num / max_num;
-		n = n.sqrt; // lessens the impact of very high peaks in the indentation profile
+		n = n.pow(1/4); // lessens the impact of very high peaks in the indentation profile, basically compressing the signal
 		sum = sum + n;
 		n
 	});
+	"data normalized".postln;
 	// Remove DC bias
 	// A running average may do better to equal out the large peaks in the waveform?
+	// This DC blocker is inadequate for properly evening out the DC of the peaks (which should swing from one pole to the other)
+	// Hopefully, later highpass filtering and DC blocking as well as resynthesis is enough
 	"remove dc bias".postln;
-	average = sum / numbers.size;
-	("average: " + average).postln;
-	numbers = numbers.collect({ | num |
+	average = sum / list.size;
+	// ("average: " + average).postln;
+	list = list.collect({ | num |
 		var n = num - average;
 		n
 	});
 
-	buf = Buffer.loadCollection(s, numbers);
+	buf = Buffer.loadCollection(s, list);
 	buf
 };
 ~buffers = List[];
 path_groups.do { |path_group|
-	var group_buffers = List[];
+	var group_buffers = List[], max_num = 0;
+	// load all files into lists
 	path_group.do{ | end_path |
 		var local_path = root_path ++ end_path;
 		group_buffers.add(~loadIndentationToBuffer.(local_path));
 	};
+	// find the largest peak in all the lists for equal normalization
+	group_buffers.do{|buf|
+		buf.do({ | num |
+			if(num > max_num, { max_num = num; });
+		});
+	};
+	// normalize and turn into sound buffer format on the server
+	group_buffers = group_buffers.collect{|list|
+		var buf = ~applyNormalizationAndDCBlocking.(list, max_num);
+		buf
+	};
+
 	~buffers.add(group_buffers);
 };
 )
@@ -103,7 +123,6 @@ var path, digits, numbers, max_num = 0, average, sum = 0;
 path = "/home/erik/code/kth/request-bot-files/20200124/yahoo01-12-2020_16_06/";
 
 )
-
 ~buf.plot
 
 (
@@ -118,12 +137,12 @@ path = "/home/erik/code/kth/request-bot-files/20200124/yahoo01-12-2020_16_06/";
 )
 
 ( // Super simple wave guide implementation
-~buf = ~buffers[5][0];
+~buf = ~buffers[4][0];
 {
 	var sig, freq = 50, decay = MouseX.kr(0.001, 1.0, 'exponential'), rate, buf = ~buf;
 	rate = BufDur.ir(buf) / 2.0; // scale the buffer playback so all buffers take the same amount of time
 	sig = PlayBuf.ar(1, buf, rate: rate, doneAction: 2);
-	sig = LeakDC.ar(sig);
+	sig = LeakDC.ar(HPF.ar(sig, 20));
 	// optionally control more parameters using the same values
 	decay = sig;
 	// freq = 40 + (1000 * sig.abs);
@@ -163,32 +182,35 @@ SynthDef(\tick2, {
 }).play;
 )
 
+// 0 = bing, 1 = duckduckgo, 2 = google, 3 = wikipedia, 4 = yahoo
 ( // Play all buffers of a type
 {
-	var bufferGroup = ~buffers[2];
+	var bufferGroup = ~buffers[1];
 	bufferGroup.do { |buf, i|
 		var duration = buf.duration * 0.08;
+		duration = 1;
 		(i.asString + "dur: " + duration).postln;
-		Synth(\separator);
+		// Synth(\separator);
+		0.1.wait;
 		// 0.3.wait;
 		{
-			var sig, freq = 30, decay = MouseX.kr(0.001, 1.0, 'exponential'), rate;
+			var sig, freq = 30, decay = MouseX.kr(0.001, 1.0, 'exponential'), rate, maxfreq = 1000, minfreq = 50;
 			rate = BufDur.ir(buf) / duration; // scale the buffer playback so all buffers take the same amount of time
 			sig = PlayBuf.ar(1, buf, rate: rate, doneAction: 2);
-			sig = LeakDC.ar(sig);
+			sig = LeakDC.ar(HPF.ar(sig, 20));
 			// optionally control more parameters using the same values
 			// decay = sig;
 			// decay.poll;
 			decay = 0.038;
-			freq = 400 + (350 * sig.lag(0.1));
+			freq = maxfreq - ((maxfreq-minfreq) * sig.abs.lag(0.1).pow(1/3));
 			sig = CombC.ar(sig, 0.2, freq.reciprocal, decay);
 			sig = Limiter.ar(sig);
 			sig = Pan2.ar(sig);
-			sig = sig + DelayL.ar((JPverb.ar(sig, 3.0)*0.6), 0.05, 0.05);
+			sig = sig + DelayL.ar((JPverb.ar(sig, 3.0)*0.09), 0.05, 0.05);
 			sig
 
 		}.play;
-		{ // beat
+		/*{ // beat
 			var numBeats = 3, beatLength = duration/numBeats;
 			(numBeats-1).do {
 				3.do{
@@ -199,7 +221,7 @@ SynthDef(\tick2, {
 				Synth(\tick2, [\rel, 0.2, \freq, 5000, \rq, 1, \amp, 0.2]);
 				// Synth(\beat);
 			};
-		}.fork;
+		}.fork;*/
 		duration.wait;
 	};
 }.fork;
@@ -208,30 +230,38 @@ SynthDef(\tick2, {
 
 // Play two buffers simultaneously, one in each channel
 (
-var duration, bufGroup = ~buffers[2], index = 1;
+var duration, bufGroup = ~buffers[2], index = 0;
 ~playBuffer = { | buf, pan = 0, duration |
 	{
-			var sig, freq = 30, decay = MouseX.kr(0.001, 1.0, 'exponential'), rate;
-			rate = BufDur.ir(buf) / duration; // scale the buffer playback so all buffers take the same amount of time
-			sig = PlayBuf.ar(1, buf, rate: rate, doneAction: 2);
-			sig = LeakDC.ar(sig);
-			// optionally control more parameters using the same values
-			// decay = sig;
-			// decay.poll;
-			decay = 0.038;
-			freq = 400 + (350 * sig.lag(0.1));
-			sig = CombC.ar(sig, 0.2, freq.reciprocal, decay);
-			sig = Limiter.ar(sig);
-			sig = Pan2.ar(sig, pan);
+		var sig, freq = 30, decay = MouseX.kr(0.001, 1.0, 'exponential'), rate, maxfreq = 1000, minfreq = 50;
+		rate = BufDur.ir(buf) / duration; // scale the buffer playback so all buffers take the same amount of time
+		sig = PlayBuf.ar(1, buf, rate: rate, doneAction: 2);
+		sig = LeakDC.ar(HPF.ar(sig, 20));
+		// optionally control more parameters using the same values
+		// decay = sig;
+		// decay.poll;
+		decay = 0.038;
+		// freq = 400 + (350 * sig.lag(0.1));
+		freq = maxfreq - ((maxfreq-minfreq) * sig.abs.lag(0.1).pow(1/3));
+		sig = CombC.ar(sig, 0.2, freq.reciprocal, decay);
+		sig = Limiter.ar(sig);
+		sig = Pan2.ar(sig, pan);
 		// sig = sig + DelayL.ar((JPverb.ar(sig, 3.0)*0.6), 0.05, 0.05);
-			sig
+		sig
 
-		}.play;
+	}.play;
 };
 
-duration = bufGroup[index].duration * 0.08;
-~playBuffer.(bufGroup[index], -1, duration);
-~playBuffer.(bufGroup[(index+1) % bufGroup.size], 1, duration);
+{
+	bufGroup.size.do { | i |
+		index = i;
+		duration = bufGroup[index].duration * 0.08;
+		~playBuffer.(bufGroup[index], -1, duration);
+		~playBuffer.(bufGroup[(index+1) % bufGroup.size], 1, duration);
+		duration.wait;
+		0.2.wait;
+	};
+}.fork;
 
 )
 
