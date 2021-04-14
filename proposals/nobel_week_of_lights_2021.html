@@ -53,14 +53,21 @@
             inhabit. Common for
             both variants is the desire to convey the <b>sublimity and texture</b> of core high frequency
             <b>software</b> operations
-            using <b>laser projection</b> technology through fine grained <b>live generated visuals</b>.</p>
+            using <b>laser projection</b> technology through fine grained <b>live generated visuals</b>.
+          </p>
 
-          <p>The term "laser projector" can have several meanings. What we mean when we say laser projector is the type
+          <p>The term "laser projector" can have several meanings. What we mean is the type
             of fast
             scanning laser projector used for works such as <a href="https://www.youtube.com/watch?v=P9UQqTqGcHs">DEEP
               WEB by Christopher Bauder</a>, <a href="https://roberthenke.com/concerts/lumiere.html">Lumière</a> and <a
               href="https://roberthenke.com/installations/fragile_territories.html">Fragile Territories</a> by Robert
-            Henke</a> or this <a href="https://vimeo.com/wearetundra">live performance by TUNDRA</a>.</p>
+            Henke</a> or this <a href="https://vimeo.com/342449199">live performance by TUNDRA</a>.</p>
+
+        </div>
+        <div class="image">
+          <img src="../images/nobel2021proposal/Robert_Henke_Lumiere_III_by_Fons_Artois_1920x1080.jpg" alt="" />
+          <img src="../images/nobel2021proposal/Christopher_Bauder-DEEP_WEB.jpg" alt="" />
+          <img src="../images/nobel2021proposal/TUNDRA-NOMAD.jpg" alt="" />
 
         </div>
 
@@ -77,7 +84,8 @@
             <li><a href="#concept">Concept</a></li>
             <li><a href="#toc">Table of Contents</a></li>
             <li><a href="#variant1">Variant 1: Interactive generative light projection installation</a></li>
-            <li><a href="#variant2">Variant 2: Real time generative light installation powered by real science experiments</a></li>
+            <li><a href="#variant2">Variant 2: Real time generative light installation powered by real science
+                experiments</a></li>
             <li><a href="#tech">Tech requirements</a></li>
           </ul>
         </div>
@@ -101,11 +109,13 @@
             possibly overlapping, projections.</p>
 
           <p>Interaction will made available through a web app in which visitors can choose among a range Nobel
-            laureates. Having chosen one, their face will be projected and moved around by the visitor. When choosing a
-            Nobel laureate, a short text that describes the discovery that earned them their
-            prize will be available.</p>
+            laureates. A short text that describes the discovery that earned them their
+            prize will be shown. Having chosen one, their face will be projected on a wall and moved around by the
+            visitor.</p>
 
-          <p>The software activity that we want to display is the very software that runs the installation. To power the
+          <p>This, in one sense rather simple interaction, requires a lot of software to work. The software activity
+            that we want to display through the generative art is the very software that runs the installation. To power
+            the
             interactive element we will have a web server handle communication between the visitors' smartphones and the
             visual interface controlling the projections. This web server, while controlling this communication, will
             produce tons of software activity: millions of events every second. We will use the most relevant subset of
@@ -176,12 +186,17 @@
         <!-- <div class="image"><img src="images/request1.png" alt="" /></div> -->
         <div id="tech" class="content">
           <h3>Tech</h3>
+          <h4>On site</h4>
           <p><b>Laser projector(s)</b> of sufficient brightness will need to be rented, as well as necessary housing for
             such a projector e.g. a container. Standard safety precautions need to be taken. 3 projectors
             will be required for ideal results, although we can make it work with fewer for some locations.</p>
-          <p><b>Stable and fast internet</b> is needed to connect the installation to the web interface that
+          <p><b>Computer</b> generating the visuals and encoding them in the correct format for the projectors.</p>
+          <p><b>Stable and fast internet</b> to connect the installation to the web interface that
             the visitors can access.</p>
-
+          <p><b>Power</b> for both the projectors and the computer controlling them.</p>
+          <h4>Off site</h4>
+          <p>A <b>web server</b> to connect the installation to its data source as well as provide the
+            interactive experience in <a href="#variant1">variant 1</a>.</p>
         </div>
 
       </section>
