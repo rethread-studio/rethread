@@ -49,28 +49,37 @@ path_groups = [
             "yahoo01-19-2020_20_01/",
         ],
     ];
+~path_groups = path_groups;
 
 // Function to load the indentation data into a buffer, scaled to values that make sense for audio
 ~loadIndentationToBuffer = { | path |
-	var data, digits, numbers, average, sum = 0, buf;
+	var data, digits, numbers, average, sum = 0, buf, moving_avg = 0.0, moving_avg_coeff = 0.9995;
 	// load csv file
 	~data = File.readAllString(path ++ "indent_profile.csv");
 	("data from " + path + "was read").postln;
 	digits = ~data.split($,);
 	("data was split into " + digits.size + "numbers").postln;
 	numbers = digits.collect({ | num |
-		var n = num.asInteger;
-		n
+		var conv = num.asInteger.asFloat, new;
+		new = conv - (moving_avg);
+		// new = conv;
+		moving_avg = (moving_avg * (moving_avg_coeff)) + (conv * (1.0 - moving_avg_coeff));
+		if(moving_avg.isNaN) {
+			("nan!" + num + conv).postln;
+		};
+		new
 	});
 	("data was converted to integers").postln;
 	numbers
 };
 ~applyNormalizationAndDCBlocking = { | list, max_num |
-	var average, sum = 0, buf;
+	var average, sum = 0, buf, last_value = 0;
 
 	list = list.collect({ | num |
-		var n = num / max_num;
-		n = n.pow(1/4); // lessens the impact of very high peaks in the indentation profile, basically compressing the signal
+		var n = num / max_num, sign = 1;
+		// We cannot take the root of a negative number without a complex result so we store the sign and take the root of the absolute value
+		if(n < 0, {sign = -1});
+		n = n.abs.pow(1/4) * sign; // lessens the impact of very high peaks in the indentation profile, basically compressing the signal
 		sum = sum + n;
 		n
 	});
@@ -81,14 +90,14 @@ path_groups = [
 	// Hopefully, later highpass filtering and DC blocking as well as resynthesis is enough
 	"remove dc bias".postln;
 	average = sum / list.size;
+	("average: " + average).postln;
 	// ("average: " + average).postln;
 	list = list.collect({ | num |
-		var n = num - average;
-		n
+		var new = num - average;
+		new
 	});
 
-	buf = Buffer.loadCollection(s, list);
-	buf
+	list
 };
 ~buffers = List[];
 path_groups.do { |path_group|
@@ -101,30 +110,41 @@ path_groups.do { |path_group|
 	// find the largest peak in all the lists for equal normalization
 	group_buffers.do{|buf|
 		buf.do({ | num |
-			if(num > max_num, { max_num = num; });
+			if(num.abs > max_num, { max_num = num.abs; });
 		});
 	};
+	("max_num: " + max_num).postln;
 	// normalize and turn into sound buffer format on the server
 	group_buffers = group_buffers.collect{|list|
 		var buf = ~applyNormalizationAndDCBlocking.(list, max_num);
 		buf
 	};
 
+	group_buffers = group_buffers.collect({|list|
+		Buffer.loadCollection(s, list);
+	});
+
 	~buffers.add(group_buffers);
 };
 )
-
-(
-var path, digits, numbers, max_num = 0, average, sum = 0;
-// path = "/home/erik/code/kth/request-bot-files/20200124/bing01-12-2020_16_06/";
-// path = "/home/erik/code/kth/request-bot-files/20200124/duckduck01-13-2020_11_45/";
-// path = "/home/erik/code/kth/request-bot-files/20200124/google01-12-2020_15_42/";
-// path = "/home/erik/code/kth/request-bot-files/20200124/wikipedia01-12-2020_16_06/";
-path = "/home/erik/code/kth/request-bot-files/20200124/yahoo01-12-2020_16_06/";
+~path_groups[0][0][0..~path_groups[0][0].size-2]
+( // Save all the buffers generated to disk in .wav format
+var root_path = "/home/erik/Dokument/KTH/software_evolution/js indentation sonification/raw_bufs/";
+~buffers.do{ |bufGroup, i|
+	bufGroup.do{| buf, k |
+		var filename = ~path_groups[i][k];
+		// remove the ending /
+		filename = filename[0..filename.size-2];
+		buf.write(root_path ++ filename ++ ".wav", headerFormat: "wav", sampleFormat: "int24");
+	};
+};
 
 )
-~buf.plot
 
+~buf.plot
+~buffers[0][0].plot
+~buffers[0][0].play
+~buffers[0][0].get(9, {|num| num.postln;})
 (
 {
 	var sig;
@@ -185,7 +205,7 @@ SynthDef(\tick2, {
 // 0 = bing, 1 = duckduckgo, 2 = google, 3 = wikipedia, 4 = yahoo
 ( // Play all buffers of a type
 {
-	var bufferGroup = ~buffers[1];
+	var bufferGroup = ~buffers[0];
 	bufferGroup.do { |buf, i|
 		var duration = buf.duration * 0.08;
 		duration = 1;
@@ -194,15 +214,16 @@ SynthDef(\tick2, {
 		0.1.wait;
 		// 0.3.wait;
 		{
-			var sig, freq = 30, decay = MouseX.kr(0.001, 1.0, 'exponential'), rate, maxfreq = 1000, minfreq = 50;
+			var sig, freq = 30, decay = MouseX.kr(0.001, 1.0, 'exponential'), rate, maxfreq = 500, minfreq = 50;
 			rate = BufDur.ir(buf) / duration; // scale the buffer playback so all buffers take the same amount of time
 			sig = PlayBuf.ar(1, buf, rate: rate, doneAction: 2);
 			sig = LeakDC.ar(HPF.ar(sig, 20));
 			// optionally control more parameters using the same values
 			// decay = sig;
 			// decay.poll;
-			decay = 0.038;
-			freq = maxfreq - ((maxfreq-minfreq) * sig.abs.lag(0.1).pow(1/3));
+			decay = 0.068;
+			// freq = maxfreq - ((maxfreq-minfreq) * sig.abs.lag(0.1).pow(1/3));
+			freq = minfreq + ((maxfreq) * sig.abs.lag(0.1).pow(1/2));
 			sig = CombC.ar(sig, 0.2, freq.reciprocal, decay);
 			sig = Limiter.ar(sig);
 			sig = Pan2.ar(sig);
@@ -230,7 +251,7 @@ SynthDef(\tick2, {
 
 // Play two buffers simultaneously, one in each channel
 (
-var duration, bufGroup = ~buffers[2], index = 0;
+var duration, bufGroup = ~buffers[0], index = 0;
 ~playBuffer = { | buf, pan = 0, duration |
 	{
 		var sig, freq = 30, decay = MouseX.kr(0.001, 1.0, 'exponential'), rate, maxfreq = 1000, minfreq = 50;
