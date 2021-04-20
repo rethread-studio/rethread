@@ -324,7 +324,7 @@ input, select, textarea {
 
 a {
     color: inherit;
-    border-bottom-color: #d6d6d6;
+    border-bottom-color: #3d40f8;
 }
 
 a:hover {
@@ -2841,7 +2841,7 @@ table.alt tbody tr td {
 
 .wrapper.style2 a {
     color: inherit;
-    border-bottom-color: #d6d6d6;
+    border-bottom-color: #3d40f8;
 }
 
 .wrapper.style2 a:hover {
