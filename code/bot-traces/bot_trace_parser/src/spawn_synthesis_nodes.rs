@@ -9,6 +9,9 @@ use erael_dsp::Sample;
 
 use crate::profile::*;
 
+/// Goal:
+/// Analyse the call graph and map it to sound parameters in such a way that similarities in different graphs result in similar sounds. Radical differences in the execution result in high level overarching differences in sonification while recognisable gestures are preserved across call graphs.
+
 pub fn generate_wave_guide_synthesis_node(freq: f32, sample_rate: f32) -> SynthesisNode {
     let mut wave_guide = WaveGuide::new(sample_rate);
     let mut envelope = Envelope::new(
