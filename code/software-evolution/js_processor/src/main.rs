@@ -1,15 +1,20 @@
-use clap::{App, Arg, SubCommand};
+use clap::{App, Arg};
 use rfd::FileDialog;
 use std::fs::{self, File};
 use std::io::prelude::*;
 use std::{ffi::OsStr, process::Command};
 use std::path::PathBuf;
 
+struct Settings {
+    do_indentation: bool,
+    do_line_length: bool,
+}
+
 fn main() -> Result<(), std::io::Error> {
     let matches = App::new("JS formatter and analyzer")
         .version("0.1")
         .author("re|thread")
-        .about("Formats the javascript in profiler and extracts information from it")
+        .about("Formats the javascript in a trace and extracts information from it")
         .arg(
             Arg::with_name("project")
                 .short("p")
@@ -23,6 +28,13 @@ fn main() -> Result<(), std::io::Error> {
                 .long("path")
                 .help("Give the path through an argument instead of choosing it manually through a dialog box")
                 .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("line_length")
+                .short("l")
+                .long("line_length")
+                .help("Count the length of every line in addition to the indentation")
+                .takes_value(false),
         )
         .get_matches();
 
@@ -39,12 +51,22 @@ fn main() -> Result<(), std::io::Error> {
         }
     };
 
+    let mut settings = Settings {
+        do_indentation: true,
+        do_line_length: false,
+    };
+
+    if matches.is_present("line_length") {
+        settings.do_line_length = true;
+        println!("Line length counting activated.");
+    }
+
     if matches.is_present("project") {
         println!("Processing folder as project containing many traces");
-        process_project(folder_path)?;
+        process_project(folder_path, &settings)?;
     } else {
         println!("Processing folder as trace");
-        process_trace(folder_path)?;
+        process_trace(folder_path, &settings)?;
     }
 
     println!("Processing done!");
@@ -52,7 +74,7 @@ fn main() -> Result<(), std::io::Error> {
     Ok(())
 }
 
-fn process_trace(folder_path: std::path::PathBuf) -> Result<(), std::io::Error> {
+fn process_trace(folder_path: std::path::PathBuf, settings: &Settings) -> Result<(), std::io::Error> {
     println!("Path: {}", folder_path.to_str().unwrap());
 
     let js_ext = OsStr::new("js");
@@ -109,42 +131,67 @@ fn process_trace(folder_path: std::path::PathBuf) -> Result<(), std::io::Error> 
     // let mut file = File::create(file_path)?;
     // file.write_all(full_formatted_source.as_bytes())?;
 
-    // Get the indentation profile
     let lines: Vec<_> = full_formatted_source.split('\n').collect();
-    let mut outline = Vec::with_capacity(lines.len());
-    for line in lines {
-        for (i, c) in line.chars().into_iter().enumerate() {
-            if c != '\t' {
-                outline.push(i);
-                break;
+
+    if settings.do_indentation {
+        println!("indentation");
+        // Get the indentation profile
+        let mut outline = Vec::with_capacity(lines.len());
+        for line in &lines {
+            for (i, c) in line.chars().into_iter().enumerate() {
+                if c != '\t' {
+                    outline.push(i);
+                    break;
+                }
+            }
+        }
+
+        // Write the indentation profile to file
+        let mut file_path = folder_path.clone();
+        file_path.push("indent_profile.csv");
+        let mut file = File::create(file_path)?;
+        for (i, indent) in outline.iter().enumerate() {
+            file.write_all(indent.to_string().as_bytes())?;
+            if i != outline.len() - 1 {
+                file.write_all(b",")?;
             }
         }
     }
 
-    // Write the indentation profile to file
-    let mut file_path = folder_path.clone();
-    file_path.push("indent_profile.csv");
-    let mut file = File::create(file_path)?;
-    for (i, indent) in outline.iter().enumerate() {
-        file.write_all(indent.to_string().as_bytes())?;
-        if i != outline.len() - 1 {
-            file.write_all(b",")?;
+    if settings.do_line_length {
+        println!("line_length");
+        // Get the indentation profile
+        let mut outline = Vec::with_capacity(lines.len());
+        for line in &lines {
+            outline.push(line.len());
+        }
+
+        // Write the indentation profile to file
+        let mut file_path = folder_path.clone();
+        file_path.push("line_length_profile.csv");
+        let mut file = File::create(file_path)?;
+        for (i, indent) in outline.iter().enumerate() {
+            file.write_all(indent.to_string().as_bytes())?;
+            if i != outline.len() - 1 {
+                file.write_all(b",")?;
+            }
         }
     }
+    
 
     Ok(())
 }
 
-fn process_project(project_path: std::path::PathBuf) -> Result<(), std::io::Error> {
+fn process_project(project_path: std::path::PathBuf, settings: &Settings) -> Result<(), std::io::Error> {
     // Get all subfolders
-    let mut entries = fs::read_dir(project_path)?
+    let entries = fs::read_dir(project_path)?
         .filter(|r| r.is_ok()) // Get rid of Err variants for Result<DirEntry>
         .map(|r| r.unwrap().path())
         .filter(|r| r.is_dir()) // Only keep folders
         .collect::<Vec<_>>();
 
     for trace_path in entries {
-        process_trace(trace_path)?;
+        process_trace(trace_path, settings)?;
     }
 
     Ok(())
