@@ -135,6 +135,7 @@ impl FunctionCall {
 pub struct TraceData {
     pub graph_data: GraphData,
     pub indentation_profile: Option<Vec<u32>>,
+    pub line_length_profile: Option<Vec<u32>>,
     pub name: String,
     pub timestamp: String,
 }
@@ -144,6 +145,7 @@ impl TraceData {
         Self{
             graph_data,
             indentation_profile: None,
+            line_length_profile: None,
             name, 
             timestamp,
         }
@@ -160,6 +162,20 @@ impl TraceData {
             }
         }
         self.indentation_profile = Some(indentation_profile);
+        Ok(())
+    }
+    pub fn add_line_length_profile(&mut self, data: String) -> Result<(), ()> {
+        let mut line_length_profile = vec![];
+        for n in data.split(',') {
+            match n.parse::<u32>() {
+                Ok(num) => line_length_profile.push(num),
+                Err(e) => {
+                    eprintln!("Failed to parse number {}, {}", n, e);
+                    return Err(());
+                }
+            }
+        }
+        self.line_length_profile = Some(line_length_profile);
         Ok(())
     }
 }

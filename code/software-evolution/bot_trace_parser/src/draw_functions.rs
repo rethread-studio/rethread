@@ -225,18 +225,52 @@ pub fn draw_single_flower_indentation(draw: &Draw, model: &Model, win: &Rect) {
     let index = model.selected_profile;
     let deep_indent = model.deepest_indentation as f32;
 
-    let max_radius = win.h() * 0.5;
+    let max_radius = win.h() * 0.4;
     if let Some(indent_profile) = &td.indentation_profile {
-        let angle_scale: f32 = PI * 2.0 / indent_profile.len() as f32;
+        let angle_scale: f32 = PI * 2.0 / (indent_profile.len() +1) as f32;
         for i in 0..indent_profile.len() {
             if true {
                 //if i % res_decimator == 0 {
                 let angle = i as f32 * angle_scale;
+                
                 if i < indent_profile.len() {
+                    let sine = (angle * (10. + 5.7362 * indent_profile[i] as f32)).sin() * max_radius * 0.01;
                     // let radius = (indent_profile[i] + 1) as f32 * radius_scale;
-                    let radius = (indent_profile[i] as f32 / deep_indent).powf(0.33) * max_radius;
+                    let radius = ((indent_profile[i] + 1) as f32 / deep_indent).powf(0.7) * max_radius + sine;
                     let col = match model.color_mode {
-                        ColorMode::Script => script_color(indent_profile[i] as f32 * 0.01),
+                        ColorMode::Script => script_color(indent_profile[i] as f32),
+                        ColorMode::Profile => profile_color(index as f32),
+                        ColorMode::Selected => selected_color(index, model.selected_profile),
+                    };
+
+                    let start = pt2(angle.cos() * radius, angle.sin() * radius);
+                    // Draw the line representing the indentation level
+                    draw.rect().xy(start).w_h(1.0, 1.0).color(col);
+                }
+            }
+        }
+    }
+}
+
+pub fn draw_single_flower_line_length(draw: &Draw, model: &Model, win: &Rect) {
+    let td = &model.trace_datas[model.selected_profile];
+    let index = model.selected_profile;
+    let deep_indent = model.deepest_line_length as f32;
+
+    let max_radius = win.h() * 0.4;
+    if let Some(line_profile) = &td.line_length_profile {
+        let angle_scale: f32 = PI * 2.0 / (line_profile.len() +1) as f32;
+        for i in 0..line_profile.len() {
+            if true {
+                //if i % res_decimator == 0 {
+                let angle = i as f32 * angle_scale;
+                
+                if i < line_profile.len() {
+                    // let sine = (angle * (10. + 5.7362 * line_profile[i] as f32)).sin() * max_radius * 0.001;
+                    // let radius = (indent_profile[i] + 1) as f32 * radius_scale;
+                    let radius = ((line_profile[i] + 1) as f32 / deep_indent).powf(0.16) * max_radius;
+                    let col = match model.color_mode {
+                        ColorMode::Script => script_color(line_profile[i] as f32 * 0.1),
                         ColorMode::Profile => profile_color(index as f32),
                         ColorMode::Selected => selected_color(index, model.selected_profile),
                     };

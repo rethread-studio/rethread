@@ -12,7 +12,7 @@ use std::{
 mod profile;
 use profile::{GraphData, Profile, TraceData, TreeNode};
 mod audio_interface;
-use audio_interface::*; 
+use audio_interface::*;
 mod spawn_synthesis_nodes;
 use spawn_synthesis_nodes::*;
 mod draw_functions;
@@ -28,12 +28,45 @@ enum ColorMode {
 }
 
 enum DrawMode {
-    VerticalGraphDepth,
-    PolarGraphDepth,
-    HorizontalGraphDepth,
-    FlowerGridGraphDepth,
-    FlowerGridIndentation,
-    SingleFlowerIndentation,
+    Indentation(ProfileDrawMode),
+    LineLength(ProfileDrawMode),
+    GraphDepth(GraphDepthDrawMode),
+}
+
+enum ProfileDrawMode {
+    SingleFlower,
+}
+
+enum GraphDepthDrawMode {
+    Vertical,
+    Horizontal,
+    Polar,
+    PolarGrid,
+}
+
+impl DrawMode {
+    fn to_str(&self) -> &str {
+        match self {
+            DrawMode::Indentation(pdm) => match pdm {
+                ProfileDrawMode::SingleFlower => "indentation - single flower",
+            },
+            DrawMode::LineLength(pdm) => match pdm {
+                ProfileDrawMode::SingleFlower => "line length - single flower",
+            },
+            DrawMode::GraphDepth(gddm) => match gddm {
+                GraphDepthDrawMode::Vertical => "graph depth - vertical",
+                GraphDepthDrawMode::Horizontal => "graph depth - horizontal",
+                GraphDepthDrawMode::Polar => "graph depth - polar",
+                GraphDepthDrawMode::PolarGrid => "graph depth - polar grid",
+            },
+        }
+    }
+}
+
+/// For keeping track of frames when rendering
+enum RenderState {
+    NoRendering,
+    RenderAllTraces { current_trace: usize },
 }
 
 pub struct Model {
@@ -45,6 +78,8 @@ pub struct Model {
     longest_tree: u32,
     deepest_indentation: u32,
     longest_indentation: u32,
+    deepest_line_length: u32,
+    longest_line_length: u32,
     index: usize,
     separation_ratio: f32,
     num_profiles: u32,
@@ -53,6 +88,7 @@ pub struct Model {
     sender: osc::Sender<osc::Connected>,
     audio_interface: audio_interface::AudioInterface,
     font: nannou::text::Font,
+    render_state: RenderState,
 }
 
 fn model(app: &App) -> Model {
@@ -99,15 +135,18 @@ fn model(app: &App) -> Model {
         longest_tree: 0,
         deepest_indentation: 0,
         longest_indentation: 0,
+        deepest_line_length: 0,
+        longest_line_length: 0,
         index: 0,
         separation_ratio: 1.0,
         num_profiles: 7,
-        draw_mode: DrawMode::PolarGraphDepth,
+        draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
         color_mode: ColorMode::Profile,
         sender,
         selected_profile: 0,
         audio_interface,
         font,
+        render_state: RenderState::NoRendering,
     };
 
     load_profiles(&mut model);
@@ -160,16 +199,21 @@ fn load_profiles(model: &mut Model) {
         } else {
             String::from("unknown timestamp")
         };
-        let mut trace_data = TraceData::new(
-            pages[model.selected_page].to_owned(),
-            timestamp,
-            graph_data,
-        );
+        let mut trace_data =
+            TraceData::new(pages[model.selected_page].to_owned(), timestamp, graph_data);
         // Load indentation profile
         folder_path.pop();
         folder_path.push("indent_profile.csv");
         if let Ok(indentation_profile) = fs::read_to_string(&folder_path) {
             if let Err(_) = trace_data.add_indentation_profile(indentation_profile) {
+                eprintln!("Failed to parse {:?}", folder_path);
+            }
+        }
+        // Load line length profile
+        folder_path.pop();
+        folder_path.push("line_length_profile.csv");
+        if let Ok(line_length_profile) = fs::read_to_string(&folder_path) {
+            if let Err(_) = trace_data.add_line_length_profile(line_length_profile) {
                 eprintln!("Failed to parse {:?}", folder_path);
             }
         }
@@ -181,6 +225,8 @@ fn load_profiles(model: &mut Model) {
     let mut longest_tree = 0;
     let mut deepest_indentation = 0;
     let mut longest_indentation = 0;
+    let mut deepest_line_length = 0;
+    let mut longest_line_length = 0;
     for td in &trace_datas {
         let gd = &td.graph_data;
         if gd.depth_tree.len() > longest_tree {
@@ -201,6 +247,16 @@ fn load_profiles(model: &mut Model) {
                 }
             }
         }
+        if let Some(line_length_profile) = &td.line_length_profile {
+            if line_length_profile.len() > longest_line_length {
+                longest_line_length = line_length_profile.len();
+            }
+            for v in line_length_profile {
+                if *v > deepest_line_length {
+                    deepest_line_length = *v;
+                }
+            }
+        }
     }
 
     println!(
@@ -215,10 +271,35 @@ fn load_profiles(model: &mut Model) {
     model.deepest_tree_depth = deepest_tree_depth.try_into().unwrap();
     model.longest_indentation = longest_indentation.try_into().unwrap();
     model.deepest_indentation = deepest_indentation;
+    model.longest_line_length = longest_line_length.try_into().unwrap();
+    model.deepest_line_length = deepest_line_length;
 }
 
-fn update(_app: &App, model: &mut Model, _update: Update) {
+fn update(app: &App, model: &mut Model, _update: Update) {
     model.index += 10;
+    match &mut model.render_state {
+        RenderState::RenderAllTraces { current_trace } => {
+            if *current_trace > 0 {
+                // We must wait until the first trace has been drawn before saving it.
+                // Capture the frame!
+                let name = &model.trace_datas[model.selected_profile].name;
+                let timestamp = &model.trace_datas[model.selected_profile].timestamp;
+                let file_path = rendering_frame_path(app, &model.draw_mode, name, timestamp);
+                app.main_window().capture_frame(file_path);
+            }
+            // Are we done?
+            if *current_trace == model.trace_datas.len() {
+                // All traces have been rendered
+                model.render_state = RenderState::NoRendering;
+                model.selected_profile = 0;
+            } else {
+                // Set the next trace up for rendering
+                model.selected_profile = *current_trace;
+                *current_trace += 1;
+            }
+        }
+        RenderState::NoRendering => (),
+    }
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {
@@ -238,35 +319,41 @@ fn view(app: &App, model: &Model, frame: Frame) {
         ColorMode::Selected => "selection colour",
     };
 
-    let visualisation_type = match model.draw_mode {
-        DrawMode::PolarGraphDepth => {
-            draw_functions::draw_polar_depth_graph(&draw, model, &win);
-            "polar graph depth"
-        }
-        DrawMode::FlowerGridGraphDepth => {
-            draw_functions::draw_flower_grid_graph_depth(&draw, model, &win);
-            "flower grid graph depth"
-        }
-        DrawMode::FlowerGridIndentation => {
-            draw_functions::draw_flower_grid_indentation(&draw, model, &win);
-            "flower grid indentation"
-        }
-        DrawMode::SingleFlowerIndentation => {
-            draw_functions::draw_single_flower_indentation(&draw, model, &win);
-            timestamp = &model.trace_datas[model.selected_profile].timestamp;
-            "single flower indentation"
-        }
-        DrawMode::VerticalGraphDepth => {
-            draw_functions::draw_vertical_graph_depth(&draw, model, &win);
-            "vertical graph depth"
-        }
-        DrawMode::HorizontalGraphDepth => {
-            draw_functions::draw_horizontal_graph_depth(&draw, model, &win);
-            "horizontal graph depth"
-        }
+    let visualisation_type = model.draw_mode.to_str();
+    match &model.draw_mode {
+        DrawMode::GraphDepth(gddm) => match gddm {
+            GraphDepthDrawMode::Horizontal => {
+                draw_functions::draw_horizontal_graph_depth(&draw, model, &win);
+            }
+            GraphDepthDrawMode::Vertical => {
+                draw_functions::draw_vertical_graph_depth(&draw, model, &win);
+            }
+            GraphDepthDrawMode::Polar => {
+                draw_functions::draw_polar_depth_graph(&draw, model, &win);
+                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+            }
+            GraphDepthDrawMode::PolarGrid => {
+                draw_functions::draw_flower_grid_graph_depth(&draw, model, &win);
+            }
+        },
+        DrawMode::Indentation(pdm) => match pdm {
+            ProfileDrawMode::SingleFlower => {
+                draw_functions::draw_single_flower_indentation(&draw, model, &win);
+                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+            }
+        },
+        DrawMode::LineLength(pdm) => match pdm {
+            ProfileDrawMode::SingleFlower => {
+                draw_functions::draw_single_flower_line_length(&draw, model, &win);
+                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+            }
+        },
     };
 
-    let full_text = format!("{}\n{}\n\n{}\n{}", name, timestamp, visualisation_type, color_type);
+    let full_text = format!(
+        "{}\n{}\n\n{}\n{}",
+        name, timestamp, visualisation_type, color_type
+    );
     draw.text(&full_text)
         .font_size(16)
         .align_text_bottom()
@@ -284,24 +371,54 @@ fn view(app: &App, model: &Model, frame: Frame) {
 fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     match event {
         KeyPressed(key) => match key {
-            Key::Left => {
-                model.draw_mode = match model.draw_mode {
-                    DrawMode::VerticalGraphDepth => DrawMode::PolarGraphDepth,
-                    DrawMode::PolarGraphDepth => DrawMode::HorizontalGraphDepth,
-                    DrawMode::HorizontalGraphDepth => DrawMode::FlowerGridGraphDepth,
-                    DrawMode::FlowerGridGraphDepth => DrawMode::FlowerGridIndentation,
-                    DrawMode::FlowerGridIndentation => DrawMode::SingleFlowerIndentation,
-                    DrawMode::SingleFlowerIndentation => DrawMode::VerticalGraphDepth,
+            Key::A => match &mut model.draw_mode {
+                DrawMode::GraphDepth(ref mut gddm) => match gddm {
+                    GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::Vertical,
+                    GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Polar,
+                    GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::PolarGrid,
+                    GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Horizontal,
+                },
+                DrawMode::Indentation(ref mut pdm) => match pdm {
+                    ProfileDrawMode::SingleFlower => (),
+                },
+                DrawMode::LineLength(ref mut pdm) => match pdm {
+                    ProfileDrawMode::SingleFlower => (),
+                },
+            },
+            Key::D => match &mut model.draw_mode {
+                DrawMode::GraphDepth(ref mut gddm) => match gddm {
+                    GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::PolarGrid,
+                    GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Horizontal,
+                    GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::Vertical,
+                    GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Polar,
+                },
+                DrawMode::Indentation(ref mut pdm) => match pdm {
+                    ProfileDrawMode::SingleFlower => (),
+                },
+                DrawMode::LineLength(ref mut pdm) => match pdm {
+                    ProfileDrawMode::SingleFlower => (),
+                },
+            },
+            Key::W => {
+                model.draw_mode = match &model.draw_mode {
+                    DrawMode::GraphDepth(_gddm) => {
+                        DrawMode::Indentation(ProfileDrawMode::SingleFlower)
+                    }
+                    DrawMode::Indentation(_pdm) => {
+                        DrawMode::LineLength(ProfileDrawMode::SingleFlower)
+                    }
+                    DrawMode::LineLength(_pdm) => DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
                 }
             }
-            Key::Right => {
-                model.draw_mode = match model.draw_mode {
-                    DrawMode::VerticalGraphDepth => DrawMode::SingleFlowerIndentation,
-                    DrawMode::PolarGraphDepth => DrawMode::VerticalGraphDepth,
-                    DrawMode::HorizontalGraphDepth => DrawMode::PolarGraphDepth,
-                    DrawMode::FlowerGridGraphDepth => DrawMode::HorizontalGraphDepth,
-                    DrawMode::FlowerGridIndentation => DrawMode::FlowerGridGraphDepth,
-                    DrawMode::SingleFlowerIndentation => DrawMode::FlowerGridIndentation,
+            Key::S => {
+                model.draw_mode = match &model.draw_mode {
+                    DrawMode::GraphDepth(_gddm) => {
+                        DrawMode::LineLength(ProfileDrawMode::SingleFlower)
+                    }
+                    DrawMode::Indentation(_pdm) => DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
+                    DrawMode::LineLength(_pdm) => {
+                        DrawMode::Indentation(ProfileDrawMode::SingleFlower)
+                    }
                 }
             }
             Key::Up => {
@@ -314,14 +431,14 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 load_profiles(model);
                 model.selected_profile = 0;
             }
-            Key::A => {
+            Key::Left => {
                 if model.selected_profile > 0 {
                     model.selected_profile -= 1;
                 } else {
                     model.selected_profile = model.trace_datas.len() - 1;
                 }
             }
-            Key::D => {
+            Key::Right => {
                 model.selected_profile = (model.selected_profile + 1) % model.trace_datas.len();
             }
             Key::C => {
@@ -338,7 +455,12 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             }
             Key::T => {
                 // Send graph data via osc
-                model.trace_datas[model.selected_profile].graph_data.send_script_data_osc(&model.sender);
+                model.trace_datas[model.selected_profile]
+                    .graph_data
+                    .send_script_data_osc(&model.sender);
+            }
+            Key::R => {
+                model.render_state = RenderState::RenderAllTraces { current_trace: 0 };
             }
             Key::Space => {
                 // model.audio_interface.send(EventMsg::AddSynthesisNode(Some(
@@ -395,6 +517,28 @@ fn captured_frame_path(app: &App) -> std::path::PathBuf {
         .join("screencaps")
         // Name each file after the number of the frame.
         .join(format!("{}", now.to_rfc3339()))
+        // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
+        .with_extension("png")
+}
+
+fn rendering_frame_path(
+    app: &App,
+    draw_mode: &DrawMode,
+    name: &str,
+    timestamp: &str,
+) -> std::path::PathBuf {
+    // Create a path that we want to save this frame to.
+    let now: DateTime<Utc> = Utc::now();
+    app.project_path()
+        .expect("failed to locate `project_path`")
+        // Capture all frames to a directory called `/<path_to_nannou>/nannou/simple_capture`.
+        .join("renders")
+        .join(name)
+        .join(draw_mode.to_str())
+        // Name each file after the number of the frame.
+        // .join(format!("{}", now.to_rfc3339()))
+        // Name each file after its timestamp
+        .join(timestamp)
         // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
         .with_extension("png")
 }
