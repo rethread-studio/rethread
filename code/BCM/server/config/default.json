@@ -9,9 +9,9 @@
         "port": 8080
     },
     "OSC": {
-        "ip": "130.229.163.238",
-        "port": 57121,
-        "server_port": 57121,
+        "ip": "192.168.0.1",
+        "port": 57130,
+        "server_port": 57130,
         "address": "/package"
     }
 }
