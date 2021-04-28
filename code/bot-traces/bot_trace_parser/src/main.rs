@@ -1,6 +1,8 @@
+// Turn on clippy lints
+#![warn(clippy::all)]
 use chrono::{DateTime, Utc};
 use crossbeam_channel::bounded;
-use nannou::prelude::*;
+use nannou::{daggy::petgraph::graph, prelude::*};
 use nannou_osc as osc;
 use std::{
     convert::TryInto,
@@ -8,11 +10,12 @@ use std::{
     path::{Path, PathBuf},
 };
 mod profile;
-use profile::{GraphData, Profile, TreeNode};
+use profile::{GraphData, Profile, TraceData, TreeNode};
 mod audio_interface;
-use audio_interface::*;
+use audio_interface::*; 
 mod spawn_synthesis_nodes;
 use spawn_synthesis_nodes::*;
+mod draw_functions;
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -25,19 +28,19 @@ enum ColorMode {
 }
 
 enum DrawMode {
-    Vertical,
-    Polar,
-    Horizontal,
-    FlowerGrid,
+    VerticalGraphDepth,
+    PolarGraphDepth,
+    HorizontalGraphDepth,
+    FlowerGridGraphDepth,
     FlowerGridIndentation,
-    FlowerIndentation,
+    SingleFlowerIndentation,
 }
 
-struct Model {
-    profile_group: usize,
+pub struct Model {
+    selected_page: usize,
     profiles: Vec<Profile>,
     selected_profile: usize,
-    graph_datas: Vec<GraphData>,
+    trace_datas: Vec<TraceData>,
     deepest_tree_depth: u32,
     longest_tree: u32,
     deepest_indentation: u32,
@@ -49,6 +52,7 @@ struct Model {
     color_mode: ColorMode,
     sender: osc::Sender<osc::Connected>,
     audio_interface: audio_interface::AudioInterface,
+    font: nannou::text::Font,
 }
 
 fn model(app: &App) -> Model {
@@ -85,10 +89,12 @@ fn model(app: &App) -> Model {
         generate_wave_guide_synthesis_node(220. * 7. / 4., audio_interface.sample_rate as f32),
     )));
 
+    let font = nannou::text::font::from_file("/home/erik/.fonts/SpaceMono-Regular.ttf").unwrap();
+
     let mut model = Model {
-        profile_group: 0,
+        selected_page: 0,
         profiles: vec![],
-        graph_datas: vec![],
+        trace_datas: vec![],
         deepest_tree_depth: 0,
         longest_tree: 0,
         deepest_indentation: 0,
@@ -96,11 +102,12 @@ fn model(app: &App) -> Model {
         index: 0,
         separation_ratio: 1.0,
         num_profiles: 7,
-        draw_mode: DrawMode::Polar,
+        draw_mode: DrawMode::PolarGraphDepth,
         color_mode: ColorMode::Profile,
         sender,
         selected_profile: 0,
         audio_interface,
+        font,
     };
 
     load_profiles(&mut model);
@@ -109,74 +116,64 @@ fn model(app: &App) -> Model {
 
 fn load_profiles(model: &mut Model) {
     let mut profiles = vec![];
-    let root_path = PathBuf::from("/home/erik/code/kth/request-bot-files/20200124/");
-    let path_groups = [
-        vec![
-            "bing01-12-2020_16_06/",
-            "bing01-13-2020_11_45/",
-            "bing01-14-2020_15_32/",
-            "bing01-15-2020_14_00/",
-            "bing01-16-2020_13_34/",
-            "bing01-17-2020_14_10/",
-            "bing01-19-2020_20_01/",
-        ],
-        vec![
-            "duckduck01-12-2020_16_06/",
-            "duckduck01-13-2020_11_45/",
-            "duckduck01-14-2020_15_32/",
-            "duckduck01-15-2020_14_00/",
-            "duckduck01-16-2020_13_34/",
-            "duckduck01-17-2020_14_10/",
-            "duckduck01-19-2020_20_01/",
-        ],
-        vec![
-            "google01-12-2020_15_42/",
-            "google01-12-2020_16_06/",
-            "google01-13-2020_11_45/",
-            "google01-14-2020_15_32/",
-            "google01-15-2020_14_00/",
-            "google01-16-2020_13_34/",
-            "google01-17-2020_14_10/",
-            "google01-19-2020_20_01/",
-        ],
-        vec![
-            "wikipedia01-12-2020_16_06/",
-            "wikipedia01-14-2020_15_32/",
-            "wikipedia01-13-2020_11_45/",
-            "wikipedia01-15-2020_14_00/",
-            "wikipedia01-16-2020_13_34/",
-            "wikipedia01-17-2020_14_10/",
-            "wikipedia01-19-2020_20_01/",
-        ],
-        vec![
-            "yahoo01-12-2020_16_06/",
-            "yahoo01-13-2020_11_45/",
-            "yahoo01-14-2020_15_32/",
-            "yahoo01-15-2020_14_00/",
-            "yahoo01-16-2020_13_34/",
-            "yahoo01-17-2020_14_10/",
-            "yahoo01-19-2020_20_01/",
-        ],
+    let root_path = PathBuf::from("/home/erik/code/kth/web-evolution/");
+    let pages = vec![
+        "bing",
+        "duckduckgo",
+        "google",
+        "kiddle",
+        "qwant",
+        "spotify",
+        "wikipedia",
+        "yahoo",
     ];
 
-    while model.profile_group >= path_groups.len() {
-        model.profile_group -= path_groups.len()
+    while model.selected_page < pages.len() {
+        model.selected_page += pages.len()
+    }
+    while model.selected_page >= pages.len() {
+        model.selected_page -= pages.len()
     }
 
-    let mut graph_datas = vec![];
-    for p in &path_groups[model.profile_group] {
-        let mut folder_path = root_path.clone();
-        folder_path.push(p);
+    let mut trace_datas = vec![];
+    let mut page_folder = root_path.clone();
+    page_folder.push(pages[model.selected_page]);
+    let trace_paths_in_folder = fs::read_dir(page_folder)
+        .expect("Failed to open page folder")
+        .filter(|r| r.is_ok()) // Get rid of Err variants for Result<DirEntry>
+        .map(|r| r.unwrap().path())
+        .filter(|r| r.is_dir()) // Only keep folders
+        .collect::<Vec<_>>();
+    for p in &trace_paths_in_folder {
+        let mut folder_path = p.clone();
         folder_path.push("profile.json");
         let data = fs::read_to_string(&folder_path).unwrap();
         let profile: Profile = serde_json::from_str(&data).unwrap();
+        let graph_data = profile.generate_graph_data();
+        // Create TraceData
+        let timestamp: String = if let Some(ts_osstr) = p.iter().last() {
+            if let Some(ts) = ts_osstr.to_str() {
+                ts.to_owned()
+            } else {
+                String::from("failed to process folder name")
+            }
+        } else {
+            String::from("unknown timestamp")
+        };
+        let mut trace_data = TraceData::new(
+            pages[model.selected_page].to_owned(),
+            timestamp,
+            graph_data,
+        );
+        // Load indentation profile
         folder_path.pop();
         folder_path.push("indent_profile.csv");
-        let indentation_profile =
-            fs::read_to_string(folder_path).expect("indent_profile.csv could not be loaded");
-        let mut graph_data = profile.generate_graph_data();
-        graph_data.add_indentation_profile(indentation_profile);
-        graph_datas.push(graph_data);
+        if let Ok(indentation_profile) = fs::read_to_string(&folder_path) {
+            if let Err(_) = trace_data.add_indentation_profile(indentation_profile) {
+                eprintln!("Failed to parse {:?}", folder_path);
+            }
+        }
+        trace_datas.push(trace_data);
         profiles.push(profile);
     }
 
@@ -184,7 +181,8 @@ fn load_profiles(model: &mut Model) {
     let mut longest_tree = 0;
     let mut deepest_indentation = 0;
     let mut longest_indentation = 0;
-    for gd in &graph_datas {
+    for td in &trace_datas {
+        let gd = &td.graph_data;
         if gd.depth_tree.len() > longest_tree {
             longest_tree = gd.depth_tree.len();
         }
@@ -193,7 +191,7 @@ fn load_profiles(model: &mut Model) {
                 deepest_tree_depth = node.depth;
             }
         }
-        if let Some(indentation_profile) = &gd.indentation_profile {
+        if let Some(indentation_profile) = &td.indentation_profile {
             if indentation_profile.len() > longest_indentation {
                 longest_indentation = indentation_profile.len();
             }
@@ -212,7 +210,7 @@ fn load_profiles(model: &mut Model) {
 
     model.num_profiles = profiles.len().try_into().unwrap();
     model.profiles = profiles;
-    model.graph_datas = graph_datas;
+    model.trace_datas = trace_datas;
     model.longest_tree = longest_tree.try_into().unwrap();
     model.deepest_tree_depth = deepest_tree_depth.try_into().unwrap();
     model.longest_indentation = longest_indentation.try_into().unwrap();
@@ -228,275 +226,59 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
 
     // Clear the background to purple.
-    draw.background().color(hsl(0.6, 0.1, 0.05));
+    draw.background().color(hsl(0.6, 0.1, 0.02));
 
     let win = app.window_rect();
 
-    match model.draw_mode {
-        DrawMode::Polar => {
-            let angle_scale: f32 = PI * 2.0 / model.longest_tree as f32;
-            let radius_scale: f32 = win.h()
-                / ((model.deepest_tree_depth + 1) as f32
-                    * (((model.num_profiles - 1) as f32 * model.separation_ratio) + 1.0)
-                    * 2.0);
-            let tree_separation = radius_scale * model.deepest_tree_depth as f32;
-            for i in 0..model.index {
-                let angle = i as f32 * angle_scale;
-                for (index, gd) in model.graph_datas.iter().enumerate() {
-                    let d_tree = &gd.depth_tree;
-                    if i < d_tree.len() && index < model.num_profiles as usize {
-                        let start_radius = d_tree[i].depth as f32 * radius_scale
-                            + (index as f32 * tree_separation * model.separation_ratio);
-                        let radius = (d_tree[i].depth + 1) as f32 * radius_scale
-                            + (index as f32 * tree_separation * model.separation_ratio);
-                        let col = match model.color_mode {
-                            ColorMode::Script => script_color(d_tree[i].script_id as f32),
-                            ColorMode::Profile => profile_color(index as f32),
-                            ColorMode::Selected => selected_color(index, model.selected_profile),
-                        };
-                        let weight = d_tree[i].ticks as f32;
-                        let weight = weight;
-                        let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
-                        let end = pt2(angle.cos() * radius, angle.sin() * radius);
-                        // Draw a transparent circle representing the time spent
-                        let mut transparent_col = col.clone();
-                        transparent_col.alpha = 0.01 * weight;
-                        draw.ellipse()
-                            .radius(weight.max(0.0))
-                            .xy(start)
-                            .stroke_weight(0.0)
-                            .color(transparent_col);
-                        // Draw the line representing the function call
-                        draw.line()
-                            .stroke_weight(1.0)
-                            .start(start)
-                            .end(end)
-                            .color(col);
-                    }
-                }
-            }
-        }
-        DrawMode::FlowerGrid => {
-            let angle_scale: f32 = PI * 2.0 / model.longest_tree as f32;
-            let radius_scale: f32 = win.h() / ((model.deepest_tree_depth + 1) as f32 * 4.0);
-            for (index, gd) in model.graph_datas.iter().enumerate() {
-                let d_tree = &gd.depth_tree;
-                let offset_angle = (index as f32 / model.num_profiles as f32) * PI * 2.0;
-                let offset_radius = match index {
-                    0 => 0.0,
-                    _ => radius_scale * model.deepest_tree_depth as f32 * 1.5,
-                };
-                let offset = pt2(
-                    offset_angle.cos() * offset_radius,
-                    offset_angle.sin() * offset_radius,
-                );
-                for i in 0..model.index {
-                    let angle = i as f32 * angle_scale;
-                    if i < d_tree.len() && index < model.num_profiles as usize {
-                        let start_radius = d_tree[i].depth as f32 * radius_scale;
-                        let radius = (d_tree[i].depth + 1) as f32 * radius_scale;
-                        let col = match model.color_mode {
-                            ColorMode::Script => script_color(d_tree[i].script_id as f32),
-                            ColorMode::Profile => profile_color(index as f32),
-                            ColorMode::Selected => selected_color(index, model.selected_profile),
-                        };
-                        let weight = d_tree[i].ticks as f32;
-                        let weight = weight.max(0.0);
+    let mut name = &model.trace_datas[0].name;
+    let mut timestamp = "";
+    let mut color_type = match model.color_mode {
+        ColorMode::Script => "script colour",
+        ColorMode::Profile => "profile index colour",
+        ColorMode::Selected => "selection colour",
+    };
 
-                        let start =
-                            pt2(angle.cos() * start_radius, angle.sin() * start_radius) + offset;
-                        let end = pt2(angle.cos() * radius, angle.sin() * radius) + offset;
-                        // Draw a transparent circle representing the time spent
-                        let mut transparent_col = col.clone();
-                        transparent_col.alpha = 0.01 * weight;
-                        draw.ellipse()
-                            .radius(weight)
-                            .stroke_weight(0.0)
-                            .xy(start)
-                            .color(transparent_col);
-                        // Draw the line representing the function call
-                        draw.line()
-                            .stroke_weight(1.0)
-                            .start(start)
-                            .end(end)
-                            .color(col);
-                    }
-                }
-            }
+    let visualisation_type = match model.draw_mode {
+        DrawMode::PolarGraphDepth => {
+            draw_functions::draw_polar_depth_graph(&draw, model, &win);
+            "polar graph depth"
+        }
+        DrawMode::FlowerGridGraphDepth => {
+            draw_functions::draw_flower_grid_graph_depth(&draw, model, &win);
+            "flower grid graph depth"
         }
         DrawMode::FlowerGridIndentation => {
-            let angle_scale: f32 = PI * 2.0 / model.longest_indentation as f32;
-            let radius_scale: f32 = win.h() / ((model.deepest_indentation + 1) as f32 * 4.0);
-
-            // If there are too many lines to be drawn on the screen, don't draw them all
-            let graph_width = radius_scale * model.deepest_indentation as f32 * 1.5;
-            let res_decimator = (1.0 / (angle_scale * graph_width)) as usize;
-            println!("res_decimator: {}", res_decimator);
-            for (index, gd) in model.graph_datas.iter().enumerate() {
-                if let Some(indent_profile) = &gd.indentation_profile {
-                    let offset_angle = (index as f32 / model.num_profiles as f32) * PI * 2.0;
-                    let offset_radius = match index {
-                        0 => 0.0,
-                        _ => radius_scale * model.deepest_indentation as f32 * 1.5,
-                    };
-                    let offset = pt2(
-                        offset_angle.cos() * offset_radius,
-                        offset_angle.sin() * offset_radius,
-                    );
-
-                    for i in 0..indent_profile.len() {
-                        if i % res_decimator == 0 {
-                            let angle = i as f32 * angle_scale;
-                            if i < indent_profile.len() {
-                                let start_radius = indent_profile[i] as f32 * radius_scale;
-                                let radius = (indent_profile[i] + 1) as f32 * radius_scale;
-                                let col = match model.color_mode {
-                                    ColorMode::Script => script_color(indent_profile[i] as f32),
-                                    ColorMode::Profile => profile_color(index as f32),
-                                    ColorMode::Selected => {
-                                        selected_color(index, model.selected_profile)
-                                    }
-                                };
-
-                                let start =
-                                    pt2(angle.cos() * start_radius, angle.sin() * start_radius)
-                                        + offset;
-                                let end = pt2(angle.cos() * radius, angle.sin() * radius) + offset;
-                                // Draw the line representing the indentation level
-                                draw.line()
-                                    .stroke_weight(1.0)
-                                    .start(start)
-                                    .end(end)
-                                    .color(col);
-                            }
-                        }
-                    }
-                }
-            }
+            draw_functions::draw_flower_grid_indentation(&draw, model, &win);
+            "flower grid indentation"
         }
-        DrawMode::FlowerIndentation => {
-            let gd = &model.graph_datas[model.selected_profile];
-            let index = model.selected_profile;
-            let deep_indent = model.deepest_indentation as f32;
-
-            let max_radius = win.h() * 0.5;
-            if let Some(indent_profile) = &gd.indentation_profile {
-                let angle_scale: f32 = PI * 2.0 / indent_profile.len() as f32;
-                for i in 0..indent_profile.len() {
-                    if true {
-                        //if i % res_decimator == 0 {
-                        let angle = i as f32 * angle_scale;
-                        if i < indent_profile.len() {
-                            // let radius = (indent_profile[i] + 1) as f32 * radius_scale;
-                            let radius =
-                                (indent_profile[i] as f32 / deep_indent).powf(0.33) * max_radius;
-                            let col = match model.color_mode {
-                                ColorMode::Script => script_color(indent_profile[i] as f32 * 0.01),
-                                ColorMode::Profile => profile_color(index as f32),
-                                ColorMode::Selected => {
-                                    selected_color(index, model.selected_profile)
-                                }
-                            };
-
-                            let start = pt2(angle.cos() * radius, angle.sin() * radius);
-                            // Draw the line representing the indentation level
-                            draw.rect().xy(start).w_h(1.0, 1.0).color(col);
-                        }
-                    }
-                }
-            }
+        DrawMode::SingleFlowerIndentation => {
+            draw_functions::draw_single_flower_indentation(&draw, model, &win);
+            timestamp = &model.trace_datas[model.selected_profile].timestamp;
+            "single flower indentation"
         }
-        DrawMode::Vertical => {
-            let x_scale: f32 = win.w()
-                / ((model.num_profiles as f32 * model.separation_ratio + 1.0)
-                    * model.deepest_tree_depth as f32);
-            let y_scale: f32 = win.h() / model.longest_tree as f32;
-
-            let tree_separation = win.w() / model.num_profiles as f32;
-            for i in 0..model.index {
-                let y = win.top() - (i as f32 * y_scale);
-                for (index, gd) in model.graph_datas.iter().enumerate() {
-                    let d_tree = &gd.depth_tree;
-                    if i < d_tree.len() && index < model.num_profiles as usize {
-                        let x = win.left()
-                            + (d_tree[i].depth as f32 * x_scale
-                                + (index as f32 * tree_separation * model.separation_ratio));
-                        let col = match model.color_mode {
-                            ColorMode::Script => script_color(d_tree[i].script_id as f32),
-                            ColorMode::Profile => profile_color(index as f32),
-                            ColorMode::Selected => selected_color(index, model.selected_profile),
-                        };
-                        let weight = d_tree[i].ticks as f32;
-                        // Draw a transparent circle representing the time spent
-                        let mut transparent_col = col.clone();
-                        transparent_col.alpha = 0.01 * weight;
-                        draw.ellipse()
-                            .radius(weight)
-                            .stroke_weight(0.0)
-                            .xy(pt2(x, y))
-                            .color(transparent_col);
-                        draw.rect().color(col).x_y(x, y).w_h(x_scale, y_scale);
-                    }
-                }
-            }
+        DrawMode::VerticalGraphDepth => {
+            draw_functions::draw_vertical_graph_depth(&draw, model, &win);
+            "vertical graph depth"
         }
-        DrawMode::Horizontal => {
-            let y_scale: f32 = win.h()
-                / ((model.num_profiles as f32 * model.separation_ratio + 1.0)
-                    * model.deepest_tree_depth as f32);
-            let x_scale: f32 = win.w() / model.longest_tree as f32;
-
-            let tree_separation = win.h() / model.num_profiles as f32;
-            for i in 0..model.index {
-                let x = win.left() + (i as f32 * x_scale);
-                for (index, gd) in model.graph_datas.iter().enumerate() {
-                    let d_tree = &gd.depth_tree;
-                    if i < d_tree.len() && index < model.num_profiles as usize {
-                        let y = win.top()
-                            - (d_tree[i].depth as f32 * y_scale
-                                + (index as f32 * tree_separation * model.separation_ratio));
-                        let col = match model.color_mode {
-                            ColorMode::Script => script_color(d_tree[i].script_id as f32),
-                            ColorMode::Profile => profile_color(index as f32),
-                            ColorMode::Selected => selected_color(index, model.selected_profile),
-                        };
-                        let weight = d_tree[i].ticks as f32;
-                        // Draw a transparent circle representing the time spent
-                        let mut transparent_col = col.clone();
-                        transparent_col.alpha = 0.01 * weight;
-                        draw.ellipse()
-                            .radius(weight)
-                            .stroke_weight(0.0)
-                            .xy(pt2(x, y))
-                            .color(transparent_col);
-                        draw.rect()
-                            .color(col)
-                            .x_y(x, y)
-                            .w_h(x_scale, (y_scale * 0.5).max(1.0));
-                    }
-                }
-            }
+        DrawMode::HorizontalGraphDepth => {
+            draw_functions::draw_horizontal_graph_depth(&draw, model, &win);
+            "horizontal graph depth"
         }
-    }
+    };
+
+    let full_text = format!("{}\n{}\n\n{}\n{}", name, timestamp, visualisation_type, color_type);
+    draw.text(&full_text)
+        .font_size(16)
+        .align_text_bottom()
+        .right_justify()
+        // .x_y(0.0, 0.0)
+        .wh(win.clone().pad(20.).wh())
+        .font(model.font.clone())
+        // .x_y(win.right()-130.0, win.bottom() + 10.0)
+        .color(LIGHTGREY);
 
     // Write to the window frame.
     draw.to_frame(app, &frame).unwrap();
-}
-
-fn script_color(id: f32) -> Hsla {
-    hsla(id as f32 * 0.0226, 0.8, 0.45, 1.0)
-}
-
-fn profile_color(index: f32) -> Hsla {
-    hsla(index * 0.048573, 0.8, 0.45, 1.0)
-}
-
-fn selected_color(index: usize, selected: usize) -> Hsla {
-    if index == selected {
-        hsla(0.048573, 0.8, 0.45, 1.0)
-    } else {
-        hsla(0.7, 0.8, 0.45, 1.0)
-    }
 }
 
 fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
@@ -504,45 +286,43 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
         KeyPressed(key) => match key {
             Key::Left => {
                 model.draw_mode = match model.draw_mode {
-                    DrawMode::Vertical => DrawMode::Polar,
-                    DrawMode::Polar => DrawMode::Horizontal,
-                    DrawMode::Horizontal => DrawMode::FlowerGrid,
-                    DrawMode::FlowerGrid => DrawMode::FlowerGridIndentation,
-                    DrawMode::FlowerGridIndentation => DrawMode::FlowerIndentation,
-                    DrawMode::FlowerIndentation => DrawMode::Vertical,
+                    DrawMode::VerticalGraphDepth => DrawMode::PolarGraphDepth,
+                    DrawMode::PolarGraphDepth => DrawMode::HorizontalGraphDepth,
+                    DrawMode::HorizontalGraphDepth => DrawMode::FlowerGridGraphDepth,
+                    DrawMode::FlowerGridGraphDepth => DrawMode::FlowerGridIndentation,
+                    DrawMode::FlowerGridIndentation => DrawMode::SingleFlowerIndentation,
+                    DrawMode::SingleFlowerIndentation => DrawMode::VerticalGraphDepth,
                 }
             }
             Key::Right => {
                 model.draw_mode = match model.draw_mode {
-                    DrawMode::Vertical => DrawMode::FlowerIndentation,
-                    DrawMode::Polar => DrawMode::Vertical,
-                    DrawMode::Horizontal => DrawMode::Polar,
-                    DrawMode::FlowerGrid => DrawMode::Horizontal,
-                    DrawMode::FlowerGridIndentation => DrawMode::FlowerGrid,
-                    DrawMode::FlowerIndentation => DrawMode::FlowerGridIndentation,
+                    DrawMode::VerticalGraphDepth => DrawMode::SingleFlowerIndentation,
+                    DrawMode::PolarGraphDepth => DrawMode::VerticalGraphDepth,
+                    DrawMode::HorizontalGraphDepth => DrawMode::PolarGraphDepth,
+                    DrawMode::FlowerGridGraphDepth => DrawMode::HorizontalGraphDepth,
+                    DrawMode::FlowerGridIndentation => DrawMode::FlowerGridGraphDepth,
+                    DrawMode::SingleFlowerIndentation => DrawMode::FlowerGridIndentation,
                 }
             }
             Key::Up => {
-                model.profile_group += 1;
+                model.selected_page += 1;
                 load_profiles(model);
                 model.selected_profile = 0;
             }
             Key::Down => {
-                if model.profile_group > 0 {
-                    model.profile_group -= 1;
-                    load_profiles(model);
-                    model.selected_profile = 0;
-                }
+                model.selected_page -= 1;
+                load_profiles(model);
+                model.selected_profile = 0;
             }
             Key::A => {
                 if model.selected_profile > 0 {
                     model.selected_profile -= 1;
                 } else {
-                    model.selected_profile = model.graph_datas.len() - 1;
+                    model.selected_profile = model.trace_datas.len() - 1;
                 }
             }
             Key::D => {
-                model.selected_profile = (model.selected_profile + 1) % model.graph_datas.len();
+                model.selected_profile = (model.selected_profile + 1) % model.trace_datas.len();
             }
             Key::C => {
                 model.color_mode = match model.color_mode {
@@ -558,7 +338,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             }
             Key::T => {
                 // Send graph data via osc
-                model.graph_datas[model.selected_profile].send_script_data_osc(&model.sender);
+                model.trace_datas[model.selected_profile].graph_data.send_script_data_osc(&model.sender);
             }
             Key::Space => {
                 // model.audio_interface.send(EventMsg::AddSynthesisNode(Some(
@@ -568,7 +348,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 //     ),
                 // )));
                 synthesize_call_graph(
-                    &model.graph_datas[model.selected_profile],
+                    &model.trace_datas[model.selected_profile].graph_data,
                     5.0,
                     model.audio_interface.sample_rate as f32,
                     &mut model.audio_interface,

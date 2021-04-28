@@ -40,7 +40,7 @@ pub fn generate_wave_guide_synthesis_node(freq: f32, sample_rate: f32) -> Synthe
     ))
 }
 
-pub fn synthesis_node_from_graph_data(graph_data: &GraphData, sample_rate: f32) -> SynthesisNode {
+pub fn synthesis_node_from_graph_data(trace_data: &TraceData, sample_rate: f32) -> SynthesisNode {
     let mut wave_guide = WaveGuide::new(sample_rate);
     let mut envelope = Envelope::new(
         0.0,
@@ -52,7 +52,7 @@ pub fn synthesis_node_from_graph_data(graph_data: &GraphData, sample_rate: f32) 
         .exciter_release(3.0)
         .exciter_filter_freq(300.0)
         .feedback_filter_freq(5000.0);
-    let freq = if let Some(indent) = &graph_data.indentation_profile {
+    let freq = if let Some(indent) = &trace_data.indentation_profile {
         indent.len() as f64 * 0.001 + 10.
     } else {
         50.

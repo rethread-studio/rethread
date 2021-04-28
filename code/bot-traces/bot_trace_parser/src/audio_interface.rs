@@ -248,24 +248,24 @@ impl SynthesisEngine {
         let dc_blocker = biquad::DirectForm1::<f32>::new(dc_blocker_coeffs);
         let mut resources = Resources::new(sample_rate);
         // Load all the buffers we want into resources
-        let buf_path = Path::new("/home/erik/Dokument/KTH/software_evolution/js indentation sonification/raw_bufs/bing01-12-2020_16_06.wav");
-        //let buf_path = Path::new("/home/erik/Musik/06. Displaced.wav");
-        let buf_i = resources
-            .push_buffer(Buffer::from_file(buf_path))
-            .expect("Failed to push buffer into resources");
+        // let buf_path = Path::new("/home/erik/Dokument/KTH/software_evolution/js indentation sonification/raw_bufs/bing01-12-2020_16_06.wav");
+        // //let buf_path = Path::new("/home/erik/Musik/06. Displaced.wav");
+        // let buf_i = resources
+        //     .push_buffer(Buffer::from_file(buf_path))
+        //     .expect("Failed to push buffer into resources");
 
         // let buf_i = resources
         //     .push_buffer(Buffer::from_file(Path::new(
         //         "/home/erik/Musik/sounds/127751__149203__hammer-17-16bit_mono.wav",
         //     )))
         //     .expect("Failed to push buffer into resources");
-        let buf_i = resources
-            .push_buffer(Buffer::from_file(Path::new(
-                "/home/erik/Musik/sounds/148773__daphne-in-wonderland__piano-pedal-sustain-2_mono.wav",
-            )))
-            .expect("Failed to push buffer into resources");
+        // let buf_i = resources
+        //     .push_buffer(Buffer::from_file(Path::new(
+        //         "/home/erik/Musik/sounds/148773__daphne-in-wonderland__piano-pedal-sustain-2_mono.wav",
+        //     )))
+        //     .expect("Failed to push buffer into resources");
         let wave_guides =
-            vec![WaveGuide::new_with_sampler(buf_i, 1.0, sample_rate); NUM_WAVEGUIDES];
+            vec![WaveGuide::new(sample_rate); NUM_WAVEGUIDES];
         Self {
             synthesis_nodes: HopSlotMap::with_capacity(1000),
             deallocation_keys: Vec::with_capacity(1000),

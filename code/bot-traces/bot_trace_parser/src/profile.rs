@@ -132,10 +132,42 @@ impl FunctionCall {
     }
 }
 
+pub struct TraceData {
+    pub graph_data: GraphData,
+    pub indentation_profile: Option<Vec<u32>>,
+    pub name: String,
+    pub timestamp: String,
+}
+
+impl TraceData {
+    pub fn new(name: String, timestamp: String, graph_data: GraphData) -> Self {
+        Self{
+            graph_data,
+            indentation_profile: None,
+            name, 
+            timestamp,
+        }
+    }
+    pub fn add_indentation_profile(&mut self, data: String) -> Result<(), ()> {
+        let mut indentation_profile = vec![];
+        for n in data.split(',') {
+            match n.parse::<u32>() {
+                Ok(num) => indentation_profile.push(num),
+                Err(e) => {
+                    eprintln!("Failed to parse number {}, {}", n, e);
+                    return Err(());
+                }
+            }
+        }
+        self.indentation_profile = Some(indentation_profile);
+        Ok(())
+    }
+}
+
 pub struct GraphData {
     pub script_data: HashMap<String, ScriptData>,
     pub depth_tree: Vec<TreeNode>,
-    pub indentation_profile: Option<Vec<u32>>,
+    
 }
 
 impl GraphData {
@@ -143,16 +175,7 @@ impl GraphData {
         GraphData {
             script_data: HashMap::new(),
             depth_tree: vec![],
-            indentation_profile: None,
         }
-    }
-
-    pub fn add_indentation_profile(&mut self, data: String) {
-        let indentation_profile = data
-            .split(',')
-            .map(|n| n.parse::<u32>().unwrap())
-            .collect::<Vec<u32>>();
-        self.indentation_profile = Some(indentation_profile);
     }
 
     pub fn get_script_data(&mut self, script_id: String) -> &mut ScriptData {
