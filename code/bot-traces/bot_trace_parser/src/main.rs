@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use crossbeam_channel::bounded;
 use nannou::prelude::*;
 use nannou_osc as osc;
 use std::{
@@ -8,6 +9,10 @@ use std::{
 };
 mod profile;
 use profile::{GraphData, Profile, TreeNode};
+mod audio_interface;
+use audio_interface::*;
+mod spawn_synthesis_nodes;
+use spawn_synthesis_nodes::*;
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -43,6 +48,7 @@ struct Model {
     draw_mode: DrawMode,
     color_mode: ColorMode,
     sender: osc::Sender<osc::Connected>,
+    audio_interface: audio_interface::AudioInterface,
 }
 
 fn model(app: &App) -> Model {
@@ -63,6 +69,22 @@ fn model(app: &App) -> Model {
         .connect(target_addr)
         .expect("Could not connect to socket at address");
 
+    let mut audio_interface = AudioInterface::new();
+    audio_interface.connect_to_system(2);
+
+    audio_interface.send(EventMsg::AddSynthesisNode(Some(
+        generate_wave_guide_synthesis_node(220., audio_interface.sample_rate as f32),
+    )));
+    audio_interface.send(EventMsg::AddSynthesisNode(Some(
+        generate_wave_guide_synthesis_node(440., audio_interface.sample_rate as f32),
+    )));
+    audio_interface.send(EventMsg::AddSynthesisNode(Some(
+        generate_wave_guide_synthesis_node(220. * 5. / 4., audio_interface.sample_rate as f32),
+    )));
+    audio_interface.send(EventMsg::AddSynthesisNode(Some(
+        generate_wave_guide_synthesis_node(220. * 7. / 4., audio_interface.sample_rate as f32),
+    )));
+
     let mut model = Model {
         profile_group: 0,
         profiles: vec![],
@@ -78,6 +100,7 @@ fn model(app: &App) -> Model {
         color_mode: ColorMode::Profile,
         sender,
         selected_profile: 0,
+        audio_interface,
     };
 
     load_profiles(&mut model);
@@ -536,6 +559,20 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             Key::T => {
                 // Send graph data via osc
                 model.graph_datas[model.selected_profile].send_script_data_osc(&model.sender);
+            }
+            Key::Space => {
+                // model.audio_interface.send(EventMsg::AddSynthesisNode(Some(
+                //     synthesis_node_from_graph_data(
+                //         &model.graph_datas[model.selected_profile],
+                //         model.audio_interface.sample_rate as f32,
+                //     ),
+                // )));
+                synthesize_call_graph(
+                    &model.graph_datas[model.selected_profile],
+                    5.0,
+                    model.audio_interface.sample_rate as f32,
+                    &mut model.audio_interface,
+                )
             }
             _ => (),
         },
