@@ -33,3 +33,9 @@ cargo run --release -- --project
 ```
 
 and point the folder selection to the superdirectory of the trace folders.
+
+To also set the path on the CLI, use the `--path` flag
+
+``` shell
+cargo run --release -- --project --path="/path/to/my/project folder/"
+```

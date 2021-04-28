@@ -3,6 +3,7 @@ use rfd::FileDialog;
 use std::fs::{self, File};
 use std::io::prelude::*;
 use std::{ffi::OsStr, process::Command};
+use std::path::PathBuf;
 
 fn main() -> Result<(), std::io::Error> {
     let matches = App::new("JS formatter and analyzer")
@@ -16,24 +17,34 @@ fn main() -> Result<(), std::io::Error> {
                 .help("Select a project folder containing many traces")
                 .takes_value(false),
         )
+        .arg(
+            Arg::with_name("path")
+                .short("i")
+                .long("path")
+                .help("Give the path through an argument instead of choosing it manually through a dialog box")
+                .takes_value(true),
+        )
         .get_matches();
 
-    let working_dir_path = std::env::current_dir().expect("Can't get working directory");
-    // Open folder selection dialog
-    let dialog_result = FileDialog::new()
-        .set_directory(&working_dir_path)
-        .pick_folder();
-
-    if let Some(folder_path) = dialog_result {
-        if matches.is_present("project") {
-            println!("Processing folder as project containing many traces");
-            process_project(folder_path)?;
-        } else {
-            println!("Processing folder as trace");
-            process_trace(folder_path)?;
+    let folder_path = match matches.value_of("path") {
+        Some(path) => PathBuf::from(path),
+        None => {
+            let working_dir_path = std::env::current_dir().expect("Can't get working directory");
+            // Open folder selection dialog
+            let dialog_result = FileDialog::new()
+                .set_directory(&working_dir_path)
+                .pick_folder();
+            let dialog_path = dialog_result.expect("No path chosen, exiting!");
+            PathBuf::from(dialog_path)
         }
+    };
+
+    if matches.is_present("project") {
+        println!("Processing folder as project containing many traces");
+        process_project(folder_path)?;
     } else {
-        println!("No folder chosen");
+        println!("Processing folder as trace");
+        process_trace(folder_path)?;
     }
 
     println!("Processing done!");
