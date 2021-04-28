@@ -104,10 +104,10 @@ fn process_trace(folder_path: std::path::PathBuf) -> Result<(), std::io::Error> 
     }
 
     // Write the full source to file
-    let mut file_path = folder_path.clone();
-    file_path.push("full_source.js");
-    let mut file = File::create(file_path)?;
-    file.write_all(full_formatted_source.as_bytes())?;
+    // let mut file_path = folder_path.clone();
+    // file_path.push("full_source.js");
+    // let mut file = File::create(file_path)?;
+    // file.write_all(full_formatted_source.as_bytes())?;
 
     // Get the indentation profile
     let lines: Vec<_> = full_formatted_source.split('\n').collect();
@@ -116,6 +116,7 @@ fn process_trace(folder_path: std::path::PathBuf) -> Result<(), std::io::Error> 
         for (i, c) in line.chars().into_iter().enumerate() {
             if c != '\t' {
                 outline.push(i);
+                break;
             }
         }
     }
