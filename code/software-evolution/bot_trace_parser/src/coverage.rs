@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Coverage {
-    scripts: Vec<CoverageScript>,
+    scripts: Option<Vec<CoverageScript>>,
     pub vector: Vec<(i64, i32)>,
     pub total_length: i64,
     pub total_count: i32,
@@ -35,7 +35,21 @@ impl Coverage {
         // vector.sort_by_key(|item| item.0);
 
         Self {
-            scripts,
+            scripts: Some(scripts),
+            vector,
+            total_length,
+            total_count,
+        }
+    }
+    pub fn from_vector(vector: Vec<(i64, i32)>) -> Self {
+        let mut total_length = 0;
+        let mut total_count = 0;
+        for pair in &vector {
+            total_length += pair.0;
+            total_count += pair.1;
+        }
+        Self {
+            scripts: None,
             vector,
             total_length,
             total_count,

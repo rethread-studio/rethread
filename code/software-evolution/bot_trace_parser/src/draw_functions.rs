@@ -8,14 +8,14 @@ pub fn draw_polar_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
     let angle_scale: f32 = PI * 2.0 / model.longest_tree as f32;
     let radius_scale: f32 = win.h()
         / ((model.deepest_tree_depth + 1) as f32
-            * (((model.num_profiles - 1) as f32 * model.separation_ratio) + 1.0)
+            * (((model.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
             * 2.0);
     let tree_separation = radius_scale * model.deepest_tree_depth as f32;
     for i in 0..model.index {
         let angle = i as f32 * angle_scale;
         for (index, td) in model.trace_datas.iter().enumerate() {
             let d_tree = &td.graph_data.depth_tree;
-            if i < d_tree.len() && index < model.num_profiles as usize {
+            if i < d_tree.len() && index < model.trace_datas.len() {
                 let start_radius = d_tree[i].depth as f32 * radius_scale
                     + (index as f32 * tree_separation * model.separation_ratio);
                 let radius = (d_tree[i].depth + 1) as f32 * radius_scale
@@ -53,7 +53,7 @@ pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
     let radius_scale: f32 = win.h() / ((model.deepest_tree_depth + 1) as f32 * 4.0);
     for (index, td) in model.trace_datas.iter().enumerate() {
         let d_tree = &td.graph_data.depth_tree;
-        let offset_angle = (index as f32 / model.num_profiles as f32) * PI * 2.0;
+        let offset_angle = (index as f32 / model.trace_datas.len() as f32) * PI * 2.0;
         let offset_radius = match index {
             0 => 0.0,
             _ => radius_scale * model.deepest_tree_depth as f32 * 1.5,
@@ -64,7 +64,7 @@ pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
         );
         for i in 0..model.index {
             let angle = i as f32 * angle_scale;
-            if i < d_tree.len() && index < model.num_profiles as usize {
+            if i < d_tree.len() && index < model.trace_datas.len() as usize {
                 let start_radius = d_tree[i].depth as f32 * radius_scale;
                 let radius = (d_tree[i].depth + 1) as f32 * radius_scale;
                 let col = match model.color_mode {
@@ -98,16 +98,16 @@ pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
 
 pub fn draw_vertical_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
     let x_scale: f32 = win.w()
-        / ((model.num_profiles as f32 * model.separation_ratio + 1.0)
+        / ((model.trace_datas.len() as f32 * model.separation_ratio + 1.0)
             * model.deepest_tree_depth as f32);
     let y_scale: f32 = win.h() / model.longest_tree as f32;
 
-    let tree_separation = win.w() / model.num_profiles as f32;
+    let tree_separation = win.w() / model.trace_datas.len() as f32;
     for i in 0..model.index {
         let y = win.top() - (i as f32 * y_scale);
         for (index, td) in model.trace_datas.iter().enumerate() {
             let d_tree = &td.graph_data.depth_tree;
-            if i < d_tree.len() && index < model.num_profiles as usize {
+            if i < d_tree.len() && index < model.trace_datas.len() as usize {
                 let x = win.left()
                     + (d_tree[i].depth as f32 * x_scale
                         + (index as f32 * tree_separation * model.separation_ratio));
@@ -133,16 +133,16 @@ pub fn draw_vertical_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
 
 pub fn draw_horizontal_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
     let y_scale: f32 = win.h()
-        / ((model.num_profiles as f32 * model.separation_ratio + 1.0)
+        / ((model.trace_datas.len() as f32 * model.separation_ratio + 1.0)
             * model.deepest_tree_depth as f32);
     let x_scale: f32 = win.w() / model.longest_tree as f32;
 
-    let tree_separation = win.h() / model.num_profiles as f32;
+    let tree_separation = win.h() / model.trace_datas.len() as f32;
     for i in 0..model.index {
         let x = win.left() + (i as f32 * x_scale);
         for (index, td) in model.trace_datas.iter().enumerate() {
             let d_tree = &td.graph_data.depth_tree;
-            if i < d_tree.len() && index < model.num_profiles as usize {
+            if i < d_tree.len() && index < model.trace_datas.len() as usize {
                 let y = win.top()
                     - (d_tree[i].depth as f32 * y_scale
                         + (index as f32 * tree_separation * model.separation_ratio));
@@ -181,7 +181,7 @@ pub fn draw_flower_grid_indentation(draw: &Draw, model: &Model, win: &Rect) {
     println!("res_decimator: {}", res_decimator);
     for (index, td) in model.trace_datas.iter().enumerate() {
         if let Some(indent_profile) = &td.indentation_profile {
-            let offset_angle = (index as f32 / model.num_profiles as f32) * PI * 2.0;
+            let offset_angle = (index as f32 / model.trace_datas.len() as f32) * PI * 2.0;
             let offset_radius = match index {
                 0 => 0.0,
                 _ => radius_scale * model.deepest_indentation as f32 * 1.5,

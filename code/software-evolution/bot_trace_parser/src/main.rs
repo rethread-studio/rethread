@@ -18,6 +18,7 @@ use coverage::*;
 mod spawn_synthesis_nodes;
 use spawn_synthesis_nodes::*;
 mod draw_functions;
+mod from_web_api;
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -83,7 +84,7 @@ enum RenderState {
 
 pub struct Model {
     selected_page: usize,
-    profiles: Vec<Profile>,
+    sites: Vec<String>,
     selected_profile: usize,
     trace_datas: Vec<TraceData>,
     deepest_tree_depth: u32,
@@ -97,13 +98,13 @@ pub struct Model {
     max_coverage_total_length: i64,
     index: usize,
     separation_ratio: f32,
-    num_profiles: u32,
     draw_mode: DrawMode,
     color_mode: ColorMode,
     sender: osc::Sender<osc::Connected>,
     audio_interface: audio_interface::AudioInterface,
     font: nannou::text::Font,
     render_state: RenderState,
+    use_web_api: bool,
 }
 
 fn model(app: &App) -> Model {
@@ -140,11 +141,30 @@ fn model(app: &App) -> Model {
         generate_wave_guide_synthesis_node(220. * 7. / 4., audio_interface.sample_rate as f32),
     )));
 
+    let use_web_api = true;
+    let sites = if use_web_api {
+        from_web_api::get_all_sites().expect("Failed to get list of pages from Web API")
+    } else {
+        let list = vec![
+            "bing",
+            "duckduckgo",
+            "google",
+            "kiddle",
+            "qwant",
+            "spotify",
+            "wikipedia",
+            "yahoo",
+        ];
+        list.iter()
+            .map(|s| String::from(*s))
+            .collect::<Vec<String>>()
+    };
+
     let font = nannou::text::font::from_file("/home/erik/.fonts/SpaceMono-Regular.ttf").unwrap();
 
     let mut model = Model {
         selected_page: 0,
-        profiles: vec![],
+        sites,
         trace_datas: vec![],
         deepest_tree_depth: 0,
         longest_tree: 0,
@@ -157,7 +177,6 @@ fn model(app: &App) -> Model {
         max_coverage_total_length: 0,
         index: 0,
         separation_ratio: 1.0,
-        num_profiles: 7,
         draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
         color_mode: ColorMode::Profile,
         sender,
@@ -165,36 +184,19 @@ fn model(app: &App) -> Model {
         audio_interface,
         font,
         render_state: RenderState::NoRendering,
+        use_web_api,
     };
 
-    load_profiles(&mut model, app);
+    load_site(&mut model, app);
     model
 }
 
-fn load_profiles(model: &mut Model, app: &App) {
-    let mut profiles = vec![];
+fn load_site_from_disk(site: &str) -> Vec<TraceData> {
     let root_path = PathBuf::from("/home/erik/code/kth/web_evolution_2021-04/");
-    let pages = vec![
-        "bing",
-        "duckduckgo",
-        "google",
-        "kiddle",
-        "qwant",
-        "spotify",
-        "wikipedia",
-        "yahoo",
-    ];
-
-    while model.selected_page < pages.len() {
-        model.selected_page += pages.len()
-    }
-    while model.selected_page >= pages.len() {
-        model.selected_page -= pages.len()
-    }
-
     let mut trace_datas = vec![];
+
     let mut page_folder = root_path.clone();
-    page_folder.push(pages[model.selected_page]);
+    page_folder.push(site);
     let trace_paths_in_folder = fs::read_dir(page_folder)
         .expect("Failed to open page folder")
         .filter(|r| r.is_ok()) // Get rid of Err variants for Result<DirEntry>
@@ -217,8 +219,7 @@ fn load_profiles(model: &mut Model, app: &App) {
         } else {
             String::from("unknown timestamp")
         };
-        let mut trace_data =
-            TraceData::new(pages[model.selected_page].to_owned(), timestamp, graph_data);
+        let mut trace_data = TraceData::new(site.to_owned(), timestamp, graph_data);
         // Load indentation profile
         folder_path.pop();
         folder_path.push("indent_profile.csv");
@@ -248,8 +249,23 @@ fn load_profiles(model: &mut Model, app: &App) {
         // copy_screenshot(&folder_path, &app, pages[model.selected_page], i);
 
         trace_datas.push(trace_data);
-        profiles.push(profile);
     }
+    trace_datas
+}
+
+fn load_site(model: &mut Model, _app: &App) {
+    while model.selected_page < model.sites.len() {
+        model.selected_page += model.sites.len()
+    }
+    while model.selected_page >= model.sites.len() {
+        model.selected_page -= model.sites.len()
+    }
+
+    let trace_datas = if model.use_web_api {
+        from_web_api::get_trace_data_from_site(&model.sites[model.selected_page])
+    } else {
+        load_site_from_disk(&model.sites[model.selected_page])
+    };
 
     let mut deepest_tree_depth = 0;
     let mut longest_tree = 0;
@@ -311,8 +327,6 @@ fn load_profiles(model: &mut Model, app: &App) {
         deepest_indentation, longest_indentation
     );
 
-    model.num_profiles = profiles.len().try_into().unwrap();
-    model.profiles = profiles;
     model.trace_datas = trace_datas;
     model.longest_tree = longest_tree.try_into().unwrap();
     model.deepest_tree_depth = deepest_tree_depth.try_into().unwrap();
@@ -492,12 +506,12 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             }
             Key::Up => {
                 model.selected_page += 1;
-                load_profiles(model, app);
+                load_site(model, app);
                 model.selected_profile = 0;
             }
             Key::Down => {
                 model.selected_page -= 1;
-                load_profiles(model, app);
+                load_site(model, app);
                 model.selected_profile = 0;
             }
             Key::Left => {
