@@ -264,8 +264,7 @@ impl SynthesisEngine {
         //         "/home/erik/Musik/sounds/148773__daphne-in-wonderland__piano-pedal-sustain-2_mono.wav",
         //     )))
         //     .expect("Failed to push buffer into resources");
-        let wave_guides =
-            vec![WaveGuide::new(sample_rate); NUM_WAVEGUIDES];
+        let wave_guides = vec![WaveGuide::new(sample_rate); NUM_WAVEGUIDES];
         Self {
             synthesis_nodes: HopSlotMap::with_capacity(1000),
             deallocation_keys: Vec::with_capacity(1000),

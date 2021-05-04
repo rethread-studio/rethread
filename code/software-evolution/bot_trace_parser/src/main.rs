@@ -12,7 +12,9 @@ use std::{
 mod profile;
 use profile::{GraphData, Profile, TraceData, TreeNode};
 mod audio_interface;
+mod coverage;
 use audio_interface::*;
+use coverage::*;
 mod spawn_synthesis_nodes;
 use spawn_synthesis_nodes::*;
 mod draw_functions;
@@ -31,6 +33,7 @@ enum DrawMode {
     Indentation(ProfileDrawMode),
     LineLength(ProfileDrawMode),
     GraphDepth(GraphDepthDrawMode),
+    Coverage(CoverageDrawMode),
 }
 
 enum ProfileDrawMode {
@@ -42,6 +45,11 @@ enum GraphDepthDrawMode {
     Horizontal,
     Polar,
     PolarGrid,
+}
+
+enum CoverageDrawMode {
+    HeatMap,
+    Blob,
 }
 
 impl DrawMode {
@@ -58,6 +66,10 @@ impl DrawMode {
                 GraphDepthDrawMode::Horizontal => "graph depth - horizontal",
                 GraphDepthDrawMode::Polar => "graph depth - polar",
                 GraphDepthDrawMode::PolarGrid => "graph depth - polar grid",
+            },
+            DrawMode::Coverage(cdm) => match cdm {
+                CoverageDrawMode::HeatMap => "coverage - heat map",
+                CoverageDrawMode::Blob => "coverage - blob",
             },
         }
     }
@@ -80,6 +92,9 @@ pub struct Model {
     longest_indentation: u32,
     deepest_line_length: u32,
     longest_line_length: u32,
+    longest_coverage_vector: usize,
+    max_coverage_vector_count: i32,
+    max_coverage_total_length: i64,
     index: usize,
     separation_ratio: f32,
     num_profiles: u32,
@@ -137,6 +152,9 @@ fn model(app: &App) -> Model {
         longest_indentation: 0,
         deepest_line_length: 0,
         longest_line_length: 0,
+        longest_coverage_vector: 0,
+        max_coverage_vector_count: 0,
+        max_coverage_total_length: 0,
         index: 0,
         separation_ratio: 1.0,
         num_profiles: 7,
@@ -149,13 +167,13 @@ fn model(app: &App) -> Model {
         render_state: RenderState::NoRendering,
     };
 
-    load_profiles(&mut model);
+    load_profiles(&mut model, app);
     model
 }
 
-fn load_profiles(model: &mut Model) {
+fn load_profiles(model: &mut Model, app: &App) {
     let mut profiles = vec![];
-    let root_path = PathBuf::from("/home/erik/code/kth/web-evolution/");
+    let root_path = PathBuf::from("/home/erik/code/kth/web_evolution_2021-04/");
     let pages = vec![
         "bing",
         "duckduckgo",
@@ -183,7 +201,7 @@ fn load_profiles(model: &mut Model) {
         .map(|r| r.unwrap().path())
         .filter(|r| r.is_dir()) // Only keep folders
         .collect::<Vec<_>>();
-    for p in &trace_paths_in_folder {
+    for (i, p) in trace_paths_in_folder.iter().enumerate() {
         let mut folder_path = p.clone();
         folder_path.push("profile.json");
         let data = fs::read_to_string(&folder_path).unwrap();
@@ -217,6 +235,18 @@ fn load_profiles(model: &mut Model) {
                 eprintln!("Failed to parse {:?}", folder_path);
             }
         }
+        // Load coverage
+        folder_path.pop();
+        folder_path.push("coverage.json");
+        let data = fs::read_to_string(&folder_path).unwrap();
+        let coverage = Coverage::from_data(data);
+        trace_data.coverage = Some(coverage);
+
+        // Copy screenshots to new location
+        folder_path.pop();
+        folder_path.push("screenshots");
+        // copy_screenshot(&folder_path, &app, pages[model.selected_page], i);
+
         trace_datas.push(trace_data);
         profiles.push(profile);
     }
@@ -227,6 +257,9 @@ fn load_profiles(model: &mut Model) {
     let mut longest_indentation = 0;
     let mut deepest_line_length = 0;
     let mut longest_line_length = 0;
+    let mut longest_coverage_vector = 0;
+    let mut max_coverage_vector_count = 0;
+    let mut max_coverage_total_length = 0;
     for td in &trace_datas {
         let gd = &td.graph_data;
         if gd.depth_tree.len() > longest_tree {
@@ -257,6 +290,20 @@ fn load_profiles(model: &mut Model) {
                 }
             }
         }
+        if let Some(coverage) = &td.coverage {
+            if coverage.vector.len() > longest_coverage_vector {
+                longest_coverage_vector = coverage.vector.len();
+            }
+            let total_length = coverage.total_length;
+            if total_length > max_coverage_total_length {
+                max_coverage_total_length = total_length;
+            }
+            for pair in &coverage.vector {
+                if pair.1 > max_coverage_vector_count {
+                    max_coverage_vector_count = pair.1;
+                }
+            }
+        }
     }
 
     println!(
@@ -273,6 +320,9 @@ fn load_profiles(model: &mut Model) {
     model.deepest_indentation = deepest_indentation;
     model.longest_line_length = longest_line_length.try_into().unwrap();
     model.deepest_line_length = deepest_line_length;
+    model.longest_coverage_vector = longest_coverage_vector;
+    model.max_coverage_vector_count = max_coverage_vector_count;
+    model.max_coverage_total_length = max_coverage_total_length;
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
@@ -284,7 +334,8 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                 // Capture the frame!
                 let name = &model.trace_datas[model.selected_profile].name;
                 let timestamp = &model.trace_datas[model.selected_profile].timestamp;
-                let file_path = rendering_frame_path(app, &model.draw_mode, name, timestamp);
+                let file_path =
+                    rendering_frame_path(app, &model.draw_mode, name, *current_trace - 1);
                 app.main_window().capture_frame(file_path);
             }
             // Are we done?
@@ -348,6 +399,16 @@ fn view(app: &App, model: &Model, frame: Frame) {
                 timestamp = &model.trace_datas[model.selected_profile].timestamp;
             }
         },
+        DrawMode::Coverage(cdm) => match cdm {
+            CoverageDrawMode::HeatMap => {
+                draw_functions::draw_coverage_heat_map(&draw, model, &win);
+                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+            }
+            CoverageDrawMode::Blob => {
+                draw_functions::draw_coverage_blob(&draw, model, &win);
+                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+            }
+        },
     };
 
     let full_text = format!(
@@ -384,6 +445,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 DrawMode::LineLength(ref mut pdm) => match pdm {
                     ProfileDrawMode::SingleFlower => (),
                 },
+                DrawMode::Coverage(ref mut cdm) => match cdm {
+                    CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Blob,
+                    CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
+                },
             },
             Key::D => match &mut model.draw_mode {
                 DrawMode::GraphDepth(ref mut gddm) => match gddm {
@@ -398,6 +463,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 DrawMode::LineLength(ref mut pdm) => match pdm {
                     ProfileDrawMode::SingleFlower => (),
                 },
+                DrawMode::Coverage(ref mut cdm) => match cdm {
+                    CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Blob,
+                    CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
+                },
             },
             Key::W => {
                 model.draw_mode = match &model.draw_mode {
@@ -407,28 +476,28 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     DrawMode::Indentation(_pdm) => {
                         DrawMode::LineLength(ProfileDrawMode::SingleFlower)
                     }
-                    DrawMode::LineLength(_pdm) => DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
+                    DrawMode::LineLength(_pdm) => DrawMode::Coverage(CoverageDrawMode::HeatMap),
+                    DrawMode::Coverage(_cdm) => DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
                 }
             }
             Key::S => {
                 model.draw_mode = match &model.draw_mode {
-                    DrawMode::GraphDepth(_gddm) => {
-                        DrawMode::LineLength(ProfileDrawMode::SingleFlower)
-                    }
+                    DrawMode::GraphDepth(_gddm) => DrawMode::Coverage(CoverageDrawMode::HeatMap),
                     DrawMode::Indentation(_pdm) => DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
                     DrawMode::LineLength(_pdm) => {
                         DrawMode::Indentation(ProfileDrawMode::SingleFlower)
                     }
+                    DrawMode::Coverage(_cdm) => DrawMode::LineLength(ProfileDrawMode::SingleFlower),
                 }
             }
             Key::Up => {
                 model.selected_page += 1;
-                load_profiles(model);
+                load_profiles(model, app);
                 model.selected_profile = 0;
             }
             Key::Down => {
                 model.selected_page -= 1;
-                load_profiles(model);
+                load_profiles(model, app);
                 model.selected_profile = 0;
             }
             Key::Left => {
@@ -525,7 +594,7 @@ fn rendering_frame_path(
     app: &App,
     draw_mode: &DrawMode,
     name: &str,
-    timestamp: &str,
+    frame_number: usize,
 ) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     let now: DateTime<Utc> = Utc::now();
@@ -538,7 +607,63 @@ fn rendering_frame_path(
         // Name each file after the number of the frame.
         // .join(format!("{}", now.to_rfc3339()))
         // Name each file after its timestamp
-        .join(timestamp)
+        .join(format!("{:04}", frame_number))
         // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
         .with_extension("png")
+}
+
+fn screenshot_collection_path(app: &App, name: &str, frame_number: usize) -> std::path::PathBuf {
+    app.project_path()
+        .expect("failed to locate `project_path`")
+        .join("screenshot_collection")
+        .join(name)
+        .join(format!("{:04}", frame_number))
+        .with_extension("jpg")
+}
+
+fn copy_screenshot(folder_path: &PathBuf, app: &App, name: &str, frame_number: usize) {
+    let screenshot_paths_in_folder = fs::read_dir(folder_path)
+        .expect("Failed to open screenshot folder")
+        .filter(|r| r.is_ok()) // Get rid of Err variants for Result<DirEntry>
+        .map(|r| r.unwrap().path())
+        .filter(|r| r.is_file())
+        .filter(|r| {
+            if let Some(ext) = r.extension() {
+                ext == "jpg"
+            } else {
+                false
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let mut last_screenshot_path = PathBuf::new();
+    let mut highest_screenshot_timestamp = 0;
+    for p in screenshot_paths_in_folder {
+        let timestamp: u64 = p
+            .file_stem()
+            .unwrap()
+            .to_string_lossy()
+            .parse::<u64>()
+            .unwrap();
+        if timestamp > highest_screenshot_timestamp {
+            last_screenshot_path = p;
+            highest_screenshot_timestamp = timestamp;
+        }
+    }
+    let new_path = screenshot_collection_path(&app, name, frame_number);
+    println!(
+        "old: {:?}: {:?}, new: {:?}",
+        last_screenshot_path,
+        last_screenshot_path.is_file(),
+        new_path
+    );
+    // Create the parent dir of the new file if it doesn't exist
+    let mut new_path_parent = new_path.clone();
+    new_path_parent.pop();
+    fs::create_dir_all(new_path_parent);
+    // Copy the file
+    match std::fs::copy(last_screenshot_path, new_path) {
+        Ok(_) => (),
+        Err(e) => eprintln!("{}", e),
+    }
 }

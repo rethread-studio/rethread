@@ -1,7 +1,10 @@
+use crate::coverage::*;
 use nannou_osc as osc;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+// structs needed to deserialize the profile.json file
+/// Profile is the main deserializing struct for the profile.json file
 #[derive(Serialize, Deserialize)]
 pub struct Profile {
     nodes: Vec<FunctionCall>,
@@ -136,17 +139,19 @@ pub struct TraceData {
     pub graph_data: GraphData,
     pub indentation_profile: Option<Vec<u32>>,
     pub line_length_profile: Option<Vec<u32>>,
+    pub coverage: Option<Coverage>,
     pub name: String,
     pub timestamp: String,
 }
 
 impl TraceData {
     pub fn new(name: String, timestamp: String, graph_data: GraphData) -> Self {
-        Self{
+        Self {
             graph_data,
             indentation_profile: None,
             line_length_profile: None,
-            name, 
+            coverage: None,
+            name,
             timestamp,
         }
     }
@@ -183,7 +188,6 @@ impl TraceData {
 pub struct GraphData {
     pub script_data: HashMap<String, ScriptData>,
     pub depth_tree: Vec<TreeNode>,
-    
 }
 
 impl GraphData {
