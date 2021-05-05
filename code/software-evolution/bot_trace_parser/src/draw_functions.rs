@@ -69,7 +69,10 @@ pub fn draw_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
         let start_radius = index as f32 * tree_separation * model.separation_ratio;
         let mut start = pt2(start_radius, start_radius);
         for i in 0..d_tree.len() {
-            let angle = index as f32 * angle_scale + PI / 4. + i as f32 * 0.5;
+            let circle_radius_scale = 1. / (i as f32) + 0.2;
+            let angle = index as f32 * angle_scale + PI / 4.; // + i as f32 * 0.5;
+            // Add some sine curvature to the line
+            let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
             if i < d_tree.len() && index < model.trace_datas.len() {
                 let radius = (model.longest_tree as f32 - i as f32) * radius_scale + radius_offset;
                 let col = match model.color_mode {
@@ -81,7 +84,7 @@ pub fn draw_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
                 let weight = 1.0 - (1.0 - (weight / model.max_profile_tick)).powi(4);
                 // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
                 let end = pt2(angle.cos() * radius, angle.sin() * radius);
-                let circle_radius_scale = 1. / (i as f32) + 0.2;
+                
                 // Draw a transparent circle representing the time spent
                 let mut transparent_col = col;
                 transparent_col.alpha = 0.25; // (0.005 * weight * 20.0).min(0.5);
@@ -103,7 +106,7 @@ pub fn draw_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
         }
     }
     for (point, colour) in coloured_points {
-        draw.rect().xy(point).color(colour).w_h(1., 1.);
+        draw.rect().xy(point).color(colour).w_h(0.5, 0.5);
     }
 }
 

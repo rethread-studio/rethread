@@ -74,10 +74,6 @@ impl PartialEq for FunctionCall {
 }
 
 impl FunctionCall {
-    fn eq_id(&self, other_id: i32) -> bool {
-        self.id == other_id
-    }
-
     fn add_graph_data(&self, graph_data: &mut GraphData, nodes: &Vec<FunctionCall>) {
         let script = graph_data.get_script_data(self.call_frame.script_id.clone());
         script.add_funcion_call(self.call_frame.function_name.clone(), self.ticks());

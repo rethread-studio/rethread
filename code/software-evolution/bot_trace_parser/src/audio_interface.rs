@@ -171,7 +171,8 @@ impl AudioInterface {
         // Connect outputs from this client to the system playback inputs
 
         for i in 0..self.out_port_names.len() {
-            if i >= system_ports.len() {
+            if i+offset >= system_ports.len() {
+                println!("Unable to connect to port {}, it doesn't exist", i+offset);
                 break;
             }
             match self

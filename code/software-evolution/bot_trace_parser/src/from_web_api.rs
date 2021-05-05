@@ -129,7 +129,7 @@ pub fn get_coverage_for_visit(
     Ok(coverage)
 }
 
-pub fn get_all_coverages_for_site(
+pub fn _get_all_coverages_for_site(
     site: &str,
 ) -> Result<HashMap<String, Vec<(i64, i32)>>, Box<dyn std::error::Error>> {
     // Try to get the
