@@ -11,10 +11,13 @@ pub fn draw_polar_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
             * (((model.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
             * 2.0);
     let tree_separation = radius_scale * model.deepest_tree_depth as f32;
-    for i in 0..model.index {
-        let angle = i as f32 * angle_scale;
-        for (index, td) in model.trace_datas.iter().enumerate() {
-            let d_tree = &td.graph_data.depth_tree;
+
+    for (index, td) in model.trace_datas.iter().enumerate() {
+        let d_tree = &td.graph_data.depth_tree;
+        let start_radius = index as f32 * tree_separation * model.separation_ratio;
+        let mut start = pt2(start_radius, start_radius);
+        for i in 0..model.index {
+            let angle = i as f32 * angle_scale + PI / 4. + index.pow(2) as f32 * 0.00003;
             if i < d_tree.len() && index < model.trace_datas.len() {
                 let start_radius = d_tree[i].depth as f32 * radius_scale
                     + (index as f32 * tree_separation * model.separation_ratio);
@@ -26,26 +29,136 @@ pub fn draw_polar_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
                     ColorMode::Selected => selected_color(index, model.selected_profile),
                 };
                 let weight = d_tree[i].ticks as f32;
-                let weight = weight;
-                let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
+                let weight = 1.0 - (1.0 - (weight.clamp(0.0, 20.0) / 20.0)).powi(2);
+                // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
                 let end = pt2(angle.cos() * radius, angle.sin() * radius);
                 // Draw a transparent circle representing the time spent
                 let mut transparent_col = col.clone();
-                transparent_col.alpha = 0.01 * weight;
+                transparent_col.alpha = 0.5; // (0.005 * weight * 20.0).min(0.5);
+                draw.rect().xy(end).color(col).w_h(1., 1.);
                 draw.ellipse()
-                    .radius(weight.max(0.0))
+                    .radius(weight * tree_separation)
                     .xy(start)
                     .stroke_weight(0.0)
                     .color(transparent_col);
                 // Draw the line representing the function call
-                draw.line()
-                    .stroke_weight(1.0)
-                    .start(start)
-                    .end(end)
-                    .color(col);
+                // draw.line()
+                //     .stroke_weight(1.0)
+                //     .start(start)
+                //     .end(end)
+                //     .color(col);
+                start = end;
             }
         }
     }
+}
+
+pub fn draw_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
+    let angle_scale: f32 = PI * 2.0 / model.trace_datas.len() as f32;
+    let radius_offset = win.h() * 0.02;
+    let radius_scale: f32 = win.h() * 0.90
+        / ((model.longest_tree + 1) as f32
+            //* (((model.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
+            * 2.0);
+    let tree_separation = radius_scale * model.deepest_tree_depth as f32;
+
+    let mut coloured_points =
+        Vec::with_capacity(model.trace_datas.len() * model.longest_tree as usize);
+    for (index, td) in model.trace_datas.iter().enumerate() {
+        let d_tree = &td.graph_data.depth_tree;
+        let start_radius = index as f32 * tree_separation * model.separation_ratio;
+        let mut start = pt2(start_radius, start_radius);
+        for i in 0..d_tree.len() {
+            let angle = index as f32 * angle_scale + PI / 4. + i as f32 * 0.5;
+            if i < d_tree.len() && index < model.trace_datas.len() {
+                let radius = (model.longest_tree as f32 - i as f32) * radius_scale + radius_offset;
+                let col = match model.color_mode {
+                    ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                    ColorMode::Profile => profile_color(index as f32),
+                    ColorMode::Selected => selected_color(index, model.selected_profile),
+                };
+                let weight = d_tree[i].ticks as f32;
+                let weight = 1.0 - (1.0 - (weight / model.max_profile_tick)).powi(4);
+                // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
+                let end = pt2(angle.cos() * radius, angle.sin() * radius);
+                let circle_radius_scale = 1. / (i as f32) + 0.2;
+                // Draw a transparent circle representing the time spent
+                let mut transparent_col = col;
+                transparent_col.alpha = 0.25; // (0.005 * weight * 20.0).min(0.5);
+
+                coloured_points.push((end, col));
+                draw.ellipse()
+                    .radius((weight * radius_scale * 90.0) * circle_radius_scale)
+                    .xy(start)
+                    .stroke_weight(0.0)
+                    .color(transparent_col);
+                // Draw the line representing the function call
+                // draw.line()
+                //     .stroke_weight(1.0)
+                //     .start(start)
+                //     .end(end)
+                //     .color(col);
+                start = end;
+            }
+        }
+    }
+    for (point, colour) in coloured_points {
+        draw.rect().xy(point).color(colour).w_h(1., 1.);
+    }
+}
+
+pub fn draw_depth_graph_rings(draw: &Draw, model: &Model, win: &Rect) {
+    let num_circles = 5.0;
+    let points_per_circle = model.longest_tree as f32 / num_circles;
+    let angle_scale: f32 = PI * 2.0 / model.longest_tree as f32;
+    let radius_scale: f32 = (win.h() * 0.95)
+        / ((model.deepest_tree_depth + 1) as f32 * ((num_circles + 1.) + 1.0) * 2.0);
+    let tree_separation = radius_scale * model.deepest_tree_depth as f32;
+    let d_tree = &model.trace_datas[model.selected_profile]
+        .graph_data
+        .depth_tree;
+    let start_radius = win.h() * 0.05;
+    let mut start = pt2(0.0, start_radius);
+    let mut coloured_points = Vec::with_capacity(d_tree.len());
+    for i in 0..d_tree.len() {
+        let angle = i as f32 * angle_scale * num_circles + PI / 2.;
+        // index = what circle we are at
+        let index = i as f32 / points_per_circle;
+
+        let radius = (d_tree[i].depth) as f32 * radius_scale
+            + (index as f32 * tree_separation)
+            + start_radius;
+        let col = match model.color_mode {
+            ColorMode::Script => script_color(d_tree[i].script_id as f32),
+            ColorMode::Profile => profile_color(index),
+            ColorMode::Selected => selected_color(model.selected_profile, model.selected_profile),
+        };
+        let weight = d_tree[i].ticks as f32;
+        let weight = 1.0 - (1.0 - (weight.clamp(0.0, 20.0) / 20.0)).powi(2);
+        // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
+        let point = pt2(angle.cos() * radius, angle.sin() * radius);
+        // Draw a transparent circle representing the time spent
+        let mut transparent_col = col;
+        transparent_col.alpha = 0.25; // (0.005 * weight * 20.0).min(0.5);
+        draw.ellipse()
+            .radius(weight * 15.)
+            .xy(point)
+            .stroke_weight(0.0)
+            .color(transparent_col);
+        // Draw the line representing the function call
+        // draw.line()
+        //     .stroke_weight(6.0)
+        //     .start(start)
+        //     .end(end)
+        //     .color(col);
+        // start = point;
+
+        coloured_points.push((point, col));
+    }
+    draw.polyline()
+        .join_round()
+        .weight(2.0)
+        .points_colored(coloured_points);
 }
 
 pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {

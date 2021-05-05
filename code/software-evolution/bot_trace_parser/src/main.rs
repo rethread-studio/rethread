@@ -1,16 +1,12 @@
 // Turn on clippy lints
 #![warn(clippy::all)]
 use chrono::{DateTime, Utc};
-use crossbeam_channel::bounded;
-use nannou::{daggy::petgraph::graph, prelude::*};
+
+use nannou::prelude::*;
 use nannou_osc as osc;
-use std::{
-    convert::TryInto,
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{convert::TryInto, fs, path::PathBuf};
 mod profile;
-use profile::{GraphData, Profile, TraceData, TreeNode};
+use profile::{Profile, TraceData};
 mod audio_interface;
 mod coverage;
 use audio_interface::*;
@@ -46,6 +42,8 @@ enum GraphDepthDrawMode {
     Horizontal,
     Polar,
     PolarGrid,
+    Rings,
+    PolarAxes,
 }
 
 enum CoverageDrawMode {
@@ -67,6 +65,8 @@ impl DrawMode {
                 GraphDepthDrawMode::Horizontal => "graph depth - horizontal",
                 GraphDepthDrawMode::Polar => "graph depth - polar",
                 GraphDepthDrawMode::PolarGrid => "graph depth - polar grid",
+                GraphDepthDrawMode::Rings => "graph depth - rings",
+                GraphDepthDrawMode::PolarAxes => "graph depth - polar axes",
             },
             DrawMode::Coverage(cdm) => match cdm {
                 CoverageDrawMode::HeatMap => "coverage - heat map",
@@ -96,6 +96,7 @@ pub struct Model {
     longest_coverage_vector: usize,
     max_coverage_vector_count: i32,
     max_coverage_total_length: i64,
+    max_profile_tick: f32,
     index: usize,
     separation_ratio: f32,
     draw_mode: DrawMode,
@@ -128,18 +129,18 @@ fn model(app: &App) -> Model {
     let mut audio_interface = AudioInterface::new();
     audio_interface.connect_to_system(2);
 
-    audio_interface.send(EventMsg::AddSynthesisNode(Some(
-        generate_wave_guide_synthesis_node(220., audio_interface.sample_rate as f32),
-    )));
-    audio_interface.send(EventMsg::AddSynthesisNode(Some(
-        generate_wave_guide_synthesis_node(440., audio_interface.sample_rate as f32),
-    )));
-    audio_interface.send(EventMsg::AddSynthesisNode(Some(
-        generate_wave_guide_synthesis_node(220. * 5. / 4., audio_interface.sample_rate as f32),
-    )));
-    audio_interface.send(EventMsg::AddSynthesisNode(Some(
-        generate_wave_guide_synthesis_node(220. * 7. / 4., audio_interface.sample_rate as f32),
-    )));
+    // audio_interface.send(EventMsg::AddSynthesisNode(Some(
+    //     generate_wave_guide_synthesis_node(220., audio_interface.sample_rate as f32),
+    // )));
+    // audio_interface.send(EventMsg::AddSynthesisNode(Some(
+    //     generate_wave_guide_synthesis_node(440., audio_interface.sample_rate as f32),
+    // )));
+    // audio_interface.send(EventMsg::AddSynthesisNode(Some(
+    //     generate_wave_guide_synthesis_node(220. * 5. / 4., audio_interface.sample_rate as f32),
+    // )));
+    // audio_interface.send(EventMsg::AddSynthesisNode(Some(
+    //     generate_wave_guide_synthesis_node(220. * 7. / 4., audio_interface.sample_rate as f32),
+    // )));
 
     let use_web_api = true;
     let sites = if use_web_api {
@@ -175,10 +176,11 @@ fn model(app: &App) -> Model {
         longest_coverage_vector: 0,
         max_coverage_vector_count: 0,
         max_coverage_total_length: 0,
+        max_profile_tick: 0.,
         index: 0,
         separation_ratio: 1.0,
         draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
-        color_mode: ColorMode::Profile,
+        color_mode: ColorMode::Script,
         sender,
         selected_profile: 0,
         audio_interface,
@@ -254,12 +256,10 @@ fn load_site_from_disk(site: &str) -> Vec<TraceData> {
 }
 
 fn load_site(model: &mut Model, _app: &App) {
-    while model.selected_page < model.sites.len() {
-        model.selected_page += model.sites.len()
-    }
     while model.selected_page >= model.sites.len() {
-        model.selected_page -= model.sites.len()
+        model.selected_page -= model.sites.len();
     }
+    println!("Loading selected site: {}", model.selected_page);
 
     let trace_datas = if model.use_web_api {
         from_web_api::get_trace_data_from_site(&model.sites[model.selected_page])
@@ -276,6 +276,7 @@ fn load_site(model: &mut Model, _app: &App) {
     let mut longest_coverage_vector = 0;
     let mut max_coverage_vector_count = 0;
     let mut max_coverage_total_length = 0;
+    let mut max_profile_tick = 0;
     for td in &trace_datas {
         let gd = &td.graph_data;
         if gd.depth_tree.len() > longest_tree {
@@ -284,6 +285,9 @@ fn load_site(model: &mut Model, _app: &App) {
         for node in &gd.depth_tree {
             if node.depth > deepest_tree_depth {
                 deepest_tree_depth = node.depth;
+            }
+            if node.ticks > max_profile_tick {
+                max_profile_tick = node.ticks;
             }
         }
         if let Some(indentation_profile) = &td.indentation_profile {
@@ -337,6 +341,7 @@ fn load_site(model: &mut Model, _app: &App) {
     model.longest_coverage_vector = longest_coverage_vector;
     model.max_coverage_vector_count = max_coverage_vector_count;
     model.max_coverage_total_length = max_coverage_total_length;
+    model.max_profile_tick = max_profile_tick as f32;
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
@@ -376,9 +381,9 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     let win = app.window_rect();
 
-    let mut name = &model.trace_datas[0].name;
+    let name = &model.trace_datas[0].name;
     let mut timestamp = "";
-    let mut color_type = match model.color_mode {
+    let color_type = match model.color_mode {
         ColorMode::Script => "script colour",
         ColorMode::Profile => "profile index colour",
         ColorMode::Selected => "selection colour",
@@ -395,10 +400,16 @@ fn view(app: &App, model: &Model, frame: Frame) {
             }
             GraphDepthDrawMode::Polar => {
                 draw_functions::draw_polar_depth_graph(&draw, model, &win);
-                timestamp = &model.trace_datas[model.selected_profile].timestamp;
             }
             GraphDepthDrawMode::PolarGrid => {
                 draw_functions::draw_flower_grid_graph_depth(&draw, model, &win);
+            }
+            GraphDepthDrawMode::Rings => {
+                draw_functions::draw_depth_graph_rings(&draw, model, &win);
+                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+            }
+            GraphDepthDrawMode::PolarAxes => {
+                draw_functions::draw_polar_axes_depth_graph(&draw, model, &win);
             }
         },
         DrawMode::Indentation(pdm) => match pdm {
@@ -451,7 +462,9 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::Vertical,
                     GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Polar,
                     GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::PolarGrid,
-                    GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Horizontal,
+                    GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Rings,
+                    GraphDepthDrawMode::Rings => *gddm = GraphDepthDrawMode::PolarAxes,
+                    GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::Horizontal,
                 },
                 DrawMode::Indentation(ref mut pdm) => match pdm {
                     ProfileDrawMode::SingleFlower => (),
@@ -466,10 +479,12 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             },
             Key::D => match &mut model.draw_mode {
                 DrawMode::GraphDepth(ref mut gddm) => match gddm {
-                    GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::PolarGrid,
+                    GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::PolarAxes,
                     GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Horizontal,
                     GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::Vertical,
                     GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Polar,
+                    GraphDepthDrawMode::Rings => *gddm = GraphDepthDrawMode::PolarGrid,
+                    GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::Rings,
                 },
                 DrawMode::Indentation(ref mut pdm) => match pdm {
                     ProfileDrawMode::SingleFlower => (),
@@ -506,11 +521,19 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             }
             Key::Up => {
                 model.selected_page += 1;
+                if model.selected_page >= model.sites.len() {
+                    model.selected_page = 0;
+                }
                 load_site(model, app);
                 model.selected_profile = 0;
             }
             Key::Down => {
-                model.selected_page -= 1;
+                if model.selected_page > 0 {
+                    model.selected_page -= 1;
+                } else {
+                    model.selected_page = model.sites.len() - 1;
+                }
+                println!("Key down pressed, selected_page: {}", model.selected_page);
                 load_site(model, app);
                 model.selected_profile = 0;
             }
@@ -531,7 +554,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     ColorMode::Selected => ColorMode::Script,
                 }
             }
-            Key::S => {
+            Key::X => {
                 // Capture the frame!
                 let file_path = captured_frame_path(app);
                 app.main_window().capture_frame(file_path);
