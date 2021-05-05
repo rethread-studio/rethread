@@ -5,20 +5,21 @@ use nannou::{color::Mix, prelude::*};
 // GRAPH DEPTH
 
 pub fn draw_polar_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
-    let angle_scale: f32 = PI * 2.0 / model.longest_tree as f32;
+    let site = &model.sites[model.selected_site];
+    let angle_scale: f32 = PI * 2.0 / site.longest_tree as f32;
     let radius_scale: f32 = win.h()
-        / ((model.deepest_tree_depth + 1) as f32
-            * (((model.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
+        / ((site.deepest_tree_depth + 1) as f32
+            * (((site.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
             * 2.0);
-    let tree_separation = radius_scale * model.deepest_tree_depth as f32;
+    let tree_separation = radius_scale * site.deepest_tree_depth as f32;
 
-    for (index, td) in model.trace_datas.iter().enumerate() {
+    for (index, td) in site.trace_datas.iter().enumerate() {
         let d_tree = &td.graph_data.depth_tree;
         let start_radius = index as f32 * tree_separation * model.separation_ratio;
         let mut start = pt2(start_radius, start_radius);
         for i in 0..model.index {
             let angle = i as f32 * angle_scale + PI / 4. + index.pow(2) as f32 * 0.00003;
-            if i < d_tree.len() && index < model.trace_datas.len() {
+            if i < d_tree.len() && index < site.trace_datas.len() {
                 let start_radius = d_tree[i].depth as f32 * radius_scale
                     + (index as f32 * tree_separation * model.separation_ratio);
                 let radius = (d_tree[i].depth + 1) as f32 * radius_scale
@@ -26,7 +27,7 @@ pub fn draw_polar_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
                 let col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
-                    ColorMode::Selected => selected_color(index, model.selected_profile),
+                    ColorMode::Selected => selected_color(index, model.selected_visit),
                 };
                 let weight = d_tree[i].ticks as f32;
                 let weight = 1.0 - (1.0 - (weight.clamp(0.0, 20.0) / 20.0)).powi(2);
@@ -54,37 +55,97 @@ pub fn draw_polar_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
-    let angle_scale: f32 = PI * 2.0 / model.trace_datas.len() as f32;
+    let trace_datas = &model.sites[model.selected_site].trace_datas;
+    let site = &model.sites[model.selected_site];
+    let angle_scale: f32 = PI * 2.0 / trace_datas.len() as f32;
     let radius_offset = win.h() * 0.02;
     let radius_scale: f32 = win.h() * 0.90
-        / ((model.longest_tree + 1) as f32
+        / ((site.longest_tree + 1) as f32
             //* (((model.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
             * 2.0);
-    let tree_separation = radius_scale * model.deepest_tree_depth as f32;
+    let tree_separation = radius_scale * site.deepest_tree_depth as f32;
 
-    let mut coloured_points =
-        Vec::with_capacity(model.trace_datas.len() * model.longest_tree as usize);
-    for (index, td) in model.trace_datas.iter().enumerate() {
+    let mut coloured_points = Vec::with_capacity(trace_datas.len() * site.longest_tree as usize);
+    for (index, td) in trace_datas.iter().enumerate() {
         let d_tree = &td.graph_data.depth_tree;
         let start_radius = index as f32 * tree_separation * model.separation_ratio;
         let mut start = pt2(start_radius, start_radius);
         for i in 0..d_tree.len() {
             let circle_radius_scale = 1. / (i as f32) + 0.2;
             let angle = index as f32 * angle_scale + PI / 4.; // + i as f32 * 0.5;
-            // Add some sine curvature to the line
+                                                              // Add some sine curvature to the line
             let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
-            if i < d_tree.len() && index < model.trace_datas.len() {
-                let radius = (model.longest_tree as f32 - i as f32) * radius_scale + radius_offset;
+            if i < d_tree.len() && index < trace_datas.len() {
+                let radius = (site.longest_tree as f32 - i as f32) * radius_scale + radius_offset;
                 let col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
-                    ColorMode::Selected => selected_color(index, model.selected_profile),
+                    ColorMode::Selected => selected_color(index, model.selected_visit),
                 };
                 let weight = d_tree[i].ticks as f32;
-                let weight = 1.0 - (1.0 - (weight / model.max_profile_tick)).powi(4);
+                let weight = 1.0 - (1.0 - (weight / site.max_profile_tick)).powi(4);
                 // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
                 let end = pt2(angle.cos() * radius, angle.sin() * radius);
-                
+
+                // Draw a transparent circle representing the time spent
+                let mut transparent_col = col;
+                transparent_col.alpha = 0.25; // (0.005 * weight * 20.0).min(0.5);
+
+                coloured_points.push((end, col));
+                draw.ellipse()
+                    .radius((weight * radius_scale * 90.0) * circle_radius_scale)
+                    .xy(start)
+                    .stroke_weight(0.0)
+                    .color(transparent_col);
+                // Draw the line representing the function call
+                // draw.line()
+                //     .stroke_weight(1.0)
+                //     .start(start)
+                //     .end(end)
+                //     .color(col);
+                start = end;
+            }
+        }
+    }
+    for (point, colour) in coloured_points {
+        draw.rect().xy(point).color(colour).w_h(0.5, 0.5);
+    }
+}
+
+pub fn draw_all_sites_single_visit_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
+    let site = &model.sites[model.selected_site];
+    // TODO: Change to do all sites with one visit per site (with a tail of previous visits)
+    let angle_scale: f32 = PI * 2.0 / site.trace_datas.len() as f32;
+    let radius_offset = win.h() * 0.02;
+    let radius_scale: f32 = win.h() * 0.90
+        / ((site.longest_tree + 1) as f32
+            //* (((site.trace_datas.len() - 1) as f32 * site.separation_ratio) + 1.0)
+            * 2.0);
+    let tree_separation = radius_scale * site.deepest_tree_depth as f32;
+
+    let mut coloured_points =
+        Vec::with_capacity(site.trace_datas.len() * site.longest_tree as usize);
+    for (index, td) in site.trace_datas.iter().enumerate() {
+        let d_tree = &td.graph_data.depth_tree;
+        let start_radius = index as f32 * tree_separation * model.separation_ratio;
+        let mut start = pt2(start_radius, start_radius);
+        for i in 0..d_tree.len() {
+            let circle_radius_scale = 1. / (i as f32) + 0.2;
+            let angle = index as f32 * angle_scale + PI / 4.; // + i as f32 * 0.5;
+                                                              // Add some sine curvature to the line
+            let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
+            if i < d_tree.len() && index < site.trace_datas.len() {
+                let radius = (site.longest_tree as f32 - i as f32) * radius_scale + radius_offset;
+                let col = match model.color_mode {
+                    ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                    ColorMode::Profile => profile_color(index as f32),
+                    ColorMode::Selected => selected_color(index, model.selected_visit),
+                };
+                let weight = d_tree[i].ticks as f32;
+                let weight = 1.0 - (1.0 - (weight / site.max_profile_tick)).powi(4);
+                // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
+                let end = pt2(angle.cos() * radius, angle.sin() * radius);
+
                 // Draw a transparent circle representing the time spent
                 let mut transparent_col = col;
                 transparent_col.alpha = 0.25; // (0.005 * weight * 20.0).min(0.5);
@@ -111,15 +172,14 @@ pub fn draw_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_depth_graph_rings(draw: &Draw, model: &Model, win: &Rect) {
+    let site = &model.sites[model.selected_site];
     let num_circles = 5.0;
-    let points_per_circle = model.longest_tree as f32 / num_circles;
-    let angle_scale: f32 = PI * 2.0 / model.longest_tree as f32;
+    let points_per_circle = site.longest_tree as f32 / num_circles;
+    let angle_scale: f32 = PI * 2.0 / site.longest_tree as f32;
     let radius_scale: f32 = (win.h() * 0.95)
-        / ((model.deepest_tree_depth + 1) as f32 * ((num_circles + 1.) + 1.0) * 2.0);
-    let tree_separation = radius_scale * model.deepest_tree_depth as f32;
-    let d_tree = &model.trace_datas[model.selected_profile]
-        .graph_data
-        .depth_tree;
+        / ((site.deepest_tree_depth + 1) as f32 * ((num_circles + 1.) + 1.0) * 2.0);
+    let tree_separation = radius_scale * site.deepest_tree_depth as f32;
+    let d_tree = &site.trace_datas[model.selected_visit].graph_data.depth_tree;
     let start_radius = win.h() * 0.05;
     let mut start = pt2(0.0, start_radius);
     let mut coloured_points = Vec::with_capacity(d_tree.len());
@@ -134,7 +194,7 @@ pub fn draw_depth_graph_rings(draw: &Draw, model: &Model, win: &Rect) {
         let col = match model.color_mode {
             ColorMode::Script => script_color(d_tree[i].script_id as f32),
             ColorMode::Profile => profile_color(index),
-            ColorMode::Selected => selected_color(model.selected_profile, model.selected_profile),
+            ColorMode::Selected => selected_color(model.selected_visit, model.selected_visit),
         };
         let weight = d_tree[i].ticks as f32;
         let weight = 1.0 - (1.0 - (weight.clamp(0.0, 20.0) / 20.0)).powi(2);
@@ -165,14 +225,15 @@ pub fn draw_depth_graph_rings(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
-    let angle_scale: f32 = PI * 2.0 / model.longest_tree as f32;
-    let radius_scale: f32 = win.h() / ((model.deepest_tree_depth + 1) as f32 * 4.0);
-    for (index, td) in model.trace_datas.iter().enumerate() {
+    let site = &model.sites[model.selected_site];
+    let angle_scale: f32 = PI * 2.0 / site.longest_tree as f32;
+    let radius_scale: f32 = win.h() / ((site.deepest_tree_depth + 1) as f32 * 4.0);
+    for (index, td) in site.trace_datas.iter().enumerate() {
         let d_tree = &td.graph_data.depth_tree;
-        let offset_angle = (index as f32 / model.trace_datas.len() as f32) * PI * 2.0;
+        let offset_angle = (index as f32 / site.trace_datas.len() as f32) * PI * 2.0;
         let offset_radius = match index {
             0 => 0.0,
-            _ => radius_scale * model.deepest_tree_depth as f32 * 1.5,
+            _ => radius_scale * site.deepest_tree_depth as f32 * 1.5,
         };
         let offset = pt2(
             offset_angle.cos() * offset_radius,
@@ -180,13 +241,13 @@ pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
         );
         for i in 0..model.index {
             let angle = i as f32 * angle_scale;
-            if i < d_tree.len() && index < model.trace_datas.len() as usize {
+            if i < d_tree.len() && index < site.trace_datas.len() as usize {
                 let start_radius = d_tree[i].depth as f32 * radius_scale;
                 let radius = (d_tree[i].depth + 1) as f32 * radius_scale;
                 let col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
-                    ColorMode::Selected => selected_color(index, model.selected_profile),
+                    ColorMode::Selected => selected_color(index, model.selected_visit),
                 };
                 let weight = d_tree[i].ticks as f32;
                 let weight = weight.max(0.0);
@@ -213,24 +274,25 @@ pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_vertical_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
+    let site = &model.sites[model.selected_site];
     let x_scale: f32 = win.w()
-        / ((model.trace_datas.len() as f32 * model.separation_ratio + 1.0)
-            * model.deepest_tree_depth as f32);
-    let y_scale: f32 = win.h() / model.longest_tree as f32;
+        / ((site.trace_datas.len() as f32 * model.separation_ratio + 1.0)
+            * site.deepest_tree_depth as f32);
+    let y_scale: f32 = win.h() / site.longest_tree as f32;
 
-    let tree_separation = win.w() / model.trace_datas.len() as f32;
+    let tree_separation = win.w() / site.trace_datas.len() as f32;
     for i in 0..model.index {
         let y = win.top() - (i as f32 * y_scale);
-        for (index, td) in model.trace_datas.iter().enumerate() {
+        for (index, td) in site.trace_datas.iter().enumerate() {
             let d_tree = &td.graph_data.depth_tree;
-            if i < d_tree.len() && index < model.trace_datas.len() as usize {
+            if i < d_tree.len() && index < site.trace_datas.len() as usize {
                 let x = win.left()
                     + (d_tree[i].depth as f32 * x_scale
                         + (index as f32 * tree_separation * model.separation_ratio));
                 let col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
-                    ColorMode::Selected => selected_color(index, model.selected_profile),
+                    ColorMode::Selected => selected_color(index, model.selected_visit),
                 };
                 let weight = d_tree[i].ticks as f32;
                 // Draw a transparent circle representing the time spent
@@ -248,24 +310,25 @@ pub fn draw_vertical_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_horizontal_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
+    let site = &model.sites[model.selected_site];
     let y_scale: f32 = win.h()
-        / ((model.trace_datas.len() as f32 * model.separation_ratio + 1.0)
-            * model.deepest_tree_depth as f32);
-    let x_scale: f32 = win.w() / model.longest_tree as f32;
+        / ((site.trace_datas.len() as f32 * model.separation_ratio + 1.0)
+            * site.deepest_tree_depth as f32);
+    let x_scale: f32 = win.w() / site.longest_tree as f32;
 
-    let tree_separation = win.h() / model.trace_datas.len() as f32;
+    let tree_separation = win.h() / site.trace_datas.len() as f32;
     for i in 0..model.index {
         let x = win.left() + (i as f32 * x_scale);
-        for (index, td) in model.trace_datas.iter().enumerate() {
+        for (index, td) in site.trace_datas.iter().enumerate() {
             let d_tree = &td.graph_data.depth_tree;
-            if i < d_tree.len() && index < model.trace_datas.len() as usize {
+            if i < d_tree.len() && index < site.trace_datas.len() as usize {
                 let y = win.top()
                     - (d_tree[i].depth as f32 * y_scale
                         + (index as f32 * tree_separation * model.separation_ratio));
                 let col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
-                    ColorMode::Selected => selected_color(index, model.selected_profile),
+                    ColorMode::Selected => selected_color(index, model.selected_visit),
                 };
                 let weight = d_tree[i].ticks as f32;
                 // Draw a transparent circle representing the time spent
@@ -288,19 +351,20 @@ pub fn draw_horizontal_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
 // INDENTATION
 
 pub fn draw_flower_grid_indentation(draw: &Draw, model: &Model, win: &Rect) {
-    let angle_scale: f32 = PI * 2.0 / model.longest_indentation as f32;
-    let radius_scale: f32 = win.h() / ((model.deepest_indentation + 1) as f32 * 4.0);
+    let site = &model.sites[model.selected_site];
+    let angle_scale: f32 = PI * 2.0 / site.longest_indentation as f32;
+    let radius_scale: f32 = win.h() / ((site.deepest_indentation + 1) as f32 * 4.0);
 
     // If there are too many lines to be drawn on the screen, don't draw them all
-    let graph_width = radius_scale * model.deepest_indentation as f32 * 1.5;
+    let graph_width = radius_scale * site.deepest_indentation as f32 * 1.5;
     let res_decimator = (1.0 / (angle_scale * graph_width)) as usize;
     println!("res_decimator: {}", res_decimator);
-    for (index, td) in model.trace_datas.iter().enumerate() {
+    for (index, td) in site.trace_datas.iter().enumerate() {
         if let Some(indent_profile) = &td.indentation_profile {
-            let offset_angle = (index as f32 / model.trace_datas.len() as f32) * PI * 2.0;
+            let offset_angle = (index as f32 / site.trace_datas.len() as f32) * PI * 2.0;
             let offset_radius = match index {
                 0 => 0.0,
-                _ => radius_scale * model.deepest_indentation as f32 * 1.5,
+                _ => radius_scale * site.deepest_indentation as f32 * 1.5,
             };
             let offset = pt2(
                 offset_angle.cos() * offset_radius,
@@ -316,7 +380,7 @@ pub fn draw_flower_grid_indentation(draw: &Draw, model: &Model, win: &Rect) {
                         let col = match model.color_mode {
                             ColorMode::Script => script_color(indent_profile[i] as f32),
                             ColorMode::Profile => profile_color(index as f32),
-                            ColorMode::Selected => selected_color(index, model.selected_profile),
+                            ColorMode::Selected => selected_color(index, model.selected_visit),
                         };
 
                         let start =
@@ -336,9 +400,10 @@ pub fn draw_flower_grid_indentation(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_single_flower_indentation(draw: &Draw, model: &Model, win: &Rect) {
-    let td = &model.trace_datas[model.selected_profile];
-    let index = model.selected_profile;
-    let deep_indent = model.deepest_indentation as f32;
+    let site = &model.sites[model.selected_site];
+    let td = &site.trace_datas[model.selected_visit];
+    let index = model.selected_visit;
+    let deep_indent = site.deepest_indentation as f32;
 
     let max_radius = win.h() * 0.4;
     if let Some(indent_profile) = &td.indentation_profile {
@@ -359,7 +424,7 @@ pub fn draw_single_flower_indentation(draw: &Draw, model: &Model, win: &Rect) {
                     let col = match model.color_mode {
                         ColorMode::Script => script_color(indent_profile[i] as f32),
                         ColorMode::Profile => profile_color(index as f32),
-                        ColorMode::Selected => selected_color(index, model.selected_profile),
+                        ColorMode::Selected => selected_color(index, model.selected_visit),
                     };
 
                     let start = pt2(angle.cos() * radius, angle.sin() * radius);
@@ -372,9 +437,10 @@ pub fn draw_single_flower_indentation(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_single_flower_line_length(draw: &Draw, model: &Model, win: &Rect) {
-    let td = &model.trace_datas[model.selected_profile];
-    let index = model.selected_profile;
-    let deep_indent = model.deepest_line_length as f32;
+    let site = &model.sites[model.selected_site];
+    let td = &site.trace_datas[model.selected_visit];
+    let index = model.selected_visit;
+    let deep_indent = site.deepest_line_length as f32;
 
     let max_radius = win.h() * 0.4;
     if let Some(line_profile) = &td.line_length_profile {
@@ -392,7 +458,7 @@ pub fn draw_single_flower_line_length(draw: &Draw, model: &Model, win: &Rect) {
                     let col = match model.color_mode {
                         ColorMode::Script => script_color(line_profile[i] as f32 * 0.1),
                         ColorMode::Profile => profile_color(index as f32),
-                        ColorMode::Selected => selected_color(index, model.selected_profile),
+                        ColorMode::Selected => selected_color(index, model.selected_visit),
                     };
 
                     let start = pt2(angle.cos() * radius, angle.sin() * radius);
@@ -407,19 +473,20 @@ pub fn draw_single_flower_line_length(draw: &Draw, model: &Model, win: &Rect) {
 // COVERAGE
 
 pub fn draw_coverage_heat_map_square(draw: &Draw, model: &Model, win: &Rect) {
-    if let Some(coverage) = &model.trace_datas[model.selected_profile].coverage {
+    let site = &model.sites[model.selected_site];
+    if let Some(coverage) = &site.trace_datas[model.selected_visit].coverage {
         let vector = &coverage.vector;
         let total_area = win.w() * win.h();
-        let area_per_pair = total_area as f64 / model.longest_coverage_vector as f64;
+        let area_per_pair = total_area as f64 / site.longest_coverage_vector as f64;
         let side_length = area_per_pair.sqrt() as f32;
         let squares_per_row = (win.w() / side_length).floor();
 
         for (i, pair) in vector.iter().enumerate() {
-            //let heat = pair.1 as f32 / model.max_coverage_vector_count as f32;
-            let heat = pair.0 as f32 / model.max_coverage_total_length as f32;
+            //let heat = pair.1 as f32 / site.max_coverage_vector_count as f32;
+            let heat = pair.0 as f32 / site.max_coverage_total_length as f32;
             let heat = heat.powf(0.33);
             let col = hsla(-0.5 + heat * 0.5, 0.7, 0.6, 1.0);
-            // let size = (pair.0 as f32 / model.max_coverage_total_length as f32) * total_area;
+            // let size = (pair.0 as f32 / site.max_coverage_total_length as f32) * total_area;
             let y = win.top() - (i as f32 / squares_per_row).floor() as f32 * side_length;
             let x = (i % squares_per_row as usize) as f32 * side_length + win.left();
             draw.rect()
@@ -431,12 +498,13 @@ pub fn draw_coverage_heat_map_square(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_coverage_heat_map(draw: &Draw, model: &Model, win: &Rect) {
-    let coverage = match &model.trace_datas[model.selected_profile].coverage {
+    let site = &model.sites[model.selected_site];
+    let coverage = match &site.trace_datas[model.selected_visit].coverage {
         Some(it) => it,
         _ => return,
     };
     let vector = &coverage.vector;
-    let width_per_length = win.w() as f64 / model.max_coverage_total_length as f64;
+    let width_per_length = win.w() as f64 / site.max_coverage_total_length as f64;
     //let width_per_length = win.w() as f64 / coverage.total_length as f64;
 
     let col1 = hsla(0.0, 1.0, 0.45, 1.0);
@@ -449,7 +517,7 @@ pub fn draw_coverage_heat_map(draw: &Draw, model: &Model, win: &Rect) {
     let mut old_rect = Rect::from_wh(pt2(0.0, 0.0)).left_of(*win);
 
     for (i, pair) in vector.iter().enumerate() {
-        let heat = pair.1 as f32 / model.max_coverage_vector_count as f32;
+        let heat = pair.1 as f32 / site.max_coverage_vector_count as f32;
         let width = pair.0 as f64 * width_per_length;
         if width == 0.0 {
             println!("width 0, pair.0: {}", pair.0);
@@ -469,7 +537,8 @@ pub fn draw_coverage_heat_map(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_coverage_blob(draw: &Draw, model: &Model, win: &Rect) {
-    let coverage = match &model.trace_datas[model.selected_profile].coverage {
+    let site = &model.sites[model.selected_site];
+    let coverage = match &site.trace_datas[model.selected_visit].coverage {
         Some(it) => it,
         _ => return,
     };
@@ -483,8 +552,8 @@ pub fn draw_coverage_blob(draw: &Draw, model: &Model, win: &Rect) {
     let mut coloured_points = vec![];
     let mut sum_length = 0.0;
     for (i, pair) in vector.iter().enumerate() {
-        let this_length = pair.0 as f32 / model.max_coverage_total_length as f32;
-        let heat = pair.1 as f32 / model.max_coverage_vector_count as f32;
+        let this_length = pair.0 as f32 / site.max_coverage_total_length as f32;
+        let heat = pair.1 as f32 / site.max_coverage_vector_count as f32;
         let heat = heat.powf(0.1);
         let angle = sum_length * PI * 2. * num_circles;
         let num_circles = (sum_length * num_circles).floor();

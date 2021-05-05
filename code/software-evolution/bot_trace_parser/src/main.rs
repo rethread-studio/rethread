@@ -82,10 +82,8 @@ enum RenderState {
     RenderAllTraces { current_trace: usize },
 }
 
-pub struct Model {
-    selected_page: usize,
-    sites: Vec<String>,
-    selected_profile: usize,
+struct Site {
+    name: String,
     trace_datas: Vec<TraceData>,
     deepest_tree_depth: u32,
     longest_tree: u32,
@@ -97,6 +95,12 @@ pub struct Model {
     max_coverage_vector_count: i32,
     max_coverage_total_length: i64,
     max_profile_tick: f32,
+}
+
+pub struct Model {
+    selected_site: usize,
+    sites: Vec<Site>,
+    selected_visit: usize,
     index: usize,
     separation_ratio: f32,
     draw_mode: DrawMode,
@@ -161,36 +165,27 @@ fn model(app: &App) -> Model {
             .collect::<Vec<String>>()
     };
 
+    let sites: Vec<Site> = sites
+        .iter()
+        .map(|name| load_site(&name, use_web_api))
+        .collect();
+
     let font = nannou::text::font::from_file("/home/erik/.fonts/SpaceMono-Regular.ttf").unwrap();
 
-    let mut model = Model {
-        selected_page: 0,
+    Model {
+        selected_site: 0,
         sites,
-        trace_datas: vec![],
-        deepest_tree_depth: 0,
-        longest_tree: 0,
-        deepest_indentation: 0,
-        longest_indentation: 0,
-        deepest_line_length: 0,
-        longest_line_length: 0,
-        longest_coverage_vector: 0,
-        max_coverage_vector_count: 0,
-        max_coverage_total_length: 0,
-        max_profile_tick: 0.,
         index: 0,
         separation_ratio: 1.0,
         draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
         color_mode: ColorMode::Script,
         sender,
-        selected_profile: 0,
+        selected_visit: 0,
         audio_interface,
         font,
         render_state: RenderState::NoRendering,
         use_web_api,
-    };
-
-    load_site(&mut model, app);
-    model
+    }
 }
 
 fn load_site_from_disk(site: &str) -> Vec<TraceData> {
@@ -255,16 +250,11 @@ fn load_site_from_disk(site: &str) -> Vec<TraceData> {
     trace_datas
 }
 
-fn load_site(model: &mut Model, _app: &App) {
-    while model.selected_page >= model.sites.len() {
-        model.selected_page -= model.sites.len();
-    }
-    println!("Loading selected site: {}", model.selected_page);
-
-    let trace_datas = if model.use_web_api {
-        from_web_api::get_trace_data_from_site(&model.sites[model.selected_page])
+fn load_site(name: &str, use_web_api: bool) -> Site {
+    let trace_datas = if use_web_api {
+        from_web_api::get_trace_data_from_site(name)
     } else {
-        load_site_from_disk(&model.sites[model.selected_page])
+        load_site_from_disk(name)
     };
 
     let mut deepest_tree_depth = 0;
@@ -331,17 +321,20 @@ fn load_site(model: &mut Model, _app: &App) {
         deepest_indentation, longest_indentation
     );
 
-    model.trace_datas = trace_datas;
-    model.longest_tree = longest_tree.try_into().unwrap();
-    model.deepest_tree_depth = deepest_tree_depth.try_into().unwrap();
-    model.longest_indentation = longest_indentation.try_into().unwrap();
-    model.deepest_indentation = deepest_indentation;
-    model.longest_line_length = longest_line_length.try_into().unwrap();
-    model.deepest_line_length = deepest_line_length;
-    model.longest_coverage_vector = longest_coverage_vector;
-    model.max_coverage_vector_count = max_coverage_vector_count;
-    model.max_coverage_total_length = max_coverage_total_length;
-    model.max_profile_tick = max_profile_tick as f32;
+    Site {
+        name: name.to_owned(),
+        trace_datas,
+        deepest_tree_depth: deepest_tree_depth.try_into().unwrap(),
+        longest_tree: longest_tree.try_into().unwrap(),
+        deepest_indentation,
+        longest_indentation: longest_indentation.try_into().unwrap(),
+        deepest_line_length,
+        longest_line_length: longest_line_length.try_into().unwrap(),
+        longest_coverage_vector,
+        max_coverage_vector_count,
+        max_coverage_total_length,
+        max_profile_tick: max_profile_tick as f32,
+    }
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
@@ -351,20 +344,21 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             if *current_trace > 0 {
                 // We must wait until the first trace has been drawn before saving it.
                 // Capture the frame!
-                let name = &model.trace_datas[model.selected_profile].name;
-                let timestamp = &model.trace_datas[model.selected_profile].timestamp;
+                let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
+                let timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
                 let file_path =
                     rendering_frame_path(app, &model.draw_mode, name, *current_trace - 1);
                 app.main_window().capture_frame(file_path);
             }
             // Are we done?
-            if *current_trace == model.trace_datas.len() {
+            if *current_trace == model.sites[model.selected_site].trace_datas.len() {
                 // All traces have been rendered
                 model.render_state = RenderState::NoRendering;
-                model.selected_profile = 0;
+                model.selected_visit = 0;
             } else {
                 // Set the next trace up for rendering
-                model.selected_profile = *current_trace;
+                model.selected_visit = *current_trace;
                 *current_trace += 1;
             }
         }
@@ -381,7 +375,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     let win = app.window_rect();
 
-    let name = &model.trace_datas[0].name;
+    let name = &model.sites[model.selected_site].name;
     let mut timestamp = "";
     let color_type = match model.color_mode {
         ColorMode::Script => "script colour",
@@ -406,7 +400,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
             }
             GraphDepthDrawMode::Rings => {
                 draw_functions::draw_depth_graph_rings(&draw, model, &win);
-                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+                timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
             }
             GraphDepthDrawMode::PolarAxes => {
                 draw_functions::draw_polar_axes_depth_graph(&draw, model, &win);
@@ -415,23 +410,27 @@ fn view(app: &App, model: &Model, frame: Frame) {
         DrawMode::Indentation(pdm) => match pdm {
             ProfileDrawMode::SingleFlower => {
                 draw_functions::draw_single_flower_indentation(&draw, model, &win);
-                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+                timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
             }
         },
         DrawMode::LineLength(pdm) => match pdm {
             ProfileDrawMode::SingleFlower => {
                 draw_functions::draw_single_flower_line_length(&draw, model, &win);
-                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+                timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
             }
         },
         DrawMode::Coverage(cdm) => match cdm {
             CoverageDrawMode::HeatMap => {
                 draw_functions::draw_coverage_heat_map(&draw, model, &win);
-                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+                timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
             }
             CoverageDrawMode::Blob => {
                 draw_functions::draw_coverage_blob(&draw, model, &win);
-                timestamp = &model.trace_datas[model.selected_profile].timestamp;
+                timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
             }
         },
     };
@@ -520,32 +519,30 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 }
             }
             Key::Up => {
-                model.selected_page += 1;
-                if model.selected_page >= model.sites.len() {
-                    model.selected_page = 0;
+                model.selected_site += 1;
+                if model.selected_site >= model.sites.len() {
+                    model.selected_site = 0;
                 }
-                load_site(model, app);
-                model.selected_profile = 0;
+                model.selected_visit = 0;
             }
             Key::Down => {
-                if model.selected_page > 0 {
-                    model.selected_page -= 1;
+                if model.selected_site > 0 {
+                    model.selected_site -= 1;
                 } else {
-                    model.selected_page = model.sites.len() - 1;
+                    model.selected_site = model.sites.len() - 1;
                 }
-                println!("Key down pressed, selected_page: {}", model.selected_page);
-                load_site(model, app);
-                model.selected_profile = 0;
+                model.selected_visit = 0;
             }
             Key::Left => {
-                if model.selected_profile > 0 {
-                    model.selected_profile -= 1;
+                if model.selected_visit > 0 {
+                    model.selected_visit -= 1;
                 } else {
-                    model.selected_profile = model.trace_datas.len() - 1;
+                    model.selected_visit = model.sites[model.selected_site].trace_datas.len() - 1;
                 }
             }
             Key::Right => {
-                model.selected_profile = (model.selected_profile + 1) % model.trace_datas.len();
+                model.selected_visit =
+                    (model.selected_visit + 1) % model.sites[model.selected_site].trace_datas.len();
             }
             Key::C => {
                 model.color_mode = match model.color_mode {
@@ -561,7 +558,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             }
             Key::T => {
                 // Send graph data via osc
-                model.trace_datas[model.selected_profile]
+                model.sites[model.selected_site].trace_datas[model.selected_visit]
                     .graph_data
                     .send_script_data_osc(&model.sender);
             }
@@ -576,7 +573,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 //     ),
                 // )));
                 synthesize_call_graph(
-                    &model.trace_datas[model.selected_profile].graph_data,
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].graph_data,
                     5.0,
                     model.audio_interface.sample_rate as f32,
                     &mut model.audio_interface,
