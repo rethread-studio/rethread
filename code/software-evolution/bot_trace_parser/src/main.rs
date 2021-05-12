@@ -3,8 +3,9 @@
 use chrono::{DateTime, Utc};
 
 use nannou::prelude::*;
+use nannou::ui::prelude::*;
 use nannou_osc as osc;
-use std::{convert::TryInto, fs, path::PathBuf};
+use std::{convert::TryInto, fs, path::PathBuf, process::Command};
 mod profile;
 use profile::{Profile, TraceData};
 mod audio_interface;
@@ -44,11 +45,14 @@ enum GraphDepthDrawMode {
     PolarGrid,
     Rings,
     PolarAxes,
+    AllSitesPolarAxes,
 }
 
 enum CoverageDrawMode {
     HeatMap,
     Blob,
+    SmoothBlob,
+    Spacebrush,
 }
 
 impl DrawMode {
@@ -67,10 +71,13 @@ impl DrawMode {
                 GraphDepthDrawMode::PolarGrid => "graph depth - polar grid",
                 GraphDepthDrawMode::Rings => "graph depth - rings",
                 GraphDepthDrawMode::PolarAxes => "graph depth - polar axes",
+                GraphDepthDrawMode::AllSitesPolarAxes => "graph_depth - all sites polar axes",
             },
             DrawMode::Coverage(cdm) => match cdm {
                 CoverageDrawMode::HeatMap => "coverage - heat map",
                 CoverageDrawMode::Blob => "coverage - blob",
+                CoverageDrawMode::SmoothBlob => "coverage - smooth blob",
+                CoverageDrawMode::Spacebrush => "coverage - spacebrush",
             },
         }
     }
@@ -98,6 +105,8 @@ struct Site {
 }
 
 pub struct Model {
+    ui: Ui,
+    ids: Ids,
     selected_site: usize,
     sites: Vec<Site>,
     selected_visit: usize,
@@ -110,6 +119,17 @@ pub struct Model {
     font: nannou::text::Font,
     render_state: RenderState,
     use_web_api: bool,
+    show_gui: bool,
+    background_lightness: f32,
+}
+
+widget_ids! {
+    struct Ids {
+        separation_ratio,
+        selected_site,
+        selected_visit,
+    background_lightness,
+    }
 }
 
 fn model(app: &App) -> Model {
@@ -120,6 +140,12 @@ fn model(app: &App) -> Model {
         .size(1080, 1080)
         .build()
         .unwrap();
+
+    // Create the UI.
+    let mut ui = app.new_ui().build().unwrap();
+
+    // Generate some ids for our widgets.
+    let ids = Ids::new(ui.widget_id_generator());
 
     // Set up osc sender
     let port = 57120;
@@ -173,11 +199,13 @@ fn model(app: &App) -> Model {
     let font = nannou::text::font::from_file("/home/erik/.fonts/SpaceMono-Regular.ttf").unwrap();
 
     Model {
+        ui,
+        ids,
         selected_site: 0,
         sites,
         index: 0,
         separation_ratio: 1.0,
-        draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
+        draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::AllSitesPolarAxes),
         color_mode: ColorMode::Script,
         sender,
         selected_visit: 0,
@@ -185,6 +213,8 @@ fn model(app: &App) -> Model {
         font,
         render_state: RenderState::NoRendering,
         use_web_api,
+        show_gui: true,
+        background_lightness: 0.43,
     }
 }
 
@@ -338,7 +368,60 @@ fn load_site(name: &str, use_web_api: bool) -> Site {
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
-    model.index += 10;
+    // GUI
+    // Calling `set_widgets` allows us to instantiate some widgets.
+    let ui = &mut model.ui.set_widgets();
+
+    fn slider(val: f32, min: f32, max: f32) -> widget::Slider<'static, f32> {
+        widget::Slider::new(val, min, max)
+            .w_h(200.0, 30.0)
+            .label_font_size(15)
+            .rgb(0.3, 0.3, 0.3)
+            .label_rgb(1.0, 1.0, 1.0)
+            .border(1.0)
+    }
+
+    for value in slider(model.separation_ratio, 0.0, 1.0)
+        .top_left_with_margin(20.0)
+        .label("Separation ratio")
+        .set(model.ids.separation_ratio, ui)
+    {
+        model.separation_ratio = value as f32;
+    }
+
+    for value in slider(
+        model.selected_site as f32,
+        0.0,
+        (model.sites.len() - 1) as f32,
+    )
+    .down(10.0)
+    .label("Selected site")
+    .set(model.ids.selected_site, ui)
+    {
+        model.selected_site = value as usize;
+    }
+
+    for value in slider(
+        model.selected_visit as f32,
+        0.0,
+        (model.sites[model.selected_site].trace_datas.len() - 1) as f32,
+    )
+    .down(10.0)
+    .label("Selected visit")
+    .set(model.ids.selected_visit, ui)
+    {
+        model.selected_visit = value as usize;
+    }
+
+    for value in slider(model.background_lightness, 0.0, 1.0)
+        .down(10.)
+        .label(&format!("Background light: {}", model.background_lightness))
+        .set(model.ids.background_lightness, ui)
+    {
+        model.background_lightness = value.pow(2);
+    }
+
+    // update frame rendering
     match &mut model.render_state {
         RenderState::RenderAllTraces { current_trace } => {
             if *current_trace > 0 {
@@ -356,6 +439,35 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                 // All traces have been rendered
                 model.render_state = RenderState::NoRendering;
                 model.selected_visit = 0;
+                let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
+                let w = app.window_rect().w() as usize;
+                let h = app.window_rect().h() as usize;
+                let video_path = rendering_video_path(app, &model.draw_mode, name);
+                let frame_folder_path = rendering_frame_folder_path(app, &model.draw_mode, name);
+                // Run ffmpeg to make video files from the rendered images
+                std::thread::spawn(move || {
+                    let output = Command::new("ffmpeg")
+                        .current_dir(frame_folder_path)
+                        .arg("-y") // overwrite output files
+                        .arg("-r").arg("30")
+                        .arg("-start_number").arg("0")
+                        .arg("-i").arg("%04d.png")
+                        .arg("-c:v").arg("libx264")
+                        .arg("-crf").arg("17")
+                        .arg("-preset").arg("veryslow")
+			.arg("-s")
+                        .arg(&format!("{}x{}", w, h))
+                        .arg(&video_path)
+                        .output()
+                        .expect("failed to execute process");
+                    println!("Finished rendering {}", video_path.to_str().unwrap());
+                    println!("Rendering output: {}", output.status);
+                    use std::io::{self, Write};
+                    io::stdout().write_all(&output.stdout).unwrap();
+                    io::stderr().write_all(&output.stderr).unwrap();
+
+                    // ffmpeg -r 4 -start_number 0 -i %04d.png -c:v libx264 -crf 18 -preset veryslow -s 1080x1051 ../coverage_spacebrush.mp4
+                });
             } else {
                 // Set the next trace up for rendering
                 model.selected_visit = *current_trace;
@@ -371,7 +483,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
 
     // Clear the background to purple.
-    draw.background().color(hsl(0.6, 0.1, 0.02));
+    draw.background()
+        .color(hsl(0.6, 0.1, model.background_lightness));
 
     let win = app.window_rect();
 
@@ -406,6 +519,13 @@ fn view(app: &App, model: &Model, frame: Frame) {
             GraphDepthDrawMode::PolarAxes => {
                 draw_functions::draw_polar_axes_depth_graph(&draw, model, &win);
             }
+            GraphDepthDrawMode::AllSitesPolarAxes => {
+                draw_functions::draw_all_sites_single_visit_polar_axes_depth_graph(
+                    &draw, model, &win,
+                );
+                timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
+            }
         },
         DrawMode::Indentation(pdm) => match pdm {
             ProfileDrawMode::SingleFlower => {
@@ -432,6 +552,16 @@ fn view(app: &App, model: &Model, frame: Frame) {
                 timestamp =
                     &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
             }
+            CoverageDrawMode::SmoothBlob => {
+                draw_functions::draw_smooth_coverage_blob(&draw, model, &win);
+                timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
+            }
+            CoverageDrawMode::Spacebrush => {
+                draw_functions::draw_coverage_spacebrush(&draw, model, &win);
+                timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
+            }
         },
     };
 
@@ -451,6 +581,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     // Write to the window frame.
     draw.to_frame(app, &frame).unwrap();
+
+    if model.show_gui {
+        // Draw the state of the `Ui` to the frame.
+        model.ui.draw_to_frame(app, &frame).unwrap();
+    }
 }
 
 fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
@@ -463,7 +598,8 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::PolarGrid,
                     GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Rings,
                     GraphDepthDrawMode::Rings => *gddm = GraphDepthDrawMode::PolarAxes,
-                    GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::Horizontal,
+                    GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::AllSitesPolarAxes,
+                    GraphDepthDrawMode::AllSitesPolarAxes => *gddm = GraphDepthDrawMode::Horizontal,
                 },
                 DrawMode::Indentation(ref mut pdm) => match pdm {
                     ProfileDrawMode::SingleFlower => (),
@@ -473,17 +609,20 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 },
                 DrawMode::Coverage(ref mut cdm) => match cdm {
                     CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Blob,
-                    CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
+                    CoverageDrawMode::Blob => *cdm = CoverageDrawMode::SmoothBlob,
+                    CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Spacebrush,
+                    CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::HeatMap,
                 },
             },
             Key::D => match &mut model.draw_mode {
                 DrawMode::GraphDepth(ref mut gddm) => match gddm {
-                    GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::PolarAxes,
+                    GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::AllSitesPolarAxes,
                     GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Horizontal,
                     GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::Vertical,
                     GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Polar,
                     GraphDepthDrawMode::Rings => *gddm = GraphDepthDrawMode::PolarGrid,
                     GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::Rings,
+                    GraphDepthDrawMode::AllSitesPolarAxes => *gddm = GraphDepthDrawMode::PolarAxes,
                 },
                 DrawMode::Indentation(ref mut pdm) => match pdm {
                     ProfileDrawMode::SingleFlower => (),
@@ -492,8 +631,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     ProfileDrawMode::SingleFlower => (),
                 },
                 DrawMode::Coverage(ref mut cdm) => match cdm {
-                    CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Blob,
+                    CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Spacebrush,
                     CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
+                    CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Blob,
+                    CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::SmoothBlob,
                 },
             },
             Key::W => {
@@ -565,6 +706,9 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             Key::R => {
                 model.render_state = RenderState::RenderAllTraces { current_trace: 0 };
             }
+            Key::G => {
+                model.show_gui = !model.show_gui;
+            }
             Key::Space => {
                 // model.audio_interface.send(EventMsg::AddSynthesisNode(Some(
                 //     synthesis_node_from_graph_data(
@@ -583,7 +727,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
         },
         KeyReleased(_key) => {}
         MouseMoved(pos) => {
-            model.separation_ratio = (pos.x + app.window_rect().w() / 2.0) / app.window_rect().w();
+            // model.separation_ratio = (pos.x + app.window_rect().w() / 2.0) / app.window_rect().w();
         }
         MousePressed(button) => match button {
             MouseButton::Left => {
@@ -624,12 +768,7 @@ fn captured_frame_path(app: &App) -> std::path::PathBuf {
         .with_extension("png")
 }
 
-fn rendering_frame_path(
-    app: &App,
-    draw_mode: &DrawMode,
-    name: &str,
-    frame_number: usize,
-) -> std::path::PathBuf {
+fn rendering_frame_folder_path(app: &App, draw_mode: &DrawMode, name: &str) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     let now: DateTime<Utc> = Utc::now();
     app.project_path()
@@ -638,12 +777,31 @@ fn rendering_frame_path(
         .join("renders")
         .join(name)
         .join(draw_mode.to_str())
-        // Name each file after the number of the frame.
-        // .join(format!("{}", now.to_rfc3339()))
-        // Name each file after its timestamp
+}
+fn rendering_frame_path(
+    app: &App,
+    draw_mode: &DrawMode,
+    name: &str,
+    frame_number: usize,
+) -> std::path::PathBuf {
+    // Create a path that we want to save this frame to.
+    // let now: DateTime<Utc> = Utc::now();
+    rendering_frame_folder_path(app, draw_mode, name)
         .join(format!("{:04}", frame_number))
         // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
         .with_extension("png")
+}
+
+fn rendering_video_path(app: &App, draw_mode: &DrawMode, name: &str) -> std::path::PathBuf {
+    // Create a path that we want to save this frame to.
+    // let now: DateTime<Utc> = Utc::now();
+    app.project_path()
+        .expect("failed to locate `project_path`")
+        // Capture all frames to a directory called `/<path_to_nannou>/nannou/simple_capture`.
+        .join("renders")
+        .join(name)
+        .join(&format!("{}_{}", name, draw_mode.to_str()))
+        .with_extension("mp4")
 }
 
 fn screenshot_collection_path(app: &App, name: &str, frame_number: usize) -> std::path::PathBuf {
@@ -694,7 +852,7 @@ fn copy_screenshot(folder_path: &PathBuf, app: &App, name: &str, frame_number: u
     // Create the parent dir of the new file if it doesn't exist
     let mut new_path_parent = new_path.clone();
     new_path_parent.pop();
-    fs::create_dir_all(new_path_parent);
+    fs::create_dir_all(new_path_parent).expect("Failed to create directory for screenshots");
     // Copy the file
     match std::fs::copy(last_screenshot_path, new_path) {
         Ok(_) => (),
