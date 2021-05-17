@@ -1,6 +1,10 @@
 use crate::profile::*;
+use crate::wgpu_helpers::*;
 use crate::{ColorMode, Model};
-use nannou::{color::Mix, prelude::*};
+use nannou::{
+    color::{IntoColor, Mix},
+    prelude::*,
+};
 
 // GRAPH DEPTH
 
@@ -572,7 +576,7 @@ pub fn draw_coverage_blob(draw: &Draw, model: &Model, win: &Rect) {
         let heat = pair.1 as f32 / site.max_coverage_vector_count as f32;
         let heat = heat.powf(0.1);
         let angle = sum_length * PI * 2. * num_circles;
-        let num_circles = (sum_length * num_circles);
+        let num_circles = sum_length * num_circles;
         let radius = heat * radius_per_circle + num_circles * radius_per_circle + win.h() * 0.1;
         sum_length += this_length;
         let point = pt2(angle.cos() * radius, angle.sin() * radius);
@@ -616,7 +620,7 @@ pub fn draw_smooth_coverage_blob(draw: &Draw, model: &Model, win: &Rect) {
         // Split the line into many points if the segment is long
         while this_length > MINIMUM_LENGTH {
             let angle = sum_length * PI * 2. * num_circles;
-            let num_circles = (sum_length * num_circles);
+            let num_circles = sum_length * num_circles;
             let radius =
                 height * radius_per_circle + num_circles * radius_per_circle + win.h() * 0.1;
             let point = pt2(angle.cos() * radius, angle.sin() * radius);
@@ -627,7 +631,7 @@ pub fn draw_smooth_coverage_blob(draw: &Draw, model: &Model, win: &Rect) {
         }
         // Now add the last point
         let angle = sum_length * PI * 2. * num_circles;
-        let num_circles = (sum_length * num_circles);
+        let num_circles = sum_length * num_circles;
         let radius = heat * radius_per_circle + num_circles * radius_per_circle + win.h() * 0.1;
         let point = pt2(angle.cos() * radius, angle.sin() * radius);
 
@@ -700,7 +704,6 @@ pub fn draw_coverage_spacebrush(draw: &Draw, model: &Model, win: &Rect) {
     let mut spacebrush_points = vec![];
     let mut ellipse_sizes = vec![];
     let mut sum_length = 0.0;
-    let mut last_heat = 0.;
     const MINIMUM_LENGTH: f32 = 0.00004;
     for (i, pair) in vector.iter().enumerate() {
         let mut this_length = pair.0 as f32 / site.max_coverage_total_length as f32;
@@ -713,7 +716,7 @@ pub fn draw_coverage_spacebrush(draw: &Draw, model: &Model, win: &Rect) {
             0.055 + height * 0.6,
             (heat * 2.0).min(0.9) + 0.1,
         );
-        let spacebrush_thrust = heat * 20.0;
+        let _spacebrush_thrust = heat * 20.0;
         let spacebrush_normal_thrust = model.separation_ratio.powf(2.) * 50.0;
         // Split the line into many points if the segment is long
         while this_length > MINIMUM_LENGTH {
@@ -741,7 +744,6 @@ pub fn draw_coverage_spacebrush(draw: &Draw, model: &Model, win: &Rect) {
         spacebrush_points.push((spacebrush.pos, spacebrush.col()));
         ellipse_sizes.push(height);
         coloured_points.push((point, col));
-        last_heat = heat;
         sum_length += this_length;
     }
     // draw.polyline()
@@ -765,6 +767,52 @@ pub fn draw_coverage_spacebrush(draw: &Draw, model: &Model, win: &Rect) {
         .join_round()
         .weight(1.0)
         .points_colored(spacebrush_points);
+}
+
+pub fn draw_coverage_organic(
+    draw: &Draw,
+    model: &Model,
+    window: &Window,
+    win: &Rect,
+    frame: &Frame,
+    wgpu_shader_data: &mut WgpuShaderData,
+) {
+    let site = &model.sites[model.selected_site];
+    let coverage = match &site.trace_datas[model.selected_visit].coverage {
+        Some(it) => it,
+        _ => return,
+    };
+    let vector = &coverage.vector;
+    // Make sure the vertex vector is the right size
+    wgpu_shader_data
+        .vertices
+        .resize(vector.len(), Vertex::new());
+
+    let num_circles = 8.;
+
+    let radius_per_circle = 1.0 / (num_circles + 2.0);
+
+    let mut coloured_points = vec![];
+    let mut sum_length = 0.0;
+    for (i, pair) in vector.iter().enumerate() {
+        let this_length = pair.0 as f32 / site.max_coverage_total_length as f32;
+        let heat = pair.1 as f32 / site.max_coverage_vector_count as f32;
+        let heat = heat.powf(0.1);
+        let angle = sum_length * PI * 2. * num_circles;
+        let num_circles = sum_length * num_circles;
+        let radius = heat * radius_per_circle + num_circles * radius_per_circle;
+        sum_length += this_length;
+        let point = pt2(angle.cos() * radius, angle.sin() * radius);
+        let col = hsla(0.6 + heat * 0.6, 0.4 + heat * 0.6, 0.055 + heat * 0.6, 1.0);
+        let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(col);
+        coloured_points.push((point, col));
+        wgpu_shader_data.vertices[i] = Vertex {
+            position: [point.x, point.y, 0.0],
+            color: [rgb.red, rgb.blue, rgb.green],
+        };
+    }
+    wgpu_shader_data.set_new_vertices(window);
+    wgpu_shader_data.view(frame);
 }
 
 // HELPER FUNCTIONS

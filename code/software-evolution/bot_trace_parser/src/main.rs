@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 use nannou::prelude::*;
 use nannou::ui::prelude::*;
 use nannou_osc as osc;
-use std::{convert::TryInto, fs, path::PathBuf, process::Command};
+use std::{cell::RefCell, convert::TryInto, fs, path::PathBuf, process::Command};
 mod profile;
 use profile::{Profile, TraceData};
 mod audio_interface;
@@ -16,6 +16,8 @@ mod spawn_synthesis_nodes;
 use spawn_synthesis_nodes::*;
 mod draw_functions;
 mod from_web_api;
+mod wgpu_helpers;
+use wgpu_helpers::*;
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -53,6 +55,14 @@ enum CoverageDrawMode {
     Blob,
     SmoothBlob,
     Spacebrush,
+    Organic(RefCell<WgpuShaderData>),
+}
+
+impl CoverageDrawMode {
+    pub fn organic(window: &Window) -> Self {
+        let wgpu_shader_data = WgpuShaderData::new(window);
+        CoverageDrawMode::Organic(RefCell::new(wgpu_shader_data))
+    }
 }
 
 impl DrawMode {
@@ -78,6 +88,7 @@ impl DrawMode {
                 CoverageDrawMode::Blob => "coverage - blob",
                 CoverageDrawMode::SmoothBlob => "coverage - smooth blob",
                 CoverageDrawMode::Spacebrush => "coverage - spacebrush",
+                CoverageDrawMode::Organic(_) => "coverage - organic",
             },
         }
     }
@@ -230,7 +241,7 @@ fn load_site_from_disk(site: &str) -> Vec<TraceData> {
         .map(|r| r.unwrap().path())
         .filter(|r| r.is_dir()) // Only keep folders
         .collect::<Vec<_>>();
-    for (i, p) in trace_paths_in_folder.iter().enumerate() {
+    for (_i, p) in trace_paths_in_folder.iter().enumerate() {
         let mut folder_path = p.clone();
         folder_path.push("profile.json");
         let data = fs::read_to_string(&folder_path).unwrap();
@@ -449,13 +460,19 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                     let output = Command::new("ffmpeg")
                         .current_dir(frame_folder_path)
                         .arg("-y") // overwrite output files
-                        .arg("-r").arg("30")
-                        .arg("-start_number").arg("0")
-                        .arg("-i").arg("%04d.png")
-                        .arg("-c:v").arg("libx264")
-                        .arg("-crf").arg("17")
-                        .arg("-preset").arg("veryslow")
-			.arg("-s")
+                        .arg("-r")
+                        .arg("30")
+                        .arg("-start_number")
+                        .arg("0")
+                        .arg("-i")
+                        .arg("%04d.png")
+                        .arg("-c:v")
+                        .arg("libx264")
+                        .arg("-crf")
+                        .arg("17")
+                        .arg("-preset")
+                        .arg("veryslow")
+                        .arg("-s")
                         .arg(&format!("{}x{}", w, h))
                         .arg(&video_path)
                         .output()
@@ -489,81 +506,13 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let win = app.window_rect();
 
     let name = &model.sites[model.selected_site].name;
-    let mut timestamp = "";
+    let timestamp = &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
     let color_type = match model.color_mode {
         ColorMode::Script => "script colour",
         ColorMode::Profile => "profile index colour",
         ColorMode::Selected => "selection colour",
     };
-
     let visualisation_type = model.draw_mode.to_str();
-    match &model.draw_mode {
-        DrawMode::GraphDepth(gddm) => match gddm {
-            GraphDepthDrawMode::Horizontal => {
-                draw_functions::draw_horizontal_graph_depth(&draw, model, &win);
-            }
-            GraphDepthDrawMode::Vertical => {
-                draw_functions::draw_vertical_graph_depth(&draw, model, &win);
-            }
-            GraphDepthDrawMode::Polar => {
-                draw_functions::draw_polar_depth_graph(&draw, model, &win);
-            }
-            GraphDepthDrawMode::PolarGrid => {
-                draw_functions::draw_flower_grid_graph_depth(&draw, model, &win);
-            }
-            GraphDepthDrawMode::Rings => {
-                draw_functions::draw_depth_graph_rings(&draw, model, &win);
-                timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-            }
-            GraphDepthDrawMode::PolarAxes => {
-                draw_functions::draw_polar_axes_depth_graph(&draw, model, &win);
-            }
-            GraphDepthDrawMode::AllSitesPolarAxes => {
-                draw_functions::draw_all_sites_single_visit_polar_axes_depth_graph(
-                    &draw, model, &win,
-                );
-                timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-            }
-        },
-        DrawMode::Indentation(pdm) => match pdm {
-            ProfileDrawMode::SingleFlower => {
-                draw_functions::draw_single_flower_indentation(&draw, model, &win);
-                timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-            }
-        },
-        DrawMode::LineLength(pdm) => match pdm {
-            ProfileDrawMode::SingleFlower => {
-                draw_functions::draw_single_flower_line_length(&draw, model, &win);
-                timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-            }
-        },
-        DrawMode::Coverage(cdm) => match cdm {
-            CoverageDrawMode::HeatMap => {
-                draw_functions::draw_coverage_heat_map(&draw, model, &win);
-                timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-            }
-            CoverageDrawMode::Blob => {
-                draw_functions::draw_coverage_blob(&draw, model, &win);
-                timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-            }
-            CoverageDrawMode::SmoothBlob => {
-                draw_functions::draw_smooth_coverage_blob(&draw, model, &win);
-                timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-            }
-            CoverageDrawMode::Spacebrush => {
-                draw_functions::draw_coverage_spacebrush(&draw, model, &win);
-                timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-            }
-        },
-    };
 
     let full_text = format!(
         "{}\n{}\n\n{}\n{}",
@@ -579,8 +528,85 @@ fn view(app: &App, model: &Model, frame: Frame) {
         // .x_y(win.right()-130.0, win.bottom() + 10.0)
         .color(LIGHTGREY);
 
-    // Write to the window frame.
     draw.to_frame(app, &frame).unwrap();
+
+    match &model.draw_mode {
+        DrawMode::GraphDepth(gddm) => match gddm {
+            GraphDepthDrawMode::Horizontal => {
+                draw_functions::draw_horizontal_graph_depth(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            GraphDepthDrawMode::Vertical => {
+                draw_functions::draw_vertical_graph_depth(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            GraphDepthDrawMode::Polar => {
+                draw_functions::draw_polar_depth_graph(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            GraphDepthDrawMode::PolarGrid => {
+                draw_functions::draw_flower_grid_graph_depth(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            GraphDepthDrawMode::Rings => {
+                draw_functions::draw_depth_graph_rings(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            GraphDepthDrawMode::PolarAxes => {
+                draw_functions::draw_polar_axes_depth_graph(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            GraphDepthDrawMode::AllSitesPolarAxes => {
+                draw_functions::draw_all_sites_single_visit_polar_axes_depth_graph(
+                    &draw, model, &win,
+                );
+                draw.to_frame(app, &frame).unwrap();
+            }
+        },
+        DrawMode::Indentation(pdm) => match pdm {
+            ProfileDrawMode::SingleFlower => {
+                draw_functions::draw_single_flower_indentation(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+        },
+        DrawMode::LineLength(pdm) => match pdm {
+            ProfileDrawMode::SingleFlower => {
+                draw_functions::draw_single_flower_line_length(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+        },
+        DrawMode::Coverage(cdm) => match cdm {
+            CoverageDrawMode::HeatMap => {
+                draw_functions::draw_coverage_heat_map(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            CoverageDrawMode::Blob => {
+                draw_functions::draw_coverage_blob(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            CoverageDrawMode::SmoothBlob => {
+                draw_functions::draw_smooth_coverage_blob(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            CoverageDrawMode::Spacebrush => {
+                draw_functions::draw_coverage_spacebrush(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            CoverageDrawMode::Organic(ref wgpu_shader_data) => {
+                draw_functions::draw_coverage_organic(
+                    &draw,
+                    model,
+                    &app.main_window(),
+                    &win,
+                    &frame,
+                    &mut wgpu_shader_data.borrow_mut(),
+                );
+            }
+        },
+    };
+
+    // // Write to the window frame.
+    //
 
     if model.show_gui {
         // Draw the state of the `Ui` to the frame.
@@ -611,7 +637,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Blob,
                     CoverageDrawMode::Blob => *cdm = CoverageDrawMode::SmoothBlob,
                     CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Spacebrush,
-                    CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::HeatMap,
+                    CoverageDrawMode::Spacebrush => {
+                        *cdm = CoverageDrawMode::organic(&app.main_window())
+                    }
+                    CoverageDrawMode::Organic(_) => *cdm = CoverageDrawMode::HeatMap,
                 },
             },
             Key::D => match &mut model.draw_mode {
@@ -631,10 +660,13 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     ProfileDrawMode::SingleFlower => (),
                 },
                 DrawMode::Coverage(ref mut cdm) => match cdm {
-                    CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Spacebrush,
+                    CoverageDrawMode::HeatMap => {
+                        *cdm = CoverageDrawMode::organic(&app.main_window())
+                    }
                     CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
                     CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Blob,
                     CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::SmoothBlob,
+                    CoverageDrawMode::Organic(_) => *cdm = CoverageDrawMode::Spacebrush,
                 },
             },
             Key::W => {
