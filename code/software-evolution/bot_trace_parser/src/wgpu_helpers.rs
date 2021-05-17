@@ -23,15 +23,15 @@ impl WgpuShaderData {
         let vertices = vec![
             Vertex {
                 position: [0.0, 0.5, 0.0],
-                color: [1.0, 0.0, 0.0],
+                color: [1.0, 0.0, 0.0, 1.0],
             },
             Vertex {
                 position: [-0.5, -0.5, 0.0],
-                color: [0.0, 1.0, 0.0],
+                color: [0.0, 1.0, 0.0, 1.0],
             },
             Vertex {
                 position: [0.5, -0.5, 0.0],
-                color: [0.0, 0.0, 1.0],
+                color: [0.0, 0.0, 1.0, 1.0],
             },
         ];
 
@@ -86,7 +86,9 @@ impl WgpuShaderData {
         // begin a render pass that outputs to the frame's texture. Then we add sub-commands for
         // setting the bind group, render pipeline, vertex buffers and then finally drawing.
         let mut render_pass = wgpu::RenderPassBuilder::new()
-            .color_attachment(frame.texture_view(), |color| color)
+            .color_attachment(frame.texture_view(), |color| {
+                color.load_op(wgpu::LoadOp::Load)
+            })
             .begin(&mut encoder);
         render_pass.set_bind_group(0, &self.bind_group, &[]);
         render_pass.set_pipeline(&self.render_pipeline);
@@ -105,14 +107,14 @@ impl WgpuShaderData {
 #[derive(Copy, Clone, Debug)]
 pub struct Vertex {
     pub position: [f32; 3],
-    pub color: [f32; 3],
+    pub color: [f32; 4],
 }
 
 impl Vertex {
     pub fn new() -> Self {
         Vertex {
             position: [0.0; 3],
-            color: [0.0; 3],
+            color: [0.0; 4],
         }
     }
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
@@ -130,7 +132,7 @@ impl Vertex {
                 wgpu::VertexAttribute {
                     offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
                     shader_location: 1,
-                    format: wgpu::VertexFormat::Float3,
+                    format: wgpu::VertexFormat::Float4,
                 },
             ],
         }
