@@ -5,6 +5,7 @@ use nannou::{
     color::{IntoColor, Mix},
     prelude::*,
 };
+use spade::delaunay::FloatDelaunayTriangulation;
 
 // GRAPH DEPTH
 
@@ -769,7 +770,7 @@ pub fn draw_coverage_spacebrush(draw: &Draw, model: &Model, win: &Rect) {
         .points_colored(spacebrush_points);
 }
 
-pub fn draw_coverage_organic(
+pub fn draw_coverage_organic_two_colours(
     draw: &Draw,
     model: &Model,
     window: &Window,
@@ -784,9 +785,12 @@ pub fn draw_coverage_organic(
     };
     let vector = &coverage.vector;
     // Make sure the vertex vector is the right size
-    wgpu_shader_data
-        .vertices
-        .resize(vector.len(), Vertex::new());
+    // wgpu_shader_data
+    //     .vertices
+    //     .resize(vector.len(), Vertex::new());
+
+    let mut float_delaunay = FloatDelaunayTriangulation::with_tree_locate();
+    // Supports the insertion of f64-Vectors
 
     let num_circles = 8.;
 
@@ -806,11 +810,83 @@ pub fn draw_coverage_organic(
         let col = hsla(0.6 + heat * 0.6, 0.4 + heat * 0.6, 0.055 + heat * 0.6, 1.0);
         let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(col);
         coloured_points.push((point, col));
-        wgpu_shader_data.vertices[i] = Vertex {
+        float_delaunay.insert(Vertex {
             position: [point.x, point.y, 0.0],
             color: [rgb.red, rgb.blue, rgb.green],
-        };
+        });
     }
+
+    // Triangulate all the points
+    wgpu_shader_data
+        .vertices
+        .resize(float_delaunay.num_triangles() * 3, Vertex::new());
+    for (i, face) in float_delaunay.triangles().enumerate() {
+        let triangle = face.as_triangle();
+        wgpu_shader_data.vertices[i * 3] = *triangle[0];
+        wgpu_shader_data.vertices[i * 3 + 1] = *triangle[1];
+        wgpu_shader_data.vertices[i * 3 + 2] = *triangle[2];
+    }
+
+    wgpu_shader_data.set_new_vertices(window);
+    wgpu_shader_data.view(frame);
+}
+
+pub fn draw_coverage_organic(
+    draw: &Draw,
+    model: &Model,
+    window: &Window,
+    win: &Rect,
+    frame: &Frame,
+    wgpu_shader_data: &mut WgpuShaderData,
+) {
+    let site = &model.sites[model.selected_site];
+    let coverage = match &site.trace_datas[model.selected_visit].coverage {
+        Some(it) => it,
+        _ => return,
+    };
+    let vector = &coverage.vector;
+    // Make sure the vertex vector is the right size
+    // wgpu_shader_data
+    //     .vertices
+    //     .resize(vector.len(), Vertex::new());
+
+    let mut float_delaunay = FloatDelaunayTriangulation::with_tree_locate();
+    // Supports the insertion of f64-Vectors
+
+    let num_circles = 8.;
+
+    let radius_per_circle = 1.0 / (num_circles + 2.0);
+
+    let mut coloured_points = vec![];
+    let mut sum_length = 0.0;
+    for (i, pair) in vector.iter().enumerate() {
+        let this_length = pair.0 as f32 / site.max_coverage_total_length as f32;
+        let heat = pair.1 as f32 / site.max_coverage_vector_count as f32;
+        let heat = heat.powf(0.1);
+        let angle = sum_length * PI * 2. * num_circles;
+        let num_circles = sum_length * num_circles;
+        let radius = heat * radius_per_circle + num_circles * radius_per_circle;
+        sum_length += this_length;
+        let point = pt2(angle.cos() * radius, angle.sin() * radius);
+        let col = hsla(0.6 + heat * 0.6, 0.4 + heat * 0.6, 0.055 + heat * 0.6, 1.0);
+        let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(col);
+        coloured_points.push((point, col));
+        float_delaunay.insert(Vertex {
+            position: [point.x, point.y, 0.0],
+            color: [rgb.red, rgb.blue, rgb.green],
+        });
+    }
+    // Triangulate all the points
+    wgpu_shader_data
+        .vertices
+        .resize(float_delaunay.num_triangles() * 3, Vertex::new());
+    for (i, face) in float_delaunay.triangles().enumerate() {
+        let triangle = face.as_triangle();
+        wgpu_shader_data.vertices[i * 3] = *triangle[0];
+        wgpu_shader_data.vertices[i * 3 + 1] = *triangle[1];
+        wgpu_shader_data.vertices[i * 3 + 2] = *triangle[2];
+    }
+
     wgpu_shader_data.set_new_vertices(window);
     wgpu_shader_data.view(frame);
 }

@@ -22,6 +22,7 @@ crossbeam = "0.8.0"
 crossbeam-channel = "0.5.1"
 biquad = "0.4.1"
 jack = "0.7.0"
+spade = "1.8.2"
 
 [build-dependencies]
 anyhow = "1.0"

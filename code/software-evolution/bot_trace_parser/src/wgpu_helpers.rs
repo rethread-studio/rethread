@@ -1,4 +1,5 @@
 use nannou::prelude::*;
+use spade::HasPosition;
 
 pub struct WgpuShaderData {
     bind_group: wgpu::BindGroup,
@@ -136,6 +137,13 @@ impl Vertex {
     }
 }
 
+impl HasPosition for Vertex {
+    type Point = [f32; 2];
+    fn position(&self) -> [f32; 2] {
+        [self.position[0], self.position[1]]
+    }
+}
+
 pub fn create_bind_group_layout(
     device: &wgpu::Device,
     texture_sample_type: wgpu::TextureSampleType,
@@ -189,7 +197,7 @@ pub fn create_render_pipeline(
         .color_format(dst_format)
         .add_vertex_buffer_layout(Vertex::desc())
         .sample_count(sample_count)
-        .primitive_topology(wgpu::PrimitiveTopology::LineList)
+        .primitive_topology(wgpu::PrimitiveTopology::TriangleList)
         .build(device)
 }
 
