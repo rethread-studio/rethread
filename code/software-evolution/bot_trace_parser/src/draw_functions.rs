@@ -770,7 +770,7 @@ pub fn draw_coverage_spacebrush(draw: &Draw, model: &Model, win: &Rect) {
         .points_colored(spacebrush_points);
 }
 
-pub fn draw_coverage_organic_two_colours(
+pub fn draw_coverage_shell(
     draw: &Draw,
     model: &Model,
     window: &Window,
@@ -871,10 +871,10 @@ pub fn draw_coverage_organic(
             self.pos += self.vel;
             self.hue += (count_ratio - 0.05).max(0.) * 0.04;
             self.sat = count_ratio.powf(0.3) * 3.;
-            self.lightness = count_ratio.powf(0.35) * 1.2;
+            self.lightness = count_ratio.powf(0.4) * 1.3;
         }
         fn col(&self) -> Hsla {
-            hsla(self.hue, (self.sat * 2.0).min(1.0), self.lightness, 0.8)
+            hsla(self.hue, (self.sat * 2.5).min(1.0), self.lightness, 1.0)
         }
     }
 
@@ -953,7 +953,7 @@ pub fn draw_coverage_organic(
     //                     point.y + angle.sin() * radius,
     //                     0.0,
     //                 ],
-    //                 color: [rgb.red, rgb.blue, rgb.green],
+    //                 color: [rgb.red, rgb.blue, rgb.green, rgb.alpha],
     //             });
     //         }
     //     }
@@ -967,6 +967,7 @@ pub fn draw_coverage_organic(
         wgpu_shader_data.vertices[i * 3] = *triangle[0];
         wgpu_shader_data.vertices[i * 3 + 1] = *triangle[1];
         wgpu_shader_data.vertices[i * 3 + 2] = *triangle[2];
+        // wgpu_shader_data.vertices[i * 3 + 3] = *triangle[0];
     }
 
     wgpu_shader_data.set_new_vertices(window);

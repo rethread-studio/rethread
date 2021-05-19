@@ -55,12 +55,17 @@ enum CoverageDrawMode {
     Blob,
     SmoothBlob,
     Spacebrush,
+    Shell(RefCell<WgpuShaderData>),
     Organic(RefCell<WgpuShaderData>),
 }
 
 impl CoverageDrawMode {
+    pub fn shell(window: &Window) -> Self {
+        let wgpu_shader_data = WgpuShaderData::new(window, "vertex_triangles");
+        CoverageDrawMode::Shell(RefCell::new(wgpu_shader_data))
+    }
     pub fn organic(window: &Window) -> Self {
-        let wgpu_shader_data = WgpuShaderData::new(window);
+        let wgpu_shader_data = WgpuShaderData::new(window, "vertex_triangles");
         CoverageDrawMode::Organic(RefCell::new(wgpu_shader_data))
     }
 }
@@ -89,6 +94,7 @@ impl DrawMode {
                 CoverageDrawMode::SmoothBlob => "coverage - smooth blob",
                 CoverageDrawMode::Spacebrush => "coverage - spacebrush",
                 CoverageDrawMode::Organic(_) => "coverage - organic",
+                CoverageDrawMode::Shell(_) => "coverage - shell",
             },
         }
     }
@@ -602,6 +608,16 @@ fn view(app: &App, model: &Model, frame: Frame) {
                     &mut wgpu_shader_data.borrow_mut(),
                 );
             }
+            CoverageDrawMode::Shell(ref wgpu_shader_data) => {
+                draw_functions::draw_coverage_shell(
+                    &draw,
+                    model,
+                    &app.main_window(),
+                    &win,
+                    &frame,
+                    &mut wgpu_shader_data.borrow_mut(),
+                );
+            }
         },
     };
 
@@ -638,6 +654,9 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     CoverageDrawMode::Blob => *cdm = CoverageDrawMode::SmoothBlob,
                     CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Spacebrush,
                     CoverageDrawMode::Spacebrush => {
+                        *cdm = CoverageDrawMode::shell(&app.main_window())
+                    }
+                    CoverageDrawMode::Shell(_) => {
                         *cdm = CoverageDrawMode::organic(&app.main_window())
                     }
                     CoverageDrawMode::Organic(_) => *cdm = CoverageDrawMode::HeatMap,
@@ -666,7 +685,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
                     CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Blob,
                     CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::SmoothBlob,
-                    CoverageDrawMode::Organic(_) => *cdm = CoverageDrawMode::Spacebrush,
+                    CoverageDrawMode::Shell(_) => *cdm = CoverageDrawMode::Spacebrush,
+                    CoverageDrawMode::Organic(_) => {
+                        *cdm = CoverageDrawMode::shell(&app.main_window())
+                    }
                 },
             },
             Key::W => {
