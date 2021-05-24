@@ -1,6 +1,7 @@
-use std::{env, fs::File, io::Read, path::PathBuf};
+use std::{cell::RefCell, env, fs::File, io::Read, path::PathBuf};
 
-use nannou::prelude::*;
+use crate::texture::Texture;
+use nannou::{image::buffer, prelude::*};
 use spade::HasPosition;
 
 /// Returns (vertex_module, fragment_module)
@@ -108,12 +109,7 @@ impl WgpuShaderData {
         // setting the bind group, render pipeline, vertex buffers and then finally drawing.
         let mut render_pass = wgpu::RenderPassBuilder::new()
             .color_attachment(frame.texture_view(), |color| {
-                color.load_op(wgpu::LoadOp::Clear(wgpu::Color {
-                    r: 0.0,
-                    g: 0.0,
-                    b: 0.0,
-                    a: 0.0,
-                }))
+                color.load_op(wgpu::LoadOp::Load)
             })
             .begin(&mut encoder);
         render_pass.set_bind_group(0, &self.bind_group, &[]);
@@ -265,88 +261,33 @@ impl OffscreenView {
     }
 }
 
-struct Shader {
+pub struct Shader {
     fragment_module: nannou::wgpu::ShaderModule,
     vertex_module: nannou::wgpu::ShaderModule,
     render_pipeline: nannou::wgpu::RenderPipeline,
     bind_group_layouts: Vec<nannou::wgpu::BindGroupLayout>,
-    bind_groups: Vec<nannou::wgpu::BindGroup>,
-    buffers: Vec<nannou::wgpu::Buffer>,
+    // uniform_buffer: nannou::wgpu::Buffer,
 }
 
 impl Shader {
-    pub fn view(&self, frame: &Frame) {
-        let mut encoder = frame.command_encoder();
-        let mut render_pass = wgpu::RenderPassBuilder::new()
-            .color_attachment(frame.texture_view(), |color| {
-                color.load_op(wgpu::LoadOp::Clear(wgpu::Color {
-                    r: 0.0,
-                    g: 0.0,
-                    b: 0.0,
-                    a: 0.0,
-                }))
-            })
-            .begin(&mut encoder);
-        for (i, bind_group) in self.bind_groups.iter().enumerate() {
-            render_pass.set_bind_group(i as u32, bind_group, &[]);
-        }
-        render_pass.set_pipeline(&self.render_pipeline);
-    }
-}
-
-struct VoronoiShader {
-    shader: Shader,
-    uniform: VoronoiUniform,
-}
-
-impl VoronoiShader {
-    pub fn new(window: &Window) -> Self {
+    pub fn new(
+        window: &Window,
+        bind_group_layouts: Vec<nannou::wgpu::BindGroupLayout>,
+        shader_name: &str,
+    ) -> Self {
         let device = window.swap_chain_device();
         let format = Frame::TEXTURE_FORMAT;
         let sample_count = window.msaa_samples();
-        let shader_name = "voronoi";
-        let mut spirv_read_buf = Vec::new();
-        let mut f = File::open(&format!("shaders/{}.vert.spv", shader_name)).unwrap();
-        f.read_to_end(&mut spirv_read_buf).unwrap();
-        let vertex_module = wgpu::shader_from_spirv_bytes(device, spirv_read_buf.as_slice());
-        let mut f = File::open(&format!("shaders/{}.frag.spv", shader_name)).unwrap();
-        f.read_to_end(&mut spirv_read_buf).unwrap();
-        let fragment_module = wgpu::shader_from_spirv_bytes(device, spirv_read_buf.as_slice());
+        let (vertex_module, fragment_module) = load_shader(device, shader_name);
 
-        let uniform_bind_group_layout =
-            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-                entries: &[wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStage::FRAGMENT,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None,
-                }],
-                label: Some("uniform_bind_group_layout"),
-            });
-        let uniform = VoronoiUniform {
-            points: vec![
-                (0.5, 0.5),
-                (0.0, 0.0),
-                (-0.5, 0.5),
-                (-0.5, -0.5),
-                (0.5, -0.5),
-            ],
-        };
+        let bind_group_layout_refs: Vec<&nannou::wgpu::BindGroupLayout> =
+            bind_group_layouts.iter().map(|l| l).collect();
 
-        // TODO: Move most of this to the Shader
-        let uniform_buffer = uniform.buffer(&device);
-
-        let uniform_bind_group =
-            uniform.bind_group(device, &uniform_bind_group_layout, &uniform_buffer);
-
+        // TODO: Enable adding more bind_group_layouts
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
-                bind_group_layouts: &[&uniform_bind_group_layout],
+                bind_group_layouts: bind_group_layout_refs.as_slice(),
                 push_constant_ranges: &[],
             });
 
@@ -356,7 +297,7 @@ impl VoronoiShader {
             vertex: wgpu::VertexState {
                 module: &vertex_module,
                 entry_point: "main",
-                buffers: &[Vertex::desc()],
+                buffers: &[],
             },
             fragment: Some(wgpu::FragmentState {
                 module: &fragment_module,
@@ -378,42 +319,243 @@ impl VoronoiShader {
             },
             depth_stencil: None,
             multisample: wgpu::MultisampleState {
-                count: 1,
+                count: sample_count,
                 mask: !0,
                 alpha_to_coverage_enabled: false,
             },
         });
 
-        let shader = Shader {
+        Shader {
             fragment_module,
             vertex_module,
-            bind_group_layouts: vec![uniform_bind_group_layout],
-            bind_groups: vec![uniform_bind_group],
-            buffers: vec![uniform_buffer],
+            bind_group_layouts,
+            // uniform_buffer,
             render_pipeline,
-        };
-        Self { shader, uniform }
+        }
+    }
+    pub fn view(
+        &mut self,
+        frame: &Frame,
+        window: &Window,
+        bind_groups: &Vec<nannou::wgpu::BindGroup>,
+    ) {
+        let mut encoder = frame.command_encoder();
+        let mut render_pass = wgpu::RenderPassBuilder::new()
+            .color_attachment(frame.texture_view(), |color| {
+                color.load_op(wgpu::LoadOp::Clear(wgpu::Color {
+                    r: 0.0,
+                    g: 0.0,
+                    b: 0.0,
+                    a: 0.0,
+                }))
+            })
+            .begin(&mut encoder);
+        // render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
+        for (i, bind_group) in bind_groups.iter().enumerate() {
+            render_pass.set_bind_group(i as u32, bind_group, &[]);
+        }
+        render_pass.set_pipeline(&self.render_pipeline);
+        let vertex_range = 0..6 as u32;
+        let instance_range = 0..1;
+        render_pass.draw(vertex_range, instance_range);
+    }
+}
+
+pub struct VoronoiShader {
+    shader: Shader,
+    uniform: VoronoiUniform,
+    data_texture: Texture,
+    bind_groups: Vec<nannou::wgpu::BindGroup>,
+}
+
+impl VoronoiShader {
+    pub fn new(window: &Window) -> Self {
+        let shader_name = "frag_voronoi2";
+        let device = window.swap_chain_device();
+        let queue = window.swap_chain_queue();
+
+        let (width, height) = window.inner_size_pixels();
+
+        let points: Vec<[f32; 4]> = vec![
+            // [0.5, 0.5, 0.0, 0.0],
+            // [0.0, 0.0, 0.0, 0.0],
+            // [0.0, 0.0, 0.0, 0.0],
+            // [0.1, 0.0, 0.0, 0.0],
+            [-0.3, 0.0, 0.0, 0.0],
+            // [-0.2, 0.0, 0.0, 0.0],
+            // [-0.3, 0.0, 0.0, 0.0],
+            [-1.0, 0.0, 0.0, 0.0],
+            [-0.5, 0.5, 0.0, 0.0],
+            [-0.5, -0.5, 0.0, 0.0],
+            [0.5, -0.5, 0.0, 0.0],
+            [0.15, -0.15, 0.0, 0.0],
+            [0.15, 0.0, 0.0, 0.0],
+        ];
+        let resolution = [width as f32, height as f32];
+        let width = points.len() as u32;
+        let uniform = VoronoiUniform::new(resolution, points.len() as u32, [width as f32, 1.]);
+        let uniform_buffer = uniform.buffer(&device);
+        let uniform_bind_group_layout = uniform.bind_group_layout(device);
+        let uniform_bind_group =
+            uniform.bind_group(device, &uniform_bind_group_layout, &uniform_buffer);
+
+        let data_texture = Texture::from_data_vec4(
+            device,
+            queue,
+            &points,
+            width,
+            1,
+            Some("fragment_data_texture"),
+        )
+        .unwrap();
+        let texture_bind_group_layout = data_texture.bind_group_layout(device);
+        let texture_bind_group = data_texture.bind_group(device);
+
+        let bind_group_layouts = vec![uniform_bind_group_layout, texture_bind_group_layout];
+        let bind_groups = vec![uniform_bind_group, texture_bind_group];
+
+        let shader = Shader::new(window, bind_group_layouts, shader_name);
+
+        Self {
+            shader,
+            uniform,
+            data_texture,
+            bind_groups,
+        }
+    }
+    pub fn view(&mut self, frame: &Frame, window: &Window) {
+        // Check if we need to rebuild things because the uniforms have changed
+        if self.uniform.needs_rebuild() {
+            let device = window.swap_chain_device();
+            let new_buffer = self.uniform.buffer(device);
+            let uniform_bind_group_layout = self.uniform.bind_group_layout(device);
+            self.bind_groups[0] =
+                self.uniform
+                    .bind_group(device, &uniform_bind_group_layout, &new_buffer);
+        }
+
+        self.shader.view(frame, window, &self.bind_groups);
+    }
+    pub fn set_points(&mut self, mut points: Vec<[f32; 4]>, window: &Window) {
+        let device = window.swap_chain_device();
+        let queue = window.swap_chain_queue();
+        // Pad the points to create a 2D texture
+        let width = 1024;
+        let height = (points.len() as f64 / width as f64).ceil() as u32;
+        let padding_points = width * height - points.len() as u32;
+        for _i in 0..padding_points {
+            points.push([0., 0., 0., 0.]);
+        }
+        // Create a new texture
+        let data_texture = Texture::from_data_vec4(
+            device,
+            queue,
+            &points,
+            width,
+            height,
+            Some("fragment_data_texture"),
+        )
+        .unwrap();
+        // The bind layout should be the same, but the bind group needs to be remade
+        let texture_bind_group = data_texture.bind_group(device);
+        self.bind_groups[1] = texture_bind_group;
+
+        // The Uniform also needs to be changed if the number of points changed
+        if points.len() as u32 != self.uniform.num_points {
+            self.uniform.num_points = points.len() as u32;
+            self.uniform.texture_res = [width as f32, height as f32];
+            self.uniform.rebuild_raw();
+            self.bind_groups[0] = self.uniform.bind_group(
+                device,
+                &self.uniform.bind_group_layout(device),
+                &self.uniform.buffer(device),
+            )
+        }
     }
 }
 
 pub trait Uniform {
-    fn data(&self) -> &[u8];
+    // fn data(&self) -> &[u8];
     fn bind_group(
         &self,
         device: &nannou::wgpu::Device,
         layout: &nannou::wgpu::BindGroupLayout,
         buffer: &nannou::wgpu::Buffer,
     ) -> nannou::wgpu::BindGroup;
+    fn bind_group_layout(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::BindGroupLayout;
     fn buffer(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::Buffer;
+    /// If the data in the uniform has changed in such a way that an array is bigger or similar, the bind group and the buffer need rebuilding
+    fn needs_rebuild(&self) -> bool;
 }
 
+enum UniformState {
+    NeedsRebuild { bind_group: bool, buffer: bool },
+    Unchanged,
+}
+
+/// The raw struct that gets converted to
+#[repr(C)]
+#[derive(Copy, Clone)]
+struct VoronoiUniformRaw {
+    resolution: [f32; 2],
+    num_points: u32,
+    texture_res: [f32; 2],
+}
+// Potentially very unsafe, I don't know what I'm doing
+unsafe impl bytemuck::Pod for VoronoiUniformRaw {}
+unsafe impl bytemuck::Zeroable for VoronoiUniformRaw {}
+
 struct VoronoiUniform {
-    points: Vec<(f32, f32)>,
+    resolution: [f32; 2],
+    num_points: u32,
+    texture_res: [f32; 2],
+    raw: VoronoiUniformRaw,
+    uniform_state: RefCell<UniformState>,
+}
+
+impl VoronoiUniform {
+    pub fn new(resolution: [f32; 2], num_points: u32, texture_res: [f32; 2]) -> Self {
+        let raw = VoronoiUniformRaw {
+            resolution,
+            num_points,
+            texture_res,
+        };
+        let mut s = Self {
+            resolution,
+            num_points,
+            texture_res,
+            raw,
+            uniform_state: RefCell::new(UniformState::NeedsRebuild {
+                bind_group: true,
+                buffer: true,
+            }),
+        };
+        s.rebuild_raw();
+        s
+    }
+    fn rebuild_raw(&mut self) {
+        self.raw.resolution = self.resolution;
+        self.raw.num_points = self.num_points;
+        self.raw.texture_res = self.texture_res;
+    }
 }
 
 impl Uniform for VoronoiUniform {
-    fn data(&self) -> &[u8] {
-        unsafe { wgpu::bytes::from_slice(self.points.as_slice()) }
+    // fn data(&self) -> &[u8] {}
+    fn bind_group_layout(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::BindGroupLayout {
+        device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStage::FRAGMENT,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+            label: Some("uniform_bind_group_layout"),
+        })
     }
     fn bind_group(
         &self,
@@ -429,16 +571,44 @@ impl Uniform for VoronoiUniform {
             }],
             label: Some("uniform_bind_group"),
         });
+        let uniform_state = &mut *self.uniform_state.borrow_mut();
+        match uniform_state {
+            UniformState::NeedsRebuild { buffer: false, .. } => {
+                *uniform_state = UniformState::Unchanged
+            }
+            UniformState::NeedsRebuild {
+                buffer: true,
+                ref mut bind_group,
+            } => *bind_group = false,
+            UniformState::Unchanged => (),
+        };
         uniform_bind_group
     }
     fn buffer(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::Buffer {
-        let uniform_bytes = self.data();
+        // let uniform_bytes = self.data();
         let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Uniform Buffer"),
-            contents: uniform_bytes,
+            contents: bytemuck::cast_slice(&[self.raw]),
             usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
         });
+        let uniform_state = &mut *self.uniform_state.borrow_mut();
+        match uniform_state {
+            UniformState::NeedsRebuild {
+                bind_group: false, ..
+            } => *uniform_state = UniformState::Unchanged,
+            UniformState::NeedsRebuild {
+                bind_group: true,
+                ref mut buffer,
+            } => *buffer = false,
+            UniformState::Unchanged => (),
+        };
         uniform_buffer
+    }
+    fn needs_rebuild(&self) -> bool {
+        match &*self.uniform_state.borrow() {
+            UniformState::NeedsRebuild { .. } => true,
+            UniformState::Unchanged => false,
+        }
     }
 }
 
@@ -475,6 +645,14 @@ impl Vertex {
                 },
             ],
         }
+    }
+    pub fn to_vec4(&self) -> [f32; 4] {
+        [
+            self.position[0],
+            self.position[1],
+            self.color[0],
+            self.color[1],
+        ]
     }
 }
 

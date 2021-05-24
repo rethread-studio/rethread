@@ -18,6 +18,7 @@ mod draw_functions;
 mod from_web_api;
 mod wgpu_helpers;
 use wgpu_helpers::*;
+mod texture;
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -56,7 +57,8 @@ enum CoverageDrawMode {
     SmoothBlob,
     Spacebrush,
     Shell(RefCell<WgpuShaderData>),
-    Organic(RefCell<WgpuShaderData>),
+    GemStone(RefCell<WgpuShaderData>),
+    Voronoi(RefCell<VoronoiShader>),
 }
 
 impl CoverageDrawMode {
@@ -64,9 +66,13 @@ impl CoverageDrawMode {
         let wgpu_shader_data = WgpuShaderData::new(window, "vertex_triangles");
         CoverageDrawMode::Shell(RefCell::new(wgpu_shader_data))
     }
-    pub fn organic(window: &Window) -> Self {
+    pub fn gem_stone(window: &Window) -> Self {
         let wgpu_shader_data = WgpuShaderData::new(window, "vertex_triangles");
-        CoverageDrawMode::Organic(RefCell::new(wgpu_shader_data))
+        CoverageDrawMode::GemStone(RefCell::new(wgpu_shader_data))
+    }
+    pub fn voronoi(window: &Window) -> Self {
+        let voronoi_shader = VoronoiShader::new(window);
+        CoverageDrawMode::Voronoi(RefCell::new(voronoi_shader))
     }
 }
 
@@ -93,8 +99,9 @@ impl DrawMode {
                 CoverageDrawMode::Blob => "coverage - blob",
                 CoverageDrawMode::SmoothBlob => "coverage - smooth blob",
                 CoverageDrawMode::Spacebrush => "coverage - spacebrush",
-                CoverageDrawMode::Organic(_) => "coverage - organic",
+                CoverageDrawMode::GemStone(_) => "coverage - gem stone",
                 CoverageDrawMode::Shell(_) => "coverage - shell",
+                CoverageDrawMode::Voronoi(_) => "coverage - voronoi",
             },
         }
     }
@@ -230,7 +237,7 @@ fn model(app: &App) -> Model {
         font,
         render_state: RenderState::NoRendering,
         use_web_api,
-        show_gui: true,
+        show_gui: false,
         background_lightness: 0.43,
     }
 }
@@ -598,7 +605,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                 draw_functions::draw_coverage_spacebrush(&draw, model, &win);
                 draw.to_frame(app, &frame).unwrap();
             }
-            CoverageDrawMode::Organic(ref wgpu_shader_data) => {
+            CoverageDrawMode::GemStone(ref wgpu_shader_data) => {
                 draw_functions::draw_coverage_organic(
                     &draw,
                     model,
@@ -616,6 +623,17 @@ fn view(app: &App, model: &Model, frame: Frame) {
                     &win,
                     &frame,
                     &mut wgpu_shader_data.borrow_mut(),
+                );
+            }
+            CoverageDrawMode::Voronoi(ref voronoi_shader) => {
+                // TOOD change function
+                draw_functions::draw_coverage_voronoi(
+                    &draw,
+                    model,
+                    &app.main_window(),
+                    &win,
+                    &frame,
+                    &mut voronoi_shader.borrow_mut(),
                 );
             }
         },
@@ -657,9 +675,12 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                         *cdm = CoverageDrawMode::shell(&app.main_window())
                     }
                     CoverageDrawMode::Shell(_) => {
-                        *cdm = CoverageDrawMode::organic(&app.main_window())
+                        *cdm = CoverageDrawMode::gem_stone(&app.main_window())
                     }
-                    CoverageDrawMode::Organic(_) => *cdm = CoverageDrawMode::HeatMap,
+                    CoverageDrawMode::GemStone(_) => {
+                        *cdm = CoverageDrawMode::voronoi(&app.main_window())
+                    }
+                    CoverageDrawMode::Voronoi(_) => *cdm = CoverageDrawMode::HeatMap,
                 },
             },
             Key::D => match &mut model.draw_mode {
@@ -680,14 +701,17 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 },
                 DrawMode::Coverage(ref mut cdm) => match cdm {
                     CoverageDrawMode::HeatMap => {
-                        *cdm = CoverageDrawMode::organic(&app.main_window())
+                        *cdm = CoverageDrawMode::voronoi(&app.main_window())
                     }
                     CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
                     CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Blob,
                     CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::SmoothBlob,
                     CoverageDrawMode::Shell(_) => *cdm = CoverageDrawMode::Spacebrush,
-                    CoverageDrawMode::Organic(_) => {
+                    CoverageDrawMode::GemStone(_) => {
                         *cdm = CoverageDrawMode::shell(&app.main_window())
+                    }
+                    CoverageDrawMode::Voronoi(_) => {
+                        *cdm = CoverageDrawMode::gem_stone(&app.main_window())
                     }
                 },
             },

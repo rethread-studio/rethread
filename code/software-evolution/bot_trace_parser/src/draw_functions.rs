@@ -974,6 +974,157 @@ pub fn draw_coverage_organic(
     wgpu_shader_data.view(frame);
 }
 
+pub fn draw_coverage_voronoi(
+    draw: &Draw,
+    model: &Model,
+    window: &Window,
+    win: &Rect,
+    frame: &Frame,
+    voronoi_shader: &mut VoronoiShader,
+) {
+    let site = &model.sites[model.selected_site];
+    let coverage = match &site.trace_datas[model.selected_visit].coverage {
+        Some(it) => it,
+        _ => return,
+    };
+    let vector = &coverage.vector;
+    let radius_offset = 0.1;
+    // let mut float_delaunay = FloatDelaunayTriangulation::with_tree_locate();
+
+    // struct Spacebrush {
+    //     pos: Point2<f32>,
+    //     vel: Vector2<f32>,
+    //     hue: f32,
+    //     sat: f32,
+    //     lightness: f32,
+    // }
+    // impl Spacebrush {
+    //     fn update(
+    //         &mut self,
+    //         ring_pos: Point2<f32>,
+    //         ring_angle: f32,
+    //         count_ratio: f32,
+    //         normal_thrust: f32,
+    //     ) {
+    //         let thrust = count_ratio.powf(0.5) * 20.;
+    //         let ring_vel = (ring_pos - self.pos) * normal_thrust;
+    //         let thrust_vel = pt2(ring_angle.cos(), ring_angle.sin()) * thrust;
+    //         const MIX: f32 = 0.99;
+    //         self.vel = (self.vel * MIX) + (ring_vel + thrust_vel) * (1. - MIX);
+    //         // self.vel.limit_magnitude(10.0);
+    //         self.pos += self.vel;
+    //         self.hue += (count_ratio - 0.05).max(0.) * 0.04;
+    //         self.sat = count_ratio.powf(0.3) * 3.;
+    //         self.lightness = count_ratio.powf(0.4) * 1.3;
+    //     }
+    //     fn col(&self) -> Hsla {
+    //         hsla(self.hue, (self.sat * 2.5).min(1.0), self.lightness, 1.0)
+    //     }
+    // }
+
+    // let mut spacebrush = Spacebrush {
+    //     pos: pt2(radius_offset, 0.),
+    //     vel: pt2(0., 0.),
+    //     hue: 0.0,
+    //     sat: 0.0,
+    //     lightness: 0.0,
+    // };
+
+    // let num_circles = 20.;
+
+    // let radius_per_circle = 0.5 / (num_circles * 1.4);
+
+    //
+    // let mut spacebrush_points = vec![];
+    // let mut ellipse_sizes = vec![];
+    // let mut sum_length = 0.0;
+    // const MINIMUM_LENGTH: f32 = 0.4;
+    // for (i, pair) in vector.iter().enumerate() {
+    //     let mut this_length = pair.0 as f32 / site.max_coverage_total_length as f32;
+    //     let count_ratio = pair.1 as f32 / site.max_coverage_vector_count as f32;
+    //     let height = count_ratio.powf(0.1);
+    //     let heat = count_ratio.powf(0.2);
+    //     let _spacebrush_thrust = heat * 20.0;
+    //     let spacebrush_normal_thrust = model.separation_ratio.powf(2.) * 50.0;
+    //     // Split the line into many points if the segment is long
+    //     while this_length > MINIMUM_LENGTH {
+    //         let angle = sum_length * PI * 2. * num_circles;
+    //         let num_circles = sum_length * num_circles;
+    //         let radius = height * radius_per_circle + num_circles * radius_per_circle;
+    //         let point = pt2(angle.cos() * radius, angle.sin() * radius);
+
+    //         spacebrush.update(point, angle, count_ratio, spacebrush_normal_thrust);
+    //         spacebrush_points.push((spacebrush.pos, spacebrush.col()));
+    //         ellipse_sizes.push(height);
+    //         let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(spacebrush.col());
+    //         float_delaunay.insert(Vertex {
+    //             position: [spacebrush.pos.x, spacebrush.pos.y, 0.0],
+    //             color: [rgb.red, rgb.blue, rgb.green, rgb.alpha],
+    //         });
+    //         this_length -= MINIMUM_LENGTH;
+
+    //         sum_length += MINIMUM_LENGTH;
+    //     }
+    //     // Now add the last point
+    //     let angle = sum_length * PI * 2. * num_circles;
+    //     let num_circles = sum_length * num_circles;
+    //     let radius = heat * radius_per_circle + num_circles * radius_per_circle;
+    //     let point = pt2(angle.cos() * radius, angle.sin() * radius);
+
+    //     spacebrush.update(point, angle, count_ratio, spacebrush_normal_thrust);
+    //     spacebrush_points.push((spacebrush.pos, spacebrush.col()));
+    //     ellipse_sizes.push(height);
+    //     let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(spacebrush.col());
+    //     float_delaunay.insert(Vertex {
+    //         position: [spacebrush.pos.x, spacebrush.pos.y, 0.0],
+    //         color: [rgb.red, rgb.blue, rgb.green, rgb.alpha],
+    //     });
+    //     sum_length += this_length;
+    // }
+    // Triangulate all the points
+    // let mut voronoi_points = Vec::with_capacity(float_delaunay.num_triangles() * 3);
+    // for (i, face) in float_delaunay.triangles().enumerate() {
+    //     let triangle = face.as_triangle();
+    //     voronoi_points.push(triangle[0].to_vec4());
+    //     voronoi_points.push(triangle[1].to_vec4());
+    //     voronoi_points.push(triangle[2].to_vec4());
+    // }
+
+    let num_circles = 300.;
+
+    let radius_per_circle = 1.0 / (num_circles + 1.0);
+
+    let mut sum_length = 0.0;
+    let mut voronoi_points = vec![];
+    let mut heat_sum = 0.;
+    for (i, pair) in vector.iter().enumerate() {
+        let this_length = pair.0 as f32 / site.max_coverage_total_length as f32;
+        let count_ratio = pair.1 as f32 / site.max_coverage_vector_count as f32;
+        let heat = count_ratio.powf(0.1);
+        let angle = sum_length * PI * 2. * num_circles;
+        let circle = sum_length * num_circles;
+        let radius = (circle / num_circles + heat / num_circles).powf(1. / 3.);
+        // let radius = heat * radius_per_circle + circle * radius_per_circle;
+        // let radius = radius * 1.2;
+        sum_length += this_length;
+        let point = pt2(angle.cos() * radius, angle.sin() * radius);
+        let col = hsla(0.6 + heat * 0.6, 0.4 + heat * 0.6, 0.055 + heat * 0.6, 1.0);
+        let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(col);
+        // coloured_points.push((point, col));
+        let vertex = Vertex {
+            position: [point.x, point.y, 0.0],
+            color: [heat, heat_sum, rgb.green, rgb.alpha],
+        };
+        voronoi_points.push(vertex.to_vec4());
+        // heat_sum += heat;
+        heat_sum += (count_ratio.powf(0.5) - 0.05).max(0.) * 0.1;
+    }
+
+    println!("Num points: {}", voronoi_points.len());
+    voronoi_shader.set_points(voronoi_points, window);
+    voronoi_shader.view(frame, window);
+}
+
 // HELPER FUNCTIONS
 
 fn script_color(id: f32) -> Hsla {
