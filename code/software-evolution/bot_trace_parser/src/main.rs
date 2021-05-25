@@ -48,6 +48,7 @@ enum GraphDepthDrawMode {
     PolarGrid,
     Rings,
     PolarAxes,
+    PolarAxesRolling,
     AllSitesPolarAxes,
 }
 
@@ -92,6 +93,7 @@ impl DrawMode {
                 GraphDepthDrawMode::PolarGrid => "graph depth - polar grid",
                 GraphDepthDrawMode::Rings => "graph depth - rings",
                 GraphDepthDrawMode::PolarAxes => "graph depth - polar axes",
+                GraphDepthDrawMode::PolarAxesRolling => "graph depth - polar axes rolling",
                 GraphDepthDrawMode::AllSitesPolarAxes => "graph_depth - all sites polar axes",
             },
             DrawMode::Coverage(cdm) => match cdm {
@@ -542,6 +544,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
         .color(LIGHTGREY);
 
     draw.to_frame(app, &frame).unwrap();
+    let draw = app.draw();
 
     match &model.draw_mode {
         DrawMode::GraphDepth(gddm) => match gddm {
@@ -567,6 +570,10 @@ fn view(app: &App, model: &Model, frame: Frame) {
             }
             GraphDepthDrawMode::PolarAxes => {
                 draw_functions::draw_polar_axes_depth_graph(&draw, model, &win);
+                draw.to_frame(app, &frame).unwrap();
+            }
+            GraphDepthDrawMode::PolarAxesRolling => {
+                draw_functions::draw_polar_axes_rolling_depth_graph(&draw, model, &win);
                 draw.to_frame(app, &frame).unwrap();
             }
             GraphDepthDrawMode::AllSitesPolarAxes => {
@@ -626,7 +633,6 @@ fn view(app: &App, model: &Model, frame: Frame) {
                 );
             }
             CoverageDrawMode::Voronoi(ref voronoi_shader) => {
-                // TOOD change function
                 draw_functions::draw_coverage_voronoi(
                     &draw,
                     model,
@@ -635,6 +641,20 @@ fn view(app: &App, model: &Model, frame: Frame) {
                     &frame,
                     &mut voronoi_shader.borrow_mut(),
                 );
+
+                // Try drawing the text on top
+                let draw = app.draw();
+                draw.text(&full_text)
+                    .font_size(16)
+                    .align_text_bottom()
+                    .right_justify()
+                    // .x_y(0.0, 0.0)
+                    .wh(win.clone().pad(20.).wh())
+                    .font(model.font.clone())
+                    // .x_y(win.right()-130.0, win.bottom() + 10.0)
+                    .color(DARKGREY);
+
+                draw.to_frame(app, &frame).unwrap();
             }
         },
     };
@@ -658,7 +678,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::PolarGrid,
                     GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Rings,
                     GraphDepthDrawMode::Rings => *gddm = GraphDepthDrawMode::PolarAxes,
-                    GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::AllSitesPolarAxes,
+                    GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::PolarAxesRolling,
+                    GraphDepthDrawMode::PolarAxesRolling => {
+                        *gddm = GraphDepthDrawMode::AllSitesPolarAxes
+                    }
                     GraphDepthDrawMode::AllSitesPolarAxes => *gddm = GraphDepthDrawMode::Horizontal,
                 },
                 DrawMode::Indentation(ref mut pdm) => match pdm {
@@ -691,7 +714,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Polar,
                     GraphDepthDrawMode::Rings => *gddm = GraphDepthDrawMode::PolarGrid,
                     GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::Rings,
-                    GraphDepthDrawMode::AllSitesPolarAxes => *gddm = GraphDepthDrawMode::PolarAxes,
+                    GraphDepthDrawMode::PolarAxesRolling => *gddm = GraphDepthDrawMode::PolarAxes,
+                    GraphDepthDrawMode::AllSitesPolarAxes => {
+                        *gddm = GraphDepthDrawMode::PolarAxesRolling
+                    }
                 },
                 DrawMode::Indentation(ref mut pdm) => match pdm {
                     ProfileDrawMode::SingleFlower => (),

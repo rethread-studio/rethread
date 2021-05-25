@@ -153,7 +153,7 @@ void main() {
   vec3 col_bg = vec3(0.7725, 0.9451, 1.0);
 
   // col3 = mix(col3, hsb2rgb(vec3(data.y + 0.6, 1.0, 0.6)), (data.x + 0.5) * np);
-  col3 = mix(col3, hsb2rgb(vec3((data.y * np + next_data.y * p)/2.0, 1.0, 0.2)), (data.x + 0.5) * np);
+  col3 = mix(col_bg, hsb2rgb(vec3(fract(data.y + 0.55), 0.95, 0.65)), min(data.x * 2.0, 1.0) * np);
   // col_bg = mix(col3, hsb2rgb(vec3((data.y + next_data.y)/2.0, 1.0, 0.2)), (data.x + 0.5) * np);
   
   vec3 col = mix(col1 * (smoothstep(0.0, 1.0, p) * 0.5 + 0.7), col3, data.x);
