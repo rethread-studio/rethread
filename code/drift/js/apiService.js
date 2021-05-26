@@ -18,6 +18,10 @@ class ApiService {
         return type == "views" ? viewsMenu : sitesMenu;
     }
 
+    getData(type) {
+        return dataTest;
+    }
+
 
 }
 
