@@ -85,6 +85,15 @@ a{
     color:white;
 }
 
+button{
+    font-size: 18px;
+    text-decoration: none;
+    color:white;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
 .centerText{
     position: absolute;
     top: 50%;
