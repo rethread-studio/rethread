@@ -46,10 +46,17 @@ enum GraphDepthDrawMode {
     Horizontal,
     Polar,
     PolarGrid,
-    Rings,
+    Rings(RefCell<WgpuShaderData>),
     PolarAxes,
     PolarAxesRolling,
     AllSitesPolarAxes,
+}
+
+impl GraphDepthDrawMode {
+    pub fn rings(window: &Window, resolution: [u32; 2]) -> Self {
+        let wgpu_shader_data = WgpuShaderData::new(window, resolution, "vertex_triangles");
+        GraphDepthDrawMode::Rings(RefCell::new(wgpu_shader_data))
+    }
 }
 
 enum CoverageDrawMode {
@@ -63,16 +70,16 @@ enum CoverageDrawMode {
 }
 
 impl CoverageDrawMode {
-    pub fn shell(window: &Window) -> Self {
-        let wgpu_shader_data = WgpuShaderData::new(window, "vertex_triangles");
+    pub fn shell(window: &Window, resolution: [u32; 2]) -> Self {
+        let wgpu_shader_data = WgpuShaderData::new(window, resolution, "vertex_triangles");
         CoverageDrawMode::Shell(RefCell::new(wgpu_shader_data))
     }
-    pub fn gem_stone(window: &Window) -> Self {
-        let wgpu_shader_data = WgpuShaderData::new(window, "vertex_triangles");
+    pub fn gem_stone(window: &Window, resolution: [u32; 2]) -> Self {
+        let wgpu_shader_data = WgpuShaderData::new(window, resolution, "vertex_triangles");
         CoverageDrawMode::GemStone(RefCell::new(wgpu_shader_data))
     }
-    pub fn voronoi(window: &Window) -> Self {
-        let voronoi_shader = VoronoiShader::new(window);
+    pub fn voronoi(window: &Window, resolution: [u32; 2]) -> Self {
+        let voronoi_shader = VoronoiShader::new(window, resolution);
         CoverageDrawMode::Voronoi(RefCell::new(voronoi_shader))
     }
 }
@@ -91,7 +98,7 @@ impl DrawMode {
                 GraphDepthDrawMode::Horizontal => "graph depth - horizontal",
                 GraphDepthDrawMode::Polar => "graph depth - polar",
                 GraphDepthDrawMode::PolarGrid => "graph depth - polar grid",
-                GraphDepthDrawMode::Rings => "graph depth - rings",
+                GraphDepthDrawMode::Rings(_) => "graph depth - rings",
                 GraphDepthDrawMode::PolarAxes => "graph depth - polar axes",
                 GraphDepthDrawMode::PolarAxesRolling => "graph depth - polar axes rolling",
                 GraphDepthDrawMode::AllSitesPolarAxes => "graph_depth - all sites polar axes",
@@ -137,7 +144,9 @@ pub struct Model {
     sites: Vec<Site>,
     selected_visit: usize,
     index: usize,
-    separation_ratio: f32,
+    param1: f32,
+    param2: f32,
+    param3: f32,
     draw_mode: DrawMode,
     color_mode: ColorMode,
     sender: osc::Sender<osc::Connected>,
@@ -147,11 +156,24 @@ pub struct Model {
     use_web_api: bool,
     show_gui: bool,
     background_lightness: f32,
+    // The texture that we will draw to.
+    texture: wgpu::Texture,
+    // Create a `Draw` instance for drawing to our texture.
+    draw: nannou::Draw,
+    // The type used to render the `Draw` vertices to our texture.
+    renderer: nannou::draw::Renderer,
+    // The type used to capture the texture.
+    texture_capturer: wgpu::TextureCapturer,
+    // The type used to resize our texture to the window texture.
+    texture_reshaper: wgpu::TextureReshaper,
+    render_video: bool,
 }
 
 widget_ids! {
     struct Ids {
-        separation_ratio,
+        param1,
+    param2,
+    param3,
         selected_site,
         selected_visit,
     background_lightness,
@@ -159,13 +181,61 @@ widget_ids! {
 }
 
 fn model(app: &App) -> Model {
-    let _window = app
+    // Lets write to a 4K UHD texture.
+    let texture_size = [2_160, 2_160];
+
+    // Create the window.
+    let [win_w, win_h] = [texture_size[0] / 2, texture_size[1] / 2];
+    let w_id = app
         .new_window()
         .view(view)
         .event(window_event)
-        .size(1080, 1080)
+        .size(win_w, win_h)
         .build()
         .unwrap();
+
+    // Hi-res capturing setup
+
+    let window = app.window(w_id).unwrap();
+
+    // Retrieve the wgpu device.
+    let device = window.swap_chain_device();
+
+    // Create our custom texture.
+    let sample_count = window.msaa_samples();
+    let texture = wgpu::TextureBuilder::new()
+        .size(texture_size)
+        // Our texture will be used as the RENDER_ATTACHMENT for our `Draw` render pass.
+        // It will also be SAMPLED by the `TextureCapturer` and `TextureResizer`.
+        .usage(wgpu::TextureUsage::RENDER_ATTACHMENT | wgpu::TextureUsage::SAMPLED)
+        // Use nannou's default multisampling sample count.
+        .sample_count(sample_count)
+        // Use a spacious 16-bit linear sRGBA format suitable for high quality drawing.
+        .format(wgpu::TextureFormat::Rgba16Float)
+        // Build it!
+        .build(device);
+
+    // Create our `Draw` instance and a renderer for it.
+    let draw = nannou::Draw::new();
+    let descriptor = texture.descriptor();
+    let renderer =
+        nannou::draw::RendererBuilder::new().build_from_texture_descriptor(device, descriptor);
+
+    // Create the texture capturer.
+    let texture_capturer = wgpu::TextureCapturer::default();
+
+    // Create the texture reshaper.
+    let texture_view = texture.view().build();
+    let texture_sample_type = texture.sample_type();
+    let dst_format = Frame::TEXTURE_FORMAT;
+    let texture_reshaper = wgpu::TextureReshaper::new(
+        device,
+        &texture_view,
+        sample_count,
+        texture_sample_type,
+        sample_count,
+        dst_format,
+    );
 
     // Create the UI.
     let mut ui = app.new_ui().build().unwrap();
@@ -230,8 +300,13 @@ fn model(app: &App) -> Model {
         selected_site: 0,
         sites,
         index: 0,
-        separation_ratio: 1.0,
-        draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::AllSitesPolarAxes),
+        param1: 1.0,
+        param2: 0.5,
+        param3: 0.5,
+        draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::rings(
+            &app.main_window(),
+            texture.size(),
+        )),
         color_mode: ColorMode::Script,
         sender,
         selected_visit: 0,
@@ -240,7 +315,13 @@ fn model(app: &App) -> Model {
         render_state: RenderState::NoRendering,
         use_web_api,
         show_gui: false,
-        background_lightness: 0.43,
+        background_lightness: 0.0, // 0.43,
+        texture,
+        draw,
+        renderer,
+        texture_capturer,
+        texture_reshaper,
+        render_video: false,
     }
 }
 
@@ -395,130 +476,97 @@ fn load_site(name: &str, use_web_api: bool) -> Site {
 
 fn update(app: &App, model: &mut Model, _update: Update) {
     // GUI
-    // Calling `set_widgets` allows us to instantiate some widgets.
-    let ui = &mut model.ui.set_widgets();
-
-    fn slider(val: f32, min: f32, max: f32) -> widget::Slider<'static, f32> {
-        widget::Slider::new(val, min, max)
-            .w_h(200.0, 30.0)
-            .label_font_size(15)
-            .rgb(0.3, 0.3, 0.3)
-            .label_rgb(1.0, 1.0, 1.0)
-            .border(1.0)
-    }
-
-    for value in slider(model.separation_ratio, 0.0, 1.0)
-        .top_left_with_margin(20.0)
-        .label("Separation ratio")
-        .set(model.ids.separation_ratio, ui)
     {
-        model.separation_ratio = value as f32;
-    }
+        // Calling `set_widgets` allows us to instantiate some widgets.
+        let ui = &mut model.ui.set_widgets();
 
-    for value in slider(
-        model.selected_site as f32,
-        0.0,
-        (model.sites.len() - 1) as f32,
-    )
-    .down(10.0)
-    .label("Selected site")
-    .set(model.ids.selected_site, ui)
-    {
-        model.selected_site = value as usize;
-    }
-
-    for value in slider(
-        model.selected_visit as f32,
-        0.0,
-        (model.sites[model.selected_site].trace_datas.len() - 1) as f32,
-    )
-    .down(10.0)
-    .label("Selected visit")
-    .set(model.ids.selected_visit, ui)
-    {
-        model.selected_visit = value as usize;
-    }
-
-    for value in slider(model.background_lightness, 0.0, 1.0)
-        .down(10.)
-        .label(&format!("Background light: {}", model.background_lightness))
-        .set(model.ids.background_lightness, ui)
-    {
-        model.background_lightness = value.pow(2);
-    }
-
-    // update frame rendering
-    match &mut model.render_state {
-        RenderState::RenderAllTraces { current_trace } => {
-            if *current_trace > 0 {
-                // We must wait until the first trace has been drawn before saving it.
-                // Capture the frame!
-                let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
-                let timestamp =
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-                let file_path =
-                    rendering_frame_path(app, &model.draw_mode, name, *current_trace - 1);
-                app.main_window().capture_frame(file_path);
-            }
-            // Are we done?
-            if *current_trace == model.sites[model.selected_site].trace_datas.len() {
-                // All traces have been rendered
-                model.render_state = RenderState::NoRendering;
-                model.selected_visit = 0;
-                let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
-                let w = app.window_rect().w() as usize;
-                let h = app.window_rect().h() as usize;
-                let video_path = rendering_video_path(app, &model.draw_mode, name);
-                let frame_folder_path = rendering_frame_folder_path(app, &model.draw_mode, name);
-                // Run ffmpeg to make video files from the rendered images
-                std::thread::spawn(move || {
-                    let output = Command::new("ffmpeg")
-                        .current_dir(frame_folder_path)
-                        .arg("-y") // overwrite output files
-                        .arg("-r")
-                        .arg("30")
-                        .arg("-start_number")
-                        .arg("0")
-                        .arg("-i")
-                        .arg("%04d.png")
-                        .arg("-c:v")
-                        .arg("libx264")
-                        .arg("-crf")
-                        .arg("17")
-                        .arg("-preset")
-                        .arg("veryslow")
-                        .arg("-s")
-                        .arg(&format!("{}x{}", w, h))
-                        .arg(&video_path)
-                        .output()
-                        .expect("failed to execute process");
-                    println!("Finished rendering {}", video_path.to_str().unwrap());
-                    println!("Rendering output: {}", output.status);
-                    use std::io::{self, Write};
-                    io::stdout().write_all(&output.stdout).unwrap();
-                    io::stderr().write_all(&output.stderr).unwrap();
-
-                    // ffmpeg -r 4 -start_number 0 -i %04d.png -c:v libx264 -crf 18 -preset veryslow -s 1080x1051 ../coverage_spacebrush.mp4
-                });
-            } else {
-                // Set the next trace up for rendering
-                model.selected_visit = *current_trace;
-                *current_trace += 1;
-            }
+        fn slider(val: f32, min: f32, max: f32) -> widget::Slider<'static, f32> {
+            widget::Slider::new(val, min, max)
+                .w_h(200.0, 30.0)
+                .label_font_size(15)
+                .rgb(0.3, 0.3, 0.3)
+                .label_rgb(1.0, 1.0, 1.0)
+                .border(1.0)
         }
-        RenderState::NoRendering => (),
+
+        for value in slider(model.param1, 0.0, 1.0)
+            .top_left_with_margin(20.0)
+            .label(&format!("Param 1: {}", model.param1))
+            .set(model.ids.param1, ui)
+        {
+            model.param1 = value as f32;
+        }
+        for value in slider(model.param2, 0.0, 1.0)
+            .down(10.0)
+            .label(&format!("Param 2: {}", model.param2))
+            .set(model.ids.param2, ui)
+        {
+            model.param2 = value as f32;
+        }
+        for value in slider(model.param3, 0.0, 1.0)
+            .down(10.0)
+            .label(&format!("Param 3: {}", model.param3))
+            .set(model.ids.param3, ui)
+        {
+            model.param3 = value as f32;
+        }
+
+        for value in slider(
+            model.selected_site as f32,
+            0.0,
+            (model.sites.len() - 1) as f32,
+        )
+        .down(10.0)
+        .label("Selected site")
+        .set(model.ids.selected_site, ui)
+        {
+            model.selected_site = value as usize;
+        }
+
+        for value in slider(
+            model.selected_visit as f32,
+            0.0,
+            (model.sites[model.selected_site].trace_datas.len() - 1) as f32,
+        )
+        .down(10.0)
+        .label("Selected visit")
+        .set(model.ids.selected_visit, ui)
+        {
+            model.selected_visit = value as usize;
+        }
+
+        for value in slider(model.background_lightness, 0.0, 1.0)
+            .down(10.)
+            .label(&format!("Background light: {}", model.background_lightness))
+            .set(model.ids.background_lightness, ui)
+        {
+            model.background_lightness = value.pow(2);
+        }
     }
-}
 
-fn view(app: &App, model: &Model, frame: Frame) {
-    // Prepare to draw.
-    let draw = app.draw();
+    // Do the drawing in update for hi-res texture rendering reasons
+    // First, reset the `draw` state.
+    let draw = &model.draw;
+    draw.reset();
 
-    // Clear the background to purple.
+    // Create a `Rect` for our texture to help with drawing.
+    let [w, h] = model.texture.size();
+    let win = geom::Rect::from_w_h(w as f32, h as f32);
+
+    // Setup rendering to texture
+    let window = app.main_window();
+    let device = window.swap_chain_device();
+    let ce_desc = wgpu::CommandEncoderDescriptor {
+        label: Some("texture renderer"),
+    };
+
+    ////////////////////////////////////////////////////////////////////////// DO ALL OF THE DRAWING STUFF
+
+    // Clear the background
     draw.background()
         .color(hsl(0.6, 0.1, model.background_lightness));
 
-    let win = app.window_rect();
+    // let win = app.window_rect();
 
     let name = &model.sites[model.selected_site].name;
     let timestamp = &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
@@ -529,138 +577,291 @@ fn view(app: &App, model: &Model, frame: Frame) {
     };
     let visualisation_type = model.draw_mode.to_str();
 
-    let full_text = format!(
-        "{}\n{}\n\n{}\n{}",
-        name, timestamp, visualisation_type, color_type
-    );
-    draw.text(&full_text)
-        .font_size(16)
-        .align_text_bottom()
-        .right_justify()
-        // .x_y(0.0, 0.0)
-        .wh(win.clone().pad(20.).wh())
-        .font(model.font.clone())
-        // .x_y(win.right()-130.0, win.bottom() + 10.0)
-        .color(LIGHTGREY);
+    // let full_text = format!(
+    //     "{}\n{}\n\n{}\n{}",
+    //     name, timestamp, visualisation_type, color_type
+    // );
+    // draw.text(&full_text)
+    //     .font_size(32)
+    //     .align_text_bottom()
+    //     .right_justify()
+    //     // .x_y(0.0, 0.0)
+    //     .wh(win.clone().pad(40.).wh())
+    //     .font(model.font.clone())
+    //     // .x_y(win.right()-130.0, win.bottom() + 10.0)
+    //     .color(LIGHTGREY);
 
-    draw.to_frame(app, &frame).unwrap();
-    let draw = app.draw();
+    // draw.to_frame(app, &frame).unwrap();
+    let mut encoder = device.create_command_encoder(&ce_desc);
+    model
+        .renderer
+        .render_to_texture(device, &mut encoder, draw, &model.texture);
+    draw.reset();
+
+    use nannou::wgpu::ToTextureView;
+    let texture_view = model.texture.to_texture_view();
+
+    // let mut encoder = frame.command_encoder();
 
     match &model.draw_mode {
         DrawMode::GraphDepth(gddm) => match gddm {
             GraphDepthDrawMode::Horizontal => {
-                draw_functions::draw_horizontal_graph_depth(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_horizontal_graph_depth(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             GraphDepthDrawMode::Vertical => {
-                draw_functions::draw_vertical_graph_depth(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_vertical_graph_depth(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             GraphDepthDrawMode::Polar => {
-                draw_functions::draw_polar_depth_graph(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_polar_depth_graph(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             GraphDepthDrawMode::PolarGrid => {
-                draw_functions::draw_flower_grid_graph_depth(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_flower_grid_graph_depth(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
-            GraphDepthDrawMode::Rings => {
-                draw_functions::draw_depth_graph_rings(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+            GraphDepthDrawMode::Rings(ref wgpu_shader_data) => {
+                draw_functions::draw_depth_graph_rings(
+                    &draw,
+                    &model,
+                    &app.main_window(),
+                    &win,
+                    &mut encoder,
+                    &texture_view,
+                    &mut wgpu_shader_data.borrow_mut(),
+                );
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             GraphDepthDrawMode::PolarAxes => {
-                draw_functions::draw_polar_axes_depth_graph(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_polar_axes_depth_graph(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             GraphDepthDrawMode::PolarAxesRolling => {
-                draw_functions::draw_polar_axes_rolling_depth_graph(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_polar_axes_rolling_depth_graph(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             GraphDepthDrawMode::AllSitesPolarAxes => {
                 draw_functions::draw_all_sites_single_visit_polar_axes_depth_graph(
-                    &draw, model, &win,
+                    &draw, &model, &win,
                 );
-                draw.to_frame(app, &frame).unwrap();
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
         },
         DrawMode::Indentation(pdm) => match pdm {
             ProfileDrawMode::SingleFlower => {
-                draw_functions::draw_single_flower_indentation(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_single_flower_indentation(&draw, &model, &win);
             }
         },
         DrawMode::LineLength(pdm) => match pdm {
             ProfileDrawMode::SingleFlower => {
-                draw_functions::draw_single_flower_line_length(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_single_flower_line_length(&draw, &model, &win);
             }
         },
         DrawMode::Coverage(cdm) => match cdm {
             CoverageDrawMode::HeatMap => {
-                draw_functions::draw_coverage_heat_map(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_coverage_heat_map(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             CoverageDrawMode::Blob => {
-                draw_functions::draw_coverage_blob(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_coverage_blob(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             CoverageDrawMode::SmoothBlob => {
-                draw_functions::draw_smooth_coverage_blob(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_smooth_coverage_blob(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             CoverageDrawMode::Spacebrush => {
-                draw_functions::draw_coverage_spacebrush(&draw, model, &win);
-                draw.to_frame(app, &frame).unwrap();
+                draw_functions::draw_coverage_spacebrush(&draw, &model, &win);
+                model
+                    .renderer
+                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
             CoverageDrawMode::GemStone(ref wgpu_shader_data) => {
                 draw_functions::draw_coverage_organic(
                     &draw,
-                    model,
+                    &model,
                     &app.main_window(),
                     &win,
-                    &frame,
+                    &mut encoder,
+                    &texture_view,
                     &mut wgpu_shader_data.borrow_mut(),
                 );
             }
             CoverageDrawMode::Shell(ref wgpu_shader_data) => {
                 draw_functions::draw_coverage_shell(
                     &draw,
-                    model,
+                    &model,
                     &app.main_window(),
                     &win,
-                    &frame,
+                    &mut encoder,
+                    &texture_view,
                     &mut wgpu_shader_data.borrow_mut(),
                 );
             }
             CoverageDrawMode::Voronoi(ref voronoi_shader) => {
                 draw_functions::draw_coverage_voronoi(
                     &draw,
-                    model,
+                    &model,
                     &app.main_window(),
                     &win,
-                    &frame,
+                    &mut encoder,
+                    &texture_view,
                     &mut voronoi_shader.borrow_mut(),
                 );
 
                 // Try drawing the text on top
-                let draw = app.draw();
-                draw.text(&full_text)
-                    .font_size(16)
-                    .align_text_bottom()
-                    .right_justify()
-                    // .x_y(0.0, 0.0)
-                    .wh(win.clone().pad(20.).wh())
-                    .font(model.font.clone())
-                    // .x_y(win.right()-130.0, win.bottom() + 10.0)
-                    .color(DARKGREY);
+                // draw.reset();
+                // draw.text(&full_text)
+                //     .font_size(16)
+                //     .align_text_bottom()
+                //     .right_justify()
+                //     // .x_y(0.0, 0.0)
+                //     .wh(win.clone().pad(20.).wh())
+                //     .font(model.font.clone())
+                //     // .x_y(win.right()-130.0, win.bottom() + 10.0)
+                //     .color(DARKGREY);
 
-                draw.to_frame(app, &frame).unwrap();
+                // model
+                //     .renderer
+                //     .render_to_texture(device, &mut encoder, &draw, &model.texture);
             }
         },
     };
 
-    // // Write to the window frame.
+    ////////////////////////////////////////////////////////////////////////// END DO ALL OF THE DRAWING STUFF
+
+    // Render our drawing to the texture.
+    // model
+    //     .renderer
+    //     .render_to_texture(device, &mut encoder, draw, &model.texture);
+
+    // Take a snapshot of the texture. The capturer will do the following:
     //
+    // 1. Resolve the texture to a non-multisampled texture if necessary.
+    // 2. Convert the format to non-linear 8-bit sRGBA ready for image storage.
+    // 3. Copy the result to a buffer ready to be mapped for reading.
+    let snapshot = model
+        .texture_capturer
+        .capture(device, &mut encoder, &model.texture);
+
+    // Submit the commands for our drawing and texture capture to the GPU.
+    window.swap_chain_queue().submit(Some(encoder.finish()));
+
+    // update frame rendering
+    match &mut model.render_state {
+        RenderState::RenderAllTraces { current_trace } => {
+            // We must wait until the first trace has been drawn before saving it.
+            // Capture the frame!
+            let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
+            let timestamp =
+                &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
+            let file_path = if model.render_video {
+                rendering_frame_path(app, &model.draw_mode, name, *current_trace)
+            } else {
+                rendering_visit_path(app, &model.draw_mode, name, timestamp)
+            };
+
+            // Submit a function for writing our snapshot to a PNG.
+            //
+            // NOTE: It is essential that the commands for capturing the snapshot are `submit`ted before we
+            // attempt to read the snapshot - otherwise we will read a blank texture!
+
+            // let path = capture_directory(app)
+            //     .join(elapsed_frames.to_string())
+            //     .with_extension("png");
+            snapshot
+                .read(move |result| {
+                    let image = result.expect("failed to map texture memory").to_owned();
+                    image
+                        .save(&file_path)
+                        .expect("failed to save texture to png image");
+                })
+                .unwrap();
+
+            // Select the next visit for rendering
+            *current_trace += 1;
+            model.selected_visit = *current_trace;
+
+            // Are we done?
+            if *current_trace == model.sites[model.selected_site].trace_datas.len() {
+                // All traces have been rendered
+                model.render_state = RenderState::NoRendering;
+                model.selected_visit = 0;
+                if model.render_video {
+                    let name =
+                        &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
+                    let [w, h] = model.texture.size();
+                    let video_path = rendering_video_path(app, &model.draw_mode, name);
+                    let frame_folder_path =
+                        rendering_frame_folder_path(app, &model.draw_mode, name);
+                    // Run ffmpeg to make video files from the rendered images
+                    std::thread::spawn(move || {
+                        let output = Command::new("ffmpeg")
+                            .current_dir(frame_folder_path)
+                            .arg("-y") // overwrite output files
+                            .arg("-r")
+                            .arg("30")
+                            .arg("-start_number")
+                            .arg("0")
+                            .arg("-i")
+                            .arg("%04d.png")
+                            .arg("-c:v")
+                            .arg("libx264")
+                            .arg("-crf")
+                            .arg("17")
+                            .arg("-preset")
+                            .arg("veryslow")
+                            .arg("-s")
+                            .arg(&format!("{}x{}", w, h))
+                            .arg(&video_path)
+                            .output()
+                            .expect("failed to execute process");
+                        println!("Finished rendering {}", video_path.to_str().unwrap());
+                        println!("Rendering output: {}", output.status);
+                        use std::io::{self, Write};
+                        io::stdout().write_all(&output.stdout).unwrap();
+                        io::stderr().write_all(&output.stderr).unwrap();
+
+                        // ffmpeg -r 4 -start_number 0 -i %04d.png -c:v libx264 -crf 18 -preset veryslow -s 1080x1051 ../coverage_spacebrush.mp4
+                    });
+                }
+            }
+        }
+        RenderState::NoRendering => (),
+    }
+}
+
+fn view(app: &App, model: &Model, frame: Frame) {
+    // Sample the texture and write it to the frame.
+    {
+        let mut encoder = frame.command_encoder();
+        model
+            .texture_reshaper
+            .encode_render_pass(frame.texture_view(), &mut *encoder);
+    }
 
     if model.show_gui {
         // Draw the state of the `Ui` to the frame.
@@ -676,8 +877,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::Vertical,
                     GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Polar,
                     GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::PolarGrid,
-                    GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Rings,
-                    GraphDepthDrawMode::Rings => *gddm = GraphDepthDrawMode::PolarAxes,
+                    GraphDepthDrawMode::PolarGrid => {
+                        *gddm = GraphDepthDrawMode::rings(&app.main_window(), model.texture.size())
+                    }
+                    GraphDepthDrawMode::Rings(_) => *gddm = GraphDepthDrawMode::PolarAxes,
                     GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::PolarAxesRolling,
                     GraphDepthDrawMode::PolarAxesRolling => {
                         *gddm = GraphDepthDrawMode::AllSitesPolarAxes
@@ -695,13 +898,13 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     CoverageDrawMode::Blob => *cdm = CoverageDrawMode::SmoothBlob,
                     CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Spacebrush,
                     CoverageDrawMode::Spacebrush => {
-                        *cdm = CoverageDrawMode::shell(&app.main_window())
+                        *cdm = CoverageDrawMode::shell(&app.main_window(), model.texture.size())
                     }
                     CoverageDrawMode::Shell(_) => {
-                        *cdm = CoverageDrawMode::gem_stone(&app.main_window())
+                        *cdm = CoverageDrawMode::gem_stone(&app.main_window(), model.texture.size())
                     }
                     CoverageDrawMode::GemStone(_) => {
-                        *cdm = CoverageDrawMode::voronoi(&app.main_window())
+                        *cdm = CoverageDrawMode::voronoi(&app.main_window(), model.texture.size())
                     }
                     CoverageDrawMode::Voronoi(_) => *cdm = CoverageDrawMode::HeatMap,
                 },
@@ -712,8 +915,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Horizontal,
                     GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::Vertical,
                     GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Polar,
-                    GraphDepthDrawMode::Rings => *gddm = GraphDepthDrawMode::PolarGrid,
-                    GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::Rings,
+                    GraphDepthDrawMode::Rings(_) => *gddm = GraphDepthDrawMode::PolarGrid,
+                    GraphDepthDrawMode::PolarAxes => {
+                        *gddm = GraphDepthDrawMode::rings(&app.main_window(), model.texture.size())
+                    }
                     GraphDepthDrawMode::PolarAxesRolling => *gddm = GraphDepthDrawMode::PolarAxes,
                     GraphDepthDrawMode::AllSitesPolarAxes => {
                         *gddm = GraphDepthDrawMode::PolarAxesRolling
@@ -727,17 +932,17 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 },
                 DrawMode::Coverage(ref mut cdm) => match cdm {
                     CoverageDrawMode::HeatMap => {
-                        *cdm = CoverageDrawMode::voronoi(&app.main_window())
+                        *cdm = CoverageDrawMode::voronoi(&app.main_window(), model.texture.size())
                     }
                     CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
                     CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Blob,
                     CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::SmoothBlob,
                     CoverageDrawMode::Shell(_) => *cdm = CoverageDrawMode::Spacebrush,
                     CoverageDrawMode::GemStone(_) => {
-                        *cdm = CoverageDrawMode::shell(&app.main_window())
+                        *cdm = CoverageDrawMode::shell(&app.main_window(), model.texture.size())
                     }
                     CoverageDrawMode::Voronoi(_) => {
-                        *cdm = CoverageDrawMode::gem_stone(&app.main_window())
+                        *cdm = CoverageDrawMode::gem_stone(&app.main_window(), model.texture.size())
                     }
                 },
             },
@@ -831,7 +1036,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
         },
         KeyReleased(_key) => {}
         MouseMoved(pos) => {
-            // model.separation_ratio = (pos.x + app.window_rect().w() / 2.0) / app.window_rect().w();
+            // model.param1 = (pos.x + app.window_rect().w() / 2.0) / app.window_rect().w();
         }
         MousePressed(button) => match button {
             MouseButton::Left => {
@@ -890,22 +1095,51 @@ fn rendering_frame_path(
 ) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     // let now: DateTime<Utc> = Utc::now();
-    rendering_frame_folder_path(app, draw_mode, name)
+    let path = rendering_frame_folder_path(app, draw_mode, name)
         .join(format!("{:04}", frame_number))
         // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
-        .with_extension("png")
+        .with_extension("png");
+    // Create the parent dir of the new file if it doesn't exist
+    let mut new_path_parent = path.clone();
+    new_path_parent.pop();
+    fs::create_dir_all(new_path_parent).expect("Failed to create directory for screenshots");
+    path
+}
+fn rendering_visit_path(
+    app: &App,
+    draw_mode: &DrawMode,
+    name: &str,
+    timestamp: &str,
+) -> std::path::PathBuf {
+    // Create a path that we want to save this frame to.
+    // let now: DateTime<Utc> = Utc::now();
+    let path = rendering_frame_folder_path(app, draw_mode, name)
+        .join(timestamp)
+        // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
+        .with_extension("png");
+    // Create the parent dir of the new file if it doesn't exist
+    let mut new_path_parent = path.clone();
+    new_path_parent.pop();
+    fs::create_dir_all(new_path_parent).expect("Failed to create directory for screenshots");
+    path
 }
 
 fn rendering_video_path(app: &App, draw_mode: &DrawMode, name: &str) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     // let now: DateTime<Utc> = Utc::now();
-    app.project_path()
+    let path = app
+        .project_path()
         .expect("failed to locate `project_path`")
         // Capture all frames to a directory called `/<path_to_nannou>/nannou/simple_capture`.
         .join("renders")
         .join(name)
         .join(&format!("{}_{}", name, draw_mode.to_str()))
-        .with_extension("mp4")
+        .with_extension("mp4");
+    // Create the parent dir of the new file if it doesn't exist
+    let mut new_path_parent = path.clone();
+    new_path_parent.pop();
+    fs::create_dir_all(new_path_parent).expect("Failed to create directory for screenshots");
+    path
 }
 
 fn screenshot_collection_path(app: &App, name: &str, frame_number: usize) -> std::path::PathBuf {
@@ -962,4 +1196,16 @@ fn copy_screenshot(folder_path: &PathBuf, app: &App, name: &str, frame_number: u
         Ok(_) => (),
         Err(e) => eprintln!("{}", e),
     }
+}
+
+// Wait for capture to finish.
+fn exit(app: &App, model: Model) {
+    println!("Waiting for PNG writing to complete...");
+    let window = app.main_window();
+    let device = window.swap_chain_device();
+    model
+        .texture_capturer
+        .await_active_snapshots(&device)
+        .unwrap();
+    println!("Done!");
 }
