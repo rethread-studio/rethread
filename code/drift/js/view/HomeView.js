@@ -18,7 +18,7 @@ class HomeView {
                 <button id="meetRobotBtn" type="button">Meet <br>the robot</button>
                 <button id="exhibitionBtn" type="button">View <br>Exhibition</button>
                 <button id="tourBtn" type="button">Virtual <br>tour</button>
-                <button id="AboutBtn" type="button">About <br>rethread</button>
+                <button id="AboutBtn" type="button">About <br>re|thread</button>
             </ul>
         </div>
     </div>

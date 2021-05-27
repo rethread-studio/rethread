@@ -19,6 +19,9 @@ window.onload = function () {
     let aboutView = new AboutView('page-content', model);
     aboutViewController = new AboutViewController(aboutView);
 
+    let mainMenuView = new MainMenuView('mainMenu', model);
+    mainMenuViewController = new MainMenuViewController(mainMenuView);
+
     //start home view
     showView("home");
 };
@@ -30,20 +33,26 @@ function showView(view) {
     switch (view) {
         case 'home':
             homeViewController.renderView();
+            mainMenuViewController.unMountView();
             break;
         case 'exhibition':
             exhibitionViewController.renderView();
+            mainMenuViewController.renderView();
             break;
         case 'meetTheRobot':
             robotViewController.renderView();
+            mainMenuViewController.renderView();
             break;
         case 'tour':
             tourViewController.renderView();
+            mainMenuViewController.renderView();
             break;
         case 'about':
             aboutViewController.renderView();
+            mainMenuViewController.renderView();
             break;
         default:
             homeViewController.renderView();
+            mainMenuViewController.unMountView();
     }
 }
