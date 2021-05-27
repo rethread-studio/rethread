@@ -3,7 +3,11 @@ class MainMenuView {
     constructor(container) {
 
         this.container = document.getElementById(container);
-
+        this.home_link = null;
+        this.meetRobot_link = null;
+        this.viewExhibition_link = null;
+        this.takeTour_link = null;
+        this.aboutReThread_link = null;
     }
 
     render() {
@@ -14,19 +18,19 @@ class MainMenuView {
 
     <!-- Menu items -->
     <div class="text-lg text-gray-600 hidden lg:flex">
-        <a href="#" class="block mt-4 lg:inline-block text-teal-600 lg:mt-0 mr-10">
+        <a id="home" href="#" class="block mt-4 lg:inline-block text-teal-600 lg:mt-0 mr-10">
             Drift
         </a>
-        <a href="#" class="block mt-4 lg:inline-block hover:text-gray-700 lg:mt-0 mr-10">
+        <a id="meetRobot" href="#" class="block mt-4 lg:inline-block hover:text-gray-700 lg:mt-0 mr-10">
             Meet<br>the robot
         </a>
-        <a href="#" class="block mt-4 lg:inline-block hover:text-gray-700 lg:mt-0 mr-10">
+        <a id="viewExhibit" href="#" class="block mt-4 lg:inline-block hover:text-gray-700 lg:mt-0 mr-10">
             View <br>Exhibition
         </a>
-        <a href="#" class="block hover:text-gray-700 mt-4 lg:inline-block lg:mt-0 mr-10">
+        <a id="virtualTour" href="#" class="block hover:text-gray-700 mt-4 lg:inline-block lg:mt-0 mr-10">
             Virtual <br>tour
         </a>
-        <a href="#" class="block hover:text-gray-700 mt-4 lg:inline-block lg:mt-0">
+        <a id="aboutRethread" href="#" class="block hover:text-gray-700 mt-4 lg:inline-block lg:mt-0">
             About <br>re|thread
         </a>
     </div>
@@ -48,18 +52,19 @@ class MainMenuView {
 </header>
 		`;
         this.container.innerHTML = content;
-        // this.setIdentifications();
+        this.setIdentifications();
     }
 
     unMount() {
         this.container.innerHTML = ``;
     }
 
-    // setIdentifications() {
-    //     this.meetRobot_btn = document.getElementById("meetRobotBtn");
-    //     this.viewExhibition_btn = document.getElementById("exhibitionBtn");
-    //     this.takeTour_btn = document.getElementById("tourBtn");
-    //     this.aboutReThread_btn = document.getElementById("AboutBtn");
-    // }
+    setIdentifications() {
+        this.home_link = document.getElementById("home");
+        this.meetRobot_link = document.getElementById("meetRobot");
+        this.viewExhibition_link = document.getElementById("viewExhibit");
+        this.takeTour_link = document.getElementById("virtualTour");
+        this.aboutReThread_link = document.getElementById("aboutRethread");
+    }
 }
 

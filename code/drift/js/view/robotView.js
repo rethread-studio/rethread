@@ -16,7 +16,7 @@ class RobotView {
 
         new Twitch.Embed("twitch-embed", {
             width: window.innerWidth,
-            height: window.innerHeight,
+            height: window.innerHeight * 0.9,
             autoplay: true,
             muted: true,
             theme: "dark",
