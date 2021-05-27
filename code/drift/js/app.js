@@ -1,8 +1,7 @@
 window.onload = function () {
     //We instantiate our model
     let model = new DriftModel();
-    model.getData()
-
+    model.init();
 
     //Initialize VIEWS and controllers
     let homeView = new HomeView('page-content');
@@ -11,9 +10,13 @@ window.onload = function () {
     let exhibitionView = new ExhibitionView('page-content', model);
     exhibitionViewController = new ExhibitionViewController(exhibitionView);
 
+    let robotView = new RobotView('page-content', model);
+    robotViewController = new RobotController(exhibitionView);
+
+
 
     //start home view
-    showView("exhibition");
+    showView("home");
 };
 
 //show view
@@ -26,6 +29,9 @@ function showView(view) {
             break;
         case 'exhibition':
             exhibitionViewController.renderView();
+            break;
+        case 'robot':
+            robotViewController.renderView();
             break;
         default:
             homeViewController.renderView();

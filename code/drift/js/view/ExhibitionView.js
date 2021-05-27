@@ -9,7 +9,7 @@ class ExhibitionView {
     render() {
         var content = `
         <div id="webSitesWrapper"></div>
-        <div id="wrapper"></div>
+        <div id="sideMenuWrapper"></div>
 		`;
         this.container.innerHTML = content;
         this.renderMainVis();
@@ -21,8 +21,16 @@ class ExhibitionView {
     }
 
     renderMainVis() {
+        //ADD MAIN VISUALIZATION VIEW
         let mainVisView = new MainVisView("webSitesWrapper", this.model);
         this.mainVizController = new MainVisController(mainVisView, this.model);
         this.mainVizController.renderView();
+
+        //ADD SIDE MENU VIEW
+        let sideMenuView = new SideMenuView("sideMenuWrapper", this.model);
+        this.sideMenuController = new SideMenuController(sideMenuView, this.model);
+        this.sideMenuController.renderView();
+        //ADD TIMELINE VIEW
+
     }
 }

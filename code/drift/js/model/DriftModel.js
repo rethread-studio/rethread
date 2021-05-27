@@ -10,6 +10,13 @@ const calculateSize = (active, inactive) => (d) => {
     d.value = d.state == 0 ? inactive : active;
     return d;
 }
+//update the state of the menu item 
+const updateState = (_name) => {
+    return (d) => {
+        d.state = d.name == _name ? 1 : 0;
+        return d;
+    }
+}
 
 class DriftModel {
 
@@ -30,11 +37,83 @@ class DriftModel {
         }
         this.visDimensions.boundedWidth = this.visDimensions.width - this.visDimensions.margin.right - this.visDimensions.margin.left;
         this.visDimensions.boundedHeight = this.visDimensions.height - this.visDimensions.margin.top - this.visDimensions.margin.bottom;
+
+        this.menuDimensions = {
+            width: 150,
+            height: window.innerHeight * 0.3,
+            margin: {
+                top: 10,
+                right: 10,
+                bottom: 10,
+                left: 30
+            }
+        }
+        this.menuDimensions.boundedWidth = this.menuDimensions.width - this.menuDimensions.margin.left - this.menuDimensions.margin.right;
+        this.menuDimensions.boundedHeight = this.menuDimensions.height - this.menuDimensions.margin.top - this.menuDimensions.margin.bottom;
+
+        this.rectDimensions = {
+            height: 5,
+            width: 1,
+        }
+        this.rectDimensions.sectionHeight = this.menuDimensions.height / this.menu.length;
+
+    }
+
+    init() {
+        this.getData();
+        this.loadMenu("views");
+    }
+
+    getRectDimensions() {
+        return this.rectDimensions;
+    }
+
+    getSideMenudimensions() {
+        return this.menuDimensions;
     }
 
     getVisDimensions() {
         return this.visDimensions;
     }
+
+    getData(type) {
+        this.data = apiService.getData(type);
+    }
+
+    loadMenu(type) {
+        this.menu = apiService.getMenu(type)
+        this.rectDimensions.sectionHeight = this.menuDimensions.height / this.menu.length;
+        this.currentSection = this.menu[0];
+        // apiService.getMenu(type)
+        //     .then(data => {
+        //         this.menu = data;
+        //         this.notifyObservers({ type: "newMenu", menu: this.menu });
+
+        //     }).catch(error => {
+        //         console.log('Get menu error:', error);
+        //         this.notifyObservers({ type: "error", menu: this.menu });
+        //     });
+
+    }
+    /*
+    getMenu 
+    type :  string with either SITES or VIEWS
+    return a object array with the sections for the website
+    */
+    getMenu(type) {
+        return this.menu;
+    }
+
+    calculatePack() {
+        return d3.pack()
+            .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
+            .padding(10)
+            (d3.hierarchy(this.data)
+                .sum(hierarchySize)
+                .sort(sortBySize))
+    }
+
+
 
     //add observers to the model
     addObserver(observer) {
@@ -51,43 +130,31 @@ class DriftModel {
         }
     }
 
-    getData(type) {
-        this.data = apiService.getData(type);
-    }
-    /*
-    getMenu 
-    type :  string with either SITES or VIEWS
-    return a object array with the sections for the website
-    */
-    getMenu(type) {
-        apiService.getMenu(type)
-            .then(data => {
-                this.menu = data;
-                this.notifyObservers({ type: "newMenu", menu: this.menu });
-
-            }).catch(error => {
-                console.log('Get menu error:', error);
-                this.notifyObservers({ type: "error", menu: this.menu });
-            });
-
+    getSectionPos() {
+        return d3.scaleLinear()
+            .rangeRound([0, this.menu.length - 1]);
     }
 
-    getPack() {
-        return d3.pack()
-            .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
-            .padding(10)
-            (d3.hierarchy(this.data)
-                .sum(hierarchySize)
-                .sort(sortBySize))
-    }
+    isNewMenu(scrollY, windowHeight) {
+        const sectionPos = this.getSectionPos()
+        const nextSection = this.menu[sectionPos(scrollY / windowHeight)];
 
+        //check if it is a different section
+        const isDifferent = this.currentSection.name != nextSection.name;
+        //diferent section update and update DATA
+        if (isDifferent) {
+            this.currentSection = nextSection;
+            this.menu = this.menu.map(updateState(this.currentSection.name))
+            this.notifyObservers({ type: "updateSideMenu" });
+        }
+
+    }
 
     selectDataItem(item) {
 
         //update the data
         const node = this.data.children.find(findByName(item.data.name))
         node.state = node.state == 0 ? 1 : 0;
-
 
         const percentageActive = 95;
         const percentageInactive = 100 - percentageActive;
@@ -100,8 +167,7 @@ class DriftModel {
         this.data.children = this.data.children.map(calculateSize(activeSize, inactiveSize))
 
         this.notifyObservers({ type: "selectItem" });
-        //alert 
-        // updateWebSites(data)
+
     }
 
 }

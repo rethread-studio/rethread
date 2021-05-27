@@ -1,6 +1,6 @@
 
 
-//ACCESSORS
+//ACCESSORS 
 const stateAccessor = (d) => d.data.state;
 const logoAccessor = (d) => stateAccessor(d) == 0 ? `./img/${d.data.logo}` : `./img/${d.data.image}`;
 const translateToCenter = (radius, dimensions) => () => `translate(${dimensions.boundedWidth / 2 - radius},${dimensions.boundedHeight / 2 - radius})`;
@@ -85,7 +85,7 @@ class MainVisView {
 
     renderBubles() {
         //calculate positions
-        const pack = this.model.getPack()
+        const pack = this.model.calculatePack()
 
         d3.select("#" + this.container)
             .select(".bounds")
@@ -101,6 +101,8 @@ class MainVisView {
     //update info when modified in model
     update(changeDetails) {
         if (changeDetails.type == "selectItem") {
+            this.renderBubles();
+        } else if (changeDetails.type == "updateSideMenu") {
             this.renderBubles();
         }
     }
