@@ -13,7 +13,7 @@ class ExhibitionView {
 		`;
         this.container.innerHTML = content;
         this.renderMainVis();
-
+        this.renderSideMenu();
     }
 
     setIdentifications() {
@@ -25,12 +25,13 @@ class ExhibitionView {
         let mainVisView = new MainVisView("webSitesWrapper", this.model);
         this.mainVizController = new MainVisController(mainVisView, this.model);
         this.mainVizController.renderView();
+    }
 
+    renderSideMenu() {
         //ADD SIDE MENU VIEW
         let sideMenuView = new SideMenuView("sideMenuWrapper", this.model);
         this.sideMenuController = new SideMenuController(sideMenuView, this.model);
         this.sideMenuController.renderView();
         //ADD TIMELINE VIEW
-
     }
 }

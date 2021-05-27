@@ -11,9 +11,7 @@ window.onload = function () {
     exhibitionViewController = new ExhibitionViewController(exhibitionView);
 
     let robotView = new RobotView('page-content', model);
-    robotViewController = new RobotController(exhibitionView);
-
-
+    robotViewController = new RobotViewController(robotView);
 
     //start home view
     showView("home");
@@ -30,7 +28,7 @@ function showView(view) {
         case 'exhibition':
             exhibitionViewController.renderView();
             break;
-        case 'robot':
+        case 'meetTheRobot':
             robotViewController.renderView();
             break;
         default:
