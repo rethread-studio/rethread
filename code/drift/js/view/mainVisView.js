@@ -104,6 +104,9 @@ class MainVisView {
             this.renderBubles();
         } else if (changeDetails.type == "updateSideMenu") {
             this.renderBubles();
+        } else if (changeDetails.type == "updateData") {
+            this.renderBubles();
         }
+
     }
 }

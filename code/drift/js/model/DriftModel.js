@@ -22,17 +22,17 @@ class DriftModel {
 
     constructor() {
         this.menu = []; //menu is the list of views or list of sites
-        this.data = {} //is the current sites or views to displa in the viz
+        this.data = dataTest //is the current sites or views to displa in the viz
         this.currentSection = this.menu[0];
         this.observers = [];
         this.visDimensions = {
             width: window.innerWidth,
             height: window.innerHeight,
             margin: {
-                top: 50,
+                top: 0,
                 right: 150,
-                bottom: 100,
-                left: 50
+                bottom: 200,
+                left: 20
             }
         }
         this.visDimensions.boundedWidth = this.visDimensions.width - this.visDimensions.margin.right - this.visDimensions.margin.left;
@@ -57,11 +57,14 @@ class DriftModel {
         }
         this.rectDimensions.sectionHeight = this.menuDimensions.height / this.menu.length;
 
+        this.visits = [];
     }
 
     init() {
         this.getData();
         this.loadMenu("views");
+        this.getSitesVisits()
+
     }
 
     getRectDimensions() {
@@ -77,7 +80,25 @@ class DriftModel {
     }
 
     getData(type) {
-        this.data = apiService.getData(type);
+        apiService.getData(type)
+            .then(data => data.map((site, i) => {
+                return {
+                    name: site,
+                    state: i == 0 ? 1 : 0,
+                    value: 0,
+                    image: "imgTest.png",
+                    logo: `logo.${site}.png`
+                }
+            })
+            )
+            .then(children => {
+                this.data = {
+                    value: 0,
+                    children: children
+                }
+                this.calculateDataValues();
+                this.notifyObservers({ type: "updateData" });
+            })
     }
 
     loadMenu(type) {
@@ -150,24 +171,43 @@ class DriftModel {
 
     }
 
+    getSitesVisits() {
+        const sites = this.data.children
+            .filter((site) => site.state == 1)
+            .map((site) => site.name)
+        apiService.getVisitDates(sites)
+            .then(data => {
+                this.visits = d3.merge(data)
+                    .sort((a, b) => a - b)
+                this.notifyObservers({ type: "updateVisits" });
+            })
+
+    }
+
+
     selectDataItem(item) {
 
         //update the data
         const node = this.data.children.find(findByName(item.data.name))
         node.state = node.state == 0 ? 1 : 0;
 
+
+
+        this.calculateDataValues();
+
+        this.notifyObservers({ type: "selectItem" });
+
+    }
+
+    calculateDataValues() {
         const percentageActive = 95;
         const percentageInactive = 100 - percentageActive;
-
         //get the amount of active
         //get the total
         const activeNodes = this.data.children.filter(filterByState(1)).length
         const activeSize = percentageActive / activeNodes;
         const inactiveSize = percentageInactive / (this.data.children.length - activeNodes)
         this.data.children = this.data.children.map(calculateSize(activeSize, inactiveSize))
-
-        this.notifyObservers({ type: "selectItem" });
-
     }
 
 }

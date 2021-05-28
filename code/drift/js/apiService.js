@@ -9,9 +9,11 @@ class ApiService {
         return requestService.getRequest(url)
     }
 
-    getVisitDates(site) {
-        var url = `${BASE_URL}/api/site/${site}/visits`;
-        return requestService.getRequest(url);
+    getVisitDates(sites) {
+        return Promise.all(sites.map(site => {
+            const url = `${BASE_URL}/api/site/${site}/visits`;
+            return requestService.getRequest(url)
+        }))
     }
 
     getMenu(type) {
@@ -19,9 +21,9 @@ class ApiService {
     }
 
     getData(type) {
-        return dataTest;
+        const url = `${BASE_URL}/api/sites`;
+        return requestService.getRequest(url)
     }
-
 
 }
 
@@ -33,7 +35,7 @@ const dataTest = {
     children: [
         {
             name: "bing",
-            state: 0,
+            state: 1,
             value: 1.25,
             image: "imgTest.png",
             logo: "logo.bing.png",
@@ -44,7 +46,7 @@ const dataTest = {
             state: 0,
             value: 1.25,
             image: "imgTest.png",
-            logo: "logo.duck.png",
+            logo: "logo.duckduckgo.png",
 
         },
         {
@@ -76,7 +78,7 @@ const dataTest = {
             state: 0,
             value: 1.25,
             image: "imgTest.png",
-            logo: "logo.wiki.png",
+            logo: "logo.wikipedia.png",
 
         },
         {

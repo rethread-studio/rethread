@@ -30,7 +30,7 @@ class MainMenuViewController {
     }
 
     removeEventListener() {
-        this.view.meetRobot_link.addEventListener("click", () => {
+        this.view.home_link.removeEventListener("click", () => {
             showView('meetTheRobot');
         });
         this.view.meetRobot_link.removeEventListener("click", () => {
@@ -48,7 +48,7 @@ class MainMenuViewController {
     }
 
     unMountView() {
-        this.removeEventListener()
+        if (this.view.home_link != null) this.removeEventListener()
         this.view.unMount();
     }
 
