@@ -12,13 +12,14 @@ const steps = [
   "yahoo",
   "wikipedia",
 ];
-schedule.scheduleJob("*/5 * * * *", async () => {
+schedule.scheduleJob("0 * * * *", async () => {
   for (let step of steps) {
     try {
       const bot = new ITBot();
 
       const d = new Date();
       d.setMilliseconds(0);
+      d.setSeconds(0);
       d.setMinutes(0);
       const session = `${step}/${d.getTime()}`;
       await bot.runStep({
