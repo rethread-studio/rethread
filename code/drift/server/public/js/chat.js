@@ -105,7 +105,7 @@ $(function () {
   });
 
   socket.on("users", (data) => {
-    $("#users-list").html();
+    $("#users-list").html("");
     console.log(data);
     for (let user of data) {
       $("#users-list").append(
