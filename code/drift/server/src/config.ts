@@ -1,0 +1,1 @@
+export const OUTPUT_PATH = "/Users/tdurieux/git/ITBot/out";

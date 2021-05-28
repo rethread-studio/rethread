@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "experimentalDecorators": true,
+      "module": "commonjs",
+      "target": "es5",
+      "outDir": "lib",
+      "lib": ["es5"],
+      "moduleResolution": "node",
+      "declaration": true,
+      // "strict": true
+    },
+    "exclude": ["node_modules", "tests"],
+    "include": ["src"],
+  }
