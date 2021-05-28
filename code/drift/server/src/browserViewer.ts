@@ -1,15 +1,19 @@
 import { io } from "socket.io-client";
 import { join } from "path";
+import { existsSync } from "fs";
 import ITBot from "itbot";
 
-const socket = io("ws://drift.durieux.me:8080");
+const socket = io("https://drift.durieux.me");
 
 socket.on("elected", (data) => {
   const bot = new ITBot();
-
+  const stepPath = join("websites", data.website + ".steps");
+  if (!existsSync(stepPath)) {
+    return;
+  }
   bot.runStep({
     outputPath: "trash",
-    stepPath: join("websites", data.website),
+    stepPath,
     collectNetwork: false,
     collectProfile: false,
   });
