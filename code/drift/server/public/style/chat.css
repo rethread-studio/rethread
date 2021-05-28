@@ -35,9 +35,18 @@ body {
   flex-direction: column;
   border-left: 1px solid #333;
 }
+#users-list .icon {
+  width: 15px;
+  height: 15px;
+  background-size: 100%;
+  border-radius: 5px;
+  float: left;
+  margin: 2px;
+}
 #messages {
   height: 100%;
   padding: 7px;
+  overflow: scroll;
 }
 .message {
   min-height: 55px;
