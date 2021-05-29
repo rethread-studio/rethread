@@ -20,12 +20,12 @@ class TimeLineController {
     }
 
     changeSelection() {
-        this.model.setSpeed(this.view.selectMenu.selectedIndex)
+        this.model.setSpeed(this.view.selectMenu.selectedIndex);
     }
 
     addEventListeners() {
         this.view.play_btn.addEventListener("click", this.clickHandler);
-        this.view.selectMenu.addEventListener("change", this.changeHandler)
+        this.view.selectMenu.addEventListener("change", this.changeHandler);
     }
 
 

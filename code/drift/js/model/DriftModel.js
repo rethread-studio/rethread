@@ -169,6 +169,14 @@ class DriftModel {
             })
     }
 
+    getCurrentTime() {
+        return d3.timeFormat("%b %d %a %H:%M")(this.visits[this.currentVisitPos])
+    }
+
+    isSliderInMiddle() {
+        return this.currentVisitPos > this.visits.length / 2 ? true : false;
+    }
+
     loadMenu(type) {
         this.menu = apiService.getMenu(type)
         this.rectDimensions.sectionHeight = this.menuDimensions.height / this.menu.length;
@@ -287,7 +295,7 @@ class DriftModel {
         const scale = d3.scaleLinear()
             .domain(extent)
             .range([0, this.timeLineDimensions.rectDimensions.width]);
-        // Add scales to axis
+        // Add scales to axis 
         const formatHour = date => d3.timeFormat("%H:%M")(date)
         const formatDay = date => d3.timeFormat("%d %a")(date)
         const formatMonth = date => d3.timeFormat("%b")(date)

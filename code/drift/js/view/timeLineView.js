@@ -54,14 +54,22 @@ class TimeLineView {
             .attr("width", rectDimensions.width)
             .style("fill", "#ffffff")
 
-        timeLine.append("rect")
+        const slider = timeLine.append("g")
             .attr("id", "sliderTimeLine")
-            .attr("height", sliderDimensions.height)
-            .attr("width", sliderDimensions.width)
-            .style("fill", "#ffffff")
             .style("transform", `translate(${0
                 }px, ${-sliderDimensions.height / 2
                 }px)`)
+
+        slider.append("rect")
+            .attr("height", sliderDimensions.height)
+            .attr("width", sliderDimensions.width)
+            .style("fill", "#ffffff")
+
+        slider.append("text")
+            .attr("id", "currentTime")
+            .attr("y", -10)
+            .style("fill", "#ffffff")
+            .text()
 
         this.updateSlider()
         this.renderAllAxis()
@@ -71,10 +79,17 @@ class TimeLineView {
     updateSlider() {
         const { height, width } = this.model.getSliderHeight();
         const getSliderXPos = this.model.calculateSliderPos();
+        const currentTime = this.model.getCurrentTime();
+        const isMiddle = this.model.isSliderInMiddle() ? "end" : "start";
+
         d3.select("#sliderTimeLine")
             .style("transform", `translate(${getSliderXPos - width / 2
                 }px, ${-height / 2
                 }px)`)
+        d3.select("#currentTime")
+            .text(currentTime)
+            .attr("text-anchor", isMiddle)
+
     }
 
     renderAllAxis() {
