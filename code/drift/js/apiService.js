@@ -5,15 +5,14 @@ class ApiService {
 
     //return an array with all the available sites
     getSites() {
-        var url = `${BASE_URL}/api/sites`;
+        const url = `${BASE_URL}/api/websites`;
         return requestService.getRequest(url)
     }
 
-    getVisitDates(sites) {
-        return Promise.all(sites.map(site => {
-            const url = `${BASE_URL}/api/site/${site}/visits`;
-            return requestService.getRequest(url)
-        }))
+    getTimes() {
+        const url = `${BASE_URL}/api/times`;
+        return requestService.getRequest(url)
+
     }
 
     getMenu(type) {
@@ -22,6 +21,31 @@ class ApiService {
 
     getData(type) {
         const url = `${BASE_URL}/api/sites`;
+        return requestService.getRequest(url)
+    }
+
+    getSiteScreenshot(site, time) {
+        const url = `${BASE_URL}/api/time/${time}/${site}/screenshot.png?format=:format?&width=:width?&height=height?`
+        return requestService.getRequest(url)
+    }
+
+    getSiteGraph(site, time) {
+        const url = `${BASE_URL}/api/time/${time}/${site}/graph.png?format=:format?&width=:width?&height=height?`
+        return requestService.getRequest(url)
+    }
+
+    getSiteCoverage(site, time) {
+        const url = `${BASE_URL}/api/time/${time}/${site}/coverage.png?format=:format?&width=:width?&height=height?`
+        return requestService.getRequest(url)
+    }
+
+    getSiteNetwork(site, time) {
+        const url = `${BASE_URL}/api/time/${time}/${site}/network.png?format=:format?&width=:width?&height=height?`
+        return requestService.getRequest(url)
+    }
+
+    getSiteProfile(site, time) {
+        const url = `${BASE_URL}/api/time/${time}/${site}/profile.png?format=:format?&width=:width?&height=height?`
         return requestService.getRequest(url)
     }
 

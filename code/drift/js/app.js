@@ -23,7 +23,7 @@ window.onload = function () {
     mainMenuViewController = new MainMenuViewController(mainMenuView);
 
     //start home view
-    showView("home");
+    showView("exhibition");
 };
 
 //show view

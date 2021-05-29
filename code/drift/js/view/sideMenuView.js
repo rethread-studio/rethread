@@ -1,5 +1,5 @@
 const nameAccessor = (d) => d.name;
-const getState = (d) => d.state == 1 ? "menuText active" : "menuText"
+const getState = (d) => d.state == 1 ? "menuText active cursor-pointer" : "menuText cursor-pointer"
 const getStyle = (rectDimensions) => (d, i) => `translate(${-20
     }px, ${rectDimensions.sectionHeight * i + rectDimensions.sectionHeight / 2
     }px)`;

@@ -38,10 +38,10 @@ h1{
     height: 100%;
 }
 
-.container{
-    display: flex;
+.content{
+    /* display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center; */
     height: 100%;
     position: relative;
 }
@@ -124,7 +124,6 @@ button{
     fill: #4d4e50;
     text-anchor: end;
     opacity: 20;
-    cursor: pointer;
 }
 
 .menuText.active{
@@ -143,3 +142,15 @@ button{
     right: 0;
     height: 0;
   }
+
+  .translate-middle{
+    transform: translate(0%,-50%);
+  }
+
+  g.tick {
+    color: white;
+}
+
+.white{
+    color:white;
+}

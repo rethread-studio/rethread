@@ -10,10 +10,12 @@ class ExhibitionView {
         var content = `
         <div id="webSitesWrapper"></div>
         <div id="sideMenuWrapper"></div>
+        <div id="timeLineWrapper"></div>
 		`;
         this.container.innerHTML = content;
         this.renderMainVis();
         this.renderSideMenu();
+        this.renderTimeLine();
     }
 
     setIdentifications() {
@@ -31,7 +33,14 @@ class ExhibitionView {
         //ADD SIDE MENU VIEW
         let sideMenuView = new SideMenuView("sideMenuWrapper", this.model);
         this.sideMenuController = new SideMenuController(sideMenuView, this.model);
+
         this.sideMenuController.renderView();
-        //ADD TIMELINE VIEW
+    }
+
+    renderTimeLine() {
+        let timeLineView = new TimeLineView("timeLineWrapper", this.model);
+        this.timeLineController = new TimeLineController(timeLineView, this.model);
+
+        this.timeLineController.renderView();
     }
 }

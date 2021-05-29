@@ -58,6 +58,7 @@ class MainVisView {
                 .attr("transform", translaeWithRadius)
                 .attr("width", getSize)
                 .attr("height", getSize)
+                .attr("class", "cursor-pointer")
         }
     }
     onUpdate() {

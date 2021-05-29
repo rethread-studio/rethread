@@ -58,6 +58,48 @@ class DriftModel {
         this.rectDimensions.sectionHeight = this.menuDimensions.height / this.menu.length;
 
         this.visits = [];
+
+        this.timeLineDimensions = {
+            width: window.innerWidth * 0.95,
+            height: 150,
+            margin: {
+                top: 10,
+                right: 10,
+                bottom: 10,
+                left: 10
+            },
+            rectDimensions: {
+                height: 3,
+                width: window.innerWidth * 0.8,
+            },
+            sliderDimensions: {
+                height: 50,
+                width: 5,
+            }
+
+        }
+        this.timeLineDimensions.boundedWidth = this.timeLineDimensions.width - this.timeLineDimensions.margin.left - this.timeLineDimensions.margin.right;
+        this.timeLineDimensions.boundedHeight = this.timeLineDimensions.height - this.timeLineDimensions.margin.top - this.timeLineDimensions.margin.bottom;
+
+        this.currentVisitPos = 0;
+        this.baseSpeed = 1000;
+        this.currentSpeed = 0;
+        this.playState = false;
+
+        this.sliderSpeed = [
+            {
+                text: "Normal",
+                speed: 1000
+            },
+            {
+                text: "1.5",
+                speed: this.baseSpeed / 2
+            },
+            {
+                text: "2",
+                speed: this.baseSpeed / 9
+            },
+        ]
     }
 
     init() {
@@ -65,6 +107,24 @@ class DriftModel {
         this.loadMenu("views");
         this.getSitesVisits()
 
+    }
+
+    getCurrentSpeed() {
+        return this.sliderSpeed[this.currentSpeed];
+    }
+
+    getPlayState() {
+        return this.playState;
+    }
+
+    getChangePlayState() {
+        this.playState = !this.playState;
+        const type = this.playState ? "playTimeLine" : "pauseTimeLine"
+        this.notifyObservers({ type: type });
+    }
+
+    getSliderSpeed() {
+        return this.sliderSpeed;
     }
 
     getRectDimensions() {
@@ -75,8 +135,16 @@ class DriftModel {
         return this.menuDimensions;
     }
 
+    getTimeLineDimensions() {
+        return this.timeLineDimensions;
+    }
+
     getVisDimensions() {
         return this.visDimensions;
+    }
+
+    getSliderHeight() {
+        return this.timeLineDimensions.sliderDimensions;
     }
 
     getData(type) {
@@ -175,11 +243,13 @@ class DriftModel {
         const sites = this.data.children
             .filter((site) => site.state == 1)
             .map((site) => site.name)
-        apiService.getVisitDates(sites)
+        apiService.getTimes(sites)
+            //strings to int
+            .then(visits => visits.map(visit => new Date(parseInt(visit))))
+            //set visits and notify
             .then(data => {
-                this.visits = d3.merge(data)
-                    .sort((a, b) => a - b)
-                this.notifyObservers({ type: "updateVisits" });
+                this.visits = data;
+                this.notifyObservers({ type: "updateTimeLine" });
             })
 
     }
@@ -208,6 +278,68 @@ class DriftModel {
         const activeSize = percentageActive / activeNodes;
         const inactiveSize = percentageInactive / (this.data.children.length - activeNodes)
         this.data.children = this.data.children.map(calculateSize(activeSize, inactiveSize))
+    }
+
+    calculateBottomAxis() {
+        // Create scale
+        const extent = d3.extent(this.visits)
+        const scale = d3.scaleLinear()
+            .domain(extent)
+            .range([0, this.timeLineDimensions.rectDimensions.width]);
+        // Add scales to axis
+        const formatHour = date => d3.timeFormat("%H:%M")(date)
+        const formatDay = date => d3.timeFormat("%d %a")(date)
+        const formatMonth = date => d3.timeFormat("%b")(date)
+        const formatYear = date => d3.timeFormat("%Y")(date)
+        const axis = d3.axisBottom()
+            .scale(scale);
+
+        const everyDay = d3.timeDay.every(7).range(extent[0], extent[1]).length;
+        const everyHour = everyDay * 3;//d3.timeHour.every(144).range(extent[0], extent[1]).length;
+        const everyMonth = d3.timeMonth.every(3).range(extent[0], extent[1]).length;
+        const everyYear = d3.timeYear.every(1).range(extent[0], extent[1]).length;
+
+        return [
+            {
+                format: formatHour,
+                numTicks: everyHour,
+                padding: [0],
+                axis: axis,
+            },
+            {
+                format: formatDay,
+                numTicks: everyDay,
+                padding: [-20],
+                axis: axis,
+            },
+            {
+                format: formatYear,
+                numTicks: everyYear == 0 ? 1 : everyYear,
+                padding: [-40],
+                axis: axis,
+            },
+            {
+                format: formatMonth,
+                numTicks: everyMonth == 0 ? 1 : everyMonth,
+                padding: [-30],
+                axis: axis,
+            },
+        ]
+    }
+
+    advanceSliderPos() {
+        const newPos = this.currentVisitPos + 1;
+        this.currentVisitPos = newPos % this.visits.length == 0 ? 0 : newPos;
+        this.notifyObservers({ type: "updateSlider" });
+    }
+
+    calculateSliderPos() {
+        const currentDate = this.visits[this.currentVisitPos]//this.visits.length - 1
+        const extent = d3.extent(this.visits)
+        const scale = d3.scaleLinear()
+            .domain(extent)
+            .range([0, this.timeLineDimensions.rectDimensions.width]);
+        return scale(currentDate);
     }
 
 }
