@@ -13,7 +13,7 @@ class TimeLineView {
         const rectDimensions = dimensions.rectDimensions;
         const sliderDimensions = dimensions.sliderDimensions;
         const options = this.model.getSliderSpeed().map(speed => `<option>${speed.text}</option>`);
-        const playButton = this.model.getPlayState() ? "play" : "pause";
+        const playButton = this.model.getPlayState() ? "pause" : "play";
         const buttons = `
         <div class="flex flex-row justify-center content-center items-center pl-6">
         <button id="playBtn" class="mr-8" >${playButton}</button>
@@ -91,7 +91,7 @@ class TimeLineView {
     }
 
     updatePlayBtn() {
-        const playButton = this.model.getPlayState() ? "play" : "pause";
+        const playButton = this.model.getPlayState() ? "pause" : "play";
         const butnContainer = document.getElementById("playBtn");
         butnContainer.innerHTML = playButton;
     }
