@@ -6,6 +6,8 @@ class TimeLineController {
         this.model = model;
         this.timeInterval = null;
         this.model.addObserver(this);
+        this.clickHandler = this.onClick.bind(this);
+        this.changeHandler = this.changeSelection.bind(this);
     }
 
     renderView() {
@@ -13,15 +15,17 @@ class TimeLineController {
         this.addEventListeners();
     }
 
+    onClick() {
+        this.model.getChangePlayState();
+    }
+
+    changeSelection() {
+        this.model.setSpeed(this.view.selectMenu.selectedIndex)
+    }
+
     addEventListeners() {
-
-        this.view.play_btn.addEventListener("click", () => {
-            this.model.getChangePlayState();
-        });
-
-        this.view.selectMenu.addEventListener("change", () => {
-            this.model.setSpeed(this.view.selectMenu.selectedIndex)
-        })
+        this.view.play_btn.addEventListener("click", this.clickHandler);
+        this.view.selectMenu.addEventListener("change", this.changeHandler)
     }
 
 
@@ -37,12 +41,16 @@ class TimeLineController {
     }
 
     removeEventListeners() {
-
+        this.view.play_btn.removeEventListener("click", this.clickHandler);
+        this.view.selectMenu.removeEventListener("change", this.changeHandler)
     }
 
-    unmount() {
+
+    unMountView() {
+        this.model.removeObserver(this);
         this.removeTimeInterval();
         this.removeEventListeners();
+        this.model.resetSlider();
     }
 
     update(changeDetails) {

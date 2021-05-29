@@ -17,4 +17,8 @@ class ExhibitionViewController {
         this.view.render();
         // this.addEventListener();
     }
+
+    unMountView() {
+        this.view.unMountView()
+    }
 }

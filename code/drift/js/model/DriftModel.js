@@ -207,10 +207,11 @@ class DriftModel {
     //add observers to the model
     addObserver(observer) {
         this.observers.push(observer);
+
     }
     //remove observer from the observers list
     removeObserver(observer) {
-        return this._boservers.filter(obs => obs !== observer);
+        this.observers = this.observers.filter(obs => obs !== observer);
     }
     // USE this function to notify all observers the changes
     notifyObservers(changeDetails) {
@@ -345,6 +346,11 @@ class DriftModel {
     setSpeed(pos) {
         this.currentSpeed = pos;
         if (this.playState == true) this.notifyObservers({ type: "updateSpeed" });
+    }
+
+    resetSlider() {
+        this.currentSpeed = 0;
+        this.playState = false;
     }
 
 }

@@ -43,4 +43,7 @@ class ExhibitionView {
 
         this.timeLineController.renderView();
     }
+    unMountView() {
+        this.timeLineController.unMountView();
+    }
 }

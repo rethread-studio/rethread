@@ -9,5 +9,8 @@ class AboutViewController {
     renderView() {
         this.view.render();
     }
+    unMountView() {
+
+    }
 
 }

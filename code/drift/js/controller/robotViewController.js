@@ -12,4 +12,8 @@ class RobotViewController {
         this.view.render();
     }
 
+    unMountView() {
+
+    }
+
 }

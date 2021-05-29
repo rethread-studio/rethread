@@ -9,5 +9,8 @@ class TourViewController {
     renderView() {
         this.view.render();
     }
+    unMountView() {
+
+    }
 
 }
