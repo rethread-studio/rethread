@@ -110,7 +110,7 @@ class DriftModel {
     }
 
     getCurrentSpeed() {
-        return this.sliderSpeed[this.currentSpeed];
+        return this.sliderSpeed[this.currentSpeed].speed;
     }
 
     getPlayState() {
@@ -340,6 +340,11 @@ class DriftModel {
             .domain(extent)
             .range([0, this.timeLineDimensions.rectDimensions.width]);
         return scale(currentDate);
+    }
+
+    setSpeed(pos) {
+        this.currentSpeed = pos;
+        if (this.playState == true) this.notifyObservers({ type: "updateSpeed" });
     }
 
 }

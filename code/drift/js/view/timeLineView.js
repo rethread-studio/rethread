@@ -6,6 +6,7 @@ class TimeLineView {
         this.model = model;
         this.model.addObserver(this);
         this.play_btn = null;
+        this.selectMenu = null;
     }
 
     render() {
@@ -19,7 +20,7 @@ class TimeLineView {
         <button id="playBtn" class="mr-8" >${playButton}</button>
             <div class="relative">
             <span class="white">speed</span>
-                <select class="...">
+                <select id="selectMenu" class="...">
                     ${options}
                 </select>
                 <div class="pointer-events-auto ...">
@@ -112,6 +113,7 @@ class TimeLineView {
 
     setIdentifications() {
         this.play_btn = document.getElementById("playBtn");
+        this.selectMenu = document.getElementById("selectMenu")
     }
 
 }

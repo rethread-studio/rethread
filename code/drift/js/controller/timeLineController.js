@@ -17,16 +17,19 @@ class TimeLineController {
 
         this.view.play_btn.addEventListener("click", () => {
             this.model.getChangePlayState();
-            // this.model.advanceSliderPos();
         });
+
+        this.view.selectMenu.addEventListener("change", () => {
+            this.model.setSpeed(this.view.selectMenu.selectedIndex)
+        })
     }
 
-    advanceSlider() {
-        return () => { this.model.advanceSliderPos() }
-    }
+
 
     setTimeInterval() {
-        this.timeInterval = window.setInterval(this.advanceSlider(), 1000)
+        const speed = this.model.getCurrentSpeed()
+        this.timeInterval = window.setInterval(() =>
+            this.model.advanceSliderPos(), speed)
     }
 
     removeTimeInterval() {
@@ -47,6 +50,9 @@ class TimeLineController {
             this.setTimeInterval();
         } else if (changeDetails.type == "pauseTimeLine") {
             this.removeTimeInterval();
+        } else if (changeDetails.type == "updateSpeed") {
+            this.removeTimeInterval();
+            this.setTimeInterval();
         }
     }
 
