@@ -349,6 +349,7 @@ class DriftModel {
     }
 
     resetSlider() {
+        this.currentVisitPos = 0;
         this.currentSpeed = 0;
         this.playState = false;
     }
