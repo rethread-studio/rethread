@@ -4,16 +4,11 @@ use chrono::{DateTime, Utc};
 
 use nannou::prelude::*;
 use nannou::ui::prelude::*;
-use nannou_osc as osc;
-use std::{cell::RefCell, convert::TryInto, fs, path::PathBuf, process::Command};
+use std::{cell::RefCell, convert::TryInto, env, fs, path::PathBuf, process::Command};
 mod profile;
 use profile::{Profile, TraceData};
-mod audio_interface;
 mod coverage;
-use audio_interface::*;
 use coverage::*;
-mod spawn_synthesis_nodes;
-use spawn_synthesis_nodes::*;
 mod draw_functions;
 mod from_web_api;
 mod wgpu_helpers;
@@ -120,6 +115,8 @@ impl DrawMode {
 enum RenderState {
     NoRendering,
     RenderAllTraces { current_trace: usize },
+    RenderSingleTraceThenExit { output_path: Option<PathBuf> },
+    Exit,
 }
 
 struct Site {
@@ -149,9 +146,7 @@ pub struct Model {
     param3: f32,
     draw_mode: DrawMode,
     color_mode: ColorMode,
-    sender: osc::Sender<osc::Connected>,
-    audio_interface: audio_interface::AudioInterface,
-    font: nannou::text::Font,
+    font: Option<nannou::text::Font>,
     render_state: RenderState,
     use_web_api: bool,
     show_gui: bool,
@@ -181,6 +176,70 @@ widget_ids! {
 }
 
 fn model(app: &App) -> Model {
+    // Parse command line arguments
+    let matches = clap::App::new("Drift visualiser")
+        .version("1.0")
+        .author("re|thread/Erik Natanael Gustafsson")
+        .about("Visualises web software")
+        .arg(
+            clap::Arg::with_name("offline")
+                .long("offline")
+                .help("Read from cache, don't try to download from the internet"),
+        )
+        .arg(
+            clap::Arg::with_name("cache")
+                .short("c")
+                .long("cache")
+                .value_name("CACHE_PATH")
+                .help("path to the cache, default: ./assets/cache/")
+                .takes_value(true),
+        )
+        .subcommand(
+            clap::SubCommand::with_name("single")
+                .about("render a single visit for a single page in a single way")
+                .arg(
+                    clap::Arg::with_name("visit")
+                        .short("v")
+                        .long("visit")
+                        .value_name("VISIT")
+                        .help("visit timestamp")
+                        .required(true)
+                        .takes_value(true),
+                )
+                .arg(
+                    clap::Arg::with_name("site")
+                        .short("s")
+                        .long("site")
+                        .value_name("SITE")
+                        .takes_value(true)
+                        .required(true)
+                        .help("website name"),
+                )
+                .arg(
+                    clap::Arg::with_name("output")
+                        .short("o")
+                        .long("output")
+                        .value_name("OUTPUT_PATH")
+                        .takes_value(true)
+                        .help("output image file path"),
+                )
+                .arg(
+                    clap::Arg::with_name("visualisation")
+                        .long("visualisation")
+                        .short("w")
+                        .value_name("VIS")
+                        .takes_value(true)
+                        .help("visualisation name: coverage_voronoi, profile_rings etc."),
+                ),
+        )
+        .get_matches();
+
+    let use_web_api = if matches.is_present("offline") {
+        false
+    } else {
+        true
+    };
+
     // Lets write to a 4K UHD texture.
     let texture_size = [2_160, 2_160];
 
@@ -243,56 +302,104 @@ fn model(app: &App) -> Model {
     // Generate some ids for our widgets.
     let ids = Ids::new(ui.widget_id_generator());
 
-    // Set up osc sender
-    let port = 57120;
-    let target_addr = format!("{}:{}", "127.0.0.1", port);
-
-    let sender = osc::sender()
-        .expect("Could not bind to default socket")
-        .connect(target_addr)
-        .expect("Could not connect to socket at address");
-
-    let mut audio_interface = AudioInterface::new();
-    audio_interface.connect_to_system(2);
-
-    // audio_interface.send(EventMsg::AddSynthesisNode(Some(
-    //     generate_wave_guide_synthesis_node(220., audio_interface.sample_rate as f32),
-    // )));
-    // audio_interface.send(EventMsg::AddSynthesisNode(Some(
-    //     generate_wave_guide_synthesis_node(440., audio_interface.sample_rate as f32),
-    // )));
-    // audio_interface.send(EventMsg::AddSynthesisNode(Some(
-    //     generate_wave_guide_synthesis_node(220. * 5. / 4., audio_interface.sample_rate as f32),
-    // )));
-    // audio_interface.send(EventMsg::AddSynthesisNode(Some(
-    //     generate_wave_guide_synthesis_node(220. * 7. / 4., audio_interface.sample_rate as f32),
-    // )));
-
-    let use_web_api = true;
-    let sites = if use_web_api {
-        from_web_api::get_all_sites().expect("Failed to get list of pages from Web API")
-    } else {
-        let list = vec![
-            "bing",
-            "duckduckgo",
-            "google",
-            "kiddle",
-            "qwant",
-            "spotify",
-            "wikipedia",
-            "yahoo",
-        ];
-        list.iter()
-            .map(|s| String::from(*s))
-            .collect::<Vec<String>>()
+    let font = match nannou::text::font::from_file("assets/SpaceMono-Regular.ttf") {
+        Ok(the_font) => Some(the_font),
+        Err(e) => {
+            eprintln!(
+                "Failed to load font. Make sure the file ./assets/SpaceMono-Regular.ttf exists. {}",
+                e
+            );
+            None
+        }
     };
 
-    let sites: Vec<Site> = sites
-        .iter()
-        .map(|name| load_site(&name, use_web_api))
-        .collect();
+    let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::rings(
+        &app.main_window(),
+        texture.size(),
+    ));
 
-    let font = nannou::text::font::from_file("/home/erik/.fonts/SpaceMono-Regular.ttf").unwrap();
+    let cache_path = if let Some(path) = matches.value_of("cache") {
+        PathBuf::from(path)
+    } else {
+        PathBuf::from("./assets/cache/")
+    };
+
+    let (sites, render_state) = if let Some(matches) = matches.subcommand_matches("single") {
+        let site = matches.value_of("site").unwrap();
+        let visit = matches.value_of("visit").unwrap();
+        let render_state = if let Some(output_path) = matches.value_of("output") {
+            RenderState::RenderSingleTraceThenExit {
+                output_path: Some(PathBuf::from(output_path)),
+            }
+        } else {
+            RenderState::RenderSingleTraceThenExit { output_path: None }
+        };
+        let sites = vec![load_site(
+            site,
+            &vec![visit.to_owned()],
+            use_web_api,
+            &cache_path,
+        )];
+        if let Some(vis) = matches.value_of("visualisation") {
+            draw_mode = match vis {
+                "coverage_voronoi" => DrawMode::Coverage(CoverageDrawMode::voronoi(
+                    &app.main_window(),
+                    texture.size(),
+                )),
+                "profile_rings" => DrawMode::GraphDepth(GraphDepthDrawMode::rings(
+                    &app.main_window(),
+                    texture.size(),
+                )),
+                _ => {
+                    eprintln!("Invalid visualisation type. Rendering with the default.");
+                    DrawMode::Coverage(CoverageDrawMode::voronoi(
+                        &app.main_window(),
+                        texture.size(),
+                    ))
+                }
+            }
+        }
+        (sites, render_state)
+    } else {
+        let sites = if use_web_api {
+            from_web_api::get_all_sites().expect("Failed to get list of pages from Web API")
+        } else {
+            let list = vec![
+                "bing",
+                "duckduckgo",
+                "google",
+                "kiddle",
+                "qwant",
+                "spotify",
+                "wikipedia",
+                "yahoo",
+            ];
+            list.iter()
+                .map(|s| String::from(*s))
+                .collect::<Vec<String>>()
+        };
+
+        let visits = if use_web_api {
+            from_web_api::get_all_visits().expect("Failed to retrieve visits")
+        } else {
+            vec![]
+        };
+
+        // Filter out the invalid visits
+        let visits = visits
+            .into_iter()
+            .filter(|ts| {
+                let its = ts.parse::<u64>().unwrap();
+                !(1619654400000..=1620054000000).contains(&its)
+            })
+            .collect();
+
+        let sites: Vec<Site> = sites
+            .iter()
+            .map(|name| load_site(&name, &visits, use_web_api, &cache_path))
+            .collect();
+        (sites, RenderState::NoRendering)
+    };
 
     Model {
         ui,
@@ -303,16 +410,11 @@ fn model(app: &App) -> Model {
         param1: 1.0,
         param2: 0.5,
         param3: 0.5,
-        draw_mode: DrawMode::GraphDepth(GraphDepthDrawMode::rings(
-            &app.main_window(),
-            texture.size(),
-        )),
+        draw_mode,
         color_mode: ColorMode::Script,
-        sender,
         selected_visit: 0,
-        audio_interface,
         font,
-        render_state: RenderState::NoRendering,
+        render_state,
         use_web_api,
         show_gui: false,
         background_lightness: 0.0, // 0.43,
@@ -325,24 +427,36 @@ fn model(app: &App) -> Model {
     }
 }
 
-fn load_site_from_disk(site: &str) -> Vec<TraceData> {
-    let root_path = PathBuf::from("/home/erik/code/kth/web_evolution_2021-04/");
+fn load_site_from_disk(site: &str, visits: &Vec<String>, cache_path: &PathBuf) -> Vec<TraceData> {
+    let root_path = cache_path;
     let mut trace_datas = vec![];
 
     let mut page_folder = root_path.clone();
     page_folder.push(site);
-    let trace_paths_in_folder = fs::read_dir(page_folder)
-        .expect("Failed to open page folder")
-        .filter(|r| r.is_ok()) // Get rid of Err variants for Result<DirEntry>
-        .map(|r| r.unwrap().path())
-        .filter(|r| r.is_dir()) // Only keep folders
-        .collect::<Vec<_>>();
+    // Automatically find all visits
+    let trace_paths_in_folder = if visits.len() > 0 {
+        visits
+            .iter()
+            .map(|visit| {
+                let mut path = page_folder.clone();
+                path.push(visit);
+                path
+            })
+            .collect::<Vec<PathBuf>>()
+    } else {
+        fs::read_dir(page_folder)
+            .expect("Failed to open page folder")
+            .filter(|r| r.is_ok()) // Get rid of Err variants for Result<DirEntry>
+            .map(|r| r.unwrap().path())
+            .filter(|r| r.is_dir()) // Only keep folders
+            .collect::<Vec<PathBuf>>()
+    };
+    println!(
+        "Found {} visits for site {}",
+        trace_paths_in_folder.len(),
+        site
+    );
     for (_i, p) in trace_paths_in_folder.iter().enumerate() {
-        let mut folder_path = p.clone();
-        folder_path.push("profile.json");
-        let data = fs::read_to_string(&folder_path).unwrap();
-        let profile: Profile = serde_json::from_str(&data).unwrap();
-        let graph_data = profile.generate_graph_data();
         // Create TraceData
         let timestamp: String = if let Some(ts_osstr) = p.iter().last() {
             if let Some(ts) = ts_osstr.to_str() {
@@ -353,12 +467,27 @@ fn load_site_from_disk(site: &str) -> Vec<TraceData> {
         } else {
             String::from("unknown timestamp")
         };
-        let mut trace_data = TraceData::new(site.to_owned(), timestamp, graph_data);
+        let mut folder_path = p.clone();
+        folder_path.push("profile.json");
+        let mut trace_data = if let Ok(data) = fs::read_to_string(&folder_path) {
+            let profile: Profile = serde_json::from_str(&data).unwrap();
+            let graph_data = profile.generate_graph_data();
+            TraceData::new(site.to_owned(), timestamp.clone(), graph_data)
+        } else {
+            eprintln!(
+                "Failed to find profile file at {}",
+                folder_path.to_str().unwrap()
+            );
+            continue;
+        };
         // Load indentation profile
         folder_path.pop();
         folder_path.push("indent_profile.csv");
         if let Ok(indentation_profile) = fs::read_to_string(&folder_path) {
-            if let Err(_) = trace_data.add_indentation_profile(indentation_profile) {
+            if trace_data
+                .add_indentation_profile(indentation_profile)
+                .is_err()
+            {
                 eprintln!("Failed to parse {:?}", folder_path);
             }
         }
@@ -366,16 +495,23 @@ fn load_site_from_disk(site: &str) -> Vec<TraceData> {
         folder_path.pop();
         folder_path.push("line_length_profile.csv");
         if let Ok(line_length_profile) = fs::read_to_string(&folder_path) {
-            if let Err(_) = trace_data.add_line_length_profile(line_length_profile) {
+            if trace_data
+                .add_line_length_profile(line_length_profile)
+                .is_err()
+            {
                 eprintln!("Failed to parse {:?}", folder_path);
             }
         }
         // Load coverage
         folder_path.pop();
         folder_path.push("coverage.json");
-        let data = fs::read_to_string(&folder_path).unwrap();
-        let coverage = Coverage::from_data(data);
-        trace_data.coverage = Some(coverage);
+        if let Ok(data) = fs::read_to_string(&folder_path) {
+            let vector: Vec<(i64, i32)> =
+                serde_json::from_str(&data).expect("Failed to parse coverage vector data");
+            trace_data.coverage = Some(Coverage::from_vector(vector));
+        } else {
+            eprintln!("Failed to find coverage for {} {}", site, timestamp);
+        }
 
         // Copy screenshots to new location
         folder_path.pop();
@@ -387,13 +523,7 @@ fn load_site_from_disk(site: &str) -> Vec<TraceData> {
     trace_datas
 }
 
-fn load_site(name: &str, use_web_api: bool) -> Site {
-    let trace_datas = if use_web_api {
-        from_web_api::get_trace_data_from_site(name)
-    } else {
-        load_site_from_disk(name)
-    };
-
+fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>) -> Site {
     let mut deepest_tree_depth = 0;
     let mut longest_tree = 0;
     let mut deepest_indentation = 0;
@@ -453,10 +583,10 @@ fn load_site(name: &str, use_web_api: bool) -> Site {
         }
     }
 
-    println!(
-        "deepest_indentation: {}, longest_indentation: {}",
-        deepest_indentation, longest_indentation
-    );
+    // println!(
+    //     "deepest_indentation: {}, longest_indentation: {}",
+    //     deepest_indentation, longest_indentation
+    // );
 
     Site {
         name: name.to_owned(),
@@ -472,6 +602,16 @@ fn load_site(name: &str, use_web_api: bool) -> Site {
         max_coverage_total_length,
         max_profile_tick: max_profile_tick as f32,
     }
+}
+
+fn load_site(name: &str, visits: &Vec<String>, use_web_api: bool, cache_path: &PathBuf) -> Site {
+    let trace_datas = if use_web_api {
+        from_web_api::get_trace_data_from_site(name, visits, cache_path)
+    } else {
+        load_site_from_disk(name, visits, cache_path)
+    };
+
+    site_from_trace_datas(name, trace_datas)
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
@@ -544,231 +684,236 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         }
     }
 
-    // Do the drawing in update for hi-res texture rendering reasons
-    // First, reset the `draw` state.
-    let draw = &model.draw;
-    draw.reset();
+    // Encapsulate the drawing stuff so that the window isn't borrowed when calling quit
+    let snapshot = {
+        // Do the drawing in update for hi-res texture rendering reasons
+        // First, reset the `draw` state.
+        let draw = &model.draw;
+        draw.reset();
 
-    // Create a `Rect` for our texture to help with drawing.
-    let [w, h] = model.texture.size();
-    let win = geom::Rect::from_w_h(w as f32, h as f32);
+        // Create a `Rect` for our texture to help with drawing.
+        let [w, h] = model.texture.size();
+        let win = geom::Rect::from_w_h(w as f32, h as f32);
 
-    // Setup rendering to texture
-    let window = app.main_window();
-    let device = window.swap_chain_device();
-    let ce_desc = wgpu::CommandEncoderDescriptor {
-        label: Some("texture renderer"),
+        // Setup rendering to texture
+        let window = app.main_window();
+        let device = window.swap_chain_device();
+        let ce_desc = wgpu::CommandEncoderDescriptor {
+            label: Some("texture renderer"),
+        };
+
+        ////////////////////////////////////////////////////////////////////////// DO ALL OF THE DRAWING STUFF
+
+        // Clear the background
+        draw.background()
+            .color(hsl(0.6, 0.1, model.background_lightness));
+
+        // let win = app.window_rect();
+
+        let name = &model.sites[model.selected_site].name;
+        let timestamp =
+            &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
+        let color_type = match model.color_mode {
+            ColorMode::Script => "script colour",
+            ColorMode::Profile => "profile index colour",
+            ColorMode::Selected => "selection colour",
+        };
+        let visualisation_type = model.draw_mode.to_str();
+
+        // let full_text = format!(
+        //     "{}\n{}\n\n{}\n{}",
+        //     name, timestamp, visualisation_type, color_type
+        // );
+        // draw.text(&full_text)
+        //     .font_size(32)
+        //     .align_text_bottom()
+        //     .right_justify()
+        //     // .x_y(0.0, 0.0)
+        //     .wh(win.clone().pad(40.).wh())
+        //     .font(model.font.clone())
+        //     // .x_y(win.right()-130.0, win.bottom() + 10.0)
+        //     .color(LIGHTGREY);
+
+        // draw.to_frame(app, &frame).unwrap();
+        let mut encoder = device.create_command_encoder(&ce_desc);
+        model
+            .renderer
+            .render_to_texture(device, &mut encoder, draw, &model.texture);
+        draw.reset();
+
+        use nannou::wgpu::ToTextureView;
+        let texture_view = model.texture.to_texture_view();
+
+        // let mut encoder = frame.command_encoder();
+
+        match &model.draw_mode {
+            DrawMode::GraphDepth(gddm) => match gddm {
+                GraphDepthDrawMode::Horizontal => {
+                    draw_functions::draw_horizontal_graph_depth(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                GraphDepthDrawMode::Vertical => {
+                    draw_functions::draw_vertical_graph_depth(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                GraphDepthDrawMode::Polar => {
+                    draw_functions::draw_polar_depth_graph(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                GraphDepthDrawMode::PolarGrid => {
+                    draw_functions::draw_flower_grid_graph_depth(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                GraphDepthDrawMode::Rings(ref wgpu_shader_data) => {
+                    draw_functions::draw_depth_graph_rings(
+                        &draw,
+                        &model,
+                        &app.main_window(),
+                        &win,
+                        &mut encoder,
+                        &texture_view,
+                        &mut wgpu_shader_data.borrow_mut(),
+                    );
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                GraphDepthDrawMode::PolarAxes => {
+                    draw_functions::draw_polar_axes_depth_graph(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                GraphDepthDrawMode::PolarAxesRolling => {
+                    draw_functions::draw_polar_axes_rolling_depth_graph(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                GraphDepthDrawMode::AllSitesPolarAxes => {
+                    draw_functions::draw_all_sites_single_visit_polar_axes_depth_graph(
+                        &draw, &model, &win,
+                    );
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+            },
+            DrawMode::Indentation(pdm) => match pdm {
+                ProfileDrawMode::SingleFlower => {
+                    draw_functions::draw_single_flower_indentation(&draw, &model, &win);
+                }
+            },
+            DrawMode::LineLength(pdm) => match pdm {
+                ProfileDrawMode::SingleFlower => {
+                    draw_functions::draw_single_flower_line_length(&draw, &model, &win);
+                }
+            },
+            DrawMode::Coverage(cdm) => match cdm {
+                CoverageDrawMode::HeatMap => {
+                    draw_functions::draw_coverage_heat_map(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                CoverageDrawMode::Blob => {
+                    draw_functions::draw_coverage_blob(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                CoverageDrawMode::SmoothBlob => {
+                    draw_functions::draw_smooth_coverage_blob(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                CoverageDrawMode::Spacebrush => {
+                    draw_functions::draw_coverage_spacebrush(&draw, &model, &win);
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                CoverageDrawMode::GemStone(ref wgpu_shader_data) => {
+                    draw_functions::draw_coverage_organic(
+                        &draw,
+                        &model,
+                        &app.main_window(),
+                        &win,
+                        &mut encoder,
+                        &texture_view,
+                        &mut wgpu_shader_data.borrow_mut(),
+                    );
+                }
+                CoverageDrawMode::Shell(ref wgpu_shader_data) => {
+                    draw_functions::draw_coverage_shell(
+                        &draw,
+                        &model,
+                        &app.main_window(),
+                        &win,
+                        &mut encoder,
+                        &texture_view,
+                        &mut wgpu_shader_data.borrow_mut(),
+                    );
+                }
+                CoverageDrawMode::Voronoi(ref voronoi_shader) => {
+                    draw_functions::draw_coverage_voronoi(
+                        &draw,
+                        &model,
+                        &app.main_window(),
+                        &win,
+                        &mut encoder,
+                        &texture_view,
+                        &mut voronoi_shader.borrow_mut(),
+                    );
+
+                    // Try drawing the text on top
+                    // draw.reset();
+                    // draw.text(&full_text)
+                    //     .font_size(16)
+                    //     .align_text_bottom()
+                    //     .right_justify()
+                    //     // .x_y(0.0, 0.0)
+                    //     .wh(win.clone().pad(20.).wh())
+                    //     .font(model.font.clone())
+                    //     // .x_y(win.right()-130.0, win.bottom() + 10.0)
+                    //     .color(DARKGREY);
+
+                    // model
+                    //     .renderer
+                    //     .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+            },
+        };
+
+        ////////////////////////////////////////////////////////////////////////// END DO ALL OF THE DRAWING STUFF
+
+        // Render our drawing to the texture.
+        // model
+        //     .renderer
+        //     .render_to_texture(device, &mut encoder, draw, &model.texture);
+
+        // Take a snapshot of the texture. The capturer will do the following:
+        //
+        // 1. Resolve the texture to a non-multisampled texture if necessary.
+        // 2. Convert the format to non-linear 8-bit sRGBA ready for image storage.
+        // 3. Copy the result to a buffer ready to be mapped for reading.
+        let snapshot = model
+            .texture_capturer
+            .capture(device, &mut encoder, &model.texture);
+
+        // Submit the commands for our drawing and texture capture to the GPU.
+        window.swap_chain_queue().submit(Some(encoder.finish()));
+        snapshot
     };
-
-    ////////////////////////////////////////////////////////////////////////// DO ALL OF THE DRAWING STUFF
-
-    // Clear the background
-    draw.background()
-        .color(hsl(0.6, 0.1, model.background_lightness));
-
-    // let win = app.window_rect();
-
-    let name = &model.sites[model.selected_site].name;
-    let timestamp = &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-    let color_type = match model.color_mode {
-        ColorMode::Script => "script colour",
-        ColorMode::Profile => "profile index colour",
-        ColorMode::Selected => "selection colour",
-    };
-    let visualisation_type = model.draw_mode.to_str();
-
-    // let full_text = format!(
-    //     "{}\n{}\n\n{}\n{}",
-    //     name, timestamp, visualisation_type, color_type
-    // );
-    // draw.text(&full_text)
-    //     .font_size(32)
-    //     .align_text_bottom()
-    //     .right_justify()
-    //     // .x_y(0.0, 0.0)
-    //     .wh(win.clone().pad(40.).wh())
-    //     .font(model.font.clone())
-    //     // .x_y(win.right()-130.0, win.bottom() + 10.0)
-    //     .color(LIGHTGREY);
-
-    // draw.to_frame(app, &frame).unwrap();
-    let mut encoder = device.create_command_encoder(&ce_desc);
-    model
-        .renderer
-        .render_to_texture(device, &mut encoder, draw, &model.texture);
-    draw.reset();
-
-    use nannou::wgpu::ToTextureView;
-    let texture_view = model.texture.to_texture_view();
-
-    // let mut encoder = frame.command_encoder();
-
-    match &model.draw_mode {
-        DrawMode::GraphDepth(gddm) => match gddm {
-            GraphDepthDrawMode::Horizontal => {
-                draw_functions::draw_horizontal_graph_depth(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            GraphDepthDrawMode::Vertical => {
-                draw_functions::draw_vertical_graph_depth(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            GraphDepthDrawMode::Polar => {
-                draw_functions::draw_polar_depth_graph(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            GraphDepthDrawMode::PolarGrid => {
-                draw_functions::draw_flower_grid_graph_depth(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            GraphDepthDrawMode::Rings(ref wgpu_shader_data) => {
-                draw_functions::draw_depth_graph_rings(
-                    &draw,
-                    &model,
-                    &app.main_window(),
-                    &win,
-                    &mut encoder,
-                    &texture_view,
-                    &mut wgpu_shader_data.borrow_mut(),
-                );
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            GraphDepthDrawMode::PolarAxes => {
-                draw_functions::draw_polar_axes_depth_graph(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            GraphDepthDrawMode::PolarAxesRolling => {
-                draw_functions::draw_polar_axes_rolling_depth_graph(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            GraphDepthDrawMode::AllSitesPolarAxes => {
-                draw_functions::draw_all_sites_single_visit_polar_axes_depth_graph(
-                    &draw, &model, &win,
-                );
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-        },
-        DrawMode::Indentation(pdm) => match pdm {
-            ProfileDrawMode::SingleFlower => {
-                draw_functions::draw_single_flower_indentation(&draw, &model, &win);
-            }
-        },
-        DrawMode::LineLength(pdm) => match pdm {
-            ProfileDrawMode::SingleFlower => {
-                draw_functions::draw_single_flower_line_length(&draw, &model, &win);
-            }
-        },
-        DrawMode::Coverage(cdm) => match cdm {
-            CoverageDrawMode::HeatMap => {
-                draw_functions::draw_coverage_heat_map(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            CoverageDrawMode::Blob => {
-                draw_functions::draw_coverage_blob(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            CoverageDrawMode::SmoothBlob => {
-                draw_functions::draw_smooth_coverage_blob(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            CoverageDrawMode::Spacebrush => {
-                draw_functions::draw_coverage_spacebrush(&draw, &model, &win);
-                model
-                    .renderer
-                    .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-            CoverageDrawMode::GemStone(ref wgpu_shader_data) => {
-                draw_functions::draw_coverage_organic(
-                    &draw,
-                    &model,
-                    &app.main_window(),
-                    &win,
-                    &mut encoder,
-                    &texture_view,
-                    &mut wgpu_shader_data.borrow_mut(),
-                );
-            }
-            CoverageDrawMode::Shell(ref wgpu_shader_data) => {
-                draw_functions::draw_coverage_shell(
-                    &draw,
-                    &model,
-                    &app.main_window(),
-                    &win,
-                    &mut encoder,
-                    &texture_view,
-                    &mut wgpu_shader_data.borrow_mut(),
-                );
-            }
-            CoverageDrawMode::Voronoi(ref voronoi_shader) => {
-                draw_functions::draw_coverage_voronoi(
-                    &draw,
-                    &model,
-                    &app.main_window(),
-                    &win,
-                    &mut encoder,
-                    &texture_view,
-                    &mut voronoi_shader.borrow_mut(),
-                );
-
-                // Try drawing the text on top
-                // draw.reset();
-                // draw.text(&full_text)
-                //     .font_size(16)
-                //     .align_text_bottom()
-                //     .right_justify()
-                //     // .x_y(0.0, 0.0)
-                //     .wh(win.clone().pad(20.).wh())
-                //     .font(model.font.clone())
-                //     // .x_y(win.right()-130.0, win.bottom() + 10.0)
-                //     .color(DARKGREY);
-
-                // model
-                //     .renderer
-                //     .render_to_texture(device, &mut encoder, &draw, &model.texture);
-            }
-        },
-    };
-
-    ////////////////////////////////////////////////////////////////////////// END DO ALL OF THE DRAWING STUFF
-
-    // Render our drawing to the texture.
-    // model
-    //     .renderer
-    //     .render_to_texture(device, &mut encoder, draw, &model.texture);
-
-    // Take a snapshot of the texture. The capturer will do the following:
-    //
-    // 1. Resolve the texture to a non-multisampled texture if necessary.
-    // 2. Convert the format to non-linear 8-bit sRGBA ready for image storage.
-    // 3. Copy the result to a buffer ready to be mapped for reading.
-    let snapshot = model
-        .texture_capturer
-        .capture(device, &mut encoder, &model.texture);
-
-    // Submit the commands for our drawing and texture capture to the GPU.
-    window.swap_chain_queue().submit(Some(encoder.finish()));
 
     // update frame rendering
     match &mut model.render_state {
@@ -789,9 +934,6 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             // NOTE: It is essential that the commands for capturing the snapshot are `submit`ted before we
             // attempt to read the snapshot - otherwise we will read a blank texture!
 
-            // let path = capture_directory(app)
-            //     .join(elapsed_frames.to_string())
-            //     .with_extension("png");
             snapshot
                 .read(move |result| {
                     let image = result.expect("failed to map texture memory").to_owned();
@@ -851,7 +993,49 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             }
         }
         RenderState::NoRendering => (),
+        RenderState::RenderSingleTraceThenExit { output_path } => {
+            let file_path = if let Some(path) = output_path {
+                path.clone()
+            } else {
+                let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
+                let timestamp =
+                    &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
+                rendering_visit_path(app, &model.draw_mode, name, timestamp)
+            };
+
+            println!("Writing image to path: {}", file_path.to_str().unwrap());
+
+            // Submit a function for writing our snapshot to a PNG.
+            //
+            // NOTE: It is essential that the commands for capturing the snapshot are `submit`ted before we
+            // attempt to read the snapshot - otherwise we will read a blank texture!
+
+            snapshot
+                .read(move |result| {
+                    let image = result.expect("failed to map texture memory").to_owned();
+                    image
+                        .save(&file_path)
+                        .expect("failed to save texture to png image");
+                })
+                .unwrap();
+            model.render_state = RenderState::Exit;
+
+            // Wait for rendering to file
+            println!("Waiting for PNG writing to complete...");
+            let window = app.main_window();
+            let device = window.swap_chain_device();
+            model
+                .texture_capturer
+                .await_active_snapshots(&device)
+                .unwrap();
+            println!("Done!");
+            // Hopefully the exit function will wait for the screenshot to be saved here
+        }
+        RenderState::Exit => {
+            app.quit();
+        }
     }
+    if matches!(model.render_state, RenderState::Exit) {}
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {
@@ -1007,10 +1191,10 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 app.main_window().capture_frame(file_path);
             }
             Key::T => {
-                // Send graph data via osc
-                model.sites[model.selected_site].trace_datas[model.selected_visit]
-                    .graph_data
-                    .send_script_data_osc(&model.sender);
+                // // Send graph data via osc
+                // model.sites[model.selected_site].trace_datas[model.selected_visit]
+                //     .graph_data
+                //     .send_script_data_osc(&model.sender);
             }
             Key::R => {
                 model.render_state = RenderState::RenderAllTraces { current_trace: 0 };
@@ -1018,20 +1202,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
             Key::G => {
                 model.show_gui = !model.show_gui;
             }
-            Key::Space => {
-                // model.audio_interface.send(EventMsg::AddSynthesisNode(Some(
-                //     synthesis_node_from_graph_data(
-                //         &model.graph_datas[model.selected_profile],
-                //         model.audio_interface.sample_rate as f32,
-                //     ),
-                // )));
-                synthesize_call_graph(
-                    &model.sites[model.selected_site].trace_datas[model.selected_visit].graph_data,
-                    5.0,
-                    model.audio_interface.sample_rate as f32,
-                    &mut model.audio_interface,
-                )
-            }
+            Key::Space => {}
             _ => (),
         },
         KeyReleased(_key) => {}
