@@ -4,7 +4,7 @@
 
 | API | Description |
 | --- | ----------- |
-| `/api/websites` |  |
+| `/api/sites` |  |
 | `/api/site/:site/visits` |  |
 | `/api/site/:site/:visit/coverage/js` |  |
 | `/api/site/:site/:visit/coverage/css` |  |
@@ -17,7 +17,7 @@
 
 | API | Description |
 | --- | ----------- |
-| `/api/websites` |  |
+| `/api/sites` |  |
 | `/api/times` |  |
 | `/api/time/:time/:site/coverage/js` |  |
 | `/api/time/:time/:site/coverage/css` |  |
