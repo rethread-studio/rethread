@@ -1,5 +1,5 @@
 [package]
-name = "bot_trace_parser"
+name = "drift_vis"
 version = "0.1.0"
 authors = ["Erik Natanael Gustafsson <erik@eriknatanael.com>"]
 edition = "2018"
