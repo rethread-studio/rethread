@@ -24,29 +24,24 @@ class ApiService {
         return requestService.getRequest(url)
     }
 
-    getSiteScreenshot(site, time) {
-        const url = `${BASE_URL}/api/time/${time}/${site}/screenshot.png?format=:format?&width=:width?&height=height?`
-        return requestService.getRequest(url)
+    getSiteScreenshot(site, time, size) {
+        return `${BASE_URL}/api/time/${time}/${site}/screenshot.png?&width=${size}`
     }
 
-    getSiteGraph(site, time) {
-        const url = `${BASE_URL}/api/time/${time}/${site}/graph.png?format=:format?&width=:width?&height=height?`
-        return requestService.getRequest(url)
+    getSiteGraph(site, time, size) {
+        return `${BASE_URL}/api/time/${time}/${site}/graph.png?&width=${size}`
     }
 
-    getSiteCoverage(site, time) {
-        const url = `${BASE_URL}/api/time/${time}/${site}/coverage.png?format=:format?&width=:width?&height=height?`
-        return requestService.getRequest(url)
+    getSiteCoverage(site, time, size) {
+        return `${BASE_URL}/api/time/${time}/${site}/coverage.png?&width=${size}`
     }
 
-    getSiteNetwork(site, time) {
-        const url = `${BASE_URL}/api/time/${time}/${site}/network.png?format=:format?&width=:width?&height=height?`
-        return requestService.getRequest(url)
+    getSiteNetwork(site, time, size) {
+        return `${BASE_URL}/api/time/${time}/${site}/network.png?&width=${size}`
     }
 
-    getSiteProfile(site, time) {
-        const url = `${BASE_URL}/api/time/${time}/${site}/profile.png?format=:format?&width=:width?&height=height?`
-        return requestService.getRequest(url)
+    getSiteProfile(site, time, size) {
+        return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}`
     }
 
 }
@@ -61,7 +56,7 @@ const dataTest = {
             name: "bing",
             state: 1,
             value: 1.25,
-            image: "imgTest.png",
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.bing.png",
 
         },
@@ -69,7 +64,7 @@ const dataTest = {
             name: "duckduckgo",
             state: 0,
             value: 1.25,
-            image: "imgTest.png",
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.duckduckgo.png",
 
         },
@@ -77,7 +72,7 @@ const dataTest = {
             name: "google",
             state: 0,
             value: 1.25,
-            image: "imgTest.png",
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.google.png",
 
         },
@@ -85,7 +80,7 @@ const dataTest = {
             name: "qwant",
             state: 0,
             value: 1.25,
-            image: "imgTest.png",
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.qwant.png",
 
         },
@@ -93,7 +88,7 @@ const dataTest = {
             name: "spotify",
             state: 1,
             value: 90,
-            image: "imgTest.png",
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.spotify.png",
 
         },
@@ -101,7 +96,7 @@ const dataTest = {
             name: "wikipedia",
             state: 0,
             value: 1.25,
-            image: "imgTest.png",
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.wikipedia.png",
 
         },
@@ -109,7 +104,7 @@ const dataTest = {
             name: "yahoo",
             state: 0,
             value: 1.25,
-            image: "imgTest.png",
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.yahoo.png",
 
         },
@@ -117,7 +112,7 @@ const dataTest = {
             name: "kiddle",
             state: 0,
             value: 1.25,
-            image: "imgTest.png",
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.kiddle.png",
 
         },
@@ -132,15 +127,19 @@ const viewsMenu = [{
     state: 0,
 },
 {
-    name: "Coverage",
+    name: "Graph",
     state: 0,
 },
 {
-    name: "Profile",
+    name: "Coverage",
     state: 0
 },
 {
     name: "Network",
+    state: 0
+},
+{
+    name: "Profile",
     state: 0
 }
 ]

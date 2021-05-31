@@ -100,6 +100,7 @@ class DriftModel {
                 speed: this.baseSpeed / 9
             },
         ]
+        this.pack;
     }
 
     init() {
@@ -107,6 +108,10 @@ class DriftModel {
         this.loadMenu("views");
         this.getSitesVisits()
 
+    }
+
+    getPack() {
+        return this.pack;
     }
 
     getCurrentSpeed() {
@@ -154,7 +159,7 @@ class DriftModel {
                     name: site,
                     state: i == 0 ? 1 : 0,
                     value: 0,
-                    image: "imgTest.png",
+                    image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
                     logo: `logo.${site}.png`
                 }
             })
@@ -202,12 +207,13 @@ class DriftModel {
     }
 
     calculatePack() {
-        return d3.pack()
+        this.pack = d3.pack()
             .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
             .padding(10)
             (d3.hierarchy(this.data)
                 .sum(hierarchySize)
                 .sort(sortBySize))
+        return this.pack;
     }
 
 
@@ -243,6 +249,7 @@ class DriftModel {
         if (isDifferent) {
             this.currentSection = nextSection;
             this.menu = this.menu.map(updateState(this.currentSection.name))
+            this.updateDataImage();
             this.notifyObservers({ type: "updateSideMenu" });
         }
 
@@ -269,8 +276,6 @@ class DriftModel {
         //update the data
         const node = this.data.children.find(findByName(item.data.name))
         node.state = node.state == 0 ? 1 : 0;
-
-
 
         this.calculateDataValues();
 
@@ -339,7 +344,47 @@ class DriftModel {
     advanceSliderPos() {
         const newPos = this.currentVisitPos + 1;
         this.currentVisitPos = newPos % this.visits.length == 0 ? 0 : newPos;
-        this.notifyObservers({ type: "updateSlider" });
+        this.updateDataImage();
+        this.notifyObservers({ type: "updateCurrentVisit" });
+        this.notifyObservers({ type: "updateImages" })
+    }
+
+    updateDataImage() {
+        //if it is the intro skip
+        if (this.currentSection == "Intro") return;
+        // get time in unix timestamp
+        const currentTime = this.visits[this.currentVisitPos].getTime();
+        //get current VIEW from MENU
+        const menuName = this.currentSection.name.toLowerCase();
+        //change the images in the data
+        this.data.children = this.data.children.map(site => {
+            site.image = this.getApiImage(menuName, site.name, 800, currentTime)
+            return site;
+        })
+    }
+
+    getActiveNodes() {
+        return this.pack.descendants()
+            .splice(1)
+            .filter(node => node.data.state == 1)
+    }
+
+    getApiImage(view, site, size, time) {
+        switch (view) {
+            case 'screenshot':
+                return apiService.getSiteScreenshot(site, time, size);
+            case 'graph':
+                return apiService.getSiteGraph(site, time, size);
+            case 'coverage':
+                return apiService.getSiteCoverage(site, time, size);
+            case 'network':
+                return apiService.getSiteNetwork(site, time, size);
+            case 'profile':
+                return apiService.getSiteProfile(site, time, size);
+
+            default:
+                return apiService.getSiteScreenshot(site, time, size);
+        }
     }
 
     calculateSliderPos() {
@@ -362,4 +407,15 @@ class DriftModel {
         this.playState = false;
     }
 
+    //posX is the percentage of the posX with the Width
+    updateSliderPos(percentage) {
+        const pos = percentage < 0 ? 0 : percentage;
+        const scale = d3.scaleLinear()
+            .rangeRound([0, this.visits.length - 1]);
+        this.currentVisitPos = scale(pos);
+        this.updateDataImage();
+        this.notifyObservers({ type: "updateCurrentVisit" });
+        this.notifyObservers({ type: "updateImages" });
+
+    }
 }

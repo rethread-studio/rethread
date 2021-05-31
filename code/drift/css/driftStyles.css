@@ -151,6 +151,11 @@ button{
     color: white;
 }
 
+.noColor{
+    fill:red;
+    opacity:0%;
+}
+
 .white{
     color:white;
 }

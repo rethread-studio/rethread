@@ -45,11 +45,12 @@ class TimeLineView {
                 }px, ${dimensions.margin.top + dimensions.boundedHeight / 2
                 }px)`)
 
+
+
         const timeLine = bounds.append("g")
             .attr("id", "timeLine")
 
         timeLine.append("rect")
-            .attr("x", 0)
             .attr("height", rectDimensions.height)
             .attr("width", rectDimensions.width)
             .style("fill", "#ffffff")
@@ -70,6 +71,15 @@ class TimeLineView {
             .attr("y", -10)
             .style("fill", "#ffffff")
             .text()
+
+        bounds.append("rect")
+            .attr("id", "timeLinebounds")
+            .attr("class", "noColor")
+            .style("transform", `translate(${0
+                }px, ${-sliderDimensions.height / 2
+                }px)`)
+            .attr("height", sliderDimensions.height)
+            .attr("width", rectDimensions.width)
 
         this.updateSlider()
         this.renderAllAxis()
@@ -117,7 +127,7 @@ class TimeLineView {
         if (changeDetails.type == "updateTimeLine") {
             this.renderAllAxis();
             this.updateSlider();
-        } else if (changeDetails.type == "updateSlider") {
+        } else if (changeDetails.type == "updateCurrentVisit") {
             this.updateSlider();
         } else if (changeDetails.type == "playTimeLine") {
             this.updatePlayBtn();
@@ -129,6 +139,8 @@ class TimeLineView {
     setIdentifications() {
         this.play_btn = document.getElementById("playBtn");
         this.selectMenu = document.getElementById("selectMenu")
+        this.timeline = document.getElementById("timeLinebounds")
+
     }
 
 }

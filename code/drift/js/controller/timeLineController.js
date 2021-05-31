@@ -8,11 +8,19 @@ class TimeLineController {
         this.model.addObserver(this);
         this.clickHandler = this.onClick.bind(this);
         this.changeHandler = this.changeSelection.bind(this);
+        this.clickTimeLineHandler = this.onClickTimeline.bind(this);
     }
 
     renderView() {
         this.view.render();
         this.addEventListeners();
+    }
+
+    onClickTimeline(e) {
+        const { left, width } = e.target.getBoundingClientRect();
+        const posX = e.clientX - left;
+        //pass the percentage
+        this.model.updateSliderPos(posX / width)
     }
 
     onClick() {
@@ -24,6 +32,7 @@ class TimeLineController {
     }
 
     addEventListeners() {
+        this.view.timeline.addEventListener("click", this.clickTimeLineHandler)
         this.view.play_btn.addEventListener("click", this.clickHandler);
         this.view.selectMenu.addEventListener("change", this.changeHandler);
     }
@@ -41,6 +50,7 @@ class TimeLineController {
     }
 
     removeEventListeners() {
+        this.view.timeline.removeEventListener("click", this.clickTimeLineHandler)
         this.view.play_btn.removeEventListener("click", this.clickHandler);
         this.view.selectMenu.removeEventListener("change", this.changeHandler)
     }
