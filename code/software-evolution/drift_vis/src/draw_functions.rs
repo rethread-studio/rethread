@@ -202,62 +202,72 @@ pub fn draw_triangle_rolling_depth_graph(draw: &Draw, model: &Model, win: &Rect)
 
     let actual_num_visits = num_visits.min(model.selected_visit + 1); // Don't index negative numbers
 
-    for (index_u, td) in trace_datas[(model.selected_visit - actual_num_visits + 1)
-        ..(model.selected_visit + 1 + actual_num_visits)]
+    for (index_u, td) in trace_datas
+        [(model.selected_visit - actual_num_visits + 1)..=(model.selected_visit)]
         .iter()
         .enumerate()
     {
         let d_tree = &td.graph_data.depth_tree;
         let mut index = index_u as f32 + 1.0;
         let mut y_dir = 1.0;
+        let mut visit_repeats = 1;
         // Fold the index numbering around for future traces, but with an inverted y
-        if index > actual_num_visits as f32 {
-            index = (actual_num_visits + actual_num_visits) as f32 - index;
-            // println!("index {} = {}", index_u + 1, index);
-            y_dir = -1.0;
+        if (index - actual_num_visits as f32).abs() < f32::EPSILON {
+            visit_repeats = num_visits;
+            // Repeat the current visit downwards
         }
-        let x_scale = (index as f32 / (actual_num_visits as f32 + 1.0)).powf(0.5);
+        for repeat in 0..visit_repeats {
+            index += repeat as f32;
 
-        for i in 0..d_tree.len() {
-            let circle_radius_scale = 1. / (i as f32) + 0.2;
-            let y = y_scale * (actual_num_visits - index_u) as f32 * y_dir;
-            // Add some sine curvature to the line
-            // let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
-            if i < d_tree.len() && index_u < trace_datas.len() {
-                let radius = ((i as f32) * radius_scale * 2.0 + radius_offset) * x_scale;
-                let mut col = match model.color_mode {
-                    ColorMode::Script => script_color(d_tree[i].script_id as f32),
-                    ColorMode::Profile => profile_color(index as f32),
-                    ColorMode::Selected => selected_color(index_u, model.selected_visit),
-                };
-                let weight = d_tree[i].ticks as f32;
-                let weight = 1.0 - (1.0 - (weight / site.max_profile_tick)).powi(4);
-                // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
-                let pos = pt2(radius, y);
+            if index > actual_num_visits as f32 {
+                // Fold repeats of the current trace down
+                index = (actual_num_visits + actual_num_visits) as f32 - index;
+                y_dir = -1.0;
+            }
 
-                // Draw a transparent circle representing the time spent
-                let index_transparency =
-                    (index as f32 / (actual_num_visits as f32 + 1.0)).powf(4.0);
-                let mut transparent_col = col;
-                transparent_col.alpha = 0.25 * index_transparency; // (0.005 * weight * 20.0).min(0.5);
-                col.alpha = index_transparency;
+            let x_scale = (index as f32 / (actual_num_visits as f32 + 1.0)).powf(0.5);
 
-                coloured_points.push((pos, col));
-                draw.ellipse()
-                    .radius(
-                        (weight * radius_scale * 90.0)
-                            * circle_radius_scale
-                            * (1.0 / (index_transparency * 0.9 + 0.1)),
-                    )
-                    .xy(pos)
-                    .stroke_weight(0.0)
-                    .color(transparent_col);
-                // Draw the line representing the function call
-                // draw.line()
-                //     .stroke_weight(1.0)
-                //     .start(start)
-                //     .end(end)
-                //     .color(col);
+            for i in 0..d_tree.len() {
+                let circle_radius_scale = 1. / (i as f32) + 0.2;
+                let y = y_scale * (actual_num_visits as f32 - index - 1.0) * y_dir;
+                // Add some sine curvature to the line
+                // let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
+                if i < d_tree.len() && index_u < trace_datas.len() {
+                    let radius = ((i as f32) * radius_scale * 2.0 + radius_offset) * x_scale;
+                    let mut col = match model.color_mode {
+                        ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                        ColorMode::Profile => profile_color(index as f32),
+                        ColorMode::Selected => selected_color(index_u, model.selected_visit),
+                    };
+                    let weight = d_tree[i].ticks as f32;
+                    let weight = 1.0 - (1.0 - (weight / site.max_profile_tick)).powi(4);
+                    // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
+                    let pos = pt2(radius, y);
+
+                    // Draw a transparent circle representing the time spent
+                    let index_transparency =
+                        (index as f32 / (actual_num_visits as f32 + 1.0)).powf(4.0);
+                    let mut transparent_col = col;
+                    transparent_col.alpha = 0.25 * index_transparency; // (0.005 * weight * 20.0).min(0.5);
+                    col.alpha = index_transparency;
+
+                    coloured_points.push((pos, col));
+                    draw.ellipse()
+                        .radius(
+                            (weight * radius_scale * 90.0)
+                                * circle_radius_scale
+                                * (1.0 / (index_transparency * 0.9 + 0.1)),
+                        )
+                        .xy(pos)
+                        .stroke_weight(0.0)
+                        .color(transparent_col);
+                    // Draw the line representing the function call
+                    // draw.line()
+                    //     .stroke_weight(1.0)
+                    //     .start(start)
+                    //     .end(end)
+                    //     .color(col);
+                }
             }
         }
     }

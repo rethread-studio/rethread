@@ -234,7 +234,9 @@ fn model(app: &App) -> Model {
                         .short("w")
                         .value_name("VIS")
                         .takes_value(true)
-                        .help("visualisation name: coverage_voronoi, profile_rings etc."),
+                        .help(
+                            "visualisation name: coverage_voronoi, profile_rings, profile_triangle",
+                        ),
                 ),
         )
         .get_matches();
@@ -352,6 +354,7 @@ fn model(app: &App) -> Model {
                     &app.main_window(),
                     texture.size(),
                 )),
+                "profile_triangle" => DrawMode::GraphDepth(GraphDepthDrawMode::TriangleRolling),
                 _ => {
                     eprintln!("Invalid visualisation type. Rendering with the default.");
                     DrawMode::Coverage(CoverageDrawMode::voronoi(
