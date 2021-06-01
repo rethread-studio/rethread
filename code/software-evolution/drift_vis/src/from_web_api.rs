@@ -112,7 +112,7 @@ pub fn get_coverage_for_visit(
     let mut path = cache_path.clone();
     path.push(site);
     path.push(visit);
-    path.push("coverage.json");
+    path.push("coverage.min.json");
     let coverage = match fs::read_to_string(&path) {
         Ok(ref data) => {
             let vector: Vec<(i64, i32)> = serde_json::from_str(data)?;

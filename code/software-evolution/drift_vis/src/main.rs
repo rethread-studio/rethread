@@ -44,6 +44,7 @@ enum GraphDepthDrawMode {
     Rings(RefCell<WgpuShaderData>),
     PolarAxes,
     PolarAxesRolling,
+    TriangleRolling,
     AllSitesPolarAxes,
 }
 
@@ -97,6 +98,7 @@ impl DrawMode {
                 GraphDepthDrawMode::PolarAxes => "graph depth - polar axes",
                 GraphDepthDrawMode::PolarAxesRolling => "graph depth - polar axes rolling",
                 GraphDepthDrawMode::AllSitesPolarAxes => "graph_depth - all sites polar axes",
+                GraphDepthDrawMode::TriangleRolling => "graph_depth - triangle_rolling",
             },
             DrawMode::Coverage(cdm) => match cdm {
                 CoverageDrawMode::HeatMap => "coverage - heat map",
@@ -116,6 +118,7 @@ enum RenderState {
     NoRendering,
     RenderAllTraces { current_trace: usize },
     RenderSingleTraceThenExit { output_path: Option<PathBuf> },
+    Screenshot,
     Exit,
 }
 
@@ -162,6 +165,7 @@ pub struct Model {
     // The type used to resize our texture to the window texture.
     texture_reshaper: wgpu::TextureReshaper,
     render_video: bool,
+    show_text: bool,
 }
 
 widget_ids! {
@@ -172,6 +176,7 @@ widget_ids! {
         selected_site,
         selected_visit,
     background_lightness,
+    show_text,
     }
 }
 
@@ -313,10 +318,7 @@ fn model(app: &App) -> Model {
         }
     };
 
-    let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::rings(
-        &app.main_window(),
-        texture.size(),
-    ));
+    let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::TriangleRolling);
 
     let cache_path = if let Some(path) = matches.value_of("cache") {
         PathBuf::from(path)
@@ -424,6 +426,7 @@ fn model(app: &App) -> Model {
         texture_capturer,
         texture_reshaper,
         render_video: false,
+        show_text: false,
     }
 }
 
@@ -504,7 +507,7 @@ fn load_site_from_disk(site: &str, visits: &Vec<String>, cache_path: &PathBuf) -
         }
         // Load coverage
         folder_path.pop();
-        folder_path.push("coverage.json");
+        folder_path.push("coverage.min.json");
         if let Ok(data) = fs::read_to_string(&folder_path) {
             let vector: Vec<(i64, i32)> =
                 serde_json::from_str(&data).expect("Failed to parse coverage vector data");
@@ -682,6 +685,14 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         {
             model.background_lightness = value.pow(2);
         }
+
+        for value in widget::Toggle::new(model.show_text)
+            .down(10.)
+            .label(&format!("Show text"))
+            .set(model.ids.show_text, ui)
+        {
+            model.show_text = value;
+        }
     }
 
     // Encapsulate the drawing stuff so that the window isn't borrowed when calling quit
@@ -720,19 +731,32 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         };
         let visualisation_type = model.draw_mode.to_str();
 
-        // let full_text = format!(
-        //     "{}\n{}\n\n{}\n{}",
-        //     name, timestamp, visualisation_type, color_type
-        // );
-        // draw.text(&full_text)
-        //     .font_size(32)
-        //     .align_text_bottom()
-        //     .right_justify()
-        //     // .x_y(0.0, 0.0)
-        //     .wh(win.clone().pad(40.).wh())
-        //     .font(model.font.clone())
-        //     // .x_y(win.right()-130.0, win.bottom() + 10.0)
-        //     .color(LIGHTGREY);
+        if model.show_text {
+            let full_text = format!(
+                "{}\n{}\n\n{}\n{}",
+                name, timestamp, visualisation_type, color_type
+            );
+            if let Some(font) = &model.font {
+                draw.text(&full_text)
+                    .font_size(32)
+                    .align_text_bottom()
+                    .right_justify()
+                    // .x_y(0.0, 0.0)
+                    .wh(win.clone().pad(40.).wh())
+                    .font(font.clone())
+                    // .x_y(win.right()-130.0, win.bottom() + 10.0)
+                    .color(LIGHTGREY);
+            } else {
+                draw.text(&full_text)
+                    .font_size(32)
+                    .align_text_bottom()
+                    .right_justify()
+                    // .x_y(0.0, 0.0)
+                    .wh(win.clone().pad(40.).wh())
+                    // .x_y(win.right()-130.0, win.bottom() + 10.0)
+                    .color(LIGHTGREY);
+            }
+        }
 
         // draw.to_frame(app, &frame).unwrap();
         let mut encoder = device.create_command_encoder(&ce_desc);
@@ -802,6 +826,12 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                     draw_functions::draw_all_sites_single_visit_polar_axes_depth_graph(
                         &draw, &model, &win,
                     );
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
+                }
+                GraphDepthDrawMode::TriangleRolling => {
+                    draw_functions::draw_triangle_rolling_depth_graph(&draw, &model, &win);
                     model
                         .renderer
                         .render_to_texture(device, &mut encoder, &draw, &model.texture);
@@ -1034,8 +1064,20 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         RenderState::Exit => {
             app.quit();
         }
+        RenderState::Screenshot => {
+            // Capture the frame!
+            let file_path = captured_frame_path(app);
+            snapshot
+                .read(move |result| {
+                    let image = result.expect("failed to map texture memory").to_owned();
+                    image
+                        .save(&file_path)
+                        .expect("failed to save texture to png image");
+                })
+                .unwrap();
+            model.render_state = RenderState::NoRendering;
+        }
     }
-    if matches!(model.render_state, RenderState::Exit) {}
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {
@@ -1067,6 +1109,9 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     GraphDepthDrawMode::Rings(_) => *gddm = GraphDepthDrawMode::PolarAxes,
                     GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::PolarAxesRolling,
                     GraphDepthDrawMode::PolarAxesRolling => {
+                        *gddm = GraphDepthDrawMode::TriangleRolling
+                    }
+                    GraphDepthDrawMode::TriangleRolling => {
                         *gddm = GraphDepthDrawMode::AllSitesPolarAxes
                     }
                     GraphDepthDrawMode::AllSitesPolarAxes => *gddm = GraphDepthDrawMode::Horizontal,
@@ -1104,8 +1149,11 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                         *gddm = GraphDepthDrawMode::rings(&app.main_window(), model.texture.size())
                     }
                     GraphDepthDrawMode::PolarAxesRolling => *gddm = GraphDepthDrawMode::PolarAxes,
-                    GraphDepthDrawMode::AllSitesPolarAxes => {
+                    GraphDepthDrawMode::TriangleRolling => {
                         *gddm = GraphDepthDrawMode::PolarAxesRolling
+                    }
+                    GraphDepthDrawMode::AllSitesPolarAxes => {
+                        *gddm = GraphDepthDrawMode::TriangleRolling
                     }
                 },
                 DrawMode::Indentation(ref mut pdm) => match pdm {
@@ -1186,9 +1234,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 }
             }
             Key::X => {
-                // Capture the frame!
-                let file_path = captured_frame_path(app);
-                app.main_window().capture_frame(file_path);
+                model.render_state = RenderState::Screenshot;
             }
             Key::T => {
                 // // Send graph data via osc

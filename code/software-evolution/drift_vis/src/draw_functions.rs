@@ -186,6 +186,86 @@ pub fn draw_polar_axes_rolling_depth_graph(draw: &Draw, model: &Model, win: &Rec
     }
 }
 
+pub fn draw_triangle_rolling_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
+    let num_visits = 24;
+    let trace_datas = &model.sites[model.selected_site].trace_datas;
+    let site = &model.sites[model.selected_site];
+    let y_scale = (win.h() * 0.9 / 2.0) / num_visits as f32;
+
+    let radius_offset = win.h() * 0.02 - win.h() * 0.45;
+    let radius_scale: f32 = win.h() * 0.90
+        / ((site.longest_tree + 1) as f32
+            //* (((model.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
+           * 2.0);
+
+    let mut coloured_points = Vec::with_capacity(trace_datas.len() * site.longest_tree as usize);
+
+    let actual_num_visits = num_visits.min(model.selected_visit + 1); // Don't index negative numbers
+
+    for (index_u, td) in trace_datas[(model.selected_visit - actual_num_visits + 1)
+        ..(model.selected_visit + 1 + actual_num_visits)]
+        .iter()
+        .enumerate()
+    {
+        let d_tree = &td.graph_data.depth_tree;
+        let mut index = index_u as f32 + 1.0;
+        let mut y_dir = 1.0;
+        // Fold the index numbering around for future traces, but with an inverted y
+        if index > actual_num_visits as f32 {
+            index = (actual_num_visits + actual_num_visits) as f32 - index;
+            // println!("index {} = {}", index_u + 1, index);
+            y_dir = -1.0;
+        }
+        let x_scale = (index as f32 / (actual_num_visits as f32 + 1.0)).powf(0.5);
+
+        for i in 0..d_tree.len() {
+            let circle_radius_scale = 1. / (i as f32) + 0.2;
+            let y = y_scale * (actual_num_visits - index_u) as f32 * y_dir;
+            // Add some sine curvature to the line
+            // let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
+            if i < d_tree.len() && index_u < trace_datas.len() {
+                let radius = ((i as f32) * radius_scale * 2.0 + radius_offset) * x_scale;
+                let mut col = match model.color_mode {
+                    ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                    ColorMode::Profile => profile_color(index as f32),
+                    ColorMode::Selected => selected_color(index_u, model.selected_visit),
+                };
+                let weight = d_tree[i].ticks as f32;
+                let weight = 1.0 - (1.0 - (weight / site.max_profile_tick)).powi(4);
+                // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
+                let pos = pt2(radius, y);
+
+                // Draw a transparent circle representing the time spent
+                let index_transparency =
+                    (index as f32 / (actual_num_visits as f32 + 1.0)).powf(4.0);
+                let mut transparent_col = col;
+                transparent_col.alpha = 0.25 * index_transparency; // (0.005 * weight * 20.0).min(0.5);
+                col.alpha = index_transparency;
+
+                coloured_points.push((pos, col));
+                draw.ellipse()
+                    .radius(
+                        (weight * radius_scale * 90.0)
+                            * circle_radius_scale
+                            * (1.0 / (index_transparency * 0.9 + 0.1)),
+                    )
+                    .xy(pos)
+                    .stroke_weight(0.0)
+                    .color(transparent_col);
+                // Draw the line representing the function call
+                // draw.line()
+                //     .stroke_weight(1.0)
+                //     .start(start)
+                //     .end(end)
+                //     .color(col);
+            }
+        }
+    }
+    for (point, colour) in coloured_points {
+        draw.rect().xy(point).color(colour).w_h(0.5, 0.5);
+    }
+}
+
 pub fn draw_all_sites_single_visit_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
     let site = &model.sites[model.selected_site];
     let angle_offset_per_site = PI * 2.0 / model.sites.len() as f32;
