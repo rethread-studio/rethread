@@ -22,7 +22,7 @@ class MainMenuView {
             Drift
         </a>
         <a id="meetRobot" href="#" class="block mt-4 lg:inline-block hover:text-gray-700 lg:mt-0 mr-10">
-            Meet<br>the robot
+            Meet<br>the artists
         </a>
         <a id="viewExhibit" href="#" class="block mt-4 lg:inline-block hover:text-gray-700 lg:mt-0 mr-10">
             View <br>Exhibition

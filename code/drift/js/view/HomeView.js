@@ -15,7 +15,7 @@ class HomeView {
         <div class="centerText">
             <h1>Dr<span>i</span>ft</h1>
             <ul>
-                <button id="meetRobotBtn" type="button">Meet <br>the robot</button>
+                <button id="meetRobotBtn" type="button">Meet <br>the artists</button>
                 <button id="exhibitionBtn" type="button">View <br>Exhibition</button>
                 <button id="tourBtn" type="button">Virtual <br>tour</button>
                 <button id="AboutBtn" type="button">About <br>re|thread</button>

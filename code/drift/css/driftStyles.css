@@ -46,10 +46,14 @@ h1{
     position: relative;
 }
 
+
 .center{
     color:white;
     position: relative;
     text-align: center;
+}
+.noColor{
+    opacity: 0%;
 }
 
 .center img{

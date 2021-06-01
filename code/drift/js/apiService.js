@@ -25,23 +25,23 @@ class ApiService {
     }
 
     getSiteScreenshot(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/screenshot.png?&width=${size}`
+        return `${BASE_URL}/api/time/${time}/${site}/screenshot.png?&width=${size}&format=jpg`
     }
 
     getSiteGraph(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/graph.png?&width=${size}`
+        return `${BASE_URL}/api/time/${time}/${site}/graph.png?&width=${size}&format=jpg`
     }
 
     getSiteCoverage(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/coverage.png?&width=${size}`
+        return `${BASE_URL}/api/time/${time}/${site}/coverage.png?&width=${size}&format=jpg`
     }
 
     getSiteNetwork(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/network.png?&width=${size}`
+        return `${BASE_URL}/api/time/${time}/${site}/network.png?&width=${size}&format=jpg`
     }
 
     getSiteProfile(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}`
+        return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}&format=jpg`
     }
 
 }
