@@ -209,7 +209,7 @@ class DriftModel {
     calculatePack() {
         this.pack = d3.pack()
             .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
-            .padding(10)
+            .padding(30)
             (d3.hierarchy(this.data)
                 .sum(hierarchySize)
                 .sort(sortBySize))

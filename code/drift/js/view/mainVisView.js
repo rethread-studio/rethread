@@ -6,6 +6,10 @@ const stateAccessor = (d) => d.data.state;
 const imageAccessor = (d) => d.data.image;
 const logoAccessor = (d) => stateAccessor(d) == 0 ? `./img/${d.data.logo}` : `${d.data.image}`;
 const translateToCenter = (radius, dimensions) => () => `translate(${dimensions.boundedWidth / 2 - radius},${dimensions.boundedHeight / 2 - radius})`;
+const translateBottomCenter = (radius, dimensions) => () => {
+    console.log(radius, dimensions)
+    return `translate(${dimensions.boundedWidth / 2 - radius},${dimensions.boundedHeight / 2 - radius / 2})`
+};
 const translaeWithRadius = d => `translate(${d.x - d.r},${d.y - d.r})`
 const getSize = (d) => d.r * 2;
 
@@ -49,11 +53,12 @@ class MainVisView {
             const radius = 80;
             const dimensions = this.model.visDimensions;
 
-            enter
+            const element = enter
                 .append("g")
                 .attr("id", dataNameAccessor)
                 .attr("class", "image-container")
-                .append("svg:image")
+
+            element.append("svg:image")
                 .attr("transform", translateToCenter(radius, dimensions))
                 .attr("xlink:href", logoAccessor)
                 .attr("width", radius)
@@ -64,6 +69,19 @@ class MainVisView {
                 .attr("width", getSize)
                 .attr("height", getSize)
                 .attr("class", "cursor-pointer")
+
+            element
+                .append(`text`)
+                .text(dataNameAccessor)
+                .attr("fill", "white")
+                .attr("opacity", `0%`)
+                .attr("transform", (node) => `translate(${node.x}
+                    ,${node.y + node.r + 20})`)
+
+            // console.log(text)
+
+            // .attr("class", getState)
+            // .style("transform", getStyle(rectDimensions))
         }
     }
     onUpdate() {
@@ -83,6 +101,7 @@ class MainVisView {
                 .attr("transform", translaeWithRadius)
                 .attr("width", getSize)
                 .attr("height", getSize)
+
         }
     }
 
@@ -94,6 +113,7 @@ class MainVisView {
             .splice(1)
         const joinTransition = d3.transition().duration(800)
         const updateTransition = joinTransition.transition().duration(600)
+        const textTransition = updateTransition.transition().duration(800)
         const radius = 100;
         const dimensions = this.model.visDimensions;
 
@@ -109,6 +129,16 @@ class MainVisView {
                 .attr("transform", translaeWithRadius(node))
                 .attr("width", getSize(node))
                 .attr("height", getSize(node))
+
+            const text = d3.select(`#${dataNameAccessor(node)}`)
+                .select(`text`)
+                .attr("opacity", `0%`)
+                .transition(joinTransition)
+                .attr("opacity", `0%`)
+                .attr("transform", `translate(${node.x}
+                    ,${node.y + node.r + 20})`)
+                .transition(textTransition)
+                .attr("opacity", node.data.state == 1 ? `100%` : `0%`)
         })
     }
 
