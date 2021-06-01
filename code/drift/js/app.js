@@ -24,7 +24,7 @@ window.onload = function () {
     mainMenuViewController = new MainMenuViewController(mainMenuView);
 
     //start home view
-    showView("exhibition");
+    showView("tour");
 };
 
 //show view

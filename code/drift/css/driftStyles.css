@@ -130,6 +130,16 @@ button{
     fill: #ffffff;
 }
 
+.transform-50{
+    transform: translate(-50%, -50%);
+}
+
+.top-2-4{
+    top:50%;
+}
+.left-2-4{
+    left:50%;
+}
 .webLink{
     cursor:pointer;
 }
@@ -149,11 +159,6 @@ button{
 
   g.tick {
     color: white;
-}
-
-.noColor{
-    fill:red;
-    opacity:0%;
 }
 
 .white{

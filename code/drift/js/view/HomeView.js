@@ -10,8 +10,8 @@ class HomeView {
 
     render() {
         var content = `
-        <div id="intro" class="center">
-        <img src="./img/imgTest.png" alt="yahoo profile test">
+        <div id="intro" class="center h-full">
+        <img class="relative top-2-4 left-2-4 transform-50" src="./img/imgTest.png" alt="yahoo profile test">
         <div class="centerText">
             <h1>Dr<span>i</span>ft</h1>
             <ul>

@@ -78,10 +78,6 @@ class MainVisView {
                 .attr("transform", (node) => `translate(${node.x}
                     ,${node.y + node.r + 20})`)
 
-            // console.log(text)
-
-            // .attr("class", getState)
-            // .style("transform", getStyle(rectDimensions))
         }
     }
     onUpdate() {
