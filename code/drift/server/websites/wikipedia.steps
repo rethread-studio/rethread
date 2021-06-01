@@ -1,0 +1,12 @@
+
+goto https://www.wikipedia.org/
+sleep 500
+focus [name=search]
+sleep 600
+text '2021' 200 400
+sleep 2000
+screenshot
+key Enter
+sleep 5000
+snapshot
+screenshot

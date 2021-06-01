@@ -14,21 +14,21 @@ pub fn draw_polar_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
     let angle_scale: f32 = PI * 2.0 / site.longest_tree as f32;
     let radius_scale: f32 = win.h()
         / ((site.deepest_tree_depth + 1) as f32
-            * (((site.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
+            * (((site.trace_datas.len() - 1) as f32 * model.param1) + 1.0)
             * 2.0);
     let tree_separation = radius_scale * site.deepest_tree_depth as f32;
 
     for (index, td) in site.trace_datas.iter().enumerate() {
         let d_tree = &td.graph_data.depth_tree;
-        let start_radius = index as f32 * tree_separation * model.separation_ratio;
+        let start_radius = index as f32 * tree_separation * model.param1;
         let mut start = pt2(start_radius, start_radius);
         for i in 0..model.index {
             let angle = i as f32 * angle_scale + PI / 4. + index.pow(2) as f32 * 0.00003;
             if i < d_tree.len() && index < site.trace_datas.len() {
                 let start_radius = d_tree[i].depth as f32 * radius_scale
-                    + (index as f32 * tree_separation * model.separation_ratio);
+                    + (index as f32 * tree_separation * model.param1);
                 let radius = (d_tree[i].depth + 1) as f32 * radius_scale
-                    + (index as f32 * tree_separation * model.separation_ratio);
+                    + (index as f32 * tree_separation * model.param1);
                 let col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
@@ -41,7 +41,7 @@ pub fn draw_polar_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
                 // Draw a transparent circle representing the time spent
                 let mut transparent_col = col.clone();
                 transparent_col.alpha = 0.5; // (0.005 * weight * 20.0).min(0.5);
-                draw.rect().xy(end).color(col).w_h(1., 1.);
+                draw.rect().xy(end).color(col).w_h(2., 2.);
                 draw.ellipse()
                     .radius(weight * tree_separation)
                     .xy(start)
@@ -73,7 +73,7 @@ pub fn draw_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
     let mut coloured_points = Vec::with_capacity(trace_datas.len() * site.longest_tree as usize);
     for (index, td) in trace_datas.iter().enumerate() {
         let d_tree = &td.graph_data.depth_tree;
-        let start_radius = index as f32 * tree_separation * model.separation_ratio;
+        let start_radius = index as f32 * tree_separation * model.param1;
         let mut start = pt2(start_radius, start_radius);
         for i in 0..d_tree.len() {
             let circle_radius_scale = 1. / (i as f32) + 0.2;
@@ -118,9 +118,10 @@ pub fn draw_polar_axes_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
 }
 
 pub fn draw_polar_axes_rolling_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
+    let num_visits = 24;
     let trace_datas = &model.sites[model.selected_site].trace_datas;
     let site = &model.sites[model.selected_site];
-    let angle_scale: f32 = PI * 2.0 / trace_datas.len() as f32;
+    let angle_scale: f32 = PI * 2.0 / num_visits as f32;
     let radius_offset = win.h() * 0.02;
     let radius_scale: f32 = win.h() * 0.90
         / ((site.longest_tree + 1) as f32
@@ -129,18 +130,26 @@ pub fn draw_polar_axes_rolling_depth_graph(draw: &Draw, model: &Model, win: &Rec
     let tree_separation = radius_scale * site.deepest_tree_depth as f32;
 
     let mut coloured_points = Vec::with_capacity(trace_datas.len() * site.longest_tree as usize);
-    for (index, td) in trace_datas.iter().enumerate() {
+
+    let actual_num_visits = num_visits.min(model.selected_visit);
+
+    for (index, td) in trace_datas
+        [model.selected_visit - actual_num_visits..model.selected_visit + 1]
+        .iter()
+        .rev()
+        .enumerate()
+    {
         let d_tree = &td.graph_data.depth_tree;
-        let start_radius = index as f32 * tree_separation * model.separation_ratio;
+        let start_radius = index as f32 * tree_separation * model.param1;
         let mut start = pt2(start_radius, start_radius);
         for i in 0..d_tree.len() {
             let circle_radius_scale = 1. / (i as f32) + 0.2;
-            let angle = index as f32 * angle_scale + PI / 4.; // + i as f32 * 0.5;
-                                                              // Add some sine curvature to the line
-            let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
+            let angle = PI / 2. - index as f32 * angle_scale;
+            // Add some sine curvature to the line
+            // let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
             if i < d_tree.len() && index < trace_datas.len() {
                 let radius = (site.longest_tree as f32 - i as f32) * radius_scale + radius_offset;
-                let col = match model.color_mode {
+                let mut col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
                     ColorMode::Selected => selected_color(index, model.selected_visit),
@@ -151,8 +160,10 @@ pub fn draw_polar_axes_rolling_depth_graph(draw: &Draw, model: &Model, win: &Rec
                 let end = pt2(angle.cos() * radius, angle.sin() * radius);
 
                 // Draw a transparent circle representing the time spent
+                let index_transparency = 1.0 - (index as f32 / actual_num_visits as f32);
                 let mut transparent_col = col;
-                transparent_col.alpha = 0.25; // (0.005 * weight * 20.0).min(0.5);
+                transparent_col.alpha = 0.25 * index_transparency; // (0.005 * weight * 20.0).min(0.5);
+                col.alpha = index_transparency;
 
                 coloured_points.push((end, col));
                 draw.ellipse()
@@ -167,6 +178,96 @@ pub fn draw_polar_axes_rolling_depth_graph(draw: &Draw, model: &Model, win: &Rec
                 //     .end(end)
                 //     .color(col);
                 start = end;
+            }
+        }
+    }
+    for (point, colour) in coloured_points {
+        draw.rect().xy(point).color(colour).w_h(0.5, 0.5);
+    }
+}
+
+pub fn draw_triangle_rolling_depth_graph(draw: &Draw, model: &Model, win: &Rect) {
+    let num_visits = 24;
+    let trace_datas = &model.sites[model.selected_site].trace_datas;
+    let site = &model.sites[model.selected_site];
+    let y_scale = (win.h() * 0.9 / 2.0) / num_visits as f32;
+
+    let radius_offset = win.h() * 0.02 - win.h() * 0.45;
+    let radius_scale: f32 = win.h() * 0.90
+        / ((site.longest_tree + 1) as f32
+            //* (((model.trace_datas.len() - 1) as f32 * model.separation_ratio) + 1.0)
+           * 2.0);
+
+    let mut coloured_points = Vec::with_capacity(trace_datas.len() * site.longest_tree as usize);
+
+    let actual_num_visits = num_visits.min(model.selected_visit + 1); // Don't index negative numbers
+
+    for (index_u, td) in trace_datas
+        [(model.selected_visit - actual_num_visits + 1)..=(model.selected_visit)]
+        .iter()
+        .enumerate()
+    {
+        let d_tree = &td.graph_data.depth_tree;
+        let mut index = index_u as f32 + 1.0;
+        let mut y_dir = 1.0;
+        let mut visit_repeats = 1;
+        // Fold the index numbering around for future traces, but with an inverted y
+        if (index - actual_num_visits as f32).abs() < f32::EPSILON {
+            visit_repeats = num_visits;
+            // Repeat the current visit downwards
+        }
+        for repeat in 0..visit_repeats {
+            index += repeat as f32;
+
+            if index > actual_num_visits as f32 {
+                // Fold repeats of the current trace down
+                index = (actual_num_visits + actual_num_visits) as f32 - index;
+                y_dir = -1.0;
+            }
+
+            let x_scale = (index as f32 / (actual_num_visits as f32 + 1.0)).powf(0.5);
+
+            for i in 0..d_tree.len() {
+                let circle_radius_scale = 1. / (i as f32) + 0.2;
+                let y = y_scale * (actual_num_visits as f32 - index - 1.0) * y_dir;
+                // Add some sine curvature to the line
+                // let angle = angle + (i as f32 * 0.05).sin() * circle_radius_scale * angle_scale * 2.;
+                if i < d_tree.len() && index_u < trace_datas.len() {
+                    let radius = ((i as f32) * radius_scale * 2.0 + radius_offset) * x_scale;
+                    let mut col = match model.color_mode {
+                        ColorMode::Script => script_color(d_tree[i].script_id as f32),
+                        ColorMode::Profile => profile_color(index as f32),
+                        ColorMode::Selected => selected_color(index_u, model.selected_visit),
+                    };
+                    let weight = d_tree[i].ticks as f32;
+                    let weight = 1.0 - (1.0 - (weight / site.max_profile_tick)).powi(4);
+                    // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
+                    let pos = pt2(radius, y);
+
+                    // Draw a transparent circle representing the time spent
+                    let index_transparency =
+                        (index as f32 / (actual_num_visits as f32 + 1.0)).powf(4.0);
+                    let mut transparent_col = col;
+                    transparent_col.alpha = 0.25 * index_transparency; // (0.005 * weight * 20.0).min(0.5);
+                    col.alpha = index_transparency;
+
+                    coloured_points.push((pos, col));
+                    draw.ellipse()
+                        .radius(
+                            (weight * radius_scale * 90.0)
+                                * circle_radius_scale
+                                * (1.0 / (index_transparency * 0.9 + 0.1)),
+                        )
+                        .xy(pos)
+                        .stroke_weight(0.0)
+                        .color(transparent_col);
+                    // Draw the line representing the function call
+                    // draw.line()
+                    //     .stroke_weight(1.0)
+                    //     .start(start)
+                    //     .end(end)
+                    //     .color(col);
+                }
             }
         }
     }
@@ -195,7 +296,7 @@ pub fn draw_all_sites_single_visit_polar_axes_depth_graph(draw: &Draw, model: &M
                    * 2.0);
                 let tree_separation = radius_scale * site.deepest_tree_depth as f32;
                 let d_tree = &site.trace_datas[visit as usize].graph_data.depth_tree;
-                let start_radius = index as f32 * tree_separation * model.separation_ratio;
+                let start_radius = index as f32 * tree_separation * model.param1;
                 let mut start = pt2(start_radius, start_radius);
                 let angle = index as f32 * angle_offset_per_site + PI / 4.;
                 // Add angle offset per visit
@@ -250,57 +351,102 @@ pub fn draw_all_sites_single_visit_polar_axes_depth_graph(draw: &Draw, model: &M
     }
 }
 
-pub fn draw_depth_graph_rings(draw: &Draw, model: &Model, win: &Rect) {
+pub fn draw_depth_graph_rings(
+    draw: &Draw,
+    model: &Model,
+    window: &Window,
+    win: &Rect,
+    encoder: &mut wgpu::CommandEncoder,
+    texture_view: &wgpu::TextureView,
+    wgpu_shader_data: &mut WgpuShaderData,
+) {
     let site = &model.sites[model.selected_site];
-    let num_circles = 5.0;
+    let num_circles = 4.;
     let points_per_circle = site.longest_tree as f32 / num_circles;
     let angle_scale: f32 = PI * 2.0 / site.longest_tree as f32;
-    let radius_scale: f32 = (win.h() * 0.95)
+    let max_radius = 0.475 * 2.0;
+    let radius_scale: f32 = (max_radius * 2.)
         / ((site.deepest_tree_depth + 1) as f32 * ((num_circles + 1.) + 1.0) * 2.0);
     let tree_separation = radius_scale * site.deepest_tree_depth as f32;
     let d_tree = &site.trace_datas[model.selected_visit].graph_data.depth_tree;
     let start_radius = win.h() * 0.05;
     let mut start = pt2(0.0, start_radius);
     let mut coloured_points = Vec::with_capacity(d_tree.len());
+    let mut float_delaunay = FloatDelaunayTriangulation::with_tree_locate();
     for i in 0..d_tree.len() {
         let angle = i as f32 * angle_scale * num_circles + PI / 2.;
         // index = what circle we are at
         let index = i as f32 / points_per_circle;
 
-        let radius = (d_tree[i].depth) as f32 * radius_scale
-            + (index as f32 * tree_separation)
-            + start_radius;
-        let col = match model.color_mode {
-            ColorMode::Script => script_color(d_tree[i].script_id as f32),
+        let weight = d_tree[i].ticks as f32;
+        let weight = (weight.clamp(0., 20.) / 20.).powf(0.45);
+        // let weight = 1.0 - (1.0 - (weight.clamp(0.0, 20.0) / 20.0)).powf(0.5);
+
+        let radius = (((d_tree[i].depth) as f32 / site.deepest_tree_depth as f32).powf(0.5)
+            + weight)
+            * (max_radius / num_circles)
+            + (index as f32 * tree_separation);
+        // let radius = max_radius - radius;
+        let radius = (radius / max_radius).powf(0.9) * max_radius;
+
+        let mut col = match model.color_mode {
+            ColorMode::Script => script_color_sl(
+                d_tree[i].script_id as f32,
+                weight * 0.2 + 0.8,
+                0.67 - (weight * 0.6).max((i as f32 / d_tree.len() as f32) * 0.5),
+            ),
             ColorMode::Profile => profile_color(index),
             ColorMode::Selected => selected_color(model.selected_visit, model.selected_visit),
         };
-        let weight = d_tree[i].ticks as f32;
-        let weight = 1.0 - (1.0 - (weight.clamp(0.0, 20.0) / 20.0)).powi(2);
+
         // let start = pt2(angle.cos() * start_radius, angle.sin() * start_radius);
         let point = pt2(angle.cos() * radius, angle.sin() * radius);
+        // let point = pt2(-max_radius + radius * 2., weight * 100.);
         // Draw a transparent circle representing the time spent
         let mut transparent_col = col;
         transparent_col.alpha = 0.25; // (0.005 * weight * 20.0).min(0.5);
-        draw.ellipse()
-            .radius(weight * 15.)
-            .xy(point)
-            .stroke_weight(0.0)
-            .color(transparent_col);
-        // Draw the line representing the function call
-        // draw.line()
-        //     .stroke_weight(6.0)
-        //     .start(start)
-        //     .end(end)
-        //     .color(col);
-        // start = point;
+                                      // Draw the line representing the function call
+                                      // draw.line()
+                                      //     .stroke_weight(6.0)
+                                      //     .start(start)
+                                      //     .end(end)
+                                      //     .color(col);
+                                      // start = point;
+        col.alpha = 0.08;
+        let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(col);
 
         coloured_points.push((point, col));
+        float_delaunay.insert(Vertex {
+            position: [point.x, point.y, 0.0],
+            color: [rgb.red, rgb.blue, rgb.green, rgb.alpha],
+        });
     }
-    draw.polyline()
-        .join_round()
-        .weight(2.0)
-        .points_colored(coloured_points);
+
+    fn vertex_to_col_point(vertex: &Vertex, width: f32, height: f32) -> (Point2<f32>, Rgba) {
+        (
+            pt2(vertex.position[0] * width, vertex.position[1] * height),
+            rgba(vertex.color[0], vertex.color[1], vertex.color[2], 1.0),
+        )
+    }
+
+    // Triangulate all the points
+    wgpu_shader_data
+        .vertices
+        .resize(float_delaunay.num_triangles() * 3, Vertex::new());
+    for (i, face) in float_delaunay.triangles().enumerate() {
+        let triangle = face.as_triangle();
+        wgpu_shader_data.vertices[i * 3] = *triangle[0];
+        wgpu_shader_data.vertices[i * 3 + 1] = *triangle[1];
+        wgpu_shader_data.vertices[i * 3 + 2] = *triangle[2];
+        let points = vec![
+            vertex_to_col_point(&triangle[0], win.w() * 0.5, win.h() * 0.5),
+            vertex_to_col_point(&triangle[1], win.w() * 0.5, win.h() * 0.5),
+            vertex_to_col_point(&triangle[2], win.w() * 0.5, win.h() * 0.5),
+        ];
+        draw.polyline().stroke_weight(3.0).points_colored(points);
+    }
+    wgpu_shader_data.set_new_vertices(window);
+    wgpu_shader_data.view(encoder, texture_view);
 }
 
 pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
@@ -355,8 +501,7 @@ pub fn draw_flower_grid_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
 pub fn draw_vertical_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
     let site = &model.sites[model.selected_site];
     let x_scale: f32 = win.w()
-        / ((site.trace_datas.len() as f32 * model.separation_ratio + 1.0)
-            * site.deepest_tree_depth as f32);
+        / ((site.trace_datas.len() as f32 * model.param1 + 1.0) * site.deepest_tree_depth as f32);
     let y_scale: f32 = win.h() / site.longest_tree as f32;
 
     let tree_separation = win.w() / site.trace_datas.len() as f32;
@@ -367,7 +512,7 @@ pub fn draw_vertical_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
             if i < d_tree.len() && index < site.trace_datas.len() as usize {
                 let x = win.left()
                     + (d_tree[i].depth as f32 * x_scale
-                        + (index as f32 * tree_separation * model.separation_ratio));
+                        + (index as f32 * tree_separation * model.param1));
                 let col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
@@ -391,8 +536,7 @@ pub fn draw_vertical_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
 pub fn draw_horizontal_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
     let site = &model.sites[model.selected_site];
     let y_scale: f32 = win.h()
-        / ((site.trace_datas.len() as f32 * model.separation_ratio + 1.0)
-            * site.deepest_tree_depth as f32);
+        / ((site.trace_datas.len() as f32 * model.param1 + 1.0) * site.deepest_tree_depth as f32);
     let x_scale: f32 = win.w() / site.longest_tree as f32;
 
     let tree_separation = win.h() / site.trace_datas.len() as f32;
@@ -403,7 +547,7 @@ pub fn draw_horizontal_graph_depth(draw: &Draw, model: &Model, win: &Rect) {
             if i < d_tree.len() && index < site.trace_datas.len() as usize {
                 let y = win.top()
                     - (d_tree[i].depth as f32 * y_scale
-                        + (index as f32 * tree_separation * model.separation_ratio));
+                        + (index as f32 * tree_separation * model.param1));
                 let col = match model.color_mode {
                     ColorMode::Script => script_color(d_tree[i].script_id as f32),
                     ColorMode::Profile => profile_color(index as f32),
@@ -776,7 +920,7 @@ pub fn draw_coverage_spacebrush(draw: &Draw, model: &Model, win: &Rect) {
             (heat * 2.0).min(0.9) + 0.1,
         );
         let _spacebrush_thrust = heat * 20.0;
-        let spacebrush_normal_thrust = model.separation_ratio.powf(2.) * 50.0;
+        let spacebrush_normal_thrust = model.param1.powf(2.) * 50.0;
         // Split the line into many points if the segment is long
         while this_length > MINIMUM_LENGTH {
             let angle = sum_length * PI * 2. * num_circles;
@@ -833,7 +977,8 @@ pub fn draw_coverage_shell(
     model: &Model,
     window: &Window,
     win: &Rect,
-    frame: &Frame,
+    encoder: &mut wgpu::CommandEncoder,
+    texture_view: &wgpu::TextureView,
     wgpu_shader_data: &mut WgpuShaderData,
 ) {
     let site = &model.sites[model.selected_site];
@@ -856,16 +1001,23 @@ pub fn draw_coverage_shell(
 
     let mut coloured_points = vec![];
     let mut sum_length = 0.0;
+    let mut sum_count_ratio = 0.0;
     for (i, pair) in vector.iter().enumerate() {
         let this_length = pair.0 as f32 / site.max_coverage_total_length as f32;
-        let heat = pair.1 as f32 / site.max_coverage_vector_count as f32;
-        let heat = heat.powf(0.1);
+        let count_ratio = pair.1 as f32 / site.max_coverage_vector_count as f32;
+        let heat = count_ratio.powf(0.1);
         let angle = sum_length * PI * 2. * num_circles;
         let num_circles = sum_length * num_circles;
         let radius = heat * radius_per_circle + num_circles * radius_per_circle;
         sum_length += this_length;
         let point = pt2(angle.cos() * radius, angle.sin() * radius);
-        let col = hsla(0.6 + heat * 0.6, 0.4 + heat * 0.6, 0.055 + heat * 0.6, 1.0);
+        sum_count_ratio += (count_ratio.powf(0.5) - 0.05).max(0.) * model.param1 * 0.1;
+        let col = hsla(
+            0.6 + sum_count_ratio + model.param2,
+            0.4 + heat * 0.6,
+            0.055 + heat * 0.6,
+            1.0,
+        );
         let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(col);
         coloured_points.push((point, col));
         float_delaunay.insert(Vertex {
@@ -886,7 +1038,7 @@ pub fn draw_coverage_shell(
     }
 
     wgpu_shader_data.set_new_vertices(window);
-    wgpu_shader_data.view(frame);
+    wgpu_shader_data.view(encoder, texture_view);
 }
 
 pub fn draw_coverage_organic(
@@ -894,7 +1046,8 @@ pub fn draw_coverage_organic(
     model: &Model,
     window: &Window,
     win: &Rect,
-    frame: &Frame,
+    encoder: &mut wgpu::CommandEncoder,
+    texture_view: &wgpu::TextureView,
     wgpu_shader_data: &mut WgpuShaderData,
 ) {
     let site = &model.sites[model.selected_site];
@@ -959,7 +1112,7 @@ pub fn draw_coverage_organic(
         let height = count_ratio.powf(0.1);
         let heat = count_ratio.powf(0.2);
         let _spacebrush_thrust = heat * 20.0;
-        let spacebrush_normal_thrust = model.separation_ratio.powf(2.) * 50.0;
+        let spacebrush_normal_thrust = model.param1.powf(2.) * 50.0;
         // Split the line into many points if the segment is long
         while this_length > MINIMUM_LENGTH {
             let angle = sum_length * PI * 2. * num_circles;
@@ -1029,7 +1182,7 @@ pub fn draw_coverage_organic(
     }
 
     wgpu_shader_data.set_new_vertices(window);
-    wgpu_shader_data.view(frame);
+    wgpu_shader_data.view(encoder, texture_view);
 }
 
 pub fn draw_coverage_voronoi(
@@ -1037,7 +1190,8 @@ pub fn draw_coverage_voronoi(
     model: &Model,
     window: &Window,
     win: &Rect,
-    frame: &Frame,
+    encoder: &mut wgpu::CommandEncoder,
+    texture_view: &wgpu::TextureView,
     voronoi_shader: &mut VoronoiShader,
 ) {
     let site = &model.sites[model.selected_site];
@@ -1180,13 +1334,17 @@ pub fn draw_coverage_voronoi(
 
     println!("Num points: {}", voronoi_points.len());
     voronoi_shader.set_points(voronoi_points, window);
-    voronoi_shader.view(frame, window);
+    voronoi_shader.view(encoder, texture_view, window);
 }
 
 // HELPER FUNCTIONS
 
 fn script_color(id: f32) -> Hsla {
     hsla(id as f32 * 0.0226, 0.8, 0.45, 1.0)
+}
+
+fn script_color_sl(id: f32, saturation: f32, lightness: f32) -> Hsla {
+    hsla(id as f32 * 0.0226, saturation, lightness, 1.0)
 }
 
 fn profile_color(index: f32) -> Hsla {

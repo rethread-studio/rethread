@@ -1,0 +1,5 @@
+
+goto https://spotifycharts.com/regional
+sleep 5000
+snapshot
+screenshot

@@ -32,7 +32,7 @@ pub struct WgpuShaderData {
 }
 
 impl WgpuShaderData {
-    pub fn new(window: &Window, shader: &str) -> Self {
+    pub fn new(window: &Window, resolution: [u32; 2], shader: &str) -> Self {
         let device = window.swap_chain_device();
         let format = Frame::TEXTURE_FORMAT;
         let sample_count = window.msaa_samples();
@@ -100,18 +100,13 @@ impl WgpuShaderData {
         });
     }
 
-    pub fn view(&self, frame: &Frame) {
-        // Using this we will encode commands that will be submitted to the GPU.
-        let mut encoder = frame.command_encoder();
-
+    pub fn view(&self, encoder: &mut wgpu::CommandEncoder, texture_view: &wgpu::TextureView) {
         // The render pass can be thought of a single large command consisting of sub commands. Here we
         // begin a render pass that outputs to the frame's texture. Then we add sub-commands for
         // setting the bind group, render pipeline, vertex buffers and then finally drawing.
         let mut render_pass = wgpu::RenderPassBuilder::new()
-            .color_attachment(frame.texture_view(), |color| {
-                color.load_op(wgpu::LoadOp::Load)
-            })
-            .begin(&mut encoder);
+            .color_attachment(texture_view, |color| color.load_op(wgpu::LoadOp::Load))
+            .begin(encoder);
         render_pass.set_bind_group(0, &self.bind_group, &[]);
         render_pass.set_pipeline(&self.render_pipeline);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
@@ -335,13 +330,13 @@ impl Shader {
     }
     pub fn view(
         &mut self,
-        frame: &Frame,
+        encoder: &mut wgpu::CommandEncoder,
+        texture_view: &wgpu::TextureView,
         window: &Window,
         bind_groups: &Vec<nannou::wgpu::BindGroup>,
     ) {
-        let mut encoder = frame.command_encoder();
         let mut render_pass = wgpu::RenderPassBuilder::new()
-            .color_attachment(frame.texture_view(), |color| {
+            .color_attachment(texture_view, |color| {
                 color.load_op(wgpu::LoadOp::Clear(wgpu::Color {
                     r: 0.0,
                     g: 0.0,
@@ -349,7 +344,7 @@ impl Shader {
                     a: 0.0,
                 }))
             })
-            .begin(&mut encoder);
+            .begin(encoder);
         // render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
         for (i, bind_group) in bind_groups.iter().enumerate() {
             render_pass.set_bind_group(i as u32, bind_group, &[]);
@@ -369,12 +364,12 @@ pub struct VoronoiShader {
 }
 
 impl VoronoiShader {
-    pub fn new(window: &Window) -> Self {
+    pub fn new(window: &Window, resolution: [u32; 2]) -> Self {
         let shader_name = "frag_voronoi2";
         let device = window.swap_chain_device();
         let queue = window.swap_chain_queue();
 
-        let (width, height) = window.inner_size_pixels();
+        let (width, height) = (resolution[0], resolution[1]);
 
         let points: Vec<[f32; 4]> = vec![
             // [0.5, 0.5, 0.0, 0.0],
@@ -391,6 +386,7 @@ impl VoronoiShader {
             [0.15, -0.15, 0.0, 0.0],
             [0.15, 0.0, 0.0, 0.0],
         ];
+
         let resolution = [width as f32, height as f32];
         let width = points.len() as u32;
         let uniform = VoronoiUniform::new(resolution, points.len() as u32, [width as f32, 1.]);
@@ -423,7 +419,12 @@ impl VoronoiShader {
             bind_groups,
         }
     }
-    pub fn view(&mut self, frame: &Frame, window: &Window) {
+    pub fn view(
+        &mut self,
+        encoder: &mut wgpu::CommandEncoder,
+        texture_view: &wgpu::TextureView,
+        window: &Window,
+    ) {
         // Check if we need to rebuild things because the uniforms have changed
         if self.uniform.needs_rebuild() {
             let device = window.swap_chain_device();
@@ -434,7 +435,8 @@ impl VoronoiShader {
                     .bind_group(device, &uniform_bind_group_layout, &new_buffer);
         }
 
-        self.shader.view(frame, window, &self.bind_groups);
+        self.shader
+            .view(encoder, texture_view, window, &self.bind_groups);
     }
     pub fn set_points(&mut self, mut points: Vec<[f32; 4]>, window: &Window) {
         let device = window.swap_chain_device();

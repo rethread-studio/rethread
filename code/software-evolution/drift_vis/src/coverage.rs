@@ -3,6 +3,7 @@
 Deserializing of the coverage.json file and conversion of the data within it to other formats.
  */
 
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -15,8 +16,9 @@ pub struct Coverage {
 }
 
 impl Coverage {
-    pub fn from_data(data: String) -> Self {
-        let scripts: Vec<CoverageScript> = serde_json::from_str(&data).unwrap();
+    pub fn from_data(data: String) -> Result<Self> {
+        let scripts: Vec<CoverageScript> =
+            serde_json::from_str(&data).context("Failed to deserialize")?;
         // Convert the data into a vector of pairs (function_length, count) and sort
         let mut vector = Vec::with_capacity(scripts.len() * 4);
         let mut total_length = 0;
@@ -34,12 +36,12 @@ impl Coverage {
         // vector.sort_by_key(|item| item.1);
         // vector.sort_by_key(|item| item.0);
 
-        Self {
+        Ok(Self {
             scripts: Some(scripts),
             vector,
             total_length,
             total_count,
-        }
+        })
     }
     pub fn from_vector(vector: Vec<(i64, i32)>) -> Self {
         let mut total_length = 0;

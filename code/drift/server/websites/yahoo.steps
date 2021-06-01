@@ -1,0 +1,14 @@
+
+goto https://yahoo.com
+sleep 1500
+clickOn [name=agree]
+sleep 750
+focus [name=q]
+sleep 500
+text '2021' 200 400
+sleep 2000
+screenshot
+key Enter
+sleep 5000
+snapshot
+screenshot

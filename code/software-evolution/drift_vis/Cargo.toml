@@ -1,5 +1,5 @@
 [package]
-name = "bot_trace_parser"
+name = "drift_vis"
 version = "0.1.0"
 authors = ["Erik Natanael Gustafsson <erik@eriknatanael.com>"]
 edition = "2018"
@@ -13,19 +13,21 @@ nannou = "0.16"
 nannou_osc = "0.16.0"
 chrono = "0.4"
 reqwest = { version = "0.11", features = ["blocking", "json"] }
-# Audio stuff
-cpal = "0.13.1"
-slotmap = { version = "1.0" }
-rtrb = "0.1.3"
-erael_dsp = { path = "/home/erik/code/rust/rust_wave_guides/erael_dsp/" }
-crossbeam = "0.8.0"
-crossbeam-channel = "0.5.1"
-biquad = "0.4.1"
-jack = "0.7.0"
+# # Audio stuff
+# cpal = "0.13.1"
+# slotmap = { version = "1.0" }
+# rtrb = "0.1.3"
+# erael_dsp = { path = "/home/erik/code/rust/rust_wave_guides/erael_dsp/" }
+# crossbeam = "0.8.0"
+# crossbeam-channel = "0.5.1"
+# biquad = "0.4.1"
+# jack = "0.7.0"
+# Triangulation
 spade = "1.8.2"
 bytemuck = { version = "1.4", features = [ "derive" ] }
 anyhow = "1.0"
 image = "0.23.14"
+clap = "2.33"
 
 
 [build-dependencies]
