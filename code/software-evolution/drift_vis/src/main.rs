@@ -320,7 +320,10 @@ fn model(app: &App) -> Model {
         }
     };
 
-    let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::TriangleRolling);
+    let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::rings(
+        &app.main_window(),
+        texture.size(),
+    ));
 
     let cache_path = if let Some(path) = matches.value_of("cache") {
         PathBuf::from(path)
@@ -1051,7 +1054,6 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                         .expect("failed to save texture to png image");
                 })
                 .unwrap();
-            model.render_state = RenderState::Exit;
 
             // Wait for rendering to file
             println!("Waiting for PNG writing to complete...");
@@ -1061,6 +1063,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                 .texture_capturer
                 .await_active_snapshots(&device)
                 .unwrap();
+            model.render_state = RenderState::Exit;
             println!("Done!");
             // Hopefully the exit function will wait for the screenshot to be saved here
         }
