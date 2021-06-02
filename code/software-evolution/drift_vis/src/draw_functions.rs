@@ -1357,29 +1357,45 @@ pub fn draw_coverage_voronoi(
     voronoi_shader.set_points_and_colors(voronoi_points, window, colors);
     voronoi_shader.view(encoder, texture_view, window);
 
+    fn length_of_vertex_line(v1: &Vertex, v2: &Vertex) -> f32 {
+        let p1 = pt2(v1.position[0], v1.position[1]);
+        let p2 = pt2(v2.position[0], v2.position[1]);
+        p1.distance2(p2)
+    }
+
     // Triangulate all the points
     for (i, face) in float_delaunay.triangles().enumerate() {
         let triangle = face.as_triangle();
-        let points = vec![
-            vertex_to_col_point_alpha(
-                &vertex_halfway_between(&triangle[0], &triangle[1]),
-                win.w() * 0.5,
-                win.h() * 0.5,
-            ),
-            vertex_to_col_point_alpha(
-                &vertex_halfway_between(&triangle[1], &triangle[2]),
-                win.w() * 0.5,
-                win.h() * 0.5,
-            ),
-            vertex_to_col_point_alpha(
-                &vertex_halfway_between(&triangle[2], &triangle[0]),
-                win.w() * 0.5,
-                win.h() * 0.5,
-            ),
-        ];
-        draw.polyline()
-            .stroke_weight(2.0)
-            .points_colored_closed(points.clone());
+        let dist1 = length_of_vertex_line(&triangle[0], &triangle[1]);
+        let thresh = 0.64
+            * 0.1
+            * (1.0 - pt2(triangle[0].position[0], triangle[0].position[1]).distance(pt2(0.0, 0.0)));
+        if dist1 < thresh
+            && length_of_vertex_line(&triangle[1], &triangle[2]) < thresh
+            && length_of_vertex_line(&triangle[2], &triangle[0]) < thresh
+        {
+            let points = vec![
+                vertex_to_col_point_alpha(
+                    &vertex_halfway_between(&triangle[0], &triangle[1]),
+                    win.w() * 0.5,
+                    win.h() * 0.5,
+                ),
+                vertex_to_col_point_alpha(
+                    &vertex_halfway_between(&triangle[1], &triangle[2]),
+                    win.w() * 0.5,
+                    win.h() * 0.5,
+                ),
+                vertex_to_col_point_alpha(
+                    &vertex_halfway_between(&triangle[2], &triangle[0]),
+                    win.w() * 0.5,
+                    win.h() * 0.5,
+                ),
+            ];
+
+            draw.polyline()
+                .stroke_weight(2.0)
+                .points_colored_closed(points.clone());
+        }
         // draw.polyline()
         //     .stroke_weight(2.0)
         //     .x_y(1.0, 1.0)

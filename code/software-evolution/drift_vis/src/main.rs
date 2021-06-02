@@ -379,9 +379,9 @@ fn model(app: &App) -> Model {
 
     let mut rgb_selectors = Vec::new();
     rgb_selectors.push(RgbSelector::new(
-        0.3142,
-        0.9370,
-        0.6756,
+        0.0950,
+        0.5245,
+        0.8283,
         ui.widget_id_generator(),
     ));
     rgb_selectors.push(RgbSelector::new(0.0, 0.0, 0.0, ui.widget_id_generator()));
@@ -392,9 +392,9 @@ fn model(app: &App) -> Model {
         ui.widget_id_generator(),
     ));
     rgb_selectors.push(RgbSelector::new(
-        0.5025,
-        0.9451,
-        0.8722,
+        0.5741,
+        0.8863,
+        1.0,
         ui.widget_id_generator(),
     ));
 
