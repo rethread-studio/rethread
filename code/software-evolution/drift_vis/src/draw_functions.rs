@@ -1330,7 +1330,7 @@ pub fn draw_coverage_voronoi(
         let heat = count_ratio.powf(0.1);
         let angle = sum_length * PI * 2. * num_circles;
         let circle = sum_length * num_circles;
-        let radius = (circle / num_circles + heat / num_circles).powf(1. / 3.);
+        let radius = (circle / num_circles + heat / num_circles).powf(1. / 3.) * 0.95;
         // let radius = heat * radius_per_circle + circle * radius_per_circle;
         // let radius = radius * 1.2;
         sum_length += this_length;
