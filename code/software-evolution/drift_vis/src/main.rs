@@ -140,6 +140,8 @@ struct Site {
 pub struct Model {
     ui: Ui,
     ids: Ids,
+    rgb_selectors: Vec<RgbSelector>,
+    voronoi_fade_out_distance: f32,
     selected_site: usize,
     sites: Vec<Site>,
     selected_visit: usize,
@@ -169,6 +171,69 @@ pub struct Model {
 }
 
 widget_ids! {
+    struct RgbIds {
+    r,
+    g,
+    b,
+    }
+}
+
+pub struct RgbSelector {
+    r: f32,
+    g: f32,
+    b: f32,
+    ids: RgbIds,
+}
+
+impl RgbSelector {
+    fn new(r: f32, g: f32, b: f32, generator: widget::id::Generator) -> Self {
+        Self {
+            r,
+            g,
+            b,
+            ids: RgbIds::new(generator),
+        }
+    }
+    fn view(&mut self, ui: &mut UiCell) {
+        fn slider(
+            val: f32,
+            min: f32,
+            max: f32,
+            rgb: (f32, f32, f32),
+        ) -> widget::Slider<'static, f32> {
+            widget::Slider::new(val, min, max)
+                .w_h(200.0, 15.0)
+                .label_font_size(12)
+                .rgb(rgb.0, rgb.1, rgb.2)
+                .label_rgb(1.0 - rgb.0, 1.0 - rgb.1, 1.0 - rgb.2)
+                .border(1.0)
+        }
+
+        for value in slider(self.r, 0.0, 1.0, (self.r, self.g, self.b))
+            .down(15.0)
+            .label(&format!("r: {}", self.r))
+            .set(self.ids.r, ui)
+        {
+            self.r = value as f32;
+        }
+        for value in slider(self.g, 0.0, 1.0, (self.r, self.g, self.b))
+            .down(2.0)
+            .label(&format!("g: {}", self.g))
+            .set(self.ids.g, ui)
+        {
+            self.g = value as f32;
+        }
+        for value in slider(self.b, 0.0, 1.0, (self.r, self.g, self.b))
+            .down(2.0)
+            .label(&format!("b: {}", self.b))
+            .set(self.ids.b, ui)
+        {
+            self.b = value as f32;
+        }
+    }
+}
+
+widget_ids! {
     struct Ids {
         param1,
     param2,
@@ -177,6 +242,7 @@ widget_ids! {
         selected_visit,
     background_lightness,
     show_text,
+    voronoi_fade_out_distance,
     }
 }
 
@@ -249,9 +315,11 @@ fn model(app: &App) -> Model {
 
     // Lets write to a 4K UHD texture.
     let texture_size = [2_160, 2_160];
+    // let texture_size = [1080, 1080]; // Temporarily render 1080p for speed
 
     // Create the window.
     let [win_w, win_h] = [texture_size[0] / 2, texture_size[1] / 2];
+    // let [win_w, win_h] = [texture_size[0], texture_size[1]];
     let w_id = app
         .new_window()
         .view(view)
@@ -309,6 +377,27 @@ fn model(app: &App) -> Model {
     // Generate some ids for our widgets.
     let ids = Ids::new(ui.widget_id_generator());
 
+    let mut rgb_selectors = Vec::new();
+    rgb_selectors.push(RgbSelector::new(
+        0.3142,
+        0.9370,
+        0.6756,
+        ui.widget_id_generator(),
+    ));
+    rgb_selectors.push(RgbSelector::new(0.0, 0.0, 0.0, ui.widget_id_generator()));
+    rgb_selectors.push(RgbSelector::new(
+        0.1294,
+        0.6353,
+        0.7882,
+        ui.widget_id_generator(),
+    ));
+    rgb_selectors.push(RgbSelector::new(
+        0.5025,
+        0.9451,
+        0.8722,
+        ui.widget_id_generator(),
+    ));
+
     let font = match nannou::text::font::from_file("assets/SpaceMono-Regular.ttf") {
         Ok(the_font) => Some(the_font),
         Err(e) => {
@@ -320,7 +409,11 @@ fn model(app: &App) -> Model {
         }
     };
 
-    let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::rings(
+    // let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::rings(
+    //     &app.main_window(),
+    //     texture.size(),
+    // ));
+    let mut draw_mode = DrawMode::Coverage(CoverageDrawMode::voronoi(
         &app.main_window(),
         texture.size(),
     ));
@@ -388,6 +481,7 @@ fn model(app: &App) -> Model {
         };
 
         let visits = if use_web_api {
+            println!("Fetching all visit timestamps from server");
             from_web_api::get_all_visits().expect("Failed to retrieve visits")
         } else {
             vec![]
@@ -412,12 +506,14 @@ fn model(app: &App) -> Model {
     Model {
         ui,
         ids,
+        rgb_selectors,
+        voronoi_fade_out_distance: 0.00057,
         selected_site: 0,
         sites,
         index: 0,
         param1: 1.0,
         param2: 0.5,
-        param3: 0.5,
+        param3: 0.0,
         draw_mode,
         color_mode: ColorMode::Script,
         selected_visit: 0,
@@ -659,6 +755,16 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         {
             model.param3 = value as f32;
         }
+        for value in slider(model.voronoi_fade_out_distance, 0.0, 0.01)
+            .down(10.0)
+            .label(&format!(
+                "Fade out distance: {}",
+                model.voronoi_fade_out_distance
+            ))
+            .set(model.ids.voronoi_fade_out_distance, ui)
+        {
+            model.voronoi_fade_out_distance = value as f32;
+        }
 
         for value in slider(
             model.selected_site as f32,
@@ -698,6 +804,9 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             .set(model.ids.show_text, ui)
         {
             model.show_text = value;
+        }
+        for rgb in model.rgb_selectors.iter_mut() {
+            rgb.view(ui);
         }
     }
 
@@ -901,15 +1010,23 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                     );
                 }
                 CoverageDrawMode::Voronoi(ref voronoi_shader) => {
+                    let mut cols = [[0.; 4]; 4];
+                    for (i, rgb) in model.rgb_selectors.iter().enumerate() {
+                        cols[i] = [rgb.r, rgb.g, rgb.b, 1.0];
+                    }
                     draw_functions::draw_coverage_voronoi(
                         &draw,
                         &model,
                         &app.main_window(),
                         &win,
+                        cols,
                         &mut encoder,
                         &texture_view,
                         &mut voronoi_shader.borrow_mut(),
                     );
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
 
                     // Try drawing the text on top
                     // draw.reset();
