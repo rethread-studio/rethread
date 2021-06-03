@@ -8,11 +8,17 @@ class ExhibitionView {
 
     render() {
         var content = `
-        <div id="webSitesWrapper"></div>
-        <div id="sideMenuWrapper"></div>
-        <div id="timeLineWrapper"></div>
+    
+            <div id="exhibitionIntro" class="relative h-full"> </div>
+            <div id="visContainer" class="relative  h-full ">
+                <div id="webSitesWrapper"></div>
+                <div id="sideMenuWrapper"></div>
+                <div id="timeLineWrapper"></div>
+            </div>
+       
 		`;
         this.container.innerHTML = content;
+        this.renderIntroSection();
         this.renderMainVis();
         this.renderSideMenu();
         this.renderTimeLine();
@@ -33,8 +39,13 @@ class ExhibitionView {
         //ADD SIDE MENU VIEW
         let sideMenuView = new SideMenuView("sideMenuWrapper", this.model);
         this.sideMenuController = new SideMenuController(sideMenuView, this.model);
-
         this.sideMenuController.renderView();
+    }
+
+    renderIntroSection() {
+        let introView = new IntroView("exhibitionIntro", this.model);
+        this.introController = new IntroViewController(introView, this.model);
+        this.introController.renderView();
     }
 
     renderTimeLine() {

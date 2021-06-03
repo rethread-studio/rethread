@@ -10,15 +10,15 @@ class HomeView {
 
     render() {
         var content = `
-        <div id="intro" class="center h-full">
-        <img class="relative top-2-4 left-2-4 transform-50" src="./img/imgTest.png" alt="yahoo profile test">
-        <div class="centerText">
-            <h1>Dr<span>i</span>ft</h1>
-            <ul>
-                <button id="meetRobotBtn" type="button">Meet <br>the artists</button>
-                <button id="exhibitionBtn" type="button">View <br>Exhibition</button>
-                <button id="tourBtn" type="button">Virtual <br>tour</button>
-                <button id="AboutBtn" type="button">About <br>re|thread</button>
+        <div id="intro" class="center txt-white relative h-screen ">
+        <img class="relative top-2-4 left-2-4 transform-50 h-auto .max-727 blur" src="./img/imgTest.png" alt="yahoo profile test">
+        <div class="absolute middleInset translateCenter">
+            <h1 class="m-0 text-center" >Dr<span>i</span>ft</h1>
+            <ul class="flex flex-row justify-between p-0 m-0">
+                <li><a href="#" id="meetRobotBtn" >Meet <br>the artists</a></li>
+                <li><a href="#" id="exhibitionBtn" >View <br>Exhibition</a></li>
+                <li><a href="#" id="tourBtn" >Virtual <br>tour</a></li>
+                <li><a href="#" id="AboutBtn" >About <br>re|thread</a></li>
             </ul>
         </div>
     </div>
