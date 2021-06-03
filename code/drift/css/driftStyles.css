@@ -85,11 +85,18 @@ h1{
 #intro li{
     list-style-type: none;
     font-size: 20px;
+    text-align: center;
 }
 
-a{
+#intro a{
     text-decoration: none;
     color:white;
+    display: block;
+}
+
+#intro a:hover{
+    text-decoration: none;
+    color:black;
 }
 
 

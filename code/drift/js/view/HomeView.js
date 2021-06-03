@@ -15,10 +15,10 @@ class HomeView {
         <div class="absolute middleInset translateCenter">
             <h1 class="m-0 text-center" >Dr<span>i</span>ft</h1>
             <ul class="flex flex-row justify-between p-0 m-0">
-                <li><a href="#" id="meetRobotBtn" >Meet <br>the artists</a></li>
-                <li><a href="#" id="exhibitionBtn" >View <br>Exhibition</a></li>
-                <li><a href="#" id="tourBtn" >Virtual <br>tour</a></li>
-                <li><a href="#" id="AboutBtn" >About <br>re|thread</a></li>
+                <li><a class="transition-colors duration-500 ease-in-out text-white hover:text-black" href="#" id="meetRobotBtn" >Meet <br>the artists</a></li>
+                <li><a class="transition-colors duration-500 ease-in-out text-white hover:text-black" href="#" id="exhibitionBtn" >View <br>Exhibition</a></li>
+                <li><a class="transition-colors duration-500 ease-in-out text-white hover:text-black" href="#" id="tourBtn" >Virtual <br>tour</a></li>
+                <li><a class="transition-colors duration-500 ease-in-out text-white hover:text-black" href="#" id="AboutBtn" >About <br>re|thread</a></li>
             </ul>
         </div>
     </div>
