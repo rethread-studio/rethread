@@ -23,8 +23,11 @@ window.onload = function () {
     let mainMenuView = new MainMenuView('mainMenu', model);
     mainMenuViewController = new MainMenuViewController(mainMenuView);
 
+    let legendView = new LegendView('page-content', model);
+    legendViewController = new LegendViewController(legendView);
+
     //start home view
-    showView("home");
+    showView("meetTheRobot");
 };
 
 //show view
@@ -56,6 +59,11 @@ function showView(view) {
         case 'about':
             currentView = aboutViewController;
             aboutViewController.renderView();
+            mainMenuViewController.renderView();
+            break;
+        case 'legend':
+            currentView = legendViewController;
+            legendViewController.renderView();
             mainMenuViewController.renderView();
             break;
         default:

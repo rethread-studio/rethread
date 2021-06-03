@@ -12,44 +12,26 @@ class MainMenuView {
 
     render() {
         var content = `
-<header>
-<nav class="flex items-center justify-between p-6 container mx-auto">
+        <header class="fixed w-screen block z-50">
+        <nav class="flex items-center justify-between p-6 container mx-auto">
 
 
-    <!-- Menu items -->
-    <div class="text-lg text-gray-600 hidden lg:flex">
-        <a id="home" href="#" class="block mt-4 lg:inline-block text-teal-600 lg:mt-0 mr-10">
-            Drift
-        </a>
-        <a id="meetRobot" href="#" class="block mt-4 lg:inline-block hover:text-gray-700 lg:mt-0 mr-10">
-            Meet<br>the artists
-        </a>
-        <a id="viewExhibit" href="#" class="block mt-4 lg:inline-block hover:text-gray-700 lg:mt-0 mr-10">
-            View <br>Exhibition
-        </a>
-        <a id="virtualTour" href="#" class="block hover:text-gray-700 mt-4 lg:inline-block lg:mt-0 mr-10">
-            Virtual <br>tour
-        </a>
-        <a id="aboutRethread" href="#" class="block hover:text-gray-700 mt-4 lg:inline-block lg:mt-0">
-            About <br>re|thread
-        </a>
-    </div>
+            <!-- Menu items -->
+        
+                <a id="home" class="robotoFont self-center txt-white text-3xl font-semibold tracking-widest" href="#" class="block mt-4 lg:inline-block text-teal-600 lg:mt-0 mr-10">
+                    Dr<span class="italic">i</span>ft
+                </a>
 
-    <!-- CTA and Hamburger icon -->
-    <div class="flex items-center">
+                <button class="flex px-4 py-3 border rounded mt-auto focus:outline-none">
+                        <svg class="fill-current text-white h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <title>Menu</title>
+                            <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
+                        </svg>
+                </button>
+        
 
-        <div class="block lg:hidden">
-            <button
-                class="flex items-center px-4 py-3 border rounded text-teal-500 border-teal-500 focus:outline-none">
-                <svg class="fill-current h-3 w-3" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <title>Menu</title>
-                    <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-                </svg>
-            </button>
-        </div>
-    </div>
-</nav>
-</header>
+        </nav>
+        </header>
 		`;
         this.container.innerHTML = content;
         this.setIdentifications();

@@ -10,7 +10,9 @@ class RobotView {
     render() {
 
         var content = `
-        <div id="twitch-embed"></div>
+        <div class="relative pt-80">
+            <div id="twitch-embed"  ></div>
+        </div>
 		`;
         this.container.innerHTML = content;
 

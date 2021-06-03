@@ -13,6 +13,21 @@ body {
     /* Firefox */
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+font-family: 'Roboto', sans-serif;
+  font-weight: inherit;
+}
+
+p{
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;   
+}
+
 
 
 .background{
@@ -149,7 +164,7 @@ h1{
 
 #twitch-embed {
     position: absolute;
-    top: 0vh;
+    top:100px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -166,4 +181,14 @@ h1{
 
 .white{
     color:white;
+}
+
+
+.text-8xl{
+    font-size: 6rem;
+line-height: 1;
+}
+
+#vimeoPlayer{
+
 }

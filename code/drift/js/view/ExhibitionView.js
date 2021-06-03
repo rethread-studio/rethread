@@ -9,8 +9,8 @@ class ExhibitionView {
     render() {
         var content = `
     
-            <div id="exhibitionIntro" class="relative h-full"> </div>
-            <div id="visContainer" class="relative  h-full ">
+            <div id="exhibitionIntro" class="relative h-screen"> </div>
+            <div id="visContainer" class="relative  h-screen ">
                 <div id="webSitesWrapper"></div>
                 <div id="sideMenuWrapper"></div>
                 <div id="timeLineWrapper"></div>

@@ -4,6 +4,7 @@ class MainMenuViewController {
 
     constructor(view) {
         this.view = view;
+        this.clickHandler = this.onClickHome.bind(this);
     }
 
     renderView() {
@@ -11,40 +12,18 @@ class MainMenuViewController {
         this.addEventListener();
     }
 
+    onClickHome() {
+        showView('home');
+    }
+
     addEventListener() {
-        this.view.home_link.addEventListener("click", () => {
-            showView('home');
-        });
-        this.view.meetRobot_link.addEventListener("click", () => {
-            showView('meetTheRobot');
-        });
-        this.view.viewExhibition_link.addEventListener("click", () => {
-            showView('exhibition');
-        });
-        this.view.takeTour_link.addEventListener("click", () => {
-            showView('tour');
-        });
-        this.view.aboutReThread_link.addEventListener("click", () => {
-            showView('about');
-        });
+        this.view.home_link.addEventListener("click", this.clickHandler);
+
     }
 
     removeEventListener() {
-        this.view.home_link.removeEventListener("click", () => {
-            showView('meetTheRobot');
-        });
-        this.view.meetRobot_link.removeEventListener("click", () => {
-            showView('meetTheRobot');
-        });
-        this.view.viewExhibition_link.removeEventListener("click", () => {
-            showView('exhibition');
-        });
-        this.view.takeTour_link.removeEventListener("click", () => {
-            showView('tour');
-        });
-        this.view.aboutReThread_link.removeEventListener("click", () => {
-            showView('about');
-        });
+        this.view.home_link.removeEventListener("click", this.clickHandler);
+
     }
 
     unMountView() {
