@@ -34,7 +34,7 @@ class TimeLineView {
         //ADD ALL THE VISUAL ITEMS 
         //MAIN wrapper in the HTML
         const wrapper = d3.select("#" + this.container)
-            .attr("class", "absolute bottom-0 left-0 translate-middle flex")
+            .attr("class", "absolute bottom-0 left-0  flex")
             .append("svg")
             .attr("width", dimensions.width)
             .attr("height", dimensions.height)

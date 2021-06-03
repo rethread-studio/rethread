@@ -44,7 +44,7 @@ p{
 }
 
 .fullHeight{
-    height: calc(30000px + 100vh);
+    height: calc(100vh*5);
 }
 
 
@@ -191,4 +191,8 @@ line-height: 1;
 
 #vimeoPlayer{
 
+}
+
+.pt-40{
+    padding-top: 10rem;
 }
