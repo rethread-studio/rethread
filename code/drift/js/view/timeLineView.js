@@ -17,7 +17,7 @@ class TimeLineView {
         const playButton = this.model.getPlayState() ? "pause" : "play";
         const buttons = `
         <div class="flex flex-row justify-center content-center items-center pl-6">
-        <button id="playBtn" class="mr-8" >${playButton}</button>
+        <button id="playBtn" class="mr-8 white" >${playButton}</button>
             <div class="relative">
             <span class="white">speed</span>
                 <select id="selectMenu" class="...">

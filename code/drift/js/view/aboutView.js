@@ -10,7 +10,7 @@ class AboutView {
         var content = `
         <div class="grid grid-cols-2 w-full h-full p-24">
             <div class="pr-20">
-             <img class="relative top-2-4 left-2-4 transform-50 h-auto .max-727 blur" src="./img/imgTest.png" alt="yahoo profile test">
+             <img class="h-auto .max-727 blur" src="./img/imgTest.png" alt="yahoo profile test">
             </div>
             <div id="tour" class="container white  ">
                 <h1 class= "text-8xl mb-12" >About<br> re|thread</h1>
