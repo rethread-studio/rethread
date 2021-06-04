@@ -24,11 +24,17 @@ class RobotViewController {
     );
 
     this.model.interaction.onElected((data) => {
-      this.view.renderVoteWebsite();
+      [
+        ...this.view.container.querySelectorAll(
+          ".vote-website." + data.website + " .voters div"
+        ),
+      ].map((e) => e.remove());
     });
 
     setInterval(() => {
-      let sec = Math.ceil((new Date(this.model.interaction.voteTime) - new Date()) / 1000);
+      let sec = Math.ceil(
+        (new Date(this.model.interaction.voteTime) - new Date()) / 1000
+      );
       if (sec < 0) {
         sec = 0;
       }
