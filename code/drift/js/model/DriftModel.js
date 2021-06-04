@@ -21,6 +21,7 @@ const updateState = (_name) => {
 class DriftModel {
 
     constructor() {
+        this.interaction = new Interaction()
         this.menu = []; //menu is the list of views or list of sites
         this.data = dataTest //is the current sites or views to displa in the viz
         this.currentSection = this.menu[0];

@@ -4,15 +4,18 @@ window.onload = function () {
     let model = new DriftModel();
     model.init();
 
+    let chatView = new ChatView('chat', model);
+    miniChatController = new MiniChatController(chatView, model);
+
     //Initialize VIEWS and controllers
-    let homeView = new HomeView('page-content');
-    homeViewController = new HomeViewController(homeView);
+    let homeView = new HomeView('page-content')
+    homeViewController = new HomeViewController(homeView, model);
 
     let exhibitionView = new ExhibitionView('page-content', model);
     exhibitionViewController = new ExhibitionViewController(exhibitionView);
 
     let robotView = new RobotView('page-content', model);
-    robotViewController = new RobotViewController(robotView);
+    robotViewController = new RobotViewController(robotView, chatView, model);
 
     let tourView = new TourView('page-content', model);
     tourViewController = new TourViewController(tourView);
@@ -22,6 +25,9 @@ window.onload = function () {
 
     let mainMenuView = new MainMenuView('mainMenu', model);
     mainMenuViewController = new MainMenuViewController(mainMenuView);
+
+    let emojiView = new EmojiView('emojiParty');
+    emojiController = new EmojiController(emojiView, model);
 
     //start home view
     showView("home");

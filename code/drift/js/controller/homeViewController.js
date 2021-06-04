@@ -1,7 +1,8 @@
 
 class HomeViewController {
-    constructor(view) {
+    constructor(view, model) {
         this.view = view;
+        this.model = model;
     }
 
     addEventListener() {
@@ -17,6 +18,14 @@ class HomeViewController {
         this.view.aboutReThread_btn.addEventListener("click", () => {
             showView('about');
         });
+
+        this.view.username_inp.addEventListener("change", () => {
+            this.model.interaction.changeUsername(this.view.username_inp.value);
+        });
+
+        this.model.interaction.onWelcome((data) => {
+            this.view.updateUsername(this.model.interaction.username);
+        })
     }
 
     removeEventListener() {
