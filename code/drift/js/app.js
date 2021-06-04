@@ -21,13 +21,13 @@ window.onload = function () {
     aboutViewController = new AboutViewController(aboutView);
 
     let mainMenuView = new MainMenuView('mainMenu', model);
-    mainMenuViewController = new MainMenuViewController(mainMenuView);
+    mainMenuViewController = new MainMenuViewController(mainMenuView, model);
 
     let legendView = new LegendView('page-content', model);
     legendViewController = new LegendViewController(legendView);
 
     //start home view
-    showView("tour");
+    showView("about");
 };
 
 //show view

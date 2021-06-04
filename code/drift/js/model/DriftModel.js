@@ -101,6 +101,8 @@ class DriftModel {
             },
         ]
         this.pack;
+
+        this.menuVisible = false;
     }
 
     init() {
@@ -108,6 +110,10 @@ class DriftModel {
         this.loadMenu("views");
         this.getSitesVisits()
 
+    }
+
+    getMenuVisible() {
+        return this.menuVisible;
     }
 
     getPack() {
@@ -417,5 +423,10 @@ class DriftModel {
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
 
+    }
+
+    toggleMenu(toggle = undefined) {
+        this.menuVisible = toggle == undefined ? !this.menuVisible : toggle;
+        this.notifyObservers({ type: "toggleMenu" });
     }
 }

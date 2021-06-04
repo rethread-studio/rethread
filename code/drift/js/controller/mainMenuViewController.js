@@ -2,9 +2,12 @@
 
 class MainMenuViewController {
 
-    constructor(view) {
+    constructor(view, model) {
         this.view = view;
-        this.clickHandler = this.onClickHome.bind(this);
+        this.model = model;
+        this.hamburguerClickHandler = this.onClickMenuButon.bind(this);
+        this.menuClickHandler = this.onMenuClick.bind(this);
+        this.model.addObserver(this);
     }
 
     renderView() {
@@ -12,23 +15,51 @@ class MainMenuViewController {
         this.addEventListener();
     }
 
-    onClickHome() {
-        showView('home');
+    onMenuClick(e) {
+        showView(e.target.getAttribute('value'))
+        this.model.toggleMenu(false)
+    }
+
+
+
+    onClickMenuButon() {
+        this.model.toggleMenu()
     }
 
     addEventListener() {
-        this.view.home_link.addEventListener("click", this.clickHandler);
+        this.view.home_link.addEventListener("click", this.menuClickHandler);
+        this.view.menuButton.addEventListener("click", this.hamburguerClickHandler);
 
+        if (this.model.getMenuVisible()) {
+            this.view.meetArtists_link.addEventListener("click", this.menuClickHandler);
+            this.view.viewExhibition_link.addEventListener("click", this.menuClickHandler);
+            this.view.takeTour_link.addEventListener("click", this.menuClickHandler);
+            this.view.aboutReThread_link.addEventListener("click", this.menuClickHandler);
+        }
     }
 
     removeEventListener() {
-        this.view.home_link.removeEventListener("click", this.clickHandler);
-
+        if (this.model.getMenuVisible()) {
+            this.view.meetArtists_link.removeEventListener("click", this.menuClickHandler);
+            this.view.viewExhibition_link.removeEventListener("click", this.menuClickHandler);
+            this.view.takeTour_link.removeEventListener("click", this.menuClickHandler);
+            this.view.aboutReThread_link.removeEventListener("click", this.menuClickHandler);
+        }
+        this.view.home_link.removeEventListener("click", this.menuClickHandler);
+        this.view.menuButton.removeEventListener("click", this.hamburguerClickHandler);
     }
 
     unMountView() {
         if (this.view.home_link != null) this.removeEventListener()
         this.view.unMount();
+    }
+
+    //update info when modified in model
+    update(changeDetails) {
+        if (changeDetails.type == "toggleMenu") {
+            this.view.render();
+            this.addEventListener();
+        }
     }
 
 }
