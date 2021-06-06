@@ -16,11 +16,9 @@ class MainMenuViewController {
     }
 
     onMenuClick(e) {
+        this.model.hideMenu()
         showView(e.target.getAttribute('value'))
-        this.model.toggleMenu(false)
     }
-
-
 
     onClickMenuButon() {
         this.model.toggleMenu()
@@ -50,7 +48,7 @@ class MainMenuViewController {
     }
 
     unMountView() {
-        if (this.view.home_link != null) this.removeEventListener()
+        this.removeEventListener()
         this.view.unMount();
     }
 

@@ -103,6 +103,7 @@ class DriftModel {
         this.pack;
 
         this.menuVisible = false;
+        this.mode = false;
     }
 
     init() {
@@ -110,6 +111,10 @@ class DriftModel {
         this.loadMenu("views");
         this.getSitesVisits()
 
+    }
+
+    getMode() {
+        return this.mode;
     }
 
     getMenuVisible() {
@@ -428,5 +433,14 @@ class DriftModel {
     toggleMenu(toggle = undefined) {
         this.menuVisible = toggle == undefined ? !this.menuVisible : toggle;
         this.notifyObservers({ type: "toggleMenu" });
+    }
+
+    hideMenu() {
+        this.menuVisible = false;
+    }
+
+    setMode(mode) {
+        this.mode = mode;
+        this.notifyObservers({ type: "toggleMode" });
     }
 }

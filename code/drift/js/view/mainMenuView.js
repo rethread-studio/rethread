@@ -16,7 +16,8 @@ class MainMenuView {
         const visible = this.model.getMenuVisible();
 
         const menu = `
-        <nav id= "burguerMenu" class="absolute flex flex-col items-center  justify-center  mx-auto w-screen    h-screen  pt-20 pb-20 background ">
+        <nav id= "burguerMenu" class="${visible ? "visible" : "invisible"} absolute flex flex-col items-center  justify-center  mx-auto w-screen    h-screen  pt-20 pb-20 background ">
+            <div id="toggleItem"></div>
             <a id="meetArtists_link" value="meetTheRobot" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">Meet the artists</a>
             <a id="viewExhibition_link" value="exhibition" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">View Exhibition</a>
             <a id="takeTour_link" value="tour" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">Virtual tour</a>
@@ -37,16 +38,23 @@ class MainMenuView {
                     <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
                 </svg>
             </button>
-           ${visible ? menu : ""}
+           ${menu}
         </header>
 		`;
         this.container.innerHTML = content;
         this.setIdentifications();
+        this.renderToggle();
     }
 
 
     unMount() {
         this.container.innerHTML = ``;
+    }
+
+    renderToggle() {
+        let toggleView = new ToggleView("toggleItem", this.model);
+        this.toggleViewController = new ToggleViewController(toggleView, this.model);
+        this.toggleViewController.renderView();
     }
 
     setIdentifications() {

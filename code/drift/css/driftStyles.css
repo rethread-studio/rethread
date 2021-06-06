@@ -189,10 +189,25 @@ h1{
 line-height: 1;
 }
 
-#vimeoPlayer{
-
-}
 
 .pt-40{
     padding-top: 10rem;
+}
+
+/* Toggle B */
+input:checked ~ .dot {
+    transform: translateX(130%);
+    background-color: #48bb78;
+  }
+
+  .w-14{
+    width: 3.5rem;
+  }
+
+  .top-1{
+    top: 0.25rem;
+  }
+
+  .cool-gray-400{
+    color:#9CA3AF
 }
