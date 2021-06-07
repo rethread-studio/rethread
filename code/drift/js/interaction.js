@@ -1,6 +1,7 @@
 class Interaction {
   constructor() {
-    this.socket =  io.connect("https://drift.durieux.me");
+    // this.socket = io.connect("https://drift.durieux.me");
+    this.socket = io.connect("/");
     this.uuid = localStorage.uuid;
     this.username = localStorage.username;
     this.chatMessages = [];
@@ -40,6 +41,14 @@ class Interaction {
 
   vote(website) {
     this.socket.emit("vote", { website });
+  }
+
+  page(page) {
+    this.socket.emit("page", { page });
+  }
+
+  onPage(cb) {
+    this.on("on_page", cb);
   }
 
   message(message) {

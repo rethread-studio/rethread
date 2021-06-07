@@ -8,15 +8,8 @@ class RobotViewController {
   addEventListener() {
     [...this.view.container.querySelectorAll(".vote-website")].map((e) =>
       e.addEventListener("click", (event) => {
-        console.log(
-          event.currentTarget,
-          this.view.websites.filter(
-            (w) => w == event.currentTarget.dataset.website
-          ),
-          event.currentTarget
-        );
         this.model.interaction.vote(
-          this.view.websites.filter(
+          this.model.voteWebsites.filter(
             (w) => w == event.currentTarget.dataset.website
           )[0]
         );

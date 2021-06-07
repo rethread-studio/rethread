@@ -1,25 +1,12 @@
 class RobotView {
-  constructor(container, chatView, model) {
-    this.chatView = chatView;
+  constructor(container, model) {
     this.container = document.getElementById(container);
     this.model = model;
-
-    this.websites = [
-      "spotify",
-      "qwant",
-      "bing",
-      "google",
-      "duckduckgo",
-      "kiddle",
-      "yahoo",
-      "wikipedia",
-      "drift",
-    ];
   }
 
   renderVoteWebsite() {
     let content = "";
-    for (let website of this.websites) {
+    for (let website of this.model.voteWebsites) {
       content += `<div class="vote-website ${website}" data-website="${website}"><div class="name">${website}</div><div class="voters"></div></div>`;
     }
     document.getElementById("votes").innerHTML = content;

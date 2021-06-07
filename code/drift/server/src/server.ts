@@ -322,6 +322,15 @@ api.get("/chat/user/:uuid/avatar", async (req, res) => {
   res.type("svg").send(generateFromString(req.params.uuid));
 });
 
+api.get("/vote/websites", async (req, res) => {
+  const files = await fs.promises.readdir(join(__dirname, "..", "websites"));
+  res.json(
+    files
+      .filter((f) => f.indexOf(".steps") > -1)
+      .map((f) => f.replace(".steps", ""))
+  );
+});
+
 const server = app.listen(8080, () => {
   console.log("Server listening on port: 8080");
 });
@@ -423,6 +432,10 @@ io.on("connection", (socket) => {
   });
   socket.on("stop_typing", () => {
     io.sockets.emit("stop_typing", user);
+  });
+
+  socket.on("page", (data: { page: string }) => {
+    io.sockets.emit("on_page", { user, page: data.page });
   });
 
   socket.on("vote", (data: { website: string }) => {
