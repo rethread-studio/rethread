@@ -149,26 +149,32 @@ const mainMenu = [
 
 const viewsMenu = [{
     name: "Intro",
+    human: "Intro",
+    nerd: "What",
     state: 1,
 },
 {
     name: "Screenshot",
+    human: "Schreenshot",
+    nerd: "human",
     state: 0,
 },
 {
     name: "Graph",
+    human: "Coverage",
+    nerd: "Code",
     state: 0,
 },
 {
     name: "Coverage",
+    human: "Execution trace",
+    nerd: "Flow",
     state: 0
 },
 {
     name: "Network",
-    state: 0
-},
-{
-    name: "Profile",
+    human: "Network",
+    nerd: "Underworld",
     state: 0
 }
 ]

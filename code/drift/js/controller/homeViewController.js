@@ -8,7 +8,7 @@ class HomeViewController {
 
     addEventListener() {
         this.view.meetRobot_btn.addEventListener("click", () => {
-            showView('meetTheRobot');
+            showView('robot');
         });
         this.view.viewExhibition_btn.addEventListener("click", () => {
             showView('exhibition');
@@ -25,7 +25,7 @@ class HomeViewController {
 
 
         this.view.meetRobot_btn.removeEventListener("click", () => {
-            showView('meetTheRobot');
+            showView('robot');
         });
         this.view.viewExhibition_btn.removeEventListener("click", () => {
             showView('exhibition');

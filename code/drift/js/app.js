@@ -27,7 +27,7 @@ window.onload = function () {
     legendViewController = new LegendViewController(legendView);
 
     //start home view
-    showView("exhibition");
+    showView("about");
 };
 
 //show view
@@ -46,7 +46,7 @@ function showView(view) {
             exhibitionViewController.renderView();
             mainMenuViewController.renderView();
             break;
-        case 'meetTheRobot':
+        case 'robot':
             currentView = robotViewController;
             robotViewController.renderView();
             mainMenuViewController.renderView();

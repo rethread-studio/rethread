@@ -102,7 +102,7 @@ class DriftModel {
         ]
         this.pack;
 
-        this.menuVisible = true;
+        this.menuVisible = false;
         this.mode = false;
         this.mainMenu = mainMenu;
     }
@@ -111,6 +111,11 @@ class DriftModel {
         this.getData();
         this.loadMenu("views");
         this.getSitesVisits()
+        this.getMainMenu()
+    }
+
+    getMainMenu() {
+        this.mainMenu = apiService.getMainMenu();
     }
 
     getMainMenu(splitName = true) {
@@ -462,5 +467,6 @@ class DriftModel {
     setMode(mode, message) {
         this.mode = mode;
         this.notifyObservers({ type: message });
+        this.notifyObservers({ type: "changeMode" });
     }
 }

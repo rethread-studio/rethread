@@ -9,7 +9,9 @@ class ExhibitionView {
     render() {
         var content = `
             <div class="fullHeight">
-                <div id="exhibitionIntro" class="relative h-screen sticky top-0"> </div>
+                <div id="exhibitionIntro" class="flex content-center items-center justify-center relative h-screen  white "> </div>
+                <div id="exhibitionProcess" class="flex content-center items-center justify-center relative h-screen  white"> </div>
+                <div id="exhibitionExplanation" class="flex content-center items-center justify-center relative h-screen  white"> </div>
                 <div id="visContainer" class="relative  h-screen sticky top-0 background-black">
                     <div id="webSitesWrapper"></div>
                     <div id="sideMenuWrapper"></div>
@@ -20,6 +22,8 @@ class ExhibitionView {
 		`;
         this.container.innerHTML = content;
         this.renderIntroSection();
+        this.renderWhatWeDid();
+        this.renderExplanation()
         this.renderMainVis();
         this.renderSideMenu();
         this.renderTimeLine();
@@ -49,10 +53,20 @@ class ExhibitionView {
         this.introController.renderView();
     }
 
+    renderWhatWeDid() {
+        let whatView = new WhatWeDidViewView("exhibitionProcess", this.model);
+        this.whatController = new WhatWeDidViewController(whatView, this.model);
+        this.whatController.renderView();
+    }
+    renderExplanation() {
+        let explanationView = new ExplainView("exhibitionExplanation", this.model);
+        this.explainController = new ExplainViewController(explanationView, this.model);
+        this.explainController.renderView();
+    }
+
     renderTimeLine() {
         let timeLineView = new TimeLineView("timeLineWrapper", this.model);
         this.timeLineController = new TimeLineController(timeLineView, this.model);
-
         this.timeLineController.renderView();
     }
     unMountView() {
