@@ -21,8 +21,10 @@ const updateState = (_name) => {
 class DriftModel {
 
     constructor() {
+        this.interaction = new Interaction()
         this.menu = []; //menu is the list of views or list of sites
         this.data = dataTest //is the current sites or views to displa in the viz
+        this.voteWebsites = []; // the list of website that can be visited by the robot
         this.currentSection = this.menu[0];
         this.observers = [];
         this.visDimensions = {
@@ -107,7 +109,7 @@ class DriftModel {
         this.getData();
         this.loadMenu("views");
         this.getSitesVisits()
-
+        this.getVoteWebsites()
     }
 
     getPack() {
@@ -268,6 +270,15 @@ class DriftModel {
                 this.notifyObservers({ type: "updateTimeLine" });
             })
 
+    }
+
+    getVoteWebsites() {
+        apiService.getVoteWebsites()
+            //strings to int
+            .then(websites => {
+                console.log(arguments)
+                this.voteWebsites = websites
+            })
     }
 
 

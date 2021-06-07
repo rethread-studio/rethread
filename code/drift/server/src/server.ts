@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as fs from "fs";
 import * as core from "cors";
-import { join } from "path";
+import { join, resolve } from "path";
 import * as compression from "compression";
 import { Server } from "socket.io";
 import { v4 as uuid } from "uuid";
@@ -14,7 +14,12 @@ import { OUTPUT_PATH } from "./config";
 const app = express();
 app.use(core());
 app.use(compression());
-app.use(express.static(__dirname + "/../public"));
+app.use("/js", express.static(__dirname + "/../../js"));
+app.use("/img", express.static(__dirname + "/../../img"));
+app.use("/css", express.static(__dirname + "/../../css"));
+app.get("/", (req, res) =>
+  res.sendFile(resolve(__dirname + "/../../index.html"))
+);
 
 const api = express.Router();
 app.use("/api", api);
@@ -317,11 +322,25 @@ api.get("/chat/user/:uuid/avatar", async (req, res) => {
   res.type("svg").send(generateFromString(req.params.uuid));
 });
 
+api.get("/vote/websites", async (req, res) => {
+  const files = await fs.promises.readdir(join(__dirname, "..", "websites"));
+  res.json(
+    files
+      .filter((f) => f.indexOf(".steps") > -1)
+      .map((f) => f.replace(".steps", ""))
+  );
+});
+
 const server = app.listen(8080, () => {
   console.log("Server listening on port: 8080");
 });
 
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 
 interface User {
   id: string;
@@ -373,7 +392,7 @@ io.on("connection", (socket) => {
 
   //listen on change_username
   socket.on("change_username", (data) => {
-    user.username = escape(data.nickName);
+    user.username = escape(data.username);
     if (data.id) {
       user.id = escape(data.id);
     }
@@ -395,11 +414,28 @@ io.on("connection", (socket) => {
     });
   });
 
+  //listen on on_emoji
+  socket.on("emoji", (data: { emoji }) => {
+    data.emoji.emoji = escape(data.emoji.emoji);
+    io.sockets.emit("new_message", {
+      message: `${user.username} says: ${data.emoji.emoji}`,
+      user,
+    });
+    io.sockets.emit("on_emoji", {
+      emoji: data.emoji,
+      user,
+    });
+  });
+
   socket.on("typing", () => {
     io.sockets.emit("typing", user);
   });
   socket.on("stop_typing", () => {
     io.sockets.emit("stop_typing", user);
+  });
+
+  socket.on("page", (data: { page: string }) => {
+    io.sockets.emit("on_page", { user, page: data.page });
   });
 
   socket.on("vote", (data: { website: string }) => {

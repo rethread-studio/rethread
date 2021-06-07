@@ -44,6 +44,10 @@ class ApiService {
         return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}&format=jpg`
     }
 
+    getVoteWebsites() {
+        const url = `${BASE_URL}/api/vote/websites`
+        return requestService.getRequest(url)
+    }
 }
 
 

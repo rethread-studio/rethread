@@ -168,3 +168,107 @@ button{
 .white{
     color:white;
 }
+/*Mini Chat view*/
+#chat {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    width: 250px;
+    height: 175px;
+    background-color: rgba(255,255,255,0.3);
+    border-radius: 4px;
+
+    display: flex;
+    flex-direction: column;
+}
+#chat.full {
+    right: 0;
+    bottom: 0;
+    left: initial;
+    height: 100%;
+}
+#emojis .emoji {
+    float: left;
+    cursor: pointer;
+}
+#messages {
+    height: 100%;
+    padding: 7px;
+    overflow: scroll;
+}
+.message {
+    min-height: 55px;
+}
+.message .chat-text {
+    width: calc(100% - 55px);
+    margin: 0;
+    margin-left: 55px;
+    padding: 4px;
+    background-color: rgb(231, 231, 231);
+}
+.message .icon {
+    width: 50px;
+    height: 50px;
+    background-size: 100%;
+    border-radius: 5px;
+    float: left;
+}
+
+/* Emoji party */
+.floating-emoji {
+    position: fixed;
+    color: white;
+    z-index: 999999;
+}
+.floating-emoji span {
+    font-size: 50px;
+}
+/* meet the artists */
+.flex-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+.left {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.right {
+    width: 400px;
+}
+#stream {
+    width: 100%;
+    height: 100%;
+}
+#votes {
+    height: 200px;
+    width: 100%;
+}
+.vote-website {
+    display: inline-block;
+    margin: 4px;
+    padding: 7px;
+    background-color: aliceblue;
+    cursor: pointer;
+}
+.vote-website .voters .icon {
+    width: 15px;
+    height: 15px;
+    background-size: 100%;
+    border-radius: 5px;
+    float: left;
+    margin: 2px;
+}
+
+#vote_time {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 50px;
+    background-color: red;
+}
