@@ -1,0 +1,9 @@
+{
+  "name": "wikipedia",
+  "longest_coverage_vector": 4350,
+  "max_coverage_total_length": 3041835,
+  "max_coverage_vector_count": 22632,
+  "longest_tree": 476,
+  "max_profile_tick": 32,
+  "deepest_tree_depth": 33
+}

@@ -1,10 +1,21 @@
 // Turn on clippy lints
 #![warn(clippy::all)]
 use chrono::{DateTime, Utc};
+use phf::{phf_map, phf_set};
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
 
 use nannou::prelude::*;
 use nannou::ui::prelude::*;
-use std::{cell::RefCell, convert::TryInto, env, fs, path::PathBuf, process::Command};
+use std::{
+    cell::RefCell,
+    convert::TryInto,
+    env,
+    fs::{self, File},
+    io::Read,
+    path::PathBuf,
+    process::Command,
+};
 mod profile;
 use profile::{Profile, TraceData};
 mod coverage;
@@ -257,6 +268,11 @@ fn model(app: &App) -> Model {
                 .long("offline")
                 .help("Read from cache, don't try to download from the internet"),
         )
+	.arg(
+            clap::Arg::with_name("recalculate")
+                .long("recalculate")
+                .help("Recalculate the longest traces, highest count values etc. This breaks compatibility along traces so ideally every trace image should be rerendered after recalculating."),
+        )
         .arg(
             clap::Arg::with_name("cache")
                 .short("c")
@@ -311,6 +327,12 @@ fn model(app: &App) -> Model {
         false
     } else {
         true
+    };
+
+    let recalculate_data = if matches.is_present("recalculate") {
+        true
+    } else {
+        false
     };
 
     // Lets write to a 4K UHD texture.
@@ -439,6 +461,7 @@ fn model(app: &App) -> Model {
             &vec![visit.to_owned()],
             use_web_api,
             &cache_path,
+            recalculate_data,
         )];
         if let Some(vis) = matches.value_of("visualisation") {
             draw_mode = match vis {
@@ -498,7 +521,7 @@ fn model(app: &App) -> Model {
 
         let sites: Vec<Site> = sites
             .iter()
-            .map(|name| load_site(&name, &visits, use_web_api, &cache_path))
+            .map(|name| load_site(&name, &visits, use_web_api, &cache_path, recalculate_data))
             .collect();
         (sites, RenderState::NoRendering)
     };
@@ -628,7 +651,19 @@ fn load_site_from_disk(site: &str, visits: &Vec<String>, cache_path: &PathBuf) -
     trace_datas
 }
 
-fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>) -> Site {
+/// Used to store the data for a site so that it is consistent across single renders
+#[derive(Serialize, Deserialize)]
+struct SiteData {
+    name: String,
+    longest_coverage_vector: usize,
+    max_coverage_total_length: i64,
+    max_coverage_vector_count: i32,
+    longest_tree: usize,
+    max_profile_tick: i32,
+    deepest_tree_depth: i32,
+}
+
+fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>, recalculate: bool) -> Site {
     let mut deepest_tree_depth = 0;
     let mut longest_tree = 0;
     let mut deepest_indentation = 0;
@@ -639,53 +674,117 @@ fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>) -> Site {
     let mut max_coverage_vector_count = 0;
     let mut max_coverage_total_length = 0;
     let mut max_profile_tick = 0;
-    for td in &trace_datas {
-        let gd = &td.graph_data;
-        if gd.depth_tree.len() > longest_tree {
-            longest_tree = gd.depth_tree.len();
+
+    let site_data_path = PathBuf::from(format!("./assets/vis_data/{}.json", name));
+    let mut loaded_data = false;
+
+    if !recalculate {
+        let file = File::open(&site_data_path);
+        if let Ok(mut file) = file {
+            let mut data = String::new();
+            file.read_to_string(&mut data).unwrap();
+            if let Ok(d) = serde_json::from_str::<SiteData>(&data) {
+                loaded_data = true;
+                deepest_tree_depth = d.deepest_tree_depth;
+                longest_coverage_vector = d.longest_coverage_vector;
+                max_coverage_total_length = d.max_coverage_total_length;
+                max_coverage_vector_count = d.max_coverage_vector_count;
+                longest_tree = d.longest_tree as usize;
+                max_profile_tick = d.max_profile_tick;
+            } else {
+                eprintln!("Failed to deserialize visualisation data, trying to recalculate.");
+            }
+        } else {
+            eprintln!("Failed to open visualisation data file, trying to recalculate.");
         }
-        for node in &gd.depth_tree {
-            if node.depth > deepest_tree_depth {
-                deepest_tree_depth = node.depth;
+    }
+
+    if !loaded_data {
+        for td in &trace_datas {
+            let gd = &td.graph_data;
+            if gd.depth_tree.len() > longest_tree {
+                longest_tree = gd.depth_tree.len();
             }
-            if node.ticks > max_profile_tick {
-                max_profile_tick = node.ticks;
+            for node in &gd.depth_tree {
+                if node.depth > deepest_tree_depth {
+                    deepest_tree_depth = node.depth;
+                }
+                if node.ticks > max_profile_tick {
+                    max_profile_tick = node.ticks;
+                }
             }
-        }
-        if let Some(indentation_profile) = &td.indentation_profile {
-            if indentation_profile.len() > longest_indentation {
-                longest_indentation = indentation_profile.len();
+            if let Some(indentation_profile) = &td.indentation_profile {
+                if indentation_profile.len() > longest_indentation {
+                    longest_indentation = indentation_profile.len();
+                }
+                for v in indentation_profile {
+                    if *v > deepest_indentation {
+                        deepest_indentation = *v;
+                    }
+                }
             }
-            for v in indentation_profile {
-                if *v > deepest_indentation {
-                    deepest_indentation = *v;
+            if let Some(line_length_profile) = &td.line_length_profile {
+                if line_length_profile.len() > longest_line_length {
+                    longest_line_length = line_length_profile.len();
+                }
+                for v in line_length_profile {
+                    if *v > deepest_line_length {
+                        deepest_line_length = *v;
+                    }
+                }
+            }
+            if let Some(coverage) = &td.coverage {
+                if coverage.vector.len() > longest_coverage_vector {
+                    longest_coverage_vector = coverage.vector.len();
+                }
+                let total_length = coverage.total_length;
+                if total_length > max_coverage_total_length {
+                    max_coverage_total_length = total_length;
+                }
+                for pair in &coverage.vector {
+                    if pair.1 > max_coverage_vector_count {
+                        max_coverage_vector_count = pair.1;
+                    }
                 }
             }
         }
-        if let Some(line_length_profile) = &td.line_length_profile {
-            if line_length_profile.len() > longest_line_length {
-                longest_line_length = line_length_profile.len();
-            }
-            for v in line_length_profile {
-                if *v > deepest_line_length {
-                    deepest_line_length = *v;
-                }
-            }
+        // Save the data to disk
+        let path_parent = site_data_path.parent().unwrap();
+        fs::create_dir_all(path_parent).expect("Failed to create directory for screenshots");
+        let site_data = SiteData {
+            name: name.to_owned(),
+            longest_coverage_vector,
+            max_coverage_total_length,
+            max_coverage_vector_count,
+            longest_tree,
+            max_profile_tick,
+            deepest_tree_depth,
+        };
+        if let Err(e) = fs::write(
+            &site_data_path,
+            serde_json::to_string_pretty(&site_data).unwrap(),
+        ) {
+            eprintln!(
+                "Couldn't save site data to file: {}",
+                site_data_path.to_str().unwrap()
+            );
         }
-        if let Some(coverage) = &td.coverage {
-            if coverage.vector.len() > longest_coverage_vector {
-                longest_coverage_vector = coverage.vector.len();
-            }
-            let total_length = coverage.total_length;
-            if total_length > max_coverage_total_length {
-                max_coverage_total_length = total_length;
-            }
-            for pair in &coverage.vector {
-                if pair.1 > max_coverage_vector_count {
-                    max_coverage_vector_count = pair.1;
-                }
-            }
-        }
+        println!(
+            "{}:\n
+longest_coverage_vector: {}\n
+max_coverage_total_length: {}\n
+max_coverage_vector_count: {}\n
+longest_tree: {}\n
+max_profile_tick: {}\n
+deepest_tree_depth: {}\n",
+            name,
+            longest_coverage_vector,
+            max_coverage_total_length,
+            max_coverage_vector_count,
+            longest_tree,
+            max_profile_tick,
+            deepest_tree_depth
+        );
     }
 
     // println!(
@@ -709,14 +808,20 @@ fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>) -> Site {
     }
 }
 
-fn load_site(name: &str, visits: &Vec<String>, use_web_api: bool, cache_path: &PathBuf) -> Site {
+fn load_site(
+    name: &str,
+    visits: &Vec<String>,
+    use_web_api: bool,
+    cache_path: &PathBuf,
+    recalculate_data: bool,
+) -> Site {
     let trace_datas = if use_web_api {
         from_web_api::get_trace_data_from_site(name, visits, cache_path)
     } else {
         load_site_from_disk(name, visits, cache_path)
     };
 
-    site_from_trace_datas(name, trace_datas)
+    site_from_trace_datas(name, trace_datas, recalculate_data)
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {

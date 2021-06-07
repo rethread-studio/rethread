@@ -1,0 +1,9 @@
+{
+  "name": "google",
+  "longest_coverage_vector": 35999,
+  "max_coverage_total_length": 9402514,
+  "max_coverage_vector_count": 49392,
+  "longest_tree": 953,
+  "max_profile_tick": 58,
+  "deepest_tree_depth": 149
+}

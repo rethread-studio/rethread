@@ -1,0 +1,9 @@
+{
+  "name": "duckduckgo",
+  "longest_coverage_vector": 8594,
+  "max_coverage_total_length": 4983717,
+  "max_coverage_vector_count": 17207,
+  "longest_tree": 813,
+  "max_profile_tick": 94,
+  "deepest_tree_depth": 42
+}

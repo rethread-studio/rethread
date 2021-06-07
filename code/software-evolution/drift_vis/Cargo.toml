@@ -13,6 +13,7 @@ nannou = "0.16"
 nannou_osc = "0.16.0"
 chrono = "0.4"
 reqwest = { version = "0.11", features = ["blocking", "json"] }
+phf =  { version = "0.8.0", features = ["macros"] }
 # # Audio stuff
 # cpal = "0.13.1"
 # slotmap = { version = "1.0" }

@@ -1,0 +1,9 @@
+{
+  "name": "bing",
+  "longest_coverage_vector": 7550,
+  "max_coverage_total_length": 4138458,
+  "max_coverage_vector_count": 2099859,
+  "longest_tree": 680,
+  "max_profile_tick": 60,
+  "deepest_tree_depth": 72
+}
