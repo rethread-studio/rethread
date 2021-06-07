@@ -27,7 +27,7 @@ window.onload = function () {
     legendViewController = new LegendViewController(legendView);
 
     //start home view
-    showView("about");
+    showView("legend");
 };
 
 //show view

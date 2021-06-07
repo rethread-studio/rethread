@@ -10,7 +10,7 @@ class ToggleView {
     render() {
         const cMode = this.model.getMode();
         const getMode = "Human Mode"
-        const robMode = "Robot Mode"
+        const robMode = "Nerd Mode"
         const content = `
         <!-- Toggle B -->
         <div class="flex items-center justify-center w-full mb-12">
