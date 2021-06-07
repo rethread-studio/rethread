@@ -2,11 +2,11 @@ let currentView;
 window.onload = function () {
     //We instantiate our model
     let model = new DriftModel();
-    model.init();
+    model.init(); ``
 
     //Initialize VIEWS and controllers
-    let homeView = new HomeView('page-content');
-    homeViewController = new HomeViewController(homeView);
+    let homeView = new HomeView('page-content', model);
+    homeViewController = new HomeViewController(homeView, model);
 
     let exhibitionView = new ExhibitionView('page-content', model);
     exhibitionViewController = new ExhibitionViewController(exhibitionView);
@@ -27,7 +27,7 @@ window.onload = function () {
     legendViewController = new LegendViewController(legendView);
 
     //start home view
-    showView("about");
+    showView("exhibition");
 };
 
 //show view
@@ -38,8 +38,8 @@ function showView(view) {
     switch (view) {
         case 'home':
             currentView = homeViewController;
-            homeViewController.renderView();
             mainMenuViewController.unMountView();
+            homeViewController.renderView();
             break;
         case 'exhibition':
             currentView = exhibitionViewController;

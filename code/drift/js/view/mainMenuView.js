@@ -18,10 +18,9 @@ class MainMenuView {
         const menu = `
         <nav id= "burguerMenu" class="${visible ? "visible" : "invisible"} absolute flex flex-col items-center  justify-center  mx-auto w-screen    h-screen  pt-20 pb-20 background ">
             <div id="toggleItem"></div>
-            <a id="meetArtists_link" value="meetTheRobot" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">Meet the artists</a>
-            <a id="viewExhibition_link" value="exhibition" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">View Exhibition</a>
-            <a id="takeTour_link" value="tour" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">Virtual tour</a>
-            <a id="aboutReThread_link" value="about" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">About re|thread </a>
+            <div id="mainMenuItems"  class="text-center">
+           
+            </dv>
         </nav>
             `
 
@@ -42,8 +41,22 @@ class MainMenuView {
         </header>
 		`;
         this.container.innerHTML = content;
+        this.renderMenuItems()
         this.setIdentifications();
         this.renderToggle();
+    }
+
+    renderMenuItems() {
+        const menuContainer = document.getElementById("mainMenuItems");
+        const menuContent = this.model.getMainMenu(false)
+            .map(i => {
+                return ` <a id="${i.value}Link" value="${i.value}" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">${i.name}</a>`
+            })
+            .join(" ");
+
+        menuContainer.innerHTML = menuContent;
+        this.setIdentifications();
+
     }
 
 
@@ -53,7 +66,7 @@ class MainMenuView {
 
     renderToggle() {
         let toggleView = new ToggleView("toggleItem", this.model);
-        this.toggleViewController = new ToggleViewController(toggleView, this.model);
+        this.toggleViewController = new ToggleViewController(toggleView, this.model, "toggleModeMenu");
         this.toggleViewController.renderView();
     }
 
@@ -62,10 +75,10 @@ class MainMenuView {
         this.menuButton = document.getElementById("menuButton");
 
         if (this.model.getMenuVisible()) {
-            this.meetArtists_link = document.getElementById("meetArtists_link");
-            this.viewExhibition_link = document.getElementById("viewExhibition_link");
-            this.takeTour_link = document.getElementById("takeTour_link");
-            this.aboutReThread_link = document.getElementById("aboutReThread_link");
+            this.meetArtists_link = document.getElementById("robotLink");
+            this.viewExhibition_link = document.getElementById("exhibitionLink");
+            this.takeTour_link = document.getElementById("tourLink");
+            this.aboutReThread_link = document.getElementById("aboutLink");
         }
     }
 }

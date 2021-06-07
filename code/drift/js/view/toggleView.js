@@ -9,7 +9,6 @@ class ToggleView {
 
     render() {
         const cMode = this.model.getMode();
-        console.log(cMode, "re render ")
         const getMode = "Human Mode"
         const robMode = "Robot Mode"
         const content = `

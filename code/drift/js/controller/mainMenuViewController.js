@@ -43,8 +43,8 @@ class MainMenuViewController {
             this.view.takeTour_link.removeEventListener("click", this.menuClickHandler);
             this.view.aboutReThread_link.removeEventListener("click", this.menuClickHandler);
         }
-        this.view.home_link.removeEventListener("click", this.menuClickHandler);
-        this.view.menuButton.removeEventListener("click", this.hamburguerClickHandler);
+        if (this.view.home_link != null) this.view.home_link.removeEventListener("click", this.menuClickHandler);
+        if (this.view.menuButton != null) this.view.menuButton.removeEventListener("click", this.hamburguerClickHandler);
     }
 
     unMountView() {
@@ -55,6 +55,9 @@ class MainMenuViewController {
     //update info when modified in model
     update(changeDetails) {
         if (changeDetails.type == "toggleMenu") {
+            this.view.render();
+            this.addEventListener();
+        } if (changeDetails.type == "toggleModeMenu") {
             this.view.render();
             this.addEventListener();
         }

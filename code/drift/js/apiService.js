@@ -44,6 +44,10 @@ class ApiService {
         return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}&format=jpg`
     }
 
+    getMainMenu() {
+        return mainMenu;
+    }
+
 }
 
 
@@ -118,6 +122,31 @@ const dataTest = {
         },
     ]
 }
+
+const mainMenu = [
+    {
+        human: "Meet the artists",
+        nerd: "Meet Motoo",
+        value: "robot"
+    },
+    {
+        human: "View Exhibition",
+        nerd: "View Evolution",
+        value: "exhibition"
+    },
+    {
+        human: "Virtual tour",
+        nerd: "Video exploration",
+        value: "tour"
+    },
+    {
+        human: "About re|thread ",
+        nerd: "About re|thread",
+        value: "about"
+    }
+]
+
+
 const viewsMenu = [{
     name: "Intro",
     state: 1,

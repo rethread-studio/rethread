@@ -102,14 +102,34 @@ class DriftModel {
         ]
         this.pack;
 
-        this.menuVisible = false;
+        this.menuVisible = true;
         this.mode = false;
+        this.mainMenu = mainMenu;
     }
 
     init() {
         this.getData();
         this.loadMenu("views");
         this.getSitesVisits()
+    }
+
+    getMainMenu(splitName = true) {
+        const val = !this.mode ? "human" : "nerd";
+
+        return this.mainMenu.map(i => {
+            let name = i[val];
+            let arr = [];
+            if (splitName) {
+                arr = name.split(" ")
+                arr.splice(1, 0, "<br>")
+                arr = arr.join(" ")
+            }
+
+            return {
+                name: splitName ? arr : name,
+                value: i.value,
+            }
+        })
 
     }
 
@@ -439,8 +459,8 @@ class DriftModel {
         this.menuVisible = false;
     }
 
-    setMode(mode) {
+    setMode(mode, message) {
         this.mode = mode;
-        this.notifyObservers({ type: "toggleMode" });
+        this.notifyObservers({ type: message });
     }
 }

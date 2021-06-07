@@ -1,7 +1,9 @@
 
 class HomeViewController {
-    constructor(view) {
+    constructor(view, model) {
         this.view = view;
+        this.model = model;
+        this.model.addObserver(this);
     }
 
     addEventListener() {
@@ -20,6 +22,8 @@ class HomeViewController {
     }
 
     removeEventListener() {
+
+
         this.view.meetRobot_btn.removeEventListener("click", () => {
             showView('meetTheRobot');
         });
@@ -32,6 +36,18 @@ class HomeViewController {
         this.view.aboutReThread_btn.removeEventListener("click", () => {
             showView('about');
         });
+
+    }
+
+    //update info when modified in model
+    update(changeDetails) {
+        if (changeDetails.type == "toggleHome") {
+            if (currentView == this) {
+                this.removeEventListener();
+                this.view.renderMenuItems();
+                this.addEventListener();
+            }
+        }
     }
 
     renderView() {

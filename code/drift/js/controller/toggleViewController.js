@@ -2,11 +2,12 @@
 
 class ToggleViewController {
 
-    constructor(view, model) {
+    constructor(view, model, message) {
         this.view = view;
         this.model = model;
         this.model.addObserver(this);
         this.toggleClickHandler = this.onClickToggle.bind(this);
+        this.message = message;
 
     }
 
@@ -16,7 +17,7 @@ class ToggleViewController {
     }
 
     onClickToggle(e) {
-        this.model.setMode(e.target.checked)
+        this.model.setMode(e.target.checked, this.message)
     }
 
     addEventListener() {
@@ -34,8 +35,7 @@ class ToggleViewController {
 
     //update info when modified in model
     update(changeDetails) {
-        if (changeDetails.type == "toggleMode") {
-            console.log("in")
+        if (changeDetails.type == this.message) {
             this.removeEventListener()
             this.renderView();
         }
