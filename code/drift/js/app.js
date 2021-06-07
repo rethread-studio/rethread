@@ -1,23 +1,14 @@
 let currentView, model;
 window.onload = function () {
     //We instantiate our model
-<<<<<<< HEAD
     let model = new DriftModel();
     model.init(); ``
-=======
-    model = new DriftModel();
-    model.init();
->>>>>>> d52af47d62e3e6e28c1a9564957faf2495cbc0eb
 
     let chatView = new ChatView('chat', model);
     miniChatController = new MiniChatController(chatView, model);
 
     //Initialize VIEWS and controllers
-<<<<<<< HEAD
     let homeView = new HomeView('page-content', model);
-=======
-    let homeView = new HomeView('page-content')
->>>>>>> d52af47d62e3e6e28c1a9564957faf2495cbc0eb
     homeViewController = new HomeViewController(homeView, model);
 
     let exhibitionView = new ExhibitionView('page-content', model);
