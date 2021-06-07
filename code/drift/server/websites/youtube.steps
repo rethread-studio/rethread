@@ -1,0 +1,11 @@
+
+goto https://www.youtube.com/
+sleep 2000
+clickOn button
+sleep 2500
+focus #search
+sleep 500
+text '2021' 200 400
+sleep 500
+key Enter
+sleep 25000

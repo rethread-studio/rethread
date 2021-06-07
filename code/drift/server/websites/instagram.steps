@@ -1,0 +1,13 @@
+
+goto https://www.instagram.com/rethread.art/
+sleep 2000
+clickOn "button:nth-child(2)"
+sleep 1000
+focus [placeholder=Search]
+sleep 500
+text '2021' 200 400
+sleep 1000
+key Enter
+sleep 1000
+clickOn "[role=none]:nth-child(3)"
+sleep 25000

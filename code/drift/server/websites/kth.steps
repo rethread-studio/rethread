@@ -1,0 +1,9 @@
+
+goto https://www.kth.se/
+sleep 1500
+focus [name=q]
+sleep 500
+text '2021' 200 400
+sleep 500
+key Enter
+sleep 25000 
