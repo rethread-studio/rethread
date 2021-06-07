@@ -1,7 +1,7 @@
 class Interaction {
   constructor() {
-    // this.socket = io.connect("https://drift.durieux.me");
-    this.socket = io.connect("/");
+    this.socket = io.connect("https://drift.durieux.me");
+    //this.socket = io.connect("/");
     this.uuid = localStorage.uuid;
     this.username = localStorage.username;
     this.chatMessages = [];

@@ -1,4 +1,4 @@
-const BASE_URL = "";
+const BASE_URL = "https://drift.durieux.me";
 const requestService = new RequestService();
 
 class ApiService {
