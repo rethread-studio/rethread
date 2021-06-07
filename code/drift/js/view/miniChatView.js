@@ -37,6 +37,7 @@ class ChatView {
     node.className = "message";
     node.innerHTML = content;
     this.messages.appendChild(node);
+    this.scrollBottom();
   }
 
   scrollBottom() {
