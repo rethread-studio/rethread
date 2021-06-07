@@ -1,0 +1,16 @@
+
+goto https://drift.durieux.me/
+sleep 2000
+focus #usernameInp
+sleep 500
+text 'Motoo' 200 400
+sleep 500
+key Enter
+clickOn #exhibitionBtn
+sleep 2500
+clickOn #spotify
+sleep 1500
+clickOn #google
+sleep 1500
+clickOn #graph
+sleep 25000

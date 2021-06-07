@@ -1,6 +1,7 @@
 use std::{cell::RefCell, env, fs::File, io::Read, path::PathBuf};
 
 use crate::texture::Texture;
+use crevice::std140::{AsStd140, Std140};
 use nannou::{image::buffer, prelude::*};
 use spade::HasPosition;
 
@@ -358,7 +359,7 @@ impl Shader {
 
 pub struct VoronoiShader {
     shader: Shader,
-    uniform: VoronoiUniform,
+    pub uniform: VoronoiUniform,
     data_texture: Texture,
     bind_groups: Vec<nannou::wgpu::BindGroup>,
 }
@@ -438,7 +439,12 @@ impl VoronoiShader {
         self.shader
             .view(encoder, texture_view, window, &self.bind_groups);
     }
-    pub fn set_points(&mut self, mut points: Vec<[f32; 4]>, window: &Window) {
+    pub fn set_points_and_colors(
+        &mut self,
+        mut points: Vec<[f32; 4]>,
+        window: &Window,
+        cols: [[f32; 4]; 4],
+    ) {
         let device = window.swap_chain_device();
         let queue = window.swap_chain_queue();
         // Pad the points to create a 2D texture
@@ -463,16 +469,20 @@ impl VoronoiShader {
         self.bind_groups[1] = texture_bind_group;
 
         // The Uniform also needs to be changed if the number of points changed
-        if points.len() as u32 != self.uniform.num_points {
-            self.uniform.num_points = points.len() as u32;
-            self.uniform.texture_res = [width as f32, height as f32];
-            self.uniform.rebuild_raw();
-            self.bind_groups[0] = self.uniform.bind_group(
-                device,
-                &self.uniform.bind_group_layout(device),
-                &self.uniform.buffer(device),
-            )
-        }
+        // if points.len() as u32 != self.uniform.num_points {
+        self.uniform.num_points = points.len() as u32;
+        self.uniform.texture_res = [width as f32, height as f32];
+        self.uniform.col1 = cols[0];
+        self.uniform.col2 = cols[1];
+        self.uniform.col3 = cols[2];
+        self.uniform.col4 = cols[3];
+        self.uniform.rebuild_raw();
+        self.bind_groups[0] = self.uniform.bind_group(
+            device,
+            &self.uniform.bind_group_layout(device),
+            &self.uniform.buffer(device),
+        )
+        // }
     }
 }
 
@@ -497,20 +507,29 @@ enum UniformState {
 
 /// The raw struct that gets converted to
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, AsStd140)]
 struct VoronoiUniformRaw {
-    resolution: [f32; 2],
+    resolution: mint::Vector2<f32>,
     num_points: u32,
-    texture_res: [f32; 2],
+    texture_res: mint::Vector2<f32>,
+    fade_out_distance: f32,
+    border_margin: f32,
+    col1: mint::Vector4<f32>,
+    col2: mint::Vector4<f32>,
+    col3: mint::Vector4<f32>,
+    col4: mint::Vector4<f32>,
 }
-// Potentially very unsafe, I don't know what I'm doing
-unsafe impl bytemuck::Pod for VoronoiUniformRaw {}
-unsafe impl bytemuck::Zeroable for VoronoiUniformRaw {}
 
-struct VoronoiUniform {
-    resolution: [f32; 2],
-    num_points: u32,
-    texture_res: [f32; 2],
+pub struct VoronoiUniform {
+    pub resolution: [f32; 2],
+    pub num_points: u32,
+    pub texture_res: [f32; 2],
+    pub fade_out_distance: f32,
+    pub border_margin: f32,
+    pub col1: [f32; 4],
+    pub col2: [f32; 4],
+    pub col3: [f32; 4],
+    pub col4: [f32; 4],
     raw: VoronoiUniformRaw,
     uniform_state: RefCell<UniformState>,
 }
@@ -518,15 +537,27 @@ struct VoronoiUniform {
 impl VoronoiUniform {
     pub fn new(resolution: [f32; 2], num_points: u32, texture_res: [f32; 2]) -> Self {
         let raw = VoronoiUniformRaw {
-            resolution,
+            resolution: resolution.into(),
             num_points,
-            texture_res,
+            texture_res: texture_res.into(),
+            fade_out_distance: 0.01,
+            border_margin: 0.2,
+            col1: [0.; 4].into(),
+            col2: [0.; 4].into(),
+            col3: [0.; 4].into(),
+            col4: [0.; 4].into(),
         };
         let mut s = Self {
             resolution,
             num_points,
             texture_res,
+            fade_out_distance: 0.01,
+            border_margin: 0.2,
             raw,
+            col1: [0.; 4],
+            col2: [0.; 4],
+            col3: [0.; 4],
+            col4: [0.; 4],
             uniform_state: RefCell::new(UniformState::NeedsRebuild {
                 bind_group: true,
                 buffer: true,
@@ -536,9 +567,15 @@ impl VoronoiUniform {
         s
     }
     fn rebuild_raw(&mut self) {
-        self.raw.resolution = self.resolution;
+        self.raw.resolution = self.resolution.into();
         self.raw.num_points = self.num_points;
-        self.raw.texture_res = self.texture_res;
+        self.raw.texture_res = self.texture_res.into();
+        self.raw.fade_out_distance = self.fade_out_distance;
+        self.raw.border_margin = self.border_margin;
+        self.raw.col1 = self.col1.into();
+        self.raw.col2 = self.col2.into();
+        self.raw.col3 = self.col3.into();
+        self.raw.col4 = self.col4.into();
     }
 }
 
@@ -588,9 +625,11 @@ impl Uniform for VoronoiUniform {
     }
     fn buffer(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::Buffer {
         // let uniform_bytes = self.data();
+        let uniform_std140 = self.raw.as_std140();
+        let uniform_bytes = uniform_std140.as_bytes();
         let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Uniform Buffer"),
-            contents: bytemuck::cast_slice(&[self.raw]),
+            contents: bytemuck::cast_slice(uniform_bytes),
             usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
         });
         let uniform_state = &mut *self.uniform_state.borrow_mut();
@@ -655,6 +694,11 @@ impl Vertex {
             self.color[0],
             self.color[1],
         ]
+    }
+    pub fn to_point_col(&self) -> (Vector2, Rgba) {
+        let point = pt2(self.position[0], self.position[1]);
+        let col = rgba(self.color[0], self.color[1], self.color[2], self.color[3]);
+        (point, col)
     }
 }
 

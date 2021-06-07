@@ -1,10 +1,21 @@
 // Turn on clippy lints
 #![warn(clippy::all)]
 use chrono::{DateTime, Utc};
+use phf::{phf_map, phf_set};
+use serde::{Deserialize, Serialize};
+use serde_json::Result;
 
 use nannou::prelude::*;
 use nannou::ui::prelude::*;
-use std::{cell::RefCell, convert::TryInto, env, fs, path::PathBuf, process::Command};
+use std::{
+    cell::RefCell,
+    convert::TryInto,
+    env,
+    fs::{self, File},
+    io::Read,
+    path::PathBuf,
+    process::Command,
+};
 mod profile;
 use profile::{Profile, TraceData};
 mod coverage;
@@ -140,6 +151,8 @@ struct Site {
 pub struct Model {
     ui: Ui,
     ids: Ids,
+    rgb_selectors: Vec<RgbSelector>,
+    voronoi_fade_out_distance: f32,
     selected_site: usize,
     sites: Vec<Site>,
     selected_visit: usize,
@@ -169,6 +182,69 @@ pub struct Model {
 }
 
 widget_ids! {
+    struct RgbIds {
+    r,
+    g,
+    b,
+    }
+}
+
+pub struct RgbSelector {
+    r: f32,
+    g: f32,
+    b: f32,
+    ids: RgbIds,
+}
+
+impl RgbSelector {
+    fn new(r: f32, g: f32, b: f32, generator: widget::id::Generator) -> Self {
+        Self {
+            r,
+            g,
+            b,
+            ids: RgbIds::new(generator),
+        }
+    }
+    fn view(&mut self, ui: &mut UiCell) {
+        fn slider(
+            val: f32,
+            min: f32,
+            max: f32,
+            rgb: (f32, f32, f32),
+        ) -> widget::Slider<'static, f32> {
+            widget::Slider::new(val, min, max)
+                .w_h(200.0, 15.0)
+                .label_font_size(12)
+                .rgb(rgb.0, rgb.1, rgb.2)
+                .label_rgb(1.0 - rgb.0, 1.0 - rgb.1, 1.0 - rgb.2)
+                .border(1.0)
+        }
+
+        for value in slider(self.r, 0.0, 1.0, (self.r, self.g, self.b))
+            .down(15.0)
+            .label(&format!("r: {}", self.r))
+            .set(self.ids.r, ui)
+        {
+            self.r = value as f32;
+        }
+        for value in slider(self.g, 0.0, 1.0, (self.r, self.g, self.b))
+            .down(2.0)
+            .label(&format!("g: {}", self.g))
+            .set(self.ids.g, ui)
+        {
+            self.g = value as f32;
+        }
+        for value in slider(self.b, 0.0, 1.0, (self.r, self.g, self.b))
+            .down(2.0)
+            .label(&format!("b: {}", self.b))
+            .set(self.ids.b, ui)
+        {
+            self.b = value as f32;
+        }
+    }
+}
+
+widget_ids! {
     struct Ids {
         param1,
     param2,
@@ -177,6 +253,7 @@ widget_ids! {
         selected_visit,
     background_lightness,
     show_text,
+    voronoi_fade_out_distance,
     }
 }
 
@@ -190,6 +267,11 @@ fn model(app: &App) -> Model {
             clap::Arg::with_name("offline")
                 .long("offline")
                 .help("Read from cache, don't try to download from the internet"),
+        )
+	.arg(
+            clap::Arg::with_name("recalculate")
+                .long("recalculate")
+                .help("Recalculate the longest traces, highest count values etc. This breaks compatibility along traces so ideally every trace image should be rerendered after recalculating."),
         )
         .arg(
             clap::Arg::with_name("cache")
@@ -247,11 +329,19 @@ fn model(app: &App) -> Model {
         true
     };
 
+    let recalculate_data = if matches.is_present("recalculate") {
+        true
+    } else {
+        false
+    };
+
     // Lets write to a 4K UHD texture.
     let texture_size = [2_160, 2_160];
+    // let texture_size = [1080, 1080]; // Temporarily render 1080p for speed
 
     // Create the window.
     let [win_w, win_h] = [texture_size[0] / 2, texture_size[1] / 2];
+    // let [win_w, win_h] = [texture_size[0], texture_size[1]];
     let w_id = app
         .new_window()
         .view(view)
@@ -309,6 +399,27 @@ fn model(app: &App) -> Model {
     // Generate some ids for our widgets.
     let ids = Ids::new(ui.widget_id_generator());
 
+    let mut rgb_selectors = Vec::new();
+    rgb_selectors.push(RgbSelector::new(
+        0.0950,
+        0.5245,
+        0.8283,
+        ui.widget_id_generator(),
+    ));
+    rgb_selectors.push(RgbSelector::new(0.0, 0.0, 0.0, ui.widget_id_generator()));
+    rgb_selectors.push(RgbSelector::new(
+        0.1294,
+        0.6353,
+        0.7882,
+        ui.widget_id_generator(),
+    ));
+    rgb_selectors.push(RgbSelector::new(
+        0.5741,
+        0.8863,
+        1.0,
+        ui.widget_id_generator(),
+    ));
+
     let font = match nannou::text::font::from_file("assets/SpaceMono-Regular.ttf") {
         Ok(the_font) => Some(the_font),
         Err(e) => {
@@ -320,7 +431,14 @@ fn model(app: &App) -> Model {
         }
     };
 
-    let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::TriangleRolling);
+    // let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::rings(
+    //     &app.main_window(),
+    //     texture.size(),
+    // ));
+    let mut draw_mode = DrawMode::Coverage(CoverageDrawMode::voronoi(
+        &app.main_window(),
+        texture.size(),
+    ));
 
     let cache_path = if let Some(path) = matches.value_of("cache") {
         PathBuf::from(path)
@@ -343,6 +461,7 @@ fn model(app: &App) -> Model {
             &vec![visit.to_owned()],
             use_web_api,
             &cache_path,
+            recalculate_data,
         )];
         if let Some(vis) = matches.value_of("visualisation") {
             draw_mode = match vis {
@@ -385,6 +504,7 @@ fn model(app: &App) -> Model {
         };
 
         let visits = if use_web_api {
+            println!("Fetching all visit timestamps from server");
             from_web_api::get_all_visits().expect("Failed to retrieve visits")
         } else {
             vec![]
@@ -401,7 +521,7 @@ fn model(app: &App) -> Model {
 
         let sites: Vec<Site> = sites
             .iter()
-            .map(|name| load_site(&name, &visits, use_web_api, &cache_path))
+            .map(|name| load_site(&name, &visits, use_web_api, &cache_path, recalculate_data))
             .collect();
         (sites, RenderState::NoRendering)
     };
@@ -409,12 +529,14 @@ fn model(app: &App) -> Model {
     Model {
         ui,
         ids,
+        rgb_selectors,
+        voronoi_fade_out_distance: 0.00057,
         selected_site: 0,
         sites,
         index: 0,
         param1: 1.0,
         param2: 0.5,
-        param3: 0.5,
+        param3: 0.0,
         draw_mode,
         color_mode: ColorMode::Script,
         selected_visit: 0,
@@ -529,7 +651,19 @@ fn load_site_from_disk(site: &str, visits: &Vec<String>, cache_path: &PathBuf) -
     trace_datas
 }
 
-fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>) -> Site {
+/// Used to store the data for a site so that it is consistent across single renders
+#[derive(Serialize, Deserialize)]
+struct SiteData {
+    name: String,
+    longest_coverage_vector: usize,
+    max_coverage_total_length: i64,
+    max_coverage_vector_count: i32,
+    longest_tree: usize,
+    max_profile_tick: i32,
+    deepest_tree_depth: i32,
+}
+
+fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>, recalculate: bool) -> Site {
     let mut deepest_tree_depth = 0;
     let mut longest_tree = 0;
     let mut deepest_indentation = 0;
@@ -540,53 +674,117 @@ fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>) -> Site {
     let mut max_coverage_vector_count = 0;
     let mut max_coverage_total_length = 0;
     let mut max_profile_tick = 0;
-    for td in &trace_datas {
-        let gd = &td.graph_data;
-        if gd.depth_tree.len() > longest_tree {
-            longest_tree = gd.depth_tree.len();
+
+    let site_data_path = PathBuf::from(format!("./assets/vis_data/{}.json", name));
+    let mut loaded_data = false;
+
+    if !recalculate {
+        let file = File::open(&site_data_path);
+        if let Ok(mut file) = file {
+            let mut data = String::new();
+            file.read_to_string(&mut data).unwrap();
+            if let Ok(d) = serde_json::from_str::<SiteData>(&data) {
+                loaded_data = true;
+                deepest_tree_depth = d.deepest_tree_depth;
+                longest_coverage_vector = d.longest_coverage_vector;
+                max_coverage_total_length = d.max_coverage_total_length;
+                max_coverage_vector_count = d.max_coverage_vector_count;
+                longest_tree = d.longest_tree as usize;
+                max_profile_tick = d.max_profile_tick;
+            } else {
+                eprintln!("Failed to deserialize visualisation data, trying to recalculate.");
+            }
+        } else {
+            eprintln!("Failed to open visualisation data file, trying to recalculate.");
         }
-        for node in &gd.depth_tree {
-            if node.depth > deepest_tree_depth {
-                deepest_tree_depth = node.depth;
+    }
+
+    if !loaded_data {
+        for td in &trace_datas {
+            let gd = &td.graph_data;
+            if gd.depth_tree.len() > longest_tree {
+                longest_tree = gd.depth_tree.len();
             }
-            if node.ticks > max_profile_tick {
-                max_profile_tick = node.ticks;
+            for node in &gd.depth_tree {
+                if node.depth > deepest_tree_depth {
+                    deepest_tree_depth = node.depth;
+                }
+                if node.ticks > max_profile_tick {
+                    max_profile_tick = node.ticks;
+                }
             }
-        }
-        if let Some(indentation_profile) = &td.indentation_profile {
-            if indentation_profile.len() > longest_indentation {
-                longest_indentation = indentation_profile.len();
+            if let Some(indentation_profile) = &td.indentation_profile {
+                if indentation_profile.len() > longest_indentation {
+                    longest_indentation = indentation_profile.len();
+                }
+                for v in indentation_profile {
+                    if *v > deepest_indentation {
+                        deepest_indentation = *v;
+                    }
+                }
             }
-            for v in indentation_profile {
-                if *v > deepest_indentation {
-                    deepest_indentation = *v;
+            if let Some(line_length_profile) = &td.line_length_profile {
+                if line_length_profile.len() > longest_line_length {
+                    longest_line_length = line_length_profile.len();
+                }
+                for v in line_length_profile {
+                    if *v > deepest_line_length {
+                        deepest_line_length = *v;
+                    }
+                }
+            }
+            if let Some(coverage) = &td.coverage {
+                if coverage.vector.len() > longest_coverage_vector {
+                    longest_coverage_vector = coverage.vector.len();
+                }
+                let total_length = coverage.total_length;
+                if total_length > max_coverage_total_length {
+                    max_coverage_total_length = total_length;
+                }
+                for pair in &coverage.vector {
+                    if pair.1 > max_coverage_vector_count {
+                        max_coverage_vector_count = pair.1;
+                    }
                 }
             }
         }
-        if let Some(line_length_profile) = &td.line_length_profile {
-            if line_length_profile.len() > longest_line_length {
-                longest_line_length = line_length_profile.len();
-            }
-            for v in line_length_profile {
-                if *v > deepest_line_length {
-                    deepest_line_length = *v;
-                }
-            }
+        // Save the data to disk
+        let path_parent = site_data_path.parent().unwrap();
+        fs::create_dir_all(path_parent).expect("Failed to create directory for screenshots");
+        let site_data = SiteData {
+            name: name.to_owned(),
+            longest_coverage_vector,
+            max_coverage_total_length,
+            max_coverage_vector_count,
+            longest_tree,
+            max_profile_tick,
+            deepest_tree_depth,
+        };
+        if let Err(e) = fs::write(
+            &site_data_path,
+            serde_json::to_string_pretty(&site_data).unwrap(),
+        ) {
+            eprintln!(
+                "Couldn't save site data to file: {}",
+                site_data_path.to_str().unwrap()
+            );
         }
-        if let Some(coverage) = &td.coverage {
-            if coverage.vector.len() > longest_coverage_vector {
-                longest_coverage_vector = coverage.vector.len();
-            }
-            let total_length = coverage.total_length;
-            if total_length > max_coverage_total_length {
-                max_coverage_total_length = total_length;
-            }
-            for pair in &coverage.vector {
-                if pair.1 > max_coverage_vector_count {
-                    max_coverage_vector_count = pair.1;
-                }
-            }
-        }
+        println!(
+            "{}:\n
+longest_coverage_vector: {}\n
+max_coverage_total_length: {}\n
+max_coverage_vector_count: {}\n
+longest_tree: {}\n
+max_profile_tick: {}\n
+deepest_tree_depth: {}\n",
+            name,
+            longest_coverage_vector,
+            max_coverage_total_length,
+            max_coverage_vector_count,
+            longest_tree,
+            max_profile_tick,
+            deepest_tree_depth
+        );
     }
 
     // println!(
@@ -610,14 +808,20 @@ fn site_from_trace_datas(name: &str, trace_datas: Vec<TraceData>) -> Site {
     }
 }
 
-fn load_site(name: &str, visits: &Vec<String>, use_web_api: bool, cache_path: &PathBuf) -> Site {
+fn load_site(
+    name: &str,
+    visits: &Vec<String>,
+    use_web_api: bool,
+    cache_path: &PathBuf,
+    recalculate_data: bool,
+) -> Site {
     let trace_datas = if use_web_api {
         from_web_api::get_trace_data_from_site(name, visits, cache_path)
     } else {
         load_site_from_disk(name, visits, cache_path)
     };
 
-    site_from_trace_datas(name, trace_datas)
+    site_from_trace_datas(name, trace_datas, recalculate_data)
 }
 
 fn update(app: &App, model: &mut Model, _update: Update) {
@@ -655,6 +859,16 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             .set(model.ids.param3, ui)
         {
             model.param3 = value as f32;
+        }
+        for value in slider(model.voronoi_fade_out_distance, 0.0, 0.01)
+            .down(10.0)
+            .label(&format!(
+                "Fade out distance: {}",
+                model.voronoi_fade_out_distance
+            ))
+            .set(model.ids.voronoi_fade_out_distance, ui)
+        {
+            model.voronoi_fade_out_distance = value as f32;
         }
 
         for value in slider(
@@ -695,6 +909,9 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             .set(model.ids.show_text, ui)
         {
             model.show_text = value;
+        }
+        for rgb in model.rgb_selectors.iter_mut() {
+            rgb.view(ui);
         }
     }
 
@@ -898,15 +1115,23 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                     );
                 }
                 CoverageDrawMode::Voronoi(ref voronoi_shader) => {
+                    let mut cols = [[0.; 4]; 4];
+                    for (i, rgb) in model.rgb_selectors.iter().enumerate() {
+                        cols[i] = [rgb.r, rgb.g, rgb.b, 1.0];
+                    }
                     draw_functions::draw_coverage_voronoi(
                         &draw,
                         &model,
                         &app.main_window(),
                         &win,
+                        cols,
                         &mut encoder,
                         &texture_view,
                         &mut voronoi_shader.borrow_mut(),
                     );
+                    model
+                        .renderer
+                        .render_to_texture(device, &mut encoder, &draw, &model.texture);
 
                     // Try drawing the text on top
                     // draw.reset();
@@ -1051,7 +1276,6 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                         .expect("failed to save texture to png image");
                 })
                 .unwrap();
-            model.render_state = RenderState::Exit;
 
             // Wait for rendering to file
             println!("Waiting for PNG writing to complete...");
@@ -1061,6 +1285,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                 .texture_capturer
                 .await_active_snapshots(&device)
                 .unwrap();
+            model.render_state = RenderState::Exit;
             println!("Done!");
             // Hopefully the exit function will wait for the screenshot to be saved here
         }

@@ -3,7 +3,10 @@ class HomeViewController {
     constructor(view, model) {
         this.view = view;
         this.model = model;
+<<<<<<< HEAD
         this.model.addObserver(this);
+=======
+>>>>>>> d52af47d62e3e6e28c1a9564957faf2495cbc0eb
     }
 
     addEventListener() {
@@ -19,6 +22,14 @@ class HomeViewController {
         this.view.aboutReThread_btn.addEventListener("click", () => {
             showView('about');
         });
+
+        this.view.username_inp.addEventListener("change", () => {
+            this.model.interaction.changeUsername(this.view.username_inp.value);
+        });
+
+        this.model.interaction.onWelcome((data) => {
+            this.view.updateUsername(this.model.interaction.username);
+        })
     }
 
     removeEventListener() {

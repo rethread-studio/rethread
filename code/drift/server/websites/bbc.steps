@@ -1,0 +1,9 @@
+
+goto https://www.bbc.com/
+sleep 2000
+clickOn ".fc-cta-consent"
+sleep 1000
+focus [name=q]
+sleep 750
+text '2021' 200 400
+sleep 25000

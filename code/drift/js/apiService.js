@@ -44,10 +44,17 @@ class ApiService {
         return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}&format=jpg`
     }
 
+<<<<<<< HEAD
     getMainMenu() {
         return mainMenu;
     }
 
+=======
+    getVoteWebsites() {
+        const url = `${BASE_URL}/api/vote/websites`
+        return requestService.getRequest(url)
+    }
+>>>>>>> d52af47d62e3e6e28c1a9564957faf2495cbc0eb
 }
 
 

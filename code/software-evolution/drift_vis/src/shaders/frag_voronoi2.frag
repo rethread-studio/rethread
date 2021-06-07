@@ -11,6 +11,12 @@ uniform Uniforms {
   vec2 resolution;
   uint num_points;
   vec2 texture_res;
+  float fade_out_distance;
+  float border_margin;
+  vec4 col1;
+  vec4 col2;
+  vec4 col3;
+  vec4 col_bg;
 };
 
 
@@ -79,8 +85,8 @@ void main() {
   vec2 uv = (gl_FragCoord.xy/resolution - vec2(0.5, 0.5)) * vec2(2, -2);
   // uv *= length(uv);
   // The next to minimum distance, useful to find the midpoint
-  float next_min_dist = 10000000;
-  float min_dist = 10000000;
+  float next_min_dist = 10000000.0;
+  float min_dist = 10000000.0;
   vec2 data = vec2(0., 0.);
   vec2 next_data = vec2(0., 0.);
   // uint iterations = 0;
@@ -88,7 +94,7 @@ void main() {
     // Get data out of the texture
     float x = float(i % uint(texture_res.x))/(texture_res.x);
     float y = float(i/uint(texture_res.x))/(texture_res.y);
-    vec4 val = texture(sampler2D(t_diffuse, s_diffuse), vec2(float(i)/float(num_points), 0));
+    vec4 val = texture(sampler2D(t_diffuse, s_diffuse), vec2(x, y));
     vec2 len = val.xy - uv;
     
     float dist = dot(len, len);
@@ -141,26 +147,30 @@ void main() {
 
   
   // float p = float(dist < 0.01);
+  float from_center = dot(uv, uv);
   float p = pow(min_dist/next_min_dist, 0.9);
   // float p = min(sqrt(min_dist) * 10.0, 1.0);
   float np = pow(max(1.0 - (p), 0.), 0.8);
   // float np = p;
-  float borders = smoothstep(0.8, 1.0,p);
+  float borders = smoothstep(1.0-border_margin, 1.0, p);
   // float borders = smoothstep(0.00005, 0.00002,abs(min_dist-next_min_dist));
-  vec3 col1 = vec3(0.3843, 0.8392, 0.7255);
-  vec3 col2 = vec3(0.8314, 0.9059, 0.9412);
-  vec3 col3 = vec3(0.1294, 0.6353, 0.7882);
-  vec3 col_bg = vec3(0.7725, 0.9451, 1.0);
+  // vec3 col1 = vec3(0.3843, 0.8392, 0.7255);
+  // vec3 col2 = vec3(0.8314, 0.9059, 0.9412);
+  // vec3 col3 = vec3(0.1294, 0.6353, 0.7882);
+  // vec3 col_bg = vec3(0.7725, 0.9451, 1.0);
 
   // col3 = mix(col3, hsb2rgb(vec3(data.y + 0.6, 1.0, 0.6)), (data.x + 0.5) * np);
-  col3 = mix(col_bg, hsb2rgb(vec3(fract(data.y + 0.55), 0.95, 0.65)), min(data.x * 2.0, 1.0) * np);
+  vec3 new_col3 = mix(col_bg.rgb, hsb2rgb(vec3(fract(data.y + 0.55), 0.95, 0.65)) * data.x * 3.0, min(data.x * 2.0, 1.0) * np);
   // col_bg = mix(col3, hsb2rgb(vec3((data.y + next_data.y)/2.0, 1.0, 0.2)), (data.x + 0.5) * np);
   
-  vec3 col = mix(col1 * (smoothstep(0.0, 1.0, p) * 0.5 + 0.7), col3, data.x);
-  // col = mix(col, col2, borders);
-  float fade_out_distance = 0.01;
-  col = mix(col, col_bg, borders);
-  col = mix(col, col_bg, smoothstep(fade_out_distance, fade_out_distance * 10., min_dist)); // Fade out at long distances to get a more celly look
+  vec3 col = mix(col1.rgb * (smoothstep(0.0, 1.0, p) * 0.5 + 0.7), new_col3, data.x);
+  col = mix(col, col2.rgb, borders);
+  float fade_out_distance2 = fade_out_distance * 1.0/from_center;
+  // col = mix(col, col_bg.rgb, borders);
+  col = mix(col, col_bg.rgb, smoothstep(fade_out_distance2 * 0.1, fade_out_distance2, min_dist)); // Fade out at long distances to get a more celly look
+
+  // Create a microscope light like
+  col *= 0.95 + sqrt(1.0/max(from_center, 0.04)) * 0.04;
   
 
   // col = vec3(smoothstep(0.9, 1.0,p));

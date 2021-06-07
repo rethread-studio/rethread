@@ -351,6 +351,25 @@ pub fn draw_all_sites_single_visit_polar_axes_depth_graph(draw: &Draw, model: &M
     }
 }
 
+fn vertex_to_col_point(vertex: &Vertex, width: f32, height: f32) -> (Point2<f32>, Rgba) {
+    (
+        pt2(vertex.position[0] * width, vertex.position[1] * height),
+        rgba(vertex.color[0], vertex.color[1], vertex.color[2], 1.0),
+    )
+}
+
+fn vertex_to_col_point_alpha(vertex: &Vertex, width: f32, height: f32) -> (Point2<f32>, Rgba) {
+    (
+        pt2(vertex.position[0] * width, vertex.position[1] * height),
+        rgba(
+            vertex.color[0],
+            vertex.color[1],
+            vertex.color[2],
+            vertex.color[3],
+        ),
+    )
+}
+
 pub fn draw_depth_graph_rings(
     draw: &Draw,
     model: &Model,
@@ -420,13 +439,6 @@ pub fn draw_depth_graph_rings(
             position: [point.x, point.y, 0.0],
             color: [rgb.red, rgb.blue, rgb.green, rgb.alpha],
         });
-    }
-
-    fn vertex_to_col_point(vertex: &Vertex, width: f32, height: f32) -> (Point2<f32>, Rgba) {
-        (
-            pt2(vertex.position[0] * width, vertex.position[1] * height),
-            rgba(vertex.color[0], vertex.color[1], vertex.color[2], 1.0),
-        )
     }
 
     // Triangulate all the points
@@ -1190,6 +1202,7 @@ pub fn draw_coverage_voronoi(
     model: &Model,
     window: &Window,
     win: &Rect,
+    colors: [[f32; 4]; 4],
     encoder: &mut wgpu::CommandEncoder,
     texture_view: &wgpu::TextureView,
     voronoi_shader: &mut VoronoiShader,
@@ -1305,36 +1318,109 @@ pub fn draw_coverage_voronoi(
     let num_circles = 300.;
 
     let radius_per_circle = 1.0 / (num_circles + 1.0);
+    let mut float_delaunay = FloatDelaunayTriangulation::with_tree_locate();
 
     let mut sum_length = 0.0;
     let mut voronoi_points = vec![];
     let mut heat_sum = 0.;
+
     for (i, pair) in vector.iter().enumerate() {
         let this_length = pair.0 as f32 / site.max_coverage_total_length as f32;
         let count_ratio = pair.1 as f32 / site.max_coverage_vector_count as f32;
         let heat = count_ratio.powf(0.1);
         let angle = sum_length * PI * 2. * num_circles;
         let circle = sum_length * num_circles;
-        let radius = (circle / num_circles + heat / num_circles).powf(1. / 3.);
+        let radius = (circle / num_circles + heat / num_circles).powf(1. / 3.) * 0.95;
         // let radius = heat * radius_per_circle + circle * radius_per_circle;
         // let radius = radius * 1.2;
         sum_length += this_length;
         let point = pt2(angle.cos() * radius, angle.sin() * radius);
-        let col = hsla(0.6 + heat * 0.6, 0.4 + heat * 0.6, 0.055 + heat * 0.6, 1.0);
+        let col = hsla(0.6 + heat * 0.6, 0.4 + heat * 0.6, 0.055 + heat * 0.6, 0.15);
         let rgb = nannou::color::IntoLinSrgba::into_lin_srgba(col);
         // coloured_points.push((point, col));
         let vertex = Vertex {
             position: [point.x, point.y, 0.0],
             color: [heat, heat_sum, rgb.green, rgb.alpha],
         };
+        float_delaunay.insert(Vertex {
+            position: [point.x, point.y, 0.0],
+            color: [rgb.red, rgb.blue, rgb.green, rgb.alpha],
+        });
         voronoi_points.push(vertex.to_vec4());
         // heat_sum += heat;
         heat_sum += (count_ratio.powf(0.5) - 0.05).max(0.) * 0.15;
     }
 
     println!("Num points: {}", voronoi_points.len());
-    voronoi_shader.set_points(voronoi_points, window);
+    voronoi_shader.uniform.fade_out_distance = model.voronoi_fade_out_distance;
+    voronoi_shader.uniform.border_margin = model.param3;
+    voronoi_shader.set_points_and_colors(voronoi_points, window, colors);
     voronoi_shader.view(encoder, texture_view, window);
+
+    fn length_of_vertex_line(v1: &Vertex, v2: &Vertex) -> f32 {
+        let p1 = pt2(v1.position[0], v1.position[1]);
+        let p2 = pt2(v2.position[0], v2.position[1]);
+        p1.distance2(p2)
+    }
+
+    // Triangulate all the points
+    for (i, face) in float_delaunay.triangles().enumerate() {
+        let triangle = face.as_triangle();
+        let dist1 = length_of_vertex_line(&triangle[0], &triangle[1]);
+        let thresh = 0.64
+            * 0.1
+            * (1.0 - pt2(triangle[0].position[0], triangle[0].position[1]).distance(pt2(0.0, 0.0)));
+        if dist1 < thresh
+            && length_of_vertex_line(&triangle[1], &triangle[2]) < thresh
+            && length_of_vertex_line(&triangle[2], &triangle[0]) < thresh
+        {
+            let points = vec![
+                vertex_to_col_point_alpha(
+                    &vertex_halfway_between(&triangle[0], &triangle[1]),
+                    win.w() * 0.5,
+                    win.h() * 0.5,
+                ),
+                vertex_to_col_point_alpha(
+                    &vertex_halfway_between(&triangle[1], &triangle[2]),
+                    win.w() * 0.5,
+                    win.h() * 0.5,
+                ),
+                vertex_to_col_point_alpha(
+                    &vertex_halfway_between(&triangle[2], &triangle[0]),
+                    win.w() * 0.5,
+                    win.h() * 0.5,
+                ),
+            ];
+
+            draw.polyline()
+                .stroke_weight(2.0)
+                .points_colored_closed(points.clone());
+        }
+        // draw.polyline()
+        //     .stroke_weight(2.0)
+        //     .x_y(1.0, 1.0)
+        //     .points_colored_closed(points.clone());
+        // draw.polyline()
+        //     .stroke_weight(2.0)
+        //     .x_y(-1.0, 0.0)
+        //     .points_colored_closed(points.clone());
+    }
+}
+
+fn vertex_halfway_between(v1: &Vertex, v2: &Vertex) -> Vertex {
+    Vertex {
+        position: [
+            v1.position[0] + (v2.position[0] - v1.position[0]) / 2.0,
+            v1.position[1] + (v2.position[1] - v1.position[1]) / 2.0,
+            v1.position[2] + (v2.position[2] - v1.position[2]) / 2.0,
+        ],
+        color: [
+            v1.color[0] + (v2.color[0] - v1.color[0]) / 2.0,
+            v1.color[1] + (v2.color[1] - v1.color[1]) / 2.0,
+            v1.color[2] + (v2.color[2] - v1.color[2]) / 2.0,
+            v1.color[3] + (v2.color[3] - v1.color[3]) / 2.0,
+        ],
+    }
 }
 
 // HELPER FUNCTIONS
