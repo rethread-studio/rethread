@@ -1,25 +1,50 @@
 @tailwind base;
-
 @tailwind components;
-
 @tailwind utilities;
 
-body{
-    height: calc(30000px + 100vh);
-    margin: 0;
-    background-color: #02061B;
-    font-family: 'Roboto', sans-serif;
-    
-}
 
 body::-webkit-scrollbar {
-    display: none;
+    /* display: none; */
   }
-  
   /* Hide scrollbar for IE, Edge and Firefox */
 body {
     -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    /* scrollbar-width: none;   */
+    /* Firefox */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+font-family: 'Roboto', sans-serif;
+  font-weight: inherit;
+}
+
+p{
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;   
+}
+
+
+
+.background{
+    background-color: #02061B;
+}
+
+.background-black{
+    background-color: #02061B;
+    
+}
+
+.robotoFont{
+    font-family: 'Roboto', sans-serif;
+}
+
+.fullHeight{
+    height: calc(100vh*5);
 }
 
 
@@ -31,11 +56,11 @@ h1{
 
 
 #app{
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    /* position: fixed; */
+    /* top: 0; */
+    /* left: 0; */
+    /* width: 100%; */
+    /* height: 100%; */
 }
 
 .content{
@@ -47,66 +72,55 @@ h1{
 }
 
 
-.center{
+.txt-white{
     color:white;
-    position: relative;
-    text-align: center;
 }
 .noColor{
     opacity: 0%;
 }
 
-.center img{
+.blur{
     filter:blur(3px);
+}
+.max-727{
     max-width: 727px;
-    height: auto;
 }
 
-.center h1{
-    justify-content: center;
-    text-align: center;
+#intro h1{
     font-size: 200px;
-    margin: 0;
     font-weight: 900;
     letter-spacing: 10px;
-    /* filter:blur(3px); */
 }
 
-.center h1 span{
+#intro h1 span{
     font-style: italic;
 }
 
-.center ul{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0;
-    margin: 0;
-}
 
-.center li{
+#intro li{
     list-style-type: none;
-    font-size: 18px;
+    font-size: 24px;
+    text-align: center;
 }
 
-a{
+#intro a{
     text-decoration: none;
     color:white;
+    display: block;
 }
 
-button{
-    font-size: 18px;
+#intro a:hover{
     text-decoration: none;
-    color:white;
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
+    color:black;
 }
 
-.centerText{
-    position: absolute;
+
+.middleInset{
     top: 50%;
     left: 50%;
+}
+
+.translateCenter{
     transform: translate(-50%, -50%);
 }
 
@@ -150,7 +164,7 @@ button{
 
 #twitch-embed {
     position: absolute;
-    top: 0vh;
+    top:100px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -168,6 +182,35 @@ button{
 .white{
     color:white;
 }
+
+
+.text-8xl{
+    font-size: 6rem;
+line-height: 1;
+}
+
+
+.pt-40{
+    padding-top: 10rem;
+}
+
+/* Toggle B */
+input:checked ~ .dot {
+    transform: translateX(130%);
+    background-color: #48bb78;
+  }
+
+  .w-14{
+    width: 3.5rem;
+  }
+
+  .top-1{
+    top: 0.25rem;
+  }
+
+  .cool-gray-400{
+    color:#9CA3AF
+  }
 /*Mini Chat view*/
 #chat {
     position: fixed;

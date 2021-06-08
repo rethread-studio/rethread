@@ -103,13 +103,49 @@ class DriftModel {
             },
         ]
         this.pack;
+
+        this.menuVisible = false;
+        this.mode = false;
+        this.mainMenu = mainMenu;
     }
 
     init() {
         this.getData();
         this.loadMenu("views");
         this.getSitesVisits()
+        this.getMainMenu()
         this.getVoteWebsites()
+    }
+
+    getMainMenu() {
+        this.mainMenu = apiService.getMainMenu();
+    }
+
+    getMainMenu(splitName = true) {
+        const val = !this.mode ? "human" : "nerd";
+
+        return this.mainMenu.map(i => {
+            let name = i[val];
+            let arr = [];
+            if (splitName) {
+                arr = name.split(" ")
+                arr.splice(1, 0, "<br>")
+                arr = arr.join(" ")
+            }
+
+            return {
+                name: splitName ? arr : name,
+                value: i.value,
+            }
+        })
+    }
+
+    getMode() {
+        return this.mode;
+    }
+
+    getMenuVisible() {
+        return this.menuVisible;
     }
 
     getPack() {
@@ -428,5 +464,20 @@ class DriftModel {
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
 
+    }
+
+    toggleMenu(toggle = undefined) {
+        this.menuVisible = toggle == undefined ? !this.menuVisible : toggle;
+        this.notifyObservers({ type: "toggleMenu" });
+    }
+
+    hideMenu() {
+        this.menuVisible = false;
+    }
+
+    setMode(mode, message) {
+        this.mode = mode;
+        this.notifyObservers({ type: message });
+        this.notifyObservers({ type: "changeMode" });
     }
 }

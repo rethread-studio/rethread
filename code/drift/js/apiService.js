@@ -44,6 +44,10 @@ class ApiService {
         return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}&format=jpg`
     }
 
+    getMainMenu() {
+        return mainMenu;
+    }
+
     getVoteWebsites() {
         const url = `${BASE_URL}/api/vote/websites`
         return requestService.getRequest(url)
@@ -122,28 +126,59 @@ const dataTest = {
         },
     ]
 }
+
+const mainMenu = [
+    {
+        human: "Meet the artists",
+        nerd: "Meet Motoo",
+        value: "robot"
+    },
+    {
+        human: "View Exhibition",
+        nerd: "View Evolution",
+        value: "exhibition"
+    },
+    {
+        human: "Virtual tour",
+        nerd: "Video exploration",
+        value: "tour"
+    },
+    {
+        human: "About re|thread ",
+        nerd: "About re|thread",
+        value: "about"
+    }
+]
+
+
 const viewsMenu = [{
     name: "Intro",
+    human: "Intro",
+    nerd: "What",
     state: 1,
 },
 {
     name: "Screenshot",
+    human: "Schreenshot",
+    nerd: "human",
     state: 0,
 },
 {
     name: "Graph",
+    human: "Coverage",
+    nerd: "Code",
     state: 0,
 },
 {
     name: "Coverage",
+    human: "Execution trace",
+    nerd: "Flow",
     state: 0
 },
 {
     name: "Network",
-    state: 0
-},
-{
-    name: "Profile",
+    human: "Network",
+    nerd: "Underworld",
     state: 0
 }
 ]
