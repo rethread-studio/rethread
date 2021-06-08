@@ -1,8 +1,8 @@
 let currentView, model;
 window.onload = function () {
     //We instantiate our model
-    let model = new DriftModel();
-    model.init(); ``
+    model = new DriftModel();
+    model.init();
 
     let chatView = new ChatView('chat', model);
     miniChatController = new MiniChatController(chatView, model);
@@ -39,6 +39,7 @@ window.onload = function () {
 //show view
 //view: string with the name of the view to render
 function showView(view) {
+
     model.interaction.page(view);
     if (currentView != null) currentView.unMountView()
     switch (view) {
