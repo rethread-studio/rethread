@@ -18,7 +18,7 @@ class HomeView {
         <div id="intro" class="center txt-white relative h-screen ">
             <img class="relative top-2-4 left-2-4 transform-50 h-auto .max-727 blur" src="./img/imgTest.png" alt="yahoo profile test">
             <div class="absolute middleInset translateCenter">
-                <h1 class="m-0 text-center" >Dr<span>i</span>ft</h1>
+                <h1 class="m-0 text-center dritTittle" >Dr<span>i</span>ft</h1>
             <h3>Welcome <input id="usernameInp">
                 <ul id="mainMenuMain" class="flex flex-row justify-between p-0 m-0">
                     
