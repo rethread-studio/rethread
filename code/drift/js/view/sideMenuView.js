@@ -87,6 +87,8 @@ class SideMenuView {
     update(changeDetails) {
         if (changeDetails.type == "updateSideMenu") {
             this.updateMenu();
+        } else if (changeDetails.type == "changeMode") {
+            this.updateMenu();
         }
     }
 }

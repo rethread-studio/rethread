@@ -44,6 +44,10 @@ class ApiService {
         return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}&format=jpg`
     }
 
+    getMainMenu() {
+        return mainMenu;
+    }
+
     getVoteWebsites() {
         const url = `${BASE_URL}/api/vote/websites`
         return requestService.getRequest(url)
@@ -90,7 +94,7 @@ const dataTest = {
         },
         {
             name: "spotify",
-            state: 1,
+            state: 0,
             value: 90,
             image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.spotify.png",
@@ -122,30 +126,81 @@ const dataTest = {
         },
     ]
 }
-const viewsMenu = [{
-    name: "Intro",
-    state: 1,
-},
-{
-    name: "Screenshot",
-    state: 0,
-},
-{
-    name: "Graph",
-    state: 0,
-},
-{
-    name: "Coverage",
-    state: 0
-},
-{
-    name: "Network",
-    state: 0
-},
-{
-    name: "Profile",
-    state: 0
-}
+
+const mainMenu = [
+    {
+        human: "Meet the artists",
+        nerd: "Meet Motoo",
+        value: "robot"
+    },
+    {
+        human: "View Exhibition",
+        nerd: "View Evolution",
+        value: "exhibition"
+    },
+    {
+        human: "Virtual tour",
+        nerd: "Video exploration",
+        value: "tour"
+    },
+    {
+        human: "About re|thread ",
+        nerd: "About re|thread",
+        value: "about"
+    }
+]
+
+
+const viewsMenu = [
+    {
+        name: "Intro",
+        human: "intro",
+        nerd: "intro",
+        value: "intro",
+        state: 1,
+    }, {
+        name: "The exhibition",
+        human: "The exhibition",
+        nerd: "What we did",
+        value: "what",
+        state: 1,
+    },
+
+    {
+        name: "Visiting",
+        human: "visiting",
+        nerd: "visiting",
+        value: "how",
+        state: 0,
+    },
+    {
+        name: "Screenshot",
+        human: "Schreenshot",
+        nerd: "human",
+        value: "screenshot",
+        state: 0,
+    },
+    {
+        name: "Graph",
+        human: "Coverage",
+        nerd: "Code",
+        value: "coverage",
+        state: 0,
+    },
+    {
+        name: "Coverage",
+        human: "Execution trace",
+        nerd: "Flow",
+        value: "trace",
+        state: 0
+    },
+    {
+        name: "Network",
+        human: "Network",
+        nerd: "Underworld",
+        value: "network",
+        state: 0
+    }
 ]
 
 const sitesMenu = [{

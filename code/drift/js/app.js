@@ -8,7 +8,7 @@ window.onload = function () {
     miniChatController = new MiniChatController(chatView, model);
 
     //Initialize VIEWS and controllers
-    let homeView = new HomeView('page-content')
+    let homeView = new HomeView('page-content', model);
     homeViewController = new HomeViewController(homeView, model);
 
     let exhibitionView = new ExhibitionView('page-content', model);
@@ -24,32 +24,36 @@ window.onload = function () {
     aboutViewController = new AboutViewController(aboutView);
 
     let mainMenuView = new MainMenuView('mainMenu', model);
-    mainMenuViewController = new MainMenuViewController(mainMenuView);
+    mainMenuViewController = new MainMenuViewController(mainMenuView, model);
+
+    let legendView = new LegendView('page-content', model);
+    legendViewController = new LegendViewController(legendView);
 
     let emojiView = new EmojiView('emojiParty');
     emojiController = new EmojiController(emojiView, model);
 
     //start home view
-    showView("home");
+    showView("exhibition");
 };
 
 //show view
 //view: string with the name of the view to render
 function showView(view) {
+
     model.interaction.page(view);
     if (currentView != null) currentView.unMountView()
     switch (view) {
         case 'home':
             currentView = homeViewController;
-            homeViewController.renderView();
             mainMenuViewController.unMountView();
+            homeViewController.renderView();
             break;
         case 'exhibition':
             currentView = exhibitionViewController;
             exhibitionViewController.renderView();
             mainMenuViewController.renderView();
             break;
-        case 'meetTheRobot':
+        case 'robot':
             currentView = robotViewController;
             robotViewController.renderView();
             mainMenuViewController.renderView();
@@ -62,6 +66,11 @@ function showView(view) {
         case 'about':
             currentView = aboutViewController;
             aboutViewController.renderView();
+            mainMenuViewController.renderView();
+            break;
+        case 'legend':
+            currentView = legendViewController;
+            legendViewController.renderView();
             mainMenuViewController.renderView();
             break;
         default:

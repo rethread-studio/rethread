@@ -10,6 +10,12 @@ const calculateSize = (active, inactive) => (d) => {
     d.value = d.state == 0 ? inactive : active;
     return d;
 }
+const splitString = (n) => {
+    let arr = n.split(" ")
+    arr.splice(1, 0, "<br>")
+    arr = arr.join(" ")
+    return arr
+}
 //update the state of the menu item 
 const updateState = (_name) => {
     return (d) => {
@@ -33,8 +39,8 @@ class DriftModel {
             margin: {
                 top: 0,
                 right: 150,
-                bottom: 200,
-                left: 20
+                bottom: 100,
+                left: 0
             }
         }
         this.visDimensions.boundedWidth = this.visDimensions.width - this.visDimensions.margin.right - this.visDimensions.margin.left;
@@ -103,13 +109,49 @@ class DriftModel {
             },
         ]
         this.pack;
+
+        this.menuVisible = false;
+        this.mode = false;
+        this.mainMenu = mainMenu;
     }
 
     init() {
         this.getData();
         this.loadMenu("views");
         this.getSitesVisits()
+        this.getMainMenu()
         this.getVoteWebsites()
+    }
+
+    getcurrentSection() {
+        this.currentSection;
+    }
+    isCurrentScreenshot() {
+
+    }
+
+    getMainMenu() {
+        this.mainMenu = apiService.getMainMenu();
+    }
+
+    getMainMenu(splitName = true) {
+        const val = "human";
+        return this.mainMenu.map(i => {
+            let name = i[val];
+            let arr = splitName ? splitString(name) : [];
+            return {
+                name: splitName ? arr : name,
+                value: i.value,
+            }
+        })
+    }
+
+    getMode() {
+        return this.mode;
+    }
+
+    getMenuVisible() {
+        return this.menuVisible;
     }
 
     getPack() {
@@ -188,16 +230,6 @@ class DriftModel {
         this.menu = apiService.getMenu(type)
         this.rectDimensions.sectionHeight = this.menuDimensions.height / this.menu.length;
         this.currentSection = this.menu[0];
-        // apiService.getMenu(type)
-        //     .then(data => {
-        //         this.menu = data;
-        //         this.notifyObservers({ type: "newMenu", menu: this.menu });
-
-        //     }).catch(error => {
-        //         console.log('Get menu error:', error);
-        //         this.notifyObservers({ type: "error", menu: this.menu });
-        //     });
-
     }
     /*
     getMenu 
@@ -208,11 +240,27 @@ class DriftModel {
         return this.menu;
     }
 
+    getDataChildren() {
+        return this.data.children.sort((a, b) => b.name > a.name ? -1 : b.name < a.name ? 1 : 0);
+    }
+
     calculatePack() {
-        this.pack = d3.pack()
+        // console.log(this.data)
+        const data = {
+            children: this.data.children.filter(filterByState(1))
+        }
+        const activeNum = data.children.length;
+        data.children = data.children.map((n) => {
+            n.value = 100 / activeNum;
+            return n
+        })
+
+        this.pack = d3.treemap()
+            .tile(d3.treemapBinary)
             .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
             .padding(30)
-            (d3.hierarchy(this.data)
+            .round(true)
+            (d3.hierarchy(data)
                 .sum(hierarchySize)
                 .sort(sortBySize))
         return this.pack;
@@ -428,5 +476,29 @@ class DriftModel {
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
 
+    }
+
+    toggleMenu(toggle = undefined) {
+        this.menuVisible = toggle == undefined ? !this.menuVisible : toggle;
+        this.notifyObservers({ type: "toggleMenu" });
+    }
+
+    hideMenu() {
+        this.menuVisible = false;
+    }
+
+    setMode(mode, message) {
+        this.mode = mode;
+        this.notifyObservers({ type: message });
+    }
+
+    selectSite(name) {
+        this.data.children = this.data.children
+            .map(i => {
+                if (i.name == name) i.state = i.state == 1 ? 0 : 1;
+                return i;
+            })
+            .sort((a, b) => b.name > a.name)
+        this.notifyObservers({ type: "sitesUpdated" });
     }
 }

@@ -17,7 +17,7 @@ class TimeLineView {
         const playButton = this.model.getPlayState() ? "pause" : "play";
         const buttons = `
         <div class="flex flex-row justify-center content-center items-center pl-6">
-        <button id="playBtn" class="mr-8" >${playButton}</button>
+        <button id="playBtn" class="mr-8 white" >${playButton}</button>
             <div class="relative">
             <span class="white">speed</span>
                 <select id="selectMenu" class="...">
@@ -34,7 +34,7 @@ class TimeLineView {
         //ADD ALL THE VISUAL ITEMS 
         //MAIN wrapper in the HTML
         const wrapper = d3.select("#" + this.container)
-            .attr("class", "absolute bottom-0 left-0 translate-middle flex")
+            .attr("class", "absolute bottom-0 left-0  flex")
             .append("svg")
             .attr("width", dimensions.width)
             .attr("height", dimensions.height)
