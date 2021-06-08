@@ -3,7 +3,6 @@ class HomeViewController {
     constructor(view, model) {
         this.view = view;
         this.model = model;
-        this.model.addObserver(this);
     }
 
     addEventListener() {
@@ -47,16 +46,6 @@ class HomeViewController {
 
     }
 
-    //update info when modified in model
-    update(changeDetails) {
-        if (changeDetails.type == "toggleHome") {
-            if (currentView == this) {
-                this.removeEventListener();
-                this.view.renderMenuItems();
-                this.addEventListener();
-            }
-        }
-    }
 
     renderView() {
         this.view.render();

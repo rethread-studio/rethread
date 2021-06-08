@@ -18,12 +18,10 @@ class HomeView {
         <div id="intro" class="center txt-white relative h-screen ">
             <img class="relative top-2-4 left-2-4 transform-50 h-auto .max-727 blur" src="./img/imgTest.png" alt="yahoo profile test">
             <div class="absolute middleInset translateCenter">
+                <h3 class="text-center text-xl">Welcome <br> <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none" id="usernameInp">
                 <h1 class="m-0 text-center dritTittle" >Dr<span>i</span>ft</h1>
-            <h3>Welcome <input id="usernameInp">
                 <ul id="mainMenuMain" class="flex flex-row justify-between p-0 m-0">
-                    
                 </ul>
-                <div id="toggleHome" class="mt-10"></div>
             </div>
         </div>
 		`;
@@ -31,7 +29,6 @@ class HomeView {
         this.container.innerHTML = content;
         this.renderMenuItems()
         this.setIdentifications();
-        this.renderToggle();
     }
 
     renderMenuItems() {
@@ -47,11 +44,6 @@ class HomeView {
 
     }
 
-    renderToggle() {
-        let toggleView = new ToggleView("toggleHome", this.model);
-        this.toggleViewController = new ToggleViewController(toggleView, this.model, "toggleHome");
-        this.toggleViewController.renderView();
-    }
 
     setIdentifications() {
         this.meetRobot_btn = document.getElementById("robotBtn");
