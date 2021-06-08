@@ -177,6 +177,7 @@ pub struct Model {
     texture_capturer: wgpu::TextureCapturer,
     // The type used to resize our texture to the window texture.
     texture_reshaper: wgpu::TextureReshaper,
+    blur_shader: BlurShader,
     render_video: bool,
     show_text: bool,
 }
@@ -254,6 +255,10 @@ widget_ids! {
     background_lightness,
     show_text,
     voronoi_fade_out_distance,
+        blur_size,
+        sigma,
+        contrast,
+        blur_alpha,
     }
 }
 
@@ -363,7 +368,11 @@ fn model(app: &App) -> Model {
         .size(texture_size)
         // Our texture will be used as the RENDER_ATTACHMENT for our `Draw` render pass.
         // It will also be SAMPLED by the `TextureCapturer` and `TextureResizer`.
-        .usage(wgpu::TextureUsage::RENDER_ATTACHMENT | wgpu::TextureUsage::SAMPLED)
+        .usage(
+            wgpu::TextureUsage::RENDER_ATTACHMENT
+                | wgpu::TextureUsage::SAMPLED
+                | wgpu::TextureUsage::COPY_DST,
+        )
         // Use nannou's default multisampling sample count.
         .sample_count(sample_count)
         // Use a spacious 16-bit linear sRGBA format suitable for high quality drawing.
@@ -393,6 +402,8 @@ fn model(app: &App) -> Model {
         dst_format,
     );
 
+    // Blur shader setup
+    let blur_shader = BlurShader::new(&window, texture_size, &texture_view);
     // Create the UI.
     let mut ui = app.new_ui().build().unwrap();
 
@@ -431,14 +442,14 @@ fn model(app: &App) -> Model {
         }
     };
 
-    // let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::rings(
-    //     &app.main_window(),
-    //     texture.size(),
-    // ));
-    let mut draw_mode = DrawMode::Coverage(CoverageDrawMode::voronoi(
+    let mut draw_mode = DrawMode::GraphDepth(GraphDepthDrawMode::rings(
         &app.main_window(),
         texture.size(),
     ));
+    // let mut draw_mode = DrawMode::Coverage(CoverageDrawMode::voronoi(
+    //     &app.main_window(),
+    //     texture.size(),
+    // ));
 
     let cache_path = if let Some(path) = matches.value_of("cache") {
         PathBuf::from(path)
@@ -550,6 +561,7 @@ fn model(app: &App) -> Model {
         renderer,
         texture_capturer,
         texture_reshaper,
+        blur_shader,
         render_video: false,
         show_text: false,
     }
@@ -913,6 +925,36 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         for rgb in model.rgb_selectors.iter_mut() {
             rgb.view(ui);
         }
+
+        for value in slider(model.blur_shader.blur_size as f32, 0.0, 64.0)
+            .down(10.)
+            .label(&format!("blur size: {}", model.blur_shader.blur_size))
+            .set(model.ids.blur_size, ui)
+        {
+            model.blur_shader.blur_size = value as u32;
+        }
+
+        for value in slider(model.blur_shader.sigma as f32, 0.0, 32.0)
+            .down(10.)
+            .label(&format!("sigma: {}", model.blur_shader.sigma))
+            .set(model.ids.sigma, ui)
+        {
+            model.blur_shader.sigma = value;
+        }
+        for value in slider(model.blur_shader.contrast as f32, 0.0, 2.0)
+            .down(10.)
+            .label(&format!("contrast: {}", model.blur_shader.contrast))
+            .set(model.ids.contrast, ui)
+        {
+            model.blur_shader.contrast = value;
+        }
+        for value in slider(model.blur_shader.blur_alpha as f32, 0.0, 1.0)
+            .down(10.)
+            .label(&format!("blur_alpha: {}", model.blur_shader.blur_alpha))
+            .set(model.ids.blur_alpha, ui)
+        {
+            model.blur_shader.blur_alpha = value;
+        }
     }
 
     // Encapsulate the drawing stuff so that the window isn't borrowed when calling quit
@@ -1158,6 +1200,11 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         // model
         //     .renderer
         //     .render_to_texture(device, &mut encoder, draw, &model.texture);
+
+        // Apply the post processing to the high res texture
+        model
+            .blur_shader
+            .view(&mut encoder, &model.texture, &texture_view, &window);
 
         // Take a snapshot of the texture. The capturer will do the following:
         //

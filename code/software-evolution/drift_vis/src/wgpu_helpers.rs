@@ -1,9 +1,10 @@
 use std::{cell::RefCell, env, fs::File, io::Read, path::PathBuf};
 
-use crate::texture::Texture;
+use crate::texture::{self, Texture};
 use crevice::std140::{AsStd140, Std140};
 use nannou::{image::buffer, prelude::*};
 use spade::HasPosition;
+use wgpu::{Extent3d, TextureCopyViewBase};
 
 /// Returns (vertex_module, fragment_module)
 pub fn load_shader(
@@ -261,7 +262,9 @@ pub struct Shader {
     fragment_module: nannou::wgpu::ShaderModule,
     vertex_module: nannou::wgpu::ShaderModule,
     render_pipeline: nannou::wgpu::RenderPipeline,
-    bind_group_layouts: Vec<nannou::wgpu::BindGroupLayout>,
+    pub bind_group_layouts: Vec<nannou::wgpu::BindGroupLayout>,
+    load_op: nannou::wgpu::LoadOp<wgpu::Color>,
+    sample_count: u32,
     // uniform_buffer: nannou::wgpu::Buffer,
 }
 
@@ -279,7 +282,6 @@ impl Shader {
         let bind_group_layout_refs: Vec<&nannou::wgpu::BindGroupLayout> =
             bind_group_layouts.iter().map(|l| l).collect();
 
-        // TODO: Enable adding more bind_group_layouts
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Render Pipeline Layout"),
@@ -327,24 +329,71 @@ impl Shader {
             bind_group_layouts,
             // uniform_buffer,
             render_pipeline,
+            load_op: wgpu::LoadOp::Clear(wgpu::Color {
+                r: 0.0,
+                g: 0.0,
+                b: 0.0,
+                a: 0.0,
+            }),
+            sample_count,
         }
+    }
+    /// First set the bind_group_layouts of the Shader
+    pub fn remake_render_pipeline(&mut self, device: &wgpu::Device) {
+        let bind_group_layout_refs: Vec<&nannou::wgpu::BindGroupLayout> =
+            self.bind_group_layouts.iter().map(|l| l).collect();
+
+        let format = Frame::TEXTURE_FORMAT;
+        let render_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Render Pipeline Layout"),
+                bind_group_layouts: bind_group_layout_refs.as_slice(),
+                push_constant_ranges: &[],
+            });
+
+        self.render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("Render Pipeline"),
+            layout: Some(&render_pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &self.vertex_module,
+                entry_point: "main",
+                buffers: &[],
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &self.fragment_module,
+                entry_point: "main",
+                targets: &[wgpu::ColorTargetState {
+                    format,
+                    alpha_blend: wgpu::BlendState::REPLACE,
+                    color_blend: wgpu::BlendState::REPLACE,
+                    write_mask: wgpu::ColorWrite::ALL,
+                }],
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                strip_index_format: None,
+                front_face: wgpu::FrontFace::Ccw,
+                cull_mode: wgpu::CullMode::Back,
+                // Setting this to anything other than Fill requires Features::NON_FILL_POLYGON_MODE
+                polygon_mode: wgpu::PolygonMode::Fill,
+            },
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState {
+                count: self.sample_count,
+                mask: !0,
+                alpha_to_coverage_enabled: false,
+            },
+        });
     }
     pub fn view(
         &mut self,
         encoder: &mut wgpu::CommandEncoder,
-        texture_view: &wgpu::TextureView,
+        texture_view: &wgpu::TextureViewHandle,
         window: &Window,
         bind_groups: &Vec<nannou::wgpu::BindGroup>,
     ) {
         let mut render_pass = wgpu::RenderPassBuilder::new()
-            .color_attachment(texture_view, |color| {
-                color.load_op(wgpu::LoadOp::Clear(wgpu::Color {
-                    r: 0.0,
-                    g: 0.0,
-                    b: 0.0,
-                    a: 0.0,
-                }))
-            })
+            .color_attachment(texture_view, |color| color.load_op(self.load_op.clone()))
             .begin(encoder);
         // render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
         for (i, bind_group) in bind_groups.iter().enumerate() {
@@ -427,14 +476,12 @@ impl VoronoiShader {
         window: &Window,
     ) {
         // Check if we need to rebuild things because the uniforms have changed
-        if self.uniform.needs_rebuild() {
-            let device = window.swap_chain_device();
-            let new_buffer = self.uniform.buffer(device);
-            let uniform_bind_group_layout = self.uniform.bind_group_layout(device);
-            self.bind_groups[0] =
-                self.uniform
-                    .bind_group(device, &uniform_bind_group_layout, &new_buffer);
-        }
+        let device = window.swap_chain_device();
+        let new_buffer = self.uniform.buffer(device);
+        let uniform_bind_group_layout = self.uniform.bind_group_layout(device);
+        self.bind_groups[0] =
+            self.uniform
+                .bind_group(device, &uniform_bind_group_layout, &new_buffer);
 
         self.shader
             .view(encoder, texture_view, window, &self.bind_groups);
@@ -496,8 +543,6 @@ pub trait Uniform {
     ) -> nannou::wgpu::BindGroup;
     fn bind_group_layout(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::BindGroupLayout;
     fn buffer(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::Buffer;
-    /// If the data in the uniform has changed in such a way that an array is bigger or similar, the bind group and the buffer need rebuilding
-    fn needs_rebuild(&self) -> bool;
 }
 
 enum UniformState {
@@ -531,7 +576,6 @@ pub struct VoronoiUniform {
     pub col3: [f32; 4],
     pub col4: [f32; 4],
     raw: VoronoiUniformRaw,
-    uniform_state: RefCell<UniformState>,
 }
 
 impl VoronoiUniform {
@@ -558,10 +602,6 @@ impl VoronoiUniform {
             col2: [0.; 4],
             col3: [0.; 4],
             col4: [0.; 4],
-            uniform_state: RefCell::new(UniformState::NeedsRebuild {
-                bind_group: true,
-                buffer: true,
-            }),
         };
         s.rebuild_raw();
         s
@@ -580,7 +620,6 @@ impl VoronoiUniform {
 }
 
 impl Uniform for VoronoiUniform {
-    // fn data(&self) -> &[u8] {}
     fn bind_group_layout(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::BindGroupLayout {
         device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             entries: &[wgpu::BindGroupLayoutEntry {
@@ -610,17 +649,6 @@ impl Uniform for VoronoiUniform {
             }],
             label: Some("uniform_bind_group"),
         });
-        let uniform_state = &mut *self.uniform_state.borrow_mut();
-        match uniform_state {
-            UniformState::NeedsRebuild { buffer: false, .. } => {
-                *uniform_state = UniformState::Unchanged
-            }
-            UniformState::NeedsRebuild {
-                buffer: true,
-                ref mut bind_group,
-            } => *bind_group = false,
-            UniformState::Unchanged => (),
-        };
         uniform_bind_group
     }
     fn buffer(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::Buffer {
@@ -632,24 +660,7 @@ impl Uniform for VoronoiUniform {
             contents: bytemuck::cast_slice(uniform_bytes),
             usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
         });
-        let uniform_state = &mut *self.uniform_state.borrow_mut();
-        match uniform_state {
-            UniformState::NeedsRebuild {
-                bind_group: false, ..
-            } => *uniform_state = UniformState::Unchanged,
-            UniformState::NeedsRebuild {
-                bind_group: true,
-                ref mut buffer,
-            } => *buffer = false,
-            UniformState::Unchanged => (),
-        };
         uniform_buffer
-    }
-    fn needs_rebuild(&self) -> bool {
-        match &*self.uniform_state.borrow() {
-            UniformState::NeedsRebuild { .. } => true,
-            UniformState::Unchanged => false,
-        }
     }
 }
 
@@ -709,6 +720,282 @@ impl HasPosition for Vertex {
     }
 }
 
+pub struct BlurShader {
+    blur_shader: Shader,
+    // combine_shader: Shader,
+    pub blur_uniform: BlurUniform,
+    blur_texture: Texture,
+    blur_bind_groups: Vec<nannou::wgpu::BindGroup>,
+    pub blur_size: u32,
+    pub sigma: f32,
+    combine_shader: Shader,
+    pub combine_uniform: CombineUniform,
+    combine_texture: Texture, // You cannot read form and write to the same texture
+    pub contrast: f32,
+    pub blur_alpha: f32,
+}
+
+impl BlurShader {
+    pub fn new(
+        window: &Window,
+        resolution: [u32; 2],
+        render_texture_view: &wgpu::TextureView,
+    ) -> Self {
+        let shader_name = "blur";
+        let device = window.swap_chain_device();
+        let queue = window.swap_chain_queue();
+
+        let (width, height) = (resolution[0], resolution[1]);
+        let blur_size = 18;
+        let sigma = 3.5;
+        let contrast = 1.0;
+        let blur_alpha = 0.5;
+
+        let resolution = [width as f32, height as f32];
+        let blur_uniform = BlurUniform {
+            resolution: resolution.into(),
+            blur_size,
+            sigma,
+            tex_offset: [1.0, 0.0].into(),
+        };
+        let blur_uniform_buffer = blur_uniform.buffer(&device);
+        let blur_uniform_bind_group_layout = blur_uniform.bind_group_layout(device);
+        let blur_uniform_bind_group = blur_uniform.bind_group(
+            device,
+            &blur_uniform_bind_group_layout,
+            &blur_uniform_buffer,
+        );
+
+        // The blur texture is a texture to which the intermediate blur result can be written and which can then be overlayed on the original image or be the subject of more post processing
+        let blur_texture = Texture::empty(
+            device,
+            queue,
+            Some("blur_texture"),
+            Frame::TEXTURE_FORMAT,
+            width,
+            height,
+            window.msaa_samples(), // Must match the screen texture becase the Shader assumes it
+        );
+        let texture_bind_group_layout = blur_texture.bind_group_layout(device);
+        let texture_bind_group = blur_texture.bind_group(device);
+
+        let bind_group_layouts = vec![blur_uniform_bind_group_layout, texture_bind_group_layout];
+        let blur_bind_groups = vec![blur_uniform_bind_group, texture_bind_group];
+
+        let mut blur_shader = Shader::new(window, bind_group_layouts, shader_name);
+        blur_shader.load_op = wgpu::LoadOp::Load;
+        // Init the combine shader stuff
+
+        let combine_uniform = CombineUniform {
+            resolution: resolution.into(),
+            contrast,
+            blur_alpha,
+        };
+        let combine_uniform_bind_group_layout = combine_uniform.bind_group_layout(&device);
+        let combine_uniform_buffer = combine_uniform.buffer(device);
+        let render_texture_layout =
+            texture::texture_bind_group_layout(&device, render_texture_view.sample_type());
+
+        let bind_group_layouts = vec![
+            combine_uniform_bind_group_layout,
+            blur_texture.bind_group_layout(device),
+            render_texture_layout,
+        ];
+        // Since you cannot read from the texture you're writing to, this will
+        // hold the result of the combine shader pass.
+        let combine_texture = Texture::empty(
+            device,
+            queue,
+            Some("combine_texture"),
+            Frame::TEXTURE_FORMAT,
+            width,
+            height,
+            window.msaa_samples(), // Must match the screen texture becase the Shader assumes it
+        );
+
+        let mut combine_shader = Shader::new(window, bind_group_layouts, "combine");
+        combine_shader.load_op = wgpu::LoadOp::Load;
+        Self {
+            blur_shader,
+            blur_uniform,
+            blur_texture,
+            blur_bind_groups,
+            blur_size,
+            sigma,
+            combine_shader,
+            combine_texture,
+            combine_uniform,
+            contrast,
+            blur_alpha,
+        }
+    }
+    pub fn view(
+        &mut self,
+        encoder: &mut wgpu::CommandEncoder,
+        screen_texture: &wgpu::TextureHandle,
+        screen_texture_view: &wgpu::TextureView,
+        window: &Window,
+    ) {
+        self.blur_uniform.blur_size = self.blur_size;
+        self.blur_uniform.sigma = self.sigma;
+        self.combine_uniform.contrast = self.contrast;
+        self.combine_uniform.blur_alpha = self.blur_alpha;
+        // First run the shader with the screen texture as source and blur
+        // texture as destination
+        // Rebuild uniform:
+        self.blur_uniform.tex_offset = [1.0, 0.0].into();
+        let device = window.swap_chain_device();
+        let new_buffer = self.blur_uniform.buffer(device);
+        let uniform_bind_group_layout = self.blur_uniform.bind_group_layout(device);
+        self.blur_bind_groups[0] =
+            self.blur_uniform
+                .bind_group(device, &uniform_bind_group_layout, &new_buffer);
+        self.blur_shader.bind_group_layouts[0] = uniform_bind_group_layout;
+        // Set the screen texture as source texture
+        let screen_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            address_mode_u: wgpu::AddressMode::ClampToEdge,
+            address_mode_v: wgpu::AddressMode::ClampToEdge,
+            address_mode_w: wgpu::AddressMode::ClampToEdge,
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Nearest,
+            mipmap_filter: wgpu::FilterMode::Nearest,
+            ..Default::default()
+        });
+        let screen_layout =
+            texture::texture_bind_group_layout(&device, screen_texture_view.sample_type());
+        let screen_texture_bind_group = texture::texture_bind_group(
+            &device,
+            &screen_sampler,
+            &screen_texture_view,
+            &screen_layout,
+        );
+        self.blur_shader.bind_group_layouts[1] = screen_layout;
+        self.blur_bind_groups[1] = screen_texture_bind_group;
+        self.blur_shader.remake_render_pipeline(&device); // This is probably not the most efficient way
+        self.blur_shader.view(
+            encoder,
+            &self.blur_texture.view,
+            window,
+            &self.blur_bind_groups,
+        );
+
+        // Then run it again, reading from the same texture it's writing to for
+        // the second blur pass (in the other direction)
+        self.blur_uniform.tex_offset = [0.0, 1.0].into();
+        let new_buffer = self.blur_uniform.buffer(device);
+        let combine_uniform_bind_group_layout = self.combine_uniform.bind_group_layout(&device);
+        let uniform_bind_group_layout = self.blur_uniform.bind_group_layout(device);
+        self.blur_bind_groups[0] =
+            self.blur_uniform
+                .bind_group(device, &uniform_bind_group_layout, &new_buffer);
+
+        self.blur_shader.bind_group_layouts[1] = self.blur_texture.bind_group_layout(&device);
+        self.blur_bind_groups[1] = self.blur_texture.bind_group(&device);
+        self.blur_shader.remake_render_pipeline(&device); // This is probably not the most efficient way
+                                                          // self.shader
+                                                          //     .view(encoder, &self.blur_texture.view, window, &self.bind_groups);
+        self.blur_shader.view(
+            encoder,
+            &self.combine_texture.view,
+            window,
+            &self.blur_bind_groups,
+        );
+
+        // Then blend the blur with the original in a combination shader
+        let combine_uniform_buffer = self.combine_uniform.buffer(device);
+        let combine_uniform_bind_group = self.combine_uniform.bind_group(
+            &device,
+            &combine_uniform_bind_group_layout,
+            &combine_uniform_buffer,
+        );
+        let screen_layout =
+            texture::texture_bind_group_layout(&device, screen_texture_view.sample_type());
+        let screen_texture_bind_group = texture::texture_bind_group(
+            &device,
+            &screen_sampler,
+            &screen_texture_view,
+            &screen_layout,
+        );
+        let combine_bind_groups = vec![
+            combine_uniform_bind_group,
+            self.combine_texture.bind_group(device),
+            screen_texture_bind_group,
+        ];
+        self.combine_shader.view(
+            encoder,
+            &self.blur_texture.view,
+            window,
+            &combine_bind_groups,
+        );
+        // Copy the result to the render texture target
+        let copy_size = screen_texture_view.extent();
+        let source_copy_view = wgpu::TextureCopyViewBase{
+            texture: &self.blur_texture.texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+        };
+        let dest_copy_view = wgpu::TextureCopyViewBase{
+            texture: screen_texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+        };
+        encoder.copy_texture_to_texture(source_copy_view, dest_copy_view, copy_size)
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, AsStd140)]
+pub struct BlurUniform {
+    resolution: mint::Vector2<f32>,
+    blur_size: u32,
+    sigma: f32,
+    tex_offset: mint::Vector2<f32>,
+}
+
+impl Uniform for BlurUniform {
+    fn bind_group_layout(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::BindGroupLayout {
+        device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStage::FRAGMENT,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+            label: Some("uniform_bind_group_layout"),
+        })
+    }
+    fn bind_group(
+        &self,
+        device: &nannou::wgpu::Device,
+        layout: &nannou::wgpu::BindGroupLayout,
+        buffer: &nannou::wgpu::Buffer,
+    ) -> nannou::wgpu::BindGroup {
+        let uniform_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: buffer.as_entire_binding(),
+            }],
+            label: Some("uniform_bind_group"),
+        });
+        uniform_bind_group
+    }
+    fn buffer(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::Buffer {
+        let uniform_std140 = self.as_std140();
+        let uniform_bytes = uniform_std140.as_bytes();
+        let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Uniform Buffer"),
+            contents: bytemuck::cast_slice(uniform_bytes),
+            usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+        });
+        uniform_buffer
+    }
+}
+
 pub fn create_bind_group_layout(
     device: &wgpu::Device,
     texture_sample_type: wgpu::TextureSampleType,
@@ -723,6 +1010,58 @@ pub fn create_bind_group_layout(
         )
         .sampler(wgpu::ShaderStage::FRAGMENT, sampler_filtering)
         .build(device)
+}
+#[repr(C)]
+#[derive(Copy, Clone, AsStd140)]
+pub struct CombineUniform {
+    resolution: mint::Vector2<f32>,
+    contrast: f32,
+    blur_alpha: f32,
+}
+
+// TODO: Make all this part of the Uniform trait and demand the trait AsStd140
+impl Uniform for CombineUniform {
+    fn bind_group_layout(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::BindGroupLayout {
+        device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStage::FRAGMENT,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+            label: Some("uniform_bind_group_layout"),
+        })
+    }
+    fn bind_group(
+        &self,
+        device: &nannou::wgpu::Device,
+        layout: &nannou::wgpu::BindGroupLayout,
+        buffer: &nannou::wgpu::Buffer,
+    ) -> nannou::wgpu::BindGroup {
+        let uniform_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: buffer.as_entire_binding(),
+            }],
+            label: Some("uniform_bind_group"),
+        });
+        uniform_bind_group
+    }
+    fn buffer(&self, device: &nannou::wgpu::Device) -> nannou::wgpu::Buffer {
+        let uniform_std140 = self.as_std140();
+        let uniform_bytes = uniform_std140.as_bytes();
+        let uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Uniform Buffer"),
+            contents: bytemuck::cast_slice(uniform_bytes),
+            usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+        });
+        uniform_buffer
+    }
 }
 
 pub fn create_bind_group(
