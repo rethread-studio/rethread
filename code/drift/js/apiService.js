@@ -94,7 +94,7 @@ const dataTest = {
         },
         {
             name: "spotify",
-            state: 1,
+            state: 0,
             value: 90,
             image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.spotify.png",
@@ -151,36 +151,56 @@ const mainMenu = [
 ]
 
 
-const viewsMenu = [{
-    name: "Intro",
-    human: "Intro",
-    nerd: "What",
-    state: 1,
-},
-{
-    name: "Screenshot",
-    human: "Schreenshot",
-    nerd: "human",
-    state: 0,
-},
-{
-    name: "Graph",
-    human: "Coverage",
-    nerd: "Code",
-    state: 0,
-},
-{
-    name: "Coverage",
-    human: "Execution trace",
-    nerd: "Flow",
-    state: 0
-},
-{
-    name: "Network",
-    human: "Network",
-    nerd: "Underworld",
-    state: 0
-}
+const viewsMenu = [
+    {
+        name: "Intro",
+        human: "intro",
+        nerd: "intro",
+        value: "intro",
+        state: 1,
+    }, {
+        name: "The exhibition",
+        human: "The exhibition",
+        nerd: "What we did",
+        value: "what",
+        state: 1,
+    },
+
+    {
+        name: "Visiting",
+        human: "visiting",
+        nerd: "visiting",
+        value: "how",
+        state: 0,
+    },
+    {
+        name: "Screenshot",
+        human: "Schreenshot",
+        nerd: "human",
+        value: "screenshot",
+        state: 0,
+    },
+    {
+        name: "Graph",
+        human: "Coverage",
+        nerd: "Code",
+        value: "coverage",
+        state: 0,
+    },
+    {
+        name: "Coverage",
+        human: "Execution trace",
+        nerd: "Flow",
+        value: "trace",
+        state: 0
+    },
+    {
+        name: "Network",
+        human: "Network",
+        nerd: "Underworld",
+        value: "network",
+        state: 0
+    }
 ]
 
 const sitesMenu = [{

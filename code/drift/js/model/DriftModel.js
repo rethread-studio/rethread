@@ -123,6 +123,13 @@ class DriftModel {
         this.getVoteWebsites()
     }
 
+    getcurrentSection() {
+        this.currentSection;
+    }
+    isCurrentScreenshot() {
+
+    }
+
     getMainMenu() {
         this.mainMenu = apiService.getMainMenu();
     }
@@ -233,23 +240,30 @@ class DriftModel {
         return this.menu;
     }
 
+    getDataChildren() {
+        return this.data.children.sort((a, b) => b.name > a.name ? -1 : b.name < a.name ? 1 : 0);
+    }
+
     calculatePack() {
+        // console.log(this.data)
+        const data = {
+            children: this.data.children.filter(filterByState(1))
+        }
+        const activeNum = data.children.length;
+        data.children = data.children.map((n) => {
+            n.value = 100 / activeNum;
+            return n
+        })
+
         this.pack = d3.treemap()
             .tile(d3.treemapBinary)
             .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
             .padding(30)
             .round(true)
-            (d3.hierarchy(this.data)
+            (d3.hierarchy(data)
                 .sum(hierarchySize)
                 .sort(sortBySize))
         return this.pack;
-        // this.pack = d3.pack()
-        //     .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
-        //     .padding(30)
-        //     (d3.hierarchy(this.data)
-        //         .sum(hierarchySize)
-        //         .sort(sortBySize))
-        // return this.pack;
     }
 
 
@@ -476,6 +490,15 @@ class DriftModel {
     setMode(mode, message) {
         this.mode = mode;
         this.notifyObservers({ type: message });
-        this.notifyObservers({ type: "changeMode" });
+    }
+
+    selectSite(name) {
+        this.data.children = this.data.children
+            .map(i => {
+                if (i.name == name) i.state = i.state == 1 ? 0 : 1;
+                return i;
+            })
+            .sort((a, b) => b.name > a.name)
+        this.notifyObservers({ type: "sitesUpdated" });
     }
 }

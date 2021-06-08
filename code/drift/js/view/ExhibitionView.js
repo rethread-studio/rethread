@@ -16,6 +16,7 @@ class ExhibitionView {
                     <div id="webSitesWrapper"></div>
                     <div id="sideMenuWrapper"></div>
                     <div id="timeLineWrapper"></div>
+                    <div id="sitesMenuWrapper" class="absolute mt-20 ml-5"></div>
                 </div>
             </div>
        
@@ -27,6 +28,7 @@ class ExhibitionView {
         this.renderMainVis();
         this.renderSideMenu();
         this.renderTimeLine();
+        this.renderSitesMenu();
     }
 
     setIdentifications() {
@@ -68,6 +70,12 @@ class ExhibitionView {
         let timeLineView = new TimeLineView("timeLineWrapper", this.model);
         this.timeLineController = new TimeLineController(timeLineView, this.model);
         this.timeLineController.renderView();
+    }
+
+    renderSitesMenu() {
+        let sitesMenuView = new CheckBoxListView("sitesMenuWrapper", this.model);
+        this.sitesMenuViewController = new CheckBoxViewController(sitesMenuView, this.model);
+        this.sitesMenuViewController.renderView();
     }
     unMountView() {
         this.timeLineController.unMountView();
