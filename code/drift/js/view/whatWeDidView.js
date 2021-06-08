@@ -6,7 +6,7 @@ class WhatWeDidViewView {
 
     render() {
         const content = `
-        <div class="w-3/6 text-2xl font-thin">
+        <div class="w-2/6 text-xl font-thin">
             <h1 class="font-bold text-4xl dritTittle tracking-widest mb-5">The Dr<span class="italic font-bold text-4xl">i</span>ft exhibition</h1>
             <p>In biology, genetic drift indicates a high frequency of gene variations through generations. Drift is a digital art exhibition that unveils the very rapid evolution of search engines. It dissects the different strata of code that power the search engines. The visitors can experience the contrast between the evolution of the visible and the invisible parts of search engines, as well as between different search engines.</p>
             <br>
