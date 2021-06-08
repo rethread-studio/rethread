@@ -33,7 +33,7 @@ window.onload = function () {
     emojiController = new EmojiController(emojiView, model);
 
     //start home view
-    showView("home");
+    showView("exhibition");
 };
 
 //show view

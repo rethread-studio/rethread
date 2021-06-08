@@ -4,14 +4,28 @@
 const dataNameAccessor = (d) => d.data.name.toLowerCase();
 const stateAccessor = (d) => d.data.state;
 const imageAccessor = (d) => d.data.image;
+const getMaskId = (d) => `${d.data.name}Mask`
+
+const getUrlMaskId = (d) => `url(#${d.data.name}Mask)`
+
+
 const logoAccessor = (d) => stateAccessor(d) == 0 ? `./img/${d.data.logo}` : `${d.data.image}`;
-const translateToCenter = (radius, dimensions) => () => `translate(${dimensions.boundedWidth / 2 - radius},${dimensions.boundedHeight / 2 - radius})`;
+const translateTo = (radius, dimensions) => () => `translate(${dimensions.boundedWidth / 2 - radius},${dimensions.boundedHeight / 2 - radius})`;
 const translateBottomCenter = (radius, dimensions) => () => {
     console.log(radius, dimensions)
     return `translate(${dimensions.boundedWidth / 2 - radius},${dimensions.boundedHeight / 2 - radius / 2})`
 };
+const translateToPos = d => `translate(${d.x0},${d.y0})`;
+const translateToUnderImage = d => `translate(${(d.x1 - d.x0) / 2},${d.y1 - d.y0 + 30})`;
+
+const getCenterX = d => (d.x1 - d.x0) / 2;
+const getCenterY = d => (d.y1 - d.y0) / 2;
+
 const translaeWithRadius = d => `translate(${d.x - d.r},${d.y - d.r})`
 const getSize = (d) => d.r * 2;
+const getWidth = (d) => d.x1 - d.x0;
+const getHeight = (d) => d.y1 - d.y0;
+const calculateRadius = (d) => (d.y1 - d.y0) / 2;
 
 class MainVisView {
 
@@ -50,33 +64,62 @@ class MainVisView {
     onEnter() {
         return (enter) => {
             const introTransition = d3.transition().duration(800)
-            const radius = 80;
             const dimensions = this.model.visDimensions;
 
             const element = enter
                 .append("g")
                 .attr("id", dataNameAccessor)
                 .attr("class", "image-container")
+                .attr("transform", translateToPos)
+
+            const def = element.append(`defs`)
+            const gradient = def.append(`radialGradient`)
+                .attr(`id`, `radialGradient`)
+
+            gradient.append(`stop`)
+                .attr(`class`, `start`)
+                .attr(`offset`, `5%`)
+                .attr(`stop-color`, `white`)
+                .attr(`stop-opacity`, 1);
+
+            gradient.append(`stop`)
+                .attr(`class`, `start`)
+                .attr(`offset`, `100%`)
+                .attr(`stop-color`, `black`)
+                .attr(`stop-opacity`, 1);
+            def.append(`mask`)
+                .attr("id", getMaskId)
+                .append(`circle`)
+                .attr(`cx`, getCenterX)
+                .attr(`cy`, getCenterY)
+                .attr(`r`, calculateRadius)
+                .attr(`fill`, "url('#radialGradient')")
 
             element.append("svg:image")
-                .attr("transform", translateToCenter(radius, dimensions))
                 .attr("xlink:href", logoAccessor)
-                .attr("width", radius)
-                .attr("height", radius)
-                .on("click", this.handleClick())
-                .transition(introTransition)
-                .attr("transform", translaeWithRadius)
-                .attr("width", getSize)
-                .attr("height", getSize)
-                .attr("class", "cursor-pointer")
+                .attr("width", getWidth)
+                .attr("height", getHeight)
+                .attr("mask", getUrlMaskId)
+
+            //     <defs>
+            //     <radialGradient id="Gradient">
+            //      <stop offset="5%" stop-color="white" />
+            //      <stop offset="100%" stop-color="black" />
+            //    </radialGradient>
+            //    <mask id="Mask">
+            //      <circle cx="50" cy="50" r="50" fill="url(#Gradient)"  />
+            //    </mask>
+            //  </defs>
+
 
             element
                 .append(`text`)
                 .text(dataNameAccessor)
                 .attr("fill", "white")
-                .attr("opacity", `0%`)
-                .attr("transform", (node) => `translate(${node.x}
-                    ,${node.y + node.r + 20})`)
+                .attr("opacity", `100%`)
+                .attr("transform", translateToUnderImage)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle")
 
         }
     }
@@ -89,7 +132,7 @@ class MainVisView {
             update
                 .select("image")
                 .transition(joinTransition)
-                .attr("transform", translateToCenter(radius, dimensions))
+                .attr("transform", translateTo(radius, dimensions))
                 .attr("width", radius)
                 .attr("height", radius)
                 .transition(updateTransition)
@@ -113,29 +156,29 @@ class MainVisView {
         const radius = 100;
         const dimensions = this.model.visDimensions;
 
-        nodes.forEach(node => {
-            d3.select(`#${dataNameAccessor(node)}`)
-                .select("image")
-                .transition(joinTransition)
-                .attr("transform", translateToCenter(radius, dimensions))
-                .attr("width", radius)
-                .attr("height", radius)
-                .transition(updateTransition)
-                .attr("xlink:href", logoAccessor(node))
-                .attr("transform", translaeWithRadius(node))
-                .attr("width", getSize(node))
-                .attr("height", getSize(node))
+        // nodes.forEach(node => {
+        // d3.select(`#${ dataNameAccessor(node) } `)
+        // .select("image")
+        // .transition(joinTransition)
+        // .attr("transform", translateTo(radius, dimensions))
+        // .attr("width", getWidth)
+        // .attr("height", getHeight)
+        // .transition(updateTransition)
+        // .attr("xlink:href", logoAccessor(node))
+        // .attr("transform", translateToPos(node))
+        // .attr("width", getWidth)
+        // .attr("height", getHeight)
 
-            const text = d3.select(`#${dataNameAccessor(node)}`)
-                .select(`text`)
-                .attr("opacity", `0%`)
-                .transition(joinTransition)
-                .attr("opacity", `0%`)
-                .attr("transform", `translate(${node.x}
-                    ,${node.y + node.r + 20})`)
-                .transition(textTransition)
-                .attr("opacity", node.data.state == 1 ? `100%` : `0%`)
-        })
+        // const text = d3.select(`#${ dataNameAccessor(node) } `)
+        //     .select(`text`)
+        //     .attr("opacity", `0 % `)
+        //     .transition(joinTransition)
+        //     .attr("opacity", `0 % `)
+        //     .attr("transform", `translate(${ node.x }
+        //         ,${node.y + node.r + 20})`)
+        //     .transition(textTransition)
+        //     .attr("opacity", node.data.state == 1 ? `100%` : `0%`)
+        // })
     }
 
     onExit() {
@@ -151,8 +194,8 @@ class MainVisView {
             .data(pack.descendants().splice(1))
             .join(
                 this.onEnter(),
-                this.onUpdate(),
-                this.onExit(),
+                // this.onUpdate(),
+                // this.onExit(),
             )
     }
 

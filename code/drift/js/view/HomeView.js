@@ -18,8 +18,8 @@ class HomeView {
         <div id="intro" class="center txt-white relative h-screen ">
             <img class="relative top-2-4 left-2-4 transform-50 h-auto .max-727 blur" src="./img/imgTest.png" alt="yahoo profile test">
             <div class="absolute middleInset translateCenter">
-                <h3 class="text-center text-xl">Welcome <br> <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none" id="usernameInp">
-                <h1 class="m-0 text-center dritTittle" >Dr<span>i</span>ft</h1>
+                <h3 class="text-center text-xl select-none">Welcome <br> <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none" id="usernameInp">
+                <h1 class="m-0 select-none text-center dritTittle" >Dr<span class="italic">i</span>ft</h1>
                 <ul id="mainMenuMain" class="flex flex-row justify-between p-0 m-0">
                 </ul>
             </div>

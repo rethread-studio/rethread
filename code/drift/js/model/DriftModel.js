@@ -10,6 +10,12 @@ const calculateSize = (active, inactive) => (d) => {
     d.value = d.state == 0 ? inactive : active;
     return d;
 }
+const splitString = (n) => {
+    let arr = n.split(" ")
+    arr.splice(1, 0, "<br>")
+    arr = arr.join(" ")
+    return arr
+}
 //update the state of the menu item 
 const updateState = (_name) => {
     return (d) => {
@@ -33,8 +39,8 @@ class DriftModel {
             margin: {
                 top: 0,
                 right: 150,
-                bottom: 200,
-                left: 20
+                bottom: 100,
+                left: 0
             }
         }
         this.visDimensions.boundedWidth = this.visDimensions.width - this.visDimensions.margin.right - this.visDimensions.margin.left;
@@ -122,17 +128,10 @@ class DriftModel {
     }
 
     getMainMenu(splitName = true) {
-        const val = !this.mode ? "human" : "nerd";
-
+        const val = "human";
         return this.mainMenu.map(i => {
             let name = i[val];
-            let arr = [];
-            if (splitName) {
-                arr = name.split(" ")
-                arr.splice(1, 0, "<br>")
-                arr = arr.join(" ")
-            }
-
+            let arr = splitName ? splitString(name) : [];
             return {
                 name: splitName ? arr : name,
                 value: i.value,
@@ -224,16 +223,6 @@ class DriftModel {
         this.menu = apiService.getMenu(type)
         this.rectDimensions.sectionHeight = this.menuDimensions.height / this.menu.length;
         this.currentSection = this.menu[0];
-        // apiService.getMenu(type)
-        //     .then(data => {
-        //         this.menu = data;
-        //         this.notifyObservers({ type: "newMenu", menu: this.menu });
-
-        //     }).catch(error => {
-        //         console.log('Get menu error:', error);
-        //         this.notifyObservers({ type: "error", menu: this.menu });
-        //     });
-
     }
     /*
     getMenu 
@@ -245,13 +234,22 @@ class DriftModel {
     }
 
     calculatePack() {
-        this.pack = d3.pack()
+        this.pack = d3.treemap()
+            .tile(d3.treemapBinary)
             .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
             .padding(30)
+            .round(true)
             (d3.hierarchy(this.data)
                 .sum(hierarchySize)
                 .sort(sortBySize))
         return this.pack;
+        // this.pack = d3.pack()
+        //     .size([this.visDimensions.boundedWidth, this.visDimensions.boundedHeight])
+        //     .padding(30)
+        //     (d3.hierarchy(this.data)
+        //         .sum(hierarchySize)
+        //         .sort(sortBySize))
+        // return this.pack;
     }
 
 
