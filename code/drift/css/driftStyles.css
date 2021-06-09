@@ -309,3 +309,9 @@ input:checked ~ .dot {
 .-translate-y-2-4{
     transform: translate(0 , -50%);
 }
+.-top-20{
+    top: -36%;
+}
+.-left-5{
+    left: -5%;
+}
