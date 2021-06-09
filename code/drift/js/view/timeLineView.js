@@ -16,10 +16,10 @@ class TimeLineView {
         const options = this.model.getSliderSpeed().map(speed => `<option>${speed.text}</option>`);
         const playButton = this.model.getPlayState() ? "pause" : "play";
         const buttons = `
-        <div class="flex flex-row justify-center content-center items-center pl-6">
-        <button id="playBtn" class="mr-8 white" >${playButton}</button>
+        <div class="flex flex-row content-center  pl-5 ">
+            <button id="playBtn" class="mr-8 white" >${playButton}</button>
             <div class="relative">
-            <span class="white">speed</span>
+                <span class="white">speed</span>
                 <select id="selectMenu" class="...">
                     ${options}
                 </select>
@@ -34,7 +34,7 @@ class TimeLineView {
         //ADD ALL THE VISUAL ITEMS 
         //MAIN wrapper in the HTML
         const wrapper = d3.select("#" + this.container)
-            .attr("class", "absolute bottom-0 left-0  flex")
+            .attr("class", "absolute bottom-0 left-0  flex flex-col flex-wrap justify-start ")
             .append("svg")
             .attr("width", dimensions.width)
             .attr("height", dimensions.height)
@@ -42,7 +42,7 @@ class TimeLineView {
         //general graphic container
         const bounds = wrapper.append("g")
             .style("transform", `translate(${dimensions.margin.left
-                }px, ${dimensions.margin.top + dimensions.boundedHeight / 2
+                }px, ${75
                 }px)`)
 
 
@@ -66,11 +66,11 @@ class TimeLineView {
             .attr("width", sliderDimensions.width)
             .style("fill", "#ffffff")
 
-        slider.append("text")
-            .attr("id", "currentTime")
-            .attr("y", -10)
-            .style("fill", "#ffffff")
-            .text()
+        // slider.append("text")
+        //     .attr("id", "currentTime")
+        //     .attr("y", -10)
+        //     .style("fill", "#ffffff")
+        //     .text()
 
         bounds.append("rect")
             .attr("id", "timeLinebounds")
@@ -89,16 +89,16 @@ class TimeLineView {
     updateSlider() {
         const { height, width } = this.model.getSliderHeight();
         const getSliderXPos = this.model.calculateSliderPos();
-        const currentTime = this.model.getCurrentTime();
-        const isMiddle = this.model.isSliderInMiddle() ? "end" : "start";
+        // const currentTime = this.model.getCurrentTime();
+        // const isMiddle = this.model.isSliderInMiddle() ? "end" : "start";
 
         d3.select("#sliderTimeLine")
             .style("transform", `translate(${getSliderXPos - width / 2
                 }px, ${-height / 2
                 }px)`)
-        d3.select("#currentTime")
-            .text(currentTime)
-            .attr("text-anchor", isMiddle)
+        // d3.select("#currentTime")
+        //     .text(currentTime)
+        //     .attr("text-anchor", isMiddle)
 
     }
 

@@ -8,7 +8,7 @@ class CheckBoxListView {
     render() {
         const checkBox = this.model.getDataChildren()
             .map(i => {
-                return `<label id="${i.name}SCbx" class="inline-flex items-center">
+                return `<label id="${i.name}SCbx" class="inline-flex items-center cursor-pointer">
                             <input type="checkbox" class="m0" value="${i.name}" ${i.state ? "checked" : ``}>
                             <span class="ml-2 white">${i.name}</span>
                         </label>`

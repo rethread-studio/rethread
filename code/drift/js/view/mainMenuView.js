@@ -14,23 +14,24 @@ class MainMenuView {
 
     render() {
         const visible = this.model.getMenuVisible();
+        const viewToggle = currentView == exhibitionViewController;
 
         const menu = `
-        <nav id= "burguerMenu" class="${visible ? "visible" : "invisible"} absolute flex flex-col items-center  justify-center  mx-auto w-screen    h-screen  pt-20 pb-20 background ">
-            <div id="toggleItem"></div>
-            <div id="mainMenuItems"  class="text-center">
-           
-            </dv>
+        <nav id= "burguerMenu" class="${visible ? "visible" : "invisible"} absolute top-0 left-0 flex flex-col items-center  justify-center  mx-auto w-screen  h-screen  pt-20 pb-20 background ">
+        <div id="mainMenuItems"  class="text-center">
+        
+        </dv>
         </nav>
-            `
+        `
 
         const content = `
-        <header class="fixed w-screen block z-50 flex flex-wrap flex-row justify-between p-6">
-            <!-- Menu items -->
-            <a id="home" value="home" class="z-50 robotoFont self-center txt-white text-3xl font-semibold tracking-widest" href="#" class="block mt-4 lg:inline-block text-teal-600 lg:mt-0 mr-10">
-                Dr<span class="italic">i</span>ft
-            </a>
-
+        <header class="fixed w-screen block z-50 flex flex-wrap flex-row place-content-center  place-items-center justify-between  p-6">
+        <!-- Menu items -->
+        <a id="home" value="home" class="z-50 robotoFont self-center txt-white text-3xl font-semibold tracking-widest" href="#" class="block mt-4 lg:inline-block text-teal-600 lg:mt-0 mr-10">
+        Dr<span class="italic">i</span>ft
+        </a>
+        
+            <div id="toggleItem" class="ml-auto pr-8 pt-2 ${viewToggle ? "visible" : "invisible"}"></div>
             <button id="menuButton" class="flex px-4 py-3 border rounded mt-auto z-50 transition-colors duration-500 ease-in-out ${visible ? "bg-white" : "bg-current"} ">
                 <svg class="fill-current h-3 w-3 ${visible ? " text-black" : " text-white"}" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <title>Menu</title>
