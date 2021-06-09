@@ -301,3 +301,11 @@ input:checked ~ .dot {
     font-size: 50px;
     background-color: red;
 }
+
+.top-2-4{
+    top:50%;
+}
+
+.-translate-y-2-4{
+    transform: translate(0 , -50%);
+}

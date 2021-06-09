@@ -16,7 +16,7 @@ class ExhibitionView {
                     <div id="webSitesWrapper"></div>
                     <div id="sideMenuWrapper"></div>
                     <div id="timeLineWrapper"></div>
-                    <div id="sitesMenuWrapper" class="absolute mt-20 ml-5"></div>
+                    <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5"></div>
                 </div>
             </div>
        
