@@ -15,10 +15,9 @@ class MainMenuView {
     render() {
         const visible = this.model.getMenuVisible();
         const viewToggle = currentView == exhibitionViewController;
-        console.log("MA I IN EXHIBITION", viewToggle)
 
         const menu = `
-        <nav id= "burguerMenu" class="${visible ? "visible" : "invisible"} absolute flex flex-col items-center  justify-center  mx-auto w-screen  h-screen  pt-20 pb-20 background ">
+        <nav id= "burguerMenu" class="${visible ? "visible" : "invisible"} absolute top-0 left-0 flex flex-col items-center  justify-center  mx-auto w-screen  h-screen  pt-20 pb-20 background ">
         <div id="mainMenuItems"  class="text-center">
         
         </dv>

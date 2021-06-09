@@ -110,7 +110,7 @@ class DriftModel {
         ]
         this.pack;
 
-        this.menuVisible = false;
+        this.menuVisible = true;
         this.mode = false;
         this.mainMenu = mainMenu;
     }
