@@ -36,8 +36,9 @@ font-family: 'Roboto', sans-serif;
 
 .background-black{
     background-color: #02061B;
-    
 }
+
+
 
 .robotoFont{
     font-family: 'Roboto', sans-serif;
@@ -170,6 +171,10 @@ h1{
 
 .white{
     color:white;
+}
+
+.black{
+    color:#02061B;
 }
 
 

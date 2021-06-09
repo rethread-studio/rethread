@@ -14,13 +14,13 @@ class TimeLineView {
         const rectDimensions = dimensions.rectDimensions;
         const sliderDimensions = dimensions.sliderDimensions;
         const options = this.model.getSliderSpeed().map(speed => `<option>${speed.text}</option>`);
-        const playButton = this.model.getPlayState() ? "pause" : "play";
+        const playButton = this.model.getPlayState() ? `<i class="fas fa-pause"></i>` : `<i class="fas fa-play"></i>`;
         const buttons = `
-        <div class="flex flex-row content-center  pl-5 ">
-            <button id="playBtn" class="mr-8 white" >${playButton}</button>
-            <div class="relative">
-                <span class="white">speed</span>
-                <select id="selectMenu" class="...">
+        <div class="flex flex-row content-center items-center  pl-5 ">
+            <button id="playBtn" class="transition-colors duration-500 ease-in-out mr-2 rounded-full h-10 w-10 hover:bg-white white hover:text-black text-center focus:border-0 focus:border-transparent focus:outline-none flex items-center justify-center" >${playButton}</button>
+            <div class="relative flex items-center">
+                <span class="white mr-2">Speed</span>
+                <select id="selectMenu" class="h-10 w-24 pl-2 pr-2">
                     ${options}
                 </select>
                 <div class="pointer-events-auto ...">
@@ -117,7 +117,7 @@ class TimeLineView {
     }
 
     updatePlayBtn() {
-        const playButton = this.model.getPlayState() ? "pause" : "play";
+        const playButton = this.model.getPlayState() ? `<i class="fas fa-pause"></i>` : `<i class="fas fa-play"></i>`;
         const butnContainer = document.getElementById("playBtn");
         butnContainer.innerHTML = playButton;
     }
