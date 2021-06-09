@@ -732,6 +732,7 @@ pub struct BlurShader {
     pub combine_uniform: CombineUniform,
     combine_texture: Texture, // You cannot read form and write to the same texture
     pub contrast: f32,
+    pub lightness: f32,
     pub blur_alpha: f32,
 }
 
@@ -749,6 +750,7 @@ impl BlurShader {
         let blur_size = 18;
         let sigma = 3.5;
         let contrast = 1.0;
+        let lightness = 1.0;
         let blur_alpha = 0.5;
 
         let resolution = [width as f32, height as f32];
@@ -789,6 +791,7 @@ impl BlurShader {
         let combine_uniform = CombineUniform {
             resolution: resolution.into(),
             contrast,
+            lightness,
             blur_alpha,
         };
         let combine_uniform_bind_group_layout = combine_uniform.bind_group_layout(&device);
@@ -826,6 +829,7 @@ impl BlurShader {
             combine_texture,
             combine_uniform,
             contrast,
+            lightness,
             blur_alpha,
         }
     }
@@ -840,6 +844,7 @@ impl BlurShader {
         self.blur_uniform.sigma = self.sigma;
         self.combine_uniform.contrast = self.contrast;
         self.combine_uniform.blur_alpha = self.blur_alpha;
+        self.combine_uniform.lightness = self.lightness;
         // First run the shader with the screen texture as source and blur
         // texture as destination
         // Rebuild uniform:
@@ -1016,6 +1021,7 @@ pub fn create_bind_group_layout(
 pub struct CombineUniform {
     resolution: mint::Vector2<f32>,
     contrast: f32,
+    lightness: f32,
     blur_alpha: f32,
 }
 

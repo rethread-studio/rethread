@@ -9,6 +9,7 @@ layout(std140, set=0, binding=0)
 uniform Uniforms {
   vec2 resolution;
   float contrast;
+  float lightness;
   float blur_alpha;
   // TODO: lightness (to compensate for contrast)
 };
@@ -41,6 +42,7 @@ void main() {
   col = (col * blur_alpha) + (original_col * (1.0-blur_alpha));
   // col.rgb = brightness_contrast(col.rgb, 0.0, contrast);
   col.rgb = gamma(col.rgb, contrast);
+  col.rgb *= lightness;
   // col = vec4(pow(col.r, 1.0/contrast), pow(col.g, 1.0/contrast), pow(col.r, 1.0/contrast), col.a);
   // col *= vec4(1.1, 0.5, 0.5, 1.0);
   // col = original_col;

@@ -258,6 +258,7 @@ widget_ids! {
         blur_size,
         sigma,
         contrast,
+        lightness,
         blur_alpha,
     }
 }
@@ -273,7 +274,7 @@ fn model(app: &App) -> Model {
                 .long("offline")
                 .help("Read from cache, don't try to download from the internet"),
         )
-	.arg(
+.arg(
             clap::Arg::with_name("recalculate")
                 .long("recalculate")
                 .help("Recalculate the longest traces, highest count values etc. This breaks compatibility along traces so ideally every trace image should be rerendered after recalculating."),
@@ -284,6 +285,14 @@ fn model(app: &App) -> Model {
                 .long("cache")
                 .value_name("CACHE_PATH")
                 .help("path to the cache, default: ./assets/cache/")
+                .takes_value(true),
+        )
+        .arg(
+            clap::Arg::with_name("max_visits")
+                .short("m")
+                .long("max_visits")
+                .value_name("MAX_VISITS")
+                .help("max number of visits to load, from the most recent ones")
                 .takes_value(true),
         )
         .subcommand(
@@ -340,6 +349,11 @@ fn model(app: &App) -> Model {
         false
     };
 
+    let max_visits: Option<u32> = if let Some(max) = matches.value_of("max_visits") {
+        Some(max.parse::<u32>().unwrap())
+    } else {
+        None
+    };
     // Lets write to a 4K UHD texture.
     let texture_size = [2_160, 2_160];
     // let texture_size = [1080, 1080]; // Temporarily render 1080p for speed
@@ -349,6 +363,8 @@ fn model(app: &App) -> Model {
     // let [win_w, win_h] = [texture_size[0], texture_size[1]];
     let w_id = app
         .new_window()
+        // .power_preference(wgpu::PowerPreference::HighPerformance)
+        .msaa_samples(1)
         .view(view)
         .event(window_event)
         .size(win_w, win_h)
@@ -469,10 +485,11 @@ fn model(app: &App) -> Model {
         };
         let sites = vec![load_site(
             site,
-            &vec![visit.to_owned()],
+            vec![visit.to_owned()],
             use_web_api,
             &cache_path,
             recalculate_data,
+            None,
         )];
         if let Some(vis) = matches.value_of("visualisation") {
             draw_mode = match vis {
@@ -522,7 +539,7 @@ fn model(app: &App) -> Model {
         };
 
         // Filter out the invalid visits
-        let visits = visits
+        let visits: Vec<String> = visits
             .into_iter()
             .filter(|ts| {
                 let its = ts.parse::<u64>().unwrap();
@@ -532,12 +549,21 @@ fn model(app: &App) -> Model {
 
         let sites: Vec<Site> = sites
             .iter()
-            .map(|name| load_site(&name, &visits, use_web_api, &cache_path, recalculate_data))
+            .map(|name| {
+                load_site(
+                    &name,
+                    visits.clone(),
+                    use_web_api,
+                    &cache_path,
+                    recalculate_data,
+                    max_visits,
+                )
+            })
             .collect();
         (sites, RenderState::NoRendering)
     };
 
-    Model {
+    let mut m = Model {
         ui,
         ids,
         rgb_selectors,
@@ -564,10 +590,17 @@ fn model(app: &App) -> Model {
         blur_shader,
         render_video: false,
         show_text: false,
-    }
+    };
+    set_blur_shader_params(&mut m);
+    m
 }
 
-fn load_site_from_disk(site: &str, visits: &Vec<String>, cache_path: &PathBuf) -> Vec<TraceData> {
+fn load_site_from_disk(
+    site: &str,
+    visits: Vec<String>,
+    cache_path: &PathBuf,
+    max_visits: Option<u32>,
+) -> Vec<TraceData> {
     let root_path = cache_path;
     let mut trace_datas = vec![];
 
@@ -575,6 +608,17 @@ fn load_site_from_disk(site: &str, visits: &Vec<String>, cache_path: &PathBuf) -
     page_folder.push(site);
     // Automatically find all visits
     let trace_paths_in_folder = if visits.len() > 0 {
+        // Restrict to max visits
+        let visits = if let Some(max_visits_num) = max_visits {
+            visits
+                .into_iter()
+                .rev()
+                .take(max_visits_num.try_into().unwrap())
+                .rev()
+                .collect()
+        } else {
+            visits
+        };
         visits
             .iter()
             .map(|visit| {
@@ -584,12 +628,23 @@ fn load_site_from_disk(site: &str, visits: &Vec<String>, cache_path: &PathBuf) -
             })
             .collect::<Vec<PathBuf>>()
     } else {
-        fs::read_dir(page_folder)
+        let mut paths = fs::read_dir(page_folder)
             .expect("Failed to open page folder")
             .filter(|r| r.is_ok()) // Get rid of Err variants for Result<DirEntry>
             .map(|r| r.unwrap().path())
             .filter(|r| r.is_dir()) // Only keep folders
-            .collect::<Vec<PathBuf>>()
+            .collect::<Vec<PathBuf>>();
+        if let Some(max_visits_num) = max_visits {
+            if paths.len() > max_visits_num as usize {
+                paths = paths
+                    .into_iter()
+                    .rev()
+                    .take(max_visits_num as usize)
+                    .rev()
+                    .collect();
+            }
+        }
+        paths
     };
     println!(
         "Found {} visits for site {}",
@@ -822,15 +877,27 @@ deepest_tree_depth: {}\n",
 
 fn load_site(
     name: &str,
-    visits: &Vec<String>,
+    visits: Vec<String>,
     use_web_api: bool,
     cache_path: &PathBuf,
     recalculate_data: bool,
+    max_visits: Option<u32>,
 ) -> Site {
     let trace_datas = if use_web_api {
-        from_web_api::get_trace_data_from_site(name, visits, cache_path)
+        // Filter out the visits here since they wont't be collected from the folder names
+        let visits = if let Some(max_visits_num) = max_visits {
+            visits
+                .into_iter()
+                .rev()
+                .take(max_visits_num.try_into().unwrap())
+                .rev()
+                .collect()
+        } else {
+            visits
+        };
+        from_web_api::get_trace_data_from_site(name, &visits, cache_path)
     } else {
-        load_site_from_disk(name, visits, cache_path)
+        load_site_from_disk(name, visits, cache_path, max_visits)
     };
 
     site_from_trace_datas(name, trace_datas, recalculate_data)
@@ -926,7 +993,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             rgb.view(ui);
         }
 
-        for value in slider(model.blur_shader.blur_size as f32, 0.0, 64.0)
+        for value in slider(model.blur_shader.blur_size as f32, 0.0, 128.0)
             .down(10.)
             .label(&format!("blur size: {}", model.blur_shader.blur_size))
             .set(model.ids.blur_size, ui)
@@ -934,7 +1001,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             model.blur_shader.blur_size = value as u32;
         }
 
-        for value in slider(model.blur_shader.sigma as f32, 0.0, 32.0)
+        for value in slider(model.blur_shader.sigma as f32, 0.0, 64.0)
             .down(10.)
             .label(&format!("sigma: {}", model.blur_shader.sigma))
             .set(model.ids.sigma, ui)
@@ -948,6 +1015,14 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         {
             model.blur_shader.contrast = value;
         }
+        for value in slider(model.blur_shader.lightness as f32, 0.0, 4.0)
+            .down(10.)
+            .label(&format!("lightness: {}", model.blur_shader.lightness))
+            .set(model.ids.lightness, ui)
+        {
+            model.blur_shader.lightness = value;
+        }
+
         for value in slider(model.blur_shader.blur_alpha as f32, 0.0, 1.0)
             .down(10.)
             .label(&format!("blur_alpha: {}", model.blur_shader.blur_alpha))
@@ -1373,86 +1448,110 @@ fn view(app: &App, model: &Model, frame: Frame) {
 fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     match event {
         KeyPressed(key) => match key {
-            Key::A => match &mut model.draw_mode {
-                DrawMode::GraphDepth(ref mut gddm) => match gddm {
-                    GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::Vertical,
-                    GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Polar,
-                    GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::PolarGrid,
-                    GraphDepthDrawMode::PolarGrid => {
-                        *gddm = GraphDepthDrawMode::rings(&app.main_window(), model.texture.size())
-                    }
-                    GraphDepthDrawMode::Rings(_) => *gddm = GraphDepthDrawMode::PolarAxes,
-                    GraphDepthDrawMode::PolarAxes => *gddm = GraphDepthDrawMode::PolarAxesRolling,
-                    GraphDepthDrawMode::PolarAxesRolling => {
-                        *gddm = GraphDepthDrawMode::TriangleRolling
-                    }
-                    GraphDepthDrawMode::TriangleRolling => {
-                        *gddm = GraphDepthDrawMode::AllSitesPolarAxes
-                    }
-                    GraphDepthDrawMode::AllSitesPolarAxes => *gddm = GraphDepthDrawMode::Horizontal,
-                },
-                DrawMode::Indentation(ref mut pdm) => match pdm {
-                    ProfileDrawMode::SingleFlower => (),
-                },
-                DrawMode::LineLength(ref mut pdm) => match pdm {
-                    ProfileDrawMode::SingleFlower => (),
-                },
-                DrawMode::Coverage(ref mut cdm) => match cdm {
-                    CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Blob,
-                    CoverageDrawMode::Blob => *cdm = CoverageDrawMode::SmoothBlob,
-                    CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Spacebrush,
-                    CoverageDrawMode::Spacebrush => {
-                        *cdm = CoverageDrawMode::shell(&app.main_window(), model.texture.size())
-                    }
-                    CoverageDrawMode::Shell(_) => {
-                        *cdm = CoverageDrawMode::gem_stone(&app.main_window(), model.texture.size())
-                    }
-                    CoverageDrawMode::GemStone(_) => {
-                        *cdm = CoverageDrawMode::voronoi(&app.main_window(), model.texture.size())
-                    }
-                    CoverageDrawMode::Voronoi(_) => *cdm = CoverageDrawMode::HeatMap,
-                },
-            },
-            Key::D => match &mut model.draw_mode {
-                DrawMode::GraphDepth(ref mut gddm) => match gddm {
-                    GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::AllSitesPolarAxes,
-                    GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Horizontal,
-                    GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::Vertical,
-                    GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Polar,
-                    GraphDepthDrawMode::Rings(_) => *gddm = GraphDepthDrawMode::PolarGrid,
-                    GraphDepthDrawMode::PolarAxes => {
-                        *gddm = GraphDepthDrawMode::rings(&app.main_window(), model.texture.size())
-                    }
-                    GraphDepthDrawMode::PolarAxesRolling => *gddm = GraphDepthDrawMode::PolarAxes,
-                    GraphDepthDrawMode::TriangleRolling => {
-                        *gddm = GraphDepthDrawMode::PolarAxesRolling
-                    }
-                    GraphDepthDrawMode::AllSitesPolarAxes => {
-                        *gddm = GraphDepthDrawMode::TriangleRolling
-                    }
-                },
-                DrawMode::Indentation(ref mut pdm) => match pdm {
-                    ProfileDrawMode::SingleFlower => (),
-                },
-                DrawMode::LineLength(ref mut pdm) => match pdm {
-                    ProfileDrawMode::SingleFlower => (),
-                },
-                DrawMode::Coverage(ref mut cdm) => match cdm {
-                    CoverageDrawMode::HeatMap => {
-                        *cdm = CoverageDrawMode::voronoi(&app.main_window(), model.texture.size())
-                    }
-                    CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
-                    CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Blob,
-                    CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::SmoothBlob,
-                    CoverageDrawMode::Shell(_) => *cdm = CoverageDrawMode::Spacebrush,
-                    CoverageDrawMode::GemStone(_) => {
-                        *cdm = CoverageDrawMode::shell(&app.main_window(), model.texture.size())
-                    }
-                    CoverageDrawMode::Voronoi(_) => {
-                        *cdm = CoverageDrawMode::gem_stone(&app.main_window(), model.texture.size())
-                    }
-                },
-            },
+            Key::A => {
+                match &mut model.draw_mode {
+                    DrawMode::GraphDepth(ref mut gddm) => match gddm {
+                        GraphDepthDrawMode::Horizontal => *gddm = GraphDepthDrawMode::Vertical,
+                        GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Polar,
+                        GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::PolarGrid,
+                        GraphDepthDrawMode::PolarGrid => {
+                            *gddm =
+                                GraphDepthDrawMode::rings(&app.main_window(), model.texture.size())
+                        }
+                        GraphDepthDrawMode::Rings(_) => *gddm = GraphDepthDrawMode::PolarAxes,
+                        GraphDepthDrawMode::PolarAxes => {
+                            *gddm = GraphDepthDrawMode::PolarAxesRolling
+                        }
+                        GraphDepthDrawMode::PolarAxesRolling => {
+                            *gddm = GraphDepthDrawMode::TriangleRolling
+                        }
+                        GraphDepthDrawMode::TriangleRolling => {
+                            *gddm = GraphDepthDrawMode::AllSitesPolarAxes
+                        }
+                        GraphDepthDrawMode::AllSitesPolarAxes => {
+                            *gddm = GraphDepthDrawMode::Horizontal
+                        }
+                    },
+                    DrawMode::Indentation(ref mut pdm) => match pdm {
+                        ProfileDrawMode::SingleFlower => (),
+                    },
+                    DrawMode::LineLength(ref mut pdm) => match pdm {
+                        ProfileDrawMode::SingleFlower => (),
+                    },
+                    DrawMode::Coverage(ref mut cdm) => match cdm {
+                        CoverageDrawMode::HeatMap => *cdm = CoverageDrawMode::Blob,
+                        CoverageDrawMode::Blob => *cdm = CoverageDrawMode::SmoothBlob,
+                        CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Spacebrush,
+                        CoverageDrawMode::Spacebrush => {
+                            *cdm = CoverageDrawMode::shell(&app.main_window(), model.texture.size())
+                        }
+                        CoverageDrawMode::Shell(_) => {
+                            *cdm = CoverageDrawMode::gem_stone(
+                                &app.main_window(),
+                                model.texture.size(),
+                            )
+                        }
+                        CoverageDrawMode::GemStone(_) => {
+                            *cdm =
+                                CoverageDrawMode::voronoi(&app.main_window(), model.texture.size())
+                        }
+                        CoverageDrawMode::Voronoi(_) => *cdm = CoverageDrawMode::HeatMap,
+                    },
+                }
+                set_blur_shader_params(model);
+            }
+            Key::D => {
+                match &mut model.draw_mode {
+                    DrawMode::GraphDepth(ref mut gddm) => match gddm {
+                        GraphDepthDrawMode::Horizontal => {
+                            *gddm = GraphDepthDrawMode::AllSitesPolarAxes
+                        }
+                        GraphDepthDrawMode::Vertical => *gddm = GraphDepthDrawMode::Horizontal,
+                        GraphDepthDrawMode::Polar => *gddm = GraphDepthDrawMode::Vertical,
+                        GraphDepthDrawMode::PolarGrid => *gddm = GraphDepthDrawMode::Polar,
+                        GraphDepthDrawMode::Rings(_) => *gddm = GraphDepthDrawMode::PolarGrid,
+                        GraphDepthDrawMode::PolarAxes => {
+                            *gddm =
+                                GraphDepthDrawMode::rings(&app.main_window(), model.texture.size())
+                        }
+                        GraphDepthDrawMode::PolarAxesRolling => {
+                            *gddm = GraphDepthDrawMode::PolarAxes
+                        }
+                        GraphDepthDrawMode::TriangleRolling => {
+                            *gddm = GraphDepthDrawMode::PolarAxesRolling
+                        }
+                        GraphDepthDrawMode::AllSitesPolarAxes => {
+                            *gddm = GraphDepthDrawMode::TriangleRolling
+                        }
+                    },
+                    DrawMode::Indentation(ref mut pdm) => match pdm {
+                        ProfileDrawMode::SingleFlower => (),
+                    },
+                    DrawMode::LineLength(ref mut pdm) => match pdm {
+                        ProfileDrawMode::SingleFlower => (),
+                    },
+                    DrawMode::Coverage(ref mut cdm) => match cdm {
+                        CoverageDrawMode::HeatMap => {
+                            *cdm =
+                                CoverageDrawMode::voronoi(&app.main_window(), model.texture.size())
+                        }
+                        CoverageDrawMode::Blob => *cdm = CoverageDrawMode::HeatMap,
+                        CoverageDrawMode::SmoothBlob => *cdm = CoverageDrawMode::Blob,
+                        CoverageDrawMode::Spacebrush => *cdm = CoverageDrawMode::SmoothBlob,
+                        CoverageDrawMode::Shell(_) => *cdm = CoverageDrawMode::Spacebrush,
+                        CoverageDrawMode::GemStone(_) => {
+                            *cdm = CoverageDrawMode::shell(&app.main_window(), model.texture.size())
+                        }
+                        CoverageDrawMode::Voronoi(_) => {
+                            *cdm = CoverageDrawMode::gem_stone(
+                                &app.main_window(),
+                                model.texture.size(),
+                            )
+                        }
+                    },
+                }
+                set_blur_shader_params(model);
+            }
             Key::W => {
                 model.draw_mode = match &model.draw_mode {
                     DrawMode::GraphDepth(_gddm) => {
@@ -1463,7 +1562,8 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                     }
                     DrawMode::LineLength(_pdm) => DrawMode::Coverage(CoverageDrawMode::HeatMap),
                     DrawMode::Coverage(_cdm) => DrawMode::GraphDepth(GraphDepthDrawMode::Polar),
-                }
+                };
+                set_blur_shader_params(model);
             }
             Key::S => {
                 model.draw_mode = match &model.draw_mode {
@@ -1473,7 +1573,8 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                         DrawMode::Indentation(ProfileDrawMode::SingleFlower)
                     }
                     DrawMode::Coverage(_cdm) => DrawMode::LineLength(ProfileDrawMode::SingleFlower),
-                }
+                };
+                set_blur_shader_params(model);
             }
             Key::Up => {
                 model.selected_site += 1;
@@ -1556,6 +1657,27 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     }
 }
 
+fn set_blur_shader_params(model: &mut Model) {
+    match &model.draw_mode {
+        DrawMode::Coverage(cdm) => {
+            let bs = &mut model.blur_shader;
+            bs.blur_size = 128;
+            bs.sigma = 64.0;
+            bs.contrast = 1.34;
+            bs.lightness = 1.05;
+            bs.blur_alpha = 0.6;
+        }
+        DrawMode::GraphDepth(gdm) => {
+            let bs = &mut model.blur_shader;
+            bs.blur_size = 128;
+            bs.sigma = 64.0;
+            bs.contrast = 1.14;
+            bs.lightness = 2.15;
+            bs.blur_alpha = 0.67;
+        }
+        _ => (),
+    }
+}
 fn captured_frame_path(app: &App) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     let now: DateTime<Utc> = Utc::now();
