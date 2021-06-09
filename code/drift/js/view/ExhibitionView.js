@@ -16,6 +16,7 @@ class ExhibitionView {
                     <div id="webSitesWrapper"></div>
                     <div id="sideMenuWrapper"></div>
                     <div id="timeLineWrapper"></div>
+                    <div id="currentTimeWrapper" class= "absolute top-100 ml-5"></div>
                     <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5"></div>
                 </div>
             </div>
@@ -29,12 +30,19 @@ class ExhibitionView {
         this.renderSideMenu();
         this.renderTimeLine();
         this.renderSitesMenu();
+        this.renderCurrentTime();
     }
 
     setIdentifications() {
         // this.meetRobot_btn = document.getElementById("meetRobotBtn");
     }
 
+    renderCurrentTime() {
+        //ADD MAIN VISUALIZATION VIEW
+        let currentTimeView = new CurrentTimeView("currentTimeWrapper", this.model);
+        this.currentTimeController = new CurrentTimeViewController(currentTimeView, this.model);
+        this.currentTimeController.renderView();
+    }
     renderMainVis() {
         //ADD MAIN VISUALIZATION VIEW
         let mainVisView = new MainVisView("webSitesWrapper", this.model);

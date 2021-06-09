@@ -68,21 +68,21 @@ class DriftModel {
         this.visits = [];
 
         this.timeLineDimensions = {
-            width: window.innerWidth * 0.95,
-            height: 150,
+            width: window.innerWidth,
+            height: 100,
             margin: {
-                top: 10,
+                top: 0,
                 right: 10,
-                bottom: 10,
+                bottom: 0,
                 left: 10
             },
             rectDimensions: {
-                height: 3,
-                width: window.innerWidth * 0.8,
+                height: 25,
+                width: window.innerWidth,
             },
             sliderDimensions: {
                 height: 50,
-                width: 5,
+                width: 2,
             }
 
         }
@@ -110,7 +110,7 @@ class DriftModel {
         ]
         this.pack;
 
-        this.menuVisible = true;
+        this.menuVisible = false;
         this.mode = false;
         this.mainMenu = mainMenu;
     }
@@ -218,9 +218,10 @@ class DriftModel {
             })
     }
 
-    getCurrentTime() {
-        return d3.timeFormat("%b %d %a %H:%M")(this.visits[this.currentVisitPos])
+    getCurrentTime(format = true) {
+        return format ? d3.timeFormat("%b %d %a %H:%M")(this.visits[this.currentVisitPos]) : this.visits[this.currentVisitPos];
     }
+
 
     isSliderInMiddle() {
         return this.currentVisitPos > this.visits.length / 2 ? true : false;
@@ -373,12 +374,6 @@ class DriftModel {
         const everyYear = d3.timeYear.every(1).range(extent[0], extent[1]).length;
 
         return [
-            {
-                format: formatHour,
-                numTicks: everyHour,
-                padding: [0],
-                axis: axis,
-            },
             {
                 format: formatDay,
                 numTicks: everyDay,

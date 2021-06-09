@@ -7,7 +7,7 @@ class AboutView {
     }
 
     render() {
-        var content = `
+        const content = `
         <div class="grid grid-cols-2 p-24 pt-40">
             <div class="pr-20 ">
              <img class="h-auto .max-727 blur" src="./img/imgTest.png" alt="yahoo profile test">
