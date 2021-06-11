@@ -17,6 +17,7 @@ app.use(compression());
 app.use("/js", express.static(__dirname + "/../../js"));
 app.use("/img", express.static(__dirname + "/../../img"));
 app.use("/css", express.static(__dirname + "/../../css"));
+app.use("/webfonts", express.static(__dirname + "/../../webfonts"));
 app.get("/", (req, res) =>
   res.sendFile(resolve(__dirname + "/../../index.html"))
 );
