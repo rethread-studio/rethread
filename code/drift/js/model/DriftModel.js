@@ -72,9 +72,9 @@ class DriftModel {
             height: 100,
             margin: {
                 top: 0,
-                right: 10,
+                right: 20,
                 bottom: 0,
-                left: 10
+                left: 20
             },
             rectDimensions: {
                 height: 25,
@@ -82,7 +82,7 @@ class DriftModel {
             },
             sliderDimensions: {
                 height: 50,
-                width: 2,
+                width: 4,
             }
 
         }
@@ -223,8 +223,9 @@ class DriftModel {
     }
 
 
-    isSliderInMiddle() {
-        return this.currentVisitPos > this.visits.length / 2 ? true : false;
+    isSliderInMiddle(pos = null) {
+        const pCompare = pos == null ? this.currentVisitPos : pos;
+        return pCompare > this.visits.length / 2 ? true : false;
     }
 
     loadMenu(type) {
@@ -359,7 +360,7 @@ class DriftModel {
         const extent = d3.extent(this.visits)
         const scale = d3.scaleLinear()
             .domain(extent)
-            .range([0, this.timeLineDimensions.rectDimensions.width]);
+            .range([0, this.timeLineDimensions.boundedWidth]);
         // Add scales to axis 
         const formatHour = date => d3.timeFormat("%H:%M")(date)
         const formatDay = date => d3.timeFormat("%d %a")(date)
@@ -441,12 +442,12 @@ class DriftModel {
         }
     }
 
-    calculateSliderPos() {
-        const currentDate = this.visits[this.currentVisitPos]//this.visits.length - 1
+    calculateSliderPos(pos = null) {
+        const currentDate = this.visits[pos == null ? this.currentVisitPos : pos]//this.visits.length - 1
         const extent = d3.extent(this.visits)
         const scale = d3.scaleLinear()
             .domain(extent)
-            .range([0, this.timeLineDimensions.rectDimensions.width]);
+            .range([0, this.timeLineDimensions.boundedWidth]);
         return scale(currentDate);
     }
 
@@ -471,6 +472,22 @@ class DriftModel {
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
 
+    }
+
+    //posX is the percentage of the posX with the Width
+    getDatebyPosX(percentage) {
+        const pos = percentage < 0 ? 0 : percentage;
+        const scale = d3.scaleLinear()
+            .rangeRound([0, this.visits.length - 1]);
+        return scale(pos);
+    }
+
+    getDateByPos(pos) {
+        return this.visits[pos];
+    }
+
+    formatDateString(date) {
+        return `${formatMonth(date)} ${formatDay(date)} ${formatHour(date)} `
     }
 
     toggleMenu(toggle = undefined) {

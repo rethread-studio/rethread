@@ -7,14 +7,15 @@ class ExhibitionView {
     }
 
     render() {
-        var content = `
-            <div class="fullHeight">
+        // <div id="sideMenuWrapper" class="fixed"></div>
+        const content = `
+            <div class="">
                 <div id="exhibitionIntro" class="flex content-center items-center justify-center relative h-screen  white "> </div>
                 <div id="exhibitionProcess" class="flex content-center items-center justify-center relative h-screen  white"> </div>
                 <div id="exhibitionExplanation" class="flex content-center items-center justify-center relative h-screen  white"> </div>
+                
                 <div id="visContainer" class="relative  h-screen sticky top-0 background-black">
                     <div id="webSitesWrapper"></div>
-                    <div id="sideMenuWrapper"></div>
                     <div id="timeLineWrapper"></div>
                     <div id="currentTimeWrapper" class= "absolute top-100 ml-5"></div>
                     <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5"></div>
@@ -27,7 +28,7 @@ class ExhibitionView {
         this.renderWhatWeDid();
         this.renderExplanation()
         this.renderMainVis();
-        this.renderSideMenu();
+        // this.renderSideMenu();
         this.renderTimeLine();
         this.renderSitesMenu();
         this.renderCurrentTime();

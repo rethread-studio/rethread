@@ -52,7 +52,7 @@ class TimeLineView {
 
         timeLine.append("rect")
             .attr("height", rectDimensions.height)
-            .attr("width", rectDimensions.width)
+            .attr("width", dimensions.boundedWidth)
             .style("fill", "#ffffff")
 
         const slider = timeLine.append("g")
@@ -66,11 +66,23 @@ class TimeLineView {
             .attr("width", sliderDimensions.width)
             .style("fill", "#ffffff")
 
-        // slider.append("text")
-        //     .attr("id", "currentTime")
-        //     .attr("y", -10)
-        //     .style("fill", "#ffffff")
-        //     .text()
+        const phantomSlider = timeLine.append("g")
+            .attr("id", "phantomSlider")
+            .style("transform", `translate(${0
+                }px, ${-sliderDimensions.height / 2
+                }px)`)
+            .attr("opacity", 0)
+
+        phantomSlider.append("rect")
+            .attr("height", sliderDimensions.height)
+            .attr("width", sliderDimensions.width)
+            .style("fill", "#ffffff")
+
+        phantomSlider.append("text")
+            .attr("id", "phatomTime")
+            .attr("y", -10)
+            .style("fill", "#ffffff")
+            .text()
 
         bounds.append("rect")
             .attr("id", "timeLinebounds")
@@ -79,7 +91,7 @@ class TimeLineView {
                 }px, ${-sliderDimensions.height / 2
                 }px)`)
             .attr("height", sliderDimensions.height)
-            .attr("width", rectDimensions.width)
+            .attr("width", dimensions.boundedWidth)
 
         this.updateSlider()
         this.renderAllAxis()
@@ -116,6 +128,23 @@ class TimeLineView {
             })
     }
 
+    updatePhantomSlider(formatedDate, isMiddle, slidePos) {
+        const sliderDimensions = this.model.getTimeLineDimensions().sliderDimensions;
+
+        d3.select("#phantomSlider")
+            .style("transform", `translate(${slidePos
+                }px, ${-sliderDimensions.height / 2
+                }px)`)
+        d3.select("#phatomTime")
+            .text(formatedDate)
+            .attr("text-anchor", isMiddle)
+    }
+
+    viewPhantomSlider(view) {
+        d3.select("#phantomSlider")
+            .attr("opacity", view ? 1 : 0)
+    }
+
     updatePlayBtn() {
         const playButton = this.model.getPlayState() ? `<i class="fas fa-pause"></i>` : `<i class="fas fa-play"></i>`;
         const butnContainer = document.getElementById("playBtn");
@@ -140,6 +169,7 @@ class TimeLineView {
         this.play_btn = document.getElementById("playBtn");
         this.selectMenu = document.getElementById("selectMenu")
         this.timeline = document.getElementById("timeLinebounds")
+        this.phantomSlider = document.getElementById("phantomSlider");
 
     }
 

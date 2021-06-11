@@ -9,6 +9,9 @@ class TimeLineController {
         this.clickHandler = this.onClick.bind(this);
         this.changeHandler = this.changeSelection.bind(this);
         this.clickTimeLineHandler = this.onClickTimeline.bind(this);
+        this.onMouoverHandler = this.onmouseover.bind(this);
+        this.onMouseOutHandler = this.onmouseout.bind(this);
+        this.onMouseMoveHandler = this.onmousemove.bind(this);
     }
 
     renderView() {
@@ -16,10 +19,31 @@ class TimeLineController {
         this.addEventListeners();
     }
 
-    onClickTimeline(e) {
-        const { left, width } = e.target.getBoundingClientRect();
+    onmouseover(e) {
+        this.view.timeline.addEventListener("mousemove", this.onMouseMoveHandler)
+        this.view.viewPhantomSlider(true);
+    }
+    onmousemove(e) {
+        const { width, left } = e.target.getBoundingClientRect();
         const posX = e.clientX - left;
-        //pass the percentage
+        const datePos = this.model.getDatebyPosX(posX / width)
+        const date = this.model.getDateByPos(datePos)
+        const formatedDate = this.model.formatDateString(date);
+        const isMiddle = this.model.isSliderInMiddle(datePos) ? "end" : "start";
+        const slidePos = this.model.calculateSliderPos(datePos);
+
+        this.view.updatePhantomSlider(formatedDate, isMiddle, slidePos)
+
+    }
+    onmouseout(e) {
+        this.view.viewPhantomSlider(false);
+        this.view.timeline.removeEventListener("mousemove", this.onMouseMoveHandler)
+    }
+    // const { left, width } = e.target.getBoundingClientRect();
+    // const posX = e.clientX - left;
+    onClickTimeline(e) {
+        const { width, left } = e.target.getBoundingClientRect();
+        const posX = e.clientX - left;
         this.model.updateSliderPos(posX / width)
     }
 
@@ -33,6 +57,8 @@ class TimeLineController {
 
     addEventListeners() {
         this.view.timeline.addEventListener("click", this.clickTimeLineHandler)
+        this.view.timeline.addEventListener("mouseover", this.onMouoverHandler)
+        this.view.timeline.addEventListener("mouseout", this.onMouseOutHandler)
         this.view.play_btn.addEventListener("click", this.clickHandler);
         this.view.selectMenu.addEventListener("change", this.changeHandler);
     }
@@ -50,6 +76,8 @@ class TimeLineController {
     }
 
     removeEventListeners() {
+        this.view.timeline.removeEventListener("mouseover", this.onMouoverHandler)
+        this.view.timeline.removeEventListener("mouseout", this.onMouseOutHandler)
         this.view.timeline.removeEventListener("click", this.clickTimeLineHandler)
         this.view.play_btn.removeEventListener("click", this.clickHandler);
         this.view.selectMenu.removeEventListener("change", this.changeHandler)
