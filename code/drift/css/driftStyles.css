@@ -204,14 +204,23 @@ input:checked ~ .dot {
   .cool-gray-400{
     color:#9CA3AF
   }
+
+#chatButton {
+    position: fixed;
+    bottom: 175px;
+    right: 20px;
+    width: 30px;
+    height: 30px;
+}
+
 /*Mini Chat view*/
 #chat {
     position: fixed;
-    bottom: 15px;
-    left: 15px;
+    bottom: 20px;
+    right: 20px;
     width: 250px;
     height: 175px;
-    background-color: rgba(255,255,255,0.3);
+    background-color:#2F3345;
     border-radius: 4px;
 
     display: flex;
@@ -223,31 +232,54 @@ input:checked ~ .dot {
     left: initial;
     height: 100%;
 }
+#emojis  {
+background-color: #5C6074;
+padding: 5px 10px;
+}
 #emojis .emoji {
     float: left;
     cursor: pointer;
 }
 #messages {
     height: 100%;
-    padding: 7px;
+    padding: 10px;
     overflow: scroll;
 }
 .message {
-    min-height: 55px;
+    min-height: 50px;
+    display:flex;
+    align-items:center;
+    flex-direction: row;
+    place-content: space-evenly;
 }
 .message .chat-text {
     width: calc(100% - 55px);
     margin: 0;
-    margin-left: 55px;
-    padding: 4px;
-    background-color: rgb(231, 231, 231);
+    margin-left: 5px;
+    padding: 8px;
+    padding-right: 10px;
+    background-color: #5C6074;
+    color:white;
+    border-radius: 0.375rem;
+    text-align:right;
 }
 .message .icon {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     background-size: 100%;
-    border-radius: 5px;
+    border-radius: 0.375rem;
     float: left;
+}
+
+#messageInp{
+    height: 2.75rem;
+    padding: 8px
+}
+
+#closeBtn {
+    top: -20px;
+    height: 30px;
+    width: 20px;
 }
 
 /* Emoji party */
@@ -255,6 +287,10 @@ input:checked ~ .dot {
     position: fixed;
     color: white;
     z-index: 999999;
+    text-align: right;
+    font-size: 0.875rem;
+    line-height: 3rem;
+
 }
 .floating-emoji span {
     font-size: 50px;

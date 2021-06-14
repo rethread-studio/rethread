@@ -7,6 +7,7 @@ class MiniChatController {
   }
 
   addEventListener() {
+
     this.view.message_inp.addEventListener("change", () => {
       this.model.interaction.message(this.view.message_inp.value);
       this.view.message_inp.value = "";
@@ -34,5 +35,5 @@ class MiniChatController {
   renderView() {
     this.view.render();
   }
-  unMountView() {}
+  unMountView() { }
 }

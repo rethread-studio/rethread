@@ -2,7 +2,7 @@ class ChatView {
   constructor(container, model) {
     this.model = model;
     this.container = document.getElementById(container);
-
+    this.model.addObserver(this);
     this.emojis = [
       {
         emoji: "👋",
@@ -20,6 +20,7 @@ class ChatView {
   }
 
   render() {
+
     let content = `<div id="messages"></div><ul id="emojis">`;
     for (let emoji of this.emojis) {
       content += `<li class="emoji">${emoji.emoji}</li>`;
@@ -30,8 +31,12 @@ class ChatView {
     this.setIdentifications();
   }
 
+  renderButton() {
+
+  }
+
   addMessage(message) {
-    const content = `<div class="icon" style='background-image:url("/api/chat/user/${message.user.id}/avatar")'></div>
+    const content = `<div class="icon" style='background-image:url(${apiService.getAvatar(message.user.id)})'></div>
     <p class="chat-text">${message.message}</p>`;
     const node = document.createElement("div");
     node.className = "message";
@@ -48,5 +53,16 @@ class ChatView {
   setIdentifications() {
     this.messages = document.getElementById("messages");
     this.message_inp = document.getElementById("messageInp");
+  }
+
+  updateView() {
+    // node.className = "floating-emoji";
+    this.container.className = this.model.getChatVisible() ? "visible" : "invisible"
+  }
+
+  update(changeDetails) {
+    if (changeDetails.type == "toggleChat") {
+      this.updateView();
+    }
   }
 }

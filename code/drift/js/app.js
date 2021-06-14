@@ -32,8 +32,11 @@ window.onload = function () {
     let emojiView = new EmojiView('emojiParty');
     emojiController = new EmojiController(emojiView, model);
 
+    let chatBtnView = new ChatButtonView('chatButton', model);
+    chatBtnController = new ChatBtnViewController(chatBtnView, model);
+
     //start home view
-    showView("exhibition");
+    showView("home");
 };
 
 //show view

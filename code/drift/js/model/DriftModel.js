@@ -113,6 +113,7 @@ class DriftModel {
         this.menuVisible = false;
         this.mode = false;
         this.mainMenu = mainMenu;
+        this.chatvisible = true;
     }
 
     init() {
@@ -126,8 +127,9 @@ class DriftModel {
     getcurrentSection() {
         this.currentSection;
     }
-    isCurrentScreenshot() {
 
+    getChatVisible() {
+        return this.chatvisible;
     }
 
     getMainMenu() {
@@ -502,6 +504,11 @@ class DriftModel {
     setMode(mode, message) {
         this.mode = mode;
         this.notifyObservers({ type: message });
+    }
+
+    toggleChatVisible() {
+        this.chatvisible = !this.chatvisible;
+        this.notifyObservers({ type: "toggleChat" });
     }
 
     selectSite(name) {

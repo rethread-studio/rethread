@@ -3,17 +3,17 @@ class EmojiView {
     this.model = model;
   }
 
-  render() {}
+  render() { }
 
   addEmoji(data) {
     const node = document.createElement("div");
     node.className = "floating-emoji";
-    node.innerHTML = `${data.user.username} says: <span class="">${data.emoji.emoji}</span>`;
+    node.innerHTML = `${data.user.username}<br><span class="">${data.emoji.emoji}</span>`;
     node.style.top = window.innerHeight + "px";
-    node.style.left = "25px";
+    node.style.right = "25px";
     const interval = setInterval(() => {
       node.style.top = parseInt(node.style.top) - 5 + "px";
-      if (parseInt(node.style.top) < 0) {
+      if (parseInt(node.style.top) < -10) {
         clearInterval(interval);
         node.remove();
       }
@@ -21,5 +21,5 @@ class EmojiView {
     document.body.appendChild(node);
   }
 
-  setIdentifications() {}
+  setIdentifications() { }
 }

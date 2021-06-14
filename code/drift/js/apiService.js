@@ -52,6 +52,10 @@ class ApiService {
         const url = `${BASE_URL}/api/vote/websites`
         return requestService.getRequest(url)
     }
+
+    getAvatar(userId) {
+        return `${BASE_URL}/api/chat/user/${userId}/avatar`
+    }
 }
 
 
