@@ -35,7 +35,6 @@ class Interaction {
     this.username = username;
     localStorage.username = username;
     this.uuid = id;
-    console.log("change_username", { id: this.uuid, username });
     this.socket.emit("change_username", { id: this.uuid, username });
   }
 

@@ -19,7 +19,7 @@ class RobotViewController {
     this.model.interaction.onElected((data) => {
       [
         ...this.view.container.querySelectorAll(
-          ".vote-website." + data.website + " .voters div"
+          ".vote-website .voters div"
         ),
       ].map((e) => e.remove());
     });
