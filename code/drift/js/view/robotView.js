@@ -14,9 +14,9 @@ class RobotView {
   render() {
     var content = `
     <div class="flex-container">
-        <div class="left">
+        <div class="relative w-full flex flex-col"> 
             <div id="stream"></div>
-            <div id="votes"></div>
+            <div id="votes" class="flex flex-row justify-center"></div>
             <div id="vote_time"></div>
         </div>
         <div class="right"></div>

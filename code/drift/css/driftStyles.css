@@ -304,12 +304,7 @@ padding: 5px 10px;
     flex-direction: row;
     align-items: stretch;
 }
-.left {
-    position: relative;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-}
+
 .right {
     width: 400px;
 }
@@ -318,15 +313,20 @@ padding: 5px 10px;
     height: 100%;
 }
 #votes {
-    height: 200px;
+    /* height: 200px; */
     width: 100%;
 }
 .vote-website {
-    display: inline-block;
+   
     margin: 4px;
-    padding: 7px;
+    padding: 7px 15px;
+    text-align: center;
     background-color: aliceblue;
     cursor: pointer;
+    border-radius: 0.375rem;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
 }
 .vote-website .voters .icon {
     width: 15px;
@@ -339,10 +339,11 @@ padding: 5px 10px;
 
 #vote_time {
     position: absolute;
-    top: 5px;
-    right: 5px;
+    top: 40px;
+    right: 0px;
     font-size: 50px;
-    background-color: red;
+    background-color: white;
+    padding: 0 10px;
 }
 
 .top-2-4{
