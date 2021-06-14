@@ -16,6 +16,24 @@ class ChatView {
         emoji: "👏",
         message: "Well done!",
       },
+      {
+        emoji: "😀"
+      },
+      {
+        emoji: "🤩",
+      },
+      {
+        emoji: "🥳",
+      },
+      {
+        emoji: "🤯",
+      },
+      {
+        emoji: "🔬",
+      },
+      {
+        emoji: "🖼",
+      }
     ];
   }
 
