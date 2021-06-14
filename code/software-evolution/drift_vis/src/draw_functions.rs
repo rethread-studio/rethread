@@ -412,7 +412,7 @@ pub fn draw_depth_graph_rings(
             ColorMode::Script => script_color_sl(
                 d_tree[i].script_id as f32,
                 weight * 0.2 + 0.8,
-                0.67 - (weight * 0.6).max((i as f32 / d_tree.len() as f32) * 0.5),
+                0.57 - (weight * 0.5).max((i as f32 / d_tree.len() as f32) * 0.2),
             ),
             ColorMode::Profile => profile_color(index),
             ColorMode::Selected => selected_color(model.selected_visit, model.selected_visit),

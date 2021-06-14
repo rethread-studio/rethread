@@ -33,6 +33,7 @@ clap = "2.33"
 crevice = "0.6.0"
 mint = "0.5.6"
 
+futures = "0.3.15"
 
 [build-dependencies]
 anyhow = "1.0"
