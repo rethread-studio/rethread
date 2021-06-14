@@ -84,6 +84,24 @@ class TimeLineView {
             .style("fill", "#ffffff")
             .text()
 
+        const today = timeLine.append("g")
+            .attr("id", "phantomSlider")
+            .style("transform", `translate(${dimensions.boundedWidth
+                }px, ${-sliderDimensions.height / 2
+                }px)`)
+
+        today.append("rect")
+            .attr("height", sliderDimensions.height)
+            .attr("width", sliderDimensions.width)
+            .style("fill", "#ffffff")
+
+        today.append("text")
+            .attr("id", "todaysDate")
+            .attr("y", -10)
+            .style("fill", "#ffffff")
+            .text("Today")
+            .attr("text-anchor", "end")
+
         bounds.append("rect")
             .attr("id", "timeLinebounds")
             .attr("class", "noColor")
