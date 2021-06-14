@@ -249,7 +249,6 @@ class DriftModel {
     }
 
     calculatePack() {
-        // console.log(this.data)
         const data = {
             children: this.data.children.filter(filterByState(1))
         }
@@ -328,7 +327,6 @@ class DriftModel {
         apiService.getVoteWebsites()
             //strings to int
             .then(websites => {
-                console.log(arguments)
                 this.voteWebsites = websites
             })
     }
