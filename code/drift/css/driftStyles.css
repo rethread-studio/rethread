@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    height: 100%;
+}
 
 body::-webkit-scrollbar {
     /* display: none; */
@@ -358,4 +361,8 @@ padding: 5px 10px;
 }
 .-left-5{
     left: -5%;
+}
+
+.h-100 {
+    height: 100%;
 }

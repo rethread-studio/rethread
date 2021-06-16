@@ -1314,6 +1314,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             // NOTE: It is essential that the commands for capturing the snapshot are `submit`ted before we
             // attempt to read the snapshot - otherwise we will read a blank texture!
 
+            // Note: Saves the snapshot on a different thread
             snapshot
                 .read(move |result| {
                     let image = result.expect("failed to map texture memory").to_owned();
@@ -1399,19 +1400,35 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                 })
                 .unwrap();
 
-            // Wait for rendering to file
-            println!("Waiting for PNG writing to complete...");
-            let window = app.main_window();
-            let device = window.swap_chain_device();
-            model
-                .texture_capturer
-                .await_active_snapshots(&device)
-                .unwrap();
+            // Try to read the snapshot on the current thread instead
+            // Warning:
+            // This blocks indefinitely because the texture is never finished.
+            // Something further down has to be run first. Waiting on the next
+            // frame should be better. use futures::executor::block_on;
+
+            // let snapshot_result = block_on(snapshot.read_async());
+            // let image = snapshot_result
+            //     .expect("failed to map texture memory")
+            //     .to_owned();
+            // image
+            //     .save(&file_path)
+            //     .expect("failed to save texture to png image");
+
             model.render_state = RenderState::Exit;
             println!("Done!");
             // Hopefully the exit function will wait for the screenshot to be saved here
         }
         RenderState::Exit => {
+            // Wait for rendering to file
+            println!("Waiting for PNG writing to complete...");
+            {
+                let window = app.main_window();
+                let device = window.swap_chain_device();
+                model
+                    .texture_capturer
+                    .await_active_snapshots(&device)
+                    .unwrap();
+            }
             app.quit();
         }
         RenderState::Screenshot => {
@@ -1663,16 +1680,16 @@ fn set_blur_shader_params(model: &mut Model) {
             let bs = &mut model.blur_shader;
             bs.blur_size = 128;
             bs.sigma = 64.0;
-            bs.contrast = 1.34;
-            bs.lightness = 1.05;
+            bs.contrast = 1.80;
+            bs.lightness = 1.13;
             bs.blur_alpha = 0.6;
         }
         DrawMode::GraphDepth(gdm) => {
             let bs = &mut model.blur_shader;
             bs.blur_size = 128;
-            bs.sigma = 64.0;
+            bs.sigma = 30.0;
             bs.contrast = 1.14;
-            bs.lightness = 2.15;
+            bs.lightness = 1.75;
             bs.blur_alpha = 0.67;
         }
         _ => (),

@@ -170,7 +170,7 @@ void main() {
   col = mix(col, col_bg.rgb, smoothstep(fade_out_distance2 * 0.1, fade_out_distance2, min_dist)); // Fade out at long distances to get a more celly look
 
   // Create a microscope light like
-  col *= 0.95 + sqrt(1.0/max(from_center, 0.04)) * 0.04;
+  col *= 0.95 + sqrt(1.0/max(from_center, 0.04)) * 0.03;
   
 
   // col = vec3(smoothstep(0.9, 1.0,p));

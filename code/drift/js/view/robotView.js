@@ -11,6 +11,7 @@ class RobotView {
     }
     document.getElementById("votes").innerHTML = content;
   }
+  
   render() {
     var content = `
     <div class="flex-container">

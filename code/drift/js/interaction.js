@@ -12,6 +12,7 @@ class Interaction {
     }
 
     this.onWelcome((data) => {
+      console.log(data);
       this.voteTime = data.voteTime;
       this.chatMessages = data.lastMessages;
       if (!localStorage.uuid) {
@@ -35,12 +36,15 @@ class Interaction {
     this.username = username;
     localStorage.username = username;
     this.uuid = id;
-    console.log("change_username", { id: this.uuid, username });
     this.socket.emit("change_username", { id: this.uuid, username });
   }
 
   vote(website) {
     this.socket.emit("vote", { website });
+  }
+
+  votes() {
+    this.socket.emit("votes");
   }
 
   page(page) {
