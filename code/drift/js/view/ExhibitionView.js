@@ -14,7 +14,7 @@ class ExhibitionView {
                 <div id="exhibitionProcess" class="flex content-center items-center justify-center relative h-screen  white"> </div>
                 <div id="exhibitionExplanation" class="flex content-center items-center justify-center relative h-screen  white"> </div>
                 
-                <div id="visContainer" class="relative  h-screen sticky top-0 background-black">
+                <div id="visContainer" class="relative  h-screen sticky top-0">
                     <div id="webSitesWrapper"></div>
                     <div id="timeLineWrapper"></div>
                     <div id="currentTimeWrapper" class= "absolute top-100 ml-5"></div>

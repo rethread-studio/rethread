@@ -1,5 +1,6 @@
+import showView from '../app.js'
 
-class HomeViewController {
+export default class HomeViewController {
     constructor(view, model) {
         this.view = view;
         this.model = model;

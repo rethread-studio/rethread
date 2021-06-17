@@ -1,5 +1,5 @@
 
-class TourViewController {
+export default class TourViewController {
 
     constructor(view) {
         this.view = view;

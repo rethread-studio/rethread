@@ -1,8 +1,31 @@
-let currentView, model;
+import MainVizTDModel from './model/mainVizTDModel.js';
+import ChatView from './view/miniChatView.js';
+import MiniChatController from './controller/miniChatController.js';
+import HomeView from './view/HomeView.js';
+import HomeViewController from './controller/homeViewController.js';
+import AboutView from './view/aboutView.js';
+import AboutViewController from './controller/AboutViewController.js'
+import MainMenuView from './view/mainMenuView.js';
+import MainMenuViewController from './controller/mainMenuViewController.js';
+import RobotView from './view/robotView.js';
+import RobotViewController from './controller/robotViewController.js';
+import TourView from './view/tourView.js';
+import TourViewController from './controller/tourViewController.js';
+
+
+export let mainVizTD, robotView, miniChatController, homeViewController, exhibitionViewController, robotViewController, tourViewController, aboutViewController, mainMenuViewController, legendViewController, emojiController, chatBtnController, mainVizController;
+// let mainVizTD
+export let currentView;
+let model;
+
 window.onload = function () {
     //We instantiate our model
     model = new DriftModel();
     model.init();
+
+    //We instantiate our model
+    mainVizTD = new MainVizTDModel();
+    mainVizTD.init();
 
     let chatView = new ChatView('chat', model);
     miniChatController = new MiniChatController(chatView, model);
@@ -35,13 +58,16 @@ window.onload = function () {
     let chatBtnView = new ChatButtonView('chatButton', model);
     chatBtnController = new ChatBtnViewController(chatBtnView, model);
 
+    let mainViztDView = new MainVizTDView('mainViz', mainVizTD);
+    mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
+
     //start home view
     showView("home");
 };
 
 //show view
 //view: string with the name of the view to render
-function showView(view) {
+export default function showView(view) {
 
     model.interaction.page(view);
     if (currentView != null) currentView.unMountView()

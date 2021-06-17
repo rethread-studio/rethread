@@ -1,5 +1,5 @@
 
-class AboutView {
+export default class AboutView {
     constructor(container) {
 
         this.container = document.getElementById(container);

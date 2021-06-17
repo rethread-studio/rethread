@@ -1,5 +1,6 @@
+import { currentView, exhibitionViewController } from '../app.js';
 
-class MainMenuView {
+export default class MainMenuView {
     constructor(container, model) {
 
         this.container = document.getElementById(container);

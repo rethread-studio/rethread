@@ -1,5 +1,5 @@
 
-class AboutViewController {
+export default class AboutViewController {
 
     constructor(view) {
         this.view = view;

@@ -1,4 +1,4 @@
-class ChatView {
+export default class ChatView {
   constructor(container, model) {
     this.model = model;
     this.container = document.getElementById(container);

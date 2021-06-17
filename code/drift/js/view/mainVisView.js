@@ -1,5 +1,4 @@
 
-
 //ACCESSORS 
 const dataNameAccessor = (d) => d.data.name.toLowerCase();
 const stateAccessor = (d) => d.data.state;

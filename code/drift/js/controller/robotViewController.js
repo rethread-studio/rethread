@@ -1,4 +1,4 @@
-class RobotViewController {
+export default class RobotViewController {
   constructor(view, chatView, model) {
     this.view = view;
     this.chatView = chatView;

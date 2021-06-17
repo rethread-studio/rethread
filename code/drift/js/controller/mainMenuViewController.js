@@ -1,6 +1,7 @@
 
+import showView from '../app.js';
 
-class MainMenuViewController {
+export default class MainMenuViewController {
 
     constructor(view, model) {
         this.view = view;

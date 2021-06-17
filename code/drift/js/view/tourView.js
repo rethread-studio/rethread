@@ -1,4 +1,4 @@
-class TourView {
+export default class TourView {
     constructor(container) {
 
         this.container = document.getElementById(container);

@@ -1,4 +1,4 @@
-class RobotView {
+export default class RobotView {
   constructor(container, model) {
     this.container = document.getElementById(container);
     this.model = model;
@@ -11,7 +11,7 @@ class RobotView {
     }
     document.getElementById("votes").innerHTML = content;
   }
-  
+
   render() {
     var content = `
     <div class="flex-container">

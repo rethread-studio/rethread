@@ -1,4 +1,4 @@
-class HomeView {
+export default class HomeView {
     constructor(container, model) {
 
         this.container = document.getElementById(container);
