@@ -370,3 +370,39 @@ padding: 5px 10px;
 .-z-10{
     z-index: -10;
 }
+
+#imageIntro{
+    animation: 3s ease-in 0s infinite alternate both running blurIn;
+}
+
+@-webkit-keyframes blurIn { from {  
+    top:51%;
+    -webkit-filter: blur(2px);
+} to {  
+    top:49%;
+    -webkit-filter: blur(10px);
+}  }
+@keyframes blurIn { from {  
+top:51%;
+-webkit-filter: blur(2px);
+} to {  
+top:49%;
+-webkit-filter: blur(10px);
+}  }
+
+/* #intro h1{
+    animation: 3s ease-in 0s infinite alternate both running blurMid;
+}
+
+@-webkit-keyframes blurMid { 
+    0%{-webkit-filter: blur(0px);}
+    50%{-webkit-filter: blur(3px);}
+    100%{-webkit-filter: blur(0px);}
+      
+}
+@keyframes blurMid { 
+    0%{-webkit-filter: blur(0px);}
+    50%{-webkit-filter: blur(3px);}
+    100%{-webkit-filter: blur(0px);}
+      
+} */

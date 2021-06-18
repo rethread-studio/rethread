@@ -17,7 +17,7 @@ export default class MainVizTDModel {
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
-        this.numParticles = 400;
+        this.numParticles = 250;
     }
 
     init() {
