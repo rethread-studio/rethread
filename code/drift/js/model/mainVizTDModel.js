@@ -94,9 +94,9 @@ export default class MainVizTDModel {
         return this.renderer;
     }
 
-    setMouse(_mX, _mY) {
-        this.mouseX = _mX - this.windowHalfX;
-        this.mouseY = _mY - this.windowHalfY;
+    setMouse(_mX = undefined, _mY = undefined) {
+        this.mouseX = _mX == undefined ? this.mouseX : _mX - this.windowHalfX;
+        this.mouseY = _mY == undefined ? this.mosueY : _mY - this.windowHalfY;
     }
 
     updateSize(winW, winH) {

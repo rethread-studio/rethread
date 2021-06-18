@@ -5,8 +5,10 @@ class MainVizTDViewController {
         this.renderView();
         this.addEventListener();
         this.pointHandler = this.onPointerMove.bind(this);
+        // this.mouseScrollHandler = this.onMouseScroll.bind(this);
 
         // this.model.addObserver(this)
+        this.scrollPos = 0;
     }
 
     addEventListener() {
@@ -15,9 +17,16 @@ class MainVizTDViewController {
             this.onPointerMove(event)
         })
         window.addEventListener('resize', this.onWindowResize);
+        window.addEventListener('scroll', (event) => {
+
+            let diff = this.scrollPos < window.scrollY ? window.scrollY - this.scrollPos : -(this.scrollPos - window.scrollY);
+            this.scrollPos = window.scrollY;
+            this.model.setMouse(undefined, diff * 10)
+        });
     }
 
-    onWindowResize() {
+
+    onWindowResize(event) {
         this.model.updateSize(window.innerWidth, window.innerHeight)
     }
 
