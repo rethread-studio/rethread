@@ -524,12 +524,11 @@ class DriftModel {
             active += active == 0 && e.state == 1 ? 1 : 0;
             return e;
         })
-        console.log(this.menu)
         this.notifyObservers({ type: "sitesUpdated" });
     }
     toggleDisplay() {
         this.stack = !this.stack;
-        !this.stack ? this.cleanSites() : "";
+        this.stack ? this.cleanSites() : "";
         this.notifyObservers({ type: "displayUpdate" });
     }
 }
