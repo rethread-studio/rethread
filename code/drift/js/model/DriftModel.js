@@ -73,7 +73,7 @@ class DriftModel {
             margin: {
                 top: 0,
                 right: 40,
-                bottom: 40,
+                bottom: 0,
                 left: 20
             },
             rectDimensions: {
@@ -82,7 +82,11 @@ class DriftModel {
             },
             sliderDimensions: {
                 height: 50,
-                width: 4,
+                width: 2,
+            },
+            tickDimensions: {
+                height: 15,
+                width: 2,
             }
 
         }
@@ -355,92 +359,12 @@ class DriftModel {
         this.data.children = this.data.children.map(calculateSize(activeSize, inactiveSize))
     }
 
-    calculateBottomAxis() {
-        const dateDist = this.timeLineDimensions.boundedWidth / this.visits.length;
-        const positions = this.visits.map((d, i) => dateDist * i);
-
-        // Create scale
-        const extent = d3.extent(this.visits)
-        const scale = d3.scaleLinear()
-            .domain(extent)
-            .range([0, this.timeLineDimensions.boundedWidth]);
-        // Add scales to axis 
-        // const formatHour = date => d3.timeFormat("%H:%M")(date)
-        const formatDay = date => d3.timeFormat("%d %a")(date)
-        const formatMonth = date => d3.timeFormat("%b")(date)
-        const formatYear = date => d3.timeFormat("%Y")(date)
-        const axis = d3.axisBottom()
-            .scale(scale);
-
-        const everyDay = d3.timeDay.every(7).range(extent[0], extent[1]).length;
-        // const everyHour = everyDay * 3;//d3.timeHour.every(144).range(extent[0], extent[1]).length;
-        const everyMonth = d3.timeMonth.every(3).range(extent[0], extent[1]).length;
-        const everyYear = d3.timeYear.every(1).range(extent[0], extent[1]).length;
-
-        return [
-            {
-                format: formatDay,
-                numTicks: everyDay,
-                padding: [-20],
-                axis: axis,
-            },
-            {
-                format: formatYear,
-                numTicks: everyYear == 0 ? 1 : everyYear,
-                padding: [-40],
-                axis: axis,
-            },
-            {
-                format: formatMonth,
-                numTicks: everyMonth == 0 ? 1 : everyMonth,
-                padding: [-30],
-                axis: axis,
-            },
-        ]
+    getDateFormated(index = 0) {
+        const date = this.visits[index];
+        return date == undefined ? "" : d3.timeFormat("%d %b %Y")(date)
     }
-    // calculateBottomAxis() {
-    //     const dateDist = this.timeLineDimensions.boundedWidth / this.visits.length;
-    //     const positions = this.visits.map((d, i) => dateDist * i);
 
-    //     // Create scale
-    //     const extent = d3.extent(this.visits)
-    //     const scale = d3.scaleThreshold()
-    //         .domain(this.visits)
-    //         .range(positions);
-    //     // Add scales to axis 
-    //     // const formatHour = date => d3.timeFormat("%H:%M")(date)
-    //     const formatDay = date => d3.timeFormat("%d %a")(date)
-    //     const formatMonth = date => d3.timeFormat("%b")(date)
-    //     const formatYear = date => d3.timeFormat("%Y")(date)
-    //     const axis = d3.axisBottom()
-    //         .scale(scale);
 
-    //     const everyDay = d3.timeDay.every(7).range(extent[0], extent[1]).length;
-    //     // const everyHour = everyDay * 3;//d3.timeHour.every(144).range(extent[0], extent[1]).length;
-    //     const everyMonth = d3.timeMonth.every(3).range(extent[0], extent[1]).length;
-    //     const everyYear = d3.timeYear.every(1).range(extent[0], extent[1]).length;
-
-    //     return [
-    //         {
-    //             format: formatDay,
-    //             numTicks: everyDay,
-    //             padding: [-20],
-    //             axis: axis,
-    //         },
-    //         {
-    //             format: formatYear,
-    //             numTicks: everyYear == 0 ? 1 : everyYear,
-    //             padding: [-40],
-    //             axis: axis,
-    //         },
-    //         {
-    //             format: formatMonth,
-    //             numTicks: everyMonth == 0 ? 1 : everyMonth,
-    //             padding: [-30],
-    //             axis: axis,
-    //         },
-    //     ]
-    // }
 
     advanceSliderPos() {
         const newPos = this.currentVisit + 1;

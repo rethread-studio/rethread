@@ -13,6 +13,7 @@ class TimeLineView {
         const dimensions = this.model.getTimeLineDimensions();
         const rectDimensions = dimensions.rectDimensions;
         const sliderDimensions = dimensions.sliderDimensions;
+        const tickDimensions = dimensions.tickDimensions;
         const options = this.model.getSliderSpeed().map(speed => `<option>${speed.text}</option>`);
         const playButton = this.model.getPlayState() ? `<i class="fas fa-pause"></i>` : `<i class="fas fa-play"></i>`;
         const buttons = `
@@ -84,23 +85,35 @@ class TimeLineView {
             .style("fill", "#ffffff")
             .text()
 
-        const today = timeLine.append("g")
-            .attr("id", "phantomSlider")
-            .style("transform", `translate(${dimensions.boundedWidth
-                }px, ${-sliderDimensions.height / 2
+        const presentDate = timeLine.append("g")
+            .attr("id", "presentDate")
+            .style("transform", `translate(${dimensions.boundedWidth - tickDimensions.width
+                }px, ${-rectDimensions.height / 2 + 12
                 }px)`)
 
-        today.append("rect")
-            .attr("height", sliderDimensions.height)
-            .attr("width", sliderDimensions.width)
-            .style("fill", "#ffffff")
 
-        today.append("text")
+        presentDate.append("text")
             .attr("id", "todaysDate")
+            .attr("class", "text-xs")
             .attr("y", -10)
             .style("fill", "#ffffff")
             .text("Today")
             .attr("text-anchor", "end")
+
+        const firstDate = timeLine.append("g")
+            .attr("id", "firstDate")
+            .style("transform", `translate(${0
+                }px, ${-rectDimensions.height / 2 + 12
+                }px)`)
+
+        const dateFormated = this.model.getDateFormated(0);
+        firstDate.append("text")
+            .attr("id", "firstDateText")
+            .attr("class", "text-xs")
+            .attr("y", -10)
+            .style("fill", "#ffffff")
+            .text(dateFormated)
+            .attr("text-anchor", "start")
 
         bounds.append("rect")
             .attr("id", "timeLinebounds")
@@ -112,39 +125,25 @@ class TimeLineView {
             .attr("width", dimensions.boundedWidth)
 
         this.updateSlider()
-        // this.renderAllAxis()
         this.setIdentifications();
     }
 
     updateSlider() {
         const { height, width } = this.model.getSliderHeight();
         const getSliderXPos = this.model.calculateSliderPos();
-        // const currentTime = this.model.getCurrentTime();
-        // const isMiddle = this.model.isSliderInMiddle() ? "end" : "start";
+        const dateFormated = this.model.getDateFormated(0);
+
 
         d3.select("#sliderTimeLine")
             .style("transform", `translate(${getSliderXPos - width / 2
                 }px, ${-height / 2
                 }px)`)
-        // d3.select("#currentTime")
-        //     .text(currentTime)
-        //     .attr("text-anchor", isMiddle)
+        console.log("update")
 
+        d3.select("#firstDateText")
+            .text(dateFormated)
     }
 
-    renderAllAxis() {
-        //get all axis from model
-        this.model.calculateBottomAxis()
-            .forEach(axis => {
-                d3.select("#timeLine")
-                    .append("g")
-                    .call(axis.axis
-                        .ticks(axis.numTicks)
-                        .tickFormat(axis.format)
-                        .tickPadding(axis.padding)
-                    );
-            })
-    }
 
     updatePhantomSlider(formatedDate, isMiddle, slidePos) {
         const sliderDimensions = this.model.getTimeLineDimensions().sliderDimensions;
@@ -160,7 +159,7 @@ class TimeLineView {
 
     viewPhantomSlider(view) {
         d3.select("#phantomSlider")
-            .attr("opacity", view ? 1 : 0)
+            .attr("opacity", view ? 0.5 : 0)
     }
 
     updatePlayBtn() {
@@ -172,7 +171,6 @@ class TimeLineView {
 
     update(changeDetails) {
         if (changeDetails.type == "updateTimeLine") {
-            // this.renderAllAxis();
             this.updateSlider();
         } else if (changeDetails.type == "updateCurrentVisit") {
             this.updateSlider();
