@@ -119,10 +119,10 @@ export default class MainVizTDModel {
     render() {
         const time = Date.now() * 0.00005;
 
-        this.camera.position.x += (this.mouseX - this.camera.position.x) * 0.006;
-        this.camera.position.y += (- this.mouseY - this.camera.position.y) * 0.006;
+        // this.camera.position.x += (this.mouseX - this.camera.position.x) * 0.006;
+        // this.camera.position.y += (- this.mouseY - this.camera.position.y) * 0.006;
 
-        this.camera.lookAt(this.scene.position);
+        // this.camera.lookAt(this.scene.position);
 
         for (let i = 0; i < this.scene.children.length; i++) {
 

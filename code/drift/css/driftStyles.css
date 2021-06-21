@@ -210,7 +210,7 @@ input:checked ~ .dot {
 
 #chatButton {
     position: fixed;
-    bottom: 175px;
+    bottom: 285px;
     right: 20px;
     width: 30px;
     height: 30px;
@@ -219,7 +219,7 @@ input:checked ~ .dot {
 /*Mini Chat view*/
 #chat {
     position: fixed;
-    bottom: 20px;
+    bottom: 130px;
     right: 20px;
     width: 250px;
     height: 175px;

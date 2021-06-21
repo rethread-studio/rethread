@@ -73,7 +73,7 @@ class DriftModel {
             margin: {
                 top: 0,
                 right: 40,
-                bottom: 20,
+                bottom: 40,
                 left: 20
             },
             rectDimensions: {
@@ -89,7 +89,7 @@ class DriftModel {
         this.timeLineDimensions.boundedWidth = this.timeLineDimensions.width - this.timeLineDimensions.margin.left - this.timeLineDimensions.margin.right;
         this.timeLineDimensions.boundedHeight = this.timeLineDimensions.height - this.timeLineDimensions.margin.top - this.timeLineDimensions.margin.bottom;
 
-        this.currentVisitPos = 0;
+        this.currentVisit = 0;
         this.baseSpeed = 1000;
         this.currentSpeed = 0;
         this.playState = false;
@@ -221,12 +221,12 @@ class DriftModel {
     }
 
     getCurrentTime(format = true) {
-        return format ? d3.timeFormat("%b %d %a %H:%M")(this.visits[this.currentVisitPos]) : this.visits[this.currentVisitPos];
+        return format ? d3.timeFormat("%b %d %a %H:%M")(this.visits[this.currentVisit]) : this.visits[this.currentVisit];
     }
 
 
     isSliderInMiddle(pos = null) {
-        const pCompare = pos == null ? this.currentVisitPos : pos;
+        const pCompare = pos == null ? this.currentVisit : pos;
         return pCompare > this.visits.length / 2 ? true : false;
     }
 
@@ -356,13 +356,16 @@ class DriftModel {
     }
 
     calculateBottomAxis() {
+        const dateDist = this.timeLineDimensions.boundedWidth / this.visits.length;
+        const positions = this.visits.map((d, i) => dateDist * i);
+
         // Create scale
         const extent = d3.extent(this.visits)
         const scale = d3.scaleLinear()
             .domain(extent)
             .range([0, this.timeLineDimensions.boundedWidth]);
         // Add scales to axis 
-        const formatHour = date => d3.timeFormat("%H:%M")(date)
+        // const formatHour = date => d3.timeFormat("%H:%M")(date)
         const formatDay = date => d3.timeFormat("%d %a")(date)
         const formatMonth = date => d3.timeFormat("%b")(date)
         const formatYear = date => d3.timeFormat("%Y")(date)
@@ -370,7 +373,7 @@ class DriftModel {
             .scale(scale);
 
         const everyDay = d3.timeDay.every(7).range(extent[0], extent[1]).length;
-        const everyHour = everyDay * 3;//d3.timeHour.every(144).range(extent[0], extent[1]).length;
+        // const everyHour = everyDay * 3;//d3.timeHour.every(144).range(extent[0], extent[1]).length;
         const everyMonth = d3.timeMonth.every(3).range(extent[0], extent[1]).length;
         const everyYear = d3.timeYear.every(1).range(extent[0], extent[1]).length;
 
@@ -395,10 +398,53 @@ class DriftModel {
             },
         ]
     }
+    // calculateBottomAxis() {
+    //     const dateDist = this.timeLineDimensions.boundedWidth / this.visits.length;
+    //     const positions = this.visits.map((d, i) => dateDist * i);
+
+    //     // Create scale
+    //     const extent = d3.extent(this.visits)
+    //     const scale = d3.scaleThreshold()
+    //         .domain(this.visits)
+    //         .range(positions);
+    //     // Add scales to axis 
+    //     // const formatHour = date => d3.timeFormat("%H:%M")(date)
+    //     const formatDay = date => d3.timeFormat("%d %a")(date)
+    //     const formatMonth = date => d3.timeFormat("%b")(date)
+    //     const formatYear = date => d3.timeFormat("%Y")(date)
+    //     const axis = d3.axisBottom()
+    //         .scale(scale);
+
+    //     const everyDay = d3.timeDay.every(7).range(extent[0], extent[1]).length;
+    //     // const everyHour = everyDay * 3;//d3.timeHour.every(144).range(extent[0], extent[1]).length;
+    //     const everyMonth = d3.timeMonth.every(3).range(extent[0], extent[1]).length;
+    //     const everyYear = d3.timeYear.every(1).range(extent[0], extent[1]).length;
+
+    //     return [
+    //         {
+    //             format: formatDay,
+    //             numTicks: everyDay,
+    //             padding: [-20],
+    //             axis: axis,
+    //         },
+    //         {
+    //             format: formatYear,
+    //             numTicks: everyYear == 0 ? 1 : everyYear,
+    //             padding: [-40],
+    //             axis: axis,
+    //         },
+    //         {
+    //             format: formatMonth,
+    //             numTicks: everyMonth == 0 ? 1 : everyMonth,
+    //             padding: [-30],
+    //             axis: axis,
+    //         },
+    //     ]
+    // }
 
     advanceSliderPos() {
-        const newPos = this.currentVisitPos + 1;
-        this.currentVisitPos = newPos % this.visits.length == 0 ? 0 : newPos;
+        const newPos = this.currentVisit + 1;
+        this.currentVisit = newPos % this.visits.length == 0 ? 0 : newPos;
         this.updateDataImage();
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" })
@@ -408,7 +454,7 @@ class DriftModel {
         //if it is the intro skip
         if (this.currentSection == "Intro") return;
         // get time in unix timestamp
-        const currentTime = this.visits[this.currentVisitPos].getTime();
+        const currentTime = this.visits[this.currentVisit].getTime();
         //get current VIEW from MENU
         const menuName = this.currentSection.name.toLowerCase();
         //change the images in the data
@@ -436,19 +482,17 @@ class DriftModel {
                 return apiService.getSiteNetwork(site, time, size);
             case 'profile':
                 return apiService.getSiteProfile(site, time, size);
-
             default:
                 return apiService.getSiteScreenshot(site, time, size);
         }
     }
 
     calculateSliderPos(pos = null) {
-        const currentDate = this.visits[pos == null ? this.currentVisitPos : pos]//this.visits.length - 1
-        const extent = d3.extent(this.visits)
+        const percent = (pos == null ? this.currentVisit : pos) / this.visits.length;
         const scale = d3.scaleLinear()
-            .domain(extent)
+            .domain([0, 1])
             .range([0, this.timeLineDimensions.boundedWidth]);
-        return scale(currentDate);
+        return scale(percent);
     }
 
     setSpeed(pos) {
@@ -457,7 +501,7 @@ class DriftModel {
     }
 
     resetSlider() {
-        this.currentVisitPos = 0;
+        this.currentVisit = 0;
         this.currentSpeed = 0;
         this.playState = false;
     }
@@ -467,7 +511,7 @@ class DriftModel {
         const pos = percentage < 0 ? 0 : percentage;
         const scale = d3.scaleLinear()
             .rangeRound([0, this.visits.length - 1]);
-        this.currentVisitPos = scale(pos);
+        this.currentVisit = scale(pos);
         this.updateDataImage();
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
@@ -476,6 +520,7 @@ class DriftModel {
 
     //posX is the percentage of the posX with the Width
     getDatebyPosX(percentage) {
+
         const pos = percentage < 0 ? 0 : percentage;
         const scale = d3.scaleLinear()
             .rangeRound([0, this.visits.length - 1]);

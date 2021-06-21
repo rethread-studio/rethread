@@ -34,7 +34,7 @@ class TimeLineView {
         //ADD ALL THE VISUAL ITEMS 
         //MAIN wrapper in the HTML
         const wrapper = d3.select("#" + this.container)
-            .attr("class", "absolute bottom-0 left-0  flex flex-col flex-wrap justify-start ")
+            .attr("class", "absolute bottom-0 mb-10 left-0  flex flex-col flex-wrap justify-start ")
             .append("svg")
             .attr("width", dimensions.width)
             .attr("height", dimensions.height)
@@ -112,7 +112,7 @@ class TimeLineView {
             .attr("width", dimensions.boundedWidth)
 
         this.updateSlider()
-        this.renderAllAxis()
+        // this.renderAllAxis()
         this.setIdentifications();
     }
 
@@ -172,7 +172,7 @@ class TimeLineView {
 
     update(changeDetails) {
         if (changeDetails.type == "updateTimeLine") {
-            this.renderAllAxis();
+            // this.renderAllAxis();
             this.updateSlider();
         } else if (changeDetails.type == "updateCurrentVisit") {
             this.updateSlider();

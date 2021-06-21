@@ -8,6 +8,7 @@ export default class AboutView {
 
     render() {
         const content = `
+        <div class="flex flex-col m-auto  w-4/5">
         <div class="grid grid-cols-2 p-24 pt-40">
             <div class="pr-20 ">
              <img class="h-auto .max-727 blur" src="./img/imgTest.png" alt="yahoo profile test">
@@ -73,6 +74,7 @@ export default class AboutView {
 
        <div class="flex flex-row justify-center content-center mb-40 space-x-10 white">
         <p>Lorem ipsum - Lorem ipsum - Lorem ipsum - Lorem ipsum - Lorem ipsum</p>
+       </div>
        </div>
 
        `;
