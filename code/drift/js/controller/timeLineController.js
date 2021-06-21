@@ -39,8 +39,7 @@ class TimeLineController {
         this.view.viewPhantomSlider(false);
         this.view.timeline.removeEventListener("mousemove", this.onMouseMoveHandler)
     }
-    // const { left, width } = e.target.getBoundingClientRect();
-    // const posX = e.clientX - left;
+
     onClickTimeline(e) {
         const { width, left } = e.target.getBoundingClientRect();
         const posX = e.clientX - left;

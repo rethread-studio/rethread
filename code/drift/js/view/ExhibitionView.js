@@ -7,17 +7,17 @@ class ExhibitionView {
     }
 
     render() {
-        // <div id="sideMenuWrapper" class="fixed"></div>
         const content = `
-            <div class="">
-                <div id="exhibitionIntro" class="flex content-center items-center justify-center relative h-screen  white "> </div>
-                <div id="exhibitionProcess" class="flex content-center items-center justify-center relative h-screen  white"> </div>
-                <div id="exhibitionExplanation" class="flex content-center items-center justify-center relative h-screen  white"> </div>
-                
-                <div id="visContainer" class="relative  h-screen sticky top-0">
-                    <div id="webSitesWrapper"></div>
+        <div class="">
+            <div id="exhibitionIntro" class="flex content-center items-center justify-center relative h-screen  white "> </div>
+            <div id="exhibitionProcess" class="flex content-center items-center justify-center relative h-screen  white"> </div>
+            <div id="exhibitionExplanation" class="flex content-center items-center justify-center relative h-screen  white"> </div>
+            
+            <div id="visContainer" class="h-screen w-screen fixed top-0">
+                     <div id="webSitesWrapper"></div>
+                    <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0"></div>
                     <div id="timeLineWrapper"></div>
-                    <div id="currentTimeWrapper" class= "absolute top-100 ml-5"></div>
+                    <div id="currentTimeWrapper" class= "relative top-100 ml-5 "></div>
                     <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5"></div>
                 </div>
             </div>
@@ -28,7 +28,7 @@ class ExhibitionView {
         this.renderWhatWeDid();
         this.renderExplanation()
         this.renderMainVis();
-        // this.renderSideMenu();
+        this.renderSideMenu();
         this.renderTimeLine();
         this.renderSitesMenu();
         this.renderCurrentTime();
@@ -39,7 +39,7 @@ class ExhibitionView {
     }
 
     renderCurrentTime() {
-        //ADD MAIN VISUALIZATION VIEW
+        //ADD MAIN VISUALIZATION VIEWda
         let currentTimeView = new CurrentTimeView("currentTimeWrapper", this.model);
         this.currentTimeController = new CurrentTimeViewController(currentTimeView, this.model);
         this.currentTimeController.renderView();
@@ -53,7 +53,7 @@ class ExhibitionView {
 
     renderSideMenu() {
         //ADD SIDE MENU VIEW
-        let sideMenuView = new SideMenuView("sideMenuWrapper", this.model);
+        let sideMenuView = new SideMenuView("viewSideMenu", this.model);
         this.sideMenuController = new SideMenuController(sideMenuView, this.model);
         this.sideMenuController.renderView();
     }
@@ -82,8 +82,8 @@ class ExhibitionView {
     }
 
     renderSitesMenu() {
-        let sitesMenuView = new CheckBoxListView("sitesMenuWrapper", this.model);
-        this.sitesMenuViewController = new CheckBoxViewController(sitesMenuView, this.model);
+        let sitesMenuView = new SelectSiteToggleView("sitesMenuWrapper", this.model);
+        this.sitesMenuViewController = new SelectSiteToggleViewController(sitesMenuView, this.model);
         this.sitesMenuViewController.renderView();
     }
     unMountView() {

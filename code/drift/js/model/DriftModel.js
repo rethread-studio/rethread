@@ -118,6 +118,7 @@ class DriftModel {
         this.mode = false;
         this.mainMenu = mainMenu;
         this.chatvisible = true;
+        this.stack = true;
     }
 
     init() {
@@ -126,6 +127,10 @@ class DriftModel {
         this.getSitesVisits()
         this.getMainMenu()
         this.getVoteWebsites()
+    }
+
+    getStack() {
+        return this.stack;
     }
 
     getcurrentSection() {
@@ -158,6 +163,12 @@ class DriftModel {
 
     getMenuVisible() {
         return this.menuVisible;
+    }
+
+    getModeAccessor() {
+        const humanAccessor = (d) => d.human;
+        const nerdAccessor = (d) => d.nerd;
+        return this.mode ? nerdAccessor : humanAccessor;
     }
 
     getPack() {
@@ -348,6 +359,15 @@ class DriftModel {
 
     }
 
+    selectView(viewVal) {
+        this.menu = this.menu.map(e => {
+            e.state = e.value == viewVal ? 1 : 0;
+            return e;
+        })
+        this.notifyObservers({ type: "updateViewSideMenu" });
+
+    }
+
     calculateDataValues() {
         const percentageActive = 95;
         const percentageInactive = 100 - percentageActive;
@@ -468,9 +488,9 @@ class DriftModel {
         this.menuVisible = false;
     }
 
-    setMode(mode, message) {
+    setMode(mode) {
         this.mode = mode;
-        this.notifyObservers({ type: message });
+        this.notifyObservers({ type: "changeMode" });
     }
 
     toggleChatVisible() {
@@ -486,5 +506,30 @@ class DriftModel {
             })
             .sort((a, b) => b.name > a.name)
         this.notifyObservers({ type: "sitesUpdated" });
+    }
+
+    selectRadialSite(name) {
+        this.data.children = this.data.children
+            .map(i => {
+                i.state = i.name == name ? 1 : 0;
+                return i;
+            })
+            .sort((a, b) => b.name > a.name)
+        this.notifyObservers({ type: "sitesUpdated" });
+    }
+    cleanSites() {
+        let active = 0;
+        this.data.children = this.data.children.map(e => {
+            e.state = active == 0 && e.state == 1 ? 1 : 0;
+            active += active == 0 && e.state == 1 ? 1 : 0;
+            return e;
+        })
+        console.log(this.menu)
+        this.notifyObservers({ type: "sitesUpdated" });
+    }
+    toggleDisplay() {
+        this.stack = !this.stack;
+        !this.stack ? this.cleanSites() : "";
+        this.notifyObservers({ type: "displayUpdate" });
     }
 }

@@ -156,33 +156,13 @@ const mainMenu = [
 
 
 const viewsMenu = [
-    {
-        name: "Intro",
-        human: "intro",
-        nerd: "intro",
-        value: "intro",
-        state: 1,
-    }, {
-        name: "The exhibition",
-        human: "The exhibition",
-        nerd: "What we did",
-        value: "what",
-        state: 1,
-    },
 
     {
-        name: "Visiting",
-        human: "visiting",
-        nerd: "visiting",
-        value: "how",
-        state: 0,
-    },
-    {
         name: "Screenshot",
-        human: "Schreenshot",
-        nerd: "human",
+        human: "Screenshot",
+        nerd: "Human",
         value: "screenshot",
-        state: 0,
+        state: 1,
     },
     {
         name: "Graph",

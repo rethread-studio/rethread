@@ -17,7 +17,7 @@ class ToggleViewController {
     }
 
     onClickToggle(e) {
-        this.model.setMode(e.target.checked, this.message)
+        this.model.setMode(e.target.checked)
     }
 
     addEventListener() {
@@ -35,7 +35,7 @@ class ToggleViewController {
 
     //update info when modified in model
     update(changeDetails) {
-        if (changeDetails.type == this.message) {
+        if (changeDetails.type == "changeMode") {
             this.removeEventListener()
             this.renderView();
         }

@@ -61,10 +61,6 @@ h1{
 }
 
 
-
-
-
-
 .txt-white{
     color:white;
 }
@@ -389,6 +385,24 @@ top:51%;
 top:49%;
 -webkit-filter: blur(10px);
 }  }
+
+
+.w-140{
+    width:140px;
+}
+.box{
+    width: 8px;
+    height: 16px;
+}
+
+.viewItem:hover{
+   color:white;
+}
+
+.viewItem:hover .box{
+    background-color:white;
+    border-color: white;
+ }
 
 /* #intro h1{
     animation: 3s ease-in 0s infinite alternate both running blurMid;

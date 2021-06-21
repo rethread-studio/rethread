@@ -138,7 +138,6 @@ class TimeLineView {
             .style("transform", `translate(${getSliderXPos - width / 2
                 }px, ${-height / 2
                 }px)`)
-        console.log("update")
 
         d3.select("#firstDateText")
             .text(dateFormated)

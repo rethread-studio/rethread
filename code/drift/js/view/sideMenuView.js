@@ -1,4 +1,6 @@
 const nameAccessor = (d) => d.name;
+const stateItemAccessor = (d) => d.state;
+const valueAccessor = (d) => d.value;
 const getState = (d) => d.state == 1 ? "menuText active cursor-pointer" : "menuText cursor-pointer"
 const getStyle = (rectDimensions) => (d, i) => `translate(${-20
     }px, ${rectDimensions.sectionHeight * i + rectDimensions.sectionHeight / 2
@@ -11,84 +13,42 @@ const posScale = (dimensions) => d3.scaleLinear()
 class SideMenuView {
 
     constructor(container, model) {
-        this.container = container;
+        this.container = document.getElementById(container);
         this.model = model;
-        this.model.addObserver(this);
     }
 
     render() {
-        const dimensions = this.model.getSideMenudimensions();
-        const rectDimensions = this.model.getRectDimensions();
-
-        //ADD ALL THE VISUAL ITEMS 
-        //MAIN wrapper in the HTML
-        const wrapper = d3.select("#" + this.container)
-            .append("svg")
-            .attr("width", dimensions.width)
-            .attr("height", dimensions.height)
-
-        //general graphic container
-        const bounds = wrapper.append("g")
-            .style("transform", `translate(${dimensions.width - dimensions.margin.left - rectDimensions.width
-                }px, ${dimensions.margin.top
-                }px)`)
-
-        const scrollState = bounds.append("g")
-            .attr("id", "sideMenuInfo")
-            .style("transform", `translate(${0
-                }px, ${0
-                }px)`)
-
-        //SQUARE
-        scrollState.append("rect")
-            .attr("x", 0)
-            .attr("height", dimensions.height)
-            .attr("width", rectDimensions.width)
-            .style("fill", "#ffffff")
-
-        //Current position
-        scrollState.append("rect")
-            .attr("id", "scrollPosition")
-            .attr("x", posScale(dimensions)(0))
-            .attr("height", 0)
-            .attr("width", rectDimensions.width)
-            .style("fill", "#ff0000")
-
-        //menu text
-        scrollState
-            .selectAll('text')
-            .data(this.model.getMenu("views"))
-            .enter().append("text")
-            .text(nameAccessor)
-            .attr("class", getState)
-            .style("transform", getStyle(rectDimensions))
-        // .on("click", clickMenu)
-    }
-
-    updateScroll(mouseY) {
-        const dimensions = this.model.getSideMenudimensions();
-        d3.select("#scrollPosition")
-            .attr("height", posScale(dimensions)(mouseY));
-    }
-
-    updateMenu() {
+        const accessor = this.model.getModeAccessor();
+        const stack = this.model.getStack();
+        const btnIcon = stack ? `<i class="fas fa-square-full mr-1 ml-2 text-xs"></i> <i class="fas fa-square-full text-xs"></i>` : `<i class="fas fa-clone ml-2"></i>`
         const menuInfo = this.model.getMenu("views")
-        //menu text
-        d3.select("#sideMenuInfo")
-            .selectAll('text')
-            .data(menuInfo)
-            .join("text")
-            .text(nameAccessor)
-            .attr("class", getState)
-            .style("transform", getStyle)
-        // .on("click", clickMenu)
+            .map((i) => {
+                const slct = stateItemAccessor(i);
+                return `<li data-value="${valueAccessor(i)}" class ="viewListItem cursor-pointer transition duration-500 ease-in-out viewItem text-right mt-3 flex flex-row items-center justify-end ${slct == 1 ? "white" : " text-gray-700"}">
+                            <i class="fas fa-question mr-2 text-xs text-gray-800 hover:text-white"></i>
+                            ${accessor(i)}  
+                        <div class="box transition duration-500 ease-in-out rounded-md border-2 ${slct == 1 ? "border-white bg-white" : " border-gray-700"} bg-transparent ml-2" ><div/>
+                    </li>`
+
+            })
+            .join(" ")
+
+        const content = `
+        <div class="flex flex-col items-end">
+            <button id="spreadBtn" class="transition-colors border-gray-600 bg-gray-600 border-2 duration-500 ease-in-out mb-5 rounded-xl p-3  bg-transparent hover:bg-white white hover:text-black text-center focus:border-0 focus:border-transparent focus:outline-none flex flex-row items-center justify-center" >${stack ? "spread" : "stack"} ${btnIcon} </button>
+            <ul class="viewsList">
+                ${menuInfo}
+            </ul>
+        </div>
+       
+		`;
+        this.container.innerHTML = content;
+        this.setIdentifications();
     }
 
-    update(changeDetails) {
-        if (changeDetails.type == "updateSideMenu") {
-            this.updateMenu();
-        } else if (changeDetails.type == "changeMode") {
-            this.updateMenu();
-        }
+    setIdentifications() {
+        this.items = document.querySelectorAll(".viewListItem");
+        this.btn = document.getElementById("spreadBtn")
     }
+
 }

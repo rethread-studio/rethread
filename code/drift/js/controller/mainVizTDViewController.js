@@ -5,6 +5,7 @@ class MainVizTDViewController {
         this.renderView();
         this.addEventListener();
         this.pointHandler = this.onPointerMove.bind(this);
+        this.resizeHandler = this.onWindowResize.bind(this);
         // this.mouseScrollHandler = this.onMouseScroll.bind(this);
 
         // this.model.addObserver(this)
@@ -16,7 +17,7 @@ class MainVizTDViewController {
         document.body.addEventListener('pointermove', (event) => {
             this.onPointerMove(event)
         })
-        window.addEventListener('resize', this.onWindowResize);
+        window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('scroll', (event) => {
 
             let diff = this.scrollPos < window.scrollY ? window.scrollY - this.scrollPos : -(this.scrollPos - window.scrollY);
@@ -41,10 +42,10 @@ class MainVizTDViewController {
         this.model.animate()
     }
 
-    update(changeDetails) {
-        // if (changeDetails.type == "toggleChat") {
-        //     this.renderView();
-        //     this.addEventListener();
-        // }
-    }
+    // update(changeDetails) {
+    // if (changeDetails.type == "toggleChat") {
+    //     this.renderView();
+    //     this.addEventListener();
+    // }
+    // }
 }
