@@ -62,7 +62,7 @@ window.onload = function () {
     mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
 
     //start home view
-    showView("exhibition");
+    showView("home");
 };
 
 //show view
