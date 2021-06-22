@@ -56,7 +56,7 @@ class ExhibitionView {
     renderSideMenu() {
         //ADD SIDE MENU VIEW
         let sideMenuView = new SideMenuView("viewSideMenu", this.model);
-        this.sideMenuController = new SideMenuController(sideMenuView, this.model);
+        this.sideMenuController = new SideMenuController(sideMenuView, this.model, this.vizModel);
         this.sideMenuController.renderView();
     }
 

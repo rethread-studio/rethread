@@ -83,7 +83,6 @@ export default function showView(view) {
             exhibitionViewController.renderView();
             mainMenuViewController.renderView();
             model.toggleChatVisible(false);
-            mainVizTD.showImages()
             break;
         case 'robot':
             currentView = robotViewController;

@@ -31,6 +31,7 @@ export default class MainVizTDModel {
 
         this.timeImage = 0
 
+        model.addObserver(this);
 
         this.sections = [
             {
@@ -178,14 +179,44 @@ export default class MainVizTDModel {
             this.groups.push(group);
             this.scene.add(group);
             this.meshes.push(mesh);
-            mesh.position.y = i * -1.3;
-            mesh.position.x = 6 + (i * .002);
+            mesh.position.y = 2 + i * -1.3;
+            mesh.position.x = 6.5 + (i * .002);
             mesh.position.z = 985 + i;
-            mesh.scale.set(7, 7, 7)
+            i == images.length - 1 ? mesh.scale.set(8, 8, 8) : mesh.scale.set(7, 7, 7);
             // group.rotation.y = -0.5;
             // group.rotation.x = -0.3;
             // group.rotation.z = -0.1;
         });
+    }
+
+    handleImage() {
+        let images = [...document.querySelectorAll("img")];
+        let im = images[images.length - 1]
+        let i = images.length - 1;
+        // let imgApi = model.getImagesFromSite();
+        // console.log(imgApi)
+
+        let mat = this.material.clone();
+        this.materialsImage.push(mat);
+        let group = new THREE.Group();
+        // mat.wireframe = true;
+        mat.uniforms.texture1.value = new THREE.Texture(im);
+        mat.uniforms.texture1.value.needsUpdate = true;
+
+        let geo = i == images.length - 1 ? new THREE.PlaneBufferGeometry(1.80780487805, 1, 20, 20) : new THREE.CircleBufferGeometry(1, 40)
+        let mesh = new THREE.Mesh(geo, mat);
+        group.add(mesh);
+        this.groups.push(group);
+        this.scene.add(group);
+        this.meshes.push(mesh);
+        mesh.position.y = 2 + i * -1.3;
+        mesh.position.x = 6.5 + (i * .002);
+        mesh.position.z = 985 + i;
+        i == images.length - 1 ? mesh.scale.set(8, 8, 8) : mesh.scale.set(7, 7, 7);
+        // group.rotation.y = -0.5;
+        // group.rotation.x = -0.3;
+        // group.rotation.z = -0.1;
+
     }
 
     addObjects() {
@@ -248,13 +279,15 @@ export default class MainVizTDModel {
         this.handleImages();
     }
 
+    showFirstImage() {
+        this.addObjects();
+        this.handleImage();
+    }
+
     removeImages() {
         this.groups.forEach(e => {
             this.scene.remove(e)
         })
-        // this.groups.push(group);
-        // this.scene.add(group);
-        // this.meshes.push(mesh);
     }
 
     //
@@ -262,6 +295,31 @@ export default class MainVizTDModel {
     animate() {
         window.requestAnimationFrame(this.animateHandler);
         this.render();
+    }
+
+    changeLayout() {
+        const stack = model.getStack();
+        stack ? this.centerImages() : this.spreadImages()
+    }
+
+    centerImages() {
+        this.meshes.forEach((mesh, i) => {
+            mesh.position.y = 4 + i * -1.3;
+            mesh.position.x = 0 + (i * .002);
+            mesh.position.z = 985 + i;
+            mesh.scale.set(7, 7, 7)
+        })
+
+    }
+
+    spreadImages() {
+        this.meshes.forEach((mesh, i) => {
+            mesh.position.y = 4;
+            mesh.position.x = 21 - (i * 8);
+            mesh.position.z = 985;
+            mesh.scale.set(3.5, 3.5, 3.5)
+        })
+
     }
 
     render() {
@@ -302,6 +360,13 @@ export default class MainVizTDModel {
 
         this.renderer.render(this.scene, this.camera);
 
+    }
+
+
+    update(changeDetails) {
+        if (changeDetails.type == "displayUpdate") {
+            this.changeLayout()
+        }
     }
 
 }

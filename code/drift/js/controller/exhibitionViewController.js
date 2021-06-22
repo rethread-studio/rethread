@@ -33,7 +33,10 @@ class ExhibitionViewController {
                 this.view.timeline.classList.add("hidden")
                 this.view.viewsMenu.classList.add("hidden")
                 this.view.sitesMenuViewController.hideOptions()
-
+                this.model.removeImages()
+                this.model.showFirstImage()
+                // this.model.showImages()
+                // this.model.spreadImages()
                 //hide timeline
                 //hide side menu views
                 //hide other view options enable only the first
@@ -45,6 +48,8 @@ class ExhibitionViewController {
                 this.view.process.classList.remove("hidden")
                 this.view.viewsMenu.classList.remove("hidden")
                 this.view.sideMenuController.hideOptions()
+                this.model.removeImages()
+                this.model.showImages()
                 //show views side menu, hide button spread
                 //viz show all views 
                 // 
@@ -71,6 +76,7 @@ class ExhibitionViewController {
                 this.view.explanation.classList.add("hidden")
                 this.view.spread.classList.add("hidden")
                 this.view.sitesMenuViewController.showOptions()
+                this.model.centerImages()
                 //show all and hide texts
                 break;
 
