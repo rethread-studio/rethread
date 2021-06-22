@@ -162,8 +162,8 @@ export default class MainVizTDModel {
 
     handleImages() {
         let images = [...document.querySelectorAll("img")];
-        let imgApi = model.getImagesFromSite();
-        console.log(imgApi)
+        // let imgApi = model.getImagesFromSite();
+        // console.log(imgApi)
         images.forEach((im, i) => {
             let mat = this.material.clone();
             this.materialsImage.push(mat);
@@ -172,16 +172,16 @@ export default class MainVizTDModel {
             mat.uniforms.texture1.value = new THREE.Texture(im);
             mat.uniforms.texture1.value.needsUpdate = true;
 
-            let geo = new THREE.CircleBufferGeometry(1, 40);
+            let geo = i == images.length - 1 ? new THREE.PlaneBufferGeometry(1.80780487805, 1, 20, 20) : new THREE.CircleBufferGeometry(1, 40)
             let mesh = new THREE.Mesh(geo, mat);
             group.add(mesh);
             this.groups.push(group);
             this.scene.add(group);
             this.meshes.push(mesh);
-            mesh.position.y = i * 1.2;
-            mesh.position.x = 5;
-            mesh.position.z = 990;
-            mesh.scale.set(5, 5, 5)
+            mesh.position.y = i * -1.3;
+            mesh.position.x = 6 + (i * .002);
+            mesh.position.z = 985 + i;
+            mesh.scale.set(7, 7, 7)
             // group.rotation.y = -0.5;
             // group.rotation.x = -0.3;
             // group.rotation.z = -0.1;
