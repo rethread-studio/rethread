@@ -27,6 +27,50 @@
         <div id="mainViz" class="fixed top-0 -z-10"></div>
     </div>
 
+    <img src="img/coverage.jpg" class="hidden" alt="">
+
+    <!-- SHADER AND VERTEX -->
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+        uniform float time;
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        uniform vec2 pixels;
+        float PI=3.141592653589793238;
+        uniform float distanceFromCenter;
+        void main(){
+            vUv=(uv-vec2(.5))*(.8-.2*distanceFromCenter*(2.-distanceFromCenter))+vec2(.5);
+            vec3 pos=position;
+            pos.y+=sin(PI*uv.x)*.01;
+            pos.z+=sin(PI*uv.x)*.02;
+            
+            pos.y+=sin(time*.3)*.02;
+            vUv.y-=sin(time*.3)*.02;
+            gl_Position=projectionMatrix*modelViewMatrix*vec4(pos,1.);
+        }
+
+    </script>
+
+    <script type="x-shader/x-fragment" id="fragmentshader">
+
+        uniform float time;
+        uniform float progress;
+        uniform float distanceFromCenter;
+        uniform sampler2D texture1;
+        uniform vec4 resolution;
+        varying vec2 vUv;
+        varying vec3 vPosition;
+        float PI=3.141592653589793238;
+        void main(){
+            vec4 t=texture2D(texture1,vUv);
+            float bw=(t.r+t.b+t.g)/3.;
+            vec4 another=vec4(bw,bw,bw,1.);
+            gl_FragColor=mix(another,t,distanceFromCenter);
+            gl_FragColor.a=clamp(distanceFromCenter,.2,1.);
+        }
+
+    </script>
+
     <!-- EXTERNAL LIBRARIES -->
     <script src="./js/d3.min.js"></script>
     <script src="https://embed.twitch.tv/embed/v1.js"></script>

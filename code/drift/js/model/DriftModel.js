@@ -431,6 +431,25 @@ class DriftModel {
         }
     }
 
+    getImagesFromSite() {
+        //get selected item in menu
+        const site = this.data.children.find(e => e.state == 1)
+        //get time
+        console.log(site)
+        const time = this.visits[this.currentVisit].getTime();
+        console.log("thime", time)
+        //size
+        const size = 800;
+        return [
+            apiService.getSiteScreenshot(site.name, time, size),
+            // apiService.getSiteGraph(site, time, size),
+            // apiService.getSiteCoverage(site, time, size),
+            // apiService.getSiteNetwork(site, time, size),
+            // apiService.getSiteProfile(site, time, size),
+            // apiService.getSiteScreenshot(site, time, size),
+        ]
+    }
+
     calculateSliderPos(pos = null) {
         const percent = (pos == null ? this.currentVisit : pos) / this.visits.length;
         const scale = d3.scaleLinear()

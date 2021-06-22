@@ -16,7 +16,7 @@ import TourViewController from './controller/tourViewController.js';
 export let mainVizTD, robotView, miniChatController, homeViewController, exhibitionViewController, robotViewController, tourViewController, aboutViewController, mainMenuViewController, legendViewController, emojiController, chatBtnController, mainVizController;
 // let mainVizTD
 export let currentView;
-let model;
+export let model;
 
 window.onload = function () {
     //We instantiate our model
@@ -62,7 +62,7 @@ window.onload = function () {
     mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
 
     //start home view
-    showView("exhibition");
+    showView("home");
 };
 
 //show view
@@ -70,6 +70,7 @@ window.onload = function () {
 export default function showView(view) {
 
     model.interaction.page(view);
+    if (currentView == exhibitionViewController) mainVizTD.removeImages();
     if (currentView != null) currentView.unMountView()
     switch (view) {
         case 'home':
@@ -82,6 +83,7 @@ export default function showView(view) {
             exhibitionViewController.renderView();
             mainMenuViewController.renderView();
             model.toggleChatVisible(false);
+            mainVizTD.showImages()
             break;
         case 'robot':
             currentView = robotViewController;

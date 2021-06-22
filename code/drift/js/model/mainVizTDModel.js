@@ -1,12 +1,12 @@
 
 import * as THREE from 'https://cdn.skypack.dev/pin/three@v0.129.0-s11MgzfqGP1yDDoEH9m1/mode=imports,min/optimized/three.js';
-
 // import { GUI } from './threejs/libs/dat.gui.min.js';
-
+import { model } from '../app.js'
 
 export default class MainVizTDModel {
 
     constructor() {
+
         this.scene;
         this.camera;
         this.renderer;
@@ -17,13 +17,19 @@ export default class MainVizTDModel {
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
-        this.numParticles = 250;
+        this.numParticles = 100;
 
         this.observers = [];
 
         this.speed = 0;
         this.position = 0;
         this.rounded = 0;
+
+        this.groups = [];
+        this.materialsImage = [];
+        this.meshes = [];
+
+        this.timeImage = 0
 
 
         this.sections = [
@@ -132,14 +138,17 @@ export default class MainVizTDModel {
             particles.rotation.z = Math.random() * 6;
 
             this.scene.add(particles);
-
+            // this.addObject()
         }
 
         //
 
-        this.renderer = new THREE.WebGLRenderer({ alpha: true });
+        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, });
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.physicallyCorrectLights = true;
+        this.renderer.outputEncoding = THREE.sRGBEncoding;
+
 
 
         //ACTIVATE LATER
@@ -148,6 +157,59 @@ export default class MainVizTDModel {
         // document.body.addEventListener('pointermove', onPointerMove);
         // window.addEventListener('resize', onWindowResize);
     }
+
+
+
+    handleImages() {
+        let images = [...document.querySelectorAll("img")];
+        let imgApi = model.getImagesFromSite();
+        console.log(imgApi)
+        images.forEach((im, i) => {
+            let mat = this.material.clone();
+            this.materialsImage.push(mat);
+            let group = new THREE.Group();
+            // mat.wireframe = true;
+            mat.uniforms.texture1.value = new THREE.Texture(im);
+            mat.uniforms.texture1.value.needsUpdate = true;
+
+            let geo = new THREE.CircleBufferGeometry(1, 40);
+            let mesh = new THREE.Mesh(geo, mat);
+            group.add(mesh);
+            this.groups.push(group);
+            this.scene.add(group);
+            this.meshes.push(mesh);
+            mesh.position.y = i * 1.2;
+            mesh.position.x = 5;
+            mesh.position.z = 990;
+            mesh.scale.set(5, 5, 5)
+            // group.rotation.y = -0.5;
+            // group.rotation.x = -0.3;
+            // group.rotation.z = -0.1;
+        });
+    }
+
+    addObjects() {
+        let that = this;
+        this.material = new THREE.ShaderMaterial({
+            extensions: {
+                derivatives: "#extension GL_OES_standard_derivatives : enable",
+            },
+            side: THREE.DoubleSide,
+            uniforms: {
+                time: { type: "f", value: 0 },
+                distanceFromCenter: { type: "f", value: 1 },
+                texture1: { type: "t", value: null },
+                resolution: { type: "v4", value: new THREE.Vector4() },
+                uvRate1: { value: new THREE.Vector2(1, 1) },
+            },
+            // wireframe: true,
+            // transparent: true,
+            vertexShader: document.getElementById('vertexshader').textContent,
+            fragmentShader: document.getElementById('fragmentshader').textContent,
+        });
+    }
+
+
     getRenderer() {
         return this.renderer;
     }
@@ -181,6 +243,20 @@ export default class MainVizTDModel {
         // console.log(this.rounded)
     }
 
+    showImages() {
+        this.addObjects();
+        this.handleImages();
+    }
+
+    removeImages() {
+        this.groups.forEach(e => {
+            this.scene.remove(e)
+        })
+        // this.groups.push(group);
+        // this.scene.add(group);
+        // this.meshes.push(mesh);
+    }
+
     //
 
     animate() {
@@ -190,7 +266,13 @@ export default class MainVizTDModel {
 
     render() {
         const time = Date.now() * 0.00005;
-
+        // if (!this.isPlaying) return;
+        this.timeImage += 0.01;
+        if (this.materialsImage) {
+            this.materialsImage.forEach((m) => {
+                m.uniforms.time.value = this.timeImage;
+            });
+        }
         // this.camera.position.x += (this.mouseX - this.camera.position.x) * 0.006;
         // this.camera.position.y += (- this.mouseY - this.camera.position.y) * 0.006;
 
@@ -215,6 +297,8 @@ export default class MainVizTDModel {
         }
 
         this.raf()
+
+
 
         this.renderer.render(this.scene, this.camera);
 
