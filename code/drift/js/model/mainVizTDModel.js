@@ -18,6 +18,64 @@ export default class MainVizTDModel {
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
         this.numParticles = 250;
+
+        this.observers = [];
+
+        this.speed = 0;
+        this.position = 0;
+        this.rounded = 0;
+
+
+        this.sections = [
+            {
+                id: "exhibitionIntro",
+                active: 1
+            },
+            {
+                id: "exhibitionProcess",
+                active: 0
+            }, {
+                id: "exhibitionExplanation",
+                active: 0
+            }, {
+                id: "exhibitionSpread",
+                active: 0
+            }, {
+                id: "visContainer",
+                active: 0
+            }
+        ]
+    }
+
+    //add observers to the model
+    addObserver(observer) {
+        this.observers.push(observer);
+
+    }
+    //remove observer from the observers list
+    removeObserver(observer) {
+        this.observers = this.observers.filter(obs => obs !== observer);
+    }
+
+    // USE this function to notify all observers the changes
+    notifyObservers(changeDetails) {
+        for (var i = 0; i < this.observers.length; i++) {
+            this.observers[i].update(changeDetails);
+        }
+    }
+
+    stepActiveSection() {
+        const index = this.sections.findIndex(e => e.active == 1);
+        const step = index + 1 > this.sections.length - 1 ? 0 : index + 1;
+        this.sections.map((e, i) => {
+            e.active = i == step ? 1 : 0;
+            return e;
+        })
+        this.notifyObservers({ type: "changeVisState" });
+    }
+
+    getActiveSection() {
+        return this.sections.findIndex(e => e.active == 1)
     }
 
     init() {
@@ -109,6 +167,20 @@ export default class MainVizTDModel {
         this.renderer.setSize(winW, winH);
     }
 
+    updateSpeed(delta) {
+        this.speed += delta * 0.0003;
+    }
+
+    raf() {
+        this.position += this.speed;
+        this.speed *= 0.8;
+
+        this.rounded = Math.round(this.position);
+        let diff = (this.rounded - this.position)
+        // this.position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.8) * 0.015
+        // console.log(this.rounded)
+    }
+
     //
 
     animate() {
@@ -141,6 +213,8 @@ export default class MainVizTDModel {
             this.materials[i].color.setHSL(h, color[1], color[2]);
 
         }
+
+        this.raf()
 
         this.renderer.render(this.scene, this.camera);
 

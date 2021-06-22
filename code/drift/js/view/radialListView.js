@@ -30,4 +30,21 @@ class RadialListView {
             .map(i => document.getElementById(`${i.name}Radial`))
     }
 
+    hideOptions() {
+
+        this.model.getDataChildren()
+            .map(i => document.getElementById(`${i.name}Radial`))
+            .forEach((e, i) => {
+                if (i != 0) e.classList.add("hidden")
+            })
+    }
+
+    showOptions() {
+        this.model.getDataChildren()
+            .map(i => document.getElementById(`${i.name}Radial`))
+            .forEach((e, i) => {
+                if (i != 0) e.classList.remove("hidden")
+            })
+    }
+
 }

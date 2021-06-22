@@ -20,5 +20,11 @@ class SelectSiteToggleViewController {
             this.renderView();
         }
     }
+    hideOptions() {
+        this.view.hideOptions()
+    }
+    showOptions() {
+        this.view.showOptions()
+    }
 
 }

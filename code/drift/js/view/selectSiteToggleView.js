@@ -24,6 +24,15 @@ class SelectSiteToggleView {
         this.sitesRadialController.unMountView();
     }
 
+    hideOptions() {
+        // this.siteCheckBoxController.hideOptions()
+        this.sitesRadialController.hideOptions();
+    }
+    showOptions() {
+        // this.siteCheckBoxController.showOptions()
+        this.sitesRadialController.showOptions();
+    }
+
     renderCheckBoxList() {
         let siteCheckBox = new CheckBoxListView("checkBoxList", this.model);
         this.siteCheckBoxController = new CheckBoxViewController(siteCheckBox, this.model);

@@ -36,6 +36,14 @@ class CheckBoxViewController {
         this.removeEventListener()
     }
 
+    hideOptions() {
+        this.view.hideOptions();
+    }
+
+    showOptions() {
+        this.view.showOptions();
+    }
+
     //update info when modified in model
     update(changeDetails) {
         if (changeDetails.type == "sitesUpdated") {

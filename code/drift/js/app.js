@@ -34,8 +34,8 @@ window.onload = function () {
     let homeView = new HomeView('page-content', model);
     homeViewController = new HomeViewController(homeView, model);
 
-    let exhibitionView = new ExhibitionView('page-content', model);
-    exhibitionViewController = new ExhibitionViewController(exhibitionView);
+    let exhibitionView = new ExhibitionView('page-content', model, mainVizTD);
+    exhibitionViewController = new ExhibitionViewController(exhibitionView, mainVizTD);
 
     let robotView = new RobotView('page-content', model);
     robotViewController = new RobotViewController(robotView, chatView, model);
@@ -81,6 +81,7 @@ export default function showView(view) {
             currentView = exhibitionViewController;
             exhibitionViewController.renderView();
             mainMenuViewController.renderView();
+            model.toggleChatVisible(false);
             break;
         case 'robot':
             currentView = robotViewController;

@@ -25,6 +25,23 @@ class CheckBoxListView {
         this.setIdentifications();
     }
 
+    hideOptions() {
+
+        this.model.getDataChildren()
+            .map(i => document.getElementById(`${i.name}SCbx`))
+            .forEach((e, i) => {
+                if (i != 0) e.disabled = true;
+            })
+    }
+
+    showOptions() {
+        this.model.getDataChildren()
+            .map(i => document.getElementById(`${i.name}SCbx`))
+            .forEach((e, i) => {
+                if (i != 0) e.disabled = false;
+            })
+    }
+
     setIdentifications() {
         this.checkbox = this.model.getDataChildren()
             .map(i => document.getElementById(`${i.name}SCbx`))

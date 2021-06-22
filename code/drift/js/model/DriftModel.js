@@ -493,8 +493,8 @@ class DriftModel {
         this.notifyObservers({ type: "changeMode" });
     }
 
-    toggleChatVisible() {
-        this.chatvisible = !this.chatvisible;
+    toggleChatVisible(visible = null) {
+        this.chatvisible = visible != null ? visible : !this.chatvisible;
         this.notifyObservers({ type: "toggleChat" });
     }
 

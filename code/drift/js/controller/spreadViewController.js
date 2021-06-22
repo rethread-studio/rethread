@@ -1,5 +1,6 @@
 
-class WhatWeDidViewController {
+
+class SpreadViewController {
 
     constructor(view, model) {
         this.view = view;
@@ -8,7 +9,6 @@ class WhatWeDidViewController {
     }
 
     onClickBtn() {
-        console.log("in")
         this.model.stepActiveSection()
     }
 
@@ -28,5 +28,6 @@ class WhatWeDidViewController {
     unMountView() {
         removeEventListeners();
     }
+
 
 }

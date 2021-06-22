@@ -404,6 +404,14 @@ top:49%;
     border-color: white;
  }
 
+ .pl-72{
+    padding-left: 18rem;
+ }
+
+ .left-300{
+     left:300px
+ }
+
 /* #intro h1{
     animation: 3s ease-in 0s infinite alternate both running blurMid;
 }

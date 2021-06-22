@@ -41,4 +41,12 @@ class SideMenuController {
         }
     }
 
+    hideOptions() {
+        this.view.btn.classList.add("hidden")
+    }
+
+    showOptions() {
+        this.view.btn.classList.remove("hidden")
+    }
+
 }
