@@ -4,7 +4,7 @@ import MiniChatController from './controller/miniChatController.js';
 import HomeView from './view/HomeView.js';
 import HomeViewController from './controller/homeViewController.js';
 import AboutView from './view/aboutView.js';
-import AboutViewController from './controller/AboutViewController.js'
+import AboutViewController from './controller/aboutViewController.js'
 import MainMenuView from './view/mainMenuView.js';
 import MainMenuViewController from './controller/mainMenuViewController.js';
 import RobotView from './view/robotView.js';
