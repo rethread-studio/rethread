@@ -1,4 +1,5 @@
 import MainVizTDModel from './model/mainVizTDModel.js';
+import DriftModel from './model/DriftModel.js';
 import ChatView from './view/miniChatView.js';
 import MiniChatController from './controller/miniChatController.js';
 import HomeView from './view/HomeView.js';
@@ -11,14 +12,26 @@ import RobotView from './view/robotView.js';
 import RobotViewController from './controller/robotViewController.js';
 import TourView from './view/tourView.js';
 import TourViewController from './controller/tourViewController.js';
+import ApiService from './apiService.js';
+import ExhibitionView from './view/ExhibitionView.js';
+import ExhibitionViewController from './controller/exhibitionViewController.js';
+import ChatButtonView from './view/chatButtonView.js';
+import ChatBtnViewController from './controller/chatButtonViewController.js';
+import MainVizTDView from './view/MainVizTDView.js';
+import MainVizTDViewController from './controller/mainVizTDViewController.js';
+import EmojiView from './view/emojiView.js';
+import EmojiController from './controller/emojiController.js';
 
 
-export let mainVizTD, robotView, miniChatController, homeViewController, exhibitionViewController, robotViewController, tourViewController, aboutViewController, mainMenuViewController, legendViewController, emojiController, chatBtnController, mainVizController;
+export let mainVizTD, robotView, miniChatController, homeViewController, exhibitionViewController, robotViewController, tourViewController, aboutViewController, mainMenuViewController, emojiController, chatBtnController, mainVizController;
 // let mainVizTD
-export let currentView;
-export let model;
+export let currentView, model;
+
+export let apiService;
 
 window.onload = function () {
+
+    apiService = new ApiService();
     //We instantiate our model
     model = new DriftModel();
     model.init();
@@ -49,9 +62,6 @@ window.onload = function () {
     let mainMenuView = new MainMenuView('mainMenu', model);
     mainMenuViewController = new MainMenuViewController(mainMenuView, model);
 
-    let legendView = new LegendView('page-content', model);
-    legendViewController = new LegendViewController(legendView);
-
     let emojiView = new EmojiView('emojiParty');
     emojiController = new EmojiController(emojiView, model);
 
@@ -62,7 +72,7 @@ window.onload = function () {
     mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
 
     //start home view
-    showView("home");
+    showView("exhibition");
 };
 
 //show view
@@ -97,11 +107,6 @@ export default function showView(view) {
         case 'about':
             currentView = aboutViewController;
             aboutViewController.renderView();
-            mainMenuViewController.renderView();
-            break;
-        case 'legend':
-            currentView = legendViewController;
-            legendViewController.renderView();
             mainMenuViewController.renderView();
             break;
         default:

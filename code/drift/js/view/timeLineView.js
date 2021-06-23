@@ -1,6 +1,6 @@
 
 
-class TimeLineView {
+export default class TimeLineView {
     constructor(container, model) {
         this.container = container;
         this.model = model;

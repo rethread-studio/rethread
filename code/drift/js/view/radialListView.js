@@ -1,4 +1,4 @@
-class RadialListView {
+export default class RadialListView {
     constructor(container, model) {
         this.model = model;
         this.container = document.getElementById(container);

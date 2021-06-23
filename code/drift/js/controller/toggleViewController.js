@@ -1,6 +1,6 @@
 
 
-class ToggleViewController {
+export default class ToggleViewController {
 
     constructor(view, model, message) {
         this.view = view;

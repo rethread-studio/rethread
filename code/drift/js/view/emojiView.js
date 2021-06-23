@@ -1,4 +1,4 @@
-class EmojiView {
+export default class EmojiView {
   constructor(container, model) {
     this.model = model;
   }

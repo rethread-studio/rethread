@@ -10,7 +10,7 @@ const posScale = (dimensions) => d3.scaleLinear()
     .domain([0, document.documentElement.scrollHeight])
     .range([0, dimensions.height])
 
-class SideMenuView {
+export default class SideMenuView {
 
     constructor(container, model) {
         this.container = document.getElementById(container);

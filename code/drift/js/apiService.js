@@ -1,7 +1,7 @@
 const BASE_URL = "https://drift.durieux.me";
 const requestService = new RequestService();
 
-class ApiService {
+export default class ApiService {
 
     //return an array with all the available sites
     getSites() {
@@ -61,7 +61,7 @@ class ApiService {
 
 
 
-const dataTest = {
+export const dataTest = {
     value: 0,
     children: [
         {
@@ -131,7 +131,7 @@ const dataTest = {
     ]
 }
 
-const mainMenu = [
+export const mainMenu = [
     {
         human: "Meet the artists",
         nerd: "Meet Motoo",

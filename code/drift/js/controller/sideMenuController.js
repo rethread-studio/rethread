@@ -1,5 +1,5 @@
 
-class SideMenuController {
+export default class SideMenuController {
     constructor(view, model) {
         this.view = view;
         this.model = model;

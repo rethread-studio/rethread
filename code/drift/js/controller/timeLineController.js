@@ -1,5 +1,5 @@
 
-class TimeLineController {
+export default class TimeLineController {
 
     constructor(view, model) {
         this.view = view;

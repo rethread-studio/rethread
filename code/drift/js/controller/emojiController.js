@@ -1,4 +1,4 @@
-class EmojiController {
+export default class EmojiController {
   constructor(view, model) {
     this.model = model;
     this.view = view;
@@ -15,5 +15,5 @@ class EmojiController {
   renderView() {
     this.view.render();
   }
-  unMountView() {}
+  unMountView() { }
 }

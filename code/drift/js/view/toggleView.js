@@ -1,5 +1,5 @@
 
-class ToggleView {
+export default class ToggleView {
     constructor(container, model) {
 
         this.container = document.getElementById(container);

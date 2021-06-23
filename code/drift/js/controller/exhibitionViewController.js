@@ -1,7 +1,7 @@
 
 
 
-class ExhibitionViewController {
+export default class ExhibitionViewController {
     constructor(view, model) {
         this.view = view;
         this.wheelHandler = this.wheelEvent.bind(this);
@@ -100,6 +100,8 @@ class ExhibitionViewController {
     }
 
     unMountView() {
+        this.model.resetActiveSection()
+        this.model.removeImages();
         this.view.unMountView()
         this.removeEventListener()
     }

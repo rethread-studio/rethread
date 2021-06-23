@@ -1,5 +1,5 @@
 
-class MainVizTDView {
+export default class MainVizTDView {
     constructor(container, model) {
         this.model = model;
         this.container = document.getElementById(container);

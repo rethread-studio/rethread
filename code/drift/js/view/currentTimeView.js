@@ -1,9 +1,6 @@
-const formatHour = date => d3.timeFormat("%H:%M")(date)
-const formatDay = date => d3.timeFormat("%d")(date)
-const formatMonth = date => d3.timeFormat("%b")(date)
+import { formatHour, formatDay, formatMonth } from '../helpers.js';
 
-
-class CurrentTimeView {
+export default class CurrentTimeView {
     constructor(container, model) {
 
         this.container = document.getElementById(container);

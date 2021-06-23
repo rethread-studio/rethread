@@ -1,4 +1,4 @@
-class CheckBoxListView {
+export default class CheckBoxListView {
     constructor(container, model) {
         this.model = model;
         this.container = document.getElementById(container);

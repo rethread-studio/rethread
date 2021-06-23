@@ -1,6 +1,6 @@
 
 
-class RadialViewController {
+export default class RadialViewController {
     constructor(view, model) {
         this.view = view;
         this.model = model;

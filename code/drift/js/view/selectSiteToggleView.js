@@ -1,5 +1,10 @@
 
-class SelectSiteToggleView {
+import CheckBoxListView from './checkBoxListView.js';
+import CheckBoxViewController from '../controller/checkBoxViewController.js';
+import RadialListView from './radialListView.js';
+import RadialViewController from '../controller/radialViewController.js';
+
+export default class SelectSiteToggleView {
     constructor(container, model) {
         this.model = model;
         this.container = document.getElementById(container);

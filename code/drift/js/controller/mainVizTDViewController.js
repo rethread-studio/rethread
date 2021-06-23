@@ -1,4 +1,4 @@
-class MainVizTDViewController {
+export default class MainVizTDViewController {
     constructor(view, model) {
         this.model = model;
         this.view = view;

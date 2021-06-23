@@ -1,6 +1,6 @@
 
 
-class SelectSiteToggleViewController {
+export default class SelectSiteToggleViewController {
     constructor(view, model) {
         this.view = view;
         this.model = model;

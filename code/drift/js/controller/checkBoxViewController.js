@@ -1,6 +1,6 @@
 
 
-class CheckBoxViewController {
+export default class CheckBoxViewController {
     constructor(view, model) {
         this.view = view;
         this.model = model;

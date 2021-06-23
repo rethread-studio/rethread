@@ -1,4 +1,4 @@
-class ChatBtnViewController {
+export default class ChatBtnViewController {
     constructor(view, model) {
         this.model = model;
         this.view = view;

@@ -1,6 +1,7 @@
 
-const apiService = new ApiService();
-
+import { apiService } from '../app.js'
+import { dataTest, mainMenu } from '../apiService.js';
+import { formatMonth, formatDay, formatHour } from '../helpers.js';
 //HELPERS
 const hierarchySize = (d) => d.value;
 const sortBySize = (a, b) => hierarchySize(b) - hierarchySize(a);
@@ -24,7 +25,7 @@ const updateState = (_name) => {
     }
 }
 
-class DriftModel {
+export default class DriftModel {
 
     constructor() {
         this.interaction = new Interaction()
@@ -168,7 +169,7 @@ class DriftModel {
     getModeAccessor() {
         const humanAccessor = (d) => d.human;
         const nerdAccessor = (d) => d.nerd;
-        return this.mode ? nerdAccessor : humanAccessor;
+        return this.mode ? humanAccessor : nerdAccessor;
     }
 
     getPack() {

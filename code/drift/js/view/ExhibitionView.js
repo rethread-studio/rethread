@@ -1,4 +1,16 @@
-class ExhibitionView {
+import SideMenuView from './sideMenuView.js';
+import SideMenuController from '../controller/sideMenuController.js';
+import SelectSiteToggleView from './selectSiteToggleView.js';
+import SelectSiteToggleViewController from '../controller/selectSiteToggleViewController.js';
+import TimeLineView from './timeLineView.js';
+import TimeLineController from '../controller/timeLineController.js';
+import CurrentTimeView from './currentTimeView.js';
+import CurrentTimeViewController from '../controller/currentTimeViewController.js';
+import TextView from './textView.js';
+import TextViewController from '../controller/textViewController.js';
+import exhibitionTexts from '../staticData.js'
+
+export default class ExhibitionView {
     constructor(container, model, vizModel) {
 
         this.container = document.getElementById(container);
@@ -26,10 +38,7 @@ class ExhibitionView {
        
 		`;
         this.container.innerHTML = content;
-        this.renderIntroSection();
-        this.renderWhatWeDid();
-        this.renderExplanation();
-        this.renderSpreadSection()
+        this.renderTexts();
         // this.renderMainVis();
         this.renderSideMenu();
         this.renderTimeLine();
@@ -60,26 +69,21 @@ class ExhibitionView {
         this.sideMenuController.renderView();
     }
 
-    renderIntroSection() {
-        let introView = new IntroView("exhibitionIntro", this.vizModel);
-        this.introController = new IntroViewController(introView, this.vizModel);
+    renderTexts() {
+        let introView = new TextView("exhibitionIntro", exhibitionTexts.intro.tittle, exhibitionTexts.intro.text);
+        this.introController = new TextViewController(introView, this.vizModel);
         this.introController.renderView();
-    }
 
-    renderWhatWeDid() {
-        let whatView = new WhatWeDidViewView("exhibitionProcess", this.vizModel);
-        this.whatController = new WhatWeDidViewController(whatView, this.vizModel);
+        let whatView = new TextView("exhibitionProcess", exhibitionTexts.views.tittle, exhibitionTexts.views.text);
+        this.whatController = new TextViewController(whatView, this.vizModel);
         this.whatController.renderView();
-    }
-    renderExplanation() {
-        let explanationView = new ExplainView("exhibitionExplanation", this.vizModel);
-        this.explainController = new ExplainViewController(explanationView, this.vizModel);
-        this.explainController.renderView();
-    }
 
-    renderSpreadSection() {
-        let spreadView = new SpreadView("exhibitionSpread", this.vizModel);
-        this.spreadController = new SpreadViewController(spreadView, this.vizModel);
+        let explanationView = new TextView("exhibitionExplanation", exhibitionTexts.timeline.tittle, exhibitionTexts.timeline.text);
+        this.explainController = new TextViewController(explanationView, this.vizModel);
+        this.explainController.renderView();
+
+        let spreadView = new TextView("exhibitionSpread", exhibitionTexts.spread.tittle, exhibitionTexts.spread.text);
+        this.spreadController = new TextViewController(spreadView, this.vizModel);
         this.spreadController.renderView();
     }
 

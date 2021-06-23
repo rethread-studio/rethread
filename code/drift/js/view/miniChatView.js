@@ -1,3 +1,6 @@
+
+import { apiService } from '../app.js'
+
 export default class ChatView {
   constructor(container, model) {
     this.model = model;

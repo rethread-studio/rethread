@@ -1,4 +1,6 @@
 import { currentView, exhibitionViewController } from '../app.js';
+import ToggleView from './toggleView.js';
+import ToggleViewController from '../controller/toggleViewController.js';
 
 export default class MainMenuView {
     constructor(container, model) {

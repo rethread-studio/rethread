@@ -17,7 +17,7 @@ export default class MainVizTDModel {
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
-        this.numParticles = 100;
+        this.numParticles = 1; //100
 
         this.observers = [];
 
@@ -83,6 +83,13 @@ export default class MainVizTDModel {
 
     getActiveSection() {
         return this.sections.findIndex(e => e.active == 1)
+    }
+
+    resetActiveSection() {
+        this.sections = this.sections.map((s, i) => {
+            s.active = i == 0 ? 1 : 0;
+            return s;
+        })
     }
 
     init() {
