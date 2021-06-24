@@ -31,7 +31,6 @@ export default class RadialListView {
     }
 
     hideOptions() {
-        console.log("hide radials")
         this.model.getDataChildren()
             .map(i => document.getElementById(`${i.name}Radial`))
             .forEach((e, i) => {

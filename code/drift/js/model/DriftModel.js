@@ -137,8 +137,8 @@ export default class DriftModel {
         return this.viewModeBtn;
     }
 
-    toggleViewModeBtn() {
-        this.viewModeBtn = !this.viewModeBtn;
+    toggleViewModeBtn(view = undefined) {
+        this.viewModeBtn = view == undefined ? !this.viewModeBtn : view;
     }
 
     getStack() {

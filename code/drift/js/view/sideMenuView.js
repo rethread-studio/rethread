@@ -18,7 +18,6 @@ export default class SideMenuView {
         const accessor = this.model.getModeAccessor();
         const stack = this.model.getStack();
         const viewButton = this.model.getViewMode();
-        console.log(viewButton)
         const btnIcon = stack ? `<i class="fas fa-square-full mr-1 ml-2 text-xs"></i> <i class="fas fa-square-full text-xs"></i>` : `<i class="fas fa-clone ml-2"></i>`
         const menuInfo = this.model.getMenu("views")
             .map((i) => {
