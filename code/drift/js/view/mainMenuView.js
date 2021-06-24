@@ -21,9 +21,9 @@ export default class MainMenuView {
 
         const menu = `
         <nav id= "burguerMenu" class="${visible ? "visible" : "invisible"} absolute top-0 left-0 flex flex-col items-center  justify-center  mx-auto w-screen  h-screen  pt-20 pb-20 background ">
-        <div id="mainMenuItems"  class="text-center">
-        
-        </dv>
+            <div id="mainMenuItems"  class="text-center z-10">
+            </div>
+            <img id="imageIntro" class="absolute left-2-4 transform-50 h-auto .max-727 z-0" src="./img/imgTest.png" alt="yahoo profile test">
         </nav>
         `
 
@@ -31,7 +31,7 @@ export default class MainMenuView {
         <header class="fixed w-screen block z-50 flex flex-wrap flex-row place-content-center  place-items-center justify-between  p-6">
         <!-- Menu items -->
         <a id="home" value="home" class="z-50 robotoFont self-center txt-white text-3xl font-semibold tracking-widest" href="#" class="block mt-4 lg:inline-block text-teal-600 lg:mt-0 mr-10">
-        Dr<span class="italic">i</span>ft
+             Dr<span class="italic">i</span>ft
         </a>
         
             <div id="toggleItem" class="ml-auto pr-8 pt-2 ${viewToggle ? "visible" : "invisible"}"></div>
@@ -52,11 +52,12 @@ export default class MainMenuView {
 
     renderMenuItems() {
         const menuContainer = document.getElementById("mainMenuItems");
-        const menuContent = this.model.getMainMenu(false)
+        const items = this.model.getMainMenu(false)
             .map(i => {
                 return ` <a id="${i.value}Link" value="${i.value}" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">${i.name}</a>`
             })
             .join(" ");
+        const menuContent = ` ${items}`
 
         menuContainer.innerHTML = menuContent;
         this.setIdentifications();

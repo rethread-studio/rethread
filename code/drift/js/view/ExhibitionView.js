@@ -22,11 +22,8 @@ export default class ExhibitionView {
     render() {
         // <div id="webSitesWrapper"></div>
         const content = `
-        <div class="">
-            <div id="exhibitionIntro" class="flex content-center items-center justify-left h-screen  white fixed top-0 left-300 hidden z-10 "> </div>
-            <div id="exhibitionProcess" class="flex content-center items-center justify-left h-screen  white fixed top-0 left-300 hidden z-10"> </div>
-            <div id="exhibitionExplanation" class="flex content-center items-center justify-left h-screen  white fixed top-0 left-300 hidden z-10"> </div>
-            <div id="exhibitionSpread" class="flex content-center items-center justify-left h-screen  white fixed top-0 left-300 hidden z-10"> </div>
+        <div id="exhibitContent" class="">
+            
             
             <div id="visContainer" class="h-screen w-screen fixed top-0">
                     <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0"></div>
@@ -34,6 +31,11 @@ export default class ExhibitionView {
                     <div id="currentTimeWrapper" class= "relative top-100 ml-5 "></div>
                     <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5"></div>
             </div>
+            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 "> </div>
+            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72"> </div>
+            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72"> </div>
+            <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72"> </div>
+            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72"> </div>
         </div>
        
 		`;
@@ -110,5 +112,6 @@ export default class ExhibitionView {
         this.visContainer = document.getElementById('visContainer')
         this.timeline = document.getElementById('timeLineWrapper')
         this.viewsMenu = document.getElementById('viewSideMenu')
+        this.exhibitContent = document.getElementById('exhibitContent');
     }
 }

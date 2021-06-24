@@ -19,7 +19,6 @@ export default class MainVizTDViewController {
         })
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('scroll', (event) => {
-
             let diff = this.scrollPos < window.scrollY ? window.scrollY - this.scrollPos : -(this.scrollPos - window.scrollY);
             this.scrollPos = window.scrollY;
             this.model.setMouse(undefined, diff * 10)

@@ -48,7 +48,7 @@ export default class MainVizTDModel {
                 id: "exhibitionSpread",
                 active: 0
             }, {
-                id: "visContainer",
+                id: "mainExhibit",
                 active: 0
             }
         ]
@@ -76,6 +76,14 @@ export default class MainVizTDModel {
         const step = index + 1 > this.sections.length - 1 ? 0 : index + 1;
         this.sections.map((e, i) => {
             e.active = i == step ? 1 : 0;
+            return e;
+        })
+        this.notifyObservers({ type: "changeVisState" });
+    }
+
+    activateSection(name) {
+        this.sections.map(e => {
+            e.active = e.id == name ? 1 : 0;
             return e;
         })
         this.notifyObservers({ type: "changeVisState" });
