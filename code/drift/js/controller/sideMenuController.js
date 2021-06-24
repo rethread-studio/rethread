@@ -42,11 +42,13 @@ export default class SideMenuController {
     }
 
     hideOptions() {
-        this.view.btn.classList.add("hidden")
+        this.model.toggleViewModeBtn(false)
+        this.view.btn.classList.remove("appear")
     }
 
     showOptions() {
-        this.view.btn.classList.remove("hidden")
+        this.model.toggleViewModeBtn(true)
+        this.view.btn.classList.add("appear")
     }
 
 }

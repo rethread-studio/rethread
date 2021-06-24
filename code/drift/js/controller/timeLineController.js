@@ -85,16 +85,17 @@ export default class TimeLineController {
 
     unMountView() {
         this.model.removeObserver(this);
-        this.removeTimeInterval();
+        // this.removeTimeInterval();
         this.removeEventListeners();
         this.model.resetSlider();
     }
 
     update(changeDetails) {
         if (changeDetails.type == "playTimeLine") {
-            this.setTimeInterval();
+            // console.log("play interval")
+            // this.setTimeInterval();
         } else if (changeDetails.type == "pauseTimeLine") {
-            this.removeTimeInterval();
+            // this.removeTimeInterval();
         } else if (changeDetails.type == "updateSpeed") {
             this.removeTimeInterval();
             this.setTimeInterval();

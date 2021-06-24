@@ -7,6 +7,7 @@ html {
 }
 
 body::-webkit-scrollbar {
+    overflow-x: hidden;
     /* display: none; */
   }
   /* Hide scrollbar for IE, Edge and Firefox */
@@ -417,7 +418,7 @@ top:49%;
 }
 
 @-webkit-keyframes blurMid { 
-    0%{-webkit-filter: blur(0px);}
+    0%{-webkit-filter: blur(0px);}  
     50%{-webkit-filter: blur(3px);}
     100%{-webkit-filter: blur(0px);}
       
@@ -428,3 +429,66 @@ top:49%;
     100%{-webkit-filter: blur(0px);}
       
 } */
+
+
+.fade-in {
+    opacity: 0;
+    transition: opacity 250ms ease-in;
+  }
+  
+.fade-in.appear {
+    opacity: 1;
+}
+
+.from-left {
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%);
+}
+  
+.from-right {
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
+}
+
+.from-mid-right{
+    -webkit-transform: translate(100%,-50%);
+    transform: translate(100%,-50%);
+}
+
+.from-down {
+    -webkit-transform: translateY(150%);
+    transform: translateY(150%);
+}
+  
+.from-left,
+.from-right,
+.from-mid-right {
+transition: opacity 250ms ease-in, -webkit-transform 400ms ease-in;
+transition: opacity 250ms ease-in, transform 400ms ease-in;
+transition: opacity 250ms ease-in, transform 400ms ease-in,
+    -webkit-transform 400ms ease-in;
+opacity: 0;
+}
+
+.from-down {
+    transition: opacity 250ms ease-in, -webkit-transform 400ms ease-in;
+    transition: opacity 250ms ease-in, transform 400ms ease-in;
+    transition: opacity 250ms ease-in, transform 400ms ease-in,
+        -webkit-transform 400ms ease-in;
+    }
+  
+  .from-left.appear,
+  .from-right.appear {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+    opacity: 1;
+  }
+  .from-mid-right.appear {
+    -webkit-transform: translate(0,-50%);
+    transform: translate(0,-50%);
+    opacity: 1;
+  }
+  .from-down.appear {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }

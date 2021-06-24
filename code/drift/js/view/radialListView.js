@@ -8,7 +8,7 @@ export default class RadialListView {
     render() {
         const checkBox = this.model.getDataChildren()
             .map(i => {
-                return `<label id="${i.name}Radial" class="inline-flex items-center mt-3 cursor-pointer">
+                return `<label id="${i.name}Radial" class="inline-flex items-center mt-3 cursor-pointer from-left appear">
                             <input type="radio" value="${i.name}" class="form-radio h-5 w-5 text-red-600" ${i.state ? "checked" : ``}>
                             <span class="ml-2 white">${i.name}</span>
                         </label>`
@@ -31,11 +31,11 @@ export default class RadialListView {
     }
 
     hideOptions() {
-
+        console.log("hide radials")
         this.model.getDataChildren()
             .map(i => document.getElementById(`${i.name}Radial`))
             .forEach((e, i) => {
-                if (i != 0) e.classList.add("hidden")
+                if (i != 0) e.classList.remove("appear")
             })
     }
 
@@ -43,7 +43,7 @@ export default class RadialListView {
         this.model.getDataChildren()
             .map(i => document.getElementById(`${i.name}Radial`))
             .forEach((e, i) => {
-                if (i != 0) e.classList.remove("hidden")
+                if (i != 0) e.classList.add("appear")
             })
     }
 

@@ -2,14 +2,15 @@
 import createObserver from '../intersectionOberserver.js'
 
 export default class ExhibitionViewController {
-    constructor(view, model) {
+    constructor(view, vizModel, model) {
         this.view = view;
         // this.wheelHandler = this.wheelEvent.bind(this);
         this.speed = 0;
         this.position = 0;
         this.rounded = 0;
-        this.model = model
-        this.model.addObserver(this);
+        this.model = model;
+        this.vizModel = vizModel
+        this.vizModel.addObserver(this);
         this.scrollHandler = this.onScroll.bind(this);
         this.prevRatio = 0;
         this.intersectHandler = this.handleIntersect.bind(this)
@@ -23,7 +24,7 @@ export default class ExhibitionViewController {
 
 
     // wheelEvent(e) {
-    //     this.model.updateSpeed(e.deltaY);
+    //     this.vizModel.updateSpeed(e.deltaY);
     //     this.position += e.deltaY
 
     // }
@@ -35,10 +36,13 @@ export default class ExhibitionViewController {
             // console.log(entry.target, entry.isIntersecting, entry.intersectionRatio)
             const element = entry.target.getAttribute("id") == "exhibitDescrip" ? entry.target.parentElement : entry.target;
             if (entry.isIntersecting) {
-                // console.log(this.model, this)
-                this.model.activateSection(element.getAttribute("id"))
+                // console.log(this.vizModel, this)
+                element.classList.add("appear")
+                this.vizModel.activateSection(element.getAttribute("id"))
                 // console.log(element.getAttribute("value"))
 
+            } else {
+                element.classList.remove("appear")
             }
 
             // if (entry.intersectionRatio > this.prevRatio) {
@@ -73,51 +77,50 @@ export default class ExhibitionViewController {
     }
 
     setState() {
-        const state = this.model.getActiveSection()
+        const state = this.vizModel.getActiveSection()
         //get state
         switch (state) {
             case 0:
-                // this.view.intro.classList.remove("hidden")
-                this.view.timeline.classList.add("hidden")
-                this.view.viewsMenu.classList.add("hidden")
-                this.view.sitesMenuViewController.hideOptions()
-                this.model.removeImages()
-                this.model.showFirstImage()
-                // this.model.showImages()
-                // this.model.spreadImages()
-                //hide timeline
-                //hide side menu views
-                //hide other view options enable only the first
-                //viz show only screen shot
 
+                this.view.currentTime.classList.add("appear")
+                this.view.timeline.classList.remove("appear")
+                this.view.viewsMenu.classList.remove("appear")
+                this.view.sitesMenuViewController.hideOptions()
+                this.view.sideMenuController.hideOptions()
+                this.vizModel.removeImages()
+                this.vizModel.showFirstImage()
+                this.model.getChangePlayState(true)
                 break;
             case 1:
-                // this.view.intro.classList.add("hidden")
-                // this.view.process.classList.remove("hidden")
-                this.view.timeline.classList.add("hidden")
-                this.view.viewsMenu.classList.remove("hidden")
+                this.view.timeline.classList.remove("appear")
+                this.view.viewsMenu.classList.add("appear")
                 this.view.sideMenuController.hideOptions()
-                this.model.removeImages()
-                this.model.showImages()
-                //show views side menu, hide button spread
-                //viz show all views 
-                // 
+                this.view.sitesMenuViewController.hideOptions()
+                this.vizModel.removeImages()
+                this.vizModel.showImages()
                 break;
             case 2:
-                this.view.timeline.classList.remove("hidden")
+                this.view.timeline.classList.add("appear")
                 this.view.sideMenuController.hideOptions()
+                this.view.sitesMenuViewController.hideOptions()
                 //show timeline
                 break;
             case 3:
                 this.view.sideMenuController.showOptions()
-                this.model.removeImages()
-                this.model.showImages()
-                //show button and spread viz
+
+                this.view.timeline.classList.add("appear")
+                this.view.viewsMenu.classList.add("appear")
+                this.vizModel.removeImages()
+                this.vizModel.showImages()
                 break;
             case 4:
+                this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.showOptions()
-                // this.model.removeImages()
-                this.model.centerImages()
+                this.view.timeline.classList.add("appear")
+                this.view.viewsMenu.classList.add("appear")
+                this.vizModel.removeImages()
+                this.vizModel.showImages()
+                this.vizModel.centerImages()
                 //show all and hide texts
                 break;
 
@@ -146,13 +149,14 @@ export default class ExhibitionViewController {
     }
 
     unMountView() {
-        this.model.resetActiveSection()
-        this.model.removeImages();
+        this.model.removeTimeInterval()
+        this.vizModel.resetActiveSection()
+        this.vizModel.removeImages();
         this.view.unMountView()
         this.removeEventListener()
     }
 
-    //update info when modified in model
+    //update info when modified in vizModel
     update(changeDetails) {
         if (changeDetails.type == "changeVisState") {
             this.setState()

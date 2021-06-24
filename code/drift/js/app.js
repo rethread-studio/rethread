@@ -48,7 +48,7 @@ window.onload = function () {
     homeViewController = new HomeViewController(homeView, model);
 
     let exhibitionView = new ExhibitionView('page-content', model, mainVizTD);
-    exhibitionViewController = new ExhibitionViewController(exhibitionView, mainVizTD);
+    exhibitionViewController = new ExhibitionViewController(exhibitionView, mainVizTD, model);
 
     let robotView = new RobotView('page-content', model);
     robotViewController = new RobotViewController(robotView, chatView, model);

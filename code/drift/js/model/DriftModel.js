@@ -120,6 +120,9 @@ export default class DriftModel {
         this.mainMenu = mainMenu;
         this.chatvisible = true;
         this.stack = true;
+        this.timeInterval = null;
+        this.intervalHandler = this.advanceSliderPos.bind(this);
+        this.viewModeBtn = false;
     }
 
     init() {
@@ -128,6 +131,14 @@ export default class DriftModel {
         this.getSitesVisits()
         this.getMainMenu()
         this.getVoteWebsites()
+    }
+
+    getViewMode() {
+        return this.viewModeBtn;
+    }
+
+    toggleViewModeBtn() {
+        this.viewModeBtn = !this.viewModeBtn;
     }
 
     getStack() {
@@ -184,10 +195,22 @@ export default class DriftModel {
         return this.playState;
     }
 
-    getChangePlayState() {
-        this.playState = !this.playState;
+    getChangePlayState(play = true) {
+        this.playState = play != undefined ? play : !this.playState;
         const type = this.playState ? "playTimeLine" : "pauseTimeLine"
+        if (this.timeInterval != null) this.removeTimeInterval()
+        type == "playTimeLine" ? this.setTimeInterval() : this.removeTimeInterval();
         this.notifyObservers({ type: type });
+    }
+
+    setTimeInterval() {
+        const speed = this.getCurrentSpeed()
+        this.timeInterval = window.setInterval(this.intervalHandler, speed)
+    }
+
+    removeTimeInterval() {
+        if (this.timeInterval != null && this.timeInterval != undefined) clearInterval(this.timeInterval);
+        this.timeInterval = null;
     }
 
     getSliderSpeed() {
@@ -436,9 +459,8 @@ export default class DriftModel {
         //get selected item in menu
         const site = this.data.children.find(e => e.state == 1)
         //get time
-        console.log(site)
         const time = this.visits[this.currentVisit].getTime();
-        console.log("thime", time)
+
         //size
         const size = 800;
         return [
@@ -551,4 +573,6 @@ export default class DriftModel {
         this.stack ? this.cleanSites() : "";
         this.notifyObservers({ type: "displayUpdate" });
     }
+
+
 }

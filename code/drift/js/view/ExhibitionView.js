@@ -26,16 +26,16 @@ export default class ExhibitionView {
             
             
             <div id="visContainer" class="h-screen w-screen fixed top-0">
-                    <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0"></div>
-                    <div id="timeLineWrapper"></div>
-                    <div id="currentTimeWrapper" class= "relative top-100 ml-5 "></div>
-                    <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5"></div>
+                    <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right"></div>
+                    <div id="timeLineWrapper" class="absolute bottom-0 mb-10 left-0  flex flex-col flex-wrap justify-start from-down"></div>
+                    <div id="currentTimeWrapper" class= "relative top-100 ml-5 fade-in"></div>
+                    <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5 "></div>
             </div>
-            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 "> </div>
-            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72"> </div>
-            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72"> </div>
-            <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72"> </div>
-            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72"> </div>
+            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in "> </div>
+            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
+            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
+            <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
+            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
         </div>
        
 		`;
@@ -113,5 +113,6 @@ export default class ExhibitionView {
         this.timeline = document.getElementById('timeLineWrapper')
         this.viewsMenu = document.getElementById('viewSideMenu')
         this.exhibitContent = document.getElementById('exhibitContent');
+        this.currentTime = document.getElementById('currentTimeWrapper');
     }
 }

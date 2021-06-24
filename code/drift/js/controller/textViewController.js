@@ -16,19 +16,19 @@ export default class TextViewController {
 
     addEventListeners() {
 
-        this.view.btn.addEventListener("click", this.clickHandler);
+        // this.view.btn.addEventListener("click", this.clickHandler);
 
     }
 
     removeEventListeners() {
-        this.view.btn.removeEventListener("click", this.clickHandler);
+        // this.view.btn.removeEventListener("click", this.clickHandler);
 
 
     }
 
     renderView() {
         this.view.render();
-        this.addEventListeners()
+        // this.addEventListeners()
     }
     unMountView() {
         removeEventListeners();

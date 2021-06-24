@@ -1,10 +1,7 @@
-const nameAccessor = (d) => d.name;
+
 const stateItemAccessor = (d) => d.state;
 const valueAccessor = (d) => d.value;
-const getState = (d) => d.state == 1 ? "menuText active cursor-pointer" : "menuText cursor-pointer"
-const getStyle = (rectDimensions) => (d, i) => `translate(${-20
-    }px, ${rectDimensions.sectionHeight * i + rectDimensions.sectionHeight / 2
-    }px)`;
+
 //calculate the height related to the windows scroll height
 const posScale = (dimensions) => d3.scaleLinear()
     .domain([0, document.documentElement.scrollHeight])
@@ -20,6 +17,8 @@ export default class SideMenuView {
     render() {
         const accessor = this.model.getModeAccessor();
         const stack = this.model.getStack();
+        const viewButton = this.model.getViewMode();
+        console.log(viewButton)
         const btnIcon = stack ? `<i class="fas fa-square-full mr-1 ml-2 text-xs"></i> <i class="fas fa-square-full text-xs"></i>` : `<i class="fas fa-clone ml-2"></i>`
         const menuInfo = this.model.getMenu("views")
             .map((i) => {
@@ -35,7 +34,7 @@ export default class SideMenuView {
 
         const content = `
         <div class="flex flex-col items-end">
-            <button id="spreadBtn" class="transition-colors border-gray-600 bg-gray-600 border-2 duration-500 ease-in-out mb-5 rounded-xl p-3  bg-transparent hover:bg-white white hover:text-black text-center focus:border-0 focus:border-transparent focus:outline-none flex flex-row items-center justify-center" >${stack ? "spread" : "stack"} ${btnIcon} </button>
+            <button id="spreadBtn" class="transition-colors border-gray-600 bg-gray-600 border-2 duration-500 ease-in-out mb-5 rounded-xl p-3  bg-transparent hover:bg-white white hover:text-black text-center focus:border-0 focus:border-transparent focus:outline-none flex flex-row items-center justify-center from-right ${viewButton ? " appear" : ""}" >${stack ? "spread" : "stack"} ${btnIcon} </button>
             <ul class="viewsList">
                 ${menuInfo}
             </ul>
