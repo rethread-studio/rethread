@@ -5,3 +5,5 @@ export const formatMonth = date => d3.timeFormat("%b")(date)
 let d = 0;
 
 export default d;
+
+

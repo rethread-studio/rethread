@@ -8,14 +8,17 @@ import CurrentTimeView from './currentTimeView.js';
 import CurrentTimeViewController from '../controller/currentTimeViewController.js';
 import TextView from './textView.js';
 import TextViewController from '../controller/textViewController.js';
-import exhibitionTexts from '../staticData.js'
+import exhibitionTexts from '../staticData.js';
+import LegendView from './legendView.js';
+import LegendViewController from '../controller/legendViewController.js';
 
 export default class ExhibitionView {
-    constructor(container, model, vizModel) {
+    constructor(container, model, vizModel, legendModel) {
 
         this.container = document.getElementById(container);
         this.model = model;
         this.vizModel = vizModel;
+        this.legendModel = legendModel;
         // this.meetRobot_btn = null;
     }
 
@@ -23,13 +26,12 @@ export default class ExhibitionView {
         // <div id="webSitesWrapper"></div>
         const content = `
         <div id="exhibitContent" class="">
-            
-            
             <div id="visContainer" class="h-screen w-screen fixed top-0">
-                    <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right"></div>
+                    <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right background-black p-8 rounded-md shadow-lg "></div>
                     <div id="timeLineWrapper" class="absolute bottom-0 mb-10 left-0  flex flex-col flex-wrap justify-start from-down"></div>
                     <div id="currentTimeWrapper" class= "relative top-100 ml-5 fade-in"></div>
-                    <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5 "></div>
+                    <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5  "></div>
+                    <div id="legend" class="absolute z-10 top-0 p-5 bg-gray-800 rounded-xl transition-transform duration-500 ease-in-out w-5/12 hidden"></div>
             </div>
             <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in "> </div>
             <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
@@ -42,6 +44,7 @@ export default class ExhibitionView {
         this.container.innerHTML = content;
         this.renderTexts();
         // this.renderMainVis();
+        this.renderLegend();
         this.renderSideMenu();
         this.renderTimeLine();
         this.renderSitesMenu();
@@ -57,6 +60,12 @@ export default class ExhibitionView {
         this.currentTimeController = new CurrentTimeViewController(currentTimeView, this.model);
         this.currentTimeController.renderView();
     }
+
+    renderLegend() {
+        let legendView = new LegendView('legend', this.legendModel);
+        this.legendViewController = new LegendViewController(legendView, this.legendModel);
+        this.legendViewController.renderView()
+    }
     // renderMainVis() {
     //     //ADD MAIN VISUALIZATION VIEW
     //     let mainVisView = new MainVisView("webSitesWrapper", this.model);
@@ -67,7 +76,7 @@ export default class ExhibitionView {
     renderSideMenu() {
         //ADD SIDE MENU VIEW
         let sideMenuView = new SideMenuView("viewSideMenu", this.model);
-        this.sideMenuController = new SideMenuController(sideMenuView, this.model, this.vizModel);
+        this.sideMenuController = new SideMenuController(sideMenuView, this.model, this.vizModel, this.legendViewController);
         this.sideMenuController.renderView();
     }
 
