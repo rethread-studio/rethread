@@ -492,3 +492,21 @@ opacity: 0;
     -webkit-transform: translateY(0);
     transform: translateY(0);
   }
+
+  #tooltipText:before {
+    content: '';
+  position: absolute;
+  bottom: 0;
+  top: 50%;
+  left:100%;
+  width: 12px;
+  height: 12px;
+  /* --tw-bg-opacity: 1; */
+    background-color: rgba(45, 55, 72, 1);
+  
+  border-top-color: transparent;
+  border-left-color: transparent;
+  transform: translate(-50%, 50%) rotate(-45deg);
+  transform-origin: center center;
+  z-index: 10;
+  }

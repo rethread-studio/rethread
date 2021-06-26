@@ -173,6 +173,10 @@ export default class DriftModel {
         return this.mode;
     }
 
+    getModeText() {
+        return !this.mode ? 'human' : 'nerd';
+    }
+
     getMenuVisible() {
         return this.menuVisible;
     }

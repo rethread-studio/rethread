@@ -21,11 +21,12 @@ import MainVizTDView from './view/MainVizTDView.js';
 import MainVizTDViewController from './controller/mainVizTDViewController.js';
 import EmojiView from './view/emojiView.js';
 import EmojiController from './controller/emojiController.js';
-
+import { legendTexts } from './staticData.js'
+import Legend from './model/legendModel.js'
 
 export let mainVizTD, robotView, miniChatController, homeViewController, exhibitionViewController, robotViewController, tourViewController, aboutViewController, mainMenuViewController, emojiController, chatBtnController, mainVizController;
 // let mainVizTD
-export let currentView, model;
+export let currentView, model, legendModel;
 
 export let apiService;
 
@@ -40,6 +41,8 @@ window.onload = function () {
     mainVizTD = new MainVizTDModel();
     mainVizTD.init();
 
+    legendModel = new Legend(legendTexts);
+
     let chatView = new ChatView('chat', model);
     miniChatController = new MiniChatController(chatView, model);
 
@@ -47,7 +50,7 @@ window.onload = function () {
     let homeView = new HomeView('page-content', model);
     homeViewController = new HomeViewController(homeView, model);
 
-    let exhibitionView = new ExhibitionView('page-content', model, mainVizTD);
+    let exhibitionView = new ExhibitionView('page-content', model, mainVizTD, legendModel);
     exhibitionViewController = new ExhibitionViewController(exhibitionView, mainVizTD, model);
 
     let robotView = new RobotView('page-content', model);

@@ -23,10 +23,12 @@ export default class SideMenuView {
             .map((i) => {
                 const slct = stateItemAccessor(i);
                 return `<li data-value="${valueAccessor(i)}" class ="viewListItem cursor-pointer transition duration-500 ease-in-out viewItem text-right mt-3 flex flex-row items-center justify-end ${slct == 1 ? "white" : " text-gray-700"}">
-                            <i class="fas fa-question mr-2 text-xs text-gray-800 hover:text-white"></i>
-                            ${accessor(i)}  
-                        <div class="box transition duration-500 ease-in-out rounded-md border-2 ${slct == 1 ? "border-white bg-white" : " border-gray-700"} bg-transparent ml-2" ><div/>
-                    </li>`
+                            <div class="question"> 
+                                <i class="fas fa-question mr-2 text-xs text-gray-800 hover:text-white"></i>
+                            </div>
+                                ${accessor(i)}  
+                            <div class="box transition duration-500 ease-in-out rounded-md border-2 ${slct == 1 ? "border-white bg-white" : " border-gray-700"} bg-transparent ml-2" ><div/>
+                        </li>`
 
             })
             .join(" ")
