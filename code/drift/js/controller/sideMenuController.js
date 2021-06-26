@@ -11,6 +11,28 @@ export default class SideMenuController {
         this.btnClickHandler = this.onClickBtn.bind(this);
         this.mouseOverHandler = this.onMouseOver.bind(this);
         this.mouseOutHandler = this.onmouseOut.bind(this)
+
+        this.itemOverHandler = this.onItemMouseEnter.bind(this)
+        this.itemLeaveandler = this.onItemMouseLeave.bind(this)
+
+        this.timeOut = null;
+    }
+
+    onItemMouseEnter(e) {
+        const element = e.currentTarget;
+        const value = element.dataset.value;
+        const showTooltip = this.showTooltip.bind(this);
+        this.timeOut = setTimeout(function () { showTooltip(element, value) }, 1000);
+    }
+
+    onItemMouseLeave(e) {
+        this.clearLegendTimeOut()
+        this.legendViewController.hideLegend()
+    }
+
+    clearLegendTimeOut() {
+        if (this.timeOut != null) clearTimeout(this.timeOut);
+        this.timeOut = null;
     }
 
     onMouseOver(e) {
@@ -24,10 +46,12 @@ export default class SideMenuController {
 
     onClickBtn(e) {
         this.model.toggleDisplay();
+        this.legendViewController.hideLegend();
     }
 
     onClickItem(e) {
         const value = e.currentTarget.dataset.value;
+        this.clearLegendTimeOut()
         this.model.selectView(value)
     }
 
@@ -36,13 +60,14 @@ export default class SideMenuController {
         // let bodyRect = document.body.getBoundingClientRect()
         let { y } = element.getBoundingClientRect()
         let { x } = this.view.container.getBoundingClientRect()
-        console.log(element.parentNode)
         this.legendViewController.showLegend(x, y, value, mode)
     }
 
     addEventListener() {
         this.view.items.forEach(element => {
             element.addEventListener("click", this.clickHandler)
+            element.addEventListener("mouseenter", this.itemOverHandler)
+            element.addEventListener("mouseleave", this.itemLeaveandler)
         });
         const questionsBtn = [...document.getElementsByClassName("question")];
 
@@ -53,6 +78,22 @@ export default class SideMenuController {
 
         this.view.btn.addEventListener("click", this.btnClickHandler)
 
+    }
+
+    removeEventListener() {
+        this.view.items.forEach(element => {
+            element.removeEventListener("click", this.clickHandler)
+            element.removeEventListener("mouseenter", this.itemOverHandler)
+            element.removeEventListener("mouseleave", this.itemLeaveandler)
+        });
+        const questionsBtn = [...document.getElementsByClassName("question")];
+
+        questionsBtn.forEach(el => {
+            el.removeEventListener("mouseenter", this.mouseOverHandler)
+            el.removeEventListener("mouseleave", this.mouseOutHandler)
+        })
+
+        this.view.btn.removeEventListener("click", this.btnClickHandler)
     }
 
     renderView() {

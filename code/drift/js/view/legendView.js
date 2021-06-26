@@ -3,7 +3,6 @@ export default class LegendView {
 
         this.container = document.getElementById(container);
         this.model = model
-        console.log(this.model)
 
     }
 
