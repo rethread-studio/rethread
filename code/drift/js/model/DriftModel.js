@@ -2,6 +2,8 @@
 import { apiService } from '../app.js'
 import { dataTest, mainMenu } from '../apiService.js';
 import { formatMonth, formatDay, formatHour } from '../helpers.js';
+import ImageSequence from './imageSequence.js'
+
 //HELPERS
 const hierarchySize = (d) => d.value;
 const sortBySize = (a, b) => hierarchySize(b) - hierarchySize(a);
@@ -123,6 +125,8 @@ export default class DriftModel {
         this.timeInterval = null;
         this.intervalHandler = this.advanceSliderPos.bind(this);
         this.viewModeBtn = false;
+
+        this.imageSequence;
     }
 
     init() {
@@ -360,6 +364,15 @@ export default class DriftModel {
             //set visits and notify
             .then(data => {
                 this.visits = data;
+                const sitesName = dataTest.children.map(s => {
+                    return {
+                        name: s.name,
+                        active: s.state
+                    }
+                });
+                const views = this.menu.map(v => v.value)
+                this.imageSequence = new ImageSequence(data, sitesName, views)
+                this.imageSequence.step();
                 this.notifyObservers({ type: "updateTimeLine" });
             })
 
@@ -415,7 +428,13 @@ export default class DriftModel {
 
     advanceSliderPos() {
         const newPos = this.currentVisit + 1;
+        //advance only if next position is loaded
+        if (this.imageSequence.isStepLoaded(newPos) == false) return;
+        //if next position loaded update
         this.currentVisit = newPos % this.visits.length == 0 ? 0 : newPos;
+        //UPLOAD RANGE
+        this.updateSequenceLoaderPos()
+        //ask for the image 
         this.updateDataImage();
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" })
@@ -501,10 +520,14 @@ export default class DriftModel {
         const scale = d3.scaleLinear()
             .rangeRound([0, this.visits.length - 1]);
         this.currentVisit = scale(pos);
+        this.updateSequenceLoaderPos()
         this.updateDataImage();
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
+    }
 
+    updateSequenceLoaderPos() {
+        this.imageSequence.setRange(this.currentVisit);
     }
 
     //posX is the percentage of the posX with the Width
@@ -550,6 +573,7 @@ export default class DriftModel {
                 return i;
             })
             .sort((a, b) => b.name > a.name)
+        this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
     }
 
@@ -560,6 +584,7 @@ export default class DriftModel {
                 return i;
             })
             .sort((a, b) => b.name > a.name)
+        this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
     }
     cleanSites() {
@@ -569,8 +594,16 @@ export default class DriftModel {
             active += active == 0 && e.state == 1 ? 1 : 0;
             return e;
         })
+        this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
     }
+
+    updateSequenceSites() {
+        const activeSites = this.data.children.filter(s => s.state == 1)
+            .map(s => s.name)
+        this.imageSequence.activateOrDeactivateSite(activeSites, 1);
+    }
+
     toggleDisplay() {
         this.stack = !this.stack;
         this.stack ? this.cleanSites() : "";

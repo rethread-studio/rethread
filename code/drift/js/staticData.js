@@ -37,7 +37,7 @@ export const legendTexts = {
         human: `Coverage Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
         nerd: `Coverage mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
     },
-    trace: {
+    graph: {
         human: `Execution Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
         nerd: `Execution  mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
     },

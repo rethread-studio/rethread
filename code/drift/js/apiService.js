@@ -165,17 +165,17 @@ const viewsMenu = [
         state: 1,
     },
     {
-        name: "Graph",
+        name: "Coverage",
         human: "Coverage",
         nerd: "Code",
         value: "coverage",
         state: 0,
     },
     {
-        name: "Coverage",
+        name: "graph",
         human: "Execution trace",
         nerd: "Flow",
-        value: "trace",
+        value: "graph",
         state: 0
     },
     {
