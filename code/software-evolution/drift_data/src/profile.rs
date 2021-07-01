@@ -131,6 +131,7 @@ impl FunctionCall {
     }
 }
 
+#[derive(Clone)]
 pub struct TraceData {
     pub graph_data: GraphData,
     pub indentation_profile: Option<Vec<u32>>,
@@ -181,6 +182,7 @@ impl TraceData {
     }
 }
 
+#[derive(Clone)]
 pub struct GraphData {
     pub script_data: HashMap<String, ScriptData>,
     pub depth_tree: Vec<TreeNode>,
@@ -241,6 +243,7 @@ impl GraphData {
     }
 }
 
+#[derive(Clone)]
 pub struct TreeNode {
     pub depth: i32,
     pub script_id: i32,
@@ -248,6 +251,7 @@ pub struct TreeNode {
     pub ticks: i32,
 }
 
+#[derive(Clone)]
 pub struct ScriptData {
     pub id: i32,
     /// the number of ticks recorded in the functions in this script
@@ -301,6 +305,7 @@ impl ScriptData {
     }
 }
 
+#[derive(Clone)]
 pub struct FunctionData {
     pub ticks_in_function: i32,
     pub calls_to_function: u32,
