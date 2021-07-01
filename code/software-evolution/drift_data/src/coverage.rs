@@ -6,7 +6,7 @@ Deserializing of the coverage.json file and conversion of the data within it to 
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Coverage {
     scripts: Option<Vec<CoverageScript>>,
@@ -59,7 +59,7 @@ impl Coverage {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CoverageScript {
     script_id: String,
@@ -67,7 +67,7 @@ pub struct CoverageScript {
     functions: Vec<CoverageFunction>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CoverageFunction {
     function_name: String,
@@ -75,7 +75,7 @@ pub struct CoverageFunction {
     is_block_coverage: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CoverageRange {
     start_offset: i64,
