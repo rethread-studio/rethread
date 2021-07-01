@@ -42,6 +42,10 @@ font-family: 'Roboto', sans-serif;
     background-color: #02061B;
 }
 
+.background-black-opacity{
+    background-color: rgba(2 6 27/ 85%);
+
+}
 
 
 .robotoFont{

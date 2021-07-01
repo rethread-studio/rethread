@@ -122,6 +122,7 @@ export default class DriftModel {
         this.mainMenu = mainMenu;
         this.chatvisible = true;
         this.stack = true;
+        this.stackDisabled = true;
         this.timeInterval = null;
         this.intervalHandler = this.advanceSliderPos.bind(this);
         this.viewModeBtn = false;
@@ -211,6 +212,7 @@ export default class DriftModel {
     }
 
     setTimeInterval() {
+        if (this.timeInterval != null) return;
         const speed = this.getCurrentSpeed()
         this.timeInterval = window.setInterval(this.intervalHandler, speed)
     }
@@ -286,7 +288,7 @@ export default class DriftModel {
     type :  string with either SITES or VIEWS
     return a object array with the sections for the website
     */
-    getMenu(type) {
+    getMenu() {
         return this.menu;
     }
 
@@ -348,8 +350,8 @@ export default class DriftModel {
         if (isDifferent) {
             this.currentSection = nextSection;
             this.menu = this.menu.map(updateState(this.currentSection.name))
-            this.updateDataImage();
             this.notifyObservers({ type: "updateSideMenu" });
+            this.notifyObservers({ type: "updateImages" });
         }
 
     }
@@ -405,6 +407,7 @@ export default class DriftModel {
             return e;
         })
         this.notifyObservers({ type: "updateViewSideMenu" });
+        this.notifyObservers({ type: "updateImages" });
 
     }
 
@@ -435,23 +438,8 @@ export default class DriftModel {
         //UPLOAD RANGE
         this.updateSequenceLoaderPos()
         //ask for the image 
-        this.updateDataImage();
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" })
-    }
-
-    updateDataImage() {
-        //if it is the intro skip
-        if (this.currentSection == "Intro") return;
-        // get time in unix timestamp
-        const currentTime = this.visits[this.currentVisit].getTime();
-        //get current VIEW from MENU
-        const menuName = this.currentSection.name.toLowerCase();
-        //change the images in the data
-        this.data.children = this.data.children.map(site => {
-            site.image = this.getApiImage(menuName, site.name, 800, currentTime)
-            return site;
-        })
     }
 
     getActiveNodes() {
@@ -478,21 +466,28 @@ export default class DriftModel {
     }
 
     getImagesFromSite() {
-        //get selected item in menu
-        const site = this.data.children.find(e => e.state == 1)
-        //get time
-        const time = this.visits[this.currentVisit].getTime();
+        //get images at current pos from image sequence
+        const activeIndex = this.menu.findIndex(e => e.state == 1);
+        let images = [...this.imageSequence.getImagesInPos(this.currentVisit, activeIndex)]
+        images = images == null ? this.imageSequence.getBackUpImages() : images;
+        //SORT IMAGES ACCORDING TO MENU
 
-        //size
-        const size = 800;
-        return [
-            apiService.getSiteScreenshot(site.name, time, size),
-            // apiService.getSiteGraph(site, time, size),
-            // apiService.getSiteCoverage(site, time, size),
-            // apiService.getSiteNetwork(site, time, size),
-            // apiService.getSiteProfile(site, time, size),
-            // apiService.getSiteScreenshot(site, time, size),
-        ]
+        return images;
+    }
+
+    getSitesImages() {
+        const activeIndex = this.menu.findIndex(e => e.state == 1);
+        return [...this.imageSequence.getSitesImagesInPos(this.currentVisit, activeIndex)]
+    }
+
+    getNumActiveSites() {
+        return this.data.children.filter(e => e.state == 1).length;
+    }
+
+    getScreenShotFromSite() {
+        let images = this.imageSequence.getScreenShotInPos(this.currentVisit)
+        images = images == null ? this.imageSequence.getBackUpImages() : images;
+        return images;
     }
 
     calculateSliderPos(pos = null) {
@@ -521,7 +516,6 @@ export default class DriftModel {
             .rangeRound([0, this.visits.length - 1]);
         this.currentVisit = scale(pos);
         this.updateSequenceLoaderPos()
-        this.updateDataImage();
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
     }
@@ -567,14 +561,36 @@ export default class DriftModel {
     }
 
     selectSite(name) {
-        this.data.children = this.data.children
-            .map(i => {
-                if (i.name == name) i.state = i.state == 1 ? 0 : 1;
-                return i;
-            })
+
+        const activeItems = this.data.children.filter(i => {
+            return i.state == 1
+        });
+        if (activeItems.length == 1 && activeItems[0].name == name) {
+            this.notifyObservers({ type: "sitesUpdated" });
+            return;
+        };
+
+        this.data.children = this.data.children.map(i => {
+            if (i.name == name) i.state = i.state == 1 ? 0 : 1;
+            return i;
+        })
             .sort((a, b) => b.name > a.name)
+
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
+        this.notifyObservers({ type: "updateImages" });
+    }
+
+    selectFirstSite() {
+        this.data.children = this.data.children.map((item, i) => {
+            item.state = i == 0 ? 1 : 0;
+            return item;
+        })
+            .sort((a, b) => b.name > a.name)
+
+        this.updateSequenceSites();
+        this.notifyObservers({ type: "sitesUpdated" });
+        this.notifyObservers({ type: "updateImages" });
     }
 
     selectRadialSite(name) {
@@ -586,6 +602,7 @@ export default class DriftModel {
             .sort((a, b) => b.name > a.name)
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
+        this.notifyObservers({ type: "updateImages" });
     }
     cleanSites() {
         let active = 0;
@@ -604,10 +621,23 @@ export default class DriftModel {
         this.imageSequence.activateOrDeactivateSite(activeSites, 1);
     }
 
-    toggleDisplay() {
-        this.stack = !this.stack;
+    toggleDisplay(spread = null) {
+        this.stack = spread == null ? !this.stack : spread;
         this.stack ? this.cleanSites() : "";
         this.notifyObservers({ type: "displayUpdate" });
+    }
+
+    toggleNoNotification(toggleTo) {
+        this.stack = toggleTo;
+        // this.notifyObservers({ type: "updateToggle" });
+    }
+
+    getStackDisabled() {
+        return this.stackDisabled;
+    }
+
+    setStackDisabled(disabled) {
+        this.stackDisabled = disabled
     }
 
 

@@ -1,5 +1,7 @@
 
 import * as THREE from 'https://cdn.skypack.dev/pin/three@v0.129.0-s11MgzfqGP1yDDoEH9m1/mode=imports,min/optimized/three.js';
+import { OrbitControls } from 'https://cdn.skypack.dev/three@0.120.0/examples/jsm/controls/OrbitControls.js'
+// import { GUI } from './threejs/libs/co';
 // import { GUI } from './threejs/libs/dat.gui.min.js';
 import { model } from '../app.js'
 
@@ -17,7 +19,7 @@ export default class MainVizTDModel {
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
-        this.numParticles = 1; //100
+        this.numParticles = 100; //100
 
         this.observers = [];
 
@@ -30,6 +32,8 @@ export default class MainVizTDModel {
         this.meshes = [];
 
         this.timeImage = 0
+
+        this.controls;
 
         model.addObserver(this);
 
@@ -101,12 +105,16 @@ export default class MainVizTDModel {
     }
 
     init() {
+        // this.camera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 0.1, 2000);
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 2000);
         this.camera.position.z = 1000;
 
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
+
+        // const helper = new THREE.CameraHelper(this.camera);
+        // this.scene.add(helper);
         const geometry = new THREE.BufferGeometry();
         const vertices = [];
 
@@ -167,7 +175,17 @@ export default class MainVizTDModel {
 
 
 
-        //ACTIVATE LATER
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        // this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        // this.controls.dampingFactor = 0.05;
+
+        // this.controls.screenSpacePanning = false;
+
+        // this.controls.minDistance = 100;
+        // this.controls.maxDistance = 500;
+
+        // this.controls.maxPolarAngle = Math.PI / 2;
+        //ACTIVATE LATER    
         // document.body.appendChild(this.renderer.domElement);
         // document.body.style.touchAction = 'none';
         // document.body.addEventListener('pointermove', onPointerMove);
@@ -176,66 +194,67 @@ export default class MainVizTDModel {
 
 
 
-    handleImages() {
-        let images = [...document.querySelectorAll("img")];
-        // let imgApi = model.getImagesFromSite();
-        // console.log(imgApi)
-        images.forEach((im, i) => {
+    showSiteViewsVetically() {
+        //GET IMAGES FROM SEQUENCE
+        let imgApi = model.getImagesFromSite();
+
+        imgApi.forEach((im, i) => {
             let mat = this.material.clone();
             this.materialsImage.push(mat);
             let group = new THREE.Group();
+
             // mat.wireframe = true;
-            mat.uniforms.texture1.value = new THREE.Texture(im);
+            const texture = new THREE.TextureLoader().load(im.url);
+            mat.uniforms.texture1.value = texture;
             mat.uniforms.texture1.value.needsUpdate = true;
 
-            let geo = i == images.length - 1 ? new THREE.PlaneBufferGeometry(1.80780487805, 1, 20, 20) : new THREE.CircleBufferGeometry(1, 40)
-            let mesh = new THREE.Mesh(geo, mat);
+            let geo = im.type == "screenshot" ? new THREE.PlaneBufferGeometry((1.80780487805 * 1.5), (1 * 1.5), 20, 20) : new THREE.CircleBufferGeometry(1, 40)
+
+            let mesh;
+            if (im.type == "screenshot") {
+                const material = new THREE.MeshBasicMaterial({ map: texture });
+                mesh = new THREE.Mesh(geo, material);
+            } else {
+                mesh = new THREE.Mesh(geo, mat);
+            }
             group.add(mesh);
             this.groups.push(group);
             this.scene.add(group);
             this.meshes.push(mesh);
-            mesh.position.y = 2 + i * -1.3;
+            mesh.position.y = 2 + i * 0.5;
             mesh.position.x = 6.5 + (i * .002);
-            mesh.position.z = 985 + i;
-            i == images.length - 1 ? mesh.scale.set(8, 8, 8) : mesh.scale.set(7, 7, 7);
-            // group.rotation.y = -0.5;
-            // group.rotation.x = -0.3;
-            // group.rotation.z = -0.1;
+            mesh.position.z = 985 + -i;
         });
     }
 
-    handleImage() {
-        let images = [...document.querySelectorAll("img")];
-        let im = images[images.length - 1]
-        let i = images.length - 1;
-        // let imgApi = model.getImagesFromSite();
-        // console.log(imgApi)
+    showScreenShot() {
+        const screenShot = model.getScreenShotFromSite();
 
-        let mat = this.material.clone();
+        let mat = this.ctrMaterial().clone();
         this.materialsImage.push(mat);
         let group = new THREE.Group();
-        // mat.wireframe = true;
-        mat.uniforms.texture1.value = new THREE.Texture(im);
-        mat.uniforms.texture1.value.needsUpdate = true;
+        const texture = new THREE.TextureLoader().load(screenShot.url);
+        // mat.uniforms.texture1.value = new THREE.TextureLoader().load(screenShot.url);
+        // mat.uniforms.texture1.value.needsUpdate = true;
 
-        let geo = i == images.length - 1 ? new THREE.PlaneBufferGeometry(1.80780487805, 1, 20, 20) : new THREE.CircleBufferGeometry(1, 40)
-        let mesh = new THREE.Mesh(geo, mat);
+        let geo = new THREE.PlaneBufferGeometry(1.8058690745, 1, 20, 20);
+        const material = new THREE.MeshBasicMaterial({ color: 0xffffff, map: texture });
+        let mesh = new THREE.Mesh(geo, material);
         group.add(mesh);
         this.groups.push(group);
         this.scene.add(group);
         this.meshes.push(mesh);
-        mesh.position.y = 2 + i * -1.3;
-        mesh.position.x = 6.5 + (i * .002);
-        mesh.position.z = 985 + i;
-        i == images.length - 1 ? mesh.scale.set(8, 8, 8) : mesh.scale.set(7, 7, 7);
+        mesh.position.y = 0;
+        mesh.position.x = 0;
+        mesh.position.z = 800;
+        // i == mesh.scale.set(1, 1, 1);
         // group.rotation.y = -0.5;
         // group.rotation.x = -0.3;
         // group.rotation.z = -0.1;
 
     }
 
-    addObjects() {
-        let that = this;
+    addMaterial() {
         this.material = new THREE.ShaderMaterial({
             extensions: {
                 derivatives: "#extension GL_OES_standard_derivatives : enable",
@@ -253,6 +272,45 @@ export default class MainVizTDModel {
             vertexShader: document.getElementById('vertexshader').textContent,
             fragmentShader: document.getElementById('fragmentshader').textContent,
         });
+    }
+
+    ctrMaterial() {
+
+        return this.material = new THREE.ShaderMaterial({
+            extensions: {
+                derivatives: "#extension GL_OES_standard_derivatives : enable",
+            },
+            side: THREE.DoubleSide,
+            uniforms: {
+                time: { type: "f", value: 0 },
+                texture1: { type: "t", value: null },
+                u_resolution: { value: new THREE.Vector2(800, 443) },
+            },
+            // wireframe: true,
+            // transparent: true,
+            vertexShader: document.getElementById('CRTvertexshader').textContent,
+            fragmentShader: document.getElementById('CRTfragmentshader').textContent,
+        });
+        // return new THREE.ShaderMaterial({
+        //     extensions: {
+        //         derivatives: "#extension GL_OES_standard_derivatives : enable",
+        //     },
+        //     side: THREE.DoubleSide,
+        //     uniforms: {
+        //         time: { type: "f", value: 0 },
+        //         texture1: { type: "t", value: null },
+        //         curvature: { type: "v2", value: new THREE.Vector2(3.0, 3.0) },
+        //         screenResolution: { type: "v2", value: new THREE.Vector2(1853, 1025) },
+        //         scanLineOpacity: { type: "v2", value: new THREE.Vector2(1, 1) },
+        //         vignetteOpacity: { type: "f", value: 1 },
+        //         resolution: { type: "v4", value: new THREE.Vector4() },
+
+        //     },
+        //     // wireframe: true,
+        //     // transparent: true,
+        //     vertexShader: document.getElementById('CRTvertexshader').textContent,
+        //     fragmentShader: document.getElementById('CRTfragmentshader').textContent,
+        // });
     }
 
 
@@ -286,54 +344,82 @@ export default class MainVizTDModel {
         this.rounded = Math.round(this.position);
         let diff = (this.rounded - this.position)
         // this.position += Math.sign(diff) * Math.pow(Math.abs(diff), 0.8) * 0.015
-        // console.log(this.rounded)
-    }
 
-    showImages() {
-        this.addObjects();
-        this.handleImages();
-    }
-
-    showFirstImage() {
-        this.addObjects();
-        this.handleImage();
     }
 
     removeImages() {
         this.groups.forEach(e => {
             this.scene.remove(e)
         })
+
+        this.meshes.forEach(m => {
+            m.geometry.dispose();
+            m.material.dispose();
+            m = undefined;
+        })
+
+        this.groups = [];
+        this.materialsImage = [];
+        this.meshes = [];
     }
 
     //
 
     animate() {
         window.requestAnimationFrame(this.animateHandler);
+        // this.controls.update();
         this.render();
     }
 
-    changeLayout() {
+    showNewLayout() {
+        this.removeImages()
+        this.addMaterial();
         const stack = model.getStack();
-        stack ? this.centerImages() : this.spreadImages()
-    }
-
-    centerImages() {
-        this.meshes.forEach((mesh, i) => {
-            mesh.position.y = 4 + i * -1.3;
-            mesh.position.x = 0 + (i * .002);
-            mesh.position.z = 985 + i;
-            mesh.scale.set(7, 7, 7)
-        })
+        if (stack) {
+            this.showSiteViewsVetically()
+            this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
+        } else {
+            this.showSpreadSites()
+            const dof = model.getNumActiveSites()
+            this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof <= 2 ? 0.5 : 1)
+        }
 
     }
 
-    spreadImages() {
-        this.meshes.forEach((mesh, i) => {
-            mesh.position.y = 4;
-            mesh.position.x = 21 - (i * 8);
-            mesh.position.z = 985;
-            mesh.scale.set(3.5, 3.5, 3.5)
-        })
+
+    showSpreadSites() {
+        const sites = model.getSitesImages();
+        const initX = -4;
+        const size = 2;
+        const spread = size * 2 + size / 2;
+
+        sites.forEach((site, i) => {
+            site.images.forEach((img, j) => {
+                let mat = this.material.clone();
+                this.materialsImage.push(mat);
+                let group = new THREE.Group();
+                // mat.wireframe = true;
+                const texture = new THREE.TextureLoader().load(img.url);
+                mat.uniforms.texture1.value = texture
+                mat.uniforms.texture1.value.needsUpdate = true;
+
+                let geo = img.type == "screenshot" ? new THREE.PlaneBufferGeometry((1.80780487805 * size), (1 * size), 20, 20) : new THREE.CircleBufferGeometry(size, 40)
+                let mesh;
+                if (img.type == "screenshot") {
+                    const material = new THREE.MeshBasicMaterial({ map: texture });
+                    mesh = new THREE.Mesh(geo, material);
+                } else {
+                    mesh = new THREE.Mesh(geo, mat);
+                }
+                group.add(mesh);
+                this.groups.push(group);
+                this.scene.add(group);
+                this.meshes.push(mesh);
+                mesh.position.y = spread * -i;
+                mesh.position.x = initX + spread * j;
+                mesh.position.z = 985;
+            })
+        });
 
     }
 
@@ -377,10 +463,87 @@ export default class MainVizTDModel {
 
     }
 
+    upDateImages() {
+        const state = this.getActiveSection()
+        //get state
+        switch (state) {
+            case 0:
+                this.removeImages()
+                this.addMaterial();
+                this.showScreenShot();
+                this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1)
+                break;
+            case 1:
+                this.removeImages()
+                this.addMaterial();
+                this.showSiteViewsVetically();
+                this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
+                break;
+            case 2:
+                // if (!model.getStack()) model.toggleDisplay(true);
+                this.removeImages()
+                this.addMaterial();
+                this.showSiteViewsVetically();
+                this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
+                break;
+            case 3:
+                //RENDER SPREAD IMAGES
+                // console.log(model.stack)
+                // if (model.getStack()) 
+                // model.toggleNoNotification(false)
+                this.showNewLayout()
+                // this.showImages()
+                break;
+            case 4:
+                //do nothing
+                this.showNewLayout();
+                break;
 
+            default:
+                this.showNewLayout()
+                break;
+        }
+
+    }
+
+
+
+
+    fitCameraToSelection(camera, controls, selection, fitOffset = 1.2) {
+        const box = new THREE.Box3();
+
+        for (const object of selection) box.expandByObject(object);
+
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+
+        const maxSize = Math.max(size.x, size.y, size.z);
+        const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
+        const fitWidthDistance = fitHeightDistance / camera.aspect;
+        const distance = fitOffset * Math.max(fitHeightDistance, fitWidthDistance);
+
+        const direction = controls.target.clone()
+            .sub(camera.position)
+            .normalize()
+            .multiplyScalar(distance);
+
+        controls.maxDistance = distance * 10;
+        controls.target.copy(center);
+
+        camera.near = distance / 100;
+        camera.far = distance * 100;
+        camera.updateProjectionMatrix();
+
+        camera.position.copy(controls.target).sub(direction);
+
+        controls.update();
+    }
     update(changeDetails) {
         if (changeDetails.type == "displayUpdate") {
-            this.changeLayout()
+            this.upDateImages()
+
+        } else if (changeDetails.type == "updateImages") {
+            this.upDateImages()
         }
     }
 

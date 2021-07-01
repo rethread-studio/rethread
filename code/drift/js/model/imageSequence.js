@@ -29,26 +29,42 @@ class ImageGroup {
         this.loaded = false;
         this.imagesLoaded = 0;
         this.loadHandler = this.imageLoaded.bind(this);
+        this.urls = [];
+        this.initUrls();
     }
 
+    initUrls() {
+        this.urls = this.views.map(view => {
+            return {
+                type: view,
+                url: getApiImage(view, this.site, 800, this.visit.getTime())
+            }
+        })
+    }
 
+    getUrls() {
+        return this.urls;
+    }
 
     loadImage(url, type, callback) {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.addEventListener('load', () => {
-                callback()
+                callback(url, type)
                 resolve({
+                    imgGroup: this,
                     img: img,
                     source: url
                 })
             })
             img.addEventListener('error', (err) => {
-                callback()
+                const backup = `./img/backup${type.charAt(0).toUpperCase() + type.slice(1)}.jpg`;
+                callback(backup, type)
                 resolve({
+                    imgGroup: this,
                     img: img,
-                    source: `backup${type.charAt(0).toUpperCase() + type.slice(1)}`
-                })
+                    source: backup
+                });
             });
             img.src = url;
         });
@@ -57,6 +73,7 @@ class ImageGroup {
     loadImages() {
         this.images = this.views.map(view => {
             return {
+                site: this.site,
                 url: getApiImage(view, this.site, 800, this.visit.getTime()),
                 view: view
             }
@@ -68,6 +85,11 @@ class ImageGroup {
         return this.images;
     }
 
+    getImagesSolved() {
+        console.log(this.images)
+        return this.images
+    }
+
     getLoaded() {
         return this.loaded;
     }
@@ -76,11 +98,13 @@ class ImageGroup {
         this.loaded = val;
     }
 
-    imageLoaded() {
+    imageLoaded(url, type) {
         this.imagesLoaded++;
         if (this.imagesLoaded == this.images.length) {
             this.loaded = true;
         }
+        const image = this.urls.find(u => u.type == type)
+        image.url = url;
     }
 
 }
@@ -126,8 +150,16 @@ class SiteImages {
         return this.viewsImages[pos].getImages();
     }
 
+    getImagesFromPos(pos) {
+        return this.viewsImages[pos].getUrls();
+    }
+
+    getScreenShotFromPos(pos) {
+        return this.viewsImages[pos].getUrls().find(s => s.type == "screenshot")
+    }
+
     posLoaded(pos) {
-        return this.viewsImages[pos].isLoaded();
+        return this.viewsImages[pos].getLoaded();
     }
 }
 
@@ -159,14 +191,18 @@ class ImageSequence {
         const sites = this.getActiveSites();
         let imagePromises = [];
         sites.forEach(s => {
-            imagePromises = [...imagePromises, s.loadImagesPos(this.loadPos)]
+            imagePromises = [...imagePromises, ...s.loadImagesPos(this.loadPos)]
         })
-        Promise.all(imagePromises).then((values) => {
-            //update site group as loaded
-            this.siteChangeLoadStatus(this.loadPos, true)
-            //check if there is a next step
-            this.checkStep()
-        });
+        Promise.all(imagePromises)
+            .then((value) => {
+                //update site group as loaded
+                this.siteChangeLoadStatus(this.loadPos, true)
+                //check if there is a next step
+                this.checkStep()
+            })
+        // .catch(error => {
+        //     // console.error(error.message)
+        // });
 
     }
 
@@ -213,12 +249,49 @@ class ImageSequence {
         return average / total;
     }
 
-    getImagesInPos(pos) {
+    getScreenShotInPos(pos) {
+        const activeSite = this.getActiveSites()[0];
+        const image = activeSite.getScreenShotFromPos(pos);
+        return image;
+    }
+
+    getImagesInPos(pos, activeIndex) {
         //check if all images are loaded
         let activeSites = this.getActiveSites()
-        if (!imagesLoadedAtPos(activeSites, pos)) return null;
+        // if (!this.imagesLoadedAtPos(activeSites, pos)) return null;
+        let images = [];
+        activeSites.forEach(s => {
+            const d = s.getImagesFromPos(pos)
+            images = [...images, ...d]
+        })
+
+        images = this.sortByIndex(images, activeIndex)
+
+        return images;
         //return all the websites with their images from that date
         //if it is not loaded then return null
+    }
+
+    getSitesImagesInPos(pos, activeIndex) {
+        //check if all images are loaded
+        return this.getActiveSites().map(s => {
+            //get images
+            let images = s.getImagesFromPos(pos);
+            // images = this.sortByIndex(images, activeIndex)
+            return {
+                images: images,
+                name: s.name
+            }
+        })
+    }
+
+    sortByIndex(images, activeIndex) {
+        if (activeIndex > 0) {
+            const removed = images.splice(0, activeIndex)
+            images = [...images, ...removed]
+            return images;
+        }
+        return images;
     }
 
     getActiveSites() {
@@ -227,6 +300,10 @@ class ImageSequence {
 
     imagesLoadedAtPos(activeSites, pos) {
         return activeSites.every(e => e.posLoaded(pos))
+    }
+
+    getBackUpImages() {
+
     }
 }
 

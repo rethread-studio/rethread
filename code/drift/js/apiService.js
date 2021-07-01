@@ -37,7 +37,8 @@ export default class ApiService {
     }
 
     getSiteNetwork(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/network.png?&width=${size}&format=jpg`
+        return './img/backupNetwork.jpg';
+        // return `${BASE_URL}/api/time/${time}/${site}/network.png?&width=${size}&format=jpg`
     }
 
     getSiteProfile(site, time, size) {

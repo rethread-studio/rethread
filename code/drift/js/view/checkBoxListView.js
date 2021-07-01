@@ -8,7 +8,7 @@ export default class CheckBoxListView {
     render() {
         const checkBox = this.model.getDataChildren()
             .map(i => {
-                return `<label id="${i.name}SCbx" class="inline-flex items-center cursor-pointer">
+                return `<label id="${i.name}SCbx" class="inline-flex items-center cursor-pointer from-left appear">
                             <input type="checkbox" class="m0" value="${i.name}" ${i.state ? "checked" : ``}>
                             <span class="ml-2 white">${i.name}</span>
                         </label>`
@@ -30,7 +30,7 @@ export default class CheckBoxListView {
         this.model.getDataChildren()
             .map(i => document.getElementById(`${i.name}SCbx`))
             .forEach((e, i) => {
-                if (i != 0) e.disabled = true;
+                if (i != 0) e.classList.remove("appear")
             })
     }
 
@@ -38,7 +38,7 @@ export default class CheckBoxListView {
         this.model.getDataChildren()
             .map(i => document.getElementById(`${i.name}SCbx`))
             .forEach((e, i) => {
-                if (i != 0) e.disabled = false;
+                if (i != 0) e.classList.add("appear")
             })
     }
 
