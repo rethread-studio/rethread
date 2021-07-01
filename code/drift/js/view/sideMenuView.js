@@ -2,11 +2,6 @@
 const stateItemAccessor = (d) => d.state;
 const valueAccessor = (d) => d.value;
 
-//calculate the height related to the windows scroll height
-const posScale = (dimensions) => d3.scaleLinear()
-    .domain([0, document.documentElement.scrollHeight])
-    .range([0, dimensions.height])
-
 export default class SideMenuView {
 
     constructor(container, model) {
@@ -50,10 +45,7 @@ export default class SideMenuView {
         const disabled = this.model.getStackDisabled()
         const viewButton = this.model.getViewMode();
         const btnIcon = stack ? `<i class="fas fa-square-full mr-1 ml-2 text-xs"></i> <i class="fas fa-square-full text-xs"></i>` : `<i class="fas fa-clone ml-2"></i>`
-
-        let but = `<button ${disabled ? "disabled " : " "} id="spreadBtn" class="transition-colors border-gray-600 bg-gray-600 border-2 duration-500 ease-in-out mb-5 rounded-xl p-3  bg-transparent hover:bg-white white hover:text-black text-center focus:border-0 focus:border-transparent focus:outline-none flex flex-row items-center justify-center from-right ${viewButton ? " appear" : ""}" >${stack ? "spread" : "stack"} ${btnIcon} </button>`;
-
-        return but;
+        return `<button ${disabled ? "disabled " : " "} id="spreadBtn" class="transition-colors border-gray-600 bg-gray-600 border-2 duration-500 ease-in-out mb-5 rounded-xl p-3  bg-transparent hover:bg-white white hover:text-black text-center focus:border-0 focus:border-transparent focus:outline-none flex flex-row items-center justify-center from-right ${viewButton ? " appear" : ""}" >${stack ? "spread" : "stack"} ${btnIcon} </button>`;
     }
 
     updateViewList() {

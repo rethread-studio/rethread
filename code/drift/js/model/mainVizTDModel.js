@@ -288,7 +288,7 @@ export default class MainVizTDModel {
             },
             // wireframe: true,
             // transparent: true,
-            vertexShader: document.getElementById('CRTvertexshader').textContent,
+            // vertexShader: document.getElementById('CRTvertexshader').textContent,
             fragmentShader: document.getElementById('CRTfragmentshader').textContent,
         });
         // return new THREE.ShaderMaterial({
@@ -471,7 +471,7 @@ export default class MainVizTDModel {
                 this.removeImages()
                 this.addMaterial();
                 this.showScreenShot();
-                this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1)
+                this.fitCameraToSelection(this.camera, this.controls, this.meshes, 0.6)
                 break;
             case 1:
                 this.removeImages()
