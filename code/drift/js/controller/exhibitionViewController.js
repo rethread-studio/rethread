@@ -89,7 +89,7 @@ export default class ExhibitionViewController {
                 this.view.sideMenuController.hideOptions()
                 this.vizModel.removeImages()
                 this.vizModel.showFirstImage()
-                this.model.getChangePlayState(true)
+                // this.model.getChangePlayState(true)
                 break;
             case 1:
                 this.view.timeline.classList.remove("appear")

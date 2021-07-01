@@ -199,10 +199,9 @@ export default class DriftModel {
         return this.playState;
     }
 
-    getChangePlayState(play = true) {
-        this.playState = play != undefined ? play : !this.playState;
+    getChangePlayState(play = null) {
+        this.playState = play != null ? play : !this.playState;
         const type = this.playState ? "playTimeLine" : "pauseTimeLine"
-        if (this.timeInterval != null) this.removeTimeInterval()
         type == "playTimeLine" ? this.setTimeInterval() : this.removeTimeInterval();
         this.notifyObservers({ type: type });
     }
