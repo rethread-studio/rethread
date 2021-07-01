@@ -211,6 +211,14 @@ export default class DriftModel {
         this.notifyObservers({ type: type });
     }
 
+    setSpeed(pos) {
+        this.currentSpeed = pos;
+        if (this.playState) {
+            this.removeTimeInterval();
+            this.setTimeInterval()
+        }
+    }
+
     setTimeInterval() {
         if (this.timeInterval != null) return;
         const speed = this.getCurrentSpeed()
@@ -498,10 +506,7 @@ export default class DriftModel {
         return scale(percent);
     }
 
-    setSpeed(pos) {
-        this.currentSpeed = pos;
-        if (this.playState == true) this.notifyObservers({ type: "updateSpeed" });
-    }
+
 
     resetSlider() {
         this.currentVisit = 0;

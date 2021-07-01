@@ -68,9 +68,11 @@ export default class TimeLineController {
         const speed = this.model.getCurrentSpeed()
         this.timeInterval = window.setInterval(() =>
             this.model.advanceSliderPos(), speed)
+        console.log("SET TIME", this.timeInterval)
     }
 
     removeTimeInterval() {
+        console.log("clean", this.timeInterval)
         if (this.timeInterval != null && this.timeInterval != undefined) clearInterval(this.timeInterval);
     }
 
@@ -97,8 +99,8 @@ export default class TimeLineController {
         } else if (changeDetails.type == "pauseTimeLine") {
             // this.removeTimeInterval();
         } else if (changeDetails.type == "updateSpeed") {
-            this.removeTimeInterval();
-            this.setTimeInterval();
+            // this.removeTimeInterval();
+            // this.setTimeInterval();
         }
     }
 
