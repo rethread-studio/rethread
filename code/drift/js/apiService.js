@@ -37,7 +37,8 @@ export default class ApiService {
     }
 
     getSiteNetwork(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/network.png?&width=${size}&format=jpg`
+        return './img/backupNetwork.jpg';
+        // return `${BASE_URL}/api/time/${time}/${site}/network.png?&width=${size}&format=jpg`
     }
 
     getSiteProfile(site, time, size) {
@@ -165,17 +166,17 @@ const viewsMenu = [
         state: 1,
     },
     {
-        name: "Graph",
+        name: "Coverage",
         human: "Coverage",
         nerd: "Code",
         value: "coverage",
         state: 0,
     },
     {
-        name: "Coverage",
+        name: "graph",
         human: "Execution trace",
         nerd: "Flow",
-        value: "trace",
+        value: "graph",
         state: 0
     },
     {

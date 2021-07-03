@@ -27,17 +27,17 @@ export default class ExhibitionView {
         const content = `
         <div id="exhibitContent" class="">
             <div id="visContainer" class="h-screen w-screen fixed top-0">
-                    <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right background-black p-8 rounded-md shadow-lg "></div>
+                    <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right  "></div>
                     <div id="timeLineWrapper" class="absolute bottom-0 mb-10 left-0  flex flex-col flex-wrap justify-start from-down"></div>
                     <div id="currentTimeWrapper" class= "relative top-100 ml-5 fade-in"></div>
                     <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5  "></div>
                     <div id="legend" class="absolute z-10 top-0 p-5 bg-gray-800 rounded-xl transition-transform duration-500 ease-in-out w-5/12 hidden"></div>
             </div>
-            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in "> </div>
-            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
-            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
-            <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
-            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-left h-screen  white  z-10 pl-72 fade-in"> </div>
+            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in "> </div>
+            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
+            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
+            <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
+            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
         </div>
        
 		`;

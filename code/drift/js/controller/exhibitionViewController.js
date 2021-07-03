@@ -87,40 +87,37 @@ export default class ExhibitionViewController {
                 this.view.viewsMenu.classList.remove("appear")
                 this.view.sitesMenuViewController.hideOptions()
                 this.view.sideMenuController.hideOptions()
-                this.vizModel.removeImages()
-                this.vizModel.showFirstImage()
-                // this.model.getChangePlayState(true)
+                this.model.getChangePlayState(true)
                 break;
             case 1:
                 this.view.timeline.classList.remove("appear")
                 this.view.viewsMenu.classList.add("appear")
                 this.view.sideMenuController.hideOptions()
                 this.view.sitesMenuViewController.hideOptions()
-                this.vizModel.removeImages()
-                this.vizModel.showImages()
                 break;
             case 2:
+                this.model.toggleNoNotification(true)
                 this.view.timeline.classList.add("appear")
                 this.view.sideMenuController.hideOptions()
                 this.view.sitesMenuViewController.hideOptions()
-                //show timeline
                 break;
             case 3:
+                this.model.toggleDisplay(false);
+                this.model.setStackDisabled(true);
+                this.model.selectFirstSite();
                 this.view.sideMenuController.showOptions()
-
+                this.view.sitesMenuViewController.hideOptions()
+                //CHANGE TO SPREAD
                 this.view.timeline.classList.add("appear")
                 this.view.viewsMenu.classList.add("appear")
-                this.vizModel.removeImages()
-                this.vizModel.showImages()
                 break;
             case 4:
+                this.model.setStackDisabled(false);
                 this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.showOptions()
                 this.view.timeline.classList.add("appear")
                 this.view.viewsMenu.classList.add("appear")
-                this.vizModel.removeImages()
-                this.vizModel.showImages()
-                this.vizModel.centerImages()
+
                 //show all and hide texts
                 break;
 
@@ -131,6 +128,7 @@ export default class ExhibitionViewController {
                 // this.view.spread.classList.add("hidden")
                 break;
         }
+        this.vizModel.upDateImages()
     }
 
 

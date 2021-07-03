@@ -110,6 +110,13 @@ export default class SideMenuController {
             this.renderView();
         } else if (changeDetails.type == "displayUpdate") {
             this.renderView();
+            // this.removeEventListener()
+            // this.view.updateButton();
+            // this.view.updateViewList();
+            // this.view.showHideViewList();
+            // this.addEventListener();
+        } else if (changeDetails.type == "updateToggle") {
+            this.renderView();
         }
     }
 
@@ -121,6 +128,12 @@ export default class SideMenuController {
     showOptions() {
         this.model.toggleViewModeBtn(true)
         this.view.btn.classList.add("appear")
+        this.enableButon()
+    }
+
+    enableButon() {
+        const disabled = this.model.getStackDisabled()
+        this.view.btn.disabled = disabled;
     }
 
 }

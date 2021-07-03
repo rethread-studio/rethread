@@ -30,11 +30,11 @@ export default class SelectSiteToggleView {
     }
 
     hideOptions() {
-        // this.siteCheckBoxController.hideOptions()
+        this.siteCheckBoxController.hideOptions()
         this.sitesRadialController.hideOptions();
     }
     showOptions() {
-        // this.siteCheckBoxController.showOptions()
+        this.siteCheckBoxController.showOptions()
         this.sitesRadialController.showOptions();
     }
 

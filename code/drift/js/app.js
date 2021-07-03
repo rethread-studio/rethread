@@ -75,7 +75,7 @@ window.onload = function () {
     mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
 
     //start home view
-    showView("exhibition");
+    showView("home");
 };
 
 //show view
@@ -83,7 +83,10 @@ window.onload = function () {
 export default function showView(view) {
 
     model.interaction.page(view);
-    if (currentView == exhibitionViewController) mainVizTD.removeImages();
+    if (currentView == exhibitionViewController) {
+        mainVizTD.removeImages();
+        model.toggleNoNotification(true);
+    }
     if (currentView != null) currentView.unMountView()
     switch (view) {
         case 'home':
