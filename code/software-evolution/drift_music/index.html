@@ -13,15 +13,48 @@
 </head>
 <body>
 	<tone-example label="Player">
-		<tone-loader></tone-loader>
-		<div slot="explanation">
-			Click on the button to play the audio file on loop
-			using <a href="https://tonejs.github.io/docs/Player">Tone.Player</a>.
-		</div>
-
+      <h1>Background ambiance for Drift</h1>
+      <div id="asset-loading-progress"></div>
+<button id="start-all" type="button">
+	Enable and start everything
+</button>
+	<br/>
 		<div id="content">
-			<button id="tone-play-toggle" type="button"> 
-				Play
+			<button id="play-sites" type="button">
+				Play sites
+			</button>
+			<button id="stop-sites" type="button">
+				Stop sites
+			</button>
+
+			<div>
+  <input type="checkbox" id="fast" name="variant" value="fast"
+         checked>
+  <label for="fast">Fast</label>
+</div>
+<div>
+  <input type="checkbox" id="middle" name="variant" value="middle"
+         checked>
+  <label for="middle">Middle</label>
+</div>
+<div>
+  <input type="checkbox" id="slow" name="variant" value="slow"
+         checked>
+  <label for="slow">Slow</label>
+</div>
+			<br/>
+			<button id="start-root" type="button">
+			Start root note
+			</button>
+			<button id="stop-root" type="button">
+			Stop root note
+			</button>
+			<br/>
+			<button id="start-long" type="button">
+			Start long notes
+			</button>
+			<button id="stop-long" type="button">
+			Stop long notes
 			</button>
 		</div>
 	</tone-example>
