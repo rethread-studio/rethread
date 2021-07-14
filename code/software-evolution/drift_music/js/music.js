@@ -55,6 +55,7 @@ const sites = ["bing", "duckduckgo", "google"];
 const site_variants = ["fast", "middle", "slow"];
 var enabled_variants = ["fast", "middle", "slow"];
 var enabled_sites = [...sites];
+var visitors_connected_level = 0; // 0-3, the number of connected visitors influences some sounds
 var site_playing = false;
 var last_played_site_sample = ""; // Keep track not to play the same 2 times in a row if possible
 var currently_playing_site_sample = null;
@@ -75,6 +76,7 @@ function register_sound_asset_loaded() {
     }
 
 }
+
 let root_sample = new Sample(audio_file_root + "root_note.mp3", false, true);
 let long_notes_sample = new Sample(audio_file_root + "long_notes.mp3", false, true);
 
@@ -91,6 +93,42 @@ for (let variant of site_variants) {
         variant_map.set(site, sample);
 	}
     site_sample_variants.set(variant, variant_map);
+}
+
+let visitor_samples = [];
+let visitor_sample_file_names = ["visitors1", "visitors2", "visitors3"];
+for (let name of visitor_sample_file_names) {
+    visitor_samples.push(new Sample(audio_file_root + name + ".mp3", false, true));
+}
+console.log("visitor_samples: " + JSON.stringify(visitor_samples));
+
+let update_visitors_connected = function(new_level) {
+    if (new_level != visitors_connected_level) {
+        if (new_level > visitors_connected_level) {
+            // Start new sound samples
+            for(let i = visitors_connected_level; i < new_level; i++) {
+                console.log("Starting " + (i));
+                visitor_samples[i].start();
+                
+            }
+        } else {
+            // Stop existing sound samples
+            for(let i = new_level; i < visitors_connected_level; i++) {
+                console.log("Stopping " + (i));
+                visitor_samples[i].stop();
+            }
+        }
+        visitors_connected_level = new_level;
+    }
+};
+
+let event_sample_names = ["arpeggio1", "arpeggio2", "rain1", "rain2", "chord1-1", "chord1-2", "chord2-1", "chord4-1", "chord5-1"];
+let event_samples = [];
+let event_div = document.getElementById("event-samples");
+for (let name of event_sample_names) {
+    event_samples.push(new Sample(audio_file_root + name + ".mp3", false, false));
+    let i = event_samples.length-1;
+    event_div.innerHTML += '<button id="start-' + name + '" type="button" onclick="event_samples['+i+'].start()">'+name+'</button>';
 }
 
 // Set up checkboxes
@@ -162,6 +200,13 @@ document.getElementById("stop-sites").onclick = () => {
         currently_playing_site_sample.stop();
     }
 };
+
+document.getElementById("numVisitors").addEventListener('input', () => {
+    let value = document.getElementById("numVisitors").value;
+    console.log("numVisitors changed to " + value);
+    update_visitors_connected(value);
+});
+
 
 // Start everything with default settings (move this to the actual exhibition)
 

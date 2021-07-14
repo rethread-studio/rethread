@@ -6,13 +6,11 @@
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.4.3/webcomponents-bundle.js"></script>
-	<link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet"/>
-	<script src="https://unpkg.com/tone@14.8.26/build/Tone.js"></script>
+	<!-- <script src="https://unpkg.com/tone@14.8.26/build/Tone.js"></script> -->
+	<script src="./js/Tone.js"></script>
 
 </head>
 <body>
-	<tone-example label="Player">
       <h1>Background ambiance for Drift</h1>
       <div id="asset-loading-progress"></div>
 <button id="start-all" type="button">
@@ -56,8 +54,12 @@
 			<button id="stop-long" type="button">
 			Stop long notes
 			</button>
+			<br />
+			<p>Simulate different numbers of visitors: </p>
+  		<input type="range" min="0" max="3" value="0" class="slider" id="numVisitors">
+			<p>Extra sounds that can be triggered by visitor interaction: </p>
+			<div id="event-samples"></div>
 		</div>
-	</tone-example>
 
 	<script type="text/javascript">
 			</script>
