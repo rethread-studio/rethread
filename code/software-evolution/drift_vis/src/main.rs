@@ -123,8 +123,13 @@ impl DrawMode {
 /// For keeping track of frames when rendering
 enum RenderState {
     NoRendering,
-    RenderAllTraces { current_trace: usize },
-    RenderSingleTraceThenExit { output_path: Option<PathBuf> },
+    RenderAllTraces {
+        current_trace: usize,
+        render_all: bool,
+    },
+    RenderSingleTraceThenExit {
+        output_path: Option<PathBuf>,
+    },
     Screenshot,
     Exit,
 }
@@ -301,6 +306,13 @@ fn model(app: &App) -> Model {
                 .takes_value(true)
                 .help("path to the folder with frame renders"),
             )
+        .arg(
+            clap::Arg::with_name("render_all")
+                .short("x")
+                .long("render_all")
+                .help("render all the visualisations used for all sites"),
+            )
+
         .subcommand(
             clap::SubCommand::with_name("single")
                 .about("render a single visit for a single page in a single way")
@@ -347,6 +359,15 @@ fn model(app: &App) -> Model {
         false
     } else {
         true
+    };
+
+    let mut render_state = if matches.is_present("render_all") {
+        RenderState::RenderAllTraces {
+            current_trace: 0,
+            render_all: true,
+        }
+    } else {
+        RenderState::NoRendering
     };
 
     let recalculate_data = if matches.is_present("recalculate") {
@@ -499,10 +520,10 @@ fn model(app: &App) -> Model {
         PathBuf::from("./assets/cache/")
     };
 
-    let (sites, render_state) = if let Some(matches) = matches.subcommand_matches("single") {
+    let sites = if let Some(matches) = matches.subcommand_matches("single") {
         let site = matches.value_of("site").unwrap();
         let visit = matches.value_of("visit").unwrap();
-        let render_state = if let Some(output_path) = matches.value_of("output") {
+        render_state = if let Some(output_path) = matches.value_of("output") {
             RenderState::RenderSingleTraceThenExit {
                 output_path: Some(PathBuf::from(output_path)),
             }
@@ -537,7 +558,7 @@ fn model(app: &App) -> Model {
                 }
             }
         }
-        (sites, render_state)
+        sites
     } else {
         let sites = if use_web_api {
             from_web_api::get_all_sites().expect("Failed to get list of pages from Web API")
@@ -607,7 +628,7 @@ fn model(app: &App) -> Model {
                 )
             })
             .collect();
-        (sites, RenderState::NoRendering)
+        sites
     };
 
     let mut m = Model {
@@ -1037,16 +1058,29 @@ fn update(app: &App, model: &mut Model, _update: Update) {
 
     // update frame rendering
     match &mut model.render_state {
-        RenderState::RenderAllTraces { current_trace } => {
+        RenderState::RenderAllTraces {
+            current_trace,
+            render_all,
+        } => {
             // We must wait until the first trace has been drawn before saving it.
             // Capture the frame!
             let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
             let timestamp =
                 &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
             let file_path = if model.render_video {
-                rendering_frame_path(model.render_folder.clone(), &model.draw_mode, name, *current_trace)
+                rendering_frame_path(
+                    model.render_folder.clone(),
+                    &model.draw_mode,
+                    name,
+                    *current_trace,
+                )
             } else {
-                rendering_visit_path(model.render_folder.clone(), &model.draw_mode, name, timestamp)
+                rendering_visit_path(
+                    model.render_folder.clone(),
+                    &model.draw_mode,
+                    name,
+                    timestamp,
+                )
             };
 
             // Submit a function for writing our snapshot to a PNG.
@@ -1070,46 +1104,76 @@ fn update(app: &App, model: &mut Model, _update: Update) {
 
             // Are we done?
             if *current_trace == model.sites[model.selected_site].trace_datas.len() {
-                // All traces have been rendered
-                model.render_state = RenderState::NoRendering;
-                model.selected_visit = 0;
-                if model.render_video {
-                    let name =
-                        &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
-                    let [w, h] = model.texture.size();
-                    let video_path = rendering_video_path(model.render_folder.clone(), &model.draw_mode, name);
-                    let frame_folder_path =
-                        rendering_frame_folder_path(model.render_folder.clone(), &model.draw_mode, name);
-                    // Run ffmpeg to make video files from the rendered images
-                    std::thread::spawn(move || {
-                        let output = Command::new("ffmpeg")
-                            .current_dir(frame_folder_path)
-                            .arg("-y") // overwrite output files
-                            .arg("-r")
-                            .arg("30")
-                            .arg("-start_number")
-                            .arg("0")
-                            .arg("-i")
-                            .arg("%04d.png")
-                            .arg("-c:v")
-                            .arg("libx264")
-                            .arg("-crf")
-                            .arg("17")
-                            .arg("-preset")
-                            .arg("veryslow")
-                            .arg("-s")
-                            .arg(&format!("{}x{}", w, h))
-                            .arg(&video_path)
-                            .output()
-                            .expect("failed to execute process");
-                        println!("Finished rendering {}", video_path.to_str().unwrap());
-                        println!("Rendering output: {}", output.status);
-                        use std::io::{self, Write};
-                        io::stdout().write_all(&output.stdout).unwrap();
-                        io::stderr().write_all(&output.stderr).unwrap();
+                if *render_all {
+                    println!("Site {} finished", model.sites[model.selected_site].name);
+                    // go to the next site
+                    model.selected_site += 1;
+                    model.selected_visit = 0;
+                    *current_trace = 0;
+                    if model.selected_site >= model.sites.len() {
+                        model.selected_site = 0;
+                        // go to the next
+                        println!("Visualisation finished");
+                        let new_draw_mode = match &model.draw_mode {
+                            DrawMode::GraphDepth(GraphDepthDrawMode::Rings(_)) => DrawMode::Coverage(CoverageDrawMode::voronoi(&app.main_window(), model.texture.size())),
+                            _ => {
+                                model.render_state = RenderState::NoRendering;
+                                DrawMode::GraphDepth(GraphDepthDrawMode::TriangleRolling)
+                            }
+                        };
+                        model.draw_mode = new_draw_mode;
+                        set_blur_shader_params(model);
+                    }
+                } else {
+                    // All traces have been rendered
+                    model.render_state = RenderState::NoRendering;
+                    model.selected_visit = 0;
+                    if model.render_video {
+                        let name = &model.sites[model.selected_site].trace_datas
+                            [model.selected_visit]
+                            .name;
+                        let [w, h] = model.texture.size();
+                        let video_path = rendering_video_path(
+                            model.render_folder.clone(),
+                            &model.draw_mode,
+                            name,
+                        );
+                        let frame_folder_path = rendering_frame_folder_path(
+                            model.render_folder.clone(),
+                            &model.draw_mode,
+                            name,
+                        );
+                        // Run ffmpeg to make video files from the rendered images
+                        std::thread::spawn(move || {
+                            let output = Command::new("ffmpeg")
+                                .current_dir(frame_folder_path)
+                                .arg("-y") // overwrite output files
+                                .arg("-r")
+                                .arg("30")
+                                .arg("-start_number")
+                                .arg("0")
+                                .arg("-i")
+                                .arg("%04d.png")
+                                .arg("-c:v")
+                                .arg("libx264")
+                                .arg("-crf")
+                                .arg("17")
+                                .arg("-preset")
+                                .arg("veryslow")
+                                .arg("-s")
+                                .arg(&format!("{}x{}", w, h))
+                                .arg(&video_path)
+                                .output()
+                                .expect("failed to execute process");
+                            println!("Finished rendering {}", video_path.to_str().unwrap());
+                            println!("Rendering output: {}", output.status);
+                            use std::io::{self, Write};
+                            io::stdout().write_all(&output.stdout).unwrap();
+                            io::stderr().write_all(&output.stderr).unwrap();
 
-                        // ffmpeg -r 4 -start_number 0 -i %04d.png -c:v libx264 -crf 18 -preset veryslow -s 1080x1051 ../coverage_spacebrush.mp4
-                    });
+                            // ffmpeg -r 4 -start_number 0 -i %04d.png -c:v libx264 -crf 18 -preset veryslow -s 1080x1051 ../coverage_spacebrush.mp4
+                        });
+                    }
                 }
             }
         }
@@ -1121,7 +1185,12 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                 let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
                 let timestamp =
                     &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-                rendering_visit_path(model.render_folder.clone(), &model.draw_mode, name, timestamp)
+                rendering_visit_path(
+                    model.render_folder.clone(),
+                    &model.draw_mode,
+                    name,
+                    timestamp,
+                )
             };
 
             println!("Writing image to path: {}", file_path.to_str().unwrap());
@@ -1377,7 +1446,7 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
                 //     .send_script_data_osc(&model.sender);
             }
             Key::R => {
-                model.render_state = RenderState::RenderAllTraces { current_trace: 0 };
+                model.render_state = RenderState::RenderAllTraces { current_trace: 0, render_all: false };
             }
             Key::G => {
                 model.show_gui = !model.show_gui;
