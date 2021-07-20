@@ -82,6 +82,8 @@ window.onload = function () {
 //view: string with the name of the view to render
 export default function showView(view) {
 
+    start_sound_effect(); // Play a sound effect
+    
     model.interaction.page(view);
     if (currentView == exhibitionViewController) {
         mainVizTD.removeImages();

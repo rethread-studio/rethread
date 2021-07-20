@@ -56,7 +56,7 @@ var total_sound_assets = 0;
 var loaded_sound_assets = 0;
 const audio_file_root = "./audio/";
 const sites = ["bing", "duckduckgo", "google"];
-const event_sample_names = ["arpeggio1", "arpeggio2", "rain1", "rain2", "chord1-1", "chord1-2", "chord2-1", "chord4-1", "chord5-1"];
+const event_sample_names = ["chord5-1", "arpeggio1", "arpeggio2", "rain1", "rain2", "chord1-1", "chord1-2", "chord2-1", "chord4-1"];
 const site_variants = ["fast", "middle", "slow"];
 var enabled_variants = ["fast", "middle", "slow"];
 var enabled_sites = [...sites];
@@ -101,11 +101,8 @@ function load_all_music_assets() {
         visitor_samples.push(new Sample(audio_file_root + name + ".mp3", false, true));
     }
     // Event samples
-    let event_div = document.getElementById("event-samples");
     for (let name of event_sample_names) {
         event_samples.push(new Sample(audio_file_root + name + ".mp3", false, false));
-        let i = event_samples.length-1;
-        event_div.innerHTML += '<button id="start-' + name + '" type="button" onclick="event_samples['+i+'].start()">'+name+'</button>';
     }
 }
 

@@ -17,6 +17,7 @@ export default class ToggleViewController {
     }
 
     onClickToggle(e) {
+        start_sound_effect(); // Play sound effect
         this.model.setMode(e.target.checked)
     }
 
