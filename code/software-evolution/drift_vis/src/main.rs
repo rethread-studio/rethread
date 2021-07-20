@@ -589,7 +589,7 @@ fn model(app: &App) -> Model {
                 .into_iter()
                 .filter(|ts| {
                     let its = ts.parse::<u64>().unwrap();
-                    its >= max_ts
+                    its <= max_ts
                 })
                 .collect();
         }
@@ -1173,7 +1173,8 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         }
         RenderState::Screenshot => {
             // Capture the frame!
-            let file_path = captured_frame_path(app);
+            let file_path = captured_frame_path(model.render_folder.clone());
+            println!("screenshot path: {:?}", file_path);
             snapshot
                 .read(move |result| {
                     let image = result.expect("failed to map texture memory").to_owned();
@@ -1435,17 +1436,20 @@ fn set_blur_shader_params(model: &mut Model) {
         _ => (),
     }
 }
-fn captured_frame_path(app: &App) -> std::path::PathBuf {
+fn captured_frame_path(render_path: PathBuf) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     let now: DateTime<Utc> = Utc::now();
-    app.project_path()
-        .expect("failed to locate `project_path`")
-        // Capture all frames to a directory called `/<path_to_nannou>/nannou/simple_capture`.
+    let path = render_path
         .join("screencaps")
         // Name each file after the number of the frame.
         .join(format!("{}", now.to_rfc3339()))
         // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
-        .with_extension("png")
+        .with_extension("png");
+    // Create the parent dir of the new file if it doesn't exist
+    let mut new_path_parent = path.clone();
+    new_path_parent.pop();
+    fs::create_dir_all(new_path_parent).expect("Failed to create directory for screenshots");
+    path
 }
 
 fn rendering_frame_folder_path(
