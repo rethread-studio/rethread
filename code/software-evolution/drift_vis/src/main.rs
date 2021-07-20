@@ -19,8 +19,8 @@ mod wgpu_helpers;
 use wgpu_helpers::*;
 mod texture;
 
-pub use drift_data::*;
 pub use drift_data::Site;
+pub use drift_data::*;
 
 fn main() {
     nannou::app(model).update(update).run();
@@ -129,7 +129,6 @@ enum RenderState {
     Exit,
 }
 
-
 pub struct Model {
     ui: Ui,
     ids: Ids,
@@ -161,6 +160,7 @@ pub struct Model {
     texture_reshaper: wgpu::TextureReshaper,
     blur_shader: BlurShader,
     render_video: bool,
+    render_folder: PathBuf,
     show_text: bool,
 }
 
@@ -277,6 +277,30 @@ fn model(app: &App) -> Model {
                 .help("max number of visits to load, from the most recent ones")
                 .takes_value(true),
         )
+        .arg(
+            clap::Arg::with_name("earliest_timestamp")
+                .short("e")
+                .long("earliest_timestamp")
+                .value_name("UNIX TIMESTAMP")
+                .takes_value(true)
+                .help("the minimum timestamp to include"),
+        )
+        .arg(
+            clap::Arg::with_name("latest_timestamp")
+                .short("l")
+                .long("latest_timestamp")
+                .value_name("UNIX TIMESTAMP")
+                .takes_value(true)
+                .help("the maximum timestamp to include"),
+        )
+        .arg(
+            clap::Arg::with_name("render_path")
+                .short("r")
+                .long("render_path")
+                .value_name("PATH")
+                .takes_value(true)
+                .help("path to the folder with frame renders"),
+            )
         .subcommand(
             clap::SubCommand::with_name("single")
                 .about("render a single visit for a single page in a single way")
@@ -335,6 +359,26 @@ fn model(app: &App) -> Model {
         Some(max.parse::<u32>().unwrap())
     } else {
         None
+    };
+
+    let min_ts: Option<u64> = if let Some(max) = matches.value_of("earliest_timestamp") {
+        Some(max.parse::<u64>().unwrap())
+    } else {
+        None
+    };
+    let max_ts: Option<u64> = if let Some(max) = matches.value_of("latest_timestamp") {
+        Some(max.parse::<u64>().unwrap())
+    } else {
+        None
+    };
+    let render_folder: PathBuf = if let Some(path) = matches.value_of("render_path") {
+        let path = PathBuf::from(path);
+        if !path.is_dir() {
+            panic!("Render path given is not a folder");
+        }
+        path
+    } else {
+        app.project_path().expect("Failed to find a project path")
     };
     // Lets write to a 4K UHD texture.
     let texture_size = [2_160, 2_160];
@@ -521,13 +565,34 @@ fn model(app: &App) -> Model {
         };
 
         // Filter out the invalid visits
-        let visits: Vec<String> = visits
+        let mut visits: Vec<String> = visits
             .into_iter()
             .filter(|ts| {
                 let its = ts.parse::<u64>().unwrap();
                 !(1619654400000..=1620054000000).contains(&its)
             })
             .collect();
+
+        // Filter out timestamps that are too early
+        if let Some(min_ts) = min_ts {
+            visits = visits
+                .into_iter()
+                .filter(|ts| {
+                    let its = ts.parse::<u64>().unwrap();
+                    its >= min_ts
+                })
+                .collect();
+        }
+        // Filter out timestamps that are too late
+        if let Some(max_ts) = max_ts {
+            visits = visits
+                .into_iter()
+                .filter(|ts| {
+                    let its = ts.parse::<u64>().unwrap();
+                    its >= max_ts
+                })
+                .collect();
+        }
 
         let sites: Vec<Site> = sites
             .iter()
@@ -571,12 +636,12 @@ fn model(app: &App) -> Model {
         texture_reshaper,
         blur_shader,
         render_video: false,
+        render_folder,
         show_text: false,
     };
     set_blur_shader_params(&mut m);
     m
 }
-
 
 fn update(app: &App, model: &mut Model, _update: Update) {
     // GUI
@@ -979,9 +1044,9 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             let timestamp =
                 &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
             let file_path = if model.render_video {
-                rendering_frame_path(app, &model.draw_mode, name, *current_trace)
+                rendering_frame_path(model.render_folder.clone(), &model.draw_mode, name, *current_trace)
             } else {
-                rendering_visit_path(app, &model.draw_mode, name, timestamp)
+                rendering_visit_path(model.render_folder.clone(), &model.draw_mode, name, timestamp)
             };
 
             // Submit a function for writing our snapshot to a PNG.
@@ -1012,9 +1077,9 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                     let name =
                         &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
                     let [w, h] = model.texture.size();
-                    let video_path = rendering_video_path(app, &model.draw_mode, name);
+                    let video_path = rendering_video_path(model.render_folder.clone(), &model.draw_mode, name);
                     let frame_folder_path =
-                        rendering_frame_folder_path(app, &model.draw_mode, name);
+                        rendering_frame_folder_path(model.render_folder.clone(), &model.draw_mode, name);
                     // Run ffmpeg to make video files from the rendered images
                     std::thread::spawn(move || {
                         let output = Command::new("ffmpeg")
@@ -1056,7 +1121,7 @@ fn update(app: &App, model: &mut Model, _update: Update) {
                 let name = &model.sites[model.selected_site].trace_datas[model.selected_visit].name;
                 let timestamp =
                     &model.sites[model.selected_site].trace_datas[model.selected_visit].timestamp;
-                rendering_visit_path(app, &model.draw_mode, name, timestamp)
+                rendering_visit_path(model.render_folder.clone(), &model.draw_mode, name, timestamp)
             };
 
             println!("Writing image to path: {}", file_path.to_str().unwrap());
@@ -1383,25 +1448,27 @@ fn captured_frame_path(app: &App) -> std::path::PathBuf {
         .with_extension("png")
 }
 
-fn rendering_frame_folder_path(app: &App, draw_mode: &DrawMode, name: &str) -> std::path::PathBuf {
+fn rendering_frame_folder_path(
+    render_path: PathBuf,
+    draw_mode: &DrawMode,
+    name: &str,
+) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     let now: DateTime<Utc> = Utc::now();
-    app.project_path()
-        .expect("failed to locate `project_path`")
-        // Capture all frames to a directory called `/<path_to_nannou>/nannou/simple_capture`.
+    render_path
         .join("renders")
         .join(name)
         .join(draw_mode.to_str())
 }
 fn rendering_frame_path(
-    app: &App,
+    render_path: PathBuf,
     draw_mode: &DrawMode,
     name: &str,
     frame_number: usize,
 ) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     // let now: DateTime<Utc> = Utc::now();
-    let path = rendering_frame_folder_path(app, draw_mode, name)
+    let path = rendering_frame_folder_path(render_path, draw_mode, name)
         .join(format!("{:04}", frame_number))
         // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
         .with_extension("png");
@@ -1412,14 +1479,14 @@ fn rendering_frame_path(
     path
 }
 fn rendering_visit_path(
-    app: &App,
+    render_path: PathBuf,
     draw_mode: &DrawMode,
     name: &str,
     timestamp: &str,
 ) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     // let now: DateTime<Utc> = Utc::now();
-    let path = rendering_frame_folder_path(app, draw_mode, name)
+    let path = rendering_frame_folder_path(render_path, draw_mode, name)
         .join(timestamp)
         // The extension will be PNG. We also support tiff, bmp, gif, jpeg, webp and some others.
         .with_extension("png");
@@ -1430,13 +1497,14 @@ fn rendering_visit_path(
     path
 }
 
-fn rendering_video_path(app: &App, draw_mode: &DrawMode, name: &str) -> std::path::PathBuf {
+fn rendering_video_path(
+    render_path: PathBuf,
+    draw_mode: &DrawMode,
+    name: &str,
+) -> std::path::PathBuf {
     // Create a path that we want to save this frame to.
     // let now: DateTime<Utc> = Utc::now();
-    let path = app
-        .project_path()
-        .expect("failed to locate `project_path`")
-        // Capture all frames to a directory called `/<path_to_nannou>/nannou/simple_capture`.
+    let path = render_path
         .join("renders")
         .join(name)
         .join(&format!("{}_{}", name, draw_mode.to_str()))
@@ -1448,16 +1516,19 @@ fn rendering_video_path(app: &App, draw_mode: &DrawMode, name: &str) -> std::pat
     path
 }
 
-fn screenshot_collection_path(app: &App, name: &str, frame_number: usize) -> std::path::PathBuf {
-    app.project_path()
-        .expect("failed to locate `project_path`")
+fn screenshot_collection_path(
+    render_path: PathBuf,
+    name: &str,
+    frame_number: usize,
+) -> std::path::PathBuf {
+    render_path
         .join("screenshot_collection")
         .join(name)
         .join(format!("{:04}", frame_number))
         .with_extension("jpg")
 }
 
-fn copy_screenshot(folder_path: &PathBuf, app: &App, name: &str, frame_number: usize) {
+fn copy_screenshot(folder_path: &PathBuf, render_path: PathBuf, name: &str, frame_number: usize) {
     let screenshot_paths_in_folder = fs::read_dir(folder_path)
         .expect("Failed to open screenshot folder")
         .filter(|r| r.is_ok()) // Get rid of Err variants for Result<DirEntry>
@@ -1486,7 +1557,7 @@ fn copy_screenshot(folder_path: &PathBuf, app: &App, name: &str, frame_number: u
             highest_screenshot_timestamp = timestamp;
         }
     }
-    let new_path = screenshot_collection_path(&app, name, frame_number);
+    let new_path = screenshot_collection_path(render_path, name, frame_number);
     println!(
         "old: {:?}: {:?}, new: {:?}",
         last_screenshot_path,
