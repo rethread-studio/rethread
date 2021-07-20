@@ -200,4 +200,6 @@ function start_all() {
 	site_loop.start(0);
 }
 
-load_all_music_assets();
+setTimeout( () => {
+    load_all_music_assets()
+}, 10);
