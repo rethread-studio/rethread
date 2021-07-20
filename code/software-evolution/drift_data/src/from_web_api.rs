@@ -3,9 +3,12 @@ use std::{collections::HashMap, fs, path::PathBuf};
 use crate::coverage::*;
 use crate::profile::*;
 
+const BASE_URL: &str = "https://drift.durieux.me:8443/";
+
 pub fn get_all_sites() -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let url = BASE_URL.to_owned() + "api/sites";
     let sites =
-        reqwest::blocking::get("https://drift.durieux.me/api/sites")?.json::<Vec<String>>()?;
+        reqwest::blocking::get(url)?.json::<Vec<String>>()?;
     println!("Retrieved all sites: {:?}", sites);
     Ok(sites)
 }
@@ -54,20 +57,20 @@ pub fn get_trace_data_from_site(
 }
 
 pub fn get_all_visits() -> Result<Vec<String>, Box<dyn std::error::Error>> {
-    let url = "https://drift.durieux.me/api/times";
+    let url = BASE_URL.to_owned() + "api/times";
     let visits = reqwest::blocking::get(url)?.json::<Vec<String>>()?;
     Ok(visits)
 }
 
-pub fn get_visits_for_site(site: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-    let url = format!(
-        "http://130.237.224.22:8080/api/site/{site_name}/visits",
-        site_name = site
-    );
-    let visits = reqwest::blocking::get(url)?.json::<Vec<String>>()?;
-    println!("Retrieved all visits for {}: {:}", site, visits.len());
-    Ok(visits)
-}
+// pub fn get_visits_for_site(site: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+//     let url = format!(
+//         "http://130.237.224.22:8080/api/site/{site_name}/visits",
+//         site_name = site
+//     );
+//     let visits = reqwest::blocking::get(url)?.json::<Vec<String>>()?;
+//     println!("Retrieved all visits for {}: {:}", site, visits.len());
+//     Ok(visits)
+// }
 
 pub fn get_profile_for_visit(
     site: &str,
@@ -86,7 +89,8 @@ pub fn get_profile_for_visit(
         }
         Err(_) => {
             let url = format!(
-                "https://drift.durieux.me/api/time/{visit_ts}/{site_name}/profile",
+                "{base}api/time/{visit_ts}/{site_name}/profile",
+                base = BASE_URL,
                 site_name = site,
                 visit_ts = visit
             );
@@ -120,7 +124,8 @@ pub fn get_coverage_for_visit(
         }
         Err(_) => {
             let url = format!(
-                "https://drift.durieux.me/api/time/{visit_ts}/{site_name}/coverage/js",
+                "{base}api/time/{visit_ts}/{site_name}/coverage/js",
+                base = BASE_URL,
                 site_name = site,
                 visit_ts = visit
             );
@@ -135,18 +140,4 @@ pub fn get_coverage_for_visit(
     };
 
     Ok(coverage)
-}
-
-pub fn _get_all_coverages_for_site(
-    site: &str,
-) -> Result<HashMap<String, Vec<(i64, i32)>>, Box<dyn std::error::Error>> {
-    // Try to get the
-
-    let url = format!(
-        "http://130.237.224.22:8080/api/site/{site_name}/coverages/js",
-        site_name = site,
-    );
-    let coverages = reqwest::blocking::get(url)?.json::<HashMap<String, Vec<(i64, i32)>>>()?;
-    println!("Retrieved all coverages for {}: {:}", site, coverages.len());
-    Ok(coverages)
 }
