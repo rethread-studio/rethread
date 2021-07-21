@@ -1,9 +1,9 @@
 {
   "name": "yahoo",
-  "longest_coverage_vector": 12663,
-  "max_coverage_total_length": 5734822,
+  "longest_coverage_vector": 22859,
+  "max_coverage_total_length": 12734948,
   "max_coverage_vector_count": 14596200,
-  "longest_tree": 1244,
+  "longest_tree": 1787,
   "max_profile_tick": 385,
   "deepest_tree_depth": 63
 }

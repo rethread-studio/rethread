@@ -69,3 +69,8 @@ Navigate using the keyboard shortcuts below. Unless using the --offline flag, al
 $ ffmpeg -r 8 -start_number 0 -i %04d.png -c:v libx264 -crf 20 -preset veryslow -s 1080x1051 ../bing_coverage_rings.mp4
 ```
 
+## Rendering every visualisation from a certain timestamp on
+
+``` shell
+cargo run --release -- --render_path /media/erik/Eolus/drift --earliest_timestamp 1619820000000 --render_all
+```

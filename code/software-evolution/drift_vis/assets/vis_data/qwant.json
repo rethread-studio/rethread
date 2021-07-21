@@ -1,9 +1,9 @@
 {
   "name": "qwant",
-  "longest_coverage_vector": 9005,
-  "max_coverage_total_length": 3683723,
-  "max_coverage_vector_count": 39500,
-  "longest_tree": 804,
+  "longest_coverage_vector": 9241,
+  "max_coverage_total_length": 3764651,
+  "max_coverage_vector_count": 40254,
+  "longest_tree": 834,
   "max_profile_tick": 23,
-  "deepest_tree_depth": 46
+  "deepest_tree_depth": 55
 }

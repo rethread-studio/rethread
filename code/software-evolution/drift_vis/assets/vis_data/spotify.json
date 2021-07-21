@@ -1,7 +1,7 @@
 {
   "name": "spotify",
-  "longest_coverage_vector": 3137,
-  "max_coverage_total_length": 1042050,
+  "longest_coverage_vector": 3154,
+  "max_coverage_total_length": 1049095,
   "max_coverage_vector_count": 203217,
   "longest_tree": 376,
   "max_profile_tick": 341,

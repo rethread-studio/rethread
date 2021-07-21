@@ -1,7 +1,7 @@
 {
   "name": "kiddle",
-  "longest_coverage_vector": 5346,
-  "max_coverage_total_length": 1810660,
+  "longest_coverage_vector": 5374,
+  "max_coverage_total_length": 1827830,
   "max_coverage_vector_count": 16728,
   "longest_tree": 451,
   "max_profile_tick": 27,
