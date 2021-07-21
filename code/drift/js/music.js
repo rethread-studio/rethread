@@ -14,11 +14,10 @@ class Sample {
         this.autostart = autostart;
 		let that = this;
 		let buffer = new Tone.Buffer(url_path, function(){
-			console.log("loaded buffer " + url_path);
+			// console.log("loaded buffer " + url_path);
 			
 			//the buffer is now available.
 			that.buf = buffer.get();
-			console.log(" length: " + buffer.length/buffer.sampleRate);
 
 			that.player = new Tone.Player({
 				url: buffer,
@@ -30,7 +29,6 @@ class Sample {
             that.player.fadeOut = 0.8;
 			
 			if (that.autostart) {
-				console.log("starting " + url_path);
 				that.player.start();
 			}
             register_sound_asset_loaded();
@@ -70,6 +68,7 @@ var long_notes_sample = null;
 let site_sample_variants = new Map();
 let visitor_samples = [];
 let event_samples = [];
+var all_music_loaded = false;
 
 function load_all_music_assets() {
     // Load all audio files
@@ -113,6 +112,7 @@ function register_sound_asset_loaded() {
     if (loaded_sound_assets == total_sound_assets) {
         // e.innerHTML = "All assets loaded";
         start_all();
+        all_music_loaded = true;
     } else {
 //         let progress = (loaded_sound_assets / total_sound_assets) * 100;
 //         e.innerHTML = `
@@ -143,11 +143,16 @@ function shuffleArray(array) {
 
 var event_sample_index = Math.floor(Math.random() * event_samples.length);
 function start_sound_effect() {
-    event_samples[event_sample_index].start();
-    event_sample_index += 1;
-    if(event_sample_index >= event_samples.length) {
-        shuffleArray(event_samples);
-        event_sample_index = 0;
+    if(all_music_loaded) {
+        event_samples[event_sample_index].start();
+        event_sample_index += 1;
+        if(event_sample_index >= event_samples.length) {
+            shuffleArray(event_samples);
+            event_sample_index = 0;
+        }
+    } else {
+        // If the sounds haven't been loaded, schedule a sound effect to be played in a little while instead.
+        setTimeout(start_sound_effect, 300);
     }
 }
 
@@ -180,7 +185,6 @@ var site_loop = new Tone.Loop(function(time){
         variant = enabled_variants[Math.floor(Math.random() * enabled_variants.length)];
         site = enabled_sites[Math.floor(Math.random() * enabled_sites.length)];
         } while (enabled_variants.length * enabled_sites.length > 1 && (variant + site) == last_played_site_sample);
-        console.log("variant: " + variant + " site: " + site);
         currently_playing_site_sample = site_sample_variants.get(variant).get(site);
         currently_playing_site_sample.start();
         last_played_site_sample = variant + site;
@@ -200,6 +204,7 @@ function start_all() {
 	site_loop.start(0);
 }
 
+// Delaying the sound asset loading by enough time here seems to place it after everything else, creating a smoother experience
 setTimeout( () => {
     load_all_music_assets()
-}, 10);
+}, 1000);
