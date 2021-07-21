@@ -60,6 +60,7 @@ var loaded_sound_assets = 0;
 const audio_file_root = "./audio/";
 const sites = ["bing", "duckduckgo", "google"];
 const root_sample_names = ["root_note_short1", "root_note_short2", "root_note_short3"];
+const long_sample_names = ["long_notes_short1", "long_notes_short2", "long_notes_short3", "long_notes_short4"];
 const event_sample_names = ["chord5-1", "arpeggio1", "arpeggio2", "rain1", "rain2", "chord1-1", "chord1-2", "chord2-1", "chord4-1"];
 const site_variants = ["fast", "middle", "slow"];
 var enabled_variants = ["fast", "middle", "slow"];
@@ -71,7 +72,8 @@ var currently_playing_site_sample = null;
 
 // var root_sample = null;
 var root_samples = [];
-var long_notes_sample = null;
+// var long_notes_sample = null;
+var long_samples = [];
 let site_sample_variants = new Map();
 let visitor_samples = [];
 let event_samples = [];
@@ -109,7 +111,27 @@ function load_all_music_assets() {
         }
         root_i += 1;
     }
-    long_notes_sample = new Sample(audio_file_root + "long_notes.mp3", false, true);
+    root_i = 0;
+    for (let file of long_sample_names) {
+        if (root_i == 0) {
+            long_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
+                                         (source) => {
+                                                 let i = Math.floor(Math.random() * root_samples.length);
+                                                 long_samples[i].start();
+                                         }));
+        } else {
+            // Delay subsequent root samples for a bit, no need to load them right away
+            setTimeout(() => {
+            long_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
+                                         (source) => {
+                                                 let i = Math.floor(Math.random() * root_samples.length);
+                                                 long_samples[i].start();
+                                         }, true));
+            }, 30000);
+        }
+        root_i += 1;
+    }
+    // long_notes_sample = new Sample(audio_file_root + "long_notes.mp3", false, true);
 
     // Site samples
     for (let variant of site_variants) {
@@ -230,7 +252,7 @@ function start_all() {
     setTimeout(() => {
         root_samples[0].start();
     }, 5000);
-    long_notes_sample.start();
+    long_samples[0].start();
 	Tone.Transport.start();
 	site_loop.start(0);
 }
