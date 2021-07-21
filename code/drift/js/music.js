@@ -7,8 +7,11 @@
 // Each sound file needs to be loaded into a buffer and played by a player
 
 class Sample {
-	constructor(url_path, autostart = false, loop = false, onstop = (source) => {}) {
-        total_sound_assets += 1;
+	constructor(url_path, autostart = false, loop = false, onstop = (source) => {}, delayed = false) {
+        // delayed is used for samples that aren't needed right away and won't be counted for asset loading
+        if (!delayed) {
+            total_sound_assets += 1;
+        }
 		this.buf = null;
 		this.player = null;
         this.autostart = autostart;
@@ -31,7 +34,9 @@ class Sample {
 			if (that.autostart) {
 				that.player.start();
 			}
-            register_sound_asset_loaded();
+            if(!delayed) {
+                register_sound_asset_loaded();
+            }
 		});
 	}
 	start() {
@@ -54,6 +59,7 @@ var total_sound_assets = 0;
 var loaded_sound_assets = 0;
 const audio_file_root = "./audio/";
 const sites = ["bing", "duckduckgo", "google"];
+const root_sample_names = ["root_note_short1", "root_note_short2", "root_note_short3"];
 const event_sample_names = ["chord5-1", "arpeggio1", "arpeggio2", "rain1", "rain2", "chord1-1", "chord1-2", "chord2-1", "chord4-1"];
 const site_variants = ["fast", "middle", "slow"];
 var enabled_variants = ["fast", "middle", "slow"];
@@ -63,7 +69,8 @@ var site_playing = false;
 var last_played_site_sample = ""; // Keep track not to play the same 2 times in a row if possible
 var currently_playing_site_sample = null;
 
-var root_sample = null;
+// var root_sample = null;
+var root_samples = [];
 var long_notes_sample = null;
 let site_sample_variants = new Map();
 let visitor_samples = [];
@@ -77,7 +84,31 @@ function load_all_music_assets() {
     loaded_sound_assets = 0;
 
     // Background samples
-    root_sample = new Sample(audio_file_root + "root_note.mp3", false, true);
+    // root_sample = new Sample(audio_file_root + "root_note.mp3", false, true);
+    let root_i = 0;
+    for (let file of root_sample_names) {
+        if (root_i == 0) {
+            root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
+                                         (source) => {
+                                             setTimeout(() => {
+                                                 let i = Math.floor(Math.random() * root_samples.length);
+                                                 root_samples[i].start();
+                                             }, Math.pow(Math.random(), 2.0) * 10000);
+                                         }));
+        } else {
+            // Delay subsequent root samples for a bit, no need to load them right away
+            setTimeout(() => {
+            root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
+                                         (source) => {
+                                             setTimeout(() => {
+                                                 let i = Math.floor(Math.random() * root_samples.length);
+                                                 root_samples[i].start();
+                                             }, Math.pow(Math.random(), 2.0) * 10000);
+                                         }, true));
+            }, 30000);
+        }
+        root_i += 1;
+    }
     long_notes_sample = new Sample(audio_file_root + "long_notes.mp3", false, true);
 
     // Site samples
@@ -197,7 +228,7 @@ Tone.Transport.bpm.value = 75;
 // Starts everything with default settings
 function start_all() {
     setTimeout(() => {
-        root_sample.start();
+        root_samples[0].start();
     }, 5000);
     long_notes_sample.start();
 	Tone.Transport.start();
