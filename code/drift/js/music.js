@@ -220,8 +220,22 @@ function start_sound_effect() {
 }
 
 
-function update_visitors_connected(new_level) {
+function update_visitors_connected() {
     if(all_music_loaded) {
+        let new_level = 0;
+        if (interaction.users) {
+            if (interaction.users.length > 1) {
+                // Someone more than the current user
+                new_level = 1;
+            }
+            if (interaction.users.length > 3) {
+                new_level = 2;
+            }
+            if (interaction.users.length > 7) {
+                new_level = 3;
+            }
+        }
+        // console.log("visitors connected, new_level: " + new_level + "\ninteraction.users: " + JSON.stringify(interaction.users));
         if (new_level != visitors_connected_level) {
             if (new_level > visitors_connected_level) {
                 // Start new sound samples
@@ -236,6 +250,7 @@ function update_visitors_connected(new_level) {
             }
             visitors_connected_level = new_level;
         }
+        setTimeout(update_visitors_connected, 20000);
     }
 };
 
@@ -271,6 +286,7 @@ function start_all() {
         long_samples[0].start();
         Tone.Transport.start();
         site_loop.start(0);
+        update_visitors_connected();
     } else if (!music_is_playing) {
         setTimeout(() => { start_all(); }, 300);
     }
@@ -306,7 +322,7 @@ function toggleAudioOnOff() {
     }
     let e = document.getElementById("audio-div");
     e.innerHTML = getAudioOnOffButton();
-    console.log("toggle audio, music_is_playing = " + music_is_playing + " ");
+    // console.log("toggle audio, music_is_playing = " + music_is_playing + " ");
 }
 
 let audio_button_size = "fa-5x";
