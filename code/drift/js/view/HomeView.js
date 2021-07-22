@@ -14,6 +14,7 @@ export default class HomeView {
 
 
     render() {
+        let audio_button = getAudioOnOffButton("fa-5x");
         const content = `
         <div id="intro" class="center txt-white relative h-screen ">
             <img id="imageIntro" class="relative left-2-4 transform-50 h-auto .max-727" src="./img/imgTest.png" alt="yahoo profile test">
@@ -22,6 +23,7 @@ export default class HomeView {
                 <h1 class="m-0 select-none text-center dritTittle" >Dr<span class="italic">i</span>ft</h1>
                 <ul id="mainMenuMain" class="flex flex-row justify-between p-0 m-0">
                 </ul>
+                <div id="audio-div" style="margin-top: 1em; display: flex; justify-content: center;">${audio_button}</div>
             </div>
         </div>
 		`;
@@ -29,6 +31,7 @@ export default class HomeView {
         this.container.innerHTML = content;
         this.renderMenuItems()
         this.setIdentifications();
+
     }
 
     renderMenuItems() {

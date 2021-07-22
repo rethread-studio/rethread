@@ -92,20 +92,24 @@ function load_all_music_assets() {
         if (root_i == 0) {
             root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
                                          (source) => {
-                                             setTimeout(() => {
-                                                 let i = Math.floor(Math.random() * root_samples.length);
-                                                 root_samples[i].start();
-                                             }, Math.pow(Math.random(), 2.0) * 10000);
+                                            if(music_is_playing) {
+                                                setTimeout(() => {
+                                                    let i = Math.floor(Math.random() * root_samples.length);
+                                                    root_samples[i].start();
+                                                }, Math.pow(Math.random(), 2.0) * 10000);
+                                            }
                                          }));
         } else {
             // Delay subsequent root samples for a bit, no need to load them right away
             setTimeout(() => {
             root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
                                          (source) => {
-                                             setTimeout(() => {
-                                                 let i = Math.floor(Math.random() * root_samples.length);
-                                                 root_samples[i].start();
-                                             }, Math.pow(Math.random(), 2.0) * 10000);
+                                            if(music_is_playing) {
+                                                setTimeout(() => {
+                                                    let i = Math.floor(Math.random() * root_samples.length);
+                                                    root_samples[i].start();
+                                                }, Math.pow(Math.random(), 2.0) * 10000);
+                                            }
                                          }, true));
             }, 30000);
         }
@@ -116,16 +120,20 @@ function load_all_music_assets() {
         if (root_i == 0) {
             long_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
                                          (source) => {
+                                            if(music_is_playing) {
                                                  let i = Math.floor(Math.random() * root_samples.length);
                                                  long_samples[i].start();
+                                            }
                                          }));
         } else {
             // Delay subsequent root samples for a bit, no need to load them right away
             setTimeout(() => {
             long_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
                                          (source) => {
+                                            if(music_is_playing) {
                                                  let i = Math.floor(Math.random() * root_samples.length);
                                                  long_samples[i].start();
+                                            }
                                          }, true));
             }, 30000);
         }
@@ -164,7 +172,7 @@ function register_sound_asset_loaded() {
     // let e = document.getElementById("asset-loading-progress");
     if (loaded_sound_assets == total_sound_assets) {
         // e.innerHTML = "All assets loaded";
-        start_all();
+        // start_all();
         all_music_loaded = true;
     } else {
 //         let progress = (loaded_sound_assets / total_sound_assets) * 100;
@@ -196,34 +204,38 @@ function shuffleArray(array) {
 
 var event_sample_index = Math.floor(Math.random() * event_samples.length);
 function start_sound_effect() {
-    if(all_music_loaded) {
-        event_samples[event_sample_index].start();
-        event_sample_index += 1;
-        if(event_sample_index >= event_samples.length) {
-            shuffleArray(event_samples);
-            event_sample_index = 0;
+    if(music_is_playing) {
+        if(all_music_loaded) {
+            event_samples[event_sample_index].start();
+            event_sample_index += 1;
+            if(event_sample_index >= event_samples.length) {
+                shuffleArray(event_samples);
+                event_sample_index = 0;
+            }
+        } else {
+            // If the sounds haven't been loaded, schedule a sound effect to be played in a little while instead.
+            setTimeout(start_sound_effect, 300);
         }
-    } else {
-        // If the sounds haven't been loaded, schedule a sound effect to be played in a little while instead.
-        setTimeout(start_sound_effect, 300);
     }
 }
 
 
 function update_visitors_connected(new_level) {
-    if (new_level != visitors_connected_level) {
-        if (new_level > visitors_connected_level) {
-            // Start new sound samples
-            for(let i = visitors_connected_level; i < new_level; i++) {
-                visitor_samples[i].start();
+    if(all_music_loaded) {
+        if (new_level != visitors_connected_level) {
+            if (new_level > visitors_connected_level) {
+                // Start new sound samples
+                for(let i = visitors_connected_level; i < new_level; i++) {
+                    visitor_samples[i].start();
+                }
+            } else {
+                // Stop existing sound samples
+                for(let i = new_level; i < visitors_connected_level; i++) {
+                    visitor_samples[i].stop();
+                }
             }
-        } else {
-            // Stop existing sound samples
-            for(let i = new_level; i < visitors_connected_level; i++) {
-                visitor_samples[i].stop();
-            }
+            visitors_connected_level = new_level;
         }
-        visitors_connected_level = new_level;
     }
 };
 
@@ -247,14 +259,70 @@ var site_loop = new Tone.Loop(function(time){
 
 Tone.Transport.bpm.value = 75;
 
+var music_is_playing = false;
 // Starts everything with default settings
 function start_all() {
-    setTimeout(() => {
-        root_samples[0].start();
-    }, 5000);
-    long_samples[0].start();
-	Tone.Transport.start();
-	site_loop.start(0);
+    if(all_music_loaded) {
+        setTimeout(() => {
+            if(music_is_playing) {
+                root_samples[0].start();
+            }
+        }, 5000);
+        long_samples[0].start();
+        Tone.Transport.start();
+        site_loop.start(0);
+    } else if (!music_is_playing) {
+        setTimeout(() => { start_all(); }, 300);
+    }
+    music_is_playing = true;
+}
+
+function stop_all() {
+    // Must set this property first, otherwise some sounds will be restarted once stopped
+    music_is_playing = false;
+    Tone.Transport.stop();
+    site_loop.stop();
+    currently_playing_site_sample.stop();
+    for (let sample of root_samples) {
+        sample.stop();
+    }
+    for (let sample of long_samples) {
+        sample.stop();
+    }
+    for (let sample of visitor_samples) {
+        sample.stop();
+    }
+    for (let sample of event_samples) {
+        sample.stop();
+    }
+}
+
+// UI
+function toggleAudioOnOff() {
+    if(music_is_playing) {
+        stop_all();
+    } else {
+        start_all();
+    }
+    let e = document.getElementById("audio-div");
+    e.innerHTML = getAudioOnOffButton();
+    console.log("toggle audio, music_is_playing = " + music_is_playing + " ");
+}
+
+let audio_button_size = "fa-5x";
+function getAudioOnOffButton(size = audio_button_size) {
+    audio_button_size = size;
+    let html;
+    if (music_is_playing) {
+        html = `
+        <button onclick="toggleAudioOnOff();"><i class="fas fa-volume-up ${size}"></i></button>
+        `;
+    } else {
+        html = `
+        <button onclick="toggleAudioOnOff();"><i class="fas fa-volume-mute ${size}"></i></button>
+        `;
+    }
+    return html;
 }
 
 // Delaying the sound asset loading by enough time here seems to place it after everything else, creating a smoother experience
