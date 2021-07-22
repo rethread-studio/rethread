@@ -370,7 +370,9 @@ export default class DriftModel {
             .map((site) => site.name)
         apiService.getTimes(sites)
             //strings to int
-            .then(visits => visits.map(visit => new Date(parseInt(visit))))
+            .then(visits => visits.map(visit => parseInt(visit)))
+            .then(visits => visits.filter(visit => visit > 1619820000000)) // filter out early visits
+            .then(visits => visits.map(visit => new Date(visit)))
             //set visits and notify
             .then(data => {
                 this.visits = data;
