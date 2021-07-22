@@ -204,7 +204,7 @@ export default class MainVizTDModel {
             let group = new THREE.Group();
 
             // mat.wireframe = true;
-            const texture = new THREE.TextureLoader().load(im.url);
+            const texture = new THREE.Texture( im.img );
             mat.uniforms.texture1.value = texture;
             mat.uniforms.texture1.value.needsUpdate = true;
 
@@ -228,12 +228,14 @@ export default class MainVizTDModel {
     }
 
     showScreenShot() {
-        const screenShot = model.getScreenShotFromSite();
+        const screenShot = model.getImagesFromSite().filter(i => i.type == "screenshot")[0];
 
         let mat = this.ctrMaterial().clone();
         this.materialsImage.push(mat);
         let group = new THREE.Group();
-        const texture = new THREE.TextureLoader().load(screenShot.url);
+        const texture = new THREE.Texture( screenShot.img );
+        mat.uniforms.texture1.value = texture;
+        mat.uniforms.texture1.value.needsUpdate = true;
         // mat.uniforms.texture1.value = new THREE.TextureLoader().load(screenShot.url);
         // mat.uniforms.texture1.value.needsUpdate = true;
 
@@ -399,7 +401,7 @@ export default class MainVizTDModel {
                 this.materialsImage.push(mat);
                 let group = new THREE.Group();
                 // mat.wireframe = true;
-                const texture = new THREE.TextureLoader().load(img.url);
+                const texture = new THREE.Texture( img.img )
                 mat.uniforms.texture1.value = texture
                 mat.uniforms.texture1.value.needsUpdate = true;
 
