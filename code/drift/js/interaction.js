@@ -6,13 +6,13 @@ class Interaction {
     this.username = localStorage.username;
     this.chatMessages = [];
     this.voteTime = new Date();
+    this.users = [];
 
     if (localStorage.uuid) {
       this.changeUsername(localStorage.uuid, localStorage.username);
     }
 
     this.onWelcome((data) => {
-      console.log(data);
       this.voteTime = data.voteTime;
       this.chatMessages = data.lastMessages;
       if (!localStorage.uuid) {
@@ -25,6 +25,10 @@ class Interaction {
 
     this.onElected((data) => {
       this.voteTime = data.voteTime;
+    });
+
+    this.on("users", (data) => {
+      this.users = data.users;
     });
   }
 

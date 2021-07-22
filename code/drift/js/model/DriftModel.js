@@ -32,7 +32,7 @@ export default class DriftModel {
     constructor() {
         this.interaction = new Interaction()
         this.menu = []; //menu is the list of views or list of sites
-        this.data = dataTest //is the current sites or views to displa in the viz
+        this.data = dataTest //is the current sites or views to display in the viz
         this.voteWebsites = []; // the list of website that can be visited by the robot
         this.currentSection = this.menu[0];
         this.observers = [];
