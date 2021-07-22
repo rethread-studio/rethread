@@ -264,7 +264,7 @@ export default class MainVizTDModel {
             side: THREE.DoubleSide,
             uniforms: {
                 time: { type: "f", value: 0 },
-                distanceFromCenter: { type: "f", value: 1 },
+                distanceFromCenter: { type: "f", value: 3 }, // The value here determines the zoom of the image in the center
                 texture1: { type: "t", value: null },
                 resolution: { type: "v4", value: new THREE.Vector4() },
                 uvRate1: { value: new THREE.Vector2(1, 1) },
