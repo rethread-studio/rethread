@@ -30,7 +30,7 @@ const updateState = (_name) => {
 export default class DriftModel {
 
     constructor() {
-        this.interaction = new Interaction()
+        this.interaction = window.interaction;
         this.menu = []; //menu is the list of views or list of sites
         this.data = dataTest //is the current sites or views to display in the viz
         this.voteWebsites = []; // the list of website that can be visited by the robot

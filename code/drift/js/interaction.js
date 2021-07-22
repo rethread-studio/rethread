@@ -27,8 +27,8 @@ class Interaction {
       this.voteTime = data.voteTime;
     });
 
-    this.on("users", (data) => {
-      this.users = data.users;
+    this.on("users", (users) => {
+      this.users = users;
     });
   }
 
