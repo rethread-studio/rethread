@@ -46,31 +46,29 @@ class ImageGroup {
         return this.urls;
     }
 
-    loadImage(url, type, callback) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.addEventListener('load', () => {
-                callback(url, type)
-                resolve({
-                    imgGroup: this,
-                    img: img,
-                    source: url
-                })
-            })
-            img.addEventListener('error', (err) => {
-                const backup = `./img/backup${type.charAt(0).toUpperCase() + type.slice(1)}.jpg`;
-                callback(backup, type)
-                resolve({
-                    imgGroup: this,
-                    img: img,
-                    source: backup
-                });
-            });
-            img.src = url;
+    loadImage(image, callback) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        image.img = img;
+        image.type = image.view;
+        img.addEventListener('load', () => {
+            callback(image.url, image.view)
+            image.imgGroup = this;
+        })
+        img.addEventListener('error', (err) => {
+            const backup = `./img/backup${image.view.charAt(0).toUpperCase() + image.view.slice(1)}.jpg`;
+            callback(backup, image.view)
+            image.imgGroup = this;
+            image.url = backup;
+            img.src = backup;
         });
+        img.src = image.url;
+        return image
     }
 
     loadImages() {
+        // dont load when the images are already loaded
+        if (this.images.length > 0) return;
         this.images = this.views.map(view => {
             return {
                 site: this.site,
@@ -78,7 +76,7 @@ class ImageGroup {
                 view: view
             }
         })
-            .map(image => this.loadImage(image.url, image.view, this.loadHandler));
+            .map(image => this.loadImage(image, this.loadHandler));
     }
 
     getImages() {
@@ -100,7 +98,7 @@ class ImageGroup {
 
     imageLoaded(url, type) {
         this.imagesLoaded++;
-        if (this.imagesLoaded == this.images.length) {
+        if (this.imagesLoaded >= this.images.length) {
             this.loaded = true;
         }
         const image = this.urls.find(u => u.type == type)
@@ -187,13 +185,13 @@ class ImageSequence {
 
     step() {
         //if it is already loaded then skip to next
-        if (this.isStepLoaded(this.loadPos)) this.checkStep();
+        if (this.isStepLoaded(this.loadPos)) return this.checkStep();
         const sites = this.getActiveSites();
         let imagePromises = [];
         sites.forEach(s => {
             imagePromises = [...imagePromises, ...s.loadImagesPos(this.loadPos)]
         })
-        Promise.all(imagePromises)
+        Promise.all(imagePromises.map(i => new Promise((resolve) => {if (i.imgGroup) return resolve(); i.img.addEventListener('load', resolve);i.img.addEventListener('error', resolve)})))
             .then((value) => {
                 //update site group as loaded
                 this.siteChangeLoadStatus(this.loadPos, true)
@@ -261,7 +259,7 @@ class ImageSequence {
         // if (!this.imagesLoadedAtPos(activeSites, pos)) return null;
         let images = [];
         activeSites.forEach(s => {
-            const d = s.getImagesFromPos(pos)
+            const d = s.loadImagesPos(pos)
             images = [...images, ...d]
         })
 
@@ -276,7 +274,7 @@ class ImageSequence {
         //check if all images are loaded
         return this.getActiveSites().map(s => {
             //get images
-            let images = s.getImagesFromPos(pos);
+            let images = s.loadImagesPos(pos);
             // images = this.sortByIndex(images, activeIndex)
             return {
                 images: images,

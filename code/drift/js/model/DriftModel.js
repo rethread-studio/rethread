@@ -479,7 +479,6 @@ export default class DriftModel {
         let images = [...this.imageSequence.getImagesInPos(this.currentVisit, activeIndex)]
         images = images == null ? this.imageSequence.getBackUpImages() : images;
         //SORT IMAGES ACCORDING TO MENU
-
         return images;
     }
 
