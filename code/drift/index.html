@@ -83,7 +83,7 @@
             vec4 t=texture2D(texture1,vUv);
             // The 0.75 corresponds to a distanceFromCenter value of 3
             vec2 centered_co = (vUv.xy * 2.0 - 1.0) * 0.75;
-            t *= 1.0 - pow(length(centered_co), 3.0);
+            t *= 1.0 - pow(clamp(length(centered_co) - 0.5, 0.0, 1.0) * 2.0, 5.0);
             gl_FragColor=t;
         }
 
