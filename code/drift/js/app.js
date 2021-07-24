@@ -74,8 +74,20 @@ window.onload = function () {
     let mainViztDView = new MainVizTDView('mainViz', mainVizTD);
     mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
 
-    //start home view
-    showView("home");
+    goToLocation();
+};
+
+function goToLocation() {
+    let loadingPage = "home";
+    const paths = document.location.pathname.substring(1).split('/')
+    if (paths.length > 0) {
+        loadingPage = paths[0];
+    }
+    showView(loadingPage);
+}
+
+window.onpopstate = function() {
+    goToLocation();
 };
 
 //show view

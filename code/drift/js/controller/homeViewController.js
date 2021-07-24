@@ -7,17 +7,25 @@ export default class HomeViewController {
     }
 
     addEventListener() {
-        this.view.meetRobot_btn.addEventListener("click", () => {
+        this.view.meetRobot_btn.addEventListener("click", (e) => {
+            this.model.updateURL("/robot", "Meet the Artists");
             showView('robot');
+            e.preventDefault();
         });
-        this.view.viewExhibition_btn.addEventListener("click", () => {
+        this.view.viewExhibition_btn.addEventListener("click", (e) => {
+            this.model.updateURL("/exhibition", "Drift");
             showView('exhibition');
+            e.preventDefault();
         });
-        this.view.takeTour_btn.addEventListener("click", () => {
+        this.view.takeTour_btn.addEventListener("click", (e) => {
+            this.model.updateURL("/tour", "Tour");
             showView('tour');
+            e.preventDefault();
         });
-        this.view.aboutReThread_btn.addEventListener("click", () => {
+        this.view.aboutReThread_btn.addEventListener("click", (e) => {
+            this.model.updateURL("/about", "About");
             showView('about');
+            e.preventDefault();
         });
 
         this.view.username_inp.addEventListener("change", () => {

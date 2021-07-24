@@ -15,12 +15,10 @@ const app = express();
 app.use(core());
 app.use(compression());
 app.use("/js", express.static(__dirname + "/../../js"));
+app.use("/site.webmanifest", express.static(__dirname + "/../../site.webmanifest"));
 app.use("/img", express.static(__dirname + "/../../img"));
 app.use("/css", express.static(__dirname + "/../../css"));
 app.use("/webfonts", express.static(__dirname + "/../../webfonts"));
-app.get("/", (req, res) =>
-  res.sendFile(resolve(__dirname + "/../../index.html"))
-);
 
 const api = express.Router();
 app.use("/api", api);
@@ -331,6 +329,11 @@ api.get("/vote/websites", async (req, res) => {
       .map((f) => f.replace(".steps", ""))
   );
 });
+
+
+app.get("*", (req, res) =>
+  res.sendFile(resolve(__dirname + "/../../index.html"))
+);
 
 const server = app.listen(8080, () => {
   console.log("Server listening on port: 8080");

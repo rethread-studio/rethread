@@ -646,5 +646,8 @@ export default class DriftModel {
         this.stackDisabled = disabled
     }
 
+    updateURL(url, title) {
+        window.history.pushState(null, title || window.document.title, url)
+    }
 
 }
