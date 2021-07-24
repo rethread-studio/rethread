@@ -19,6 +19,7 @@ app.use("/site.webmanifest", express.static(__dirname + "/../../site.webmanifest
 app.use("/img", express.static(__dirname + "/../../img"));
 app.use("/css", express.static(__dirname + "/../../css"));
 app.use("/webfonts", express.static(__dirname + "/../../webfonts"));
+app.use("/audio", express.static(__dirname + "/../../audio"));
 
 const api = express.Router();
 app.use("/api", api);
