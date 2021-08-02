@@ -468,45 +468,53 @@ export default class MainVizTDModel {
     upDateImages() {
         const state = this.getActiveSection()
         //get state
-        switch (state) {
-            case 0:
-                this.removeImages()
-                this.addMaterial();
-                this.showScreenShot();
-                this.fitCameraToSelection(this.camera, this.controls, this.meshes, 0.6)
-                break;
-            case 1:
-                this.showNewLayout();
-                // this.removeImages()
-                // this.addMaterial();
-                // this.showSiteViewsVetically();
-                // this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
-                break;
-            case 2:
-                this.showNewLayout();
-                // if (!model.getStack()) model.toggleDisplay(true);
-                // this.removeImages()
-                // this.addMaterial();
-                // this.showSiteViewsVetically();
-                // this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
-                break;
-            case 3:
-                //RENDER SPREAD IMAGES
-                // console.log(model.stack)
-                // if (model.getStack()) 
-                // model.toggleNoNotification(false)
-                // this.showNewLayout()
-                // this.showImages()
-                // break;
-                // case 4:
-                //do nothing
-                this.showNewLayout();
-                break;
-
-            default:
-                this.showNewLayout()
-                break;
+        if (state == 0) {
+            this.removeImages()
+            this.addMaterial();
+            this.showScreenShot();
+            this.fitCameraToSelection(this.camera, this.controls, this.meshes, 0.6)
+        } else {
+            this.showNewLayout();
         }
+        // switch (state) {
+        //     case 0:
+        //         this.removeImages()
+        //         this.addMaterial();
+        //         this.showScreenShot();
+        //         this.fitCameraToSelection(this.camera, this.controls, this.meshes, 0.6)
+        //         break;
+        //     case 1:
+        //         this.showNewLayout();
+        //         // this.removeImages()
+        //         // this.addMaterial();
+        //         // this.showSiteViewsVetically();
+        //         // this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
+        //         break;
+        //     case 2:
+        //         this.showNewLayout();
+        //         // if (!model.getStack()) model.toggleDisplay(true);
+        //         // this.removeImages()
+        //         // this.addMaterial();
+        //         // this.showSiteViewsVetically();
+        //         // this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
+        //         break;
+        //     case 3:
+        //         //RENDER SPREAD IMAGES
+        //         // console.log(model.stack)
+        //         // if (model.getStack()) 
+        //         // model.toggleNoNotification(false)
+        //         // this.showNewLayout()
+        //         // this.showImages()
+        //         // break;
+        //         // case 4:
+        //         //do nothing
+        //         this.showNewLayout();
+        //         break;
+
+        //     default:
+        //         this.showNewLayout()
+        //         break;
+        // }
 
     }
 

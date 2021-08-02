@@ -170,7 +170,7 @@ const viewsMenu = [
         human: "Coverage",
         nerd: "Code",
         value: "coverage",
-        state: 0,
+        state: 1,
     },
     {
         name: "graph",
