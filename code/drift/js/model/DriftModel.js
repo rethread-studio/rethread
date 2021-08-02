@@ -618,6 +618,7 @@ export default class DriftModel {
                 return i;
             })
             .sort((a, b) => b.name > a.name)
+        this.firstItemSelected = this.data.children.find(i => i.state == 1).name;
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
         this.notifyObservers({ type: "updateImages" });
