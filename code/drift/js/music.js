@@ -204,6 +204,7 @@ function shuffleArray(array) {
 
 var event_sample_index = Math.floor(Math.random() * event_samples.length);
 function start_sound_effect() {
+    console.log("called SOUND CHANGE")
     if (music_is_playing) {
         if (all_music_loaded) {
             event_samples[event_sample_index].start();

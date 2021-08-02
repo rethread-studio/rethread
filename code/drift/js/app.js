@@ -83,7 +83,6 @@ function goToLocation() {
     if (paths.length > 0) {
         loadingPage = paths[0];
     }
-    console.log("THIS IS THE LOADING PAGE", loadingPage)
     showView(loadingPage);
 }
 

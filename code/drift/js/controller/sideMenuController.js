@@ -53,6 +53,7 @@ export default class SideMenuController {
         const value = e.currentTarget.dataset.value;
         this.clearLegendTimeOut()
         this.model.selectView(value)
+        start_sound_effect();
     }
 
     showTooltip(element, value) {

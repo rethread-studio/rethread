@@ -44,6 +44,7 @@ export default class TimeLineController {
         const { width, left } = e.target.getBoundingClientRect();
         const posX = e.clientX - left;
         this.model.updateSliderPos(posX / width)
+        start_sound_effect();
     }
 
     onClick() {

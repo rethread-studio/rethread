@@ -24,6 +24,7 @@ export default class CheckBoxViewController {
     onClickCheckBox(e) {
         if (e.target.value == undefined) return;
         this.model.selectSite(e.target.value)
+        start_sound_effect();
 
     }
 
