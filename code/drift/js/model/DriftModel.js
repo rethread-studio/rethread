@@ -27,12 +27,20 @@ const updateState = (_name) => {
     }
 }
 
+const updateDataState = (_name, _state) => {
+    return (i) => {
+        if (i.name == _name) i.state = _state;
+        return i;
+    }
+}
+
 export default class DriftModel {
 
     constructor() {
         this.interaction = window.interaction;
         this.menu = []; //menu is the list of views or list of sites
         this.data = dataTest //is the current sites or views to display in the viz
+        this.firstItemSelected = dataTest.children[0].name;
         this.voteWebsites = []; // the list of website that can be visited by the robot
         this.currentSection = this.menu[0];
         this.observers = [];
@@ -107,11 +115,7 @@ export default class DriftModel {
                 speed: 1000
             },
             {
-                text: "1.5",
-                speed: this.baseSpeed / 2
-            },
-            {
-                text: "2",
+                text: "Ridiculous",
                 speed: this.baseSpeed / 9
             },
         ]
@@ -568,14 +572,22 @@ export default class DriftModel {
 
     selectSite(name) {
 
-        const activeItems = this.data.children.filter(i => {
-            return i.state == 1
-        });
+
+        const activeItems = this.data.children.filter(i => i.state == 1);
+        const activeNames = activeItems.map(i => i.name)
         if (activeItems.length == 1 && activeItems[0].name == name) {
             this.notifyObservers({ type: "sitesUpdated" });
             return;
-        };
+        } else if (activeItems.length == 2 && !activeNames.includes(name)) {
+            //change the state of the last one
+            this.data.children.map(updateDataState(this.firstItemSelected, 0))
+            //change the last one to the new active
+            this.firstItemSelected = activeItems.filter((i) => i.name != this.firstItemSelected)[0].name;
+        } else if (activeItems.length == 2 && activeNames.includes(name)) {
+            this.firstItemSelected = activeItems.filter((i) => i.name != name)[0].name;
+        }
 
+        //update the item that matches the name
         this.data.children = this.data.children.map(i => {
             if (i.name == name) i.state = i.state == 1 ? 0 : 1;
             return i;
