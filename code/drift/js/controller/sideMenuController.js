@@ -122,14 +122,14 @@ export default class SideMenuController {
     }
 
     hideOptions() {
-        this.model.toggleViewModeBtn(false)
-        this.view.btn.classList.remove("appear")
+        // this.model.toggleViewModeBtn(false)
+        // this.view.btn.classList.remove("appear")
     }
 
     showOptions() {
-        this.model.toggleViewModeBtn(true)
-        this.view.btn.classList.add("appear")
-        this.enableButon()
+        // this.model.toggleViewModeBtn(true)
+        // this.view.btn.classList.add("appear")
+        // this.enableButon()
     }
 
     enableButon() {

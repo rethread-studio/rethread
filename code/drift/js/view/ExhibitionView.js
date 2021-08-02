@@ -36,11 +36,11 @@ export default class ExhibitionView {
             <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in "> </div>
             <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
             <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
-            <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
             <div id="mainExhibit" value = "4" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
-        </div>
-       
-		`;
+            </div>
+            
+            `;
+        // <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
         this.container.innerHTML = content;
         this.renderTexts();
         // this.renderMainVis();
@@ -93,9 +93,9 @@ export default class ExhibitionView {
         this.explainController = new TextViewController(explanationView, this.vizModel);
         this.explainController.renderView();
 
-        let spreadView = new TextView("exhibitionSpread", exhibitionTexts.spread.tittle, exhibitionTexts.spread.text);
-        this.spreadController = new TextViewController(spreadView, this.vizModel);
-        this.spreadController.renderView();
+        // let spreadView = new TextView("exhibitionSpread", exhibitionTexts.spread.tittle, exhibitionTexts.spread.text);
+        // this.spreadController = new TextViewController(spreadView, this.vizModel);
+        // this.spreadController.renderView();
     }
 
     renderTimeLine() {

@@ -191,7 +191,7 @@ class ImageSequence {
         sites.forEach(s => {
             imagePromises = [...imagePromises, ...s.loadImagesPos(this.loadPos)]
         })
-        Promise.all(imagePromises.map(i => new Promise((resolve) => {if (i.imgGroup) return resolve(); i.img.addEventListener('load', resolve);i.img.addEventListener('error', resolve)})))
+        Promise.all(imagePromises.map(i => new Promise((resolve) => { if (i.imgGroup) return resolve(); i.img.addEventListener('load', resolve); i.img.addEventListener('error', resolve) })))
             .then((value) => {
                 //update site group as loaded
                 this.siteChangeLoadStatus(this.loadPos, true)
@@ -270,7 +270,7 @@ class ImageSequence {
         //if it is not loaded then return null
     }
 
-    getSitesImagesInPos(pos, activeIndex) {
+    getSitesImagesInPos(pos) {
         //check if all images are loaded
         return this.getActiveSites().map(s => {
             //get images

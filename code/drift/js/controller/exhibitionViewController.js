@@ -92,17 +92,17 @@ export default class ExhibitionViewController {
             case 1:
                 this.view.timeline.classList.remove("appear")
                 this.view.viewsMenu.classList.add("appear")
-                this.view.sideMenuController.hideOptions()
+                this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.hideOptions()
                 break;
             case 2:
-                this.model.toggleNoNotification(true)
+                // this.model.toggleNoNotification(true)
                 this.view.timeline.classList.add("appear")
-                this.view.sideMenuController.hideOptions()
+                this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.hideOptions()
                 break;
             case 3:
-                this.model.toggleDisplay(false);
+                // this.model.toggleDisplay(false);
                 this.model.setStackDisabled(true);
                 this.model.selectFirstSite();
                 this.view.sideMenuController.showOptions()

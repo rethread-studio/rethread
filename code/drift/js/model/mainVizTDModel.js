@@ -377,14 +377,14 @@ export default class MainVizTDModel {
         this.removeImages()
         this.addMaterial();
         const stack = model.getStack();
-        if (stack) {
-            this.showSiteViewsVetically()
-            this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
-        } else {
-            this.showSpreadSites()
-            const dof = model.getNumActiveSites()
-            this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof <= 2 ? 0.5 : 1)
-        }
+        // if (stack) {
+        //     this.showSiteViewsVetically()
+        //     this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
+        // } else {
+        this.showSpreadSites()
+        const dof = model.getNumActiveSites()
+        this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof <= 2 ? 0.5 : 1)
+        // }
 
     }
 
@@ -476,27 +476,29 @@ export default class MainVizTDModel {
                 this.fitCameraToSelection(this.camera, this.controls, this.meshes, 0.6)
                 break;
             case 1:
-                this.removeImages()
-                this.addMaterial();
-                this.showSiteViewsVetically();
-                this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
+                this.showNewLayout();
+                // this.removeImages()
+                // this.addMaterial();
+                // this.showSiteViewsVetically();
+                // this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
                 break;
             case 2:
+                this.showNewLayout();
                 // if (!model.getStack()) model.toggleDisplay(true);
-                this.removeImages()
-                this.addMaterial();
-                this.showSiteViewsVetically();
-                this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
+                // this.removeImages()
+                // this.addMaterial();
+                // this.showSiteViewsVetically();
+                // this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
                 break;
             case 3:
                 //RENDER SPREAD IMAGES
                 // console.log(model.stack)
                 // if (model.getStack()) 
                 // model.toggleNoNotification(false)
-                this.showNewLayout()
+                // this.showNewLayout()
                 // this.showImages()
-                break;
-            case 4:
+                // break;
+                // case 4:
                 //do nothing
                 this.showNewLayout();
                 break;
