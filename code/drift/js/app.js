@@ -83,10 +83,11 @@ function goToLocation() {
     if (paths.length > 0) {
         loadingPage = paths[0];
     }
+    console.log("THIS IS THE LOADING PAGE", loadingPage)
     showView(loadingPage);
 }
 
-window.onpopstate = function() {
+window.onpopstate = function () {
     goToLocation();
 };
 
@@ -95,7 +96,7 @@ window.onpopstate = function() {
 export default function showView(view) {
 
     start_sound_effect(); // Play a sound effect
-    
+
     model.interaction.page(view);
     if (currentView == exhibitionViewController) {
         mainVizTD.removeImages();

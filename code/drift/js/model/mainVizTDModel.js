@@ -19,7 +19,7 @@ export default class MainVizTDModel {
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
-        this.numParticles = 100; //100
+        this.numParticles = 1; //100
 
         this.observers = [];
 
@@ -204,7 +204,7 @@ export default class MainVizTDModel {
             let group = new THREE.Group();
 
             // mat.wireframe = true;
-            const texture = new THREE.Texture( im.img );
+            const texture = new THREE.Texture(im.img);
             mat.uniforms.texture1.value = texture;
             mat.uniforms.texture1.value.needsUpdate = true;
 
@@ -233,7 +233,7 @@ export default class MainVizTDModel {
         let mat = this.ctrMaterial().clone();
         this.materialsImage.push(mat);
         let group = new THREE.Group();
-        const texture = new THREE.Texture( screenShot.img );
+        const texture = new THREE.Texture(screenShot.img);
         mat.uniforms.texture1.value = texture;
         mat.uniforms.texture1.value.needsUpdate = true;
         // mat.uniforms.texture1.value = new THREE.TextureLoader().load(screenShot.url);
@@ -401,7 +401,7 @@ export default class MainVizTDModel {
                 this.materialsImage.push(mat);
                 let group = new THREE.Group();
                 // mat.wireframe = true;
-                const texture = new THREE.Texture( img.img )
+                const texture = new THREE.Texture(img.img)
                 mat.uniforms.texture1.value = texture
                 mat.uniforms.texture1.value.needsUpdate = true;
 

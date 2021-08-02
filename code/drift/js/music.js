@@ -7,52 +7,52 @@
 // Each sound file needs to be loaded into a buffer and played by a player
 
 class Sample {
-	constructor(url_path, autostart = false, loop = false, onstop = (source) => {}, delayed = false) {
+    constructor(url_path, autostart = false, loop = false, onstop = (source) => { }, delayed = false) {
         // delayed is used for samples that aren't needed right away and won't be counted for asset loading
         if (!delayed) {
             total_sound_assets += 1;
         }
-		this.buf = null;
-		this.player = null;
+        this.buf = null;
+        this.player = null;
         this.autostart = autostart;
-		let that = this;
-		let buffer = new Tone.Buffer(url_path, function(){
-			// console.log("loaded buffer " + url_path);
-			
-			//the buffer is now available.
-			that.buf = buffer.get();
+        let that = this;
+        let buffer = new Tone.Buffer(url_path, function () {
+            // console.log("loaded buffer " + url_path);
 
-			that.player = new Tone.Player({
-				url: buffer,
-				loop: loop,
-				loopStart: 0.0,
-				loopEnd: buffer.length/buffer.sampleRate,
-				onstop: onstop,
-			}).toDestination();
+            //the buffer is now available.
+            that.buf = buffer.get();
+
+            that.player = new Tone.Player({
+                url: buffer,
+                loop: loop,
+                loopStart: 0.0,
+                loopEnd: buffer.length / buffer.sampleRate,
+                onstop: onstop,
+            }).toDestination();
             that.player.fadeOut = 0.8;
-			
-			if (that.autostart) {
-				that.player.start();
-			}
-            if(!delayed) {
+
+            if (that.autostart) {
+                that.player.start();
+            }
+            if (!delayed) {
                 register_sound_asset_loaded();
             }
-		});
-	}
-	start() {
-		if (this.player != null) {
-			this.player.start();
-		} else {
+        });
+    }
+    start() {
+        if (this.player != null) {
+            this.player.start();
+        } else {
             this.autostart = true;
         }
-	}
+    }
     stop() {
-		if (this.player != null) {
-			this.player.stop();
-		} else {
+        if (this.player != null) {
+            this.player.stop();
+        } else {
             this.autostart = false;
         }
-	}	
+    }
 }
 
 var total_sound_assets = 0;
@@ -81,7 +81,7 @@ var all_music_loaded = false;
 
 function load_all_music_assets() {
     // Load all audio files
-    
+
     total_sound_assets = 0;
     loaded_sound_assets = 0;
 
@@ -91,26 +91,26 @@ function load_all_music_assets() {
     for (let file of root_sample_names) {
         if (root_i == 0) {
             root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
-                                         (source) => {
-                                            if(music_is_playing) {
-                                                setTimeout(() => {
-                                                    let i = Math.floor(Math.random() * root_samples.length);
-                                                    root_samples[i].start();
-                                                }, Math.pow(Math.random(), 2.0) * 10000);
-                                            }
-                                         }));
+                (source) => {
+                    if (music_is_playing) {
+                        setTimeout(() => {
+                            let i = Math.floor(Math.random() * root_samples.length);
+                            root_samples[i].start();
+                        }, Math.pow(Math.random(), 2.0) * 10000);
+                    }
+                }));
         } else {
             // Delay subsequent root samples for a bit, no need to load them right away
             setTimeout(() => {
-            root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
-                                         (source) => {
-                                            if(music_is_playing) {
-                                                setTimeout(() => {
-                                                    let i = Math.floor(Math.random() * root_samples.length);
-                                                    root_samples[i].start();
-                                                }, Math.pow(Math.random(), 2.0) * 10000);
-                                            }
-                                         }, true));
+                root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
+                    (source) => {
+                        if (music_is_playing) {
+                            setTimeout(() => {
+                                let i = Math.floor(Math.random() * root_samples.length);
+                                root_samples[i].start();
+                            }, Math.pow(Math.random(), 2.0) * 10000);
+                        }
+                    }, true));
             }, 30000);
         }
         root_i += 1;
@@ -119,22 +119,22 @@ function load_all_music_assets() {
     for (let file of long_sample_names) {
         if (root_i == 0) {
             long_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
-                                         (source) => {
-                                            if(music_is_playing) {
-                                                 let i = Math.floor(Math.random() * root_samples.length);
-                                                 long_samples[i].start();
-                                            }
-                                         }));
+                (source) => {
+                    if (music_is_playing) {
+                        let i = Math.floor(Math.random() * root_samples.length);
+                        long_samples[i].start();
+                    }
+                }));
         } else {
             // Delay subsequent root samples for a bit, no need to load them right away
             setTimeout(() => {
-            long_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
-                                         (source) => {
-                                            if(music_is_playing) {
-                                                 let i = Math.floor(Math.random() * root_samples.length);
-                                                 long_samples[i].start();
-                                            }
-                                         }, true));
+                long_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
+                    (source) => {
+                        if (music_is_playing) {
+                            let i = Math.floor(Math.random() * root_samples.length);
+                            long_samples[i].start();
+                        }
+                    }, true));
             }, 30000);
         }
         root_i += 1;
@@ -175,12 +175,12 @@ function register_sound_asset_loaded() {
         // start_all();
         all_music_loaded = true;
     } else {
-//         let progress = (loaded_sound_assets / total_sound_assets) * 100;
-//         e.innerHTML = `
-// <h5>Loading assets:</h5>
-// <progress value="${progress}" max="100">
-// </progress>
-// `;
+        //         let progress = (loaded_sound_assets / total_sound_assets) * 100;
+        //         e.innerHTML = `
+        // <h5>Loading assets:</h5>
+        // <progress value="${progress}" max="100">
+        // </progress>
+        // `;
     }
 }
 
@@ -204,11 +204,11 @@ function shuffleArray(array) {
 
 var event_sample_index = Math.floor(Math.random() * event_samples.length);
 function start_sound_effect() {
-    if(music_is_playing) {
-        if(all_music_loaded) {
+    if (music_is_playing) {
+        if (all_music_loaded) {
             event_samples[event_sample_index].start();
             event_sample_index += 1;
-            if(event_sample_index >= event_samples.length) {
+            if (event_sample_index >= event_samples.length) {
                 shuffleArray(event_samples);
                 event_sample_index = 0;
             }
@@ -221,7 +221,7 @@ function start_sound_effect() {
 
 
 function update_visitors_connected() {
-    if(all_music_loaded) {
+    if (all_music_loaded) {
         let new_level = 0;
         if (interaction.users) {
             if (interaction.users.length > 1) {
@@ -239,12 +239,12 @@ function update_visitors_connected() {
         if (new_level != visitors_connected_level) {
             if (new_level > visitors_connected_level) {
                 // Start new sound samples
-                for(let i = visitors_connected_level; i < new_level; i++) {
+                for (let i = visitors_connected_level; i < new_level; i++) {
                     visitor_samples[i].start();
                 }
             } else {
                 // Stop existing sound samples
-                for(let i = new_level; i < visitors_connected_level; i++) {
+                for (let i = new_level; i < visitors_connected_level; i++) {
                     visitor_samples[i].stop();
                 }
             }
@@ -255,15 +255,15 @@ function update_visitors_connected() {
 };
 
 // The loop that starts new site samples depending on what is enabled
-var site_loop = new Tone.Loop(function(time){
-    if(!site_playing && enabled_variants.length > 0 && enabled_sites.length > 0) {
+var site_loop = new Tone.Loop(function (time) {
+    if (!site_playing && enabled_variants.length > 0 && enabled_sites.length > 0) {
         // First choose a variant among the enabled variants
         let variant;
         let site;
         // Loop until finding a different one than last time
         do {
-        variant = enabled_variants[Math.floor(Math.random() * enabled_variants.length)];
-        site = enabled_sites[Math.floor(Math.random() * enabled_sites.length)];
+            variant = enabled_variants[Math.floor(Math.random() * enabled_variants.length)];
+            site = enabled_sites[Math.floor(Math.random() * enabled_sites.length)];
         } while (enabled_variants.length * enabled_sites.length > 1 && (variant + site) == last_played_site_sample);
         currently_playing_site_sample = site_sample_variants.get(variant).get(site);
         currently_playing_site_sample.start();
@@ -277,9 +277,9 @@ Tone.Transport.bpm.value = 75;
 var music_is_playing = false;
 // Starts everything with default settings
 function start_all() {
-    if(all_music_loaded) {
+    if (all_music_loaded) {
         setTimeout(() => {
-            if(music_is_playing) {
+            if (music_is_playing) {
                 root_samples[0].start();
             }
         }, 5000);
@@ -315,7 +315,7 @@ function stop_all() {
 
 // UI
 function toggleAudioOnOff() {
-    if(music_is_playing) {
+    if (music_is_playing) {
         stop_all();
     } else {
         start_all();
@@ -342,6 +342,6 @@ function getAudioOnOffButton(size = audio_button_size) {
 }
 
 // Delaying the sound asset loading by enough time here seems to place it after everything else, creating a smoother experience
-setTimeout( () => {
+setTimeout(() => {
     load_all_music_assets()
 }, 1000);

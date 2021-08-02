@@ -18,7 +18,7 @@ export default class MainMenuView {
     render() {
         const visible = this.model.getMenuVisible();
         const viewToggle = currentView == exhibitionViewController;
-        let audio_button = getAudioOnOffButton("fa-3x");
+        let audio_button = getAudioOnOffButton("fa-2x");
 
         const menu = `
         <nav id= "burguerMenu" class="${visible ? "visible" : "invisible"} absolute top-0 left-0 flex flex-col items-center  justify-center  mx-auto w-screen  h-screen  pt-20 pb-20 background ">
@@ -37,7 +37,7 @@ export default class MainMenuView {
         </a>
             
             <div id="toggleItem" class="ml-auto pr-8 pt-2 ${viewToggle ? "visible" : "invisible"}"></div>
-            <div id="audio-div" style="color: white; margin-right: 2em; margin-left: 1em;">${audio_button}</div>
+            <div id="audio-div" class="mr-8 ml-4 text-white pt-2">${audio_button}</div>
             <button id="menuButton" class="flex px-4 py-3 border rounded mt-auto z-50 transition-colors duration-500 ease-in-out ${visible ? "bg-white" : "bg-current"} ">
                 <svg class="fill-current h-3 w-3 ${visible ? " text-black" : " text-white"}" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <title>Menu</title>
