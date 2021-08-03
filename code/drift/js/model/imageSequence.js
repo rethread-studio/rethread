@@ -83,6 +83,10 @@ class ImageGroup {
         return this.images;
     }
 
+    getActiveImages(imageList) {
+        return this.images.filter(e => imageList.includes(e.view));
+    }
+
     getImagesSolved() {
         console.log(this.images)
         return this.images
@@ -270,7 +274,7 @@ class ImageSequence {
         //if it is not loaded then return null
     }
 
-    getSitesImagesInPos(pos) {
+    getSitesImagesInPos(pos, activeItems) {
         //check if all images are loaded
         return this.getActiveSites().map(s => {
             //get images

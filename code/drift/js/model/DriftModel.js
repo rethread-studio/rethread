@@ -304,6 +304,11 @@ export default class DriftModel {
         return this.menu;
     }
 
+    getActiveMenuItems() {
+        return this.menu.filter(i => i.state == 1)
+            .map(i => i.value)
+    }
+
     getDataChildren() {
         return this.data.children.sort((a, b) => b.name > a.name ? -1 : b.name < a.name ? 1 : 0);
     }
@@ -483,16 +488,22 @@ export default class DriftModel {
 
     getImagesFromSite() {
         //get images at current pos from image sequence
-        const activeIndex = this.menu.findIndex(e => e.state == 1);
-        let images = [...this.imageSequence.getImagesInPos(this.currentVisit, activeIndex)]
+        const activeItems = this.menu.findIndex(e => e.state == 1);
+        let images = [...this.imageSequence.getImagesInPos(this.currentVisit, activeItems)]
         images = images == null ? this.imageSequence.getBackUpImages() : images;
         //SORT IMAGES ACCORDING TO MENU
         return images;
     }
 
     getSitesImages() {
-        const activeIndex = this.menu.findIndex(e => e.state == 1);
-        return [...this.imageSequence.getSitesImagesInPos(this.currentVisit, activeIndex)]
+        const activeItems = this.getActiveMenuItems();
+        const sitesImg = this.imageSequence.getSitesImagesInPos(this.currentVisit, activeItems)
+        //filter only the selected views
+        sitesImg.forEach(s => {
+            s.images = s.images.filter(i => activeItems.includes(i.type))
+        });
+
+        return [...sitesImg]
     }
 
     getNumActiveSites() {

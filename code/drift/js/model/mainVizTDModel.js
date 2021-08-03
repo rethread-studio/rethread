@@ -376,7 +376,7 @@ export default class MainVizTDModel {
     showNewLayout() {
         this.removeImages()
         this.addMaterial();
-        const stack = model.getStack();
+        // const stack = model.getStack();
         // if (stack) {
         //     this.showSiteViewsVetically()
         //     this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
