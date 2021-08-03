@@ -28,7 +28,7 @@ export default class ExhibitionView {
         <div id="exhibitContent" class="">
             <div id="visContainer" class="h-screen w-screen fixed top-0">
                     <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right  "></div>
-                    <div id="timeLineWrapper" class="absolute bottom-0 mb-10 left-0  flex flex-col flex-wrap justify-start from-down"></div>
+                    <div id="timeLineWrapper" class="absolute bottom-0  left-0  flex flex-col flex-wrap justify-start from-down"></div>
                     <div id="currentTimeWrapper" class= "relative top-100 ml-5 fade-in"></div>
                     <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5  "></div>
                     <div id="legend" class="absolute z-10 top-0 p-5 bg-gray-800 rounded-xl transition-transform duration-500 ease-in-out w-5/12 hidden"></div>

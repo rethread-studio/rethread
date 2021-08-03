@@ -383,7 +383,7 @@ export default class MainVizTDModel {
         // } else {
         this.showSpreadSites()
         const dof = model.getNumActiveSites()
-        this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof == 1 ? 0.5 : 0.85)
+        this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof == 1 ? 0.5 : 0.8)
         // }
 
     }
