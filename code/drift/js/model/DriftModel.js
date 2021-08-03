@@ -502,7 +502,6 @@ export default class DriftModel {
         sitesImg.forEach(s => {
             s.images = s.images.filter(i => activeItems.includes(i.type))
         });
-
         return [...sitesImg]
     }
 

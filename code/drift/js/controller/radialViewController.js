@@ -23,7 +23,7 @@ export default class RadialViewController {
 
     onClickRadial(e) {
         if (e.target.value == undefined) return;
-        this.model.selectRadialSite(e.target.value)
+        this.model.selectSite(e.target.value)
         start_sound_effect();
     }
 
