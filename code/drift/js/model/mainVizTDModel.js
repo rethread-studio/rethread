@@ -376,14 +376,14 @@ export default class MainVizTDModel {
     showNewLayout() {
         this.removeImages()
         this.addMaterial();
-        // const stack = model.getStack();
+        const stack = model.getStack();
         // if (stack) {
         //     this.showSiteViewsVetically()
         //     this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
         // } else {
         this.showSpreadSites()
         const dof = model.getNumActiveSites()
-        this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof <= 2 ? 0.5 : 1)
+        this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof == 1 ? 0.5 : 0.85)
         // }
 
     }
@@ -393,7 +393,7 @@ export default class MainVizTDModel {
         const sites = model.getSitesImages();
         const initX = -4;
         const size = 2;
-        const spread = size * 2 + size / 2;
+        const spread = size * 1.5 + size / 2;
 
         sites.forEach((site, i) => {
             site.images.forEach((img, j) => {

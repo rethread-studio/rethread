@@ -17,7 +17,7 @@ export default class SelectSiteToggleView {
         const stack = this.model.getStack()
         const content = `
         <div id="checkBoxList"class="${!stack ? "block" : "hidden"}" > </div>
-        <div id="radialList" class="${stack ? "block" : "hidden"}"> </div>
+        <div id="radialList" class="${stack ? "block" : "hidden"}"> </div> 
 		`;
         this.container.innerHTML = content;
         this.renderCheckBoxList()
