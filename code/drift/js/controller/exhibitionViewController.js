@@ -82,9 +82,11 @@ export default class ExhibitionViewController {
                 this.view.sitesMenuViewController.hideOptions()
                 this.view.sideMenuController.hideOptions()
                 this.model.getChangePlayState(true)
+                this.model.removeLayerStepInterval();
                 break;
             case 1:
                 // this.model.resetSites();
+                this.model.setLayerStepInterval();
                 this.view.timeline.classList.remove("appear")
                 this.view.viewsMenu.classList.add("appear")
                 this.view.sideMenuController.showOptions()
@@ -94,6 +96,7 @@ export default class ExhibitionViewController {
                 // this.model.resetSites();
                 // this.model.toggleNoNotification(true)
                 this.model.selectFirstSite();
+                this.model.removeLayerStepInterval();
                 this.view.timeline.classList.add("appear")
                 this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.hideOptions()
@@ -103,6 +106,7 @@ export default class ExhibitionViewController {
                 // this.model.resetSites();
                 // this.model.toggleDisplay(false);
                 this.model.setStackDisabled(true);
+                this.model.removeLayerStepInterval();
                 this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.hideOptions()
                 //CHANGE TO SPREAD
@@ -111,6 +115,7 @@ export default class ExhibitionViewController {
                 break;
             case 4:
                 this.model.setStackDisabled(false);
+                this.model.removeLayerStepInterval();
                 this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.showOptions()
                 this.view.timeline.classList.add("appear")

@@ -44,6 +44,7 @@ export default class DriftModel {
         this.voteWebsites = []; // the list of website that can be visited by the robot
         this.currentSection = this.menu[0];
         this.observers = [];
+        this.layerSpeed = 4000;
         this.visDimensions = {
             width: window.innerWidth,
             height: window.innerHeight,
@@ -128,7 +129,9 @@ export default class DriftModel {
         this.stack = true;
         this.stackDisabled = true;
         this.timeInterval = null;
+        this.layerStepInterval = null;
         this.intervalHandler = this.advanceSliderPos.bind(this);
+        this.layerIntervalHandler = this.stepView.bind(this);
         this.viewModeBtn = false;
 
         this.imageSequence;
@@ -137,9 +140,9 @@ export default class DriftModel {
     init() {
         this.getData();
         this.loadMenu("views");
-        this.getSitesVisits()
-        this.getMainMenu()
-        this.getVoteWebsites()
+        this.getSitesVisits();
+        this.getMainMenu();
+        this.getVoteWebsites();
     }
 
     getViewMode() {
@@ -232,6 +235,17 @@ export default class DriftModel {
     removeTimeInterval() {
         if (this.timeInterval != null && this.timeInterval != undefined) clearInterval(this.timeInterval);
         this.timeInterval = null;
+    }
+
+    setLayerStepInterval() {
+        if (this.layerStepInterval != null) return;
+        const speed = this.layerSpeed;
+        this.layerStepInterval = window.setInterval(this.layerIntervalHandler, speed)
+    }
+
+    removeLayerStepInterval() {
+        if (this.layerStepInterval != null && this.layerStepInterval != undefined) clearInterval(this.layerStepInterval);
+        this.layerStepInterval = null;
     }
 
     getSliderSpeed() {
@@ -427,6 +441,8 @@ export default class DriftModel {
             e.state = e.value == viewVal ? 1 : 0;
             return e;
         })
+        if (this.layerStepInterval != null && this.layerStepInterval != undefined) this.removeLayerStepInterval()
+
         this.notifyObservers({ type: "updateViewSideMenu" });
         this.notifyObservers({ type: "updateImages" });
 
@@ -460,6 +476,18 @@ export default class DriftModel {
         this.updateSequenceLoaderPos()
         //ask for the image 
         this.notifyObservers({ type: "updateCurrentVisit" });
+        this.notifyObservers({ type: "updateImages" })
+    }
+
+    // change the layer to view on each step
+    stepView() {
+        const currentPos = this.menu.findIndex(v => v.value !== "screenshot" && v.state == 1);
+        const nextStep = currentPos + 1 > this.menu.length - 1 ? 1 : currentPos + 1;
+        this.menu = this.menu.map((v, i) => {
+            v.state = i == currentPos ? 0 : i == nextStep ? 1 : i == 0 ? 1 : 0;
+            return v;
+        })
+        this.notifyObservers({ type: "updateViewSideMenu" });
         this.notifyObservers({ type: "updateImages" })
     }
 
