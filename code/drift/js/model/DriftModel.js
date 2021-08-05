@@ -618,6 +618,7 @@ export default class DriftModel {
         })
             .sort((a, b) => b.name > a.name)
 
+        this.firstItemSelected = this.data.children[0].name;
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
         this.notifyObservers({ type: "updateImages" });
@@ -644,6 +645,23 @@ export default class DriftModel {
         })
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
+    }
+
+    resetSites() {
+        //check if the number of active sites
+        const aSites = this.getNumActiveSites();
+        //if the fist is active and the only one return
+        if (aSites == 1 && this.data.children[0].state == 1) return;
+
+        //restore all items to 0 but the first one
+        this.data.children = this.data.children.map((s, i) => {
+            s.state = i == 0 ? 1 : 0;
+            return s;
+        })
+        this.firstItemSelected = this.data.children[0].name;
+        this.updateSequenceSites();
+        this.notifyObservers({ type: "sitesUpdated" });
+
     }
 
     updateSequenceSites() {

@@ -81,7 +81,7 @@ export default class ExhibitionViewController {
         //get state
         switch (state) {
             case 0:
-
+                this.model.resetSites();
                 this.view.currentTime.classList.add("appear")
                 this.view.timeline.classList.remove("appear")
                 this.view.viewsMenu.classList.remove("appear")
@@ -90,21 +90,24 @@ export default class ExhibitionViewController {
                 this.model.getChangePlayState(true)
                 break;
             case 1:
+                this.model.resetSites();
                 this.view.timeline.classList.remove("appear")
                 this.view.viewsMenu.classList.add("appear")
                 this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.hideOptions()
                 break;
             case 2:
+                this.model.resetSites();
                 // this.model.toggleNoNotification(true)
                 this.view.timeline.classList.add("appear")
                 this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.hideOptions()
                 break;
             case 3:
+                this.model.resetSites();
                 // this.model.toggleDisplay(false);
                 this.model.setStackDisabled(true);
-                this.model.selectFirstSite();
+                // this.model.selectFirstSite();
                 this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.hideOptions()
                 //CHANGE TO SPREAD
