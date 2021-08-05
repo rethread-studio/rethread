@@ -100,6 +100,7 @@ export default function showView(view) {
     if (currentView == exhibitionViewController) {
         mainVizTD.removeImages();
         model.toggleNoNotification(true);
+        model.removeLayerStepInterval();
     }
     if (currentView != null) currentView.unMountView()
     switch (view) {

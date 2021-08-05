@@ -143,6 +143,8 @@ export default class ExhibitionViewController {
     }
 
     renderView() {
+        console.log("render view")
+        this.model.addKeyEventListener();
         this.view.render();
         // this.setHeight();
         this.addEventListener();
@@ -155,6 +157,7 @@ export default class ExhibitionViewController {
         this.vizModel.removeImages();
         this.view.unMountView()
         this.removeEventListener()
+        this.model.removeKeyEventListener();
     }
 
     //update info when modified in vizModel

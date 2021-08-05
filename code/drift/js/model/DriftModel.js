@@ -132,6 +132,8 @@ export default class DriftModel {
         this.layerStepInterval = null;
         this.intervalHandler = this.advanceSliderPos.bind(this);
         this.layerIntervalHandler = this.stepView.bind(this);
+        this.keyEventHandler = this.keyEvent.bind(this);
+
         this.viewModeBtn = false;
 
         this.imageSequence;
@@ -224,6 +226,16 @@ export default class DriftModel {
             this.removeTimeInterval();
             this.setTimeInterval()
         }
+    }
+
+    addKeyEventListener() {
+        document.addEventListener('keydown', this.keyEventHandler)
+    }
+
+    removeKeyEventListener() {
+        console.log("remove event key")
+        document.removeEventListener('keydown', this.keyEventHandler)
+
     }
 
     setTimeInterval() {
@@ -466,12 +478,18 @@ export default class DriftModel {
 
 
 
-    advanceSliderPos() {
-        const newPos = this.currentVisit + 1;
+    advanceSliderPos(direction = 1) {
+        let newPos = 0;
+        if (direction == 1) {
+            newPos = this.currentVisit + 1;
+            this.currentVisit = newPos % this.visits.length == 0 ? 0 : newPos;
+        } else {
+            this.currentVisit = this.currentVisit - 1 < 0 ? 0 : this.currentVisit - 1;
+        }
         //advance only if next position is loaded
         if (this.imageSequence.isStepLoaded(newPos) == false) return;
         //if next position loaded update
-        this.currentVisit = newPos % this.visits.length == 0 ? 0 : newPos;
+
         //UPLOAD RANGE
         this.updateSequenceLoaderPos()
         //ask for the image 
@@ -480,15 +498,52 @@ export default class DriftModel {
     }
 
     // change the layer to view on each step
-    stepView() {
+    stepView(direction = 1) {
+        console.log(direction)
         const currentPos = this.menu.findIndex(v => v.value !== "screenshot" && v.state == 1);
-        const nextStep = currentPos + 1 > this.menu.length - 1 ? 1 : currentPos + 1;
+        let nextStep = 0;
+        if (direction == 1) {
+            nextStep = currentPos + 1 > this.menu.length - 1 ? 1 : currentPos + 1;
+        } else {
+            nextStep = currentPos - 1 < 1 ? this.menu.length - 1 : currentPos - 1;
+        }
         this.menu = this.menu.map((v, i) => {
             v.state = i == currentPos ? 0 : i == nextStep ? 1 : i == 0 ? 1 : 0;
             return v;
         })
         this.notifyObservers({ type: "updateViewSideMenu" });
         this.notifyObservers({ type: "updateImages" })
+    }
+
+    keyEvent(event) {
+        const keyName = event.key;
+        switch (keyName) {
+
+            case 'Right':
+            case 'ArrowRight':
+                this.advanceSliderPos()
+                break;
+            case 'Left':
+            case 'ArrowLeft':
+                this.advanceSliderPos(-1)
+                break;
+            case 'Up':
+            case 'ArrowUp':
+                this.stepView(-1)
+                break;
+            case 'Down':
+            case 'ArrowDown':
+                this.stepView(1)
+                break;
+            case ' ':
+                this.getChangePlayState();
+                break;
+
+            default:
+                break;
+        }
+        // Cancel the default action to avoid it being handled twice
+        event.preventDefault();
     }
 
     getActiveNodes() {
