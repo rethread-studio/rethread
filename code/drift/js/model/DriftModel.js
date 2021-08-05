@@ -485,6 +485,7 @@ export default class DriftModel {
             this.currentVisit = newPos % this.visits.length == 0 ? 0 : newPos;
         } else {
             this.currentVisit = this.currentVisit - 1 < 0 ? 0 : this.currentVisit - 1;
+            newPos = this.currentVisit;
         }
         //advance only if next position is loaded
         if (this.imageSequence.isStepLoaded(newPos) == false) return;
@@ -499,7 +500,6 @@ export default class DriftModel {
 
     // change the layer to view on each step
     stepView(direction = 1) {
-        console.log(direction)
         const currentPos = this.menu.findIndex(v => v.value !== "screenshot" && v.state == 1);
         let nextStep = 0;
         if (direction == 1) {
