@@ -1,5 +1,5 @@
 
-import { apiService } from '../app.js'
+import { apiService, currentView } from '../app.js'
 import { dataTest, mainMenu } from '../apiService.js';
 import { formatMonth, formatDay, formatHour } from '../helpers.js';
 import ImageSequence from './imageSequence.js'
@@ -482,13 +482,15 @@ export default class DriftModel {
         let newPos = 0;
         if (direction == 1) {
             newPos = this.currentVisit + 1;
-            this.currentVisit = newPos % this.visits.length == 0 ? 0 : newPos;
         } else {
-            this.currentVisit = this.currentVisit - 1 < 0 ? 0 : this.currentVisit - 1;
-            newPos = this.currentVisit;
+            newPos = this.currentVisit - 1 < 0 ? 0 : this.currentVisit - 1;
         }
         //advance only if next position is loaded
         if (this.imageSequence.isStepLoaded(newPos) == false) return;
+
+        this.currentVisit = newPos;
+        //Check stepping backwards 
+
         //if next position loaded update
 
         //UPLOAD RANGE
