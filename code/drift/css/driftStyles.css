@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
 
 html {
     height: 100%;
@@ -80,11 +78,15 @@ h1{
     max-width: 727px;
 }
 
+.text-200xl{
+    font-size: 200px;   
+}
+/* 
 #intro h1{
     font-size: 200px;
     font-weight: 900;
     letter-spacing: 10px;
-}
+} */
 
 .italic{
     font-style: italic;   

@@ -17,10 +17,10 @@ export default class HomeView {
         let audio_button = getAudioOnOffButton("fa-4x");
         const content = `
         <div id="intro" class="center txt-white relative h-screen ">
-            <img id="imageIntro" class="relative left-2-4 transform-50 h-auto .max-727" src="./img/imgTest.png" alt="yahoo profile test">
+            <img id="imageIntro" class="relative left-2-4 transform-50 h-auto .max-727" src="./img/imgTest.png" alt="Drift intro">
             <div class="absolute middleInset translateCenter">
-                <h3 class="text-center text-xl select-none">Welcome <br> <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none" id="usernameInp">
-                <h1 class="m-0 select-none text-center dritTittle" >Dr<span class="italic">i</span>ft</h1>
+                <h3 class="text-center text-xl select-none ">Welcome <br> <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none" id="usernameInp">
+                <h1 class=" text-200xl sm:text-xs m-0 select-none text-center font-black" >Dr<span class="italic">i</span>ft</h1>
                 <ul id="mainMenuMain" class="flex flex-row justify-between p-0 m-0">
                 </ul>
                 <div id="audio-div" class="m-8 flex justify-center">${audio_button}</div>

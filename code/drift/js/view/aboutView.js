@@ -26,8 +26,10 @@ export default class AboutView {
             </div>
             <div class="container white  ">
             <h3 class="mt-5">Benoit</h2> 
+            <a href="https://softwarediversity.eu/" target="_blank" >
             <p>Professor in Software Technology<br>
-             <a href="https://softwarediversity.eu/" target="_blank" >Website</a> </p>   
+            </p>   
+             </a> 
             </div>
         </div>
         
@@ -37,8 +39,10 @@ export default class AboutView {
             </div>
             <div class="container white  ">
             <h3 class="mt-5">Thomas</h2> 
+            <a href="https://durieux.me/" target="_blank" >
             <p>Postdoc in Software Engineering<br>
-             <a href="https://durieux.me/" target="_blank" >Website</a> </p>   
+            </p>   
+             </a> 
             </div>
         </div>
 
@@ -48,8 +52,10 @@ export default class AboutView {
             </div>
             <div class="container white  ">
             <h3 class="mt-5">Erik</h2> 
+            <a href="https://eriknatanael.com/" target="_blank" >
             <p>Artist, musician, audiovisual composer<br>
-             <a href="https://eriknatanael.com/" target="_blank" >Website</a> </p>   
+             </p>   
+             </a> 
             </div>
         </div>
 
@@ -59,8 +65,10 @@ export default class AboutView {
             </div>
             <div class="container white  ">
             <h3 class="mt-5">Jonathan</h2> 
+            <a href="https://www.ramirezjonathan.com/" target="_blank" >
             <p>Interaction designer and researcher<br>
-             <a href="https://www.ramirezjonathan.com/" target="_blank" >Website</a> </p>   
+            </p>   
+             </a> 
             </div>
         </div>        
        </div>
@@ -72,9 +80,7 @@ export default class AboutView {
        
        </div>
 
-       <div class="flex flex-row justify-center content-center mb-40 space-x-10 white">
-        <p>Lorem ipsum - Lorem ipsum - Lorem ipsum - Lorem ipsum - Lorem ipsum</p>
-       </div>
+       
        </div>
 
        `;
