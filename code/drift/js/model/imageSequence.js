@@ -37,7 +37,7 @@ class ImageGroup {
         this.urls = this.views.map(view => {
             return {
                 type: view,
-                url: getApiImage(view, this.site, 800, this.visit.getTime())
+                url: getApiImage(view, this.site, 300, this.visit.getTime())
             }
         })
     }
@@ -72,7 +72,7 @@ class ImageGroup {
         this.images = this.views.map(view => {
             return {
                 site: this.site,
-                url: getApiImage(view, this.site, 800, this.visit.getTime()),
+                url: getApiImage(view, this.site, 300, this.visit.getTime()),
                 view: view
             }
         })

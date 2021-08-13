@@ -57,7 +57,7 @@ export default class MainMenuView {
         const menuContainer = document.getElementById("mainMenuItems");
         const items = this.model.getMainMenu(false)
             .map(i => {
-                return ` <a id="${i.value}Link" value="${i.value}" href="#" class="block py-1 white roboto text-8xl mb-10 font-light hover:underline">${i.name}</a>`
+                return ` <a id="${i.value}Link" value="${i.value}" href="#" class="block py-1 white roboto text-4xl sm:text-8xl mb-4sm:mb-10 font-light hover:underline">${i.name}</a>`
             })
             .join(" ");
         const menuContent = ` ${items}`

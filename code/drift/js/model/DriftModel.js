@@ -15,7 +15,7 @@ const calculateSize = (active, inactive) => (d) => {
 }
 const splitString = (n) => {
     let arr = n.split(" ")
-    arr.splice(1, 0, "<br>")
+    arr.splice(1, 0, `<br class="hidden sm:block">`)
     arr = arr.join(" ")
     return arr
 }
@@ -125,7 +125,7 @@ export default class DriftModel {
         this.menuVisible = false;
         this.mode = false;
         this.mainMenu = mainMenu;
-        this.chatvisible = true;
+        this.chatvisible = false;
         this.stack = true;
         this.stackDisabled = true;
         this.timeInterval = null;
@@ -143,7 +143,6 @@ export default class DriftModel {
         this.getData();
         this.loadMenu("views");
         this.getSitesVisits();
-        this.getMainMenu();
         this.getVoteWebsites();
     }
 
@@ -165,10 +164,6 @@ export default class DriftModel {
 
     getChatVisible() {
         return this.chatvisible;
-    }
-
-    getMainMenu() {
-        this.mainMenu = apiService.getMainMenu();
     }
 
     getMainMenu(splitName = true) {

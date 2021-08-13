@@ -48,6 +48,7 @@ export default class ChatView {
     }
     content += `</ul><input id="messageInp" placeholder="Your message...">`;
     this.container.innerHTML = content;
+    this.container.className = this.model.getChatVisible() ? "visible" : "invisible"
 
     this.setIdentifications();
   }

@@ -1,0 +1,14 @@
+{
+  "name": "drift",
+  "version": "1.0.0",
+  "description": "Drift - Software evolution 🦖=>🐓 =================================================",
+  "main": "index.js",
+  "scripts": {
+    "build-css": "tailwindcss build src/styles.css -o css/tailWindStyles.css"
+  },
+  "author": "rethread",
+  "license": "ISC",
+  "dependencies": {
+    "tailwindcss": "^2.2.7"
+  }
+}
