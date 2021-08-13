@@ -164,10 +164,6 @@ h1{
 }
 
 
-.text-8xl{
-    font-size: 6rem;
-line-height: 1;
-}
 
 
 .pt-40{
@@ -194,7 +190,7 @@ input:checked ~ .dot {
 
 #chatButton {
     position: fixed;
-    bottom: 10px;
+    bottom: 60px;
     right: 20px;
     width: 30px;
     height: 30px;
@@ -205,10 +201,10 @@ input:checked ~ .dot {
 /*Mini Chat view*/
 #chat {
     position: fixed;
-    bottom: 40px;
+    bottom: 90px;
     right: 20px;
     width: 90%;
-    height: 30%;
+    height: 40%;
     background-color:#2F3345;
     border-radius: 4px;
 
@@ -230,7 +226,20 @@ input:checked ~ .dot {
     width: 20px;
 }
 
+#emojis  {
+    background-color: #5C6074;
+    padding: 5px 10px;
+    font-size: 1.7em;
+    }
+#emojis .emoji {
+    float: left;
+    cursor: pointer;
+}
+
 @media (min-width: 640px) { 
+    #emojis  {
+        font-size: 1em;
+        }
 
     #closeBtn {
         top: -20px;
@@ -269,14 +278,7 @@ input:checked ~ .dot {
 
 }
 
-#emojis  {
-background-color: #5C6074;
-padding: 5px 10px;
-}
-#emojis .emoji {
-    float: left;
-    cursor: pointer;
-}
+
 #messages {
     height: 100%;
     padding: 10px;

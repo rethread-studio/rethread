@@ -113,12 +113,13 @@ export default class DriftModel {
         this.sliderSpeed = [
             {
                 text: "Normal",
-                speed: 1000
-            },
-            {
-                text: "Ridiculous",
                 speed: this.baseSpeed / 9
             },
+            {
+                text: "Ludicrous",
+                speed: this.baseSpeed / 18
+            },
+
         ]
         this.pack;
 
@@ -331,7 +332,7 @@ export default class DriftModel {
     }
 
     getDataChildren() {
-        return this.data.children.sort((a, b) => b.name > a.name ? -1 : b.name < a.name ? 1 : 0);
+        return this.data.children//.sort((a, b) => b.name > a.name ? -1 : b.name < a.name ? 1 : 0);
     }
 
     calculatePack() {

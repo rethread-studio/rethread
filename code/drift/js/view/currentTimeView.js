@@ -11,7 +11,7 @@ export default class CurrentTimeView {
     render() {
         const date = this.model.getCurrentTime(false);
         const content = `
-        <div class="flex flex-row items-center space-x-5 text-4xl select-none" >
+        <div class="flex flex-row items-center space-x-5 text-lg sm:text-4xl select-none" >
             <div class="white" >${formatMonth(date)} ${formatDay(date)}</div>
             <div class="bg-white p-2" >${formatHour(date)}</div>
         <div>

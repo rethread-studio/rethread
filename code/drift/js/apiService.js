@@ -66,8 +66,16 @@ export const dataTest = {
     value: 0,
     children: [
         {
-            name: "bing",
+            name: "qwant",
             state: 1,
+            value: 1.25,
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
+            logo: "logo.qwant.png",
+
+        },
+        {
+            name: "bing",
+            state: 0,
             value: 1.25,
             image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.bing.png",
@@ -87,14 +95,6 @@ export const dataTest = {
             value: 1.25,
             image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.google.png",
-
-        },
-        {
-            name: "qwant",
-            state: 0,
-            value: 1.25,
-            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
-            logo: "logo.qwant.png",
 
         },
         {
@@ -193,6 +193,10 @@ const sitesMenu = [{
     state: 1,
 },
 {
+    name: "Qwant",
+    state: 0
+},
+{
     name: "Bing",
     state: 0,
 },
@@ -206,10 +210,6 @@ const sitesMenu = [{
 },
 {
     name: "Kiddle",
-    state: 0
-},
-{
-    name: "Qwant",
     state: 0
 },
 {

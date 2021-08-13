@@ -12,11 +12,16 @@ export default class TimeLineController {
         this.onMouoverHandler = this.onmouseover.bind(this);
         this.onMouseOutHandler = this.onmouseout.bind(this);
         this.onMouseMoveHandler = this.onmousemove.bind(this);
+        this.onResizeHandler = this.onResizeHandler.bind(this)
     }
 
     renderView() {
         this.view.render();
         this.addEventListeners();
+    }
+
+    onResizeHandler() {
+        console.log("hello")
     }
 
     onmouseover(e) {
@@ -61,6 +66,7 @@ export default class TimeLineController {
         this.view.timeline.addEventListener("mouseout", this.onMouseOutHandler)
         this.view.play_btn.addEventListener("click", this.clickHandler);
         this.view.selectMenu.addEventListener("change", this.changeHandler);
+        window.addEventListener("resize", this.onResizeHandler);
     }
 
 
@@ -83,6 +89,7 @@ export default class TimeLineController {
         this.view.timeline.removeEventListener("click", this.clickTimeLineHandler)
         this.view.play_btn.removeEventListener("click", this.clickHandler);
         this.view.selectMenu.removeEventListener("change", this.changeHandler)
+        window.removeEventListener("resize", this.onResizeHandler);
     }
 
 

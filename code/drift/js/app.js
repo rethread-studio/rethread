@@ -78,7 +78,7 @@ window.onload = function () {
 };
 
 function goToLocation() {
-    let loadingPage = "home";
+    let loadingPage = "exhibition";
     // const paths = document.location.pathname.substring(1).split('/')
     // if (paths.length > 0) {
     //     loadingPage = paths[0];
