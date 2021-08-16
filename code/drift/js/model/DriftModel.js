@@ -541,7 +541,7 @@ export default class DriftModel {
                 break;
         }
         // Cancel the default action to avoid it being handled twice
-        event.preventDefault();
+        // event.preventDefault();
     }
 
     getActiveNodes() {
@@ -685,7 +685,7 @@ export default class DriftModel {
             if (i.name == name) i.state = i.state == 1 ? 0 : 1;
             return i;
         })
-            .sort((a, b) => b.name > a.name)
+        // .sort((a, b) => b.name > a.name)
 
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
