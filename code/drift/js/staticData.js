@@ -41,12 +41,12 @@ const exhibitionTexts = {
 
 export const legendTexts = {
     screenshot: {
-        human: `Screenshot Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
-        nerd: `Screenshot mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
+        human: `This is what you normally see when searching for 2021 on the search engine.`,
+        nerd: `This is a screenshot taken by the Drift bot after searching for 2021`
     },
     coverage: {
-        human: `Coverage Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
-        nerd: `Coverage mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
+        human: `An abstract representation of all the lines of code that are necessary to produce the search result web page.`,
+        nerd: `A visualization of the coverage of the javacript code that has been executed to render the search result page.`
     },
     graph: {
         human: `Execution Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
