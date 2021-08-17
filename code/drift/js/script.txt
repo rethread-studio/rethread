@@ -1,0 +1,60 @@
+### Frame 1
+Search engines
+
+### Frame 2
+We use them all the time, 
+every day, 
+for all sorts of tasks
+information, (google bar)
+education, (wikipedia bar)
+entertainment (spotify bar)
+
+We trust them (qwant bar)
+We rely on them (bing bar)
+We know them (google bar)
+
+### Frame 14
+Do we? (zoom / anonymous bar)
+
+### Frame 3
+How do they work?
+Do they ever change?
+Why did this new icon appear recently?
+Where is this new color coming from?
+Why is it slower than yesterday
+
+Well….
+
+### Frame 15
+it’s because a search engine is not only a page with results (screenshot)
+it’s a program
+made of code (code appears)
+made of complex operations (trace appears)
+made of world-wide connection (networks appears)
+
+### Frame 6
+Drift captures the aesthetics of each of these layers (the drift home page)
+What you see, and (screenshot)
+The code, the search engine’s organism (code → abstract image)
+The complex operations, the nervous system  (trace → abstract image)
+The world-wide connections, the deep underworld (network → image)
+
+### frame 8
+Drift let’s you experiment how all layers keep on evolving in time, all the time, every hour
+
+With any search engine, as user, you might think that the page is always the same (wikipidia fullscreeen with time passing)
+But, all around the world, software development teams keep on 
+changing the underlying code (code appears)
+to experiment with new features, to fix bugs, (switch to trace)
+to improve user experience, to push search to ludicrous speed (switch to network)
+
+### Frame 9
+Visiting Drift, you can explore the layers of eight search engines that were recorded every hour, from XXX to YYYY
+_questions combined with explanation of the interactions_
+
+### Frame 10
+Do you want to know more about the exhibition, the layers, the artists, the bot or spaceballs?
+Come meet us (with screencast of ‘meet the artists’)
+
+### Frame 11
+_conclusion_
