@@ -35,6 +35,8 @@ export default class MainVizTDModel {
 
         this.controls;
 
+        this.viewParticles = true;
+
         model.addObserver(this);
 
         this.sections = [
@@ -112,28 +114,78 @@ export default class MainVizTDModel {
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
+        if (this.viewParticles) this.addParticles()
 
+        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.physicallyCorrectLights = true;
+        this.renderer.outputEncoding = THREE.sRGBEncoding;
+
+
+
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        //ADD LATER
+        // window.addEventListener('resize', onWindowResize);
+    }
+
+
+    toggleParticles(toView = true) {
+        console.log("VIEW PARTICLES", toView)
+        //if the same as current view ommit
+        if (this.viewParticles == toView) return;
+
+        this.viewParticles = toView;
+
+        if (this.viewParticles) {
+            this.resetCameraPos()
+            this.addParticles();
+        } else {
+            this.removeParticles();
+        }
+    }
+
+    resetCameraPos() {
+        //fov
+        this.camera.fov = 75;
+        //aspect
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        //near
+        this.camera.near = 1;
+        //far
+        this.camera.far = 2000;
+        //position
+        this.camera.position.z = 1000;
+        this.camera.position.x = 0;
+        this.camera.position.y = 0;
+        //update projeciton matrix
+        this.camera.updateProjectionMatrix();
+    }
+
+    removeParticles() {
+        this.materials = [];
+        //remove this.scene particle
+        this.scene.children
+            .filter(o => o.type == "Points")
+            .forEach(p => this.scene.remove(p))
+    }
+
+    addParticles() {
         // const helper = new THREE.CameraHelper(this.camera);
         // this.scene.add(helper);
         const geometry = new THREE.BufferGeometry();
         const vertices = [];
-
         const textureLoader = new THREE.TextureLoader();
-
-        // const sprite1 = textureLoader.load('./img/textures/snowflake1.png');
-        // const sprite2 = textureLoader.load('./img/textures/snowflake2.png');
         // const sprite3 = textureLoader.load('./img/textures/snowflake3.png');
         const sprite4 = textureLoader.load('./img/textures/snowflake4.png');
         const sprite5 = textureLoader.load('./img/textures/snowflake5.png');
 
+        //ADD ALL THE PARTICLES
         for (let i = 0; i < this.numParticles; i++) {
-
             const x = Math.random() * 2000 - 1000;
             const y = Math.random() * 2000 - 1000;
             const z = Math.random() * 2000 - 1000;
-
             vertices.push(x, y, z);
-
         }
 
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
@@ -164,32 +216,6 @@ export default class MainVizTDModel {
             this.scene.add(particles);
             // this.addObject()
         }
-
-        //
-
-        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, });
-        this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.physicallyCorrectLights = true;
-        this.renderer.outputEncoding = THREE.sRGBEncoding;
-
-
-
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        // this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-        // this.controls.dampingFactor = 0.05;
-
-        // this.controls.screenSpacePanning = false;
-
-        // this.controls.minDistance = 100;
-        // this.controls.maxDistance = 500;
-
-        // this.controls.maxPolarAngle = Math.PI / 2;
-        //ACTIVATE LATER    
-        // document.body.appendChild(this.renderer.domElement);
-        // document.body.style.touchAction = 'none';
-        // document.body.addEventListener('pointermove', onPointerMove);
-        // window.addEventListener('resize', onWindowResize);
     }
 
 
@@ -449,17 +475,7 @@ export default class MainVizTDModel {
 
         }
 
-        for (let i = 0; i < this.materials.length; i++) {
-
-            const color = this.parameters[i][0];
-            const h = (360 * (color[0] + time) % 360) / 360;
-            this.materials[i].color.setHSL(h, color[1], color[2]);
-
-        }
-
         this.raf()
-
-
 
         this.renderer.render(this.scene, this.camera);
 
@@ -476,46 +492,6 @@ export default class MainVizTDModel {
         } else {
             this.showNewLayout();
         }
-        // switch (state) {
-        //     case 0:
-        //         this.removeImages()
-        //         this.addMaterial();
-        //         this.showScreenShot();
-        //         this.fitCameraToSelection(this.camera, this.controls, this.meshes, 0.6)
-        //         break;
-        //     case 1:
-        //         this.showNewLayout();
-        //         // this.removeImages()
-        //         // this.addMaterial();
-        //         // this.showSiteViewsVetically();
-        //         // this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
-        //         break;
-        //     case 2:
-        //         this.showNewLayout();
-        //         // if (!model.getStack()) model.toggleDisplay(true);
-        //         // this.removeImages()
-        //         // this.addMaterial();
-        //         // this.showSiteViewsVetically();
-        //         // this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
-        //         break;
-        //     case 3:
-        //         //RENDER SPREAD IMAGES
-        //         // console.log(model.stack)
-        //         // if (model.getStack()) 
-        //         // model.toggleNoNotification(false)
-        //         // this.showNewLayout()
-        //         // this.showImages()
-        //         // break;
-        //         // case 4:
-        //         //do nothing
-        //         this.showNewLayout();
-        //         break;
-
-        //     default:
-        //         this.showNewLayout()
-        //         break;
-        // }
-
     }
 
 

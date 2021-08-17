@@ -108,31 +108,38 @@ export default function showView(view) {
             currentView = homeViewController;
             mainMenuViewController.unMountView();
             homeViewController.renderView();
+            mainVizTD.toggleParticles(true);
             break;
         case 'exhibition':
             currentView = exhibitionViewController;
             exhibitionViewController.renderView();
             mainMenuViewController.renderView();
             model.toggleChatVisible(false);
+            console.log(mainVizTD, mainVizTD.viewParticles)
+            mainVizTD.toggleParticles(false);
             break;
         case 'robot':
             currentView = robotViewController;
             robotViewController.renderView();
             mainMenuViewController.renderView();
+            mainVizTD.toggleParticles(false);
             break;
         case 'tour':
             currentView = tourViewController;
             tourViewController.renderView();
             mainMenuViewController.renderView();
+            mainVizTD.toggleParticles(false);
             break;
         case 'about':
             currentView = aboutViewController;
             aboutViewController.renderView();
             mainMenuViewController.renderView();
+            mainVizTD.toggleParticles(true);
             break;
         default:
             currentView = homeViewController;
             homeViewController.renderView();
             mainMenuViewController.unMountView();
+            mainVizTD.toggleParticles(true)
     }
 }
