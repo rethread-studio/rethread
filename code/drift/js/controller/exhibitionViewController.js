@@ -61,6 +61,7 @@ export default class ExhibitionViewController {
                 this.view.sideMenuController.hideOptions()
                 this.model.getChangePlayState(true)
                 this.model.removeLayerStepInterval();
+                this.model.selectSiteByName("qwant");
                 break;
             case 1:
                 // this.model.resetSites();
@@ -73,7 +74,6 @@ export default class ExhibitionViewController {
             case 2:
                 // this.model.resetSites();
                 // this.model.toggleNoNotification(true)
-                this.model.selectFirstSite();
                 this.model.removeLayerStepInterval();
                 this.view.timeline.classList.add("appear")
                 this.view.sideMenuController.showOptions()

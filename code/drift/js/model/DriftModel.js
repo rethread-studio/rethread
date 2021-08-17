@@ -705,6 +705,19 @@ export default class DriftModel {
         this.notifyObservers({ type: "updateImages" });
     }
 
+    selectSiteByName(name) {
+        this.data.children = this.data.children.map((item, i) => {
+            if (item.name == name) this.firstItemSelected = item.name;
+            item.state = item.name == name ? 1 : 0;
+            return item;
+        })
+        // .sort((a, b) => b.name > a.name)
+
+        this.updateSequenceSites();
+        this.notifyObservers({ type: "sitesUpdated" });
+        this.notifyObservers({ type: "updateImages" });
+    }
+
     selectRadialSite(name) {
         this.data.children = this.data.children
             .map(i => {
