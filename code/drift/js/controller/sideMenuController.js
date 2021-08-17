@@ -111,11 +111,6 @@ export default class SideMenuController {
             this.renderView();
         } else if (changeDetails.type == "displayUpdate") {
             this.renderView();
-            // this.removeEventListener()
-            // this.view.updateButton();
-            // this.view.updateViewList();
-            // this.view.showHideViewList();
-            // this.addEventListener();
         } else if (changeDetails.type == "updateToggle") {
             this.renderView();
         }

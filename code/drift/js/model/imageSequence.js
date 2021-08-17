@@ -169,12 +169,13 @@ class SiteImages {
 class ImageSequence {
     constructor(visits, sites, views) {
         this.visitsLength = visits.length - 1;
+        this.NUMCALLS = 20
         this.sites = sites.map(s => new SiteImages(s.name, visits, s.active, views));
         this.range = {
             min: 0,
-            max: 20,
+            max: this.NUMCALLS,
         }
-        this.amount = 20;
+        this.amount = this.NUMCALLS;
         this.loadPos = 0;
     }
 
@@ -182,7 +183,7 @@ class ImageSequence {
         this.loadPos = pos;
         this.range = {
             min: pos,
-            max: Math.min((pos + 20), this.visitsLength)
+            max: Math.min((pos + this.NUMCALLS), this.visitsLength)
         }
         this.step();
     }

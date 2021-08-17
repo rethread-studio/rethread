@@ -9,7 +9,7 @@ export default class RadialListView {
         const checkBox = this.model.getDataChildren()
             .map(i => {
                 return `<label id="${i.name}Radial" class="inline-flex items-center mt-3 cursor-pointer from-left appear">
-                            <input type="radio" value="${i.name}" class="form-radio h-5 w-5 text-red-600" ${i.state ? "checked" : ``}>
+                            <input type="radio" value="${i.name}" class="form-radio h-5 w-5 text-red-600" ${i.state ? "checked" : ` appear`}>
                             <span class="ml-2 white">${i.name}</span>
                         </label>`
             })

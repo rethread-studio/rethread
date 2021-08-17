@@ -321,7 +321,7 @@ input:checked ~ .dot {
 .floating-emoji {
     position: fixed;
     color: white;
-    z-index: 999999;
+    z-index: 0;
     text-align: right;
     font-size: 0.875rem;
     line-height: 3rem;

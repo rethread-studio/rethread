@@ -23,12 +23,6 @@ export default class ExhibitionViewController {
     }
 
 
-    // wheelEvent(e) {
-    //     this.vizModel.updateSpeed(e.deltaY);
-    //     this.position += e.deltaY
-
-    // }
-
     handleIntersect(entries, observer) {
         entries.forEach((entry) => {
             const element = entry.target.getAttribute("id") == "exhibitDescrip" ? entry.target.parentElement : entry.target;
@@ -39,15 +33,6 @@ export default class ExhibitionViewController {
                 element.classList.remove("appear")
             }
 
-            // if (entry.intersectionRatio > this.prevRatio) {
-            //     // console.log(entry, "going in", entry.intersectionRatio)
-            //     entry.target.style.opacity = entry.intersectionRatio;
-            // } else {
-            //     // console.log(entry, "going out", entry.intersectionRatio)
-            //     entry.target.style.opacity = entry.intersectionRatio;
-            // }
-
-            // this.prevRatio = entry.intersectionRatio;
         })
     }
 
@@ -56,13 +41,6 @@ export default class ExhibitionViewController {
         sections.shift()
 
         createObserver(this.intersectHandler, sections)
-        // window.addEventListener('wheel', this.wheelHandler);
-        // window.addEventListener('scroll', this.scrollHandler);
-
-        // this.view.meetRobot_btn.addEventListener("click", () => {
-        //     showView('meetTheRobot');
-        // });
-        // this.view.viewExhibition_btn.addEventListener("click", () => {
     }
 
     removeEventListener() {
@@ -79,7 +57,7 @@ export default class ExhibitionViewController {
                 this.view.currentTime.classList.add("appear")
                 this.view.timeline.classList.remove("appear")
                 this.view.viewsMenu.classList.remove("appear")
-                this.view.sitesMenuViewController.hideOptions()
+                // this.view.sitesMenuViewController.hideOptions()
                 this.view.sideMenuController.hideOptions()
                 this.model.getChangePlayState(true)
                 this.model.removeLayerStepInterval();
@@ -90,7 +68,7 @@ export default class ExhibitionViewController {
                 this.view.timeline.classList.remove("appear")
                 this.view.viewsMenu.classList.add("appear")
                 this.view.sideMenuController.showOptions()
-                this.view.sitesMenuViewController.hideOptions()
+                // this.view.sitesMenuViewController.hideOptions()
                 break;
             case 2:
                 // this.model.resetSites();
@@ -99,7 +77,7 @@ export default class ExhibitionViewController {
                 this.model.removeLayerStepInterval();
                 this.view.timeline.classList.add("appear")
                 this.view.sideMenuController.showOptions()
-                this.view.sitesMenuViewController.hideOptions()
+                // this.view.sitesMenuViewController.hideOptions()
                 break;
             case 3:
 
@@ -108,7 +86,7 @@ export default class ExhibitionViewController {
                 this.model.setStackDisabled(true);
                 this.model.removeLayerStepInterval();
                 this.view.sideMenuController.showOptions()
-                this.view.sitesMenuViewController.hideOptions()
+                // this.view.sitesMenuViewController.hideOptions()
                 //CHANGE TO SPREAD
                 this.view.timeline.classList.add("appear")
                 this.view.viewsMenu.classList.add("appear")
@@ -116,7 +94,7 @@ export default class ExhibitionViewController {
             case 4:
                 this.model.setStackDisabled(false);
                 this.model.removeLayerStepInterval();
-                this.view.sideMenuController.showOptions()
+                // this.view.sideMenuController.showOptions()
                 this.view.sitesMenuViewController.showOptions()
                 this.view.timeline.classList.add("appear")
                 this.view.viewsMenu.classList.add("appear")

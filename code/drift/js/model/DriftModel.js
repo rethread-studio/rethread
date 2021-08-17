@@ -229,7 +229,7 @@ export default class DriftModel {
     }
 
     removeKeyEventListener() {
-        console.log("remove event key")
+
         document.removeEventListener('keydown', this.keyEventHandler)
 
     }
@@ -285,7 +285,7 @@ export default class DriftModel {
             .then(data => data.map((site, i) => {
                 return {
                     name: site,
-                    state: i == 0 ? 1 : 0,
+                    state: site == "qwant" ? 1 : 0,
                     value: 0,
                     image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
                     logo: `logo.${site}.png`
@@ -297,6 +297,7 @@ export default class DriftModel {
                     value: 0,
                     children: children
                 }
+                this.firstItemSelected = this.data.children.find(s => s.state == 1).name
                 this.calculateDataValues();
                 this.notifyObservers({ type: "updateData" });
             })
@@ -665,7 +666,6 @@ export default class DriftModel {
 
     selectSite(name) {
 
-
         const activeItems = this.data.children.filter(i => i.state == 1);
         const activeNames = activeItems.map(i => i.name)
         if (activeItems.length == 1 && activeItems[0].name == name) {
@@ -697,7 +697,7 @@ export default class DriftModel {
             item.state = i == 0 ? 1 : 0;
             return item;
         })
-            .sort((a, b) => b.name > a.name)
+        // .sort((a, b) => b.name > a.name)
 
         this.firstItemSelected = this.data.children[0].name;
         this.updateSequenceSites();
@@ -711,7 +711,7 @@ export default class DriftModel {
                 i.state = i.name == name ? 1 : 0;
                 return i;
             })
-            .sort((a, b) => b.name > a.name)
+        // .sort((a, b) => b.name > a.name)
         this.firstItemSelected = this.data.children.find(i => i.state == 1).name;
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });

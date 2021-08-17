@@ -65,14 +65,7 @@ export default class ApiService {
 export const dataTest = {
     value: 0,
     children: [
-        {
-            name: "qwant",
-            state: 1,
-            value: 1.25,
-            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
-            logo: "logo.qwant.png",
 
-        },
         {
             name: "bing",
             state: 0,
@@ -95,6 +88,22 @@ export const dataTest = {
             value: 1.25,
             image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.google.png",
+
+        },
+        {
+            name: "kiddle",
+            state: 0,
+            value: 1.25,
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
+            logo: "logo.kiddle.png",
+
+        },
+        {
+            name: "qwant",
+            state: 1,
+            value: 1.25,
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
+            logo: "logo.qwant.png",
 
         },
         {
@@ -121,14 +130,7 @@ export const dataTest = {
             logo: "logo.yahoo.png",
 
         },
-        {
-            name: "kiddle",
-            state: 0,
-            value: 1.25,
-            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
-            logo: "logo.kiddle.png",
 
-        },
     ]
 }
 
