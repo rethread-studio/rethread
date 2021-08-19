@@ -52,7 +52,16 @@ to improve user experience, to push search to ludicrous speed (switch to network
 
 ### Frame 9
 [Visiting Drift, REMOVE?] you can explore the layers of eight search engines that were recorded every hour, from XXX to YYYY
-_questions combined with explanation of the interactions_
+
+###
+Discover the engine with most code
+or less code
+
+Find the engine with most network calls
+with less calls
+
+or even compare them...
+with ludicrous speed!
 
 ### Frame 10
 Do you want to know more about the exhibition, the layers, the artists, the bot or spaceballs?
