@@ -31,6 +31,7 @@ it’s a program
 made of code (code appears)
 made of complex operations (trace appears)
 made of world-wide connection (networks appears)
+[ADD] All of this seamless to the user
 
 ### Frame 6
 Drift captures the aesthetics of each of these layers (the drift home page)
