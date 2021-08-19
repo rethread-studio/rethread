@@ -51,7 +51,7 @@ to experiment with new features, to fix bugs, (switch to trace)
 to improve user experience, to push search to ludicrous speed (switch to network)
 
 ### Frame 9
-Visiting Drift, you can explore the layers of eight search engines that were recorded every hour, from XXX to YYYY
+[Visiting Drift, REMOVE?] you can explore the layers of eight search engines that were recorded every hour, from XXX to YYYY
 _questions combined with explanation of the interactions_
 
 ### Frame 10
