@@ -45,16 +45,16 @@ export const legendTexts = {
         nerd: `This is a screenshot taken by the Drift bot after searching for 2021`
     },
     coverage: {
-        human: `An abstract representation of all the lines of code that are necessary to produce the search result web page.`,
+        human: `An abstract visualization of all the lines of code, written by teams of developers and that are necessary to produce the search result web page.`,
         nerd: `A visualization of the coverage of the javacript code that has been executed to render the search result page.`
     },
     graph: {
-        human: `Execution Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
-        nerd: `Execution  mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
+        human: `The flow represents the complete seaquence of operations that have been performed in order to deliver the result of the search on a web page, and to organize this content in a nice anc comprehensive manner.`,
+        nerd: `This represents the complete execution trace of javascript functions was observed when rendering the search result page in the browser of the Drift bot`
     },
     network: {
-        human: `Network Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
-        nerd: `Network  mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
+        human: `This web looking image represents all the connections that were established with various machines around the globe in order to fetch the content (text, images, colors, code, etc.) that appear in the web page`,
+        nerd: `This is the deepest software layer, the one takeing care of world-wide Internet connections in order to fetch the content to be delivered in the search results page`
     }
 }
 
