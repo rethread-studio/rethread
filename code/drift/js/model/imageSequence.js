@@ -137,10 +137,6 @@ class SiteImages {
         return this.name;
     }
 
-    getTotalImages() {
-        //return num of all images
-    }
-
     isPosLoaded(pos) {
         if (this.viewsImages[pos] == undefined) return false;
         return this.viewsImages[pos].getLoaded();
@@ -208,6 +204,8 @@ class ImageSequence {
         // });
 
     }
+
+
 
     checkStep() {
         const nextStep = this.loadPos + 1;
@@ -280,13 +278,14 @@ class ImageSequence {
         return this.getActiveSites().map(s => {
             //get images
             let images = s.loadImagesPos(pos);
-            // images = this.sortByIndex(images, activeIndex)
             return {
                 images: images,
                 name: s.name
             }
         })
     }
+
+
 
     sortByIndex(images, activeIndex) {
         if (activeIndex > 0) {
@@ -305,9 +304,7 @@ class ImageSequence {
         return activeSites.every(e => e.posLoaded(pos))
     }
 
-    getBackUpImages() {
 
-    }
 }
 
 export default ImageSequence;

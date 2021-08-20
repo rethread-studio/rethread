@@ -140,11 +140,11 @@ export default class DriftModel {
         this.imageSequence;
     }
 
-    init() {
-        this.getData();
+    async init() {
+        await this.getData();
         this.loadMenu("views");
-        this.getSitesVisits();
-        this.getVoteWebsites();
+        await this.getSitesVisits();
+        await this.getVoteWebsites();
     }
 
     getViewMode() {
@@ -281,7 +281,8 @@ export default class DriftModel {
     }
 
     getData(type) {
-        apiService.getData(type)
+
+        return apiService.getData(type)
             .then(data => data.map((site, i) => {
                 return {
                     name: site,
@@ -301,6 +302,7 @@ export default class DriftModel {
                 this.calculateDataValues();
                 this.notifyObservers({ type: "updateData" });
             })
+
     }
 
     getCurrentTime(format = true) {
@@ -396,11 +398,11 @@ export default class DriftModel {
 
     }
 
-    getSitesVisits() {
+    async getSitesVisits() {
         const sites = this.data.children
             .filter((site) => site.state == 1)
             .map((site) => site.name)
-        apiService.getTimes(sites)
+        await apiService.getTimes(sites)
             //strings to int
             .then(visits => visits.map(visit => parseInt(visit)))
             .then(visits => visits.filter(visit => visit > 1619820000000)) // filter out early visits
@@ -415,15 +417,15 @@ export default class DriftModel {
                     }
                 });
                 const views = this.menu.map(v => v.value)
+                console.log("new image squences")
                 this.imageSequence = new ImageSequence(data, sitesName, views)
                 this.imageSequence.step();
                 this.notifyObservers({ type: "updateTimeLine" });
             })
-
     }
 
     getVoteWebsites() {
-        apiService.getVoteWebsites()
+        return apiService.getVoteWebsites()
             //strings to int
             .then(websites => {
                 this.voteWebsites = websites

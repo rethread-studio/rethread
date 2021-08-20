@@ -35,12 +35,24 @@ window.onload = function () {
     apiService = new ApiService();
     //We instantiate our model
     model = new DriftModel();
-    model.init();
-
     //We instantiate our model
     mainVizTD = new MainVizTDModel();
-    mainVizTD.init();
 
+
+    model.init()
+        .then(e => {
+            mainVizTD.init();
+            initViewsAndControllers()
+            goToLocation();
+        }).catch(error => {
+            console.log("erro", error.error)
+        })
+
+
+
+};
+
+function initViewsAndControllers() {
     legendModel = new Legend(legendTexts);
 
     let chatView = new ChatView('chat', model);
@@ -74,8 +86,7 @@ window.onload = function () {
     let mainViztDView = new MainVizTDView('mainViz', mainVizTD);
     mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
 
-    goToLocation();
-};
+}
 
 function goToLocation() {
     let loadingPage = "home";
@@ -135,6 +146,9 @@ export default function showView(view) {
             aboutViewController.renderView();
             mainMenuViewController.renderView();
             mainVizTD.toggleParticles(true);
+            break;
+        case 'loading':
+            console.log("loading page")
             break;
         default:
             currentView = homeViewController;

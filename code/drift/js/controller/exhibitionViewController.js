@@ -121,7 +121,6 @@ export default class ExhibitionViewController {
     }
 
     renderView() {
-        console.log("render view")
         this.model.addKeyEventListener();
         this.view.render();
         // this.setHeight();
