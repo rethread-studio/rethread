@@ -126,7 +126,14 @@ export default class MainVizTDModel {
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         //ADD LATER
-        // window.addEventListener('resize', onWindowResize);
+        window.addEventListener('resize', this.onWindowResize);
+    }
+
+    onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
 
