@@ -38,6 +38,10 @@ window.onload = function () {
     //We instantiate our model
     mainVizTD = new MainVizTDModel();
 
+    //CREATE LOADING PAGE
+    //GO TO LOADING PAGE
+
+    //CREATE ERROR PAGE
 
     model.init()
         .then(e => {
@@ -46,6 +50,7 @@ window.onload = function () {
             goToLocation();
         }).catch(error => {
             console.log("erro", error.error)
+            //TAKE TO ERROR PAGE
         })
 
 
