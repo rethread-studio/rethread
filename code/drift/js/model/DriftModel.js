@@ -15,7 +15,7 @@ const calculateSize = (active, inactive) => (d) => {
 }
 const splitString = (n) => {
     let arr = n.split(" ")
-    arr.splice(1, 0, "<br>")
+    arr.splice(1, 0, `<br class="hidden sm:block">`)
     arr = arr.join(" ")
     return arr
 }
@@ -113,19 +113,20 @@ export default class DriftModel {
         this.sliderSpeed = [
             {
                 text: "Normal",
-                speed: 1000
-            },
-            {
-                text: "Ridiculous",
                 speed: this.baseSpeed / 9
             },
+            {
+                text: "Ludicrous",
+                speed: this.baseSpeed / 18
+            },
+
         ]
         this.pack;
 
         this.menuVisible = false;
         this.mode = false;
         this.mainMenu = mainMenu;
-        this.chatvisible = true;
+        this.chatvisible = false;
         this.stack = true;
         this.stackDisabled = true;
         this.timeInterval = null;
@@ -139,12 +140,11 @@ export default class DriftModel {
         this.imageSequence;
     }
 
-    init() {
-        this.getData();
+    async init() {
+        await this.getData();
         this.loadMenu("views");
-        this.getSitesVisits();
-        this.getMainMenu();
-        this.getVoteWebsites();
+        await this.getSitesVisits();
+        await this.getVoteWebsites();
     }
 
     getViewMode() {
@@ -165,10 +165,6 @@ export default class DriftModel {
 
     getChatVisible() {
         return this.chatvisible;
-    }
-
-    getMainMenu() {
-        this.mainMenu = apiService.getMainMenu();
     }
 
     getMainMenu(splitName = true) {
@@ -233,7 +229,7 @@ export default class DriftModel {
     }
 
     removeKeyEventListener() {
-        console.log("remove event key")
+
         document.removeEventListener('keydown', this.keyEventHandler)
 
     }
@@ -285,11 +281,12 @@ export default class DriftModel {
     }
 
     getData(type) {
-        apiService.getData(type)
+
+        return apiService.getData(type)
             .then(data => data.map((site, i) => {
                 return {
                     name: site,
-                    state: i == 0 ? 1 : 0,
+                    state: site == "qwant" ? 1 : 0,
                     value: 0,
                     image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
                     logo: `logo.${site}.png`
@@ -301,9 +298,11 @@ export default class DriftModel {
                     value: 0,
                     children: children
                 }
+                this.firstItemSelected = this.data.children.find(s => s.state == 1).name
                 this.calculateDataValues();
                 this.notifyObservers({ type: "updateData" });
             })
+
     }
 
     getCurrentTime(format = true) {
@@ -336,7 +335,7 @@ export default class DriftModel {
     }
 
     getDataChildren() {
-        return this.data.children.sort((a, b) => b.name > a.name ? -1 : b.name < a.name ? 1 : 0);
+        return this.data.children//.sort((a, b) => b.name > a.name ? -1 : b.name < a.name ? 1 : 0);
     }
 
     calculatePack() {
@@ -399,11 +398,11 @@ export default class DriftModel {
 
     }
 
-    getSitesVisits() {
+    async getSitesVisits() {
         const sites = this.data.children
             .filter((site) => site.state == 1)
             .map((site) => site.name)
-        apiService.getTimes(sites)
+        await apiService.getTimes(sites)
             //strings to int
             .then(visits => visits.map(visit => parseInt(visit)))
             .then(visits => visits.filter(visit => visit > 1619820000000)) // filter out early visits
@@ -418,15 +417,15 @@ export default class DriftModel {
                     }
                 });
                 const views = this.menu.map(v => v.value)
+                console.log("new image squences")
                 this.imageSequence = new ImageSequence(data, sitesName, views)
                 this.imageSequence.step();
                 this.notifyObservers({ type: "updateTimeLine" });
             })
-
     }
 
     getVoteWebsites() {
-        apiService.getVoteWebsites()
+        return apiService.getVoteWebsites()
             //strings to int
             .then(websites => {
                 this.voteWebsites = websites
@@ -545,7 +544,7 @@ export default class DriftModel {
                 break;
         }
         // Cancel the default action to avoid it being handled twice
-        event.preventDefault();
+        // event.preventDefault();
     }
 
     getActiveNodes() {
@@ -669,7 +668,6 @@ export default class DriftModel {
 
     selectSite(name) {
 
-
         const activeItems = this.data.children.filter(i => i.state == 1);
         const activeNames = activeItems.map(i => i.name)
         if (activeItems.length == 1 && activeItems[0].name == name) {
@@ -689,7 +687,7 @@ export default class DriftModel {
             if (i.name == name) i.state = i.state == 1 ? 0 : 1;
             return i;
         })
-            .sort((a, b) => b.name > a.name)
+        // .sort((a, b) => b.name > a.name)
 
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
@@ -701,9 +699,22 @@ export default class DriftModel {
             item.state = i == 0 ? 1 : 0;
             return item;
         })
-            .sort((a, b) => b.name > a.name)
+        // .sort((a, b) => b.name > a.name)
 
         this.firstItemSelected = this.data.children[0].name;
+        this.updateSequenceSites();
+        this.notifyObservers({ type: "sitesUpdated" });
+        this.notifyObservers({ type: "updateImages" });
+    }
+
+    selectSiteByName(name) {
+        this.data.children = this.data.children.map((item, i) => {
+            if (item.name == name) this.firstItemSelected = item.name;
+            item.state = item.name == name ? 1 : 0;
+            return item;
+        })
+        // .sort((a, b) => b.name > a.name)
+
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });
         this.notifyObservers({ type: "updateImages" });
@@ -715,7 +726,7 @@ export default class DriftModel {
                 i.state = i.name == name ? 1 : 0;
                 return i;
             })
-            .sort((a, b) => b.name > a.name)
+        // .sort((a, b) => b.name > a.name)
         this.firstItemSelected = this.data.children.find(i => i.state == 1).name;
         this.updateSequenceSites();
         this.notifyObservers({ type: "sitesUpdated" });

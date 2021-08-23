@@ -37,7 +37,7 @@ class ImageGroup {
         this.urls = this.views.map(view => {
             return {
                 type: view,
-                url: getApiImage(view, this.site, 800, this.visit.getTime())
+                url: getApiImage(view, this.site, 300, this.visit.getTime())
             }
         })
     }
@@ -72,7 +72,7 @@ class ImageGroup {
         this.images = this.views.map(view => {
             return {
                 site: this.site,
-                url: getApiImage(view, this.site, 800, this.visit.getTime()),
+                url: getApiImage(view, this.site, 300, this.visit.getTime()),
                 view: view
             }
         })
@@ -137,10 +137,6 @@ class SiteImages {
         return this.name;
     }
 
-    getTotalImages() {
-        //return num of all images
-    }
-
     isPosLoaded(pos) {
         if (this.viewsImages[pos] == undefined) return false;
         return this.viewsImages[pos].getLoaded();
@@ -169,12 +165,13 @@ class SiteImages {
 class ImageSequence {
     constructor(visits, sites, views) {
         this.visitsLength = visits.length - 1;
+        this.NUMCALLS = 20
         this.sites = sites.map(s => new SiteImages(s.name, visits, s.active, views));
         this.range = {
             min: 0,
-            max: 20,
+            max: this.NUMCALLS,
         }
-        this.amount = 20;
+        this.amount = this.NUMCALLS;
         this.loadPos = 0;
     }
 
@@ -182,7 +179,7 @@ class ImageSequence {
         this.loadPos = pos;
         this.range = {
             min: pos,
-            max: Math.min((pos + 20), this.visitsLength)
+            max: Math.min((pos + this.NUMCALLS), this.visitsLength)
         }
         this.step();
     }
@@ -207,6 +204,8 @@ class ImageSequence {
         // });
 
     }
+
+
 
     checkStep() {
         const nextStep = this.loadPos + 1;
@@ -279,13 +278,14 @@ class ImageSequence {
         return this.getActiveSites().map(s => {
             //get images
             let images = s.loadImagesPos(pos);
-            // images = this.sortByIndex(images, activeIndex)
             return {
                 images: images,
                 name: s.name
             }
         })
     }
+
+
 
     sortByIndex(images, activeIndex) {
         if (activeIndex > 0) {
@@ -304,9 +304,7 @@ class ImageSequence {
         return activeSites.every(e => e.posLoaded(pos))
     }
 
-    getBackUpImages() {
 
-    }
 }
 
 export default ImageSequence;

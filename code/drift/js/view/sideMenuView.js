@@ -28,7 +28,7 @@ export default class SideMenuView {
             .join(" ")
 
         const content = `
-        <div class="flex flex-col items-end">
+        <div class="flex flex-col items-end ">
             ${this.renderButton()}
             <ul id = "viewListMenu" class="viewsList from-right ${stack ? "appear" : ""}">
                 ${menuInfo}

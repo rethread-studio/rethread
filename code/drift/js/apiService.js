@@ -25,24 +25,19 @@ export default class ApiService {
     }
 
     getSiteScreenshot(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/screenshot.png?&width=${size}&format=jpg`
+        return `${BASE_URL}/assets/images/${size}/${site}/screenshots/${time}.jpg`;
     }
 
     getSiteGraph(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/graph.png?&width=${size}&format=jpg`
+        return `${BASE_URL}/assets/images/${size}/${site}/graph/${time}.jpg`;
     }
 
     getSiteCoverage(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/coverage.png?&width=${size}&format=jpg`
+        return `${BASE_URL}/assets/images/${size}/${site}/coverage/${time}.jpg`;
     }
 
     getSiteNetwork(site, time, size) {
-        // return './img/backupNetwork.jpg';
-        return `${BASE_URL}/api/time/${time}/${site}/network.png?&width=${size}&format=jpg`
-    }
-
-    getSiteProfile(site, time, size) {
-        return `${BASE_URL}/api/time/${time}/${site}/profile.png?&width=${size}&format=jpg`
+        return `${BASE_URL}/assets/images/${size}/${site}/network/${time}.jpg`;
     }
 
     getMainMenu() {
@@ -65,9 +60,10 @@ export default class ApiService {
 export const dataTest = {
     value: 0,
     children: [
+
         {
             name: "bing",
-            state: 1,
+            state: 0,
             value: 1.25,
             image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.bing.png",
@@ -90,8 +86,16 @@ export const dataTest = {
 
         },
         {
-            name: "qwant",
+            name: "kiddle",
             state: 0,
+            value: 1.25,
+            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
+            logo: "logo.kiddle.png",
+
+        },
+        {
+            name: "qwant",
+            state: 1,
             value: 1.25,
             image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
             logo: "logo.qwant.png",
@@ -121,14 +125,7 @@ export const dataTest = {
             logo: "logo.yahoo.png",
 
         },
-        {
-            name: "kiddle",
-            state: 0,
-            value: 1.25,
-            image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
-            logo: "logo.kiddle.png",
 
-        },
     ]
 }
 
@@ -193,6 +190,10 @@ const sitesMenu = [{
     state: 1,
 },
 {
+    name: "Qwant",
+    state: 0
+},
+{
     name: "Bing",
     state: 0,
 },
@@ -206,10 +207,6 @@ const sitesMenu = [{
 },
 {
     name: "Kiddle",
-    state: 0
-},
-{
-    name: "Qwant",
     state: 0
 },
 {

@@ -35,12 +35,29 @@ window.onload = function () {
     apiService = new ApiService();
     //We instantiate our model
     model = new DriftModel();
-    model.init();
-
     //We instantiate our model
     mainVizTD = new MainVizTDModel();
-    mainVizTD.init();
 
+    //CREATE LOADING PAGE
+    //GO TO LOADING PAGE
+
+    //CREATE ERROR PAGE
+
+    model.init()
+        .then(e => {
+            mainVizTD.init();
+            initViewsAndControllers()
+            goToLocation();
+        }).catch(error => {
+            console.log("erro", error.error)
+            //TAKE TO ERROR PAGE
+        })
+
+
+
+};
+
+function initViewsAndControllers() {
     legendModel = new Legend(legendTexts);
 
     let chatView = new ChatView('chat', model);
@@ -74,15 +91,14 @@ window.onload = function () {
     let mainViztDView = new MainVizTDView('mainViz', mainVizTD);
     mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
 
-    goToLocation();
-};
+}
 
 function goToLocation() {
-    let loadingPage = "home";
-    const paths = document.location.pathname.substring(1).split('/')
-    if (paths.length > 0) {
-        loadingPage = paths[0];
-    }
+    let loadingPage = "exhibition";
+    // const paths = document.location.pathname.substring(1).split('/')
+    // if (paths.length > 0) {
+    //     loadingPage = paths[0];
+    // }
     showView(loadingPage);
 }
 
@@ -108,31 +124,41 @@ export default function showView(view) {
             currentView = homeViewController;
             mainMenuViewController.unMountView();
             homeViewController.renderView();
+            mainVizTD.toggleParticles(true);
             break;
         case 'exhibition':
             currentView = exhibitionViewController;
             exhibitionViewController.renderView();
             mainMenuViewController.renderView();
             model.toggleChatVisible(false);
+            console.log(mainVizTD, mainVizTD.viewParticles)
+            mainVizTD.toggleParticles(false);
             break;
         case 'robot':
             currentView = robotViewController;
             robotViewController.renderView();
             mainMenuViewController.renderView();
+            mainVizTD.toggleParticles(false);
             break;
         case 'tour':
             currentView = tourViewController;
             tourViewController.renderView();
             mainMenuViewController.renderView();
+            mainVizTD.toggleParticles(false);
             break;
         case 'about':
             currentView = aboutViewController;
             aboutViewController.renderView();
             mainMenuViewController.renderView();
+            mainVizTD.toggleParticles(true);
+            break;
+        case 'loading':
+            console.log("loading page")
             break;
         default:
             currentView = homeViewController;
             homeViewController.renderView();
             mainMenuViewController.unMountView();
+            mainVizTD.toggleParticles(true)
     }
 }
