@@ -13,13 +13,19 @@ import { OUTPUT_PATH } from "./config";
 
 const app = express();
 app.use(core());
+app.use("/assets", express.static(__dirname + "/../../assets"), {
+  etag: true,
+  lastModified: true,
+  maxAge: 3600000, // 1h
+});
+app.use("/audio", express.static(__dirname + "/../../audio"));
+
 app.use(compression());
 app.use("/js", express.static(__dirname + "/../../js"));
 app.use("/site.webmanifest", express.static(__dirname + "/../../site.webmanifest"));
 app.use("/img", express.static(__dirname + "/../../img"));
 app.use("/css", express.static(__dirname + "/../../css"));
 app.use("/webfonts", express.static(__dirname + "/../../webfonts"));
-app.use("/audio", express.static(__dirname + "/../../audio"));
 
 const api = express.Router();
 app.use("/api", api);
@@ -229,68 +235,6 @@ api.get("/time/:time/:site/coverage/css", async (req, res) => {
   }
 });
 
-function sendImage(path: string, req: express.Request, res: express.Response) {
-  const widthString = req.query.width;
-  const heightString = req.query.height;
-  const format = req.query.format;
-
-  let width, height;
-  if (widthString) {
-    width = parseInt(widthString.toString());
-  }
-  if (heightString) {
-    height = parseInt(heightString.toString());
-  }
-  if (width || height) {
-    res.type(`image/${format || "png"}`);
-    // Get the resized image
-    util
-      .resize({
-        path,
-        format: format ? format.toString() : null,
-        width,
-        height,
-      })
-      .pipe(res);
-  } else {
-    res.sendFile(path);
-  }
-}
-
-api.get("/time/:time/:site/screenshot.png", async (req, res) => {
-  try {
-    const path = await util.getScreenshot({
-      site: req.params.site,
-      time: req.params.time,
-    });
-    sendImage(path, req, res);
-  } catch (error) {
-    console.log(error);
-    return res.sendStatus(404);
-  }
-});
-api.get("/time/:time/:site/graph.png", async (req, res) => {
-  try {
-    const path = await util.getGraphImage({
-      site: req.params.site,
-      time: req.params.time,
-    });
-    sendImage(path, req, res);
-  } catch (error) {
-    return res.sendStatus(404);
-  }
-});
-api.get("/time/:time/:site/coverage.png", async (req, res) => {
-  try {
-    const path = await util.getCoverageImage({
-      site: req.params.site,
-      time: req.params.time,
-    });
-    sendImage(path, req, res);
-  } catch (error) {
-    return res.sendStatus(404);
-  }
-});
 
 api.get("/time/:time/:site/network", async (req, res) => {
   try {
