@@ -13,12 +13,16 @@ import { OUTPUT_PATH } from "./config";
 
 const app = express();
 app.use(core());
-app.use("/assets", express.static(__dirname + "/../../assets"), {
+app.use("/assets", express.static(__dirname + "/../../assets", {
   etag: true,
   lastModified: true,
   maxAge: 3600000, // 1h
-});
-app.use("/audio", express.static(__dirname + "/../../audio"));
+}));
+app.use("/audio", express.static(__dirname + "/../../audio", {
+  etag: true,
+  lastModified: true,
+  maxAge: 3600000, // 1h
+}));
 
 app.use(compression());
 app.use("/js", express.static(__dirname + "/../../js"));
