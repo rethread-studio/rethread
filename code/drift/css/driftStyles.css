@@ -173,7 +173,7 @@ h1{
 /* Toggle B */
 input:checked ~ .dot {
     transform: translateX(130%);
-    background-color: #48bb78;
+    /* background-color: #48bb78; */
   }
 
   .w-14{
@@ -389,7 +389,7 @@ input:checked ~ .dot {
     transform: translate(0 , -50%);
 }
 .-top-20{
-    top: -36%;
+    top: -15%;
 }
 .-left-5{
     left: -5%;
