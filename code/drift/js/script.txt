@@ -6,8 +6,9 @@ We use them all the time,
 every day, 
 for all sorts of tasks
 information, (google bar)
-education, (wikipedia bar)
 entertainment (spotify bar)
+education, (wikipedia bar)
+
 
 We trust them (qwant bar)
 We rely on them (bing bar)
@@ -17,7 +18,7 @@ We know them (google bar)
 Do we? (zoom / anonymous bar)
 
 ### Frame 3
-What are they, really?
+     
 How do they work?
 Do they ever change?
 Why did this new icon appear recently?
@@ -28,10 +29,10 @@ Well….
 
 ### Frame 15
 it’s because a search engine is not only a page with results (screenshot)
-it’s a program
+it’s a program  
 made of millions of lines of code (code appears) 
 made of thousands of interconected operations (trace appears)
-made of world-wide connection (networks appears) ---slow down voice
+made of world-wide connection (networks appears) ---slow down vo ice
 [ADD] 
 
 ### Frame 6
@@ -43,14 +44,8 @@ The complex operations, the nervous system  (trace → abstract image)
 The world-wide connections, the deep underworld (network → image)
 
 ### frame 8
-Drift let’s you observe the layers and reveals [ACTION CLICK PLAY TIMELINE] how the invisible layers keep on evolving in time, all the time [HIGHLIGHT TIME], every hour
+Drift let’s you observe the layers and reveals [ACTION CLICK PLAY TIMELINE] how the invisible layers keep on evolving in time, all the time [HIGHLIGHT TIME], every hour 
 
-[COMMENT] This part is more related to the beggining, it is explaining why the Engines are like that, and It repearts web page material
-With any search engine, as user, you might think that the page is always the same (wikipidia fullscreeen with time passing)
-But, all around the world, software development teams keep on 
-changing the underlying code (code appears)
-to experiment with new features, to fix bugs, (switch to trace)
-to improve user experience, to push search to ludicrous speed (switch to network)
 
 ### Frame 9
 In Drift you can explore the layers of eight search engines that were recorded every hour, from XXX to YYYY
