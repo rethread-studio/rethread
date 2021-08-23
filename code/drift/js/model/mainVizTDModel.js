@@ -134,6 +134,7 @@ export default class MainVizTDModel {
         camera.updateProjectionMatrix();
 
         renderer.setSize(window.innerWidth, window.innerHeight);
+        this.upDateImages()
     }
 
 
