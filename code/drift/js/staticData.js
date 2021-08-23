@@ -3,19 +3,30 @@
 const exhibitionTexts = {
     intro: {
         tittle: `Dr<span class="italic font-bold text-2xl">i</span>ft`,
-        text: `<p class="text-left">Web search engines are part of our digital lives. They are familiar and the comforting starting point for our explorations of the cyber space. There exist different search engines, each with its own aesthetic. When we adopt one, it becomes a mundane cyber place, we recognze it and we appreciate its stability. But is it really stable? Do search engines ever change over time? Is it really the same search engine we go back to every day?</p>
+        text: `<p class="text-left">Search engines are familiar. 
+        We use them every day for all sorts of occupations. From education and information to entertainment.
+        Search engines are deeply integrated in our digital life.
+        We trust them. We rely on them. We know them.</p>
             <br>
             <p class="text-left">Drift lets you experience how search engines evolve, every hour.</p>`
     },
     views: {
         tittle: `Dr<span class="italic font-bold text-2xl">i</span>ft`,
-        text: `<p class="text-left">Web search engines are part of our digital lives. They are familiar and the comforting starting point for our explorations of the cyber space. There exist different search engines, each with its own aesthetic. When we adopt one, it becomes a mundane cyber place, we recognze it and we appreciate its stability. But is it really stable? Do search engines ever change over time? Is it really the same search engine we go back to every day?</p>
+        text: `<p class="text-left">Drift lets you explore search engines in a way you never thought about them.
+        This online exhition lets you discover the intricate strata of code and network that operate to deliver the content of a search.
+        And Drift reveals how these strata continuously evolve, even behind what seems a very well known, stable, familiar web site.</p>
             <br>
             <p class="text-left">Drift lets you experience how search engines evolve, every hour.</p>`
     },
     timeline: {
         tittle: `Dr<span class="italic font-bold text-2xl">i</span>ft`,
-        text: `<p class="text-left">Web search engines are part of our digital lives. They are familiar and the comforting starting point for our explorations of the cyber space. There exist different search engines, each with its own aesthetic. When we adopt one, it becomes a mundane cyber place, we recognze it and we appreciate its stability. But is it really stable? Do search engines ever change over time? Is it really the same search engine we go back to every day?</p>
+        text: `<p class="text-left">While you visit Drift, you will discover the teeming world of code and complex networks
+        that keep evolving to deliver the content of eight search engines. Evolution is powered by the constant 
+        work of software development teams, that continuously improve performance, security and user experience.
+        
+        Drift lets you interactively explore the strata of 8 search engines that have been captured every hour over a period of 
+        two months in May and June 2020. You can explore evolution step by step or let time evolve at normal or ludicrous speed. 
+        You can explore the relative pace of evolution among strata and between two different web sites.</p>
             <br>
             <p class="text-left">Drift lets you experience how search engines evolve, every hour.</p>`
     },
@@ -30,20 +41,20 @@ const exhibitionTexts = {
 
 export const legendTexts = {
     screenshot: {
-        human: `Screenshot Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
-        nerd: `Screenshot mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
+        human: `This is what you normally see when searching for 2021 on the search engine.`,
+        nerd: `This is a screenshot taken by the Drift bot after searching for 2021`
     },
     coverage: {
-        human: `Coverage Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
-        nerd: `Coverage mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
+        human: `An abstract visualization of all the lines of code, written by teams of developers and that are necessary to produce the search result web page.`,
+        nerd: `A visualization of the coverage of the javacript code that has been executed to render the search result page.`
     },
     graph: {
-        human: `Execution Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
-        nerd: `Execution  mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
+        human: `The flow represents the complete seaquence of operations that have been performed in order to deliver the result of the search on a web page, and to organize this content in a nice anc comprehensive manner.`,
+        nerd: `This represents the complete execution trace of javascript functions was observed when rendering the search result page in the browser of the Drift bot`
     },
     network: {
-        human: `Network Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla pellentesque mi at tempor luctus. Ut tincidunt, purus non congue facilisis, dui turpis malesuada neque, et pulvinar velit nisl a lacus. Aenean turpis nibh, lacinia tristique feugiat non, finibus at ante. Ut scelerisque volutpat massa, vitae aliquam lacus lacinia at. Praesent.`,
-        nerd: `Network  mash tun bittering hops alcohol ale brewing, cask priming amber shelf life. hop back bitter, hefe lauter tun racking, filter keg alpha acid. pitch balthazar wort chiller beer length hand pump heat exchanger caramel malt`
+        human: `This web looking image represents all the connections that were established with various machines around the globe in order to fetch the content (text, images, colors, code, etc.) that appear in the web page`,
+        nerd: `This is the deepest software layer, the one takeing care of world-wide Internet connections in order to fetch the content to be delivered in the search results page`
     }
 }
 
