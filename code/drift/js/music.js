@@ -57,7 +57,7 @@ class Sample {
 
 var total_sound_assets = 0;
 var loaded_sound_assets = 0;
-const audio_file_root = "./audio/lowestq/";
+const audio_file_root = "./audio/";
 const sites = ["bing", "google"];
 // const root_sample_names = ["root_note_short1", "root_note_short2", "root_note_short3"];
 const root_sample_names = ["root_note_shorter1", "root_note_shorter2"];
