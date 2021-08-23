@@ -57,13 +57,15 @@ class Sample {
 
 var total_sound_assets = 0;
 var loaded_sound_assets = 0;
-const audio_file_root = "./audio/";
-const sites = ["bing", "duckduckgo", "google"];
-const root_sample_names = ["root_note_short1", "root_note_short2", "root_note_short3"];
-const long_sample_names = ["long_notes_short1", "long_notes_short2", "long_notes_short3", "long_notes_short4"];
+const audio_file_root = "./audio/lowestq/";
+const sites = ["bing", "google"];
+// const root_sample_names = ["root_note_short1", "root_note_short2", "root_note_short3"];
+const root_sample_names = ["root_note_shorter1", "root_note_shorter2"];
+// const long_sample_names = ["long_notes_short1", "long_notes_short2", "long_notes_short3", "long_notes_short4"];
+const long_sample_names = ["long_notes_short1", "long_notes_short2"];
 const event_sample_names = ["chord5-1", "arpeggio1", "arpeggio2", "rain1", "rain2", "chord1-1", "chord1-2", "chord2-1", "chord4-1"];
-const site_variants = ["fast", "middle", "slow"];
-var enabled_variants = ["fast", "middle", "slow"];
+const site_variants = ["fast", "middle_short", "slow_short"];
+var enabled_variants = ["fast", "middle_short", "slow_short"];
 var enabled_sites = [...sites];
 var visitors_connected_level = 0; // 0-3, the number of connected visitors influences some sounds
 var site_playing = false;
@@ -76,6 +78,7 @@ var root_samples = [];
 var long_samples = [];
 let site_sample_variants = new Map();
 let visitor_samples = [];
+let playing_visitor_sample = null;
 let event_samples = [];
 var all_music_loaded = false;
 
@@ -93,10 +96,11 @@ function load_all_music_assets() {
             root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
                 (source) => {
                     if (music_is_playing) {
+                        let delay = Math.pow(Math.random(), 1.5) * 50000 + 10000;
                         setTimeout(() => {
                             let i = Math.floor(Math.random() * root_samples.length);
                             root_samples[i].start();
-                        }, Math.pow(Math.random(), 2.0) * 10000);
+                        }, delay);
                     }
                 }));
         } else {
@@ -105,10 +109,11 @@ function load_all_music_assets() {
                 root_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
                     (source) => {
                         if (music_is_playing) {
+                            let delay = Math.pow(Math.random(), 1.5) * 50000 + 10000;
                             setTimeout(() => {
                                 let i = Math.floor(Math.random() * root_samples.length);
                                 root_samples[i].start();
-                            }, Math.pow(Math.random(), 2.0) * 10000);
+                            }, delay);
                         }
                     }, true));
             }, 30000);
@@ -149,7 +154,7 @@ function load_all_music_assets() {
                 // Set site_playing to false after a short break
                 setTimeout(() => {
                     site_playing = false
-                }, 3000)
+                }, Math.pow(Math.random(), 1.5) * 20000 + 5000)
             });
             variant_map.set(site, sample);
         }
@@ -158,7 +163,13 @@ function load_all_music_assets() {
     // Visitor samples
     let visitor_sample_file_names = ["visitors1", "visitors2", "visitors3"];
     for (let name of visitor_sample_file_names) {
-        visitor_samples.push(new Sample(audio_file_root + name + ".mp3", false, true));
+        let array = [];
+        for (let i = 0; i < 3; i++) {
+            array.push(new Sample(audio_file_root + name + "-" + (i+1) + ".mp3", false, true, (source) => {
+                visitor_samples[i][Math.floor(Math.random() * 3)].start();
+            }));
+        }
+        visitor_samples.push(array);
     }
     // Event samples
     for (let name of event_sample_names) {
@@ -221,7 +232,7 @@ function start_sound_effect() {
 
 
 function update_visitors_connected() {
-    if (all_music_loaded) {
+    if (all_music_loaded && music_is_playing) {
         let new_level = 0;
         if (interaction.users) {
             if (interaction.users.length > 1) {
@@ -238,14 +249,22 @@ function update_visitors_connected() {
         // console.log("visitors connected, new_level: " + new_level + "\ninteraction.users: " + JSON.stringify(interaction.users));
         if (new_level != visitors_connected_level) {
             if (new_level > visitors_connected_level) {
+                // Stop existing sound samples
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        visitor_samples[i][j].stop();
+                    }
+                }
                 // Start new sound samples
                 for (let i = visitors_connected_level; i < new_level; i++) {
-                    visitor_samples[i].start();
+                    visitor_samples[i][0].start();
                 }
             } else {
                 // Stop existing sound samples
                 for (let i = new_level; i < visitors_connected_level; i++) {
-                    visitor_samples[i].stop();
+                    for (let j = 0; j < 3; j++) {
+                        visitor_samples[i][j].stop();
+                    }
                 }
             }
             visitors_connected_level = new_level;
@@ -278,15 +297,22 @@ var music_is_playing = false;
 // Starts everything with default settings
 function start_all() {
     if (all_music_loaded) {
+        // delay the start of the root notes
         setTimeout(() => {
             if (music_is_playing) {
                 root_samples[0].start();
             }
-        }, 5000);
+        }, 10000);
         long_samples[0].start();
         Tone.Transport.start();
-        site_loop.start(0);
+        // delay the start of the site samples
+        setTimeout(() => {
+            if (music_is_playing) {
+                site_loop.start(0);
+            }
+        }, 8000);
         update_visitors_connected();
+        event_samples[3].start();
     } else if (!music_is_playing) {
         setTimeout(() => { start_all(); }, 300);
     }
