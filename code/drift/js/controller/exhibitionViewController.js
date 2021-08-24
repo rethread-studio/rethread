@@ -60,13 +60,15 @@ export default class ExhibitionViewController {
                 this.view.viewsMenu.classList.remove("appear")
                 // this.view.sitesMenuViewController.hideOptions()
                 this.view.sideMenuController.hideOptions()
-                this.model.getChangePlayState(true)
+                this.model.getChangePlayState(false)
                 this.model.removeLayerStepInterval();
                 this.model.selectSiteByName("qwant");
+
                 break;
             case 1:
                 // this.model.resetSites();
                 this.model.setLayerStepInterval();
+                this.model.getChangePlayState(true)
                 this.view.timeline.classList.remove("appear")
                 this.view.viewsMenu.classList.add("appear")
                 this.view.sideMenuController.showOptions()
