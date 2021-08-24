@@ -95,10 +95,10 @@ function initViewsAndControllers() {
 
 function goToLocation() {
     let loadingPage = "exhibition";
-    // const paths = document.location.pathname.substring(1).split('/')
-    // if (paths.length > 0) {
-    //     loadingPage = paths[0];
-    // }
+    const paths = document.location.pathname.substring(1).split('/')
+    if (paths.length > 0) {
+        loadingPage = paths[0];
+    }
     showView(loadingPage);
 }
 

@@ -417,7 +417,10 @@ export default class MainVizTDModel {
         // } else {
         this.showSpreadSites()
         const dof = model.getNumActiveSites()
-        this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof == 1 ? 0.5 : 0.8)
+        const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
+        let camVal = deviceW < 768 ? [0.8, 0.8] : [0.5, 0.8]
+
+        this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof == 1 ? camVal[0] : camVal[1])
         // }
 
     }
