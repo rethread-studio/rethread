@@ -33,10 +33,10 @@ export default class ExhibitionView {
                     <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5  "></div>
                     <div id="legend" class="absolute z-10 top-0 p-5 bg-gray-800 rounded-xl transition-transform duration-500 ease-in-out w-5/12 hidden"></div>
             </div>
-            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 fade-in "> </div>
-            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 fade-in"> </div>
-            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 fade-in"> </div>
-            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 fade-in"> </div>
+            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20  "> </div>
+            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 "> </div>
+            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 "> </div>
+            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 "> </div>
             </div>
             
             `;

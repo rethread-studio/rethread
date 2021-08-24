@@ -27,11 +27,12 @@ export default class ExhibitionViewController {
         entries.forEach((entry) => {
             const element = entry.target.getAttribute("id") == "exhibitDescrip" ? entry.target.parentElement : entry.target;
             if (entry.isIntersecting) {
-                element.classList.add("appear")
+                // element.classList.add("appear")
                 this.vizModel.activateSection(element.getAttribute("id"))
-            } else {
-                element.classList.remove("appear")
             }
+            // else {
+            // element.classList.remove("appear")
+            // }
 
         })
     }
