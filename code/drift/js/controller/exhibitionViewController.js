@@ -122,20 +122,33 @@ export default class ExhibitionViewController {
     }
 
     renderView() {
-        this.model.addKeyEventListener();
-        this.view.render();
-        // this.setHeight();
-        this.addEventListener();
-        this.setState()
+        const deviceW = this.model.getScreenSize()
+        if (deviceW < 768) {
+            this.view.renderMobile()
+            this.addEventListener();
+            this.setState()
+        } else {
+
+            this.model.addKeyEventListener();
+            this.view.render();
+            this.addEventListener();
+            this.setState()
+        }
+
     }
 
     unMountView() {
-        this.model.removeTimeInterval()
-        this.vizModel.resetActiveSection()
-        this.vizModel.removeImages();
-        this.view.unMountView()
-        this.removeEventListener()
-        this.model.removeKeyEventListener();
+        const deviceW = this.model.getScreenSize()
+        if (deviceW < 768) {
+            console.log("render cel")
+        } else {
+            this.model.removeTimeInterval()
+            this.vizModel.resetActiveSection()
+            this.vizModel.removeImages();
+            this.view.unMountView()
+            this.removeEventListener()
+            this.model.removeKeyEventListener();
+        }
     }
 
     //update info when modified in vizModel

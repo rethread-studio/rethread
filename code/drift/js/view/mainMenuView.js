@@ -36,7 +36,7 @@ export default class MainMenuView {
              Dr<span class="italic">i</span>ft
         </a>
             
-            <div id="toggleItem" class="ml-auto mr-4 pt-2 ${viewToggle ? "visible" : "invisible"}"></div>
+            <div id="toggleItem" class="ml-auto mr-4 pt-2 hidden md:block ${viewToggle ? "visible" : "invisible"}"></div>
             <div id="audio-div" class="mr-4 md:mr-8 ml-2 md:ml-4 text-white pt-2">${audio_button}</div>
             <button id="menuButton" class="flex px-4 py-3 border rounded mt-auto z-50 transition-colors duration-500 ease-in-out ${visible ? "bg-white" : "bg-current"} ">
                 <svg class="fill-current h-3 w-3 ${visible ? " text-black" : " text-white"}" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

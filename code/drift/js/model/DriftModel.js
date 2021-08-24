@@ -81,7 +81,7 @@ export default class DriftModel {
 
         this.timeLineDimensions = {
             width: window.innerWidth,
-            height: 100,
+            height: 85,
             margin: {
                 top: 0,
                 right: 40,
@@ -772,6 +772,10 @@ export default class DriftModel {
 
     updateURL(url, title) {
         window.history.pushState(null, title || window.document.title, url)
+    }
+
+    getScreenSize() {
+        return Math.max(document.documentElement.clientWidth, window.innerWidth);
     }
 
 }

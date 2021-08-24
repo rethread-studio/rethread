@@ -1,5 +1,7 @@
 import SideMenuView from './sideMenuView.js';
 import SideMenuController from '../controller/sideMenuController.js';
+import DropDownView from './dropDownView.js';
+import DropDownController from '../controller/dropDownController.js';
 import SelectSiteToggleView from './selectSiteToggleView.js';
 import SelectSiteToggleViewController from '../controller/selectSiteToggleViewController.js';
 import TimeLineView from './timeLineView.js';
@@ -22,21 +24,52 @@ export default class ExhibitionView {
         // this.meetRobot_btn = null;
     }
 
+    renderMobile() {
+        const content = `
+        <div id="exhibitContent" class="">
+            <div id="visContainer" class="h-screen w-screen fixed top-0">
+                    <div id="viewSideMenu" class="absolute top-28 md:top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right  "></div>
+                    <div id="timeLineWrapper" class="absolute bottom-0  left-0  flex flex-col flex-wrap justify-start from-down"></div>
+                    <div id="currentTimeWrapper" class= "relative top-14 md:top-100 ml-6 md:ml-5 fade-in"></div>
+                    <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5  "></div>
+                    <div id="legend" class="absolute z-10 top-0 p-5 bg-gray-800 rounded-xl transition-transform duration-500 ease-in-out w-5/12 hidden"></div>
+            </div>
+            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20  "> </div>
+            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20 "> </div>
+            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20 "> </div>
+            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20 "> </div>
+            </div>
+            
+            `;
+        // <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
+        this.container.innerHTML = content;
+        this.renderTexts();
+        // this.renderMainVis();
+        this.renderLegend();
+        this.renderSideMenuMobile(); //
+        this.renderTimeLine();
+        this.renderSitesMenu(); //
+        this.renderCurrentTime();
+        this.setIdentifications()
+
+    }
+
     render() {
         // <div id="webSitesWrapper"></div>
+
         const content = `
         <div id="exhibitContent" class="">
             <div id="visContainer" class="h-screen w-screen fixed top-0">
                     <div id="viewSideMenu" class="absolute top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right  "></div>
                     <div id="timeLineWrapper" class="absolute bottom-0  left-0  flex flex-col flex-wrap justify-start from-down"></div>
-                    <div id="currentTimeWrapper" class= "relative top-100 ml-5 fade-in"></div>
+                    <div id="currentTimeWrapper" class= "relative top-14 md:top-100 ml-6 md:ml-5 fade-in"></div>
                     <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5  "></div>
                     <div id="legend" class="absolute z-10 top-0 p-5 bg-gray-800 rounded-xl transition-transform duration-500 ease-in-out w-5/12 hidden"></div>
             </div>
-            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20  "> </div>
-            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 "> </div>
-            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 "> </div>
-            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-center h-screen  white  z-10 pl-20 "> </div>
+            <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20  "> </div>
+            <div id="exhibitionProcess" value = "1" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20 "> </div>
+            <div id="exhibitionExplanation" value = "2" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20 "> </div>
+            <div id="mainExhibit" value = "4" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20 "> </div>
             </div>
             
             `;
@@ -50,6 +83,7 @@ export default class ExhibitionView {
         this.renderSitesMenu();
         this.renderCurrentTime();
         this.setIdentifications()
+
     }
 
 
@@ -72,6 +106,13 @@ export default class ExhibitionView {
     //     this.mainVizController = new MainVisController(mainVisView, this.model);
     //     this.mainVizController.renderView();
     // }
+
+    renderSideMenuMobile() {
+        //ADD SIDE MENU VIEW
+        let dropDownView = new DropDownView("viewSideMenu", this.model);
+        this.sideMenuController = new DropDownController(dropDownView, this.model, this.vizModel);
+        this.sideMenuController.renderView();
+    }
 
     renderSideMenu() {
         //ADD SIDE MENU VIEW
