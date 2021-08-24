@@ -447,9 +447,10 @@ export default class DriftModel {
 
     selectView(viewVal) {
         if (viewVal == "screenshot") return;
+
         this.menu = this.menu.map(e => {
             if (e.value == "screenshot") return e;
-            e.state = e.value == viewVal ? 1 : 0;
+            e.state = e.value == viewVal ? e.state == 1 ? 0 : 1 : 0;
             return e;
         })
         if (this.layerStepInterval != null && this.layerStepInterval != undefined) this.removeLayerStepInterval()
