@@ -117,7 +117,7 @@ export default class DriftModel {
             },
             {
                 text: "Ludicrous",
-                speed: this.baseSpeed / 18
+                speed: this.baseSpeed / 14
             },
 
         ]

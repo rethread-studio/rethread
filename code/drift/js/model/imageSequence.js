@@ -165,7 +165,7 @@ class SiteImages {
 class ImageSequence {
     constructor(visits, sites, views) {
         this.visitsLength = visits.length - 1;
-        this.NUMCALLS = 20
+        this.NUMCALLS = 7
         this.sites = sites.map(s => new SiteImages(s.name, visits, s.active, views));
         this.range = {
             min: 0,
