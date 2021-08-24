@@ -1,5 +1,7 @@
 import SideMenuView from './sideMenuView.js';
 import SideMenuController from '../controller/sideMenuController.js';
+import DropDownToggleView from './dropDownToggleView.js';
+import DropDownToggleController from '../controller/dropDownToggleController.js';
 import DropDownView from './dropDownView.js';
 import DropDownController from '../controller/dropDownController.js';
 import SelectSiteToggleView from './selectSiteToggleView.js';
@@ -31,7 +33,7 @@ export default class ExhibitionView {
                     <div id="viewSideMenu" class="absolute top-28 md:top-2-4 -translate-y-2-4  mr-5 right-0 from-mid-right  "></div>
                     <div id="timeLineWrapper" class="absolute bottom-0  left-0  flex flex-col flex-wrap justify-start from-down"></div>
                     <div id="currentTimeWrapper" class= "relative top-14 md:top-100 ml-6 md:ml-5 fade-in"></div>
-                    <div id="sitesMenuWrapper" class="absolute top-2-4 -translate-y-2-4  ml-5  "></div>
+                    <div id="sitesMenuWrapper" class="absolute top-28 md:top-2-4 -translate-y-2-4  ml-5  "></div>
                     <div id="legend" class="absolute z-10 top-0 p-5 bg-gray-800 rounded-xl transition-transform duration-500 ease-in-out w-5/12 hidden"></div>
             </div>
             <div id="exhibitionIntro" value = "0" class="flex content-center items-center justify-center h-screen  white  z-10 pl-0 md:pl-20  "> </div>
@@ -44,11 +46,9 @@ export default class ExhibitionView {
         // <div id="exhibitionSpread" value = "3" class="flex content-center items-center justify-left h-screen  white  z-10 pl-20 fade-in"> </div>
         this.container.innerHTML = content;
         this.renderTexts();
-        // this.renderMainVis();
-        this.renderLegend();
         this.renderSideMenuMobile(); //
         this.renderTimeLine();
-        this.renderSitesMenu(); //
+        this.renderSitesMenuMobile(); //
         this.renderCurrentTime();
         this.setIdentifications()
 
@@ -143,6 +143,12 @@ export default class ExhibitionView {
         let timeLineView = new TimeLineView("timeLineWrapper", this.model);
         this.timeLineController = new TimeLineController(timeLineView, this.model);
         this.timeLineController.renderView();
+    }
+
+    renderSitesMenuMobile() {
+        let sitesMenuView = new DropDownToggleView("sitesMenuWrapper", this.model);
+        this.sitesMenuViewController = new DropDownToggleController(sitesMenuView, this.model);
+        this.sitesMenuViewController.renderView();
     }
 
     renderSitesMenu() {

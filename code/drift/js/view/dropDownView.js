@@ -6,7 +6,7 @@ export default class DropDownView {
     constructor(container, model) {
         this.container = document.getElementById(container);
         this.model = model;
-        this.model.addObserver(this);
+
     }
 
     render() {
@@ -45,11 +45,6 @@ export default class DropDownView {
        `;
         this.container.innerHTML = content;
         this.setIdentifications();
-    }
-    update(changeDetails) {
-        if (changeDetails.type == "updateCurrentVisit") {
-            // this.render();
-        }
     }
 
     setIdentifications() {
