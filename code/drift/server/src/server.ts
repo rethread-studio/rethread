@@ -303,26 +303,25 @@ let users: User[] = [];
 const lastMessages = [];
 
 let votes: { [key: string]: User[] } = {};
-const voteInterval = 30;
+const voteInterval = 15;
 let voteTime = new Date();
 voteTime.setSeconds(voteTime.getSeconds() + voteInterval);
+
+
+const botSites = fs.readdirSync(join(__dirname, "..", "websites")).filter((f) => f.indexOf(".steps") > -1)
+.map((f) => f.replace(".steps", ""));
 
 setInterval(() => {
   if (voteTime > new Date()) {
     return;
   }
-  let elected = "drift";
-  let max = 0;
-  for (let website in votes) {
-    if (votes[website].length > max) {
-      elected = website;
-      max = votes[website].length;
-    }
-  }
+  
+  const index = Math.round(Math.random() * (botSites.length - 1));
   votes = {};
   voteTime = new Date();
   voteTime.setSeconds(voteTime.getSeconds() + voteInterval);
-  io.emit("elected", { website: elected, voteTime });
+  if (users.length > 0)
+    io.emit("elected", { website: botSites[index], voteTime });
 }, 500);
 
 //listen on every connection
