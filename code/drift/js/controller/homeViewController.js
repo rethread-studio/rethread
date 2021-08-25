@@ -8,8 +8,8 @@ export default class HomeViewController {
 
     addEventListener() {
         this.view.meetRobot_btn.addEventListener("click", (e) => {
-            this.model.updateURL("/robot", "Meet the Artists");
-            showView('robot');
+            this.model.updateURL("/driftbot", "Meet the bot");
+            showView('driftbot');
             e.preventDefault();
         });
         this.view.viewExhibition_btn.addEventListener("click", (e) => {
@@ -41,7 +41,7 @@ export default class HomeViewController {
 
 
         this.view.meetRobot_btn.removeEventListener("click", () => {
-            showView('robot');
+            showView('driftbot');
         });
         this.view.viewExhibition_btn.removeEventListener("click", () => {
             showView('exhibition');

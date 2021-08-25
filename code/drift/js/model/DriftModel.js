@@ -417,7 +417,6 @@ export default class DriftModel {
                     }
                 });
                 const views = this.menu.map(v => v.value)
-                console.log("new image squences")
                 this.imageSequence = new ImageSequence(data, sitesName, views)
                 this.imageSequence.step();
                 this.notifyObservers({ type: "updateTimeLine" });

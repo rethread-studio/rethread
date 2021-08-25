@@ -139,7 +139,6 @@ export default class MainVizTDModel {
 
 
     toggleParticles(toView = true) {
-        console.log("VIEW PARTICLES", toView)
         //if the same as current view ommit
         if (this.viewParticles == toView) return;
 

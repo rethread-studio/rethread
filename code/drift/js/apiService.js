@@ -131,12 +131,12 @@ export const dataTest = {
 
 export const mainMenu = [
     {
-        human: "Meet the artists",
+        human: "Meet the bot",
         nerd: "Meet Motoo",
-        value: "robot"
+        value: "driftbot"
     },
     {
-        human: "View Exhibition",
+        human: "View exhibition",
         nerd: "View Evolution",
         value: "exhibition"
     },

@@ -134,7 +134,7 @@ export default function showView(view) {
             console.log(mainVizTD, mainVizTD.viewParticles)
             mainVizTD.toggleParticles(false);
             break;
-        case 'robot':
+        case 'driftbot':
             currentView = robotViewController;
             robotViewController.renderView();
             mainMenuViewController.renderView();

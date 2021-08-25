@@ -165,7 +165,7 @@ function load_all_music_assets() {
     for (let name of visitor_sample_file_names) {
         let array = [];
         for (let i = 0; i < 3; i++) {
-            array.push(new Sample(audio_file_root + name + "-" + (i+1) + ".mp3", false, true, (source) => {
+            array.push(new Sample(audio_file_root + name + "-" + (i + 1) + ".mp3", false, true, (source) => {
                 visitor_samples[i][Math.floor(Math.random() * 3)].start();
             }));
         }
@@ -284,6 +284,7 @@ var site_loop = new Tone.Loop(function (time) {
             variant = enabled_variants[Math.floor(Math.random() * enabled_variants.length)];
             site = enabled_sites[Math.floor(Math.random() * enabled_sites.length)];
         } while (enabled_variants.length * enabled_sites.length > 1 && (variant + site) == last_played_site_sample);
+        console.log("IN LOOP")
         currently_playing_site_sample = site_sample_variants.get(variant).get(site);
         currently_playing_site_sample.start();
         last_played_site_sample = variant + site;

@@ -53,7 +53,7 @@ export default class HomeView {
 
 
     setIdentifications() {
-        this.meetRobot_btn = document.getElementById("robotBtn");
+        this.meetRobot_btn = document.getElementById("driftbotBtn");
         this.viewExhibition_btn = document.getElementById("exhibitionBtn");
         this.takeTour_btn = document.getElementById("tourBtn");
         this.aboutReThread_btn = document.getElementById("aboutBtn");
