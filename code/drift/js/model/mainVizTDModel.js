@@ -1,8 +1,8 @@
 
-import * as THREE from 'https://cdn.skypack.dev/pin/three@v0.129.0-s11MgzfqGP1yDDoEH9m1/mode=imports,min/optimized/three.js';
-import { OrbitControls } from 'https://cdn.skypack.dev/three@0.120.0/examples/jsm/controls/OrbitControls.js'
-// import { GUI } from './threejs/libs/co';
-// import { GUI } from './threejs/libs/dat.gui.min.js';
+// import * as THREE from 'https://cdn.skypack.dev/pin/three@v0.129.0-s11MgzfqGP1yDDoEH9m1/mode=imports,min/optimized/three.js';
+import * as THREE from '../threejs/build/three.module.js';
+import { OrbitControls } from '../threejs/examples/jsm/controls/OrbitControls.js'
+
 import { model } from '../app.js'
 
 export default class MainVizTDModel {
