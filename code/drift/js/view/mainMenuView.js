@@ -83,7 +83,7 @@ export default class MainMenuView {
         this.menuButton = document.getElementById("menuButton");
 
         if (this.model.getMenuVisible()) {
-            this.meetArtists_link = document.getElementById("robotLink");
+            this.meetArtists_link = document.getElementById("driftbotLink");
             this.viewExhibition_link = document.getElementById("exhibitionLink");
             this.takeTour_link = document.getElementById("tourLink");
             this.aboutReThread_link = document.getElementById("aboutLink");
