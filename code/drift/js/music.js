@@ -131,7 +131,7 @@ function load_all_music_assets() {
                     }
                 }));
         } else {
-            // Delay subsequent root samples for a bit, no need to load them right away
+            // Delay subsequent long samples for a bit, no need to load them right away
             setTimeout(() => {
                 long_samples.push(new Sample(audio_file_root + file + ".mp3", false, false,
                     (source) => {
@@ -284,7 +284,6 @@ var site_loop = new Tone.Loop(function (time) {
             variant = enabled_variants[Math.floor(Math.random() * enabled_variants.length)];
             site = enabled_sites[Math.floor(Math.random() * enabled_sites.length)];
         } while (enabled_variants.length * enabled_sites.length > 1 && (variant + site) == last_played_site_sample);
-        console.log("IN LOOP")
         currently_playing_site_sample = site_sample_variants.get(variant).get(site);
         currently_playing_site_sample.start();
         last_played_site_sample = variant + site;
@@ -297,6 +296,7 @@ Tone.Transport.bpm.value = 75;
 var music_is_playing = false;
 // Starts everything with default settings
 function start_all() {
+    console.log("Start audio");
     if (all_music_loaded) {
         // delay the start of the root notes
         setTimeout(() => {
@@ -321,22 +321,41 @@ function start_all() {
 }
 
 function stop_all() {
+    console.log("Stop audio");
     // Must set this property first, otherwise some sounds will be restarted once stopped
     music_is_playing = false;
     Tone.Transport.stop();
-    site_loop.stop();
-    currently_playing_site_sample.stop();
+    if(site_loop != null) {
+        site_loop.stop();
+    }
+    if(currently_playing_site_sample instanceof Sample) {
+        currently_playing_site_sample.stop();
+    }
+    
     for (let sample of root_samples) {
-        sample.stop();
+        if(sample instanceof Sample) {
+            sample.stop();
+        }
     }
     for (let sample of long_samples) {
-        sample.stop();
+        if(sample instanceof Sample) {
+            sample.stop();
+        } else {
+            console.log("long sample not Sample")
+            console.log(sample)
+        }
     }
-    for (let sample of visitor_samples) {
-        sample.stop();
+    for (let sample_list of visitor_samples) {
+        for (let sample of sample_list) {
+            if(sample instanceof Sample) {
+                sample.stop();
+            }
+        }
     }
     for (let sample of event_samples) {
-        sample.stop();
+        if(sample instanceof Sample) {
+            sample.stop();
+        }
     }
 }
 
