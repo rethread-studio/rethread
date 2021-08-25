@@ -5,7 +5,7 @@ clickOn "span > div > div > div > button:nth-child(2)"
 sleep 750
 focus [name=q]
 sleep 500
-text '2021' 200 400
+text 2021 200 400
 sleep 1000
 screenshot
 key Enter
