@@ -44,8 +44,9 @@ window.onload = function () {
 
     let loadingView = new LoadingView('page-content');
     loadingController = new LoadingController(loadingView);
-
-    showView("loading");
+    currentView = loadingController;
+    loadingController.renderView();
+    // showView("loading");
 
 
     model.init()
@@ -119,10 +120,10 @@ window.onpopstate = function () {
 export default function showView(view) {
 
     start_sound_effect(); // Play a sound effect
-
     model.interaction.page(view);
     if (currentView == exhibitionViewController) {
         mainVizTD.removeImages();
+        mainVizTD.resetCameraPos();
         model.toggleNoNotification(true);
         model.removeLayerStepInterval();
     }

@@ -148,6 +148,7 @@ export default class MainVizTDModel {
             this.resetCameraPos()
             this.addParticles();
         } else {
+            this.resetCameraPos()
             this.removeParticles();
         }
     }
@@ -382,7 +383,17 @@ export default class MainVizTDModel {
 
     }
 
+    resetCameraPos() {
+        console.log("before changes", this.camera)
+        if (this.camera.position == undefined) return;
+        this.camera.position.z = 1000;
+        this.camera.position.x = 0;
+        this.camera.position.y = 0;
+        console.log("restore camera", this.camera.position)
+    }
+
     removeImages() {
+        //restore camera position
         this.groups.forEach(e => {
             this.scene.remove(e)
         })
