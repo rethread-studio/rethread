@@ -96,7 +96,7 @@ export default class TimeLineView {
             .attr("class", "text-xs")
             .attr("y", -10)
             .style("fill", "#ffffff")
-            .text("Today")
+            .text(this.model.getLastDateFormated())
             .attr("text-anchor", "end")
 
         const firstDate = timeLine.append("g")

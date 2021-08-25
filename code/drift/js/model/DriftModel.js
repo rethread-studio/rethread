@@ -475,6 +475,11 @@ export default class DriftModel {
         return date == undefined ? "" : d3.timeFormat("%d %b %Y")(date)
     }
 
+    getLastDateFormated() {
+        const date = this.visits[this.visits.length - 1];
+        return date == undefined ? "" : d3.timeFormat("%d %b %Y")(date)
+    }
+
 
 
     advanceSliderPos(direction = 1) {
