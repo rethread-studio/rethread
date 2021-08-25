@@ -1,11 +1,13 @@
 
 goto https://www.youtube.com/
-sleep 2000
+sleep 3000
 clickOn [aria-label='Agree to the use of cookies and other data for the purposes described']
 sleep 2500
 focus #search
 sleep 500
-text 2021 200 400
+text spaceballs 200 400
 sleep 500
 key Enter
+sleep 5000
+clickOn "ytd-video-renderer a"
 sleep 25000

@@ -1,11 +1,11 @@
 
 goto https://maps.google.com
 sleep 2000
-clickOn button
+clickOn "form button"
 sleep 2500
 focus [name=q]
 sleep 500
-text '2021' 200 400
+text 2021 200 400
 sleep 500
 key Enter
 sleep 25000

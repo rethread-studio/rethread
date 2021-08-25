@@ -1,0 +1,12 @@
+
+goto https://dn.se
+sleep 2000
+clickOn "button[type=submit]"
+sleep 1000
+clickOn "a[href='/sok/']"
+sleep 750
+text 2021 200 400
+key Enter
+sleep 2000
+clickOn "a.article-results__item"
+sleep 25000
