@@ -123,7 +123,6 @@ export default function showView(view) {
     model.interaction.page(view);
     if (currentView == exhibitionViewController) {
         mainVizTD.removeImages();
-        mainVizTD.resetCameraPos();
         model.toggleNoNotification(true);
         model.removeLayerStepInterval();
     }
@@ -140,7 +139,6 @@ export default function showView(view) {
             exhibitionViewController.renderView();
             mainMenuViewController.renderView();
             model.toggleChatVisible(false);
-            console.log(mainVizTD, mainVizTD.viewParticles)
             mainVizTD.toggleParticles(false);
             break;
         case 'driftbot':

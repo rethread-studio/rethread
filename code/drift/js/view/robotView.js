@@ -13,17 +13,20 @@ export default class RobotView {
   }
 
   render() {
+
+    //<div id="votes" class="flex flex-row justify-center"></div>
+    //<div id="vote_time"></div>
     var content = `
     <div class="flex-container">
         <div class="relative w-full flex flex-col"> 
             <div id="stream"></div>
-            <div id="votes" class="flex flex-row justify-center"></div>
-            <div id="vote_time"></div>
+            
+            
         </div>
         <div class="right"></div>
     </div>`;
     this.container.innerHTML = content;
-    this.renderVoteWebsite();
+    // this.renderVoteWebsite();
 
     setTimeout(() => {
       new Twitch.Embed("stream", {
@@ -38,10 +41,10 @@ export default class RobotView {
         parent: ["embed.example.com", "othersite.example.com"],
       });
     }, 100);
-    this.setIdentifications();
+    // this.setIdentifications();
   }
 
   setIdentifications() {
-    this.timer = document.getElementById("vote_time");
+    // this.timer = document.getElementById("vote_time");
   }
 }
