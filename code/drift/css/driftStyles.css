@@ -402,6 +402,9 @@ input:checked ~ .dot {
 .-z-10{
     z-index: -10;
 }
+.z-500{
+    z-index: 500;;
+}
 
 #imageIntro{
     animation: 3s ease-in 0s infinite alternate both running blurIn;

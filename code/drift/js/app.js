@@ -23,12 +23,16 @@ import EmojiView from './view/emojiView.js';
 import EmojiController from './controller/emojiController.js';
 import { legendTexts } from './staticData.js'
 import Legend from './model/legendModel.js'
+import LoadingView from './view/loadingView.js';
+import LoadingController from './controller/loadingController.js';
 
 export let mainVizTD, robotView, miniChatController, homeViewController, exhibitionViewController, robotViewController, tourViewController, aboutViewController, mainMenuViewController, emojiController, chatBtnController, mainVizController;
 // let mainVizTD
 export let currentView, model, legendModel;
 
 export let apiService;
+
+let loadingController;
 
 window.onload = function () {
 
@@ -38,10 +42,11 @@ window.onload = function () {
     //We instantiate our model
     mainVizTD = new MainVizTDModel();
 
-    //CREATE LOADING PAGE
-    //GO TO LOADING PAGE
+    let loadingView = new LoadingView('page-content');
+    loadingController = new LoadingController(loadingView);
 
-    //CREATE ERROR PAGE
+    showView("loading");
+
 
     model.init()
         .then(e => {
@@ -49,7 +54,7 @@ window.onload = function () {
             initViewsAndControllers()
             goToLocation();
         }).catch(error => {
-            console.log("erro", error.error)
+            console.log("error", error.error)
             //TAKE TO ERROR PAGE
         })
 
@@ -90,6 +95,9 @@ function initViewsAndControllers() {
 
     let mainViztDView = new MainVizTDView('mainViz', mainVizTD);
     mainVizController = new MainVizTDViewController(mainViztDView, mainVizTD);
+
+    //loading view
+    //loading controller
 
 }
 
@@ -154,6 +162,13 @@ export default function showView(view) {
             break;
         case 'loading':
             console.log("loading page")
+            currentView = loadingController;
+            loadingController.renderView();
+            break;
+        case 'error':
+            console.log("error page")
+            currentView = loadingController;
+            loadingController.renderView();
             break;
         default:
             currentView = homeViewController;
