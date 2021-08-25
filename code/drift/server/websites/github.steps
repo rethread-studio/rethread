@@ -1,0 +1,11 @@
+
+goto https://github.com
+sleep 5000
+focus "input[name=q]"
+sleep 1500
+text rethread 200 400
+sleep 2500
+key Enter
+sleep 3500
+clickOn a[href='/castor-software/rethread']
+sleep 5000

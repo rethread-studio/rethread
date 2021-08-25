@@ -5,7 +5,7 @@ clickOn [name=agree]
 sleep 750
 focus [name=q]
 sleep 500
-text '2021' 200 400
+text 2021 200 400
 sleep 2000
 screenshot
 key Enter

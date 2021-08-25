@@ -1,0 +1,5 @@
+
+goto http://www.tv5monde.com/
+sleep 2000
+clickOn #didomi-notice-agree-button
+sleep 25000

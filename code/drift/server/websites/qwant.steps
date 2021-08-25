@@ -3,7 +3,7 @@ goto https://qwant.com
 sleep 750
 focus [name=q]
 sleep 750
-text '2021' 200 400
+text 2021 200 400
 sleep 1200
 screenshot
 key Enter

@@ -5,7 +5,7 @@ clickOn #bnp_btn_accept
 sleep 500
 focus [name=q]
 sleep 500
-text '2021' 200 400
+text 2021 200 400
 sleep 1000
 screenshot
 key Enter

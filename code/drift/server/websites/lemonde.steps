@@ -1,0 +1,14 @@
+
+goto https://lemonde.fr
+sleep 2000
+clickOn "button.gdpr-lmd-button--main"
+sleep 1000
+clickOn "a.search"
+sleep 5000
+focus #search_keywords
+sleep 500
+text 2021 200 400
+key Enter
+sleep 2000
+clickOn "a.teaser__link"
+sleep 25000

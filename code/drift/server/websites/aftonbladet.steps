@@ -1,0 +1,5 @@
+
+goto https://aftonbladet.se
+sleep 2000
+clickOn "button[tile='Okej']"
+sleep 25000

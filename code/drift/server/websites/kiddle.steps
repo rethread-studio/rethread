@@ -3,7 +3,7 @@ goto https://kiddle.co
 sleep 500
 focus [name=q]
 sleep 600
-text '2021' 200 400
+text 2021 200 400
 sleep 1500
 screenshot
 key Enter
