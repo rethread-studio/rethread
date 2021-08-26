@@ -16,6 +16,8 @@ export default class HomeView {
     render() {
         const width = window.innerWidth;
         let audio_button = getAudioOnOffButton(width > 640 ? "fa-4x" : "fa-2x");
+        const name = this.model.interaction.username;
+        console.log("name", name)
         const content = `
         <div id="intro" class="center txt-white relative h-screen ">
             <img id="imageIntro" class="relative left-2-4 transform-50 h-auto max-w-xs md:max-w-3xl" src="./img/imgTest.png" alt="Drift intro">
@@ -24,7 +26,7 @@ export default class HomeView {
                     Welcome <br> 
                     <div class="relative w-28 md:w-60 m-auto">
                         <i class="absolute inset-y-4 md:inset-y-6 right-2 md:right-4 fas fa-pen text-xs md:text-base"></i>
-                        <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none w-28 md:w-60 h-8 md:h-16" id="usernameInp">
+                        <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none w-28 md:w-60 h-8 md:h-16" placeholder="${name}" id="usernameInp">
                     </div>
                 </h3>
                 <h1 class="text-9xl md:text-200xl m-0  mt-5 md:mt-0 select-none text-center font-black" >Dr<span class="italic">i</span>ft</h1>
