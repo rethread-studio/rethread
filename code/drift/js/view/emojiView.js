@@ -7,13 +7,21 @@ export default class EmojiView {
 
   addEmoji(data) {
     const node = document.createElement("div");
+    const baseX = 25;
+    let time = 0;
+    let dist = 25;
     node.className = "floating-emoji";
-    node.innerHTML = `${data.user.username}<br><span class="">${data.emoji.emoji}</span>`;
-    node.style.top = window.innerHeight / 2 - 100 + "px";
-    node.style.right = "25px";
+    //${data.user.username}<br>
+    node.innerHTML = `<span class="">${data.emoji.emoji}</span>`;
+    node.style.top = window.innerHeight + "px";
+    node.style.right = `${dist}px`;
     const interval = setInterval(() => {
+      time += 0.2;
+      dist = 25 + Math.sin(time) * baseX;
       node.style.top = parseInt(node.style.top) - 5 + "px";
-      if (parseInt(node.style.top) < -10) {
+      node.style.right = `${dist}px`;
+
+      if (parseInt(node.style.top) < -100) {
         clearInterval(interval);
         node.remove();
       }
