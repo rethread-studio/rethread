@@ -31,7 +31,7 @@ export default class RobotView {
     setTimeout(() => {
       new Twitch.Embed("stream", {
         width: document.querySelector("#stream").clientWidth,
-        height: document.querySelector("#stream").clientHeight,
+        height: window.innerHeight,
         autoplay: true,
         muted: true,
         theme: "dark",

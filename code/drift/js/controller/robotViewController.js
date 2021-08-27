@@ -66,6 +66,7 @@ export default class RobotViewController {
     this.chatView.container.className = "full";
   }
   unMountView() {
+    console.log("unmountView")
     // clearInterval(this.timerInterval);
     // [...this.view.container.querySelectorAll(".vote-website")].map((e) =>
     //   e.removeEventListener("click", this.onWebsiteClick)
