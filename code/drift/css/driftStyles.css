@@ -1,17 +1,28 @@
 html {
-    height: 100%;
+    /* height: 100%; */
 }
 
-body::-webkit-scrollbar {
-    overflow-x: hidden;
+body{
+    /* overflow:scroll; */
+    touch-action: pan-y !important;
+}
+@media (min-width: 640px) { 
+    body{
+        touch-action:none;
+    }
+}
+
+
+/* body::-webkit-scrollbar { */
+    /* overflow-x: hidden; */
     /* display: none; */
-  }
+  /* } */
   /* Hide scrollbar for IE, Edge and Firefox */
-body {
-    -ms-overflow-style: none;  /* IE and Edge */
+/* body { */
+    /* -ms-overflow-style: none;  IE and Edge */
     /* scrollbar-width: none;   */
     /* Firefox */
-}
+/* } */
 
 h1,
 h2,
@@ -217,7 +228,7 @@ input:checked ~ .dot {
     right: 0;
     bottom: 0;
     left: initial;
-    height: 100%;
+    height: 80%;
 }
 
 #closeBtn {
