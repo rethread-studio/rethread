@@ -25,11 +25,10 @@ export default class MiniChatController {
       this.view.addMessage(message);
       this.view.scrollBottom();
     });
-    this.model.interaction.onWelcome((data) => {
-      for (let message of data.lastMessages) {
-        this.view.addMessage(message);
-      }
-    });
+    
+    for (let message of this.model.interaction.chatMessages) {
+      this.view.addMessage(message);
+    }
   }
 
   renderView() {

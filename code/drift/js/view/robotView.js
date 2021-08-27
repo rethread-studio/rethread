@@ -38,7 +38,7 @@ export default class RobotView {
         channel: "rethread",
         layout: "video",
         // Only needed if this page is going to be embedded on other websites
-        parent: ["embed.example.com", "drift.durieux.me", "drift.rethread.art/"],
+        // parent: ["embed.example.com", "drift.durieux.me", "drift.rethread.art/"],
       });
     }, 100);
     // this.setIdentifications();

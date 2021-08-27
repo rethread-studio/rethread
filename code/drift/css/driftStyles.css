@@ -293,7 +293,7 @@ input:checked ~ .dot {
 #messages {
     height: 100%;
     padding: 10px;
-    overflow: scroll;
+    overflow: auto;
 }
 .message {
     min-height: 50px;
