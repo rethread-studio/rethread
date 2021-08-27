@@ -18,8 +18,9 @@ export default class MainMenuViewController {
 
     onMenuClick(e) {
         this.model.hideMenu()
-        showView(e.target.getAttribute('value'))
-        this.model.updateURL("/" + e.target.getAttribute('value'), "Drift");
+        const value = e.target.getAttribute('value') == null ? "home" : e.target.getAttribute('value');
+        showView(value)
+        this.model.updateURL("/" + value, "Drift");
         e.preventDefault();
     }
 

@@ -17,7 +17,7 @@ export default class HomeView {
         const width = window.innerWidth;
         let audio_button = getAudioOnOffButton(width > 640 ? "fa-4x" : "fa-2x");
         const name = this.model.interaction.username;
-        console.log("name", name)
+
         const content = `
         <div id="intro" class="center txt-white relative h-screen ">
             <img id="imageIntro" class="relative left-2-4 transform-50 h-auto max-w-xs md:max-w-3xl" src="./img/imgTest.png" alt="Drift intro">
