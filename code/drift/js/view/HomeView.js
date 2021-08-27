@@ -25,8 +25,8 @@ export default class HomeView {
                 <h3 class="text-center text-sm md:text-xl select-none">
                     Welcome <br> 
                     <div class="relative w-28 md:w-60 m-auto">
-                        <i class="absolute inset-y-4 md:inset-y-6 right-2 md:right-4 fas fa-pen text-xs md:text-base"></i>
-                        <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none w-28 md:w-60 h-8 md:h-16" placeholder="${name}" id="usernameInp">
+                        <label for="usernameInp"><i class="absolute inset-y-4 md:inset-y-6 right-2 md:right-4 fas fa-pen text-xs md:text-base"></i></label>
+                        <input class="transition-colors duration-500 ease-in-out border border-gray-400 bg-transparent focus:bg-white focus:bg-opacity-1 mt-2 text-center text-white focus:text-gray-900 appearance-none inline-block rounded py-3 px-4 focus:outline-none w-28 md:w-60 h-8 md:h-16" value="${name}" id="usernameInp">
                     </div>
                 </h3>
                 <h1 class="text-9xl md:text-200xl m-0  mt-5 md:mt-0 select-none text-center font-black" >Dr<span class="italic">i</span>ft</h1>

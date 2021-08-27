@@ -324,10 +324,12 @@ setInterval(() => {
     io.emit("elected", { website: botSites[index], voteTime });
 }, 500);
 
+const nameOptions = ['Doraemon', 'Mega Man', 'GERTY', 'Tachikomas', 'Awesom-O', 'HK-47', 'ED-209', 'Beer-Fetching Robot', 'Bishop', 'H.E.L.P.eR.', 'Clank', 'Daft Punk', 'Johnny 5', 'The Robot', 'Mr. Roboto', 'Marvin the Paranoid Android', 'Mindstorms NXT', 'Robbie', 'Astro Boy', 'The Iron Giant', 'Optimus Prime', 'Roomba', 'DJ Roomba', 'Cindi Mayweather', 'Rosie', 'Crow T. Robot', 'K-9', 'The Terminator', 'The Maschinenmensch', 'ASIMO', 'GLaDOS', 'HAL 9000', 'HAL 9000', 'Sojourner', 'Data', 'R2D2', 'Bender', 'Wall-E']
+
 //listen on every connection
 io.on("connection", (socket) => {
   const user: User = {
-    username: "Anonymous",
+    username: nameOptions[Math.round((nameOptions.length - 1) * Math.random())],
     id: uuid(),
   };
   users.push(user);
