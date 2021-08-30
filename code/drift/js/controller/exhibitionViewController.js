@@ -42,6 +42,7 @@ export default class ExhibitionViewController {
         sections.shift()
 
         createObserver(this.intersectHandler, sections)
+
     }
 
     removeEventListener() {

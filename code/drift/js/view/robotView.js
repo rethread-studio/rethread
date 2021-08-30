@@ -27,11 +27,11 @@ export default class RobotView {
     </div>`;
     this.container.innerHTML = content;
     // this.renderVoteWebsite();
-
+    const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
     setTimeout(() => {
       new Twitch.Embed("stream", {
-        width: document.querySelector("#stream").clientWidth,
-        height: window.innerHeight,
+        width: deviceW < 768 ? window.innerWidth : document.querySelector("#stream").clientWidth,
+        height: deviceW < 768 ? window.innerHeight * 0.6 : window.innerHeight,
         autoplay: true,
         muted: true,
         theme: "dark",

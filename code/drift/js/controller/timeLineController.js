@@ -12,7 +12,7 @@ export default class TimeLineController {
         this.onMouoverHandler = this.onmouseover.bind(this);
         this.onMouseOutHandler = this.onmouseout.bind(this);
         this.onMouseMoveHandler = this.onmousemove.bind(this);
-        this.onResizeHandler = this.onResizeHandler.bind(this)
+        this.onResizeHandler = this.onResize.bind(this)
     }
 
     renderView() {
@@ -20,8 +20,9 @@ export default class TimeLineController {
         this.addEventListeners();
     }
 
-    onResizeHandler() {
-        console.log("hello")
+    onResize() {
+        this.model.updateTimelineDimensions();
+        this.view.render();
     }
 
     onmouseover(e) {

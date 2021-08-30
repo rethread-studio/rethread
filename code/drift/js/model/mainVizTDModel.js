@@ -126,16 +126,22 @@ export default class MainVizTDModel {
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         //ADD LATER
-        window.addEventListener('resize', this.onWindowResize);
+        window.addEventListener('resize', () => {
+            if (this.viewParticles == true) {
+
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            } else {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.upDateImages()
+            }
+        });
     }
 
-    onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        this.upDateImages()
-    }
 
 
     toggleParticles(toView = true) {
@@ -421,7 +427,9 @@ export default class MainVizTDModel {
         this.showSpreadSites()
         const dof = model.getNumActiveSites()
         const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
-        let camVal = deviceW < 768 ? [0.8, 0.8] : [0.5, 0.8]
+        let camVal = deviceW < 768 ? [0.9, 0.8] : deviceW < 1300 ? [0.8, 0.9] : deviceW < 1700 ? [0.7, 0.8] : deviceW > 1700 ? [0.6, 0.8] : [0.5, 0.8];
+
+        // let camVal = deviceW < 1700 ? [0.7, 0.7] : deviceW < 1300 ? [0.5, 0.5] : deviceW < 768 ? [0.8, 0.8] : [0.5, 0.8]
 
         this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof == 1 ? camVal[0] : camVal[1])
         // }
@@ -502,7 +510,9 @@ export default class MainVizTDModel {
             this.removeImages()
             this.addMaterial();
             this.showScreenShot();
-            this.fitCameraToSelection(this.camera, this.controls, this.meshes, 0.6)
+            const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
+            let camVal = deviceW < 768 ? 0.9 : deviceW < 1300 ? 0.8 : deviceW < 1700 ? 0.7 : deviceW > 1300 ? 0.6 : 0.5;
+            this.fitCameraToSelection(this.camera, this.controls, this.meshes, camVal)
         } else {
             this.showNewLayout();
         }

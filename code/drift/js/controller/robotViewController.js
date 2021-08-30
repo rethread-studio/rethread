@@ -60,17 +60,13 @@ export default class RobotViewController {
   }
 
   renderView() {
+    this.model.toggleChatVisible(true)
+    document.getElementById("chat").classList.add("full");
     this.view.render();
-    // this.addEventListener();
-    // this.model.interaction.votes();
-    this.chatView.container.className = "full";
+
   }
   unMountView() {
-    console.log("unmountView")
-    // clearInterval(this.timerInterval);
-    // [...this.view.container.querySelectorAll(".vote-website")].map((e) =>
-    //   e.removeEventListener("click", this.onWebsiteClick)
-    // );
-    // this.chatView.container.className = "";
+    this.model.toggleChatVisible(false)
+    document.getElementById("chat").classList.remove("full")
   }
 }

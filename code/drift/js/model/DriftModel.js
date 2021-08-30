@@ -309,6 +309,35 @@ export default class DriftModel {
         return format ? d3.timeFormat("%b %d %a %H:%M")(this.visits[this.currentVisit]) : this.visits[this.currentVisit];
     }
 
+    updateTimelineDimensions() {
+        this.timeLineDimensions = {
+            width: window.innerWidth,
+            height: 85,
+            margin: {
+                top: 0,
+                right: 40,
+                bottom: 0,
+                left: 20
+            },
+            rectDimensions: {
+                height: 25,
+                width: window.innerWidth,
+            },
+            sliderDimensions: {
+                height: 50,
+                width: 2,
+            },
+            tickDimensions: {
+                height: 15,
+                width: 2,
+            }
+
+        }
+        this.timeLineDimensions.boundedWidth = this.timeLineDimensions.width - this.timeLineDimensions.margin.left - this.timeLineDimensions.margin.right;
+        this.timeLineDimensions.boundedHeight = this.timeLineDimensions.height - this.timeLineDimensions.margin.top - this.timeLineDimensions.margin.bottom;
+
+    }
+
 
     isSliderInMiddle(pos = null) {
         const pCompare = pos == null ? this.currentVisit : pos;

@@ -214,7 +214,7 @@ input:checked ~ .dot {
     position: fixed;
     bottom: 90px;
     right: 20px;
-    width: 90%;
+    width: 100%;
     height: 40%;
     background-color:#2F3345;
     border-radius: 4px;
@@ -228,7 +228,7 @@ input:checked ~ .dot {
     right: 0;
     bottom: 0;
     left: initial;
-    height: 80%;
+    height: 40%;
 }
 
 #closeBtn {
@@ -284,7 +284,7 @@ input:checked ~ .dot {
         right: 0;
         bottom: 0;
         left: initial;
-        height: 100%;
+        height: 90%;
     }    
 
 }
