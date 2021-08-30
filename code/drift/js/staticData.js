@@ -42,7 +42,7 @@ export const legendTexts = {
         nerd: `This is a screenshot taken by the Drift bot after searching for 2021`
     },
     coverage: {
-        human: `An abstract visualization of all the lines of code, written by teams of developers. All of tgem are necessary to produce the search result web page.`,
+        human: `An abstract visualization of all the lines of code, written by teams of developers. All of them are necessary to produce the search result web page.`,
         nerd: `A visualization of the coverage of the javacript code that has been executed to render the search result page.`
     },
     graph: {
