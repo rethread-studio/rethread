@@ -1,46 +1,36 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
+use serde_with::serde_as;
+use serde_with::DisplayFromStr;
 
-#[derive(Deserialize)]
-pub struct CommitObject {
-    sha: String,
-    node_id: String,
-    commit: Commit,
-    // url: String,
-    // html_url: String,
-    // comments_url: String,
-    author: Author,
-}
+#[serde_as]
 #[derive(Deserialize)]
 pub struct Commit {
-    author: SimpleAuthor,
-    committer: SimpleAuthor,
-    message: String,
-    tree: Tree,
-    url: String,
-    comment_count: i32,
-    // verification: Verification,
-}
-
-#[derive(Deserialize)]
-pub struct SimpleAuthor {
-    name: String,
-    email: String,
-    #[serde(with = "date_serializer")] // declaring custom deserializer
-    date: NaiveDateTime,
-}
-
-#[derive(Deserialize)]
-pub struct Tree {
-    sha: String,
-    url: String,
-}
-
-#[derive(Deserialize)]
-pub struct Author {
-    login: String,
-    id: u64,
-    node_id: String,
+    pub repository: String,
+    pub commit_nr: i32,
+    pub commit_hash: String,
+    pub author_name: String,
+    pub author_email: String,
+    #[serde_as(as = "DisplayFromStr")]
+    pub author_date_unix_timestamp: u64,
+    pub subject: String,
+    pub subject_sanitized: String,
+    pub stats: String,
+    pub time_hour: u8,
+    pub time_minutes: u8,
+    pub time_seconds: u8,
+    pub time_gmt: String,
+    pub date_day_week: String,
+    pub date_month_day: u8,
+    pub date_month_name: String,
+    pub date_month_number: u8,
+    #[serde_as(as = "DisplayFromStr")]
+    pub date_year: u16,
+    pub date_iso_8601: String,
+    pub files_changed: u32,
+    pub insertions: u32,
+    pub deletions: u32,
+    pub impact: i32,
 }
 
 mod date_serializer {
