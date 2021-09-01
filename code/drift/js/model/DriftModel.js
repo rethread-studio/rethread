@@ -518,6 +518,8 @@ export default class DriftModel {
         } else {
             newPos = this.currentVisit - 1 < 0 ? 0 : this.currentVisit - 1;
         }
+        //check if it reached the limit and pause it
+        if (newPos >= this.visits.length - 1) this.getChangePlayState(false);
         //advance only if next position is loaded
         if (this.imageSequence.isStepLoaded(newPos) == false) return;
 
