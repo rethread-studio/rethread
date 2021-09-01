@@ -12,7 +12,7 @@ const exhibitionTexts = {
     views: {
         tittle: `Dr<span class="italic font-bold text-xl md:text-2xl">i</span>ft`,
         text: `<p class="text-left text-base md:text-xl">Drift lets you explore search engines in a way you never thought about them.
-        This online exhition lets you discover the intricate strata of code and network that operate to deliver the content of a search.
+        This online exhibition lets you discover the intricate strata of code and network that operate to deliver the content of a search.
         And Drift reveals how these strata continuously evolve, even behind what seems a very well known, stable, familiar web site.</p>
           `
     },
