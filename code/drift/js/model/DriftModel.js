@@ -3,6 +3,7 @@ import { apiService, currentView } from '../app.js'
 import { dataTest, mainMenu } from '../apiService.js';
 import { formatMonth, formatDay, formatHour } from '../helpers.js';
 import ImageSequence from './imageSequence.js'
+import SequenceController from './sequenceController.js';
 
 //HELPERS
 const hierarchySize = (d) => d.value;
@@ -138,6 +139,8 @@ export default class DriftModel {
         this.viewModeBtn = false;
 
         this.imageSequence;
+        this.sequenceControll;
+        this.TOTAL_STEPS = 7;
     }
 
     async init() {
@@ -434,8 +437,8 @@ export default class DriftModel {
         await apiService.getTimes(sites)
             //strings to int
             .then(visits => visits.map(visit => parseInt(visit)))
-            .then(visits => visits.filter(visit => visit > 1619820000000)) // filter out early visits
-            .then(visits => visits.map(visit => new Date(visit)))
+            // .then(visits => visits.filter(visit => visit > 1619820000000)) // filter out early visits
+            // .then(visits => visits.map(visit => new Date(visit)))
             //set visits and notify
             .then(data => {
                 this.visits = data;
@@ -448,8 +451,17 @@ export default class DriftModel {
                 const views = this.menu.map(v => v.value)
                 this.imageSequence = new ImageSequence(data, sitesName, views)
                 this.imageSequence.step();
+                this.sequenceControll = new SequenceController(this.sequenceControll);
+                console.log(this.currentVisit)
+                console.log(this.visits[0], this.visits[this.TOTAL_STEPS], this.getDatesToLoad(), this.getDatesToLoad().length)
+                // this.sequenceControll.loadDates(dates, activeViews)
                 this.notifyObservers({ type: "updateTimeLine" });
             })
+    }
+
+    //get N number of spaces starting from current date 
+    getDatesToLoad() {
+        return this.visits.splice(this.currentVisit, this.TOTAL_STEPS)
     }
 
     getVoteWebsites() {
@@ -500,17 +512,19 @@ export default class DriftModel {
     }
 
     getDateFormated(index = 0) {
-        const date = this.visits[index];
+        const date = new Date(this.visits[index]);
         return date == undefined ? "" : d3.timeFormat("%d %b %Y")(date)
     }
 
     getLastDateFormated() {
-        const date = this.visits[this.visits.length - 1];
+        const date = new Date(this.visits[this.visits.length - 1]);
         return date == undefined ? "" : d3.timeFormat("%d %b %Y")(date)
     }
 
 
-
+    //Advance one step in the history array
+    //asks for the image of that specific date
+    //notifies to show it
     advanceSliderPos(direction = 1) {
         let newPos = 0;
         if (direction == 1) {
@@ -676,7 +690,7 @@ export default class DriftModel {
     }
 
     getDateByPos(pos) {
-        return this.visits[pos];
+        return new Date(this.visits[pos]);
     }
 
     formatDateString(date) {

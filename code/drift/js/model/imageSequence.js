@@ -23,7 +23,7 @@ class ImageGroup {
 
     constructor(visit, views, site) {
         this.site = site;
-        this.visit = visit;
+        this.visit = new Date(visit);
         this.images = [];
         this.views = views;
         this.loaded = false;
