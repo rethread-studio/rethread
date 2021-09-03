@@ -14,8 +14,6 @@ export default class MainVizTDModel {
         this.renderer;
         this.parameters;
         this.materials = [];
-        this.mouseX = 0;
-        this.mouseY = 0;
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
@@ -237,7 +235,6 @@ export default class MainVizTDModel {
     showSiteViewsVetically() {
         //GET IMAGES FROM SEQUENCE
         let imgApi = model.getImagesFromSite();
-
         imgApi.forEach((im, i) => {
             let mat = this.material.clone();
             this.materialsImage.push(mat);
@@ -268,8 +265,7 @@ export default class MainVizTDModel {
     }
 
     showScreenShot() {
-        const screenShot = model.getImagesFromSite().filter(i => i.type == "screenshot")[0];
-
+        const screenShot = model.getImagesFromSite().filter(i => i.view == "screenshot")[0];
         let mat = this.ctrMaterial().clone();
         this.materialsImage.push(mat);
         let group = new THREE.Group();
@@ -360,10 +356,6 @@ export default class MainVizTDModel {
         return this.renderer;
     }
 
-    setMouse(_mX = undefined, _mY = undefined) {
-        this.mouseX = _mX == undefined ? this.mouseX : _mX - this.windowHalfX;
-        this.mouseY = _mY == undefined ? this.mosueY : _mY - this.windowHalfY;
-    }
 
     updateSize(winW, winH) {
         this.windowHalfX = winW / 2;
@@ -411,9 +403,9 @@ export default class MainVizTDModel {
     //
 
     animate() {
-        window.requestAnimationFrame(this.animateHandler);
-        // this.controls.update();
+        requestAnimationFrame(this.animateHandler);
         this.render();
+        // this.controls.update();
     }
 
     showNewLayout() {
@@ -452,10 +444,9 @@ export default class MainVizTDModel {
                 const texture = new THREE.Texture(img.img)
                 mat.uniforms.texture1.value = texture
                 mat.uniforms.texture1.value.needsUpdate = true;
-
-                let geo = img.type == "screenshot" ? new THREE.PlaneBufferGeometry((1.80780487805 * size), (1 * size), 20, 20) : new THREE.CircleBufferGeometry(size, 40)
+                let geo = img.view == "screenshot" ? new THREE.PlaneBufferGeometry((1.80780487805 * size), (1 * size), 20, 20) : new THREE.CircleBufferGeometry(size, 40)
                 let mesh;
-                if (img.type == "screenshot") {
+                if (img.view == "screenshot") {
                     const material = new THREE.MeshBasicMaterial({ map: texture });
                     mesh = new THREE.Mesh(geo, material);
                 } else {
@@ -482,16 +473,12 @@ export default class MainVizTDModel {
                 m.uniforms.time.value = this.timeImage;
             });
         }
-        // this.camera.position.x += (this.mouseX - this.camera.position.x) * 0.006;
-        // this.camera.position.y += (- this.mouseY - this.camera.position.y) * 0.006;
-
-        // this.camera.lookAt(this.scene.position);
-
         for (let i = 0; i < this.scene.children.length; i++) {
 
             const object = this.scene.children[i];
 
             if (object instanceof THREE.Points) {
+                console.log(this.scene.children.length)
                 object.rotation.y = time * (i < 4 ? i + 1 : - (i + 1));
             }
 

@@ -1,8 +1,7 @@
 
-import { apiService, currentView } from '../app.js'
+import { apiService } from '../app.js'
 import { dataTest, mainMenu } from '../apiService.js';
 import { formatMonth, formatDay, formatHour } from '../helpers.js';
-import ImageSequence from './imageSequence.js'
 import SequenceController from './sequenceController.js';
 
 //HELPERS
@@ -138,7 +137,6 @@ export default class DriftModel {
 
         this.viewModeBtn = false;
 
-        this.imageSequence;
         this.sequenceControll;
         this.TOTAL_STEPS = 7;
     }
@@ -361,6 +359,7 @@ export default class DriftModel {
         return this.menu;
     }
 
+    //returns the active VIEWS 
     getActiveMenuItems() {
         return this.menu.filter(i => i.state == 1)
             .map(i => i.value)
@@ -437,31 +436,38 @@ export default class DriftModel {
         await apiService.getTimes(sites)
             //strings to int
             .then(visits => visits.map(visit => parseInt(visit)))
-            // .then(visits => visits.filter(visit => visit > 1619820000000)) // filter out early visits
+            .then(visits => this.visits = visits)
+            .then(visits => visits.filter(visit => visit > 1619820000000)) // filter out early visits
             // .then(visits => visits.map(visit => new Date(visit)))
             //set visits and notify
             .then(data => {
-                this.visits = data;
                 const sitesName = dataTest.children.map(s => {
                     return {
                         name: s.name,
                         active: s.state
                     }
                 });
-                const views = this.menu.map(v => v.value)
-                this.imageSequence = new ImageSequence(data, sitesName, views)
-                this.imageSequence.step();
-                this.sequenceControll = new SequenceController(this.sequenceControll);
-                console.log(this.currentVisit)
-                console.log(this.visits[0], this.visits[this.TOTAL_STEPS], this.getDatesToLoad(), this.getDatesToLoad().length)
-                // this.sequenceControll.loadDates(dates, activeViews)
+
+                this.sequenceControll = new SequenceController(this.TOTAL_STEPS);
+                this.updateSequenceControll()
+
+
                 this.notifyObservers({ type: "updateTimeLine" });
             })
+    }
+
+    updateSequenceControll() {
+        if (this.sequenceControll == null) return;
+        this.sequenceControll.selectGroupDates(this.getDatesToLoad(), this.getActiveMenuItems(), this.getActiveWebSites().map(s => s.name))
     }
 
     //get N number of spaces starting from current date 
     getDatesToLoad() {
         return this.visits.splice(this.currentVisit, this.TOTAL_STEPS)
+    }
+
+    getNextDateToLoad() {
+        return this.visits[this.currentVisit + this.TOTAL_STEPS]
     }
 
     getVoteWebsites() {
@@ -495,6 +501,8 @@ export default class DriftModel {
         })
         if (this.layerStepInterval != null && this.layerStepInterval != undefined) this.removeLayerStepInterval()
 
+        this.updateSequenceControll()
+
         this.notifyObservers({ type: "updateViewSideMenu" });
         this.notifyObservers({ type: "updateImages" });
 
@@ -512,13 +520,13 @@ export default class DriftModel {
     }
 
     getDateFormated(index = 0) {
-        const date = new Date(this.visits[index]);
-        return date == undefined ? "" : d3.timeFormat("%d %b %Y")(date)
+        const date = this.visits[index];
+        return date == undefined ? "" : d3.timeFormat("%d %b %Y")(new Date(date))
     }
 
     getLastDateFormated() {
-        const date = new Date(this.visits[this.visits.length - 1]);
-        return date == undefined ? "" : d3.timeFormat("%d %b %Y")(date)
+        const date = this.visits[this.visits.length - 1];
+        return date == undefined ? "" : d3.timeFormat("%d %b %Y")(new Date(date))
     }
 
 
@@ -533,14 +541,14 @@ export default class DriftModel {
             newPos = this.currentVisit - 1 < 0 ? 0 : this.currentVisit - 1;
         }
         //check if it reached the limit and pause it
-        if (newPos >= this.visits.length - 1) this.getChangePlayState(false);
+        if (newPos >= this.visits.length - 1) {
+            this.getChangePlayState(false);
+            newPos = 0;
+        }
         //advance only if next position is loaded
-        if (this.imageSequence.isStepLoaded(newPos) == false) return;
+        if (this.sequenceControll.isStepLoaded() == false) return;
 
         this.currentVisit = newPos;
-        //Check stepping backwards 
-
-        //if next position loaded update
 
         //UPLOAD RANGE
         this.updateSequenceLoaderPos()
@@ -621,33 +629,24 @@ export default class DriftModel {
     }
 
     getImagesFromSite() {
-        //get images at current pos from image sequence
-        const activeItems = this.menu.findIndex(e => e.state == 1);
-        let images = [...this.imageSequence.getImagesInPos(this.currentVisit, activeItems)]
-        images = images == null ? this.imageSequence.getBackUpImages() : images;
-        //SORT IMAGES ACCORDING TO MENU
-        return images;
+        return this.sequenceControll.getImagesInPos()
     }
 
     getSitesImages() {
-        const activeItems = this.getActiveMenuItems();
-        const sitesImg = this.imageSequence.getSitesImagesInPos(this.currentVisit, activeItems)
-        //filter only the selected views
-        sitesImg.forEach(s => {
-            s.images = s.images.filter(i => activeItems.includes(i.type))
-        });
-        return [...sitesImg]
+        const activeItems = this.getActiveWebSites().map(s => s.name);
+        const sitesImg = this.sequenceControll.getImagesInPos();
+
+        return activeItems.map(s => {
+            return {
+                images: sitesImg.filter(i => i.site == s)
+            }
+        })
     }
 
     getNumActiveSites() {
         return this.data.children.filter(e => e.state == 1).length;
     }
 
-    getScreenShotFromSite() {
-        let images = this.imageSequence.getScreenShotInPos(this.currentVisit)
-        images = images == null ? this.imageSequence.getBackUpImages() : images;
-        return images;
-    }
 
     calculateSliderPos(pos = null) {
         const percent = (pos == null ? this.currentVisit : pos) / this.visits.length;
@@ -677,7 +676,8 @@ export default class DriftModel {
     }
 
     updateSequenceLoaderPos() {
-        this.imageSequence.setRange(this.currentVisit);
+        //replace for step in new
+        this.sequenceControll.step(this.getNextDateToLoad(), this.getActiveMenuItems(), this.getActiveWebSites().map(s => s.name))
     }
 
     //posX is the percentage of the posX with the Width
@@ -739,7 +739,7 @@ export default class DriftModel {
         })
         // .sort((a, b) => b.name > a.name)
 
-        this.updateSequenceSites();
+        this.updateSequenceControll();
         this.notifyObservers({ type: "sitesUpdated" });
         this.notifyObservers({ type: "updateImages" });
     }
@@ -752,7 +752,7 @@ export default class DriftModel {
         // .sort((a, b) => b.name > a.name)
 
         this.firstItemSelected = this.data.children[0].name;
-        this.updateSequenceSites();
+        this.updateSequenceControll();
         this.notifyObservers({ type: "sitesUpdated" });
         this.notifyObservers({ type: "updateImages" });
     }
@@ -765,7 +765,7 @@ export default class DriftModel {
         })
         // .sort((a, b) => b.name > a.name)
 
-        this.updateSequenceSites();
+        this.updateSequenceControll();
         this.notifyObservers({ type: "sitesUpdated" });
         this.notifyObservers({ type: "updateImages" });
     }
@@ -778,7 +778,7 @@ export default class DriftModel {
             })
         // .sort((a, b) => b.name > a.name)
         this.firstItemSelected = this.data.children.find(i => i.state == 1).name;
-        this.updateSequenceSites();
+        this.updateSequenceControll();
         this.notifyObservers({ type: "sitesUpdated" });
         this.notifyObservers({ type: "updateImages" });
     }
@@ -789,15 +789,8 @@ export default class DriftModel {
             active += active == 0 && e.state == 1 ? 1 : 0;
             return e;
         })
-        this.updateSequenceSites();
+        this.updateSequenceControll();
         this.notifyObservers({ type: "sitesUpdated" });
-    }
-
-
-    updateSequenceSites() {
-        const activeSites = this.data.children.filter(s => s.state == 1)
-            .map(s => s.name)
-        this.imageSequence.activateOrDeactivateSite(activeSites, 1);
     }
 
     toggleDisplay(spread = null) {
@@ -825,6 +818,10 @@ export default class DriftModel {
 
     getScreenSize() {
         return Math.max(document.documentElement.clientWidth, window.innerWidth);
+    }
+
+    getActiveWebSites() {
+        return this.data.children.filter(filterByState(1));
     }
 
 }
