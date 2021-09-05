@@ -17,6 +17,7 @@ export default class MainVizTDModel {
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
+        this.rafReq;
         this.numParticles = 100; //100
 
         this.observers = [];
@@ -112,7 +113,7 @@ export default class MainVizTDModel {
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
-        if (this.viewParticles) this.addParticles()
+        // if (this.viewParticles) this.addParticles()
 
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, });
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -403,9 +404,12 @@ export default class MainVizTDModel {
     //
 
     animate() {
-        requestAnimationFrame(this.animateHandler);
+        this.rafReq = requestAnimationFrame(this.animateHandler);
         this.render();
-        // this.controls.update();
+    }
+
+    removeAnimation() {
+        if (this.rafReq) cancelAnimationFrame(this.rafReq);
     }
 
     showNewLayout() {
@@ -464,28 +468,29 @@ export default class MainVizTDModel {
 
     }
 
-    render() {
-        const time = Date.now() * 0.00005;
-        // if (!this.isPlaying) return;
-        this.timeImage += 0.01;
+    renderViews() {
         if (this.materialsImage) {
             this.materialsImage.forEach((m) => {
                 m.uniforms.time.value = this.timeImage;
             });
         }
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    render() {
+        const time = Date.now() * 0.00005;
+        // if (!this.isPlaying) return;
+        this.timeImage += 0.01;
+
         for (let i = 0; i < this.scene.children.length; i++) {
 
             const object = this.scene.children[i];
 
             if (object instanceof THREE.Points) {
-                console.log(this.scene.children.length)
                 object.rotation.y = time * (i < 4 ? i + 1 : - (i + 1));
             }
 
         }
-
-        this.raf()
-
         this.renderer.render(this.scene, this.camera);
 
     }
@@ -540,9 +545,12 @@ export default class MainVizTDModel {
     update(changeDetails) {
         if (changeDetails.type == "displayUpdate") {
             this.upDateImages()
-
+            this.render()
         } else if (changeDetails.type == "updateImages") {
             this.upDateImages()
+            this.renderViews()
+        } else if (changeDetails.type == "reRender") {
+            this.renderViews()
         }
     }
 

@@ -134,11 +134,12 @@ export default class DriftModel {
         this.intervalHandler = this.advanceSliderPos.bind(this);
         this.layerIntervalHandler = this.stepView.bind(this);
         this.keyEventHandler = this.keyEvent.bind(this);
+        this.observersHandler = this.notifyObservers.bind(this);
 
         this.viewModeBtn = false;
 
         this.sequenceControll;
-        this.TOTAL_STEPS = 7;
+        this.TOTAL_STEPS = 4;
     }
 
     async init() {
@@ -456,9 +457,9 @@ export default class DriftModel {
             })
     }
 
-    updateSequenceControll() {
+    updateSequenceControll(notify = false, callBack = null) {
         if (this.sequenceControll == null) return;
-        this.sequenceControll.selectGroupDates(this.getDatesToLoad(), this.getActiveMenuItems(), this.getActiveWebSites().map(s => s.name))
+        this.sequenceControll.selectGroupDates(this.getDatesToLoad(), this.getActiveMenuItems(), this.getActiveWebSites().map(s => s.name), notify, callBack)
     }
 
     //get N number of spaces starting from current date 
@@ -551,10 +552,10 @@ export default class DriftModel {
         this.currentVisit = newPos;
 
         //UPLOAD RANGE
-        this.updateSequenceLoaderPos()
+        this.updateSequenceLoaderPos();
         //ask for the image 
         this.notifyObservers({ type: "updateCurrentVisit" });
-        this.notifyObservers({ type: "updateImages" })
+        this.notifyObservers({ type: "updateImages" });
     }
 
     // change the layer to view on each step
@@ -571,10 +572,10 @@ export default class DriftModel {
             return v;
         })
         //UPLOAD RANGE
-        this.updateSequenceControll();
+        this.updateSequenceControll(true, this.observersHandler);
         this.notifyObservers({ type: "updateViewSideMenu" });
-        this.notifyObservers({ type: "updateImages" })
     }
+
 
     keyEvent(event) {
         const keyName = event.key;
@@ -739,11 +740,11 @@ export default class DriftModel {
             if (i.name == name) i.state = i.state == 1 ? 0 : 1;
             return i;
         })
-        // .sort((a, b) => b.name > a.name)
+        // .sort((a, b) => b.name > a.name)  
 
-        this.updateSequenceControll();
-        this.notifyObservers({ type: "sitesUpdated" });
-        this.notifyObservers({ type: "updateImages" });
+        this.updateSequenceControll(true, this.observersHandler);
+        // this.notifyObservers({ type: "sitesUpdated" });
+        // this.notifyObservers({ type: "updateImages" });
     }
 
     selectFirstSite() {
@@ -767,9 +768,9 @@ export default class DriftModel {
         })
         // .sort((a, b) => b.name > a.name)
 
-        this.updateSequenceControll();
-        this.notifyObservers({ type: "sitesUpdated" });
-        this.notifyObservers({ type: "updateImages" });
+        this.updateSequenceControll(true, this.observersHandler);
+        // this.notifyObservers({ type: "sitesUpdated" });
+        // this.notifyObservers({ type: "updateImages" });
     }
 
     selectRadialSite(name) {

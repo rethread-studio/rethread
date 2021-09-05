@@ -19,6 +19,6 @@ export default class MainVizTDViewController {
 
     renderView() {
         this.view.render();
-        this.model.animate()
+        // this.model.animate()
     }
 }

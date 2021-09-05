@@ -148,6 +148,7 @@ export default class ExhibitionViewController {
             this.model.removeTimeInterval()
             this.vizModel.resetActiveSection()
             this.vizModel.removeImages();
+            this.vizModel.render()
             this.view.unMountView()
             this.removeEventListener()
             this.model.removeKeyEventListener();

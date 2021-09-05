@@ -32,16 +32,16 @@ class SequenceController {
 
     //active views can be one or more
     //active sites can be one or more
-    selectGroupDates(dates, activeViews, activeSites) {
+    selectGroupDates(dates, activeViews, activeSites, notify = false, callBack = null) {
         // console.log(this.imagesArr.length, this.imagesArr, dates, activeViews)
         //load the dates in the images
         this.imagesArr.forEach((e, i) => {
             this.imagesArr[i] = dates[i] != null && dates[i] != undefined ? new imageGroup(dates[i], activeViews, activeSites) : null;
         })
-        this.loadImages();
+        this.loadImages(notify, callBack);
     }
 
-    loadImages() {
+    loadImages(makeCall = false, callBack) {
         //get all the images whose status is IDDLE
         const toLoadArr = this.getAllImages()
             .filter(i => i.status == IDDLE)
@@ -51,7 +51,6 @@ class SequenceController {
             })
             .map(i => new Promise((resolve) => {
                 if (this.status == LOADED) {
-                    console.log("resolved")
                     return resolve();
                 }
                 i.img.addEventListener('load', resolve);
@@ -59,6 +58,16 @@ class SequenceController {
             }))
         //Create a promise all and load them
         Promise.all(toLoadArr)
+            .then(d => {
+                //CALL THE CALLBACK TO NOTIFY IS LOADED
+                if (makeCall) {
+                    callBack({ type: "reRender" });
+                    callBack({ type: "sitesUpdated" });
+                    callBack({ type: "updateImages" });
+
+                }
+
+            })
             .catch(error => {
                 console.error(error.message)
             });

@@ -72,7 +72,7 @@ function initViewsAndControllers() {
 
     //Initialize VIEWS and controllers
     let homeView = new HomeView('page-content', model);
-    homeViewController = new HomeViewController(homeView, model);
+    homeViewController = new HomeViewController(homeView, model, mainVizTD);
 
     let exhibitionView = new ExhibitionView('page-content', model, mainVizTD, legendModel);
     exhibitionViewController = new ExhibitionViewController(exhibitionView, mainVizTD, model);
@@ -104,7 +104,7 @@ function initViewsAndControllers() {
 }
 
 function goToLocation() {
-    let loadingPage = "exhibition";
+    let loadingPage = "home";
     // const paths = document.location.pathname.substring(1).split('/')
     // if (paths.length > 0) {
     //     loadingPage = paths[0];
@@ -123,7 +123,7 @@ export default function showView(view) {
     start_sound_effect(); // Play a sound effect
     model.interaction.page(view);
     if (currentView == exhibitionViewController) {
-        mainVizTD.removeImages();
+        // mainVizTD.removeImages();
         model.toggleNoNotification(true);
         model.removeLayerStepInterval();
     }
