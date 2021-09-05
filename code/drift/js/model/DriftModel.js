@@ -570,6 +570,8 @@ export default class DriftModel {
             v.state = i == currentPos ? 0 : i == nextStep ? 1 : i == 0 ? 1 : 0;
             return v;
         })
+        //UPLOAD RANGE
+        this.updateSequenceControll();
         this.notifyObservers({ type: "updateViewSideMenu" });
         this.notifyObservers({ type: "updateImages" })
     }
