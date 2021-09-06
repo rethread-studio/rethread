@@ -140,17 +140,13 @@ export default class DriftModel {
 
         this.sequenceControll;
         this.TOTAL_STEPS = 4;
-
-        this.imageSize = 800;
     }
 
     async init() {
-        this.setImageSize();
         await this.getData();
         this.loadMenu("views");
         await this.getSitesVisits();
         await this.getVoteWebsites();
-        this.addResizeEvent()
     }
 
     getViewMode() {
@@ -286,15 +282,6 @@ export default class DriftModel {
         return this.timeLineDimensions.sliderDimensions;
     }
 
-    getImageSize() {
-        return this.imageSize
-    }
-
-    setImageSize() {
-        const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
-        this.imageSize = deviceW < 768 ? 300 : 800;
-    }
-
     getData(type) {
 
         return apiService.getData(type)
@@ -303,7 +290,7 @@ export default class DriftModel {
                     name: site,
                     state: site == "qwant" ? 1 : 0,
                     value: 0,
-                    image: `https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=${this.getImageSize()}`,
+                    image: "https://drift.durieux.me/api/time/1619197200000/google/graph.png?width=300",
                     logo: `logo.${site}.png`
                 }
             })
@@ -472,7 +459,7 @@ export default class DriftModel {
 
     updateSequenceControll(notify = false, callBack = null) {
         if (this.sequenceControll == null) return;
-        this.sequenceControll.selectGroupDates(this.getDatesToLoad(), this.getActiveMenuItems(), this.getActiveWebSites().map(s => s.name), notify, callBack, this.getImageSize())
+        this.sequenceControll.selectGroupDates(this.getDatesToLoad(), this.getActiveMenuItems(), this.getActiveWebSites().map(s => s.name), notify, callBack)
     }
 
     //get N number of spaces starting from current date 
@@ -838,13 +825,6 @@ export default class DriftModel {
 
     getActiveWebSites() {
         return this.data.children.filter(filterByState(1));
-    }
-
-    addResizeEvent() {
-        window.addEventListener('resize', () => {
-            console.log("resize")
-            this.setImageSize()
-        });
     }
 
 }

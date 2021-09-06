@@ -32,13 +32,13 @@ class SequenceController {
 
     //active views can be one or more
     //active sites can be one or more
-    selectGroupDates(dates, activeViews, activeSites, notify = false, callBack = null, imageSize = 800) {
+    selectGroupDates(dates, activeViews, activeSites, notify = false, callBack = null) {
         // console.log(this.imagesArr.length, this.imagesArr, dates, activeViews)
         //load the dates in the images
         this.imagesArr.forEach((e, i) => {
-            this.imagesArr[i] = dates[i] != null && dates[i] != undefined ? new imageGroup(dates[i], activeViews, activeSites, imageSize) : null;
+            this.imagesArr[i] = dates[i] != null && dates[i] != undefined ? new imageGroup(dates[i], activeViews, activeSites) : null;
         })
-        this.loadImages(notify, callBack, imageSize);
+        this.loadImages(notify, callBack);
     }
 
     loadImages(makeCall = false, callBack) {
@@ -123,10 +123,10 @@ class SequenceController {
 
 class imageGroup {
 
-    constructor(dates, views, sites, imageSize = 800) {
+    constructor(dates, views, sites) {
         //get images
         this.sites = sites;
-        this.images = this.setImages(dates, views, sites, imageSize)
+        this.images = this.setImages(dates, views, sites)
     }
 
     removeSites(sites) {
@@ -134,11 +134,11 @@ class imageGroup {
         return this;
     }
 
-    setImages(dates, views, sites, imageSize) {
+    setImages(dates, views, sites) {
         let imagesArr = [];
         sites.forEach(s => {
             views.forEach(v => {
-                imagesArr = [...imagesArr, new SimpleImage(v, dates, s, imageSize)]
+                imagesArr = [...imagesArr, new SimpleImage(v, dates, s)]
             })
         })
 
@@ -165,13 +165,13 @@ const LOADED = 2;
 const ERROR = 3;
 
 class SimpleImage {
-    constructor(view, date, site, imageSize = 800) {
+    constructor(view, date, site) {
         this.view = view;
         // this.type = view;
         this.status = IDDLE;
         this.site = site;
         this.date = date;
-        this.url = getApiImage(view, site, imageSize, date);
+        this.url = getApiImage(view, site, 800, date);
         this.backUp = getImageBackup(view)
         // this.src = ;
         this.img = this.createImage(this.url)
