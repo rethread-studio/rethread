@@ -116,7 +116,6 @@ export default class MainVizTDModel {
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
-        // if (this.viewParticles) this.addParticles()
 
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, });
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -351,15 +350,16 @@ export default class MainVizTDModel {
         //     m.dispose();
         // })
 
-
+        console.log("REMOVE ALL THIS", this.scene.children.length)
         // this.removeParticles()
         this.resMgr.dispose();
+        console.log("REMOVE ALL THIS particles", this.scene.children.length)
 
         for (let i = 0; i < this.scene.children.length; i++) {
             const object = this.scene.children[i];
             this.scene.remove(object)
         }
-
+        this.parameters = [];
         this.groups = [];
         this.materialsImage = [];
         this.meshes = [];
