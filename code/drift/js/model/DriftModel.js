@@ -543,7 +543,7 @@ export default class DriftModel {
         }
         //check if it reached the limit and pause it
         if (newPos >= this.visits.length - 1) {
-            this.getChangePlayState(false);
+            // this.getChangePlayState(false);
             newPos = 0;
         }
         //advance only if next position is loaded
