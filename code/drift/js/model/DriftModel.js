@@ -113,7 +113,7 @@ export default class DriftModel {
         this.sliderSpeed = [
             {
                 text: "Normal",
-                speed: this.baseSpeed / 9
+                speed: this.baseSpeed / 4
             },
             {
                 text: "Ludicrous",
