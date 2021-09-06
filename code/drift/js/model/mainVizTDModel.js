@@ -15,7 +15,7 @@ export default class MainVizTDModel {
         this.scene;
         this.camera;
         this.renderer;
-        this.parameters;
+
         this.materials = [];
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
@@ -205,7 +205,7 @@ export default class MainVizTDModel {
 
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
-        this.parameters = [
+        const parameters = [
             [[1.0, 0.2, 0.5], sprite4, 20],
             [[0.95, 0.1, 0.5], sprite5, 15],
             [[0.90, 0.05, 0.5], sprite4, 10],
@@ -213,11 +213,11 @@ export default class MainVizTDModel {
             [[0.80, 0, 0.5], sprite4, 5]
         ];
 
-        for (let i = 0; i < this.parameters.length; i++) {
+        for (let i = 0; i < parameters.length; i++) {
 
-            const color = this.parameters[i][0];
-            const sprite = this.parameters[i][1];
-            const size = this.parameters[i][2];
+            const color = parameters[i][0];
+            const sprite = parameters[i][1];
+            const size = parameters[i][2];
 
             this.materials[i] = this.track(new THREE.PointsMaterial({ size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent: true }));
             this.materials[i].color.setHSL(color[0], color[1], color[2]);
@@ -350,16 +350,13 @@ export default class MainVizTDModel {
         //     m.dispose();
         // })
 
-        console.log("REMOVE ALL THIS", this.scene.children.length)
         // this.removeParticles()
         this.resMgr.dispose();
-        console.log("REMOVE ALL THIS particles", this.scene.children.length)
 
         for (let i = 0; i < this.scene.children.length; i++) {
             const object = this.scene.children[i];
             this.scene.remove(object)
         }
-        this.parameters = [];
         this.groups = [];
         this.materialsImage = [];
         this.meshes = [];
@@ -434,7 +431,7 @@ export default class MainVizTDModel {
     render() {
         const time = Date.now() * 0.00005;
         this.timeImage += 0.01;
-        console.log("children", this.scene.children.length)
+
         for (let i = 0; i < this.scene.children.length; i++) {
             const object = this.scene.children[i];
             if (object instanceof THREE.Points) {
