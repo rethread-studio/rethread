@@ -9,17 +9,19 @@ export default class MainVizTDModel {
 
     constructor() {
 
+        this.resMgr = new ResourceTracker();
+        this.track = this.resMgr.track.bind(this.resMgr);
+
         this.scene;
         this.camera;
         this.renderer;
         this.parameters;
         this.materials = [];
-        this.mouseX = 0;
-        this.mouseY = 0;
         this.windowHalfX = window.innerWidth / 2;
         this.windowHalfY = window.innerHeight / 2;
         this.animateHandler = this.animate.bind(this);
-        this.numParticles = 100; //100
+        this.rafReq;
+        this.numParticles = 50; //100
 
         this.observers = [];
 
@@ -114,7 +116,7 @@ export default class MainVizTDModel {
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
-        if (this.viewParticles) this.addParticles()
+        // if (this.viewParticles) this.addParticles()
 
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, });
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -187,12 +189,12 @@ export default class MainVizTDModel {
     addParticles() {
         // const helper = new THREE.CameraHelper(this.camera);
         // this.scene.add(helper);
-        const geometry = new THREE.BufferGeometry();
+        const geometry = this.track(new THREE.BufferGeometry());
         const vertices = [];
-        const textureLoader = new THREE.TextureLoader();
+        const textureLoader = this.track(new THREE.TextureLoader());
         // const sprite3 = textureLoader.load('./img/textures/snowflake3.png');
-        const sprite4 = textureLoader.load('./img/textures/snowflake4.png');
-        const sprite5 = textureLoader.load('./img/textures/snowflake5.png');
+        const sprite4 = this.track(textureLoader.load('./img/textures/snowflake4.png'));
+        const sprite5 = this.track(textureLoader.load('./img/textures/snowflake5.png'));
 
         //ADD ALL THE PARTICLES
         for (let i = 0; i < this.numParticles; i++) {
@@ -218,86 +220,55 @@ export default class MainVizTDModel {
             const sprite = this.parameters[i][1];
             const size = this.parameters[i][2];
 
-            this.materials[i] = new THREE.PointsMaterial({ size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent: true });
+            this.materials[i] = this.track(new THREE.PointsMaterial({ size: size, map: sprite, blending: THREE.AdditiveBlending, depthTest: false, transparent: true }));
             this.materials[i].color.setHSL(color[0], color[1], color[2]);
 
-            const particles = new THREE.Points(geometry, this.materials[i]);
+            const particles = this.track(new THREE.Points(geometry, this.materials[i]));
 
             particles.rotation.x = Math.random() * 6;
             particles.rotation.y = Math.random() * 6;
             particles.rotation.z = Math.random() * 6;
 
             this.scene.add(particles);
-            // this.addObject()
         }
     }
 
-
-
-    showSiteViewsVetically() {
-        //GET IMAGES FROM SEQUENCE
-        let imgApi = model.getImagesFromSite();
-
-        imgApi.forEach((im, i) => {
-            let mat = this.material.clone();
-            this.materialsImage.push(mat);
-            let group = new THREE.Group();
-
-            // mat.wireframe = true;
-            const texture = new THREE.Texture(im.img);
-            mat.uniforms.texture1.value = texture;
-            mat.uniforms.texture1.value.needsUpdate = true;
-
-            let geo = im.type == "screenshot" ? new THREE.PlaneBufferGeometry((1.80780487805 * 1.5), (1 * 1.5), 20, 20) : new THREE.CircleBufferGeometry(1, 40)
-
-            let mesh;
-            if (im.type == "screenshot") {
-                const material = new THREE.MeshBasicMaterial({ map: texture });
-                mesh = new THREE.Mesh(geo, material);
-            } else {
-                mesh = new THREE.Mesh(geo, mat);
-            }
-            group.add(mesh);
-            this.groups.push(group);
-            this.scene.add(group);
-            this.meshes.push(mesh);
-            mesh.position.y = 2 + i * 0.5;
-            mesh.position.x = 6.5 + (i * .002);
-            mesh.position.z = 985 + -i;
-        });
-    }
-
     showScreenShot() {
-        const screenShot = model.getImagesFromSite().filter(i => i.type == "screenshot")[0];
+        //get the url from the model
+        const screenShot = model.getImagesFromSite().filter(i => i.view == "screenshot")[0];
 
+        //TRAK 
         let mat = this.ctrMaterial().clone();
         this.materialsImage.push(mat);
         let group = new THREE.Group();
+        //TRAK
         const texture = new THREE.Texture(screenShot.img);
         mat.uniforms.texture1.value = texture;
         mat.uniforms.texture1.value.needsUpdate = true;
-        // mat.uniforms.texture1.value = new THREE.TextureLoader().load(screenShot.url);
-        // mat.uniforms.texture1.value.needsUpdate = true;
 
-        let geo = new THREE.PlaneBufferGeometry(1.8058690745, 1, 20, 20);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff, map: texture });
-        let mesh = new THREE.Mesh(geo, material);
+        //TRAK
+        let geo = this.track(new THREE.PlaneBufferGeometry(1.8058690745, 1, 20, 20));
+        const material = this.track(new THREE.MeshBasicMaterial({ color: 0xffffff, map: texture }));
+        let mesh = this.track(new THREE.Mesh(geo, material));
+
         group.add(mesh);
         this.groups.push(group);
         this.scene.add(group);
         this.meshes.push(mesh);
+
         mesh.position.y = 0;
         mesh.position.x = 0;
         mesh.position.z = 800;
-        // i == mesh.scale.set(1, 1, 1);
-        // group.rotation.y = -0.5;
-        // group.rotation.x = -0.3;
-        // group.rotation.z = -0.1;
+
+        //FIT TO CAMERA
+        const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
+        let camVal = deviceW < 768 ? 0.9 : deviceW < 1300 ? 0.8 : deviceW < 1700 ? 0.7 : deviceW > 1300 ? 0.6 : 0.5;
+        this.fitCameraToSelection(this.camera, this.controls, this.meshes, camVal)
 
     }
 
     addMaterial() {
-        this.material = new THREE.ShaderMaterial({
+        this.material = this.track(new THREE.ShaderMaterial({
             extensions: {
                 derivatives: "#extension GL_OES_standard_derivatives : enable",
             },
@@ -309,16 +280,14 @@ export default class MainVizTDModel {
                 resolution: { type: "v4", value: new THREE.Vector4() },
                 uvRate1: { value: new THREE.Vector2(1, 1) },
             },
-            // wireframe: true,
-            // transparent: true,
             vertexShader: document.getElementById('vertexshader').textContent,
             fragmentShader: document.getElementById('fragmentshader').textContent,
-        });
+        }));
     }
 
     ctrMaterial() {
 
-        return this.material = new THREE.ShaderMaterial({
+        return this.material = this.track(new THREE.ShaderMaterial({
             extensions: {
                 derivatives: "#extension GL_OES_standard_derivatives : enable",
             },
@@ -328,31 +297,8 @@ export default class MainVizTDModel {
                 texture1: { type: "t", value: null },
                 u_resolution: { value: new THREE.Vector2(800, 443) },
             },
-            // wireframe: true,
-            // transparent: true,
-            // vertexShader: document.getElementById('CRTvertexshader').textContent,
             fragmentShader: document.getElementById('CRTfragmentshader').textContent,
-        });
-        // return new THREE.ShaderMaterial({
-        //     extensions: {
-        //         derivatives: "#extension GL_OES_standard_derivatives : enable",
-        //     },
-        //     side: THREE.DoubleSide,
-        //     uniforms: {
-        //         time: { type: "f", value: 0 },
-        //         texture1: { type: "t", value: null },
-        //         curvature: { type: "v2", value: new THREE.Vector2(3.0, 3.0) },
-        //         screenResolution: { type: "v2", value: new THREE.Vector2(1853, 1025) },
-        //         scanLineOpacity: { type: "v2", value: new THREE.Vector2(1, 1) },
-        //         vignetteOpacity: { type: "f", value: 1 },
-        //         resolution: { type: "v4", value: new THREE.Vector4() },
-
-        //     },
-        //     // wireframe: true,
-        //     // transparent: true,
-        //     vertexShader: document.getElementById('CRTvertexshader').textContent,
-        //     fragmentShader: document.getElementById('CRTfragmentshader').textContent,
-        // });
+        }));
     }
 
 
@@ -360,10 +306,6 @@ export default class MainVizTDModel {
         return this.renderer;
     }
 
-    setMouse(_mX = undefined, _mY = undefined) {
-        this.mouseX = _mX == undefined ? this.mouseX : _mX - this.windowHalfX;
-        this.mouseY = _mY == undefined ? this.mosueY : _mY - this.windowHalfY;
-    }
 
     updateSize(winW, winH) {
         this.windowHalfX = winW / 2;
@@ -390,18 +332,33 @@ export default class MainVizTDModel {
     }
 
 
-
+    //dispose resourses
+    //should dispose: textures, geometries and materials
     removeImages() {
-        //restore camera position
-        this.groups.forEach(e => {
-            this.scene.remove(e)
-        })
+        // //restore camera position
+        // this.groups.forEach(e => {
+        //     this.scene.remove(e)
+        // })
 
-        this.meshes.forEach(m => {
-            m.geometry.dispose();
-            m.material.dispose();
-            m = undefined;
-        })
+        // this.meshes.forEach(m => {
+        //     m.geometry.dispose();
+        //     //dispose texture
+        //     m.material.dispose();
+        //     m = undefined;
+        // })
+
+        // this.materialsImage.forEach(m => {
+        //     m.dispose();
+        // })
+
+
+        // this.removeParticles()
+        this.resMgr.dispose();
+
+        for (let i = 0; i < this.scene.children.length; i++) {
+            const object = this.scene.children[i];
+            this.scene.remove(object)
+        }
 
         this.groups = [];
         this.materialsImage = [];
@@ -411,29 +368,20 @@ export default class MainVizTDModel {
     //
 
     animate() {
-        window.requestAnimationFrame(this.animateHandler);
-        // this.controls.update();
+        this.rafReq = requestAnimationFrame(this.animateHandler);
         this.render();
     }
 
+    removeAnimation() {
+        if (this.rafReq) cancelAnimationFrame(this.rafReq);
+    }
+
     showNewLayout() {
-        this.removeImages()
-        this.addMaterial();
-        // const stack = model.getStack();
-        // if (stack) {
-        //     this.showSiteViewsVetically()
-        //     this.fitCameraToSelection(this.camera, this.controls, this.meshes, 1.4)
-        // } else {
         this.showSpreadSites()
         const dof = model.getNumActiveSites()
         const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
         let camVal = deviceW < 768 ? [0.9, 0.8] : deviceW < 1300 ? [0.8, 0.9] : deviceW < 1700 ? [0.7, 0.8] : deviceW > 1700 ? [0.6, 0.8] : [0.5, 0.8];
-
-        // let camVal = deviceW < 1700 ? [0.7, 0.7] : deviceW < 1300 ? [0.5, 0.5] : deviceW < 768 ? [0.8, 0.8] : [0.5, 0.8]
-
         this.fitCameraToSelection(this.camera, this.controls, this.meshes, dof == 1 ? camVal[0] : camVal[1])
-        // }
-
     }
 
 
@@ -449,17 +397,18 @@ export default class MainVizTDModel {
                 this.materialsImage.push(mat);
                 let group = new THREE.Group();
                 // mat.wireframe = true;
+
                 const texture = new THREE.Texture(img.img)
                 mat.uniforms.texture1.value = texture
                 mat.uniforms.texture1.value.needsUpdate = true;
 
-                let geo = img.type == "screenshot" ? new THREE.PlaneBufferGeometry((1.80780487805 * size), (1 * size), 20, 20) : new THREE.CircleBufferGeometry(size, 40)
+                let geo = img.view == "screenshot" ? this.track(new THREE.PlaneBufferGeometry((1.80780487805 * size), (1 * size), 20, 20)) : this.track(new THREE.CircleBufferGeometry(size, 40))
                 let mesh;
-                if (img.type == "screenshot") {
-                    const material = new THREE.MeshBasicMaterial({ map: texture });
-                    mesh = new THREE.Mesh(geo, material);
+                if (img.view == "screenshot") {
+                    const material = this.track(new THREE.MeshBasicMaterial({ map: texture }));
+                    mesh = this.track(new THREE.Mesh(geo, material));
                 } else {
-                    mesh = new THREE.Mesh(geo, mat);
+                    mesh = this.track(new THREE.Mesh(geo, mat));
                 }
                 group.add(mesh);
                 this.groups.push(group);
@@ -473,46 +422,35 @@ export default class MainVizTDModel {
 
     }
 
-    render() {
-        const time = Date.now() * 0.00005;
-        // if (!this.isPlaying) return;
-        this.timeImage += 0.01;
+    renderViews() {
         if (this.materialsImage) {
             this.materialsImage.forEach((m) => {
                 m.uniforms.time.value = this.timeImage;
             });
         }
-        // this.camera.position.x += (this.mouseX - this.camera.position.x) * 0.006;
-        // this.camera.position.y += (- this.mouseY - this.camera.position.y) * 0.006;
+        this.renderer.render(this.scene, this.camera);
+    }
 
-        // this.camera.lookAt(this.scene.position);
-
+    render() {
+        const time = Date.now() * 0.00005;
+        this.timeImage += 0.01;
+        console.log("children", this.scene.children.length)
         for (let i = 0; i < this.scene.children.length; i++) {
-
             const object = this.scene.children[i];
-
             if (object instanceof THREE.Points) {
                 object.rotation.y = time * (i < 4 ? i + 1 : - (i + 1));
             }
-
         }
-
-        this.raf()
-
         this.renderer.render(this.scene, this.camera);
-
     }
 
     upDateImages() {
         const state = this.getActiveSection()
+        this.removeImages()
+        this.addMaterial();
         //get state
         if (state == 0) {
-            this.removeImages()
-            this.addMaterial();
             this.showScreenShot();
-            const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
-            let camVal = deviceW < 768 ? 0.9 : deviceW < 1300 ? 0.8 : deviceW < 1700 ? 0.7 : deviceW > 1300 ? 0.6 : 0.5;
-            this.fitCameraToSelection(this.camera, this.controls, this.meshes, camVal)
         } else {
             this.showNewLayout();
         }
@@ -553,10 +491,76 @@ export default class MainVizTDModel {
     update(changeDetails) {
         if (changeDetails.type == "displayUpdate") {
             this.upDateImages()
-
+            this.render()
         } else if (changeDetails.type == "updateImages") {
             this.upDateImages()
+            this.renderViews()
+        } else if (changeDetails.type == "reRender") {
+            this.renderViews()
         }
     }
 
+}
+
+class ResourceTracker {
+    constructor() {
+        this.resources = new Set();
+    }
+    track(resource) {
+        if (!resource) {
+            return resource;
+        }
+
+        // handle children and when material is an array of materials or
+        // uniform is array of textures
+        if (Array.isArray(resource)) {
+            resource.forEach(resource => this.track(resource));
+            return resource;
+        }
+
+        if (resource.dispose || resource instanceof THREE.Object3D) {
+            this.resources.add(resource);
+        }
+        if (resource instanceof THREE.Object3D) {
+            this.track(resource.geometry);
+            this.track(resource.material);
+            this.track(resource.children);
+        } else if (resource instanceof THREE.Material) {
+            // We have to check if there are any textures on the material
+            for (const value of Object.values(resource)) {
+                if (value instanceof THREE.Texture) {
+                    this.track(value);
+                }
+            }
+            // We also have to check if any uniforms reference textures or arrays of textures
+            if (resource.uniforms) {
+                for (const value of Object.values(resource.uniforms)) {
+                    if (value) {
+                        const uniformValue = value.value;
+                        if (uniformValue instanceof THREE.Texture ||
+                            Array.isArray(uniformValue)) {
+                            this.track(uniformValue);
+                        }
+                    }
+                }
+            }
+        }
+        return resource;
+    }
+    untrack(resource) {
+        this.resources.delete(resource);
+    }
+    dispose() {
+        for (const resource of this.resources) {
+            if (resource instanceof THREE.Object3D) {
+                if (resource.parent) {
+                    resource.parent.remove(resource);
+                }
+            }
+            if (resource.dispose) {
+                resource.dispose();
+            }
+        }
+        this.resources.clear();
+    }
 }

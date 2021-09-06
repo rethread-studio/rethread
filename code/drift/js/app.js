@@ -54,10 +54,11 @@ window.onload = function () {
             mainVizTD.init();
             initViewsAndControllers()
             goToLocation();
-        }).catch(error => {
-            console.log("error", error.error)
-            //TAKE TO ERROR PAGE
         })
+    // .catch(error => {
+    //     console.log("error", error.error)
+    //     //TAKE TO ERROR PAGE
+    // })
 
 
 
@@ -71,7 +72,7 @@ function initViewsAndControllers() {
 
     //Initialize VIEWS and controllers
     let homeView = new HomeView('page-content', model);
-    homeViewController = new HomeViewController(homeView, model);
+    homeViewController = new HomeViewController(homeView, model, mainVizTD);
 
     let exhibitionView = new ExhibitionView('page-content', model, mainVizTD, legendModel);
     exhibitionViewController = new ExhibitionViewController(exhibitionView, mainVizTD, model);
@@ -122,7 +123,7 @@ export default function showView(view) {
     start_sound_effect(); // Play a sound effect
     model.interaction.page(view);
     if (currentView == exhibitionViewController) {
-        mainVizTD.removeImages();
+        // mainVizTD.removeImages();
         model.toggleNoNotification(true);
         model.removeLayerStepInterval();
     }
