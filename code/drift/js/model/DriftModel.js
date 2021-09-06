@@ -502,7 +502,7 @@ export default class DriftModel {
         })
         if (this.layerStepInterval != null && this.layerStepInterval != undefined) this.removeLayerStepInterval()
 
-        this.updateSequenceControll()
+        this.updateSequenceControll(true, this.observersHandler);
 
         this.notifyObservers({ type: "updateViewSideMenu" });
         this.notifyObservers({ type: "updateImages" });

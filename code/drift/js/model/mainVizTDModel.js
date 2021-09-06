@@ -429,7 +429,7 @@ export default class MainVizTDModel {
     }
 
     render() {
-        const time = Date.now() * 0.00005;
+        const time = Date.now() * 0.00002;
         this.timeImage += 0.01;
 
         for (let i = 0; i < this.scene.children.length; i++) {
