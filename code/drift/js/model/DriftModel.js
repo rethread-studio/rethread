@@ -437,7 +437,8 @@ export default class DriftModel {
         await apiService.getTimes(sites)
             //strings to int
             .then(visits => visits.map(visit => parseInt(visit)))
-            .then(visits => visits.filter(visit => visit > 1619820000000)) // filter out early visits
+            .then(visits => visits.filter(visit => visit > 1620054000000)) // filter out early visits
+            .then(visits => visits.filter(visit => (visit < 1623708000000 || visit > 1623974400000)))
             .then(visits => this.visits = visits)
             // .then(visits => visits.map(visit => new Date(visit)))
             //set visits and notify
