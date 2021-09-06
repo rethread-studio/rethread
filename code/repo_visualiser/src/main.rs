@@ -1,6 +1,7 @@
 use nannou::prelude::*;
 use std::fs;
 mod commits;
+use commits::read_commit_data;
 use commits::Commit;
 use std::path::PathBuf;
 
@@ -90,10 +91,12 @@ fn model(app: &App) -> Model {
     );
 
     // Read file with all of the commits in JSON format
-    let mut filename = app.assets_path().unwrap();
-    filename.push("gitlogg.json");
-    let f = fs::read_to_string(filename).expect("couldn't read file");
-    let commits: Vec<Commit> = serde_json::from_str(&f).expect("Failed to parse json");
+    let mut filepath = app.assets_path().unwrap();
+    let mut commit_path = filepath.clone();
+    commit_path.push("rethread_commits.json");
+    let mut stat_path = filepath.clone();
+    stat_path.push("rethread_stats.json");
+    let commits = read_commit_data(commit_path, stat_path);
     Model {
         commits,
         draw,
@@ -126,17 +129,27 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         let mut encoder = device.create_command_encoder(&ce_desc);
 
         // DO THE ACTUAL DRAWING HERE
+        //
+        draw.background().color(BLACK);
         let num_commits = model.commits.len();
         for (i, c) in model.commits.iter().enumerate() {
             let x = (win.w() / num_commits as f32) * i as f32 + win.left();
-            let y = (c.impact as f32 / 1000.) * win.bottom();
-            let size = (c.files_changed as f32 / 10000.).clamp(0.0, 1.0) * win.h() + 2.;
+            let y = (c.impact as f32 / 10000.).clamp(-1.0, 1.0);
+            let ysign = y < 0.;
+            let y = y.abs().powf(0.33) * win.bottom() * 0.8;
+            let y = if ysign { y * -1. } else { y };
+            let size = (c.files_changed.len() as f32 / 10000.)
+                .clamp(0.0, 1.0)
+                .powf(0.5)
+                * win.h()
+                * 0.25
+                + 2.;
             let r = (c.insertions as f32 / 1000.).powf(0.25);
             let b = (c.deletions as f32 / 1000.).powf(0.25);
             draw.ellipse()
                 .x_y(x, y)
                 .w_h(size, size)
-                .color(rgba(r, 0.5, b, 0.3));
+                .color(rgba(r, 0., b, 0.1));
         }
 
         // Render our drawing to the texture.
