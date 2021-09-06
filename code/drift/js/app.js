@@ -134,6 +134,7 @@ export default function showView(view) {
             mainMenuViewController.unMountView();
             homeViewController.renderView();
             mainVizTD.toggleParticles(true);
+            model.modifyTittle("Software Evolution");
             break;
         case 'exhibition':
             currentView = exhibitionViewController;
@@ -141,39 +142,46 @@ export default function showView(view) {
             mainMenuViewController.renderView();
             model.toggleChatVisible(false);
             mainVizTD.toggleParticles(false);
+            model.modifyTittle("Exhibition");
             break;
         case 'driftbot':
             currentView = robotViewController;
             robotViewController.renderView();
             mainMenuViewController.renderView();
             mainVizTD.toggleParticles(false);
+            model.modifyTittle("Driftbot");
             break;
         case 'tour':
             currentView = tourViewController;
             tourViewController.renderView();
             mainMenuViewController.renderView();
             mainVizTD.toggleParticles(false);
+            model.modifyTittle("Tour");
             break;
         case 'about':
             currentView = aboutViewController;
             aboutViewController.renderView();
             mainMenuViewController.renderView();
             mainVizTD.toggleParticles(true);
+            model.modifyTittle("About");
             break;
         case 'loading':
             console.log("loading page")
             currentView = loadingController;
             loadingController.renderView();
+            model.modifyTittle("Loading");
             break;
         case 'error':
             console.log("error page")
             currentView = loadingController;
             loadingController.renderView();
+            model.modifyTittle("Error");
             break;
         default:
             currentView = homeViewController;
             homeViewController.renderView();
             mainMenuViewController.unMountView();
             mainVizTD.toggleParticles(true)
+            model.modifyTittle("Software Evolution");
     }
 }

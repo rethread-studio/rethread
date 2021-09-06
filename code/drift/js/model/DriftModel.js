@@ -113,7 +113,7 @@ export default class DriftModel {
         this.sliderSpeed = [
             {
                 text: "Normal",
-                speed: this.baseSpeed / 9
+                speed: this.baseSpeed / 4
             },
             {
                 text: "Ludicrous",
@@ -826,6 +826,10 @@ export default class DriftModel {
 
     getActiveWebSites() {
         return this.data.children.filter(filterByState(1));
+    }
+
+    modifyTittle(text) {
+        document.title = `Drift - ${text}`
     }
 
 }
