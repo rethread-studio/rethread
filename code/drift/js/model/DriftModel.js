@@ -827,4 +827,8 @@ export default class DriftModel {
         return this.data.children.filter(filterByState(1));
     }
 
+    modifyTittle(text) {
+        document.title = `Drift - ${text}`
+    }
+
 }
