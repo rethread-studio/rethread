@@ -5,7 +5,6 @@ export default class TimeLineController {
         this.view = view;
         this.model = model;
         this.timeInterval = null;
-        this.model.addObserver(this);
         this.clickHandler = this.onClick.bind(this);
         this.changeHandler = this.changeSelection.bind(this);
         this.clickTimeLineHandler = this.onClickTimeline.bind(this);
@@ -72,13 +71,6 @@ export default class TimeLineController {
 
 
 
-    setTimeInterval() {
-        const speed = this.model.getCurrentSpeed()
-        this.timeInterval = window.setInterval(() =>
-            this.model.advanceSliderPos(), speed)
-        console.log("SET TIME", this.timeInterval)
-    }
-
     removeTimeInterval() {
         console.log("clean", this.timeInterval)
         if (this.timeInterval != null && this.timeInterval != undefined) clearInterval(this.timeInterval);
@@ -99,18 +91,6 @@ export default class TimeLineController {
         // this.removeTimeInterval();
         this.removeEventListeners();
         this.model.resetSlider();
-    }
-
-    update(changeDetails) {
-        if (changeDetails.type == "playTimeLine") {
-            // console.log("play interval")
-            // this.setTimeInterval();
-        } else if (changeDetails.type == "pauseTimeLine") {
-            // this.removeTimeInterval();
-        } else if (changeDetails.type == "updateSpeed") {
-            // this.removeTimeInterval();
-            // this.setTimeInterval();
-        }
     }
 
 }

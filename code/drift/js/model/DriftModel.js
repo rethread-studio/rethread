@@ -431,13 +431,9 @@ export default class DriftModel {
     }
 
     async getSitesVisits() {
-        const sites = this.data.children
-            .filter((site) => site.state == 1)
-            .map((site) => site.name)
-        await apiService.getTimes(sites)
-            //strings to int
+        await apiService.getTimes()
             .then(visits => visits.map(visit => parseInt(visit)))
-            .then(visits => visits.filter(visit => visit > 1620054000000)) // filter out early visits
+            .then(visits => visits.filter(visit => visit >= 1620061200000)) // filter out early visits
             .then(visits => visits.filter(visit => (visit < 1623708000000 || visit > 1623974400000)))
             .then(visits => this.visits = visits)
             // .then(visits => visits.map(visit => new Date(visit)))
@@ -465,7 +461,7 @@ export default class DriftModel {
 
     //get N number of spaces starting from current date 
     getDatesToLoad() {
-        return this.visits.splice(this.currentVisit, this.TOTAL_STEPS)
+        return [...this.visits].splice(this.currentVisit, this.TOTAL_STEPS)
     }
 
     getNextDateToLoad() {
@@ -543,15 +539,17 @@ export default class DriftModel {
             newPos = this.currentVisit - 1 < 0 ? 0 : this.currentVisit - 1;
         }
         //check if it reached the limit and pause it
-        if (newPos >= this.visits.length - 1) {
+        if (newPos > this.visits.length - 1) {
             // this.getChangePlayState(false);
             newPos = 0;
+            this.currentVisit = newPos;
+            this.updateSequenceControll()
         }
         //advance only if next position is loaded
         if (this.sequenceControll.isStepLoaded() == false) return;
 
         this.currentVisit = newPos;
-
+        console.log(this.currentVisit, this.visits.length, this.visits[this.currentVisit])
         //UPLOAD RANGE
         this.updateSequenceLoaderPos();
         //ask for the image 
@@ -633,6 +631,7 @@ export default class DriftModel {
     }
 
     getImagesFromSite() {
+        console.log(this.sequenceControll.getImagesInPos())
         return this.sequenceControll.getImagesInPos()
     }
 
