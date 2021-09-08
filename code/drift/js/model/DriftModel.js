@@ -434,7 +434,9 @@ export default class DriftModel {
         await apiService.getTimes()
             .then(visits => visits.map(visit => parseInt(visit)))
             .then(visits => visits.filter(visit => visit >= 1620061200000)) // filter out early visits
-            .then(visits => visits.filter(visit => (visit < 1623708000000 || visit > 1623974400000)))
+            .then(visits => visits.filter(visit => visit < 1623708000000 || visit > 1623974400000))
+            .then(visits => visits.filter(visit => visit < 1622732400000 || visit > 1624006800000))
+            .then(visits => visits.filter(visit => visit != 1622541600000 && visit != 1622541600000 && visit != 1625018400000))
             .then(visits => this.visits = visits)
             // .then(visits => visits.map(visit => new Date(visit)))
             //set visits and notify
@@ -465,7 +467,8 @@ export default class DriftModel {
     }
 
     getNextDateToLoad() {
-        return this.visits[this.currentVisit + this.TOTAL_STEPS]
+        const pos = this.currentVisit + this.TOTAL_STEPS < this.visits.length - 1 ? this.currentVisit + this.TOTAL_STEPS : this.visits.length - 1
+        return this.visits[pos]
     }
 
     getVoteWebsites() {
@@ -539,7 +542,7 @@ export default class DriftModel {
             newPos = this.currentVisit - 1 < 0 ? 0 : this.currentVisit - 1;
         }
         //check if it reached the limit and pause it
-        if (newPos > this.visits.length - 1) {
+        if (newPos >= this.visits.length - 1) {
             // this.getChangePlayState(false);
             newPos = 0;
             this.currentVisit = newPos;
@@ -551,7 +554,11 @@ export default class DriftModel {
         this.currentVisit = newPos;
 
         //UPLOAD RANGE
-        this.updateSequenceLoaderPos();
+        if (direction == 1) {
+            this.updateSequenceLoaderPos();
+        } else {
+            this.updateSequenceControll(true, this.observersHandler)
+        }
         //ask for the image 
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
@@ -613,22 +620,6 @@ export default class DriftModel {
             .filter(node => node.data.state == 1)
     }
 
-    getApiImage(view, site, size, time) {
-        switch (view) {
-            case 'screenshot':
-                return apiService.getSiteScreenshot(site, time, size);
-            case 'graph':
-                return apiService.getSiteGraph(site, time, size);
-            case 'coverage':
-                return apiService.getSiteCoverage(site, time, size);
-            case 'network':
-                return apiService.getSiteNetwork(site, time, size);
-            case 'profile':
-                return apiService.getSiteProfile(site, time, size);
-            default:
-                return apiService.getSiteScreenshot(site, time, size);
-        }
-    }
 
     getImagesFromSite() {
         return this.sequenceControll.getImagesInPos()
@@ -637,7 +628,6 @@ export default class DriftModel {
     getSitesImages() {
         const activeItems = this.getActiveWebSites().map(s => s.name);
         const sitesImg = this.sequenceControll.getImagesInPos();
-        console.log(sitesImg, this.visits[this.currentVisit])
         return activeItems.map(s => {
             return {
                 images: sitesImg.filter(i => i.site == s)
@@ -672,14 +662,13 @@ export default class DriftModel {
         const scale = d3.scaleLinear()
             .rangeRound([0, this.visits.length - 1]);
         this.currentVisit = scale(pos);
-        this.updateSequenceLoaderPos()
+        this.updateSequenceControll(true, this.observersHandler)
         this.notifyObservers({ type: "updateCurrentVisit" });
         this.notifyObservers({ type: "updateImages" });
     }
 
     updateSequenceLoaderPos() {
-        //replace for step in new
-        console.log("update the sequence", this.visits[this.currentVisit], this.getNextDateToLoad(), this.visits[this.currentVisit + this.TOTAL_STEPS - 1])
+
         this.sequenceControll.step(this.getNextDateToLoad(), this.getActiveMenuItems(), this.getActiveWebSites().map(s => s.name))
     }
 
