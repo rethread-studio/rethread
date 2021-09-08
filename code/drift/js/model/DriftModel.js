@@ -549,7 +549,7 @@ export default class DriftModel {
         if (this.sequenceControll.isStepLoaded() == false) return;
 
         this.currentVisit = newPos;
-        console.log(this.currentVisit, this.visits.length, this.visits[this.currentVisit])
+
         //UPLOAD RANGE
         this.updateSequenceLoaderPos();
         //ask for the image 
@@ -631,14 +631,13 @@ export default class DriftModel {
     }
 
     getImagesFromSite() {
-        console.log(this.sequenceControll.getImagesInPos())
         return this.sequenceControll.getImagesInPos()
     }
 
     getSitesImages() {
         const activeItems = this.getActiveWebSites().map(s => s.name);
         const sitesImg = this.sequenceControll.getImagesInPos();
-
+        console.log(sitesImg, this.visits[this.currentVisit])
         return activeItems.map(s => {
             return {
                 images: sitesImg.filter(i => i.site == s)
@@ -680,6 +679,7 @@ export default class DriftModel {
 
     updateSequenceLoaderPos() {
         //replace for step in new
+        console.log("update the sequence", this.visits[this.currentVisit], this.getNextDateToLoad(), this.visits[this.currentVisit + this.TOTAL_STEPS - 1])
         this.sequenceControll.step(this.getNextDateToLoad(), this.getActiveMenuItems(), this.getActiveWebSites().map(s => s.name))
     }
 

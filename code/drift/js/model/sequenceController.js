@@ -102,6 +102,7 @@ class SequenceController {
 
     //get all the images in a given position
     getImagesInPos(pos = 0) {
+        console.log("all images", this.imagesArr)
         return this.imagesArr[pos].getImages();
     }
 
