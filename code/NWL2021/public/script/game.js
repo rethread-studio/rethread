@@ -26,7 +26,7 @@ const questions = [
     ],
   },
   {
-    text: "How many nobel price has been distributed?",
+    text: "How many nobel price have been awarded?",
     position: { x1: 3, x2: 8, y1: 2, y2: 3 },
     answers: [
       {
