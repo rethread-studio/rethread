@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  server:
+    build: .
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      - REDIS_HOSTNAME=redis
+    volumes:
+      - .:/app
+    ports:
+      - $PORT:$PORT
+    links:
+      - mongodb
+      - redis
+
+  redis:
+    image: "redis:alpine"
