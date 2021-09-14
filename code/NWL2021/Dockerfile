@@ -1,7 +1,9 @@
 FROM node:15-slim
 
-ENV PORT 5000
-EXPOSE $PORT
+ENV SERVER_PORT 3000
+ENV SCREEN_PORT 3500
+EXPOSE $SERVER_PORT
+EXPOSE $SCREEN_PORT
 
 WORKDIR /app
 
@@ -14,7 +16,8 @@ COPY package-lock.json .
 RUN npm install
 
 COPY ecosystem.config.js .
+COPY config.ts .
 COPY server .
-COPY public .
+COPY screen .
 
 CMD [ "pm2-runtime", "ecosystem.config.js"]

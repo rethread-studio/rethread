@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="nwl2021" ng-controller="mainController">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width initial-scale=1.0" />
+    <base href="/" />
+    <title ng-bind="title">NWL 2021</title>
+    <link rel="stylesheet" href="/style/style.css" />
+  </head>
+  <body>
+    <ng-view></ng-view>
+    <script src="/script/external/socket.io.min.js"></script>
+    <script src="/script/external/angular.min.js"></script>
+    <script src="/script/external/angular-sanitize.min.js"></script>
+    <script src="/script/external/angular-route.min.js"></script>
+
+    <script src="script/app.js"></script>
+  </body>
+</html>
