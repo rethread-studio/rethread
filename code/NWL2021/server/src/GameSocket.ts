@@ -1,6 +1,5 @@
 import * as engine from "./engine";
 import { Server, Socket } from "socket.io";
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
 
 export default class GameSocket {
   constructor(readonly io: Server) {
@@ -12,7 +11,14 @@ export default class GameSocket {
     let target = this.io.of("screen");
     if (opt?.socket) target = opt.socket;
     target.emit("gameStateUpdate", {
-      players: engine.state.players,
+      players: Object.values(engine.state.players).map((p) => {
+        return {
+          x: p.x,
+          y: p.y,
+          inQuestion: p.inQuestion,
+          laureate: p.laureate,
+        };
+      }),
       question: engine.state.question,
     });
   }
@@ -26,8 +32,22 @@ export default class GameSocket {
     });
   }
 
+  emitQuestion(question: engine.Question) {
+    this.io.of("control").emit("question", question);
+    this.io.of("screen").emit("question", question);
+  }
+
+  emitResult(answer: engine.Answer, player?: engine.Player) {
+    let target = this.io.of("screen");
+    if (player?.socket) target = player.socket;
+    target.emit("answer", {
+      question: engine.state.question,
+      answer: answer,
+    });
+  }
+
   private _screenConnect(socket: Socket) {
-    console.log("Screen server connect")
+    console.log("Screen server connect");
     this.emitUpdates({ socket });
     this.emitSetup({ socket });
 
@@ -45,8 +65,9 @@ export default class GameSocket {
 
     socket.on("start", (laureate) => {
       const player = engine.newPlayer(socket.id, laureate);
-      socket.emit("init", player);
       
+      player.socket = socket;
+
       socket.on("up", () => engine.movePlayer(socket.id, { x: 0, y: -1 }));
       socket.on("down", () => engine.movePlayer(socket.id, { x: 0, y: 1 }));
       socket.on("left", () => engine.movePlayer(socket.id, { x: -1, y: 0 }));

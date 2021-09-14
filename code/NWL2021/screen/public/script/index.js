@@ -12,15 +12,23 @@ function start(setup) {
 
   socket.on("gameStateUpdate", updateGameState);
 
+  socket.on("answer", ({ question, answer }) => {
+    $scope.success = answer.isCorrect;
+    const answerE = document.querySelector(".answer0");
+    answerE.innerHTML = "Wining!!";
+    $scope.$apply();
+    setTimeout(() => {
+      $scope.success = undefined;
+      $scope.$apply();
+    }, 3000);
+  });
+
   function drawPlayers(players) {
     if (!players) return;
     // draw players
     Object.keys(players).forEach((playerId) => {
       let player = players[playerId];
 
-      const image = imgs[player.laureate.img]
-        ? imgs[player.laureate.img]
-        : new Image(setup.boxSize, setup.boxSize);
       if (imgs[player.laureate.img]) {
         ctx.drawImage(
           imgs[player.laureate.img],
@@ -52,12 +60,6 @@ function start(setup) {
       //   setup.boxSize,
       //   setup.boxSize
       // );
-
-      if (playerId == socket.id) {
-        direction = localDirection;
-      } else {
-        direction = player.direction;
-      }
     });
   }
 

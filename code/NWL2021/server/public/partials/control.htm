@@ -6,8 +6,16 @@
   </div>
   <div class="row">
     <div class="col">
-      <h2 >{{laureate.firstname}} {{laureate.surname}}</h2>
+      <h2>
+        {{laureate.firstname}} {{laureate.surname}}
+
+        <span ng-if="answer.isCorrect===true">:) Well done</span>
+        <span ng-if="answer.isCorrect===false">:( Try Again!</span>
+      </h2>
     </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">{{question.text}} {{answer.text}}</div>
   </div>
   <div class="row">
     <div class="col text-center">

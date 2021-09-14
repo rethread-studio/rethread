@@ -46,12 +46,29 @@ export default async function start() {
   const gameSocket = new GameSocket(io);
 
   const questionInterval = setInterval(() => {
-    engine.state.question =
-      engine.questions[
-        Math.round(Math.random() * (engine.questions.length - 1))
-      ];
-    console.log("Update question:", engine.state.question.text);
-    gameSocket.emitUpdates();
+    let answerScore = {};
+    for (const answer of engine.state.question.answers) {
+      answerScore[answer.text] = 0;
+      for (const socketID of Object.keys(engine.state.players)) {
+        const player = engine.state.players[socketID];
+        if (engine.checkCollision(player, answer.position)) {
+          answerScore[answer.text]++;
+          gameSocket.emitResult(answer, player);
+        }
+      }
+      if (answer.isCorrect) {
+        gameSocket.emitResult(answer);
+      }
+    }
+
+    setTimeout(() => {
+      engine.state.question =
+        engine.questions[
+          Math.round(Math.random() * (engine.questions.length - 1))
+        ];
+      gameSocket.emitQuestion(engine.state.question);
+      console.log("Update question:", engine.state.question.text);
+    }, 3000);
   }, config.QUESTION_INTERVAL * 1000);
 
   const updateInterval = setInterval(() => gameSocket.emitUpdates(), 60);

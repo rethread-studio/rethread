@@ -1,9 +1,7 @@
-import { stringToColour } from "./utils";
-
-interface Player extends Position {
+export interface Player extends Position {
   inQuestion: boolean;
-  color: string;
   laureate: any;
+  socket: any | null;
 }
 
 interface Position {
@@ -14,14 +12,16 @@ interface BoxPosition extends Position {
   width: number;
   height: number;
 }
-interface Question {
+export interface Answer {
+  color: string;
+  text: string;
+  isCorrect: boolean;
+  position: BoxPosition;
+}
+export interface Question {
   text: string;
   position: BoxPosition;
-  answers: {
-    color: string;
-    text: string;
-    position: BoxPosition;
-  }[];
+  answers: Answer[];
 }
 export const questions: Question[] = [
   {
@@ -36,6 +36,7 @@ export const questions: Question[] = [
           width: 3,
           height: 1,
         },
+        isCorrect: true,
         color: "green",
       },
       {
@@ -46,6 +47,7 @@ export const questions: Question[] = [
           width: 1,
           height: 2,
         },
+        isCorrect: false,
         color: "red",
       },
     ],
@@ -62,6 +64,7 @@ export const questions: Question[] = [
           width: 3,
           height: 1,
         },
+        isCorrect: false,
         color: "green",
       },
       {
@@ -72,6 +75,7 @@ export const questions: Question[] = [
           width: 3,
           height: 1,
         },
+        isCorrect: true,
         color: "red",
       },
     ],
@@ -92,7 +96,7 @@ export const gameSize = {
 };
 export const boxSize = 100;
 
-function checkCollision(player: Player, obj: Position) {
+export function checkCollision(player: Player, obj: Position) {
   if ((obj as any).width !== undefined) {
     const position: BoxPosition = obj as BoxPosition;
     return (
@@ -111,8 +115,8 @@ export function newPlayer(id: string, laureate) {
     x: 0,
     y: 0,
     laureate,
-    color: stringToColour(id),
     inQuestion: false,
+    socket: null,
   };
   while (!isValidPosition(player, id)) {
     player.x = Math.floor(Math.random() * Number(gameSize.width));

@@ -107,11 +107,26 @@ angular
     "$location",
     function ($scope, $rootScope, $location) {
       $scope.laureate = $rootScope.laureate;
+      $scope.answer = undefined;
+      $scope.question = undefined;
+
       if (!$scope.laureate) {
         return $location.url("/select");
       }
       $scope.laureate.img = "/img/laureate.png";
+
       socket.emit("start", $scope.laureate);
+      socket.on("question", (question) => {
+        $scope.question = question;
+        $scope.answer = undefined;
+        $scope.$apply();
+      });
+
+      socket.on("answer", ({ question, answer }) => {
+        $scope.answer = answer;
+        $scope.$apply();
+      });
+
       $scope.up = () => {
         socket.emit("up");
       };
