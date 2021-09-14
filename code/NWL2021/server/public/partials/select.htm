@@ -1,0 +1,37 @@
+<div class="container flex">
+  <div class="row text-center" style="align-items: center">
+    <div class="col">
+      <a class="text-btn" ng-click="previous()">⬅</a>
+    </div>
+    <div class="col">
+      <img
+        class="logo"
+        style="height: 250px"
+        ng-src="{{laureates[currentIndex].img}}"
+      />
+    </div>
+    <div class="col">
+      <a class="text-btn" ng-click="next()">⮕</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <h2>
+        {{laureates[currentIndex].firstname}}
+        {{laureates[currentIndex].surname}},
+        {{laureates[currentIndex].bornCountry}}
+      </h2>
+      <p ng-repeat="price in laureates[currentIndex].prizes">
+        Nobel Price in {{price.category}}, {{price.motivation}} {{price.year}}
+      </p>
+      <div class="text-center">
+        <a ng-href="/discovery">My discovery</a>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button ng-click="select()">Select</button>
+    </div>
+  </div>
+</div>

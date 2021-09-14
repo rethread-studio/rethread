@@ -4,7 +4,8 @@
   "description": "",
   "main": "server/index.ts",
   "scripts": {
-    "start": "ts-node --transpile-only server/index.ts",
+    "screen": "ts-node --transpile-only screen/src/index.ts",
+    "server": "ts-node --transpile-only server/src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,9 +14,11 @@
     "compression": "^1.7.4",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "got": "^11.8.2",
     "nodemon": "^2.0.12",
     "redis": "^3.1.2",
-    "socket.io": "^4.2.0"
+    "socket.io": "^4.2.0",
+    "socket.io-client": "^4.2.0"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",
