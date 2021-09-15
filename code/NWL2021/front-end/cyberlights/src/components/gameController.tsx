@@ -21,21 +21,19 @@ export const GameController = () => {
         <div className="h-full w-full p-4">
             <div className="h-full border-2 white flex flex-col justify-between">
 
-                <div className="flex flex-row justify-between">
+                <div className="flex flex-row justify-between text-sm">
 
-                    <Link to={"/select"} className="text-gray-900 bg-white h-8 w-3/6 pl-4 pt-1">
-                        <FontAwesomeIcon className="yellow-300 " icon={chevronLeft} /> Back to select
+                    <Link to={"/select"} className="text-gray-900 bg-white h-8 w-4/8 p-2 uppercase">
+                        <FontAwesomeIcon className="yellow-300" icon={chevronLeft} /> Back to select
                     </Link>
 
-                    <span className="text-white pt-1 pr-4">{score}</span>
+                    <span className="text-white p-2 pr-4">{score}</span>
                 </div>
 
-                <img className="w-4/4 h-auto mx-auto transform rotate-45" src="./characterTest.png" alt="Tu youyou" />
+                <img onClick={() => { console.log("emote") }} className="w-3/3 h-auto mx-auto transform rotate-45" src="./characterTest.png" alt="Tu youyou" />
 
-                <div className="flex w-full flex-col justify-center items-center space-y-2 ">
-
+                <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
                     <ArrowBtn direction="up" />
-
                     <div className="flex flex-row space-x-2">
                         <ArrowBtn direction="left" />
                         <ArrowBtn direction="down" />
