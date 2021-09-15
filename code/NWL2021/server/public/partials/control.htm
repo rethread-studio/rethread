@@ -1,0 +1,32 @@
+<div class="container flex">
+  <div class="row text-center">
+    <div class="col">
+      <img class="logo" style="height: 250px" src="/img/laureate.png" />
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <h2>
+        {{laureate.firstname}} {{laureate.surname}}
+
+        <span ng-if="answer.isCorrect===true">:) Well done</span>
+        <span ng-if="answer.isCorrect===false">:( Try Again!</span>
+      </h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">{{question.text}} {{answer.text}}</div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button class="key" ng-click="up()">⇧</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button class="key" ng-click="left()">⇦</button
+      ><button class="key" ng-click="down()">⇩</button
+      ><button class="key" ng-click="right()">⇨</button>
+    </div>
+  </div>
+</div>

@@ -4,6 +4,7 @@ services:
   server:
     build: .
     restart: always
+    command: pm2-runtime ecosystem.config.js --only server
     env_file:
       - ./.env
     environment:
@@ -11,10 +12,25 @@ services:
     volumes:
       - .:/app
     ports:
-      - $PORT:$PORT
+      - "127.0.0.1:$SERVER_PORT:$SERVER_PORT"
     links:
-      - mongodb
       - redis
+  screen:
+    build: .
+    restart: always
+    command: pm2-runtime ecosystem.config.js --only screen
+    env_file:
+      - ./.env
+    environment:
+      SERVER_HOST: "http://server:$SERVER_PORT/"
+    volumes:
+      - .:/app
+    ports:
+      - "127.0.0.1:$SCREEN_PORT:$SCREEN_PORT"
+    depends_on:
+      - server
+    links:
+      - server
 
   redis:
     image: "redis:alpine"
