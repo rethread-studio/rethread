@@ -17,6 +17,7 @@ RUN npm install
 
 COPY ecosystem.config.js .
 COPY config.ts .
+COPY tsconfig.json .
 COPY server .
 COPY screen .
 

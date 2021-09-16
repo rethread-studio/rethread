@@ -6,8 +6,8 @@ socket.on("setup", (data) => {
 const imgs = {};
 function start(setup) {
   const canvas = document.getElementById("game");
-  canvas.width = setup.boxSize * setup.gameSize.width;
-  canvas.height = setup.boxSize * setup.gameSize.height;
+  canvas.width = setup.unitSize * setup.width;
+  canvas.height = setup.unitSize * setup.height;
   const ctx = canvas.getContext("2d");
 
   socket.on("gameStateUpdate", updateGameState);
@@ -32,33 +32,33 @@ function start(setup) {
       if (imgs[player.laureate.img]) {
         ctx.drawImage(
           imgs[player.laureate.img],
-          player.x * setup.boxSize,
-          player.y * setup.boxSize,
-          setup.boxSize,
-          setup.boxSize
+          player.x * setup.unitSize,
+          player.y * setup.unitSize,
+          setup.unitSize,
+          setup.unitSize
         );
       } else {
-        imgs[player.laureate.img] = new Image(setup.boxSize, setup.boxSize);
+        imgs[player.laureate.img] = new Image(setup.unitSize, setup.unitSize);
         // Load an image of intrinsic size 300x227 in CSS pixels
         imgs[player.laureate.img].src =
           "http://localhost:3000/" + player.laureate.img;
         imgs[player.laureate.img].onload = function () {
           ctx.drawImage(
             imgs[player.laureate.img],
-            player.x * setup.boxSize,
-            player.y * setup.boxSize,
-            setup.boxSize,
-            setup.boxSize
+            player.x * setup.unitSize,
+            player.y * setup.unitSize,
+            setup.unitSize,
+            setup.unitSize
           );
         };
       }
 
       // ctx.fillStyle = player.inQuestion ? "blue" : player.colour;
       // ctx.fillRect(
-      //   player.x * setup.boxSize,
-      //   player.y * setup.boxSize,
-      //   setup.boxSize,
-      //   setup.boxSize
+      //   player.x * setup.unitSize,
+      //   player.y * setup.unitSize,
+      //   setup.unitSize,
+      //   setup.unitSize
       // );
     });
   }
@@ -67,10 +67,10 @@ function start(setup) {
     if (!question) return;
     const questionE = document.querySelector(".question");
     questionE.innerHTML = question.text;
-    questionE.style = `top: ${question.position.y * setup.boxSize}px;left: ${
-      question.position.x * setup.boxSize
-    }px; width: ${(question.position.width + 1) * setup.boxSize}px; height: ${
-      (question.position.height + 1) * setup.boxSize
+    questionE.style = `top: ${question.position.y * setup.unitSize}px;left: ${
+      question.position.x * setup.unitSize
+    }px; width: ${(question.position.width + 1) * setup.unitSize}px; height: ${
+      (question.position.height + 1) * setup.unitSize
     }px`;
 
     // draw Question
@@ -79,18 +79,18 @@ function start(setup) {
       const answerE = document.querySelector(".answer" + (i + 1));
       answerE.innerHTML = answer.text;
 
-      answerE.style = `top: ${answer.position.y * setup.boxSize}px;left: ${
-        answer.position.x * setup.boxSize
-      }px; width: ${(answer.position.width + 1) * setup.boxSize}px; height: ${
-        (answer.position.height + 1) * setup.boxSize
+      answerE.style = `top: ${answer.position.y * setup.unitSize}px;left: ${
+        answer.position.x * setup.unitSize
+      }px; width: ${(answer.position.width + 1) * setup.unitSize}px; height: ${
+        (answer.position.height + 1) * setup.unitSize
       }px`;
 
       ctx.fillStyle = answer.color;
       ctx.fillRect(
-        answer.position.x * setup.boxSize,
-        answer.position.y * setup.boxSize,
-        (answer.position.width + 1) * setup.boxSize,
-        (answer.position.height + 1) * setup.boxSize
+        answer.position.x * setup.unitSize,
+        answer.position.y * setup.unitSize,
+        (answer.position.width + 1) * setup.unitSize,
+        (answer.position.height + 1) * setup.unitSize
       );
     }
   }

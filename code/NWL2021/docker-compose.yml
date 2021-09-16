@@ -9,11 +9,14 @@ services:
       - ./.env
     environment:
       - REDIS_HOSTNAME=redis
+      - DB_HOSTNAME=mongodb
+      - DB_PORT=27017
     volumes:
       - .:/app
     ports:
       - "127.0.0.1:$SERVER_PORT:$SERVER_PORT"
     links:
+      - mongodb
       - redis
   screen:
     build: .
@@ -32,5 +35,28 @@ services:
     links:
       - server
 
+  mongodb:
+    image: mongo:latest
+    restart: on-failure
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $DB_USERNAME
+      MONGO_INITDB_ROOT_PASSWORD: $DB_PASSWORD
+    volumes:
+      - mongodb_data_container:/data/db
+    ports:
+      - "127.0.0.1:27000:27017"
+    command: --quiet
+    healthcheck:
+      test:
+        - CMD
+        - mongo
+        - --eval
+        - "db.adminCommand('ping')"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
   redis:
     image: "redis:alpine"
+volumes:
+  mongodb_data_container:
