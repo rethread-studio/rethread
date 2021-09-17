@@ -28,14 +28,17 @@ export default async function start() {
 
   app.use(
     "/",
-    express.static(path.join(__dirname, "..", "public"), {
-      etag: true,
-      lastModified: true,
-      maxAge: 3600, // 1h
-    })
+    express.static(
+      path.join(__dirname, "..", "..", "front-end", "cyberlights", "build"),
+      {
+        etag: true,
+        lastModified: true,
+        maxAge: 3600, // 1h
+      }
+    )
   );
   app.get("*", (req, res) =>
-    res.sendFile(path.join(__dirname, "..", "public", "index.html"))
+    res.sendFile(path.join(__dirname, "..", "..", "front-end", "cyberlights", "build", "index.html"))
   );
 
   const server = http.createServer(app);

@@ -15,9 +15,11 @@ COPY package-lock.json .
 
 RUN npm install
 
+COPY front-end front-end
+RUN cd ./front-end/cyberlights; npm i; SKIP_PREFLIGHT_CHECK=true npm run build;
+
 COPY ecosystem.config.js .
 COPY config.ts .
-COPY tsconfig.json .
 COPY server .
 COPY screen .
 
