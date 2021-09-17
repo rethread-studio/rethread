@@ -8,13 +8,28 @@ import {
 } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArrowBtn } from "./arrowBtn";
-
+import { socket } from "../api";
 
 export const GameController = () => {
 
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
     const score: string = "00334";
+
+
+    const laureate = {
+        name: "Françoise Barré-Sinoussi",
+        domain: "Physiology or Medicine",
+        year: 2008,
+        country: "France",
+        img: "/img/laureate.png",
+    };
+
+    socket.emit("start", laureate);
+    const emitDirection = (direction: string) => {
+        console.log("hit", direction)
+        socket.emit(direction);
+    }
 
     return (
 
@@ -33,11 +48,11 @@ export const GameController = () => {
                 <img onClick={() => { console.log("emote") }} className="w-3/3 h-auto mx-auto transform rotate-45" src="./characterTest.png" alt="Tu youyou" />
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
-                    <ArrowBtn direction="up" />
+                    <ArrowBtn clickEvent={emitDirection} direction="up" />
                     <div className="flex flex-row space-x-2">
-                        <ArrowBtn direction="left" />
-                        <ArrowBtn direction="down" />
-                        <ArrowBtn direction="right" />
+                        <ArrowBtn clickEvent={emitDirection} direction="left" />
+                        <ArrowBtn clickEvent={emitDirection} direction="down" />
+                        <ArrowBtn clickEvent={emitDirection} direction="right" />
                     </div>
                 </div>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BrowserRouter as Router,
   Switch,
@@ -14,8 +14,23 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import './App.css';
+import { getLaureates, dummyLaureates } from './api';
+
+
 
 function App() {
+  const [laureates, setLaureates] = useState(dummyLaureates)
+  const [loading, setLoading] = useState(true);
+
+  //load characters data
+  useEffect(() => {
+    getLaureates()
+      .then(data => { setLaureates(data); })
+      .catch(error => { console.log("error", error) })
+      .finally(() => {
+        setLoading(false);
+      })
+  }, [])
 
   library.add(fas)
 
@@ -23,20 +38,14 @@ function App() {
     <Router>
       <div className="container h-screen bg-gray-900">
         <Switch>
-          <Route path="/loading">
-            <Loading />
-          </Route>
-          <Route path="/home">
-            <Home />
-          </Route>
           <Route path="/select">
-            <SelectCharacter />
+            {loading ? <Loading /> : <SelectCharacter characters={laureates} />}
           </Route>
           <Route path="/play">
-            <GameController />
+            {loading ? <Loading /> : <GameController />}
           </Route>
           <Route path="/">
-            <Home />
+            {loading ? <Loading /> : <Home />}
           </Route>
         </Switch>
       </div>
