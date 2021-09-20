@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -9,27 +9,45 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArrowBtn } from "./arrowBtn";
 import { socket } from "../api";
+import { gameControllerI, controllDirection } from "../types";
 
-export const GameController = () => {
+export const GameController = ({ charactersList, characterIndex }: React.PropsWithChildren<gameControllerI>) => {
+
+    const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
 
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
     const score: string = "00334";
 
+    //load characters data
+    useEffect(() => {
+        const laureate = {
+            name: charactersList[characterIndex].firstname,
+            domain: charactersList[characterIndex].bornCountry,
+            year: charactersList[characterIndex].surname,
+            country: charactersList[characterIndex].bornCountry,
+            img: "/img/laureate.png",
+        };
+        socket.emit("start", laureate);
 
-    const laureate = {
-        name: "Françoise Barré-Sinoussi",
-        domain: "Physiology or Medicine",
-        year: 2008,
-        country: "France",
-        img: "/img/laureate.png",
-    };
+        return () => {
+            console.log("disconnect")
+            // socket.emit("disconnect");
+        }
 
-    socket.emit("start", laureate);
-    const emitDirection = (direction: string) => {
-        console.log("hit", direction)
+    }, [charactersList, characterIndex])
+
+
+    const emitDirection = (direction: controllDirection) => {
+        setCurrentDirection(direction)
         socket.emit(direction);
     }
+
+    const rotation: string = currentDirection === "up" ? "-translate-y-6" :
+        currentDirection === "down" ? "translate-y-6" :
+            currentDirection === "void" ? "rotate-0" :
+                currentDirection === "left" ? "-rotate-45" :
+                    currentDirection === "right" ? "rotate-45" : "rotate-0";
 
     return (
 
@@ -45,7 +63,7 @@ export const GameController = () => {
                     <span className="text-white p-2 pr-4">{score}</span>
                 </div>
 
-                <img onClick={() => { console.log("emote") }} className="w-3/3 h-auto mx-auto transform rotate-45" src="./characterTest.png" alt="Tu youyou" />
+                <img onClick={() => { console.log("emote") }} className={`w-3/3 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src="./characterTest.png" alt="Tu youyou" />
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
                     <ArrowBtn clickEvent={emitDirection} direction="up" />

@@ -15,17 +15,18 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import './App.css';
 import { getLaureates, dummyLaureates } from './api';
-
+import { laureateI } from './types';
 
 
 function App() {
-  const [laureates, setLaureates] = useState(dummyLaureates)
+  const [laureates, setLaureates] = useState<laureateI[]>(dummyLaureates)
   const [loading, setLoading] = useState(true);
+  const [characterIndex, setCharacterIndex] = useState(0);
 
   //load characters data
   useEffect(() => {
     getLaureates()
-      .then(data => { setLaureates(data); })
+      .then(data => { setLaureates(data); setCharacterIndex(0); })
       .catch(error => { console.log("error", error) })
       .finally(() => {
         setLoading(false);
@@ -39,10 +40,10 @@ function App() {
       <div className="container h-screen bg-gray-900">
         <Switch>
           <Route path="/select">
-            {loading ? <Loading /> : <SelectCharacter characters={laureates} />}
+            {loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={setCharacterIndex} />}
           </Route>
           <Route path="/play">
-            {loading ? <Loading /> : <GameController />}
+            {loading ? <Loading /> : <GameController charactersList={laureates} characterIndex={characterIndex} />}
           </Route>
           <Route path="/">
             {loading ? <Loading /> : <Home />}

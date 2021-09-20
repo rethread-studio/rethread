@@ -1,12 +1,12 @@
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
-
+import { laureateI } from "./types";
 //Socket communication
-const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io("/control");
+export const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io("/control");
 
 
 //LAUREATES API
-const getLaureates = (): Promise<any> => {
+export const getLaureates = (): Promise<any> => {
     const url = `/api/laureates`;
     return getRequest(url)
 }
@@ -22,27 +22,8 @@ const getRequest = async (url: string) => {
     return data
 }
 
-export interface laureateI {
-    born: string,
-    bornCity: string,
-    bornCountry: string,
-    bornCountryCode: string,
-    died: string,
-    diedCity: string,
-    diedCountry: string,
-    diedCountryCode: string,
-    firstname: string,
-    gender: string,
-    id: string,
-    prizes?: [any]
-    surname: string,
-    img?: string
-}
 
-
-
-
-const dummyLaureates: laureateI[] = [
+export const dummyLaureates: laureateI[] = [
     {
         born: "1940-04-01",
         bornCity: "Nyeri",
@@ -77,6 +58,20 @@ const dummyLaureates: laureateI[] = [
     },
 ]
 
+export const dummyLaureate: laureateI = {
+    born: "1940-04-01",
+    bornCity: "Nyeri",
+    bornCountry: "Kenya",
+    bornCountryCode: "KE",
+    died: "2011-09-25",
+    diedCity: "Nairobi",
+    diedCountry: "Kenya",
+    diedCountryCode: "KE",
+    firstname: "Wangari",
+    gender: "female",
+    id: "783",
+    surname: "Maathai",
+    img: "./img/laureate.png"
 
+}
 
-export { socket, getLaureates, dummyLaureates }
