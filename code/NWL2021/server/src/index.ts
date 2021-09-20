@@ -1,18 +1,21 @@
 require("dotenv").config();
 
 import * as path from "path";
-import got from "got";
-import * as redis from "redis";
 import express from "express";
 import compression from "compression";
 import http from "http";
 import { Server } from "socket.io";
 import config from "../../config";
 
-import * as engine from "./engine";
 import GameSocket from "./GameSocket";
+import * as database from "./database/database";
+import { Engine } from "./engine";
+import routes from "./routes";
+import StateModel from "./database/state/state.model";
+import { importDefaultConfiguration } from "../../import";
 
 export default async function start() {
+  await database.connect();
   const app = express();
   app.use(express.json());
 
@@ -20,58 +23,36 @@ export default async function start() {
   app.set("trust proxy", 1);
   app.set("etag", "strong");
 
-  const laureates = JSON.parse(
-    (await got("http://api.nobelprize.org/v1/laureate.json")).body
-  ).laureates.filter((f) => f.gender == "female");
-
-  app.get("/api/laureates", (req, res) => {
-    res.json(laureates);
-  });
+  app.use("/api/admin", routes.admin);
+  app.use("/api", routes.laureates);
 
   app.use(
     "/",
-    express.static(path.join(__dirname, "..", "public"), {
-      etag: true,
-      lastModified: true,
-      maxAge: 3600, // 1h
-    })
+    express.static(
+      path.join(__dirname, "..", "..", "front-end", "cyberlights", "build"),
+      {
+        etag: true,
+        lastModified: true,
+        maxAge: 3600, // 1h
+      }
+    )
   );
   app.get("*", (req, res) =>
-    res.sendFile(path.join(__dirname, "..", "public", "index.html"))
+    res.sendFile(path.join(__dirname, "..", "..", "front-end", "cyberlights", "build", "index.html"))
   );
 
   const server = http.createServer(app);
   const io = new Server(server);
 
-  const gameSocket = new GameSocket(io);
+  const gameState = await StateModel.findOne();
+  if (!gameState) {
+    console.log("import default configuration");
+    await importDefaultConfiguration();
+  }
 
-  const questionInterval = setInterval(() => {
-    let answerScore = {};
-    for (const answer of engine.state.question.answers) {
-      answerScore[answer.text] = 0;
-      for (const socketID of Object.keys(engine.state.players)) {
-        const player = engine.state.players[socketID];
-        if (engine.checkCollision(player, answer.position)) {
-          answerScore[answer.text]++;
-          gameSocket.emitResult(answer, player);
-        }
-      }
-      if (answer.isCorrect) {
-        gameSocket.emitResult(answer);
-      }
-    }
-
-    setTimeout(() => {
-      engine.state.question =
-        engine.questions[
-          Math.round(Math.random() * (engine.questions.length - 1))
-        ];
-      gameSocket.emitQuestion(engine.state.question);
-      console.log("Update question:", engine.state.question.text);
-    }, 3000);
-  }, config.QUESTION_INTERVAL * 1000);
-
-  const updateInterval = setInterval(() => gameSocket.emitUpdates(), 60);
+  const engine = new Engine();
+  await engine.init();
+  const gameSocket = new GameSocket(io, engine);
 
   server.listen(config.SERVER_PORT);
   console.log("NWL Server started on port: " + config.SERVER_PORT);

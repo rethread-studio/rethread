@@ -1,17 +1,45 @@
-import * as engine from "./engine";
 import { Server, Socket } from "socket.io";
+import { IQuestion, IAnswer } from "./database/questions/questions.types";
+import { Engine } from "./engine";
+import { Player } from "./types";
 
 export default class GameSocket {
-  constructor(readonly io: Server) {
+  constructor(readonly io: Server, readonly engine: Engine) {
     io.of("screen").on("connection", (socket) => this._screenConnect(socket));
     io.of("control").on("connection", (socket) => this._controlConnect(socket));
+
+    this.subscribe();
+  }
+
+  private subscribe() {
+    let hasChange = false;
+    this.engine.on("newPlayer").subscribe(() => (hasChange = true));
+    this.engine.on("playerLeave").subscribe(() => (hasChange = true));
+    this.engine.on("playerMove").subscribe(() => (hasChange = true));
+    this.engine.on("newQuestion").subscribe((question) => {
+      this.emitQuestion(question);
+      hasChange = true;
+    });
+    this.engine.on("userAnswer").subscribe(({ player, answer }) => {
+      this.emitResult(answer, player);
+    });
+    this.engine.on("answer").subscribe((answer) => {
+      this.emitResult(answer);
+    });
+
+    const updateInterval = setInterval(() => {
+      if (hasChange) {
+        this.emitUpdates();
+      }
+      hasChange = false;
+    }, 250);
   }
 
   emitUpdates(opt?: { socket }) {
     let target = this.io.of("screen");
     if (opt?.socket) target = opt.socket;
     target.emit("gameStateUpdate", {
-      players: Object.values(engine.state.players).map((p) => {
+      players: Object.values(this.engine.players).map((p) => {
         return {
           x: p.x,
           y: p.y,
@@ -19,29 +47,26 @@ export default class GameSocket {
           laureate: p.laureate,
         };
       }),
-      question: engine.state.question,
+      question: this.engine.currentQuestion,
     });
   }
 
   emitSetup(opt?: { socket }) {
     let target = this.io.of("screen");
     if (opt?.socket) target = opt.socket;
-    target.emit("setup", {
-      boxSize: engine.boxSize,
-      gameSize: engine.gameSize,
-    });
+    target.emit("setup", this.engine.state);
   }
 
-  emitQuestion(question: engine.Question) {
+  emitQuestion(question: IQuestion) {
     this.io.of("control").emit("question", question);
     this.io.of("screen").emit("question", question);
   }
 
-  emitResult(answer: engine.Answer, player?: engine.Player) {
+  emitResult(answer: IAnswer, player?: Player) {
     let target = this.io.of("screen");
     if (player?.socket) target = player.socket;
     target.emit("answer", {
-      question: engine.state.question,
+      question: this.engine.currentQuestion,
       answer: answer,
     });
   }
@@ -64,19 +89,25 @@ export default class GameSocket {
     socket.on("disconnect", () => this._controlDisconnect(socket));
 
     socket.on("start", (laureate) => {
-      const player = engine.newPlayer(socket.id, laureate);
-      
+      const player = this.engine.newPlayer(socket.id, laureate);
+
       player.socket = socket;
 
-      socket.on("up", () => engine.movePlayer(socket.id, { x: 0, y: -1 }));
-      socket.on("down", () => engine.movePlayer(socket.id, { x: 0, y: 1 }));
-      socket.on("left", () => engine.movePlayer(socket.id, { x: -1, y: 0 }));
-      socket.on("right", () => engine.movePlayer(socket.id, { x: 1, y: 0 }));
+      socket.on("up", () => this.engine.movePlayer(socket.id, { x: 0, y: -1 }));
+      socket.on("down", () =>
+        this.engine.movePlayer(socket.id, { x: 0, y: 1 })
+      );
+      socket.on("left", () =>
+        this.engine.movePlayer(socket.id, { x: -1, y: 0 })
+      );
+      socket.on("right", () =>
+        this.engine.movePlayer(socket.id, { x: 1, y: 0 })
+      );
     });
   }
+
   private _controlDisconnect(socket) {
     console.log("User disconnected:", socket.id);
-    delete engine.state.players[socket.id];
-    this.emitUpdates();
+    this.engine.removePlayer(socket.id);
   }
 }
