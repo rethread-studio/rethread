@@ -33,7 +33,6 @@ class SequenceController {
     //active views can be one or more
     //active sites can be one or more
     selectGroupDates(dates, activeViews, activeSites, notify = false, callBack = null) {
-        // console.log(this.imagesArr.length, this.imagesArr, dates, activeViews)
         //load the dates in the images
         this.imagesArr.forEach((e, i) => {
             this.imagesArr[i] = dates[i] != null && dates[i] != undefined ? new imageGroup(dates[i], activeViews, activeSites) : null;
@@ -86,12 +85,28 @@ class SequenceController {
     //remove the first and delete all the objects
     step(nextDate, activeViews, activeSites) {
         //if NEXT STEP is not loaded then make it wait or return 
-        // console.log("ORIGINAL", this.imagesArr)
+        if (nextDate == undefined) return;
+
         const tmp = [...this.imagesArr];
         tmp.shift();
         tmp.push(new imageGroup(nextDate, activeViews, activeSites))
         this.imagesArr = tmp;
         this.loadImages();
+    }
+
+    //add new date to the array  at the end
+    //remove the first and delete all the objects
+    stepBack(nextDate, activeViews, activeSites) {
+        //if NEXT STEP is not loaded then make it wait or return 
+        const tmp = [...this.imagesArr];
+        tmp.pop();
+        tmp.unshift(new imageGroup(nextDate, activeViews, activeSites))
+        this.imagesArr = tmp;
+        this.loadImages();
+    }
+
+    returnDates() {
+        return [...new Set(this.getAllImages().map(i => i.date))]
     }
 
     //check if current step is loaded
@@ -171,7 +186,8 @@ class SimpleImage {
         this.status = IDDLE;
         this.site = site;
         this.date = date;
-        this.url = getApiImage(view, site, 800, date);
+
+        this.url = getApiImage(view, site, this.getSizeResolution(), date);
         this.backUp = getImageBackup(view)
         // this.src = ;
         this.img = this.createImage(this.url)
@@ -180,6 +196,11 @@ class SimpleImage {
 
     getSite() {
         return this.site
+    }
+
+    getSizeResolution() {
+        const deviceW = Math.max(document.documentElement.clientWidth, window.innerWidth);
+        return deviceW < 768 ? 300 : 800;
     }
 
     createImage(url) {

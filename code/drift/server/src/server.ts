@@ -13,20 +13,29 @@ import { OUTPUT_PATH } from "./config";
 
 const app = express();
 app.use(core());
-app.use("/assets", express.static(__dirname + "/../../assets", {
-  etag: true,
-  lastModified: true,
-  maxAge: 3600000, // 1h
-}));
-app.use("/audio", express.static(__dirname + "/../../audio", {
-  etag: true,
-  lastModified: true,
-  maxAge: 3600000, // 1h
-}));
+app.use(
+  "/assets",
+  express.static(__dirname + "/../../assets", {
+    etag: true,
+    lastModified: true,
+    maxAge: 3600000, // 1h
+  })
+);
+app.use(
+  "/audio",
+  express.static(__dirname + "/../../audio", {
+    etag: true,
+    lastModified: true,
+    maxAge: 3600000, // 1h
+  })
+);
 
 app.use(compression());
 app.use("/js", express.static(__dirname + "/../../js"));
-app.use("/site.webmanifest", express.static(__dirname + "/../../site.webmanifest"));
+app.use(
+  "/site.webmanifest",
+  express.static(__dirname + "/../../site.webmanifest")
+);
 app.use("/img", express.static(__dirname + "/../../img"));
 app.use("/css", express.static(__dirname + "/../../css"));
 app.use("/webfonts", express.static(__dirname + "/../../webfonts"));
@@ -239,7 +248,6 @@ api.get("/time/:time/:site/coverage/css", async (req, res) => {
   }
 });
 
-
 api.get("/time/:time/:site/network", async (req, res) => {
   try {
     res.sendFile(
@@ -279,7 +287,6 @@ api.get("/vote/websites", async (req, res) => {
   );
 });
 
-
 app.get("*", (req, res) =>
   res.sendFile(resolve(__dirname + "/../../index.html"))
 );
@@ -302,20 +309,48 @@ interface User {
 let users: User[] = [];
 const lastMessages = [];
 
+if (fs.existsSync("chat.csv"))
+  fs.readFileSync("chat.csv")
+    .toString("utf-8")
+    .split("\n")
+    .forEach((line) => {
+      if (line.trim().length == 0) return;
+      const data = line.split(",");
+      lastMessages.push({
+        date: new Date(data[0]),
+        user: {
+          username: data[1],
+          id: data[2],
+        },
+        message: data.slice(3).join(","),
+      });
+    });
+
 let votes: { [key: string]: User[] } = {};
-const voteInterval = 15;
+const voteInterval = 20;
 let voteTime = new Date();
 voteTime.setSeconds(voteTime.getSeconds() + voteInterval);
 
+setInterval(() => {
+  let output = "";
+  for (const message of lastMessages) {
+    output += `${message.date.getTime()},${message.user.username},${
+      message.user.id
+    },${message.message}\n`;
+  }
+  fs.writeFileSync("chat.csv", output);
+}, 60000);
 
-const botSites = fs.readdirSync(join(__dirname, "..", "websites")).filter((f) => f.indexOf(".steps") > -1)
-.map((f) => f.replace(".steps", ""));
+const botSites = fs
+  .readdirSync(join(__dirname, "..", "websites"))
+  .filter((f) => f.indexOf(".steps") > -1)
+  .map((f) => f.replace(".steps", ""));
 
 setInterval(() => {
   if (voteTime > new Date()) {
     return;
   }
-  
+
   const index = Math.round(Math.random() * (botSites.length - 1));
   votes = {};
   voteTime = new Date();
@@ -324,7 +359,46 @@ setInterval(() => {
     io.emit("elected", { website: botSites[index], voteTime });
 }, 500);
 
-const nameOptions = ['Doraemon', 'Mega Man', 'GERTY', 'Tachikomas', 'Awesom-O', 'HK-47', 'ED-209', 'Beer-Fetching Robot', 'Bishop', 'H.E.L.P.eR.', 'Clank', 'Daft Punk', 'Johnny 5', 'The Robot', 'Mr. Roboto', 'Marvin the Paranoid Android', 'Mindstorms NXT', 'Robbie', 'Astro Boy', 'The Iron Giant', 'Optimus Prime', 'Roomba', 'DJ Roomba', 'Cindi Mayweather', 'Rosie', 'Crow T. Robot', 'K-9', 'The Terminator', 'The Maschinenmensch', 'ASIMO', 'GLaDOS', 'HAL 9000', 'HAL 9000', 'Sojourner', 'Data', 'R2D2', 'Bender', 'Wall-E']
+const nameOptions = [
+  "Doraemon",
+  "Mega Man",
+  "GERTY",
+  "Tachikomas",
+  "Awesom-O",
+  "HK-47",
+  "ED-209",
+  "Beer-Fetching Robot",
+  "Bishop",
+  "H.E.L.P.eR.",
+  "Clank",
+  "Daft Punk",
+  "Johnny 5",
+  "The Robot",
+  "Mr. Roboto",
+  "Marvin the Paranoid Android",
+  "Mindstorms NXT",
+  "Robbie",
+  "Astro Boy",
+  "The Iron Giant",
+  "Optimus Prime",
+  "Roomba",
+  "DJ Roomba",
+  "Cindi Mayweather",
+  "Rosie",
+  "Crow T. Robot",
+  "K-9",
+  "The Terminator",
+  "The Maschinenmensch",
+  "ASIMO",
+  "GLaDOS",
+  "HAL 9000",
+  "HAL 9000",
+  "Sojourner",
+  "Data",
+  "R2D2",
+  "Bender",
+  "Wall-E",
+];
 
 //listen on every connection
 io.on("connection", (socket) => {
@@ -354,18 +428,18 @@ io.on("connection", (socket) => {
 
   //listen on new_message
   socket.on("new_message", (data: { message }) => {
-    lastMessages.push({
+    const m = {
       message: escape(data.message),
+      date: new Date(),
       user,
-    });
-    if (lastMessages.length > 100) {
-      lastMessages.shift();
-    }
+    };
+    lastMessages.push(m);
+    // if (lastMessages.length > 100) {
+    //   lastMessages.shift();
+    // }
+
     //broadcast the new message
-    io.sockets.emit("new_message", {
-      message: escape(data.message),
-      user,
-    });
+    io.sockets.emit("new_message", m);
   });
 
   //listen on on_emoji

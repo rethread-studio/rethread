@@ -132,7 +132,6 @@ export default class TimeLineView {
         const getSliderXPos = this.model.calculateSliderPos();
         const dateFormated = this.model.getDateFormated(0);
 
-
         d3.select("#sliderTimeLine")
             .style("transform", `translate(${getSliderXPos - width / 2
                 }px, ${-height / 2
