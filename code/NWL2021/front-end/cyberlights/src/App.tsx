@@ -16,6 +16,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import './App.css';
 import { getLaureates, dummyLaureates } from './api';
 import { laureateI } from './types';
+import { dataToLaurates } from './utils';
 
 
 function App() {
@@ -26,7 +27,8 @@ function App() {
   //load characters data
   useEffect(() => {
     getLaureates()
-      .then(data => { setLaureates(data); setCharacterIndex(0); })
+      .then(data => data.map(dataToLaurates))
+      .then(data => { setLaureates(data); setCharacterIndex(0); console.log(data) })
       .catch(error => { console.log("error", error) })
       .finally(() => {
         setLoading(false);

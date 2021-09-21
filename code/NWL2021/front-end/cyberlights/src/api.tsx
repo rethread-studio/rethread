@@ -25,33 +25,29 @@ const getRequest = async (url: string) => {
 
 export const dummyLaureates: laureateI[] = [
     {
-        born: "1940-04-01",
         bornCity: "Nyeri",
         bornCountry: "Kenya",
         bornCountryCode: "KE",
-        died: "2011-09-25",
         diedCity: "Nairobi",
         diedCountry: "Kenya",
         diedCountryCode: "KE",
         firstname: "Wangari",
         gender: "female",
-        id: "783",
+        prizes: [],
         surname: "Maathai",
         img: "./img/laureate.png"
 
     },
     {
-        born: "1940-04-01",
         bornCity: "Nyeri",
         bornCountry: "Kenya",
         bornCountryCode: "KE",
-        died: "2011-09-25",
         diedCity: "Nairobi",
         diedCountry: "Kenya",
         diedCountryCode: "KE",
         firstname: "Wangari",
         gender: "female",
-        id: "783",
+        prizes: [],
         surname: "Maathai",
         img: "./img/laureate.png"
 
@@ -59,19 +55,16 @@ export const dummyLaureates: laureateI[] = [
 ]
 
 export const dummyLaureate: laureateI = {
-    born: "1940-04-01",
     bornCity: "Nyeri",
     bornCountry: "Kenya",
     bornCountryCode: "KE",
-    died: "2011-09-25",
     diedCity: "Nairobi",
     diedCountry: "Kenya",
     diedCountryCode: "KE",
     firstname: "Wangari",
     gender: "female",
-    id: "783",
+    prizes: [],
     surname: "Maathai",
     img: "./img/laureate.png"
-
 }
 

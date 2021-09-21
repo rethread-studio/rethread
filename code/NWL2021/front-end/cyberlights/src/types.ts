@@ -1,4 +1,3 @@
-import { type } from "os";
 
 export interface sliderBtnI {
     color: string,
@@ -6,20 +5,25 @@ export interface sliderBtnI {
     btnClass: "PREV" | "NEXT"
 }
 
+export interface prize {
+    category: string
+    motivation: string
+    share: number
+    year: number
+    _id: string
+}
+
 export interface laureateI {
-    born: string,
     bornCity: string,
     bornCountry: string,
     bornCountryCode: string,
-    died: string,
     diedCity: string,
     diedCountry: string,
     diedCountryCode: string,
     firstname: string,
     gender: string,
-    id: string,
-    prizes?: [any]
-    surname: string,
+    prizes: prize[]
+    surname?: string,
     img?: string
 }
 
@@ -32,6 +36,12 @@ export interface gameControllerI {
 export interface selectCharacterProps {
     characters: laureateI[],
     selectHandler: React.Dispatch<React.SetStateAction<number>>
+}
+
+export interface characterCardProps {
+    fullName: string,
+    img?: string,
+    prizes: prize[]
 }
 
 export type controllDirection = "up" | "down" | "left" | "right" | "void";

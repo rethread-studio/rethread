@@ -67,17 +67,9 @@ function start(setup) {
     if (!question) return;
     const questionE = document.querySelector(".question");
     questionE.innerHTML = question.text;
-<<<<<<< HEAD
-    questionE.style = `top: ${question.position.y * setup.boxSize}px;left: ${question.position.x * setup.boxSize
-      }px; width: ${(question.position.width + 1) * setup.boxSize}px; height: ${(question.position.height + 1) * setup.boxSize
+    questionE.style = `top: ${question.position.y * setup.unitSize}px;left: ${question.position.x * setup.unitSize
+      }px; width: ${(question.position.width + 1) * setup.unitSize}px; height: ${(question.position.height + 1) * setup.unitSize
       }px`;
-=======
-    questionE.style = `top: ${question.position.y * setup.unitSize}px;left: ${
-      question.position.x * setup.unitSize
-    }px; width: ${(question.position.width + 1) * setup.unitSize}px; height: ${
-      (question.position.height + 1) * setup.unitSize
-    }px`;
->>>>>>> 9d30152d05001f5223643cbb9d508fbfe227975c
 
     // draw Question
     for (let i = 0; i < question.answers.length; i++) {
@@ -85,17 +77,9 @@ function start(setup) {
       const answerE = document.querySelector(".answer" + (i + 1));
       answerE.innerHTML = answer.text;
 
-<<<<<<< HEAD
-      answerE.style = `top: ${answer.position.y * setup.boxSize}px;left: ${answer.position.x * setup.boxSize
-        }px; width: ${(answer.position.width + 1) * setup.boxSize}px; height: ${(answer.position.height + 1) * setup.boxSize
+      answerE.style = `top: ${answer.position.y * setup.unitSize}px;left: ${answer.position.x * setup.unitSize
+        }px; width: ${(answer.position.width + 1) * setup.unitSize}px; height: ${(answer.position.height + 1) * setup.unitSize
         }px`;
-=======
-      answerE.style = `top: ${answer.position.y * setup.unitSize}px;left: ${
-        answer.position.x * setup.unitSize
-      }px; width: ${(answer.position.width + 1) * setup.unitSize}px; height: ${
-        (answer.position.height + 1) * setup.unitSize
-      }px`;
->>>>>>> 9d30152d05001f5223643cbb9d508fbfe227975c
 
       ctx.fillStyle = answer.color;
       ctx.fillRect(
