@@ -1,3 +1,4 @@
+import e from "cors";
 
 export interface sliderBtnI {
     color: string,
@@ -5,26 +6,38 @@ export interface sliderBtnI {
     btnClass: "PREV" | "NEXT"
 }
 
+export interface affiliation {
+    name: string,
+    city: string,
+    country: string,
+}
+
 export interface prize {
-    category: string
-    motivation: string
-    share: number
-    year: number
-    _id: string
+    year: number,
+    category: string,
+    share: number,
+    motivation: string,
+    affiliations: affiliation[],
 }
 
 export interface laureateI {
-    bornCity: string,
+    firstname: string,
+    lastname: string,
+    imagePath: string,
+    country: string,
+    city: string,
+    bornDate: number,
+    diedDate: number,
     bornCountry: string,
     bornCountryCode: string,
-    diedCity: string,
+    bornCity: string,
     diedCountry: string,
     diedCountryCode: string,
-    firstname: string,
+    diedCity: string,
     gender: string,
+    description: string,
+    img?: string,
     prizes: prize[]
-    surname?: string,
-    img?: string
 }
 
 export interface gameControllerI {

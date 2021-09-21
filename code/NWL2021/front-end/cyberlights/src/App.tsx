@@ -28,7 +28,7 @@ function App() {
   useEffect(() => {
     getLaureates()
       .then(data => data.map(dataToLaurates))
-      .then(data => { setLaureates(data); setCharacterIndex(0); console.log(data) })
+      .then(data => { setLaureates(data); setCharacterIndex(0); })
       .catch(error => { console.log("error", error) })
       .finally(() => {
         setLoading(false);

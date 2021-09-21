@@ -19,15 +19,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 // Import Swiper styles
 import 'swiper/swiper.min.css';
 
-const prizesToString = (p: prize) => {
-    return (
-        <>
-            <h3>{p.category} {p.year}</h3>
-            <p>{p.motivation}</p>
-        </>
-    )
-}
-
 SwiperCore.use([Navigation, Pagination]);
 
 export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithChildren<selectCharacterProps>) => {
@@ -80,7 +71,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                     {characters.map((c: laureateI) => {
                         return (
                             <SwiperSlide key={uuidv4()} >
-                                <CharacterCard fullName={`${c.firstname} ${c.surname}`} img={c.img} prizes={c.prizes} />
+                                <CharacterCard fullName={`${c.firstname} ${c.lastname}`} img={c.img} prizes={c.prizes} />
                             </SwiperSlide>
                         )
                     })}
@@ -91,15 +82,17 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
             <button className="prev absolute h-full w-7 top-0 z-10 left-2">
                 <FontAwesomeIcon className={`transition-all duration-200 ${color} text-3xl`} icon={chevronLeft} />
             </button>
+
             <button className="next absolute h-full w-7 top-0 z-10 right-2">
                 <FontAwesomeIcon className={`transition-all duration-200 ${color} text-3xl`} icon={chevronRight} />
             </button>
 
-            <button className="w-full text-center mx-auto uppercase pt-8 pb-8 " onClick={handleClick}>My discovery</button>
+
+            <button className="w-full text-center mx-auto uppercase py-4 " onClick={handleClick}>My discovery</button>
 
 
-            <button className={`text-5xl text-center transition-all duration-200 text-${color} uppercase border-t-4 border-${color} pt-4 pb-4 w-full place-self-end z-20`} onClick={handleSelect}>
-                select
+            <button className={`text-4xl text-center transition-all duration-200 text-${color} uppercase bg-${color}  py-4 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
+                <span className="text-gray-900">select</span>
             </button>
 
             {viewBio ? <InfoCard prizes={characterPrizes} color={color} clickHandler={handleClick} /> : <></>}

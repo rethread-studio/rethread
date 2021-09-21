@@ -25,46 +25,63 @@ const getRequest = async (url: string) => {
 
 export const dummyLaureates: laureateI[] = [
     {
-        bornCity: "Nyeri",
+        firstname: "",
+        lastname: "",
+        imagePath: "",
+        country: "",
+        city: "",
+        bornDate: 1983,
+        diedDate: 1983,
         bornCountry: "Kenya",
         bornCountryCode: "KE",
-        diedCity: "Nairobi",
-        diedCountry: "Kenya",
-        diedCountryCode: "KE",
-        firstname: "Wangari",
+        bornCity: "Nyeri",
+        diedCountry: "Nairobi",
+        diedCountryCode: "Kenya",
+        diedCity: "KE",
         gender: "female",
-        prizes: [],
-        surname: "Maathai",
-        img: "./img/laureate.png"
+        description: "",
+        img: "./img/laureate.png",
+        prizes: []
 
     },
     {
-        bornCity: "Nyeri",
+        firstname: "",
+        lastname: "",
+        imagePath: "",
+        country: "",
+        city: "",
+        bornDate: 1983,
+        diedDate: 1983,
         bornCountry: "Kenya",
         bornCountryCode: "KE",
-        diedCity: "Nairobi",
-        diedCountry: "Kenya",
-        diedCountryCode: "KE",
-        firstname: "Wangari",
+        bornCity: "Nyeri",
+        diedCountry: "Nairobi",
+        diedCountryCode: "Kenya",
+        diedCity: "KE",
         gender: "female",
-        prizes: [],
-        surname: "Maathai",
-        img: "./img/laureate.png"
-
+        description: "",
+        img: "./img/laureate.png",
+        prizes: []
     },
 ]
 
 export const dummyLaureate: laureateI = {
-    bornCity: "Nyeri",
+    firstname: "",
+    lastname: "",
+    imagePath: "",
+    country: "",
+    city: "",
+    bornDate: 1983,
+    diedDate: 1983,
     bornCountry: "Kenya",
     bornCountryCode: "KE",
-    diedCity: "Nairobi",
-    diedCountry: "Kenya",
-    diedCountryCode: "KE",
-    firstname: "Wangari",
+    bornCity: "Nyeri",
+    diedCountry: "Nairobi",
+    diedCountryCode: "Kenya",
+    diedCity: "KE",
     gender: "female",
-    prizes: [],
-    surname: "Maathai",
-    img: "./img/laureate.png"
+    description: "",
+    img: "./img/laureate.png",
+    prizes: []
 }
 

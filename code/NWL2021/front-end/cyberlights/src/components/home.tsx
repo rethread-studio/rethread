@@ -16,8 +16,8 @@ export const Home = () => {
                 <p>Make sure to be at address for the complete experience.</p>
             </div>
 
-            <Link to={"/select"} className="text-7xl  text-center text-yellow-300 uppercase border-t-8 border-yellow-300 pt-4 pb-4 w-full place-self-end">
-                start
+            <Link to={"/select"} className="text-4xl  text-center text-yellow-300 uppercase bg-yellow-300  py-4 px-4 mb-6 mx-auto place-self-end">
+                <span className="text-gray-900">start</span>
             </Link>
 
         </Frame>

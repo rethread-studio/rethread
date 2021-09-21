@@ -24,7 +24,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
         const laureate = {
             name: charactersList[characterIndex].firstname,
             domain: charactersList[characterIndex].bornCountry,
-            year: charactersList[characterIndex].surname,
+            year: charactersList[characterIndex].bornDate,
             country: charactersList[characterIndex].bornCountry,
             img: "/img/laureate.png",
         };
