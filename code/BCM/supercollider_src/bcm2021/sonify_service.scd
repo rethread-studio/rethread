@@ -5,6 +5,7 @@
 ~sonify_service = { | service, activity, channel, inout |
 	var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave + 1),
 	amp = 1.0,
+	bus = channel.reverb_bus,
 	thump_atk = rrand(0.18, 0.21),
 	release_coeff = 1.0, delay = 0;
 
@@ -43,7 +44,7 @@
 					\c1, \sine,
 					\pan, rrand(-0.7, 0.7),
 					\amp, 0.05 * amp,
-					\out, channel.bus]);
+					\out, bus]);
 			}.fork;
 		}, {
 			if(activity == \low || (activity == \high)) {
@@ -57,7 +58,7 @@
 						\c1, \sine,
 						\pan, rrand(-0.7, 0.7),
 						\amp, 0.05 * amp,
-						\out, channel.bus],
+						\out, bus],
 					thump_atk * -1
 					);
 				}.fork;
@@ -73,7 +74,7 @@
 						\rel, rrand(0.5, 1),
 						\pan, rrand(-0.7, 0.7),
 						\amp, 0.05 * amp,
-						\out, channel.bus]);
+						\out, bus]);
 				}.fork;
 			};
 		});

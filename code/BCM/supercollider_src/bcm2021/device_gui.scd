@@ -1,12 +1,13 @@
-(
+
 ~makeDeviceGui = { | device, channel |
-	var palette = QPalette.dark, toggle_layout1 = HLayout(), toggle_layout2 = HLayout(), title_layout = HLayout(),
+	var palette = QPalette.light, toggle_layout1 = HLayout(), toggle_layout2 = HLayout(), title_layout = HLayout(),
 	title_view = View(bounds: Rect(0, 0, 455, 30)),
 	spat_layout = HLayout(), spat_text_azimuth, spat_text_elevation, spat_view = View(bounds: Rect(0, 0, 455, 30)),
-	window_width = 455
+	window_width = 455,
+	slider_layout = HLayout()
 	;
 
-	w = Window.new(device.asString, Rect(window_width * (~stats.size-1),200,window_width,200));
+	w = Window.new(device.asString, Rect(window_width * (~stats.size-1),200, window_width, 770));
 	w.view.background = palette.color('window', 'active');
 	StaticText(title_view, Rect(0, 0, 200, 20)).string_(device.asString);
 	/* Create toggles for
@@ -29,7 +30,14 @@
 	spat_text_elevation = StaticText(spat_view, Rect(200, 0, 200, 30));
 	spat_layout.add(spat_text_azimuth); spat_layout.add(spat_text_elevation);
 
-	w.layout_(VLayout(title_view, toggle_layout1, toggle_layout2, spat_layout));
+	slider_layout.add(~guiMakeSlider2.("verb mix",
+			channel.reverb_mix,
+			{ |slider| channel.set_reverb_mix(slider.value) },
+			{ |value_text| value_text.string = channel.reverb_mix.round(0.01); },
+			palette
+	));
+
+	w.layout_(VLayout(VLayout(title_view, toggle_layout1, toggle_layout2, spat_layout), VLayout(slider_layout)));
 	w.front;
 	CmdPeriod.add({ w.close; });
 	(
@@ -50,10 +58,31 @@
 	});
 	box*/
 };
-)
 
+~guiMakeSlider2 = { | text, default_value, action, text_action, palette |
+	var slider, slider_layout, slider_view, value_text;
+	slider_view = View(bounds:Rect(0,0,30,100));
+	slider_view.minSize = Size(30, 60);
+	slider_layout = HLayout();
+	slider_view.layout = slider_layout;
+	slider = Slider.new(slider_view,Rect(0,30,30,10));
+	slider.value = default_value;
+	value_text = StaticText(slider_view, Rect(0, 0, 0, 0)).string_(default_value).stringColor_(palette.color('windowText', 'active'));
+	text_action.(value_text);
+	slider.action = { |slider|
+		action.(slider);
+		text_action.(value_text);
+	};
+	slider_layout.add(slider);
+	slider.layout.add(value_text);
+	slider_layout.add(StaticText(slider_view, Rect(0, 0, 0, 0)).string_(text).stringColor_(palette.color('windowText', 'active')));
+	slider_view
+};
+
+/*
 (
 c = ~makeMixerChannel.("Test device", ~decoderBus);
 ~makeDeviceGui.("Test device", c);
 )
 
+*/

@@ -57,6 +57,7 @@ if(~useAmbisonics == true, {
 
 
 "../sound_forest_mixer_gui.scd".loadRelative;
+"device_gui.scd".loadRelative;
 
 "synthdefs.scd".loadRelative; // LOAD SYNTHDEFS
 
@@ -65,6 +66,23 @@ if(~useAmbisonics == true, {
 "sonify_len.scd".loadRelative;
 
 CmdPeriod.removeAll; // Reset the CmdPeriod functions
+
+// HARMONY init
+"harmonic_change1.scd".loadRelative;
+"harmonic_change2.scd".loadRelative;
+~harmonyVersion = version;
+
+~changeHarmonicFramework = { | version |
+	~harmonyVersion = version;
+	switch(version,
+		1, {
+			~initHarmony1.();
+		},
+		2, {
+			~initHarmony2.();
+		}
+	);
+};
 
 //////////////////////////////////////////////////////
 /////// STARTING EVERYTHING
@@ -80,44 +98,9 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 	/////////////////////////////////////////////////////
 
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
-	// Rich chord with harmonic 7
-	~ch1 = [120, 43, 0, 31, 57, 137];
-	~ch2 = [88, 74, 17, 39, 53, 137];
-	~ch3 = [106, 151, 31, 88, 163, 120];
-	~ch4 = [57, 163, 43, 74, 106, 180];
-	// suspended quality chord
-	~ch1 = [22, 93, 0, 9, 71, 53];
-	~ch2 = [40, 71, 9, 31, 62, 102];
-	~ch3 = [62, 102, 22, 40, 84, 124];
-	~ch4 = [84, 124, 31, 53, 93, 115];
-	~currentChord = 0;
-	~numChords = 2;
-	~changeChord = { | num = -1 |
-		// if num is -1 then
-		if(num == -1, {
-			~currentChord = (~currentChord + 1) % ~numChords;
-		}, {
-			~currentChord = num % ~numChords;
-		});
-
-		switch(~currentChord,
-			0, {
-				~ch1 = [22, 93, 0, 9, 71, 53];
-				~ch2 = [40, 71, 9, 31, 62, 102];
-				~ch3 = [62, 102, 22, 40, 84, 124];
-				~ch4 = [84, 124, 31, 53, 93, 115];
-			},
-			1, {
-				// Rich chord with harmonic 7
-				~ch1 = [120, 43, 0, 31, 57, 137];
-				~ch2 = [88, 74, 17, 39, 53, 137];
-				~ch3 = [106, 151, 31, 88, 163, 120];
-				~ch4 = [57, 163, 43, 74, 106, 180];
-			}
-		);
-	};
-	~chord = ~ch1 ++ ~ch2 ++ ~ch3 ++ ~ch4;
 	~octave = 3;
+
+	~changeHarmonicFramework.(1);
 
 	// Load buffers with voice recordings of services
 	voice_path = "../sounds/BCM_voice/whispered/".resolveRelative;
@@ -136,7 +119,7 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 
 	// Mixer channel factory
 	~makeMixerChannel = { | name, out, amp = 1 |
-		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation;
+		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation, reverb_mix = 0.25;
 		bus = Bus.audio(s, ~mixerChannelOutputs);
 		reverb_bus = Bus.audio(s, 2);
 		group = Group(s);
@@ -155,7 +138,7 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 		}, {
 			synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
 		});
-		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, 0.3, \amp, 2.0],
+		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 2.0],
 			target: synth, addAction: \addBefore);
 		(
 			my_synth: synth,
@@ -164,6 +147,7 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 			my_amp: amp,
 			my_send_amp: 0.0,
 			activity_level: 0,
+			reverb_mix: reverb_mix,
 			azimuth: azimuth,
 			elevation: elevation,
 			// Hover spat movement
@@ -174,6 +158,7 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 			azimuth_rotation: 0.0,
 			azimuth_rotation_step: 0.0,
 			azimuth_rotate: false,
+			activity_elevation: 0.0,
 			// Toggles for how to sonify the device
 			sonifyInstantlyToggle: true, // sonify right away
 			sonifyServicesToneToggle: true,
@@ -198,6 +183,10 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 			set_send_amp: {|self, send_amp|
 				self.my_send_amp = send_amp;
 				self.my_synth.set(\send_amp, send_amp);
+			},
+			set_reverb_mix: { |self, level|
+				self.reverb_mix = level;
+				self.my_reverb_synth.set(\mix, level);
 			},
 			set_activity: {|self, activity|
 				self.activity_level = activity;
@@ -238,7 +227,7 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 					self.hover_vel[1] = self.hover_vel[1] + (self.hover_acc[1] * 0.001);
 					// TODO: Limit velocity
 					self.hover_vel[0] = max(min(self.hover_vel[0], 0.15), -0.15);
-					self.hover_vel[1] = max(min(self.hover_vel[1], 0.05), -0.05);.
+					self.hover_vel[1] = max(min(self.hover_vel[1], 0.05), -0.05);
 
 					self.hover_pos[0] = self.hover_pos[0] + (self.hover_vel[0] * activity_spat_fx);
 					self.hover_pos[1] = self.hover_pos[1] + (self.hover_vel[1] * activity_spat_fx);
@@ -261,13 +250,20 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 					});
 				});
 
+				// elevation based on activity level
+				if(self.spatElevationActivityToggle, {
+					self.activity_elevation = self.activity_level * pi * 0.5;
+				}, {
+					self.activity_elevation = 0.0;
+				});
+
 				self.my_synth.set(\azimuth, self.azimuth + self.azimuth_rotation + self.hover_pos[0]);
-				self.my_synth.set(\elevation, self.elevation + self.hover_pos[1]);
+				self.my_synth.set(\elevation, self.elevation + self.hover_pos[1] + self.activity_elevation);
 			},
 			update_gui: { |self, gui|
 				{
 					gui.spat_text_azimuth.string = "azimuth: " + (self.azimuth + self.azimuth_rotation + self.hover_pos[0]).round(0.001);
-					gui.spat_text_elevation.string = "elevation: " + (self.elevation + self.hover_pos[1]).round(0.001);
+					gui.spat_text_elevation.string = "elevation: " + (self.elevation + self.hover_pos[1] + self.activity_elevation).round(0.001);
 				}.defer;
 			},
 		)
@@ -387,6 +383,7 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 		var soundType = [\standard1, \standard2, \standard3].choose;
 		switch(service.identifier,
 			\Google, { soundType = \Google },
+			\Youtube, { soundType = \YouTube },
 			"Google,Youtube".asSymbol, { soundType = \YouTube},
 			"Youtube,Google".asSymbol, {soundType = \YouTube},
 			\Amazon, { soundType = \Amazon },
@@ -394,9 +391,13 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 			\Facebook, { soundType = \Facebook },
 			\Cloudflare, { soundType = \Cloudflare },
 			\Microsoft, { soundType = \Microsoft },
-			"Github,Microsoft".asSymbol, { soundType = \GitHub }
+			"Github,Microsoft".asSymbol, { soundType = \GitHub },
+			"Whatsapp,Facebook".asSymbol, { soundType = \WhatsApp },
+			"Instagram,Facebook".asSymbol, { soundType = \Instagram },
+			\Instagram, { soundType = \Instagram },
 		);
 		service.soundType = soundType;
+		soundType.postln;
 		service.tick = { | self, channel |
 			~playSound.(self.soundType, \in, self.packets[\in], channel);
 			~playSound.(self.soundType, \out, self.packets[\out], channel);
@@ -491,8 +492,8 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 				if(out == \true, { out = true }, { out = false });
 
 				// Extract all the integers from the remote_ip
-				ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
-				// services.postln;
+				// ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
+				services.postln;
 
 				~addPacketToStats.(device, out, services, remote_ip, remote_location);
 			};
@@ -609,39 +610,11 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 
 
 			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
-			// ("overall: " + ~overallActivity).postln;
 
-			/*tick_channel.play_on(\tick2,
-			[
-			\freq, rrand(7000, 9000),
-			\rq, exprand(0.001, 0.1),
-			\out, tick_channel.bus,
-			\amp, rrand(0.01, 0.05),
-			\atk, 0.0,
-			\rel, 0.01, //0.01,
-			\pan, rrand(-0.1, 0.1),
-			]
-			);*/
-
-			// Update chord
-			if(~overallActivity > (~maxActivity * 0.5)) {
-				if(rrand(0.0, 1.0) > 0.98) {
-					~root = ~root + [-8, 0, 9, 17, -22].choose;
-					~root = ((~root + 22 - ~baseRoot) % 53) - 22 + ~baseRoot; // bring it back into the range -22 - 31
-					~root = ~root;
-				};
-			};
-			if(~overallActivity > (~maxActivity * 0.2)) {
-				if(rrand(0.0, 1.0) > 0.99) {
-					// TODO: Maybe change chord depending on activity instead of cycling through?
-					~changeChord.();
-				};
-			};
-
-			numPitchesPerChord = (~overallActivity.linexp(0, ~maxActivity, 3.0, ~ch1.size+2.99)-3.0).asInteger;
-			// ("nump: " + numPitchesPerChord).postln;
-			~chord = ~ch1[0..numPitchesPerChord] ++ ~ch2[0..numPitchesPerChord] ++ ~ch3[0..numPitchesPerChord] ++ ~ch4[0..numPitchesPerChord];
-			~chord = ~chord + ~root;
+			switch(~harmonyVersion,
+				1, { ~updateHarmony1.(~overallActivity) },
+				2, { ~updateHarmony1.(~overallActivity) }
+			);
 
 			// Update sequencer
 			if(~counter % 1 == 0) {
@@ -649,10 +622,6 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 			};
 
 			~numPacketsThisTick = 0;
-
-			/*allDevices.do { |statDevice|
-				statDevice.channel.
-			}*/
 
 			~counter = ~counter + 1;
 			0.25.wait;
