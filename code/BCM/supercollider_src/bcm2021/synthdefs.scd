@@ -86,8 +86,8 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 	sig = In.ar(\in.kr(10), 2);
 	mix = mix.lag(\mixLag.kr(10));
 
-	wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
-	wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);
+	/*wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
+	wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
 	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.9));
 
 	sig = (sig * (1-mix)) + (wet*mix);
@@ -279,7 +279,7 @@ SynthDef(\service_voice, {
 	trig = Dust.kr(Rand(15, 45));
 	pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.5));
 	sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, Rand(0.8, 1.2), pos);
-	sig = sig * 0.5 * \amp.kr(0.05) * env;
+	sig = sig * 0.05 * \amp.kr(0.5) * env;
 	sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];
 	// sig = Pan2.ar(sig, Rand(-0.7, 0.7));
 	Out.ar(\out.kr(0), sig);
@@ -293,4 +293,66 @@ SynthDef(\dist_sine, {
 	sig = (sig * \dist.kr(10)).tanh * 0.5 * env * amp;
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\dist_noise, {
+	var sig, env, trig = Dust.ar(700);
+	sig = PinkNoise.ar() * Decay2.ar(trig, 0.0001, 0.1);
+	sig = HPF.ar(sig, 1000);
+	sig = Resonz.ar(sig, \freq.kr(12500), 0.003) * 100;
+	/*sig = Klank.ar(`[
+		[8500, 9000, 9500],         // frequencies
+        nil,                             // amplitudes (default to 1.0)
+        Array.rand(5, 0.1, 2)                // ring times
+        ],
+	sig) * 0.3;*/
+	sig = sig + (DPW3Tri.ar(9050, mul: 0.1) * Env.perc(0.5, 0.6, curve: 3).ar(0));
+	sig = (sig * 7).tanh * 0.5;
+	sig = sig * Env.linen(0.01, 0.03, \rel.kr(0.05)).kr(2) * \amp.kr(0.5);
+	sig = LPF.ar(sig, \lpf.kr(7000));
+	sig = Pan2.ar(sig);
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\tick3, {
+	var sig, env, rq = \rq.kr(0.3);
+	env = Env.perc(\atk.kr(0), \rel.kr(0.5), curve: [\c0.kr(-4), \c1.kr(-4)]).ar(2);
+	sig = Impulse.ar(0);
+	sig = sig * 0.5;
+	// high freq and rq values causes the filter to blow up violently
+	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(20), rq.min(5)) * env;
+	sig = Pan2.ar(sig, \pan.kr(0)) * \amp.kr(1.0) * 10;
+	sig = (sig*7).tanh; // Should never happen, but better to soft clip
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+//fm synth by Eli Fieldsteel https://sccode.org/1-5bA
+SynthDef(\fm, {
+	arg freq=500, mRatio=1, cRatio=1,
+	index=1, iScale=5, cAtk=4, cRel=(-4),
+	amp=0.2, atk=0.01, rel=3, pan=0,
+	out=0, fx=0, fxsend=(-25);
+	var car, mod, env, iEnv;
+
+	//index of modulation
+	iEnv = EnvGen.kr(
+		Env(
+			[index, index*iScale, index],
+			[atk, rel],
+			[cAtk, cRel]
+		)
+	);
+
+	//amplitude envelope
+	env = EnvGen.kr(Env.perc(atk,rel,curve:[cAtk,cRel]),doneAction:2);
+
+	//modulator/carrier
+	mod = SinOsc.ar(freq * mRatio, mul:freq * mRatio * iEnv);
+	car = SinOsc.ar(freq * cRatio + mod) * env * amp;
+
+	car = Pan2.ar(car, pan);
+
+	//direct out/reverb send
+	Out.ar(out, car);
+	Out.ar(fx, car * fxsend.dbamp);
 }).add;
