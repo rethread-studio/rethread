@@ -19,6 +19,7 @@
 	spatHoverToggle: true,
 	spatElevationActivityToggle: false,
 	*/
+	toggle_layout1.add(~guiMakeToggleButton.(\sonifyActivityTickToggle, "Activity tick", channel));
 	toggle_layout1.add(~guiMakeToggleButton.(\sonifyInstantlyToggle, "Sonify instantly", channel));
 	toggle_layout1.add(~guiMakeToggleButton.(\sonifyServicesToneToggle, "Services tone", channel));
 	toggle_layout1.add(~guiMakeToggleButton.(\sonifyServicesWhisperToggle, "Services whisper", channel));

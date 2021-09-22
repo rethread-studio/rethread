@@ -1,18 +1,29 @@
 // The ~updateHarmony() function is called every tick
 // The harmony used by sonification functions is the pitches stored in `~chord`
 
-(
+~h2chordOctaves = 2;
+
 ~initHarmony2 = {
 	~generateHarmonicGrid.(3);
 	~h2NodeIndex = 0;
 	~h2TicksFromCenter = 0;
+
+	~h2TicksSinceChordChange = 0;
+	~h2TicksPerChordChange = 16;
 };
 
 
 ~updateHarmony2 = { |overallActivity|
-
-
-
+	~h2TicksSinceChordChange = ~h2TicksSinceChordChange + 1;
+	if(~h2TicksSinceChordChange >= ~h2TicksPerChordChange, {
+		~h2TicksSinceChordChange = 0;
+		~h2ChangeChord.();
+		if(~h2TicksFromCenter == 0, {
+			~h2TicksPerChordChange = 64;
+		}, {
+			~h2TicksPerChordChange = [16, 32].choose;
+		});
+	});
 };
 
 ~h2ChangeChord = {
@@ -24,6 +35,7 @@
 	});
 	~h2NodeIndex = new_index;
 	~chord = ~nodeGraph[~h2NodeIndex].chord.degrees();
+	("new chord: " + (~nodeGraph[~h2NodeIndex].chord.root % 53) + " " + ~nodeGraph[~h2NodeIndex].chord.mode.asString).postln;
 };
 
 
@@ -95,6 +107,7 @@
 			distance_weights = distance_weights + distance_weights.minItem; // convert to all positive
 			distance_weights = distance_weights.normalizeSum;
 			distance_weights = distance_weights.pow(ticks_from_center.pow(0.25)); // distance becomes more discriminant for higher ticks
+			distance_weights = distance_weights.normalizeSum * ticks_from_center.pow(0.25);
 
 			combined_weights = weights + distance_weights;
 			combined_weights = combined_weights.normalizeSum; // normalizes
@@ -102,6 +115,14 @@
 			("base: " + weights +"\ndistance_weights: " + distance_weights + "\ncombined_weights: " + combined_weights).postln;
 
 			node_indices.wchoose(combined_weights);
+		},
+		get_edges_to_node: { |self|
+			var edges_to_node = List[];
+			self.edges.do{|self_edge|
+				~nodeGraph[self_edge.destination].edges.do{|edge|
+					if(edge.destination == self, {edges_to_node.add(edge);});
+				};
+			};
 		},
 	)
 };
@@ -183,34 +204,37 @@
 
 // non-recursively go through all paths and record the shortest distance to the center for each edge
 ~calculateDistanceToCenter = { | start_node, start_distance = 0 |
-	var nodes_to_update = List[]; // [node_index, accumulated_distance]
-	start_node.edges.do{|edge|
+	var nodes_to_update = List[], // [node_index, accumulated_distance]
+	edges_to_start_node = start_node.get_edges_to_node();
+	edges_to_start_node.do{|edge|
 		var update = false;
 		// this ugly thing is necessary because the second condition is evaluated even if the first is true
 		if(edge.distance_to_center == nil, { update = true; }, {
-			if ((start_distance + edge.base_weight) < edge.distance_to_center, {
+			if ((start_distance + (1.0/edge.base_weight)) < edge.distance_to_center, {
 				update = true;
 			});
 		});
 		if(update, {
-			edge.distance_to_center = start_distance + edge.base_weight;
+			edge.distance_to_center = start_distance + (1.0/edge.base_weight);
 			nodes_to_update.add([edge.destination, edge.distance_to_center]);
 		});
 	};
 	while({nodes_to_update.size > 0 }, {
-		var current = nodes_to_update.removeAt(0), node = ~nodeGraph[current[0]], accumulated_distance = current[1];
-		node.edges.do{|edge|
+		var current = nodes_to_update.removeAt(0), node = ~nodeGraph[current[0]], accumulated_distance = current[1],
+		edges_to_node = node.get_edges_to_node();
+		// the edges we should update here are all the edges leading to this node
+		edges_to_node.do{|edge|
 			var update = false;
 			// this ugly thing is necessary because the second condition is evaluated even if the first is true
 			if(edge.distance_to_center == nil, { update = true; }, {
-				if ((accumulated_distance + edge.base_weight) < edge.distance_to_center, {
+				if ((accumulated_distance + (1.0/edge.base_weight)) < edge.distance_to_center, {
 					update = true;
 				});
 			});
 			if(update, {
-				edge.distance_to_center = start_distance + edge.base_weight;
+				edge.distance_to_center = start_distance + (1.0/edge.base_weight);
 				// follow the edge to its destination node and go through the edges of that node
-				nodes_to_update.add([edge.destination, edge.distance_to_center]);
+				nodes_to_update.add([edge.destination, accumulated_distance + edge.distance_to_center]);
 			});
 		}
 	});
@@ -219,7 +243,7 @@
 // go through all nodes and calculate the relative distance to the center for its edges
 ~calculateDistanceToCenterWeight = {
 	~nodeGraph.do{ |node|
-		var distances = node.edges.collect{|edge| 1/edge.distance_to_center},
+		var distances = node.edges.collect{|edge| edge.distance_to_center},
 		mean = distances.mean;
 		node.edges.do{ |edge|
 			// for weights, we want more likely edges to have a higher weight. Edges leading closer to the center have a lower distance resulting in a negative number. Therefore we need to flip the sign.
@@ -227,7 +251,9 @@
 		};
 	};
 };
-)
+
+
+/*
 
 ~initHarmony2.();
 (
@@ -243,6 +269,9 @@
 n = ~makeNode.(~makeChord.(), 5);
 ~findChord.(~makeChord.(9));
 ~nodeGraph[0]
+~nodeGraph[1].chord.root
+~nodeGraph[9].chord.root
+~nodeGraph[9].edges
 
 
 
@@ -260,4 +289,4 @@ mean = distances.mean;
 (distances-mean)/mean
 )
 
-1.5.pow(9)
+*/

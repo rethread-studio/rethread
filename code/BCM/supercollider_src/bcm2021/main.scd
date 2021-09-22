@@ -19,13 +19,7 @@ s.reboot;
 // Routing and mixer channels
 ~useAmbisonics = true; // Set to false to use a simple stereo output
 
-~sonifyInstantlyToggle = true; // sonify right away
-~sonifyServicesToneToggle = true;
-~sonifyServicesWhisperToggle = true;
-~sonifyLengthToggle = true;
-
-~spatHoverToggle = true;
-~spatElevationActivityToggle = false;
+~attackSmear = 0.0;
 
 ~controlPositionWithMouse = false; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
@@ -53,7 +47,7 @@ if(~useAmbisonics == true, {
 
 // What latency in seconds to use for scheduling playback on the server
 // If you get "late ..." messages, increase this number'
-~latency = 0.4;
+~latency = 0.5;
 
 
 "../sound_forest_mixer_gui.scd".loadRelative;
@@ -70,7 +64,7 @@ if(~useAmbisonics == true, {
 // HARMONY init
 "harmonic_change1.scd".loadRelative;
 "harmonic_change2.scd".loadRelative;
-~harmonyVersion = 1;
+~harmonyVersion = 2;
 
 ~changeHarmonicFramework = { | version |
 	~harmonyVersion = version;
@@ -100,8 +94,6 @@ if(~useAmbisonics == true, {
 
 	~s53 = Scale.chromatic('et53'); // For decoding 53edo
 	~octave = 3;
-
-	~changeHarmonicFramework.(1);
 
 	// Load buffers with voice recordings of services
 	voice_path = "../sounds/BCM_voice/whispered/".resolveRelative;
@@ -148,6 +140,7 @@ if(~useAmbisonics == true, {
 			my_amp: amp,
 			my_send_amp: 0.0,
 			activity_level: 0,
+			activity_level_peak: 0,
 			reverb_mix: reverb_mix,
 			azimuth: azimuth,
 			elevation: elevation,
@@ -165,6 +158,7 @@ if(~useAmbisonics == true, {
 			sonifyServicesToneToggle: true,
 			sonifyServicesWhisperToggle: true,
 			sonifyLengthToggle: true,
+			sonifyActivityTickToggle: true,
 
 			spatHoverToggle: true,
 			spatElevationActivityToggle: false,
@@ -192,10 +186,13 @@ if(~useAmbisonics == true, {
 			set_activity: {|self, activity|
 				self.activity_level = activity;
 				self.my_synth.set(\activity, activity);
+				if(activity > self.activity_level_peak, {
+					self.activity_level_peak = activity;
+				});
 			},
 			spat_rotate: {|self, length |
 				// Convert length to rotation per update tick
-				self.azimuth_rotation_step = (2*pi)/(length*~tickClock.tempo*4);
+				self.azimuth_rotation_step = (2*pi)/(length*100);
 				self.azimuth_rotate = true;
 			},
 			// Use play on to make sure that the
@@ -266,6 +263,24 @@ if(~useAmbisonics == true, {
 					gui.spat_text_azimuth.string = "azimuth: " + (self.azimuth + self.azimuth_rotation + self.hover_pos[0]).round(0.001);
 					gui.spat_text_elevation.string = "elevation: " + (self.elevation + self.hover_pos[1] + self.activity_elevation).round(0.001);
 				}.defer;
+			},
+			update_first: { |self|
+				if(self.sonifyActivityTickToggle, {
+					// ("activity: " + self.activity_level_peak).postln;
+					self.play_on(\tick2,
+						[
+							\freq, self.activity_level_peak * 3000 + 4000,
+							\rq, exprand(0.0001, 0.1),
+							\out, self.reverb_bus,
+							\amp, rrand(0.001, 0.02),
+							\atk, 0.000,
+							\rel, rrand(0.01, 0.05), //0.01,
+							\c1, -12,
+							\pan, 0,
+						]
+					);
+				});
+				self.activity_level_peak = self.activity_level_peak * 0.8;
 			},
 		)
 	};
@@ -398,7 +413,6 @@ if(~useAmbisonics == true, {
 			\Instagram, { soundType = \Instagram },
 		);
 		service.soundType = soundType;
-		soundType.postln;
 		service.tick = { | self, channel |
 			~playSound.(self.soundType, \in, self.packets[\in], channel);
 			~playSound.(self.soundType, \out, self.packets[\out], channel);
@@ -559,7 +573,7 @@ if(~useAmbisonics == true, {
 			numInPackets = 0, numOutPackets = 0,
 			numPitchesPerChord, root;
 
-			if(~numPacketsThisTick > 30, {
+			if(~numPacketsThisTick > 100, {
 				~randomizeTiming = true;
 			}, {
 				~randomizeTiming = false;
@@ -579,7 +593,8 @@ if(~useAmbisonics == true, {
 					});
 				};
 				statDevice.channel.set_activity((totalPacketsForDevice/~maxActivity).min(1.0));
-				statDevice.channel.update_spat();
+				// statDevice.channel.update_spat();
+				statDevice.channel.update_first();
 				// Update values in the gui e.g. spatialisation
 				gui = ~device_guis.at(statDevice.my_symbol);
 				if(gui != nil, {
@@ -614,7 +629,7 @@ if(~useAmbisonics == true, {
 
 			switch(~harmonyVersion,
 				1, { ~updateHarmony1.(~overallActivity) },
-				2, { ~updateHarmony1.(~overallActivity) }
+				2, { ~updateHarmony2.(~overallActivity) }
 			);
 
 			// Update sequencer
@@ -625,9 +640,20 @@ if(~useAmbisonics == true, {
 			~numPacketsThisTick = 0;
 
 			~counter = ~counter + 1;
+
 			0.25.wait;
 		};
 	}).play(~tickClock);
+
+	// channel update for spatialization etc
+	Routine({
+		loop {
+			~stats.do{|device|
+				device.channel.update_spat();
+			};
+			0.05.yield;
+		}
+	}).play();
 }.fork;
 )
 
@@ -659,4 +685,4 @@ if(~useAmbisonics == true, {
 )
 ~root = 22
 ~sonify_instantly.(10, true, \Google, 1);
-~tickClock.tempo*4
+~tickClock.tempo = ~tickClock.tempo*0.5

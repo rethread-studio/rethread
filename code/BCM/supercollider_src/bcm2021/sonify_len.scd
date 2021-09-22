@@ -4,6 +4,7 @@
 ~sonify_len = { | len, device |
 	var delay = 0, channel = ~stats[device].channel, bus = channel.reverb_bus, tick_amp = 0.3;
 	if(~randomizeTiming, { delay = rrand(0.0, 0.3); });
+	delay = delay + rrand(0.0, ~attackSmear);
 	if(channel.sonifyLengthToggle) {
 		{
 			delay.wait;

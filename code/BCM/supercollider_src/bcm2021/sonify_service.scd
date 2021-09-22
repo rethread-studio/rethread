@@ -10,6 +10,7 @@
 	release_coeff = 1.0, delay = 0;
 
 	if(~randomizeTiming, { delay = rrand(0.0, 0.3); });
+	delay = delay + rrand(0.0, ~attackSmear);
 
 	if(channel.sonifyServicesWhisperToggle, {
 		~service_whisper.(service, channel);
@@ -35,16 +36,18 @@
 
 		if(inout == \out, {
 			{
+				var atk = rrand(0.2, 0.4) * release_coeff;
 				delay.wait;
 				channel.play_on(\reverse_google, [
 					\freq, freq,
-					\atk, rrand(1.0, 5.0) * release_coeff,
+					\atk, atk,
 					\rel, rrand(0.1, 4 * release_coeff),
 					\c0, rrand(1, 4),
 					\c1, \sine,
 					\pan, rrand(-0.7, 0.7),
 					\amp, 0.05 * amp,
-					\out, bus]);
+					\out, bus],
+				atk * -1);
 			}.fork;
 		}, {
 			if(activity == \low || (activity == \high)) {
