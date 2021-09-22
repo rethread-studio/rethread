@@ -2,7 +2,7 @@
 ~guiMakeSlider = { | text, default_value, action, text_action, palette |
 	var slider, slider_layout, slider_view, value_text;
 	slider_view = View(bounds:Rect(0,0,30,100));
-	// slider_view.minSize = Size(60, 300);
+	slider_view.minSize = Size(60, 300);
 	slider_layout = VLayout();
 	slider_view.layout = slider_layout;
 	slider = Slider.new(slider_view,Rect(0,30,30,170)).resize_(2);

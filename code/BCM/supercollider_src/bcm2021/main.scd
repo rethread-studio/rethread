@@ -65,12 +65,12 @@ if(~useAmbisonics == true, {
 "sonify_service.scd".loadRelative;
 "sonify_len.scd".loadRelative;
 
-CmdPeriod.removeAll; // Reset the CmdPeriod functions
+// CmdPeriod.removeAll; // Reset the CmdPeriod functions
 
 // HARMONY init
 "harmonic_change1.scd".loadRelative;
 "harmonic_change2.scd".loadRelative;
-~harmonyVersion = version;
+~harmonyVersion = 1;
 
 ~changeHarmonicFramework = { | version |
 	~harmonyVersion = version;
@@ -83,6 +83,7 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 		}
 	);
 };
+~changeHarmonicFramework.(~harmonyVersion);
 
 //////////////////////////////////////////////////////
 /////// STARTING EVERYTHING
@@ -493,7 +494,7 @@ CmdPeriod.removeAll; // Reset the CmdPeriod functions
 
 				// Extract all the integers from the remote_ip
 				// ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
-				services.postln;
+				// services.postln;
 
 				~addPacketToStats.(device, out, services, remote_ip, remote_location);
 			};
