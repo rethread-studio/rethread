@@ -8,6 +8,14 @@ s.reboot;
 s.options.numOutputBusChannels = 36;
 s.reboot;
 )
+(
+//////////////////////////////////////////////////////
+/////// GLOBAL COMPOSITIONAL CHANGES
+/////////////////////////////////////////////////////
+~h2chordOctaves = 2;
+~attackSmear = 0.0;
+~tickClock.tempo = ~tickClock.tempo*0.5;
+)
 
 (
 //// RUN THIS BLOCK TO START EVERYTHING
@@ -18,8 +26,6 @@ s.reboot;
 
 // Routing and mixer channels
 ~useAmbisonics = true; // Set to false to use a simple stereo output
-
-~attackSmear = 0.0;
 
 ~controlPositionWithMouse = false; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device

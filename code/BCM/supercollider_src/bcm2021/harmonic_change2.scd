@@ -35,6 +35,7 @@
 	});
 	~h2NodeIndex = new_index;
 	~chord = ~nodeGraph[~h2NodeIndex].chord.degrees();
+	~chord = ~h2chordOctaves.collect{|i| ~chord + (53*i)}.flatten;
 	("new chord: " + (~nodeGraph[~h2NodeIndex].chord.root % 53) + " " + ~nodeGraph[~h2NodeIndex].chord.mode.asString).postln;
 };
 
