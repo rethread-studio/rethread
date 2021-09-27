@@ -20,6 +20,8 @@ export interface prize {
     affiliations: affiliation[],
 }
 
+export type colorOption = "neonyellow" | "neongreen" | "neonindigo" | "neonpink" | " neonred";
+
 export interface laureateI {
     firstname: string,
     lastname: string,
@@ -37,7 +39,8 @@ export interface laureateI {
     gender: string,
     description: string,
     img?: string,
-    prizes: prize[]
+    prizes: prize[],
+    color: colorOption
 }
 
 export interface gameControllerI {
@@ -48,6 +51,7 @@ export interface gameControllerI {
 
 export interface selectCharacterProps {
     characters: laureateI[],
+    charIndex: number,
     selectHandler: React.Dispatch<React.SetStateAction<number>>
 }
 

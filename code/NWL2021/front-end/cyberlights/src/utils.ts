@@ -1,7 +1,7 @@
-import { laureateI, prize } from './types';
+import { laureateI, prize, colorOption } from './types';
 
-
-export const dataToLaurates = (l: any): laureateI => {
+const colors: colorOption[] = ["neonyellow", "neongreen", "neonindigo", "neonpink", " neonred"]
+export const dataToLaurates = (l: any, i: number): laureateI => {
     const prizes: prize[] = l.prizes.map(dataToPrizes)
     return {
         firstname: l.firstname,
@@ -20,7 +20,8 @@ export const dataToLaurates = (l: any): laureateI => {
         gender: l.firstname,
         description: l.firstname,
         img: l.img ? l.img : 'laureate.png',
-        prizes: prizes
+        prizes: prizes,
+        color: colors[i % (colors.length - 1)]
     }
 }
 

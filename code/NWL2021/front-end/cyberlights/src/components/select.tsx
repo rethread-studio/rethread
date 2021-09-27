@@ -21,7 +21,7 @@ import 'swiper/swiper.min.css';
 
 SwiperCore.use([Navigation, Pagination]);
 
-export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithChildren<selectCharacterProps>) => {
+export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.PropsWithChildren<selectCharacterProps>) => {
     let history = useHistory();
 
     const [viewBio, setViewBio] = useState<boolean>(false);
@@ -45,8 +45,8 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
 
             <div className="">
                 <div className={`flex flex-row h-8 justify-between content-center transition-all duration-200 bg-${color} px-1 pb-1.5`}>
-                    <h4 className="text-gray-900 text-sm uppercase" >woman in science</h4>
-                    <span className="fraction text-gray-900 text-sm uppercase"></span>
+                    <h4 className="text-gray-900 text-base uppercase " >woman in science</h4>
+                    <span className="fraction text-gray-900 text-base uppercase"></span>
                 </div>
                 <Swiper
                     initialSlide={Math.random() * characters.length}
@@ -57,7 +57,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                         const { realIndex, } = SwiperCore;
                         setCharacterPrizes(characters[realIndex].prizes);
                         selectHandler(realIndex);
-                        selectColor(realIndex % 2 === 0 ? "neonyellow-300" : "neongreen-300")
+                        selectColor(`${characters[realIndex].color}-300`)
                     }}
                     navigation={{
                         prevEl: '.prev',
@@ -92,7 +92,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
 
 
             <button className={`text-4xl text-center transition-all duration-200 text-${color} uppercase bg-${color}  py-4 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
-                <span className="text-gray-900">select</span>
+                <span className="text-gray-900 font-light">select</span>
             </button>
 
             {viewBio ? <InfoCard prizes={characterPrizes} color={color} clickHandler={handleClick} /> : <></>}

@@ -41,7 +41,9 @@ export const dummyLaureates: laureateI[] = [
         gender: "female",
         description: "",
         img: "./img/laureate.png",
-        prizes: []
+        prizes: [],
+        color: "neonyellow"
+
 
     },
     {
@@ -61,7 +63,8 @@ export const dummyLaureates: laureateI[] = [
         gender: "female",
         description: "",
         img: "./img/laureate.png",
-        prizes: []
+        prizes: [],
+        color: "neonyellow"
     },
 ]
 
@@ -82,6 +85,7 @@ export const dummyLaureate: laureateI = {
     gender: "female",
     description: "",
     img: "./img/laureate.png",
-    prizes: []
+    prizes: [],
+    color: "neonyellow"
 }
 

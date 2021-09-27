@@ -42,7 +42,7 @@ function App() {
       <div className="container h-screen bg-gray-900">
         <Switch>
           <Route path="/select">
-            {loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={setCharacterIndex} />}
+            {loading ? <Loading /> : <SelectCharacter characters={laureates} charIndex={characterIndex} selectHandler={setCharacterIndex} />}
           </Route>
           <Route path="/play">
             {loading ? <Loading /> : <GameController charactersList={laureates} characterIndex={characterIndex} />}

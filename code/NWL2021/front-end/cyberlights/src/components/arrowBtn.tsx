@@ -20,7 +20,7 @@ export const ArrowBtn = ({ direction, clickEvent }: React.PropsWithChildren<arro
 
     const clickHandler = (e: MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
-        clickEvent(direction)
+        clickEvent(direction);
     };
 
     return (
