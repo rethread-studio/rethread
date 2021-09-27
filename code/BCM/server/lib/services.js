@@ -35,7 +35,7 @@ module.exports = function (packet) {
   if (hostContains(packet, "mozilla")) {
     output.add("Mozilla");
   }
-  if (hostContains(packet, "dropbox")) {
+  if (hostContains(packet, "dropbox") || packet.info?.indexOf("Dropbox") > -1) {
     output.add("Dropbox");
   }
   if (hostContains(packet, "microsoft") || hostContains(packet, "msedge.net")) {
@@ -59,7 +59,7 @@ module.exports = function (packet) {
   if (hostContains(packet, "apple") || hostContains(packet, "ios") || hostContains(packet, "itunes")) {
     output.add("Apple");
   }
-  if (hostContains(packet, "twitter")) {
+  if (hostContains(packet, "twitter") || hostContains(packet, "twimg")) {
     output.add("Twitter");
   }
   if (
@@ -89,9 +89,9 @@ module.exports = function (packet) {
   if (hostContains(packet, "wordpress")) {
     output.add("Wordpress");
   }
-  if (hostContains(packet, "kth")) {
-    output.add("KTH");
-  }
+  // if (hostContains(packet, "kth")) {
+  //   output.add("KTH");
+  // }
   if (hostContains(packet, "aws") || hostContains(packet, "amazon")) {
     output.add("Amazon");
   }
