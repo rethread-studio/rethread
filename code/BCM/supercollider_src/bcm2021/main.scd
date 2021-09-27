@@ -15,6 +15,8 @@ s.reboot;
 ~h2chordOctaves = 2;
 ~attackSmear = 0.0;
 ~tickClock.tempo = ~tickClock.tempo*0.5;
+~changeHarmonicFramework.(1);
+~changeHarmonicFramework.(2);
 )
 
 (
