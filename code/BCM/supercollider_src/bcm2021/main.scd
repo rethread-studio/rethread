@@ -6,13 +6,14 @@ s.reboot;
 
 (
 s.options.numOutputBusChannels = 36;
+s.options.memSize = 1024 * 1024 * 2;
 s.reboot;
 )
 (
 //////////////////////////////////////////////////////
 /////// GLOBAL COMPOSITIONAL CHANGES
 /////////////////////////////////////////////////////
-~h2chordOctaves = 2;
+~h2chordOctaves = 4;
 ~octave = 2;
 ~attackSmear = 0.0;
 ~whisper_amp = 0.5;
@@ -20,6 +21,8 @@ s.reboot;
 ~tickClock.tempo = ~tickClock.tempo*0.5;
 ~changeHarmonicFramework.(1);
 ~changeHarmonicFramework.(2);
+~lengthVersion = 1; // ticking
+~lengthVersion = 2; // pitches
 )
 
 (
@@ -64,6 +67,7 @@ if(~useAmbisonics == true, {
 ~h2chordOctaves = 2;
 ~attackSmear = 0.0;
 ~whisper_amp = 0.25;
+~lengthVersion = 1;
 
 "../sound_forest_mixer_gui.scd".loadRelative;
 "device_gui.scd".loadRelative;
@@ -80,17 +84,11 @@ if(~useAmbisonics == true, {
 "harmonic_change1.scd".loadRelative;
 "harmonic_change2.scd".loadRelative;
 ~harmonyVersion = 2;
+~initHarmony1.();
+~initHarmony2.();
 
 ~changeHarmonicFramework = { | version |
 	~harmonyVersion = version;
-	switch(version,
-		1, {
-			~initHarmony1.();
-		},
-		2, {
-			~initHarmony2.();
-		}
-	);
 };
 ~changeHarmonicFramework.(~harmonyVersion);
 

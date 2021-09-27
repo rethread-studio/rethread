@@ -37,8 +37,6 @@
 	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
 	b = ~guiMakeToggleButton.(\spatHoverToggle, "Spat hover", channel);
 	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
-	b = ~guiMakeToggleButton.(\spatHoverToggle, "Spat hover", channel);
-	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
 	b = ~guiMakeToggleButton.(\spatElevationActivityToggle, "Spat elevation activity", channel);
 	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
 	b = ~guiMakeToggleButton.(\reverbActivityToggle, "Reverb from activity", channel);

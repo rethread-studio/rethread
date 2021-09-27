@@ -25,6 +25,16 @@ SynthDef(\long_sine, {
 
 	Out.ar(\out.kr(0), sig);
 }).add;
+
+SynthDef(\long_sine_transient, {
+	var sig, env, freq = \freq.kr(220);
+
+	env = Env.perc(\atk.kr(0.01), \length.kr(5)).kr(2);
+	sig = SinOsc.ar(freq) * \amp.kr(0.2) * env * 0.5;
+	sig = Pan2.ar(sig, \pan.kr(0));
+
+	Out.ar(\out.kr(0), sig);
+}).add;
 SynthDef(\tick2, {
 	var sig, env, rq = \rq.kr(0.1);
 	env = Env.perc(\atk.kr(0), \rel.kr(0.05), curve: [\c0.kr(-4), \c1.kr(-4)]).ar(2);

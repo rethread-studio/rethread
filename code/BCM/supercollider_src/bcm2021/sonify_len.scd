@@ -1,7 +1,16 @@
 // Sonification of the size of packets using different percussive sounds
 
-
 ~sonify_len = { | len, device |
+	switch(~lengthVersion,
+		1, {
+			~sonify_len1.(len, device);
+		},
+		2, {
+			~sonify_len2.(len, device);
+	});
+};
+
+~sonify_len1 = { | len, device |
 	var delay = 0, channel = ~stats[device].channel, bus = channel.reverb_bus, tick_amp = 0.3 * ~tickAmp;
 	if(~randomizeTiming, { delay = rrand(0.0, 0.3); });
 	delay = delay + rrand(0.0, ~attackSmear);
@@ -138,6 +147,221 @@
 
 };
 
+
+~sonify_len2 = { | len, device |
+	var delay = 0, channel = ~stats[device].channel, bus = channel.reverb_bus, tick_amp = 0.3 * ~tickAmp, sine_amp = 1.5;
+	if(~randomizeTiming, { delay = rrand(0.0, 0.3); });
+	delay = delay + rrand(0.0, ~attackSmear);
+	if(channel.sonifyLengthToggle) {
+		{
+			delay.wait;
+
+			if(len < 80, {
+				var freq = ~s53.degreeToFreq(~chord[~chord.size-1], 0.midicps, 3);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq,
+						\mRatio, 5,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, 2,
+						\atk, 0.03,
+						\rel, 1.0,
+						\length, 1.0,
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+			});
+			if(len >= 80 && (len < 140), {
+				var freq = ~s53.degreeToFreq(~chord[((~chord.size-1) * 0.8).round(1.0)], 0.midicps, 3);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, 1,
+						\atk, 0.01,
+						\rel, 0.5,
+						\length, 1.0,
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+			});
+			if(len >= 140 && (len < 300), {
+				var freq = ~s53.degreeToFreq(~chord[((~chord.size-1) * 0.65).round], 0.midicps, 3);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, 1,
+						\atk, 0.1,
+						\rel, 2.0,
+						\length, 1.5,
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+			});
+			if(len >= 300 && (len < 500), {
+				var freq = ~s53.degreeToFreq(~chord[(~chord.size * 0.4).round], 0.midicps, 3);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 2,
+						\iScale, 1,
+						\atk, 0.1,
+						\rel, 2.0,
+						\length, 2.0,
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+			});
+			if(len >= 500 && (len < 2000), {
+				var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave + 1),
+				iScale = ((len-500)/1500.0) * 8 + 1;
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq,
+						\mRatio, 5,
+						\cRatio, 4,
+						\index, 1,
+						\iScale, iScale,
+						\atk, 0.01,
+						\rel, 0.1,
+						\length, 3.0,
+						\out, bus,
+						\amp, rrand(0.01, 0.1) * 1.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+			});
+			if(len >= 2000 && (len < 6000), {
+				var freq = ~s53.degreeToFreq(~chord[1], 0.midicps, 4);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, 1,
+						\atk, rrand(0.1, 0.2),
+						\rel, 3.0,
+						\length, 3.0,
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+			});
+			if(len >= 6000 && (len < 10000), {
+				var freq = ~s53.degreeToFreq(~chord[2], 0.midicps, 3);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, 1,
+						\atk, 0.1,
+						\rel, rrand(1.5, 3.0),
+						\length, rrand(1.5, 3.0),
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq * 2,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, 1,
+						\atk, 0.02,
+						\rel, rrand(1.5, 3.0),
+						\length, rrand(1.5, 3.0),
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+			});
+			if(len >= 10000, {
+				var freq = ~s53.degreeToFreq(~chord[0], 0.midicps, 2);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, rrand(4, 6),
+						\atk, 0.4,
+						\rel, 5.0,
+						\length, 5.0,
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+				channel.play_on(\long_sine_transient,
+					[
+						\freq, freq * 2,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, rrand(4, 6),
+						\atk, 0.05,
+						\rel, 5.0,
+						\length, 5.0,
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 1.5 * sine_amp,
+						\pan, 0,
+					]
+				);
+			});
+		}.fork;
+	};
+
+};
+/*(
+var freq = ~s53.degreeToFreq(~chord[1], 0.midicps, 2);
+				Synth(\fm,
+					[
+						\freq, freq,
+						\mRatio, 1,
+						\cRatio, 2.0,
+						\index, 1,
+						\iScale, 1,
+						\atk, 0.2,
+						\rel, 3.0,
+						\cRel, -10,
+						\out, bus,
+						\amp, rrand(0.01, 0.02) * 2.5,
+						\pan, 0,
+					]
+);
+)*/
 
 // average len: 349
 // median: 98
