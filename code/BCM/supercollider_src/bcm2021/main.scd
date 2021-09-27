@@ -25,7 +25,7 @@ s.reboot;
 /////////////////////////////////////////////////////
 
 // Routing and mixer channels
-~useAmbisonics = true; // Set to false to use a simple stereo output
+~useAmbisonics = false; // Set to false to use a simple stereo output
 
 ~controlPositionWithMouse = false; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
@@ -55,6 +55,9 @@ if(~useAmbisonics == true, {
 // If you get "late ..." messages, increase this number'
 ~latency = 0.5;
 
+// default values
+~h2chordOctaves = 2;
+~attackSmear = 0.0;
 
 "../sound_forest_mixer_gui.scd".loadRelative;
 "device_gui.scd".loadRelative;
@@ -434,18 +437,15 @@ if(~useAmbisonics == true, {
 
 	// Play a certain sound based on a number of parameters
 	~playSound = { | type, inout, packets, channel |
-		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
+		var activity = \none;
 		if(packets > ~highActivityThreshold, {
 			activity = \high;
-			chord = chord;
 		}, {
 			if(packets > ~mediumActivityThreshold, {
 				activity = \medium;
-				chord = chord[0..(chord.size()*2/3 - 1).asInteger]
 			}, {
 				if(packets > ~lowActivityThreshold, {
 					activity = \low;
-					chord = chord[0..(chord.size()/3 - 1).asInteger]
 				});
 			});
 		});

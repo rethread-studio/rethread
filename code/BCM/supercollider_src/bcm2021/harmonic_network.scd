@@ -92,3 +92,12 @@ degrees = c.degrees();
 	}.fork;
 };
 )
+
+
+// Test for harmonic_change2.scd
+(
+~h2ChangeChord.();
+~chord.postln;
+~h2TicksFromCenter.postln;
+~launchChord.(~chord, 1);
+)
