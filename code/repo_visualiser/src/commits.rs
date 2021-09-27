@@ -26,10 +26,10 @@ struct StatRaw {
 #[derive(Deserialize)]
 pub struct FileChange {
     #[serde_as(as = "DisplayFromStr")]
-    insertions: i32,
+    pub insertions: i32,
     #[serde_as(as = "DisplayFromStr")]
-    deletions: i32,
-    path: String,
+    pub deletions: i32,
+    pub path: String,
 }
 
 /// Unified commit object containing all the data we're interested in

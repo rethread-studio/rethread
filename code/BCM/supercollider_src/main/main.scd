@@ -941,7 +941,6 @@ if(~useAmbisonics == true, {
 		local_mac = msg[11],
 
 		freq, ip_parts, rel = 0.0;
-
 		// Some packets aren't interesting, such as communication with the router
 		if(local_ip != "192.168.0.1".asSymbol && (local_ip != "192.168.0.255".asSymbol)) {
 			// [msg, time, addr, recvPort].postln;
