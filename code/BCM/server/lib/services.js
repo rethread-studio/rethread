@@ -35,7 +35,10 @@ module.exports = function (packet) {
   if (hostContains(packet, "mozilla")) {
     output.add("Mozilla");
   }
-  if (hostContains(packet, "dropbox") || packet.info?.indexOf("Dropbox") > -1) {
+  if (
+    hostContains(packet, "dropbox") ||
+    (packet.info && packet.info.indexOf("Dropbox") > -1)
+  ) {
     output.add("Dropbox");
   }
   if (hostContains(packet, "microsoft") || hostContains(packet, "msedge.net")) {
@@ -56,7 +59,11 @@ module.exports = function (packet) {
   if (hostContains(packet, "instagram")) {
     output.add("Instagram");
   }
-  if (hostContains(packet, "apple") || hostContains(packet, "ios") || hostContains(packet, "itunes")) {
+  if (
+    hostContains(packet, "apple") ||
+    hostContains(packet, "ios") ||
+    hostContains(packet, "itunes")
+  ) {
     output.add("Apple");
   }
   if (hostContains(packet, "twitter") || hostContains(packet, "twimg")) {
