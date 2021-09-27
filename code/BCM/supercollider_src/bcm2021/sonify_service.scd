@@ -99,6 +99,7 @@
 		\WhatsApp, { buf = ~voiceServices.whatsapp },
 	);
 	if (buf != nil, {
-		channel.play_on(\service_voice, [\buf, buf, \amp, 0.125]);
+		("playing: " + service).postln;
+		channel.play_on(\service_voice, [\buf, buf, \amp, ~whisper_amp]);
 	});
 };

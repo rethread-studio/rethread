@@ -127,6 +127,8 @@ if(~useAmbisonics, {
 			elevation = elevation + MouseY.kr(pi * 0.5, 0);
 		};
 		sig = Mix(sig) * \amp.kr(0.5);
+		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
+		sig = Limiter.ar(sig, 0.95);
 		if(~ambisonicsOrder == 1, {
 			sig = HOAEncoder1.ar(
 				sig,
@@ -172,7 +174,7 @@ if(~useAmbisonics, {
 		var sig = In.ar(in, 2);
 		sig = sig * \amp.kr(0.8);
 		sig = Balance2.ar(sig[0], sig[1], pan);
-		sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
+		// sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
 		Out.ar(out, sig);
 		Out.ar(send, sig * send_amp);
 	}).add;

@@ -113,7 +113,7 @@
 			combined_weights = weights + distance_weights;
 			combined_weights = combined_weights.normalizeSum; // normalizes
 
-			("base: " + weights +"\ndistance_weights: " + distance_weights + "\ncombined_weights: " + combined_weights).postln;
+			// ("base: " + weights +"\ndistance_weights: " + distance_weights + "\ncombined_weights: " + combined_weights).postln;
 
 			node_indices.wchoose(combined_weights);
 		},
@@ -225,7 +225,7 @@
 	while({nodes_to_update.size > 0 }, {
 		var current = nodes_to_update.removeAt(0), node = ~nodeGraph[current[0]], accumulated_distance = current[1],
 		edges_to_node = node.get_edges_to_node();
-		("node: " + node.chord.root + " accumulated_distance: " + accumulated_distance).postln;
+		// ("node: " + node.chord.root + " accumulated_distance: " + accumulated_distance).postln;
 		// the edges we should update here are all the edges leading to this node
 		edges_to_node.do{|edge|
 			var update = false,
@@ -237,7 +237,7 @@
 					update = true;
 				});
 			});
-			("edge to: " + ~chordList[edge.destination].root +":" + ~chordList[edge.destination].mode.asString + " update: " + update.asString + " dist: " + edge.distance_to_center + " new_distance: " + (accumulated_distance + (1.0/edge.base_weight))).postln;
+			// ("edge to: " + ~chordList[edge.destination].root +":" + ~chordList[edge.destination].mode.asString + " update: " + update.asString + " dist: " + edge.distance_to_center + " new_distance: " + (accumulated_distance + (1.0/edge.base_weight))).postln;
 			// should be set to accumulated distance, adding the base weight only whe
 			if(update, {
 				edge.distance_to_center = accumulated_distance + edge_distance_weight;

@@ -13,7 +13,10 @@ s.reboot;
 /////// GLOBAL COMPOSITIONAL CHANGES
 /////////////////////////////////////////////////////
 ~h2chordOctaves = 2;
+~octave = 2;
 ~attackSmear = 0.0;
+~whisper_amp = 0.5;
+~tickAmp = 0.25;
 ~tickClock.tempo = ~tickClock.tempo*0.5;
 ~changeHarmonicFramework.(1);
 ~changeHarmonicFramework.(2);
@@ -60,6 +63,7 @@ if(~useAmbisonics == true, {
 // default values
 ~h2chordOctaves = 2;
 ~attackSmear = 0.0;
+~whisper_amp = 0.25;
 
 "../sound_forest_mixer_gui.scd".loadRelative;
 "device_gui.scd".loadRelative;
@@ -532,25 +536,7 @@ if(~useAmbisonics == true, {
 			if(~stats[device].channel.sonifyInstantlyToggle, {
 				~sonify_instantly.(len, out, services, device);
 			});
-			// Percussive sound when a packet is received
-			/*if(~overallActivity < (~maxActivity * 0.5)) {
-			{
-			rrand(0.0, 0.2).wait;
-			~channels.tick_channel.play_on(\tick2,
-			[
-			\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-			\rq, exprand(0.0001, 0.1),
-			\out, 0,
-			\amp, rrand(0.0001, 0.001) * ~tickAmp,
-			\atk, rrand(0.000, 0.004),
-			\c0, -10,
-			\rel, rrand(0.01, 0.05) + rel, //0.01,
-			\c1, -12,
-			\pan, rrand(-1*~packetRecPanWidth, ~packetRecPanWidth),
-			]
-			);
-			}.fork;
-			};*/
+
 			~num_packets = ~num_packets + 1;
 			~numPacketsThisTick = ~numPacketsThisTick + 1;
 			// ("num packets: " + ~num_packets).postln;
@@ -569,9 +555,6 @@ if(~useAmbisonics == true, {
 	~baseRoot = 17;
 	~root = ~baseRoot;
 	~tickAmp = 0.5;
-	~tickAmpTarget = 1.0;
-	~tickAmpStepsLeft = 120;
-	~tickAmpStep = (~tickAmpTarget - ~tickAmp) / ~tickAmpStepsLeft;
 	~counter = 0;
 	~randomizeTiming = false;
 	s.sync();
@@ -624,15 +607,6 @@ if(~useAmbisonics == true, {
 			};
 			~len_per_device.clear;
 
-			if(~tickAmpStepsLeft <= 0) {
-				~tickAmpStepsLeft = rrand(30, 240);
-				~tickAmpTarget = exprand(0.05, 1.0);
-				~tickAmpStep = (~tickAmpTarget - ~tickAmp) / ~tickAmpStepsLeft;
-			};
-			~tickAmp = ~tickAmp + ~tickAmpStep;
-			~tickAmpStepsLeft = ~tickAmpStepsLeft - 1;
-
-
 			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
 
 			switch(~harmonyVersion,
@@ -641,9 +615,9 @@ if(~useAmbisonics == true, {
 			);
 
 			// Update sequencer
-			if(~counter % 1 == 0) {
+			/*if(~counter % 1 == 0) {
 				~playSequencer.(~sequencer);
-			};
+			};*/
 
 			~numPacketsThisTick = 0;
 
@@ -665,32 +639,5 @@ if(~useAmbisonics == true, {
 }.fork;
 )
 
-~ch1[0..0]
-( // Test for percussive sound when packets are received
-{ var panWidth = 0.1;
-	loop {
-		exprand(1, 50).do{
-			if(rrand(0.0, 1.0) > 0.9) {
-				panWidth = rrand(0, 1.0);
-			};
-			Synth(\tick2,
-				[
-					\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-					\rq, exprand(0.0001, 0.1),
-					\out, 0,
-					\amp, rrand(0.001, 0.02),
-					\atk, 0.000,
-					\rel, rrand(0.01, 0.05), //0.01,
-					\c1, -12,
-					\pan, rrand(-1*panWidth, panWidth),
-				]
-			);
-			100.reciprocal.wait;
-		};
-		0.3.wait;
-	};
-}.fork;
-)
-~root = 22
 ~sonify_instantly.(10, true, \Google, 1);
 ~tickClock.tempo = ~tickClock.tempo*0.5

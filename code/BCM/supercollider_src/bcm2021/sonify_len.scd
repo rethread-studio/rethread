@@ -2,7 +2,7 @@
 
 
 ~sonify_len = { | len, device |
-	var delay = 0, channel = ~stats[device].channel, bus = channel.reverb_bus, tick_amp = 0.3;
+	var delay = 0, channel = ~stats[device].channel, bus = channel.reverb_bus, tick_amp = 0.3 * ~tickAmp;
 	if(~randomizeTiming, { delay = rrand(0.0, 0.3); });
 	delay = delay + rrand(0.0, ~attackSmear);
 	if(channel.sonifyLengthToggle) {
@@ -82,7 +82,7 @@
 						\atk, 0.01,
 						\rel, 0.03,
 						\out, bus,
-						\amp, rrand(0.01, 0.1) * 1.5,
+						\amp, rrand(0.01, 0.1) * 1.5 * ~tickAmp,
 						\pan, 0,
 					]
 				);
@@ -96,7 +96,7 @@
 						\lpf, 8000,
 						\out, bus,
 						\rel, rel,
-						\amp, rrand(0.1, 0.2),
+						\amp, rrand(0.1, 0.2) * ~tickAmp,
 						\pan, 0,
 					]
 				);
@@ -110,7 +110,7 @@
 						\lpf, 7000,
 						\out, bus,
 						\rel, rel,
-						\amp, rrand(0.1, 0.2),
+						\amp, rrand(0.1, 0.2) * ~tickAmp,
 						\pan, 0,
 					]
 				);
@@ -128,7 +128,7 @@
 						\rel, 5.0,
 						\cRel, -10,
 						\out, bus,
-						\amp, rrand(0.01, 0.02) * 2.5,
+						\amp, rrand(0.01, 0.02) * 2.5 * ~tickAmp,
 						\pan, 0,
 					]
 				);
