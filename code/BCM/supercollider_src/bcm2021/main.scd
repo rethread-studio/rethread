@@ -4,6 +4,7 @@ s.options.numOutputBusChannels = 36;
 s.reboot;
 )
 
+s.options.device = "JackRouter"; // for routing through jack on Windows
 (
 s.options.numOutputBusChannels = 36;
 s.options.memSize = 1024 * 1024 * 2;
