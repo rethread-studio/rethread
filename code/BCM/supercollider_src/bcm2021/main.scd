@@ -156,6 +156,7 @@ if(~useAmbisonics == true, {
 			my_send_amp: 0.0,
 			activity_level: 0,
 			activity_level_peak: 0,
+			activity_level_slow: 0,
 			reverb_mix: reverb_mix,
 			azimuth: azimuth,
 			elevation: elevation,
@@ -177,6 +178,8 @@ if(~useAmbisonics == true, {
 
 			spatHoverToggle: true,
 			spatElevationActivityToggle: false,
+
+			reverbActivityToggle: true,
 
 			bus: bus,
 			reverb_bus: reverb_bus,
@@ -277,6 +280,7 @@ if(~useAmbisonics == true, {
 				{
 					gui.spat_text_azimuth.string = "azimuth: " + (self.azimuth + self.azimuth_rotation + self.hover_pos[0]).round(0.001);
 					gui.spat_text_elevation.string = "elevation: " + (self.elevation + self.hover_pos[1] + self.activity_elevation).round(0.001);
+					gui.rev_mix_slider.valueAction = self.reverb_mix;
 				}.defer;
 			},
 			update_first: { |self|
@@ -288,14 +292,21 @@ if(~useAmbisonics == true, {
 							\rq, exprand(0.0001, 0.1),
 							\out, self.reverb_bus,
 							\amp, rrand(0.001, 0.02),
-							\atk, 0.000,
+							\atk, 0.001,
 							\rel, rrand(0.01, 0.05), //0.01,
 							\c1, -12,
 							\pan, 0,
 						]
 					);
 				});
+
 				self.activity_level_peak = self.activity_level_peak * 0.8;
+
+				self.activity_level_slow = (self.activity_level_slow * 0.9) + (self.activity_level_peak * 0.1);
+
+				if(self.reverbActivityToggle, {
+					self.set_reverb_mix(self.activity_level_slow.pow(1.5));
+				});
 			},
 		)
 	};

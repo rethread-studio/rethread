@@ -4,7 +4,8 @@
 	title_view = View(bounds: Rect(0, 0, 455, 30)),
 	spat_layout = HLayout(), spat_text_azimuth, spat_text_elevation, spat_view = View(bounds: Rect(0, 0, 455, 30)),
 	window_width = 455,
-	slider_layout = HLayout()
+	slider_layout = HLayout(),
+	rev_mix, rev_mix_view, rev_mix_slider
 	;
 
 	w = Window.new(device.asString, Rect(window_width * (~stats.size-1),200, window_width, 770));
@@ -26,17 +27,21 @@
 	toggle_layout2.add(~guiMakeToggleButton.(\sonifyLengthToggle, "Sonify length", channel));
 	toggle_layout2.add(~guiMakeToggleButton.(\spatHoverToggle, "Spat hover", channel));
 	toggle_layout2.add(~guiMakeToggleButton.(\spatElevationActivityToggle, "Spat elevation activity", channel));
+	toggle_layout2.add(~guiMakeToggleButton.(\reverbActivityToggle, "Reverb from activity", channel));
 
 	spat_text_azimuth = StaticText(spat_view, Rect(0, 0, 200, 30));
 	spat_text_elevation = StaticText(spat_view, Rect(200, 0, 200, 30));
 	spat_layout.add(spat_text_azimuth); spat_layout.add(spat_text_elevation);
 
-	slider_layout.add(~guiMakeSlider2.("verb mix",
+	rev_mix = ~guiMakeSlider2.("verb mix",
 			channel.reverb_mix,
 			{ |slider| channel.set_reverb_mix(slider.value) },
 			{ |value_text| value_text.string = channel.reverb_mix.round(0.01); },
 			palette
-	));
+	);
+	rev_mix_view = rev_mix[0];
+	rev_mix_slider = rev_mix[1];
+	slider_layout.add(rev_mix_view);
 
 	w.layout_(VLayout(VLayout(title_view, toggle_layout1, toggle_layout2, spat_layout), VLayout(slider_layout)));
 	w.front;
@@ -44,6 +49,7 @@
 	(
 		spat_text_azimuth: spat_text_azimuth,
 		spat_text_elevation: spat_text_elevation,
+		rev_mix_slider: rev_mix_slider,
 	)
 };
 
@@ -77,7 +83,7 @@
 	slider_layout.add(slider);
 	slider.layout.add(value_text);
 	slider_layout.add(StaticText(slider_view, Rect(0, 0, 0, 0)).string_(text).stringColor_(palette.color('windowText', 'active')));
-	slider_view
+	[slider_view, slider]
 };
 
 /*
