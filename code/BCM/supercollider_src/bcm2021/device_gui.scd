@@ -5,12 +5,17 @@
 	spat_layout = HLayout(), spat_text_azimuth, spat_text_elevation, spat_view = View(bounds: Rect(0, 0, 455, 30)),
 	window_width = 455,
 	slider_layout = HLayout(),
+	toggle_buttons = List[],
 	rev_mix, rev_mix_view, rev_mix_slider
 	;
 
 	w = Window.new(device.asString, Rect(window_width * (~stats.size-1),200, window_width, 770));
 	w.view.background = palette.color('window', 'active');
 	StaticText(title_view, Rect(0, 0, 200, 20)).string_(device.asString);
+	title_layout.add(title_view);
+
+
+
 	/* Create toggles for
 	sonifyInstantlyToggle: true, // sonify right away
 	sonifyServicesToneToggle: true,
@@ -20,14 +25,41 @@
 	spatHoverToggle: true,
 	spatElevationActivityToggle: false,
 	*/
-	toggle_layout1.add(~guiMakeToggleButton.(\sonifyActivityTickToggle, "Activity tick", channel));
-	toggle_layout1.add(~guiMakeToggleButton.(\sonifyInstantlyToggle, "Sonify instantly", channel));
-	toggle_layout1.add(~guiMakeToggleButton.(\sonifyServicesToneToggle, "Services tone", channel));
-	toggle_layout1.add(~guiMakeToggleButton.(\sonifyServicesWhisperToggle, "Services whisper", channel));
-	toggle_layout2.add(~guiMakeToggleButton.(\sonifyLengthToggle, "Sonify length", channel));
-	toggle_layout2.add(~guiMakeToggleButton.(\spatHoverToggle, "Spat hover", channel));
-	toggle_layout2.add(~guiMakeToggleButton.(\spatElevationActivityToggle, "Spat elevation activity", channel));
-	toggle_layout2.add(~guiMakeToggleButton.(\reverbActivityToggle, "Reverb from activity", channel));
+	b = ~guiMakeToggleButton.(\sonifyActivityTickToggle, "Activity tick", channel);
+	toggle_layout1.add(b[0]); toggle_buttons.add(b[1]);
+	b = ~guiMakeToggleButton.(\sonifyInstantlyToggle, "Sonify instantly", channel);
+	toggle_layout1.add(b[0]); toggle_buttons.add(b[1]);
+	b = ~guiMakeToggleButton.(\sonifyServicesToneToggle, "Services tone", channel);
+	toggle_layout1.add(b[0]); toggle_buttons.add(b[1]);
+	b = ~guiMakeToggleButton.(\sonifyServicesWhisperToggle, "Services whisper", channel);
+	toggle_layout1.add(b[0]); toggle_buttons.add(b[1]);
+	b = ~guiMakeToggleButton.(\sonifyLengthToggle, "Sonify length", channel);
+	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+	b = ~guiMakeToggleButton.(\spatHoverToggle, "Spat hover", channel);
+	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+	b = ~guiMakeToggleButton.(\spatHoverToggle, "Spat hover", channel);
+	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+	b = ~guiMakeToggleButton.(\spatElevationActivityToggle, "Spat elevation activity", channel);
+	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+	b = ~guiMakeToggleButton.(\reverbActivityToggle, "Reverb from activity", channel);
+	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+
+	b = Button(w, Rect(0, 0, 100, 200))
+        .states_([
+            ["Enable all", Color.white, Color.red],
+        ])
+        .action_({ arg butt;
+		toggle_buttons.do { |button| button.toggle(true, true); };
+        });
+	title_layout.add(b);
+	b = Button(w, Rect(0, 0, 100, 200))
+        .states_([
+            ["Disable all", Color.white, Color.grey],
+        ])
+        .action_({ arg butt;
+            toggle_buttons.do { |button| button.toggle(false, true); };
+        });
+	title_layout.add(b);
 
 	spat_text_azimuth = StaticText(spat_view, Rect(0, 0, 200, 30));
 	spat_text_elevation = StaticText(spat_view, Rect(200, 0, 200, 30));
@@ -43,13 +75,14 @@
 	rev_mix_slider = rev_mix[1];
 	slider_layout.add(rev_mix_view);
 
-	w.layout_(VLayout(VLayout(title_view, toggle_layout1, toggle_layout2, spat_layout), VLayout(slider_layout)));
+	w.layout_(VLayout(VLayout(title_layout, toggle_layout1, toggle_layout2, spat_layout), VLayout(slider_layout)));
 	w.front;
 	CmdPeriod.add({ w.close; });
 	(
 		spat_text_azimuth: spat_text_azimuth,
 		spat_text_elevation: spat_text_elevation,
 		rev_mix_slider: rev_mix_slider,
+		toggle_buttons: toggle_buttons,
 	)
 };
 
@@ -58,7 +91,7 @@
 	toggle = ToggleButton(view, property_text,{ arg button,bool;
 		channel.put(property, bool);
 	}, init: channel.at(property), minHeight: 20, onColor: Color.red, offColor: Color.grey);
-	view
+	[view, toggle]
 	/*var box = CheckBox(parent, Rect(0, 0, 20, 20), property_text).valueAction_({
 		|val|
 		property = val;
