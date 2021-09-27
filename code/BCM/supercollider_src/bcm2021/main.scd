@@ -34,7 +34,8 @@ s.reboot;
 /////////////////////////////////////////////////////
 
 // Routing and mixer channels
-~useAmbisonics = false; // Set to false to use a simple stereo output
+~useAmbisonicsEncoder = true; // Set to false to use a simple stereo output
+~useAmbisonicsDecoder = false; // Disable on Windows since the classes don't exist. Decoding needs to be done somewhere else.
 
 ~controlPositionWithMouse = false; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device

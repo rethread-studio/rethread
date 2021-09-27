@@ -106,7 +106,7 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 }).add;
 
 // Create different synthdefs for mixer_channels (incl. the encoder) and the decoder depending on the settings above.
-if(~useAmbisonics, {
+if(~useAmbisonicsDecoder, {
 	SynthDef(\decoder, { | in = 10, out = 0 |
 		var sig;
 		sig = In.ar(in, ~mixerChannelOutputs.asInteger);
@@ -126,6 +126,16 @@ if(~useAmbisonics, {
 		});
 		Out.ar(out, sig);
 	}).add;
+}, {
+	// no ambisonics, just straight through as stereo
+	SynthDef(\decoder, { |in = 10, out = 0 |
+		var sig = In.ar(in, ~mixerChannelOutputs.asInteger);
+		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
+		sig = Limiter.ar(sig, 0.95);
+		Out.ar(out, sig);
+	}).add;
+});
+if(~useAmbisonicsEncoder, {
 	SynthDef(\mixer_channel, { | in = 10, out = 0 |
 		var sig = In.ar(in, 2),
 		// For the HOAEncoder* set of UGens, the azimuth is at the very left at pi/2 and the very right at -pi/2.
@@ -172,14 +182,6 @@ if(~useAmbisonics, {
 		Out.ar(out, sig);
 	}).add;
 }, {
-	// no ambisonics, just straight through as stereo
-	SynthDef(\decoder, { |in = 10, out = 0 |
-		var sig = In.ar(in, ~mixerChannelOutputs.asInteger);
-		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
-		sig = Limiter.ar(sig, 0.95);
-		Out.ar(out, sig);
-	}).add;
-
 	SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0, activity = 0 |
 		var sig = In.ar(in, 2);
 		sig = sig * \amp.kr(0.8);
