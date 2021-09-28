@@ -154,7 +154,7 @@ switch(~encoderType,
 		~elevationPosition = ~elevationPosition + ~elevationStep;
 		switch(~encoderType,
 			\ambisonic, {
-			synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
 			},
 			\stereo, {
 				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
