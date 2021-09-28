@@ -34,17 +34,28 @@ s.reboot;
 /////////////////////////////////////////////////////
 
 // Routing and mixer channels
-~useAmbisonicsEncoder = true; // Set to false to use a simple stereo output
+~encoderType = \ambisonic; // \ambisonic, \stereo, \separate
+// ~useAmbisonicsEncoder = true; // Set to false to use a simple stereo output
 ~useAmbisonicsDecoder = false; // Disable on Windows since the classes don't exist. Decoding needs to be done somewhere else.
 
 ~controlPositionWithMouse = false; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
 ~positionThroughService = true;
 ~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
-if(~useAmbisonics == true, {
-	~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
-}, {
-	~mixerChannelOutputs = 2;
+switch(~encoderType,
+	\ambisonic, {
+		~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
+	},
+	\stereo, {
+		~mixerChannelOutputs = 2;
+	},
+	\separate, {
+		~mixerChannelOutputs = 1;
+		~separateChannelOutputsNext = ~mixerChannelOutputs * 4; // we want NORTH, EAST, SOUTH and WEST on the same channel always
+		~northChannel = 0;
+		~eastChannel = ~mixerChannelOutputs;
+		~southChannel = ~mixerChannelOutputs * 2;
+		~westChannel = ~mixerChannelOutputs * 3;
 });
 ~firstOutputBus = 0;
 ~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
@@ -141,11 +152,33 @@ if(~useAmbisonics == true, {
 		};
 		elevation = ~elevationPosition;
 		~elevationPosition = ~elevationPosition + ~elevationStep;
-		if(~useAmbisonics, {
+		switch(~encoderType,
+			\ambisonic, {
 			synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
-		}, {
-			synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
-		});
+			},
+			\stereo, {
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
+			},
+			\separate, {
+				~mixerChannelOutputs = 2;
+				~separateChannelOutputsNext = ~mixerChannelOutputs * 4; // we want NORTH, EAST, SOUTH and WEST on the same channel always
+				~northChannel = 0;
+				~eastChannel = ~mixerChannelOutputs;
+				~southChannel = ~mixerChannelOutputs * 2;
+				~westChannel = ~mixerChannelOutputs * 3;
+				switch(name.asSymbol,
+					\NORTH, { out = ~northChannel; },
+					\EAST, { out = ~eastChannel; },
+					\SOUTH, { out = ~southChannel; },
+					\WEST, { out = ~westChannel; },
+					{
+						out = ~separateChannelOutputsNext;
+						~separateChannelOutputsNext = ~separateChannelOutputsNext + ~mixerChannelOutputs;
+					}
+				);
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
+			}
+		);
 		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 2.0],
 			target: synth, addAction: \addBefore);
 		(
