@@ -4,20 +4,33 @@ body {
   background-color: #f4f4f3;
   margin: 0;
   padding: 0;
+  font-family: 'Roboto', sans-serif;
 }
+
+
 .board {
   position: relative;
   width: 1200px;
   height: 600px;
+ 
 }
 #game {
-  background: repeating-conic-gradient(#202936 0% 25%, #121826 0% 50%) 50% /
-    200px 200px;
-  background-color: #202936;
   margin: auto;
+  background-color: #202936;
   /* width: 100%;
   max-height: 100%; */
 }
+
+.chess1{
+  background: repeating-conic-gradient(#202936 0% 25%, #121826 0% 50%) 50% /
+  200px 200px;
+}
+
+.chess2{
+  background: repeating-conic-gradient(#121826 0% 25%, #202936 0% 50%) 50% /
+  200px 200px;
+}
+
 .question {
   position: absolute;
   background: rgba(0, 0, 0, 0.1);
@@ -28,19 +41,38 @@ body {
   top: 300px;
   color: white;
   text-align: center;
-  line-height: 100px;
-  font-size: 35px;
+  line-height: 50px;
+  font-size: 36px;
   text-transform: uppercase;
+  /* animation: pulsate 0.11s ease-in-out infinite alternate; */
+  
+  padding: 0 0.025em;
+  display:flex;
+  flex-direction:column;
+  justify-content: center;
+  align-content: center;
+  font-weight: 300;
+  letter-spacing: 0.025em;
 }
 
 .answer {
   position: absolute;
-  width: 200px;
+  wi  dth: 200px;
   height: 100px;
   text-align: center;
-  line-height: 100px;
-  font-size: 35px;
+  line-height: 50px;
+  font-size: 96px;
   text-transform: uppercase;
+
+  display:flex;
+  flex-direction:column;
+  justify-content: center;
+  align-content: center;
+
+  /* animation: pulsate 0.11s ease-in-out infinite alternate; */
+  color:white;
+  font-weight: 300;
+  letter-spacing: 0.05em;
 }
 .answer1 {
   left: 100px;
@@ -50,3 +82,43 @@ body {
   right: 0px;
   top: 100px
 }
+
+.text-neon{
+  text-shadow:
+  0 0 4px #fff,
+  0 0 11px #fff,
+  0 0 19px #fff,
+  0 0 40px #f09,
+  0 0 80px #f09,
+  0 0 90px #f09,
+  0 0 100px #f09,
+  0 0 150px #f09;
+}
+
+@keyframes pulsate {
+  100% {
+    /* Larger blur radius */
+    text-shadow:
+      0 0 4px #fff,
+      0 0 11px #fff,
+      0 0 19px #fff,
+      0 0 40px #f09,
+      0 0 80px #f09,
+      0 0 90px #f09,
+      0 0 100px #f09,
+      0 0 150px #f09;
+  }
+ 0% {
+    /* A slightly smaller blur radius */
+    text-shadow:
+      0 0 4px #fff,
+      0 0 10px #fff,
+      0 0 18px #fff,
+      0 0 38px #f09,
+      0 0 73px #f09,
+      0 0 80px #f09,
+      0 0 94px #f09,
+      0 0 140px #f09;
+  }
+}
+

@@ -26,7 +26,9 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
             domain: charactersList[characterIndex].bornCountry,
             year: charactersList[characterIndex].bornDate,
             country: charactersList[characterIndex].bornCountry,
+            color: "#ffe879",
             img: "/img/laureate.png",
+            shadowImg: "/img/laureateShadow.png",
         };
         socket.emit("start", laureate);
 

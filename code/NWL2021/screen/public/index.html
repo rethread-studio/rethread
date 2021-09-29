@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width initial-scale=1.0" />
-    <title></title>
-    <link rel="stylesheet" href="style/style.css" />
-  </head>
-  <body>
-    <div class="board">
-      <canvas id="game"></canvas>
-      <div class="question">Did Alan Turing win a nobel?</div>
-      <div class="answer answer1">Yes</div>
-      <div class="answer answer2">No</div>
-    </div>
-  </body>
-  <script src="/script/external/socket.io.min.js"></script>
-  <script src="script/index.js"></script>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width initial-scale=1.0" />
+  <title></title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+  </style>
+  <link rel="stylesheet" href="style/style.css" />
+</head>
+
+<body>
+  <div class="board">
+    <canvas id="game"></canvas>
+    <div class="question text-neon">How many nobel prices have Turing won?</div>
+    <div class="answer answer1 text-neon">Yes</div>
+    <div class="answer answer2 text-neon">No</div>
+  </div>
+</body>
+<script src="/script/external/socket.io.min.js"></script>
+<script src="script/index.js"></script>
+
 </html>

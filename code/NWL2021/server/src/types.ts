@@ -2,6 +2,8 @@ export interface Player extends Position {
   inQuestion: boolean;
   laureate: any;
   socket: any | null;
+  // previousPositions: any;
+  previousPositions: Position[];
 }
 
 export interface Position {

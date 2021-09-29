@@ -23,7 +23,7 @@ export class Engine {
   private _players: { [key: string]: Player };
   private _events = new Events();
 
-  constructor() {}
+  constructor() { }
 
   async init() {
     this._questions = await QuestionModel.find();
@@ -66,7 +66,7 @@ export class Engine {
     do {
       newQuestion =
         this._questions[
-          Math.round(Math.random() * (this._questions.length - 1))
+        Math.round(Math.random() * (this._questions.length - 1))
         ];
     } while (
       this._currentQuestion &&
@@ -96,6 +96,7 @@ export class Engine {
       laureate,
       inQuestion: false,
       socket: null,
+      previousPositions: []
     };
 
     while (!this.isValidPosition(player, id)) {
@@ -121,13 +122,13 @@ export class Engine {
     if (
       position.y >= this._currentQuestion.position.y &&
       position.y <=
-        this._currentQuestion.position.y + this._currentQuestion.position.height
+      this._currentQuestion.position.y + this._currentQuestion.position.height
     ) {
       if (
         position.x >= this._currentQuestion.position.x &&
         position.x <=
-          this._currentQuestion.position.x +
-            this._currentQuestion.position.width
+        this._currentQuestion.position.x +
+        this._currentQuestion.position.width
       ) {
         return false;
       }
@@ -174,6 +175,11 @@ export class Engine {
       y: player.y + position.y,
     };
     if (this.isValidPosition(newPosition, id)) {
+      //add the previous position
+      player.previousPositions.push({ x: player.x, y: player.y });
+      if (player.previousPositions.length > 4) {
+        player.previousPositions.shift();
+      }
       // move the player and increment score
       player.x = newPosition.x;
       player.y = newPosition.y;
