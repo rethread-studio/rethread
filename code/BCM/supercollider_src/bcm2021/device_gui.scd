@@ -5,7 +5,7 @@
 	spat_layout = HLayout(), spat_text_azimuth, spat_text_elevation, spat_view = View(bounds: Rect(0, 0, 455, 30)),
 	window_width = 455,
 	slider_layout = HLayout(),
-	toggle_buttons = List[],
+	toggle_buttons = Dictionary[],
 	rev_mix, rev_mix_view, rev_mix_slider
 	;
 
@@ -26,28 +26,28 @@
 	spatElevationActivityToggle: false,
 	*/
 	b = ~guiMakeToggleButton.(\sonifyActivityTickToggle, "Activity tick", channel);
-	toggle_layout1.add(b[0]); toggle_buttons.add(b[1]);
+	toggle_layout1.add(b[0]); toggle_buttons.put(\sonifyActivityTickToggle, b[1]);
 	b = ~guiMakeToggleButton.(\sonifyInstantlyToggle, "Sonify instantly", channel);
-	toggle_layout1.add(b[0]); toggle_buttons.add(b[1]);
+	toggle_layout1.add(b[0]); toggle_buttons.put(\sonifyInstantlyToggle, b[1]);
 	b = ~guiMakeToggleButton.(\sonifyServicesToneToggle, "Services tone", channel);
-	toggle_layout1.add(b[0]); toggle_buttons.add(b[1]);
+	toggle_layout1.add(b[0]); toggle_buttons.put(\sonifyServicesToneToggle, b[1]);
 	b = ~guiMakeToggleButton.(\sonifyServicesWhisperToggle, "Services whisper", channel);
-	toggle_layout1.add(b[0]); toggle_buttons.add(b[1]);
+	toggle_layout1.add(b[0]); toggle_buttons.put(\sonifyServicesWhisperToggle, b[1]);
 	b = ~guiMakeToggleButton.(\sonifyLengthToggle, "Sonify length", channel);
-	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+	toggle_layout2.add(b[0]); toggle_buttons.put(\sonifyLengthToggle, b[1]);
 	b = ~guiMakeToggleButton.(\spatHoverToggle, "Spat hover", channel);
-	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+	toggle_layout2.add(b[0]); toggle_buttons.put(\spatHoverToggle, b[1]);
 	b = ~guiMakeToggleButton.(\spatElevationActivityToggle, "Spat elevation activity", channel);
-	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+	toggle_layout2.add(b[0]); toggle_buttons.put(\spatElevationActivityToggle, b[1]);
 	b = ~guiMakeToggleButton.(\reverbActivityToggle, "Reverb from activity", channel);
-	toggle_layout2.add(b[0]); toggle_buttons.add(b[1]);
+	toggle_layout2.add(b[0]); toggle_buttons.put(\reverbActivityToggle, b[1]);
 
 	b = Button(w, Rect(0, 0, 100, 200))
         .states_([
             ["Enable all", Color.white, Color.red],
         ])
         .action_({ arg butt;
-		toggle_buttons.do { |button| button.toggle(true, true); };
+		toggle_buttons.values.do { |button| button.toggle(true, true); };
         });
 	title_layout.add(b);
 	b = Button(w, Rect(0, 0, 100, 200))
@@ -55,7 +55,7 @@
             ["Disable all", Color.white, Color.grey],
         ])
         .action_({ arg butt;
-            toggle_buttons.do { |button| button.toggle(false, true); };
+            toggle_buttons.values.do { |button| button.toggle(false, true); };
         });
 	title_layout.add(b);
 
@@ -75,7 +75,8 @@
 
 	w.layout_(VLayout(VLayout(title_layout, toggle_layout1, toggle_layout2, spat_layout), VLayout(slider_layout)));
 	w.front;
-	CmdPeriod.add({ w.close; });
+	~allWindows.add(w);
+
 	(
 		spat_text_azimuth: spat_text_azimuth,
 		spat_text_elevation: spat_text_elevation,
@@ -115,6 +116,12 @@
 	slider.layout.add(value_text);
 	slider_layout.add(StaticText(slider_view, Rect(0, 0, 0, 0)).string_(text).stringColor_(palette.color('windowText', 'active')));
 	[slider_view, slider]
+};
+
+~setAllDevicesToggle = { | property, value |
+	~device_guis.do{ |gui|
+		{ gui.toggle_buttons[property].toggle(value, true); }.defer;
+	};
 };
 
 /*
