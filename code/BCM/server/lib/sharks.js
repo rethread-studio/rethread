@@ -38,7 +38,7 @@ function getLocation(ip, data) {
   };
 }
 
-function isIn(clients, destinationIp) {
+function isLocalIp(clients, destinationIp) {
   for (let client of clients) {
     return destinationIp == client.ip;
   }
@@ -47,13 +47,14 @@ function isIn(clients, destinationIp) {
   }
   return (
     destinationIp.indexOf("192.168") == 0 ||
-    destinationIp.indexOf("130.229") == 0
+    destinationIp.indexOf("130.229") == 0 ||
+    destinationIp.indexOf("130.237.") == 0
   );
 }
 
 module.exports = function (networkInterface, kill, broadcast) {
   return new Promise((resolve, reject) => {
-    const cmd = `-B 5 -N Ndmntv -l -T fields -i ${networkInterface} -e frame.time_epoch -e frame.number -e ip.src -e ip.dst -e ip.src_host -e ip.dst_host -e frame.len -e frame.protocols -e eth.src -e eth.dst -e eth.src.oui_resolved -e eth.dst.oui_resolved -e _ws.col.Info`;
+    const cmd = `-B 5 -N Ndmntv -l -T fields -i ${networkInterface} -e frame.time_epoch -e frame.number -e ip.src -e ip.dst -e _ws.col.Source -e _ws.col.Destination -e frame.len -e frame.protocols -e eth.src -e eth.dst -e eth.src.oui_resolved -e eth.dst.oui_resolved -e _ws.col.Info`;
     try {
       const child = spawn("tshark", cmd.split(" "));
       console.log("Start sniffing on " + networkInterface);
@@ -82,7 +83,7 @@ module.exports = function (networkInterface, kill, broadcast) {
               len: parseInt(values[6]),
               info: values[12],
               protocol: values[7],
-              out: !isIn(clients, values[3]),
+              out: !isLocalIp(clients, values[3]),
             };
             if (new Date().getTime() - data.timestamp > 1500) {
               continue;
@@ -106,12 +107,11 @@ module.exports = function (networkInterface, kill, broadcast) {
               data.local_vender = values[11];
               data.remote_vender = values[10];
             }
-            if (data.local_ip == "") {
-              continue;
+            if (data.local_ip != "") {
+              data.local_location = getLocation(data.local_ip, data);
+              data.remote_location = getLocation(data.remote_ip, data);
             }
 
-            data.local_location = getLocation(data.local_ip, data);
-            data.remote_location = getLocation(data.remote_ip, data);
 
             data.services = getServices(data);
             broadcast(data);

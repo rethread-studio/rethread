@@ -4,7 +4,7 @@
 ~h2chordOctaves = 2;
 
 ~initHarmony2 = {
-	~generateHarmonicGrid.(3);
+	~generateHarmonicGrid.(2);
 	~h2NodeIndex = 0;
 	~h2TicksFromCenter = 0;
 
@@ -31,7 +31,7 @@
 	if(new_index == 0, {
 		~h2TicksFromCenter = 0;
 	}, {
-		~h2TicksFromCenter = ~h2TicksFromCenter + 1;
+		~h2TicksFromCenter = ~h2TicksFromCenter + 2;
 	});
 	~h2NodeIndex = new_index;
 	~chord = ~nodeGraph[~h2NodeIndex].chord.degrees();
@@ -105,15 +105,15 @@
 			combined_weights,
 			node_indices = self.edges.collect{|edge| edge.destination};
 
-			distance_weights = distance_weights + distance_weights.minItem; // convert to all positive
+			distance_weights = distance_weights - distance_weights.minItem; // convert to all positive
 			distance_weights = distance_weights.normalizeSum;
 			distance_weights = distance_weights.pow(ticks_from_center.pow(0.25)); // distance becomes more discriminant for higher ticks
-			distance_weights = distance_weights.normalizeSum * ticks_from_center.pow(0.25);
+			distance_weights = distance_weights.normalizeSum * ticks_from_center.pow(0.5);
 
 			combined_weights = weights + distance_weights;
 			combined_weights = combined_weights.normalizeSum; // normalizes
 
-			("base: " + weights +"\ndistance_weights: " + distance_weights + "\ncombined_weights: " + combined_weights).postln;
+			// ("base: " + weights +"\ndistance_weights: " + distance_weights + "\ncombined_weights: " + combined_weights).postln;
 
 			node_indices.wchoose(combined_weights);
 		},
@@ -121,15 +121,17 @@
 			var edges_to_node = List[];
 			self.edges.do{|self_edge|
 				~nodeGraph[self_edge.destination].edges.do{|edge|
-					if(edge.destination == self, {edges_to_node.add(edge);});
+					if(edge.destination == self.my_index, {edges_to_node.add(edge);});
 				};
 			};
+			edges_to_node
 		},
 	)
 };
 
-~makeEdge = { | destinationIndex, base_weight |
+~makeEdge = { | sourceIndex, destinationIndex, base_weight |
 	(
+		source_index: sourceIndex,
 		destination: destinationIndex,
 		distance_to_center: nil, // the shortest possible distance to the center node
 		base_weight: base_weight,
@@ -179,7 +181,7 @@
 		var index = ~findChord.(adjacent_chords[i]);
 		if(index != nil, {
 			var adjacent_node = ~nodeGraph[index];
-			node.add_edge(~makeEdge.(index, weights[i]));
+			node.add_edge(~makeEdge.(node.my_index, index, weights[i]));
 			if(adjacent_node.edges.size == 0, {
 				// Add the edges for this adjacent node as well if they haven't been added before
 				~addAllEdges.(adjacent_node);
@@ -217,25 +219,30 @@
 		});
 		if(update, {
 			edge.distance_to_center = start_distance + (1.0/edge.base_weight);
-			nodes_to_update.add([edge.destination, edge.distance_to_center]);
+			nodes_to_update.add([edge.source_index, edge.distance_to_center]);
 		});
 	};
 	while({nodes_to_update.size > 0 }, {
 		var current = nodes_to_update.removeAt(0), node = ~nodeGraph[current[0]], accumulated_distance = current[1],
 		edges_to_node = node.get_edges_to_node();
+		// ("node: " + node.chord.root + " accumulated_distance: " + accumulated_distance).postln;
 		// the edges we should update here are all the edges leading to this node
 		edges_to_node.do{|edge|
-			var update = false;
+			var update = false,
+			edge_distance_weight = 1.0/edge.base_weight;
+			// edge_distance_weight = 1.0;
 			// this ugly thing is necessary because the second condition is evaluated even if the first is true
 			if(edge.distance_to_center == nil, { update = true; }, {
-				if ((accumulated_distance + (1.0/edge.base_weight)) < edge.distance_to_center, {
+				if ((accumulated_distance + edge_distance_weight) < edge.distance_to_center, {
 					update = true;
 				});
 			});
+			// ("edge to: " + ~chordList[edge.destination].root +":" + ~chordList[edge.destination].mode.asString + " update: " + update.asString + " dist: " + edge.distance_to_center + " new_distance: " + (accumulated_distance + (1.0/edge.base_weight))).postln;
+			// should be set to accumulated distance, adding the base weight only whe
 			if(update, {
-				edge.distance_to_center = start_distance + (1.0/edge.base_weight);
+				edge.distance_to_center = accumulated_distance + edge_distance_weight;
 				// follow the edge to its destination node and go through the edges of that node
-				nodes_to_update.add([edge.destination, accumulated_distance + edge.distance_to_center]);
+				nodes_to_update.add([edge.source_index, edge.distance_to_center]);
 			});
 		}
 	});
@@ -270,9 +277,20 @@
 n = ~makeNode.(~makeChord.(), 5);
 ~findChord.(~makeChord.(9));
 ~nodeGraph[0]
+~nodeGraph[0].get_edges_to_node()
 ~nodeGraph[1].chord.root
-~nodeGraph[9].chord.root
+~nodeGraph[2].chord.root
+~nodeGraph[3].chord.root
+~nodeGraph[4].chord.root
+~nodeGraph[5].chord.root
+~nodeGraph[8].chord.root
 ~nodeGraph[9].edges
+
+(
+~nodeGraph[0].edges.do {|edge| (">"+edge.destination + ": " + edge.distance_to_center + " dist w: " + edge.distance_weight).postln };
+)
+~nodeGraph[8].edges.do {|edge| (">"+ ~chordList[edge.destination].root +":" + ~chordList[edge.destination].mode.asString + ": " + edge.distance_to_center).postln };
+~nodeGraph[8].edges.do {|edge| (">"+ ~chordList[edge.destination].root +":" + ~chordList[edge.destination].mode.asString + ": " + edge.distance_weight).postln };
 
 
 

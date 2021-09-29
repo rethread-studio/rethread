@@ -4,17 +4,26 @@ s.options.numOutputBusChannels = 36;
 s.reboot;
 )
 
+s.options.device = "JackRouter"; // for routing through jack on Windows
 (
 s.options.numOutputBusChannels = 36;
+s.options.memSize = 1024 * 1024 * 2;
 s.reboot;
 )
 (
 //////////////////////////////////////////////////////
 /////// GLOBAL COMPOSITIONAL CHANGES
 /////////////////////////////////////////////////////
-~h2chordOctaves = 2;
+~h2chordOctaves = 4;
+~octave = 2;
 ~attackSmear = 0.0;
+~whisper_amp = 0.5;
+~tickAmp = 0.25;
 ~tickClock.tempo = ~tickClock.tempo*0.5;
+~changeHarmonicFramework.(1);
+~changeHarmonicFramework.(2);
+~lengthVersion = 1; // ticking
+~lengthVersion = 2; // pitches
 )
 
 (
@@ -25,16 +34,28 @@ s.reboot;
 /////////////////////////////////////////////////////
 
 // Routing and mixer channels
-~useAmbisonics = true; // Set to false to use a simple stereo output
+~encoderType = \ambisonic; // \ambisonic, \stereo, \separate
+// ~useAmbisonicsEncoder = true; // Set to false to use a simple stereo output
+~useAmbisonicsDecoder = false; // Disable on Windows since the classes don't exist. Decoding needs to be done somewhere else.
 
 ~controlPositionWithMouse = false; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
 ~positionThroughService = true;
 ~ambisonicsOrder = 3; // Currently 1, 3 or 5 are supported
-if(~useAmbisonics == true, {
-	~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
-}, {
-	~mixerChannelOutputs = 2;
+switch(~encoderType,
+	\ambisonic, {
+		~mixerChannelOutputs = (~ambisonicsOrder+1).pow(2);
+	},
+	\stereo, {
+		~mixerChannelOutputs = 2;
+	},
+	\separate, {
+		~mixerChannelOutputs = 1;
+		~separateChannelOutputsNext = ~mixerChannelOutputs * 4; // we want NORTH, EAST, SOUTH and WEST on the same channel always
+		~northChannel = 0;
+		~eastChannel = ~mixerChannelOutputs;
+		~southChannel = ~mixerChannelOutputs * 2;
+		~westChannel = ~mixerChannelOutputs * 3;
 });
 ~firstOutputBus = 0;
 ~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
@@ -55,6 +76,11 @@ if(~useAmbisonics == true, {
 // If you get "late ..." messages, increase this number'
 ~latency = 0.5;
 
+// default values
+~h2chordOctaves = 2;
+~attackSmear = 0.0;
+~whisper_amp = 0.25;
+~lengthVersion = 1;
 
 "../sound_forest_mixer_gui.scd".loadRelative;
 "device_gui.scd".loadRelative;
@@ -71,17 +97,11 @@ if(~useAmbisonics == true, {
 "harmonic_change1.scd".loadRelative;
 "harmonic_change2.scd".loadRelative;
 ~harmonyVersion = 2;
+~initHarmony1.();
+~initHarmony2.();
 
 ~changeHarmonicFramework = { | version |
 	~harmonyVersion = version;
-	switch(version,
-		1, {
-			~initHarmony1.();
-		},
-		2, {
-			~initHarmony2.();
-		}
-	);
 };
 ~changeHarmonicFramework.(~harmonyVersion);
 
@@ -132,11 +152,33 @@ if(~useAmbisonics == true, {
 		};
 		elevation = ~elevationPosition;
 		~elevationPosition = ~elevationPosition + ~elevationStep;
-		if(~useAmbisonics, {
-			synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
-		}, {
-			synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
-		});
+		switch(~encoderType,
+			\ambisonic, {
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
+			},
+			\stereo, {
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
+			},
+			\separate, {
+				~mixerChannelOutputs = 2;
+				~separateChannelOutputsNext = ~mixerChannelOutputs * 4; // we want NORTH, EAST, SOUTH and WEST on the same channel always
+				~northChannel = 0;
+				~eastChannel = ~mixerChannelOutputs;
+				~southChannel = ~mixerChannelOutputs * 2;
+				~westChannel = ~mixerChannelOutputs * 3;
+				switch(name.asSymbol,
+					\NORTH, { out = ~northChannel; },
+					\EAST, { out = ~eastChannel; },
+					\SOUTH, { out = ~southChannel; },
+					\WEST, { out = ~westChannel; },
+					{
+						out = ~separateChannelOutputsNext;
+						~separateChannelOutputsNext = ~separateChannelOutputsNext + ~mixerChannelOutputs;
+					}
+				);
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
+			}
+		);
 		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 2.0],
 			target: synth, addAction: \addBefore);
 		(
@@ -147,6 +189,7 @@ if(~useAmbisonics == true, {
 			my_send_amp: 0.0,
 			activity_level: 0,
 			activity_level_peak: 0,
+			activity_level_slow: 0,
 			reverb_mix: reverb_mix,
 			azimuth: azimuth,
 			elevation: elevation,
@@ -168,6 +211,8 @@ if(~useAmbisonics == true, {
 
 			spatHoverToggle: true,
 			spatElevationActivityToggle: false,
+
+			reverbActivityToggle: true,
 
 			bus: bus,
 			reverb_bus: reverb_bus,
@@ -268,6 +313,7 @@ if(~useAmbisonics == true, {
 				{
 					gui.spat_text_azimuth.string = "azimuth: " + (self.azimuth + self.azimuth_rotation + self.hover_pos[0]).round(0.001);
 					gui.spat_text_elevation.string = "elevation: " + (self.elevation + self.hover_pos[1] + self.activity_elevation).round(0.001);
+					gui.rev_mix_slider.valueAction = self.reverb_mix;
 				}.defer;
 			},
 			update_first: { |self|
@@ -279,14 +325,21 @@ if(~useAmbisonics == true, {
 							\rq, exprand(0.0001, 0.1),
 							\out, self.reverb_bus,
 							\amp, rrand(0.001, 0.02),
-							\atk, 0.000,
+							\atk, 0.001,
 							\rel, rrand(0.01, 0.05), //0.01,
 							\c1, -12,
 							\pan, 0,
 						]
 					);
 				});
+
 				self.activity_level_peak = self.activity_level_peak * 0.8;
+
+				self.activity_level_slow = (self.activity_level_slow * 0.9) + (self.activity_level_peak * 0.1);
+
+				if(self.reverbActivityToggle, {
+					self.set_reverb_mix(self.activity_level_slow.pow(1.5));
+				});
 			},
 		)
 	};
@@ -434,18 +487,15 @@ if(~useAmbisonics == true, {
 
 	// Play a certain sound based on a number of parameters
 	~playSound = { | type, inout, packets, channel |
-		var activity = \none, chord = [~ch1, ~ch2, ~ch3, ~ch4].choose;
+		var activity = \none;
 		if(packets > ~highActivityThreshold, {
 			activity = \high;
-			chord = chord;
 		}, {
 			if(packets > ~mediumActivityThreshold, {
 				activity = \medium;
-				chord = chord[0..(chord.size()*2/3 - 1).asInteger]
 			}, {
 				if(packets > ~lowActivityThreshold, {
 					activity = \low;
-					chord = chord[0..(chord.size()/3 - 1).asInteger]
 				});
 			});
 		});
@@ -530,25 +580,7 @@ if(~useAmbisonics == true, {
 			if(~stats[device].channel.sonifyInstantlyToggle, {
 				~sonify_instantly.(len, out, services, device);
 			});
-			// Percussive sound when a packet is received
-			/*if(~overallActivity < (~maxActivity * 0.5)) {
-			{
-			rrand(0.0, 0.2).wait;
-			~channels.tick_channel.play_on(\tick2,
-			[
-			\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-			\rq, exprand(0.0001, 0.1),
-			\out, 0,
-			\amp, rrand(0.0001, 0.001) * ~tickAmp,
-			\atk, rrand(0.000, 0.004),
-			\c0, -10,
-			\rel, rrand(0.01, 0.05) + rel, //0.01,
-			\c1, -12,
-			\pan, rrand(-1*~packetRecPanWidth, ~packetRecPanWidth),
-			]
-			);
-			}.fork;
-			};*/
+
 			~num_packets = ~num_packets + 1;
 			~numPacketsThisTick = ~numPacketsThisTick + 1;
 			// ("num packets: " + ~num_packets).postln;
@@ -567,9 +599,6 @@ if(~useAmbisonics == true, {
 	~baseRoot = 17;
 	~root = ~baseRoot;
 	~tickAmp = 0.5;
-	~tickAmpTarget = 1.0;
-	~tickAmpStepsLeft = 120;
-	~tickAmpStep = (~tickAmpTarget - ~tickAmp) / ~tickAmpStepsLeft;
 	~counter = 0;
 	~randomizeTiming = false;
 	s.sync();
@@ -622,15 +651,6 @@ if(~useAmbisonics == true, {
 			};
 			~len_per_device.clear;
 
-			if(~tickAmpStepsLeft <= 0) {
-				~tickAmpStepsLeft = rrand(30, 240);
-				~tickAmpTarget = exprand(0.05, 1.0);
-				~tickAmpStep = (~tickAmpTarget - ~tickAmp) / ~tickAmpStepsLeft;
-			};
-			~tickAmp = ~tickAmp + ~tickAmpStep;
-			~tickAmpStepsLeft = ~tickAmpStepsLeft - 1;
-
-
 			~overallActivity = ~overallActivity * 0.99 + ((numInPackets + numOutPackets) * 0.01);
 
 			switch(~harmonyVersion,
@@ -639,9 +659,9 @@ if(~useAmbisonics == true, {
 			);
 
 			// Update sequencer
-			if(~counter % 1 == 0) {
+			/*if(~counter % 1 == 0) {
 				~playSequencer.(~sequencer);
-			};
+			};*/
 
 			~numPacketsThisTick = 0;
 
@@ -663,32 +683,5 @@ if(~useAmbisonics == true, {
 }.fork;
 )
 
-~ch1[0..0]
-( // Test for percussive sound when packets are received
-{ var panWidth = 0.1;
-	loop {
-		exprand(1, 50).do{
-			if(rrand(0.0, 1.0) > 0.9) {
-				panWidth = rrand(0, 1.0);
-			};
-			Synth(\tick2,
-				[
-					\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, 5).min(15000),
-					\rq, exprand(0.0001, 0.1),
-					\out, 0,
-					\amp, rrand(0.001, 0.02),
-					\atk, 0.000,
-					\rel, rrand(0.01, 0.05), //0.01,
-					\c1, -12,
-					\pan, rrand(-1*panWidth, panWidth),
-				]
-			);
-			100.reciprocal.wait;
-		};
-		0.3.wait;
-	};
-}.fork;
-)
-~root = 22
 ~sonify_instantly.(10, true, \Google, 1);
 ~tickClock.tempo = ~tickClock.tempo*0.5

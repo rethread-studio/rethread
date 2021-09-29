@@ -25,6 +25,16 @@ SynthDef(\long_sine, {
 
 	Out.ar(\out.kr(0), sig);
 }).add;
+
+SynthDef(\long_sine_transient, {
+	var sig, env, freq = \freq.kr(220);
+
+	env = Env.perc(\atk.kr(0.01), \length.kr(5)).kr(2);
+	sig = SinOsc.ar(freq) * \amp.kr(0.2) * env * 0.5;
+	sig = Pan2.ar(sig, \pan.kr(0));
+
+	Out.ar(\out.kr(0), sig);
+}).add;
 SynthDef(\tick2, {
 	var sig, env, rq = \rq.kr(0.1);
 	env = Env.perc(\atk.kr(0), \rel.kr(0.05), curve: [\c0.kr(-4), \c1.kr(-4)]).ar(2);
@@ -96,7 +106,7 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 }).add;
 
 // Create different synthdefs for mixer_channels (incl. the encoder) and the decoder depending on the settings above.
-if(~useAmbisonics, {
+if(~useAmbisonicsDecoder, {
 	SynthDef(\decoder, { | in = 10, out = 0 |
 		var sig;
 		sig = In.ar(in, ~mixerChannelOutputs.asInteger);
@@ -116,6 +126,17 @@ if(~useAmbisonics, {
 		});
 		Out.ar(out, sig);
 	}).add;
+}, {
+	// no ambisonics, just straight through as stereo
+	SynthDef(\decoder, { |in = 10, out = 0 |
+		var sig = In.ar(in, ~mixerChannelOutputs.asInteger);
+		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
+		sig = Limiter.ar(sig, 0.95);
+		Out.ar(out, sig);
+	}).add;
+});
+switch(~encoderType,
+	\ambisonic, {
 	SynthDef(\mixer_channel, { | in = 10, out = 0 |
 		var sig = In.ar(in, 2),
 		// For the HOAEncoder* set of UGens, the azimuth is at the very left at pi/2 and the very right at -pi/2.
@@ -127,6 +148,8 @@ if(~useAmbisonics, {
 			elevation = elevation + MouseY.kr(pi * 0.5, 0);
 		};
 		sig = Mix(sig) * \amp.kr(0.5);
+		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
+		sig = Limiter.ar(sig, 0.95);
 		if(~ambisonicsOrder == 1, {
 			sig = HOAEncoder1.ar(
 				sig,
@@ -151,32 +174,43 @@ if(~useAmbisonics, {
 			sig = HOAEncoder5.ar(
 				sig,
 				1.0,
-				radius,
-				azimuth,
-				elevation,
-				yes
-			);
-		});
-		Out.ar(out, sig);
-	}).add;
-}, {
-	// no ambisonics, just straight through as stereo
-	SynthDef(\decoder, { |in = 10, out = 0 |
-		var sig = In.ar(in, ~mixerChannelOutputs.asInteger);
-		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
-		sig = Limiter.ar(sig, 0.95);
-		Out.ar(out, sig);
-	}).add;
-
-	SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0, activity = 0 |
-		var sig = In.ar(in, 2);
-		sig = sig * \amp.kr(0.8);
-		sig = Balance2.ar(sig[0], sig[1], pan);
-		sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
-		Out.ar(out, sig);
-		Out.ar(send, sig * send_amp);
-	}).add;
-});
+					radius,
+					azimuth,
+					elevation,
+					yes
+				);
+			});
+			Out.ar(out, sig);
+		}).add;
+	},
+	\stereo, {
+		SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0, activity = 0 |
+			var sig = In.ar(in, 2);
+			sig = sig * \amp.kr(0.8);
+			sig = Balance2.ar(sig[0], sig[1], pan);
+			// sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
+			Out.ar(out, sig);
+			Out.ar(send, sig * send_amp);
+		}).add;
+	},
+	\separate, {
+		SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0, activity = 0 |
+			var sig;
+			if(~mixerChannelOutputs == 2, {
+			sig = In.ar(in, 2);
+			sig = sig * \amp.kr(0.8);
+			sig = Balance2.ar(sig[0], sig[1], pan);
+			});
+			if(~mixerChannelOutputs == 1, {
+				sig = In.ar(in, 1);
+				sig = sig * \amp.kr(0.8);
+			});
+			// sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
+			Out.ar(out, sig);
+			Out.ar(send, sig * send_amp);
+		}).add;
+	}
+);
 
 SynthDef(\reverse_sine, {
 	var sig, env, freq = \freq.kr(220);
