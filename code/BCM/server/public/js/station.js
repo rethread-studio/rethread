@@ -70,11 +70,12 @@ angular
     getConfig();
 
     const visualizations = [
-      "visualization1",
-      "visualization2",
-      //"visualization3",
+      // "visualization0",
+      // "visualization1",
+      // "visualization2",
+      "visualization3",
       "visualizationGlobe",
-      "visualizationSparse",
+      // "visualizationSparse",
     ];
     let currentVisualization = 0;
     $("#" + visualizations[currentVisualization]).addClass(
