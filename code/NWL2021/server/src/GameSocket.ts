@@ -46,6 +46,7 @@ export default class GameSocket {
           inQuestion: p.inQuestion,
           laureate: p.laureate,
           previousPositions: p.previousPositions,
+          status: p.status,
         };
       }),
       question: this.engine.currentQuestion,

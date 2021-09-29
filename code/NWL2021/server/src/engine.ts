@@ -96,7 +96,8 @@ export class Engine {
       laureate,
       inQuestion: false,
       socket: null,
-      previousPositions: []
+      previousPositions: [],
+      status: "iddle",
     };
 
     while (!this.isValidPosition(player, id)) {
@@ -181,6 +182,7 @@ export class Engine {
         player.previousPositions.shift();
       }
       // move the player and increment score
+      player.status = player.x < newPosition.x ? "right" : player.x > newPosition.x ? "left" : "iddle";
       player.x = newPosition.x;
       player.y = newPosition.y;
 
@@ -194,6 +196,12 @@ export class Engine {
       player.inQuestion = inQuestion;
 
       this._events.playerMove.emit(player);
+    } else {
+      player.status = "hit";
+      this._events.playerMove.emit(player);
+      if (player.previousPositions.length > 0) {
+        player.previousPositions.shift();
+      }
     }
   }
 

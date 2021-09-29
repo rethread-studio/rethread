@@ -29,20 +29,37 @@ function start(setup) {
     }, 3000);
   });
 
-  function drawPlayers(players) {
+  function getAngle(playerStatus) {
+    switch (playerStatus) {
+      case "left":
+        return -Math.PI / 4;
+      case "right":
+        return Math.PI / 4;
+      case "up" || "down" || "iddle":
+        return 0;
+      case "hit":
+        return Math.PI;
+      default:
+        return 0;
+    }
+  }
 
+  function drawPlayers(players) {
     if (!players) return;
     // draw players
     Object.keys(players).forEach((playerId) => {
       let player = players[playerId];
       if (imgs[player.laureate.img]) {
-        ctx.drawImage(
-          imgs[player.laureate.img],
-          player.x * setup.unitSize,
-          player.y * setup.unitSize,
+
+        const angle = getAngle(player.status);
+        renderImage(
+          player.x * setup.unitSize + setup.unitSize / 2,
+          player.y * setup.unitSize + setup.unitSize / 2,
           setup.unitSize,
-          setup.unitSize
-        );
+          setup.unitSize,
+          angle,
+          1,
+          imgs[player.laureate.img]);
       } else {
         imgs[player.laureate.img] = new Image(setup.unitSize, setup.unitSize);
         // Load an image of intrinsic size 300x227 in CSS pixels

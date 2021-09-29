@@ -37,7 +37,8 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
             // socket.emit("disconnect");
         }
 
-    }, [charactersList, characterIndex])
+    }, [charactersList, characterIndex]);
+
 
 
     const emitDirection = (direction: controllDirection) => {
