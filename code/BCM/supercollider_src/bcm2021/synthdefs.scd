@@ -145,8 +145,9 @@ switch(~encoderType,
 		// radius = MouseY.kr(0.0, 1.0);
 		if(~controlPositionWithMouse) {
 			azimuth = azimuth + MouseX.kr(pi * 1, -pi * 1);
-			elevation = elevation + MouseY.kr(pi * 0.5, 0);
+			elevation = elevation + MouseY.kr(pi * -0.5, 0);
 		};
+			elevation = elevation - (pi/3);
 		sig = Mix(sig) * \amp.kr(0.5);
 		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
 		sig = Limiter.ar(sig, 0.95);

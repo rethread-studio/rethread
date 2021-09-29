@@ -3,7 +3,7 @@
 // This is called in the loop, not right away. The "activity" is how many packets
 
 ~sonify_service = { | service, activity, channel, inout |
-	var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave + 1),
+	var freq = ~s53.degreeToFreq(~chord.choose + channel.pitch_offset, 0.midicps, ~octave + 1),
 	amp = 1.0,
 	bus = channel.reverb_bus,
 	thump_atk = rrand(0.18, 0.21),

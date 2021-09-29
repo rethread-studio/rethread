@@ -14,11 +14,12 @@ s.reboot;
 //////////////////////////////////////////////////////
 /////// GLOBAL COMPOSITIONAL CHANGES
 /////////////////////////////////////////////////////
-~h2chordOctaves = 4;
-~octave = 2;
+~h2chordOctaves = 5;
+~octave = 1;
 ~attackSmear = 0.0;
-~whisper_amp = 0.5;
-~tickAmp = 0.25;
+~whisper_amp = 1.5;
+~tickAmp = 0.7;
+~activity_tick_amp = 0.3;
 ~tickClock.tempo = ~tickClock.tempo*0.5;
 ~changeHarmonicFramework.(1);
 ~changeHarmonicFramework.(2);
@@ -36,7 +37,7 @@ s.reboot;
 // Routing and mixer channels
 ~encoderType = \ambisonic; // \ambisonic, \stereo, \separate
 // ~useAmbisonicsEncoder = true; // Set to false to use a simple stereo output
-~useAmbisonicsDecoder = false; // Disable on Windows since the classes don't exist. Decoding needs to be done somewhere else.
+~useAmbisonicsDecoder = true; // Disable on Windows since the classes don't exist. Decoding needs to be done somewhere else.
 
 ~controlPositionWithMouse = false; // If the mouse position will infulence ambisonics positioning
 // If ~positionThroughService is true, positioning is based on what service something comes from instead of what device
@@ -61,7 +62,7 @@ switch(~encoderType,
 ~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
 
 // Ambisonics positioning parameters
-~azimuthPosition = 0.0; // The start position, and later on current position for the next device
+~azimuthPosition = -0.45; // The start position, and later on current position for the next device
 ~azimuthStep = (0.5 * pi);
 ~elevationPosition = 0.0;
 ~elevationStep = 0.0;
@@ -81,6 +82,7 @@ switch(~encoderType,
 ~attackSmear = 0.0;
 ~whisper_amp = 0.25;
 ~lengthVersion = 1;
+~activity_tick_amp = 0.5;
 
 "../sound_forest_mixer_gui.scd".loadRelative;
 "device_gui.scd".loadRelative;
@@ -138,7 +140,7 @@ switch(~encoderType,
 
 	// Mixer channel factory
 	~makeMixerChannel = { | name, out, amp = 1 |
-		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation, reverb_mix = 0.25;
+		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation, reverb_mix = 0.25, pitch_offset = 0;
 		bus = Bus.audio(s, ~mixerChannelOutputs);
 		reverb_bus = Bus.audio(s, 2);
 		group = Group(s);
@@ -150,6 +152,12 @@ switch(~encoderType,
 		if(~azimuthPosition < -pi) {
 			~azimuthPosition = ~azimuthPosition + 2pi;
 		};
+		switch(name.asSymbol,
+			\NORTH, { pitch_offset = 31 }, // 31
+			\SOUTH,  { pitch_offset = 0 }, // 0
+			\EAST, { pitch_offset = 9 }, // 9
+			\WEST, { pitch_offset = -31 }, // -31
+		);
 		elevation = ~elevationPosition;
 		~elevationPosition = ~elevationPosition + ~elevationStep;
 		switch(~encoderType,
@@ -179,7 +187,7 @@ switch(~encoderType,
 				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
 			}
 		);
-		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 2.0],
+		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 1.7, \damp, 0.45],
 			target: synth, addAction: \addBefore);
 		(
 			my_synth: synth,
@@ -190,6 +198,7 @@ switch(~encoderType,
 			activity_level: 0,
 			activity_level_peak: 0,
 			activity_level_slow: 0,
+			pitch_offset: pitch_offset,
 			reverb_mix: reverb_mix,
 			azimuth: azimuth,
 			elevation: elevation,
@@ -324,7 +333,7 @@ switch(~encoderType,
 							\freq, self.activity_level_peak * 3000 + 4000,
 							\rq, exprand(0.0001, 0.1),
 							\out, self.reverb_bus,
-							\amp, rrand(0.001, 0.02),
+							\amp, rrand(0.001, 0.02) * ~activity_tick_amp,
 							\atk, 0.001,
 							\rel, rrand(0.01, 0.05), //0.01,
 							\c1, -12,
@@ -564,7 +573,7 @@ switch(~encoderType,
 
 				// Extract all the integers from the remote_ip
 				// ip_parts = remote_ip.asString.split($.).collect{ |num| num.asInteger};
-				// services.postln;
+				services.postln;
 
 				~addPacketToStats.(device, out, services, remote_ip, remote_location);
 			};

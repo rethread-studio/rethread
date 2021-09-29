@@ -25,7 +25,7 @@
 						\rq, exprand(0.2, 0.4),
 						\out, bus,
 						\amp, rrand(0.01, 0.1) * tick_amp,
-						\atk, rrand(0.000, 0.004),
+						\atk, rrand(0.000, 0.004) + 0.001,
 						\c0, -10,
 						\rel, rrand(0.01, 0.05) + 0.01, //0.01,
 						\c1, -12,
@@ -40,7 +40,7 @@
 						\rq, exprand(0.2, 0.4),
 						\out, bus,
 						\amp, rrand(0.01, 0.1) * tick_amp,
-						\atk, rrand(0.000, 0.004),
+						\atk, rrand(0.000, 0.004) + 0.001,
 						\c0, -10,
 						\rel, rrand(0.01, 0.05) + 0.01, //0.01,
 						\c1, -12,
@@ -55,7 +55,7 @@
 						\rq, exprand(0.1, 0.2),
 						\out, bus,
 						\amp, rrand(0.01, 0.1) * tick_amp,
-						\atk, rrand(0.000, 0.004),
+						\atk, rrand(0.000, 0.004) + 0.001,
 						\c0, -10,
 						\rel, rrand(0.01, 0.05) + 0.01, //0.01,
 						\c1, -12,
@@ -70,7 +70,7 @@
 						\rq, exprand(0.1, 0.2),
 						\out, bus,
 						\amp, rrand(0.01, 0.1) * 1.5 * tick_amp,
-						\atk, rrand(0.000, 0.004),
+						\atk, rrand(0.000, 0.004) + 0.001,
 						\c0, -10,
 						\rel, rrand(0.01, 0.05) + 0.01, //0.01,
 						\c1, -12,
@@ -149,7 +149,8 @@
 
 
 ~sonify_len2 = { | len, device |
-	var delay = 0, channel = ~stats[device].channel, bus = channel.reverb_bus, tick_amp = 0.3 * ~tickAmp, sine_amp = 1.5;
+	var delay = 0, channel = ~stats[device].channel, bus = channel.reverb_bus, tick_amp = 0.3 * ~tickAmp, sine_amp = 1.5,
+	po = channel.pitch_offset;
 	if(~randomizeTiming, { delay = rrand(0.0, 0.3); });
 	delay = delay + rrand(0.0, ~attackSmear);
 	if(channel.sonifyLengthToggle) {
@@ -157,7 +158,7 @@
 			delay.wait;
 
 			if(len < 80, {
-				var freq = ~s53.degreeToFreq(~chord[~chord.size-1], 0.midicps, 3);
+				var freq = ~s53.degreeToFreq(~chord[~chord.size-1] + po, 0.midicps, 3);
 				channel.play_on(\long_sine_transient,
 					[
 						\freq, freq,
@@ -176,7 +177,7 @@
 				);
 			});
 			if(len >= 80 && (len < 140), {
-				var freq = ~s53.degreeToFreq(~chord[((~chord.size-1) * 0.8).round(1.0)], 0.midicps, 3);
+				var freq = ~s53.degreeToFreq(~chord[((~chord.size-1) * 0.8).round(1.0)] + po, 0.midicps, 3);
 				channel.play_on(\long_sine_transient,
 					[
 						\freq, freq,
@@ -195,7 +196,7 @@
 				);
 			});
 			if(len >= 140 && (len < 300), {
-				var freq = ~s53.degreeToFreq(~chord[((~chord.size-1) * 0.65).round], 0.midicps, 3);
+				var freq = ~s53.degreeToFreq(~chord[((~chord.size-1) * 0.65).round] + po, 0.midicps, 3);
 				channel.play_on(\long_sine_transient,
 					[
 						\freq, freq,
@@ -214,7 +215,7 @@
 				);
 			});
 			if(len >= 300 && (len < 500), {
-				var freq = ~s53.degreeToFreq(~chord[(~chord.size * 0.4).round], 0.midicps, 3);
+				var freq = ~s53.degreeToFreq(~chord[(~chord.size * 0.4).round] + po, 0.midicps, 3);
 				channel.play_on(\long_sine_transient,
 					[
 						\freq, freq,
@@ -233,7 +234,7 @@
 				);
 			});
 			if(len >= 500 && (len < 2000), {
-				var freq = ~s53.degreeToFreq(~chord.choose, 0.midicps, ~octave + 1),
+				var freq = ~s53.degreeToFreq(~chord.choose + po, 0.midicps, ~octave + 1),
 				iScale = ((len-500)/1500.0) * 8 + 1;
 				channel.play_on(\long_sine_transient,
 					[
@@ -252,7 +253,7 @@
 				);
 			});
 			if(len >= 2000 && (len < 6000), {
-				var freq = ~s53.degreeToFreq(~chord[1], 0.midicps, 4);
+				var freq = ~s53.degreeToFreq(~chord[1] + po, 0.midicps, 4);
 				channel.play_on(\long_sine_transient,
 					[
 						\freq, freq,
@@ -271,7 +272,7 @@
 				);
 			});
 			if(len >= 6000 && (len < 10000), {
-				var freq = ~s53.degreeToFreq(~chord[2], 0.midicps, 3);
+				var freq = ~s53.degreeToFreq(~chord[2] + po, 0.midicps, 3);
 				channel.play_on(\long_sine_transient,
 					[
 						\freq, freq,
@@ -306,7 +307,7 @@
 				);
 			});
 			if(len >= 10000, {
-				var freq = ~s53.degreeToFreq(~chord[0], 0.midicps, 2);
+				var freq = ~s53.degreeToFreq(~chord[0] + po, 0.midicps, 2);
 				channel.play_on(\long_sine_transient,
 					[
 						\freq, freq,
