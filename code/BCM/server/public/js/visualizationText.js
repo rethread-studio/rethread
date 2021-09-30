@@ -249,7 +249,7 @@ function animate() {
     if(txt.lifetime < 0) {
       // Outside of view, remove it
       // text_group.remove(txt.mesh);
-      txt.mesh.
+      // txt.mesh.
     }
   }
 

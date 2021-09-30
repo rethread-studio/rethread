@@ -12,6 +12,8 @@
 	~ch2 = [40, 71, 9, 31, 62, 102];
 	~ch3 = [62, 102, 22, 40, 84, 124];
 	~ch4 = [84, 124, 31, 53, 93, 115];
+	~baseRoot = 17;
+	~root = ~baseRoot;
 	~currentChord = 0;
 	~numChords = 2;
 	~changeChord = { | num = -1 |

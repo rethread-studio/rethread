@@ -74,14 +74,6 @@ function locationDistance(a, b) {
 
 const easings = [TWEEN.Easing.Exponential.InOut, TWEEN.Easing.Sinusoidal.InOut, TWEEN.Easing.Circular.InOut, TWEEN.Easing.Linear.None];
 
-// Load font
-var loader = new THREE.FontLoader();
-var font;
-loader.load(
-  "assets/fonts/helvetiker_regular.typeface.json",
-  (response) => (font = response)
-);
-
 let positionPerService = new Map();
 let lightPulseSpeed = 30;
 let opacityBaseLevel = 0.4;
@@ -101,7 +93,10 @@ const onmessage = async (message) => {
     reset();
   } else if (json.event == "networkActivity") {
     const packet = json.data;
-    let location = packet.remote_location.country;
+    let location = "Sweden";
+    if (packet.remote_location) {
+      location = packet.remote_location.country;
+    }
     if (!location) {
       location = packet.local_location.country;
     }
@@ -230,8 +225,10 @@ var pointCloud;
 var particlePositions;
 var particleUniforms, particleAlphas, particleColors, particleSizes;
 
-init();
-animate();
+document.addEventListener("readystatechange", () => {
+  init();
+  animate();
+})
 
 function initGUI() {
   var gui = new GUI();

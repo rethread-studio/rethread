@@ -7,7 +7,7 @@
 			[{
 				channel.play_on(\tick2,
 					[
-						\freq, ~s53.degreeToFreq(~chord.choose + 159, 0.midicps, ~octave + 2).min(15000),
+						\freq, ~s53.degreeToFreq(~chord.choose + 159 + channel.pitch_offset, 0.midicps, ~octave + 2).min(15000),
 						\rq, exprand(0.0001, 0.1),
 						\out, channel.reverb_bus,
 						\amp, rrand(0.001, 0.01) * ~tickAmp,
@@ -21,7 +21,7 @@
 			}, {
 				channel.play_on(\dist_sine,
 					[
-						\freq, ~s53.degreeToFreq(~chord.choose + 106, 0.midicps, ~octave + 1).min(15000),
+						\freq, ~s53.degreeToFreq(~chord.choose + 106 + channel.pitch_offset, 0.midicps, ~octave + 1).min(15000),
 						\out, channel.reverb_bus,
 						\dist, rrand(1, 4),
 						\amp, rrand(0.01, 0.1) * ~tickAmp * 0.5,

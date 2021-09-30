@@ -14,16 +14,32 @@ s.reboot;
 //////////////////////////////////////////////////////
 /////// GLOBAL COMPOSITIONAL CHANGES
 /////////////////////////////////////////////////////
-~h2chordOctaves = 4;
-~octave = 2;
+~h2chordOctaves = 5;
+~octave = 1;
 ~attackSmear = 0.0;
-~whisper_amp = 0.5;
-~tickAmp = 0.25;
+~whisper_amp = 1.5;
+~tickAmp = 0.7;
+~activity_tick_amp = 0.3;
 ~tickClock.tempo = ~tickClock.tempo*0.5;
 ~changeHarmonicFramework.(1);
 ~changeHarmonicFramework.(2);
 ~lengthVersion = 1; // ticking
 ~lengthVersion = 2; // pitches
+)
+
+//// PRESETS
+~presets.sine_len.();
+~presets.ticks_whispers.();
+~presets.services.();
+~presets.instant.();
+
+(
+~playPresetLoop.([
+	[\sine_len, 10],
+	[\ticks_whispers, 10],
+	[\instant, 10],
+	[\services, 10],
+]);
 )
 
 (
@@ -34,7 +50,7 @@ s.reboot;
 /////////////////////////////////////////////////////
 
 // Routing and mixer channels
-~encoderType = \ambisonic; // \ambisonic, \stereo, \separate
+~encoderType = \stereo; // \ambisonic, \stereo, \separate
 // ~useAmbisonicsEncoder = true; // Set to false to use a simple stereo output
 ~useAmbisonicsDecoder = false; // Disable on Windows since the classes don't exist. Decoding needs to be done somewhere else.
 
@@ -61,7 +77,7 @@ switch(~encoderType,
 ~decoderBus = Bus.audio(s, ~mixerChannelOutputs);
 
 // Ambisonics positioning parameters
-~azimuthPosition = 0.0; // The start position, and later on current position for the next device
+~azimuthPosition = -0.45; // The start position, and later on current position for the next device
 ~azimuthStep = (0.5 * pi);
 ~elevationPosition = 0.0;
 ~elevationStep = 0.0;
@@ -81,6 +97,8 @@ switch(~encoderType,
 ~attackSmear = 0.0;
 ~whisper_amp = 0.25;
 ~lengthVersion = 1;
+~tickAmp = 0.7;
+~activity_tick_amp = 0.3;
 
 "../sound_forest_mixer_gui.scd".loadRelative;
 "device_gui.scd".loadRelative;
@@ -90,6 +108,7 @@ switch(~encoderType,
 "direct_sonification.scd".loadRelative;
 "sonify_service.scd".loadRelative;
 "sonify_len.scd".loadRelative;
+"presets.scd".loadRelative;
 
 // CmdPeriod.removeAll; // Reset the CmdPeriod functions
 
@@ -104,6 +123,9 @@ switch(~encoderType,
 	~harmonyVersion = version;
 };
 ~changeHarmonicFramework.(~harmonyVersion);
+
+~allWindows = List[];
+CmdPeriod.add({ ~allWindows.do{|window| window.close; }});
 
 //////////////////////////////////////////////////////
 /////// STARTING EVERYTHING
@@ -138,7 +160,7 @@ switch(~encoderType,
 
 	// Mixer channel factory
 	~makeMixerChannel = { | name, out, amp = 1 |
-		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation, reverb_mix = 0.25;
+		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation, reverb_mix = 0.25, pitch_offset = 0;
 		bus = Bus.audio(s, ~mixerChannelOutputs);
 		reverb_bus = Bus.audio(s, 2);
 		group = Group(s);
@@ -150,6 +172,12 @@ switch(~encoderType,
 		if(~azimuthPosition < -pi) {
 			~azimuthPosition = ~azimuthPosition + 2pi;
 		};
+		switch(name.asSymbol,
+			\NORTH, { pitch_offset = 31 }, // 31
+			\SOUTH,  { pitch_offset = 0 }, // 0
+			\EAST, { pitch_offset = 9 }, // 9
+			\WEST, { pitch_offset = -31 }, // -31
+		);
 		elevation = ~elevationPosition;
 		~elevationPosition = ~elevationPosition + ~elevationStep;
 		switch(~encoderType,
@@ -179,7 +207,7 @@ switch(~encoderType,
 				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
 			}
 		);
-		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 2.0],
+		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 1.7, \damp, 0.45],
 			target: synth, addAction: \addBefore);
 		(
 			my_synth: synth,
@@ -190,7 +218,10 @@ switch(~encoderType,
 			activity_level: 0,
 			activity_level_peak: 0,
 			activity_level_slow: 0,
+			pitch_offset: pitch_offset,
 			reverb_mix: reverb_mix,
+			auto_reverb_min: 0.0,
+			auto_reverb_max: 1.0,
 			azimuth: azimuth,
 			elevation: elevation,
 			// Hover spat movement
@@ -324,7 +355,7 @@ switch(~encoderType,
 							\freq, self.activity_level_peak * 3000 + 4000,
 							\rq, exprand(0.0001, 0.1),
 							\out, self.reverb_bus,
-							\amp, rrand(0.001, 0.02),
+							\amp, rrand(0.001, 0.02) * ~activity_tick_amp,
 							\atk, 0.001,
 							\rel, rrand(0.01, 0.05), //0.01,
 							\c1, -12,
@@ -338,7 +369,8 @@ switch(~encoderType,
 				self.activity_level_slow = (self.activity_level_slow * 0.9) + (self.activity_level_peak * 0.1);
 
 				if(self.reverbActivityToggle, {
-					self.set_reverb_mix(self.activity_level_slow.pow(1.5));
+					var rev_width = self.auto_reverb_max - self.auto_reverb_min;
+					self.set_reverb_mix(self.auto_reverb_min + (self.activity_level_slow.pow(1.5) * rev_width));
 				});
 			},
 		)
@@ -515,7 +547,7 @@ switch(~encoderType,
 	~num_packets = 0;
 	~numPacketsThisTick = 0;
 	~packet_density = 0;
-	~vis_sender = NetAddr("127.0.0.1", 9771);
+	~vis_sender = NetAddr("127.0.0.1", 7771);
 	~packetRecPanWidth = 0;
 	~len_per_device = Dictionary[];
 	~lengths = List[];
@@ -596,9 +628,6 @@ switch(~encoderType,
 	~tickClock = TempoClock(100/60);
 	~overallActivity = 0;
 	~maxActivity = 60;
-	~baseRoot = 17;
-	~root = ~baseRoot;
-	~tickAmp = 0.5;
 	~counter = 0;
 	~randomizeTiming = false;
 	s.sync();
@@ -662,6 +691,17 @@ switch(~encoderType,
 			/*if(~counter % 1 == 0) {
 				~playSequencer.(~sequencer);
 			};*/
+
+			// Send activity to activity visualiser
+			{
+				var activities = 0.0!4;
+
+				~stats.do{|device, i|
+					activities[i] = device.channel.activity_level_slow;
+				};
+				// TODO: Hard code to NORTH, SOUTH, WEST, EAST
+				~vis_sender.sendMsg("/setActivityLevels", activities[0], activities[1], activities[2], activities[3]);
+			}.value();
 
 			~numPacketsThisTick = 0;
 

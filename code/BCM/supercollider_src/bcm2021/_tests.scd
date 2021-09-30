@@ -46,3 +46,14 @@ c = ~makeMixerChannel.("Test device", ~decoderBus);
 )
 
 ~tickClock.tempo = 15/60;
+
+
+c = ~stats[\SoundProxy].channel
+~service_sounds[\Google].(300, 2.0, c, c.reverb_bus)
+~service_sounds[\YouTube].(300, 2.0, c, c.reverb_bus)
+~service_sounds[\Amazon].(300, 0.5, c, c.reverb_bus)
+~service_sounds[\Facebook].(300, 2.0, c, c.reverb_bus)
+~service_sounds[\Microsoft].(300, 10.0, c, c.reverb_bus)
+~service_sounds[\WhatsApp].(300, 1.0, c, c.reverb_bus)
+
+~service_sounds.at(\Facebook)
