@@ -29,6 +29,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
             color: "#ffe879",
             img: "/img/laureate.png",
             shadowImg: "/img/laureateShadow.png",
+            dialogue: "/img/dialogue.png"
         };
         socket.emit("start", laureate);
 

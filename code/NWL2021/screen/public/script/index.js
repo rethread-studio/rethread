@@ -44,6 +44,45 @@ function start(setup) {
     }
   }
 
+  function drawDialogue(players) {
+    if (!players) return;
+
+    // draw players
+    Object.keys(players).forEach((playerId) => {
+      let player = players[playerId];
+      if (imgs[player.laureate.dialogue] && player.inQuestion) {
+
+        renderImage(
+          player.x * setup.unitSize + setup.unitSize / 2,
+          player.y * setup.unitSize + setup.unitSize / 2,
+          setup.unitSize,
+          setup.unitSize,
+          0,
+          gameCycle ? 1 : 0.8,
+          imgs[player.laureate.dialogue]
+        );
+      } else {
+        imgs[player.laureate.dialogue] = new Image(setup.unitSize, setup.unitSize);
+        // Load an image of intrinsic size 300x227 in CSS pixels
+        imgs[player.laureate.dialogue].src =
+          "http://localhost:3000" + player.laureate.dialogue;
+        imgs[player.laureate.dialogue].onload = function () {
+          if (player.inQuestion) {
+            renderImage(
+              player.x * setup.unitSize + setup.unitSize / 2,
+              player.y * setup.unitSize + setup.unitSize / 2,
+              setup.unitSize,
+              setup.unitSize,
+              0,
+              gameCycle ? 1 : 0.8,
+              imgs[player.laureate.dialogue]
+            );
+          }
+        };
+      }
+    });
+  }
+
   function drawPlayers(players) {
     if (!players) return;
     // draw players
@@ -58,7 +97,7 @@ function start(setup) {
           setup.unitSize,
           setup.unitSize,
           angle,
-          1,
+          gameCycle ? 0.8 : 1,
           imgs[player.laureate.img]);
       } else {
         imgs[player.laureate.img] = new Image(setup.unitSize, setup.unitSize);
@@ -66,13 +105,22 @@ function start(setup) {
         imgs[player.laureate.img].src =
           "http://localhost:3000" + player.laureate.img;
         imgs[player.laureate.img].onload = function () {
-          ctx.drawImage(
-            imgs[player.laureate.img],
-            player.x * setup.unitSize,
-            player.y * setup.unitSize,
+          renderImage(
+            player.x * setup.unitSize + setup.unitSize / 2,
+            player.y * setup.unitSize + setup.unitSize / 2,
             setup.unitSize,
-            setup.unitSize
+            setup.unitSize,
+            0,
+            gameCycle ? 0.8 : 1,
+            imgs[player.laureate.img]
           );
+          // ctx.drawImage(
+          //   imgs[player.laureate.img],
+          //   player.x * setup.unitSize,
+          //   player.y * setup.unitSize,
+          //   setup.unitSize,
+          //   setup.unitSize
+          // );
         };
       }
     });
@@ -183,9 +231,22 @@ function start(setup) {
     questionE.style = `top: ${question.position.y * setup.unitSize}px;left: ${question.position.x * setup.unitSize
       }px; width: ${(question.position.width + 1) * setup.unitSize}px; height: ${(question.position.height + 1) * setup.unitSize
       }px`;
+    //DRAW DECORATION
+    ctx.beginPath()
+    ctx.lineWidth = gameCycle ? "4" : "1";
+    ctx.strokeStyle = "white";
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.rect(
+      question.position.x * setup.unitSize,
+      question.position.y * setup.unitSize,
+      (question.position.width + 1) * setup.unitSize,
+      (question.position.height + 1) * setup.unitSize
+    );
+    ctx.fill();
+    ctx.stroke();
 
 
-    // draw Question
+    // draw ANSWERS
     for (let i = 0; i < question.answers.length; i++) {
       const answer = question.answers[i];
       const answerE = document.querySelector(".answer" + (i + 1));
@@ -195,19 +256,21 @@ function start(setup) {
         }px; width: ${(answer.position.width + 1) * setup.unitSize}px; height: ${(answer.position.height + 1) * setup.unitSize
         }px`;
 
-      //DRAW DECORATION
-      ctx.beginPath();
-      ctx.lineWidth = i % 2 == 0 ? gameCycle ? "4" : "1" : gameCycle ? "1" : "4";
-      ctx.strokeStyle = "white";
-      ctx.rect(
-        answer.position.x * setup.unitSize,
-        answer.position.y * setup.unitSize,
-        (answer.position.width + 1) * setup.unitSize,
-        (answer.position.height + 1) * setup.unitSize
-      );
-      ctx.stroke();
-
-
+      if (gameCycle) {
+        if (i % 2 == 0) {
+          answerE.classList.remove("text-neon")
+        } else {
+          answerE.classList.add("text-neon")
+        }
+        //add new   
+      } else {
+        if (i % 2 == 0) {
+          answerE.classList.add("text-neon")
+        } else {
+          answerE.classList.remove("text-neon")
+        }
+      }
+      //draw the mid point
       for (let i = 0; i < answer.position.width + 1; i++) {
         for (let j = 0; j < answer.position.height + 1; j++) {
           ctx.fillStyle = "white";
@@ -248,5 +311,6 @@ function start(setup) {
     drawPlayersShadow(gameState.players);
     drawPreviousPosition(gameState.players);
     drawPlayers(gameState.players);
+    drawDialogue(gameState.players);
   }
 }
