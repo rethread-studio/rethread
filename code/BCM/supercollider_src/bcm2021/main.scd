@@ -35,12 +35,13 @@ s.reboot;
 
 (
 ~playPresetLoop.([
-	[\sine_len, 10],
-	[\ticks_whispers, 10],
-	[\instant, 10],
-	[\services, 10],
+	[\sine_len, 60],
+	[\ticks_whispers, 60],
+	[\instant, 60],
+	[\services, 60],
 ]);
 )
+~stopPresetLoop.()
 
 (
 //// RUN THIS BLOCK TO START EVERYTHING

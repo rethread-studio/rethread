@@ -58,8 +58,8 @@
 
 // Preset instant
 ~presets.instant = {
-	~h2chordOctaves = 5;
-	~octave = 3;
+	~h2chordOctaves = 3;
+	~octave = 0;
 	~changeHarmonicFramework.(2);
 	~whisper_amp = 0.5;
 	~setAllDevicesToggle.(\sonifyActivityTickToggle, false);
@@ -81,6 +81,7 @@
 		loop{
 			presets.do { |preset_setting|
 				var preset = preset_setting[0], duration = preset_setting[1];
+				("Starting preset: " + preset.asString).postln;
 				~presets.at(preset).();
 				duration.wait;
 			};
