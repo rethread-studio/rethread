@@ -294,7 +294,7 @@ SynthDef(\glitchy_rise, { | freq = 500, mRatio = 1, pan = 0, height = 2, atk = 0
 	mod = SinOsc.ar(modfreq * mRatio) * modfreq * mRatio;
 	sig = Pulse.ar(min(max(modfreq + mod, 20), 20000)) * 0.07 * env;
 	sig = sig + (Pulse.ar(freq) * 0.07 * env.pow(2));
-	sig = Pan2.ar(sig, pan);
+	sig = Pan2.ar(sig * \amp.kr(1.0), pan);
 	Out.ar(\out.kr(0), sig);
 }).add;
 

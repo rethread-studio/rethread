@@ -2,7 +2,7 @@
 	{
 		var channel = ~stats[device].channel, octave = (channel.activity_level_slow * 5.0).round(1.0);
 		// There can be bursts of very many packets at once. If too many packets have arrived in a short time frame, don't run this sonification.
-		if(~overallActivity < (~maxActivity * 0.5)) {
+		if(~overallActivity < (~maxActivity * 0.8)) {
 			rrand(0.0, 0.2).wait;
 			[{
 				var freq = ~s53.degreeToFreq(~chord.choose + 159 + channel.pitch_offset, 0.midicps, ~octave + 2 + octave).min(19000);

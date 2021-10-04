@@ -22,9 +22,9 @@
 	~octave = 1;
 	~lengthVersion = 1; // ticks
 	~changeHarmonicFramework.(2);
-	~whisper_amp = 1.0;
+	~whisper_amp = 0.8;
 	~tickAmp = 0.7;
-	~activity_tick_amp = 0.3;
+	~activity_tick_amp = 0.2;
 	~setAllDevicesToggle.(\sonifyActivityTickToggle, true);
 	~setAllDevicesToggle.(\sonifyInstantlyToggle, false);
 	~setAllDevicesToggle.(\sonifyServicesToneToggle, false);
@@ -40,6 +40,7 @@
 	~octave = 2;
 	~changeHarmonicFramework.(1);
 	~whisper_amp = 1.0;
+	~serviceToneAmp = 1.0;
 	~lengthVersion = 1; // ticks
 	~setAllDevicesToggle.(\sonifyActivityTickToggle, false);
 	~setAllDevicesToggle.(\sonifyInstantlyToggle, false);
@@ -62,6 +63,7 @@
 	~octave = 0;
 	~changeHarmonicFramework.(2);
 	~whisper_amp = 0.5;
+	~serviceToneAmp = 0.2;
 	~setAllDevicesToggle.(\sonifyActivityTickToggle, false);
 	~setAllDevicesToggle.(\sonifyInstantlyToggle, true);
 	~setAllDevicesToggle.(\sonifyServicesToneToggle, true);
