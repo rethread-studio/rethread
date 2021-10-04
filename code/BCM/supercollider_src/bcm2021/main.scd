@@ -36,9 +36,9 @@ s.reboot;
 
 (
 ~playPresetLoop.([
-	[\sine_len, 180],
+	[\sine_len, 200],
 	[\instant, 120],
-	[\ticks_whispers, 120],
+	[\ticks_whispers, 180],
 	[\services, 60],
 ]);
 )

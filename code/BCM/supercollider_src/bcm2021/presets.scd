@@ -63,7 +63,7 @@
 	~octave = 0;
 	~changeHarmonicFramework.(2);
 	~whisper_amp = 0.5;
-	~serviceToneAmp = 0.2;
+	~serviceToneAmp = 0.1;
 	~setAllDevicesToggle.(\sonifyActivityTickToggle, false);
 	~setAllDevicesToggle.(\sonifyInstantlyToggle, true);
 	~setAllDevicesToggle.(\sonifyServicesToneToggle, true);
