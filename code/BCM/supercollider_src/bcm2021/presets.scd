@@ -22,9 +22,9 @@
 	~octave = 1;
 	~lengthVersion = 1; // ticks
 	~changeHarmonicFramework.(2);
-	~whisper_amp = 1.0;
+	~whisper_amp = 0.8;
 	~tickAmp = 0.7;
-	~activity_tick_amp = 0.3;
+	~activity_tick_amp = 0.2;
 	~setAllDevicesToggle.(\sonifyActivityTickToggle, true);
 	~setAllDevicesToggle.(\sonifyInstantlyToggle, false);
 	~setAllDevicesToggle.(\sonifyServicesToneToggle, false);
@@ -40,6 +40,7 @@
 	~octave = 2;
 	~changeHarmonicFramework.(1);
 	~whisper_amp = 1.0;
+	~serviceToneAmp = 1.0;
 	~lengthVersion = 1; // ticks
 	~setAllDevicesToggle.(\sonifyActivityTickToggle, false);
 	~setAllDevicesToggle.(\sonifyInstantlyToggle, false);
@@ -58,10 +59,11 @@
 
 // Preset instant
 ~presets.instant = {
-	~h2chordOctaves = 5;
-	~octave = 3;
+	~h2chordOctaves = 3;
+	~octave = 0;
 	~changeHarmonicFramework.(2);
 	~whisper_amp = 0.5;
+	~serviceToneAmp = 0.1;
 	~setAllDevicesToggle.(\sonifyActivityTickToggle, false);
 	~setAllDevicesToggle.(\sonifyInstantlyToggle, true);
 	~setAllDevicesToggle.(\sonifyServicesToneToggle, true);
@@ -81,6 +83,7 @@
 		loop{
 			presets.do { |preset_setting|
 				var preset = preset_setting[0], duration = preset_setting[1];
+				("Starting preset: " + preset.asString).postln;
 				~presets.at(preset).();
 				duration.wait;
 			};

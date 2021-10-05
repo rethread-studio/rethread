@@ -4,7 +4,7 @@
 
 ~sonify_service = { | service, activity, channel, inout |
 	var freq = ~s53.degreeToFreq(~chord.choose + channel.pitch_offset, 0.midicps, ~octave + 1),
-	amp = 1.0,
+	amp = ~serviceToneAmp,
 	bus = channel.reverb_bus,
 	thump_atk = rrand(0.18, 0.21),
 	release_coeff = 1.0, delay = 0;
@@ -36,7 +36,6 @@
 		);
 
 		if(soundFunc != nil, {
-			service.postln;
 			soundFunc.(freq, amp, channel, bus);
 		}, {
 
@@ -164,7 +163,7 @@
 		\atk, rrand(2.2, 4.0) * amp.pow(2),
 		\rel, 1.0,
 		\pan, 0,
-		\amp, 0.5 * amp.pow(1.5),
+		\amp, 0.8 * amp.pow(1.5),
 		\out, bus],
 	-1);
 };

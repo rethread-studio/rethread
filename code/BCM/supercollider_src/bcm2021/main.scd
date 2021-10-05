@@ -25,6 +25,7 @@ s.reboot;
 ~changeHarmonicFramework.(2);
 ~lengthVersion = 1; // ticking
 ~lengthVersion = 2; // pitches
+~serviceToneAmp = 1.0;
 )
 
 //// PRESETS
@@ -35,12 +36,13 @@ s.reboot;
 
 (
 ~playPresetLoop.([
-	[\sine_len, 10],
-	[\ticks_whispers, 10],
-	[\instant, 10],
-	[\services, 10],
+	[\sine_len, 200],
+	[\instant, 120],
+	[\ticks_whispers, 180],
+	[\services, 60],
 ]);
 )
+~stopPresetLoop.()
 
 (
 //// RUN THIS BLOCK TO START EVERYTHING
@@ -99,6 +101,7 @@ switch(~encoderType,
 ~lengthVersion = 1;
 ~tickAmp = 0.7;
 ~activity_tick_amp = 0.3;
+~serviceToneAmp = 1.0;
 
 "../sound_forest_mixer_gui.scd".loadRelative;
 "device_gui.scd".loadRelative;
