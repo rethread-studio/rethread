@@ -256,20 +256,20 @@ function start(setup) {
         }px; width: ${(answer.position.width + 1) * setup.unitSize}px; height: ${(answer.position.height + 1) * setup.unitSize
         }px`;
 
-      if (gameCycle) {
-        if (i % 2 == 0) {
-          answerE.classList.remove("text-neon")
-        } else {
-          answerE.classList.add("text-neon")
-        }
-        //add new   
-      } else {
-        if (i % 2 == 0) {
-          answerE.classList.add("text-neon")
-        } else {
-          answerE.classList.remove("text-neon")
-        }
-      }
+      // if (gameCycle) {
+      //   if (i % 2 == 0) {
+      //     answerE.classList.remove("text-neon")
+      //   } else {
+      //     answerE.classList.add("text-neon")
+      //   }
+      //   //add new   
+      // } else {
+      //   if (i % 2 == 0) {
+      //     answerE.classList.add("text-neon")
+      //   } else {
+      //     answerE.classList.remove("text-neon")
+      //   }
+      // }
       //draw the mid point
       for (let i = 0; i < answer.position.width + 1; i++) {
         for (let j = 0; j < answer.position.height + 1; j++) {
