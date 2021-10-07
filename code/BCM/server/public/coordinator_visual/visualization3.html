@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="./style/visualization.css" />
+    <title>BCM - Visualization</title>
+
+    <style>
+      .glishBox {
+        position: absolute;
+        background-color: white;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container"></div>
+
+    <script src="./js/websocket.js"></script>
+    <script>
+      // Receive packets
+      const ws = WebSocketClient();
+
+      let allPackets = [];
+      ws.onmessage = (message) => {
+        const json = JSON.parse(message.data);
+        if (json.event == "networkActivity") {
+          const packet = json.data;
+          allPackets.push(packet);
+        }
+      };
+
+      setInterval(() => {
+        const bg = document.body;
+        if (allPackets.length > 0) {
+          bg.innerHTML = "";
+        }
+
+        for (let index = 0; index < allPackets.length; index++) {
+          const packet = allPackets[index];
+          const element = document.createElement("div");
+          element.className = "glishBox " + packet.services.join(" ");
+          bg.appendChild(element);
+
+          element.style.left = Math.floor(Math.random() * 100) + "vw";
+          element.style.top = Math.floor(Math.random() * 100) + "vh";
+
+          const width = Math.floor(Math.random() * 500);
+          height = parseFloat(150 * packet.len) / width;
+          element.style.width = width + "px";
+          element.style.height = height + "px";
+          element.style.opacity = Math.random() * 0.7;
+        }
+        allPackets = [];
+      }, 250);
+    </script>
+  </body>
+</html>

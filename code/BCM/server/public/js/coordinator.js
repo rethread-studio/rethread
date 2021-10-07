@@ -7,7 +7,7 @@ angular
     const thresh = 1024;
 
     if (Math.abs(bytes) < thresh) {
-      return bytes + " B";
+      return bytes.toFixed(dp) + " B";
     }
 
     const units = ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];

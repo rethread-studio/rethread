@@ -16,7 +16,8 @@ app.use(bodyParser.json());
 app.use("/style", express.static("public/style"));
 app.use("/assets", express.static("public/assets"));
 app.use("/js", express.static("public/js"));
-app.use("/", express.static("public/coordinator"));
+app.use("/admin", express.static("public/coordinator"));
+app.use("/", express.static("public/coordinator_visual"));
 
 const server = http.createServer(app);
 const wss = WSServer(server);

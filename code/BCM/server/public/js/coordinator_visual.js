@@ -9,22 +9,12 @@ angular
         controller: "homeController",
         title: "Home",
       })
-      .when("/welcome", {
-        templateUrl: "/partials/welcome.htm",
-        controller: "instructionController",
-        title: "Welcome",
-      })
       .when("/close", {
         templateUrl: "/partials/close.htm",
         controller: "closeController",
         title: "Close",
       })
-      .when("/instruction", {
-        templateUrl: "/partials/instruction.htm",
-        controller: "instructionController",
-        title: "Instruction",
-      })
-      .when("/visualization", {
+      .when("/", {
         templateUrl: "/partials/visualization.htm",
         controller: "visualizationController",
         title: "Visualization",
@@ -56,32 +46,24 @@ angular
     $("#welcomeBg").show();
   })
   .controller("mainController", function ($scope, $http, $location) {
-    $scope.wifi = "BCM - SoundProxy";
+    $scope.wifi = "BCM";
     $scope.password = null;
-    $scope.instruction = "";
-    $scope.deviceName = "";
-
-    function getConfig() {
-      $http.get("/api/wifi/config").then((res) => {
-        $scope.wifi = res.data.ssid;
-        $scope.password = res.data.wpa_passphrase;
-      });
-    }
-    getConfig();
 
     const visualizations = [
-      // "visualization0",
-      "visualizationGlobe",
       "visualization1",
       "visualization2",
       // "visualization3",
+      "visualizationGlobe",
       "visualizationSparse",
     ];
     let currentVisualization = 0;
     $("#" + visualizations[currentVisualization]).addClass(
       "currentVisualization"
     );
+
+    let switchTimeout = null;
     function switchVisualization() {
+      clearTimeout(switchTimeout);
       currentVisualization++;
       if (currentVisualization == visualizations.length) {
         currentVisualization = 0;
@@ -90,13 +72,13 @@ angular
       $("#" + visualizations[currentVisualization]).addClass(
         "currentVisualization"
       );
-      if ($location.url() != "/") {
-        $("#" + visualizations[currentVisualization]).show();
-      }
-      setTimeout(switchVisualization, 20000);
+      $("#" + visualizations[currentVisualization]).show();
+      switchTimeout = setTimeout(switchVisualization, 20000);
     }
 
-    setTimeout(switchVisualization, 0);
+    setTimeout(switchVisualization, 2500);
+
+    $scope.switch = () => switchVisualization();
 
     const onmessage = (message) => {
       const json = JSON.parse(message.data);
@@ -116,15 +98,15 @@ angular
         });
       }
     };
-    ws.addEventListener("message", onmessage)
+    ws.addEventListener("message", onmessage);
     ws.addEventListener("error", () => {
       $scope.$apply(() => {
         $location.url("/close");
       });
-    })
+    });
     ws.addEventListener("open", () => {
       $scope.$apply(() => {
         $location.url("/");
       });
-    })
+    });
   });
