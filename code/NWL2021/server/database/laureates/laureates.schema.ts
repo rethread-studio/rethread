@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const LaureateSchema = new Schema({
   firstname: String,
-  lastname: String,
+  surname: String,
   imagePath: String,
   country: String,
   city: String,

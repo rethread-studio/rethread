@@ -14,7 +14,7 @@ export interface IPrize {
 
 export interface ILaureate {
   firstname: string;
-  lastname: string;
+  surname: string;
   picturePath: string;
   country: string;
   city: string;

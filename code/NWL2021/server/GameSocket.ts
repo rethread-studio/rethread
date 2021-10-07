@@ -26,6 +26,9 @@ export default class GameSocket {
     this.engine.on("answer").subscribe((answer) => {
       this.emitResult(answer);
     });
+    this.engine.on("state").subscribe(() => {
+      this.emitSetup();
+    });
 
     const updateInterval = setInterval(() => {
       if (hasChange) {

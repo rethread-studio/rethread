@@ -1,5 +1,5 @@
 import { SubEvent } from "sub-events";
-import config from "../../config";
+import config from "../config";
 
 import QuestionModel from "./database/questions/questions.model";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
@@ -14,6 +14,7 @@ class Events {
   playerMove = new SubEvent<Player>();
   playerLeave = new SubEvent<Player>();
   newQuestion = new SubEvent<IQuestion>();
+  state = new SubEvent<IStateDocument>();
 }
 
 export class Engine {
@@ -23,7 +24,7 @@ export class Engine {
   private _players: { [key: string]: Player };
   private _events = new Events();
 
-  constructor() { }
+  constructor() {}
 
   async init() {
     this._questions = await QuestionModel.find();
@@ -33,11 +34,14 @@ export class Engine {
 
     const questionInterval = setInterval(() => {
       let answerScore = {};
-      for (const answer of this.currentQuestion.answers) {
+      for (let i = 0; i < this.state.answersPositions.length; i++) {
+        const answer = this.currentQuestion.answers[i];
+        const position = this.state.answersPositions[i];
+
         answerScore[answer.text] = 0;
         for (const socketID of Object.keys(this.players)) {
           const player = this.players[socketID];
-          if (this.checkCollision(player, answer.position)) {
+          if (this.checkCollision(player, position)) {
             answerScore[answer.text]++;
             this._events.userAnswer.emit({ answer, player });
           }
@@ -66,7 +70,7 @@ export class Engine {
     do {
       newQuestion =
         this._questions[
-        Math.round(Math.random() * (this._questions.length - 1))
+          Math.round(Math.random() * (this._questions.length - 1))
         ];
     } while (
       this._currentQuestion &&
@@ -97,7 +101,7 @@ export class Engine {
       inQuestion: false,
       socket: null,
       previousPositions: [],
-      status: "iddle",
+      status: "idle",
     };
 
     while (!this.isValidPosition(player, id)) {
@@ -121,15 +125,14 @@ export class Engine {
     }
 
     if (
-      position.y >= this._currentQuestion.position.y &&
+      position.y >= this.state.questionPosition.y &&
       position.y <=
-      this._currentQuestion.position.y + this._currentQuestion.position.height
+        this.state.questionPosition.y + this.state.questionPosition.height
     ) {
       if (
-        position.x >= this._currentQuestion.position.x &&
+        position.x >= this.state.questionPosition.x &&
         position.x <=
-        this._currentQuestion.position.x +
-        this._currentQuestion.position.width
+          this.state.questionPosition.x + this.state.questionPosition.width
       ) {
         return false;
       }
@@ -182,13 +185,18 @@ export class Engine {
         player.previousPositions.shift();
       }
       // move the player and increment score
-      player.status = player.x < newPosition.x ? "right" : player.x > newPosition.x ? "left" : "iddle";
+      player.status =
+        player.x < newPosition.x
+          ? "right"
+          : player.x > newPosition.x
+          ? "left"
+          : "idle";
       player.x = newPosition.x;
       player.y = newPosition.y;
 
       let inQuestion: boolean = false;
-      for (const answer of this._currentQuestion.answers) {
-        if (this.checkCollision(player, answer.position)) {
+      for (const answer of this.state.answersPositions) {
+        if (this.checkCollision(player, answer)) {
           inQuestion = true;
           break;
         }
@@ -216,6 +224,11 @@ export class Engine {
 
   get state() {
     return this._state;
+  }
+
+  set state(state) {
+    this._state = state;
+    this._events.state.emit(state);
   }
 
   get players() {

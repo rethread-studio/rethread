@@ -15,7 +15,6 @@ function start(setup) {
   canvas.height = setup.unitSize * setup.height;
   const ctx = canvas.getContext("2d");
 
-
   socket.on("gameStateUpdate", updateGameState);
 
   socket.on("answer", ({ question, answer }) => {
@@ -51,7 +50,6 @@ function start(setup) {
     Object.keys(players).forEach((playerId) => {
       let player = players[playerId];
       if (imgs[player.laureate.dialogue] && player.inQuestion) {
-
         renderImage(
           player.x * setup.unitSize + setup.unitSize / 2,
           player.y * setup.unitSize + setup.unitSize / 2,
@@ -62,10 +60,12 @@ function start(setup) {
           imgs[player.laureate.dialogue]
         );
       } else {
-        imgs[player.laureate.dialogue] = new Image(setup.unitSize, setup.unitSize);
+        imgs[player.laureate.dialogue] = new Image(
+          setup.unitSize,
+          setup.unitSize
+        );
         // Load an image of intrinsic size 300x227 in CSS pixels
-        imgs[player.laureate.dialogue].src =
-          "http://localhost:3000" + player.laureate.dialogue;
+        imgs[player.laureate.dialogue].src = player.laureate.dialogue;
         imgs[player.laureate.dialogue].onload = function () {
           if (player.inQuestion) {
             renderImage(
@@ -89,7 +89,6 @@ function start(setup) {
     Object.keys(players).forEach((playerId) => {
       let player = players[playerId];
       if (imgs[player.laureate.img]) {
-
         const angle = getAngle(player.status);
         renderImage(
           player.x * setup.unitSize + setup.unitSize / 2,
@@ -98,12 +97,12 @@ function start(setup) {
           setup.unitSize,
           angle,
           gameCycle ? 0.8 : 1,
-          imgs[player.laureate.img]);
+          imgs[player.laureate.img]
+        );
       } else {
         imgs[player.laureate.img] = new Image(setup.unitSize, setup.unitSize);
         // Load an image of intrinsic size 300x227 in CSS pixels
-        imgs[player.laureate.img].src =
-          "http://localhost:3000" + player.laureate.img;
+        imgs[player.laureate.img].src = player.laureate.img;
         imgs[player.laureate.img].onload = function () {
           renderImage(
             player.x * setup.unitSize + setup.unitSize / 2,
@@ -133,7 +132,7 @@ function start(setup) {
     ctx.translate(x, y);
 
     ctx.rotate(angle);
-    ctx.scale(scale, scale)
+    ctx.scale(scale, scale);
     // ctx.translate(x,y);
     ctx.drawImage(image, -centerX, -centerY, width, height);
 
@@ -148,28 +147,34 @@ function start(setup) {
       let player = players[playerId];
 
       if (shadows[player.laureate.shadowImg]) {
-
         Object.keys(players).forEach((playerId) => {
           let player = players[playerId];
           let positions = player.previousPositions;
           if (positions.length == 0) return;
           for (let i = 0; i < positions.length; i++) {
-
             const x = positions[i].x * setup.unitSize + setup.unitSize / 2;
             const y = positions[i].y * setup.unitSize + setup.unitSize / 2;
             const widthHeight = setup.unitSize;
             const side = i % 2 == 0 ? 1 : -1;
-            const angle = Math.PI / 4 * side * boardState;
-            renderImage(x, y, widthHeight, widthHeight, angle, 0.8, shadows[player.laureate.shadowImg]);
+            const angle = (Math.PI / 4) * side * boardState;
+            renderImage(
+              x,
+              y,
+              widthHeight,
+              widthHeight,
+              angle,
+              0.8,
+              shadows[player.laureate.shadowImg]
+            );
           }
-
         });
       } else {
-
-        shadows[player.laureate.shadowImg] = new Image(setup.unitSize, setup.unitSize);
+        shadows[player.laureate.shadowImg] = new Image(
+          setup.unitSize,
+          setup.unitSize
+        );
         // Load an image of intrinsic size 300x227 in CSS pixels
-        shadows[player.laureate.shadowImg].src =
-          "http://localhost:3000" + player.laureate.shadowImg;
+        shadows[player.laureate.shadowImg].src = player.laureate.shadowImg;
         shadows[player.laureate.shadowImg].onload = function () {
           Object.keys(players).forEach((playerId) => {
             let player = players[playerId];
@@ -180,10 +185,17 @@ function start(setup) {
               const y = positions[i].y * setup.unitSize + setup.unitSize / 2;
               const widthHeight = setup.unitSize;
               const side = i % 2 == 0 ? 1 : -1;
-              const angle = Math.PI / 4 * side * boardState;
-              renderImage(x, y, widthHeight, widthHeight, angle, 0.8, shadows[player.laureate.shadowImg]);
+              const angle = (Math.PI / 4) * side * boardState;
+              renderImage(
+                x,
+                y,
+                widthHeight,
+                widthHeight,
+                angle,
+                0.8,
+                shadows[player.laureate.shadowImg]
+              );
             }
-
           });
         };
       }
@@ -201,11 +213,20 @@ function start(setup) {
       ctx.beginPath();
       ctx.lineWidth = !gameCycle ? "4" : "2";
       ctx.strokeStyle = player.laureate.color;
-      ctx.moveTo(positions[0].x * setup.unitSize + setup.unitSize / 2, positions[0].y * setup.unitSize + setup.unitSize / 2);
+      ctx.moveTo(
+        positions[0].x * setup.unitSize + setup.unitSize / 2,
+        positions[0].y * setup.unitSize + setup.unitSize / 2
+      );
       for (let i = 1; i < positions.length; i++) {
-        ctx.lineTo(positions[i].x * setup.unitSize + setup.unitSize / 2, positions[i].y * setup.unitSize + setup.unitSize / 2);
+        ctx.lineTo(
+          positions[i].x * setup.unitSize + setup.unitSize / 2,
+          positions[i].y * setup.unitSize + setup.unitSize / 2
+        );
       }
-      ctx.lineTo(player.x * setup.unitSize + setup.unitSize / 2, player.y * setup.unitSize + setup.unitSize / 2)
+      ctx.lineTo(
+        player.x * setup.unitSize + setup.unitSize / 2,
+        player.y * setup.unitSize + setup.unitSize / 2
+      );
       ctx.stroke();
 
       for (let i = 0; i < positions.length; i++) {
@@ -220,7 +241,6 @@ function start(setup) {
         );
         ctx.fill();
       }
-
     });
   }
 
@@ -228,33 +248,38 @@ function start(setup) {
     if (!question) return;
     const questionE = document.querySelector(".question");
     questionE.innerHTML = question.text;
-    questionE.style = `top: ${question.position.y * setup.unitSize}px;left: ${question.position.x * setup.unitSize
-      }px; width: ${(question.position.width + 1) * setup.unitSize}px; height: ${(question.position.height + 1) * setup.unitSize
-      }px`;
+    questionE.style = `top: ${
+      setup.questionPosition.y * setup.unitSize
+    }px;left: ${setup.questionPosition.x * setup.unitSize}px; width: ${
+      (setup.questionPosition.width + 1) * setup.unitSize
+    }px; height: ${(setup.questionPosition.height + 1) * setup.unitSize}px`;
     //DRAW DECORATION
-    ctx.beginPath()
+    ctx.beginPath();
     ctx.lineWidth = gameCycle ? "4" : "1";
     ctx.strokeStyle = "white";
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
     ctx.rect(
-      question.position.x * setup.unitSize,
-      question.position.y * setup.unitSize,
-      (question.position.width + 1) * setup.unitSize,
-      (question.position.height + 1) * setup.unitSize
+      setup.questionPosition.x * setup.unitSize,
+      setup.questionPosition.y * setup.unitSize,
+      (setup.questionPosition.width + 1) * setup.unitSize,
+      (setup.questionPosition.height + 1) * setup.unitSize
     );
     ctx.fill();
     ctx.stroke();
 
-
     // draw ANSWERS
     for (let i = 0; i < question.answers.length; i++) {
       const answer = question.answers[i];
+      const position = setup.answersPositions[i];
+
       const answerE = document.querySelector(".answer" + (i + 1));
       answerE.innerHTML = answer.text;
 
-      answerE.style = `top: ${answer.position.y * setup.unitSize}px;left: ${answer.position.x * setup.unitSize
-        }px; width: ${(answer.position.width + 1) * setup.unitSize}px; height: ${(answer.position.height + 1) * setup.unitSize
-        }px`;
+      answerE.style = `top: ${position.y * setup.unitSize}px;left: ${
+        position.x * setup.unitSize
+      }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${
+        (position.height + 1) * setup.unitSize
+      }px`;
 
       // if (gameCycle) {
       //   if (i % 2 == 0) {
@@ -262,7 +287,7 @@ function start(setup) {
       //   } else {
       //     answerE.classList.add("text-neon")
       //   }
-      //   //add new   
+      //   //add new
       // } else {
       //   if (i % 2 == 0) {
       //     answerE.classList.add("text-neon")
@@ -271,23 +296,24 @@ function start(setup) {
       //   }
       // }
       //draw the mid point
-      for (let i = 0; i < answer.position.width + 1; i++) {
-        for (let j = 0; j < answer.position.height + 1; j++) {
+      for (let i = 0; i < position.width + 1; i++) {
+        for (let j = 0; j < position.height + 1; j++) {
           ctx.fillStyle = "white";
           ctx.beginPath();
           ctx.arc(
-            answer.position.x * setup.unitSize + setup.unitSize * i + setup.unitSize / 2,
-            answer.position.y * setup.unitSize + setup.unitSize * j + setup.unitSize / 2,
+            position.x * setup.unitSize +
+              setup.unitSize * i +
+              setup.unitSize / 2,
+            position.y * setup.unitSize +
+              setup.unitSize * j +
+              setup.unitSize / 2,
             gameCycle ? "2" : "4",
             0,
             2 * Math.PI
           );
           ctx.fill();
         }
-
       }
-
-
     }
   }
 
@@ -297,14 +323,13 @@ function start(setup) {
 
   function drawBoard() {
     const game = document.getElementById("game");
-    game.classList.remove(getCBoardClass())
-    //add new   
+    game.classList.remove(getCBoardClass());
+    //add new
     gameCycle = !gameCycle;
-    game.classList.add(getCBoardClass())
+    game.classList.add(getCBoardClass());
   }
 
   function updateGameState(gameState) {
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBoard();
     drawQuestion(gameState.question);

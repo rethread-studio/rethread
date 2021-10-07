@@ -5,6 +5,8 @@ export interface IState {
   width: number;
   height: number;
   unitSize: number;
+  questionPosition: BoxPosition;
+  answersPositions: BoxPosition[];
   walls: BoxPosition[];
 }
 

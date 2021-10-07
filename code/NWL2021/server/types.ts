@@ -15,4 +15,4 @@ export interface BoxPosition extends Position {
   height: number;
 }
 
-type playerStatus = "left" | "up" | "down" | "right" | "hit" | "win" | "lose" | "iddle";
+type playerStatus = "left" | "up" | "down" | "right" | "hit" | "win" | "lose" | "idle";
