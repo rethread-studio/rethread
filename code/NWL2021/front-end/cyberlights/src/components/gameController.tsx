@@ -12,13 +12,19 @@ import { socket } from "../api";
 import { gameControllerI, controllDirection } from "../types";
 
 export const GameController = ({ charactersList, characterIndex }: React.PropsWithChildren<gameControllerI>) => {
-
+    const [answer, setAnswer] = useState<boolean>(false);
+    const [question, setQuestion] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
 
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
-    const score: string = "00334";
-    console.log("this has started", charactersList[characterIndex].img)
+
+
+
+    socket.on("question", (question) => { setQuestion(question.text) });
+
+    socket.on("gameStateUpdate", (status) => { setAnswer(status.inQuestion) })
+
     //load characters data
     useEffect(() => {
         const laureate = {
@@ -50,8 +56,8 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
     const rotation: string = currentDirection === "up" ? "-translate-y-6" :
         currentDirection === "down" ? "translate-y-6" :
             currentDirection === "void" ? "rotate-0" :
-                currentDirection === "left" ? "-rotate-45" :
-                    currentDirection === "right" ? "rotate-45" : "rotate-0";
+                currentDirection === "left" ? "-rotate-45 -translate-x-8" :
+                    currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
 
     return (
 
@@ -63,11 +69,16 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
                     <Link to={"/select"} className="text-gray-900 bg-white h-8 w-4/8 p-2 uppercase">
                         <FontAwesomeIcon className="yellow-300" icon={chevronLeft} /> Back to select
                     </Link>
-
-                    <span className="text-white p-2 pr-4">{score}</span>
                 </div>
+                <div className="w-full text-neon text-xl uppercase text-center pt-4 ">
+                    {question !== null ? <span>{question}</span> : <></>}
+                </div>
+                <div className="relative h-full flex flex-col justify-center content-center">
 
-                <img onClick={() => { console.log("emote") }} className={`w-3/3 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/`} alt="Tu youyou" />
+                    <img onClick={() => { console.log("emote") }} className={`w-3/3 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${charactersList[characterIndex].imagePath}`} alt="Tu youyou" />
+
+
+                </div>
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
                     <ArrowBtn clickEvent={emitDirection} direction="up" />

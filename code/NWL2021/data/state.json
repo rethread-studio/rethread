@@ -1,21 +1,28 @@
 {
+  "questionPosition": {
+    "x": 3,
+    "y": 3,
+    "width": 5,
+    "height": 0
+  },
   "_id": "615ee06728f1bb00b8c4c8ce",
   "height": 6,
   "width": 13,
   "unitSize": 100,
-  "questionPosition": { "x": 3, "width": 5, "y": 3, "height": 0 },
   "answersPositions": [
     {
       "x": 0,
       "y": 4,
       "width": 3,
-      "height": 1
+      "height": 1,
+      "_id": "61654693a7b3131d0df34400"
     },
     {
       "x": 10,
       "y": 0,
       "width": 1,
-      "height": 2
+      "height": 2,
+      "_id": "61654693a7b3131d0df34401"
     }
   ],
   "walls": []
