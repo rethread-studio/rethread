@@ -21,17 +21,9 @@
     x: <input type="number" min="1" ng-model="answer.x" /><br />
     y: <input type="number" min="1" ng-model="answer.y" /><br />
     Width:
-    <input
-      type="number"
-      min="1"
-      ng-model="answer.width"
-    /><br />
+    <input type="number" min="1" ng-model="answer.width" /><br />
     height:
-    <input
-      type="number"
-      min="1"
-      ng-model="answer.height"
-    /><br /><br />
+    <input type="number" min="1" ng-model="answer.height" /><br /><br />
   </div>
 </form>
 <h2>Questions?</h2>
@@ -52,8 +44,16 @@
 <h2>Laureates</h2>
 <ul>
   <li ng-repeat="laureate in laureates">
+    <img ng-src="/img/laureates/{{laureate.imagePath}}" width="150px"/><br />
     First name: <input type="text" ng-model="laureate.firstname" /><br />
     Last name: <input type="text" ng-model="laureate.surname" /><br />
+    Image :
+    <form action="/api/admin/laureate/image" method="POST" enctype="multipart/form-data" >
+      <input type="hidden" name="id" ng-value="laureate._id">
+      <input type="file" name="image" />
+      <input type="submit">
+    </form>
+    <br />
     Born country: <input type="text" ng-model="laureate.bornCountry" /><br />
     Born city: <input type="text" ng-model="laureate.bornCity" /><br />
     Died country: <input type="text" ng-model="laureate.diedCountry" /><br />

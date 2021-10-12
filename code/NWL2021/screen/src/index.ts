@@ -23,6 +23,10 @@ export default async function start() {
       maxAge: 0, // 1h
     })
   );
+  app.use(
+    "/img/laureates/",
+    express.static(path.join(__dirname, "..", "front-end", "laureates"))
+  );
 
   const server = http.createServer(app);
   const serverIo = new Server(server);

@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as express from "express";
+import multer from "multer";
 import LaureateModel from "../database/laureates/laureates.model";
 import QuestionModel from "../database/questions/questions.model";
 import StateModel from "../database/state/state.model";
@@ -8,6 +9,27 @@ import { importDefaultConfiguration } from "../../import";
 import { Engine } from "../engine";
 
 const router = express.Router();
+
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, "../../front-end/laureates/"),
+  filename: async (req, file, cb) => {
+    console.log(req.body.id);
+    const laureate = await LaureateModel.findById(req.body.id);
+    if (laureate == null) {
+      return cb(new Error("not_found"), null);
+    }
+    const filename =
+      laureate.firstname.replace(" ", "-") +
+      "_" +
+      laureate.surname.replace(" ", "-") +
+      ".png";
+    laureate.imagePath = filename;
+    console.log(laureate, filename)
+    await laureate.save();
+    cb(null, filename);
+  },
+});
+const upload = multer({ storage: storage });
 
 let engine: Engine = null;
 export default function (e) {
@@ -18,6 +40,10 @@ export default function (e) {
 router.post("/laureate", (req, res) => {
   const data = req.body;
   new LaureateModel(data).save();
+});
+
+router.post("/laureate/image", upload.single("image"), async (req, res) => {
+  res.redirect("/admin/")
 });
 
 router.post("/state/load", async (req, res) => {

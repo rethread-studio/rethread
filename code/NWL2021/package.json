@@ -17,6 +17,7 @@
     "express": "^4.17.1",
     "got": "^11.8.2",
     "mongoose": "^6.0.6",
+    "multer": "^1.4.3",
     "nodemon": "^2.0.12",
     "redis": "^3.1.2",
     "socket.io": "^4.2.0",
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@types/compression": "^1.7.2",
     "@types/express": "^4.17.13",
+    "@types/multer": "^1.4.7",
     "@types/node": "^16.9.1",
     "@types/redis": "^2.8.32",
     "ts-loader": "^9.2.5",

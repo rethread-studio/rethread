@@ -31,6 +31,11 @@ export default async function start() {
   );
 
   app.use(
+    "/img/laureates/",
+    express.static(path.join(__dirname, "..", "front-end", "laureates"))
+  );
+
+  app.use(
     "/",
     express.static(
       path.join(__dirname, "..", "front-end", "cyberlights", "build"),
