@@ -62,11 +62,11 @@ export default async function start() {
 
   socket.on("setup", function (data) {
     setup = data;
-    serverIo.emit("setup", setup);
+    serverIo.of("screen").emit("setup", setup);
   });
 
   socket.on("gameStateUpdate", (data) => {
-    serverIo.emit("gameStateUpdate", data);
+    serverIo.of("screen").emit("gameStateUpdate", data);
   });
 
   server.listen(config.SCREEN_PORT);
