@@ -10,6 +10,7 @@ import config from "../config";
 import GameSocket from "./GameSocket";
 import * as database from "./database/database";
 import { Engine } from "./engine";
+import Monitor from "./Monitor";
 import routes from "./routes";
 import StateModel from "./database/state/state.model";
 import { importDefaultConfiguration } from "../import";
@@ -17,6 +18,18 @@ import { importDefaultConfiguration } from "../import";
 export default async function start() {
   await database.connect();
   const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server);
+  const monitor = new Monitor(io);
+
+  app.use((req, res, next) => {
+    monitor.send({
+      origin: "server",
+      action: req.url,
+    });
+    next();
+  });
+
   app.use(express.json());
 
   app.use(compression());
@@ -47,9 +60,6 @@ export default async function start() {
     )
   );
 
-  const server = http.createServer(app);
-  const io = new Server(server);
-
   const gameState = await StateModel.findOne();
   if (!gameState) {
     console.log("import default configuration");
@@ -58,7 +68,7 @@ export default async function start() {
 
   const engine = new Engine();
   await engine.init();
-  const gameSocket = new GameSocket(io, engine);
+  const gameSocket = new GameSocket(io, engine, monitor);
 
   app.use("/api/admin", routes.admin(engine));
 

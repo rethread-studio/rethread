@@ -3,7 +3,7 @@ export interface Player extends Position {
   laureate: any;
   socket: any | null;
   previousPositions: Position[];
-  status: playerStatus,
+  status: playerStatus;
 }
 
 export interface Position {
@@ -15,4 +15,17 @@ export interface BoxPosition extends Position {
   height: number;
 }
 
-type playerStatus = "left" | "up" | "down" | "right" | "hit" | "win" | "lose" | "idle";
+export interface MonitoringEvent {
+  origin: "mongodb" | "gameEngine" | "user" | "screen" | "server";
+  action: string;
+}
+
+type playerStatus =
+  | "left"
+  | "up"
+  | "down"
+  | "right"
+  | "hit"
+  | "win"
+  | "lose"
+  | "idle";

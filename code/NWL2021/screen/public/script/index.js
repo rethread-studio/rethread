@@ -1,4 +1,4 @@
-var socket = io("/");
+var socket = io("/screen");
 socket.on("setup", (data) => {
   socket.off("gameStateUpdate");
   start(data);

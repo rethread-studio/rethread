@@ -17,6 +17,11 @@ export default async function start() {
   app.set("etag", "strong");
 
   app.use(
+    "/monitor/",
+    express.static(path.join(__dirname, "..", "..", "front-end", "monitor"))
+  );
+
+  app.use(
     express.static(path.join(__dirname, "..", "public"), {
       etag: true,
       lastModified: true,
@@ -25,17 +30,22 @@ export default async function start() {
   );
   app.use(
     "/img/laureates/",
-    express.static(path.join(__dirname, "..", "front-end", "laureates"))
+    express.static(path.join(__dirname, "..", "..", "front-end", "laureates"))
   );
 
   const server = http.createServer(app);
   const serverIo = new Server(server);
 
+  const socketMonitor = io(config.SERVER_HOST + "visualization");
   const socket = io(config.SERVER_HOST + "screen");
 
   let setup = null;
 
-  serverIo.on("connection", (socket) => {
+  socketMonitor.on("message", (data) => {
+    serverIo.of("monitor").send(data);
+  });
+
+  serverIo.of("screen").on("connection", (socket) => {
     console.log("Screen connected");
     if (setup) socket.emit("setup", setup);
     socket.on("disconnect", function () {
@@ -53,9 +63,7 @@ export default async function start() {
   });
 
   server.listen(config.SCREEN_PORT);
-  console.log(
-    "Screen server started on port: " + config.SCREEN_PORT
-  );
+  console.log("Screen server started on port: " + config.SCREEN_PORT);
 }
 
 start();

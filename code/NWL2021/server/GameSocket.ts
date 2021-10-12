@@ -1,10 +1,15 @@
 import { Server, Socket } from "socket.io";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
 import { Engine } from "./engine";
+import Monitor from "./Monitor";
 import { Player } from "./types";
 
 export default class GameSocket {
-  constructor(readonly io: Server, readonly engine: Engine) {
+  constructor(
+    readonly io: Server,
+    readonly engine: Engine,
+    readonly monitor: Monitor
+  ) {
     io.of("screen").on("connection", (socket) => this._screenConnect(socket));
     io.of("control").on("connection", (socket) => this._controlConnect(socket));
 
@@ -13,17 +18,47 @@ export default class GameSocket {
 
   private subscribe() {
     let hasChange = false;
-    this.engine.on("newPlayer").subscribe(() => (hasChange = true));
-    this.engine.on("playerLeave").subscribe(() => (hasChange = true));
-    this.engine.on("playerMove").subscribe(() => (hasChange = true));
+    this.engine.on("newPlayer").subscribe(() => {
+      this.monitor.send({
+        origin: "user",
+        action: "play",
+      });
+      hasChange = true;
+    });
+    this.engine.on("playerLeave").subscribe(() => {
+      this.monitor.send({
+        origin: "user",
+        action: "leave",
+      });
+      hasChange = true;
+    });
+    this.engine.on("playerMove").subscribe(() => {
+      this.monitor.send({
+        origin: "user",
+        action: "move",
+      });
+      hasChange = true;
+    });
     this.engine.on("newQuestion").subscribe((question) => {
+      this.monitor.send({
+        origin: "gameEngine",
+        action: "newQuestion",
+      });
       this.emitQuestion(question);
       hasChange = true;
     });
     this.engine.on("userAnswer").subscribe(({ player, answer }) => {
+      this.monitor.send({
+        origin: "gameEngine",
+        action: "userAnswer",
+      });
       this.emitResult(answer, player);
     });
     this.engine.on("answer").subscribe((answer) => {
+      this.monitor.send({
+        origin: "gameEngine",
+        action: "nswer",
+      });
       this.emitResult(answer);
     });
     this.engine.on("state").subscribe(() => {
