@@ -11,6 +11,9 @@ interface Config {
   SCREEN_PORT: number;
   QUESTION_INTERVAL: number;
   SERVER_HOST: string;
+  OSC_ADDRESS: string;
+  OSC_IP: string;
+  OSC_PORT: number;
 }
 
 const config: Config = {
@@ -24,6 +27,9 @@ const config: Config = {
   SCREEN_PORT: 3500,
   QUESTION_INTERVAL: 10,
   SERVER_HOST: "http://localhost:3000/",
+  OSC_ADDRESS: "/",
+  OSC_IP: "127.0.0.1",
+  OSC_PORT: 57130,
 };
 
 for (let conf in process.env) {

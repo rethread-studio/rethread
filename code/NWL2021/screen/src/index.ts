@@ -7,6 +7,8 @@ import http from "http";
 import config from "../../config";
 import { io } from "socket.io-client";
 import { Server } from "socket.io";
+import * as osc from "./osc";
+import { MonitoringEvent } from "../../server/types";
 
 export default async function start() {
   const app = express();
@@ -41,7 +43,12 @@ export default async function start() {
 
   let setup = null;
 
-  socketMonitor.on("message", (data) => {
+  osc.open((port) => {
+    console.log("OSC server started on port: " + port);
+  });
+
+  socketMonitor.on("message", (data: MonitoringEvent) => {
+    osc.send(data);
     serverIo.of("monitor").send(data);
   });
 
