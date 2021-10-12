@@ -89,6 +89,13 @@ export default class GameSocket {
       }),
       question: this.engine.currentQuestion,
     });
+
+    Object.values(this.engine.players).forEach((p) => {
+      let target = p.socket;
+      target.emit("gameStateUpdate", {
+        inQuestion: p.inQuestion,
+      });
+    })
   }
 
   emitSetup(opt?: { socket }) {

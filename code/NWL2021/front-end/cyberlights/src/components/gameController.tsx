@@ -33,7 +33,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
             year: charactersList[characterIndex].bornDate,
             country: charactersList[characterIndex].bornCountry,
             color: "#ffe879",
-            img: "/img/laureate.png",
+            img: `/img/laureates/${charactersList[characterIndex].imagePath}`,
             shadowImg: "/img/laureateShadow.png",
             dialogue: "/img/dialogue.png"
         };
@@ -74,8 +74,8 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
                 <div className="relative h-full flex flex-col justify-center content-center">
-
-                    <img onClick={() => { console.log("emote") }} className={`w-3/3 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${charactersList[characterIndex].imagePath}`} alt="Tu youyou" />
+                    {answer ? <div className={`absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>!</div> : <></>}
+                    <img onClick={() => { console.log("emote") }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${charactersList[characterIndex].imagePath}`} alt="Tu youyou" />
 
 
                 </div>
