@@ -1,10 +1,13 @@
 import { Server, Socket } from "socket.io";
+import config from "../config";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
 import { Engine } from "./engine";
 import Monitor from "./Monitor";
 import { Player } from "./types";
 
 export default class GameSocket {
+  private _movedUsers = new Set<string>();
+
   constructor(
     readonly io: Server,
     readonly engine: Engine,
@@ -70,7 +73,8 @@ export default class GameSocket {
         this.emitUpdates();
       }
       hasChange = false;
-    }, 250);
+      this._movedUsers = new Set<string>();
+    }, config.MOVE_INTERVAL);
   }
 
   emitUpdates(opt?: { socket }) {
@@ -133,16 +137,26 @@ export default class GameSocket {
 
       player.socket = socket;
 
-      socket.on("up", () => this.engine.movePlayer(socket.id, { x: 0, y: -1 }));
-      socket.on("down", () =>
-        this.engine.movePlayer(socket.id, { x: 0, y: 1 })
-      );
-      socket.on("left", () =>
-        this.engine.movePlayer(socket.id, { x: -1, y: 0 })
-      );
-      socket.on("right", () =>
-        this.engine.movePlayer(socket.id, { x: 1, y: 0 })
-      );
+      socket.on("up", () => {
+        if (this._movedUsers.has(socket.id)) return;
+        this._movedUsers.add(socket.id);
+        this.engine.movePlayer(socket.id, { x: 0, y: -1 });
+      });
+      socket.on("down", () => {
+        if (this._movedUsers.has(socket.id)) return;
+        this._movedUsers.add(socket.id);
+        this.engine.movePlayer(socket.id, { x: 0, y: 1 });
+      });
+      socket.on("left", () => {
+        if (this._movedUsers.has(socket.id)) return;
+        this._movedUsers.add(socket.id);
+        this.engine.movePlayer(socket.id, { x: -1, y: 0 });
+      });
+      socket.on("right", () => {
+        if (this._movedUsers.has(socket.id)) return;
+        this._movedUsers.add(socket.id);
+        this.engine.movePlayer(socket.id, { x: 1, y: 0 });
+      });
     });
   }
 
