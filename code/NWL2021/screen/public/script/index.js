@@ -102,7 +102,7 @@ function start(setup) {
       } else {
         imgs[player.laureate.img] = new Image(setup.unitSize, setup.unitSize);
         // Load an image of intrinsic size 300x227 in CSS pixels
-        imgs[player.laureate.img].src = player.laureate.img;
+        imgs[player.laureate.img].src = `/img/laureates/${player.laureate.img}`;
         imgs[player.laureate.img].onload = function () {
           renderImage(
             player.x * setup.unitSize + setup.unitSize / 2,

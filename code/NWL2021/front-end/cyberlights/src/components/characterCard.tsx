@@ -12,7 +12,7 @@ export const CharacterCard = ({ fullName, img, prizes }: React.PropsWithChildren
 
     return (
         <>
-            <img className="w-3/5 h-3/5 mx-auto mt-8" src={`./${img}`} alt={fullName} />
+            <img className="w-3/5 h-3/5 mx-auto mt-8" src={`${img}`} alt={fullName} />
             <h2 className={`text-center uppercase pt-8 pb-4 px-4 font-light ${fullName.length >= 14 ? "text-2xl" : "text-4xl"}`}>{`${fullName}`}</h2>
             <p className="text-center text-white text-xl w-4/5 m-auto">Nobel price in</p>
             {prizesEl}
