@@ -18,7 +18,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
     const score: string = "00334";
-
+    console.log("this has started", charactersList[characterIndex].img)
     //load characters data
     useEffect(() => {
         const laureate = {
@@ -67,7 +67,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
                     <span className="text-white p-2 pr-4">{score}</span>
                 </div>
 
-                <img onClick={() => { console.log("emote") }} className={`w-3/3 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src="./characterTest.png" alt="Tu youyou" />
+                <img onClick={() => { console.log("emote") }} className={`w-3/3 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/`} alt="Tu youyou" />
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
                     <ArrowBtn clickEvent={emitDirection} direction="up" />
