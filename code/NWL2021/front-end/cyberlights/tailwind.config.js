@@ -1,8 +1,25 @@
 const colors = require('tailwindcss/colors')
 
 module.exports = {
-  purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
+  purge: ['src/**/*.{js,jsx,ts,tsx}', 'public/index.html', 'tailwind.config.js'],
   darkMode: false, // or 'media' or 'class'
+  safelist: [
+    'border-neonpink-300',
+    'bg-neonpink-300',
+    'text-neonpink-300',
+    'border-neonindigo-300',
+    'bg-neonindigo-300',
+    'text-neonindigo-300',
+    'border-neongreen-300',
+    'bg-neongreen-300',
+    'text-neongreen-300',
+    'border-neonred-300',
+    'bg-neonred-300',
+    'text-neonred-300',
+    'border-neonyellow-300',
+    'bg-neonyellow-300',
+    'text-neonyellow-300'
+  ],
   theme: {
     fontFamily: {
       'roboto': ['Roboto', 'sans-serif'],
