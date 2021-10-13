@@ -37,3 +37,7 @@ body{
   z-index: -2;
 }
 
+#root {
+  max-width: 600px;
+  margin: auto;
+}
