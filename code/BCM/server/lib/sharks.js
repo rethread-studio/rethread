@@ -43,7 +43,7 @@ function isLocalIp(clients, destinationIp) {
     return destinationIp == client.ip;
   }
   if (hotspot.isHotspot()) {
-    return destinationIp.indexOf("10.3.141.") == 0;
+    return destinationIp.indexOf("10.42.0.") == 0;
   }
   return (
     destinationIp.indexOf("192.168") == 0 ||
