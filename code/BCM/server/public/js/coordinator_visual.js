@@ -28,22 +28,6 @@ angular
   })
   .controller("visualizationController", function ($rootScope, $location) {
     $(".currentVisualization").show();
-    $("#welcomeBg").hide();
-  })
-  .controller("instructionController", function ($scope, $location) {
-    $(".currentVisualization").show();
-    $("#welcomeBg").hide();
-    setTimeout(() => {
-      $location.url("/visualization");
-    }, 5000);
-  })
-  .controller("closeController", function ($scope) {
-    $(".visualization").hide();
-    $("#welcomeBg").hide();
-  })
-  .controller("homeController", function ($scope) {
-    $(".visualization").hide();
-    $("#welcomeBg").show();
   })
   .controller("mainController", function ($scope, $http, $location) {
     $scope.wifi = "BCM";
@@ -52,7 +36,6 @@ angular
     const visualizations = [
       "visualization1",
       "visualization2",
-      // "visualization3",
       "visualizationGlobe",
       "visualizationSparse",
     ];
@@ -73,7 +56,11 @@ angular
         "currentVisualization"
       );
       $("#" + visualizations[currentVisualization]).show();
-      switchTimeout = setTimeout(switchVisualization, 20000);
+      let duration = 30;
+      if (currentVisualization == 0 || currentVisualization == 3) {
+        duration = 5;
+      }
+      switchTimeout = setTimeout(switchVisualization, duration * 1000);
     }
 
     setTimeout(switchVisualization, 2500);
