@@ -80,7 +80,7 @@ angular
             $http.post("/api/admin/questions", newValue).then(() => {
               getQuestions();
             });
-          }, 2500);
+          }, 1500);
         },
         true
       );
@@ -95,7 +95,7 @@ angular
             $http.post("/api/admin/state", newValue).then(() => {
               getState();
             });
-          }, 2500);
+          }, 1500);
         },
         true
       );
@@ -108,7 +108,7 @@ angular
           clearTimeout(laureatesTimeout);
           laureatesTimeout = setTimeout(() => {
             $http.post("/api/admin/laureates", newValue).then(() => {});
-          }, 2500);
+          }, 1500);
         },
         true
       );

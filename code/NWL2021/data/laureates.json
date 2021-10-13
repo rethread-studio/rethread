@@ -26,7 +26,89 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8d1"
       }
-    ]
+    ],
+    "imagePath": "Wilhelm-Conrad_Röntgen.png"
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8e1",
+    "firstname": "Martin Luther",
+    "surname": "King Jr.",
+    "bornCountry": "USA",
+    "bornCountryCode": "US",
+    "bornCity": "Atlanta, GA",
+    "diedCountry": "USA",
+    "diedCountryCode": "US",
+    "diedCity": "Memphis, TN",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 1964,
+        "category": "peace",
+        "share": 1,
+        "motivation": "for his non-violent struggle for civil rights for the Afro-American population",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8e3"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8e2"
+      }
+    ],
+    "imagePath": "Martin-Luther_King-Jr..png"
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8e4",
+    "firstname": "Anjezë Gonxhe",
+    "surname": "Bojaxhiu",
+    "bornCountry": "Ottoman Empire (now North Macedonia)",
+    "bornCountryCode": "MK",
+    "bornCity": "Uskup (now Skopje)",
+    "diedCountry": "India",
+    "diedCountryCode": "IN",
+    "diedCity": "Calcutta",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 1979,
+        "category": "peace",
+        "share": 1,
+        "motivation": "for her work for bringing help to suffering humanity",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8e6"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8e5"
+      }
+    ],
+    "imagePath": "Anjezë-Gonxhe_Bojaxhiu.png"
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8ea",
+    "firstname": "Selma",
+    "surname": "Lagerlöf",
+    "bornCountry": "Sweden",
+    "bornCountryCode": "SE",
+    "bornCity": "Mårbacka",
+    "diedCountry": "Sweden",
+    "diedCountryCode": "SE",
+    "diedCity": "Mårbacka",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 1909,
+        "category": "literature",
+        "share": 1,
+        "motivation": "in appreciation of the lofty idealism, vivid imagination and spiritual perception that characterize her writings",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8ec"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8eb"
+      }
+    ],
+    "imagePath": "Selma_Lagerlöf.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8de",
@@ -55,108 +137,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8df"
       }
-    ]
-  },
-  {
-    "_id": "615ee06a28f1bb00b8c4c8e1",
-    "firstname": "Martin Luther",
-    "surname": "King Jr.",
-    "bornCountry": "USA",
-    "bornCountryCode": "US",
-    "bornCity": "Atlanta, GA",
-    "diedCountry": "USA",
-    "diedCountryCode": "US",
-    "diedCity": "Memphis, TN",
-    "gender": "male",
-    "prizes": [
-      {
-        "year": 1964,
-        "category": "peace",
-        "share": 1,
-        "motivation": "for his non-violent struggle for civil rights for the Afro-American population",
-        "affiliations": [
-          {
-            "_id": "615ee06a28f1bb00b8c4c8e3"
-          }
-        ],
-        "_id": "615ee06a28f1bb00b8c4c8e2"
-      }
-    ]
-  },
-  {
-    "_id": "615ee06a28f1bb00b8c4c8e4",
-    "firstname": "Anjezë Gonxhe",
-    "surname": "Bojaxhiu",
-    "bornCountry": "Ottoman Empire (now North Macedonia)",
-    "bornCountryCode": "MK",
-    "bornCity": "Uskup (now Skopje)",
-    "diedCountry": "India",
-    "diedCountryCode": "IN",
-    "diedCity": "Calcutta",
-    "gender": "female",
-    "prizes": [
-      {
-        "year": 1979,
-        "category": "peace",
-        "share": 1,
-        "motivation": "for her work for bringing help to suffering humanity",
-        "affiliations": [
-          {
-            "_id": "615ee06a28f1bb00b8c4c8e6"
-          }
-        ],
-        "_id": "615ee06a28f1bb00b8c4c8e5"
-      }
-    ]
-  },
-  {
-    "_id": "615ee06a28f1bb00b8c4c8e7",
-    "firstname": "Lhamo",
-    "surname": "Thondup",
-    "bornCountry": "Tibet (now China)",
-    "bornCountryCode": "CN",
-    "bornCity": "Taktser",
-    "gender": "male",
-    "prizes": [
-      {
-        "year": 1989,
-        "category": "peace",
-        "share": 1,
-        "motivation": "for advocating peaceful solutions based upon tolerance and mutual respect in order to preserve the historical and cultural heritage of his people",
-        "affiliations": [
-          {
-            "_id": "615ee06a28f1bb00b8c4c8e9"
-          }
-        ],
-        "_id": "615ee06a28f1bb00b8c4c8e8"
-      }
-    ]
-  },
-  {
-    "_id": "615ee06a28f1bb00b8c4c8ea",
-    "firstname": "Selma",
-    "surname": "Lagerlöf",
-    "bornCountry": "Sweden",
-    "bornCountryCode": "SE",
-    "bornCity": "Mårbacka",
-    "diedCountry": "Sweden",
-    "diedCountryCode": "SE",
-    "diedCity": "Mårbacka",
-    "gender": "female",
-    "prizes": [
-      {
-        "year": 1909,
-        "category": "literature",
-        "share": 1,
-        "motivation": "in appreciation of the lofty idealism, vivid imagination and spiritual perception that characterize her writings",
-        "affiliations": [
-          {
-            "_id": "615ee06a28f1bb00b8c4c8ec"
-          }
-        ],
-        "_id": "615ee06a28f1bb00b8c4c8eb"
-      }
-    ]
+    ],
+    "imagePath": "Rita_Levi-Montalcini.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8ed",
@@ -182,7 +164,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8ee"
       }
-    ]
+    ],
+    "imagePath": "Nelly_Sachs.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8f0",
@@ -208,7 +191,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8f1"
       }
-    ]
+    ],
+    "imagePath": "Toni_Morrison.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8f3",
@@ -243,7 +227,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8f4"
       }
-    ]
+    ],
+    "imagePath": "Elinor_Ostrom.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8f7",
@@ -266,7 +251,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8f8"
       }
-    ]
+    ],
+    "imagePath": "Malala_Yousafzai.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8fa",
@@ -289,7 +275,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8fb"
       }
-    ]
+    ],
+    "imagePath": "Bob_Dylan.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8fd",
@@ -315,7 +302,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8fe"
       }
-    ]
+    ],
+    "imagePath": "Frances-H._Arnold.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8d3",
@@ -356,7 +344,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8d6"
       }
-    ]
+    ],
+    "imagePath": "Marie_Curie.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8d8",
@@ -385,7 +374,8 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8d9"
       }
-    ]
+    ],
+    "imagePath": "Albert_Einstein.png"
   },
   {
     "_id": "615ee06a28f1bb00b8c4c8db",
@@ -414,6 +404,31 @@
         ],
         "_id": "615ee06a28f1bb00b8c4c8dc"
       }
-    ]
+    ],
+    "imagePath": "Sir-Alexander_Fleming.png"
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8e7",
+    "firstname": "Lhamo",
+    "surname": "Thondup",
+    "bornCountry": "Tibet (now China)",
+    "bornCountryCode": "CN",
+    "bornCity": "Taktser",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 1989,
+        "category": "peace",
+        "share": 1,
+        "motivation": "for advocating peaceful solutions based upon tolerance and mutual respect in order to preserve the historical and cultural heritage of his people",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8e9"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8e8"
+      }
+    ],
+    "imagePath": "Lhamo_Thondup.png"
   }
 ]

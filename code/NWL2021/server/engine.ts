@@ -74,7 +74,7 @@ export class Engine {
         ];
     } while (
       this._currentQuestion &&
-      newQuestion.text !== this._currentQuestion.text
+      newQuestion.text === this._currentQuestion.text
     );
     return newQuestion;
   }

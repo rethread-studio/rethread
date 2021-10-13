@@ -131,6 +131,8 @@ router.post("/state", async (req, res) => {
   gameState.width = req.body.width;
   gameState.height = req.body.height;
   gameState.unitSize = req.body.unitSize;
+  gameState.questionPosition = req.body.questionPosition;
+  gameState.answersPositions = req.body.answersPositions;
   await gameState.save();
   engine.state = await StateModel.findOne();
   res.json("ok");

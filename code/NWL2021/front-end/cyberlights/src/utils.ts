@@ -19,7 +19,7 @@ export const dataToLaurates = (l: any, i: number): laureateI => {
         diedCity: l.firstname,
         gender: l.firstname,
         description: l.firstname,
-        img: l.img ? l.img : 'laureate.png',
+        img: l.imagePath,
         prizes: prizes,
         color: colors[i % (colors.length - 1)]
     }

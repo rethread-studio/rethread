@@ -71,7 +71,7 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
                     {characters.map((c: laureateI) => {
                         return (
                             <SwiperSlide key={uuidv4()} >
-                                <CharacterCard fullName={`${c.firstname} ${c.lastname}`} img={c.img} prizes={c.prizes} />
+                                <CharacterCard fullName={`${c.firstname} ${c.lastname}`} img={`/img/laureates/${c.img}`} prizes={c.prizes} />
                             </SwiperSlide>
                         )
                     })}
