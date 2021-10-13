@@ -60,16 +60,19 @@ export default class GameSocket {
     this.engine.on("answer").subscribe((answer) => {
       this.monitor.send({
         origin: "gameEngine",
-        action: "nswer",
+        action: "answer",
       });
       this.emitResult(answer);
     });
     this.engine.on("state").subscribe(() => {
+      console.log("state")
+      hasChange = true;
       this.emitSetup();
     });
 
     const updateInterval = setInterval(() => {
       if (hasChange) {
+        console.log("emitUpdates")
         this.emitUpdates();
       }
       hasChange = false;
