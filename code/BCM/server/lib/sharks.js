@@ -39,11 +39,13 @@ function getLocation(ip, data) {
 }
 
 function isLocalIp(clients, destinationIp) {
+  let isClient = false;
   for (let client of clients) {
-    return destinationIp == client.ip;
+    isClient = destinationIp == client.ip;
   }
+  if (isClient) return true;
   if (hotspot.isHotspot()) {
-    return destinationIp.indexOf("10.42.0.") == 0;
+    return destinationIp.indexOf("10.3.141.") == 0;
   }
   return (
     destinationIp.indexOf("192.168") == 0 ||
@@ -111,7 +113,6 @@ module.exports = function (networkInterface, kill, broadcast) {
               data.local_location = getLocation(data.local_ip, data);
               data.remote_location = getLocation(data.remote_ip, data);
             }
-
 
             data.services = getServices(data);
             broadcast(data);
