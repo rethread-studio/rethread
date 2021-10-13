@@ -331,6 +331,9 @@ function start(s) {
   //canvas initial setup
   canvas.width = setup.unitSize * setup.width;
   canvas.height = setup.unitSize * setup.height;
+  document.querySelector(
+    ".board"
+  ).style = `width: ${canvas.width}px;height:${canvas.height}px;`;
 
   updateGameState(gameState || {});
 }
