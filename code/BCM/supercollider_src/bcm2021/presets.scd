@@ -81,10 +81,11 @@
 ~playPresetLoop = { | presets |
 	~presetLoopRoutine = Routine({
 		loop{
-			presets.do { |preset_setting|
+			presets.do { |preset_setting, i|
 				var preset = preset_setting[0], duration = preset_setting[1];
 				("Starting preset: " + preset.asString).postln;
 				~presets.at(preset).();
+				~vis_sender.sendMsg("/setPreset", i);
 				duration.wait;
 			};
 		};

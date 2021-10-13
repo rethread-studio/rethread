@@ -44,6 +44,16 @@ s.reboot;
 )
 ~stopPresetLoop.()
 
+
+(
+~playPresetLoop.([
+	[\sine_len, 15],
+	[\instant, 15],
+	[\ticks_whispers, 15],
+	[\services, 15],
+]);
+)
+
 (
 //// RUN THIS BLOCK TO START EVERYTHING
 
@@ -83,6 +93,18 @@ switch(~encoderType,
 ~azimuthStep = (0.5 * pi);
 ~elevationPosition = 0.0;
 ~elevationStep = 0.0;
+
+~fixedAzimuthPositions = Dictionary[];
+[\NORTH, \EAST, \SOUTH, \WEST].do { |symbol, i|
+	~fixedAzimuthPositions.put(symbol, ~azimuthPosition);
+	~azimuthPosition = ~azimuthPosition + ~azimuthStep;
+	if(~azimuthPosition > pi) {
+		~azimuthPosition = ~azimuthPosition - 2pi;
+	};
+	if(~azimuthPosition < -pi) {
+		~azimuthPosition = ~azimuthPosition + 2pi;
+	};
+};
 
 
 // Sonification activity thresholds
@@ -167,14 +189,18 @@ CmdPeriod.add({ ~allWindows.do{|window| window.close; }});
 		bus = Bus.audio(s, ~mixerChannelOutputs);
 		reverb_bus = Bus.audio(s, 2);
 		group = Group(s);
-		azimuth = ~azimuthPosition;
-		~azimuthPosition = ~azimuthPosition + ~azimuthStep;
-		if(~azimuthPosition > pi) {
+		azimuth = ~fixedAzimuthPositions.at(name.asSymbol);
+		if(azimuth == nil, {
+			azimuth = ~azimuthPosition;
+			~azimuthPosition = ~azimuthPosition + ~azimuthStep;
+			if(~azimuthPosition > pi) {
 			~azimuthPosition = ~azimuthPosition - 2pi;
-		};
-		if(~azimuthPosition < -pi) {
-			~azimuthPosition = ~azimuthPosition + 2pi;
-		};
+			};
+			if(~azimuthPosition < -pi) {
+				~azimuthPosition = ~azimuthPosition + 2pi;
+			};
+		});
+
 		switch(name.asSymbol,
 			\NORTH, { pitch_offset = 31 }, // 31
 			\SOUTH,  { pitch_offset = 0 }, // 0
@@ -541,6 +567,14 @@ CmdPeriod.add({ ~allWindows.do{|window| window.close; }});
 
 	s.sync();
 
+	//////////////////////////////////////////////////////
+	/////// Create the default devices
+	/////////////////////////////////////////////////////
+
+	[\NORTH, \EAST, \SOUTH, \WEST].do { |device|
+		~stats.put(device, ~makeStatDevice.(device));
+	};
+
 
 	//////////////////////////////////////////////////////
 	/////// OSC PACKET PARSING
@@ -650,7 +684,11 @@ CmdPeriod.add({ ~allWindows.do{|window| window.close; }});
 				var allServices = statDevice.services.values, totalPacketsForDevice = 0, gui;
 				allServices.do { | service |
 					if((service.packets[\in] + service.packets[\out]) > 0, {
-						service.tick(statDevice.channel);
+						if(statDevice.channel != nil, {
+							service.tick(statDevice.channel);
+						}, {
+							("Error: channel was nil for service: " + service).postln;
+						});
 						numInPackets = numInPackets + service.packets[\in];
 						numOutPackets = numOutPackets + service.packets[\out];
 						totalPacketsForDevice = totalPacketsForDevice + service.packets[\in];
@@ -699,10 +737,13 @@ CmdPeriod.add({ ~allWindows.do{|window| window.close; }});
 			{
 				var activities = 0.0!4;
 
-				~stats.do{|device, i|
+				/*~stats.do{|device, i|
 					activities[i] = device.channel.activity_level_slow;
-				};
-				// TODO: Hard code to NORTH, SOUTH, WEST, EAST
+				};*/
+				activities[0] = ~stats[\NORTH].channel.activity_level_slow;
+				activities[1] = ~stats[\EAST].channel.activity_level_slow;
+				activities[2] = ~stats[\SOUTH].channel.activity_level_slow;
+				activities[3] = ~stats[\WEST].channel.activity_level_slow;
 				~vis_sender.sendMsg("/setActivityLevels", activities[0], activities[1], activities[2], activities[3]);
 			}.value();
 
