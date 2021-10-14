@@ -40,62 +40,64 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
 
 
     return (
-        <div className={`h-screen transition-all duration-200 text-${color} overflow-hidden flex flex-col justify-between relative border-8 border-${color} `}>
+        <div className="h-screen w-full p-4">
+            <div className={`h-full transition-all duration-200 text-${color} overflow-hidden flex flex-col justify-between relative neon-shadow border-2 border-white `}>
 
 
-            <div className="">
-                <div className={`flex flex-row h-8 justify-between content-center transition-all duration-200 bg-${color} px-1 pb-1.5`}>
-                    <h4 className="text-gray-900 text-base uppercase " >Nobel laureates</h4>
-                    <span className="fraction text-gray-900 text-base uppercase"></span>
+                <div>
+                    <div className={`flex flex-row h-8 justify-between content-center transition-all duration-200 text-gray-400 px-3 pt-2 pb-1.5 text-sm font-light`}>
+                        <h4 className=" capsize " >Laureates</h4>
+                        <span className="fraction  uppercase"></span>
+                    </div>
+                    <Swiper
+                        initialSlide={Math.random() * characters.length}
+                        loop={true}
+                        spaceBetween={50}
+                        slidesPerView={1}
+                        onSlideChange={(SwiperCore) => {
+                            const { realIndex, } = SwiperCore;
+                            setCharacterPrizes(characters[realIndex].prizes);
+                            selectHandler(realIndex);
+                            selectColor(`${characters[realIndex].color}-300`)
+                        }}
+                        navigation={{
+                            prevEl: '.prev',
+                            nextEl: '.next',
+                        }}
+                        pagination={{
+                            el: ".fraction",
+                            "type": "fraction"
+                        }}
+                    >
+                        {characters.map((c: laureateI) => {
+                            return (
+                                <SwiperSlide key={uuidv4()} >
+                                    <CharacterCard key={uuidv4()} fullName={`${c.firstname} ${c.surname}`} img={`/img/laureates/${c.img}`} prizes={c.prizes} country={c.country} />
+                                </SwiperSlide>
+                            )
+                        })}
+
+                    </Swiper>
                 </div>
-                <Swiper
-                    initialSlide={Math.random() * characters.length}
-                    loop={true}
-                    spaceBetween={50}
-                    slidesPerView={1}
-                    onSlideChange={(SwiperCore) => {
-                        const { realIndex, } = SwiperCore;
-                        setCharacterPrizes(characters[realIndex].prizes);
-                        selectHandler(realIndex);
-                        selectColor(`${characters[realIndex].color}-300`)
-                    }}
-                    navigation={{
-                        prevEl: '.prev',
-                        nextEl: '.next',
-                    }}
-                    pagination={{
-                        el: ".fraction",
-                        "type": "fraction"
-                    }}
-                >
-                    {characters.map((c: laureateI) => {
-                        return (
-                            <SwiperSlide key={uuidv4()} >
-                                <CharacterCard fullName={`${c.firstname} ${c.surname}`} img={`/img/laureates/${c.img}`} prizes={c.prizes} country={c.country} />
-                            </SwiperSlide>
-                        )
-                    })}
 
-                </Swiper>
+                <button className="prev absolute h-full w-7 top-0 z-10 left-2">
+                    <FontAwesomeIcon className={`transition-all duration-200 text-gray-300 text-base`} icon={chevronLeft} />
+                </button>
+
+                <button className="next absolute h-full w-7 top-0 z-10 right-2">
+                    <FontAwesomeIcon className={`transition-all duration-200 text-gray-300 text-base`} icon={chevronRight} />
+                </button>
+
+
+                <button className="w-full text-center mx-auto normal-case font-light pb-4" onClick={handleClick}>My discovery</button>
+
+                <button className={`text-2xl text-center transition-all duration-200 text-${color} lowercase bg-${color}  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
+                    <span className="text-gray-900 font-light">select</span>
+                </button>
+
+                {viewBio ? <InfoCard prizes={characterPrizes} color={color} clickHandler={handleClick} /> : <></>}
+
             </div>
-
-            <button className="prev absolute h-full w-7 top-0 z-10 left-2">
-                <FontAwesomeIcon className={`transition-all duration-200 ${color} text-3xl`} icon={chevronLeft} />
-            </button>
-
-            <button className="next absolute h-full w-7 top-0 z-10 right-2">
-                <FontAwesomeIcon className={`transition-all duration-200 ${color} text-3xl`} icon={chevronRight} />
-            </button>
-
-
-            <button className="w-full text-center mx-auto uppercase pb-4" onClick={handleClick}>My discovery</button>
-
-            <button className={`text-2xl text-center transition-all duration-200 text-${color} uppercase bg-${color}  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
-                <span className="text-gray-900 font-light">select</span>
-            </button>
-
-            {viewBio ? <InfoCard prizes={characterPrizes} color={color} clickHandler={handleClick} /> : <></>}
-
         </div>
     )
 }

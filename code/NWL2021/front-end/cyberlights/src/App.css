@@ -123,3 +123,7 @@ body{
   0 0 1rem var(--neon-border-color),
   inset 0 0 1rem var(--neon-border-color);  
 }
+
+.render-optimize{
+  image-rendering: -webkit-optimize-contrast;
+}

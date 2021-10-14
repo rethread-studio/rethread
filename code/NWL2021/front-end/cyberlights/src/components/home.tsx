@@ -1,5 +1,4 @@
 import React from "react";
-import { Frame } from "./frame";
 import { Link } from "react-router-dom";
 import { Spacer } from "./spacer";
 import LOGO from "../cgLogo.svg";
@@ -19,7 +18,7 @@ export const Home = () => {
                     <p>cyber|glow is an interactive web installation part of the Nobel Lights Week 2021. Make sure to be at <span className="underline">Benny Fredrikssons Torg</span> for the complete experience.</p>
                 </div>
 
-                <Link to={"/select"} className="text-2xl  text-center text-yellow-300 uppercase bg-yellow-300  py-2 px-4 mb-6 mx-auto place-self-end">
+                <Link to={"/select"} className="text-2xl  text-center text-yellow-300 lowercase bg-yellow-300  py-2 px-4 mb-6 mx-auto place-self-end">
                     <span className="text-gray-900 font-light">start</span>
                 </Link>
             </div>
