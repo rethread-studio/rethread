@@ -5,6 +5,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Set neon color */
+  --neon-text-color: #f40;
+  --neon-border-color: #F6D465;
+}
+
 body{
   background-color: rgba(17, 24, 39, 100);
   font-family: Roboto;
@@ -49,4 +55,71 @@ body{
   0 0 90px #f09,
   0 0 100px #f09,
   0 0 150px #f09;
+}
+
+.text-neon-yellow{
+  color:white;
+  text-shadow:
+  0 0 4px #fff,
+  0 0 11px #fff,
+  0 0 19px #fff,
+  0 0 40px #F6D465,
+  0 0 80px #F6D465,
+  0 0 90px #F6D465,
+  0 0 100px #F6D465,
+  0 0 150px #F6D465;
+   /* animation: pulsate 0.11s ease-in-out infinite alternate; */
+}
+
+.answer:before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border: 1px solid #ddd;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  transform: translate(-50%, 50%) rotate(45deg);
+  transform-origin: center center;
+  z-index: 10;
+}
+
+@keyframes pulsate {
+  100% {
+    /* Larger blur radius */
+    text-shadow:
+      0 0 4px #fff,
+      0 0 11px #fff,
+      0 0 19px #fff,
+      0 0 40px #f09,
+      0 0 80px #f09,
+      0 0 90px #f09,
+      0 0 100px #f09,
+      0 0 150px #f09;
+  }
+ 0% {
+    /* A slightly smaller blur radius */
+    text-shadow:
+      0 0 4px #fff,
+      0 0 10px #fff,
+      0 0 18px #fff,
+      0 0 38px #f09,
+      0 0 73px #f09,
+      0 0 80px #f09,
+      0 0 94px #f09,
+      0 0 140px #f09;
+  }
+}
+
+.neon-shadow{
+  box-shadow:
+  0 0 .5rem #fff,
+  inset 0 0 .5rem #fff,
+  0 0 2rem var(--neon-border-color),
+  inset 0 0 2rem var(--neon-border-color),
+  0 0 1rem var(--neon-border-color),
+  inset 0 0 1rem var(--neon-border-color);  
 }

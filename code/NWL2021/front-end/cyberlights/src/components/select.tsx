@@ -45,7 +45,7 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
 
             <div className="">
                 <div className={`flex flex-row h-8 justify-between content-center transition-all duration-200 bg-${color} px-1 pb-1.5`}>
-                    <h4 className="text-gray-900 text-base uppercase " >woman in science</h4>
+                    <h4 className="text-gray-900 text-base uppercase " >Nobel laureates</h4>
                     <span className="fraction text-gray-900 text-base uppercase"></span>
                 </div>
                 <Swiper
