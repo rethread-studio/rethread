@@ -101,18 +101,14 @@ export default class GameSocket {
         };
       }),
       question: this.engine.currentQuestion,
-<<<<<<< HEAD
     });
 
     Object.values(this.engine.players).forEach((p) => {
       let target = p.socket;
       target.emit("gameStateUpdate", {
-        inQuestion: p.inQuestion,
+        inQuestion: p.inAnswer,
       });
     })
-=======
-    } as GameState);
->>>>>>> c11e97907e9fe22d2af7d79b5d28a107644ef5b3
   }
 
   emitSetup(opt?: { socket }) {

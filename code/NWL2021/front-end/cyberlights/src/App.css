@@ -43,7 +43,6 @@ body{
   z-index: -2;
 }
 
-<<<<<<< HEAD
 .text-neon{
   color:white;
   font-weight: 300;
@@ -128,9 +127,3 @@ body{
 .render-optimize{
   image-rendering: -webkit-optimize-contrast;
 }
-=======
-#root {
-  max-width: 600px;
-  margin: auto;
-}
->>>>>>> c11e97907e9fe22d2af7d79b5d28a107644ef5b3
