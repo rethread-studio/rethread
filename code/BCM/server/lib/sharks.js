@@ -1,23 +1,31 @@
+const fs = require("fs");
 const { spawn } = require("child_process");
 const countryLookup = require("country-code-lookup");
-const geoip = require("geoip-lite");
+const geolite2 = require("geolite2");
+const maxmind = require("maxmind");
 
 const getServices = require("./services");
 const hotspot = require("./hotspot");
+
+const lookup = new maxmind.Reader(fs.readFileSync(geolite2.paths.country));
+const lookupASN = new maxmind.Reader(fs.readFileSync(geolite2.paths.asn));
 
 const knownIPs = {};
 function getLocation(ip, data) {
   let location = knownIPs[ip];
   if (!location) {
     try {
-      location = geoip.lookup(ip);
-      if (location != null && location.country != "") {
+      location = lookup.get(ip);
+      const asn = lookupASN.get(ip);
+      if (location != null) {
         try {
-          const country = countryLookup.byIso(location.country);
+          const country = countryLookup.byIso(location.country.iso_code);
+          location = {};
           location.country = country.country;
           location.continent = country.continent;
           location.region = country.region;
           location.capital = country.capital;
+          location.asn = asn?.autonomous_system_organization;
         } catch (error) {
           console.error(error, location);
         }
@@ -35,6 +43,7 @@ function getLocation(ip, data) {
   return {
     country: location.country,
     continent: location.continent,
+    asn: location.asn,
   };
 }
 
