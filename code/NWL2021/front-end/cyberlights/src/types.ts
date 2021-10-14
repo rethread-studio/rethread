@@ -1,4 +1,3 @@
-import e from "cors";
 
 export interface sliderBtnI {
     color: string,

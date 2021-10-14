@@ -7,7 +7,9 @@ export default class Monitor {
     io.of("component").on("connection", (socket) =>
       this._componentConnect(socket)
     );
-    io.of("visualization").on("connection", (socket) => socket);
+    io.of("visualization").on("connection", (socket) =>
+      this._visualizationConnect(socket)
+    );
     dbEvent.subscribe((event) => this.send(event));
   }
 
@@ -20,6 +22,6 @@ export default class Monitor {
   }
 
   public send(event: MonitoringEvent) {
-    this.io.of("visualization").send(event);
+    this.io.of("visualization").emit("event", event);
   }
 }

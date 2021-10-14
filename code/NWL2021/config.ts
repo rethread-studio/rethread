@@ -1,6 +1,7 @@
 import { resolve } from "path";
 
 interface Config {
+  MOVE_INTERVAL: number;
   DB_HOSTNAME: string;
   DB_PASSWORD: string;
   DB_USERNAME: string;
@@ -30,6 +31,7 @@ const config: Config = {
   OSC_ADDRESS: "/",
   OSC_IP: "127.0.0.1",
   OSC_PORT: 57130,
+  MOVE_INTERVAL: 200,
 };
 
 for (let conf in process.env) {

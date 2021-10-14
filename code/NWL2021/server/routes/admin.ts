@@ -13,7 +13,6 @@ const router = express.Router();
 const storage = multer.diskStorage({
   destination: path.join(__dirname, "../../front-end/laureates/"),
   filename: async (req, file, cb) => {
-    console.log(req.body.id);
     const laureate = await LaureateModel.findById(req.body.id);
     if (laureate == null) {
       return cb(new Error("not_found"), null);
@@ -24,7 +23,6 @@ const storage = multer.diskStorage({
       laureate.surname.replace(" ", "-") +
       ".png";
     laureate.imagePath = filename;
-    console.log(laureate, filename)
     await laureate.save();
     cb(null, filename);
   },
@@ -32,7 +30,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 let engine: Engine = null;
-export default function (e) {
+export default function (e: Engine) {
   engine = e;
   return router;
 }
@@ -43,7 +41,7 @@ router.post("/laureate", (req, res) => {
 });
 
 router.post("/laureate/image", upload.single("image"), async (req, res) => {
-  res.redirect("/admin/")
+  res.redirect("/admin/");
 });
 
 router.post("/state/load", async (req, res) => {

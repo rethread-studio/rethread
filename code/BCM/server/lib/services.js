@@ -1,7 +1,27 @@
 const IPCheckRange = require("ip-check-range");
+const dns = require("dns");
+
+const ip2domains = {};
+
+async function reverseLookup(ip) {
+  if (ip2domains[ip]) return ip2domains[ip];
+  return new Promise((resolve, reject) => {
+    dns.reverse(ip, function (err, domains) {
+      if (err) return reject(err);
+      ip2domains[ip] = domains;
+      return resolve(domains);
+    });
+  });
+}
 
 function hostContains(packet, str) {
+  if (packet.remote_location && packet.remote_location.asn && packet.remote_location.asn.toLowerCase().indexOf(str) > -1) {
+    return true;
+  }
   if (packet.remote_host && packet.remote_host.indexOf(str) > -1) {
+    return true;
+  }
+  if (packet.local_location && packet.local_location.asn && packet.local_location.asn.toLowerCase().indexOf(str) > -1) {
     return true;
   }
   if (packet.local_host) {

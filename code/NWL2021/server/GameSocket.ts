@@ -1,10 +1,14 @@
-import { Server, Socket } from "socket.io";
+import { Namespace, Server, Socket } from "socket.io";
+import config from "../config";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
 import { Engine } from "./engine";
 import Monitor from "./Monitor";
-import { Player } from "./types";
+import { GameState, MonitoringEvent, Player, UserEvent } from "./types";
 
 export default class GameSocket {
+  private _movedUsers = new Set<string>();
+  private _events: MonitoringEvent[] = [];
+
   constructor(
     readonly io: Server,
     readonly engine: Engine,
@@ -18,29 +22,32 @@ export default class GameSocket {
 
   private subscribe() {
     let hasChange = false;
-    this.engine.on("newPlayer").subscribe(() => {
-      this.monitor.send({
+    this.engine.on("newPlayer").subscribe((player) => {
+      this._events.push({
         origin: "user",
         action: "play",
+        userID: player.socket?.id,
       });
       hasChange = true;
     });
-    this.engine.on("playerLeave").subscribe(() => {
-      this.monitor.send({
+    this.engine.on("playerLeave").subscribe((player) => {
+      this._events.push({
         origin: "user",
         action: "leave",
+        userID: player.socket?.id,
       });
       hasChange = true;
     });
-    this.engine.on("playerMove").subscribe(() => {
-      this.monitor.send({
+    this.engine.on("playerMove").subscribe((player) => {
+      this._events.push({
         origin: "user",
         action: "move",
+        userID: player.socket?.id,
       });
       hasChange = true;
     });
     this.engine.on("newQuestion").subscribe((question) => {
-      this.monitor.send({
+      this._events.push({
         origin: "gameEngine",
         action: "newQuestion",
       });
@@ -49,28 +56,33 @@ export default class GameSocket {
     });
     this.engine.on("userAnswer").subscribe(({ player, answer }) => {
       this.monitor.send({
-        origin: "gameEngine",
+        origin: "user",
         action: "userAnswer",
-      });
+        userID: player.socket?.id,
+      } as UserEvent);
       this.emitResult(answer, player);
     });
     this.engine.on("answer").subscribe((answer) => {
       this.monitor.send({
         origin: "gameEngine",
-        action: "nswer",
+        action: "answer",
       });
       this.emitResult(answer);
     });
     this.engine.on("state").subscribe(() => {
+      hasChange = true;
       this.emitSetup();
     });
 
     const updateInterval = setInterval(() => {
       if (hasChange) {
         this.emitUpdates();
+        this._events.forEach((event) => this.monitor.send(event));
+        this._events = [];
       }
       hasChange = false;
-    }, 250);
+      this._movedUsers = new Set<string>();
+    }, config.MOVE_INTERVAL);
   }
 
   emitUpdates(opt?: { socket }) {
@@ -79,15 +91,17 @@ export default class GameSocket {
     target.emit("gameStateUpdate", {
       players: Object.values(this.engine.players).map((p) => {
         return {
+          id: p.socket.id,
           x: p.x,
           y: p.y,
-          inQuestion: p.inQuestion,
+          inAnswer: p.inAnswer,
           laureate: p.laureate,
           previousPositions: p.previousPositions,
           status: p.status,
         };
       }),
       question: this.engine.currentQuestion,
+<<<<<<< HEAD
     });
 
     Object.values(this.engine.players).forEach((p) => {
@@ -96,6 +110,9 @@ export default class GameSocket {
         inQuestion: p.inQuestion,
       });
     })
+=======
+    } as GameState);
+>>>>>>> c11e97907e9fe22d2af7d79b5d28a107644ef5b3
   }
 
   emitSetup(opt?: { socket }) {
@@ -110,7 +127,7 @@ export default class GameSocket {
   }
 
   emitResult(answer: IAnswer, player?: Player) {
-    let target = this.io.of("screen");
+    let target: Namespace | Socket = this.io.of("screen");
     if (player?.socket) target = player.socket;
     target.emit("answer", {
       question: this.engine.currentQuestion,
@@ -136,20 +153,30 @@ export default class GameSocket {
     socket.on("disconnect", () => this._controlDisconnect(socket));
 
     socket.on("start", (laureate) => {
-      const player = this.engine.newPlayer(socket.id, laureate);
+      const player = this.engine.newPlayer(socket, laureate);
 
       player.socket = socket;
 
-      socket.on("up", () => this.engine.movePlayer(socket.id, { x: 0, y: -1 }));
-      socket.on("down", () =>
-        this.engine.movePlayer(socket.id, { x: 0, y: 1 })
-      );
-      socket.on("left", () =>
-        this.engine.movePlayer(socket.id, { x: -1, y: 0 })
-      );
-      socket.on("right", () =>
-        this.engine.movePlayer(socket.id, { x: 1, y: 0 })
-      );
+      socket.on("up", () => {
+        if (this._movedUsers.has(socket.id)) return;
+        this._movedUsers.add(socket.id);
+        this.engine.movePlayer(socket.id, { x: 0, y: -1 });
+      });
+      socket.on("down", () => {
+        if (this._movedUsers.has(socket.id)) return;
+        this._movedUsers.add(socket.id);
+        this.engine.movePlayer(socket.id, { x: 0, y: 1 });
+      });
+      socket.on("left", () => {
+        if (this._movedUsers.has(socket.id)) return;
+        this._movedUsers.add(socket.id);
+        this.engine.movePlayer(socket.id, { x: -1, y: 0 });
+      });
+      socket.on("right", () => {
+        if (this._movedUsers.has(socket.id)) return;
+        this._movedUsers.add(socket.id);
+        this.engine.movePlayer(socket.id, { x: 1, y: 0 });
+      });
     });
   }
 

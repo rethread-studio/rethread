@@ -30,7 +30,11 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
             year: charactersList[characterIndex].bornDate,
             country: charactersList[characterIndex].bornCountry,
             color: "#ffe879",
+<<<<<<< HEAD
             img: `/img/laureates/${charactersList[characterIndex].imagePath}`,
+=======
+            img: charactersList[characterIndex].imagePath,
+>>>>>>> c11e97907e9fe22d2af7d79b5d28a107644ef5b3
             shadowImg: "/img/laureateShadow.png",
             dialogue: "/img/dialogue.png"
         };
