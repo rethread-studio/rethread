@@ -25,7 +25,7 @@ function getLocation(ip, data) {
           location.continent = country.continent;
           location.region = country.region;
           location.capital = country.capital;
-          location.asn = asn?.autonomous_system_organization;
+          if (asn) location.asn = asn.autonomous_system_organization;
         } catch (error) {
           console.error(error, location);
         }
