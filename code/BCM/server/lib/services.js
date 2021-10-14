@@ -15,13 +15,13 @@ async function reverseLookup(ip) {
 }
 
 function hostContains(packet, str) {
-  if (packet.remote_location?.asn && packet.remote_location.asn.toLowerCase().indexOf(str) > -1) {
+  if (packet.remote_location && packet.remote_location.asn && packet.remote_location.asn.toLowerCase().indexOf(str) > -1) {
     return true;
   }
   if (packet.remote_host && packet.remote_host.indexOf(str) > -1) {
     return true;
   }
-  if (packet.local_location?.asn && packet.local_location.asn.toLowerCase().indexOf(str) > -1) {
+  if (packet.local_location && packet.local_location.asn && packet.local_location.asn.toLowerCase().indexOf(str) > -1) {
     return true;
   }
   if (packet.local_host) {
