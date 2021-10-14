@@ -14,6 +14,7 @@ import Monitor from "./Monitor";
 import routes from "./routes";
 import StateModel from "./database/state/state.model";
 import { importDefaultConfiguration } from "../import";
+import { ServerEvent } from "./types";
 
 export default async function start() {
   await database.connect();
@@ -25,7 +26,8 @@ export default async function start() {
   app.use((req, res, next) => {
     monitor.send({
       origin: "server",
-      action: req.url,
+      action: req.url.indexOf("/api/") != -1 ? "api" : "file",
+      url: req.url,
     });
     next();
   });

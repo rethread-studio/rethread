@@ -1,5 +1,7 @@
+import { Socket } from "socket.io";
 import { SubEvent } from "sub-events";
 import config from "../config";
+import { ILaureate } from "./database/laureates/laureates.types";
 
 import QuestionModel from "./database/questions/questions.model";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
@@ -41,7 +43,7 @@ export class Engine {
         answerScore[answer.text] = 0;
         for (const socketID of Object.keys(this.players)) {
           const player = this.players[socketID];
-          if (this.checkCollision(player, position)) {
+          if (Engine.checkCollision(player, position)) {
             answerScore[answer.text]++;
             this._events.userAnswer.emit({ answer, player });
           }
@@ -79,38 +81,25 @@ export class Engine {
     return newQuestion;
   }
 
-  checkCollision(player: Player, obj: Position) {
-    if ((obj as any).width !== undefined) {
-      const position: BoxPosition = obj as BoxPosition;
-      return (
-        player.x >= position.x &&
-        player.x <= position.x + position.width &&
-        player.y >= position.y &&
-        player.y <= position.y + position.height
-      );
-    }
-    return player.x == obj.x && player.y == obj.y;
-  }
-
-  newPlayer(id: string, laureate) {
+  newPlayer(socket: Socket, laureate: ILaureate) {
     // get open position
     const player: Player = {
       x: 0,
       y: 0,
       laureate,
-      inQuestion: false,
-      socket: null,
+      inAnswer: false,
+      socket,
       previousPositions: [],
       status: "idle",
     };
 
-    while (!this.isValidPosition(player, id)) {
+    while (!this.isValidPosition(player, socket.id)) {
       player.x = Math.floor(Math.random() * this._state.width);
       player.y = Math.floor(Math.random() * this._state.height);
     }
 
     // add player to engine.players obj
-    this._players[id] = player;
+    this._players[socket.id] = player;
     this._events.newPlayer.emit(player);
     return player;
   }
@@ -155,7 +144,7 @@ export class Engine {
       } // ignore current player in collision check
       const player = this._players[key];
       // if the state.players overlap. hope this works
-      if (this.checkCollision(player, position)) {
+      if (Engine.checkCollision(player, position)) {
         hasCollided = true;
         return; // don't bother checking other stuff
       }
@@ -167,7 +156,7 @@ export class Engine {
     return true;
   }
 
-  removePlayer(id) {
+  removePlayer(id: string) {
     this._events.playerLeave.emit(this._players[id]);
     delete this._players[id];
   }
@@ -196,12 +185,12 @@ export class Engine {
 
       let inQuestion: boolean = false;
       for (const answer of this.state.answersPositions) {
-        if (this.checkCollision(player, answer)) {
+        if (Engine.checkCollision(player, answer)) {
           inQuestion = true;
           break;
         }
       }
-      player.inQuestion = inQuestion;
+      player.inAnswer = inQuestion;
 
       this._events.playerMove.emit(player);
     } else {
@@ -212,6 +201,20 @@ export class Engine {
       }
     }
   }
+
+  static checkCollision(player: Player, obj: Position) {
+    if ((obj as any).width !== undefined) {
+      const position: BoxPosition = obj as BoxPosition;
+      return (
+        player.x >= position.x &&
+        player.x <= position.x + position.width &&
+        player.y >= position.y &&
+        player.y <= position.y + position.height
+      );
+    }
+    return player.x == obj.x && player.y == obj.y;
+  }
+
 
   get currentQuestion() {
     return this._currentQuestion;

@@ -6,7 +6,8 @@ mongoose.plugin((schema, options) => {
   schema.post(/^(find|insert|update|delete|remove)/, function (value, next) {
     event.emit({
       origin: "mongodb",
-      action: `${this.op} ${this.mongooseCollection.collectionName}`,
+      action: this.op,
+      collection: this.mongooseCollection.collectionName,
     });
     if (next) next();
   });

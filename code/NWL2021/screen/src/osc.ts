@@ -24,11 +24,26 @@ export function close() {
   udpPort = null;
 }
 
-export function send(data: MonitoringEvent) {
+export function send(data: any) {
   const args = [];
 
-  for (let i of ["origin", "action"]) {
-    let value = data[i];
+  for (const i of [
+    "origin",
+    "action",
+    "userID",
+    "answer",
+    "question",
+    "position",
+    "collection",
+    "url",
+  ]) {
+    const value = data[i];
+    if (value === undefined) continue;
+    if (i == "position") {
+      args.push({ type: "number", value: value.x });
+      args.push({ type: "number", value: value.y });
+      continue;
+    }
     const type = typeof value == "number" ? "i" : "s";
     args.push({ type, value });
   }
