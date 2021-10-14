@@ -24,7 +24,7 @@ export type colorOption = "neonyellow" | "neongreen" | "neonindigo" | "neonpink"
 
 export interface laureateI {
     firstname: string,
-    lastname: string,
+    surname: string,
     imagePath: string,
     country: string,
     city: string,
@@ -58,7 +58,8 @@ export interface selectCharacterProps {
 export interface characterCardProps {
     fullName: string,
     img?: string,
-    prizes: prize[]
+    prizes: prize[],
+    country: string,
 }
 
 export type controllDirection = "up" | "down" | "left" | "right" | "void";

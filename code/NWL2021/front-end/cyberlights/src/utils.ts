@@ -5,7 +5,7 @@ export const dataToLaurates = (l: any, i: number): laureateI => {
     const prizes: prize[] = l.prizes.map(dataToPrizes)
     return {
         firstname: l.firstname,
-        lastname: l.lastname ? l.lastname : "",
+        surname: l.surname ? l.surname : "",
         imagePath: l.imagePath,
         country: l.country,
         city: l.city,

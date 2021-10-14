@@ -71,7 +71,7 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
                     {characters.map((c: laureateI) => {
                         return (
                             <SwiperSlide key={uuidv4()} >
-                                <CharacterCard fullName={`${c.firstname} ${c.lastname}`} img={`/img/laureates/${c.img}`} prizes={c.prizes} />
+                                <CharacterCard fullName={`${c.firstname} ${c.surname}`} img={`/img/laureates/${c.img}`} prizes={c.prizes} country={c.country} />
                             </SwiperSlide>
                         )
                     })}
@@ -88,10 +88,9 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
             </button>
 
 
-            <button className="w-full text-center mx-auto uppercase py-4 " onClick={handleClick}>My discovery</button>
+            <button className="w-full text-center mx-auto uppercase pb-4" onClick={handleClick}>My discovery</button>
 
-
-            <button className={`text-4xl text-center transition-all duration-200 text-${color} uppercase bg-${color}  py-4 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
+            <button className={`text-2xl text-center transition-all duration-200 text-${color} uppercase bg-${color}  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
                 <span className="text-gray-900 font-light">select</span>
             </button>
 

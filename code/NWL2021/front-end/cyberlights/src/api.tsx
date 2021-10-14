@@ -26,7 +26,7 @@ const getRequest = async (url: string) => {
 export const dummyLaureates: laureateI[] = [
     {
         firstname: "",
-        lastname: "",
+        surname: "",
         imagePath: "",
         country: "",
         city: "",
@@ -48,7 +48,7 @@ export const dummyLaureates: laureateI[] = [
     },
     {
         firstname: "",
-        lastname: "",
+        surname: "",
         imagePath: "",
         country: "",
         city: "",
@@ -70,7 +70,7 @@ export const dummyLaureates: laureateI[] = [
 
 export const dummyLaureate: laureateI = {
     firstname: "",
-    lastname: "",
+    surname: "",
     imagePath: "",
     country: "",
     city: "",
