@@ -92,7 +92,7 @@ function drawPlayers(players) {
     } else {
       imgs[player.laureate.img] = new Image(setup.unitSize, setup.unitSize);
       // Load an image of intrinsic size 300x227 in CSS pixels
-      imgs[player.laureate.img].src = `/img/laureates/${player.laureate.img}`;
+      imgs[player.laureate.img].src = `${player.laureate.img}`;
       imgs[player.laureate.img].onload = function () {
         renderImage(
           player.x * setup.unitSize + setup.unitSize / 2,
@@ -238,11 +238,9 @@ function drawQuestion(question) {
   if (!question) return;
   const questionE = document.querySelector(".question");
   questionE.innerHTML = question.text;
-  questionE.style = `top: ${
-    setup.questionPosition.y * setup.unitSize
-  }px;left: ${setup.questionPosition.x * setup.unitSize}px; width: ${
-    (setup.questionPosition.width + 1) * setup.unitSize
-  }px; height: ${(setup.questionPosition.height + 1) * setup.unitSize}px`;
+  questionE.style = `top: ${setup.questionPosition.y * setup.unitSize
+    }px;left: ${setup.questionPosition.x * setup.unitSize}px; width: ${(setup.questionPosition.width + 1) * setup.unitSize
+    }px; height: ${(setup.questionPosition.height + 1) * setup.unitSize}px`;
   //DRAW DECORATION
   ctx.beginPath();
   ctx.lineWidth = gameCycle ? "4" : "1";
@@ -265,11 +263,9 @@ function drawQuestion(question) {
     const answerE = document.querySelector(".answer" + (i + 1));
     answerE.innerHTML = answer.text;
 
-    answerE.style = `top: ${position.y * setup.unitSize}px;left: ${
-      position.x * setup.unitSize
-    }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${
-      (position.height + 1) * setup.unitSize
-    }px`;
+    answerE.style = `top: ${position.y * setup.unitSize}px;left: ${position.x * setup.unitSize
+      }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${(position.height + 1) * setup.unitSize
+      }px`;
 
     // if (gameCycle) {
     //   if (i % 2 == 0) {
