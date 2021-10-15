@@ -7,8 +7,10 @@ interface frameProps {
 
 export const Frame = ({ center, children }: React.PropsWithChildren<frameProps>) => {
     return (
-        <div className={` h-screen border-8 border-yellow-300 flex flex-col relative items-center ${center ? "justify-center items-center" : " justify-between "}`}>
-            {children}
+        <div className="h-full w-full p-4">
+            <div className={`h-full border-2 border-white flex flex-col neon-shadow ${center ? "justify-center items-center" : " justify-between "}`} >
+                {children}
+            </div>
         </div>
     )
 }
