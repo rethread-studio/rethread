@@ -24,7 +24,7 @@ export const ArrowBtn = ({ direction, clickEvent }: React.PropsWithChildren<arro
     };
 
     return (
-        <button onClick={clickHandler} className="w-20 h-20 border-2 white flex justify-center items-center">
+        <button onClick={clickHandler} className="w-20 h-20 border-2 white flex justify-center items-center neon-shadow-sm">
             <FontAwesomeIcon className="text-white text-xl" icon={chevron} />
         </button>
     )

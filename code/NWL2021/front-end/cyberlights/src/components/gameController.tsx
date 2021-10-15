@@ -20,8 +20,8 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
 
     socket.on("question", (question) => { setQuestion(question) });
-    socket.on("enterAnswer", ({answer, question}) => { setAnswer(answer) })
-    socket.on("exitAnswer", ({answer, question}) => { setAnswer(null) })
+    socket.on("enterAnswer", ({ answer, question }) => { setAnswer(answer) })
+    socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) })
 
     //load characters data
     useEffect(() => {
@@ -60,15 +60,14 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
     return (
 
         <div className="h-full w-full p-4">
-            <div className="h-full border-2 white flex flex-col justify-between">
+            <div className="h-full border-2 border-gray-600 flex flex-col justify-between ">
 
                 <div className="flex flex-row justify-between text-sm">
-
-                    <Link to={"/select"} className="text-gray-900 bg-white h-8 w-4/8 p-2 uppercase">
-                        <FontAwesomeIcon className="yellow-300" icon={chevronLeft} /> Back to select
+                    <Link to={"/select"} className="text-gray-400  h-8 w-4/8 p-2 ">
+                        <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back to select
                     </Link>
                 </div>
-                <div className="w-full text-neon text-xl uppercase text-center pt-4 ">
+                <div className="w-full text-neon text-2xl uppercase text-center pt-2 ">
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
                 <div className="relative h-full flex flex-col justify-center content-center">
@@ -85,9 +84,9 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
                     </div>
                 </div>
 
-                <div className="flex flex-row w-full justify-between text-white place-self-end p-4">
-                    <span className="text-xs uppercase">PRESS THE arrows <br /> to move </span>
-                    <span className="text-xs text-right uppercase place-self-end ">Tap CHARACTER  <br />to emote</span>
+                <div className="flex flex-row w-full justify-between text-gray-400 place-self-end p-4">
+                    <span className="text-xs ">Press the arrows <br /> to move </span>
+                    <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
             </div>
         </div>
