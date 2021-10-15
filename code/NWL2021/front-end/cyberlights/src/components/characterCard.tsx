@@ -32,11 +32,11 @@ export const CharacterCard = ({ fullName, img, prizes, country }: React.PropsWit
 
     return (
         <>
-            <img className="w-4/5 h-4/5 mx-auto mt-8" src={`./${img}`} alt={fullName} />
+            <img className="w-4/5 h-4/5 mx-auto mt-8" src={`${img}`} alt={fullName} />
 
             <h2 className={`text-center pt-4 pb-2 px-4 font-light text-neon-yellow ${fullName.length >= 14 ? "text-2xl" : "text-2xl"}`}>{`${fullName}`}</h2>
             <div className="flex flex row place-items-center place-content-center gap-6 p-4">
-                <img className="w-10 h-10 render-optimize" src={`./${iconLocation}`} alt={fullName} />
+                <img className="w-10 h-10 render-optimize" src={`${iconLocation}`} alt={fullName} />
                 <div className="text-center text-gray-400 font-normal text-base">
                     Nobel price
                     <div className="text-sm font-thin">{categories}</div>
