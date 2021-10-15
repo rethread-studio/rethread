@@ -12,6 +12,8 @@ import { BoxPosition, Player, Position } from "./types";
 class Events {
   newPlayer = new SubEvent<Player>();
   userAnswer = new SubEvent<{ answer: IAnswer; player: Player }>();
+  enterAnswer = new SubEvent<{ answer: IAnswer; player: Player }>();
+  exitAnswer = new SubEvent<{ answer: IAnswer; player: Player }>();
   answer = new SubEvent<IAnswer>();
   playerMove = new SubEvent<Player>();
   playerLeave = new SubEvent<Player>();
@@ -36,19 +38,15 @@ export class Engine {
 
     const questionInterval = setInterval(() => {
       let answerScore = {};
-      for (let i = 0; i < this.state.answersPositions.length; i++) {
-        const answer = this.currentQuestion.answers[i];
-        const position = this.state.answersPositions[i];
 
-        answerScore[answer.text] = 0;
-        for (const socketID of Object.keys(this.players)) {
-          const player = this.players[socketID];
-          if (Engine.checkCollision(player, position)) {
-            answerScore[answer.text]++;
-            this._events.userAnswer.emit({ answer, player });
-          }
-        }
+      for (const socketID of Object.keys(this.players)) {
+        const player = this.players[socketID];
+        if (!player.inAnswer) continue;
+        const { inAnswer, answer } = this._isInAnswer(player);
+        answerScore[answer.text]++;
+        this._events.userAnswer.emit({ answer, player });
       }
+
       const selectedAnswer = this.currentQuestion.answers
         .filter((f) => answerScore[f.text])
         .sort((a, b) => answerScore[a.text] - answerScore[b.text]);
@@ -59,6 +57,13 @@ export class Engine {
       setTimeout(() => {
         const newQuestion = this.chooseQuestionRandomly();
         this.currentQuestion = newQuestion;
+
+        for (const socketID of Object.keys(this.players)) {
+          const player = this.players[socketID];
+          if (!player.inAnswer) continue;
+          const { inAnswer, answer } = this._isInAnswer(player);
+          this._events.enterAnswer.emit({ answer, player });
+        }
       }, 3000);
     }, config.QUESTION_INTERVAL * 1000);
   }
@@ -161,6 +166,17 @@ export class Engine {
     delete this._players[id];
   }
 
+  private _isInAnswer(player: Player) {
+    for (let i = 0; i < this.state.answersPositions.length; i++) {
+      const answer = this.currentQuestion.answers[i];
+      const position = this.state.answersPositions[i];
+      if (Engine.checkCollision(player, position)) {
+        return { inAnswer: true, answer };
+      }
+    }
+    return { inAnswer: false, answer: null };
+  }
+
   movePlayer(id: string, position: Position) {
     var player = this._players[id];
     var newPosition = {
@@ -183,14 +199,15 @@ export class Engine {
       player.x = newPosition.x;
       player.y = newPosition.y;
 
-      let inQuestion: boolean = false;
-      for (const answer of this.state.answersPositions) {
-        if (Engine.checkCollision(player, answer)) {
-          inQuestion = true;
-          break;
-        }
+      const oldInAnswer = player.inAnswer;
+      const { inAnswer, answer } = this._isInAnswer(player);
+      player.inAnswer = inAnswer;
+
+      if (oldInAnswer === false && player.inAnswer === true) {
+        this._events.enterAnswer.emit({ answer, player });
+      } else if (oldInAnswer === true && player.inAnswer === false) {
+        this._events.exitAnswer.emit({ answer, player });
       }
-      player.inAnswer = inQuestion;
 
       this._events.playerMove.emit(player);
     } else {
@@ -214,7 +231,6 @@ export class Engine {
     }
     return player.x == obj.x && player.y == obj.y;
   }
-
 
   get currentQuestion() {
     return this._currentQuestion;

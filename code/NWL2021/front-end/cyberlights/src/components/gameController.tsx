@@ -12,15 +12,16 @@ import { socket } from "../api";
 import { gameControllerI, controllDirection } from "../types";
 
 export const GameController = ({ charactersList, characterIndex }: React.PropsWithChildren<gameControllerI>) => {
-    const [answer, setAnswer] = useState<boolean>(false);
+    const [answer, setAnswer] = useState<string | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
 
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
 
-    socket.on("question", (question) => { setQuestion(question.text) });
-    socket.on("gameStateUpdate", (status) => { setAnswer(status.inQuestion) })
+    socket.on("question", (question) => { setQuestion(question) });
+    socket.on("enterAnswer", ({answer, question}) => { setAnswer(answer) })
+    socket.on("exitAnswer", ({answer, question}) => { setAnswer(null) })
 
     //load characters data
     useEffect(() => {
@@ -71,7 +72,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
                 <div className="relative h-full flex flex-col justify-center content-center">
-                    {answer ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>!</div> : <></>}
+                    {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
                     <img onClick={() => { console.log("emote") }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${charactersList[characterIndex].imagePath}`} alt="Tu youyou" />
                 </div>
 

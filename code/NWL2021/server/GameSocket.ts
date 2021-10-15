@@ -69,6 +69,22 @@ export default class GameSocket {
       });
       this.emitResult(answer);
     });
+    this.engine.on("enterAnswer").subscribe(({ answer, player }) => {
+      this.monitor.send({
+        origin: "user",
+        action: "answer",
+        userID: player.socket?.id,
+      });
+      this.emitEnterAnswer(answer, player);
+    });
+    this.engine.on("exitAnswer").subscribe(({ answer, player }) => {
+      this.monitor.send({
+        origin: "user",
+        action: "answer",
+        userID: player.socket?.id,
+      });
+      this.emitExitAnswer(answer, player);
+    });
     this.engine.on("state").subscribe(() => {
       hasChange = true;
       this.emitSetup();
@@ -102,13 +118,6 @@ export default class GameSocket {
       }),
       question: this.engine.currentQuestion,
     });
-
-    Object.values(this.engine.players).forEach((p) => {
-      let target = p.socket;
-      target.emit("gameStateUpdate", {
-        inQuestion: p.inAnswer,
-      });
-    })
   }
 
   emitSetup(opt?: { socket }) {
@@ -118,7 +127,7 @@ export default class GameSocket {
   }
 
   emitQuestion(question: IQuestion) {
-    this.io.of("control").emit("question", question);
+    this.io.of("control").emit("question", question.text);
     this.io.of("screen").emit("question", question);
   }
 
@@ -128,6 +137,21 @@ export default class GameSocket {
     target.emit("answer", {
       question: this.engine.currentQuestion,
       answer: answer,
+    });
+  }
+
+  emitEnterAnswer(answer: IAnswer, player: Player) {
+    const target = player.socket;
+    target.emit("enterAnswer", {
+      question: this.engine.currentQuestion,
+      answer: answer.text,
+    });
+  }
+
+  emitExitAnswer(answer: IAnswer, player: Player) {
+    const target = player.socket;
+    target.emit("exitAnswer", {
+      question: this.engine.currentQuestion,
     });
   }
 
@@ -152,6 +176,8 @@ export default class GameSocket {
       const player = this.engine.newPlayer(socket, laureate);
 
       player.socket = socket;
+
+      socket.emit("question", this.engine.currentQuestion.text);
 
       socket.on("up", () => {
         if (this._movedUsers.has(socket.id)) return;

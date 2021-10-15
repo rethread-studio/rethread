@@ -127,3 +127,6 @@ body{
 .render-optimize{
   image-rendering: -webkit-optimize-contrast;
 }
+#root {
+  max-width: 600px;
+}

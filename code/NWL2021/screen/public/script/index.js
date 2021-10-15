@@ -39,7 +39,7 @@ function drawDialogue(players) {
   // draw players
   Object.keys(players).forEach((playerId) => {
     let player = players[playerId];
-    if (imgs[player.laureate.dialogue] && player.inQuestion) {
+    if (imgs[player.laureate.dialogue] && player.inAnswer) {
       renderImage(
         player.x * setup.unitSize + setup.unitSize / 2,
         player.y * setup.unitSize + setup.unitSize / 2,
@@ -57,7 +57,7 @@ function drawDialogue(players) {
       // Load an image of intrinsic size 300x227 in CSS pixels
       imgs[player.laureate.dialogue].src = player.laureate.dialogue;
       imgs[player.laureate.dialogue].onload = function () {
-        if (player.inQuestion) {
+        if (player.inAnswer) {
           renderImage(
             player.x * setup.unitSize + setup.unitSize / 2,
             player.y * setup.unitSize + setup.unitSize / 2,
