@@ -52,12 +52,16 @@ export function send(data: any) {
     return;
   }
 
-  udpPort.send(
-    {
-      address: config.OSC_ADDRESS,
-      args,
-    },
-    config.OSC_IP,
-    config.OSC_PORT
-  );
+  try {
+    udpPort.send(
+      {
+        address: config.OSC_ADDRESS,
+        args,
+      },
+      config.OSC_IP,
+      config.OSC_PORT
+    );
+  } catch (error) {
+    console.log(error);
+  }
 }
