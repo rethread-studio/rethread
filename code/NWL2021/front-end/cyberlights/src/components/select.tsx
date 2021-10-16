@@ -40,7 +40,15 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
 
     return (
         <div className="h-screen w-full p-4">
-            <div style={{ color: color }} className={`h-full transition-all duration-200  overflow-hidden flex flex-col justify-between relative neon-shadow border-2 border-white `}>
+            <div style={{
+                color: color,
+                boxShadow: `0 0 .3rem #fff,
+            inset 0 0 .3rem #fff,
+            0 0 1rem ${color},
+            inset 0 0 2rem ${color},
+            0 0 0.5rem ${color},
+            inset 0 0 0.5rem ${color}`
+            }} className={`h-full transition-all duration-200  overflow-hidden flex flex-col justify-between relative border-2 border-white `}>
 
                 <div>
 
