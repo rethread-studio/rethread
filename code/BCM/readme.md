@@ -37,9 +37,11 @@ node station.js -i NETWORK_INTERFACE
 ```
 substituting NETWORK_INTERFACE for the name of your network interface, e.g.
 ```
-node station.js -i wlp2s0
+node station.js -n BCM -i wlp2s0
 ```
 
-To see the dashboard, go to http://localhost:8000/, from where you can start the packet sniffing, play back recorded samples of data and open the visualizations.
+To see the dashboard, go to http://localhost:8000/admin, from where you can start the packet sniffing, play back recorded samples of data and open the visualizations.
+
+The visualizations are available at http://localhost:8000/.
 
 To start the sonification, open the file `code/BCM/supercollider_src/main/main.scd` and run the main block.
