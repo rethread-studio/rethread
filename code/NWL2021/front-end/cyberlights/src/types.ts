@@ -62,3 +62,6 @@ export interface characterCardProps {
 }
 
 export type controllDirection = "up" | "down" | "left" | "right" | "void";
+
+
+export type tCategoryColor = { [key: string]: string };

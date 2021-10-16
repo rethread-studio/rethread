@@ -12,6 +12,7 @@ import { InfoCard } from "./infoCard";
 import { CharacterCard } from "./characterCard";
 
 import { laureateI, selectCharacterProps, prize } from "../types";
+import { categoryColor } from "../utils";
 
 import SwiperCore, { Navigation, Pagination } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -26,7 +27,7 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
 
     const [viewBio, setViewBio] = useState<boolean>(false);
     const [characterPrizes, setCharacterPrizes] = useState<prize[]>([])
-    const [color, selectColor] = useState<string>("yellow-300")
+    const [color, selectColor] = useState<string>(categoryColor.physics)
 
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' }
     const chevronLookRight: IconLookup = { prefix: 'fas', iconName: 'chevron-right' }
@@ -34,21 +35,20 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
     const chevronRight: IconDefinition = findIconDefinition(chevronLookRight)
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { setViewBio(!viewBio); }
-
     const handleSelect = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { history.push("/play") }
-
 
 
     return (
         <div className="h-screen w-full p-4">
-            <div className={`h-full transition-all duration-200 text-${color} overflow-hidden flex flex-col justify-between relative neon-shadow border-2 border-white `}>
-
+            <div style={{ color: color }} className={`h-full transition-all duration-200  overflow-hidden flex flex-col justify-between relative neon-shadow border-2 border-white `}>
 
                 <div>
+
                     <div className={`flex flex-row h-8 justify-between content-center transition-all duration-200 text-gray-400 px-3 pt-2 pb-1.5 text-sm font-light`}>
                         <h4 className=" capsize " >Laureates</h4>
                         <span className="fraction  uppercase"></span>
                     </div>
+
                     <Swiper
                         initialSlide={Math.random() * characters.length}
                         loop={true}
@@ -58,7 +58,8 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
                             const { realIndex, } = SwiperCore;
                             setCharacterPrizes(characters[realIndex].prizes);
                             selectHandler(realIndex);
-                            selectColor(`${characters[realIndex].color}-300`)
+                            const keyCategory: string = characters[realIndex].prizes.length > 1 ? "special" : characters[realIndex].prizes[0].category as string;
+                            selectColor(categoryColor[keyCategory]);
                         }}
                         navigation={{
                             prevEl: '.prev',
@@ -91,7 +92,7 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
 
                 <button className="w-full text-center mx-auto normal-case font-light pb-4" onClick={handleClick}>My discovery</button>
 
-                <button className={`text-2xl text-center transition-all duration-200 text-${color} lowercase bg-${color}  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
+                <button style={{ backgroundColor: color }} className={`text-2xl text-center transition-all duration-200 lowercase  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
                     <span className="text-gray-900 font-light">select</span>
                 </button>
 

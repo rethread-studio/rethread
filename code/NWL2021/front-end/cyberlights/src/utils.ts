@@ -1,4 +1,4 @@
-import { laureateI, prize, colorOption } from './types';
+import { laureateI, prize, colorOption, tCategoryColor } from './types';
 
 const colors: colorOption[] = ["neonyellow", "neongreen", "neonindigo", "neonpink", " neonred"]
 export const dataToLaurates = (l: any, i: number): laureateI => {
@@ -35,3 +35,14 @@ const dataToPrizes = ((p: any): prize => {
         affiliations: [],
     }
 })
+
+
+export const categoryColor: tCategoryColor = {
+    chemistry: "#87BF00",
+    physics: "#FFF793",
+    peace: "#C4FFFF",
+    literature: "#D3762B",
+    medicine: "#C3188D",
+    economics: "#7325F0",
+    special: "#37FF00",
+}

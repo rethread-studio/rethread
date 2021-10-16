@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArrowBtn } from "./arrowBtn";
 import { socket } from "../api";
 import { gameControllerI, controllDirection } from "../types";
+import { categoryColor } from "../utils";
 
 export const GameController = ({ charactersList, characterIndex }: React.PropsWithChildren<gameControllerI>) => {
     const [answer, setAnswer] = useState<string | null>(null);
@@ -25,12 +26,14 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
 
     //load characters data
     useEffect(() => {
+        const keyCategory: string = charactersList[characterIndex].prizes.length > 1 ? "special" : charactersList[characterIndex].prizes[0].category as string;
+
         const laureate = {
             name: charactersList[characterIndex].firstname,
             domain: charactersList[characterIndex].bornCountry,
             year: charactersList[characterIndex].bornDate,
             country: charactersList[characterIndex].bornCountry,
-            color: "#ffe879",
+            color: categoryColor[keyCategory],
             img: `/img/laureates/${charactersList[characterIndex].imagePath}`,
             shadowImg: "/img/laureateShadow.png",
             dialogue: "/img/dialogue.png"
