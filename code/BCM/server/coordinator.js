@@ -61,6 +61,9 @@ function handleMessage(from, json, raw) {
       stations[from].metrics.in++;
       stations[from].metrics.lenIn += json.data.len;
     }
+    if (status.record === true) {
+      currentSample.messages.push(json.data);
+    }
     wss.broadcast(raw);
   }
 }
@@ -241,7 +244,7 @@ app.get("/api/sample/:sample", function (req, res) {
 
 let currentSample = null;
 app.post("/api/sample/record", function (req, res) {
-  if (status.record == false) {
+  if (status.record == undefined || status.record == false) {
     status.record = true;
     currentSample = {
       name: req.body.name,
@@ -249,24 +252,23 @@ app.post("/api/sample/record", function (req, res) {
     };
     res.send("ok");
   } else {
-    res.send("ko").status(500);
+    res.status(500).send("ko");
   }
 });
 
 app.post("/api/sample/save", function (req, res) {
-  if (status.record !== false) {
+  if (status.record === true && currentSample) {
     status.record = false;
-    __dirname + "/data/samples.json";
     fs.writeFileSync(
       __dirname + "/data/samples/" + currentSample.name + ".json",
       JSON.stringify(currentSample)
     );
     samples.push(currentSample.name);
+    fs.writeFileSync(__dirname + "/data/samples.json", JSON.stringify(samples));
     currentSample = null;
-    saveConfig();
     res.send("ok");
   } else {
-    res.send("ko").status(500);
+    res.status(500).send("ko");
   }
 });
 

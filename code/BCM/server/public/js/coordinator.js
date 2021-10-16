@@ -101,11 +101,9 @@ angular
     };
 
     $scope.disconnect = (station, client) => {
-      $http
-        .post(`/api/station/${station}/disconnect`, client)
-        .then((res) => {
-          getStatus();
-        });
+      $http.post(`/api/station/${station}/disconnect`, client).then((res) => {
+        getStatus();
+      });
     };
 
     $scope.toggleSniffing = (station) => {
@@ -126,6 +124,16 @@ angular
 
     $scope.closeBrowser = (station) => {
       $http.post(`/api/station/${station}/closebrowser`).then((res) => {});
+    };
+
+    $scope.record = () => {
+      $http
+        .post(`/api/sample/record`, { name: $scope.recordName })
+        .then((res) => {});
+    };
+
+    $scope.stopRecord = () => {
+      $http.post(`/api/sample/save`).then((res) => {});
     };
 
     $scope.now = () => new Date();
