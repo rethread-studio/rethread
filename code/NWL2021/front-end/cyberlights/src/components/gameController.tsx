@@ -16,7 +16,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
     const [answer, setAnswer] = useState<string | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
-
+    const [color, setcolor] = useState<string>(categoryColor.physics)
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
 
@@ -27,7 +27,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
     //load characters data
     useEffect(() => {
         const keyCategory: string = charactersList[characterIndex].prizes.length > 1 ? "special" : charactersList[characterIndex].prizes[0].category as string;
-
+        setcolor(categoryColor[keyCategory]);
         const laureate = {
             name: charactersList[characterIndex].firstname,
             domain: charactersList[characterIndex].bornCountry,
@@ -79,11 +79,11 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
                 </div>
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
-                    <ArrowBtn clickEvent={emitDirection} direction="up" />
+                    <ArrowBtn clickEvent={emitDirection} direction="up" color={color} />
                     <div className="flex flex-row space-x-2">
-                        <ArrowBtn clickEvent={emitDirection} direction="left" />
-                        <ArrowBtn clickEvent={emitDirection} direction="down" />
-                        <ArrowBtn clickEvent={emitDirection} direction="right" />
+                        <ArrowBtn clickEvent={emitDirection} direction="left" color={color} />
+                        <ArrowBtn clickEvent={emitDirection} direction="down" color={color} />
+                        <ArrowBtn clickEvent={emitDirection} direction="right" color={color} />
                     </div>
                 </div>
 
