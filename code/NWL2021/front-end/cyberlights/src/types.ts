@@ -59,6 +59,7 @@ export interface characterCardProps {
     img?: string,
     prizes: prize[],
     country: string,
+    color: string,
 }
 
 export type controllDirection = "up" | "down" | "left" | "right" | "void";

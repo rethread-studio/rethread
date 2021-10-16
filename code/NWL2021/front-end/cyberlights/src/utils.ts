@@ -46,3 +46,22 @@ export const categoryColor: tCategoryColor = {
     economics: "#7325F0",
     special: "#37FF00",
 }
+
+export const getIcon = (category: string): string => {
+    switch (category) {
+        case "physics":
+            return "ico-physics.png";
+        case "peace":
+            return "ico-peace.png";
+        case "literature":
+            return "ico-literature.png";
+        case "medicine":
+            return "ico-medicine.png";
+        case "economics":
+            return "ico-economics.png";
+        case "special":
+            return "ico-special.png";
+        default:
+            return "ico-chemistry.png"
+    }
+}
