@@ -23,6 +23,7 @@ function App() {
   const [laureates, setLaureates] = useState<laureateI[]>(dummyLaureates)
   const [loading, setLoading] = useState(true);
   const [characterIndex, setCharacterIndex] = useState(0);
+  const [colorTheme, setcolorTheme] = useState<string>("#F6D465");
 
   //load characters data
   useEffect(() => {
