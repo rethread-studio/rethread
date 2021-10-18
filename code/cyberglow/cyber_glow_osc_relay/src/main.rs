@@ -41,6 +41,7 @@ impl MonitorDataWrapper {
                 println!("Error writing data: {}", e);
             }
         }
+
         println!("Data saved");
     }
 }
@@ -51,7 +52,14 @@ fn main() {
     let ctrl_c_quit = quit.clone();
     ctrlc::set_handler(move || {
         println!("received Ctrl+C!");
-        ctrl_c_quit.store(true, Ordering::Relaxed);
+
+        if ctrl_c_quit.load(Ordering::Relaxed) {
+            // If ctrl+c was already pressed once
+            panic!("Failed to quit gracefully");
+        } else {
+            ctrl_c_quit.store(true, Ordering::Relaxed);
+        }
+
     })
     .expect("Error setting Ctrl-C handler");
 
@@ -91,9 +99,7 @@ fn main() {
                 .unwrap_or("./monitor_data.json"),
         );
         record_data(save_path, port, quit);
-    }
-
-    if let Some(matches) = matches.subcommand_matches("play") {
+    } else if let Some(matches) = matches.subcommand_matches("play") {
         let input_path = PathBuf::from(
             matches
                 .value_of("input_path")
@@ -103,7 +109,7 @@ fn main() {
         let osc_addr = matches.value_of("osc_addr").unwrap_or("/cyberglow");
         let messages = load_data(&input_path);
         if let Some(messages) = messages {
-            play_back_data(destination, messages);
+            play_back_data(destination, osc_addr, messages, quit);
         } else {
             println!("Failed to load data to play back, exiting.");
         }
@@ -174,7 +180,7 @@ fn load_data(path: &PathBuf) -> Option<Vec<MonitorMessage>> {
     }
 }
 
-fn play_back_data(destination: &str, mut messages: Vec<MonitorMessage>) {
+fn play_back_data(destination: &str, osc_addr: &str, mut messages: Vec<MonitorMessage>, quit: Arc<AtomicBool>) {
     // Bind an `osc::Sender` and connect it to the target address.
     let sender = osc::sender().unwrap().connect(destination).unwrap();
     // Assume that the messages are in timestamp order
@@ -185,10 +191,27 @@ fn play_back_data(destination: &str, mut messages: Vec<MonitorMessage>) {
         m.timestamp -= accumulated_ts;
         accumulated_ts -= m.timestamp;
     }
-    for m in messages {
+    'message_loop: for m in messages {
+        let mut total_sleep = m.timestamp.try_into().unwrap();
+        while total_sleep > 0 {
+        // Check if CTRL+C was pressed
+        if quit.load(Ordering::Relaxed) {
+            println!("Quitting!");
+            break 'message_loop;
+        }
+            if total_sleep > 100 {
+                std::thread::sleep(Duration::from_millis(100));
+                total_sleep -= 100;
+            } else {
+                std::thread::sleep(Duration::from_millis(total_sleep));
+                total_sleep = 0;
+            }
+        }
+
         std::thread::sleep(Duration::from_millis(m.timestamp.try_into().unwrap()));
 
+        println!("{:?}", m);
         let args = vec![osc::Type::String(m.origin), osc::Type::String(m.message)];
-        sender.send((destination, args)).ok();
+        sender.send((osc_addr, args)).ok();
     }
 }
