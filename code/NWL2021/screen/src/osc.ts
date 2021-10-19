@@ -23,12 +23,27 @@ export function close() {
   udpPort = null;
 }
 
-export function send(data: any) {
+export function send(
+  data: any,
+  opt?: { address?: string; ip?: string; port?: number }
+) {
   const args = [];
-  args.push({ type: "s", value: data.origin });
-  args.push({ type: "s", value: data.action });
+  if (data.origin) args.push({ type: "s", value: data.origin });
+  if (data.action) args.push({ type: "s", value: data.action });
 
-  const v = ["collection", "url", "userID", "position", "question", "answer"]
+  const v = [
+    "collection",
+    "url",
+    "userID",
+    "position",
+    "question",
+    "answer",
+    "process",
+    "timestamp",
+    "event",
+    "pid",
+    "cpu",
+  ]
     .filter((f) => data[f] !== undefined)
     .map((i) => {
       if (i == "position") {
@@ -46,11 +61,11 @@ export function send(data: any) {
   try {
     udpPort.send(
       {
-        address: config.OSC_ADDRESS,
+        address: opt?.address ? opt?.address : config.OSC_ADDRESS,
         args,
       },
-      config.OSC_IP,
-      config.OSC_PORT
+      opt?.ip ? opt?.ip : config.OSC_IP,
+      opt?.port ? opt?.port : config.OSC_PORT
     );
   } catch (error) {
     console.log(args, error);
