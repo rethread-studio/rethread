@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use nannou::geom::point::{Point2, pt2};
 type ArcMutex<T> = Arc<Mutex<T>>;
 
-use super::shared_wavetable_synth::Sample;
+use super::dsp::Sample;
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub enum EventFamily{
@@ -31,10 +31,10 @@ impl EventFamily {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct EventStat {
     pub event_family: EventFamily,
-    pub name: &'static str,
+    pub name: String,
     pub density: f64,
     pub lpf_density: f64,
     pub density_change: f64,
@@ -47,10 +47,13 @@ pub struct EventStat {
     pub synth_texture: Option<SynthesisType>,
     pub synth_pitch: Option<SynthesisType>,
     pub index: usize, // a unique index for this event
+    /// If this EventStat should be expanded into its children
+    pub do_expand_children: bool, 
+    pub children: HashMap<String, ArcMutex<EventStat>>
 }
 
 impl EventStat {
-    pub fn new(name: &'static str, event_family: EventFamily, index: usize) -> Self {
+    pub fn new(name: String, event_family: EventFamily, index: usize) -> Self {
         EventStat {
             event_family,
             name,
@@ -66,6 +69,8 @@ impl EventStat {
             synth_texture: None,
             synth_pitch: Some(SynthesisType::SinglePitch{index: index, energy: 0.5}),
             index,
+            do_expand_children: false,
+            children: HashMap::new(),
         }
     }
 
@@ -84,11 +89,9 @@ impl EventStat {
     }
 }
 
-
-
 pub fn init_stats() -> (
-    HashMap<&'static str, ArcMutex<EventStat>>, 
-    HashMap<EventFamily, HashMap<&'static str, ArcMutex<EventStat>>>
+    HashMap<EventFamily, ArcMutex<EventStat>>, 
+    HashMap<String, EventFamily>
 ) {
 
     let all_events = [
@@ -128,15 +131,9 @@ pub fn init_stats() -> (
         ("page_fault_kernel", EventFamily::EXCEPTIONS),
     ];
 
-    let mut main_map: HashMap<&str, ArcMutex<EventStat>> = HashMap::new();
+    let mut main_map: HashMap<String, ArcMutex<EventStat>> = HashMap::new();
 
-    let mut family_map = HashMap::new();
-    family_map.insert(EventFamily::RANDOM, HashMap::new());
-    family_map.insert(EventFamily::FS, HashMap::new());
-    family_map.insert(EventFamily::IRQ, HashMap::new());
-    family_map.insert(EventFamily::EXCEPTIONS, HashMap::new());
-    family_map.insert(EventFamily::TCP, HashMap::new());
-    family_map.insert(EventFamily::DRM, HashMap::new());
+    let mut index = 0;
 
     let mut family_positions = HashMap::new();
     family_positions.insert(EventFamily::RANDOM, pt2(0.0, 0.25));
@@ -146,23 +143,36 @@ pub fn init_stats() -> (
     family_positions.insert(EventFamily::TCP, pt2(0.25, 0.25));
     family_positions.insert(EventFamily::DRM, pt2(-0.25, -0.25));
 
-    let mut index = 0;
+    let mut family_map = HashMap::new();
+    let all_families = vec![EventFamily::RANDOM, EventFamily::FS, EventFamily::IRQ, EventFamily::EXCEPTIONS, EventFamily::TCP, EventFamily::DRM];
+    for event_family in all_families {
+        let mut entry = EventStat::new(event_family.str().to_owned(), event_family, index);
+        entry.pos = family_positions.get(&event_family).unwrap_or(&pt2(0.0, 0.0)).clone();
+        family_map.insert(event_family, Arc::new(Mutex::new(entry)));
+        index += 1;
+    }
 
+    let mut event_to_family_map = HashMap::new();
+    for event in all_events.iter() {
+        event_to_family_map.insert(event.0.to_owned(), event.1);
+    }
+
+    
     for event in all_events.iter() {
         // Create the stat entry
-        let mut entry = EventStat::new(event.0, event.1.clone(), index);
+        let mut entry = EventStat::new(event.0.to_owned(), event.1.clone(), index);
         index += 1;
         entry.pos = family_positions.get(&event.1).unwrap_or(&pt2(0.0, 0.0)).clone();
         entry.pos = entry.pos + pt2(random::<f32>() * 0.2 - 0.1, random::<f32>() * 0.2 - 0.1);
         
         let arc_entry = Arc::new(Mutex::new(entry));
-        let family_map = family_map.get_mut(&event.1).unwrap();
-        family_map.insert(event.0, arc_entry.clone());
-        main_map.insert(event.0, arc_entry.clone());
+        let event_family_stat = family_map.get_mut(&event.1).unwrap();
+        let mut locked_event_family_stat = event_family_stat.lock().unwrap();
+        locked_event_family_stat.children.insert(event.0.to_owned(), arc_entry);
     }
 
     // The main_map should now contain all of the event types pointing to all of the family maps
-    (main_map, family_map)
+    (family_map, event_to_family_map)
 }
 
 #[derive(Clone, Copy)]

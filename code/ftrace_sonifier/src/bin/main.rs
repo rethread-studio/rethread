@@ -5,6 +5,7 @@ use nannou::prelude::*;
 use nannou::ui::prelude::*;
 
 use crossbeam_channel::bounded;
+use crossbeam_channel::{Sender, Receiver};
 extern crate jack;
 
 use std::thread;
@@ -12,7 +13,7 @@ use std::io;
 use std::str::FromStr;
 use std::collections::HashMap;
 use std::cell::RefCell;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 type ArcMutex<T> = Arc<Mutex<T>>;
 
 // use ftrace_sonifier::synth::SynthesisEngine;
@@ -21,6 +22,7 @@ use ftrace_sonifier::audio_interface::*;
 use ftrace_sonifier::event_stats::*;
 use ftrace_sonifier::midi_input::MidiDevice;
 use ftrace_sonifier::{SharedState, SelectionMode};
+use ftrace_sonifier::gui::*;
 
 const PORT: u16 = 12345;
 
@@ -36,16 +38,49 @@ struct Ids {
     force_strength: widget::Id,
 }
 
+struct GraphicTrigger {
+    position: Point2,
+    velocity: Vector2,
+    hue: f32,
+    outside: bool,
+    lifetime: f32,
+}
+
+impl GraphicTrigger {
+    pub fn new(position: Point2, velocity: Vector2, hue: f32) -> Self {
+        GraphicTrigger {
+            position,
+            velocity,
+            hue,
+            outside: false,
+            lifetime: 1.0,
+        }
+    }
+    pub fn update(&mut self) {
+        self.position += self.velocity;
+        self.lifetime -= 0.01;
+        if self.position.x > 1.0 || self.position.x < -1.0 || self.position.y > 1.0 || self.position.y < -1.0 {
+            self.outside = true;
+        }
+        if self.lifetime <= 0.0 {
+            self.outside = true;
+        }
+    }
+}
+
 struct Model {
     _window: window::Id,
     ui: Ui,
     widget_ids: Ids,
     audio_interface: AudioInterface,
-    main_event_map: HashMap<&'static str, ArcMutex<EventStat>>,
-    event_family_map: HashMap<EventFamily, HashMap<&'static str, ArcMutex<EventStat>>>,
+    family_map: HashMap<EventFamily, ArcMutex<EventStat>>,
+    event_to_family_map: HashMap<String, EventFamily>,
     midi_device: MidiDevice,
+    gui_panel: GuiContainer,
     shared_state: ArcMutex<SharedState>,
     info_event_stat: RefCell<Option<EventStat>>, // A copy of the event_stat to be visualised
+    graphic_triggers: Vec<GraphicTrigger>,
+    graphic_trigger_rx: Receiver<GraphicTrigger>,
 }
 
 struct OSCModel {
@@ -69,7 +104,11 @@ fn model(app: &App) -> Model {
 
     let (tick_msg_tx, tick_msg_rx) = bounded::<EventMsg>(1_000_000);
 
-    let mut audio_interface = AudioInterface::new(tick_msg_rx, event_msg_rx);
+    let (mut graphic_trigger_tx, graphic_trigger_rx) = bounded::<GraphicTrigger>(1_000_000);
+
+    let (mut trigger_msg_tx, trigger_msg_rx) = bounded::<usize>(1000000);
+
+    let mut audio_interface = AudioInterface::new(tick_msg_rx, event_msg_rx, trigger_msg_rx);
     audio_interface.connect_to_system(2);
 
     let shared_state = Arc::new(Mutex::new(SharedState::new()));
@@ -92,8 +131,26 @@ fn model(app: &App) -> Model {
         friction: ui.generate_widget_id(),
         force_strength: ui.generate_widget_id(),
     };
+
+    let mut gui_panel = GuiContainer::new(vec2(0.0, 0.0));
+    let toggle_action = || println!("Toggle!");
+    let mut toggle_box = Box::new(ToggleBox::new("New toggle".to_owned(), 32.0, 150.0, Action::new(Box::new(toggle_action))));
+    // toggle_box.set_bounding_box(toggle_box.bounding_box().align_top_of(gui_panel.bounding_box().clone()));
+    gui_panel.add_element(toggle_box);
+    for i in 0..10 {
+        let mut toggle = false;
+        let toggle_action = move || {
+            toggle = !toggle;
+            println!("Toggle {} == {:?}!", i, toggle);
+        };
+        let new_toggle_box = Box::new(ToggleBox::new(format!("New toggle {}", i), 32.0, 100.0, Action::new(Box::new(toggle_action))));
+        gui_panel.add_element_beneath(new_toggle_box);
+    }
+
+    gui_panel.set_bounding_box(gui_panel.bounding_box().pad(-20.0));
+
     let mut event_type_received: HashMap<String, usize> = HashMap::new();
-    let (main_event_map, event_family_map) = init_stats();
+    let (family_map, event_to_family_map) = init_stats();
     // Model setup (general non-realtime thread state)
     let mut osc_model = OSCModel {
         sample_rate: audio_interface.sample_rate,
@@ -103,32 +160,46 @@ fn model(app: &App) -> Model {
     let mut receiver: osc::Receiver = osc::receiver(PORT).unwrap();
     let mut received_packets: Vec<Option<osc::Packet>> = vec![];
     
-    let mut main_map_copy = main_event_map.clone();
+    let mut family_map_clone = family_map.clone();
+    let mut event_to_family_map_clone = event_to_family_map.clone();
     let mut shared_state_copy = shared_state.clone();
     thread::spawn(move || {
         loop {
             update_osc(&mut receiver, &mut received_packets);
-            process_packets(&mut received_packets, &mut osc_model, &mut event_type_received, &mut main_map_copy, &mut shared_state_copy, &mut event_msg_tx);
+            process_packets(
+                &mut received_packets, 
+                &mut osc_model, 
+                &mut event_type_received, 
+                &mut family_map_clone,
+                &mut event_to_family_map_clone,
+                &mut shared_state_copy, 
+                &mut event_msg_tx, 
+                &mut graphic_trigger_tx,
+                &mut trigger_msg_tx,
+            );
         }
     });
 
-    start_synthesis_tick(tick_msg_tx, main_event_map.clone(), shared_state.clone());
+    start_synthesis_tick(tick_msg_tx, family_map.clone(), shared_state.clone());
 
     let mut model = Model {
         _window,
         ui,
         widget_ids,
         audio_interface,
-        main_event_map,
-        event_family_map,
+        family_map,
+        event_to_family_map,
         midi_device,
+        gui_panel,
         shared_state,
         info_event_stat: RefCell::new(None),
+        graphic_triggers: vec![],
+        graphic_trigger_rx,
     };
     model
 }
 
-fn window_event(_app: &App, model: &mut Model, event: WindowEvent) {
+fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     match event {
         KeyPressed(key) => {
             match key {
@@ -152,7 +223,9 @@ fn window_event(_app: &App, model: &mut Model, event: WindowEvent) {
         }
         KeyReleased(_key) => {}
         MouseMoved(_pos) => {}
-        MousePressed(_button) => {}
+        MousePressed(_button) => {
+            model.gui_panel.click(pt2(app.mouse.x, app.mouse.y));
+        }
         MouseReleased(_button) => {}
         MouseEntered => {}
         MouseExited => {}
@@ -192,6 +265,22 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         //     model.friction = value;
         // }
     }
+
+    // Update GraphicTriggers
+    for gt in &mut model.graphic_triggers {
+        gt.update();
+    }
+
+    // Remove triggers that have disappeared
+    model.graphic_triggers.retain(|gt| !gt.outside );
+
+    // Receive GraphicTriggers
+    while let Ok(gt) = model.graphic_trigger_rx.try_recv() {
+        model.graphic_triggers.push(gt);
+    }
+
+    // Update gui
+    model.gui_panel.set_bounding_box(model.gui_panel.bounding_box().align_top_of(app.window_rect()).align_right_of(app.window_rect()));
 
     // println!("fps: {}, points: {}", app.fps(), model.points.len());
 }
@@ -238,8 +327,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let mouse_pos = app.mouse.position();
     let mut hover_found = false;
 
-    for (event_name, event_stat_mut) in model.main_event_map.iter() {
-        let mut event_stat = event_stat_mut.lock().unwrap();
+    for (event_name, event_stat_mutex) in model.family_map.iter() {
+        let mut event_stat = event_stat_mutex.lock().unwrap();
         // Check if the event is inside of the selection
         let adjusted_pos = event_stat.pos - local_shared_state.focus_point;
         let is_selected = match local_shared_state.selection_mode {
@@ -249,7 +338,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
             SelectionMode::EventFamily => {
                 event_stat.event_family == local_shared_state.select_family
             }
-        }; 
+        };
         let lightness = if is_selected {
             0.2
         } else {
@@ -338,13 +427,21 @@ fn view(app: &App, model: &Model, frame: Frame) {
         }
     }
 
+    // Draw GraphicTriggers
+    for gt in &model.graphic_triggers {
+        draw.ellipse()
+            .color(hsla(gt.hue, 0.5, 0.5, gt.lifetime))
+            .radius(6.0)
+            .x_y(gt.position.x * frame.rect().w(), gt.position.y * frame.rect().h());
+    }
+
     if !hover_found {
         *model.info_event_stat.borrow_mut() = None;
     }
 
     // Draw info on the selected/hovered over 
     // info box
-    if let Some(info_event_stat) = *model.info_event_stat.borrow() {
+    if let Some(info_event_stat) = &*model.info_event_stat.borrow() {
         let box_width = frame.rect().w() * 0.2;
         let box_lines = 10.0;
         let line_height = 32.0;
@@ -368,7 +465,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
             .x_y(x, y);
 
         y -= line_height;
-        draw.text(info_event_stat.name)
+        draw.text(&info_event_stat.name)
             .color(BLACK)
             .w_h(box_width, 100.0)
             .x_y(x, y);
@@ -423,8 +520,18 @@ fn view(app: &App, model: &Model, frame: Frame) {
     // How many points have been infected
     // How many points were "isolated" model.isolated_points.len()
     // draw.text()
+
+    // Draw gui panel
+    model.gui_panel.draw(&draw, pt2(0.0, 0.0));
+    draw.rect()
+        .xy(pt2(50.0, -300.0))
+        .w_h(32.0, 32.0)
+        .color(BLACK);
+
     // Write to the window frame.
     draw.to_frame(app, &frame).unwrap();
+
+    
 
     // Draw the state of the `Ui` to the frame.
     model.ui.draw_to_frame(app, &frame).unwrap();
@@ -468,9 +575,12 @@ fn process_packets(
     received_packets: &mut Vec<Option<osc::Packet>>, 
     osc_model: &mut OSCModel,
     event_type_received: &mut HashMap<String, usize>,
-    main_map: &mut HashMap<&'static str, ArcMutex<EventStat>>,
+    family_map: &mut HashMap<EventFamily, ArcMutex<EventStat>>,
+    event_to_family_map: &mut HashMap<String, EventFamily>,
     shared_state: &mut ArcMutex<SharedState>,
-    tx: &mut crossbeam_channel::Sender<EventMsg>
+    tx: &mut Sender<EventMsg>,
+    graphic_trigger_tx: &mut Sender<GraphicTrigger>,
+    trigger_msg_tx: &mut Sender<usize>,
 ) {
     // The osc::Packet can be a bundle containing several messages. Therefore we can use into_msgs to get all of them.
     for packet in received_packets {
@@ -514,30 +624,62 @@ fn process_packets(
                                     // Extract the type
                                     let event_type = event.split(':').into_iter().next().unwrap_or("default");
 
-                                    if let Some(event_stat_mutex) = main_map.get(event_type) {
-                                        let mut event_stat = event_stat_mutex.lock().unwrap();
-                                        
-                                        // if msg.timestamp - event_stat.last_triggered_timestamp < 0.01 {
-                                        //     do_send_message = false;
-                                        // } else {
-                                        //     event_stat.last_triggered_timestamp = msg.timestamp;
-                                        // }
-                                        event_stat.register_occurrence();
-
-                                        if let Some(synthesis_type) = event_stat.synth_texture {
-                                            let mut synth_texture = synthesis_type.clone();
-                                            do_send_message = true;
-                                            match synth_texture {
-                                                SynthesisType::Texture{ ref mut index, ref mut amp, ref mut decay} => {
-                                                    *amp *= (event_stat.density * 0.1).min(10.0) * event_stat.amp_coeff;
+                                    if let Some(event_family) = event_to_family_map.get(event_type) {
+                                        // if let Some(event_stat_mutex) = main_map.get(event_type) {
+                                        if let Some(family_event_stat_mutex) = family_map.get(event_family) {
+                                            let mut family_event_stat = family_event_stat_mutex.lock().unwrap();
+                                            
+                                            // if msg.timestamp - event_stat.last_triggered_timestamp < 0.01 {
+                                            //     do_send_message = false;
+                                            // } else {
+                                            //     event_stat.last_triggered_timestamp = msg.timestamp;
+                                            // }
+                                            
+                                            // Check how far down the 
+                                            let mut event_stat = if family_event_stat.do_expand_children {
+                                                if let Some(event_stat_mutex) = family_event_stat.children.get(event_type) {
+                                                    event_stat_mutex.lock().unwrap()
+                                                } else {
+                                                    family_event_stat
                                                 }
-                                                _ => ()
-                                            }
-                                            msg.synthesis_type.push(synth_texture);
-                                        }
+                                            } else {
+                                                family_event_stat
+                                            };
 
-                                        if event_stat.mute {
-                                            do_send_message = false;
+                                            event_stat.register_occurrence();
+
+                                            // Do trigger
+                                            let triggered;
+                                            {
+                                                let mut locked_shared_state = shared_state.lock().unwrap();
+                                                triggered = locked_shared_state.triggers[event_stat.index].activate();
+                                            }
+                                            if triggered {
+                                                // Send trigger to the sound and audio systems
+                                                let angle = random_f32() * PI * 2.0;
+                                                let speed = 0.003;
+                                                let vel = vec2(angle.cos() * speed, angle.sin() * speed);
+                                                graphic_trigger_tx.send(
+                                                    GraphicTrigger::new(event_stat.pos.clone(), vel, 
+                                                    event_stat.index as f32 * 73.5732 % 1.0)).unwrap();
+                                                trigger_msg_tx.send(event_stat.index); // Send to sound synthesis
+                                            }
+
+                                            if let Some(synthesis_type) = event_stat.synth_texture {
+                                                let mut synth_texture = synthesis_type.clone();
+                                                do_send_message = true;
+                                                match synth_texture {
+                                                    SynthesisType::Texture{ ref mut index, ref mut amp, ref mut decay} => {
+                                                        *amp *= (event_stat.density * 0.1).min(10.0) * event_stat.amp_coeff;
+                                                    }
+                                                    _ => ()
+                                                }
+                                                msg.synthesis_type.push(synth_texture);
+                                            }
+
+                                            if event_stat.mute {
+                                                do_send_message = false;
+                                            }
                                         }
                                     }
 
@@ -581,7 +723,7 @@ fn process_packets(
 
 fn start_synthesis_tick(
     tx: crossbeam_channel::Sender<EventMsg>,
-    event_main_map: HashMap<&'static str, ArcMutex<EventStat>>,
+    family_map: HashMap<EventFamily, ArcMutex<EventStat>>,
     shared_state: ArcMutex<SharedState>
 ) {
     const DENSITY_DECAY: f64 = 0.97;
@@ -592,78 +734,94 @@ fn start_synthesis_tick(
             {
                 let mut locked_shared_state = shared_state.lock().unwrap();
                 tick_length = locked_shared_state.tick_length;
+                // update triggers
+                for trig in &mut locked_shared_state.triggers {
+                    trig.update();
+                }
             }
 
             let density_decay = 0.99311604842093.powi(tick_length.as_millis() as i32);
         
-            for (event_name, event_stat_mutex) in &event_main_map {
-                let mut event_stat = event_stat_mutex.lock().unwrap();
-                let mut msg = EventMsg {
-                    timestamp: 0.0,
-                    event_type: 0,
-                    has_been_parsed: false,
-                    pid: 0,
-                    cpu: 0,
-                    synthesis_type: vec![],
-                };
-                let mut do_send_message = !event_stat.mute;
-
-                // Set the synthesis message parameters
-                let freq = degree_to_freq((event_stat.density.floor()) % (53.0 * 8.0));
-                // let freq = 40.0 * (event_stat.density + 100.0) as f64;
-                // let freq = (((event.len() * 1157)) % 10000) as f64 + 100.0;
-                let mut decay = 200.0/freq;
-                let mut amp = (event_stat.density_change.sqrt() * 0.1).min(1.0);
-                amp *= event_stat.amp_coeff;
-                decay *= event_stat.decay_coeff;
-                msg.event_type = 0;
-                // match event_stat.event_family  {
-                //     EventFamily::TCP => {
-                //         let index = random_range(0, 16);
-                //         let decay = 2.0 * event_stat.decay_coeff;
-                //         msg.synthesis_type.push(SynthesisType::Bass{amp, decay, index});
-                //     }
-                //     EventFamily::RANDOM => {
-                //         let freq = random::<f64>() * 5000.0 + 9000.0;
-                //         amp *= 0.5;
-                //         decay *= 0.5;
-                //         msg.synthesis_type.push(SynthesisType::Frequency{freq, amp, decay});
-                //     }
-                //     EventFamily::FS => {
-                //         // let mut freq = freq;
-                //         // while freq > 800.0 { freq *= 0.5 }
-                //         msg.synthesis_type.push(SynthesisType::Texture{index: 0, amp, decay: decay*0.5});
-                //     }
-                //     EventFamily::EXCEPTIONS => {
-                //         let mut freq = freq;
-                //         while freq < 800.0 { freq *= 2.0 }
-                //         msg.synthesis_type.push(SynthesisType::Frequency{freq, amp, decay: decay*0.5});
-                //     }
-                //     _ => ()
-                // }
-                if let Some(pitch_synthesis_type) = event_stat.synth_pitch {
-                    let mut synth_copy = pitch_synthesis_type;
-                    match synth_copy {
-                        SynthesisType::SinglePitch{ ref mut index, ref mut energy} => {
-                            *index = event_stat.index;
-                            *energy *= ((event_stat.density_change).min(200.0) * event_stat.amp_coeff) / 200.0;
-
-                        }
-                        _ => ()
+            for (_event_family, family_event_stat_mutex) in &family_map {
+                let mut family_event_stat = family_event_stat_mutex.lock().unwrap();
+                if family_event_stat.do_expand_children {
+                    for (_, event_stat_mutex) in &family_event_stat.children {
+                        let mut event_stat = family_event_stat_mutex.lock().unwrap();
+                        perform_synthesis_tick_on_event_stat(&mut event_stat, &tx, density_decay);
                     }
-                    msg.synthesis_type.push(synth_copy);
+                } else {
+                    perform_synthesis_tick_on_event_stat(&mut family_event_stat, &tx, density_decay);
                 }
-
-                // Send the event to the audio thread.
-                if do_send_message {
-                    tx.send(msg).expect("Error sending to audio thread");
-                }
-
-                event_stat.decay_density(density_decay);  
+                
             }
             thread::sleep(tick_length);
         }
     });   
+}
+
+fn perform_synthesis_tick_on_event_stat(event_stat: &mut MutexGuard<EventStat>, tx: &crossbeam_channel::Sender<EventMsg>, density_decay: f64) {
+    let mut msg = EventMsg {
+        timestamp: 0.0,
+        event_type: 0,
+        has_been_parsed: false,
+        pid: 0,
+        cpu: 0,
+        synthesis_type: vec![],
+    };
+    let mut do_send_message = !event_stat.mute;
+
+    // Set the synthesis message parameters
+    let freq = degree_to_freq((event_stat.density.floor()) % (53.0 * 8.0));
+    // let freq = 40.0 * (event_stat.density + 100.0) as f64;
+    // let freq = (((event.len() * 1157)) % 10000) as f64 + 100.0;
+    let mut decay = 200.0/freq;
+    let mut amp = (event_stat.density_change.sqrt() * 0.1).min(1.0);
+    amp *= event_stat.amp_coeff;
+    decay *= event_stat.decay_coeff;
+    msg.event_type = 0;
+    // match event_stat.event_family  {
+    //     EventFamily::TCP => {
+    //         let index = random_range(0, 16);
+    //         let decay = 2.0 * event_stat.decay_coeff;
+    //         msg.synthesis_type.push(SynthesisType::Bass{amp, decay, index});
+    //     }
+    //     EventFamily::RANDOM => {
+    //         let freq = random::<f64>() * 5000.0 + 9000.0;
+    //         amp *= 0.5;
+    //         decay *= 0.5;
+    //         msg.synthesis_type.push(SynthesisType::Frequency{freq, amp, decay});
+    //     }
+    //     EventFamily::FS => {
+    //         // let mut freq = freq;
+    //         // while freq > 800.0 { freq *= 0.5 }
+    //         msg.synthesis_type.push(SynthesisType::Texture{index: 0, amp, decay: decay*0.5});
+    //     }
+    //     EventFamily::EXCEPTIONS => {
+    //         let mut freq = freq;
+    //         while freq < 800.0 { freq *= 2.0 }
+    //         msg.synthesis_type.push(SynthesisType::Frequency{freq, amp, decay: decay*0.5});
+    //     }
+    //     _ => ()
+    // }
+    if let Some(pitch_synthesis_type) = event_stat.synth_pitch {
+        let mut synth_copy = pitch_synthesis_type;
+        match synth_copy {
+            SynthesisType::SinglePitch{ ref mut index, ref mut energy} => {
+                *index = event_stat.index;
+                *energy *= ((event_stat.density_change).min(200.0) * event_stat.amp_coeff) / 200.0;
+
+            }
+            _ => ()
+        }
+        msg.synthesis_type.push(synth_copy);
+    }
+
+    // Send the event to the audio thread.
+    if do_send_message {
+        tx.send(msg).expect("Error sending to audio thread");
+    }
+
+    event_stat.decay_density(density_decay);  
 }
 
 

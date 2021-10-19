@@ -15,3 +15,4 @@ nannou = "0.14.1"
 oscen = "0.1.4"
 midi-control = { version = "0.1.0", path = "/home/erik/git/midi-control" }
 midir = "0.6.2"
+claxon = "0.4.3"
