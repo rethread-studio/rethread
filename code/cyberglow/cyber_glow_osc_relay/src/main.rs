@@ -15,7 +15,8 @@ use std::time::{Duration, Instant};
 #[derive(Serialize, Deserialize, Debug)]
 struct MonitorMessage {
     origin: String,
-    message: String,
+    action: String,
+    arguments: String,
     timestamp: i64,
 }
 
@@ -133,16 +134,19 @@ fn record_data(path: PathBuf, port: u16, quit: Arc<AtomicBool>) {
     loop {
         if let Ok(Some((packet, addr))) = receiver.try_recv() {
             for message in packet.into_msgs() {
+                println!("{:?}", message);
                 if message.addr == address {
                     println!("New message to {}", message.addr);
                     if let Some(args) = message.args {
                         let mut o = None;
                         let mut m = None;
+                        let mut a = None;
                         for (i, arg) in args.into_iter().enumerate() {
                             println!("{:?}", arg);
                             match (i, arg) {
                                 (0, osc::Type::String(origin)) => o = Some(origin),
                                 (1, osc::Type::String(mess)) => m = Some(mess),
+                                (2, osc::Type::String(arguments)) => a = Some(arguments),
                                 (_, _) => (),
                             }
                         }
@@ -150,7 +154,8 @@ fn record_data(path: PathBuf, port: u16, quit: Arc<AtomicBool>) {
                             let now = Utc::now();
                             messages.messages.push(MonitorMessage {
                                 origin: o.unwrap(),
-                                message: m.unwrap(),
+                                action: m.unwrap(),
+                                arguments: a.unwrap(),
                                 timestamp: now.timestamp_millis(),
                             });
                             // Save if enough time has passed
@@ -211,7 +216,7 @@ fn play_back_data(destination: &str, osc_addr: &str, mut messages: Vec<MonitorMe
         std::thread::sleep(Duration::from_millis(m.timestamp.try_into().unwrap()));
 
         println!("{:?}", m);
-        let args = vec![osc::Type::String(m.origin), osc::Type::String(m.message)];
+        let args = vec![osc::Type::String(m.origin), osc::Type::String(m.action), osc::Type::String(m.arguments)];
         sender.send((osc_addr, args)).ok();
     }
 }
