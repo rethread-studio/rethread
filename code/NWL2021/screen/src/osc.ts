@@ -25,27 +25,19 @@ export function close() {
 
 export function send(data: any) {
   const args = [];
+  args.push({ type: "s", value: data.origin });
+  args.push({ type: "s", value: data.action });
 
-  for (const i of [
-    "origin",
-    "action",
-    "userID",
-    "answer",
-    "question",
-    "position",
-    "collection",
-    "url",
-  ]) {
-    const value = data[i];
-    if (value === undefined) continue;
-    if (i == "position") {
-      args.push({ type: "i", value: value.x });
-      args.push({ type: "i", value: value.y });
-      continue;
-    }
-    const type = typeof value == "number" ? "i" : "s";
-    args.push({ type, value });
-  }
+  const v = ["collection", "url", "userID", "position", "question", "answer"]
+    .filter((f) => data[f] !== undefined)
+    .map((i) => {
+      if (i == "position") {
+        return `${data[i].x};${data[i].y}`;
+      }
+      return data[i];
+    })
+    .join(";");
+  args.push({ type: "s", value: v });
 
   if (!udpPort) {
     return;
