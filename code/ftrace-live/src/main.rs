@@ -131,7 +131,8 @@ fn start_tracer() {
 
 fn init_trace_options(pid: Option<u32>, events: &Vec<&str>) {
     // Set tracer to "function"
-    set_ftrace_parameter("current_tracer", "nop");
+    // There are several different tracers: hwlat blk mmiotrace function_graph wakeup_dl wakeup_rt wakeup function nop
+    set_ftrace_parameter("current_tracer", "function");
 
     // Set what events to listen for
     // set_event seems to only accept a single event string e.g. tcp:*
@@ -173,8 +174,14 @@ fn disable_event(name: &str) {
 fn set_ftrace_parameter(name: &str, arg: &str) {
     let mut path: String = String::from("/sys/kernel/tracing/");
     path.push_str(name);
-    let mut f = File::create(path).expect("Unable to open tracing file!");
-    f.write_all(arg.as_bytes()).expect("Unable to write tracing setting");
+    match File::create(path) {
+        Ok(mut f) => {
+            f.write_all(arg.as_bytes()).expect("Unable to write tracing setting");
+        }
+        Err(e) => {
+            println!("Unable to open file {} because: {}", name, e);
+        }
+    }
 }
 
 /// Initialise an event for use in this trace
@@ -207,6 +214,7 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
 
     let mut last_second = Instant::now();
 
+    // The system call to read the file can be interrupted by CTRL+C in which case we want to break out of the loop.
     while running.load(Ordering::SeqCst) {
         
         // Read from the file using fill_buf which will read a little bit at a time and then return
@@ -226,6 +234,7 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
                         // println!("{}", line);
                     }
                     // println!("{}", line);
+                    // Lines are sometimes printed that are not part of the trace data. These are filtered out here if they are too short to contain the data.
                     if line.len() > 49 {
                         // Parse the line
                         let (timestamp, event_string, pid, cpu) = parse_line(line, &mut state);
@@ -241,7 +250,6 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
                 }
                 num_events = 0;
             },
-            // The system call to read the file can be interrupted by CTRL+C in which case we want to break out of the loop.
             Err(e) => {
                 println!("{}", e);
                 break;
