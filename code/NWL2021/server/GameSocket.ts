@@ -8,7 +8,7 @@ import { GameState, MonitoringEvent, Player, UserEvent } from "./types";
 export default class GameSocket {
   private _movedUsers = new Set<string>();
   private _events: MonitoringEvent[] = [];
-
+  private _hasChange = false;
   constructor(
     readonly io: Server,
     readonly engine: Engine,
@@ -21,14 +21,13 @@ export default class GameSocket {
   }
 
   private subscribe() {
-    let hasChange = false;
     this.engine.on("newPlayer").subscribe((player) => {
       this._events.push({
         origin: "user",
         action: "play",
         userID: player.socket?.id,
       });
-      hasChange = true;
+      this._hasChange = true;
     });
     this.engine.on("playerLeave").subscribe((player) => {
       this._events.push({
@@ -36,7 +35,7 @@ export default class GameSocket {
         action: "leave",
         userID: player.socket?.id,
       });
-      hasChange = true;
+      this._hasChange = true;
     });
     this.engine.on("playerMove").subscribe((player) => {
       this._events.push({
@@ -44,7 +43,7 @@ export default class GameSocket {
         action: "move",
         userID: player.socket?.id,
       });
-      hasChange = true;
+      this._hasChange = true;
     });
     this.engine.on("newQuestion").subscribe((question) => {
       this._events.push({
@@ -52,7 +51,7 @@ export default class GameSocket {
         action: "newQuestion",
       });
       this.emitQuestion(question);
-      hasChange = true;
+      this._hasChange = true;
     });
     this.engine.on("userAnswer").subscribe(({ player, answer }) => {
       this.monitor.send({
@@ -86,17 +85,21 @@ export default class GameSocket {
       this.emitExitAnswer(answer, player);
     });
     this.engine.on("state").subscribe(() => {
-      hasChange = true;
+      this._hasChange = true;
       this.emitSetup();
     });
 
     const updateInterval = setInterval(() => {
-      if (hasChange) {
+      if (this._hasChange) {
+        this._events.push({
+          origin: "gameEngine",
+          action: "stateChanged",
+        });
         this.emitUpdates();
         this._events.forEach((event) => this.monitor.send(event));
         this._events = [];
       }
-      hasChange = false;
+      this._hasChange = false;
       this._movedUsers = new Set<string>();
     }, config.MOVE_INTERVAL);
   }
@@ -142,6 +145,11 @@ export default class GameSocket {
 
   emitEnterAnswer(answer: IAnswer, player: Player) {
     const target = player.socket;
+    this._events.push({
+      origin: "user",
+      action: "enterAnswer",
+      userID: player.socket.id,
+    });
     target.emit("enterAnswer", {
       question: this.engine.currentQuestion,
       answer: answer.text,
@@ -150,6 +158,11 @@ export default class GameSocket {
 
   emitExitAnswer(answer: IAnswer, player: Player) {
     const target = player.socket;
+    this._events.push({
+      origin: "user",
+      action: "exitAnswer",
+      userID: player.socket.id,
+    });
     target.emit("exitAnswer", {
       question: this.engine.currentQuestion,
     });
@@ -170,10 +183,41 @@ export default class GameSocket {
   private _controlConnect(socket: Socket) {
     console.log("User connected: ", socket.id);
 
+    this._events.push({
+      origin: "user",
+      action: "new",
+      userID: socket.id,
+    });
+
     socket.on("disconnect", () => this._controlDisconnect(socket));
+
+    socket.on("leave", () => {
+      this.engine.removePlayer(socket.id);
+      this._events.push({
+        origin: "user",
+        action: "leave",
+        userID: socket.id,
+      });
+    });
+
+    socket.on("emote", () => {
+      this._hasChange = true;
+      this.io.of("screen").emit("emote", socket.id);
+      this._events.push({
+        origin: "user",
+        action: "emote",
+        userID: socket.id,
+      });
+    });
 
     socket.on("start", (laureate) => {
       const player = this.engine.newPlayer(socket, laureate);
+
+      this._events.push({
+        origin: "user",
+        action: "start",
+        userID: socket.id,
+      });
 
       player.socket = socket;
 

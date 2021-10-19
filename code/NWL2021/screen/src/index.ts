@@ -100,8 +100,14 @@ export default async function start() {
 
   socket.on("gameStateUpdate", (data) => {
     gameState = data;
+    console.log(new Date().getTime(), "gameStateUpdate")
     serverIo.of("screen").emit("gameStateUpdate", data);
   });
+
+  socket.on("emote", (data) => {
+    serverIo.of("screen").emit("emote", data);
+  });
+
 
   server.listen(config.SCREEN_PORT);
   console.log("Screen server started on port: " + config.SCREEN_PORT);

@@ -26,23 +26,23 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
 
     //load characters data
     useEffect(() => {
-        const keyCategory: string = charactersList[characterIndex].prizes.length > 1 ? "special" : charactersList[characterIndex].prizes[0].category as string;
+        const laureateData = charactersList[characterIndex];
+        const keyCategory: string = laureateData.prizes.length > 1 ? "special" : laureateData.prizes[0].category as string;
         setcolor(categoryColor[keyCategory]);
         const laureate = {
-            name: charactersList[characterIndex].firstname,
-            domain: charactersList[characterIndex].bornCountry,
-            year: charactersList[characterIndex].bornDate,
-            country: charactersList[characterIndex].bornCountry,
+            name: laureateData.firstname,
+            domain: laureateData.bornCountry,
+            year: laureateData.bornDate,
+            country: laureateData.bornCountry,
             color: categoryColor[keyCategory],
-            img: `/img/laureates/${charactersList[characterIndex].imagePath}`,
+            img: `/img/laureates/${laureateData.imagePath}`,
             shadowImg: "/img/laureateShadow.png",
             dialogue: "/img/dialogue.png"
         };
         socket.emit("start", laureate);
 
         return () => {
-            console.log("disconnect")
-            // socket.emit("disconnect");
+            socket.emit("leave");
         }
 
     }, [charactersList, characterIndex]);
@@ -75,7 +75,7 @@ export const GameController = ({ charactersList, characterIndex }: React.PropsWi
                 </div>
                 <div className="relative h-full flex flex-col justify-center content-center">
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
-                    <img onClick={() => { console.log("emote") }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${charactersList[characterIndex].imagePath}`} alt="Tu youyou" />
+                    <img onClick={() => { socket.emit("emote") }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${charactersList[characterIndex].imagePath}`} alt={charactersList[characterIndex].firstname} />
                 </div>
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">

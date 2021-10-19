@@ -1,6 +1,5 @@
 import * as osc from "osc";
 import config from "../../config";
-import { MonitoringEvent } from "../../server/types";
 
 let udpPort;
 
@@ -40,8 +39,8 @@ export function send(data: any) {
     const value = data[i];
     if (value === undefined) continue;
     if (i == "position") {
-      args.push({ type: "number", value: value.x });
-      args.push({ type: "number", value: value.y });
+      args.push({ type: "i", value: value.x });
+      args.push({ type: "i", value: value.y });
       continue;
     }
     const type = typeof value == "number" ? "i" : "s";
@@ -62,6 +61,6 @@ export function send(data: any) {
       config.OSC_PORT
     );
   } catch (error) {
-    console.log(error);
+    console.log(args, error);
   }
 }

@@ -13,7 +13,7 @@ export const Home = () => {
                 <div className="absolute lowercase  flex flex-row font-light text-white text-xs top-4"> re|thread </div>
                 <Spacer direction={"vertical"} size={"lg"} />
                 <img className="w-36 h-36 mx-auto" src={LOGO} alt="turing lights 2021" />
-                <h1 className="text-white text-xl text-center lowercase font-light">Wellcome to <br /><span className="text-yellow-300 font-thin text-5xl text-neon-yellow">cyber|glow</span></h1>
+                <h1 className="text-white text-xl text-center lowercase font-light">Welcome to <br /><span className="text-yellow-300 font-thin text-5xl text-neon-yellow">cyber|glow</span></h1>
                 <div className="text-white  text-center w-5/6 text-base">
                     <p>cyber|glow is an interactive web installation part of the Nobel Lights Week 2021. Make sure to be at <span className="underline">Benny Fredrikssons Torg</span> for the complete experience.</p>
                 </div>

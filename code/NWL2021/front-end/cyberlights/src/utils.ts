@@ -1,40 +1,10 @@
-import { laureateI, prize, colorOption, tCategoryColor } from './types';
+import { laureateI, colorOption, tCategoryColor } from './types';
 
 const colors: colorOption[] = ["neonyellow", "neongreen", "neonindigo", "neonpink", " neonred"]
 export const dataToLaurates = (l: any, i: number): laureateI => {
-    const prizes: prize[] = l.prizes.map(dataToPrizes)
-    return {
-        firstname: l.firstname,
-        surname: l.surname ? l.surname : "",
-        imagePath: l.imagePath,
-        country: l.country,
-        city: l.city,
-        bornDate: l.bornDate,
-        diedDate: l.diedDate,
-        bornCountry: l.firstname,
-        bornCountryCode: l.firstname,
-        bornCity: l.firstname,
-        diedCountry: l.firstname,
-        diedCountryCode: l.firstname,
-        diedCity: l.firstname,
-        gender: l.firstname,
-        description: l.firstname,
-        img: l.imagePath,
-        prizes: prizes,
-        color: colors[i % (colors.length - 1)]
-    }
+    l.color = colors[i % (colors.length - 1)];
+    return l as laureateI
 }
-
-
-const dataToPrizes = ((p: any): prize => {
-    return {
-        category: p.category,
-        motivation: p.motivation,
-        share: p.share,
-        year: p.year,
-        affiliations: [],
-    }
-})
 
 
 export const categoryColor: tCategoryColor = {
@@ -63,5 +33,18 @@ export const getIcon = (category: string): string => {
             return "ico-special.png";
         default:
             return "ico-chemistry.png"
+    }
+}
+
+export const getFlag = (country: string): string => {
+    switch (country) {
+        case "Italy":
+            return "flag-italy.png"
+        case "Russian Empire (now Poland)":
+            return "flag-polonia.png"
+        case "USA":
+            return "flag-usa.png"
+        default:
+            return "flag-usa.png"
     }
 }
