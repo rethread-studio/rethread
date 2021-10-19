@@ -15,13 +15,30 @@ export default class Monitor {
     dbEvent.subscribe((event) => this.send(event));
 
     const monitor = this;
+
+    const asyncType = {};
     const asyncHook = asyncHooks.createHook({
       init(asyncId, type, triggerAsyncId) {
-        if (type != "TickObject")
+        if (type != "TickObject") asyncType[asyncId] = type;
+      },
+      after(asyncId) {
+        if (asyncType[asyncId])
           monitor.send({
             origin: "node",
-            action: "async init " + type,
+            action: "async after " + asyncType[asyncId],
           });
+        delete asyncType[asyncId];
+      },
+      destroy(asyncId) {
+        delete asyncType[asyncId];
+      },
+      promiseResolve(asyncId) {
+        if (asyncType[asyncId])
+          monitor.send({
+            origin: "node",
+            action: "promiseResolve " + asyncType[asyncId],
+          });
+        delete asyncType[asyncId];
       },
     });
     asyncHook.enable();
