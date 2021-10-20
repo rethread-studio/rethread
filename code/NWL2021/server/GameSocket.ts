@@ -1,4 +1,3 @@
-import { Session, SessionData } from "express-session";
 import { Namespace, Server, Socket } from "socket.io";
 import config from "../config";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
@@ -182,9 +181,23 @@ export default class GameSocket {
   }
 
   private _controlConnect(socket: Socket) {
+    const gameSocket = this;
     const session: any = (socket.handshake as any).session;
     socket.emit("welcome", session?.laureate);
     console.log("User connected: ", socket.id);
+
+    let disconnectTimeout;
+
+
+    function ping() {
+      clearTimeout(disconnectTimeout);
+      disconnectTimeout = setTimeout(() => {
+        console.log("inactive")
+        socket.emit("leave");
+        gameSocket._controlDisconnect(socket);
+      }, 30000);
+    }
+    ping();
 
     this._events.push({
       origin: "user",
@@ -204,6 +217,7 @@ export default class GameSocket {
           y: event.y,
         },
       });
+      ping();
     });
 
     socket.on("leave", () => {

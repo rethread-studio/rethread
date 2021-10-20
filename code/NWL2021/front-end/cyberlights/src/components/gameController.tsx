@@ -24,6 +24,7 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
     socket.on("question", (question) => { setQuestion(question) });
     socket.on("enterAnswer", ({ answer, question }) => { setAnswer(answer) });
     socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
+    socket.on("leave", () => { history.push("/") });
 
     
 
@@ -38,8 +39,11 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
         socket.emit("start", laureate);
 
         return () => {
-            selectHandler(null);
             socket.emit("leave");
+            socket.off("leave");
+            socket.off("enterAnswer");
+            socket.off("exitAnswer");
+            socket.off("question");
         }
     }, [laureate, history, selectHandler]);
 
@@ -56,13 +60,15 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
                 currentDirection === "left" ? "-rotate-45 -translate-x-8" :
                     currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
 
+    const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
+    
     return (
 
         <div className="h-full w-full p-4">
             <div className="h-full border-2 border-gray-600 flex flex-col justify-between ">
 
                 <div className="flex flex-row justify-between text-sm">
-                    <Link to={"/select"} className="text-gray-400  h-8 w-4/8 p-2 ">
+                    <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
                         <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back to select
                     </Link>
                 </div>
