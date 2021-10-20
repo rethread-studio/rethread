@@ -6,11 +6,19 @@ socket.on("setup", (data) => {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-socket.on("gameStateUpdate", updateGameState);
+socket.on("gameStateUpdate", (data) => {
+  gameState = data;
+});
 
 socket.on("answer", ({ question, answer }) => {
   const answerE = document.querySelector(".answer0");
   answerE.innerHTML = "Wining!!";
+});
+
+const emotes = {};
+socket.on("emote", (playerId) => {
+  clearTimeout(emotes[playerId]);
+  emotes[playerId] = setTimeout(() => delete emotes[playerId], 1000);
 });
 
 const imgs = {};
@@ -36,6 +44,7 @@ function getAngle(playerStatus) {
 function drawDialogue(players) {
   if (!players) return;
 
+  const scale = 1; // gameCycle ? 1 : 0.8;
   // draw players
   Object.keys(players).forEach((playerId) => {
     let player = players[playerId];
@@ -46,7 +55,7 @@ function drawDialogue(players) {
         setup.unitSize,
         setup.unitSize,
         0,
-        gameCycle ? 1 : 0.8,
+        scale,
         imgs[player.laureate.dialogue]
       );
     } else {
@@ -64,7 +73,7 @@ function drawDialogue(players) {
             setup.unitSize,
             setup.unitSize,
             0,
-            gameCycle ? 1 : 0.8,
+            scale,
             imgs[player.laureate.dialogue]
           );
         }
@@ -75,18 +84,24 @@ function drawDialogue(players) {
 
 function drawPlayers(players) {
   if (!players) return;
+
+  let scale = 1; //gameCycle ? 1 : 0.8;
   // draw players
-  Object.keys(players).forEach((playerId) => {
-    let player = players[playerId];
+
+  for (const player of players) {
+    let size = setup.unitSize;
+    if (emotes[player.id]) {
+      size *= new Date().getTime() % 2 ? 1.5 : 1.2;
+    }
     if (imgs[player.laureate.img]) {
       const angle = getAngle(player.status);
       renderImage(
         player.x * setup.unitSize + setup.unitSize / 2,
         player.y * setup.unitSize + setup.unitSize / 2,
-        setup.unitSize,
-        setup.unitSize,
+        size,
+        size,
         angle,
-        gameCycle ? 0.8 : 1,
+        scale,
         imgs[player.laureate.img]
       );
     } else {
@@ -97,22 +112,15 @@ function drawPlayers(players) {
         renderImage(
           player.x * setup.unitSize + setup.unitSize / 2,
           player.y * setup.unitSize + setup.unitSize / 2,
-          setup.unitSize,
-          setup.unitSize,
+          size,
+          size,
           0,
-          gameCycle ? 0.8 : 1,
+          scale,
           imgs[player.laureate.img]
         );
-        // ctx.drawImage(
-        //   imgs[player.laureate.img],
-        //   player.x * setup.unitSize,
-        //   player.y * setup.unitSize,
-        //   setup.unitSize,
-        //   setup.unitSize
-        // );
       };
     }
-  });
+  }
 }
 
 function renderImage(x, y, width, height, angle, scale = 1, image) {
@@ -238,9 +246,11 @@ function drawQuestion(question) {
   if (!question) return;
   const questionE = document.querySelector(".question");
   questionE.innerHTML = question.text;
-  questionE.style = `top: ${setup.questionPosition.y * setup.unitSize
-    }px;left: ${setup.questionPosition.x * setup.unitSize}px; width: ${(setup.questionPosition.width + 1) * setup.unitSize
-    }px; height: ${(setup.questionPosition.height + 1) * setup.unitSize}px`;
+  questionE.style = `top: ${
+    setup.questionPosition.y * setup.unitSize
+  }px;left: ${setup.questionPosition.x * setup.unitSize}px; width: ${
+    (setup.questionPosition.width + 1) * setup.unitSize
+  }px; height: ${(setup.questionPosition.height + 1) * setup.unitSize}px`;
   //DRAW DECORATION
   ctx.beginPath();
   ctx.lineWidth = gameCycle ? "4" : "1";
@@ -263,9 +273,11 @@ function drawQuestion(question) {
     const answerE = document.querySelector(".answer" + (i + 1));
     answerE.innerHTML = answer.text;
 
-    answerE.style = `top: ${position.y * setup.unitSize}px;left: ${position.x * setup.unitSize
-      }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${(position.height + 1) * setup.unitSize
-      }px`;
+    answerE.style = `top: ${position.y * setup.unitSize}px;left: ${
+      position.x * setup.unitSize
+    }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${
+      (position.height + 1) * setup.unitSize
+    }px`;
 
     // if (gameCycle) {
     //   if (i % 2 == 0) {
@@ -306,13 +318,19 @@ function getCBoardClass() {
 function drawBoard() {
   const game = document.getElementById("game");
   game.classList.remove(getCBoardClass());
-  //add new
-  gameCycle = !gameCycle;
   game.classList.add(getCBoardClass());
 }
 
-function updateGameState(data) {
-  gameState = data;
+setInterval(() => {
+  gameCycle = !gameCycle;
+}, 1000);
+
+setInterval(() => {
+  updateGameState();
+}, 60);
+
+function updateGameState() {
+  if (!gameState) gameState = {};
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBoard();
   drawQuestion(gameState.question);
@@ -330,6 +348,4 @@ function start(s) {
   document.querySelector(
     ".board"
   ).style = `width: ${canvas.width}px;height:${canvas.height}px;`;
-
-  updateGameState(gameState || {});
 }

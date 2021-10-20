@@ -1,6 +1,5 @@
 import * as osc from "osc";
 import config from "../../config";
-import { MonitoringEvent } from "../../server/types";
 
 let udpPort;
 
@@ -24,29 +23,36 @@ export function close() {
   udpPort = null;
 }
 
-export function send(data: any) {
+export function send(
+  data: any,
+  opt?: { address?: string; ip?: string; port?: number }
+) {
   const args = [];
+  if (data.origin) args.push({ type: "s", value: data.origin });
+  if (data.action) args.push({ type: "s", value: data.action });
 
-  for (const i of [
-    "origin",
-    "action",
-    "userID",
-    "answer",
-    "question",
-    "position",
+  const v = [
     "collection",
     "url",
-  ]) {
-    const value = data[i];
-    if (value === undefined) continue;
-    if (i == "position") {
-      args.push({ type: "number", value: value.x });
-      args.push({ type: "number", value: value.y });
-      continue;
-    }
-    const type = typeof value == "number" ? "i" : "s";
-    args.push({ type, value });
-  }
+    "userID",
+    "position",
+    "question",
+    "answer",
+    "process",
+    "timestamp",
+    "event",
+    "pid",
+    "cpu",
+  ]
+    .filter((f) => data[f] !== undefined)
+    .map((i) => {
+      if (i == "position") {
+        return `${data[i].x};${data[i].y}`;
+      }
+      return data[i];
+    })
+    .join(";");
+  args.push({ type: "s", value: v });
 
   if (!udpPort) {
     return;
@@ -55,13 +61,13 @@ export function send(data: any) {
   try {
     udpPort.send(
       {
-        address: config.OSC_ADDRESS,
+        address: opt?.address ? opt?.address : config.OSC_ADDRESS,
         args,
       },
-      config.OSC_IP,
-      config.OSC_PORT
+      opt?.ip ? opt?.ip : config.OSC_IP,
+      opt?.port ? opt?.port : config.OSC_PORT
     );
   } catch (error) {
-    console.log(error);
+    console.log(args, error);
   }
 }

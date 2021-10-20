@@ -11,6 +11,7 @@ import * as osc from "./osc";
 import { GameState, MonitoringEvent, Player } from "../../server/types";
 import { Engine } from "../../server/engine";
 import { IState } from "../../server/database/state/state.types";
+import FTrace from "./ftrace";
 
 export default async function start() {
   const app = express();
@@ -103,8 +104,17 @@ export default async function start() {
     serverIo.of("screen").emit("gameStateUpdate", data);
   });
 
+  socket.on("emote", (data) => {
+    serverIo.of("screen").emit("emote", data);
+  });
+
   server.listen(config.SCREEN_PORT);
   console.log("Screen server started on port: " + config.SCREEN_PORT);
+
+  const ftrace = new FTrace(["tcp", "random", "syscalls"]);
+  await ftrace.init();
+  await ftrace.start();
+  ftrace.readTrace();
 }
 
 start();

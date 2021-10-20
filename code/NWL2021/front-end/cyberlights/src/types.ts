@@ -55,11 +55,7 @@ export interface selectCharacterProps {
 }
 
 export interface characterCardProps {
-    fullName: string,
-    img?: string,
-    prizes: prize[],
-    country: string,
-    color: string,
+    laureate: laureateI
 }
 
 export type controllDirection = "up" | "down" | "left" | "right" | "void";

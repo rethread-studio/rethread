@@ -34,10 +34,10 @@ export interface GameState {
   question: IQuestion;
 }
 
-export type MonitoringEvent = ServerEvent | UserEvent | DatabaseEvent | GameEngineEvent;
+export type MonitoringEvent = ServerEvent | UserEvent | DatabaseEvent | GameEngineEvent | NodeEvent;
 
 interface IMonitoringEvent {
-  origin: "mongodb" | "gameEngine" | "user" | "screen" | "server";
+  origin: "mongodb" | "gameEngine" | "user" | "screen" | "server" | "node";
   action: string;
 }
 
@@ -53,6 +53,10 @@ export interface DatabaseEvent extends IMonitoringEvent {
 
 export interface GameEngineEvent extends IMonitoringEvent {
   origin: "gameEngine";
+}
+
+export interface NodeEvent extends IMonitoringEvent {
+  origin: "node";
 }
 
 export interface UserEvent extends IMonitoringEvent {

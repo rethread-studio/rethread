@@ -22,6 +22,7 @@ services:
     build: .
     restart: always
     command: pm2-runtime ecosystem.config.js --only screen
+    privileged: true
     env_file:
       - ./.env
     environment:
