@@ -309,6 +309,62 @@
         "isCorrect": true
       }
     ]
+  },
+  {
+    "text": "Who was the first woman to receive a Nobel Prize in Literature?",
+    "type":"lagerlof",
+    "answers": [
+      {
+        "text": "Selma Lagerlöf",
+        "isCorrect": true
+      },
+      {
+        "text": "Grazia Deledda",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How old was Selma Lagerlöf when she published her first novel?",
+    "type":"lagerlof",
+    "answers": [
+      {
+        "text": "33",
+        "isCorrect": true
+      },
+      {
+        "text": "19",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which of these Nobel Laureates has had a crater on Venus named after them?",
+    "type":"lagerlof",
+    "answers": [
+      {
+        "text": "Selma Lagerlöf",
+        "isCorrect": true
+      },
+      {
+        "text": "Rita Levi-Montalcini",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What was the value of the Swedish bank note featuring Selma Lagerlöf?",
+    "type":"lagerlof",
+    "answers": [
+      {
+        "text": "20 kr",
+        "isCorrect": true
+      },
+      {
+        "text": "100 kr",
+        "isCorrect": false
+      }
+    ]
   }
 
 ]
