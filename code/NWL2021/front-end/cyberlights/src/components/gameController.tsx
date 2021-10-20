@@ -27,7 +27,6 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
     socket.on("leave", () => { history.push("/") });
 
     
-
     //load characters data
     useEffect(() => {
         if (laureate == null) {
@@ -35,8 +34,24 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
         }
         const keyCategory: string = laureate.prizes.length > 1 ? "special" : laureate.prizes[0].category as string;
         setColor(categoryColor[keyCategory]);
-
+        
         socket.emit("start", laureate);
+        
+        const pressHandler = ({ key }: { key: string }) => {
+            if (key === "ArrowDown") {
+                return emitDirection("down")
+            }
+            if (key === "ArrowUp") {
+                return emitDirection("up")
+            }
+            if (key === "ArrowLeft") {
+                return emitDirection("left")
+            }
+            if (key === "ArrowRight") {
+                return emitDirection("right")
+            }
+        }
+        window.addEventListener("keydown", pressHandler);
 
         return () => {
             socket.emit("leave");
@@ -44,6 +59,7 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
             socket.off("enterAnswer");
             socket.off("exitAnswer");
             socket.off("question");
+            window.removeEventListener("keydown", pressHandler);
         }
     }, [laureate, history, selectHandler]);
 
