@@ -27,6 +27,7 @@
   },
   {
     "text": "Neon is present in the Earth's atmosphere",
+    "type": "misc",
     "answers": [
       {
         "text": "no",
@@ -40,6 +41,7 @@
   },
   {
     "text": "Three computers run 24/7 to deliver cyber|glow",
+    "type": "CS",
     "answers": [
       {
         "text": "no",
@@ -117,7 +119,34 @@
     ]
   },
   {
+    "text": "Martin Luther King was the youngest man to receive a Nobel Prize",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King was born in ",
+    "answers": [
+      {
+        "text": "1939",
+        "isCorrect": false
+      },
+      {
+        "text": "1929",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
     "text": "Margaret Hamilton programmed the flight controller for Apollo 11",
+    "type": "CS",
     "answers": [
       {
         "text": "no",
@@ -131,6 +160,7 @@
   },
   {
     "text": "The number of employees at Microsoft is",
+    "type": "CS",
     "answers": [
       {
         "text": "60000",
@@ -157,6 +187,7 @@
   },
   {
     "text": "WASP supports research for ",
+    "type": "CS",
     "answers": [
       {
         "text": "agriculture",
@@ -164,6 +195,117 @@
       },
       {
         "text": "AI, software and automatic control",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Toni Morrison graduated in  ",
+    "answers": [
+      {
+        "text": "American Comics",
+        "isCorrect": false
+      },
+      {
+        "text": "American Literature",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "In Beloved, the daughter returns as a  ",
+    "type":"morrison",
+    "answers": [
+      {
+        "text": "cat",
+        "isCorrect": false
+      },
+      {
+        "text": "ghost",
+        "isCorrect": true
+      }
+    ]
+  }, 
+  {
+    "text": "Beloved was followed by a novel called ",
+    "type":"morrison",
+    "answers": [
+      {
+        "text": "Blues",
+        "isCorrect": false
+      },
+      {
+        "text": "Jazz",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "The main character of the screen adaptation of Beloved was played by ",
+    "type":"morrison",
+    "answers": [
+      {
+        "text": "Jennifer Hudson",
+        "isCorrect": false
+      },
+      {
+        "text": "Oprah Winfrey",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "In her Nobel lecture, Toni Morrison talked about a",
+    "type":"morrison",
+    "answers": [
+      {
+        "text": "marathon man",
+        "isCorrect": false
+      },
+      {
+        "text": "blind man",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Toni Morrison received a National Book Award for Beloved",
+    "type":"morrison",
+    "answers": [
+      {
+        "text": "yes",
+        "isCorrect": false
+      },
+      {
+        "text": "no",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Toni Morrison was the first black woman of any nationality to win the Nobel prize",
+    "type":"morrison",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "The main character of Beloved is inspired by the real life of",
+    "type":"morrison",
+    "answers": [
+      {
+        "text": "Isabella Greenway",
+        "isCorrect": false
+      },
+      {
+        "text": "Margaret Garner",
         "isCorrect": true
       }
     ]
