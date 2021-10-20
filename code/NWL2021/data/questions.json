@@ -1,7 +1,7 @@
 [
   {
     "_id": "615ee06b28f1bb00b8c4c90f",
-    "text": "Did Alan Turing win a Nobel prize?",
+    "text": "Did Bill Gates win a Nobel prize?",
     "answers": [
       {
         "text": "Yes",
@@ -17,17 +17,134 @@
   },
   {
     "_id": "615ee06b28f1bb00b8c4c912",
-    "text": "How many Nobel prizes have been given?",
+    "text": "How many Nobel prizes have been awarded?",
     "answers": [
       {
-        "text": "100",
+        "text": "718",
         "isCorrect": false,
         "_id": "615ee06b28f1bb00b8c4c913"
       },
       {
-        "text": "200",
+        "text": "892",
         "isCorrect": true,
         "_id": "615ee06b28f1bb00b8c4c914"
+      }
+    ]
+  },
+  {
+    "text": "Neon is present in the Earth's atmosphere",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Three computers run 24/7 to deliver cyber|glow",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King was a pastor in",
+    "answers": [
+      {
+        "text": "California",
+        "isCorrect": false
+      },
+      {
+        "text": "Alabama",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King received a Nobel Prize at",
+    "answers": [
+      {
+        "text": "45",
+        "isCorrect": false
+      },
+      {
+        "text": "35",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "The march on Washington, D.C. gathered 500.000 persons",
+    "answers": [
+      {
+        "text": "yes",
+        "isCorrect": false
+      },
+      {
+        "text": "no",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King led a bus boycott in",
+    "answers": [
+      {
+        "text": "Atlanta",
+        "isCorrect": false
+      },
+      {
+        "text": "Montgomery",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Martin Luther King have a dream",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Margaret Hamilton programmed the flight controller for Apollo 11",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "The number of employees at Microsoft is",
+    "answers": [
+      {
+        "text": "60000",
+        "isCorrect": false
+      },
+      {
+        "text": "182000",
+        "isCorrect": true
       }
     ]
   }
