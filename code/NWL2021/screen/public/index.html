@@ -1,25 +1,29 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width initial-scale=1.0" />
+    <title></title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap");
+    </style>
+    <link rel="stylesheet" href="style/style.css" />
+  </head>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width initial-scale=1.0" />
-  <title></title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
-  </style>
-  <link rel="stylesheet" href="style/style.css" />
-</head>
-
-<body>
-  <div class="board">
-    <canvas id="game"></canvas>
-    <div class="question text-neon">How many nobel prices have Turing won?</div>
-    <div class="answer answer1 text-neon">Yes</div>
-    <div class="answer answer2 text-neon">No</div>
-  </div>
-</body>
-<script src="/script/external/socket.io.min.js"></script>
-<script src="script/index.js"></script>
-
+  <body>
+    <div class="board">
+      <canvas id="game"></canvas>
+      <div class="question text-neon">
+        How many nobel prices have Turing won?
+      </div>
+      <div class="answer answer1 text-neon">100</div>
+      <div class="answer answer2 text-neon">200</div>
+      <div class="questionAnswer text-neon">
+        <div class="q">How many nobel prices have Turing won?</div>
+        <div class="a">100!</div>
+      </div>
+    </div>
+  </body>
+  <script src="/script/external/socket.io.min.js"></script>
+  <script src="script/index.js"></script>
 </html>

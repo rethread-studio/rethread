@@ -41,9 +41,9 @@ export class Engine {
 
       for (const socketID of Object.keys(this.players)) {
         const player = this.players[socketID];
-        if (!player.inAnswer) continue;
         const { inAnswer, answer } = this._isInAnswer(player);
-        answerScore[answer.text]++;
+        if (!inAnswer) continue;
+        answerScore[answer.text] = (answerScore[answer.text] || 0) + 1;
         this._events.userAnswer.emit({ answer, player });
       }
 

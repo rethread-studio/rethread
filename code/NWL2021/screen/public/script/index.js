@@ -10,9 +10,15 @@ socket.on("gameStateUpdate", (data) => {
   gameState = data;
 });
 
+socket.on("question", ({ question, answer }) => {
+  const answerE = document.querySelector(".questionAnswer");
+  answerE.style = "display: none;";
+});
+
 socket.on("answer", ({ question, answer }) => {
-  const answerE = document.querySelector(".answer0");
-  answerE.innerHTML = "Wining!!";
+  const answerE = document.querySelector(".questionAnswer");
+  answerE.style = "display: block;";
+  answerE.innerHTML = `<div class="q">${question.text}</div><div class="a">${answer.text}</div>`;
 });
 
 const emotes = {};
@@ -105,10 +111,15 @@ function drawPlayers(players) {
         imgs[player.laureate.imagePath]
       );
     } else {
-      imgs[player.laureate.imagePath] = new Image(setup.unitSize, setup.unitSize);
+      imgs[player.laureate.imagePath] = new Image(
+        setup.unitSize,
+        setup.unitSize
+      );
       // Load an image of intrinsic size 300x227 in CSS pixels
-      imgs[player.laureate.imagePath].src = `/img/laureates/${player.laureate.imagePath}`;
-      
+      imgs[
+        player.laureate.imagePath
+      ].src = `/img/laureates/${player.laureate.imagePath}`;
+
       imgs[player.laureate.imagePath].onload = function () {
         renderImage(
           player.x * setup.unitSize + setup.unitSize / 2,
@@ -328,7 +339,7 @@ setInterval(() => {
 
 setInterval(() => {
   updateGameState();
-}, 60);
+}, 100);
 
 function updateGameState() {
   if (!gameState) gameState = {};
