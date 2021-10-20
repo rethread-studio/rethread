@@ -1,33 +1,27 @@
 [
   {
-    "_id": "615ee06b28f1bb00b8c4c90f",
     "text": "Did Bill Gates win a Nobel prize?",
     "answers": [
       {
         "text": "Yes",
         "isCorrect": false,
-        "_id": "615ee06b28f1bb00b8c4c910"
       },
       {
         "text": "No",
         "isCorrect": true,
-        "_id": "615ee06b28f1bb00b8c4c911"
       }
     ]
   },
   {
-    "_id": "615ee06b28f1bb00b8c4c912",
     "text": "How many Nobel prizes have been awarded?",
     "answers": [
       {
         "text": "718",
         "isCorrect": false,
-        "_id": "615ee06b28f1bb00b8c4c913"
       },
       {
         "text": "892",
         "isCorrect": true,
-        "_id": "615ee06b28f1bb00b8c4c914"
       }
     ]
   },
