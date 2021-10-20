@@ -132,7 +132,7 @@ fn start_tracer() {
 fn init_trace_options(pid: Option<u32>, events: &Vec<&str>) {
     // Set tracer to "function"
     // There are several different tracers: hwlat blk mmiotrace function_graph wakeup_dl wakeup_rt wakeup function nop
-    set_ftrace_parameter("current_tracer", "function");
+    set_ftrace_parameter("current_tracer", "nop");
 
     // Set what events to listen for
     // set_event seems to only accept a single event string e.g. tcp:*
@@ -238,7 +238,7 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
                     if line.len() > 49 {
                         // Parse the line
                         let (timestamp, event_string, pid, cpu) = parse_line(line, &mut state);
-                        send_osc_message(&osc_sender, timestamp, event_string, pid, cpu);
+                        //send_osc_message(&osc_sender, timestamp, event_string, pid, cpu);
                     }
                 }
                 // ensure the bytes we worked with aren't returned again later
