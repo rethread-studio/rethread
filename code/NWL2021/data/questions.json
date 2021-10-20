@@ -4,11 +4,11 @@
     "answers": [
       {
         "text": "Yes",
-        "isCorrect": false,
+        "isCorrect": false
       },
       {
         "text": "No",
-        "isCorrect": true,
+        "isCorrect": true
       }
     ]
   },
@@ -17,11 +17,11 @@
     "answers": [
       {
         "text": "718",
-        "isCorrect": false,
+        "isCorrect": false
       },
       {
         "text": "892",
-        "isCorrect": true,
+        "isCorrect": true
       }
     ]
   },
@@ -214,7 +214,7 @@
   },
   {
     "text": "In Beloved, the daughter returns as a  ",
-    "type":"morrison",
+    "type": "morrison",
     "answers": [
       {
         "text": "cat",
@@ -225,10 +225,10 @@
         "isCorrect": true
       }
     ]
-  }, 
+  },
   {
     "text": "Beloved was followed by a novel called ",
-    "type":"morrison",
+    "type": "morrison",
     "answers": [
       {
         "text": "Blues",
@@ -242,7 +242,7 @@
   },
   {
     "text": "The main character of the screen adaptation of Beloved was played by ",
-    "type":"morrison",
+    "type": "morrison",
     "answers": [
       {
         "text": "Jennifer Hudson",
@@ -256,7 +256,7 @@
   },
   {
     "text": "In her Nobel lecture, Toni Morrison talked about a",
-    "type":"morrison",
+    "type": "morrison",
     "answers": [
       {
         "text": "marathon man",
@@ -270,7 +270,7 @@
   },
   {
     "text": "Toni Morrison received a National Book Award for Beloved",
-    "type":"morrison",
+    "type": "morrison",
     "answers": [
       {
         "text": "yes",
@@ -284,7 +284,7 @@
   },
   {
     "text": "Toni Morrison was the first black woman of any nationality to win the Nobel prize",
-    "type":"morrison",
+    "type": "morrison",
     "answers": [
       {
         "text": "no",
@@ -298,7 +298,7 @@
   },
   {
     "text": "The main character of Beloved is inspired by the real life of",
-    "type":"morrison",
+    "type": "morrison",
     "answers": [
       {
         "text": "Isabella Greenway",
@@ -312,7 +312,7 @@
   },
   {
     "text": "Who was the first woman to receive a Nobel Prize in Literature?",
-    "type":"lagerlof",
+    "type": "lagerlof",
     "answers": [
       {
         "text": "Selma Lagerlöf",
@@ -326,7 +326,7 @@
   },
   {
     "text": "How old was Selma Lagerlöf when she published her first novel?",
-    "type":"lagerlof",
+    "type": "lagerlof",
     "answers": [
       {
         "text": "33",
@@ -340,7 +340,7 @@
   },
   {
     "text": "Which of these Nobel Laureates has had a crater on Venus named after them?",
-    "type":"lagerlof",
+    "type": "lagerlof",
     "answers": [
       {
         "text": "Selma Lagerlöf",
@@ -354,7 +354,7 @@
   },
   {
     "text": "What was the value of the Swedish bank note featuring Selma Lagerlöf?",
-    "type":"lagerlof",
+    "type": "lagerlof",
     "answers": [
       {
         "text": "20 kr",
@@ -366,5 +366,4 @@
       }
     ]
   }
-
 ]
