@@ -22,8 +22,10 @@ import 'swiper/swiper.min.css';
 
 SwiperCore.use([Navigation, Pagination]);
 
-export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.PropsWithChildren<selectCharacterProps>) => {
+export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithChildren<selectCharacterProps>) => {
     let history = useHistory();
+
+    const [characterIndex, setCharacterIndex] = useState<number>(-1);
 
     const [viewBio, setViewBio] = useState<boolean>(false);
     const [characterPrizes, setCharacterPrizes] = useState<prize[]>([])
@@ -35,7 +37,10 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
     const chevronRight: IconDefinition = findIconDefinition(chevronLookRight)
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { setViewBio(!viewBio); }
-    const handleSelect = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { history.push("/play") }
+    const handleSelect = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { 
+        selectHandler(characters[characterIndex]);
+        history.push("/play");
+    }
 
 
     return (
@@ -64,8 +69,8 @@ export const SelectCharacter = ({ characters, charIndex, selectHandler }: React.
                         slidesPerView={1}
                         onSlideChange={(SwiperCore) => {
                             const { realIndex, } = SwiperCore;
+                            setCharacterIndex(realIndex);
                             setCharacterPrizes(characters[realIndex].prizes);
-                            selectHandler(realIndex);
                             const keyCategory: string = characters[realIndex].prizes.length > 1 ? "special" : characters[realIndex].prizes[0].category as string;
                             selectColor(categoryColor[keyCategory]);
                         }}

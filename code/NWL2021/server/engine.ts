@@ -16,7 +16,7 @@ class Events {
   exitAnswer = new SubEvent<{ answer: IAnswer; player: Player }>();
   answer = new SubEvent<IAnswer>();
   playerMove = new SubEvent<Player>();
-  playerLeave = new SubEvent<Player>();
+  playerLeave = new SubEvent<string>();
   newQuestion = new SubEvent<IQuestion>();
   state = new SubEvent<IStateDocument>();
 }
@@ -162,7 +162,7 @@ export class Engine {
   }
 
   removePlayer(id: string) {
-    this._events.playerLeave.emit(this._players[id]);
+    this._events.playerLeave.emit(id);
     delete this._players[id];
   }
 
