@@ -195,7 +195,7 @@ export default class GameSocket {
         console.log("inactive")
         socket.emit("leave");
         gameSocket._controlDisconnect(socket);
-      }, 30000);
+      }, config.INACTIVITY_TIME * 1000);
     }
     ping();
 

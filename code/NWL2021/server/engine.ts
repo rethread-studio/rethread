@@ -37,22 +37,17 @@ export class Engine {
     this._players = {};
 
     const questionInterval = setInterval(() => {
-      let answerScore = {};
-
       for (const socketID of Object.keys(this.players)) {
         const player = this.players[socketID];
         const { inAnswer, answer } = this._isInAnswer(player);
         if (!inAnswer) continue;
-        answerScore[answer.text] = (answerScore[answer.text] || 0) + 1;
         this._events.userAnswer.emit({ answer, player });
       }
 
-      const selectedAnswer = this.currentQuestion.answers
-        .filter((f) => answerScore[f.text])
-        .sort((a, b) => answerScore[a.text] - answerScore[b.text]);
-      if (selectedAnswer.length > 0) {
-        this._events.answer.emit(selectedAnswer[0]);
-      }
+      const selectedAnswer = this.currentQuestion.answers.filter(
+        (f) => f.isCorrect
+      );
+      this._events.answer.emit(selectedAnswer[0]);
 
       setTimeout(() => {
         const newQuestion = this.chooseQuestionRandomly();
@@ -64,7 +59,7 @@ export class Engine {
           const { inAnswer, answer } = this._isInAnswer(player);
           this._events.enterAnswer.emit({ answer, player });
         }
-      }, 3000);
+      }, config.ANSWER_DURATION);
     }, config.QUESTION_INTERVAL * 1000);
   }
 
