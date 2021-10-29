@@ -379,5 +379,90 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "Mother Teresa was born in",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "Skopje",
+        "isCorrect": true
+      },
+      {
+        "text": "Calcutta",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Mother Teresa operated missions in",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "the whole World",
+        "isCorrect": true
+      },
+      {
+        "text": "India",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Mother Teresa workde in",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "the slums",
+        "isCorrect": true
+      },
+      {
+        "text": "a convent",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Shanti Nagar means",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "City of Peace",
+        "isCorrect": true
+      },
+      {
+        "text": "Children's Home",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "In 1997 how many sisters worked with Mother Teresa",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "4000",
+        "isCorrect": true
+      },
+      {
+        "text": "40000",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Both Mother Teresa's miracles are related to healing",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "true",
+        "isCorrect": true
+      },
+      {
+        "text": "false",
+        "isCorrect": false
+      }
+    ]
   }
+
 ]
