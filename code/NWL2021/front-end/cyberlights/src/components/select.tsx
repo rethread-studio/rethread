@@ -37,7 +37,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
     const chevronRight: IconDefinition = findIconDefinition(chevronLookRight)
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { setViewBio(!viewBio); }
-    const handleSelect = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { 
+    const handleSelect = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         selectHandler(characters[characterIndex]);
         history.push("/play");
     }
@@ -103,9 +103,9 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                 </button>
 
 
-                <button className="w-full text-center mx-auto normal-case font-light pb-4" onClick={handleClick}>My discovery</button>
+                <button style={{ borderColor: color }} className="border-2 w-3/6 border-opacity-40 opacity-80 text-center mx-auto normal-case font-light py-2 mb-2" onClick={handleClick}>my discovery</button>
 
-                <button style={{ backgroundColor: color }} className={`text-2xl text-center transition-all duration-200 lowercase  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
+                <button style={{ backgroundColor: color }} className={`text-2xl  w-3/6 text-center transition-all duration-200 lowercase  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
                     <span className="text-gray-900 font-light">select</span>
                 </button>
 
