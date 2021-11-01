@@ -22,11 +22,14 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
 
     socket.on("question", (question) => { setQuestion(question) });
-    socket.on("enterAnswer", ({ answer, question }) => { setAnswer(answer) });
+    socket.on("enterAnswer", ({ answer }) => {
+        setAnswer(answer);
+        window.navigator.vibrate(200);
+    });
     socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
     socket.on("leave", () => { history.push("/") });
 
-    
+
     //load characters data
     useEffect(() => {
         if (laureate == null) {
@@ -34,9 +37,9 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
         }
         const keyCategory: string = laureate.prizes.length > 1 ? "special" : laureate.prizes[0].category as string;
         setColor(categoryColor[keyCategory]);
-        
+
         socket.emit("start", laureate);
-        
+
         const pressHandler = ({ key }: { key: string }) => {
             if (key === "ArrowDown") {
                 return emitDirection("down")
@@ -77,7 +80,7 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
                     currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
 
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
-    
+
     return (
 
         <div className="h-full w-full p-4">
