@@ -3,7 +3,7 @@ import config from "../config";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
 import { Engine } from "./engine";
 import Monitor from "./Monitor";
-import { GameState, MonitoringEvent, Player, UserEvent } from "./types";
+import { MonitoringEvent, Player, UserEvent } from "./types";
 
 export default class GameSocket {
   private _movedUsers = new Set<string>();
@@ -29,11 +29,11 @@ export default class GameSocket {
       });
       this._hasChange = true;
     });
-    this.engine.on("playerLeave").subscribe((player) => {
+    this.engine.on("playerLeave").subscribe((playerId) => {
       this._events.push({
         origin: "user",
         action: "leave",
-        userID: player.socket?.id,
+        userID: playerId,
       });
       this._hasChange = true;
     });
@@ -181,7 +181,23 @@ export default class GameSocket {
   }
 
   private _controlConnect(socket: Socket) {
+    const gameSocket = this;
+    const session: any = (socket.handshake as any).session;
+    socket.emit("welcome", session?.laureate);
     console.log("User connected: ", socket.id);
+
+    let disconnectTimeout;
+
+
+    function ping() {
+      clearTimeout(disconnectTimeout);
+      disconnectTimeout = setTimeout(() => {
+        console.log("inactive")
+        socket.emit("leave");
+        gameSocket._controlDisconnect(socket);
+      }, config.INACTIVITY_TIME * 1000);
+    }
+    ping();
 
     this._events.push({
       origin: "user",
@@ -191,7 +207,22 @@ export default class GameSocket {
 
     socket.on("disconnect", () => this._controlDisconnect(socket));
 
+    socket.on("click", (event) => {
+      this.monitor.send({
+        origin: "user",
+        action: "click",
+        userID: socket.id,
+        position: {
+          x: event.x,
+          y: event.y,
+        },
+      });
+      ping();
+    });
+
     socket.on("leave", () => {
+      session.laureate = null;
+      session.save();
       this.engine.removePlayer(socket.id);
       this._events.push({
         origin: "user",
@@ -211,6 +242,8 @@ export default class GameSocket {
     });
 
     socket.on("start", (laureate) => {
+      session.laureate = laureate;
+      session.save();
       const player = this.engine.newPlayer(socket, laureate);
 
       this._events.push({

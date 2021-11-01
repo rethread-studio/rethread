@@ -10,9 +10,15 @@ socket.on("gameStateUpdate", (data) => {
   gameState = data;
 });
 
+socket.on("question", ({ question, answer }) => {
+  const answerE = document.querySelector(".questionAnswer");
+  answerE.style = "display: none;";
+});
+
 socket.on("answer", ({ question, answer }) => {
-  const answerE = document.querySelector(".answer0");
-  answerE.innerHTML = "Wining!!";
+  const answerE = document.querySelector(".questionAnswer");
+  answerE.style = "display: block;";
+  answerE.innerHTML = `<div class="q">${question.text}</div><div class="a">${answer.text}</div>`;
 });
 
 const emotes = {};
@@ -64,7 +70,7 @@ function drawDialogue(players) {
         setup.unitSize
       );
       // Load an image of intrinsic size 300x227 in CSS pixels
-      imgs[player.laureate.dialogue].src = player.laureate.dialogue;
+      imgs[player.laureate.dialogue].src = "/img/dialogue.png";
       imgs[player.laureate.dialogue].onload = function () {
         if (player.inAnswer) {
           renderImage(
@@ -93,7 +99,7 @@ function drawPlayers(players) {
     if (emotes[player.id]) {
       size *= new Date().getTime() % 2 ? 1.5 : 1.2;
     }
-    if (imgs[player.laureate.img]) {
+    if (imgs[player.laureate.imagePath]) {
       const angle = getAngle(player.status);
       renderImage(
         player.x * setup.unitSize + setup.unitSize / 2,
@@ -102,13 +108,19 @@ function drawPlayers(players) {
         size,
         angle,
         scale,
-        imgs[player.laureate.img]
+        imgs[player.laureate.imagePath]
       );
     } else {
-      imgs[player.laureate.img] = new Image(setup.unitSize, setup.unitSize);
+      imgs[player.laureate.imagePath] = new Image(
+        setup.unitSize,
+        setup.unitSize
+      );
       // Load an image of intrinsic size 300x227 in CSS pixels
-      imgs[player.laureate.img].src = `${player.laureate.img}`;
-      imgs[player.laureate.img].onload = function () {
+      imgs[
+        player.laureate.imagePath
+      ].src = `/img/laureates/${player.laureate.imagePath}`;
+
+      imgs[player.laureate.imagePath].onload = function () {
         renderImage(
           player.x * setup.unitSize + setup.unitSize / 2,
           player.y * setup.unitSize + setup.unitSize / 2,
@@ -116,7 +128,7 @@ function drawPlayers(players) {
           size,
           0,
           scale,
-          imgs[player.laureate.img]
+          imgs[player.laureate.imagePath]
         );
       };
     }
@@ -172,7 +184,7 @@ function drawPlayersShadow(players) {
         setup.unitSize
       );
       // Load an image of intrinsic size 300x227 in CSS pixels
-      shadows[player.laureate.shadowImg].src = player.laureate.shadowImg;
+      shadows[player.laureate.shadowImg].src = "/img/laureateShadow.png";
       shadows[player.laureate.shadowImg].onload = function () {
         Object.keys(players).forEach((playerId) => {
           let player = players[playerId];
@@ -327,7 +339,7 @@ setInterval(() => {
 
 setInterval(() => {
   updateGameState();
-}, 60);
+}, 100);
 
 function updateGameState() {
   if (!gameState) gameState = {};

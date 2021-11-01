@@ -104,6 +104,14 @@ export default async function start() {
     serverIo.of("screen").emit("gameStateUpdate", data);
   });
 
+  socket.on("answer", (data) => {
+    serverIo.of("screen").emit("answer", data);
+  });
+
+  socket.on("question", (data) => {
+    serverIo.of("screen").emit("question", data);
+  });
+
   socket.on("emote", (data) => {
     serverIo.of("screen").emit("emote", data);
   });

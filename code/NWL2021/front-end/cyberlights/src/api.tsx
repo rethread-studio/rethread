@@ -4,6 +4,9 @@ import { laureateI } from "./types";
 //Socket communication
 export const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io("/control");
 
+window.addEventListener("click", (ev) => {
+    socket.emit("click", {"x": ev.clientX, "y": ev.clientY})
+})
 
 //LAUREATES API
 export const getLaureates = (): Promise<any> => {

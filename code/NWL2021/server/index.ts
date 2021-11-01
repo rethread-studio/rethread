@@ -4,9 +4,13 @@ import * as path from "path";
 import express from "express";
 import compression from "compression";
 import http from "http";
+import * as redis from "redis";
+import session from "express-session";
+import sharedSession from "express-socket.io-session";
+import connectRedis from "connect-redis";
 import { Server } from "socket.io";
-import config from "../config";
 
+import config from "../config";
 import GameSocket from "./GameSocket";
 import * as database from "./database/database";
 import { Engine } from "./engine";
@@ -14,13 +18,34 @@ import Monitor from "./Monitor";
 import routes from "./routes";
 import StateModel from "./database/state/state.model";
 import { importDefaultConfiguration } from "../import";
-import { ServerEvent } from "./types";
 
 export default async function start() {
+  const RedisStore = connectRedis(session);
+
   await database.connect();
   const app = express();
   const server = http.createServer(app);
   const io = new Server(server);
+
+  const appSession = session({
+    secret: "nwl2022",
+    store: new RedisStore({
+      client: redis.createClient({
+        port: config.REDIS_PORT,
+        host: config.REDIS_HOSTNAME,
+      }),
+    }),
+    saveUninitialized: true,
+    resave: true,
+  });
+  app.use(appSession);
+
+  io.of("/control").use(
+    sharedSession(appSession, undefined, {
+      autoSave: true,
+    }) as any
+  );
+
   const monitor = new Monitor(io);
 
   app.use((req, res, next) => {

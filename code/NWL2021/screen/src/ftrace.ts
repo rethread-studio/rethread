@@ -70,9 +70,9 @@ export default class FTrace {
 
       if (new Date().getTime() - lastDate.getTime() >= 1000) {
         lastDate = new Date();
-        console.log(
-          `Events per second: ${numEventsPerSecond}/s (events: ${totalNumEvents})`
-        );
+        // console.log(
+        //   `Events per second: ${numEventsPerSecond}/s (events: ${totalNumEvents})`
+        // );
         numEventsPerSecond = 0;
       }
     }

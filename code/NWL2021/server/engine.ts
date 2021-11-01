@@ -16,7 +16,7 @@ class Events {
   exitAnswer = new SubEvent<{ answer: IAnswer; player: Player }>();
   answer = new SubEvent<IAnswer>();
   playerMove = new SubEvent<Player>();
-  playerLeave = new SubEvent<Player>();
+  playerLeave = new SubEvent<string>();
   newQuestion = new SubEvent<IQuestion>();
   state = new SubEvent<IStateDocument>();
   status = new SubEvent<GameStatus>();
@@ -40,22 +40,17 @@ export class Engine {
     this._players = {};
 
     const questionInterval = setInterval(() => {
-      let answerScore = {};
-
       for (const socketID of Object.keys(this.players)) {
         const player = this.players[socketID];
-        if (!player.inAnswer) continue;
         const { inAnswer, answer } = this._isInAnswer(player);
-        answerScore[answer.text]++;
+        if (!inAnswer) continue;
         this._events.userAnswer.emit({ answer, player });
       }
 
-      const selectedAnswer = this.currentQuestion.answers
-        .filter((f) => answerScore[f.text])
-        .sort((a, b) => answerScore[a.text] - answerScore[b.text]);
-      if (selectedAnswer.length > 0) {
-        this._events.answer.emit(selectedAnswer[0]);
-      }
+      const selectedAnswer = this.currentQuestion.answers.filter(
+        (f) => f.isCorrect
+      );
+      this._events.answer.emit(selectedAnswer[0]);
 
       setTimeout(() => {
         const newQuestion = this.chooseQuestionRandomly();
@@ -67,7 +62,7 @@ export class Engine {
           const { inAnswer, answer } = this._isInAnswer(player);
           this._events.enterAnswer.emit({ answer, player });
         }
-      }, 3000);
+      }, config.ANSWER_DURATION);
     }, config.QUESTION_INTERVAL * 1000);
   }
 
@@ -165,7 +160,7 @@ export class Engine {
   }
 
   removePlayer(id: string) {
-    this._events.playerLeave.emit(this._players[id]);
+    this._events.playerLeave.emit(id);
     delete this._players[id];
   }
 

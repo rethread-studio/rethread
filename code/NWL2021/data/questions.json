@@ -1,34 +1,468 @@
 [
   {
-    "_id": "615ee06b28f1bb00b8c4c90f",
-    "text": "Did Alan Turing win a Nobel prize?",
+    "text": "Did Bill Gates win a Nobel prize?",
     "answers": [
       {
         "text": "Yes",
-        "isCorrect": false,
-        "_id": "615ee06b28f1bb00b8c4c910"
+        "isCorrect": false
       },
       {
         "text": "No",
-        "isCorrect": true,
-        "_id": "615ee06b28f1bb00b8c4c911"
+        "isCorrect": true
       }
     ]
   },
   {
-    "_id": "615ee06b28f1bb00b8c4c912",
-    "text": "How many Nobel prizes have been given?",
+    "text": "How many Nobel prizes have been awarded?",
     "answers": [
       {
-        "text": "100",
-        "isCorrect": false,
-        "_id": "615ee06b28f1bb00b8c4c913"
+        "text": "718",
+        "isCorrect": false
       },
       {
-        "text": "200",
-        "isCorrect": true,
-        "_id": "615ee06b28f1bb00b8c4c914"
+        "text": "892",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Neon is present in the Earth's atmosphere",
+    "type": "misc",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Three computers run 24/7 to deliver cyber|glow",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King was a pastor in",
+    "answers": [
+      {
+        "text": "California",
+        "isCorrect": false
+      },
+      {
+        "text": "Alabama",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King received a Nobel Prize at",
+    "answers": [
+      {
+        "text": "45",
+        "isCorrect": false
+      },
+      {
+        "text": "35",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "The march on Washington, D.C. gathered 500.000 persons",
+    "answers": [
+      {
+        "text": "yes",
+        "isCorrect": false
+      },
+      {
+        "text": "no",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King led a bus boycott in",
+    "answers": [
+      {
+        "text": "Atlanta",
+        "isCorrect": false
+      },
+      {
+        "text": "Montgomery",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Martin Luther King have a dream",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King was the youngest man to receive a Nobel Prize",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Martin Luther King was born in ",
+    "answers": [
+      {
+        "text": "1939",
+        "isCorrect": false
+      },
+      {
+        "text": "1929",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Margaret Hamilton programmed the flight controller for Apollo 11",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "The number of employees at Microsoft is",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "60000",
+        "isCorrect": false
+      },
+      {
+        "text": "182000",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Toni Morrison was a ",
+    "answers": [
+      {
+        "text": "dancer",
+        "isCorrect": false
+      },
+      {
+        "text": "writer",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "WASP supports research for ",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "agriculture",
+        "isCorrect": false
+      },
+      {
+        "text": "AI, software and automatic control",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Toni Morrison graduated in  ",
+    "answers": [
+      {
+        "text": "American Comics",
+        "isCorrect": false
+      },
+      {
+        "text": "American Literature",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "In Beloved, the daughter returns as a  ",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "cat",
+        "isCorrect": false
+      },
+      {
+        "text": "ghost",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Beloved was followed by a novel called ",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "Blues",
+        "isCorrect": false
+      },
+      {
+        "text": "Jazz",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "The main character of the screen adaptation of Beloved was played by ",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "Jennifer Hudson",
+        "isCorrect": false
+      },
+      {
+        "text": "Oprah Winfrey",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "In her Nobel lecture, Toni Morrison talked about a",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "marathon man",
+        "isCorrect": false
+      },
+      {
+        "text": "blind man",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Toni Morrison received a National Book Award for Beloved",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "yes",
+        "isCorrect": false
+      },
+      {
+        "text": "no",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Toni Morrison was the first black woman of any nationality to win the Nobel prize",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": false
+      },
+      {
+        "text": "yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "The main character of Beloved is inspired by the real life of",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "Isabella Greenway",
+        "isCorrect": false
+      },
+      {
+        "text": "Margaret Garner",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Who was the first woman to receive a Nobel Prize in Literature?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "Selma Lagerlöf",
+        "isCorrect": true
+      },
+      {
+        "text": "Grazia Deledda",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How old was Selma Lagerlöf when she published her first novel?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "33",
+        "isCorrect": true
+      },
+      {
+        "text": "19",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which of these Nobel Laureates has had a crater on Venus named after them?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "Selma Lagerlöf",
+        "isCorrect": true
+      },
+      {
+        "text": "Rita Levi-Montalcini",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What was the value of the Swedish bank note featuring Selma Lagerlöf?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "20 kr",
+        "isCorrect": true
+      },
+      {
+        "text": "100 kr",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who was the first woman to be elected into the Swedish Academy?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "Selma Lagerlöf",
+        "isCorrect": true
+      },
+      {
+        "text": "Elin Wägner",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Mother Teresa was born in",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "Skopje",
+        "isCorrect": true
+      },
+      {
+        "text": "Calcutta",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Mother Teresa operated missions in",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "the whole World",
+        "isCorrect": true
+      },
+      {
+        "text": "India",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Mother Teresa workde in",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "the slums",
+        "isCorrect": true
+      },
+      {
+        "text": "a convent",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Shanti Nagar means",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "City of Peace",
+        "isCorrect": true
+      },
+      {
+        "text": "Children's Home",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "In 1997 how many sisters worked with Mother Teresa",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "4000",
+        "isCorrect": true
+      },
+      {
+        "text": "40000",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Both Mother Teresa's miracles are related to healing",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "true",
+        "isCorrect": true
+      },
+      {
+        "text": "false",
+        "isCorrect": false
       }
     ]
   }
+
 ]
