@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getIcon, getFlag } from "../utils";
 
 
-export const CharacterCard = ({ laureate }: React.PropsWithChildren<characterCardProps>) => {
+export const CharacterCard = ({ laureate, color }: React.PropsWithChildren<characterCardProps>) => {
     const categories: JSX.Element[] = laureate.prizes
         .map((p: prize) => <p key={uuidv4()}>{p.category} - {p.year}</p>)
 
@@ -22,11 +22,11 @@ export const CharacterCard = ({ laureate }: React.PropsWithChildren<characterCar
                     `0 0 4px #fff,
                 0 0 11px #fff,
                 0 0 19px #fff,
-                0 0 40px ${laureate.color},
-                0 0 80px ${laureate.color},
-                0 0 90px ${laureate.color},
-                0 0 100px ${laureate.color},
-                0 0 150px ${laureate.color}`
+                0 0 40px ${color},
+                0 0 80px ${color},
+                0 0 90px ${color},
+                0 0 100px ${color},
+                0 0 150px ${color}`
             }} className={`text-center pt-4 pb-2 px-4 font-light ${fullName.length >= 14 ? "text-2xl" : "text-2xl"}`}>{`${fullName}`}</h2>
             <div className="flex flex row place-items-center place-content-center gap-6 p-4">
                 <img className="w-10 h-10 render-optimize" src={iconLocation} alt={fullName} />

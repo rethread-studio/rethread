@@ -86,7 +86,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                         {characters.map((c: laureateI) => {
                             return (
                                 <SwiperSlide key={uuidv4()} >
-                                    <CharacterCard key={uuidv4()} laureate={c} />
+                                    <CharacterCard key={uuidv4()} laureate={c} color={color} />
                                 </SwiperSlide>
                             )
                         })}

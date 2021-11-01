@@ -54,7 +54,8 @@ export interface selectCharacterProps {
 }
 
 export interface characterCardProps {
-    laureate: laureateI
+    laureate: laureateI,
+    color: string
 }
 
 export type controllDirection = "up" | "down" | "left" | "right" | "void";
