@@ -8,6 +8,7 @@ const ctx = canvas.getContext("2d");
 
 socket.on("gameStateUpdate", (data) => {
   gameState = data;
+  updateGameState();
 });
 
 socket.on("question", ({ question, answer }) => {
@@ -214,12 +215,12 @@ function drawPlayersShadow(players) {
 
 function drawPreviousPosition(players) {
   if (!players) return;
-  // draw players
   Object.keys(players).forEach((playerId) => {
     let player = players[playerId];
     let positions = player.previousPositions;
     if (positions.length == 0) return;
 
+    //DRAW LINE PATH
     ctx.beginPath();
     ctx.lineWidth = !gameCycle ? "4" : "2";
     ctx.strokeStyle = player.laureate.color;
@@ -239,6 +240,7 @@ function drawPreviousPosition(players) {
     );
     ctx.stroke();
 
+    //DRAW PREVIOUS POSITION POINTS
     for (let i = 0; i < positions.length; i++) {
       ctx.fillStyle = player.laureate.color;
       ctx.beginPath();
@@ -258,26 +260,31 @@ function drawQuestion(question) {
   if (!question) return;
   const questionE = document.querySelector(".question");
   questionE.innerHTML = question.text;
-  questionE.style = `top: ${
-    setup.questionPosition.y * setup.unitSize
-  }px;left: ${setup.questionPosition.x * setup.unitSize}px; width: ${
-    (setup.questionPosition.width + 1) * setup.unitSize
-  }px; height: ${(setup.questionPosition.height + 1) * setup.unitSize}px`;
-  //DRAW DECORATION
-  ctx.beginPath();
-  ctx.lineWidth = gameCycle ? "4" : "1";
-  ctx.strokeStyle = "white";
-  ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-  ctx.rect(
-    setup.questionPosition.x * setup.unitSize,
-    setup.questionPosition.y * setup.unitSize,
-    (setup.questionPosition.width + 1) * setup.unitSize,
-    (setup.questionPosition.height + 1) * setup.unitSize
-  );
-  ctx.fill();
-  ctx.stroke();
+  questionE.style = `top: ${setup.questionPosition.y * setup.unitSize
+    }px;`;
+  //draw the mid point
+  for (let i = 0; i < setup.questionPosition.width + 1; i++) {
+    for (let j = 0; j < setup.questionPosition.height + 1; j++) {
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      ctx.arc(
+        setup.questionPosition.x * setup.unitSize + setup.unitSize * i + setup.unitSize / 2,
+        setup.questionPosition.y * setup.unitSize + setup.unitSize * j + setup.unitSize / 2,
+        gameCycle ? "2" : "4",
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+    }
+  }
+}
 
-  // draw ANSWERS
+function drawAnswers(question) {
+  if (!question) return;
+
+  const questionE = document.querySelector(".question");
+  questionE.innerHTML = "";
+
   for (let i = 0; i < question.answers.length; i++) {
     const answer = question.answers[i];
     const position = setup.answersPositions[i];
@@ -285,26 +292,10 @@ function drawQuestion(question) {
     const answerE = document.querySelector(".answer" + (i + 1));
     answerE.innerHTML = answer.text;
 
-    answerE.style = `top: ${position.y * setup.unitSize}px;left: ${
-      position.x * setup.unitSize
-    }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${
-      (position.height + 1) * setup.unitSize
-    }px`;
+    answerE.style = `top: ${position.y * setup.unitSize}px;left: ${position.x * setup.unitSize
+      }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${(position.height + 1) * setup.unitSize
+      }px`;
 
-    // if (gameCycle) {
-    //   if (i % 2 == 0) {
-    //     answerE.classList.remove("text-neon")
-    //   } else {
-    //     answerE.classList.add("text-neon")
-    //   }
-    //   //add new
-    // } else {
-    //   if (i % 2 == 0) {
-    //     answerE.classList.add("text-neon")
-    //   } else {
-    //     answerE.classList.remove("text-neon")
-    //   }
-    // }
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
       for (let j = 0; j < position.height + 1; j++) {
@@ -323,6 +314,13 @@ function drawQuestion(question) {
   }
 }
 
+function hideAnswers() {
+  const answerE1 = document.querySelector(".answer1");
+  const answerE2 = document.querySelector(".answer2");
+  answerE1.style.visibility = 'hidden';
+  answerE2.style.visibility = 'hidden';
+}
+
 function getCBoardClass() {
   return gameCycle ? "chess1" : "chess2";
 }
@@ -339,13 +337,46 @@ setInterval(() => {
 
 setInterval(() => {
   updateGameState();
-}, 100);
+}, 1000);
 
 function updateGameState() {
   if (!gameState) gameState = {};
+  //clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBoard();
-  drawQuestion(gameState.question);
+  //render status
+  // const status = gameState.status;
+  const status = "question";
+  switch (status) {
+    case "demo":
+      renderDemo();
+      break;
+    case "play":
+      renderGame();
+      break;
+    case "question":
+      hideAnswers();
+      drawQuestion(gameState.question);
+      break;
+    case "result":
+      renderResult();
+      break;
+    default:
+      renderDemo();
+      break;
+  }
+}
+
+function renderResult() {
+  console.log("render result")
+}
+
+
+function renderDemo() {
+  console.log("render demo")
+}
+
+function renderGame() {
+  drawAnswers(gameState.question);
   drawPlayersShadow(gameState.players);
   drawPreviousPosition(gameState.players);
   drawPlayers(gameState.players);

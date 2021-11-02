@@ -71,8 +71,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                             const { realIndex, } = SwiperCore;
                             setCharacterIndex(realIndex);
                             setCharacterPrizes(characters[realIndex].prizes);
-                            const keyCategory: string = characters[realIndex].prizes.length > 1 ? "special" : characters[realIndex].prizes[0].category as string;
-                            selectColor(categoryColor[keyCategory]);
+                            selectColor(characters[realIndex].color);
                         }}
                         navigation={{
                             prevEl: '.prev',

@@ -1,8 +1,8 @@
-import { laureateI, colorOption, tCategoryColor } from './types';
+import { laureateI, tCategoryColor } from './types';
 
-const colors: colorOption[] = ["neonyellow", "neongreen", "neonindigo", "neonpink", " neonred"]
 export const dataToLaurates = (l: any, i: number): laureateI => {
-    l.color = colors[i % (colors.length - 1)];
+    const keyCategory: string = l.prizes.length > 1 ? "special" : l.prizes[0].category as string;
+    l.color = categoryColor[keyCategory];
     return l as laureateI
 }
 

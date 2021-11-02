@@ -24,19 +24,16 @@ body {
 
 .question {
   position: absolute;
-  background: rgba(0, 0, 0, 0.1);
-  /* box-shadow: inset 0 0 0 3px white; */
   width: 594px;
   height: 94px;
   left: calc(50% - 300px);
   top: 300px;
   color: white;
   text-align: center;
-  line-height: 50px;
-  font-size: 36px;
+  line-height: 90px;
+  font-size: 72px;
   text-transform: uppercase;
-  /* animation: pulsate 0.11s ease-in-out infinite alternate; */
-
+  animation: pulsate 0.11s ease-in-out infinite alternate;
   padding: 0 0.025em;
   display: flex;
   flex-direction: column;

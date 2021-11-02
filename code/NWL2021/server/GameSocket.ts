@@ -108,6 +108,7 @@ export default class GameSocket {
     let target = this.io.of("screen");
     if (opt?.socket) target = opt.socket;
     target.emit("gameStateUpdate", {
+      status: this.engine.status,
       players: Object.values(this.engine.players).map((p) => {
         return {
           id: p.socket.id,
