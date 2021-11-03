@@ -109,8 +109,8 @@ body {
 .text-neon {
   color: white;
   font-weight: 300;
-  /* text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px #f09,
-    0 0 80px #f09, 0 0 90px #f09, 0 0 100px #f09, 0 0 150px #f09; */
+  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px #f09,
+    0 0 80px #f09, 0 0 90px #f09, 0 0 100px #f09, 0 0 150px #f09;
 }
 
 @keyframes pulsate {
@@ -173,8 +173,8 @@ body {
 }
 
 .green-neon {
-  /* text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px var(--neon-green),
-    0 0 80px var(--neon-green), 0 0 90px var(--neon-green), 0 0 100px var(--neon-green), 0 0 150px var(--neon-green); */
+  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px var(--neon-green),
+    0 0 80px var(--neon-green), 0 0 90px var(--neon-green), 0 0 100px var(--neon-green), 0 0 150px var(--neon-green);
 }
 
 .demo{
@@ -227,7 +227,7 @@ body {
 
 .text-neon-yellow{
   color:white;
-  /* text-shadow:
+  text-shadow:
   0 0 4px #fff,
   0 0 11px #fff,
   0 0 19px #fff,
@@ -235,6 +235,6 @@ body {
   0 0 80px #F6D465,
   0 0 90px #F6D465,
   0 0 100px #F6D465,
-  0 0 150px #F6D465; */
-   /* animation: pulsate 0.11s ease-in-out infinite alternate; */
+  0 0 150px #F6D465; 
+   /* /* animation: pulsate 0.11s ease-in-out infinite alternate; */
 }
