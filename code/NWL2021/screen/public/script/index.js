@@ -291,10 +291,9 @@ function drawAnswers(question) {
 
     const answerE = document.querySelector(".answer" + (i + 1));
     answerE.innerHTML = answer.text;
-
     answerE.style = `top: ${position.y * setup.unitSize}px;left: ${position.x * setup.unitSize
       }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${(position.height + 1) * setup.unitSize
-      }px`;
+      }px; font-size: ${answer.text.length < 8 ? " 72px;" : " 42px;"}`;
 
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
@@ -436,6 +435,7 @@ function renderDemo() {
 
 function renderGame() {
   drawAnswers(gameState.question);
+  drawQuestion(gameState.question);
   drawPlayersShadow(gameState.players);
   drawPreviousPosition(gameState.players);
   drawPlayers(gameState.players);

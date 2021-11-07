@@ -2,6 +2,8 @@
   /* Set neon color */
   --neon-green: #73F54B;
   --neon-pink: #F6D465;
+  --neon-blue: #C4FFFF;
+  --neon-purple: #7325F0;
   --tw-space-x-reverse: 0;
   --tw-space-y-reverse: 0;
 }
@@ -38,8 +40,8 @@ body {
   top: 300px;
   color: white;
   text-align: center;
-  line-height: 90px;
-  font-size: 72px;
+  /* line-height: 90px; */
+  font-size: 36px;
   text-transform: uppercase;
   /* animation: pulsate 0.11s ease-in-out infinite alternate; */
   padding: 0 0.025em;
@@ -49,7 +51,7 @@ body {
   align-content: center;
   font-weight: 300;
   letter-spacing: 0.025em;
-}
+} 
 .questionAnswer {
   position: absolute;
   background-color: #202936;
@@ -84,7 +86,7 @@ body {
   height: 100px;
   text-align: center;
   line-height: 50px;
-  font-size: 96px;
+  font-size: 42px;
   text-transform: uppercase;
 
   display: flex;
@@ -94,7 +96,7 @@ body {
 
   /* animation: pulsate 0.11s ease-in-out infinite alternate; */
   color: #07080a;
-  font-weight: 600;
+  font-weight: 300;
   letter-spacing: 0.05em;
 }
 .answer1 {
@@ -236,5 +238,19 @@ body {
   0 0 90px #F6D465,
   0 0 100px #F6D465,
   0 0 150px #F6D465; 
+   /* /* animation: pulsate 0.11s ease-in-out infinite alternate; */
+}
+
+.text-neon-blue{
+  color:white;
+  text-shadow:
+  0 0 4px #fff,
+  0 0 11px #fff,
+  0 0 19px #fff,
+  0 0 40px var(--neon-blue),
+  0 0 80px var(--neon-blue),
+  0 0 90px var(--neon-blue),
+  0 0 100px var(--neon-blue),
+  0 0 150px var(--neon-blue); 
    /* /* animation: pulsate 0.11s ease-in-out infinite alternate; */
 }

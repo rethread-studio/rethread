@@ -115,20 +115,20 @@ export class Engine {
     if (position.y < 0 || position.y >= this._state.height) {
       return false;
     }
-    //CHECK IF IT COLLIDES WITH QUESTION
-    // if (
-    //   position.y >= this.state.questionPosition.y &&
-    //   position.y <=
-    //   this.state.questionPosition.y + this.state.questionPosition.height
-    // ) {
-    //   if (
-    //     position.x >= this.state.questionPosition.x &&
-    //     position.x <=
-    //     this.state.questionPosition.x + this.state.questionPosition.width
-    //   ) {
-    //     return false;
-    //   }
-    // }
+
+    if (
+      position.y >= this.state.questionPosition.y &&
+      position.y <=
+      this.state.questionPosition.y + this.state.questionPosition.height
+    ) {
+      if (
+        position.x >= this.state.questionPosition.x &&
+        position.x <=
+        this.state.questionPosition.x + this.state.questionPosition.width
+      ) {
+        return false;
+      }
+    }
 
     for (const wall of this._state.walls) {
       if (position.y >= wall.y && position.y <= wall.y + wall.height) {
