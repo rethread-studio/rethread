@@ -46,6 +46,7 @@ export default async function start() {
 
   let setup: IState = null;
   let gameState: GameState = null;
+  let question = null;
 
   osc.open((port) => {
     console.log("OSC server started on port: " + port);
@@ -89,6 +90,8 @@ export default async function start() {
   serverIo.of("screen").on("connection", (socket) => {
     console.log("Screen connected");
     if (setup) socket.emit("setup", setup);
+    if (gameState) socket.emit("gameStateUpdate", gameState);
+    if (question) socket.emit("question", question);
     socket.on("disconnect", function () {
       console.log("Screen disconnected");
     });
@@ -109,6 +112,7 @@ export default async function start() {
   });
 
   socket.on("question", (data) => {
+    question = data;
     serverIo.of("screen").emit("question", data);
   });
 
@@ -119,10 +123,10 @@ export default async function start() {
   server.listen(config.SCREEN_PORT);
   console.log("Screen server started on port: " + config.SCREEN_PORT);
 
-  const ftrace = new FTrace(["tcp", "random", "syscalls"]);
-  await ftrace.init();
-  await ftrace.start();
-  ftrace.readTrace();
+  // const ftrace = new FTrace(["tcp", "random", "syscalls"]);
+  // await ftrace.init();
+  // await ftrace.start();
+  // ftrace.readTrace();
 }
 
 start();

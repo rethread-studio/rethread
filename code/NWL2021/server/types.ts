@@ -74,9 +74,3 @@ type playerStatus =
   | "win"
   | "lose"
   | "idle";
-
-export type GameStatus =
-  | "demo"
-  | "showQuestion"
-  | "pickAnswer"
-  | "showResult";
