@@ -34,7 +34,7 @@ export const CharacterCard = ({ laureate, color }: React.PropsWithChildren<chara
                     Nobel price
                     <div className="text-sm font-thin">{categories}</div>
                 </div>
-                <img className="w-10 h-10" src={getFlag(laureate.bornCountry)} alt={laureate.bornCountry} />
+                <img className="w-10 h-auto" src={getFlag(laureate.bornCountry)} alt={laureate.bornCountry} />
             </div>
         </>
     )

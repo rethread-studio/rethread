@@ -41,9 +41,23 @@ export const getFlag = (country: string): string => {
         case "Italy":
             return "flag-italy.png"
         case "Russian Empire (now Poland)":
-            return "flag-polonia.png"
+            return "flag-poland.png"
         case "USA":
-            return "flag-usa.png"
+            return "flag-usa.png";
+        case "Tibet (now China)":
+            return "flag-china.png";
+        case "Ottoman Empire (now North Macedonia)":
+            return "flag-macedonia.png";
+        case "Pakistan":
+            return "flag-pakistan.png";
+        case "Scotland":
+            return "flag-scotland.png";
+        case "Germany":
+            return "flag-germany.png";
+        case "Sweden":
+            return "flag-sweden.png";
+        case "Prussia (now Germany)":
+            return "flag-germany.png";
         default:
             return "flag-usa.png"
     }
