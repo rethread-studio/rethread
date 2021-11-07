@@ -85,7 +85,7 @@ body {
   width: 200px;
   height: 100px;
   text-align: center;
-  line-height: 50px;
+  /* line-height: 50px; */
   font-size: 42px;
   text-transform: uppercase;
 
