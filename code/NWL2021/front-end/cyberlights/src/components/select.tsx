@@ -63,7 +63,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                     </div>
 
                     <Swiper
-                        initialSlide={Math.random() * characters.length}
+                        initialSlide={0}
                         loop={true}
                         spaceBetween={50}
                         slidesPerView={1}
