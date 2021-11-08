@@ -1,6 +1,8 @@
+import mongoose from "mongoose";
 import { Namespace, Server, Socket } from "socket.io";
 import config from "../config";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
+import UserModel from "./database/users/users.model";
 import { Engine } from "./engine";
 import Monitor from "./Monitor";
 import { MonitoringEvent, Player, UserEvent } from "./types";
@@ -16,7 +18,9 @@ export default class GameSocket {
   ) {
     io.of("screen").on("connection", (socket) => this._screenConnect(socket));
     io.of("control").on("connection", (socket) => this._controlConnect(socket));
-    io.of("control").on("disconnect", (socket) => this._controlDisconnect(socket));
+    io.of("control").on("disconnect", (socket) =>
+      this._controlDisconnect(socket)
+    );
 
     this.subscribe();
   }
@@ -132,17 +136,23 @@ export default class GameSocket {
 
   emitQuestion(questionEvent) {
     this.io.of("control").emit("question", questionEvent.question.text);
-    this.io
-      .of("screen")
-      .emit("question", {
-        question: questionEvent.question,
-        endDate: questionEvent.endDate,
-      });
+    this.io.of("screen").emit("question", {
+      question: questionEvent.question,
+      endDate: questionEvent.endDate,
+    });
   }
 
   emitResult(answer: IAnswer, player?: Player) {
     let target: Namespace | Socket = this.io.of("screen");
     if (player?.socket) target = player.socket;
+
+    if (player) {
+      const session: any = (player?.socket as any).session;
+      UserModel.findByIdAndUpdate(session.userID, {
+        $inc: { "events.answer": 1 },
+      }).then(() => {}, console.error);
+    }
+
     target.emit("answer", {
       question: this.engine.currentQuestion,
       answer: answer,
@@ -151,6 +161,12 @@ export default class GameSocket {
 
   emitEnterAnswer(answer: IAnswer, player: Player) {
     const target = player.socket;
+
+    const session: any = (target.handshake as any).session;
+    UserModel.findByIdAndUpdate(session.userID, {
+      $inc: { "events.enterAnswer": 1 },
+    }).then(() => {}, console.error);
+
     this._events.push({
       origin: "user",
       action: "enterAnswer",
@@ -164,6 +180,12 @@ export default class GameSocket {
 
   emitExitAnswer(answer: IAnswer, player: Player) {
     const target = player.socket;
+
+    const session: any = (target.handshake as any).session;
+    UserModel.findByIdAndUpdate(session.userID, {
+      $inc: { "events.exitAnswer": 1 },
+    }).then(() => {}, console.error);
+
     this._events.push({
       origin: "user",
       action: "exitAnswer",
@@ -178,11 +200,10 @@ export default class GameSocket {
     console.log("Screen server connect");
     this.emitUpdates({ socket });
     this.emitSetup({ socket });
-    socket
-      .emit("question", {
-        question: this.engine.currentQuestion,
-        endDate: this.engine.questionEndDate,
-      });
+    socket.emit("question", {
+      question: this.engine.currentQuestion,
+      endDate: this.engine.questionEndDate,
+    });
 
     socket.on("disconnect", () => this._screenDisconnect(socket));
   }
@@ -191,18 +212,34 @@ export default class GameSocket {
     console.log("Screen disconnected");
   }
 
-  private _controlConnect(socket: Socket) {
+  private async _controlConnect(socket: Socket) {
     const gameSocket = this;
     const session: any = (socket.handshake as any).session;
+    let isNew = false;
+    if (session.userID) {
+      const user = await UserModel.findById(session.userID);
+      if (!user) {
+        const user = new UserModel({
+          _id: new mongoose.Types.ObjectId(session.userID),
+        });
+        await user.save();
+      }
+    }
+    if (!session?.userID) {
+      isNew = true;
+      const user = new UserModel({ _id: new mongoose.Types.ObjectId() });
+      session.userID = user._id;
+      await Promise.all([session.save(), user.save()]);
+    }
     socket.emit("welcome", session?.laureate);
-    console.log("User connected: ", socket.id);
+    console.log(`[USER ${session.userID}] connected (isNew: ${isNew})`);
 
     let disconnectTimeout;
 
     function ping() {
       clearTimeout(disconnectTimeout);
       disconnectTimeout = setTimeout(() => {
-        console.log("inactive");
+        console.log(`[USER ${session.userID}] Inactive`);
         socket.emit("leave");
         gameSocket._controlDisconnect(socket);
       }, config.INACTIVITY_TIME * 1000);
@@ -218,6 +255,10 @@ export default class GameSocket {
     socket.on("disconnect", () => this._controlDisconnect(socket));
 
     socket.on("click", (event) => {
+      UserModel.findByIdAndUpdate(session.userID, {
+        $inc: { "events.click": 1 },
+      }).then(() => {}, console.error);
+
       this.monitor.send({
         origin: "user",
         action: "click",
@@ -233,6 +274,11 @@ export default class GameSocket {
     socket.on("leave", () => {
       session.laureate = null;
       session.save();
+
+      UserModel.findByIdAndUpdate(session.userID, {
+        $inc: { "events.leave": 1 },
+      }).then(() => {}, console.error);
+
       this.engine.removePlayer(socket.id);
       this._events.push({
         origin: "user",
@@ -242,6 +288,10 @@ export default class GameSocket {
     });
 
     socket.on("emote", () => {
+      UserModel.findByIdAndUpdate(session.userID, {
+        $inc: { "events.emote": 1 },
+      }).then(() => {}, console.error);
+
       this._hasChange = true;
       this.io.of("screen").emit("emote", socket.id);
       this._events.push({
@@ -256,6 +306,10 @@ export default class GameSocket {
       session.save();
       const player = this.engine.newPlayer(socket, laureate);
 
+      UserModel.findByIdAndUpdate(session.userID, {
+        $inc: { "events.play": 1 },
+      }).then(() => {}, console.error);
+
       this._events.push({
         origin: "user",
         action: "start",
@@ -268,21 +322,41 @@ export default class GameSocket {
 
       socket.on("up", () => {
         if (this._movedUsers.has(socket.id)) return;
+
+        UserModel.findByIdAndUpdate(session.userID, {
+          $inc: { "events.up": 1 },
+        }).then(() => {}, console.error);
+
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: -1 });
       });
       socket.on("down", () => {
         if (this._movedUsers.has(socket.id)) return;
+
+        UserModel.findByIdAndUpdate(session.userID, {
+          $inc: { "events.down": 1 },
+        }).then(() => {}, console.error);
+
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: 1 });
       });
       socket.on("left", () => {
         if (this._movedUsers.has(socket.id)) return;
+
+        UserModel.findByIdAndUpdate(session.userID, {
+          $inc: { "events.left": 1 },
+        }).then(() => {}, console.error);
+
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: -1, y: 0 });
       });
       socket.on("right", () => {
         if (this._movedUsers.has(socket.id)) return;
+
+        UserModel.findByIdAndUpdate(session.userID, {
+          $inc: { "events.right": 1 },
+        }).then(() => {}, console.error);
+
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 1, y: 0 });
       });

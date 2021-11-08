@@ -18,6 +18,7 @@ import Monitor from "./Monitor";
 import routes from "./routes";
 import StateModel from "./database/state/state.model";
 import { importDefaultConfiguration } from "../import";
+import UserModel from "./database/users/users.model";
 
 export default async function start() {
   const RedisStore = connectRedis(session);
@@ -37,6 +38,7 @@ export default async function start() {
     }),
     saveUninitialized: true,
     resave: true,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 },
   });
   app.use(appSession);
 
@@ -49,6 +51,17 @@ export default async function start() {
   const monitor = new Monitor(io);
 
   app.use((req, res, next) => {
+    const session: any = req.session;
+    if (session.userID) {
+      const action =
+        "events." + (req.url.indexOf("/api/") != -1 ? "api" : "file");
+      const query = {};
+      query[action] = 1;
+      UserModel.findByIdAndUpdate(session.userID, {
+        $inc: query,
+      }).then(() => {}, console.error);
+    }
+
     monitor.send({
       origin: "server",
       action: req.url.indexOf("/api/") != -1 ? "api" : "file",
@@ -64,6 +77,7 @@ export default async function start() {
   app.set("etag", "strong");
 
   app.use("/api", routes.laureates);
+  app.use("/api/users", routes.user);
 
   app.use(
     "/admin/",
