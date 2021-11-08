@@ -571,10 +571,10 @@ function renderDemo() {
 function renderGame() {
   drawPlayersShadow(gameState.players);
   drawPreviousPosition(gameState.players);
-  drawPlayers(gameState.players);
-  drawDialogue(gameState.players);
   drawAnswers(gameState.question);
   drawQuestion(gameState.question);
+  drawPlayers(gameState.players);
+  drawDialogue(gameState.players);
 }
 
 function start(s) {
