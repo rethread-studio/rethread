@@ -43,6 +43,7 @@ socket.on("question", (question) => {
 
 socket.on("answer", ({ question, answer }) => {
   gamePage = "result";
+  updateGamePage(gameState);
   updateGameState();
 });
 
@@ -317,12 +318,11 @@ function updateAnswer(question) {
     const answerE = document.querySelector(".answer" + (i + 1));
     answerE.innerHTML = answer.text;
 
-
     answerE.style.top = `${position.y * setup.unitSize}px`;
     answerE.style.left = `${position.x * setup.unitSize}px`;
     answerE.style.width = `${(position.width + 1) * setup.unitSize}px`;
     answerE.style.height = `${(position.height + 1) * setup.unitSize}px`;
-    answerE.style.fontSize = answer.text.length < 8 ? " 72px;" : " 42px"
+    answerE.style.fontSize = answer.text.length < 8 ? " 72px;" : " 42px";
   }
 }
 
@@ -359,17 +359,17 @@ function showAnswers(_show) {
 
 function showResults(_show) {
   const results = document.querySelector(".result");
-  results.style.display = _show ? "block" : "none";
+  results.style.display = _show ? null : "none";
 }
 
 function showQuestion(_show) {
   const results = document.querySelector(".question");
-  results.style.display = _show ? "block" : "none";
+  results.style.display = _show ? null : "none";
 }
 
 function showDemo(_show) {
   const results = document.querySelector(".demo");
-  results.style.display = _show ? "flex" : "none";
+  results.style.display = _show ? null : "none";
 }
 
 function getCBoardClass() {

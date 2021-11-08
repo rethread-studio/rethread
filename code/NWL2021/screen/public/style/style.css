@@ -190,7 +190,7 @@ body {
   color: white;
   justify-items: center;
   place-content: center;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   text-align: center;
 }
 .demo .sub {
