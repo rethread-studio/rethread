@@ -12,6 +12,7 @@ const config = {
 };
 
 let gamePage = "demo";
+let demoInterval = null;
 function updateGamePage(gameState) {
   if (
     gameState == null ||
@@ -19,13 +20,25 @@ function updateGamePage(gameState) {
     gameState.players.length == 0
   ) {
     gamePage = "demo";
+    if (demoInterval == null) demoInterval = setInterval(runDemoEngine, 1000, dummyGameState);
   } else {
     if (gamePage == "result" || gamePage == "question") {
+      clearInterval(demoInterval);
+      demoInterval = null;
       return;
     }
     gamePage = "play";
+    clearInterval(demoInterval);
+    demoInterval = null;
   }
 }
+
+function runDemoEngine(gameState) {
+  for (const player of gameState.players) {
+    moveDummyPlayer(player);
+  }
+}
+
 
 socket.on("gameStateUpdate", (data) => {
   if (gameState == null) {
@@ -53,7 +66,7 @@ socket.on("question", ({ question, endDate }) => {
     const time = new Date(endDate) - new Date().getTime();
     document.querySelector(".timer").innerHTML = Math.round(time / 1000);
   }, 500);
-  
+
   updateAnswer(gameState.question);
 });
 
@@ -412,6 +425,44 @@ function drawBoard() {
   game.classList.add(getCBoardClass());
 }
 
+function moveDummyPlayer(player) {
+  player.previousPositions.push({ x: player.x, y: player.y });
+  if (player.previousPositions.length > 4) {
+    player.previousPositions.shift();
+  }
+  switch (player.direction) {
+    case "UP":
+      isValidPosition({ x: player.x, y: player.y - 1 }) ? player.y = player.y - 1 : player.direction = "RIGHT";
+      player.status = "up";
+      break;
+    case "DOWN":
+      isValidPosition({ x: player.x, y: player.y + 1 }) ? player.y = player.y + 1 : player.direction = "LEFT";
+      player.status = "down";
+      break;
+    case "RIGHT":
+      isValidPosition({ x: player.x + 1, y: player.y }) ? player.x = player.x + 1 : player.direction = "DOWN";
+      player.status = "right";
+      break;
+    case "LEFT":
+      isValidPosition({ x: player.x - 1, y: player.y }) ? player.x = player.x - 1 : player.direction = "UP";
+      player.status = "left";
+      break;
+    default:
+      isValidPosition({ x: player.x + 1, y: player.y }) ? player.x = player.x + 1 : player.direction = "DOWN";
+      break;
+  }
+}
+
+function isValidPosition(position) {
+  if (position.x < 0 || position.x >= setup.width) {
+    return false;
+  }
+  if (position.y < 0 || position.y >= setup.height) {
+    return false;
+  }
+  return true;
+}
+
 setInterval(() => {
   gameCycle = !gameCycle;
 }, 1000);
@@ -501,7 +552,6 @@ function renderResult() {
         wrongPlayers.push(p);
       }
     }
-    wrongPlayers.push(...gameState.players.filter(filterAnswer(false)));
   }
 
   const correctGroup = document.querySelector(".correct");
@@ -511,7 +561,12 @@ function renderResult() {
   wrongGroup.innerHTML = wrongPlayers.map(mapPlayerToHtmlImg).join(" ");
 }
 
-function renderDemo() { }
+function renderDemo() {
+  if (!setup) return;
+  drawPlayersShadow(dummyGameState.players);
+  drawPreviousPosition(dummyGameState.players);
+  drawPlayers(dummyGameState.players);
+}
 
 function renderGame() {
   drawPlayersShadow(gameState.players);
@@ -525,9 +580,45 @@ function renderGame() {
 function start(s) {
   setup = s;
   gameState = null;
+
+  dummyPlayer2.x = setup.width - 1;
+  dummyPlayer2.y = setup.height - 1;
   //canvas initial setup
   canvas.width = setup.unitSize * setup.width;
   canvas.height = setup.unitSize * setup.height;
   document.querySelector(".board").style.width = `${canvas.width}px`;
   document.querySelector(".board").style.height = `${canvas.height}px`;
+}
+
+
+let dummyPlayer1 = {
+  id: "78O5X5iNGlH0883fAAAE",
+  inAnswer: false,
+  status: "idle",
+  x: 0,
+  y: 0,
+  laureate: {
+    color: "#C4FFFF",
+    imagePath: "14th-Dalai Lama_.png",
+  },
+  previousPositions: [],
+  direction: "RIGHT",
+}
+let dummyPlayer2 = {
+  id: "78O5X5iNGlH0883fAAAE",
+  inAnswer: false,
+  status: "idle",
+  x: 0,
+  y: 0,
+  laureate: {
+    color: "#7325F0",
+    imagePath: "Elinor_Ostrom.png",
+  },
+  previousPositions: [],
+  direction: "LEFT",
+}
+
+let dummyGameState = {
+  players: [dummyPlayer1, dummyPlayer2],
+  question: {}
 }
