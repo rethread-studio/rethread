@@ -26,7 +26,6 @@ socket.on("gameStateUpdate", (data) => {
   gameState = data;
   updateGamePage(gameState);
   updateGameState();
-  console.log("game upadte")
 });
 
 socket.on("question", (question) => {
@@ -353,8 +352,8 @@ function drawAnswers(question) {
 function showAnswers(_show) {
   const answerE1 = document.querySelector(".answer1");
   const answerE2 = document.querySelector(".answer2");
-  answerE1.style.display = _show ? "block" : "none";
-  answerE2.style.display = _show ? "block" : "none";
+  answerE1.style.display = _show ? "flex" : "none";
+  answerE2.style.display = _show ? "flex" : "none";
 }
 
 function showResults(_show) {
