@@ -7,7 +7,7 @@ import QuestionModel from "./database/questions/questions.model";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
 import StateModel from "./database/state/state.model";
 import { IStateDocument } from "./database/state/state.types";
-import { BoxPosition, GameStatus, Player, Position } from "./types";
+import { BoxPosition, Player, Position } from "./types";
 
 class Events {
   newPlayer = new SubEvent<Player>();
@@ -19,7 +19,6 @@ class Events {
   playerLeave = new SubEvent<string>();
   newQuestion = new SubEvent<IQuestion>();
   state = new SubEvent<IStateDocument>();
-  status = new SubEvent<GameStatus>();
 }
 
 export class Engine {
@@ -27,16 +26,14 @@ export class Engine {
   private _currentQuestion: IQuestion;
   private _state: IStateDocument;
   private _players: { [key: string]: Player };
-  private _status: GameStatus;
   private _events = new Events();
 
   constructor() { }
 
   async init() {
     this._questions = await QuestionModel.find();
-    this._currentQuestion = this.chooseQuestionRandomly();
+    this.currentQuestion = this.chooseQuestionRandomly();
     this._state = await StateModel.findOne();
-    this._status = "demo";
     this._players = {};
 
     const questionInterval = setInterval(() => {
@@ -62,7 +59,7 @@ export class Engine {
           const { inAnswer, answer } = this._isInAnswer(player);
           this._events.enterAnswer.emit({ answer, player });
         }
-      }, config.ANSWER_DURATION);
+      }, config.ANSWER_DURATION * 1000);
     }, config.QUESTION_INTERVAL * 1000);
   }
 
@@ -246,15 +243,6 @@ export class Engine {
   set state(state) {
     this._state = state;
     this._events.state.emit(state);
-  }
-
-  get status() {
-    return this._status;
-  }
-
-  set status(status) {
-    this._status = status;
-    this._events.status.emit(status);
   }
 
   get players() {

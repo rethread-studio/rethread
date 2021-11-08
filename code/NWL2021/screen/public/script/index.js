@@ -6,23 +6,44 @@ socket.on("setup", (data) => {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+let gamePage = "demo";
+function updateGamePage(gameState) {
+  if (gameState.players.length == 0) {
+    gamePage = "demo";
+  } else {
+    if (gamePage == "result" || gamePage == "question") {
+      return;
+    }
+    gamePage = "play";
+  }
+}
+
 socket.on("gameStateUpdate", (data) => {
+  if (gameState == null) {
+    drawAnswers(data.question);
+    gameState = "play";
+  }
   gameState = data;
+  updateGamePage(gameState);
   updateGameState();
   console.log("game upadte")
 });
 
-socket.on("question", ({ question, answer }) => {
-  const answerE = document.querySelector(".questionAnswer");
-  answerE.style = "display: none;";
-  console.log("change question")
+socket.on("question", (question) => {
+  gamePage = "question";
+  gameState.question = question;
+  setTimeout(() => {
+    gamePage = "play";
+    updateGamePage(gameState);
+    updateGameState();
+  }, 4000);
+  updateGamePage(gameState);
+  updateAnswer(gameState.question);
 });
 
 socket.on("answer", ({ question, answer }) => {
-  const answerE = document.querySelector(".questionAnswer");
-  answerE.style = "display: block;";
-  answerE.innerHTML = `<div class="q">${question.text}</div><div class="a">${answer.text}</div>`;
-  console.log("show answer")
+  gamePage = "result";
+  updateGameState();
 });
 
 const emotes = {};
@@ -261,18 +282,19 @@ function drawPreviousPosition(players) {
 
 function drawQuestion(question) {
   if (!question) return;
-  const questionE = document.querySelector(".question");
-  questionE.innerHTML = question.text;
-  questionE.style = `top: ${setup.questionPosition.y * setup.unitSize
-    }px;`;
+
   //draw the mid point
   for (let i = 0; i < setup.questionPosition.width + 1; i++) {
     for (let j = 0; j < setup.questionPosition.height + 1; j++) {
       ctx.fillStyle = "white";
       ctx.beginPath();
       ctx.arc(
-        setup.questionPosition.x * setup.unitSize + setup.unitSize * i + setup.unitSize / 2,
-        setup.questionPosition.y * setup.unitSize + setup.unitSize * j + setup.unitSize / 2,
+        setup.questionPosition.x * setup.unitSize +
+        setup.unitSize * i +
+        setup.unitSize / 2,
+        setup.questionPosition.y * setup.unitSize +
+        setup.unitSize * j +
+        setup.unitSize / 2,
         gameCycle ? "2" : "4",
         0,
         2 * Math.PI
@@ -282,11 +304,11 @@ function drawQuestion(question) {
   }
 }
 
-function drawAnswers(question) {
+function updateAnswer(question) {
   if (!question) return;
 
   const questionE = document.querySelector(".question");
-  questionE.innerHTML = "";
+  questionE.innerHTML = question.text;
 
   for (let i = 0; i < question.answers.length; i++) {
     const answer = question.answers[i];
@@ -294,9 +316,21 @@ function drawAnswers(question) {
 
     const answerE = document.querySelector(".answer" + (i + 1));
     answerE.innerHTML = answer.text;
-    answerE.style = `top: ${position.y * setup.unitSize}px;left: ${position.x * setup.unitSize
-      }px; width: ${(position.width + 1) * setup.unitSize}px; height: ${(position.height + 1) * setup.unitSize
-      }px; font-size: ${answer.text.length < 8 ? " 72px;" : " 42px;"}`;
+
+
+    answerE.style.top = `${position.y * setup.unitSize}px`;
+    answerE.style.left = `${position.x * setup.unitSize}px`;
+    answerE.style.width = `${(position.width + 1) * setup.unitSize}px`;
+    answerE.style.height = `${(position.height + 1) * setup.unitSize}px`;
+    answerE.style.fontSize = answer.text.length < 8 ? " 72px;" : " 42px"
+  }
+}
+
+function drawAnswers(question) {
+  if (!question) return;
+
+  for (let i = 0; i < question.answers.length; i++) {
+    const position = setup.answersPositions[i];
 
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
@@ -319,23 +353,23 @@ function drawAnswers(question) {
 function showAnswers(_show) {
   const answerE1 = document.querySelector(".answer1");
   const answerE2 = document.querySelector(".answer2");
-  answerE1.style.display = _show ? 'block' : 'none';
-  answerE2.style.display = _show ? 'block' : 'none';
+  answerE1.style.display = _show ? "block" : "none";
+  answerE2.style.display = _show ? "block" : "none";
 }
 
 function showResults(_show) {
   const results = document.querySelector(".result");
-  results.style.display = _show ? 'block' : 'none';
+  results.style.display = _show ? "block" : "none";
 }
 
 function showQuestion(_show) {
   const results = document.querySelector(".question");
-  results.style.display = _show ? 'block' : 'none';
+  results.style.display = _show ? "block" : "none";
 }
 
 function showDemo(_show) {
   const results = document.querySelector(".demo");
-  results.style.display = _show ? 'flex' : 'none';
+  results.style.display = _show ? "flex" : "none";
 }
 
 function getCBoardClass() {
@@ -355,16 +389,14 @@ setInterval(() => {
 window.requestAnimationFrame(gameLoop);
 function gameLoop() {
   updateGameState();
+  window.requestAnimationFrame(gameLoop);
 }
 
 function updateGameState() {
   if (!gameState) gameState = {};
   //clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //render status
-  // const status = gameState.status;
-  const status = "play";
-  switch (status) {
+  switch (gamePage) {
     case "demo":
       showResults(false);
       showAnswers(false);
@@ -375,34 +407,34 @@ function updateGameState() {
     case "play":
       showAnswers(true);
       showDemo(false);
+      showQuestion(true);
+      showResults(false);
       renderGame();
       break;
     case "question":
       showAnswers(false);
       showResults(false);
       showQuestion(true);
+      showDemo(false);
       drawQuestion(gameState.question);
       break;
     case "result":
       showAnswers(false);
       showResults(true);
-      renderResult();
-      break;
-    default:
-      showResults(false);
-      showAnswers(false);
       showQuestion(false);
-      renderDemo();
+      showDemo(false);
+      renderResult();
       break;
   }
 }
 
 const mapPlayerToHtmlImg = (p, i) => {
-  const roation = gameCycle ? i % 2 == 0 ? 45 : -45 : i % 2 == 0 ? -45 : 45;
+  const rotation = gameCycle ? (i % 2 == 0 ? 45 : -45) : i % 2 == 0 ? -45 : 45;
   return `<div class="player">
-      <img style="transform: rotate(${roation}deg);" src="${"/img/laureates/" + p.laureate.imagePath}" alt="${p.laureate.firstname}">
+      <img style="transform: rotate(${rotation}deg);" src="${"/img/laureates/" + p.laureate.imagePath
+    }" alt="${p.laureate.firstname}">
     </div>`;
-}
+};
 
 function filterAnswer(_correct) {
   return (p) => p.inAnswer == _correct;
@@ -413,7 +445,9 @@ function renderResult() {
   const question = document.querySelector(".result .q");
   const answer = document.querySelector(".result .a");
   question.innerHTML = gameState.question.text;
-  answer.innerHTML = gameState.question.answers.find((a => a.isCorrect == true)).text;
+  answer.innerHTML = gameState.question.answers.find(
+    (a) => a.isCorrect == true
+  ).text;
 
   const correctPlayers = gameState.players
     .filter(filterAnswer(true))
@@ -431,18 +465,15 @@ function renderResult() {
   wrongGroup.innerHTML = wrongPlayers;
 }
 
-
-function renderDemo() {
-
-}
+function renderDemo() { }
 
 function renderGame() {
-  drawAnswers(gameState.question);
-  drawQuestion(gameState.question);
   drawPlayersShadow(gameState.players);
   drawPreviousPosition(gameState.players);
   drawPlayers(gameState.players);
   drawDialogue(gameState.players);
+  drawAnswers(gameState.question);
+  drawQuestion(gameState.question);
 }
 
 function start(s) {
@@ -450,12 +481,6 @@ function start(s) {
   //canvas initial setup
   canvas.width = setup.unitSize * setup.width;
   canvas.height = setup.unitSize * setup.height;
-  document.querySelector(
-    ".board"
-  ).style = `width: ${canvas.width}px;height:${canvas.height}px;`;
-
-  showAnswers(false);
-  showResults(false);
-  showQuestion(false);
-  showDemo(false);
+  document.querySelector(".board").style.width = `${canvas.width}px`;
+  document.querySelector(".board").style.height = `${canvas.height}px`;
 }
