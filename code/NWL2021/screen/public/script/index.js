@@ -376,13 +376,8 @@ function drawAnswers(question) {
 function showAnswers(_show) {
   const answerE1 = document.querySelector(".answer1");
   const answerE2 = document.querySelector(".answer2");
-<<<<<<< HEAD
-  answerE1.style.display = _show ? "flex" : "none";
-  answerE2.style.display = _show ? "flex" : "none";
-=======
   answerE1.style.display = _show ? null : "none";
   answerE2.style.display = _show ? null : "none";
->>>>>>> f86f91281a286fa3c21d4c3b19a7411eddd75c0d
 }
 
 function showResults(_show) {
