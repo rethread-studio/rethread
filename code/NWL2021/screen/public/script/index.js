@@ -9,17 +9,20 @@ const ctx = canvas.getContext("2d");
 socket.on("gameStateUpdate", (data) => {
   gameState = data;
   updateGameState();
+  console.log("game upadte")
 });
 
 socket.on("question", ({ question, answer }) => {
   const answerE = document.querySelector(".questionAnswer");
   answerE.style = "display: none;";
+  console.log("change question")
 });
 
 socket.on("answer", ({ question, answer }) => {
   const answerE = document.querySelector(".questionAnswer");
   answerE.style = "display: block;";
   answerE.innerHTML = `<div class="q">${question.text}</div><div class="a">${answer.text}</div>`;
+  console.log("show answer")
 });
 
 const emotes = {};
