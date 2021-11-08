@@ -148,9 +148,11 @@ export default class GameSocket {
 
     if (player) {
       const session: any = (player?.socket as any).session;
-      UserModel.findByIdAndUpdate(session.userID, {
-        $inc: { "events.answer": 1 },
-      }).then(() => {}, console.error);
+      if (session) {
+        UserModel.findByIdAndUpdate(session.userID, {
+          $inc: { "events.answer": 1 },
+        }).then(() => {}, console.error);
+      }
     }
 
     target.emit("answer", {
