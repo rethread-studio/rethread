@@ -184,7 +184,7 @@ body {
   place-content: center;
   /* flex-wrap: wrap; */
   text-align: center;
-  font-size: 3.9rm;
+  font-size: 3.9em;
 }
 .demo .sub {
   margin-bottom: 20px;
