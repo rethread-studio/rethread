@@ -4,5 +4,5 @@ const router = express.Router();
 export default router;
 
 router.get("/laureates", async (req, res) => {
-  res.json(await LaureateModel.find());
+  res.json(await LaureateModel.find().sort({ used: 1 }));
 });

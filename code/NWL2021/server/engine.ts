@@ -2,12 +2,14 @@ import { Socket } from "socket.io";
 import { SubEvent } from "sub-events";
 import config from "../config";
 import { ILaureate } from "./database/laureates/laureates.types";
+import LaureateModel from "./database/laureates/laureates.model";
 
 import QuestionModel from "./database/questions/questions.model";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
 import StateModel from "./database/state/state.model";
 import { IStateDocument } from "./database/state/state.types";
 import { BoxPosition, Player, Position } from "./types";
+import mongoose from "mongoose";
 
 class Events {
   newPlayer = new SubEvent<Player>();
@@ -90,6 +92,10 @@ export class Engine {
       previousPositions: [],
       status: "idle",
     };
+    LaureateModel.findByIdAndUpdate(laureate._id, { $inc: { used: 1 } }).then(
+      () => {},
+      () => {}
+    );
 
     while (!this.isValidPosition(player, socket.id)) {
       player.x = Math.floor(Math.random() * this._state.width);
@@ -232,7 +238,9 @@ export class Engine {
   set currentQuestion(question) {
     this._currentQuestion = question;
     this._questionEndDate = new Date();
-    this._questionEndDate.setSeconds(this._questionEndDate.getSeconds() + config.QUESTION_INTERVAL);
+    this._questionEndDate.setSeconds(
+      this._questionEndDate.getSeconds() + config.QUESTION_INTERVAL
+    );
     this._events.newQuestion.emit({ question, endDate: this._questionEndDate });
   }
 

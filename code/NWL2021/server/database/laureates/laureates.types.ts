@@ -1,4 +1,4 @@
-import * as mongoose from "mongoose";
+import mongoose from "mongoose";
 
 export interface IPrize {
   year: number;
@@ -13,6 +13,7 @@ export interface IPrize {
 }
 
 export interface ILaureate {
+  _id: string;
   firstname: string;
   surname: string;
   imagePath: string;
@@ -27,9 +28,10 @@ export interface ILaureate {
   diedCountryCode: string;
   diedCity: string;
   gender: string;
-  description: string,
+  description: string;
   prizes: IPrize[];
+  used: number;
 }
 
-export interface ILaureateDocument extends ILaureate, mongoose.Document {}
+export interface ILaureateDocument extends Omit<ILaureate, '_id'>, mongoose.Document {}
 export interface ILaureateModel extends mongoose.Model<ILaureateDocument> {}

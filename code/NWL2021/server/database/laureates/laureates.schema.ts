@@ -1,7 +1,8 @@
-import * as mongoose from "mongoose";
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const LaureateSchema = new Schema({
+  _id: mongoose.Types.ObjectId,
   firstname: String,
   surname: String,
   imagePath: String,
@@ -32,6 +33,7 @@ const LaureateSchema = new Schema({
       ],
     },
   ],
+  used: Number,
 });
 
 export default LaureateSchema;
