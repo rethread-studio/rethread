@@ -499,6 +499,7 @@ function renderResult() {
         wrongPlayers.push(p);
       }
     }
+    wrongPlayers.push(...gameState.players.filter(filterAnswer(false)));
   }
 
   const correctGroup = document.querySelector(".correct");
