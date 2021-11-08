@@ -13,7 +13,11 @@ const config = {
 
 let gamePage = "demo";
 function updateGamePage(gameState) {
-  if (gameState == null || gameState.players.length == 0) {
+  if (
+    gameState == null ||
+    !gameState.players ||
+    gameState.players.length == 0
+  ) {
     gamePage = "demo";
   } else {
     if (gamePage == "result" || gamePage == "question") {
@@ -33,7 +37,8 @@ socket.on("gameStateUpdate", (data) => {
   updateGameState();
 });
 
-socket.on("question", ({ question, date }) => {
+let timerInterval = null;
+socket.on("question", ({ question, endDate }) => {
   gamePage = "question";
   gameState.question = question;
   setTimeout(() => {
@@ -41,6 +46,11 @@ socket.on("question", ({ question, date }) => {
     updateGamePage(gameState);
     updateGameState();
   }, 4000);
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    const time = new Date(endDate) - new Date().getTime();
+    document.querySelector(".timer").innerHTML = Math.round(time / 1000);
+  }, 500);
   updateGamePage(gameState);
   updateAnswer(gameState.question);
 });
@@ -390,6 +400,11 @@ function showDemo(_show) {
   results.style.display = _show ? null : "none";
 }
 
+function showTimer(_show) {
+  const results = document.querySelector(".timer");
+  results.style.display = _show ? null : "none";
+}
+
 function getCBoardClass() {
   return gameCycle ? "chess1" : "chess2";
 }
@@ -420,6 +435,7 @@ function updateGameState() {
       showAnswers(false);
       showQuestion(false);
       showDemo(true);
+      showTimer(false);
       renderDemo();
       break;
     case "play":
@@ -427,6 +443,7 @@ function updateGameState() {
       showDemo(false);
       showQuestion(true);
       showResults(false);
+      showTimer(true);
       renderGame();
       break;
     case "question":
@@ -434,6 +451,7 @@ function updateGameState() {
       showResults(false);
       showQuestion(true);
       showDemo(false);
+      showTimer(false);
       drawQuestion(gameState.question);
       break;
     case "result":
@@ -441,6 +459,7 @@ function updateGameState() {
       showResults(true);
       showQuestion(false);
       showDemo(false);
+      showTimer(false);
       renderResult();
       break;
   }

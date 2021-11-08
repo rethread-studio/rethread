@@ -24,6 +24,7 @@ class Events {
 export class Engine {
   private _questions: IQuestion[];
   private _currentQuestion: IQuestion;
+  private _questionEndDate: Date;
   private _currentIndexQuestion: number = 0;
   private _state: IStateDocument;
   private _players: { [key: string]: Player };
@@ -230,9 +231,13 @@ export class Engine {
 
   set currentQuestion(question) {
     this._currentQuestion = question;
-    const endDate = new Date();
-    endDate.setSeconds(endDate.getSeconds() + config.ANSWER_DURATION * 1000);
-    this._events.newQuestion.emit({ question, endDate });
+    this._questionEndDate = new Date();
+    this._questionEndDate.setSeconds(this._questionEndDate.getSeconds() + config.QUESTION_INTERVAL);
+    this._events.newQuestion.emit({ question, endDate: this._questionEndDate });
+  }
+
+  get questionEndDate() {
+    return this._questionEndDate;
   }
 
   get state() {
