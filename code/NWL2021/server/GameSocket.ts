@@ -366,7 +366,8 @@ export default class GameSocket {
   }
 
   private _controlDisconnect(socket) {
-    console.log("User disconnected:", socket.id);
+    const session: any = (socket.handshake as any).session;
+    console.log(`[USER ${session?.userID}] Disconnected`);
     this.engine.removePlayer(socket.id);
   }
 }
