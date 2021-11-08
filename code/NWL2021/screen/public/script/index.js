@@ -40,18 +40,20 @@ socket.on("gameStateUpdate", (data) => {
 let timerInterval = null;
 socket.on("question", ({ question, endDate }) => {
   gamePage = "question";
+  updateGamePage(gameState);
   gameState.question = question;
   setTimeout(() => {
     gamePage = "play";
     updateGamePage(gameState);
     updateGameState();
   }, 4000);
+
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     const time = new Date(endDate) - new Date().getTime();
     document.querySelector(".timer").innerHTML = Math.round(time / 1000);
   }, 500);
-  updateGamePage(gameState);
+  
   updateAnswer(gameState.question);
 });
 

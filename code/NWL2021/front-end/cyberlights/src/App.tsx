@@ -24,7 +24,9 @@ function App() {
   const [laureates, setLaureates] = useState<laureateI[]>(dummyLaureates)
   const [loading, setLoading] = useState(true);
   const [laureate, setLaureate] = useState<laureateI | null>(null);
-
+  
+  socket.on("connect", () => setLaureate(null));
+  socket.on("disconnect", () => setLaureate(null));
   socket.on("welcome", (data) => setLaureate(data))
 
   //load characters data

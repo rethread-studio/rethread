@@ -16,6 +16,7 @@ export default class GameSocket {
   ) {
     io.of("screen").on("connection", (socket) => this._screenConnect(socket));
     io.of("control").on("connection", (socket) => this._controlConnect(socket));
+    io.of("control").on("disconnect", (socket) => this._controlDisconnect(socket));
 
     this.subscribe();
   }
