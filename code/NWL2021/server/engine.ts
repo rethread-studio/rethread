@@ -17,7 +17,7 @@ class Events {
   answer = new SubEvent<IAnswer>();
   playerMove = new SubEvent<Player>();
   playerLeave = new SubEvent<string>();
-  newQuestion = new SubEvent<IQuestion>();
+  newQuestion = new SubEvent<{ question: IQuestion; endDate: Date }>();
   state = new SubEvent<IStateDocument>();
 }
 
@@ -230,7 +230,9 @@ export class Engine {
 
   set currentQuestion(question) {
     this._currentQuestion = question;
-    this._events.newQuestion.emit(question);
+    const endDate = new Date();
+    endDate.setSeconds(endDate.getSeconds() + config.ANSWER_DURATION * 1000);
+    this._events.newQuestion.emit({ question, endDate });
   }
 
   get state() {

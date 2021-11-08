@@ -1,9 +1,10 @@
 :root {
   /* Set neon color */
   --neon-green: #73f54b;
-  --neon-pink: #f6d465;
+  --neon-pink: #f09;
   --neon-blue: #c4ffff;
   --neon-purple: #7325f0;
+  --neon-yellow: #f6d465;
   --tw-space-x-reverse: 0;
   --tw-space-y-reverse: 0;
 }
@@ -41,7 +42,7 @@ body {
   color: white;
   text-align: center;
   /* line-height: 90px; */
-  font-size: 36px;
+  font-size: 45px;
   text-transform: uppercase;
   /* animation: pulsate 0.11s ease-in-out infinite alternate; */
   padding: 0 0.025em;
@@ -108,13 +109,6 @@ body {
   top: 100px;
 }
 
-.text-neon {
-  color: white;
-  font-weight: 300;
-  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px #f09,
-    0 0 80px #f09, 0 0 90px #f09, 0 0 100px #f09, 0 0 150px #f09;
-}
-
 /* 
 @keyframes pulsate {
   100% {
@@ -167,17 +161,15 @@ body {
   justify-content: space-evenly;
   gap: 20px 20px;
 }
-
+.group.correct {
+  background-color: var(--neon-green);
+}
+.group.wrong {
+  background-color: var(--neon-pink);
+}
 .group .player img {
   width: 100px;
   height: auto;
-}
-
-.green-neon {
-  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
-    0 0 40px var(--neon-green), 0 0 80px var(--neon-green),
-    0 0 90px var(--neon-green), 0 0 100px var(--neon-green),
-    0 0 150px var(--neon-green);
 }
 
 .demo {
@@ -192,15 +184,16 @@ body {
   place-content: center;
   /* flex-wrap: wrap; */
   text-align: center;
+  font-size: 3.9rm;
 }
 .demo .sub {
   margin-bottom: 20px;
-  font-size: 0.9em;
+  font-size: 1.9em;
   font-weight: 100;
 }
 
 .demo .info {
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   font-weight: 100;
 }
 
@@ -241,4 +234,17 @@ body {
     0 0 90px var(--neon-blue), 0 0 100px var(--neon-blue),
     0 0 150px var(--neon-blue);
   /* /* animation: pulsate 0.11s ease-in-out infinite alternate; */
+}
+
+.green-neon {
+  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
+    0 0 40px var(--neon-green), 0 0 80px var(--neon-green),
+    0 0 90px var(--neon-green), 0 0 100px var(--neon-green),
+    0 0 150px var(--neon-green);
+}
+.text-neon {
+  color: white;
+  font-weight: 300;
+  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px #f09,
+    0 0 80px #f09, 0 0 90px #f09, 0 0 100px #f09, 0 0 150px #f09;
 }
