@@ -124,6 +124,7 @@ export default class GameSocket {
           status: p.status,
         };
       }),
+      questionEndDate: this.engine.questionEndDate,
       question: this.engine.currentQuestion,
     });
   }

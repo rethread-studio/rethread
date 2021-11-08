@@ -1,0 +1,159 @@
+<h2>State</h2>
+<form>
+  <div class="row mb-1">
+    <label class="col-sm-2 col-form-label">Canvas Size</label>
+    <div class="col-sm-5">
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon1">Width</span>
+        <input
+          type="number"
+          class="form-control"
+          min="1"
+          ng-model="state.width"
+        />
+      </div>
+    </div>
+    <div class="col-sm-5">
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon1">Height</span>
+        <input
+          type="number"
+          class="form-control"
+          min="1"
+          ng-model="state.height"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-3 row">
+    <label for="staticEmail" class="col-sm-2 col-form-label">Unit size</label>
+    <div class="col-sm-10">
+      <div class="input-group">
+        <input
+          type="number"
+          class="form-control"
+          min="1"
+          ng-model="state.unitSize"
+        />
+        <span class="input-group-text">px</span>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="row mb-1">
+    <label class="col-sm-2 col-form-label">Question Position</label>
+    <div class="col-sm-5">
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon1">x</span>
+        <input
+          type="number"
+          class="form-control"
+          min="1"
+          ng-model="state.questionPosition.x"
+        />
+      </div>
+    </div>
+    <div class="col-sm-5">
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon1">y</span>
+        <input
+          type="number"
+          class="form-control"
+          min="1"
+          ng-model="state.questionPosition.y"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <label class="col-sm-2 col-form-label">Question Size</label>
+    <div class="col-sm-5">
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon1">Width</span>
+        <input
+          type="number"
+          class="form-control"
+          min="1"
+          ng-model="state.questionPosition.width"
+        />
+      </div>
+    </div>
+    <div class="col-sm-5">
+      <div class="input-group">
+        <span class="input-group-text" id="basic-addon1">Height</span>
+        <input
+          type="number"
+          class="form-control"
+          min="1"
+          ng-model="state.questionPosition.height"
+        />
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div ng-repeat="answer in state.answersPositions" class="mb-2">
+    <div class="row mb-1">
+      <label class="col-sm-2 col-form-label"
+        >Answer {{$index + 1}} Position</label
+      >
+      <div class="col-sm-5">
+        <div class="input-group">
+          <span class="input-group-text" id="basic-addon1">x</span>
+          <input
+            type="number"
+            class="form-control"
+            min="1"
+            ng-model="answer.x"
+          />
+        </div>
+      </div>
+      <div class="col-sm-5">
+        <div class="input-group">
+          <span class="input-group-text" id="basic-addon1">y</span>
+          <input
+            type="number"
+            class="form-control"
+            min="1"
+            ng-model="answer.y"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="col-sm-2 col-form-label">Answer Size</label>
+      <div class="col-sm-5">
+        <div class="input-group">
+          <span class="input-group-text" id="basic-addon1">Width</span>
+          <input
+            type="number"
+            class="form-control"
+            min="1"
+            ng-model="answer.width"
+          />
+        </div>
+      </div>
+      <div class="col-sm-5">
+        <div class="input-group">
+          <span class="input-group-text" id="basic-addon1">Height</span>
+          <input
+            type="number"
+            class="form-control"
+            min="1"
+            ng-model="answer.height"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+<button class="btn btn-primary" ng-click="load()">Load state from file</button>
+<button class="btn btn-primary" ng-click="export()">
+  Export state to file
+</button>

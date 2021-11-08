@@ -1,3 +1,4 @@
+const socket = io("/screen");
 angular
   .module("nwl", ["ngRoute", "ngSanitize"])
   .config(function ($routeProvider, $locationProvider) {
@@ -5,6 +6,18 @@ angular
       .when("/", {
         templateUrl: "/admin/partials/home.htm",
         controller: "homeController",
+      })
+      .when("/state", {
+        templateUrl: "/admin/partials/state.htm",
+        controller: "stateController",
+      })
+      .when("/laureates", {
+        templateUrl: "/admin/partials/laureates.htm",
+        controller: "laureatesController",
+      })
+      .when("/questions", {
+        templateUrl: "/admin/partials/questions.htm",
+        controller: "questionsController",
       })
       .otherwise({
         templateUrl: "/admin/partials/404.htm",
@@ -17,7 +30,22 @@ angular
     "$location",
     function ($scope, $http, $location) {},
   ])
+
   .controller("homeController", [
+    "$scope",
+    "$http",
+    "$location",
+    function ($scope, $http, $location) {
+      $scope.gameState = null;
+      socket.on("gameStateUpdate", (data) => {
+        console.log("gameStateUpdate");
+        $scope.$apply(() => {
+          $scope.gameState = data;
+        });
+      });
+    },
+  ])
+  .controller("stateController", [
     "$scope",
     "$http",
     "$location",
@@ -28,21 +56,7 @@ angular
         });
       }
 
-      function getQuestions() {
-        $http.get("/api/admin/questions").then((res) => {
-          $scope.questions = res.data;
-        });
-      }
-
-      function getLaureates() {
-        $http.get("/api/laureates").then((res) => {
-          $scope.laureates = res.data;
-        });
-      }
-
       getState();
-      getLaureates();
-      getQuestions();
 
       $scope.saveState = function () {
         $http.post("/api/admin/state", $scope.state).then((res) => {
@@ -61,6 +75,34 @@ angular
           getState();
         });
       };
+
+      let stateTimeout = null;
+      $scope.$watch(
+        "state",
+        (newValue, oldValue) => {
+          if (oldValue == null) return;
+          clearTimeout(stateTimeout);
+          stateTimeout = setTimeout(() => {
+            $http.post("/api/admin/state", newValue).then(() => {
+              getState();
+            });
+          }, 1500);
+        },
+        true
+      );
+    },
+  ])
+  .controller("questionsController", [
+    "$scope",
+    "$http",
+    "$location",
+    function ($scope, $http, $location) {
+      function getQuestions() {
+        $http.get("/api/admin/questions").then((res) => {
+          $scope.questions = res.data;
+        });
+      }
+      getQuestions();
 
       $scope.addQuestion = function () {
         $scope.questions.push({ text: "", answers: [] });
@@ -84,21 +126,20 @@ angular
         },
         true
       );
+    },
+  ])
+  .controller("laureatesController", [
+    "$scope",
+    "$http",
+    "$location",
+    function ($scope, $http, $location) {
+      function getLaureates() {
+        $http.get("/api/laureates").then((res) => {
+          $scope.laureates = res.data;
+        });
+      }
 
-      let stateTimeout = null;
-      $scope.$watch(
-        "state",
-        (newValue, oldValue) => {
-          if (oldValue == null) return;
-          clearTimeout(stateTimeout);
-          stateTimeout = setTimeout(() => {
-            $http.post("/api/admin/state", newValue).then(() => {
-              getState();
-            });
-          }, 1500);
-        },
-        true
-      );
+      getLaureates();
 
       let laureatesTimeout = null;
       $scope.$watch(

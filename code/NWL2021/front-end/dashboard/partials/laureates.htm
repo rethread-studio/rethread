@@ -1,0 +1,123 @@
+<h2>Laureates</h2>
+<ol>
+  <li ng-repeat="laureate in laureates" class="mb-3">
+    <div class="row mb-2">
+      <div class="col-sm-4">
+        <input
+          type="text"
+          class="form-control col"
+          ng-model="laureate.firstname"
+        />
+      </div>
+      <div class="col-sm-4">
+        <input
+          type="text"
+          class="form-control col"
+          ng-model="laureate.surname"
+        />
+      </div>
+      <div class="col-sm-4">
+        <select
+          class="form-select"
+          aria-label="Default select example"
+          ng-model="laureate.gender"
+        >
+          <option selected>Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-3">
+        <label>
+          <img ng-src="/img/laureates/{{laureate.imagePath}}" width="100%" />
+
+          <form
+            action="/api/admin/laureate/image"
+            method="POST"
+            enctype="multipart/form-data"
+          >
+            <input type="hidden" name="id" ng-value="laureate._id" />
+            <input class="form-control" type="file" name="image" />
+            <input class="btn btn-primary" type="submit" value="Upload image" />
+          </form>
+        </label>
+      </div>
+      <div class="col-9">
+        <div class="row mb-1">
+          <label class="col-sm-2 col-form-label">Born in</label>
+          <div class="col-sm-5">
+            <input
+              type="text"
+              class="form-control"
+              ng-model="laureate.bornCountry"
+              placeholder="Born country"
+            />
+          </div>
+          <div class="col-sm-5">
+            <input
+              type="text"
+              class="form-control"
+              ng-model="laureate.bornCity"
+              placeholder="Born city"
+            />
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <label class="col-sm-2 col-form-label">Died in</label>
+          <div class="col-sm-5">
+            <input
+              type="text"
+              class="form-control"
+              ng-model="laureate.diedCountry"
+              placeholder="Died country"
+            />
+          </div>
+          <div class="col-sm-5">
+            <input
+              type="text"
+              class="form-control"
+              ng-model="laureate.diedCity"
+              placeholder="Died city"
+            />
+          </div>
+        </div>
+
+        <ul>
+          <li ng-repeat="prize in laureate.prizes">
+            <form class="row align-items-center">
+              <div class="col-12 row mb-1">
+                <label class="col-sm-auto col-form-label">Nobel</label>
+                <div class="col-sm-auto">
+                  <input
+                    type="number"
+                    class="form-control-plaintext"
+                    ng-model="prize.year"
+                  />
+                </div>
+                <label class="col-sm-auto col-form-label">in</label>
+                <div class="col-sm-auto">
+                  <input
+                    type="text"
+                    class="form-control"
+                    ng-model="prize.category"
+                  />
+                </div>
+              </div>
+              <div class="col-12">
+                <textarea
+                  ng-model="prize.motivation"
+                  class="form-control"
+                  rows="3"
+                  cols="150"
+                ></textarea>
+              </div>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </li>
+</ol>
