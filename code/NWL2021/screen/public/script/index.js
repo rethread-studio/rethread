@@ -430,25 +430,21 @@ function moveDummyPlayer(player) {
   if (player.previousPositions.length > 4) {
     player.previousPositions.shift();
   }
-  switch (player.direction) {
-    case "UP":
-      isValidPosition({ x: player.x, y: player.y - 1 }) ? player.y = player.y - 1 : player.direction = "RIGHT";
-      player.status = "up";
+  switch (player.status) {
+    case "up":
+      isValidPosition({ x: player.x, y: player.y - 1 }) ? player.y = player.y - 1 : player.status = "right";
       break;
-    case "DOWN":
-      isValidPosition({ x: player.x, y: player.y + 1 }) ? player.y = player.y + 1 : player.direction = "LEFT";
-      player.status = "down";
+    case "down":
+      isValidPosition({ x: player.x, y: player.y + 1 }) ? player.y = player.y + 1 : player.status = "left";
       break;
-    case "RIGHT":
-      isValidPosition({ x: player.x + 1, y: player.y }) ? player.x = player.x + 1 : player.direction = "DOWN";
-      player.status = "right";
+    case "right":
+      isValidPosition({ x: player.x + 1, y: player.y }) ? player.x = player.x + 1 : player.status = "down";
       break;
-    case "LEFT":
-      isValidPosition({ x: player.x - 1, y: player.y }) ? player.x = player.x - 1 : player.direction = "UP";
-      player.status = "left";
+    case "left":
+      isValidPosition({ x: player.x - 1, y: player.y }) ? player.x = player.x - 1 : player.status = "up";
       break;
     default:
-      isValidPosition({ x: player.x + 1, y: player.y }) ? player.x = player.x + 1 : player.direction = "DOWN";
+      isValidPosition({ x: player.x + 1, y: player.y }) ? player.x = player.x + 1 : player.status = "down";
       break;
   }
 }
@@ -594,7 +590,7 @@ function start(s) {
 let dummyPlayer1 = {
   id: "78O5X5iNGlH0883fAAAE",
   inAnswer: false,
-  status: "idle",
+  status: "right",
   x: 0,
   y: 0,
   laureate: {
@@ -602,12 +598,11 @@ let dummyPlayer1 = {
     imagePath: "14th-Dalai Lama_.png",
   },
   previousPositions: [],
-  direction: "RIGHT",
 }
 let dummyPlayer2 = {
   id: "78O5X5iNGlH0883fAAAE",
   inAnswer: false,
-  status: "idle",
+  status: "left",
   x: 0,
   y: 0,
   laureate: {
@@ -615,7 +610,6 @@ let dummyPlayer2 = {
     imagePath: "Elinor_Ostrom.png",
   },
   previousPositions: [],
-  direction: "LEFT",
 }
 
 let dummyGameState = {
