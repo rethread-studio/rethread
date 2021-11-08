@@ -6,9 +6,14 @@ socket.on("setup", (data) => {
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+const config = {
+  dotSize: { small: 4, big: 8 },
+  answerSize: { small: "60px", big: "100px" },
+};
+
 let gamePage = "demo";
 function updateGamePage(gameState) {
-  if (gameState.players.length == 0) {
+  if (gameState == null || gameState.players.length == 0) {
     gamePage = "demo";
   } else {
     if (gamePage == "result" || gamePage == "question") {
@@ -28,7 +33,7 @@ socket.on("gameStateUpdate", (data) => {
   updateGameState();
 });
 
-socket.on("question", (question) => {
+socket.on("question", ({ question, date }) => {
   gamePage = "question";
   gameState.question = question;
   setTimeout(() => {
@@ -42,6 +47,7 @@ socket.on("question", (question) => {
 
 socket.on("answer", ({ question, answer }) => {
   gamePage = "result";
+  updateGamePage(gameState);
   updateGameState();
 });
 
@@ -270,7 +276,7 @@ function drawPreviousPosition(players) {
       ctx.arc(
         positions[i].x * setup.unitSize + setup.unitSize / 2,
         positions[i].y * setup.unitSize + setup.unitSize / 2,
-        !gameCycle ? "6" : "4",
+        !gameCycle ? config.dotSize.big : config.dotSize.small,
         0,
         2 * Math.PI
       );
@@ -294,7 +300,7 @@ function drawQuestion(question) {
         setup.questionPosition.y * setup.unitSize +
         setup.unitSize * j +
         setup.unitSize / 2,
-        gameCycle ? "2" : "4",
+        gameCycle ? config.dotSize.small : config.dotSize.big,
         0,
         2 * Math.PI
       );
@@ -308,6 +314,14 @@ function updateAnswer(question) {
 
   const questionE = document.querySelector(".question");
   questionE.innerHTML = question.text;
+  questionE.style.top = `${setup.questionPosition.y * setup.unitSize}px`;
+  questionE.style.left = `${setup.questionPosition.x * setup.unitSize}px`;
+  questionE.style.width = `${(setup.questionPosition.width + 1) * setup.unitSize
+    }px`;
+  questionE.style.height = `${(setup.questionPosition.height + 1) * setup.unitSize
+    }px`;
+  questionE.style.fontSize =
+    question.text.length < 10 ? config.answerSize.big : config.answerSize.small;
 
   for (let i = 0; i < question.answers.length; i++) {
     const answer = question.answers[i];
@@ -316,12 +330,12 @@ function updateAnswer(question) {
     const answerE = document.querySelector(".answer" + (i + 1));
     answerE.innerHTML = answer.text;
 
-
     answerE.style.top = `${position.y * setup.unitSize}px`;
     answerE.style.left = `${position.x * setup.unitSize}px`;
     answerE.style.width = `${(position.width + 1) * setup.unitSize}px`;
     answerE.style.height = `${(position.height + 1) * setup.unitSize}px`;
-    answerE.style.fontSize = answer.text.length < 8 ? " 72px;" : " 42px"
+    answerE.style.fontSize =
+      answer.text.length < 8 ? config.answerSize.big : config.answerSize.small;
   }
 }
 
@@ -339,7 +353,7 @@ function drawAnswers(question) {
         ctx.arc(
           position.x * setup.unitSize + setup.unitSize * i + setup.unitSize / 2,
           position.y * setup.unitSize + setup.unitSize * j + setup.unitSize / 2,
-          gameCycle ? "2" : "4",
+          gameCycle ? config.dotSize.small : config.dotSize.big,
           0,
           2 * Math.PI
         );
@@ -352,23 +366,28 @@ function drawAnswers(question) {
 function showAnswers(_show) {
   const answerE1 = document.querySelector(".answer1");
   const answerE2 = document.querySelector(".answer2");
+<<<<<<< HEAD
   answerE1.style.display = _show ? "flex" : "none";
   answerE2.style.display = _show ? "flex" : "none";
+=======
+  answerE1.style.display = _show ? null : "none";
+  answerE2.style.display = _show ? null : "none";
+>>>>>>> f86f91281a286fa3c21d4c3b19a7411eddd75c0d
 }
 
 function showResults(_show) {
   const results = document.querySelector(".result");
-  results.style.display = _show ? "block" : "none";
+  results.style.display = _show ? null : "none";
 }
 
 function showQuestion(_show) {
   const results = document.querySelector(".question");
-  results.style.display = _show ? "block" : "none";
+  results.style.display = _show ? null : "none";
 }
 
 function showDemo(_show) {
   const results = document.querySelector(".demo");
-  results.style.display = _show ? "flex" : "none";
+  results.style.display = _show ? null : "none";
 }
 
 function getCBoardClass() {
@@ -442,26 +461,37 @@ function filterAnswer(_correct) {
 function renderResult() {
   if (gameState.question == undefined) return;
   const question = document.querySelector(".result .q");
-  const answer = document.querySelector(".result .a");
   question.innerHTML = gameState.question.text;
-  answer.innerHTML = gameState.question.answers.find(
-    (a) => a.isCorrect == true
-  ).text;
 
-  const correctPlayers = gameState.players
-    .filter(filterAnswer(true))
-    .map(mapPlayerToHtmlImg)
-    .join(" ");
-  const wrongPlayers = gameState.players
-    .filter(filterAnswer(false))
-    .map(mapPlayerToHtmlImg)
-    .join(" ");
+  const correctPlayers = [];
+  const wrongPlayers = [];
+
+  for (let i = 0; i < gameState.question.answers.length; i++) {
+    const position = setup.answersPositions[i];
+    const answer = gameState.question.answers[i];
+    if (!answer.isCorrect) continue;
+
+    document.querySelector(".result .a").innerHTML = answer.text;
+
+    for (const p of gameState.players.filter(filterAnswer(true))) {
+      if (
+        p.x >= position.x &&
+        p.x <= position.x + position.width &&
+        p.y >= position.y &&
+        p.y <= position.y + position.height
+      ) {
+        correctPlayers.push(p);
+      } else {
+        wrongPlayers.push(p);
+      }
+    }
+  }
 
   const correctGroup = document.querySelector(".correct");
   const wrongGroup = document.querySelector(".wrong");
 
-  correctGroup.innerHTML = correctPlayers;
-  wrongGroup.innerHTML = wrongPlayers;
+  correctGroup.innerHTML = correctPlayers.map(mapPlayerToHtmlImg).join(" ");
+  wrongGroup.innerHTML = wrongPlayers.map(mapPlayerToHtmlImg).join(" ");
 }
 
 function renderDemo() { }
@@ -477,6 +507,7 @@ function renderGame() {
 
 function start(s) {
   setup = s;
+  gameState = null;
   //canvas initial setup
   canvas.width = setup.unitSize * setup.width;
   canvas.height = setup.unitSize * setup.height;

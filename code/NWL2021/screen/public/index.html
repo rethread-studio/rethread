@@ -1,51 +1,50 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width initial-scale=1.0" />
+    <title></title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap");
+    </style>
+    <link rel="stylesheet" href="style/style.css" />
+  </head>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width initial-scale=1.0" />
-  <title></title>
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap");
-  </style>
-  <link rel="stylesheet" href="style/style.css" />
-</head>
-
-<body>
-  <div class="board">
-    <canvas id="game"></canvas>
-    <div class="question text-neon" style="display: none;"></div>
-    <div class="answer answer1 text-neon-blue" style="display: none;"></div>
-    <div class="answer answer2 text-neon-blue" style="display: none;"></div>
-    <div class="demo">
-      <div class="sub">re|thread</div>
-      <div class="tittle ">
-        Welcome to
-        <div class="brand text-neon-yellow">cyber|glow</div>
-      </div>
-      <div class="info">
-        <p>test your knowledge about the Nobel Laureates</p>
-        <p>Check the QR code behind you to play </p>
-      </div>
-      <div class="logos">
-        <div>
-          <img src="img/logo_nobel.png" alt="Nobel foundation">
-          <img src="img/logo_kth.png" alt="KTH">
+  <body>
+    <div class="board">
+      <canvas id="game"></canvas>
+      <div class="question text-neon" style="display: none"></div>
+      <div class="answer answer1 text-neon-blue" style="display: none"></div>
+      <div class="answer answer2 text-neon-blue" style="display: none"></div>
+      <div class="demo">
+        <div class="sub">re|thread</div>
+        <div class="tittle">
+          Welcome to
+          <div class="brand text-neon-yellow">cyber|glow</div>
         </div>
-        <img class="himg" src="img/logo_wasp.png" alt="Wasp">
+        <div class="info">
+          <p>admire software activity and test your knowledge about the Nobel laureates</p>
+          <p>go to https://cyberglow.rethread.art or scan QR code behind you to play</p>
+          <img src="img/qrcode.svg" alt="qrcode" style="width: 250px;"/>
+        </div>
+        <div class="logos">
+          <div>
+            <img src="img/logo_nobel.png" alt="Nobel foundation" />
+            <img src="img/logo_kth.png" alt="KTH" />
+          </div>
+          <img class="himg" src="img/logo_wasp.png" alt="Wasp" />
+        </div>
+      </div>
+      <div class="result">
+        <div class="q text-neon">How many nobels did Alan Turing win?</div>
+        <div class="a green-neon">None</div>
+        <div class="players">
+          <div class="group correct"></div>
+          <div class="group wrong"></div>
+        </div>
       </div>
     </div>
-    <div class="result">
-      <div class="q text-neon">How many nobels did Alan Turing win?</div>
-      <div class="a green-neon">None</div>
-      <div class="players">
-        <div class="group correct"></div>
-        <div class="group wrong"></div>
-      </div>
-    </div>
-  </div>
-</body>
-<script src="/script/external/socket.io.min.js"></script>
-<script src="script/index.js"></script>
-
+  </body>
+  <script src="/script/external/socket.io.min.js"></script>
+  <script src="script/index.js"></script>
 </html>
