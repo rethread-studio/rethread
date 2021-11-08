@@ -8,6 +8,7 @@ export interface IAnswer {
 export interface IQuestion {
   text: string;
   answers: IAnswer[];
+  type: string;
 }
 
 export interface IQuestionDocument extends IQuestion, mongoose.Document {}

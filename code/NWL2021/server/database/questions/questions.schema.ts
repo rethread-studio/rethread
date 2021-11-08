@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 
 const QuestionSchema = new Schema({
   text: String,
+  type: String,
   answers: [
     {
       text: String,
