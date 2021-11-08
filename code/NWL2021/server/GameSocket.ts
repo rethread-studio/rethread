@@ -45,12 +45,12 @@ export default class GameSocket {
       });
       this._hasChange = true;
     });
-    this.engine.on("newQuestion").subscribe((question) => {
+    this.engine.on("newQuestion").subscribe((questionEvent) => {
       this._events.push({
         origin: "gameEngine",
         action: "newQuestion",
       });
-      this.emitQuestion(question);
+      this.emitQuestion(questionEvent);
       this._hasChange = true;
     });
     this.engine.on("userAnswer").subscribe(({ player, answer }) => {
@@ -129,9 +129,14 @@ export default class GameSocket {
     target.emit("setup", this.engine.state);
   }
 
-  emitQuestion(question: IQuestion) {
-    this.io.of("control").emit("question", question.text);
-    this.io.of("screen").emit("question", question);
+  emitQuestion(questionEvent) {
+    this.io.of("control").emit("question", questionEvent.question.text);
+    this.io
+      .of("screen")
+      .emit("question", {
+        question: questionEvent.question,
+        endDate: questionEvent.endDate,
+      });
   }
 
   emitResult(answer: IAnswer, player?: Player) {
@@ -172,6 +177,11 @@ export default class GameSocket {
     console.log("Screen server connect");
     this.emitUpdates({ socket });
     this.emitSetup({ socket });
+    socket
+      .emit("question", {
+        question: this.engine.currentQuestion,
+        endDate: this.engine.questionEndDate,
+      });
 
     socket.on("disconnect", () => this._screenDisconnect(socket));
   }
@@ -188,11 +198,10 @@ export default class GameSocket {
 
     let disconnectTimeout;
 
-
     function ping() {
       clearTimeout(disconnectTimeout);
       disconnectTimeout = setTimeout(() => {
-        console.log("inactive")
+        console.log("inactive");
         socket.emit("leave");
         gameSocket._controlDisconnect(socket);
       }, config.INACTIVITY_TIME * 1000);
