@@ -24,15 +24,18 @@ class Events {
 export class Engine {
   private _questions: IQuestion[];
   private _currentQuestion: IQuestion;
+  private _currentIndexQuestion: number = 0;
   private _state: IStateDocument;
   private _players: { [key: string]: Player };
   private _events = new Events();
 
-  constructor() { }
+  constructor() {}
 
   async init() {
-    this._questions = await QuestionModel.find();
-    this.currentQuestion = this.chooseQuestionRandomly();
+    this._questions = (await QuestionModel.find()).sort((a, b) =>
+      Math.random() > 0.5 ? 1 : -1
+    );
+    this.currentQuestion = this.chooseQuestion();
     this._state = await StateModel.findOne();
     this._players = {};
 
@@ -50,7 +53,7 @@ export class Engine {
       this._events.answer.emit(selectedAnswer[0]);
 
       setTimeout(() => {
-        const newQuestion = this.chooseQuestionRandomly();
+        const newQuestion = this.chooseQuestion();
         this.currentQuestion = newQuestion;
 
         for (const socketID of Object.keys(this.players)) {
@@ -67,18 +70,12 @@ export class Engine {
     return this._events[key];
   }
 
-  chooseQuestionRandomly() {
-    let newQuestion: IQuestion = null;
-    do {
-      newQuestion =
-        this._questions[
-        Math.round(Math.random() * (this._questions.length - 1))
-        ];
-    } while (
-      this._currentQuestion &&
-      newQuestion.text === this._currentQuestion.text
-    );
-    return newQuestion;
+  chooseQuestion() {
+    this._currentIndexQuestion++;
+    if (this._currentIndexQuestion >= this._questions.length) {
+      this._currentIndexQuestion = 0;
+    }
+    return this._questions[this._currentIndexQuestion];
   }
 
   newPlayer(socket: Socket, laureate: ILaureate) {
@@ -116,12 +113,12 @@ export class Engine {
     if (
       position.y >= this.state.questionPosition.y &&
       position.y <=
-      this.state.questionPosition.y + this.state.questionPosition.height
+        this.state.questionPosition.y + this.state.questionPosition.height
     ) {
       if (
         position.x >= this.state.questionPosition.x &&
         position.x <=
-        this.state.questionPosition.x + this.state.questionPosition.width
+          this.state.questionPosition.x + this.state.questionPosition.width
       ) {
         return false;
       }
@@ -189,8 +186,8 @@ export class Engine {
         player.x < newPosition.x
           ? "right"
           : player.x > newPosition.x
-            ? "left"
-            : "idle";
+          ? "left"
+          : "idle";
       player.x = newPosition.x;
       player.y = newPosition.y;
 
