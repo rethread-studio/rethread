@@ -77,9 +77,14 @@ socket.on("answer", ({ question, answer }) => {
 });
 
 const emotes = {};
-socket.on("emote", (playerId) => {
+const emojis = {};
+socket.on("emote", ({ playerId, emoji }) => {
+  emojis[playerId] = emoji;
   clearTimeout(emotes[playerId]);
-  emotes[playerId] = setTimeout(() => delete emotes[playerId], 1000);
+  emotes[playerId] = setTimeout(() => {
+    delete emotes[playerId];
+    delete emojis[playerId]
+  }, 1000);
 });
 
 const imgs = {};
@@ -190,6 +195,7 @@ function drawPlayers(players) {
 }
 
 function drawEmoji(player) {
+  const emoji = emojis[player.id];
   const angle = getAngle(player.status);
   const x = player.x * setup.unitSize + setup.unitSize / 2;
   const y = player.y * setup.unitSize + setup.unitSize / 2;
@@ -198,7 +204,7 @@ function drawEmoji(player) {
   ctx.font = `${!gameCycle ? '70px' : '90px'} serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(player.laureate.emoji, 0, 0);
+  ctx.fillText(emoji, 0, 0);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 

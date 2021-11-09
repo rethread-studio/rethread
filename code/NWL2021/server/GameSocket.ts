@@ -152,7 +152,7 @@ export default class GameSocket {
       if (session) {
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.answer": 1 },
-        }).then(() => {}, console.error);
+        }).then(() => { }, console.error);
       }
     }
 
@@ -168,7 +168,7 @@ export default class GameSocket {
     const session: any = (target.handshake as any).session;
     UserModel.findByIdAndUpdate(session.userID, {
       $inc: { "events.enterAnswer": 1 },
-    }).then(() => {}, console.error);
+    }).then(() => { }, console.error);
 
     this._events.push({
       origin: "user",
@@ -187,7 +187,7 @@ export default class GameSocket {
     const session: any = (target.handshake as any).session;
     UserModel.findByIdAndUpdate(session.userID, {
       $inc: { "events.exitAnswer": 1 },
-    }).then(() => {}, console.error);
+    }).then(() => { }, console.error);
 
     this._events.push({
       origin: "user",
@@ -260,7 +260,7 @@ export default class GameSocket {
     socket.on("click", (event) => {
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.click": 1 },
-      }).then(() => {}, console.error);
+      }).then(() => { }, console.error);
 
       this.monitor.send({
         origin: "user",
@@ -280,7 +280,7 @@ export default class GameSocket {
 
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.leave": 1 },
-      }).then(() => {}, console.error);
+      }).then(() => { }, console.error);
 
       this.engine.removePlayer(socket.id);
       this._events.push({
@@ -290,13 +290,13 @@ export default class GameSocket {
       });
     });
 
-    socket.on("emote", () => {
+    socket.on("emote", (emoji) => {
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.emote": 1 },
-      }).then(() => {}, console.error);
+      }).then(() => { }, console.error);
 
       this._hasChange = true;
-      this.io.of("screen").emit("emote", socket.id);
+      this.io.of("screen").emit("emote", { playerId: socket.id, emoji: emoji });
       this._events.push({
         origin: "user",
         action: "emote",
@@ -311,7 +311,7 @@ export default class GameSocket {
 
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.play": 1 },
-      }).then(() => {}, console.error);
+      }).then(() => { }, console.error);
 
       this._events.push({
         origin: "user",
@@ -328,7 +328,7 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.up": 1 },
-        }).then(() => {}, console.error);
+        }).then(() => { }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: -1 });
@@ -338,7 +338,7 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.down": 1 },
-        }).then(() => {}, console.error);
+        }).then(() => { }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: 1 });
@@ -348,7 +348,7 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.left": 1 },
-        }).then(() => {}, console.error);
+        }).then(() => { }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: -1, y: 0 });
@@ -358,7 +358,7 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.right": 1 },
-        }).then(() => {}, console.error);
+        }).then(() => { }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 1, y: 0 });

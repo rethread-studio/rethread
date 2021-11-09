@@ -24,8 +24,8 @@ export const EmojiList = ({ handleClick, show, setShow }: React.PropsWithChildre
     //translate-y-full
 
     return <>
-        <div onClick={() => { setShow(false) }} className={`${show ? "block" : "hidden"} absolute z-10 bg-gray-800  bg-opacity-50 w-full h-screen bottom-0 p-8`}></div>
-        <div className={` transform transition ${show ? `` : `translate-y-full`} bottom-0 absolute z-20 bg-gray-800 w-full p-8  border-white h-3/6 flex flex-wrap space-x-4 place-items-start content-start justify-start`}>
+        <div onClick={() => { setShow(false) }} className={`${show ? "block" : "hidden"} absolute z-10 bg-gray-800  bg-opacity-50 w-full h-screen top-0 left-0 p-8`}></div>
+        <div className={` transform transition ${show ? `flex` : `hidden`} bottom-0 absolute z-20 bg-gray-800 w-full p-8  border-white flex-wrap space-x-4 place-items-start content-center justify-center bottom-4`}>
             {emojiButtons}
         </div>
     </>

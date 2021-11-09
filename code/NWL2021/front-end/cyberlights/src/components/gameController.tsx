@@ -31,10 +31,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
     socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
     socket.on("leave", () => { history.push("/") });
 
-    const setEmojitoLaureate = (e: string) => {
-        setEmoji(e);
-        laureate.emoji = e;
-    }
+    const setEmojitoLaureate = (e: string) => { setEmoji(e); }
 
     //load characters data
     useEffect(() => {
@@ -88,8 +85,8 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
 
     return (
 
-        <div className="h-full w-full p-4">
-            <div className="h-full border-2 border-gray-600 flex flex-col justify-between ">
+        <div className="h-full w-full p-4 ">
+            <div className="h-full border-2 border-gray-600 flex flex-col justify-between overflow-hidden">
 
                 <div className="flex flex-row justify-between text-sm">
                     <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
@@ -101,7 +98,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
                 </div>
                 <div className="relative h-full flex flex-col justify-center content-center">
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
-                    <img onClick={() => { socket.emit("emote") }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
+                    <img onClick={() => { socket.emit("emote", emoji) }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
@@ -118,8 +115,8 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
                     <button onClick={() => { setShow(true) }} className="text-2xl border-2 border-gray-500 rounded-full w-9">{emoji}</button>
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
+                <EmojiList handleClick={setEmojitoLaureate} show={show} setShow={setShow} />
             </div>
-            <EmojiList handleClick={setEmojitoLaureate} show={show} setShow={setShow} />
         </div>
     )
 }
