@@ -5,7 +5,7 @@ import { laureateI } from "./types";
 export const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io("/control");
 
 window.addEventListener("click", (ev) => {
-    socket.emit("click", {"x": ev.clientX, "y": ev.clientY})
+    socket.emit("click", { "x": ev.clientX, "y": ev.clientY })
 })
 
 //LAUREATES API
@@ -45,9 +45,8 @@ export const dummyLaureates: laureateI[] = [
         description: "",
         img: "./img/laureate.png",
         prizes: [],
-        color: "neonyellow"
-
-
+        color: "neonyellow",
+        emoji: "",
     },
     {
         firstname: "",
@@ -67,7 +66,8 @@ export const dummyLaureates: laureateI[] = [
         description: "",
         img: "./img/laureate.png",
         prizes: [],
-        color: "neonyellow"
+        color: "neonyellow",
+        emoji: "",
     },
 ]
 
@@ -89,6 +89,7 @@ export const dummyLaureate: laureateI = {
     description: "",
     img: "./img/laureate.png",
     prizes: [],
-    color: "neonyellow"
+    color: "neonyellow",
+    emoji: "",
 }
 

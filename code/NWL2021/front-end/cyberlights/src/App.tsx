@@ -17,14 +17,15 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import './App.css';
 import { getLaureates, dummyLaureates, socket } from './api';
 import { laureateI } from './types';
-import { dataToLaurates } from './utils';
+import { dataToLaurates, getEmoji } from './utils';
 
 
 function App() {
   const [laureates, setLaureates] = useState<laureateI[]>(dummyLaureates)
   const [loading, setLoading] = useState(true);
   const [laureate, setLaureate] = useState<laureateI | null>(null);
-  
+  const emoji = getEmoji();
+
   socket.on("connect", () => setLaureate(null));
   socket.on("disconnect", () => setLaureate(null));
   socket.on("welcome", (data) => setLaureate(data))
@@ -33,7 +34,7 @@ function App() {
   useEffect(() => {
     getLaureates()
       .then(data => data.map(dataToLaurates))
-      .then(data =>  setLaureates(data))
+      .then(data => setLaureates(data))
       .catch(error => { console.log("getLaureates error", error) })
       .finally(() => {
         setLoading(false);
@@ -47,10 +48,10 @@ function App() {
       <div className="container h-screen bg-gray-900">
         <Switch>
           <Route path="/select">
-            {laureate? <Redirect to="/play"/>:loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={setLaureate} />}
+            {laureate ? <Redirect to="/play" /> : loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={setLaureate} />}
           </Route>
           <Route path="/play">
-            {laureate == null? <Redirect to="/select"/>:loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate}/>}
+            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} />}
           </Route>
           <Route path="/">
             {loading ? <Loading /> : <Home />}

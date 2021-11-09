@@ -62,3 +62,10 @@ export const getFlag = (country: string): string => {
             return "flag-usa.png"
     }
 }
+
+const emojiList = ['❤️‍🔥', '😵‍💫', '🥲', '😮‍💨', '🤌', '🥸', '😶‍🌫️', '❤️‍🩹', '🤐', '🤨', '😡', '💀', '🤡', '👻', '👾', '💋', '🖖', '🤟'];
+
+export const getEmoji = () => {
+    const randPos = Math.floor(Math.random() * emojiList.length);
+    return emojiList[randPos];
+}

@@ -12,7 +12,7 @@ import { socket } from "../api";
 import { gameControllerI, controllDirection } from "../types";
 import { categoryColor } from "../utils";
 
-export const GameController = ({ laureate, selectHandler }: React.PropsWithChildren<gameControllerI>) => {
+export const GameController = ({ laureate, selectHandler, emoji }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
     const [answer, setAnswer] = useState<string | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
@@ -37,7 +37,7 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
         }
         const keyCategory: string = laureate.prizes.length > 1 ? "special" : laureate.prizes[0].category as string;
         setColor(categoryColor[keyCategory]);
-
+        laureate.emoji = emoji;
         socket.emit("start", laureate);
 
         const pressHandler = ({ key }: { key: string }) => {
@@ -64,7 +64,7 @@ export const GameController = ({ laureate, selectHandler }: React.PropsWithChild
             socket.off("question");
             window.removeEventListener("keydown", pressHandler);
         }
-    }, [laureate, history, selectHandler]);
+    }, [laureate, history, selectHandler, emoji]);
 
 
 

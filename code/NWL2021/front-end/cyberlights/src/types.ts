@@ -39,12 +39,14 @@ export interface laureateI {
     description: string,
     img?: string,
     prizes: prize[],
-    color: colorOption
+    color: colorOption,
+    emoji: string
 }
 
 export interface gameControllerI {
     laureate: laureateI,
-    selectHandler: React.Dispatch<React.SetStateAction<laureateI | null>>
+    selectHandler: React.Dispatch<React.SetStateAction<laureateI | null>>,
+    emoji: string,
 }
 
 

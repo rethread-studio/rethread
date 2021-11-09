@@ -151,9 +151,7 @@ function drawPlayers(players) {
 
   for (const player of players) {
     let size = setup.unitSize;
-    if (emotes[player.id]) {
-      size *= new Date().getTime() % 2 ? 1.5 : 1.2;
-    }
+
     if (imgs[player.laureate.imagePath]) {
       const angle = getAngle(player.status);
       renderImage(
@@ -187,7 +185,21 @@ function drawPlayers(players) {
         );
       };
     }
+    if (emotes[player.id]) drawEmoji(player);
   }
+}
+
+function drawEmoji(player) {
+  const angle = getAngle(player.status);
+  const x = player.x * setup.unitSize + setup.unitSize / 2;
+  const y = player.y * setup.unitSize + setup.unitSize / 2;
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.font = '90px serif'
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(player.laureate.emoji, 0, 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 function renderImage(x, y, width, height, angle, scale = 1, image) {
