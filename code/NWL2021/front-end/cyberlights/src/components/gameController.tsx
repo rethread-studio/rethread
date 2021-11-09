@@ -31,7 +31,10 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
     socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
     socket.on("leave", () => { history.push("/") });
 
-    const setEmojitoLaureate = (e: string) => { setEmoji(e); }
+    const setEmojitoLaureate = (e: string) => {
+        setEmoji(e);
+        socket.emit("emote", e)
+    }
 
     //load characters data
     useEffect(() => {
