@@ -507,15 +507,43 @@
     ]
   },
   {
-    "text": "Does the X-ray have patents?",
-    "type": "Conrad",
+    "text": "Is Sir Alexander a Knight?",
+    "type": "Flemming",
     "answers": [
       {
-        "text": "Yes :(",
+        "text": "Yes",
         "isCorrect": false
       },
       {
-        "text": "No :)",
+        "text": "No",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "What was the first name of Penicillin?",
+    "type": "Flemming",
+    "answers": [
+      {
+        "text": "P. rubens",
+        "isCorrect": false
+      },
+      {
+        "text": "Mould juice",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Who is the father of modern antibiotics?",
+    "type": "Flemming",
+    "answers": [
+      {
+        "text": "Penicillin",
+        "isCorrect": false
+      },
+      {
+        "text": "Advil",
         "isCorrect": true
       }
     ]
