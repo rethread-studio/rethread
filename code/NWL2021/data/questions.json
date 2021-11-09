@@ -463,5 +463,61 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "Who waitressed in a jazz club?",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Frances Arnold",
+        "isCorrect": true
+      },
+      {
+        "text": "Nicola Pellow",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What concept did Frances Arnold apply to find new proteins",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Natural evolution",
+        "isCorrect": true
+      },
+      {
+        "text": "Artificial intelligence",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What process did Frances Arnold apply to find new proteins",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Natural evolution",
+        "isCorrect": true
+      },
+      {
+        "text": "Artificial intelligence",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What is the grand-diversity generating machine?",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Evolution",
+        "isCorrect": true
+      },
+      {
+        "text": "Composition",
+        "isCorrect": false
+      }
+    ]
   }
 ]
