@@ -3,6 +3,7 @@ use clap::{App, Arg, SubCommand};
 use ctrlc;
 use nannou_osc as osc;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::fs;
 use std::fs::File;
@@ -121,8 +122,26 @@ fn main() {
                         .short("d")
                         .takes_value(true),
                 )
-                .arg(Arg::with_name("skip_ms").short("s").long("skip").value_name("SKIP_MS").help("Skips SKIP_MS milliseconds into the recorded data.").takes_value(true))
-                .arg(Arg::with_name("input_path").short("i").long("input").takes_value(true))
+                .arg(
+                    Arg::with_name("analyze")
+                        .help("only print analysis of data")
+                        .long("analyze")
+                        .short("a"),
+                )
+                .arg(
+                    Arg::with_name("skip_ms")
+                        .short("s")
+                        .long("skip")
+                        .value_name("SKIP_MS")
+                        .help("Skips SKIP_MS milliseconds into the recorded data.")
+                        .takes_value(true),
+                )
+                .arg(
+                    Arg::with_name("input_path")
+                        .short("i")
+                        .long("input")
+                        .takes_value(true),
+                )
                 .arg(Arg::with_name("osc_addr").short("a").takes_value(true)),
         )
         .get_matches();
@@ -146,12 +165,20 @@ fn main() {
                 .value_of("input_path")
                 .unwrap_or("./monitor_data.json"),
         );
-        let skip_ms = matches.value_of("skip_ms").unwrap_or("0").parse::<i64>().unwrap_or(0);
+        let skip_ms = matches
+            .value_of("skip_ms")
+            .unwrap_or("0")
+            .parse::<i64>()
+            .unwrap_or(0);
         let destination = matches.value_of("destination").unwrap_or("127.0.0.1:57130");
         let osc_addr = matches.value_of("osc_addr").unwrap_or("/cyberglow");
         let messages = load_data(&input_path);
         if let Some(messages) = messages {
-            play_back_data(destination, osc_addr, messages, quit, skip_ms);
+            if matches.is_present("analyze") {
+                print_all_message_types(&messages);
+            } else {
+                play_back_data(destination, osc_addr, messages, quit, skip_ms);
+            }
         } else {
             println!("Failed to load data to play back, exiting.");
         }
@@ -260,7 +287,7 @@ fn play_back_data(
     // This isn't very precise, as sending each message takes some time so there will be drift, but it's negligable for this purpose
     for m in &mut messages {
         match m {
-            Message::Monitor(m) => m.timestamp -= accumulated_ts,
+            Message::Monitor(m) => m.timestamp = (m.timestamp - accumulated_ts).min(300),
             Message::Ftrace(m) => m.timestamp -= accumulated_ts,
         }
 
@@ -286,6 +313,24 @@ fn play_back_data(
 
         println!("{:?}", m);
         m.send(&sender);
+    }
+}
+
+fn print_all_message_types(messages: &Vec<Message>) {
+    let mut map = HashMap::new();
+    for m in messages {
+        match m {
+            Message::Monitor(m) => {
+                let origin_map = map.entry(m.origin.clone()).or_insert(HashMap::new());
+                *origin_map.entry(m.action.clone()).or_insert(1) += 1;
+            }
+            Message::Ftrace(_m) => {}
+        }
+    }
+    for (origin, map) in map {
+        for (action, num) in map {
+            println!("{}: {}, {}", origin, action, num);
+        }
     }
 }
 
