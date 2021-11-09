@@ -1,0 +1,33 @@
+<h2>Questions</h2>
+<ol>
+  <li ng-repeat="question in questions">
+    <input
+      type="text"
+      class="form-control-plaintext"
+      ng-model="question.text"
+    />
+    <div class="input-group mb-1">
+      <input
+        type="text"
+        class="form-control"
+        ng-model="question.answers[0].text"
+      />
+      <span class="input-group-text"
+        >Is valid?
+        <input type="checkbox" ng-model="question.answers[0].isCorrect"
+      /></span>
+    </div>
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control"
+        ng-model="question.answers[1].text"
+      />
+      <span class="input-group-text"
+        >Is valid?
+        <input type="checkbox" ng-model="question.answers[1].isCorrect"
+      /></span>
+    </div>
+  </li>
+</ol>
+<button ng-click="addQuestion()">Add question</button>

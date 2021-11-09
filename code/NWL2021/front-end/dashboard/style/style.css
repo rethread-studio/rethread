@@ -1,3 +1,10 @@
+body {
+  min-height: 75rem;
+  padding-top: 4.5rem;
+}
+ng-view {
+  display: block;
+}
 ul {
   list-style: none;
   margin: 0;
@@ -5,8 +12,4 @@ ul {
 }
 ul ul {
   margin-left: 15px;
-}
-
-li {
-  margin-bottom: 15px;
 }

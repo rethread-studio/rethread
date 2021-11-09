@@ -83,6 +83,10 @@ export default async function start() {
     "/admin/",
     express.static(path.join(__dirname, "..", "front-end", "dashboard"))
   );
+  app.use(
+    "/admin/*",
+    express.static(path.join(__dirname, "..", "front-end", "dashboard", "index.html"))
+  );
 
   app.use(
     "/img/laureates/",

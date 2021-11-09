@@ -395,20 +395,6 @@
     ]
   },
   {
-    "text": "Mother Teresa operated missions in",
-    "type": "teresa",
-    "answers": [
-      {
-        "text": "the whole World",
-        "isCorrect": true
-      },
-      {
-        "text": "India",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
     "text": "Mother Teresa worked in",
     "type": "teresa",
     "answers": [
@@ -437,29 +423,43 @@
     ]
   },
   {
-    "text": "In 1997 how many sisters worked with Mother Teresa",
+    "text": "Are both Mother Teresa's miracles related to healing?",
     "type": "teresa",
     "answers": [
       {
-        "text": "4000",
+        "text": "yes",
         "isCorrect": true
       },
       {
-        "text": "40000",
+        "text": "no",
         "isCorrect": false
       }
     ]
   },
   {
-    "text": "Both Mother Teresa's miracles are related to healing",
-    "type": "teresa",
+    "text": "Internet meme was first mentioned in 1994 by",
+    "type": "CS",
     "answers": [
       {
-        "text": "true",
+        "text": "Mike Godwyn",
         "isCorrect": true
       },
       {
-        "text": "false",
+        "text": "Mike Tyson",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "The cake is a lie",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "It's a meme",
+        "isCorrect": true
+      },
+      {
+        "text": "It's true",
         "isCorrect": false
       }
     ]

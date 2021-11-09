@@ -1,71 +1,27 @@
-<button ng-click="load()">Load state from file</button>
-<button ng-click="export()">Export state to file</button>
-
-<h2>State</h2>
-<form>
-  Width: <input type="number" min="1" ng-model="state.width" /><br />
-  Height: <input type="number" min="1" ng-model="state.height" /><br />
-  Unit size: <input type="number" min="1" ng-model="state.unitSize" /><br />
-
-  <h4>Question Position</h4>
-  x: <input type="number" min="1" ng-model="state.questionPosition.x" /><br />
-  y: <input type="number" min="1" ng-model="state.questionPosition.y" /><br />
-  Width:
-  <input type="number" min="1" ng-model="state.questionPosition.width" /><br />
-  height:
-  <input type="number" min="1" ng-model="state.questionPosition.height" /><br />
-
-  <h4>Answer Positions</h4>
-  <div ng-repeat="answer in state.answersPositions">
-    <h5>Answer Position</h5>
-    x: <input type="number" min="1" ng-model="answer.x" /><br />
-    y: <input type="number" min="1" ng-model="answer.y" /><br />
-    Width:
-    <input type="number" min="1" ng-model="answer.width" /><br />
-    height:
-    <input type="number" min="1" ng-model="answer.height" /><br /><br />
+<h2>Current Question <span class="badge bg-primary text-wrap">until {{gameState.questionEndDate | date:"HH:MM:ss"}}</span></h2>
+<p>
+  <strong>{{gameState.question.text}}</strong> <br />
+  <div class="row text-center">
+    <div class="col-5">
+      {{gameState.question.answers[0].text}}
+    </div>
+    <div class="col-auto">or</div>
+    <div class="col-5">
+      {{gameState.question.answers[1].text}}
+    </div>
   </div>
-</form>
-<h2>Questions?</h2>
-<ul>
-  <li ng-repeat="question in questions">
-    <input type="text" ng-model="question.text" style="width: 350px" /><br />
-    Answers:
-    <ul>
-      <li ng-repeat="answer in question.answers">
-        Answer: <input type="text" ng-model="answer.text" /><br />
-        Is valid?: <input type="checkbox" ng-model="answer.isCorrect" /><br />
-      </li>
-    </ul>
-    <button ng-click="addAnswer(question)">Add answer</button>
+</p>
+
+<h2>Connected players ({{gameState.players.length || 0}})</h2>
+<ol>
+  <li ng-repeat="player in gameState.players">
+    <div class="row">
+      <div class="col-2">
+        <img ng-src="/img/laureates/{{player.laureate.imagePath}}" style="width: 100%;">
+      </div>
+      <div class="col-9">
+        <h3>{{player.id}}</h3>
+        <p>{{player.x}}x{{player.y}}</p>
+    </div>
   </li>
-</ul>
-<button ng-click="addQuestion()">Add question</button>
-<h2>Laureates</h2>
-<ul>
-  <li ng-repeat="laureate in laureates">
-    <img ng-src="/img/laureates/{{laureate.imagePath}}" width="150px"/><br />
-    First name: <input type="text" ng-model="laureate.firstname" /><br />
-    Last name: <input type="text" ng-model="laureate.surname" /><br />
-    Image :
-    <form action="/api/admin/laureate/image" method="POST" enctype="multipart/form-data" >
-      <input type="hidden" name="id" ng-value="laureate._id">
-      <input type="file" name="image" />
-      <input type="submit">
-    </form>
-    <br />
-    Born country: <input type="text" ng-model="laureate.bornCountry" /><br />
-    Born city: <input type="text" ng-model="laureate.bornCity" /><br />
-    Died country: <input type="text" ng-model="laureate.diedCountry" /><br />
-    Died city: <input type="text" ng-model="laureate.diedCity" /><br />
-    Gender: <input type="text" ng-model="laureate.gender" /><br />
-    <ul>
-      <li ng-repeat="prize in laureate.prizes">
-        Year: <input type="number" ng-model="prize.year" /><br />
-        Category: <input type="text" ng-model="prize.category" /><br />
-        <textarea ng-model="prize.motivation" rows="7" cols="50"></textarea
-        ><br />
-      </li>
-    </ul>
-  </li>
-</ul>
+</ol>
