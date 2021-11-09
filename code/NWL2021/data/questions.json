@@ -479,6 +479,20 @@
     ]
   },
   {
+    "text": "Within which religion is the Dalai Lama the highest religious leader?",
+    "type": "dalai_lama",
+    "answers": [
+      {
+        "text": "Tibetan Buddhism",
+        "isCorrect": true
+      },
+      {
+        "text": "Zen Buddhism",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
     "text": "X in X-ray stands for...",
     "type": "Conrad",
     "answers": [
@@ -502,6 +516,76 @@
       },
       {
         "text": "No :)",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who waitressed in a jazz club?",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Frances Arnold",
+        "isCorrect": true
+      },
+      {
+        "text": "Nicola Pellow",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "When was the first appointment of a Dalai Lama?",
+    "type": "dalai_lama",
+    "answers": [
+      {
+        "text": "In June 1578",
+        "isCorrect": true
+      },
+      {
+        "text": "In December 1124",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What concept did Frances Arnold apply to find new proteins",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Natural evolution",
+        "isCorrect": true
+      },
+      {
+        "text": "Artificial intelligence",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where does the Dalai Lama currently live?",
+    "type": "dalai_lama",
+    "answers": [
+      {
+        "text": "Germany",
+        "isCorrect": false
+      },
+      {
+        "text": "India",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "What year did Nelly Sachs flee to Sweden?",
+    "type": "sachs",
+    "answers": [
+      {
+        "text": "1944",
+        "isCorrect": false
+      },
+      {
+        "text": "1940",
         "isCorrect": true
       }
     ]
@@ -521,6 +605,20 @@
     ]
   },
   {
+    "text": "Which of the following is a recurring theme in Nelly Sachs' work?",
+    "type": "sachs",
+    "answers": [
+      {
+        "text": "Mental health",
+        "isCorrect": false
+      },
+      {
+        "text": "Suffering of Jews",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
     "text": "What was the first name of Penicillin?",
     "type": "Flemming",
     "answers": [
@@ -530,6 +628,20 @@
       },
       {
         "text": "Mould juice",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Where in Stockholm are Nelly Sachs' possessions kept to this day?",
+    "type": "sachs",
+    "answers": [
+      {
+        "text": "Nationalmuseum",
+        "isCorrect": false
+      },
+      {
+        "text": "Kungliga biblioteket",
         "isCorrect": true
       }
     ]
@@ -545,6 +657,34 @@
       {
         "text": "Advil",
         "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "What process did Frances Arnold apply to find new proteins",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Natural evolution",
+        "isCorrect": true
+      },
+      {
+        "text": "Artificial intelligence",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What is the grand-diversity generating machine?",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Evolution",
+        "isCorrect": true
+      },
+      {
+        "text": "Composition",
+        "isCorrect": false
       }
     ]
   }
