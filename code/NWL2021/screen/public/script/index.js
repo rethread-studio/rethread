@@ -20,7 +20,7 @@ function updateGamePage(gameState) {
     gameState.players.length == 0
   ) {
     gamePage = "demo";
-    if (demoInterval == null) demoInterval = setInterval(runDemoEngine, 1000, dummyGameState);
+    if (demoInterval == null) demoInterval = setInterval(runDemoEngine, 900, dummyGameState);
   } else {
     if (gamePage == "result" || gamePage == "question") {
       clearInterval(demoInterval);
@@ -312,24 +312,93 @@ function drawPreviousPosition(players) {
 
 function drawQuestion(question) {
   if (!question) return;
-
+  const size = 2.5;
   //draw the mid point
+
   for (let i = 0; i < setup.questionPosition.width + 1; i++) {
     for (let j = 0; j < setup.questionPosition.height + 1; j++) {
-      ctx.fillStyle = "white";
+
       ctx.beginPath();
-      ctx.arc(
-        setup.questionPosition.x * setup.unitSize +
-        setup.unitSize * i +
-        setup.unitSize / 2,
-        setup.questionPosition.y * setup.unitSize +
-        setup.unitSize * j +
-        setup.unitSize / 2,
-        gameCycle ? config.dotSize.small : config.dotSize.big,
-        0,
-        2 * Math.PI
-      );
-      ctx.fill();
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = "4";
+      if (i % 2 == 0) {
+        if (gameCycle) {
+          ctx.moveTo(
+            setup.questionPosition.x * setup.unitSize +
+            setup.unitSize * i +
+            setup.unitSize / 2
+            , setup.questionPosition.y * setup.unitSize +
+            setup.unitSize * j + setup.unitSize / size);
+          ctx.lineTo(
+            setup.questionPosition.x * setup.unitSize +
+            setup.unitSize * i +
+            setup.unitSize / 2
+            , setup.questionPosition.y * setup.unitSize +
+            setup.unitSize * j +
+            setup.unitSize - setup.unitSize / size
+          );
+        } else {
+          ctx.moveTo(
+            setup.questionPosition.x * setup.unitSize +
+            setup.unitSize * i +
+            setup.unitSize / size
+            , setup.questionPosition.y * setup.unitSize +
+            setup.unitSize * j + setup.unitSize / 2);
+          ctx.lineTo(
+            setup.questionPosition.x * setup.unitSize +
+            setup.unitSize * i +
+            setup.unitSize - setup.unitSize / size,
+            setup.questionPosition.y * setup.unitSize +
+            setup.unitSize * j + setup.unitSize / 2
+          );
+        }
+      } else {
+        if (gameCycle) {
+          ctx.moveTo(
+            setup.questionPosition.x * setup.unitSize +
+            setup.unitSize * i +
+            setup.unitSize / size
+            , setup.questionPosition.y * setup.unitSize +
+            setup.unitSize * j + setup.unitSize / 2);
+          ctx.lineTo(
+            setup.questionPosition.x * setup.unitSize +
+            setup.unitSize * i +
+            setup.unitSize - setup.unitSize / size,
+            setup.questionPosition.y * setup.unitSize +
+            setup.unitSize * j + setup.unitSize / 2
+          );
+        } else {
+          ctx.moveTo(
+            setup.questionPosition.x * setup.unitSize +
+            setup.unitSize * i +
+            setup.unitSize / 2
+            , setup.questionPosition.y * setup.unitSize +
+            setup.unitSize * j + setup.unitSize / size);
+          ctx.lineTo(
+            setup.questionPosition.x * setup.unitSize +
+            setup.unitSize * i +
+            setup.unitSize / 2
+            , setup.questionPosition.y * setup.unitSize +
+            setup.unitSize * j +
+            setup.unitSize - setup.unitSize / size
+          );
+
+        }
+      }
+
+      ctx.stroke();
+      // ctx.arc(
+      //   setup.questionPosition.x * setup.unitSize +
+      //   setup.unitSize * i +
+      //   setup.unitSize / 2,
+      //   setup.questionPosition.y * setup.unitSize +
+      //   setup.unitSize * j +
+      //   setup.unitSize / 2,
+      //   gameCycle ? config.dotSize.small : config.dotSize.big,
+      //   0,
+      //   2 * Math.PI
+      // );
+      // ctx.fill();
     }
   }
 }
@@ -367,9 +436,10 @@ function updateAnswer(question) {
 function drawAnswers(question) {
   if (!question) return;
 
-  for (let i = 0; i < question.answers.length; i++) {
-    const position = setup.answersPositions[i];
+  for (let k = 0; k < question.answers.length; k++) {
+    const position = setup.answersPositions[k];
 
+    const size = k % 2 == 0 ? gameCycle ? config.dotSize.small : config.dotSize.big : gameCycle ? config.dotSize.big : config.dotSize.small;
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
       for (let j = 0; j < position.height + 1; j++) {
@@ -378,7 +448,7 @@ function drawAnswers(question) {
         ctx.arc(
           position.x * setup.unitSize + setup.unitSize * i + setup.unitSize / 2,
           position.y * setup.unitSize + setup.unitSize * j + setup.unitSize / 2,
-          gameCycle ? config.dotSize.small : config.dotSize.big,
+          size,
           0,
           2 * Math.PI
         );
