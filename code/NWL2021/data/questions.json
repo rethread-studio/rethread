@@ -729,6 +729,76 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "Did Bob Dylan play at the March on Washington in 1963, where Martin Luther King, Jr gave his \"I Have A Dream\" speech?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": true
+      },
+      {
+        "text": "No",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which nobel prize did Bob Dylan received?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "Peace",
+        "isCorrect": false
+      },
+      {
+        "text": "Literature",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Bob Dylan go to Stockholm to receive his nobel prize?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "How old was was Malala when she received the nobel prize?",
+    "type": "yousafzai",
+    "answers": [
+      {
+        "text": "25",
+        "isCorrect": false
+      },
+      {
+        "text": "17",
+        "description": "Malala is the youngest laureate that received a nobel prize.",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Taliban leaders unanimously agreed to kill Malala Yousafzai?",
+    "type": "yousafzai",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": true
+      },
+      {
+        "text": "No",
+        "isCorrect": false
+      }
+    ]
   }
-  
 ]
