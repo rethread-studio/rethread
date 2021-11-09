@@ -11,8 +11,9 @@ import { ArrowBtn } from "./arrowBtn";
 import { socket } from "../api";
 import { gameControllerI, controllDirection } from "../types";
 import { categoryColor } from "../utils";
+import { EmojiList } from "./emojiList";
 
-export const GameController = ({ laureate, selectHandler, emoji }: React.PropsWithChildren<gameControllerI>) => {
+export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
     const [answer, setAnswer] = useState<string | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
@@ -20,6 +21,7 @@ export const GameController = ({ laureate, selectHandler, emoji }: React.PropsWi
     const [color, setColor] = useState<string>(categoryColor.physics)
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
+    const [show, setShow] = useState(false);
 
     socket.on("question", (question) => { setQuestion(question) });
     socket.on("enterAnswer", ({ answer }) => {
@@ -29,6 +31,10 @@ export const GameController = ({ laureate, selectHandler, emoji }: React.PropsWi
     socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
     socket.on("leave", () => { history.push("/") });
 
+    const setEmojitoLaureate = (e: string) => {
+        setEmoji(e);
+        laureate.emoji = e;
+    }
 
     //load characters data
     useEffect(() => {
@@ -37,7 +43,6 @@ export const GameController = ({ laureate, selectHandler, emoji }: React.PropsWi
         }
         const keyCategory: string = laureate.prizes.length > 1 ? "special" : laureate.prizes[0].category as string;
         setColor(categoryColor[keyCategory]);
-        laureate.emoji = emoji;
         socket.emit("start", laureate);
 
         const pressHandler = ({ key }: { key: string }) => {
@@ -64,7 +69,7 @@ export const GameController = ({ laureate, selectHandler, emoji }: React.PropsWi
             socket.off("question");
             window.removeEventListener("keydown", pressHandler);
         }
-    }, [laureate, history, selectHandler, emoji]);
+    }, [laureate, history, selectHandler]);
 
 
 
@@ -110,9 +115,11 @@ export const GameController = ({ laureate, selectHandler, emoji }: React.PropsWi
 
                 <div className="flex flex-row w-full justify-between text-gray-400 place-self-end p-4">
                     <span className="text-xs ">Press the arrows <br /> to move </span>
+                    <button onClick={() => { setShow(true) }} className="text-2xl border-2 border-gray-500 rounded-full w-9">{emoji}</button>
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
             </div>
+            <EmojiList handleClick={setEmojitoLaureate} show={show} setShow={setShow} />
         </div>
     )
 }

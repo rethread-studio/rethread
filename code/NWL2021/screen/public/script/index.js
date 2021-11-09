@@ -195,7 +195,7 @@ function drawEmoji(player) {
   const y = player.y * setup.unitSize + setup.unitSize / 2;
   ctx.translate(x, y);
   ctx.rotate(angle);
-  ctx.font = '90px serif'
+  ctx.font = `${!gameCycle ? '70px' : '90px'} serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(player.laureate.emoji, 0, 0);

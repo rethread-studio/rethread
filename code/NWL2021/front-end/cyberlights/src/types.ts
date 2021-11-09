@@ -47,6 +47,7 @@ export interface gameControllerI {
     laureate: laureateI,
     selectHandler: React.Dispatch<React.SetStateAction<laureateI | null>>,
     emoji: string,
+    setEmoji: React.Dispatch<React.SetStateAction<string>>;
 }
 
 

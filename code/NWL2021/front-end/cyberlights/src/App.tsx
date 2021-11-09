@@ -24,7 +24,7 @@ function App() {
   const [laureates, setLaureates] = useState<laureateI[]>(dummyLaureates)
   const [loading, setLoading] = useState(true);
   const [laureate, setLaureate] = useState<laureateI | null>(null);
-  const emoji = getEmoji();
+  const [emoji, setEmoji] = useState(getEmoji());
 
   socket.on("connect", () => setLaureate(null));
   socket.on("disconnect", () => setLaureate(null));
@@ -51,7 +51,7 @@ function App() {
             {laureate ? <Redirect to="/play" /> : loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={setLaureate} />}
           </Route>
           <Route path="/play">
-            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} />}
+            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} setEmoji={setEmoji} />}
           </Route>
           <Route path="/">
             {loading ? <Loading /> : <Home />}
