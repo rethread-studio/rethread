@@ -463,5 +463,61 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "What was the first medical X-ray?",
+    "type": "Conrad",
+    "answers": [
+      {
+        "text": "Wilhelms wife's hand",
+        "isCorrect": true
+      },
+      {
+        "text": "A dog",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "X in X-ray stands for...",
+    "type": "Conrad",
+    "answers": [
+      {
+        "text": "Roman number",
+        "isCorrect": false
+      },
+      {
+        "text": "X for unknown",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Does the X-ray have patents?",
+    "type": "Conrad",
+    "answers": [
+      {
+        "text": "Yes :(",
+        "isCorrect": false
+      },
+      {
+        "text": "No :)",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Does the X-ray have patents?",
+    "type": "Conrad",
+    "answers": [
+      {
+        "text": "Yes :(",
+        "isCorrect": false
+      },
+      {
+        "text": "No :)",
+        "isCorrect": true
+      }
+    ]
   }
 ]
