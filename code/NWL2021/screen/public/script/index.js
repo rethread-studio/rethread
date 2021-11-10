@@ -9,42 +9,54 @@ const ctx = canvas.getContext("2d");
 const config = {
   dotSize: { small: 4, big: 8 },
   answerSize: { small: "60px", big: "100px" },
-  demoTime: 6,
 };
 
-let gamePage = "demo";
-let demoInterval = null;
-let demoScreenTime = config.demoTime;
-let demoScreenState = true;
+let gamePage = "demo1";
+const demoConfig = {
+  interval: null,
+  time: 6,
+  screenTime: 6,
+  screeenState: true,
+}
+
 function updateGamePage(gameState) {
   if (
     gameState == null ||
     !gameState.players ||
     gameState.players.length == 0
   ) {
-    gamePage = "demo";
-    if (demoInterval == null) demoInterval = setInterval(runDemoEngine, 1000, dummyGameState);
+    setGamePage(demoConfig.screeenState ? "demo1" : "demo2");
+    if (demoConfig.interval == null) demoConfig.interval = setInterval(runDemoEngine, 1000, dummyGameState);
   } else {
     if (gamePage == "result" || gamePage == "question") {
       cleanDemoInterval();
       return;
     }
-    gamePage = "play";
+    setGamePage("play");
     cleanDemoInterval();
   }
 }
 
+
+function setGamePage(newGamePage) {
+  const oldGamePage = gamePage;
+  gamePage = newGamePage;
+  if (oldGamePage != gamePage) updateGameInterface();
+}
+
 function cleanDemoInterval() {
-  clearInterval(demoInterval);
-  demoScreenTime = config.demoTime;
-  demoInterval = null;
+  clearInterval(demoConfig.interval);
+  demoConfig.screeenState = true;
+  demoConfig.screenTime = demoConfig.time;
+  demoConfig.interval = null;
 }
 
 function runDemoEngine(gameState) {
-  demoScreenTime = demoScreenTime - 1;
-  if (demoScreenTime <= 0) {
-    demoScreenState = !demoScreenState;
-    demoScreenTime = config.demoTime;
+  demoConfig.screenTime = demoConfig.screenTime - 1;
+  if (demoConfig.screenTime <= 0) {
+    demoConfig.screeenState = !demoConfig.screeenState;
+    demoConfig.screenTime = demoConfig.time;
+    setGamePage(demoConfig.screeenState ? "demo1" : "demo2");
     updateAnswer(dummyGameState.question);
   }
   for (const player of gameState.players) {
@@ -63,13 +75,14 @@ socket.on("gameStateUpdate", (data) => {
   updateGameState();
 });
 
+
 let timerInterval = null;
 socket.on("question", ({ question, endDate }) => {
-  gamePage = "question";
+  setGamePage("question")
   updateGamePage(gameState);
   gameState.question = question;
   setTimeout(() => {
-    gamePage = "play";
+    setGamePage("play");
     updateGamePage(gameState);
     updateGameState();
   }, 4000);
@@ -84,7 +97,7 @@ socket.on("question", ({ question, endDate }) => {
 });
 
 socket.on("answer", ({ question, answer }) => {
-  gamePage = "result";
+  setGamePage("result");
   updateGamePage(gameState);
   updateGameState();
 });
@@ -489,41 +502,11 @@ function drawAnswers(question) {
   }
 }
 
-function showAnswers(_show) {
-  const answerE1 = document.querySelector(".answer1");
-  const answerE2 = document.querySelector(".answer2");
-  answerE1.style.display = _show ? null : "none";
-  answerE2.style.display = _show ? null : "none";
-}
-
-function showResults(_show) {
-  const results = document.querySelector(".result");
-  results.style.display = _show ? null : "none";
-}
-
-function showQuestion(_show) {
-  const results = document.querySelector(".question");
-  results.style.display = _show ? null : "none";
-}
-
-function showDemo(_show) {
-  const results = document.querySelector(".demo");
-  results.style.display = _show ? null : "none";
-}
-
-function showTimer(_show) {
-  const results = document.querySelector(".timer");
-  results.style.display = _show ? null : "none";
-}
-
-function getCBoardClass() {
-  return gameCycle ? "chess1" : "chess2";
-}
-
-function drawBoard() {
-  const game = document.getElementById("game");
-  game.classList.remove(getCBoardClass());
-  game.classList.add(getCBoardClass());
+function showElement(_elArr) {
+  for (const el of _elArr) {
+    const element = document.querySelector(`.${el.name}`);
+    element.style.display = el.show ? null : "none";
+  }
 }
 
 function moveDummyPlayer(player) {
@@ -575,45 +558,75 @@ function updateGameState() {
   //clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   switch (gamePage) {
-    case "demo":
-      if (demoScreenState) {
-        showResults(false);
-        showAnswers(false);
-        showQuestion(false);
-        showDemo(true);
-        showTimer(false);
-      } else {
-        showResults(false);
-        showAnswers(true);
-        showQuestion(true);
-        showDemo(false);
-        showTimer(false);
-      }
+    case "demo1":
+      renderDemo();
+      break;
+    case "demo2":
       renderDemo();
       break;
     case "play":
-      showAnswers(true);
-      showDemo(false);
-      showQuestion(true);
-      showResults(false);
-      showTimer(true);
       renderGame();
       break;
     case "question":
-      showAnswers(false);
-      showResults(false);
-      showQuestion(true);
-      showDemo(false);
-      showTimer(false);
       drawQuestion(gameState.question);
       break;
     case "result":
-      showAnswers(false);
-      showResults(true);
-      showQuestion(false);
-      showDemo(false);
-      showTimer(false);
       renderResult();
+      break;
+  }
+}
+function updateGameInterface() {
+  switch (gamePage) {
+    case "demo1":
+      showElement([
+        { name: "result", show: false },
+        { name: "answer1", show: false },
+        { name: "answer2", show: false },
+        { name: "question", show: false },
+        { name: "timer", show: false },
+        { name: "demo", show: true },
+      ]);
+      break;
+    case "demo2":
+      showElement([
+        { name: "result", show: false },
+        { name: "answer1", show: true },
+        { name: "answer2", show: true },
+        { name: "question", show: true },
+        { name: "demo", show: false },
+        { name: "timer", show: false },
+      ]);
+      break;
+    case "play":
+      updateAnswer(gameState.question);
+      showElement([
+        { name: "result", show: false },
+        { name: "answer1", show: true },
+        { name: "answer2", show: true },
+        { name: "question", show: true },
+        { name: "demo", show: false },
+        { name: "timer", show: true },
+      ]);
+      break;
+    case "question":
+      showElement([
+        { name: "result", show: false },
+        { name: "answer1", show: false },
+        { name: "answer2", show: false },
+        { name: "question", show: true },
+        { name: "demo", show: false },
+        { name: "timer", show: false },
+      ]);
+      break;
+    case "result":
+      showElement([
+        { name: "result", show: true },
+        { name: "answer1", show: false },
+        { name: "answer2", show: false },
+        { name: "question", show: false },
+        { name: "demo", show: false },
+        { name: "timer", show: false },
+      ]);
       break;
   }
 }
@@ -668,7 +681,7 @@ function renderResult() {
 
 function renderDemo() {
   if (!setup) return;
-  if (!demoScreenState) {
+  if (!demoConfig.screeenState) {
     drawAnswers(dummyGameState.question);
     drawQuestion(dummyGameState.question);
   }
