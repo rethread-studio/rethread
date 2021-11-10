@@ -687,5 +687,118 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "What did Elinor Ostrom study?",
+    "type": "ostrom",
+    "answers": [
+      {
+        "text": "Polycentric systems",
+        "isCorrect": true
+      },
+      {
+        "text": "Microtonality",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What concept does Elinor Ostrom focus on?",
+    "type": "ostrom",
+    "answers": [
+      {
+        "text": "Common Pool Resource",
+        "isCorrect": true
+      },
+      {
+        "text": "Capability",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who was the first woman to be awarded a Nobel Memorial Prize in Economic Sciences ?",
+    "type": "ostrom",
+    "answers": [
+      {
+        "text": "Elinor Ostrom",
+        "isCorrect": true
+      },
+      {
+        "text": "Esther Duflo",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Did Bob Dylan play at the March on Washington in 1963, where Martin Luther King, Jr gave his \"I Have A Dream\" speech?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": true
+      },
+      {
+        "text": "No",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which nobel prize did Bob Dylan received?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "Peace",
+        "isCorrect": false
+      },
+      {
+        "text": "Literature",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Bob Dylan go to Stockholm to receive his nobel prize?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "How old was was Malala when she received the nobel prize?",
+    "type": "yousafzai",
+    "answers": [
+      {
+        "text": "25",
+        "isCorrect": false
+      },
+      {
+        "text": "17",
+        "description": "Malala is the youngest laureate that received a nobel prize.",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Taliban leaders unanimously agreed to kill Malala Yousafzai?",
+    "type": "yousafzai",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": true
+      },
+      {
+        "text": "No",
+        "isCorrect": false
+      }
+    ]
   }
 ]
