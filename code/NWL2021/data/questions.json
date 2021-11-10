@@ -512,7 +512,7 @@
     "answers": [
       {
         "text": "Yes :(",
-        "isCorrect": false
+        "isCorrect": true
       },
       {
         "text": "No :)",
