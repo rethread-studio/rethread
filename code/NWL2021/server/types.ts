@@ -4,8 +4,10 @@ import { IQuestion } from "./database/questions/questions.types";
 
 export interface Player extends Position {
   inAnswer: boolean;
-  laureate: any;
+  laureateID: string;
   socket?: Socket;
+  socketID: string;
+  userID: string;
   previousPositions: Position[];
   status: playerStatus;
 }
@@ -20,21 +22,16 @@ export interface BoxPosition extends Position {
 }
 
 export interface GameState {
-  players: [
-    {
-      id: string;
-      x: number;
-      y: number;
-      inAnswer: boolean;
-      laureate: ILaureate;
-      previousPositions: Position[];
-      status: playerStatus;
-    }
-  ];
+  players: Player[];
   question: IQuestion;
 }
 
-export type MonitoringEvent = ServerEvent | UserEvent | DatabaseEvent | GameEngineEvent | NodeEvent;
+export type MonitoringEvent =
+  | ServerEvent
+  | UserEvent
+  | DatabaseEvent
+  | GameEngineEvent
+  | NodeEvent;
 
 interface IMonitoringEvent {
   origin: "mongodb" | "gameEngine" | "user" | "screen" | "server" | "node";
@@ -62,6 +59,7 @@ export interface NodeEvent extends IMonitoringEvent {
 export interface UserEvent extends IMonitoringEvent {
   origin: "user";
   userID: string;
+  socketID: string;
   position?: Position;
 }
 

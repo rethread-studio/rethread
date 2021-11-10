@@ -43,7 +43,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
         }
         const keyCategory: string = laureate.prizes.length > 1 ? "special" : laureate.prizes[0].category as string;
         setColor(categoryColor[keyCategory]);
-        socket.emit("start", laureate);
+        socket.emit("start", laureate._id);
 
         const pressHandler = ({ key }: { key: string }) => {
             if (key === "ArrowDown") {

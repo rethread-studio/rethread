@@ -1,6 +1,6 @@
 import { laureateI, tCategoryColor } from './types';
 
-export const dataToLaurates = (l: any, i: number): laureateI => {
+export const dataToLaureates = (l: any, i: number): laureateI => {
     const keyCategory: string = l.prizes.length > 1 ? "special" : l.prizes[0].category as string;
     l.color = categoryColor[keyCategory];
     return l as laureateI

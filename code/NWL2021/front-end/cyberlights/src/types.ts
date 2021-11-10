@@ -22,6 +22,7 @@ export interface prize {
 export type colorOption = "neonyellow" | "neongreen" | "neonindigo" | "neonpink" | " neonred";
 
 export interface laureateI {
+    _id: string,
     firstname: string,
     surname: string,
     imagePath: string,

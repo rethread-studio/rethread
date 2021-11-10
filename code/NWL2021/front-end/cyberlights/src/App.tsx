@@ -15,27 +15,30 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import './App.css';
-import { getLaureates, dummyLaureates, socket } from './api';
+import { getLaureates, getLaureate, socket } from './api';
 import { laureateI } from './types';
-import { dataToLaurates, getEmoji } from './utils';
+import { dataToLaureates, getEmoji } from './utils';
 
 
 function App() {
-  const [laureates, setLaureates] = useState<laureateI[]>(dummyLaureates)
+  const [laureates, setLaureates] = useState<laureateI[]>([])
   const [loading, setLoading] = useState(true);
   const [laureate, setLaureate] = useState<laureateI | null>(null);
   const [emoji, setEmoji] = useState(getEmoji());
 
   socket.on("connect", () => setLaureate(null));
   socket.on("disconnect", () => setLaureate(null));
-  socket.on("welcome", (data) => setLaureate(data))
+  socket.on("welcome", (laureateID) => {
+    if (!laureateID) return setLaureate(null);
+    getLaureate(laureateID).then(setLaureate).catch(() => setLaureate(null));
+  })
 
   //load characters data
   useEffect(() => {
     getLaureates()
-      .then(data => data.map(dataToLaurates))
+      .then(data => data.map(dataToLaureates))
       .then(data => setLaureates(data))
-      .catch(error => { console.log("getLaureates error", error) })
+      .catch(error => { console.error("getLaureates error", error) })
       .finally(() => {
         setLoading(false);
       })
