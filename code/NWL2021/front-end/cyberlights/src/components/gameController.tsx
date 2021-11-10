@@ -102,7 +102,7 @@ import { EmojiList } from "./emojiList";
 //         )
 //     }
 // }
-export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: React.PropsWithChildren<gameControllerI>) => {
+export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
     const [position, setPosition] = useState<{x: number, y: number}>({x: 0, y: 0});
     const [score, setScore] = useState<number>(0);
@@ -185,13 +185,34 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
 
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
 
+    function isWall(x: number, y: number): boolean {
+        if (!state) return false;
+        if (x <= state.questionPosition.x + state.questionPosition.width && x >= state.questionPosition.x
+            && 
+            y <= state.questionPosition.y + state.questionPosition.height && y >= state.questionPosition.y) {
+            return true;
+        }
+        return false;
+    }
+    function isAnswer(x: number, y: number): boolean {
+        if (!state) return false;
+        for (const answerPosition of state.answersPositions) {
+            if (x <= answerPosition.x + answerPosition.width && x >= answerPosition.x
+                && 
+                y <= answerPosition.y + answerPosition.height && y >= answerPosition.y) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     let grid = <></>;
-    for (let i = 0; i < 13; i++) {
+    for (let i = 0; i < (state?.height || 0); i++) {
         let line = <></>;
-        for (let j = 0; j < 13; j++) {
+        for (let j = 0; j < state.width; j++) {
             line = <>
                 {line}
-                <div className={"grid-position-item " + ((position.y === i && position.x === j) ? "active": "")}></div>
+                <div className={"grid-position-item " + ((position.y === i && position.x === j) ? "active ": " ") + (isWall(j, i) ? "wall ": " ")  + (isAnswer(j, i) ? "grid-answer ": " ")}></div>
             </>
         }
         grid = <>{grid}<div className="grid-line">{line}</div></>
@@ -210,6 +231,11 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
                 <div className="w-full text-neon text-2xl uppercase text-center pt-2 ">
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
+                
+                <div className="grid-position absolute zIndex">
+                    {grid}
+                </div>
+
                 <div className="relative h-full flex flex-col justify-center content-center">
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
                     <img onClick={() => { socket.emit("emote", emoji) }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
@@ -222,9 +248,6 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
                         <ArrowBtn clickEvent={emitDirection} direction="down" color={color} />
                         <ArrowBtn clickEvent={emitDirection} direction="right" color={color} />
                     </div>
-                </div>
-                <div className="grid-position absolute zIndex">
-                    {grid}
                 </div>
 
                 <div className="flex flex-row w-full justify-between text-gray-400 place-self-end p-4">

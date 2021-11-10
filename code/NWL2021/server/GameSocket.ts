@@ -254,9 +254,7 @@ export default class GameSocket {
       session.userID = user._id;
       await Promise.all([session.save(), user.save()]);
     }
-    if (session?.laureate) {
-      socket.emit("welcome", session?.laureate);
-    }
+    socket.emit("welcome", {laureateID: session?.laureate, state: this.engine.state});
     console.log(`[USER ${session.userID}] connected (isNew: ${isNew})`);
 
     let disconnectTimeout;
@@ -341,8 +339,9 @@ export default class GameSocket {
     socket.on("start", (laureateID: string) => {
       session.laureate = laureateID;
       session.save();
+      
       const player = this.engine.newPlayer(socket, laureateID, session.userID);
-
+      
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.play": 1 },
       }).then((user) => {

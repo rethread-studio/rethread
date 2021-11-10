@@ -10,6 +10,5 @@ router.get("/laureates", async (req, res) => {
 router.get("/laureates/:id", async (req, res) => {
   if (req.params.id == "null")
     return res.status(400).json({ error: "Missing id" });
-  console.log(req.params.id == null, "api");
   res.json(await LaureateModel.findById(req.params.id));
 });
