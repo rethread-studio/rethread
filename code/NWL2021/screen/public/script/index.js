@@ -9,10 +9,13 @@ const ctx = canvas.getContext("2d");
 const config = {
   dotSize: { small: 4, big: 8 },
   answerSize: { small: "60px", big: "100px" },
+  demoTime: 6,
 };
 
 let gamePage = "demo";
 let demoInterval = null;
+let demoScreenTime = config.demoTime;
+let demoScreenState = true;
 function updateGamePage(gameState) {
   if (
     gameState == null ||
@@ -20,20 +23,30 @@ function updateGamePage(gameState) {
     gameState.players.length == 0
   ) {
     gamePage = "demo";
-    if (demoInterval == null) demoInterval = setInterval(runDemoEngine, 900, dummyGameState);
+    if (demoInterval == null) demoInterval = setInterval(runDemoEngine, 1000, dummyGameState);
   } else {
     if (gamePage == "result" || gamePage == "question") {
-      clearInterval(demoInterval);
-      demoInterval = null;
+      cleanDemoInterval();
       return;
     }
     gamePage = "play";
-    clearInterval(demoInterval);
-    demoInterval = null;
+    cleanDemoInterval();
   }
 }
 
+function cleanDemoInterval() {
+  clearInterval(demoInterval);
+  demoScreenTime = config.demoTime;
+  demoInterval = null;
+}
+
 function runDemoEngine(gameState) {
+  demoScreenTime = demoScreenTime - 1;
+  if (demoScreenTime <= 0) {
+    demoScreenState = !demoScreenState;
+    demoScreenTime = config.demoTime;
+    updateAnswer(dummyGameState.question);
+  }
   for (const player of gameState.players) {
     moveDummyPlayer(player);
   }
@@ -563,11 +576,19 @@ function updateGameState() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   switch (gamePage) {
     case "demo":
-      showResults(false);
-      showAnswers(false);
-      showQuestion(false);
-      showDemo(true);
-      showTimer(false);
+      if (demoScreenState) {
+        showResults(false);
+        showAnswers(false);
+        showQuestion(false);
+        showDemo(true);
+        showTimer(false);
+      } else {
+        showResults(false);
+        showAnswers(true);
+        showQuestion(true);
+        showDemo(false);
+        showTimer(false);
+      }
       renderDemo();
       break;
     case "play":
@@ -647,6 +668,10 @@ function renderResult() {
 
 function renderDemo() {
   if (!setup) return;
+  if (!demoScreenState) {
+    drawAnswers(dummyGameState.question);
+    drawQuestion(dummyGameState.question);
+  }
   drawPlayersShadow(dummyGameState.players);
   drawPreviousPosition(dummyGameState.players);
   drawPlayers(dummyGameState.players);
@@ -702,5 +727,21 @@ let dummyPlayer2 = {
 
 let dummyGameState = {
   players: [dummyPlayer1, dummyPlayer2],
-  question: {}
+  question: {
+    text: "Do you want to play a game?",
+    _id: "61891216c625175ccc353ea8",
+    answers: [
+      {
+        isCorrect: true,
+        text: "yes",
+        _id: "61891216c625175ccc353ea9"
+      },
+      {
+        isCorrect: false,
+        text: "no",
+        _id: "61891216c625175ccc353ea9"
+      }
+    ]
+
+  }
 }
