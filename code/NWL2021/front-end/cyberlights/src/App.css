@@ -140,3 +140,22 @@ body{
   0 0 0.5rem var(--neon-border-color),
   inset 0 0 0.5rem var(--neon-border-color);  
 }
+
+.grid-position {
+  left: calc(50% - (30px * 13)/2);
+  top: calc(50% - (30px * 13)/2);
+  border: 1px solid rgba(255,255,255,0.3);
+  z-index: 0;
+}
+.grid-line {
+  display: flex;
+}
+.grid-position-item {
+  content: "";
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.grid-position-item.active {
+  background: red;
+}
