@@ -40,7 +40,6 @@ export interface laureateI {
     img?: string,
     prizes: prize[],
     color: colorOption,
-    emoji: string
 }
 
 export interface gameControllerI {
