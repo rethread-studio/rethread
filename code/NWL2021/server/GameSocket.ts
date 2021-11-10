@@ -51,6 +51,7 @@ export default class GameSocket {
         userID: player.userID,
         socketID: player.socket?.id,
       });
+      player.socket?.emit("move", { x: player.x, y: player.y });
       this._hasChange = true;
     });
     this.engine.on("newQuestion").subscribe((questionEvent) => {
