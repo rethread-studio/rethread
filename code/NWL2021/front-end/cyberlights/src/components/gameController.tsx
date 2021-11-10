@@ -89,7 +89,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
     return (
 
         <div className="h-full w-full p-4 ">
-            <div className="h-full border-2 border-gray-600 flex flex-col justify-between overflow-hidden">
+            <div className="h-full border-2 border-gray-600 relative flex flex-col justify-between overflow-hidden">
 
                 <div className="flex flex-row justify-between text-sm">
                     <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">

@@ -46,7 +46,6 @@ export const dummyLaureates: laureateI[] = [
         img: "./img/laureate.png",
         prizes: [],
         color: "neonyellow",
-        emoji: "",
     },
     {
         firstname: "",
@@ -67,7 +66,6 @@ export const dummyLaureates: laureateI[] = [
         img: "./img/laureate.png",
         prizes: [],
         color: "neonyellow",
-        emoji: "",
     },
 ]
 
@@ -90,6 +88,5 @@ export const dummyLaureate: laureateI = {
     img: "./img/laureate.png",
     prizes: [],
     color: "neonyellow",
-    emoji: "",
 }
 
