@@ -10,6 +10,7 @@ import StateModel from "./database/state/state.model";
 import { IStateDocument } from "./database/state/state.types";
 import { BoxPosition, Player, Position } from "./types";
 import mongoose from "mongoose";
+import { IUser } from "./database/users/users.types";
 
 class Events {
   newPlayer = new SubEvent<Player>();
@@ -21,6 +22,7 @@ class Events {
   playerLeave = new SubEvent<{ socketID: string; userID: string }>();
   newQuestion = new SubEvent<{ question: IQuestion; endDate: Date }>();
   state = new SubEvent<IStateDocument>();
+  score = new SubEvent<{player: Player, user: IUser}>();
 }
 
 export class Engine {

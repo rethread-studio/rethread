@@ -54,6 +54,9 @@ export default class GameSocket {
       player.socket?.emit("move", { x: player.x, y: player.y });
       this._hasChange = true;
     });
+    this.engine.on("score").subscribe(({ player, user }) => {
+      player.socket?.emit("score", Object.values(user.events).join(""));
+    });
     this.engine.on("newQuestion").subscribe((questionEvent) => {
       this._events.push({
         origin: "gameEngine",
@@ -160,7 +163,9 @@ export default class GameSocket {
       if (session) {
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.answer": 1 },
-        }).then(() => {}, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
       }
     }
 
@@ -177,7 +182,9 @@ export default class GameSocket {
     const session: any = (target.handshake as any).session;
     UserModel.findByIdAndUpdate(session.userID, {
       $inc: { "events.enterAnswer": 1 },
-    }).then(() => {}, console.error);
+    }).then((user) => {
+      this.engine.on("score").emit({ player, user });
+    }, console.error);
 
     this._events.push({
       origin: "user",
@@ -197,7 +204,9 @@ export default class GameSocket {
     const session: any = (target.handshake as any).session;
     UserModel.findByIdAndUpdate(session.userID, {
       $inc: { "events.exitAnswer": 1 },
-    }).then(() => {}, console.error);
+    }).then((user) => {
+      this.engine.on("score").emit({ player, user });
+    }, console.error);
 
     this._events.push({
       origin: "user",
@@ -274,7 +283,7 @@ export default class GameSocket {
     socket.on("click", (event) => {
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.click": 1 },
-      }).then(() => {}, console.error);
+      }).then((user) => {}, console.error);
 
       this.monitor.send({
         origin: "user",
@@ -295,7 +304,11 @@ export default class GameSocket {
 
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.leave": 1 },
-      }).then(() => {}, console.error);
+      }).then((user) => {
+        this.engine
+          .on("score")
+          .emit({ player: this.engine.players[socket.id], user });
+      }, console.error);
 
       this.engine.removePlayer(socket.id, session.userID);
       this._events.push({
@@ -309,7 +322,11 @@ export default class GameSocket {
     socket.on("emote", (emoji) => {
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.emote": 1 },
-      }).then(() => {}, console.error);
+      }).then((user) => {
+        this.engine
+          .on("score")
+          .emit({ player: this.engine.players[socket.id], user });
+      }, console.error);
 
       this._hasChange = true;
       this.io.of("screen").emit("emote", { playerId: socket.id, emoji: emoji });
@@ -328,7 +345,9 @@ export default class GameSocket {
 
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.play": 1 },
-      }).then(() => {}, console.error);
+      }).then((user) => {
+        this.engine.on("score").emit({ player, user });
+      }, console.error);
 
       this._events.push({
         origin: "user",
@@ -346,7 +365,9 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.up": 1 },
-        }).then(() => {}, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: -1 });
@@ -356,7 +377,9 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.down": 1 },
-        }).then(() => {}, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: 1 });
@@ -366,7 +389,9 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.left": 1 },
-        }).then(() => {}, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: -1, y: 0 });
@@ -376,7 +401,9 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.right": 1 },
-        }).then(() => {}, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 1, y: 0 });
