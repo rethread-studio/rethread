@@ -55,7 +55,7 @@ export default class GameSocket {
       this._hasChange = true;
     });
     this.engine.on("score").subscribe(({ player, user }) => {
-      player.socket?.emit("score", Object.values(user.events).join(""));
+      player?.socket?.emit("score", Object.values(user.events).join(""));
     });
     this.engine.on("newQuestion").subscribe((questionEvent) => {
       this._events.push({
