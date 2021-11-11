@@ -78,6 +78,7 @@ export default async function start() {
   app.set("etag", "strong");
 
   app.use("/api", cors(), routes.laureates);
+  app.use("/api", cors(), routes.emojis);
   app.use("/api/users", cors(), routes.user);
 
   app.use(
@@ -86,7 +87,9 @@ export default async function start() {
   );
   app.use(
     "/admin/*",
-    express.static(path.join(__dirname, "..", "front-end", "dashboard", "index.html"))
+    express.static(
+      path.join(__dirname, "..", "front-end", "dashboard", "index.html")
+    )
   );
 
   app.use(

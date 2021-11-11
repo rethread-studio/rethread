@@ -20,6 +20,11 @@ export const getLaureate = (laureateID: string): Promise<laureateI> => {
     const url = `/api/laureates/` + laureateID;
     return getRequest(url)
 }
+//Emoji API
+export const getEmojis = (): Promise<[{_id: string, emoji: string}]> => {
+    const url = `/api/emojis/`;
+    return getRequest(url)
+}
 
 
 const getRequest = async (url: string) => {
