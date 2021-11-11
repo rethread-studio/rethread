@@ -3,10 +3,11 @@ function drawPlayersShadow(players) {
   const height = game.setup.unitSize;
 
   const boardState = game.gameCycle ? 1 : -1;
-
-  const imagePath = "/img/laureateShadow.png";
+  // const imagePath = "/img/laureateShadow.png";
   // draw players
   for (const player of players) {
+    if (player.laureate == undefined) return;
+    const imagePath = `/img/laureates/${player.laureate.imagePath.split(".png")[0]}_shadow.png`;
     if (!imageCache[imagePath]) {
       imageCache[imagePath] = new Image(width, height);
       imageCache[imagePath].src = imagePath;
@@ -158,9 +159,9 @@ function renderQuestion(question) {
           ctx.lineTo(
             x,
             questionPosition.y * unitSize +
-              unitSize * j +
-              unitSize -
-              unitSize / size
+            unitSize * j +
+            unitSize -
+            unitSize / size
           );
         } else {
           ctx.moveTo(
@@ -169,9 +170,9 @@ function renderQuestion(question) {
           );
           ctx.lineTo(
             questionPosition.x * unitSize +
-              unitSize * i +
-              unitSize -
-              unitSize / size,
+            unitSize * i +
+            unitSize -
+            unitSize / size,
             questionPosition.y * unitSize + unitSize * j + unitSize / 2
           );
         }
@@ -183,9 +184,9 @@ function renderQuestion(question) {
           );
           ctx.lineTo(
             questionPosition.x * unitSize +
-              unitSize * i +
-              unitSize -
-              unitSize / size,
+            unitSize * i +
+            unitSize -
+            unitSize / size,
             questionPosition.y * unitSize + unitSize * j + unitSize / 2
           );
         } else {
@@ -196,9 +197,9 @@ function renderQuestion(question) {
           ctx.lineTo(
             questionPosition.x * unitSize + unitSize * i + unitSize / 2,
             questionPosition.y * unitSize +
-              unitSize * j +
-              unitSize -
-              unitSize / size
+            unitSize * j +
+            unitSize -
+            unitSize / size
           );
         }
       }
@@ -218,8 +219,8 @@ function renderAnswer(question) {
           ? config.dotSize.small
           : config.dotSize.big
         : game.gameCycle
-        ? config.dotSize.big
-        : config.dotSize.small;
+          ? config.dotSize.big
+          : config.dotSize.small;
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
       for (let j = 0; j < position.height + 1; j++) {
@@ -227,11 +228,11 @@ function renderAnswer(question) {
         ctx.beginPath();
         ctx.arc(
           position.x * game.setup.unitSize +
-            game.setup.unitSize * i +
-            game.setup.unitSize / 2,
+          game.setup.unitSize * i +
+          game.setup.unitSize / 2,
           position.y * game.setup.unitSize +
-            game.setup.unitSize * j +
-            game.setup.unitSize / 2,
+          game.setup.unitSize * j +
+          game.setup.unitSize / 2,
           size,
           0,
           2 * Math.PI
