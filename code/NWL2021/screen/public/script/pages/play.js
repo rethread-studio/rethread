@@ -1,3 +1,4 @@
+
 function drawPlayersShadow(players) {
   const width = game.setup.unitSize;
   const height = game.setup.unitSize;
