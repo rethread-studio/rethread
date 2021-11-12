@@ -47,6 +47,9 @@ router.post("/laureate/image", upload.single("image"), async (req, res) => {
 router.post("/state/load", async (req, res) => {
   await importDefaultConfiguration();
   engine.state = await StateModel.findOne();
+  engine.questions = (await QuestionModel.find()).sort((a, b) =>
+    Math.random() > 0.5 ? 1 : -1
+  );
   res.json("ok");
 });
 

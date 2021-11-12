@@ -26,7 +26,7 @@ class Events {
 }
 
 export class Engine {
-  private _questions: IQuestion[];
+  questions: IQuestion[];
   private _currentQuestion: IQuestion;
   private _questionEndDate: Date;
   private _currentIndexQuestion: number = 0;
@@ -37,7 +37,7 @@ export class Engine {
   constructor() {}
 
   async init() {
-    this._questions = (await QuestionModel.find()).sort((a, b) =>
+    this.questions = (await QuestionModel.find()).sort((a, b) =>
       Math.random() > 0.5 ? 1 : -1
     );
     this.currentQuestion = this.chooseQuestion();
@@ -77,10 +77,10 @@ export class Engine {
 
   chooseQuestion() {
     this._currentIndexQuestion++;
-    if (this._currentIndexQuestion >= this._questions.length) {
+    if (this._currentIndexQuestion >= this.questions.length) {
       this._currentIndexQuestion = 0;
     }
-    return this._questions[this._currentIndexQuestion];
+    return this.questions[this._currentIndexQuestion];
   }
 
   newPlayer(socket: Socket, laureateID: string, userID: string) {

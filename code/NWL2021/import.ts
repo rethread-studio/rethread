@@ -8,6 +8,7 @@ import StateModel from "./server/database/state/state.model";
 import EmojiModel from "./server/database/emojis/emojis.model";
 import { ILaureate } from "./server/database/laureates/laureates.types";
 import { IEmoji } from "./server/database/emojis/emojis.types";
+import mongoose from "mongoose";
 
 export async function importDefaultConfiguration() {
   try {
@@ -27,7 +28,12 @@ export async function importDefaultConfiguration() {
   const laureates: ILaureate[] = JSON.parse(
     (await fs.promises.readFile("./data/laureates.json")).toString("utf-8")
   );
-  await Promise.all(laureates.map((data) => new LaureateModel(data).save()));
+  await Promise.all(
+    laureates.map((data) => {
+      if (!data._id) data._id = new mongoose.Types.ObjectId().toString();
+      new LaureateModel(data).save();
+    })
+  );
 
   const questions: IQuestion[] = JSON.parse(
     (await fs.promises.readFile("./data/questions.json")).toString("utf-8")
@@ -37,5 +43,10 @@ export async function importDefaultConfiguration() {
   const emojis: IEmoji[] = JSON.parse(
     (await fs.promises.readFile("./data/emojis.json")).toString("utf-8")
   );
-  await Promise.all(emojis.map((data) => new EmojiModel(data).save()));
+  await Promise.all(
+    emojis.map((data) => {
+      data._id = new mongoose.Types.ObjectId().toString();
+      new EmojiModel(data).save();
+    })
+  );
 }
