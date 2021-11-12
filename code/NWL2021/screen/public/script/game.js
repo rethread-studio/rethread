@@ -144,7 +144,8 @@ socket.on("disconnect", () => {
 
 const emojiTimeouts = {};
 socket.on("emote", ({ playerId, emoji }) => {
-  game.emojis[playerId] = emoji;
+  console.log(playerId, emoji);
+  game.emojis[playerId] = emoji.emoji;
   game.hasChange = true;
 
   clearTimeout(emojiTimeouts[playerId]);

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Namespace, Server, Socket } from "socket.io";
 import config from "../config";
+import EmojiModel from "./database/emojis/emojis.model";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
 import UserModel from "./database/users/users.model";
 import { Engine } from "./engine";
@@ -254,7 +255,10 @@ export default class GameSocket {
       session.userID = user._id;
       await Promise.all([session.save(), user.save()]);
     }
-    socket.emit("welcome", {laureateID: session?.laureate, state: this.engine.state});
+    socket.emit("welcome", {
+      laureateID: session?.laureate,
+      state: this.engine.state,
+    });
     console.log(`[USER ${session.userID}] connected (isNew: ${isNew})`);
 
     let disconnectTimeout;
@@ -317,31 +321,42 @@ export default class GameSocket {
       });
     });
 
-    socket.on("emote", (emoji) => {
-      UserModel.findByIdAndUpdate(session.userID, {
-        $inc: { "events.emote": 1 },
-      }).then((user) => {
-        this.engine
-          .on("score")
-          .emit({ player: this.engine.players[socket.id], user });
-      }, console.error);
+    socket.on("emote", async (emojiID) => {
+      try {
+        const emoji = await EmojiModel.findByIdAndUpdate(emojiID, {
+          $inc: { "events.emote": 1 },
+        });
+        if (!emoji) return;
+        UserModel.findByIdAndUpdate(session.userID, {
+          $inc: { "events.emote": 1 },
+        }).then((user) => {
+          this.engine
+            .on("score")
+            .emit({ player: this.engine.players[socket.id], user });
+        }, console.error);
 
-      this._hasChange = true;
-      this.io.of("screen").emit("emote", { playerId: socket.id, emoji: emoji });
-      this._events.push({
-        origin: "user",
-        action: "emote",
-        userID: session.userID,
-        socketID: socket.id,
-      });
+        this._hasChange = true;
+        this.io
+          .of("screen")
+          .emit("emote", { playerId: socket.id, emoji });
+        this._events.push({
+          origin: "user",
+          action: "emote",
+          userID: session.userID,
+          socketID: socket.id,
+        });
+      } catch (e) {
+        console.error(e);
+        return;
+      }
     });
 
     socket.on("start", (laureateID: string) => {
       session.laureate = laureateID;
       session.save();
-      
+
       const player = this.engine.newPlayer(socket, laureateID, session.userID);
-      
+
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.play": 1 },
       }).then((user) => {

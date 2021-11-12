@@ -19,6 +19,12 @@ export interface prize {
     affiliations: affiliation[],
 }
 
+export interface IEmoji {
+    _id: string;
+    emoji: string;
+}
+
+
 export type colorOption = "neonyellow" | "neongreen" | "neonindigo" | "neonpink" | " neonred";
 
 export interface laureateI {
@@ -46,8 +52,8 @@ export interface laureateI {
 export interface gameControllerI {
     laureate: laureateI,
     selectHandler: React.Dispatch<React.SetStateAction<laureateI | null>>,
-    emoji: string,
-    setEmoji: React.Dispatch<React.SetStateAction<string>>;
+    emoji: IEmoji | null,
+    setEmoji: React.Dispatch<React.SetStateAction<IEmoji | null>>;
     state: any,
 }
 

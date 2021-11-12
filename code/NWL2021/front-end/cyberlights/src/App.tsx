@@ -15,9 +15,9 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 
 import './App.css';
-import { getLaureates, getLaureate, socket } from './api';
-import { laureateI } from './types';
-import { dataToLaureates, getEmoji } from './utils';
+import { getLaureates, getLaureate, socket, getEmojis } from './api';
+import { IEmoji, laureateI } from './types';
+import { dataToLaureates } from './utils';
 
 
 function App() {
@@ -25,19 +25,23 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [laureate, setLaureate] = useState<laureateI | null>(null);
   const [state, setState] = useState<any>(null);
-  const [emoji, setEmoji] = useState(getEmoji());
-
-  socket.on("connect", () => setLaureate(null));
-  socket.on("disconnect", () => setLaureate(null));
-  socket.on("welcome", ({laureateID, state}) => {
-    console.log("welcome", laureateID, state);
-    setState(state);
-    if (!laureateID) return setLaureate(null);
-    getLaureate(laureateID).then(setLaureate).catch(() => setLaureate(null));
-  })
+  const [emoji, setEmoji] = useState<IEmoji | null>(null);
 
   //load characters data
   useEffect(() => {
+    socket.on("connect", () => setLaureate(null));
+    socket.on("disconnect", () => setLaureate(null));
+    socket.on("welcome", ({laureateID, state}) => {
+      console.log("welcome", laureateID, state);
+      setState(state);
+      if (!laureateID) return setLaureate(null);
+      getLaureate(laureateID).then(setLaureate).catch(() => setLaureate(null));
+    })
+
+    getEmojis().then((emojis) => {
+      setEmoji(emojis[Math.random() * emojis.length | 0]);
+    }).catch(() => setEmoji(null));
+    
     getLaureates()
       .then(data => data.map(dataToLaureates))
       .then(data => setLaureates(data))
@@ -45,7 +49,12 @@ function App() {
       .finally(() => {
         setLoading(false);
       })
-  }, [])
+      return () => {
+        socket.off("welcome");
+        socket.off("connect");
+        socket.off("disconnect");
+      }
+   }, [])
 
   library.add(fas)
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { isWall, isAnswer } from "../utils";
 
 interface IGridGame {
@@ -7,8 +7,12 @@ interface IGridGame {
 }
 
 export const GridGame = ({ state, position }: React.PropsWithChildren<IGridGame>) => {
+    const [tileSize, setTileSize] = useState(0);
 
-    const tileSize: number = (window.innerWidth - 16 * 2) / state.width;
+    useEffect(() => {
+        const root = document?.getElementById("root") || document?.body;
+        setTileSize((root.clientWidth - 16 * 2) / state.width)
+    }, [state.width]);
 
     let grid = <></>;
     for (let i = 0; i < (state?.height || 0); i++) {

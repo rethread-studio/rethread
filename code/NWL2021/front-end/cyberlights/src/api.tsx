@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
-import { laureateI } from "./types";
+import { IEmoji, laureateI } from "./types";
 
 //Socket communication
 export const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io("/control");
@@ -21,7 +21,7 @@ export const getLaureate = (laureateID: string): Promise<laureateI> => {
     return getRequest(url)
 }
 //Emoji API
-export const getEmojis = (): Promise<[{_id: string, emoji: string}]> => {
+export const getEmojis = async (): Promise<[IEmoji]> => {
     const url = `/api/emojis/`;
     return getRequest(url)
 }

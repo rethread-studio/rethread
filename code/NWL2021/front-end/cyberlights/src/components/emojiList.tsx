@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { emojiList } from '../utils';
+import React, { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { getEmojis } from '../api';
+import { IEmoji } from '../types';
 
 //on click event
 //
@@ -10,17 +11,30 @@ interface IEmojiList {
     setShow: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
+
 export const EmojiList = ({ handleClick, show, setShow }: React.PropsWithChildren<IEmojiList>) => {
 
-    const clickHandler = (e: string) => {
+    const [emojiList, setEmojiList] = useState<IEmoji[]>([]);
+
+    const clickHandler = (e: IEmoji) => {
         handleClick(e);
         setShow(!show);
     };
 
-    const emojiButtons = emojiList.map((e: string) => {
-        return <button key={uuidv4()} className="text-4xl space-x-7" onClick={() => { clickHandler(e) }}>{e}</button>
+    useEffect(() => {
+        getEmojis().then(emojiList => {
+            setEmojiList(emojiList);
+        }, error => {
+            console.log(error);
+            setShow(!show);
+        })
+        return () => {}
     });
 
+    const emojiButtons = emojiList.map((emoji) => {
+        return <button key={uuidv4()} className="text-4xl space-x-7" onClick={() => { clickHandler(emoji) }}>{emoji.emoji}</button>
+    });
+    
     //translate-y-full
 
     return <>
