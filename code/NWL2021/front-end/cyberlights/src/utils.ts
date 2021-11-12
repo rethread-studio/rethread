@@ -69,3 +69,24 @@ export const getEmoji = () => {
     const randPos = Math.floor(Math.random() * emojiList.length);
     return emojiList[randPos];
 }
+
+export function isWall(x: number, y: number, state: any): boolean {
+    if (!state) return false;
+    if (x <= state.questionPosition.x + state.questionPosition.width && x >= state.questionPosition.x
+        &&
+        y <= state.questionPosition.y + state.questionPosition.height && y >= state.questionPosition.y) {
+        return true;
+    }
+    return false;
+}
+export function isAnswer(x: number, y: number, state: any): boolean {
+    if (!state) return false;
+    for (const answerPosition of state.answersPositions) {
+        if (x <= answerPosition.x + answerPosition.width && x >= answerPosition.x
+            &&
+            y <= answerPosition.y + answerPosition.height && y >= answerPosition.y) {
+            return true;
+        }
+    }
+    return false;
+}
