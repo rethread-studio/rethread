@@ -324,7 +324,7 @@ export default class GameSocket {
     socket.on("emote", async (emojiID) => {
       try {
         const emoji = await EmojiModel.findByIdAndUpdate(emojiID, {
-          $inc: { "events.emote": 1 },
+          $inc: { "used": 1 },
         });
         if (!emoji) return;
         UserModel.findByIdAndUpdate(session.userID, {
