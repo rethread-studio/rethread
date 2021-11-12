@@ -1,13 +1,13 @@
-function drawPlayersShadow(players) {
+async function drawPlayersShadow(players) {
   const width = game.setup.unitSize;
   const height = game.setup.unitSize;
 
   const boardState = game.gameCycle ? 1 : -1;
-  // const imagePath = "/img/laureateShadow.png";
+  
   // draw players
   for (const player of players) {
-    if (player.laureate == undefined) return;
-    const imagePath = `/img/laureates/${player.laureate.imagePath.split(".png")[0]}_shadow.png`;
+    const laureate = await game.getLaureate(player.laureateID);
+    const imagePath = `/img/laureates/${laureate.imagePath.split(".png")[0]}_shadow.png`;
     if (!imageCache[imagePath]) {
       imageCache[imagePath] = new Image(width, height);
       imageCache[imagePath].src = imagePath;
