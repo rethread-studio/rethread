@@ -142,8 +142,8 @@ body{
 }
 
 .grid-position {
-  left: calc(50% - (30px * 13)/2);
-  top: calc(50% - (30px * 13)/2);
+  left: -2px;
+  top: calc(50% - (20px * 13)/2);
   border: 1px solid rgba(255,255,255,0.3);
   z-index: 0;
 }
@@ -153,8 +153,8 @@ body{
 .grid-position-item {
   position: relative;
   content: "";
-  width: 30px;
-  height: 30px;
+  /* width: 20px; */
+  /* height: 20px; */
   border: 1px solid rgba(255,255,255,0.3);
 }
 .grid-position-item.active::after {
@@ -165,7 +165,7 @@ body{
   width: 80%;
   height: 80%;
   border-radius: 50%;
-  background: red;
+  background: #F6D465;
 }
 .grid-position-item.wall {
   background-color: rgba(255,255,255,0.4);
