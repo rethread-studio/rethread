@@ -94,6 +94,9 @@ async function renderDemo() {
   } else if (demoMode == "question") {
     renderQuestion(dummyGameState.question);
     renderAnswer(dummyGameState.question);
+    drawPlayersShadow(dummyGameState.players);
+    drawPreviousPosition(dummyGameState.players);
+    await renderPlayers(dummyGameState.players);
   }
 }
 
