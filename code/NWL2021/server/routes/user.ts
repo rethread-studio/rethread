@@ -11,3 +11,27 @@ router.get("/me", async (req, res) => {
     res.status(401).json({ error: "not_connected" });
   }
 });
+
+router.get("/", async (req, res) => {
+  const users = await UserModel.aggregate([
+    {
+      $project: {
+        events: 1,
+        score: {
+          $function: {
+            body: 'function(values) { const out = [];for (let i in values) {out.push(values[i]);} return parseInt(out.join("") || 0); }',
+            args: ["$events"],
+            lang: "js",
+          },
+        },
+        _id: 0,
+      },
+    },
+    {
+      $sort: {
+        score: -1,
+      },
+    },
+  ]);
+  return res.json(users);
+});
