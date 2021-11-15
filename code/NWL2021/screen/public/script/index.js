@@ -54,13 +54,13 @@ game.onUpdate(() => {
     renderAnswer();
   } else if (game.page == "results") {
     renderResults();
+    console.log("render results")
   }
 });
 
 game.onPageChange((page) => {
   console.log("[PAGE]", "change", page);
   clearCanvas();
-
   hideAll();
   clearInterval(demoInterval);
   switch (page) {

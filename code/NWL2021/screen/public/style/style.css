@@ -124,21 +124,21 @@ body {
 .result {
   position: absolute;
   top: 0;
-  width: 100%;
+  width: 90%;
 }
 
 .result .q {
-  margin-top: 30px;
+  margin-top: 50px;
   text-align: center;
-  line-height: 50px;
+  /* line-height: 50px; */
   font-size: 36px;
   text-transform: uppercase;
 }
 
 .result .a {
-  margin-top: 20px;
+  margin-top: 40px;
   text-align: center;
-  line-height: 50px;
+  
   font-size: 64px;
   text-transform: uppercase;
   font-weight: 300;
@@ -161,12 +161,12 @@ body {
   justify-content: space-evenly;
   gap: 20px 20px;
 }
-.group.correct {
+/* .group.correct {
   background-color: var(--neon-green);
 }
 .group.wrong {
   background-color: var(--neon-pink);
-}
+} */
 .group .player img {
   width: 100px;
   height: auto;
