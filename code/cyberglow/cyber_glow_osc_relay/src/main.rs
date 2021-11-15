@@ -13,7 +13,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct MonitorMessage {
     origin: String,
     action: String,
@@ -21,13 +21,13 @@ struct MonitorMessage {
     timestamp: i64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 struct FtraceMessage {
     data: String,
     timestamp: i64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 enum Message {
     Monitor(MonitorMessage),
     Ftrace(FtraceMessage),
@@ -129,6 +129,12 @@ fn main() {
                         .short("a"),
                 )
                 .arg(
+                    Arg::with_name("passthrough")
+                        .help("pass through messages in addition to playing back")
+                        .long("passthrough")
+                        .short("t"),
+                )
+                .arg(
                     Arg::with_name("skip_ms")
                         .short("s")
                         .long("skip")
@@ -173,11 +179,12 @@ fn main() {
         let destination = matches.value_of("destination").unwrap_or("127.0.0.1:57130");
         let osc_addr = matches.value_of("osc_addr").unwrap_or("/cyberglow");
         let messages = load_data(&input_path);
+        let passthrough = matches.is_present("passthrough");
         if let Some(messages) = messages {
             if matches.is_present("analyze") {
                 print_all_message_types(&messages);
             } else {
-                play_back_data(destination, osc_addr, messages, quit, skip_ms);
+                play_back_data(destination, osc_addr, messages, quit, skip_ms, passthrough);
             }
         } else {
             println!("Failed to load data to play back, exiting.");
@@ -278,9 +285,11 @@ fn play_back_data(
     mut messages: Vec<Message>,
     quit: Arc<AtomicBool>,
     skip_ms: i64,
+    passthrough: bool,
 ) {
     // Bind an `osc::Sender` and connect it to the target address.
     let sender = osc::sender().unwrap().connect(destination).unwrap();
+    let receiver = osc::receiver(57130).unwrap();
     // Assume that the messages are in timestamp order
     let mut accumulated_ts = messages[0].ts() + skip_ms;
     // Convert the timestamps in the MonitorMessages into the number of milliseconds between messages to make going through them easier
@@ -293,27 +302,53 @@ fn play_back_data(
 
         accumulated_ts += m.ts().max(0);
     }
-    'message_loop: for m in messages.into_iter().filter(|m| m.ts() >= 0) {
-        println!("Sleeping for {}", m.ts());
-        let mut total_sleep = m.ts().try_into().unwrap();
-        while total_sleep > 0 {
-            // Check if CTRL+C was pressed
-            if quit.load(Ordering::Relaxed) {
-                println!("Quitting!");
-                break 'message_loop;
-            }
-            if total_sleep > 100 {
-                std::thread::sleep(Duration::from_millis(100));
-                total_sleep -= 100;
-            } else {
-                std::thread::sleep(Duration::from_millis(total_sleep));
-                total_sleep = 0;
+    let mut message_index = 0;
+    // Skip the negative ts messages
+    while messages[message_index].ts() < 0 {
+        message_index += 1;
+    }
+    let mut last_message_time = Instant::now();
+    'message_loop: loop {
+        if passthrough {
+            if let Ok(Some((packet, _addr))) = receiver.try_recv() {
+                sender.send(packet);
             }
         }
-
-        println!("{:?}", m);
-        m.send(&sender);
+        if last_message_time.elapsed().as_millis() >= messages[message_index].ts() as u128 {
+            messages[message_index].clone().send(&sender);
+            last_message_time = Instant::now();
+            message_index += 1;
+            if message_index >= messages.len() {
+                println!("Finished playing all events!");
+                break 'message_loop;
+            }
+        }
+        if quit.load(Ordering::Relaxed) {
+            println!("Quitting!");
+            break 'message_loop;
+        }
     }
+    // 'message_loop: for m in messages.into_iter().filter(|m| m.ts() >= 0) {
+    //     println!("Sleeping for {}", m.ts());
+    //     let mut total_sleep = m.ts().try_into().unwrap();
+    //     while total_sleep > 0 {
+    //         // Check if CTRL+C was pressed
+    //         if quit.load(Ordering::Relaxed) {
+    //             println!("Quitting!");
+    //             break 'message_loop;
+    //         }
+    //         if total_sleep > 100 {
+    //             std::thread::sleep(Duration::from_millis(100));
+    //             total_sleep -= 100;
+    //         } else {
+    //             std::thread::sleep(Duration::from_millis(total_sleep));
+    //             total_sleep = 0;
+    //         }
+    //     }
+
+    //     println!("{:?}", m);
+    //     m.send(&sender);
+    // }
 }
 
 fn print_all_message_types(messages: &Vec<Message>) {
