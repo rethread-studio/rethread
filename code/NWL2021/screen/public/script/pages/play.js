@@ -26,6 +26,8 @@ async function drawPlayersShadow(players) {
 }
 
 function drawPreviousPosition(players) {
+  ctx.shadowBlur = !game.gameCycle ? 5 : 10;
+  ctx.shadowColor = "white";//TODO ADD PLAYER COLOR
   for (const player of players) {
     let positions = player.previousPositions;
     if (positions.length == 0) return;
@@ -64,6 +66,7 @@ function drawPreviousPosition(players) {
       ctx.fill();
     }
   }
+  ctx.shadowBlur = 0;
 }
 
 async function renderPlayers(players) {

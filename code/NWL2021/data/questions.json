@@ -497,7 +497,7 @@
     "type": "Conrad",
     "answers": [
       {
-        "text": "Roman number",
+        "text": "Roman number 10",
         "isCorrect": false
       },
       {
@@ -512,11 +512,11 @@
     "answers": [
       {
         "text": "Yes :(",
-        "isCorrect": true
+        "isCorrect": false
       },
       {
         "text": "No :)",
-        "isCorrect": false
+        "isCorrect": true
       }
     ]
   },
@@ -596,11 +596,11 @@
     "answers": [
       {
         "text": "Yes",
-        "isCorrect": false
+        "isCorrect": true
       },
       {
         "text": "No",
-        "isCorrect": true
+        "isCorrect": false
       }
     ]
   },
@@ -652,11 +652,11 @@
     "answers": [
       {
         "text": "Penicillin",
-        "isCorrect": false
+        "isCorrect": true
       },
       {
         "text": "Advil",
-        "isCorrect": true
+        "isCorrect": false
       }
     ]
   },

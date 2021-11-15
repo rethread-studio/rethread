@@ -48,18 +48,16 @@ function renderResults() {
   question.innerHTML = game.question.text;
   const { winners } = getPlayersResult();
   renderWinners(winners || []);
+  //if here are winners render fireworks 
+  //if not then render no winners sign or sad face
 }
 
 async function renderWinners(players) {
 
   const width = game.setup.unitSize;
   const height = game.setup.unitSize;
-
   const scale = 1;
-
   const gameW = game.setup.unitSize * game.setup.width;
-  const gameH = game.setup.unitSize * game.setup.height;
-
 
   let groupW = players.length >= config.max_group ? game.setup.unitSize * config.max_group : game.setup.unitSize * players.length;
   let iniX = gameW / 2 - groupW / 2;
@@ -72,6 +70,8 @@ async function renderWinners(players) {
     const laureate = await game.getLaureate(player.laureateID);
     player.laureate = laureate;
     const imagePath = `/img/laureates/${laureate.imagePath}`;
+
+    //calculate the initial position in X
     if (i % config.max_group == 0 && i != 0) {
       groupW = players.length - i >= config.max_group ? game.setup.unitSize * config.max_group : game.setup.unitSize * (players.length - i);
       iniX = gameW / 2 - groupW / 2;
