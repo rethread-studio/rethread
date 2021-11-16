@@ -122,7 +122,7 @@ export default async function start() {
   });
 
   socket.on("gameStateUpdate", (data) => {
-    if (gameState.players.length == 0 && isIdle === false) {
+    if ((gameState == null || gameState.players.length == 0) && isIdle === false) {
       isIdle = true;
       osc.send({ action: "on" }, { address: "/idle" });
     } else if (isIdle === true) {
