@@ -71,6 +71,8 @@ export default async function start() {
           out.position = {
             x: player.x,
             y: player.y,
+            width: setup.width,
+            height: setup.height,
           };
         }
         if (data.action == "userAnswer") {
@@ -93,6 +95,7 @@ export default async function start() {
         }
         break;
     }
+
     osc.send(out);
     serverIo.of("monitor").emit("event", out);
   });
@@ -107,12 +110,25 @@ export default async function start() {
     });
   });
 
+  let isIdle = true;
+  socket.on("disconnect", (data) => {
+    isIdle = true;
+    osc.send({ action: "on" }, { address: "/idle" });
+  });
+
   socket.on("setup", function (data) {
     setup = data;
     serverIo.of("screen").emit("setup", setup);
   });
 
   socket.on("gameStateUpdate", (data) => {
+    if (gameState.players.length == 0 && isIdle === false) {
+      isIdle = true;
+      osc.send({ action: "on" }, { address: "/idle" });
+    } else if (isIdle === true) {
+      isIdle = false;
+      osc.send({ action: "off" }, { address: "/idle" });
+    }
     gameState = data;
     serverIo.of("screen").emit("gameStateUpdate", data);
   });
