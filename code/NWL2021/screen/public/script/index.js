@@ -43,6 +43,7 @@ game.onQuestionChange((question) => {
 game.onUpdate(() => {
   clearCanvas();
   game.hasChange = false;
+
   if (game.page == "demo") {
     renderDemo();
   } else if (game.page == "play") {

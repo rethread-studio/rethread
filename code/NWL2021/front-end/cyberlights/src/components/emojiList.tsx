@@ -16,6 +16,7 @@ export const EmojiList = ({ handleClick, show, setShow }: React.PropsWithChildre
 
     const [emojiList, setEmojiList] = useState<IEmoji[]>([]);
 
+
     const clickHandler = (e: IEmoji) => {
         handleClick(e);
         setShow(!show);
@@ -23,18 +24,18 @@ export const EmojiList = ({ handleClick, show, setShow }: React.PropsWithChildre
 
     useEffect(() => {
         getEmojis().then(emojiList => {
-            setEmojiList(emojiList);
+            if (show) setEmojiList(emojiList);
         }, error => {
             console.log(error);
             setShow(!show);
         })
-        return () => {}
+        return () => { }
     });
 
     const emojiButtons = emojiList.map((emoji) => {
         return <button key={uuidv4()} className="text-4xl space-x-7" onClick={() => { clickHandler(emoji) }}>{emoji.emoji}</button>
     });
-    
+
     //translate-y-full
 
     return <>
