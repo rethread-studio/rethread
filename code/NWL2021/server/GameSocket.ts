@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Namespace, Server, Socket } from "socket.io";
 import config from "../config";
+import EmojiModel from "./database/emojis/emojis.model";
 import { IQuestion, IAnswer } from "./database/questions/questions.types";
 import UserModel from "./database/users/users.model";
 import { Engine } from "./engine";
@@ -30,15 +31,17 @@ export default class GameSocket {
       this._events.push({
         origin: "user",
         action: "play",
-        userID: player.socket?.id,
+        socketID: player.socket?.id,
+        userID: player.userID,
       });
       this._hasChange = true;
     });
-    this.engine.on("playerLeave").subscribe((playerId) => {
+    this.engine.on("playerLeave").subscribe(({ userID, socketID }) => {
       this._events.push({
         origin: "user",
         action: "leave",
-        userID: playerId,
+        socketID,
+        userID,
       });
       this._hasChange = true;
     });
@@ -46,9 +49,14 @@ export default class GameSocket {
       this._events.push({
         origin: "user",
         action: "move",
-        userID: player.socket?.id,
+        userID: player.userID,
+        socketID: player.socket?.id,
       });
+      player.socket?.emit("move", { x: player.x, y: player.y });
       this._hasChange = true;
+    });
+    this.engine.on("score").subscribe(({ player, user }) => {
+      player?.socket?.emit("score", Object.values(user.events).join(""));
     });
     this.engine.on("newQuestion").subscribe((questionEvent) => {
       this._events.push({
@@ -62,7 +70,8 @@ export default class GameSocket {
       this.monitor.send({
         origin: "user",
         action: "userAnswer",
-        userID: player.socket?.id,
+        userID: player.userID,
+        socketID: player.socket?.id,
       } as UserEvent);
       this.emitResult(answer, player);
     });
@@ -77,7 +86,8 @@ export default class GameSocket {
       this.monitor.send({
         origin: "user",
         action: "answer",
-        userID: player.socket?.id,
+        userID: player.userID,
+        socketID: player.socket?.id,
       });
       this.emitEnterAnswer(answer, player);
     });
@@ -85,7 +95,8 @@ export default class GameSocket {
       this.monitor.send({
         origin: "user",
         action: "answer",
-        userID: player.socket?.id,
+        userID: player.userID,
+        socketID: player.socket?.id,
       });
       this.emitExitAnswer(answer, player);
     });
@@ -115,11 +126,12 @@ export default class GameSocket {
     target.emit("gameStateUpdate", {
       players: Object.values(this.engine.players).map((p) => {
         return {
-          id: p.socket.id,
+          socketID: p.socketID,
+          userID: p.userID,
           x: p.x,
           y: p.y,
           inAnswer: p.inAnswer,
-          laureate: p.laureate,
+          laureateID: p.laureateID,
           previousPositions: p.previousPositions,
           status: p.status,
         };
@@ -152,7 +164,9 @@ export default class GameSocket {
       if (session) {
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.answer": 1 },
-        }).then(() => { }, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
       }
     }
 
@@ -163,17 +177,21 @@ export default class GameSocket {
   }
 
   emitEnterAnswer(answer: IAnswer, player: Player) {
+    if (!answer) return;
     const target = player.socket;
 
     const session: any = (target.handshake as any).session;
     UserModel.findByIdAndUpdate(session.userID, {
       $inc: { "events.enterAnswer": 1 },
-    }).then(() => { }, console.error);
+    }).then((user) => {
+      this.engine.on("score").emit({ player, user });
+    }, console.error);
 
     this._events.push({
       origin: "user",
       action: "enterAnswer",
-      userID: player.socket.id,
+      userID: player.userID,
+      socketID: player.socket?.id,
     });
     target.emit("enterAnswer", {
       question: this.engine.currentQuestion,
@@ -187,12 +205,15 @@ export default class GameSocket {
     const session: any = (target.handshake as any).session;
     UserModel.findByIdAndUpdate(session.userID, {
       $inc: { "events.exitAnswer": 1 },
-    }).then(() => { }, console.error);
+    }).then((user) => {
+      this.engine.on("score").emit({ player, user });
+    }, console.error);
 
     this._events.push({
       origin: "user",
       action: "exitAnswer",
-      userID: player.socket.id,
+      userID: player.userID,
+      socketID: player.socket?.id,
     });
     target.emit("exitAnswer", {
       question: this.engine.currentQuestion,
@@ -234,7 +255,10 @@ export default class GameSocket {
       session.userID = user._id;
       await Promise.all([session.save(), user.save()]);
     }
-    socket.emit("welcome", session?.laureate);
+    socket.emit("welcome", {
+      laureateID: session?.laureate,
+      state: this.engine.state,
+    });
     console.log(`[USER ${session.userID}] connected (isNew: ${isNew})`);
 
     let disconnectTimeout;
@@ -252,7 +276,8 @@ export default class GameSocket {
     this._events.push({
       origin: "user",
       action: "new",
-      userID: socket.id,
+      userID: session.userID,
+      socketID: socket.id,
     });
 
     socket.on("disconnect", () => this._controlDisconnect(socket));
@@ -260,12 +285,13 @@ export default class GameSocket {
     socket.on("click", (event) => {
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.click": 1 },
-      }).then(() => { }, console.error);
+      }).then((user) => {}, console.error);
 
       this.monitor.send({
         origin: "user",
         action: "click",
-        userID: socket.id,
+        userID: session.userID,
+        socketID: socket.id,
         position: {
           x: event.x,
           y: event.y,
@@ -280,43 +306,68 @@ export default class GameSocket {
 
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.leave": 1 },
-      }).then(() => { }, console.error);
+      }).then((user) => {
+        this.engine
+          .on("score")
+          .emit({ player: this.engine.players[socket.id], user });
+      }, console.error);
 
-      this.engine.removePlayer(socket.id);
+      this.engine.removePlayer(socket.id, session.userID);
       this._events.push({
         origin: "user",
         action: "leave",
-        userID: socket.id,
+        userID: session.userID,
+        socketID: socket.id,
       });
     });
 
-    socket.on("emote", (emoji) => {
-      UserModel.findByIdAndUpdate(session.userID, {
-        $inc: { "events.emote": 1 },
-      }).then(() => { }, console.error);
+    socket.on("emote", async (emojiID) => {
+      try {
+        const emoji = await EmojiModel.findByIdAndUpdate(emojiID, {
+          $inc: { "used": 1 },
+        });
+        if (!emoji) return;
+        UserModel.findByIdAndUpdate(session.userID, {
+          $inc: { "events.emote": 1 },
+        }).then((user) => {
+          this.engine
+            .on("score")
+            .emit({ player: this.engine.players[socket.id], user });
+        }, console.error);
 
-      this._hasChange = true;
-      this.io.of("screen").emit("emote", { playerId: socket.id, emoji: emoji });
-      this._events.push({
-        origin: "user",
-        action: "emote",
-        userID: socket.id,
-      });
+        this._hasChange = true;
+        this.io
+          .of("screen")
+          .emit("emote", { playerId: socket.id, emoji });
+        this._events.push({
+          origin: "user",
+          action: "emote",
+          userID: session.userID,
+          socketID: socket.id,
+        });
+      } catch (e) {
+        console.error(e);
+        return;
+      }
     });
 
-    socket.on("start", (laureate) => {
-      session.laureate = laureate;
+    socket.on("start", (laureateID: string) => {
+      session.laureate = laureateID;
       session.save();
-      const player = this.engine.newPlayer(socket, laureate);
+
+      const player = this.engine.newPlayer(socket, laureateID, session.userID);
 
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.play": 1 },
-      }).then(() => { }, console.error);
+      }).then((user) => {
+        this.engine.on("score").emit({ player, user });
+      }, console.error);
 
       this._events.push({
         origin: "user",
         action: "start",
-        userID: socket.id,
+        userID: session.userID,
+        socketID: socket.id,
       });
 
       player.socket = socket;
@@ -328,7 +379,9 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.up": 1 },
-        }).then(() => { }, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: -1 });
@@ -338,7 +391,9 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.down": 1 },
-        }).then(() => { }, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: 1 });
@@ -348,7 +403,9 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.left": 1 },
-        }).then(() => { }, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: -1, y: 0 });
@@ -358,7 +415,9 @@ export default class GameSocket {
 
         UserModel.findByIdAndUpdate(session.userID, {
           $inc: { "events.right": 1 },
-        }).then(() => { }, console.error);
+        }).then((user) => {
+          this.engine.on("score").emit({ player, user });
+        }, console.error);
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 1, y: 0 });
@@ -369,6 +428,6 @@ export default class GameSocket {
   private _controlDisconnect(socket) {
     const session: any = (socket.handshake as any).session;
     console.log(`[USER ${session?.userID}] Disconnected`);
-    this.engine.removePlayer(socket.id);
+    this.engine.removePlayer(socket.id, session?.userID);
   }
 }

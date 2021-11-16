@@ -6,6 +6,7 @@ import compression from "compression";
 import http from "http";
 import * as redis from "redis";
 import session from "express-session";
+import cors from "cors";
 import sharedSession from "express-socket.io-session";
 import connectRedis from "connect-redis";
 import { Server } from "socket.io";
@@ -76,8 +77,9 @@ export default async function start() {
   app.set("trust proxy", 1);
   app.set("etag", "strong");
 
-  app.use("/api", routes.laureates);
-  app.use("/api/users", routes.user);
+  app.use("/api", cors(), routes.laureates);
+  app.use("/api", cors(), routes.emojis);
+  app.use("/api/users", cors(), routes.user);
 
   app.use(
     "/admin/",
@@ -85,7 +87,9 @@ export default async function start() {
   );
   app.use(
     "/admin/*",
-    express.static(path.join(__dirname, "..", "front-end", "dashboard", "index.html"))
+    express.static(
+      path.join(__dirname, "..", "front-end", "dashboard", "index.html")
+    )
   );
 
   app.use(

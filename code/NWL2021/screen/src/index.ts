@@ -38,11 +38,19 @@ export default async function start() {
     express.static(path.join(__dirname, "..", "..", "front-end", "laureates"))
   );
 
+  app.get("/api/config", (req, res) => {
+    res.json({
+      serverURL: config.SERVER_HOST,
+    });
+  });
+
   const server = http.createServer(app);
   const serverIo = new Server(server);
 
-  const socketMonitor = io(config.SERVER_HOST + "visualization");
-  const socket = io(config.SERVER_HOST + "screen");
+  const serverHost = config.SERVER_HOST.replace("localhost", "172.17.0.1");
+
+  const socketMonitor = io(serverHost + "visualization");
+  const socket = io(serverHost + "screen");
 
   let setup: IState = null;
   let gameState: GameState = null;
@@ -56,7 +64,9 @@ export default async function start() {
     const out = data as any;
     switch (data.origin) {
       case "user":
-        const player = gameState.players.filter((f) => f.id == data.userID)[0];
+        const player = gameState.players.filter(
+          (f) => f.socketID == data.socketID
+        )[0];
         if (player) {
           out.position = {
             x: player.x,
@@ -79,7 +89,7 @@ export default async function start() {
         } else if (data.action == "answer") {
           out.answer = gameState.question.answers.filter(
             (f) => f.isCorrect
-          )[0].text;
+          )[0]?.text;
         }
         break;
     }

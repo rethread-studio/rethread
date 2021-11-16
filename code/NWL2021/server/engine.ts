@@ -10,6 +10,7 @@ import StateModel from "./database/state/state.model";
 import { IStateDocument } from "./database/state/state.types";
 import { BoxPosition, Player, Position } from "./types";
 import mongoose from "mongoose";
+import { IUser } from "./database/users/users.types";
 
 class Events {
   newPlayer = new SubEvent<Player>();
@@ -18,13 +19,14 @@ class Events {
   exitAnswer = new SubEvent<{ answer: IAnswer; player: Player }>();
   answer = new SubEvent<IAnswer>();
   playerMove = new SubEvent<Player>();
-  playerLeave = new SubEvent<string>();
+  playerLeave = new SubEvent<{ socketID: string; userID: string }>();
   newQuestion = new SubEvent<{ question: IQuestion; endDate: Date }>();
   state = new SubEvent<IStateDocument>();
+  score = new SubEvent<{player: Player, user: IUser}>();
 }
 
 export class Engine {
-  private _questions: IQuestion[];
+  questions: IQuestion[];
   private _currentQuestion: IQuestion;
   private _questionEndDate: Date;
   private _currentIndexQuestion: number = 0;
@@ -35,7 +37,7 @@ export class Engine {
   constructor() {}
 
   async init() {
-    this._questions = (await QuestionModel.find()).sort((a, b) =>
+    this.questions = (await QuestionModel.find()).sort((a, b) =>
       Math.random() > 0.5 ? 1 : -1
     );
     this.currentQuestion = this.chooseQuestion();
@@ -75,28 +77,30 @@ export class Engine {
 
   chooseQuestion() {
     this._currentIndexQuestion++;
-    if (this._currentIndexQuestion >= this._questions.length) {
+    if (this._currentIndexQuestion >= this.questions.length) {
       this._currentIndexQuestion = 0;
     }
-    return this._questions[this._currentIndexQuestion];
+    return this.questions[this._currentIndexQuestion];
   }
 
-  newPlayer(socket: Socket, laureate: ILaureate) {
-    // get open position
+  newPlayer(socket: Socket, laureateID: string, userID: string) {
     const player: Player = {
       x: 0,
       y: 0,
-      laureate,
+      laureateID,
       inAnswer: false,
       socket,
+      socketID: socket.id,
+      userID,
       previousPositions: [],
       status: "idle",
     };
-    LaureateModel.findByIdAndUpdate(laureate._id, { $inc: { used: 1 } }).then(
+    LaureateModel.findByIdAndUpdate(laureateID, { $inc: { used: 1 } }).then(
       () => {},
       () => {}
     );
 
+    // get open position
     while (!this.isValidPosition(player, socket.id)) {
       player.x = Math.floor(Math.random() * this._state.width);
       player.y = Math.floor(Math.random() * this._state.height);
@@ -160,9 +164,12 @@ export class Engine {
     return true;
   }
 
-  removePlayer(id: string) {
-    this._events.playerLeave.emit(id);
-    delete this._players[id];
+  removePlayer(socketID: string, userID: string) {
+    this._events.playerLeave.emit({
+      socketID,
+      userID,
+    });
+    delete this._players[socketID];
   }
 
   private _isInAnswer(player: Player) {

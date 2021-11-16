@@ -1,6 +1,7 @@
 [
   {
     "text": "Did Bill Gates win a Nobel prize?",
+    "type": "CS",
     "answers": [
       {
         "text": "Yes",
@@ -14,6 +15,7 @@
   },
   {
     "text": "How many Nobel prizes have been awarded?",
+    "type": "nobel",
     "answers": [
       {
         "text": "718",
@@ -27,20 +29,6 @@
   },
   {
     "text": "Neon is present in the Earth's atmosphere",
-    "type": "misc",
-    "answers": [
-      {
-        "text": "no",
-        "isCorrect": false
-      },
-      {
-        "text": "yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Three computers run 24/7 to deliver cyber|glow",
     "type": "CS",
     "answers": [
       {
@@ -55,6 +43,7 @@
   },
   {
     "text": "Martin Luther King was a pastor in",
+    "type": "king",
     "answers": [
       {
         "text": "California",
@@ -67,7 +56,8 @@
     ]
   },
   {
-    "text": "Martin Luther King received a Nobel Prize at",
+    "text": "How old was Martin Luther King when he received the peace Nobel Prize?",
+    "type": "king",
     "answers": [
       {
         "text": "45",
@@ -75,38 +65,28 @@
       },
       {
         "text": "35",
+        "description": "Martin Luther King was the youngest man to receive a Nobel Prize.",
         "isCorrect": true
       }
     ]
   },
   {
-    "text": "The march on Washington, D.C. gathered 500.000 persons",
+    "text": "How many persons went to march on Washington, D.C. in August 1963?",
+    "type": "king",
     "answers": [
       {
-        "text": "yes",
+        "text": "60,000",
         "isCorrect": false
       },
       {
-        "text": "no",
+        "text": "250,000",
         "isCorrect": true
       }
     ]
   },
   {
-    "text": "Martin Luther King led a bus boycott in",
-    "answers": [
-      {
-        "text": "Atlanta",
-        "isCorrect": false
-      },
-      {
-        "text": "Montgomery",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Did Martin Luther King have a dream",
+    "text": "Did Martin Luther King have a dream?",
+    "type": "king",
     "answers": [
       {
         "text": "no",
@@ -120,6 +100,7 @@
   },
   {
     "text": "Martin Luther King was the youngest man to receive a Nobel Prize",
+    "type": "king",
     "answers": [
       {
         "text": "no",
@@ -127,19 +108,6 @@
       },
       {
         "text": "yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Martin Luther King was born in ",
-    "answers": [
-      {
-        "text": "1939",
-        "isCorrect": false
-      },
-      {
-        "text": "1929",
         "isCorrect": true
       }
     ]
@@ -174,6 +142,7 @@
   },
   {
     "text": "Toni Morrison was a ",
+    "type": "morrison",
     "answers": [
       {
         "text": "dancer",
@@ -201,6 +170,7 @@
   },
   {
     "text": "Toni Morrison graduated in  ",
+    "type": "morrison",
     "answers": [
       {
         "text": "American Comics",
@@ -466,7 +436,7 @@
   },
   {
     "text": "What was the first medical X-ray?",
-    "type": "Conrad",
+    "type": "conrad",
     "answers": [
       {
         "text": "Wilhelms wife's hand",
@@ -494,7 +464,7 @@
   },
   {
     "text": "X in X-ray stands for...",
-    "type": "Conrad",
+    "type": "conrad",
     "answers": [
       {
         "text": "Roman number",
@@ -508,11 +478,11 @@
   },
   {
     "text": "Does the X-ray have patents?",
-    "type": "Conrad",
+    "type": "conrad",
     "answers": [
       {
         "text": "Yes :(",
-        "isCorrect": false
+        "isCorrect": true
       },
       {
         "text": "No :)",
@@ -592,7 +562,7 @@
   },
   {
     "text": "Is Sir Alexander a Knight?",
-    "type": "Flemming",
+    "type": "fleming",
     "answers": [
       {
         "text": "Yes",
@@ -620,7 +590,7 @@
   },
   {
     "text": "What was the first name of Penicillin?",
-    "type": "Flemming",
+    "type": "fleming",
     "answers": [
       {
         "text": "P. rubens",
@@ -648,7 +618,7 @@
   },
   {
     "text": "Who is the father of modern antibiotics?",
-    "type": "Flemming",
+    "type": "fleming",
     "answers": [
       {
         "text": "Penicillin",
@@ -745,7 +715,7 @@
     ]
   },
   {
-    "text": "Which nobel prize did Bob Dylan received?",
+    "text": "Which Nobel Prize did Bob Dylan receive?",
     "type": "dylan",
     "answers": [
       {
@@ -759,7 +729,7 @@
     ]
   },
   {
-    "text": "Did Bob Dylan go to Stockholm to receive his nobel prize?",
+    "text": "Did Bob Dylan go to Stockholm to receive his Nobel Prize?",
     "type": "dylan",
     "answers": [
       {
@@ -773,7 +743,7 @@
     ]
   },
   {
-    "text": "How old was was Malala when she received the nobel prize?",
+    "text": "How old was was Malala when she was awarded the peace Nobel Prize?",
     "type": "yousafzai",
     "answers": [
       {
@@ -782,13 +752,13 @@
       },
       {
         "text": "17",
-        "description": "Malala is the youngest laureate that received a nobel prize.",
+        "description": "Malala is the youngest laureate that received a Nobel Prize.",
         "isCorrect": true
       }
     ]
   },
   {
-    "text": "Did Taliban leaders unanimously agreed to kill Malala Yousafzai?",
+    "text": "Did Taliban leaders unanimously agree to kill Malala Yousafzai?",
     "type": "yousafzai",
     "answers": [
       {

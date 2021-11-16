@@ -140,3 +140,36 @@ body{
   0 0 0.5rem var(--neon-border-color),
   inset 0 0 0.5rem var(--neon-border-color);  
 }
+
+.grid-position {
+  left: -2px;
+  top: calc(50% - (20px * 13)/2);
+  border: 1px solid rgba(255,255,255,0.3);
+  z-index: 0;
+}
+.grid-line {
+  display: flex;
+}
+.grid-position-item {
+  position: relative;
+  content: "";
+  /* width: 20px; */
+  /* height: 20px; */
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.grid-position-item.active::after {
+  position: absolute;
+  content: " ";
+  margin-top: 10%;
+  margin-left: 10%;
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  background: #F6D465;
+}
+.grid-position-item.wall {
+  background-color: rgba(255,255,255,0.4);
+}
+.grid-position-item.grid-answer {
+  background-color: rgba(211, 226, 145, 0.3);
+}

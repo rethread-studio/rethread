@@ -9,12 +9,15 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArrowBtn } from "./arrowBtn";
 import { socket } from "../api";
-import { gameControllerI, controllDirection } from "../types";
+import { gameControllerI, controllDirection, IEmoji } from "../types";
 import { categoryColor } from "../utils";
 import { EmojiList } from "./emojiList";
+import { GridGame } from "./gridGame";
 
-export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: React.PropsWithChildren<gameControllerI>) => {
+export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
+    const [position, setPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
+    const [score, setScore] = useState<number>(0);
     const [answer, setAnswer] = useState<string | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
@@ -23,17 +26,11 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
     const [show, setShow] = useState(false);
 
-    socket.on("question", (question) => { setQuestion(question) });
-    socket.on("enterAnswer", ({ answer }) => {
-        setAnswer(answer);
-        window.navigator.vibrate(200);
-    });
-    socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
-    socket.on("leave", () => { history.push("/") });
 
-    const setEmojitoLaureate = (e: string) => {
+    const setEmojitoLaureate = (e: IEmoji) => {
+        console.log("emote", e)
         setEmoji(e);
-        socket.emit("emote", e)
+        socket.emit("emote", e._id)
     }
 
     //load characters data
@@ -43,7 +40,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
         }
         const keyCategory: string = laureate.prizes.length > 1 ? "special" : laureate.prizes[0].category as string;
         setColor(categoryColor[keyCategory]);
-        socket.emit("start", laureate);
+        socket.emit("start", laureate._id);
 
         const pressHandler = ({ key }: { key: string }) => {
             if (key === "ArrowDown") {
@@ -61,12 +58,25 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
         }
         window.addEventListener("keydown", pressHandler);
 
+        socket.on("question", (question) => { setQuestion(question) });
+        socket.on("enterAnswer", ({ answer }) => {
+            console.log("enterAnswer")
+            setAnswer(answer);
+            window.navigator.vibrate(200);
+        });
+        socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
+        socket.on("leave", () => { history.push("/") });
+        socket.on("score", setScore);
+        socket.on("move", setPosition);
+
         return () => {
             socket.emit("leave");
             socket.off("leave");
             socket.off("enterAnswer");
             socket.off("exitAnswer");
             socket.off("question");
+            socket.off("move");
+            socket.off("score");
             window.removeEventListener("keydown", pressHandler);
         }
     }, [laureate, history, selectHandler]);
@@ -86,22 +96,27 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
 
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
 
+
     return (
 
         <div className="h-full w-full p-4 ">
-            <div className="h-full border-2 border-gray-600 flex flex-col justify-between overflow-hidden">
+            <div className="h-full border-2 border-gray-600 relative flex flex-col justify-between overflow-hidden">
 
                 <div className="flex flex-row justify-between text-sm">
                     <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
                         <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back to select
                     </Link>
+                    <div className="score text-sm text-gray-400  h-8 w-4/8 p-2">{score}</div>
                 </div>
                 <div className="w-full text-neon text-2xl uppercase text-center pt-2 ">
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
+
+                <GridGame state={state} position={position} />
+
                 <div className="relative h-full flex flex-col justify-center content-center">
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
-                    <img onClick={() => { socket.emit("emote", emoji) }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
+                    <img onClick={() => { socket.emit("emote", emoji?._id) }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
@@ -115,7 +130,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji }: Rea
 
                 <div className="flex flex-row w-full justify-between text-gray-400 place-self-end p-4">
                     <span className="text-xs ">Press the arrows <br /> to move </span>
-                    <button onClick={() => { setShow(true) }} className="text-2xl border-2 border-gray-500 rounded-full w-9">{emoji}</button>
+                    <button onClick={() => { setShow(true) }} className="text-2xl border-2 border-gray-500 rounded-full w-9">{emoji?.emoji}</button>
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
                 <EmojiList handleClick={setEmojitoLaureate} show={show} setShow={setShow} />

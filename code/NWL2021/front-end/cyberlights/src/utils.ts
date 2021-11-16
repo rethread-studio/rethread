@@ -1,6 +1,6 @@
 import { laureateI, tCategoryColor } from './types';
 
-export const dataToLaurates = (l: any, i: number): laureateI => {
+export const dataToLaureates = (l: any, i: number): laureateI => {
     const keyCategory: string = l.prizes.length > 1 ? "special" : l.prizes[0].category as string;
     l.color = categoryColor[keyCategory];
     return l as laureateI
@@ -68,4 +68,25 @@ export const emojiList = ['❤️‍🔥', '😵‍💫', '🥲', '😮‍💨',
 export const getEmoji = () => {
     const randPos = Math.floor(Math.random() * emojiList.length);
     return emojiList[randPos];
+}
+
+export function isWall(x: number, y: number, state: any): boolean {
+    if (!state) return false;
+    if (x <= state.questionPosition.x + state.questionPosition.width && x >= state.questionPosition.x
+        &&
+        y <= state.questionPosition.y + state.questionPosition.height && y >= state.questionPosition.y) {
+        return true;
+    }
+    return false;
+}
+export function isAnswer(x: number, y: number, state: any): boolean {
+    if (!state) return false;
+    for (const answerPosition of state.answersPositions) {
+        if (x <= answerPosition.x + answerPosition.width && x >= answerPosition.x
+            &&
+            y <= answerPosition.y + answerPosition.height && y >= answerPosition.y) {
+            return true;
+        }
+    }
+    return false;
 }
