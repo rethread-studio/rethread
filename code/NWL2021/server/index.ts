@@ -81,6 +81,10 @@ export default async function start() {
   app.use("/api", cors(), routes.emojis);
   app.use("/api/users", cors(), routes.user);
 
+  app.get("/qrcode", (req, res) => {
+    res.redirect('https://cyberglow.rethread.art/');
+  });
+
   app.use(
     "/admin/",
     express.static(path.join(__dirname, "..", "front-end", "dashboard"))
