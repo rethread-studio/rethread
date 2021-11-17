@@ -22,7 +22,7 @@ class Events {
   playerLeave = new SubEvent<{ socketID: string; userID: string }>();
   newQuestion = new SubEvent<{ question: IQuestion; endDate: Date }>();
   state = new SubEvent<IStateDocument>();
-  score = new SubEvent<{player: Player, user: IUser}>();
+  score = new SubEvent<{ player: Player; user: IUser }>();
 }
 
 export class Engine {
@@ -33,6 +33,7 @@ export class Engine {
   private _state: IStateDocument;
   private _players: { [key: string]: Player };
   private _events = new Events();
+  private _questionTimeout = null;
 
   constructor() {}
 
@@ -43,32 +44,6 @@ export class Engine {
     this.currentQuestion = this.chooseQuestion();
     this._state = await StateModel.findOne();
     this._players = {};
-
-    const questionInterval = setInterval(() => {
-      for (const socketID of Object.keys(this.players)) {
-        const player = this.players[socketID];
-        const { inAnswer, answer } = this._isInAnswer(player);
-        if (!inAnswer) continue;
-        this._events.userAnswer.emit({ answer, player });
-      }
-
-      const selectedAnswer = this.currentQuestion.answers.filter(
-        (f) => f.isCorrect
-      );
-      this._events.answer.emit(selectedAnswer[0]);
-
-      setTimeout(() => {
-        const newQuestion = this.chooseQuestion();
-        this.currentQuestion = newQuestion;
-
-        for (const socketID of Object.keys(this.players)) {
-          const player = this.players[socketID];
-          if (!player.inAnswer) continue;
-          const { inAnswer, answer } = this._isInAnswer(player);
-          this._events.enterAnswer.emit({ answer, player });
-        }
-      }, config.ANSWER_DURATION * 1000);
-    }, config.QUESTION_INTERVAL * 1000);
   }
 
   on<K extends keyof Events>(key: K) {
@@ -243,12 +218,44 @@ export class Engine {
   }
 
   set currentQuestion(question) {
+    clearTimeout(this._questionTimeout);
+
+    for (const socketID of Object.keys(this.players || {})) {
+      const player = this.players[socketID];
+      const { inAnswer, answer } = this._isInAnswer(player);
+      if (!inAnswer) continue;
+      this._events.userAnswer.emit({ answer, player });
+    }
+    if (this._currentQuestion) {
+      const selectedAnswer = this._currentQuestion.answers.filter(
+        (f) => f.isCorrect
+      );
+      this._events.answer.emit(selectedAnswer[0]);
+    }
+
     this._currentQuestion = question;
     this._questionEndDate = new Date();
     this._questionEndDate.setSeconds(
       this._questionEndDate.getSeconds() + config.QUESTION_INTERVAL
     );
-    this._events.newQuestion.emit({ question, endDate: this._questionEndDate });
+
+    setTimeout(() => {
+      this._events.newQuestion.emit({
+        question,
+        endDate: this._questionEndDate,
+      });
+
+      for (const socketID of Object.keys(this.players)) {
+        const player = this.players[socketID];
+        if (!player.inAnswer) continue;
+        const { inAnswer, answer } = this._isInAnswer(player);
+        this._events.enterAnswer.emit({ answer, player });
+      }
+    }, config.ANSWER_DURATION * 1000);
+
+    this._questionTimeout = setTimeout(() => {
+      this.currentQuestion = this.chooseQuestion();
+    }, config.QUESTION_INTERVAL * 1000);
   }
 
   get questionEndDate() {

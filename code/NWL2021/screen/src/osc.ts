@@ -47,6 +47,9 @@ export function send(
     .filter((f) => data[f] !== undefined)
     .map((i) => {
       if (i == "position") {
+        if (data.position.width !== undefined) {
+          return `${data[i].x};${data[i].y};${data[i].width};${data[i].height}`;
+        }
         return `${data[i].x};${data[i].y}`;
       }
       return data[i];
