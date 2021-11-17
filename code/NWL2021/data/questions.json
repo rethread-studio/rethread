@@ -813,5 +813,90 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "How many visitors did cyber|glow receive?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "[nb_users]",
+        "isCorrect": true
+      },
+      {
+        "text": "[random]",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many lareates can you choose from in cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "15",
+        "isCorrect": true
+      },
+      {
+        "text": "45",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who developed the code to control the cyber|glow laser?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Seb Lee-Delisle",
+        "isCorrect": true
+      },
+      {
+        "text": "Linus Torvald",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many programming languages are used for cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "10",
+        "description":"javascript, typescript, C++, css, rust, html, yaml, json, python, csv",
+        "isCorrect": true
+      },
+      {
+        "text": "2",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many files are used for cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "29000",
+        "isCorrect": true
+      },
+      {
+        "text": "450000",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many lines of code are used for cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "4 million",
+        "isCorrect": true
+      },
+      {
+        "text": "15 million",
+        "isCorrect": false
+      }
+    ]
   }
 ]
