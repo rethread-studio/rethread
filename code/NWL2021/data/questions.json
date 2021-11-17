@@ -770,5 +770,48 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "Which Nobel laureate has an asteroid named after her?",
+    "type": "curie",
+    "answers": [
+      {
+        "text": "Marie Curie",
+        "isCorrect": true
+      },
+      {
+        "text": "Tu Youyou",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many times was Marie Curie awarded a Nobel prize?",
+    "type": "curie",
+    "answers": [
+      {
+        "text": "two",
+        "description":"She was and still is the only person to be awarded Nobel Prizes in two scientific categories. ",
+        "isCorrect": true
+      },
+      {
+        "text": "three",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where can we find radium?",
+    "type": "curie",
+    "answers": [
+      {
+        "text": "in thorium",
+        "isCorrect": true
+      },
+      {
+        "text": "in lokirium",
+        "isCorrect": false
+      }
+    ]
   }
 ]
