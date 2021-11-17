@@ -13,6 +13,7 @@ import { gameControllerI, controllDirection, IEmoji } from "../types";
 import { categoryColor } from "../utils";
 import { EmojiList } from "./emojiList";
 import { GridGame } from "./gridGame";
+import { ScoreList } from "./scoreList";
 
 export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
@@ -25,10 +26,9 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
     const [show, setShow] = useState(false);
-
+    const [showScoreList, setScoreList] = useState(false);
 
     const setEmojitoLaureate = (e: IEmoji) => {
-        console.log("emote", e)
         setEmoji(e);
         socket.emit("emote", e._id)
     }
@@ -60,7 +60,6 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
         socket.on("question", (question) => { setQuestion(question) });
         socket.on("enterAnswer", ({ answer }) => {
-            console.log("enterAnswer")
             setAnswer(answer);
             window.navigator.vibrate(200);
         });
@@ -96,19 +95,21 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
 
-
     return (
 
         <div className="h-full w-full p-4 ">
             <div className="h-full border-2 border-gray-600 relative flex flex-col justify-between overflow-hidden">
 
-                <div className="flex flex-row justify-between text-sm">
+                <div className="flex flex-row justify-between text-sm content-center pt-2">
                     <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
-                        <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back to select
+                        <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
                     </Link>
-                    <div className="score text-sm text-gray-400  h-8 w-4/8 p-2">{score}</div>
+                    <div className={`score text-sm text-gray-400  h-8 w-7/12 p-2 overflow-hidden text-right `}>
+                        {score.toString().length > 15 ? `Score: ${score.toString().slice(0, 15)}...` : score}
+                    </div>
+                    <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400 border-2 border-gray-500 rounded-full w-7 h-7 mr-2" >?</button>
                 </div>
-                <div className="w-full text-neon text-2xl uppercase text-center pt-2 ">
+                <div className={`w-full text-neon ${question !== null && question?.length > 60 ? "text-md" : "text-2xl"} uppercase text-center pt-2`}>
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
 
@@ -134,7 +135,8 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
                 <EmojiList handleClick={setEmojitoLaureate} show={show} setShow={setShow} />
+                {showScoreList ? <ScoreList clickHandler={setScoreList} userScore={score} /> : <></>}
             </div>
-        </div>
+        </div >
     )
 }

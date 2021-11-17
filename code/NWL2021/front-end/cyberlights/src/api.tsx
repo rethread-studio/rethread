@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { DefaultEventsMap } from "socket.io-client/build/typed-events";
-import { IEmoji, laureateI } from "./types";
+import { IEmoji, IUserPersonalScore, IUserScore, laureateI } from "./types";
 
 //Socket communication
 export const socket: Socket<DefaultEventsMap, DefaultEventsMap> = io("/control");
@@ -25,7 +25,16 @@ export const getEmojis = async (): Promise<[IEmoji]> => {
     const url = `/api/emojis/`;
     return getRequest(url)
 }
+//SCORE API
+export const getScore = async (): Promise<[IUserScore]> => {
+    const url = `/api/users/`;
+    return getRequest(url)
+}
 
+export const getPersonalScore = async (): Promise<IUserPersonalScore> => {
+    const url = `/api/users/me`;
+    return getRequest(url)
+}
 
 const getRequest = async (url: string) => {
     const options = {

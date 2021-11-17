@@ -224,6 +224,14 @@ body {
   height: auto;
 }
 
+.text-neon-g {
+  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
+    0 0 40px var(--neon-yellow), 0 0 80px var(--neon-yellow),
+    0 0 90px var(--neon-yellow), 0 0 100px var(--neon-yellow),
+    0 0 150px var(--neon-yellow);
+  color: white;
+}
+
 .text-neon-yellow {
   text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
     0 0 40px var(--neon-yellow), 0 0 80px var(--neon-yellow),
@@ -238,8 +246,10 @@ body {
     0 0 40px var(--neon-blue), 0 0 80px var(--neon-blue),
     0 0 90px var(--neon-blue), 0 0 100px var(--neon-blue),
     0 0 150px var(--neon-blue);
-  /* /* animation: pulsate 0.11s ease-in-out infinite alternate; */
+  
 }
+
+
 
 .green-neon {
   text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
