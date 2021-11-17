@@ -96,6 +96,12 @@ router.get("/questions", async (req, res) => {
   );
 });
 
+router.post("/questions/:id/activate", async (req, res) => {
+  const question = await QuestionModel.findById(req.params.id);
+  engine.currentQuestion = question;
+  res.json(question);
+});
+
 router.post("/laureates", async (req, res) => {
   const laureates = req.body;
   for (const laureate of laureates) {
