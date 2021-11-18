@@ -55,7 +55,6 @@ game.onUpdate(() => {
     renderAnswer();
   } else if (game.page == "results") {
     renderResults();
-    console.log("render results")
   }
 });
 

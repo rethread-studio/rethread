@@ -18,6 +18,7 @@ import './App.css';
 import { getLaureates, getLaureate, socket, getEmojis } from './api';
 import { IEmoji, laureateI } from './types';
 import { dataToLaureates } from './utils';
+import { About } from './components/about';
 
 
 function App() {
@@ -66,6 +67,9 @@ function App() {
           </Route>
           <Route path="/play">
             {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} setEmoji={setEmoji} state={state} />}
+          </Route>
+          <Route path="/about">
+            {loading ? <Loading /> : <About />}
           </Route>
           <Route path="/">
             {loading ? <Loading /> : <Home />}
