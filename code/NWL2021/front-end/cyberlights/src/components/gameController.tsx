@@ -27,6 +27,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
     const [show, setShow] = useState(false);
     const [showScoreList, setScoreList] = useState(false);
+    const [showEmoji, setShowEmoji] = useState(false);
 
     const setEmojitoLaureate = (e: IEmoji) => {
         setEmoji(e);
@@ -36,6 +37,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const emote = () => {
         socket.emit("emote", emoji?._id)
         window.navigator.vibrate(200);
+        setShowEmoji(true);
     }
 
     //load characters data
@@ -86,6 +88,14 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     }, [laureate, history, selectHandler]);
 
 
+    useEffect(() => {
+        const emojiTimeout = setTimeout(() => {
+            setShowEmoji(false);
+        }, 2000)
+        return (() => {
+            if (emojiTimeout) clearTimeout(emojiTimeout);
+        })
+    }, [showEmoji])
 
     const emitDirection = (direction: controllDirection) => {
         setCurrentDirection(direction)
@@ -99,7 +109,6 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
 
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
-
     return (
 
         <div className="h-full w-full p-4 ">
@@ -122,6 +131,8 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
                 <div className="relative h-full flex flex-col justify-center content-center">
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
+                    {showEmoji === true ? <div className={`answer absolute px-6 py-2 top-1/4 left-1/4 z-20 left-0 bg-white text-black text-2xl rounded-xl transition-all duration-200 transform ${rotation}`}> {emoji?.emoji}</div> : <></>}
+
                     <img onClick={emote} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
