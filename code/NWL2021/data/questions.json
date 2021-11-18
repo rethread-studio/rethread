@@ -28,7 +28,7 @@
     ]
   },
   {
-    "text": "Neon is present in the Earth's atmosphere",
+    "text": "Is neon present in the Earth's atmosphere?",
     "type": "CS",
     "answers": [
       {
@@ -42,15 +42,15 @@
     ]
   },
   {
-    "text": "Martin Luther King was a pastor in",
+    "text": "Where was Martin Luther King a pastor?",
     "type": "king",
     "answers": [
       {
-        "text": "California",
+        "text": "In California",
         "isCorrect": false
       },
       {
-        "text": "Alabama",
+        "text": "In Alabama",
         "isCorrect": true
       }
     ]
@@ -71,20 +71,6 @@
     ]
   },
   {
-    "text": "How many persons went to march on Washington, D.C. in August 1963?",
-    "type": "king",
-    "answers": [
-      {
-        "text": "60,000",
-        "isCorrect": false
-      },
-      {
-        "text": "250,000",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
     "text": "Did Martin Luther King have a dream?",
     "type": "king",
     "answers": [
@@ -99,21 +85,7 @@
     ]
   },
   {
-    "text": "Martin Luther King was the youngest man to receive a Nobel Prize",
-    "type": "king",
-    "answers": [
-      {
-        "text": "no",
-        "isCorrect": false
-      },
-      {
-        "text": "yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Margaret Hamilton programmed the flight controller for Apollo 11",
+    "text": "Did Margaret Hamilton program the flight controller for Apollo 11?",
     "type": "CS",
     "answers": [
       {
@@ -127,7 +99,7 @@
     ]
   },
   {
-    "text": "The number of employees at Microsoft is",
+    "text": "How many employees work at Microsoft?",
     "type": "CS",
     "answers": [
       {
@@ -141,21 +113,7 @@
     ]
   },
   {
-    "text": "Toni Morrison was a ",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "dancer",
-        "isCorrect": false
-      },
-      {
-        "text": "writer",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "WASP supports research for ",
+    "text": "What scientific areas does WASP support?",
     "type": "CS",
     "answers": [
       {
@@ -169,7 +127,7 @@
     ]
   },
   {
-    "text": "Toni Morrison graduated in  ",
+    "text": "In which topic did Toni Morrison graduate?",
     "type": "morrison",
     "answers": [
       {
@@ -183,49 +141,21 @@
     ]
   },
   {
-    "text": "In Beloved, the daughter returns as a  ",
+    "text": "In what form does the daughter return in Beloved?",
     "type": "morrison",
     "answers": [
       {
-        "text": "cat",
+        "text": "A cat",
         "isCorrect": false
       },
       {
-        "text": "ghost",
+        "text": "A ghost",
         "isCorrect": true
       }
     ]
   },
   {
-    "text": "Beloved was followed by a novel called ",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "Blues",
-        "isCorrect": false
-      },
-      {
-        "text": "Jazz",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "The main character of the screen adaptation of Beloved was played by ",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "Jennifer Hudson",
-        "isCorrect": false
-      },
-      {
-        "text": "Oprah Winfrey",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "In her Nobel lecture, Toni Morrison talked about a",
+    "text": "What type of man did Toni Morrison talk about in her Nobel lecture?",
     "type": "morrison",
     "answers": [
       {
@@ -239,21 +169,7 @@
     ]
   },
   {
-    "text": "Toni Morrison received a National Book Award for Beloved",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "yes",
-        "isCorrect": false
-      },
-      {
-        "text": "no",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Toni Morrison was the first black woman of any nationality to win the Nobel prize",
+    "text": "Was Toni Morrison the first black woman of any nationality to win the Nobel prize?",
     "type": "morrison",
     "answers": [
       {
@@ -262,20 +178,6 @@
       },
       {
         "text": "yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "The main character of Beloved is inspired by the real life of",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "Isabella Greenway",
-        "isCorrect": false
-      },
-      {
-        "text": "Margaret Garner",
         "isCorrect": true
       }
     ]
@@ -351,35 +253,35 @@
     ]
   },
   {
-    "text": "Mother Teresa was born in",
+    "text": "Where was Mother Teresa born?",
     "type": "teresa",
     "answers": [
       {
-        "text": "Skopje",
+        "text": "In Skopje",
         "isCorrect": true
       },
       {
-        "text": "Calcutta",
+        "text": "In Calcutta",
         "isCorrect": false
       }
     ]
   },
   {
-    "text": "Mother Teresa worked in",
+    "text": "Where did Mother Teresa work?",
     "type": "teresa",
     "answers": [
       {
-        "text": "the slums",
+        "text": "In the slums",
         "isCorrect": true
       },
       {
-        "text": "a convent",
+        "text": "In a convent",
         "isCorrect": false
       }
     ]
   },
   {
-    "text": "Shanti Nagar means",
+    "text": "What does Shanti Nagar mean?",
     "type": "teresa",
     "answers": [
       {
@@ -393,21 +295,7 @@
     ]
   },
   {
-    "text": "Are both Mother Teresa's miracles related to healing?",
-    "type": "teresa",
-    "answers": [
-      {
-        "text": "yes",
-        "isCorrect": true
-      },
-      {
-        "text": "no",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Internet meme was first mentioned in 1994 by",
+    "text": "Who introduced Internet memes in 1994?",
     "type": "CS",
     "answers": [
       {
@@ -463,7 +351,7 @@
     ]
   },
   {
-    "text": "X in X-ray stands for...",
+    "text": "What does the X in X-ray stand for.?",
     "type": "conrad",
     "answers": [
       {
@@ -701,7 +589,7 @@
     ]
   },
   {
-    "text": "Did Bob Dylan play at the March on Washington in 1963, where Martin Luther King, Jr gave his \"I Have A Dream\" speech?",
+    "text": "Did Bob Dylan play at the March on Washington in 1963, where Martin Luther King gave his \"I Have A Dream\" speech?",
     "type": "dylan",
     "answers": [
       {
@@ -810,6 +698,91 @@
       },
       {
         "text": "in lokirium",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many visitors did cyber|glow receive?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "[nb_users]",
+        "isCorrect": true
+      },
+      {
+        "text": "[random]",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many lareates can you choose from in cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "15",
+        "isCorrect": true
+      },
+      {
+        "text": "45",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who developed the code to control the cyber|glow laser?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Seb Lee-Delisle",
+        "isCorrect": true
+      },
+      {
+        "text": "Linus Torvald",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many programming languages are used for cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "10",
+        "description":"javascript, typescript, C++, css, rust, html, yaml, json, python, csv",
+        "isCorrect": true
+      },
+      {
+        "text": "2",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many files are used for cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "29000",
+        "isCorrect": true
+      },
+      {
+        "text": "450000",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many lines of code are used for cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "4 million",
+        "isCorrect": true
+      },
+      {
+        "text": "15 million",
         "isCorrect": false
       }
     ]
