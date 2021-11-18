@@ -36,6 +36,11 @@ export const About = () => {
             <br />
             <p>Software is the core medium that fuels our digital society, providing services to citizens, governments, activists and corporations. It is an invisible and intangible set of processes that run millions of operations per second, on top of world-wide networks. With cyber|glow, we wish to unveil these invisible processes and let citizens realize the extraordinary scale of software that surrounds them.
             </p>
+
+            <br />
+            <h2 className="text-yellow-300 font-thin text-2xl text-neon-yellow">re|thread</h2>
+            <p>cyber|glow was designed and developed by the <a href="https://rethread.art/#" target="_blank" rel='noreferrer' className="text-neon-yellow">rethread.art</a> collective: Erik Natanael Gustafsson, Thomas Durieux, Jonathan Ramirez Mendoza, and Benoit Baudry. For cyber|glow, re|thread collective features Ambar Troya, graphic designer and game artist.</p>
+
             <br />
             <h2 className="text-yellow-300 font-thin text-2xl text-neon-yellow ">Acknowledgments</h2>
             <div className="flex flex-row justify-center content-center space-x-10 mt-5">

@@ -46,6 +46,8 @@ export const ScoreList = ({ clickHandler, userScore }: React.PropsWithChildren<I
         );
     }
 
+    console.log(userEvents)
+
     return <div className="h-full w-full p-4 fixed top-0 left-0 bg-gray-900 z-40">
         <div className="h-full border-2 border-gray-600 relative flex flex-col justify-start overflow-hidden">
             <div className="flex flex-row justify-end text-sm content-center pt-2">
