@@ -33,6 +33,11 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
         socket.emit("emote", e._id)
     }
 
+    const emote = () => {
+        socket.emit("emote", emoji?._id)
+        window.navigator.vibrate(200);
+    }
+
     //load characters data
     useEffect(() => {
         if (laureate == null) {
@@ -117,7 +122,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
                 <div className="relative h-full flex flex-col justify-center content-center">
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
-                    <img onClick={() => { socket.emit("emote", emoji?._id) }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
+                    <img onClick={emote} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
