@@ -38,6 +38,12 @@ angular
     function ($scope, $http, $location) {
       $scope.gameState = null;
       socket.off("gameStateUpdate");
+      socket.on("question", (data) => {
+        $scope.$apply(() => {
+          $scope.gameState.questionEndDate = data.endDate;
+          $scope.gameState.question = data.question;
+        });
+      });
       socket.on("gameStateUpdate", (data) => {
         $scope.$apply(() => {
           $scope.gameState = data;
