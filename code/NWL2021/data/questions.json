@@ -912,5 +912,21 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "What phenomenon intesifies nerve growth factor in the blood plasma?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "Romantic love",
+        "isCorrect": true
+      },
+      {
+        "text": "Ice swim",
+        "isCorrect": false
+      }
+    ]
   }
 ]
+
+
