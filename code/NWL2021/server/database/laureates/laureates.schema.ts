@@ -5,6 +5,7 @@ const LaureateSchema = new Schema({
   _id: mongoose.Types.ObjectId,
   firstname: String,
   surname: String,
+  color: String,
   imagePath: String,
   country: String,
   city: String,
