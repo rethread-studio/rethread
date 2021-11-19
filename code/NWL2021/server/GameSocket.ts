@@ -324,7 +324,7 @@ export default class GameSocket {
     socket.on("emote", async (emojiID) => {
       try {
         const emoji = await EmojiModel.findByIdAndUpdate(emojiID, {
-          $inc: { "used": 1 },
+          $inc: { used: 1 },
         });
         if (!emoji) return;
         UserModel.findByIdAndUpdate(session.userID, {
@@ -336,9 +336,7 @@ export default class GameSocket {
         }, console.error);
 
         this._hasChange = true;
-        this.io
-          .of("screen")
-          .emit("emote", { playerId: socket.id, emoji });
+        this.io.of("screen").emit("emote", { playerId: socket.id, emoji });
         this._events.push({
           origin: "user",
           action: "emote",
@@ -359,6 +357,7 @@ export default class GameSocket {
 
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.play": 1 },
+        $set: { laureateID },
       }).then((user) => {
         this.engine.on("score").emit({ player, user });
       }, console.error);
