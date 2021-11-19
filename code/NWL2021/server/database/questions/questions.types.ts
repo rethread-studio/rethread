@@ -3,6 +3,7 @@ import * as mongoose from "mongoose";
 export interface IAnswer {
   text: string;
   isCorrect: boolean;
+  description?: string,
 }
 
 export interface IQuestion {
