@@ -97,6 +97,11 @@ async function renderDemo() {
     drawPlayersShadow(dummyGameState.players);
     drawPreviousPosition(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
+  } else if (demoMode == "laser") {
+    renderQuestion(dummyGameState.question);
+    drawPlayersShadow(dummyGameState.players);
+    drawPreviousPosition(dummyGameState.players);
+    await renderPlayers(dummyGameState.players);
   }
 }
 
@@ -108,10 +113,13 @@ function _displayDemo() {
     showQuestion(true);
     showAnswers(true);
     updateQuestion(dummyGameState.question);
+  } else if (demoMode == "laser") {
+    showQuestion(true);
+    updateQuestion(dummyGameState.question);
   }
 }
 let demoMode = "info";
-const demoModes = ["info", "question"];
+const demoModes = ["info", "question", "info", "laser"];
 let demoInterval = null;
 function displayDemo() {
   demoMode = "info";
