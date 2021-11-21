@@ -660,6 +660,20 @@
     ]
   },
   {
+    "text": "Who was the second recipient of the Nobel peace prize, with Malala?",
+    "type": "yousafzai",
+    "answers": [
+      {
+        "text": "Kailash Satyarthi",
+        "isCorrect": true
+      },
+      {
+        "text": "Barack Obama",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
     "text": "Which Nobel laureate has an asteroid named after her?",
     "type": "curie",
     "answers": [
@@ -786,5 +800,133 @@
         "isCorrect": false
       }
     ]
+  },
+  {
+    "text": "What is the parodic Nobel prize",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "Ig Nobel Prize",
+        "isCorrect": true
+      },
+      {
+        "text": "Darwin Award",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "For which ceremony does Miss Sweety Poo as time keeper for acceptance speeches?",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "Nobel Prize",
+        "isCorrect": true
+      },
+      {
+        "text": "Ig Nobel Prize",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "For which ceremony does Miss Sweety Poo as time keeper for acceptance speeches?",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "Nobel Prize",
+        "isCorrect": true
+      },
+      {
+        "text": "Ig Nobel Prize",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Did Mahatma Gandhi receive a Nobel Prize?",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": true
+      },
+      {
+        "text": "Yes",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who prints the Nobel Prize medals?",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "Svenska Medalj AB",
+        "isCorrect": true
+      },
+      {
+        "text": "Central Mint",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What alternative career could Albert Einstein have considered?",
+    "type": "einstein",
+    "answers": [
+      {
+        "text": "Musician",
+        "isCorrect": true
+      },
+      {
+        "text": "Banker",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What astral phenomenon is understood through general relativity?",
+    "type": "einstein",
+    "answers": [
+      {
+        "text": "Black holes",
+        "isCorrect": true
+      },
+      {
+        "text": "Northern lights",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "In which journal did Albert Einstein publish the Annus Mirabilis papers?",
+    "type": "einstein",
+    "answers": [
+      {
+        "text": "Annalen der Physik",
+        "isCorrect": true
+      },
+      {
+        "text": "Physical Review",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What phenomenon intesifies nerve growth factor in the blood plasma?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "Romantic love",
+        "isCorrect": true
+      },
+      {
+        "text": "Ice swim",
+        "isCorrect": false
+      }
+    ]
   }
 ]
+
+

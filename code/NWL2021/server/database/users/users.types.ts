@@ -2,6 +2,7 @@ import * as mongoose from "mongoose";
 
 export interface IUser {
   _id: string;
+  laureateID?: string;
   events: { [key: string]: number };
   creationDate: Date;
 }

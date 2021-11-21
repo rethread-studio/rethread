@@ -8,6 +8,7 @@ const QuestionSchema = new Schema({
     {
       text: String,
       isCorrect: Boolean,
+      description: String,
     },
   ],
 });
