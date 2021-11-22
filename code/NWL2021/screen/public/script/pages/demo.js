@@ -49,14 +49,16 @@ const dummyGameState = {
   },
 };
 
-
-
 async function getDemoLaureates() {
   demoLaureates = await getLaureates()
     .then((laureates) => {
       return laureates.map(l => l._id)
     });
   asignRandomLaureate();
+}
+
+function initDemo() {
+  getDemoLaureates();
 }
 
 function asignRandomLaureate() {
@@ -111,6 +113,9 @@ function moveDummyPlayer(player) {
   }
 }
 
+function changeOrientation(player) {
+  player.status = player.status == "up" ? "down" : player.status == "down" ? "up" : player.status == "left" ? "right" : "left";
+}
 setInterval(() => {
   if (!game.setup) return;
   for (const player of dummyGameState.players) {
@@ -181,6 +186,10 @@ function displayDemo() {
     demoMode = demoModes[(demoPos + 1) % demoModes.length];
     demoPos++;
     asignRandomLaureate();
+    if (demoPos % 15 == 0) {
+      changeOrientation(dummyPlayer1);
+      changeOrientation(dummyPlayer2);
+    }
     _displayDemo();
   }, config.demoTimer);
 }

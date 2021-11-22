@@ -121,7 +121,7 @@ class Game {
     this.config = await getConfig();
     this.setup = setup;
     initRender();
-    getDemoLaureates();
+    initDemo();
     this.page = "play";
   }
 }
