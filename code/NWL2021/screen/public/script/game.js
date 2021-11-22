@@ -7,6 +7,7 @@ const config = {
   dialogueImagePath: "/img/dialogue.png",
   emojiDuration: 2,
   max_group: 12,
+  demoTimer: 6000,
 };
 
 class Game {

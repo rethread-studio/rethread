@@ -31,6 +31,19 @@ const dummyGameState = {
       },
     ],
   },
+  questionLaser: {
+    text: "See the invisible",
+    answers: [
+      {
+        isCorrect: true,
+        text: "yes",
+      },
+      {
+        isCorrect: false,
+        text: "no",
+      },
+    ],
+  },
 };
 
 function isValidPosition(position) {
@@ -98,11 +111,28 @@ async function renderDemo() {
     drawPreviousPosition(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   } else if (demoMode == "laser") {
-    renderQuestion(dummyGameState.question);
+    renderQuestion(dummyGameState.questionLaser);
+    await drawLaserBg();
     drawPlayersShadow(dummyGameState.players);
     drawPreviousPosition(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   }
+}
+
+async function drawLaserBg() {
+  const gWidth = game.setup.unitSize * game.setup.width;
+  const gHeight = game.setup.unitSize * game.setup.height;
+
+  const width = 1920;
+  const height = 1080;
+
+  const scale = Math.max(gWidth / width, gHeight / height);
+  const imagePath = `/img/laserBg.jpg`;
+  if (!imageCache[imagePath]) {
+    imageCache[imagePath] = new Image(width, height);
+    imageCache[imagePath].src = imagePath;
+  }
+  renderImage(imageCache[imagePath], gWidth / 2, gHeight / 2, width * scale, height * scale, 0, 1);
 }
 
 function _displayDemo() {
@@ -114,19 +144,22 @@ function _displayDemo() {
     showAnswers(true);
     updateQuestion(dummyGameState.question);
   } else if (demoMode == "laser") {
+    console.log("display laser")
     showQuestion(true);
-    updateQuestion(dummyGameState.question);
+    updateQuestion(dummyGameState.questionLaser);
   }
 }
 let demoMode = "info";
 const demoModes = ["info", "question", "info", "laser"];
+let demoPos = 0;
 let demoInterval = null;
 function displayDemo() {
   demoMode = "info";
   _displayDemo();
   clearInterval(demoInterval);
   demoInterval = setInterval(() => {
-    demoMode = demoModes[(demoModes.indexOf(demoMode) + 1) % demoModes.length];
+    demoMode = demoModes[(demoPos + 1) % demoModes.length];
+    demoPos++;
     _displayDemo();
-  }, 6000);
+  }, config.demoTimer);
 }
