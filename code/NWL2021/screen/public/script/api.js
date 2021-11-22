@@ -13,3 +13,12 @@ async function getLaureate(id) {
     })
   ).json();
 }
+
+//LAUREATES API
+async function getLaureates() {
+  return (
+    await fetch(game.config.serverURL + "api/laureates/", {
+      method: "get",
+    })
+  ).json();
+}

@@ -1,3 +1,6 @@
+
+let demoLaureates = [];
+
 const dummyPlayer1 = {
   inAnswer: false,
   status: "right",
@@ -45,6 +48,24 @@ const dummyGameState = {
     ],
   },
 };
+
+
+
+async function getDemoLaureates() {
+  demoLaureates = await getLaureates()
+    .then((laureates) => {
+      return laureates.map(l => l._id)
+    });
+  asignRandomLaureate();
+}
+
+function asignRandomLaureate() {
+  const list = demoLaureates.filter(l => l != dummyPlayer1.laureateID && l != dummyPlayer2.laureateID);
+  const pos1 = Math.floor(Math.random() * list.length);
+  const pos2 = (pos1 + (Math.floor(Math.random() * (list.length - 2)) + 1)) % list.length;
+  dummyPlayer2.laureateID = list[pos2];
+  dummyPlayer1.laureateID = list[pos1];
+}
 
 function isValidPosition(position) {
   if (position.x < 0 || position.x >= game.setup.width) {
@@ -144,7 +165,6 @@ function _displayDemo() {
     showAnswers(true);
     updateQuestion(dummyGameState.question);
   } else if (demoMode == "laser") {
-    console.log("display laser")
     showQuestion(true);
     updateQuestion(dummyGameState.questionLaser);
   }
@@ -160,6 +180,7 @@ function displayDemo() {
   demoInterval = setInterval(() => {
     demoMode = demoModes[(demoPos + 1) % demoModes.length];
     demoPos++;
+    asignRandomLaureate();
     _displayDemo();
   }, config.demoTimer);
 }
