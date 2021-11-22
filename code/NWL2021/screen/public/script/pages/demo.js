@@ -116,6 +116,14 @@ function moveDummyPlayer(player) {
 function changeOrientation(player) {
   player.status = player.status == "up" ? "down" : player.status == "down" ? "up" : player.status == "left" ? "right" : "left";
 }
+function randomPosition() {
+  dummyPlayer1.x = 0;
+  dummyPlayer1.y = 0;
+  dummyPlayer1.previousPositions = [];
+  dummyPlayer2.x = game.setup.width - 1;
+  dummyPlayer2.y = game.setup.height - 1;
+  dummyPlayer2.previousPositions = [];
+}
 setInterval(() => {
   if (!game.setup) return;
   for (const player of dummyGameState.players) {
@@ -189,6 +197,7 @@ function displayDemo() {
     if (demoPos % 15 == 0) {
       changeOrientation(dummyPlayer1);
       changeOrientation(dummyPlayer2);
+      randomPosition();
     }
     _displayDemo();
   }, config.demoTimer);
