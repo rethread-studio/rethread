@@ -68,8 +68,8 @@ game.onPageChange((page) => {
   // showResults(true);//delete
   switch (page) {
     case "demo":
-      showDemo(true);
       displayDemo();
+      showDemo(true);
       break;
     case "play":
       updateQuestion(game.question);
