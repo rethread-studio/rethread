@@ -1,4 +1,3 @@
-
 let demoLaureates = [];
 
 const dummyPlayer1 = {
@@ -50,23 +49,25 @@ const dummyGameState = {
 };
 
 async function getDemoLaureates() {
-  demoLaureates = await getLaureates()
-    .then((laureates) => {
-      return laureates.map(l => l._id)
-    });
-  asignRandomLaureate();
+  demoLaureates = await getLaureates();
+  assignRandomLaureate();
 }
 
 function initDemo() {
   getDemoLaureates();
 }
 
-function asignRandomLaureate() {
-  const list = demoLaureates.filter(l => l != dummyPlayer1.laureateID && l != dummyPlayer2.laureateID);
+function assignRandomLaureate() {
+  const list = demoLaureates.filter(
+    (l) => l._id != dummyPlayer1.laureateID && l._id != dummyPlayer2.laureateID
+  );
   const pos1 = Math.floor(Math.random() * list.length);
-  const pos2 = (pos1 + (Math.floor(Math.random() * (list.length - 2)) + 1)) % list.length;
-  dummyPlayer2.laureateID = list[pos2];
-  dummyPlayer1.laureateID = list[pos1];
+  const pos2 =
+    (pos1 + (Math.floor(Math.random() * (list.length - 2)) + 1)) % list.length;
+  dummyPlayer2.laureate = list[pos2];
+  dummyPlayer2.laureateID = list[pos2]._id;
+  dummyPlayer1.laureate = list[pos1];
+  dummyPlayer1.laureateID = list[pos1]._id;
 }
 
 function isValidPosition(position) {
@@ -80,41 +81,47 @@ function isValidPosition(position) {
 }
 
 function moveDummyPlayer(player) {
-  player.previousPositions.push({ x: player.x, y: player.y });
-  if (player.previousPositions.length > 4) {
-    player.previousPositions.shift();
+  const newPosition = { x: player.x, y: player.y };
+  if (player.status == "up") {
+    newPosition.y--;
+  } else if (player.status == "down") {
+    newPosition.y++;
+  } else if (player.status == "left") {
+    newPosition.x--;
+  } else if (player.status == "right") {
+    newPosition.x++;
   }
-  switch (player.status) {
-    case "up":
-      isValidPosition({ x: player.x, y: player.y - 1 })
-        ? (player.y = player.y - 1)
-        : (player.status = "right");
-      break;
-    case "down":
-      isValidPosition({ x: player.x, y: player.y + 1 })
-        ? (player.y = player.y + 1)
-        : (player.status = "left");
-      break;
-    case "right":
-      isValidPosition({ x: player.x + 1, y: player.y })
-        ? (player.x = player.x + 1)
-        : (player.status = "down");
-      break;
-    case "left":
-      isValidPosition({ x: player.x - 1, y: player.y })
-        ? (player.x = player.x - 1)
-        : (player.status = "up");
-      break;
-    default:
-      isValidPosition({ x: player.x + 1, y: player.y })
-        ? (player.x = player.x + 1)
-        : (player.status = "down");
-      break;
+
+  if (isValidPosition(newPosition)) {
+    player.previousPositions.push({ x: player.x, y: player.y });
+    if (player.previousPositions.length > 4) {
+      player.previousPositions.shift();
+    }
+
+    player.x = newPosition.x;
+    player.y = newPosition.y;
+  } else {
+    player.status =
+      player.status == "up"
+        ? "right"
+        : player.status == "down"
+        ? "left"
+        : player.status == "left"
+        ? "up"
+        : "down";
+    moveDummyPlayer(player);
   }
 }
 
 function changeOrientation(player) {
-  player.status = player.status == "up" ? "down" : player.status == "down" ? "up" : player.status == "left" ? "right" : "left";
+  player.status =
+    player.status == "up"
+      ? "down"
+      : player.status == "down"
+      ? "up"
+      : player.status == "left"
+      ? "right"
+      : "left";
 }
 function randomPosition() {
   dummyPlayer1.x = 0;
@@ -135,25 +142,25 @@ async function renderDemo() {
   if (!game.setup) return;
 
   if (demoMode == "info") {
-    drawPlayersShadow(dummyGameState.players);
-    drawPreviousPosition(dummyGameState.players);
+    await drawPreviousPosition(dummyGameState.players);
+    await drawPlayersShadow(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   } else if (demoMode == "question") {
     renderQuestion(dummyGameState.question);
     renderAnswer(dummyGameState.question);
-    drawPlayersShadow(dummyGameState.players);
-    drawPreviousPosition(dummyGameState.players);
+    await drawPreviousPosition(dummyGameState.players);
+    await drawPlayersShadow(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   } else if (demoMode == "laser") {
     renderQuestion(dummyGameState.questionLaser);
-    await drawLaserBg();
-    drawPlayersShadow(dummyGameState.players);
-    drawPreviousPosition(dummyGameState.players);
+    drawLaserBg();
+    await drawPreviousPosition(dummyGameState.players);
+    await drawPlayersShadow(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   }
 }
 
-async function drawLaserBg() {
+function drawLaserBg() {
   const gWidth = game.setup.unitSize * game.setup.width;
   const gHeight = game.setup.unitSize * game.setup.height;
 
@@ -166,7 +173,15 @@ async function drawLaserBg() {
     imageCache[imagePath] = new Image(width, height);
     imageCache[imagePath].src = imagePath;
   }
-  renderImage(imageCache[imagePath], gWidth / 2, gHeight / 2, width * scale, height * scale, 0, 1);
+  renderImage(
+    imageCache[imagePath],
+    gWidth / 2,
+    gHeight / 2,
+    width * scale,
+    height * scale,
+    0,
+    1
+  );
 }
 
 function _displayDemo() {
@@ -181,10 +196,13 @@ function _displayDemo() {
     showQuestion(true);
     updateQuestion(dummyGameState.questionLaser);
   }
+  renderDemo();
 }
+
 let demoMode = "info";
 const demoModes = ["info", "question", "info", "laser"];
 let demoPos = 0;
+
 let demoInterval = null;
 function displayDemo() {
   demoMode = "info";
@@ -193,11 +211,11 @@ function displayDemo() {
   demoInterval = setInterval(() => {
     demoMode = demoModes[(demoPos + 1) % demoModes.length];
     demoPos++;
-    asignRandomLaureate();
+    assignRandomLaureate();
     if (demoPos % 15 == 0) {
       changeOrientation(dummyPlayer1);
       changeOrientation(dummyPlayer2);
-      randomPosition();
+      // randomPosition();
     }
     _displayDemo();
   }, config.demoTimer);

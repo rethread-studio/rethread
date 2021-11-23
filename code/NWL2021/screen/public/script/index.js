@@ -65,8 +65,8 @@ game.onPageChange((page) => {
   clearInterval(demoInterval);
   switch (page) {
     case "demo":
-      displayDemo();
       showDemo(true);
+      displayDemo();
       break;
     case "play":
       updateQuestion(game.question);

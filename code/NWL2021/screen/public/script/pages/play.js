@@ -6,9 +6,12 @@ async function drawPlayersShadow(players) {
 
   // draw players
   for (const player of players) {
-    const laureate = await game.getLaureate(player.laureateID);
+    if (!player.laureate) {
+      const laureate = await game.getLaureate(player.laureateID);
+      player.laureate = laureate;
+    }
     const imagePath = `/img/laureates/${
-      laureate.imagePath.split(".png")[0]
+      player.laureate.imagePath.split(".png")[0]
     }_shadow.png`;
     if (!imageCache[imagePath]) {
       imageCache[imagePath] = new Image(width, height);
@@ -27,10 +30,14 @@ async function drawPlayersShadow(players) {
   }
 }
 
-function drawPreviousPosition(players) {
+async function drawPreviousPosition(players) {
   ctx.shadowBlur = !game.gameCycle ? 5 : 10;
   for (const player of players) {
-    ctx.shadowColor = player.color || "white";
+    if (!player.laureate) {
+      const laureate = await game.getLaureate(player.laureateID);
+      player.laureate = laureate;
+    }
+    ctx.shadowColor = player.laureate?.color || "white";
     let positions = player.previousPositions;
     if (positions.length == 0) return;
 
@@ -59,22 +66,6 @@ function drawPreviousPosition(players) {
         (game.setup.unitSize * renderScale) / 2
     );
     ctx.stroke();
-
-    //DRAW PREVIOUS POSITION POINTS
-    for (let i = 0; i < positions.length; i++) {
-      ctx.fillStyle = player.laureate?.color || "white";
-      ctx.beginPath();
-      ctx.arc(
-        positions[i].x * renderScale * game.setup.unitSize +
-          (game.setup.unitSize * renderScale) / 2,
-        positions[i].y * renderScale * game.setup.unitSize +
-          (game.setup.unitSize * renderScale) / 2,
-        !game.gameCycle ? config.dotSize.big : config.dotSize.small,
-        0,
-        2 * Math.PI
-      );
-      ctx.fill();
-    }
   }
   ctx.shadowBlur = 0;
 }
@@ -87,9 +78,11 @@ async function renderPlayers(players) {
 
   // draw players
   for (const player of players) {
-    const laureate = await game.getLaureate(player.laureateID);
-    player.laureate = laureate;
-    const imagePath = `/img/laureates/${laureate.imagePath}`;
+    if (!player.laureate) {
+      const laureate = await game.getLaureate(player.laureateID);
+      player.laureate = laureate;
+    }
+    const imagePath = `/img/laureates/${player.laureate.imagePath}`;
 
     if (!imageCache[imagePath]) {
       imageCache[imagePath] = new Image(width, height);
@@ -286,8 +279,8 @@ async function renderGame() {
   renderAnswer(game.question);
   renderQuestion(game.question);
 
-  drawPlayersShadow(game.players || []);
-  drawPreviousPosition(game.players || []);
+  await drawPreviousPosition(game.players || []);
+  await drawPlayersShadow(game.players || []);
   await renderPlayers(game.players || []);
 }
 

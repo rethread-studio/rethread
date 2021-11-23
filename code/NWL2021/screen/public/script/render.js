@@ -46,24 +46,28 @@ function updatePositionElement(element, position) {
   element.style.height = `${(position.height + 1) * game.setup.unitSize}px`;
 }
 
-
 function renderImage(image, x, y, width, height, angle, scale = 1) {
   if (!image.complete) {
-    image.onload = () => {
+    image.addEventListener("load", () => {
       return renderImage(image, x, y, width, height, angle, scale);
-    };
+    });
     return;
   }
-  const centerX = width * renderScale / 2.0;
-  const centerY = height * renderScale / 2.0;
+  const centerX = (width * renderScale) / 2.0;
+  const centerY = (height * renderScale) / 2.0;
 
   ctx.translate(x * renderScale, y * renderScale);
 
   ctx.rotate(angle);
   ctx.scale(scale, scale);
   // ctx.translate(x,y);
-  ctx.drawImage(image, -centerX, -centerY, width * renderScale, height * renderScale);
+  ctx.drawImage(
+    image,
+    -centerX,
+    -centerY,
+    width * renderScale,
+    height * renderScale
+  );
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
-
