@@ -1,29 +1,42 @@
 {
   "questionPosition": {
-    "x": 3,
+    "x": 5,
     "y": 3,
-    "width": 5,
-    "height": 0
+    "width": 6,
+    "height": 2
   },
-  "_id": "615ee06728f1bb00b8c4c8ce",
-  "height": 6,
-  "width": 13,
+  "height": 8,
+  "width": 16,
   "unitSize": 100,
   "answersPositions": [
-    {
-      "x": 0,
-      "y": 4,
-      "width": 3,
-      "height": 1,
-      "_id": "61654693a7b3131d0df34400"
-    },
-    {
-      "x": 8,
-      "y": 0,
-      "width": 3,
-      "height": 2,
-      "_id": "61654693a7b3131d0df34401"
-    }
+    [
+      {
+        "x": 0,
+        "y": 5,
+        "width": 3,
+        "height": 2
+      },
+      {
+        "x": 13,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      }
+    ],
+    [
+      {
+        "x": 0,
+        "y": 0,
+        "width": 3,
+        "height": 2
+      },
+      {
+        "x": 13,
+        "y": 5,
+        "width": 3,
+        "height": 2
+      }
+    ]
   ],
   "walls": []
 }

@@ -136,6 +136,10 @@ export default class GameSocket {
           status: p.status,
         };
       }),
+      answerPositions:
+        this.engine.state.answersPositions[
+          this.engine.currentIndexAnswerPosition
+        ],
       questionEndDate: this.engine.questionEndDate,
       question: this.engine.currentQuestion,
     });
@@ -148,10 +152,20 @@ export default class GameSocket {
   }
 
   emitQuestion(questionEvent) {
-    this.io.of("control").emit("question", questionEvent.question.text);
+    this.io.of("control").emit("question", {
+      question: questionEvent.question.text,
+      answerPositions:
+        this.engine.state.answersPositions[
+          this.engine.currentIndexAnswerPosition
+        ],
+    });
     this.io.of("screen").emit("question", {
       question: questionEvent.question,
       endDate: questionEvent.endDate,
+      answerPositions:
+        this.engine.state.answersPositions[
+          this.engine.currentIndexAnswerPosition
+        ],
     });
   }
 
@@ -324,7 +338,7 @@ export default class GameSocket {
     socket.on("emote", async (emojiID) => {
       try {
         const emoji = await EmojiModel.findByIdAndUpdate(emojiID, {
-          $inc: { "used": 1 },
+          $inc: { used: 1 },
         });
         if (!emoji) return;
         UserModel.findByIdAndUpdate(session.userID, {
@@ -336,9 +350,7 @@ export default class GameSocket {
         }, console.error);
 
         this._hasChange = true;
-        this.io
-          .of("screen")
-          .emit("emote", { playerId: socket.id, emoji });
+        this.io.of("screen").emit("emote", { playerId: socket.id, emoji });
         this._events.push({
           origin: "user",
           action: "emote",
@@ -359,6 +371,7 @@ export default class GameSocket {
 
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.play": 1 },
+        $set: { laureateID },
       }).then((user) => {
         this.engine.on("score").emit({ player, user });
       }, console.error);
@@ -372,7 +385,13 @@ export default class GameSocket {
 
       player.socket = socket;
 
-      socket.emit("question", this.engine.currentQuestion.text);
+      socket.emit("question", {
+        question: this.engine.currentQuestion.text,
+        answerPositions:
+          this.engine.state.answersPositions[
+            this.engine.currentIndexAnswerPosition
+          ],
+      });
 
       socket.on("up", () => {
         if (this._movedUsers.has(socket.id)) return;

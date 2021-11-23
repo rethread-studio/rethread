@@ -16,6 +16,7 @@ export const EmojiList = ({ handleClick, show, setShow }: React.PropsWithChildre
 
     const [emojiList, setEmojiList] = useState<IEmoji[]>([]);
 
+
     const clickHandler = (e: IEmoji) => {
         handleClick(e);
         setShow(!show);
@@ -23,23 +24,22 @@ export const EmojiList = ({ handleClick, show, setShow }: React.PropsWithChildre
 
     useEffect(() => {
         getEmojis().then(emojiList => {
-            setEmojiList(emojiList);
+            if (show) setEmojiList(emojiList);
         }, error => {
             console.log(error);
             setShow(!show);
         })
-        return () => {}
+        return () => { }
     });
 
     const emojiButtons = emojiList.map((emoji) => {
         return <button key={uuidv4()} className="text-4xl space-x-7" onClick={() => { clickHandler(emoji) }}>{emoji.emoji}</button>
     });
-    
-    //translate-y-full
 
     return <>
         <div onClick={() => { setShow(false) }} className={`${show ? "block" : "hidden"} absolute z-10 bg-gray-800  bg-opacity-50 w-full h-screen top-0 left-0 p-8`}></div>
         <div className={` transform transition ${show ? `flex` : `hidden`} bottom-0 absolute z-20 bg-gray-800 w-full p-8  border-white flex-wrap space-x-4 place-items-start content-center justify-center bottom-4`}>
+            <h2 className="w-full text-center mb-4 text-gray-400">Select an emoji to emote</h2>
             {emojiButtons}
         </div>
     </>

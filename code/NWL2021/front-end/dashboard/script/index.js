@@ -37,8 +37,14 @@ angular
     "$location",
     function ($scope, $http, $location) {
       $scope.gameState = null;
+      socket.off("gameStateUpdate");
+      socket.on("question", (data) => {
+        $scope.$apply(() => {
+          $scope.gameState.questionEndDate = data.endDate;
+          $scope.gameState.question = data.question;
+        });
+      });
       socket.on("gameStateUpdate", (data) => {
-        console.log("gameStateUpdate");
         $scope.$apply(() => {
           $scope.gameState = data;
         });
@@ -97,6 +103,7 @@ angular
     "$http",
     "$location",
     function ($scope, $http, $location) {
+      $scope.currentQuestion = null;
       function getQuestions() {
         $http.get("/api/admin/questions").then((res) => {
           $scope.questions = res.data;
@@ -110,6 +117,14 @@ angular
 
       $scope.addAnswer = function (question) {
         question.answers.push({ text: "", isCorrect: false });
+      };
+
+      $scope.activate = function (question) {
+        $http
+          .post(`/api/admin/questions/${question._id}/activate`)
+          .then((question) => {
+            $scope.currentQuestion = question;
+          });
       };
 
       let questionsTimeout = null;

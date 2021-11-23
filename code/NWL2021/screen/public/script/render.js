@@ -2,6 +2,8 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const imageCache = {};
 
+const renderScale = 2;
+
 function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
@@ -10,8 +12,8 @@ function initRender() {
   const width = game.setup.unitSize * game.setup.width;
   const height = game.setup.unitSize * game.setup.height;
 
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = width * renderScale;
+  canvas.height = height * renderScale;
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
 
@@ -44,24 +46,28 @@ function updatePositionElement(element, position) {
   element.style.height = `${(position.height + 1) * game.setup.unitSize}px`;
 }
 
-
 function renderImage(image, x, y, width, height, angle, scale = 1) {
   if (!image.complete) {
-    image.onload = () => {
+    image.addEventListener("load", () => {
       return renderImage(image, x, y, width, height, angle, scale);
-    };
+    });
     return;
   }
-  const centerX = width / 2.0;
-  const centerY = height / 2.0;
+  const centerX = (width * renderScale) / 2.0;
+  const centerY = (height * renderScale) / 2.0;
 
-  ctx.translate(x, y);
+  ctx.translate(x * renderScale, y * renderScale);
 
   ctx.rotate(angle);
   ctx.scale(scale, scale);
   // ctx.translate(x,y);
-  ctx.drawImage(image, -centerX, -centerY, width, height);
+  ctx.drawImage(
+    image,
+    -centerX,
+    -centerY,
+    width * renderScale,
+    height * renderScale
+  );
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
-

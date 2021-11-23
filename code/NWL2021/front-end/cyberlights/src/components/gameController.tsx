@@ -13,24 +13,32 @@ import { gameControllerI, controllDirection, IEmoji } from "../types";
 import { categoryColor } from "../utils";
 import { EmojiList } from "./emojiList";
 import { GridGame } from "./gridGame";
+import { ScoreList } from "./scoreList";
 
 export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
     const [position, setPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
     const [score, setScore] = useState<number>(0);
     const [answer, setAnswer] = useState<string | null>(null);
+    const [answerPositions, setAnswerPositions] = useState<[{x:number; y: number}] | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
     const [color, setColor] = useState<string>(categoryColor.physics)
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
     const [show, setShow] = useState(false);
-
+    const [showScoreList, setScoreList] = useState(false);
+    const [showEmoji, setShowEmoji] = useState(false);
 
     const setEmojitoLaureate = (e: IEmoji) => {
-        console.log("emote", e)
         setEmoji(e);
         socket.emit("emote", e._id)
+    }
+
+    const emote = () => {
+        socket.emit("emote", emoji?._id)
+        window.navigator.vibrate(200);
+        setShowEmoji(true);
     }
 
     //load characters data
@@ -58,9 +66,11 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
         }
         window.addEventListener("keydown", pressHandler);
 
-        socket.on("question", (question) => { setQuestion(question) });
+        socket.on("question", (data) => { 
+            setQuestion(data.question);
+            setAnswerPositions(data.answerPositions); 
+        });
         socket.on("enterAnswer", ({ answer }) => {
-            console.log("enterAnswer")
             setAnswer(answer);
             window.navigator.vibrate(200);
         });
@@ -82,6 +92,14 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     }, [laureate, history, selectHandler]);
 
 
+    useEffect(() => {
+        const emojiTimeout = setTimeout(() => {
+            setShowEmoji(false);
+        }, 2000)
+        return (() => {
+            if (emojiTimeout) clearTimeout(emojiTimeout);
+        })
+    }, [showEmoji])
 
     const emitDirection = (direction: controllDirection) => {
         setCurrentDirection(direction)
@@ -95,28 +113,31 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
 
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
-
-
     return (
 
         <div className="h-full w-full p-4 ">
             <div className="h-full border-2 border-gray-600 relative flex flex-col justify-between overflow-hidden">
 
-                <div className="flex flex-row justify-between text-sm">
+                <div className="flex flex-row justify-between text-sm content-center pt-2">
                     <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
-                        <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back to select
+                        <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
                     </Link>
-                    <div className="score text-sm text-gray-400  h-8 w-4/8 p-2">{score}</div>
+                    <div className={`score text-sm text-gray-400  h-8 w-7/12 p-2 overflow-hidden text-right `}>
+                        {score.toString().length > 15 ? `Score: ${score.toString().slice(0, 15)}...` : score}
+                    </div>
+                    <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400 border-2 border-gray-500 rounded-full w-7 h-7 mr-2" >?</button>
                 </div>
-                <div className="w-full text-neon text-2xl uppercase text-center pt-2 ">
+                <div className={`w-full text-neon ${question !== null && question?.length > 60 ? "text-md" : "text-2xl"} uppercase text-center pt-2`}>
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
 
-                <GridGame state={state} position={position} />
+                <GridGame state={state} position={position} answerPositions={answerPositions}/>
 
                 <div className="relative h-full flex flex-col justify-center content-center">
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
-                    <img onClick={() => { socket.emit("emote", emoji?._id) }} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
+                    {showEmoji === true ? <div className={`answer absolute px-6 py-2 top-1/4 left-1/4 z-20 left-0 bg-white text-black text-2xl rounded-xl transition-all duration-200 transform ${rotation}`}> {emoji?.emoji}</div> : <></>}
+
+                    <img onClick={emote} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
@@ -134,7 +155,8 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
                 <EmojiList handleClick={setEmojitoLaureate} show={show} setShow={setShow} />
+                {showScoreList ? <ScoreList clickHandler={setScoreList} userScore={score} /> : <></>}
             </div>
-        </div>
+        </div >
     )
 }

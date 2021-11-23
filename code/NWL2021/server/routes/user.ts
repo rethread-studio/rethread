@@ -15,7 +15,16 @@ router.get("/me", async (req, res) => {
 router.get("/", async (req, res) => {
   const users = await UserModel.aggregate([
     {
+      $lookup: {
+        from: "laureates",
+        localField: "laureateID",
+        foreignField: "_id",
+        as: "tmp",
+      },
+    },
+    {
       $project: {
+        laureate: { $first: "$tmp" },
         events: 1,
         score: {
           $function: {
@@ -32,6 +41,6 @@ router.get("/", async (req, res) => {
         score: -1,
       },
     },
-  ]);
+  ]).limit(10);
   return res.json(users);
 });

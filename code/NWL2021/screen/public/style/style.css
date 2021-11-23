@@ -125,24 +125,37 @@ body {
   position: absolute;
   top: 0;
   width: 100%;
+  display:flex;
+  flex-direction:column;
+
+}
+
+.result .a, .result .q{
+  width:fit-content;
+  background-color: #202936;
+  padding:20px
 }
 
 .result .q {
-  margin-top: 30px;
+  margin: auto;
+  margin-top: 10px;
   text-align: center;
-  line-height: 50px;
+  /* line-height: 50px; */
   font-size: 36px;
   text-transform: uppercase;
+  
 }
 
 .result .a {
+  margin: auto;
   margin-top: 20px;
   text-align: center;
-  line-height: 50px;
+  
   font-size: 64px;
   text-transform: uppercase;
   font-weight: 300;
   color: white;
+  
 }
 
 .players {
@@ -161,12 +174,12 @@ body {
   justify-content: space-evenly;
   gap: 20px 20px;
 }
-.group.correct {
+/* .group.correct {
   background-color: var(--neon-green);
 }
 .group.wrong {
   background-color: var(--neon-pink);
-}
+} */
 .group .player img {
   width: 100px;
   height: auto;
@@ -224,6 +237,14 @@ body {
   height: auto;
 }
 
+.text-neon-g {
+  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
+    0 0 40px var(--neon-yellow), 0 0 80px var(--neon-yellow),
+    0 0 90px var(--neon-yellow), 0 0 100px var(--neon-yellow),
+    0 0 150px var(--neon-yellow);
+  color: white;
+}
+
 .text-neon-yellow {
   text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
     0 0 40px var(--neon-yellow), 0 0 80px var(--neon-yellow),
@@ -238,8 +259,10 @@ body {
     0 0 40px var(--neon-blue), 0 0 80px var(--neon-blue),
     0 0 90px var(--neon-blue), 0 0 100px var(--neon-blue),
     0 0 150px var(--neon-blue);
-  /* /* animation: pulsate 0.11s ease-in-out infinite alternate; */
+  
 }
+
+
 
 .green-neon {
   text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,

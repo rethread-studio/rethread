@@ -16,6 +16,7 @@ export interface ILaureate {
   _id: string;
   firstname: string;
   surname: string;
+  color: string;
   imagePath: string;
   country: string;
   city: string;

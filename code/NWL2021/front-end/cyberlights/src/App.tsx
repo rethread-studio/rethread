@@ -18,6 +18,7 @@ import './App.css';
 import { getLaureates, getLaureate, socket, getEmojis } from './api';
 import { IEmoji, laureateI } from './types';
 import { dataToLaureates } from './utils';
+import { About } from './components/about';
 
 
 function App() {
@@ -31,8 +32,7 @@ function App() {
   useEffect(() => {
     socket.on("connect", () => setLaureate(null));
     socket.on("disconnect", () => setLaureate(null));
-    socket.on("welcome", ({laureateID, state}) => {
-      console.log("welcome", laureateID, state);
+    socket.on("welcome", ({ laureateID, state }) => {
       setState(state);
       if (!laureateID) return setLaureate(null);
       getLaureate(laureateID).then(setLaureate).catch(() => setLaureate(null));
@@ -41,7 +41,7 @@ function App() {
     getEmojis().then((emojis) => {
       setEmoji(emojis[Math.random() * emojis.length | 0]);
     }).catch(() => setEmoji(null));
-    
+
     getLaureates()
       .then(data => data.map(dataToLaureates))
       .then(data => setLaureates(data))
@@ -49,12 +49,12 @@ function App() {
       .finally(() => {
         setLoading(false);
       })
-      return () => {
-        socket.off("welcome");
-        socket.off("connect");
-        socket.off("disconnect");
-      }
-   }, [])
+    return () => {
+      socket.off("welcome");
+      socket.off("connect");
+      socket.off("disconnect");
+    }
+  }, [])
 
   library.add(fas)
 
@@ -66,7 +66,10 @@ function App() {
             {laureate ? <Redirect to="/play" /> : loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={setLaureate} />}
           </Route>
           <Route path="/play">
-            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} setEmoji={setEmoji} state={state}/>}
+            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} setEmoji={setEmoji} state={state} />}
+          </Route>
+          <Route path="/about">
+            {loading ? <Loading /> : <About />}
           </Route>
           <Route path="/">
             {loading ? <Loading /> : <Home />}

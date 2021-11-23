@@ -76,11 +76,14 @@ export default async function start() {
           };
         }
         if (data.action == "userAnswer") {
-          for (let i = 0; i < setup.answersPositions.length; i++) {
-            const position = setup.answersPositions[i];
-            const answer = gameState.question.answers[i];
-            if (Engine.checkCollision(player as Player, position)) {
-              out.answer = answer.text;
+          const answersPositions = (gameState as any).answerPositions;
+          if (answersPositions) {
+            for (let i = 0; i < answersPositions.length; i++) {
+              const position = answersPositions[i];
+              const answer = gameState.question.answers[i];
+              if (Engine.checkCollision(player as Player, position)) {
+                out.answer = answer.text;
+              }
             }
           }
         }
@@ -122,7 +125,10 @@ export default async function start() {
   });
 
   socket.on("gameStateUpdate", (data) => {
-    if (gameState.players.length == 0 && isIdle === false) {
+    if (
+      (gameState == null || gameState.players.length == 0) &&
+      isIdle === false
+    ) {
       isIdle = true;
       osc.send({ action: "on" }, { address: "/idle" });
     } else if (isIdle === true) {

@@ -1,11 +1,13 @@
 <h2>Questions</h2>
 <ol>
-  <li ng-repeat="question in questions">
-    <input
-      type="text"
-      class="form-control-plaintext"
-      ng-model="question.text"
-    />
+  <li
+    ng-repeat="question in questions"
+    ng-class="{'active': currentQuestion._id == quesiton._id}"
+  >
+    <div class="input-group mb-1">
+      <input type="text" class="form-control" ng-model="question.text" />
+      <button class="btn btn-primary" type="button" ng-click="activate(question)">Activate</button>
+    </div>
     <div class="input-group mb-1">
       <input
         type="text"
@@ -17,7 +19,7 @@
         <input type="checkbox" ng-model="question.answers[0].isCorrect"
       /></span>
     </div>
-    <div class="input-group">
+    <div class="input-group mb-3">
       <input
         type="text"
         class="form-control"

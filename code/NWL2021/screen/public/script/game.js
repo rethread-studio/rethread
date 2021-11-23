@@ -6,6 +6,8 @@ const config = {
   questionTime: 4,
   dialogueImagePath: "/img/dialogue.png",
   emojiDuration: 2,
+  max_group: 12,
+  demoTimer: 6000,
 };
 
 class Game {
@@ -119,6 +121,7 @@ class Game {
     this.config = await getConfig();
     this.setup = setup;
     initRender();
+    initDemo();
     this.page = "play";
   }
 }
@@ -144,7 +147,6 @@ socket.on("disconnect", () => {
 
 const emojiTimeouts = {};
 socket.on("emote", ({ playerId, emoji }) => {
-  console.log(playerId, emoji);
   game.emojis[playerId] = emoji.emoji;
   game.hasChange = true;
 

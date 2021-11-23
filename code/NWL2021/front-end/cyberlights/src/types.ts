@@ -24,6 +24,31 @@ export interface IEmoji {
     emoji: string;
 }
 
+export interface IUserScore {
+    events: {
+        api: number,
+        file: number,
+        click: number,
+        play: number,
+        down: number,
+        enterAnswer: number,
+        right: number,
+        exitAnswer: number,
+        up: number,
+        left: number,
+        emote: number,
+        leave: number,
+    },
+    score: number
+}
+
+export interface IUserPersonalScore {
+    _id: string,
+    creationDate: string,
+    __v: number,
+    events: object,
+}
+
 
 export type colorOption = "neonyellow" | "neongreen" | "neonindigo" | "neonpink" | " neonred";
 
