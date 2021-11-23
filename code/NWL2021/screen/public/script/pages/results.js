@@ -43,124 +43,135 @@ function getPlayersResult() {
   }
 }
 
+const total_steps = 4;
+let demoStep = 0;
+
 function renderResults() {
+  console.log("render results")
   const question = document.querySelector(".result .q");
   question.innerHTML = game.question.text;
-  const { winners } = getPlayersResult();
-  const fireWorks = winners.length > 0 ? winners.map(w => {
-    console.log(w)
-    return createFirework(w.x, w.y)
-  }) : [];
-  renderFireWorks(fireWorks);
-  renderWinners(winners || []);
-  //if here are winners render fireworks 
-  //if not then render no winners sign or sad face
+  // const { winners } = getPlayersResult();
+  // if (winners.length > 0) {
+  //   renderWinDecoration();
+  //   renderWinners(winners || []);
+  // } else {
+  //   renderLooseDecoration();
+  // }
+  renderLooseDecoration();
+
+  demoStep = (demoStep + 1) % total_steps;
 }
 
-const totalStep = 4;
-const fireWorkAngles1 = [45, 135, 225, 315];
-const fireWorkAngles2 = [0, 90, 180, 270];
-const fireWorkLenght = { init: 0.1, end: 0.5 };
-
-function createFirework(_x, _y) {
-  const rand = Math.floor(Math.random() * 2);
-  return {
-    step: Math.floor(Math.random() * totalStep),
-    position: {
-      x: _x,
-      y: _y,
-    },
-    angles: rand == 0 ? fireWorkAngles1 : fireWorkAngles2,
-  }
-}
-
-function drawFireWorkCenter(_position, _fill) {
-  ctx.fillStyle = "white";
-  ctx.lineWidth = "2";
-  ctx.strokeStyle = "white";
-  ctx.beginPath();
-  ctx.arc(
-    _position.x * game.setup.unitSize,
-    _position.y * game.setup.unitSize,
-    8,
-    0,
-    2 * Math.PI
-  );
-  _fill ? ctx.fill() : ctx.stroke();
-}
-
-function drawFireWorkLegs(position, angles) {
-
-  // const angles = 
-  for (const angle of angles) {
-    const initX = position.x * game.setup.unitSize + Math.sin(angle * Math.PI / 180) * (fireWorkLenght.init * game.setup.unitSize);
-    const initY = position.y * game.setup.unitSize + Math.cos(angle * Math.PI / 180) * (fireWorkLenght.init * game.setup.unitSize);
-    const endX = position.x * game.setup.unitSize + Math.sin(angle * Math.PI / 180) * (fireWorkLenght.end * game.setup.unitSize);
-    const endY = position.y * game.setup.unitSize + Math.cos(angle * Math.PI / 180) * (fireWorkLenght.end * game.setup.unitSize);
-
-    ctx.beginPath();
-    ctx.lineWidth = "2";
-    ctx.strokeStyle = "white";
-    ctx.moveTo(
-      initX,
-      initY
-    );
-    ctx.lineTo(
-      endX,
-      endY
-    );
-    ctx.stroke();
-  }
-}
-
-function fireWorkSparkles(position, rad, _fill, angles) {
-
-  for (const angle of angles) {
-    const endX = position.x * game.setup.unitSize + Math.sin(angle * Math.PI / 180) * (fireWorkLenght.end * game.setup.unitSize);
-    const endY = position.y * game.setup.unitSize + Math.cos(angle * Math.PI / 180) * (fireWorkLenght.end * game.setup.unitSize);
-
-    ctx.fillStyle = "white";
-    ctx.lineWidth = "2";
-    ctx.strokeStyle = "white";
-
-    ctx.beginPath();
-    ctx.arc(
-      endX,
-      endY,
-      rad,
-      0,
-      2 * Math.PI
-    );
-    _fill ? ctx.fill() : ctx.stroke();
-  }
-
-}
-
-function renderFireWorks(fireWorks) {
-  for (const firework of fireWorks) {
-    switch (firework.step) {
-      case 0:
-        drawFireWorkCenter(firework.position, true);
-        break;
-      case 1:
-        drawFireWorkCenter(firework.position, false);
-        drawFireWorkLegs(firework.position, firework.angles);
-        break;
-      case 2:
-        drawFireWorkLegs(firework.position, firework.angles);
-        fireWorkSparkles(firework.position, 4, true, firework.angles);
-        break;
-      case 3:
-        fireWorkSparkles(firework.position, 6, false, firework.angles);
-        //get a random pos now
-        break;
-      default:
-        drawFireWorkCenter(firework.position, true);
-        break;
+function renderLooseDecoration() {
+  if (game.setup == undefined) return;
+  //get mid point
+  const ctxW = game.setup.unitSize * game.setup.width;
+  const ctxH = game.setup.unitSize * game.setup.height;
+  const guideLine = Math.max(ctxW, ctxH);
+  const unitSize = 60;
+  let lineStep = 0;
+  for (let i = unitSize; i < guideLine; i += unitSize) {
+    if (lineStep <= demoStep) {
+      ctx.shadowBlur = !game.gameCycle ? 10 : 15;
+      ctx.shadowColor = lineStep == (total_steps - 1) ? "#00DBFF" : "white";
+      ctx.globalAlpha = !game.gameCycle && lineStep % 2 == 0 ? 0.5 : 1;
+      ctx.setLineDash([5, 20 + total_steps * 2]);
+      ctx.lineCap = "round";
+      ctx.strokeStyle = lineStep == (total_steps - 1) ? "#00DBFF" : "white";
+      ctx.lineWidth = !game.gameCycle ? 6 + lineStep * 4 : 8 + lineStep * 2;
+      ctx.beginPath();
+      ctx.moveTo(ctxW / 2 - i, 10);
+      ctx.lineTo(ctxW / 2, i);
+      ctx.lineTo(ctxW / 2 + i, 10);
+      ctx.stroke();
     }
-    firework.step = (firework.step + 1) % totalStep;
+    lineStep = (lineStep + 1) % total_steps;
+  }
+  resetCtxSeetings();
+  ctx.lineCap = "round";
+  // drawStarGroup(ctxW - 150, ctxH - 150, 30);
+  // drawStarGroup(150, ctxH - 150, 30);
+  resetCtxSeetings();
+}
+function renderWinDecoration() {
+  if (game.setup == undefined) return;
+  //get mid point
+  const ctxW = game.setup.unitSize * game.setup.width;
+  const ctxH = game.setup.unitSize * game.setup.height;
+  const guideLine = Math.max(ctxW, ctxH);
+  const unitSize = 60;
+  let lineStep = 0;
+  for (let i = unitSize; i < guideLine; i += unitSize) {
+    if (lineStep <= demoStep) {
+      ctx.shadowBlur = !game.gameCycle ? 10 : 15;
+      ctx.shadowColor = lineStep == (total_steps - 1) ? "red" : "white";
+      ctx.globalAlpha = !game.gameCycle && lineStep % 2 == 0 ? 0.5 : 1;
+      ctx.setLineDash([5, 20 + total_steps * 2]);
+      ctx.lineCap = "round";
+      ctx.strokeStyle = lineStep == (total_steps - 1) ? "red" : "white";
+      ctx.lineWidth = !game.gameCycle ? 6 + lineStep * 4 : 8 + lineStep * 2;
+      ctx.beginPath();
+      ctx.moveTo(ctxW / 2 - i, ctxH + 10);
+      ctx.lineTo(ctxW / 2, ctxH - i);
+      ctx.lineTo(ctxW / 2 + i, ctxH + 10);
+      ctx.stroke();
+    }
+    lineStep = (lineStep + 1) % total_steps;
+  }
+  resetCtxSeetings();
+  ctx.lineCap = "round";
+  drawStarGroup(ctxW - 150, ctxH - 150, 30);
+  drawStarGroup(150, ctxH - 150, 30);
+  resetCtxSeetings();
+}
+
+function resetCtxSeetings() {
+  ctx.setLineDash([]);
+  ctx.lineCap = "square";
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 1;
+}
+
+function drawStarGroup(_x, _y, size) {
+  for (let i = total_steps - 1; i >= 0; i--) {
+
+    // ctx.globalAlpha = !game.gameCycle && i % 2 == 0 ? 0.5 : 1;
+    ctx.shadowBlur = i <= demoStep ? 15 : 0;
+    ctx.shadowColor = "white";
+    const color = i <= demoStep ? "white" : "#1B222E";
+    // const color = "red";
+    drawStar(_x, _y, 5, size + (i * 30), size / 2 + (i * 15), color);
+    // ctx.globalAlpha = 1;
+
   }
 }
+
+function drawStar(cx, cy, spikes, outerRadius, innerRadius, fillcolor) {
+  let rot = Math.PI / 2 * 3;
+  let x = cx;
+  let y = cy;
+  const step = Math.PI / spikes;
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - outerRadius)
+  for (i = 0; i < spikes; i++) {
+    x = cx + Math.cos(rot) * outerRadius;
+    y = cy + Math.sin(rot) * outerRadius;
+    ctx.lineTo(x, y)
+    rot += step
+
+    x = cx + Math.cos(rot) * innerRadius;
+    y = cy + Math.sin(rot) * innerRadius;
+    ctx.lineTo(x, y)
+    rot += step
+  }
+  ctx.lineTo(cx, cy - outerRadius);
+  ctx.closePath();
+  ctx.fillStyle = fillcolor;
+  ctx.fill();
+
+}
+
 
 async function renderWinners(players) {
 

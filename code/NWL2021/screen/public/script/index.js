@@ -43,7 +43,8 @@ game.onQuestionChange((question) => {
 game.onUpdate(() => {
   clearCanvas();
   game.hasChange = false;
-
+  // game.page = "results";//delete
+  // renderResults();//delete
   if (game.page == "demo") {
     renderDemo();
   } else if (game.page == "play") {
@@ -61,8 +62,10 @@ game.onUpdate(() => {
 game.onPageChange((page) => {
   console.log("[PAGE]", "change", page);
   clearCanvas();
+  // page = "results";//delete
   hideAll();
   clearInterval(demoInterval);
+  // showResults(true);//delete
   switch (page) {
     case "demo":
       showDemo(true);
