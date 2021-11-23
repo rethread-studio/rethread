@@ -147,11 +147,6 @@ function drawEmoji(player) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-function renderQuestionDecoration() {
-  console.log("render q decoration");
-
-}
-
 
 function renderQuestion(question) {
   const size = 2.5;
@@ -279,6 +274,44 @@ function updateQuestion(question) {
       answer.text.length < 8 ? config.answerSize.big : config.answerSize.small;
   }
 }
+
+const playConfig = {
+  total_steps: 4,
+  step: 0
+}
+
+function renderQuestionDecoration() {
+  playConfig.step = (playConfig.step + 1) % playConfig.total_steps;
+  const ctxW = game.setup.unitSize * renderScale * game.setup.width;
+  const ctxH = game.setup.unitSize * renderScale * game.setup.height;
+  const nLines = 8;
+  const lineDist = (ctxW / 5) / nLines;
+  const stepPos = ctxW / playConfig.total_steps * playConfig.step;
+  drawLineGroup(ctxW / 2, ctxW, ctxH, nLines, lineDist, stepPos, true);
+  drawLineGroup(ctxW / 2, ctxW, ctxH, nLines, lineDist, stepPos, false);
+
+}
+
+function drawLineGroup(_x, _width, _height, _nLines, _lineDist, _stepPos, _mirror = true) {
+
+  ctx.shadowBlur = !game.gameCycle ? 10 : 15;
+  ctx.shadowColor = "white";
+  ctx.globalAlpha = !game.gameCycle ? 0.5 : 0.7;
+  ctx.setLineDash([5, 20]);
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = !game.gameCycle ? 12 : 18;
+  const dir = _mirror ? 1 : -1;
+  for (let i = 0; i < _nLines; i++) {
+    ctx.beginPath();
+    const pos = (_stepPos + (i * _lineDist))
+    ctx.moveTo(_x + pos * dir, 0);
+    ctx.lineTo(_x + pos * dir, _height);
+    ctx.stroke();
+  }
+  resetCtxSeetings();
+}
+
 
 async function renderGame() {
   renderAnswer(game.question);
