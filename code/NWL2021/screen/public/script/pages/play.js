@@ -10,9 +10,8 @@ async function drawPlayersShadow(players) {
       const laureate = await game.getLaureate(player.laureateID);
       player.laureate = laureate;
     }
-    const imagePath = `/img/laureates/${
-      player.laureate.imagePath.split(".png")[0]
-    }_shadow.png`;
+    const imagePath = `/img/laureates/${player.laureate.imagePath.split(".png")[0]
+      }_shadow.png`;
     if (!imageCache[imagePath]) {
       imageCache[imagePath] = new Image(width, height);
       imageCache[imagePath].src = imagePath;
@@ -47,23 +46,23 @@ async function drawPreviousPosition(players) {
     ctx.strokeStyle = player.laureate?.color || "white";
     ctx.moveTo(
       positions[0].x * renderScale * game.setup.unitSize +
-        (game.setup.unitSize * renderScale) / 2,
+      (game.setup.unitSize * renderScale) / 2,
       positions[0].y * renderScale * game.setup.unitSize +
-        (game.setup.unitSize * renderScale) / 2
+      (game.setup.unitSize * renderScale) / 2
     );
     for (let i = 1; i < positions.length; i++) {
       ctx.lineTo(
         positions[i].x * renderScale * game.setup.unitSize +
-          (game.setup.unitSize * renderScale) / 2,
+        (game.setup.unitSize * renderScale) / 2,
         positions[i].y * renderScale * game.setup.unitSize +
-          (game.setup.unitSize * renderScale) / 2
+        (game.setup.unitSize * renderScale) / 2
       );
     }
     ctx.lineTo(
       player.x * renderScale * game.setup.unitSize +
-        (game.setup.unitSize * renderScale) / 2,
+      (game.setup.unitSize * renderScale) / 2,
       player.y * renderScale * game.setup.unitSize +
-        (game.setup.unitSize * renderScale) / 2
+      (game.setup.unitSize * renderScale) / 2
     );
     ctx.stroke();
   }
@@ -148,6 +147,12 @@ function drawEmoji(player) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
+function renderQuestionDecoration() {
+  console.log("render q decoration");
+
+}
+
+
 function renderQuestion(question) {
   const size = 2.5;
 
@@ -169,9 +174,9 @@ function renderQuestion(question) {
           ctx.lineTo(
             x,
             questionPosition.y * unitSize +
-              unitSize * j +
-              unitSize -
-              unitSize / size
+            unitSize * j +
+            unitSize -
+            unitSize / size
           );
         } else {
           ctx.moveTo(
@@ -180,9 +185,9 @@ function renderQuestion(question) {
           );
           ctx.lineTo(
             questionPosition.x * unitSize +
-              unitSize * i +
-              unitSize -
-              unitSize / size,
+            unitSize * i +
+            unitSize -
+            unitSize / size,
             questionPosition.y * unitSize + unitSize * j + unitSize / 2
           );
         }
@@ -194,9 +199,9 @@ function renderQuestion(question) {
           );
           ctx.lineTo(
             questionPosition.x * unitSize +
-              unitSize * i +
-              unitSize -
-              unitSize / size,
+            unitSize * i +
+            unitSize -
+            unitSize / size,
             questionPosition.y * unitSize + unitSize * j + unitSize / 2
           );
         } else {
@@ -207,9 +212,9 @@ function renderQuestion(question) {
           ctx.lineTo(
             questionPosition.x * unitSize + unitSize * i + unitSize / 2,
             questionPosition.y * unitSize +
-              unitSize * j +
-              unitSize -
-              unitSize / size
+            unitSize * j +
+            unitSize -
+            unitSize / size
           );
         }
       }
@@ -229,8 +234,8 @@ function renderAnswer(question) {
           ? config.dotSize.small
           : config.dotSize.big
         : game.gameCycle
-        ? config.dotSize.big
-        : config.dotSize.small;
+          ? config.dotSize.big
+          : config.dotSize.small;
 
     const unitSize = game.setup.unitSize * renderScale;
     //draw the mid point
@@ -284,8 +289,28 @@ async function renderGame() {
   await renderPlayers(game.players || []);
 }
 
+function cleanTimerClass() {
+  const element = document.getElementsByClassName("timer")[0];
+  element.classList.remove("text-neon-green");
+  element.classList.remove("text-neon-yellow");
+  element.classList.remove("text-neon-pink");
+}
+
+function setTimerClass(time) {
+  const element = document.getElementsByClassName("timer")[0];
+  if (time <= 10) {
+    element.classList.add("text-neon-pink");
+  } else if (time <= 20) {
+    element.classList.add("text-neon-yellow");
+  } else {
+    element.classList.add("text-neon-green");
+  }
+}
+
 setInterval(() => {
   if (!game.endDate) return;
   const time = new Date(game.endDate) - new Date().getTime();
+  cleanTimerClass();
+  setTimerClass(time / 1000);
   document.querySelector(".timer").innerHTML = Math.round(time / 1000);
 }, 250);

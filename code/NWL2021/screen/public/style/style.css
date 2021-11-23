@@ -1,6 +1,6 @@
 :root {
   /* Set neon color */
-  --neon-green: #73f54b;
+  --neon-green: #73F54B;
   --neon-pink: #f09;
   --neon-blue: #c4ffff;
   --neon-purple: #7325f0;
@@ -187,7 +187,8 @@ body {
 .timer {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 50%;
+  transform: translate(-50%, 0%);
   font-size: 5em;
 }
 .demo {
@@ -237,11 +238,11 @@ body {
   height: auto;
 }
 
-.text-neon-g {
+.text-neon-green {
   text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
-    0 0 40px var(--neon-yellow), 0 0 80px var(--neon-yellow),
-    0 0 90px var(--neon-yellow), 0 0 100px var(--neon-yellow),
-    0 0 150px var(--neon-yellow);
+    0 0 40px var(--neon-green), 0 0 80px var(--neon-green),
+    0 0 90px var(--neon-green), 0 0 100px var(--neon-green),
+    0 0 150px var(--neon-green);
   color: white;
 }
 
@@ -250,6 +251,14 @@ body {
     0 0 40px var(--neon-yellow), 0 0 80px var(--neon-yellow),
     0 0 90px var(--neon-yellow), 0 0 100px var(--neon-yellow),
     0 0 150px var(--neon-yellow);
+  color: white;
+}
+
+.text-neon-pink {
+  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
+    0 0 40px var(--neon-pink), 0 0 80px var(--neon-pink),
+    0 0 90px var(--neon-pink), 0 0 100px var(--neon-pink),
+    0 0 150px var(--neon-pink);
   color: white;
 }
 

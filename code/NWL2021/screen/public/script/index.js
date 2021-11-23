@@ -44,12 +44,14 @@ game.onUpdate(() => {
   clearCanvas();
   game.hasChange = false;
   // game.page = "results";//delete
-  // renderResults();//delete
+  // renderQuestion();//delete
+
   if (game.page == "demo") {
     renderDemo();
   } else if (game.page == "play") {
     renderGame();
   } else if (game.page == "question") {
+    renderQuestionDecoration();
     renderQuestion();
   } else if (game.page == "answer") {
     renderQuestion();
