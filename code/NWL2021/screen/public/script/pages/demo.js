@@ -29,7 +29,7 @@ const dummyGameState = {
       },
       {
         isCorrect: false,
-        text: "no",
+        text: "ja",
       },
     ],
   },
@@ -105,10 +105,10 @@ function moveDummyPlayer(player) {
       player.status == "up"
         ? "right"
         : player.status == "down"
-        ? "left"
-        : player.status == "left"
-        ? "up"
-        : "down";
+          ? "left"
+          : player.status == "left"
+            ? "up"
+            : "down";
     moveDummyPlayer(player);
   }
 }
@@ -118,10 +118,10 @@ function changeOrientation(player) {
     player.status == "up"
       ? "down"
       : player.status == "down"
-      ? "up"
-      : player.status == "left"
-      ? "right"
-      : "left";
+        ? "up"
+        : player.status == "left"
+          ? "right"
+          : "left";
 }
 function randomPosition() {
   dummyPlayer1.x = 0;
