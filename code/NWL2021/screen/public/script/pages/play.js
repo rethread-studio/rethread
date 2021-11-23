@@ -7,7 +7,9 @@ async function drawPlayersShadow(players) {
   // draw players
   for (const player of players) {
     const laureate = await game.getLaureate(player.laureateID);
-    const imagePath = `/img/laureates/${laureate.imagePath.split(".png")[0]}_shadow.png`;
+    const imagePath = `/img/laureates/${
+      laureate.imagePath.split(".png")[0]
+    }_shadow.png`;
     if (!imageCache[imagePath]) {
       imageCache[imagePath] = new Image(width, height);
       imageCache[imagePath].src = imagePath;
@@ -27,28 +29,34 @@ async function drawPlayersShadow(players) {
 
 function drawPreviousPosition(players) {
   ctx.shadowBlur = !game.gameCycle ? 5 : 10;
-  ctx.shadowColor = "white";//TODO ADD PLAYER COLOR
   for (const player of players) {
+    ctx.shadowColor = player.color || "white";
     let positions = player.previousPositions;
     if (positions.length == 0) return;
 
     //DRAW LINE PATH
     ctx.beginPath();
-    ctx.lineWidth = !game.gameCycle ? "4" : "2";
+    ctx.lineWidth = game.gameCycle ? 2 : 4;
     ctx.strokeStyle = player.laureate?.color || "white";
     ctx.moveTo(
-      positions[0].x * game.setup.unitSize + game.setup.unitSize / 2,
-      positions[0].y * game.setup.unitSize + game.setup.unitSize / 2
+      positions[0].x * renderScale * game.setup.unitSize +
+        (game.setup.unitSize * renderScale) / 2,
+      positions[0].y * renderScale * game.setup.unitSize +
+        (game.setup.unitSize * renderScale) / 2
     );
     for (let i = 1; i < positions.length; i++) {
       ctx.lineTo(
-        positions[i].x * game.setup.unitSize + game.setup.unitSize / 2,
-        positions[i].y * game.setup.unitSize + game.setup.unitSize / 2
+        positions[i].x * renderScale * game.setup.unitSize +
+          (game.setup.unitSize * renderScale) / 2,
+        positions[i].y * renderScale * game.setup.unitSize +
+          (game.setup.unitSize * renderScale) / 2
       );
     }
     ctx.lineTo(
-      player.x * game.setup.unitSize + game.setup.unitSize / 2,
-      player.y * game.setup.unitSize + game.setup.unitSize / 2
+      player.x * renderScale * game.setup.unitSize +
+        (game.setup.unitSize * renderScale) / 2,
+      player.y * renderScale * game.setup.unitSize +
+        (game.setup.unitSize * renderScale) / 2
     );
     ctx.stroke();
 
@@ -57,8 +65,10 @@ function drawPreviousPosition(players) {
       ctx.fillStyle = player.laureate?.color || "white";
       ctx.beginPath();
       ctx.arc(
-        positions[i].x * game.setup.unitSize + game.setup.unitSize / 2,
-        positions[i].y * game.setup.unitSize + game.setup.unitSize / 2,
+        positions[i].x * renderScale * game.setup.unitSize +
+          (game.setup.unitSize * renderScale) / 2,
+        positions[i].y * renderScale * game.setup.unitSize +
+          (game.setup.unitSize * renderScale) / 2,
         !game.gameCycle ? config.dotSize.big : config.dotSize.small,
         0,
         2 * Math.PI
@@ -130,8 +140,12 @@ function drawEmoji(player) {
   if (!game.emojis[player.socketID]) return;
   const emoji = game.emojis[player.socketID];
   const angle = getAngle(player.status);
-  const x = player.x * game.setup.unitSize + game.setup.unitSize / 2;
-  const y = player.y * game.setup.unitSize + game.setup.unitSize / 2;
+  const x =
+    player.x * renderScale * game.setup.unitSize +
+    (game.setup.unitSize * renderScale) / 2;
+  const y =
+    player.y * renderScale * game.setup.unitSize +
+    (game.setup.unitSize * renderScale) / 2;
   ctx.translate(x, y);
   ctx.rotate(angle);
   ctx.font = `${!game.gameCycle ? "70px" : "90px"} serif`;
@@ -145,7 +159,7 @@ function renderQuestion(question) {
   const size = 2.5;
 
   const questionPosition = game.setup.questionPosition;
-  const unitSize = game.setup.unitSize;
+  const unitSize = game.setup.unitSize * renderScale;
 
   for (let i = 0; i < questionPosition.width + 1; i++) {
     for (let j = 0; j < questionPosition.height + 1; j++) {
@@ -162,9 +176,9 @@ function renderQuestion(question) {
           ctx.lineTo(
             x,
             questionPosition.y * unitSize +
-            unitSize * j +
-            unitSize -
-            unitSize / size
+              unitSize * j +
+              unitSize -
+              unitSize / size
           );
         } else {
           ctx.moveTo(
@@ -173,9 +187,9 @@ function renderQuestion(question) {
           );
           ctx.lineTo(
             questionPosition.x * unitSize +
-            unitSize * i +
-            unitSize -
-            unitSize / size,
+              unitSize * i +
+              unitSize -
+              unitSize / size,
             questionPosition.y * unitSize + unitSize * j + unitSize / 2
           );
         }
@@ -187,9 +201,9 @@ function renderQuestion(question) {
           );
           ctx.lineTo(
             questionPosition.x * unitSize +
-            unitSize * i +
-            unitSize -
-            unitSize / size,
+              unitSize * i +
+              unitSize -
+              unitSize / size,
             questionPosition.y * unitSize + unitSize * j + unitSize / 2
           );
         } else {
@@ -200,9 +214,9 @@ function renderQuestion(question) {
           ctx.lineTo(
             questionPosition.x * unitSize + unitSize * i + unitSize / 2,
             questionPosition.y * unitSize +
-            unitSize * j +
-            unitSize -
-            unitSize / size
+              unitSize * j +
+              unitSize -
+              unitSize / size
           );
         }
       }
@@ -222,20 +236,18 @@ function renderAnswer(question) {
           ? config.dotSize.small
           : config.dotSize.big
         : game.gameCycle
-          ? config.dotSize.big
-          : config.dotSize.small;
+        ? config.dotSize.big
+        : config.dotSize.small;
+
+    const unitSize = game.setup.unitSize * renderScale;
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
       for (let j = 0; j < position.height + 1; j++) {
         ctx.fillStyle = "white";
         ctx.beginPath();
         ctx.arc(
-          position.x * game.setup.unitSize +
-          game.setup.unitSize * i +
-          game.setup.unitSize / 2,
-          position.y * game.setup.unitSize +
-          game.setup.unitSize * j +
-          game.setup.unitSize / 2,
+          position.x * unitSize + unitSize * i + unitSize / 2,
+          position.y * unitSize + unitSize * j + unitSize / 2,
           size,
           0,
           2 * Math.PI
