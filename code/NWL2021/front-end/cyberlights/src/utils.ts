@@ -63,13 +63,6 @@ export const getFlag = (country: string): string => {
     }
 }
 
-export const emojiList = ['❤️‍🔥', '😵‍💫', '🥲', '😮‍💨', '🤌', '🥸', '😶‍🌫️', '❤️‍🩹', '🤐', '🤨', '😡', '💀', '🤡', '👻', '👾', '💋', '🖖', '🤟'];
-
-export const getEmoji = () => {
-    const randPos = Math.floor(Math.random() * emojiList.length);
-    return emojiList[randPos];
-}
-
 export function isWall(x: number, y: number, state: any): boolean {
     if (!state) return false;
     if (x <= state.questionPosition.x + state.questionPosition.width && x >= state.questionPosition.x
@@ -79,9 +72,10 @@ export function isWall(x: number, y: number, state: any): boolean {
     }
     return false;
 }
-export function isAnswer(x: number, y: number, state: any): boolean {
-    if (!state) return false;
-    for (const answerPosition of state.answersPositions) {
+
+export function isAnswer(x: number, y: number, answerPositions: [any] | null): boolean {
+    if (!answerPositions) return false;
+    for (const answerPosition of answerPositions) {
         if (x <= answerPosition.x + answerPosition.width && x >= answerPosition.x
             &&
             y <= answerPosition.y + answerPosition.height && y >= answerPosition.y) {

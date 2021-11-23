@@ -4,9 +4,10 @@ import { isWall, isAnswer } from "../utils";
 interface IGridGame {
     state: any,
     position: { x: number, y: number },
+    answerPositions: [{ x: number, y: number }] | null
 }
 
-export const GridGame = ({ state, position }: React.PropsWithChildren<IGridGame>) => {
+export const GridGame = ({ state, position, answerPositions }: React.PropsWithChildren<IGridGame>) => {
     const [tileSize, setTileSize] = useState(0);
 
     useEffect(() => {
@@ -20,7 +21,7 @@ export const GridGame = ({ state, position }: React.PropsWithChildren<IGridGame>
         for (let j = 0; j < state.width; j++) {
             line = <>
                 {line}
-                <div style={{ width: `${tileSize}px`, height: `${tileSize}px` }} className={"grid-position-item " + ((position.y === i && position.x === j) ? "active " : " ") + (isWall(j, i, state) ? "wall " : " ") + (isAnswer(j, i, state) ? "grid-answer " : " ")}></div>
+                <div style={{ width: `${tileSize}px`, height: `${tileSize}px` }} className={"grid-position-item " + ((position.y === i && position.x === j) ? "active " : " ") + (isWall(j, i, state) ? "wall " : " ") + (isAnswer(j, i, answerPositions) ? "grid-answer " : " ")}></div>
             </>
         }
         grid = <>{grid}<div className="grid-line">{line}</div></>

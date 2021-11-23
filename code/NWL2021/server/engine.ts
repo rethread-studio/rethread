@@ -27,6 +27,7 @@ class Events {
 
 export class Engine {
   questions: IQuestion[];
+  currentIndexAnswerPosition: number = 0;
   private _currentQuestion: IQuestion;
   private _questionEndDate: Date;
   private _currentIndexQuestion: number = 0;
@@ -148,9 +149,14 @@ export class Engine {
   }
 
   private _isInAnswer(player: Player) {
-    for (let i = 0; i < this.state.answersPositions.length; i++) {
+    for (
+      let i = 0;
+      i < this.state.answersPositions[this.currentIndexAnswerPosition].length;
+      i++
+    ) {
       const answer = this.currentQuestion.answers[i];
-      const position = this.state.answersPositions[i];
+      const position =
+        this.state.answersPositions[this.currentIndexAnswerPosition][i];
       if (Engine.checkCollision(player, position)) {
         return { inAnswer: true, answer };
       }
@@ -247,14 +253,21 @@ export class Engine {
 
       for (const socketID of Object.keys(this.players)) {
         const player = this.players[socketID];
-        if (!player.inAnswer) continue;
         const { inAnswer, answer } = this._isInAnswer(player);
-        this._events.enterAnswer.emit({ answer, player });
+        if (player.inAnswer && !inAnswer) {
+          this._events.exitAnswer.emit({ answer, player });
+        } else if (inAnswer) {
+          this._events.enterAnswer.emit({ answer, player });
+        }
+        player.inAnswer = inAnswer;
       }
     }, config.ANSWER_DURATION * 1000);
 
     this._questionTimeout = setTimeout(() => {
       this.currentQuestion = this.chooseQuestion();
+      this.currentIndexAnswerPosition =
+        (this.currentIndexAnswerPosition + 1) %
+        this.state.answersPositions.length;
     }, config.QUESTION_INTERVAL * 1000);
   }
 

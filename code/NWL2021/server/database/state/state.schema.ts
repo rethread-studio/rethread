@@ -11,12 +11,16 @@ const StateSchema = new Schema({
     width: Number,
     height: Number,
   },
-  answersPositions: [{
-    x: Number,
-    y: Number,
-    width: Number,
-    height: Number,
-  }],
+  answersPositions: [
+    [
+      {
+        x: Number,
+        y: Number,
+        width: Number,
+        height: Number,
+      },
+    ],
+  ],
   walls: [
     {
       x: Number,

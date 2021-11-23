@@ -20,6 +20,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const [position, setPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
     const [score, setScore] = useState<number>(0);
     const [answer, setAnswer] = useState<string | null>(null);
+    const [answerPositions, setAnswerPositions] = useState<[{x:number; y: number}] | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
     const [color, setColor] = useState<string>(categoryColor.physics)
@@ -65,7 +66,10 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
         }
         window.addEventListener("keydown", pressHandler);
 
-        socket.on("question", (question) => { setQuestion(question) });
+        socket.on("question", (data) => { 
+            setQuestion(data.question);
+            setAnswerPositions(data.answerPositions); 
+        });
         socket.on("enterAnswer", ({ answer }) => {
             setAnswer(answer);
             window.navigator.vibrate(200);
@@ -127,7 +131,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
 
-                <GridGame state={state} position={position} />
+                <GridGame state={state} position={position} answerPositions={answerPositions}/>
 
                 <div className="relative h-full flex flex-col justify-center content-center">
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}

@@ -221,7 +221,7 @@ function renderQuestion(question) {
 
 function renderAnswer(question) {
   for (let k = 0; k < question.answers.length; k++) {
-    const position = game.setup.answersPositions[k];
+    const position = game.gameState.answerPositions[k];
 
     const size =
       k % 2 == 0
@@ -264,7 +264,7 @@ function updateQuestion(question) {
 
   for (let i = 0; i < question.answers.length; i++) {
     const answer = question.answers[i];
-    const position = game.setup.answersPositions[i];
+    const position = game.gameState.answerPositions[i];
 
     const answerE = document.querySelector(".answer" + (i + 1));
     answerE.innerHTML = answer.text;

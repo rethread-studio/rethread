@@ -41,7 +41,7 @@
     </div>
   </div>
 
-  <hr>
+  <hr />
 
   <div class="row mb-1">
     <label class="col-sm-2 col-form-label">Question Position</label>
@@ -51,7 +51,7 @@
         <input
           type="number"
           class="form-control"
-          min="1"
+          min="0"
           ng-model="state.questionPosition.x"
         />
       </div>
@@ -62,7 +62,7 @@
         <input
           type="number"
           class="form-control"
-          min="1"
+          min="0"
           ng-model="state.questionPosition.y"
         />
       </div>
@@ -95,59 +95,61 @@
     </div>
   </div>
 
-  <hr>
+  <hr />
 
-  <div ng-repeat="answer in state.answersPositions" class="mb-2">
-    <div class="row mb-1">
-      <label class="col-sm-2 col-form-label"
-        >Answer {{$index + 1}} Position</label
-      >
-      <div class="col-sm-5">
-        <div class="input-group">
-          <span class="input-group-text" id="basic-addon1">x</span>
-          <input
-            type="number"
-            class="form-control"
-            min="1"
-            ng-model="answer.x"
-          />
+  <div ng-repeat="answersPositions in state.answersPositions" class="mb-4">
+    <div ng-repeat="answer in answersPositions" class="mb-2">
+      <div class="row mb-1">
+        <label class="col-sm-2 col-form-label"
+          >Answer {{$index + 1}} Position</label
+        >
+        <div class="col-sm-5">
+          <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">x</span>
+            <input
+              type="number"
+              class="form-control"
+              min="0"
+              ng-model="answer.x"
+            />
+          </div>
+        </div>
+        <div class="col-sm-5">
+          <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">y</span>
+            <input
+              type="number"
+              class="form-control"
+              min="0"
+              ng-model="answer.y"
+            />
+          </div>
         </div>
       </div>
-      <div class="col-sm-5">
-        <div class="input-group">
-          <span class="input-group-text" id="basic-addon1">y</span>
-          <input
-            type="number"
-            class="form-control"
-            min="1"
-            ng-model="answer.y"
-          />
-        </div>
-      </div>
-    </div>
 
-    <div class="row">
-      <label class="col-sm-2 col-form-label">Answer Size</label>
-      <div class="col-sm-5">
-        <div class="input-group">
-          <span class="input-group-text" id="basic-addon1">Width</span>
-          <input
-            type="number"
-            class="form-control"
-            min="1"
-            ng-model="answer.width"
-          />
+      <div class="row">
+        <label class="col-sm-2 col-form-label">Answer Size</label>
+        <div class="col-sm-5">
+          <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">Width</span>
+            <input
+              type="number"
+              class="form-control"
+              min="1"
+              ng-model="answer.width"
+            />
+          </div>
         </div>
-      </div>
-      <div class="col-sm-5">
-        <div class="input-group">
-          <span class="input-group-text" id="basic-addon1">Height</span>
-          <input
-            type="number"
-            class="form-control"
-            min="1"
-            ng-model="answer.height"
-          />
+        <div class="col-sm-5">
+          <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">Height</span>
+            <input
+              type="number"
+              class="form-control"
+              min="1"
+              ng-model="answer.height"
+            />
+          </div>
         </div>
       </div>
     </div>
