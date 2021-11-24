@@ -197,20 +197,6 @@
     ]
   },
   {
-    "text": "How old was Selma Lagerlöf when she published her first novel?",
-    "type": "lagerlof",
-    "answers": [
-      {
-        "text": "33",
-        "isCorrect": true
-      },
-      {
-        "text": "19",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
     "text": "Which of these Nobel Laureates has had a crater on Venus named after her?",
     "type": "lagerlof",
     "answers": [
@@ -692,12 +678,12 @@
     "type": "curie",
     "answers": [
       {
-        "text": "two",
+        "text": "Two",
         "description":"She was and still is the only person to be awarded Nobel Prizes in two scientific categories. ",
         "isCorrect": true
       },
       {
-        "text": "three",
+        "text": "Three",
         "isCorrect": false
       }
     ]
@@ -707,11 +693,11 @@
     "type": "curie",
     "answers": [
       {
-        "text": "in thorium",
+        "text": "In thorium",
         "isCorrect": true
       },
       {
-        "text": "in lokirium",
+        "text": "In lokirium",
         "isCorrect": false
       }
     ]
@@ -731,7 +717,7 @@
     ]
   },
   {
-    "text": "How many lareates can you choose from in cyber|glow?",
+    "text": "How many laureates can you choose from in cyber|glow?",
     "type": "CS",
     "answers": [
       {
@@ -753,7 +739,7 @@
         "isCorrect": true
       },
       {
-        "text": "Linus Torvald",
+        "text": "Elon Musk",
         "isCorrect": false
       }
     ]
@@ -768,7 +754,7 @@
         "isCorrect": true
       },
       {
-        "text": "2",
+        "text": "42",
         "isCorrect": false
       }
     ]
@@ -788,7 +774,7 @@
     ]
   },
   {
-    "text": "How many lines of code are used for cyber|glow?",
+    "text": "How many lines of code is cyber|glow made of?",
     "type": "CS",
     "answers": [
       {
@@ -816,21 +802,7 @@
     ]
   },
   {
-    "text": "For which ceremony does Miss Sweety Poo as time keeper for acceptance speeches?",
-    "type": "nobel",
-    "answers": [
-      {
-        "text": "Nobel Prize",
-        "isCorrect": true
-      },
-      {
-        "text": "Ig Nobel Prize",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "For which ceremony does Miss Sweety Poo as time keeper for acceptance speeches?",
+    "text": "For which ceremony does Miss Sweety Poo acts as time keeper for acceptance speeches?",
     "type": "nobel",
     "answers": [
       {
@@ -908,7 +880,7 @@
         "isCorrect": true
       },
       {
-        "text": "Physical Review",
+        "text": "Wired",
         "isCorrect": false
       }
     ]
@@ -923,6 +895,120 @@
       },
       {
         "text": "Ice swim",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where did Rita Levi-Montalcini work during World War II?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "In her bedroom",
+        "isCorrect": true
+      },
+      {
+        "text": "In co-working spaces",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How old was Rita Levi-Montalcini when she died?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "103",
+        "description":"Rita Levi-Montalcini was the longest-living Nobel Laureate",
+        "isCorrect": true
+      },
+      {
+        "text": "91",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What is the contribution of Stephanie Forrest to cyber security?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Software diversity",
+        "isCorrect": true
+      },
+      {
+        "text": "# in passwords",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "To which demogroup did the founders of DICE belong to?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "The Silents",
+        "isCorrect": true
+      },
+      {
+        "text": "Assert",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many 0s and 1s are there in 7?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "11",
+        "description":"There are 3 1s for a 7 in binary, which is 11 in 0s and 1s",
+        "isCorrect": true
+      },
+      {
+        "text": "111",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What ancient Chinese text is based on taoistic duality of yin and yang?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "I Ching",
+        "isCorrect": true
+      },
+      {
+        "text": "Lecture on Nothing",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who was Grandma COBOL?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Grace Hopper",
+        "isCorrect": true
+      },
+      {
+        "text": "Frances Allen",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many levels are there in a Candy Crush episode?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "15",
+        "isCorrect": true
+      },
+      {
+        "text": "51",
         "isCorrect": false
       }
     ]
