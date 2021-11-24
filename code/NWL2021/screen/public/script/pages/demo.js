@@ -212,11 +212,6 @@ function displayDemo() {
     demoMode = demoModes[(demoPos + 1) % demoModes.length];
     demoPos++;
     assignRandomLaureate();
-    if (demoPos % 15 == 0) {
-      changeOrientation(dummyPlayer1);
-      changeOrientation(dummyPlayer2);
-      // randomPosition();
-    }
     _displayDemo();
   }, config.demoTimer);
 }
