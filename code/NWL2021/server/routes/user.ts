@@ -41,6 +41,6 @@ router.get("/", async (req, res) => {
         score: -1,
       },
     },
-  ]).limit(10);
+  ]).limit(3);
   return res.json(users);
 });

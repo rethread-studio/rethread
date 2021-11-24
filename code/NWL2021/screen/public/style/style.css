@@ -203,16 +203,17 @@ body {
   place-content: center;
   /* flex-wrap: wrap; */
   text-align: center;
-  font-size: 3.9em;
+  font-size: 1.5rem;
 }
 .demo .sub {
   margin-bottom: 20px;
-  font-size: 1.9em;
+  font-size: 4.5rem;
   font-weight: 100;
 }
 
 .demo .info {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
+  line-height:2.4rem;
   font-weight: 100;
 }
 
@@ -220,7 +221,7 @@ body {
   margin-top: 0.5rem;
   margin-bottom: 20px;
   font-weight: 100;
-  font-size: 3rem;
+  font-size: 6rem;
   line-height: 1;
 }
 .logos {
@@ -240,9 +241,9 @@ body {
 
 .text-neon-green {
   text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
-    0 0 40px var(--neon-green), 0 0 80px var(--neon-green),
-    0 0 90px var(--neon-green), 0 0 100px var(--neon-green),
-    0 0 150px var(--neon-green);
+    0 0 20px var(--neon-green), 0 0 60px var(--neon-green),
+    0 0 70px var(--neon-green), 0 0 80px var(--neon-green),
+    0 0 130px var(--neon-green);
   color: white;
 }
 

@@ -14,10 +14,10 @@ export const ScoreList = ({ clickHandler, userScore }: React.PropsWithChildren<I
     const [score, setScore] = useState<IUserScore[]>([]);
     const [userEvents, setUserEvents] = useState({})
     const [userData, setUserData] = useState({});
-    const topNumber: number = 3;
+    // const topNumber: number = 3;
 
     useEffect(() => {
-        getScore().then(scoreList => scoreList.length > topNumber ? scoreList.slice(0, topNumber) : scoreList)
+        getScore()//.then(scoreList => scoreList.length > topNumber ? scoreList.slice(0, topNumber) : scoreList)
             .then(scoreList => scoreList.sort((a: IUserScore, b: IUserScore) => b.score - a.score))
             .then(scoreList => {
                 setScore(scoreList);
