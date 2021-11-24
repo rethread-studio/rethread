@@ -32,11 +32,11 @@
     "type": "CS",
     "answers": [
       {
-        "text": "no",
+        "text": "No",
         "isCorrect": false
       },
       {
-        "text": "yes",
+        "text": "Yes",
         "isCorrect": true
       }
     ]
@@ -75,11 +75,11 @@
     "type": "king",
     "answers": [
       {
-        "text": "no",
+        "text": "No",
         "isCorrect": false
       },
       {
-        "text": "yes",
+        "text": "Yes",
         "isCorrect": true
       }
     ]
@@ -89,11 +89,11 @@
     "type": "CS",
     "answers": [
       {
-        "text": "no",
+        "text": "No",
         "isCorrect": false
       },
       {
-        "text": "yes",
+        "text": "Yes",
         "isCorrect": true
       }
     ]
@@ -103,7 +103,7 @@
     "type": "CS",
     "answers": [
       {
-        "text": "60000",
+        "text": "64000",
         "isCorrect": false
       },
       {
@@ -117,7 +117,7 @@
     "type": "CS",
     "answers": [
       {
-        "text": "agriculture",
+        "text": "Agriculture",
         "isCorrect": false
       },
       {
@@ -159,11 +159,11 @@
     "type": "morrison",
     "answers": [
       {
-        "text": "marathon man",
+        "text": "A marathon man",
         "isCorrect": false
       },
       {
-        "text": "blind man",
+        "text": "A blind man",
         "isCorrect": true
       }
     ]
@@ -173,11 +173,11 @@
     "type": "morrison",
     "answers": [
       {
-        "text": "no",
+        "text": "No",
         "isCorrect": false
       },
       {
-        "text": "yes",
+        "text": "Yes",
         "isCorrect": true
       }
     ]
@@ -211,7 +211,7 @@
     ]
   },
   {
-    "text": "Which of these Nobel Laureates has had a crater on Venus named after them?",
+    "text": "Which of these Nobel Laureates has had a crater on Venus named after her?",
     "type": "lagerlof",
     "answers": [
       {
@@ -351,7 +351,7 @@
     ]
   },
   {
-    "text": "What does the X in X-ray stand for.?",
+    "text": "What does the X in X-ray stand for?",
     "type": "conrad",
     "answers": [
       {
@@ -495,7 +495,7 @@
     "type": "sachs",
     "answers": [
       {
-        "text": "Nationalmuseum",
+        "text": "Skansen",
         "isCorrect": false
       },
       {
@@ -505,7 +505,7 @@
     ]
   },
   {
-    "text": "Who is the father of modern antibiotics?",
+    "text": "What is the ancestor of modern antibiotics?",
     "type": "fleming",
     "answers": [
       {
@@ -519,7 +519,7 @@
     ]
   },
   {
-    "text": "What process did Frances Arnold apply to find new proteins",
+    "text": "What process did Frances Arnold apply to find new proteins?",
     "type": "arnold",
     "answers": [
       {
@@ -631,7 +631,7 @@
     ]
   },
   {
-    "text": "How old was was Malala when she was awarded the peace Nobel Prize?",
+    "text": "How old was Malala when she was awarded the peace Nobel Prize?",
     "type": "yousafzai",
     "answers": [
       {
