@@ -1,6 +1,6 @@
 [
   {
-    "text": "Did Bill Gates win a Nobel prize?",
+    "text": "Did Bill Gates win a Nobel Prize?",
     "type": "CS",
     "answers": [
       {
@@ -14,7 +14,7 @@
     ]
   },
   {
-    "text": "How many Nobel prizes have been awarded?",
+    "text": "How many Nobel Prizes have been awarded?",
     "type": "nobel",
     "answers": [
       {
@@ -56,7 +56,7 @@
     ]
   },
   {
-    "text": "How old was Martin Luther King when he received the peace Nobel Prize?",
+    "text": "How old was Martin Luther King when he received the Nobel Peace Prize?",
     "type": "king",
     "answers": [
       {
@@ -121,7 +121,7 @@
         "isCorrect": false
       },
       {
-        "text": "AI, software and automatic control",
+        "text": "AI, software, and automatic control",
         "isCorrect": true
       }
     ]
@@ -169,7 +169,7 @@
     ]
   },
   {
-    "text": "Was Toni Morrison the first black woman of any nationality to win the Nobel prize?",
+    "text": "Was Toni Morrison the first black woman of any nationality to win the Nobel Prize?",
     "type": "morrison",
     "answers": [
       {
@@ -192,20 +192,6 @@
       },
       {
         "text": "Grazia Deledda",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How old was Selma Lagerlöf when she published her first novel?",
-    "type": "lagerlof",
-    "answers": [
-      {
-        "text": "33",
-        "isCorrect": true
-      },
-      {
-        "text": "19",
         "isCorrect": false
       }
     ]
@@ -309,7 +295,7 @@
     ]
   },
   {
-    "text": "The cake is a lie",
+    "text": "The cake is a lie.",
     "type": "CS",
     "answers": [
       {
@@ -359,7 +345,7 @@
         "isCorrect": false
       },
       {
-        "text": "X for unknown",
+        "text": "X stands for unknown",
         "isCorrect": true
       }
     ]
@@ -533,7 +519,7 @@
     ]
   },
   {
-    "text": "What is the grand-diversity generating machine?",
+    "text": "What is the grand diversity-generating machine?",
     "type": "arnold",
     "answers": [
       {
@@ -575,7 +561,7 @@
     ]
   },
   {
-    "text": "Who was the first woman to be awarded a Nobel Memorial Prize in Economic Sciences ?",
+    "text": "Who was the first woman to be awarded a Nobel Memorial Prize in Economic Sciences?",
     "type": "ostrom",
     "answers": [
       {
@@ -631,7 +617,7 @@
     ]
   },
   {
-    "text": "How old was Malala when she was awarded the peace Nobel Prize?",
+    "text": "How old was Malala when she was awarded the Nobel Peace Prize?",
     "type": "yousafzai",
     "answers": [
       {
@@ -640,7 +626,7 @@
       },
       {
         "text": "17",
-        "description": "Malala is the youngest laureate that received a Nobel Prize.",
+        "description": "Malala is the youngest laureate to receive a Nobel Prize.",
         "isCorrect": true
       }
     ]
@@ -660,7 +646,7 @@
     ]
   },
   {
-    "text": "Who was the second recipient of the Nobel peace prize, with Malala?",
+    "text": "Who was the second recipient of the Nobel Peace prize, with Malala?",
     "type": "yousafzai",
     "answers": [
       {
@@ -688,16 +674,16 @@
     ]
   },
   {
-    "text": "How many times was Marie Curie awarded a Nobel prize?",
+    "text": "How many times was Marie Curie awarded a Nobel Prize?",
     "type": "curie",
     "answers": [
       {
-        "text": "two",
-        "description":"She was and still is the only person to be awarded Nobel Prizes in two scientific categories. ",
+        "text": "Two",
+        "description":"She was and still is the only person to be awarded Nobel Prizes in two scientific categories.",
         "isCorrect": true
       },
       {
-        "text": "three",
+        "text": "Three",
         "isCorrect": false
       }
     ]
@@ -707,11 +693,11 @@
     "type": "curie",
     "answers": [
       {
-        "text": "in thorium",
+        "text": "In thorium",
         "isCorrect": true
       },
       {
-        "text": "in lokirium",
+        "text": "In lokirium",
         "isCorrect": false
       }
     ]
@@ -731,7 +717,7 @@
     ]
   },
   {
-    "text": "How many lareates can you choose from in cyber|glow?",
+    "text": "How many laureates can you choose from in cyber|glow?",
     "type": "CS",
     "answers": [
       {
@@ -753,7 +739,7 @@
         "isCorrect": true
       },
       {
-        "text": "Linus Torvald",
+        "text": "Elon Musk",
         "isCorrect": false
       }
     ]
@@ -768,7 +754,7 @@
         "isCorrect": true
       },
       {
-        "text": "2",
+        "text": "42",
         "isCorrect": false
       }
     ]
@@ -788,7 +774,7 @@
     ]
   },
   {
-    "text": "How many lines of code are used for cyber|glow?",
+    "text": "How many lines of code is cyber|glow made of?",
     "type": "CS",
     "answers": [
       {
@@ -802,7 +788,7 @@
     ]
   },
   {
-    "text": "What is the parodic Nobel prize",
+    "text": "What is the parodic Nobel Prize",
     "type": "nobel",
     "answers": [
       {
@@ -816,21 +802,7 @@
     ]
   },
   {
-    "text": "For which ceremony does Miss Sweety Poo as time keeper for acceptance speeches?",
-    "type": "nobel",
-    "answers": [
-      {
-        "text": "Nobel Prize",
-        "isCorrect": true
-      },
-      {
-        "text": "Ig Nobel Prize",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "For which ceremony does Miss Sweety Poo as time keeper for acceptance speeches?",
+    "text": "For which ceremony does Miss Sweety Poo act as timekeeper for acceptance speeches?",
     "type": "nobel",
     "answers": [
       {
@@ -908,13 +880,13 @@
         "isCorrect": true
       },
       {
-        "text": "Physical Review",
+        "text": "Wired",
         "isCorrect": false
       }
     ]
   },
   {
-    "text": "What phenomenon intesifies nerve growth factor in the blood plasma?",
+    "text": "What phenomenon intensifies nerve growth factor in the blood plasma?",
     "type": "montalcini",
     "answers": [
       {
@@ -923,6 +895,135 @@
       },
       {
         "text": "Ice swim",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where did Rita Levi-Montalcini work during World War II?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "In her bedroom",
+        "isCorrect": true
+      },
+      {
+        "text": "In co-working spaces",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How old was Rita Levi-Montalcini when she died?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "103",
+        "description":"Rita Levi-Montalcini was the longest-living Nobel Laureate",
+        "isCorrect": true
+      },
+      {
+        "text": "91",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What is the contribution of Stephanie Forrest to cyber security?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Software diversity",
+        "isCorrect": true
+      },
+      {
+        "text": "# in passwords",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "To which demogroup did the founders of DICE belong to?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "The Silents",
+        "isCorrect": true
+      },
+      {
+        "text": "Assert",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many 0s and 1s are there in 7?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "11",
+        "description":"There are 3 1s for a 7 in binary, which is 11 in 0s and 1s",
+        "isCorrect": true
+      },
+      {
+        "text": "111",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What ancient Chinese text is based on taoistic duality of yin and yang?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "I Ching",
+        "isCorrect": true
+      },
+      {
+        "text": "The mythical man month",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who was Grandma COBOL?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Grace Hopper",
+        "isCorrect": true
+      },
+      {
+        "text": "Frances Allen",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many levels are there in a Candy Crush episode?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "15",
+        "isCorrect": true
+      },
+      {
+        "text": "51",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "When does Android evolve?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Once every minute",
+        "description":"There have been 1,163,867 commits between July 2008 and May 2019",
+        "isCorrect": true
+      },
+      {
+        "text": "Once every month",
         "isCorrect": false
       }
     ]

@@ -23,6 +23,7 @@ class Events {
   newQuestion = new SubEvent<{ question: IQuestion; endDate: Date }>();
   state = new SubEvent<IStateDocument>();
   score = new SubEvent<{ player: Player; user: IUser }>();
+  hit = new SubEvent<Player>();
 }
 
 export class Engine {
@@ -36,7 +37,7 @@ export class Engine {
   private _events = new Events();
   private _questionTimeout = null;
 
-  constructor() {}
+  constructor() { }
 
   async init() {
     this.questions = (await QuestionModel.find()).sort((a, b) =>
@@ -72,8 +73,8 @@ export class Engine {
       status: "idle",
     };
     LaureateModel.findByIdAndUpdate(laureateID, { $inc: { used: 1 } }).then(
-      () => {},
-      () => {}
+      () => { },
+      () => { }
     );
 
     // get open position
@@ -100,12 +101,12 @@ export class Engine {
     if (
       position.y >= this.state.questionPosition.y &&
       position.y <=
-        this.state.questionPosition.y + this.state.questionPosition.height
+      this.state.questionPosition.y + this.state.questionPosition.height
     ) {
       if (
         position.x >= this.state.questionPosition.x &&
         position.x <=
-          this.state.questionPosition.x + this.state.questionPosition.width
+        this.state.questionPosition.x + this.state.questionPosition.width
       ) {
         return false;
       }
@@ -181,8 +182,8 @@ export class Engine {
         player.x < newPosition.x
           ? "right"
           : player.x > newPosition.x
-          ? "left"
-          : "idle";
+            ? "left"
+            : "idle";
       player.x = newPosition.x;
       player.y = newPosition.y;
 
@@ -199,6 +200,7 @@ export class Engine {
       this._events.playerMove.emit(player);
     } else {
       player.status = "hit";
+      this._events.hit.emit(player);
       this._events.playerMove.emit(player);
       if (player.previousPositions.length > 0) {
         player.previousPositions.shift();

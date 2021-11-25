@@ -29,12 +29,12 @@ function renderResults() {
   const question = document.querySelector(".result .q");
   question.innerHTML = game.question.text;
   const { winners } = getPlayersResult();
-  if (winners.length > 0) {
-    renderWinDecoration();
-    renderWinners(winners || []);
-  } else {
-    renderLooseDecoration();
-  }
+  renderWinners(winners || []);
+  // if (winners.length > 0) {
+  // renderWinDecoration();
+  // } else {
+  // renderLooseDecoration();
+  // }
   demoStep = (demoStep + 1) % total_steps;
 }
 

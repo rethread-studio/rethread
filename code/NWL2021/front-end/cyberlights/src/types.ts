@@ -90,7 +90,7 @@ export interface selectCharacterProps {
 
 export interface characterCardProps {
     laureate: laureateI,
-    color: string
+    // color: string
 }
 
 export type controllDirection = "up" | "down" | "left" | "right" | "void";

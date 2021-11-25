@@ -51,7 +51,7 @@ game.onUpdate(() => {
   } else if (game.page == "play") {
     renderGame();
   } else if (game.page == "question") {
-    renderQuestionDecoration();
+    // renderQuestionDecoration();
     renderQuestion();
   } else if (game.page == "answer") {
     renderQuestion();
