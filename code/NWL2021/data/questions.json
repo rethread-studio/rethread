@@ -980,7 +980,7 @@
         "isCorrect": true
       },
       {
-        "text": "Lecture on Nothing",
+        "text": "The mythical man month",
         "isCorrect": false
       }
     ]
@@ -1009,6 +1009,21 @@
       },
       {
         "text": "51",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "When does Android evolve?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Once every minute",
+        "description":"There have been 1,163,867 commits between July 2008 and May 2019",
+        "isCorrect": true
+      },
+      {
+        "text": "Once every month",
         "isCorrect": false
       }
     ]
