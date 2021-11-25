@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useHistory } from "react-router-dom";
-import { v4 as uuidv4 } from 'uuid';
+
 import {
     IconLookup,
     IconDefinition,
@@ -9,18 +9,11 @@ import {
 } from '@fortawesome/fontawesome-svg-core';
 
 import { InfoCard } from "./infoCard";
-import { CharacterCard } from "./characterCard";
-
-import { laureateI, selectCharacterProps, prize } from "../types";
+import { selectCharacterProps, prize } from "../types";
 import { categoryColor } from "../utils";
+import { Gallery } from "./gallery";
 
-import SwiperCore, { Navigation, Pagination } from "swiper";
-import { Swiper, SwiperSlide } from "swiper/react";
 
-// Import Swiper styles
-import 'swiper/swiper.min.css';
-
-SwiperCore.use([Navigation, Pagination]);
 
 export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithChildren<selectCharacterProps>) => {
     let history = useHistory();
@@ -62,35 +55,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                         <span className="fraction  uppercase"></span>
                     </div>
 
-                    <Swiper
-                        initialSlide={0}
-                        loop={true}
-                        spaceBetween={50}
-                        slidesPerView={1}
-                        onSlideChange={(SwiperCore) => {
-                            const { realIndex, } = SwiperCore;
-                            setCharacterIndex(realIndex);
-                            setCharacterPrizes(characters[realIndex].prizes);
-                            selectColor(characters[realIndex].color);
-                        }}
-                        navigation={{
-                            prevEl: '.prev',
-                            nextEl: '.next',
-                        }}
-                        pagination={{
-                            el: ".fraction",
-                            "type": "fraction"
-                        }}
-                    >
-                        {characters.map((c: laureateI) => {
-                            return (
-                                <SwiperSlide key={uuidv4()} >
-                                    <CharacterCard key={uuidv4()} laureate={c} color={color} />
-                                </SwiperSlide>
-                            )
-                        })}
-
-                    </Swiper>
+                    <Gallery setCharacterIndex={setCharacterIndex} setCharacterPrizes={setCharacterPrizes} selectColor={selectColor} color={color} characters={characters} />
                 </div>
 
                 <button className="prev absolute h-full w-7 top-0 z-10 left-2">

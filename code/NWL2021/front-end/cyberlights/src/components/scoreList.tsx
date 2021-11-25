@@ -7,17 +7,17 @@ import { downloadFile } from "../utils";
 
 interface IScoreInterface {
     clickHandler: any,
-    userScore: number
+    // userScore: number
 }
 
-export const ScoreList = ({ clickHandler, userScore }: React.PropsWithChildren<IScoreInterface>) => {
+export const ScoreList = ({ clickHandler }: React.PropsWithChildren<IScoreInterface>) => {
     const [score, setScore] = useState<IUserScore[]>([]);
     const [userEvents, setUserEvents] = useState({})
     const [userData, setUserData] = useState({});
-    // const topNumber: number = 3;
+
 
     useEffect(() => {
-        getScore()//.then(scoreList => scoreList.length > topNumber ? scoreList.slice(0, topNumber) : scoreList)
+        getScore()
             .then(scoreList => scoreList.sort((a: IUserScore, b: IUserScore) => b.score - a.score))
             .then(scoreList => {
                 setScore(scoreList);
@@ -62,7 +62,7 @@ export const ScoreList = ({ clickHandler, userScore }: React.PropsWithChildren<I
                 {`Your score`}
             </div>
             <div className="text-neon-yellow px-4 text-3xl">
-                {userScore}
+                {/* {userScore} */}
             </div>
             <div>
                 {/* {userEvents} */}

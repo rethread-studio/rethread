@@ -152,6 +152,10 @@ export default async function start() {
     serverIo.of("screen").emit("emote", data);
   });
 
+  socket.on("hit", (data) => {
+    serverIo.of("screen").emit("hit", data);
+  });
+
   server.listen(config.SCREEN_PORT);
   console.log("Screen server started on port: " + config.SCREEN_PORT);
 

@@ -4,14 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { getIcon, getFlag } from "../utils";
 
 
-export const CharacterCard = ({ laureate, color }: React.PropsWithChildren<characterCardProps>) => {
+export const CharacterCard = ({ laureate }: React.PropsWithChildren<characterCardProps>) => {
     const categories: JSX.Element[] = laureate.prizes
         .map((p: prize) => <p key={uuidv4()}>{p.category} - {p.year}</p>)
 
     const fullName = `${laureate.firstname} ${laureate.surname}`
     const iconLocation: string = laureate.prizes.length > 1 ? getIcon("special") : getIcon(laureate.prizes[0].category);
 
-
+    const color = "white";
     return (
         <>
             <img className="w-4/5 h-4/5 mx-auto mt-8" src={`/img/laureates/${laureate.imagePath}`} alt={fullName} />

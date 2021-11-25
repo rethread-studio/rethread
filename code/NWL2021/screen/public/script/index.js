@@ -45,6 +45,7 @@ game.onUpdate(() => {
   game.hasChange = false;
   // game.page = "results";//delete
   // renderQuestion();//delete
+  if (game.glitch) glitch();
 
   if (game.page == "demo") {
     renderDemo();
