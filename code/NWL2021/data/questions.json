@@ -393,7 +393,7 @@
     ]
   },
   {
-    "text": "What concept did Frances Arnold apply to find new proteins",
+    "text": "What concept did Frances Arnold apply to find new proteins?",
     "type": "arnold",
     "answers": [
       {
@@ -679,7 +679,7 @@
     "answers": [
       {
         "text": "Two",
-        "description":"She was and still is the only person to be awarded Nobel Prizes in two scientific categories.",
+        "description":"She was, and still is, the only person to be awarded Nobel Prizes in two scientific categories.",
         "isCorrect": true
       },
       {
@@ -788,7 +788,7 @@
     ]
   },
   {
-    "text": "What is the parodic Nobel Prize",
+    "text": "What is the parodic Nobel Prize?",
     "type": "nobel",
     "answers": [
       {
