@@ -45,14 +45,13 @@ game.onUpdate(() => {
   game.hasChange = false;
   // game.page = "results";//delete
   // renderQuestion();//delete
-  if (game.glitch) glitch();
 
   if (game.page == "demo") {
     renderDemo();
   } else if (game.page == "play") {
     renderGame();
   } else if (game.page == "question") {
-    renderQuestionDecoration();
+    // renderQuestionDecoration();
     renderQuestion();
   } else if (game.page == "answer") {
     renderQuestion();
