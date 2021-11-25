@@ -123,7 +123,7 @@ export default async function start() {
   await engine.init();
   const gameSocket = new GameSocket(io, engine, monitor);
 
-  app.use("/api/admin", routes.admin(engine));
+  app.use("/api/admin", routes.admin(engine, io));
 
   app.get("*", (req, res) =>
     res.sendFile(

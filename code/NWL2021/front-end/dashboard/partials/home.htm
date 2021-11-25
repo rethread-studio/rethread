@@ -1,18 +1,20 @@
-<h2>Current Question <span class="badge bg-primary text-wrap">until {{gameState.questionEndDate | date:"HH:mm:ss"}}</span></h2>
+<h2>Current Question</h2>
 <p>
-  <strong>{{gameState.question.text}}</strong> <br />
+  <strong>{{gameState.question.text}}</strong> <span class="badge bg-primary text-wrap">until {{gameState.questionEndDate | date:"HH:mm:ss"}}</span> <br />
   <div class="row text-center">
     <div class="col-5">
-      {{gameState.question.answers[0].text}}
+      <strong>{{gameState.question.answers[0].text}}</strong>
+      <span class="badge bg-primary text-wrap" ng-show="gameState.question.answers[0].isCorrect">Correct</span>
     </div>
     <div class="col-auto">or</div>
     <div class="col-5">
-      {{gameState.question.answers[1].text}}
+      <strong>{{gameState.question.answers[1].text}}</strong>
+      <span class="badge bg-primary text-wrap" ng-show="gameState.question.answers[1].isCorrect">Correct</span>
     </div>
   </div>
 </p>
-
-<h2>Connected players ({{gameState.players.length || 0}})</h2>
+<h2>Connected Users: {{nbUsers || 0 | number}}</h2>
+<h2>Connected players: {{gameState.players.length || 0 | number}}</h2>
 <ol>
   <li ng-repeat="player in gameState.players">
     <div class="row">
@@ -26,4 +28,5 @@
   </li>
 </ol>
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/live_stream?channel=UCeHL1hSZjh10dMdibV9U4XQ" title="Steam" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<!-- Add a placeholder for the Twitch embed -->
+<div id="twitch-embed"></div>

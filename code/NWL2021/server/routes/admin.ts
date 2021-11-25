@@ -7,6 +7,7 @@ import QuestionModel from "../database/questions/questions.model";
 import StateModel from "../database/state/state.model";
 import { importDefaultConfiguration } from "../../import";
 import { Engine } from "../engine";
+import { Server } from "socket.io";
 
 const router = express.Router();
 
@@ -30,14 +31,20 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 let engine: Engine = null;
-export default function (e: Engine) {
+let io: Server = null;
+export default function (e: Engine, i: Server) {
   engine = e;
+  io = i;
   return router;
 }
 
 router.post("/laureate", (req, res) => {
   const data = req.body;
   new LaureateModel(data).save();
+});
+
+router.get("/users", (req, res) => {
+  res.json(io.of("control").sockets.size);
 });
 
 router.post("/laureate/image", upload.single("image"), async (req, res) => {
@@ -88,6 +95,12 @@ router.post("/state/export", async (req, res) => {
     JSON.stringify(cleanDbObject(laureates), null, 2)
   );
   return res.json("ok");
+});
+
+router.get("/questions", async (req, res) => {
+  res.json(
+    cleanDbObject((await QuestionModel.find()).map((doc) => doc.toJSON()))
+  );
 });
 
 router.get("/questions", async (req, res) => {

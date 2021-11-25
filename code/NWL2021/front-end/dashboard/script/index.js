@@ -49,6 +49,24 @@ angular
           $scope.gameState = data;
         });
       });
+
+      function getNbUsers() {
+        $http.get("/api/admin/users/").then((response) => {
+          $scope.nbUsers = response.data;
+        });
+      }
+
+      let interval = setInterval(getNbUsers, 1000);
+
+      new Twitch.Player("twitch-embed", {
+        channel: "rethread",
+        width: 600,
+        height: 300
+      });
+
+      $scope.$on("$destroy", function () {
+        clearInterval(interval);
+      });
     },
   ])
   .controller("stateController", [
