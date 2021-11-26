@@ -63,9 +63,9 @@ export const SelectCharacter = ({ characters, selectHandler, setCharacterIndex }
                 </button>
 
 
-                <button style={{ borderColor: color }} className="border-2 w-3/6 border-opacity-40 opacity-80 text-center mx-auto normal-case font-light py-2 mb-2" onClick={handleClick}>my discovery</button>
+                <button style={{ borderColor: color }} className="cursor-pointer border-2 w-3/6 border-opacity-40 opacity-80 text-center mx-auto normal-case font-light py-2 mb-2" onClick={handleClick}>my discovery</button>
 
-                <button style={{ backgroundColor: color }} className={`text-2xl  w-3/6 text-center transition-all duration-200 lowercase  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={selectHandler}>
+                <button style={{ backgroundColor: color }} className={`cursor-pointer text-2xl  w-3/6 text-center transition-all duration-200 lowercase  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={selectHandler}>
                     <span className="text-gray-900 font-light">select</span>
                 </button>
 

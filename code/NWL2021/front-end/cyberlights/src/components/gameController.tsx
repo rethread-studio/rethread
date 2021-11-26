@@ -123,7 +123,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                         <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
                     </Link>
                     <Score />
-                    <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400  mr-2" >View Score </button>
+                    <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400  mr-2" >View Top 2 </button>
                 </div>
                 <div className={`w-full text-neon ${question !== null && question?.length > 60 ? "text-md" : "text-2xl"} uppercase text-center pt-2`}>
                     {question !== null ? <span>{question}</span> : <></>}
