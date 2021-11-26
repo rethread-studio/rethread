@@ -4,6 +4,7 @@ const config = {
   dotSize: { small: 4, big: 8 },
   answerSize: { small: "4.5rem", big: "6.2rem" },
   questionSize: { small: "4.5rem", big: "6.2rem" },
+  resultLineSize: { small: 6, big: 8 },
   questionTime: 4,
   dialogueImagePath: "/img/dialogue.png",
   emojiDuration: 2,
