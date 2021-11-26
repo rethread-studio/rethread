@@ -343,7 +343,11 @@ function setTimerClass(time) {
 setInterval(() => {
   if (!game.endDate) return;
   const time = new Date(game.endDate) - new Date().getTime();
+  const newTime = Math.round(time / 1000).toString()
+  const element = document.getElementsByClassName("timer")[0];
+  if (element.style.display === "none") return;
+  if (element.innerHTML == newTime) return;
   cleanTimerClass();
   setTimerClass(time / 1000);
-  document.querySelector(".timer").innerHTML = Math.round(time / 1000);
+  element.innerHTML = Math.round(time / 1000);
 }, 250);
