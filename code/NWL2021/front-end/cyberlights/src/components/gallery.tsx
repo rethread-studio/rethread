@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import SwiperCore, { Navigation, Pagination } from "swiper";
+import React from 'react';
+import SwiperCore, { EffectFade, Navigation, Pagination } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { CharacterCard } from "./characterCard";
 import { v4 as uuidv4 } from 'uuid';
@@ -21,15 +21,18 @@ interface IGallery {
 export const Gallery = ({ characters, setCharacterIndex, setCharacterPrizes, selectColor, color }: React.PropsWithChildren<IGallery>) => {
 
     return <Swiper
-        initialSlide={0}
+        // initialSlide={0}
         loop={true}
-        spaceBetween={50}
-        slidesPerView={1}
+        spaceBetween={10}
+        // slidesPerView={1}
+        allowTouchMove={false}
+        // longSwipes={false}
+        // effect={'fade'}
         onSlideChange={(SwiperCore) => {
             const { realIndex, } = SwiperCore;
-            setCharacterIndex(realIndex);
-            setCharacterPrizes(characters[realIndex].prizes);
-            selectColor(characters[realIndex].color);
+            // setCharacterIndex(realIndex);
+            // setCharacterPrizes(characters[realIndex].prizes);
+            // selectColor(characters[realIndex].color);
         }}
         navigation={{
             prevEl: '.prev',

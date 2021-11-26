@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 import {
     IconLookup,
@@ -51,8 +51,12 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                 <div>
 
                     <div className={`flex flex-row h-8 justify-between content-center transition-all duration-200 text-gray-400 px-3 pt-2 pb-1.5 text-sm font-light`}>
-                        <h4 className=" capsize " >Laureates</h4>
-                        <span className="fraction  uppercase"></span>
+                        <Link to={"/home"} className="text-gray-400  h-8 w-4/8 ">
+                            <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Home
+                        </Link>
+                        <div>
+                            <h4 className=" capsize " >Laureates <span className="fraction  uppercase"></span></h4>
+                        </div>
                     </div>
 
                     <Gallery setCharacterIndex={setCharacterIndex} setCharacterPrizes={setCharacterPrizes} selectColor={selectColor} color={color} characters={characters} />
