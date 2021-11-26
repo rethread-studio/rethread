@@ -28,6 +28,10 @@ function App() {
   const [state, setState] = useState<any>(null);
   const [emoji, setEmoji] = useState<IEmoji | null>(null);
 
+  //index
+  const [characterIndex, setCharacterIndex] = useState<number>(-1);
+  //discovery
+
   //load characters data
   useEffect(() => {
     socket.on("connect", () => setLaureate(null));
@@ -56,6 +60,10 @@ function App() {
     }
   }, [])
 
+  const handleSelect = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setLaureate(laureates[characterIndex]);
+  }
+
   library.add(fas)
 
   return (
@@ -63,7 +71,7 @@ function App() {
       <div className="container h-screen bg-gray-900">
         <Switch>
           <Route path="/select">
-            {laureate ? <Redirect to="/play" /> : loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={setLaureate} />}
+            {laureate ? <Redirect to="/play" /> : loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={handleSelect} setCharacterIndex={setCharacterIndex} />}
           </Route>
           <Route path="/play">
             {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} setEmoji={setEmoji} state={state} />}

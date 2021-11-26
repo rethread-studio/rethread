@@ -1,5 +1,5 @@
-import React from 'react';
-import SwiperCore, { EffectFade, Navigation, Pagination } from "swiper";
+import React, { memo } from 'react';
+import SwiperCore, { Navigation, Pagination } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { CharacterCard } from "./characterCard";
 import { v4 as uuidv4 } from 'uuid';
@@ -14,11 +14,9 @@ interface IGallery {
     setCharacterIndex: any,
     setCharacterPrizes: any,
     selectColor: any,
-    color: string,
     characters: laureateI[],
 }
-
-export const Gallery = ({ characters, setCharacterIndex, setCharacterPrizes, selectColor, color }: React.PropsWithChildren<IGallery>) => {
+const Gallery = ({ characters, setCharacterIndex, setCharacterPrizes, selectColor }: React.PropsWithChildren<IGallery>) => {
 
     return <Swiper
         initialSlide={0}
@@ -29,9 +27,9 @@ export const Gallery = ({ characters, setCharacterIndex, setCharacterPrizes, sel
         longSwipes={false}
         onSlideChange={(SwiperCore) => {
             const { realIndex, } = SwiperCore;
-            // setCharacterIndex(realIndex);
-            // setCharacterPrizes(characters[realIndex].prizes);
-            // selectColor(characters[realIndex].color);
+            setCharacterIndex(realIndex);
+            setCharacterPrizes(characters[realIndex].prizes);
+            selectColor(characters[realIndex].color);
         }}
         navigation={{
             prevEl: '.prev',
@@ -52,3 +50,4 @@ export const Gallery = ({ characters, setCharacterIndex, setCharacterPrizes, sel
 
     </Swiper>
 }
+export default memo(Gallery);

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {
     IconLookup,
@@ -11,14 +11,11 @@ import {
 import { InfoCard } from "./infoCard";
 import { selectCharacterProps, prize } from "../types";
 import { categoryColor } from "../utils";
-import { Gallery } from "./gallery";
+import Gallery from "./gallery";
 
 
 
-export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithChildren<selectCharacterProps>) => {
-    let history = useHistory();
-
-    const [characterIndex, setCharacterIndex] = useState<number>(-1);
+export const SelectCharacter = ({ characters, selectHandler, setCharacterIndex }: React.PropsWithChildren<selectCharacterProps>) => {
 
     const [viewBio, setViewBio] = useState<boolean>(false);
     const [characterPrizes, setCharacterPrizes] = useState<prize[]>([])
@@ -30,10 +27,6 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
     const chevronRight: IconDefinition = findIconDefinition(chevronLookRight)
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { setViewBio(!viewBio); }
-    const handleSelect = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        selectHandler(characters[characterIndex]);
-        history.push("/play");
-    }
 
 
     return (
@@ -59,7 +52,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
                         </div>
                     </div>
 
-                    <Gallery setCharacterIndex={setCharacterIndex} setCharacterPrizes={setCharacterPrizes} selectColor={selectColor} color={color} characters={characters} />
+                    <Gallery setCharacterIndex={setCharacterIndex} setCharacterPrizes={setCharacterPrizes} selectColor={selectColor} characters={characters} />
                 </div>
 
                 <button className="prev absolute h-full w-7 top-0 z-10 left-2">
@@ -73,7 +66,7 @@ export const SelectCharacter = ({ characters, selectHandler }: React.PropsWithCh
 
                 <button style={{ borderColor: color }} className="border-2 w-3/6 border-opacity-40 opacity-80 text-center mx-auto normal-case font-light py-2 mb-2" onClick={handleClick}>my discovery</button>
 
-                <button style={{ backgroundColor: color }} className={`text-2xl  w-3/6 text-center transition-all duration-200 lowercase  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={handleSelect}>
+                <button style={{ backgroundColor: color }} className={`text-2xl  w-3/6 text-center transition-all duration-200 lowercase  py-2 px-4 mb-6 mx-auto place-self-end z-20`} onClick={selectHandler}>
                     <span className="text-gray-900 font-light">select</span>
                 </button>
 

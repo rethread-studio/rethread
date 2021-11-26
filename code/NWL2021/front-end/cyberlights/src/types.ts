@@ -85,7 +85,9 @@ export interface gameControllerI {
 
 export interface selectCharacterProps {
     characters: laureateI[],
-    selectHandler: React.Dispatch<React.SetStateAction<laureateI | null>>
+    selectHandler: any,
+    // characterIndex: number,
+    setCharacterIndex: any
 }
 
 export interface characterCardProps {
