@@ -13,13 +13,13 @@
       {
         "x": 0,
         "y": 5,
-        "width": 3,
+        "width": 2,
         "height": 2
       },
       {
         "x": 13,
         "y": 0,
-        "width": 3,
+        "width": 2,
         "height": 2
       }
     ],
@@ -27,13 +27,13 @@
       {
         "x": 0,
         "y": 0,
-        "width": 3,
+        "width": 2,
         "height": 2
       },
       {
         "x": 13,
         "y": 5,
-        "width": 3,
+        "width": 2,
         "height": 2
       }
     ]
