@@ -28,7 +28,7 @@ let demoStep = 0;
 
 function renderResults() {
   const question = document.querySelector(".result .q");
-  if (question.innerHTML != game.question.text)  
+  if (question.innerHTML != game.question.text)
     question.innerHTML = game.question.text;
   const { winners } = getPlayersResult();
   renderWinners(winners || []);
@@ -43,8 +43,8 @@ function renderResults() {
 function renderLooseDecoration() {
   if (game.setup == undefined) return;
   //get mid point
-  const ctxW = game.setup.unitSize * renderScale * game.setup.width;
-  const ctxH = game.setup.unitSize * renderScale * game.setup.height;
+  const ctxW = game.setup.unitSize * config.renderScale * game.setup.width;
+  const ctxH = game.setup.unitSize * config.renderScale * game.setup.height;
   const guideLine = Math.max(ctxW, ctxH);
   const unitSize = 60;
   let lineStep = 0;
@@ -71,7 +71,7 @@ function renderLooseDecoration() {
 
 function renderFaces(_x, _y) {
   ctx.lineCap = "round";
-  const padding = 200 * renderScale;
+  const padding = 200 * config.renderScale;
   const faceSize = 250;
   drawSadFace(_x - padding, _y - padding, faceSize, false);
   drawSadFace(padding, _y - padding, faceSize, true);
@@ -128,8 +128,8 @@ function drawSadFace(_x, _y, _size, _mirror = true) {
 function renderWinDecoration() {
   if (game.setup == undefined) return;
   //get mid point
-  const ctxW = game.setup.unitSize * renderScale * game.setup.width;
-  const ctxH = game.setup.unitSize * renderScale * game.setup.height;
+  const ctxW = game.setup.unitSize * config.renderScale * game.setup.width;
+  const ctxH = game.setup.unitSize * config.renderScale * game.setup.height;
   const guideLine = Math.max(ctxW, ctxH);
   const unitSize = 60;
   let lineStep = 0;
@@ -152,7 +152,7 @@ function renderWinDecoration() {
   }
   resetCtxSeetings();
   ctx.lineCap = "round";
-  const padding = 150 * renderScale;
+  const padding = 150 * config.renderScale;
   drawStarGroup(ctxW - padding, ctxH - padding, 30);
   drawStarGroup(padding, ctxH - padding, 30);
   resetCtxSeetings();
@@ -170,7 +170,7 @@ function drawStarGroup(_x, _y, size) {
     ctx.shadowBlur = i <= demoStep ? 15 : 0;
     ctx.shadowColor = "white";
     const color = i <= demoStep ? "white" : "#1B222E";
-    drawStar(_x, _y, 5, (size + (i * 30)) * renderScale, (size / 2 + (i * 15)) * renderScale, color);
+    drawStar(_x, _y, 5, (size + (i * 30)) * config.renderScale, (size / 2 + (i * 15)) * config.renderScale, color);
   }
 }
 

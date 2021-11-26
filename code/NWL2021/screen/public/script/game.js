@@ -2,12 +2,14 @@ const socket = io("/screen");
 
 const config = {
   dotSize: { small: 4, big: 8 },
-  answerSize: { small: "60px", big: "100px" },
+  answerSize: { small: "4.5rem", big: "6.2rem" },
+  questionSize: { small: "4.5rem", big: "6.2rem" },
   questionTime: 4,
   dialogueImagePath: "/img/dialogue.png",
   emojiDuration: 2,
   max_group: 12,
   demoTimer: 15000,
+  renderScale: 2
 };
 
 class Game {

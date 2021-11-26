@@ -30,7 +30,7 @@ async function drawPlayersShadow(players) {
 }
 
 async function drawPreviousPosition(players) {
-  ctx.shadowBlur = !game.gameCycle ? 5 : 10;
+  // ctx.shadowBlur = !game.gameCycle ? 5 : 10;
   for (const player of players) {
     if (!player.laureate) {
       const laureate = await game.getLaureate(player.laureateID);
@@ -43,30 +43,30 @@ async function drawPreviousPosition(players) {
     //DRAW LINE PATH
     ctx.beginPath();
     ctx.lineWidth = game.gameCycle ? 2 : 4;
-    ctx.strokeStyle = player.laureate?.color || "white";
+    ctx.strokeStyle = "#121826";
     ctx.moveTo(
-      positions[0].x * renderScale * game.setup.unitSize +
-      (game.setup.unitSize * renderScale) / 2,
-      positions[0].y * renderScale * game.setup.unitSize +
-      (game.setup.unitSize * renderScale) / 2
+      positions[0].x * config.renderScale * game.setup.unitSize +
+      (game.setup.unitSize * config.renderScale) / 2,
+      positions[0].y * config.renderScale * game.setup.unitSize +
+      (game.setup.unitSize * config.renderScale) / 2
     );
     for (let i = 1; i < positions.length; i++) {
       ctx.lineTo(
-        positions[i].x * renderScale * game.setup.unitSize +
-        (game.setup.unitSize * renderScale) / 2,
-        positions[i].y * renderScale * game.setup.unitSize +
-        (game.setup.unitSize * renderScale) / 2
+        positions[i].x * config.renderScale * game.setup.unitSize +
+        (game.setup.unitSize * config.renderScale) / 2,
+        positions[i].y * config.renderScale * game.setup.unitSize +
+        (game.setup.unitSize * config.renderScale) / 2
       );
     }
     ctx.lineTo(
-      player.x * renderScale * game.setup.unitSize +
-      (game.setup.unitSize * renderScale) / 2,
-      player.y * renderScale * game.setup.unitSize +
-      (game.setup.unitSize * renderScale) / 2
+      player.x * config.renderScale * game.setup.unitSize +
+      (game.setup.unitSize * config.renderScale) / 2,
+      player.y * config.renderScale * game.setup.unitSize +
+      (game.setup.unitSize * config.renderScale) / 2
     );
     ctx.stroke();
   }
-  ctx.shadowBlur = 0;
+  // ctx.shadowBlur = 0;
 }
 
 async function renderPlayers(players) {
@@ -133,14 +133,14 @@ function drawEmoji(player) {
   const emoji = game.emojis[player.socketID];
   const angle = getAngle(player.status);
   const x =
-    player.x * renderScale * game.setup.unitSize +
-    (game.setup.unitSize * renderScale) / 2;
+    player.x * config.renderScale * game.setup.unitSize +
+    (game.setup.unitSize * config.renderScale) / 2;
   const y =
-    player.y * renderScale * game.setup.unitSize +
-    (game.setup.unitSize * renderScale) / 2;
+    player.y * config.renderScale * game.setup.unitSize +
+    (game.setup.unitSize * config.renderScale) / 2;
   ctx.translate(x, y);
   ctx.rotate(angle);
-  ctx.font = `${!game.gameCycle ? "70px" : "90px"} serif`;
+  ctx.font = `${!game.gameCycle ? "12.5rem" : "9.375rem"} serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(emoji, 0, 0);
@@ -152,7 +152,7 @@ function renderQuestion(question) {
   const size = 2.5;
 
   const questionPosition = game.setup.questionPosition;
-  const unitSize = game.setup.unitSize * renderScale;
+  const unitSize = game.setup.unitSize * config.renderScale;
 
   for (let i = 0; i < questionPosition.width + 1; i++) {
     for (let j = 0; j < questionPosition.height + 1; j++) {
@@ -232,7 +232,7 @@ function renderAnswer(question) {
           ? config.dotSize.big
           : config.dotSize.small;
 
-    const unitSize = game.setup.unitSize * renderScale;
+    const unitSize = game.setup.unitSize * config.renderScale;
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
       for (let j = 0; j < position.height + 1; j++) {
@@ -260,7 +260,7 @@ function updateQuestion(question) {
 
   updatePositionElement(questionE, game.setup.questionPosition);
   questionE.style.fontSize =
-    question.text.length < 10 ? config.answerSize.big : config.answerSize.small;
+    question.text.length < 10 ? config.questionSize.big : config.questionSize.small;
 
   for (let i = 0; i < question.answers.length; i++) {
     const answer = question.answers[i];
@@ -282,8 +282,8 @@ const playConfig = {
 
 function renderQuestionDecoration() {
   playConfig.step = (playConfig.step + 1) % playConfig.total_steps;
-  const ctxW = game.setup.unitSize * renderScale * game.setup.width;
-  const ctxH = game.setup.unitSize * renderScale * game.setup.height;
+  const ctxW = game.setup.unitSize * config.renderScale * game.setup.width;
+  const ctxH = game.setup.unitSize * config.renderScale * game.setup.height;
   const nLines = 8;
   const lineDist = (ctxW / 5) / nLines;
   const stepPos = ctxW / playConfig.total_steps * playConfig.step;
