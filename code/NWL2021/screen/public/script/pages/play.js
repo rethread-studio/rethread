@@ -138,8 +138,17 @@ function drawEmoji(player) {
   const y =
     player.y * config.renderScale * game.setup.unitSize +
     (game.setup.unitSize * config.renderScale) / 2;
+
+
   ctx.translate(x, y);
   ctx.rotate(angle);
+  //background
+  ctx.fillStyle = "white";
+  ctx.beginPath();
+  ctx.arc(0, 0, config.renderScale * game.setup.unitSize / 2, 0, 2 * Math.PI
+  );
+  ctx.fill();
+  //emoji
   ctx.font = `${!game.gameCycle ? "12.5rem" : "9.375rem"} serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
@@ -149,7 +158,7 @@ function drawEmoji(player) {
 
 
 function renderQuestion(question) {
-  const size = 2.5;
+  const size = config.question.linseSize;
 
   const questionPosition = game.setup.questionPosition;
   const unitSize = game.setup.unitSize * config.renderScale;
@@ -158,7 +167,7 @@ function renderQuestion(question) {
     for (let j = 0; j < questionPosition.height + 1; j++) {
       ctx.beginPath();
       ctx.strokeStyle = "white";
-      ctx.lineWidth = 4;
+      ctx.lineWidth = config.question.lineWidth;
       if (i % 2 == 0) {
         if (game.gameCycle) {
           const x = questionPosition.x * unitSize + unitSize * i + unitSize / 2;
