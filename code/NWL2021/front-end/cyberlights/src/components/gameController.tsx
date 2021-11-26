@@ -19,7 +19,6 @@ import { Score } from "./score";
 export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
     const [position, setPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
-    // const [score, setScore] = useState<number>(0);
     const [answer, setAnswer] = useState<string | null>(null);
     const [answerPositions, setAnswerPositions] = useState<[{ x: number; y: number }] | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
@@ -123,9 +122,8 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
                         <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
                     </Link>
-                    <Score />
-                    {/* SCORE */}
-                    <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400 border-2 border-gray-500 rounded-full w-7 h-7 mr-2" >?</button>
+
+                    <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400  mr-2" >View Score </button>
                 </div>
                 <div className={`w-full text-neon ${question !== null && question?.length > 60 ? "text-md" : "text-2xl"} uppercase text-center pt-2`}>
                     {question !== null ? <span>{question}</span> : <></>}
