@@ -11,6 +11,7 @@ import { IStateDocument } from "./database/state/state.types";
 import { BoxPosition, Player, Position } from "./types";
 import mongoose from "mongoose";
 import { IUser } from "./database/users/users.types";
+import UserModel from "./database/users/users.model";
 
 class Events {
   newPlayer = new SubEvent<Player>();
@@ -37,7 +38,7 @@ export class Engine {
   private _events = new Events();
   private _questionTimeout = null;
 
-  constructor() { }
+  constructor() {}
 
   async init() {
     this.questions = (await QuestionModel.find()).sort((a, b) =>
@@ -73,8 +74,8 @@ export class Engine {
       status: "idle",
     };
     LaureateModel.findByIdAndUpdate(laureateID, { $inc: { used: 1 } }).then(
-      () => { },
-      () => { }
+      () => {},
+      () => {}
     );
 
     // get open position
@@ -101,12 +102,12 @@ export class Engine {
     if (
       position.y >= this.state.questionPosition.y &&
       position.y <=
-      this.state.questionPosition.y + this.state.questionPosition.height
+        this.state.questionPosition.y + this.state.questionPosition.height
     ) {
       if (
         position.x >= this.state.questionPosition.x &&
         position.x <=
-        this.state.questionPosition.x + this.state.questionPosition.width
+          this.state.questionPosition.x + this.state.questionPosition.width
       ) {
         return false;
       }
@@ -183,8 +184,8 @@ export class Engine {
         player.x < newPosition.x
           ? "right"
           : player.x > newPosition.x
-            ? "left"
-            : "idle";
+          ? "left"
+          : "idle";
       player.x = newPosition.x;
       player.y = newPosition.y;
 

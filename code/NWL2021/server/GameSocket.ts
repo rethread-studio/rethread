@@ -130,8 +130,8 @@ export default class GameSocket {
     }, config.MOVE_INTERVAL);
   }
 
-  emitUpdates(opt?: { socket }) {
-    let target = this.io.of("screen");
+  emitUpdates(opt?: { socket?: Socket }) {
+    let target: Socket | Namespace = this.io.of("screen");
     if (opt?.socket) target = opt.socket;
     target.emit("gameStateUpdate", {
       players: Object.values(this.engine.players).map((p) => {
@@ -148,31 +148,37 @@ export default class GameSocket {
       }),
       answerPositions:
         this.engine.state.answersPositions[
-        this.engine.currentIndexAnswerPosition
+          this.engine.currentIndexAnswerPosition
         ],
       questionEndDate: this.engine.questionEndDate,
       question: this.engine.currentQuestion,
     });
   }
 
-  emitSetup(opt?: { socket }) {
-    let target = this.io.of("screen");
+  emitSetup(opt?: { socket?: Socket }) {
+    let target: Socket | Namespace = this.io.of("screen");
     if (opt?.socket) target = opt.socket;
     target.emit("setup", this.engine.state);
   }
 
-  emitHit(userID) {
+  emitHit(userID: { userID: string }) {
     this.io.of("screen").emit("hit", {
-      userID: userID.userID
+      userID: userID.userID,
     });
   }
 
-  emitQuestion(questionEvent) {
+  async emitQuestion(questionEvent: { question: IQuestion; endDate: Date }) {
+    for (const answer of questionEvent.question.answers) {
+      answer.text = answer.text
+        .replace("[random]", Math.round(Math.random() * 10000).toString())
+        .replace("[nb_users]", (await UserModel.count()).toString());
+    }
+    console.log(questionEvent.question.answers);
     this.io.of("control").emit("question", {
       question: questionEvent.question.text,
       answerPositions:
         this.engine.state.answersPositions[
-        this.engine.currentIndexAnswerPosition
+          this.engine.currentIndexAnswerPosition
         ],
     });
     this.io.of("screen").emit("question", {
@@ -180,7 +186,7 @@ export default class GameSocket {
       endDate: questionEvent.endDate,
       answerPositions:
         this.engine.state.answersPositions[
-        this.engine.currentIndexAnswerPosition
+          this.engine.currentIndexAnswerPosition
         ],
     });
   }
@@ -315,7 +321,7 @@ export default class GameSocket {
     socket.on("click", (event) => {
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.click": 1 },
-      }).then((user) => { }, console.error);
+      }).then((user) => {}, console.error);
 
       this.monitor.send({
         origin: "user",
@@ -373,6 +379,7 @@ export default class GameSocket {
           userID: session.userID,
           socketID: socket.id,
         });
+        ping();
       } catch (e) {
         console.error(e);
         return;
@@ -405,7 +412,7 @@ export default class GameSocket {
         question: this.engine.currentQuestion.text,
         answerPositions:
           this.engine.state.answersPositions[
-          this.engine.currentIndexAnswerPosition
+            this.engine.currentIndexAnswerPosition
           ],
       });
 
@@ -420,6 +427,7 @@ export default class GameSocket {
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: -1 });
+        ping();
       });
       socket.on("down", () => {
         if (this._movedUsers.has(socket.id)) return;
@@ -432,6 +440,7 @@ export default class GameSocket {
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 0, y: 1 });
+        ping();
       });
       socket.on("left", () => {
         if (this._movedUsers.has(socket.id)) return;
@@ -444,6 +453,7 @@ export default class GameSocket {
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: -1, y: 0 });
+        ping();
       });
       socket.on("right", () => {
         if (this._movedUsers.has(socket.id)) return;
@@ -456,6 +466,7 @@ export default class GameSocket {
 
         this._movedUsers.add(socket.id);
         this.engine.movePlayer(socket.id, { x: 1, y: 0 });
+        ping();
       });
     });
   }
