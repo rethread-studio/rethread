@@ -11,12 +11,12 @@ import { ArrowBtn } from "./arrowBtn";
 import { socket } from "../api";
 import { gameControllerI, controllDirection, IEmoji } from "../types";
 import { categoryColor } from "../utils";
-import { EmojiList } from "./emojiList";
+import EmojiList from "./emojiList";
 import { GridGame } from "./gridGame";
 import { ScoreList } from "./scoreList";
 import { Score } from "./score";
 
-export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state }: React.PropsWithChildren<gameControllerI>) => {
+export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
     const [position, setPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
     const [answer, setAnswer] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
     const setEmojitoLaureate = (e: IEmoji) => {
         setEmoji(e);
-        socket.emit("emote", e._id)
+        emote();
     }
 
     const emote = () => {
@@ -106,8 +106,8 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
         socket.emit(direction);
     }
 
-    const rotation: string = currentDirection === "up" ? "-translate-y-6" :
-        currentDirection === "down" ? "translate-y-6" :
+    const rotation: string = currentDirection === "up" ? "-translate-y-3" :
+        currentDirection === "down" ? "translate-y-3" :
             currentDirection === "void" ? "rotate-0" :
                 currentDirection === "left" ? "-rotate-45 -translate-x-8" :
                     currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
@@ -122,7 +122,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
                         <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
                     </Link>
-
+                    <Score />
                     <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400  mr-2" >View Score </button>
                 </div>
                 <div className={`w-full text-neon ${question !== null && question?.length > 60 ? "text-md" : "text-2xl"} uppercase text-center pt-2`}>
@@ -135,7 +135,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
                     {showEmoji === true ? <div className={`answer absolute px-6 py-2 top-1/4 left-1/4 z-20 left-0 bg-white text-black text-2xl rounded-xl transition-all duration-200 transform ${rotation}`}> {emoji?.emoji}</div> : <></>}
 
-                    <img onClick={emote} className={`w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
+                    <img onClick={emote} className={`cursor-pointer w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
                 <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
@@ -149,10 +149,10 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
                 <div className="flex flex-row w-full justify-between text-gray-400 place-self-end p-4">
                     <span className="text-xs ">Press the arrows <br /> to move </span>
-                    <button onClick={() => { setShow(true) }} className="text-2xl border-2 border-gray-500 rounded-full w-9">{emoji?.emoji}</button>
+                    <button onClick={() => { setShow(true) }} className="cursor-pointer text-2xl border-2 border-gray-500 rounded-full w-9">{emoji?.emoji}</button>
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
-                <EmojiList handleClick={setEmojitoLaureate} show={show} setShow={setShow} />
+                {show ? <EmojiList handleClick={setEmojitoLaureate} setShow={setShow} emojiList={emojiList} /> : <></>}
                 {showScoreList ? <ScoreList clickHandler={setScoreList} /> : <></>}
             </div>
         </div >

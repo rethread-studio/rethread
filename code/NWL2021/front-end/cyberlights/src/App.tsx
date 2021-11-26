@@ -27,7 +27,7 @@ function App() {
   const [laureate, setLaureate] = useState<laureateI | null>(null);
   const [state, setState] = useState<any>(null);
   const [emoji, setEmoji] = useState<IEmoji | null>(null);
-
+  const [emojiList, setEmojiList] = useState<IEmoji[] | null>(null);
   //index
   const [characterIndex, setCharacterIndex] = useState<number>(-1);
   //discovery
@@ -44,6 +44,7 @@ function App() {
 
     getEmojis().then((emojis) => {
       setEmoji(emojis[Math.random() * emojis.length | 0]);
+      setEmojiList(emojis);
     }).catch(() => setEmoji(null));
 
     getLaureates()
@@ -74,7 +75,7 @@ function App() {
             {laureate ? <Redirect to="/play" /> : loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={handleSelect} setCharacterIndex={setCharacterIndex} />}
           </Route>
           <Route path="/play">
-            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} setEmoji={setEmoji} state={state} />}
+            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} setEmoji={setEmoji} state={state} emojiList={emojiList} />}
           </Route>
           <Route path="/about">
             {loading ? <Loading /> : <About />}

@@ -80,6 +80,7 @@ export interface gameControllerI {
     emoji: IEmoji | null,
     setEmoji: React.Dispatch<React.SetStateAction<IEmoji | null>>;
     state: any,
+    emojiList: IEmoji[] | null
 }
 
 
