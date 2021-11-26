@@ -19,6 +19,10 @@ angular
         templateUrl: "/admin/partials/questions.htm",
         controller: "questionsController",
       })
+      .when("/bot", {
+        templateUrl: "/admin/partials/bot.htm",
+        controller: "botController",
+      })
       .otherwise({
         templateUrl: "/admin/partials/404.htm",
       });
@@ -61,7 +65,7 @@ angular
       new Twitch.Player("twitch-embed", {
         channel: "rethread",
         width: 600,
-        height: 300
+        height: 300,
       });
 
       $scope.$on("$destroy", function () {
@@ -186,5 +190,63 @@ angular
         },
         true
       );
+    },
+  ])
+  .controller("botController", [
+    "$scope",
+    "$http",
+    function ($scope, $http) {
+      $scope.bots = [];
+      const directions = ["up", "down", "left", "right"];
+      $scope.laureates = [];
+      function getLaureates() {
+        $http.get("/api/laureates").then((res) => {
+          $scope.laureates = res.data;
+        });
+      }
+      getLaureates();
+      $scope.addBot = function () {
+        const bot = {
+          socket: io("/control"),
+          status: "active",
+          position: null,
+          laureate: null,
+        };
+        bot.socket.on("connect", () => {
+          bot.laureate =
+            $scope.laureates[
+              Math.floor(Math.random() * $scope.laureates.length)
+            ];
+          bot.socket.emit("start", bot.laureate._id);
+        });
+
+        bot.socket.on("move", (position) => {
+          $scope.$apply(() => {
+            bot.position = position;
+          });
+        });
+
+        bot.socket.on("leave", leave);
+        bot.socket.on("disconnect", leave);
+
+        function leave() {
+          clearInterval(botinterval);
+          $scope.$apply(() => {
+            bot.status = "inactive";
+            $scope.bots.slice(0, $scope.bots.indexOf(bot));
+          });
+        }
+
+        const botinterval = setInterval(() => {
+          bot.socket.emit(directions[Math.floor(Math.random() * 4)]);
+          bot.socket.emit("click", { x: 0, y: 0 });
+        }, 500);
+        $scope.bots.push(bot);
+      };
+      $scope.$on("$destroy", function () {
+        for (let bot of $scope.bots) {
+          bot.socket.close();
+        }
+      });
     },
   ]);

@@ -41,24 +41,26 @@ game.onQuestionChange((question) => {
 });
 
 game.onUpdate(() => {
-  clearCanvas();
-  game.hasChange = false;
-  // game.page = "results";//delete
-  // renderQuestion();//delete
+  window.requestAnimationFrame(() => {
+    clearCanvas();
+    game.hasChange = false;
+    // game.page = "results";//delete
+    // renderQuestion();//delete
 
-  if (game.page == "demo") {
-    renderDemo();
-  } else if (game.page == "play") {
-    renderGame();
-  } else if (game.page == "question") {
-    // renderQuestionDecoration();
-    renderQuestion();
-  } else if (game.page == "answer") {
-    renderQuestion();
-    renderAnswer();
-  } else if (game.page == "results") {
-    renderResults();
-  }
+    if (game.page == "demo") {
+      renderDemo();
+    } else if (game.page == "play") {
+      renderGame();
+    } else if (game.page == "question") {
+      // renderQuestionDecoration();
+      renderQuestion();
+    } else if (game.page == "answer") {
+      renderQuestion();
+      renderAnswer();
+    } else if (game.page == "results") {
+      renderResults();
+    }
+  });
 });
 
 game.onPageChange((page) => {

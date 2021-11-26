@@ -1,6 +1,6 @@
 [
   {
-    "text": "Did Bill Gates win a Nobel prize?",
+    "text": "Did Bill Gates win a Nobel Prize?",
     "type": "CS",
     "answers": [
       {
@@ -14,7 +14,7 @@
     ]
   },
   {
-    "text": "How many Nobel prizes have been awarded?",
+    "text": "How many Nobel Prizes have been awarded?",
     "type": "nobel",
     "answers": [
       {
@@ -56,7 +56,7 @@
     ]
   },
   {
-    "text": "How old was Martin Luther King when he received the peace Nobel Prize?",
+    "text": "How old was Martin Luther King when he received the Nobel Peace Prize?",
     "type": "king",
     "answers": [
       {
@@ -121,7 +121,7 @@
         "isCorrect": false
       },
       {
-        "text": "AI, software and automatic control",
+        "text": "AI, software, and automatic control",
         "isCorrect": true
       }
     ]
@@ -169,7 +169,7 @@
     ]
   },
   {
-    "text": "Was Toni Morrison the first black woman of any nationality to win the Nobel prize?",
+    "text": "Was Toni Morrison the first black woman of any nationality to win the Nobel Prize?",
     "type": "morrison",
     "answers": [
       {
@@ -295,7 +295,7 @@
     ]
   },
   {
-    "text": "The cake is a lie",
+    "text": "The cake is a lie.",
     "type": "CS",
     "answers": [
       {
@@ -345,7 +345,7 @@
         "isCorrect": false
       },
       {
-        "text": "X for unknown",
+        "text": "X stands for unknown",
         "isCorrect": true
       }
     ]
@@ -393,7 +393,7 @@
     ]
   },
   {
-    "text": "What concept did Frances Arnold apply to find new proteins",
+    "text": "What concept did Frances Arnold apply to find new proteins?",
     "type": "arnold",
     "answers": [
       {
@@ -519,7 +519,7 @@
     ]
   },
   {
-    "text": "What is the grand-diversity generating machine?",
+    "text": "What is the grand diversity-generating machine?",
     "type": "arnold",
     "answers": [
       {
@@ -561,7 +561,7 @@
     ]
   },
   {
-    "text": "Who was the first woman to be awarded a Nobel Memorial Prize in Economic Sciences ?",
+    "text": "Who was the first woman to be awarded a Nobel Memorial Prize in Economic Sciences?",
     "type": "ostrom",
     "answers": [
       {
@@ -617,7 +617,7 @@
     ]
   },
   {
-    "text": "How old was Malala when she was awarded the peace Nobel Prize?",
+    "text": "How old was Malala when she was awarded the Nobel Peace Prize?",
     "type": "yousafzai",
     "answers": [
       {
@@ -626,7 +626,7 @@
       },
       {
         "text": "17",
-        "description": "Malala is the youngest laureate that received a Nobel Prize.",
+        "description": "Malala is the youngest laureate to receive a Nobel Prize.",
         "isCorrect": true
       }
     ]
@@ -646,7 +646,7 @@
     ]
   },
   {
-    "text": "Who was the second recipient of the Nobel peace prize, with Malala?",
+    "text": "Who was the second recipient of the Nobel Peace prize, with Malala?",
     "type": "yousafzai",
     "answers": [
       {
@@ -674,12 +674,12 @@
     ]
   },
   {
-    "text": "How many times was Marie Curie awarded a Nobel prize?",
+    "text": "How many times was Marie Curie awarded a Nobel Prize?",
     "type": "curie",
     "answers": [
       {
         "text": "Two",
-        "description":"She was and still is the only person to be awarded Nobel Prizes in two scientific categories. ",
+        "description":"She was, and still is, the only person to be awarded Nobel Prizes in two scientific categories.",
         "isCorrect": true
       },
       {
@@ -788,7 +788,7 @@
     ]
   },
   {
-    "text": "What is the parodic Nobel prize",
+    "text": "What is the parodic Nobel Prize?",
     "type": "nobel",
     "answers": [
       {
@@ -802,7 +802,7 @@
     ]
   },
   {
-    "text": "For which ceremony does Miss Sweety Poo acts as time keeper for acceptance speeches?",
+    "text": "For which ceremony does Miss Sweety Poo act as timekeeper for acceptance speeches?",
     "type": "nobel",
     "answers": [
       {
@@ -886,7 +886,7 @@
     ]
   },
   {
-    "text": "What phenomenon intesifies nerve growth factor in the blood plasma?",
+    "text": "What phenomenon intensifies nerve growth factor in the blood plasma?",
     "type": "montalcini",
     "answers": [
       {

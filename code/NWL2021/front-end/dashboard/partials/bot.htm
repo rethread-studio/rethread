@@ -1,0 +1,15 @@
+<h2>Bots</h2>
+<button class="btn btn-primary" id="bot-add" ng-click="addBot()">
+  Add bot
+</button>
+<div class="bot row" ng-repeat="bot in bots">
+  <div class="col col-2">
+    <img src="/img/laureates/{{bot.laureate.imagePath}}" style="width: 100%;"/>
+  </div>
+  <div class="col col-10">
+    <strong>Bot {{$index + 1}}</strong>
+    <span class="badge bg-primary text-wrap" ng-bind="bot.status"></span><br />
+
+    {{bot.position.x}}x{{bot.position.y}}
+  </div>
+</div>
