@@ -167,6 +167,7 @@ export class Engine {
 
   movePlayer(id: string, position: Position) {
     var player = this._players[id];
+    if (!player) return;
     var newPosition = {
       x: player.x + position.x,
       y: player.y + position.y,
