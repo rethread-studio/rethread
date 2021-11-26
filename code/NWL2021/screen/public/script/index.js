@@ -40,28 +40,32 @@ game.onQuestionChange((question) => {
   updateQuestion(question);
 });
 
-game.onUpdate(() => {
-  window.requestAnimationFrame(() => {
-    clearCanvas();
-    game.hasChange = false;
-    // game.page = "results";//delete
-    // renderQuestion();//delete
+function render() {
+  clearCanvas();
+  game.hasChange = false;
+  // game.page = "results";//delete
+  // renderQuestion();//delete
 
-    if (game.page == "demo") {
-      renderDemo();
-    } else if (game.page == "play") {
-      renderGame();
-    } else if (game.page == "question") {
-      // renderQuestionDecoration();
-      renderQuestion();
-    } else if (game.page == "answer") {
-      renderQuestion();
-      renderAnswer();
-    } else if (game.page == "results") {
-      renderResults();
-    }
-  });
-});
+  if (game.page == "demo") {
+    renderDemo();
+  } else if (game.page == "play") {
+    renderGame();
+  } else if (game.page == "question") {
+    // renderQuestionDecoration();
+    renderQuestion();
+  } else if (game.page == "answer") {
+    renderQuestion();
+    renderAnswer();
+  } else if (game.page == "results") {
+    renderResults();
+  }
+  window.requestAnimationFrame(render);
+}
+window.requestAnimationFrame(render);
+
+// game.onUpdate(() => {
+//   window.requestAnimationFrame(render);
+// });
 
 game.onPageChange((page) => {
   console.log("[PAGE]", "change", page);
@@ -86,6 +90,7 @@ game.onPageChange((page) => {
       break;
     case "results":
       showResults(true);
+      openResults();
       break;
   }
 });

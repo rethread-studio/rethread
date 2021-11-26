@@ -225,43 +225,34 @@ body {
 
 
 .text-neon-green {
-  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
-    0 0 20px var(--neon-green), 0 0 60px var(--neon-green),
-    0 0 70px var(--neon-green);
+  text-shadow: 0 0 4px #fff, 0 0 11px var(--neon-green), 0 0 19px var(--neon-green),
+    0 0 40px var(--neon-green);
   color: white;
 }
 
 .text-neon-yellow {
-  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
-    0 0 40px var(--neon-yellow), 0 0 80px var(--neon-yellow),
-    0 0 90px var(--neon-yellow);
+  text-shadow: 0 0 4px #fff, 0 0 11px var(--neon-yellow), 0 0 19px var(--neon-yellow),
+    0 0 40px var(--neon-yellow);
   color: white;
 }
 
-.text-neon-pink {
-  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
-    0 0 40px var(--neon-pink), 0 0 80px var(--neon-pink),
-    0 0 90px var(--neon-pink);
+.text-neon-pink, .text-neon {
+  text-shadow: 0 0 4px #fff, 0 0 11px var(--neon-pink), 0 0 19px var(--neon-pink),
+    0 0 40px var(--neon-pink);
   color: white;
 }
 
 .text-neon-blue {
   color: white;
-  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
-    0 0 40px var(--neon-blue), 0 0 80px var(--neon-blue),
-    0 0 90px var(--neon-blue);
-  
+  text-shadow: 0 0 4px #fff, 0 0 11px var(--neon-blue), 0 0 19px var(--neon-blue),
+    0 0 40px var(--neon-blue);
 }
 
 
 .green-neon {
-  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff,
-    0 0 40px var(--neon-green), 0 0 80px var(--neon-green),
-    0 0 90px var(--neon-green);
+  text-shadow: 0 0 4px #fff, 0 0 11px var(--neon-green), 0 0 19px var(--neon-green),
+    0 0 40px var(--neon-green);
 }
 .text-neon {
-  color: white;
   font-weight: 300;
-  text-shadow: 0 0 4px #fff, 0 0 11px #fff, 0 0 19px #fff, 0 0 40px #f09,
-    0 0 80px #f09, 0 0 90px #f09;
 }
