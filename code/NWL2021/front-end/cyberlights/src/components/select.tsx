@@ -42,7 +42,6 @@ export const SelectCharacter = ({ characters, selectHandler, setCharacterIndex }
             }} className={`h-full transition-all duration-200  overflow-hidden flex flex-col justify-between relative border-2 border-white `}>
 
                 <div>
-
                     <div className={`flex flex-row h-8 justify-between content-center transition-all duration-200 text-gray-400 px-3 pt-2 pb-1.5 text-sm font-light`}>
                         <Link to={"/home"} className="text-gray-400  h-8 w-4/8 ">
                             <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Home
