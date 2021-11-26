@@ -25,17 +25,21 @@ function getPlayersResult() {
 
 const total_steps = 4;
 let demoStep = 0;
-
-function renderResults() {
+let winners = [];
+function openResults() {
   const question = document.querySelector(".result .q");
   if (question.innerHTML != game.question.text)  
     question.innerHTML = game.question.text;
-  const { winners } = getPlayersResult();
+  const results = getPlayersResult();
+  winners = results.winners;
   renderWinners(winners || []);
+}
+
+function renderResults() {
   // if (winners.length > 0) {
-  // renderWinDecoration();
+  //   renderWinDecoration();
   // } else {
-  // renderLooseDecoration();
+  //   renderLooseDecoration();
   // }
   demoStep = (demoStep + 1) % total_steps;
 }

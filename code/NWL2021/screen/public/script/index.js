@@ -86,6 +86,7 @@ game.onPageChange((page) => {
       break;
     case "results":
       showResults(true);
+      openResults();
       break;
   }
 });
