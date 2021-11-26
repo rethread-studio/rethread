@@ -6,7 +6,8 @@ function getPlayersResult() {
   const answerIndex = game.question.answers.findIndex((a) => a.isCorrect);
   const answer = game.question.answers[answerIndex];
   const position = game.gameState.answerPositions[answerIndex]
-  document.querySelector(".result .a").innerHTML = answer.text;
+  const answerElement = document.querySelector(".result .a");
+  if (answerElement.innerHTML != answer.text) answerElement.innerHTML = answer.text;
   for (const p of players) {
     if (
       p.x >= position.x &&
@@ -27,7 +28,8 @@ let demoStep = 0;
 
 function renderResults() {
   const question = document.querySelector(".result .q");
-  question.innerHTML = game.question.text;
+  if (question.innerHTML != game.question.text)  
+    question.innerHTML = game.question.text;
   const { winners } = getPlayersResult();
   renderWinners(winners || []);
   // if (winners.length > 0) {
