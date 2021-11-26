@@ -32,16 +32,19 @@ function openResults() {
     question.innerHTML = game.question.text;
   const results = getPlayersResult();
   winners = results.winners;
-  renderWinners(winners || []);
 }
 
-function renderResults() {
-  // if (winners.length > 0) {
-  //   renderWinDecoration();
-  // } else {
-  //   renderLooseDecoration();
-  // }
+setInterval(() => {
   demoStep = (demoStep + 1) % total_steps;
+}, 250);
+
+function renderResults() {
+  if (winners.length > 0) {
+    renderWinners(winners || []);
+    renderWinDecoration();
+  } else {
+    renderLooseDecoration();
+  }
 }
 
 function renderLooseDecoration() {
@@ -54,10 +57,10 @@ function renderLooseDecoration() {
   let lineStep = 0;
   for (let i = unitSize; i < guideLine; i += unitSize) {
     if (lineStep <= demoStep) {
-      ctx.shadowBlur = !game.gameCycle ? 10 : 15;
-      ctx.shadowColor = lineStep == (total_steps - 1) ? "#00DBFF" : "white";
-      ctx.globalAlpha = !game.gameCycle && lineStep % 2 == 0 ? 0.5 : 1;
-      ctx.setLineDash([5, 20 + total_steps * 2]);
+      // ctx.shadowBlur = !game.gameCycle ? 10 : 15;
+      // ctx.shadowColor = lineStep == (total_steps - 1) ? "#00DBFF" : "white";
+      // ctx.globalAlpha = !game.gameCycle && lineStep % 2 == 0 ? 0.5 : 1;
+      // ctx.setLineDash([5, 20 + total_steps * 2]);
       ctx.lineCap = "round";
       ctx.strokeStyle = lineStep == (total_steps - 1) ? "#00DBFF" : "white";
       ctx.lineWidth = !game.gameCycle ? 6 + lineStep * 4 : 8 + lineStep * 2;
@@ -96,8 +99,8 @@ function drawSadFace(_x, _y, _size, _mirror = true) {
 
   //face
   resetCtxSeetings();
-  ctx.shadowBlur = !game.gameCycle ? 10 : 15;
-  ctx.shadowColor = "white";
+  // ctx.shadowBlur = !game.gameCycle ? 10 : 15;
+  // ctx.shadowColor = "white";
   ctx.strokeStyle = "#00DBFF";
   ctx.lineWidth = !game.gameCycle ? 10 : 15;
   ctx.beginPath();
@@ -139,10 +142,10 @@ function renderWinDecoration() {
   let lineStep = 0;
   for (let i = unitSize; i < guideLine; i += unitSize) {
     if (lineStep <= demoStep) {
-      ctx.shadowBlur = !game.gameCycle ? 10 : 15;
-      ctx.shadowColor = lineStep == (total_steps - 1) ? "red" : "white";
-      ctx.globalAlpha = !game.gameCycle && lineStep % 2 == 0 ? 0.5 : 1;
-      ctx.setLineDash([5, 20 + total_steps * 2]);
+      // ctx.shadowBlur = !game.gameCycle ? 10 : 15;
+      // ctx.shadowColor = lineStep == (total_steps - 1) ? "red" : "white";
+      // ctx.globalAlpha = !game.gameCycle && lineStep % 2 == 0 ? 0.5 : 1;
+      // ctx.setLineDash([5, 20 + total_steps * 2]);
       ctx.lineCap = "round";
       ctx.strokeStyle = lineStep == (total_steps - 1) ? "red" : "white";
       ctx.lineWidth = !game.gameCycle ? 6 + lineStep * 4 : 8 + lineStep * 2;
@@ -165,14 +168,14 @@ function renderWinDecoration() {
 function resetCtxSeetings() {
   ctx.setLineDash([]);
   ctx.lineCap = "square";
-  ctx.shadowBlur = 0;
+  // ctx.shadowBlur = 0;
   ctx.globalAlpha = 1;
 }
 
 function drawStarGroup(_x, _y, size) {
   for (let i = total_steps - 1; i >= 0; i--) {
-    ctx.shadowBlur = i <= demoStep ? 15 : 0;
-    ctx.shadowColor = "white";
+    // ctx.shadowBlur = i <= demoStep ? 15 : 0;
+    // ctx.shadowColor = "white";
     const color = i <= demoStep ? "white" : "#1B222E";
     drawStar(_x, _y, 5, (size + (i * 30)) * renderScale, (size / 2 + (i * 15)) * renderScale, color);
   }

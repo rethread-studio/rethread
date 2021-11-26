@@ -30,7 +30,7 @@ async function drawPlayersShadow(players) {
 }
 
 async function drawPreviousPosition(players) {
-  ctx.shadowBlur = !game.gameCycle ? 5 : 10;
+  // ctx.shadowBlur = !game.gameCycle ? 5 : 10;
   for (const player of players) {
     if (!player.laureate) {
       const laureate = await game.getLaureate(player.laureateID);
