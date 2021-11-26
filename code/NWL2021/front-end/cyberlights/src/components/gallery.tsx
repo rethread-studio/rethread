@@ -21,13 +21,12 @@ interface IGallery {
 export const Gallery = ({ characters, setCharacterIndex, setCharacterPrizes, selectColor, color }: React.PropsWithChildren<IGallery>) => {
 
     return <Swiper
-        // initialSlide={0}
+        initialSlide={0}
         loop={true}
         spaceBetween={10}
-        // slidesPerView={1}
-        allowTouchMove={false}
-        // longSwipes={false}
-        // effect={'fade'}
+        slidesPerView={1}
+        allowTouchMove={true}
+        longSwipes={false}
         onSlideChange={(SwiperCore) => {
             const { realIndex, } = SwiperCore;
             // setCharacterIndex(realIndex);
