@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import { isWall, isAnswer } from "../utils";
-
+import Tile from './tile';
 interface IGridGame {
     state: any,
     position: { x: number, y: number },
@@ -21,7 +21,7 @@ const GridGame = ({ state, position, answerPositions }: React.PropsWithChildren<
         for (let j = 0; j < state.width; j++) {
             line = <>
                 {line}
-                <div style={{ width: `${tileSize}px`, height: `${tileSize}px` }} className={"grid-position-item " + ((position.y === i && position.x === j) ? "active " : " ") + (isWall(j, i, state) ? "wall " : " ") + (isAnswer(j, i, answerPositions) ? "grid-answer " : " ")}></div>
+                <Tile tileSize={tileSize} position={position} answerPositions={answerPositions} state={state} i={i} j={j} />
             </>
         }
         grid = <>{grid}<div className="grid-line">{line}</div></>
