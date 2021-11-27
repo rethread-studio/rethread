@@ -6,7 +6,13 @@ export default router;
 router.get("/me", async (req, res) => {
   const session: any = req.session;
   if (session?.userID) {
-    res.json(await UserModel.findById(session.userID));
+    const user = (await UserModel.findById(session.userID)).toJSON();
+    let out = 0;
+    for (let i in user.events) {
+      out += user.events[i];
+    }
+    (user as any).score = out;
+    res.json(user);
   } else {
     res.status(401).json({ error: "not_connected" });
   }
@@ -28,7 +34,7 @@ router.get("/", async (req, res) => {
         events: 1,
         score: {
           $function: {
-            body: 'function(values) { const out = [];for (let i in values) {out.push(values[i]);} return parseInt(out.join("") || 0); }',
+            body: "function(values) { let out = 0;for (let i in values) {out += values[i];} return out; }",
             args: ["$events"],
             lang: "js",
           },

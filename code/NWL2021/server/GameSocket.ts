@@ -59,7 +59,7 @@ export default class GameSocket {
       this.emitHit({ userID: player.userID });
     });
     this.engine.on("score").subscribe(({ player, user }) => {
-      player?.socket?.emit("score", Object.values(user.events).join(""));
+      player?.socket?.emit("score", Object.values(user.events).reduce((v, e) => e + v, 0));
     });
     this.engine.on("newQuestion").subscribe((questionEvent) => {
       this._events.push({
@@ -173,7 +173,6 @@ export default class GameSocket {
         .replace("[random]", Math.round(Math.random() * 10000).toString())
         .replace("[nb_users]", (await UserModel.count()).toString());
     }
-    console.log(questionEvent.question.answers);
     this.io.of("control").emit("question", {
       question: questionEvent.question.text,
       answerPositions:
