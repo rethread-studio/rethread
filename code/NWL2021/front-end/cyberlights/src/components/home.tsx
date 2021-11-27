@@ -2,11 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Spacer } from "./spacer";
 import LOGO from "../cgLogo.svg";
+import { useWindowHeight } from "../hooks/windowHeight";
 
 export const Home = () => {
-
+    const { height } = useWindowHeight();
     return (
-        <div className="h-full w-full p-4">
+        <div style={{ height: `${height}px` }} className=" w-full p-4">
             <div className="h-full flex border-2 border-white flex-col relative items-center justify-between neon-shadow ">
 
                 <div className="absolute lowercase  flex flex-row font-light text-white text-xs top-4"> re|thread </div>

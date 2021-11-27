@@ -10,6 +10,7 @@ import { categoryColor } from "../utils";
 import EmojiList from "./emojiList";
 import GridGame from "./gridGame";
 import { ScoreList } from "./scoreList";
+import { useWindowHeight } from "../hooks/windowHeight";
 
 
 export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
@@ -24,6 +25,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const [show, setShow] = useState(false);
     const [showScoreList, setScoreList] = useState(false);
     const [showEmoji, setShowEmoji] = useState(false);
+    const { height } = useWindowHeight();
 
     const setEmojitoLaureate = (e: IEmoji) => {
         setEmoji(e);
@@ -110,7 +112,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
     return (
 
-        <div className="h-full w-full p-4 ">
+        <div style={{ height: `${height}px` }} className="w-full p-4 ">
             <div className="h-full border-2 border-gray-600 relative flex flex-col justify-between overflow-hidden">
 
                 <ControllMenu clickHandler={onClickBackButton} btnClick={setScoreList} />
