@@ -133,7 +133,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
                 <div className="flex flex-row w-full justify-between text-gray-400 place-self-end p-4">
                     <span className="text-xs ">Press the arrows <br /> to move </span>
-                    <button onClick={() => { setShow(true) }} className="cursor-pointer text-2xl border-2 border-gray-500 rounded-full w-9">{emoji?.emoji}</button>
+                    <button onClick={() => { setShow(true) }} className="cursor-pointer text-2xl border-2 border-yellow-300 rounded-full w-9">{emoji?.emoji}</button>
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
                 {show ? <EmojiList handleClick={setEmojitoLaureate} setShow={setShow} emojiList={emojiList} /> : <></>}

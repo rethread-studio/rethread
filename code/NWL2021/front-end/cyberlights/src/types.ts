@@ -47,6 +47,7 @@ export interface IUserPersonalScore {
     creationDate: string,
     __v: number,
     events: object,
+    score: number
 }
 
 

@@ -19,11 +19,11 @@ const ControllMenu = ({ clickHandler, btnClick }: React.PropsWithChildren<IContr
     const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
 
     return <div className="flex flex-row justify-between text-sm content-center pt-2">
-        <Link to={"/select"} onClick={clickHandler} className="text-gray-400  h-8 w-4/8 p-2 ">
+        <Link to={"/select"} onClick={clickHandler} className="text-yellow-300  h-8 w-4/8 p-2 ">
             <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
         </Link>
         <Score />
-        <button onClick={() => { btnClick(true) }} className="text-sm text-gray-400  mr-2" >View Top 2 </button>
+        <button onClick={() => { btnClick(true) }} className="text-sm text-yellow-300 mr-2" >Top score </button>
     </div>
 
 }

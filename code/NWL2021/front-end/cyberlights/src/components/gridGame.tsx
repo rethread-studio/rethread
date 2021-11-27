@@ -1,5 +1,4 @@
 import React, { memo, useEffect, useState } from 'react';
-import { isWall, isAnswer } from "../utils";
 import Tile from './tile';
 interface IGridGame {
     state: any,
