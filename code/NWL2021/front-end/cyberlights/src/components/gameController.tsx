@@ -1,12 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 
-import {
-    IconLookup,
-    IconDefinition,
-    findIconDefinition
-} from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import ControllMenu from './controllMenu';
 import ArrowsControl from './arrowsControl';
 import { socket } from "../api";
 import { gameControllerI, controllDirection, IEmoji } from "../types";
@@ -14,7 +10,7 @@ import { categoryColor } from "../utils";
 import EmojiList from "./emojiList";
 import GridGame from "./gridGame";
 import { ScoreList } from "./scoreList";
-import { Score } from "./score";
+
 
 export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
@@ -24,8 +20,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const [question, setQuestion] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
     const [color, setColor] = useState<string>(categoryColor.physics)
-    const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
-    const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
+
     const [show, setShow] = useState(false);
     const [showScoreList, setScoreList] = useState(false);
     const [showEmoji, setShowEmoji] = useState(false);
@@ -111,21 +106,15 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
             currentDirection === "void" ? "rotate-0" :
                 currentDirection === "left" ? "-rotate-45 -translate-x-8" :
                     currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
-    console.log(selectHandler)
-    const onClickBackButton = useMemo(() => (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => selectHandler(null), [selectHandler]);
+
+    const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
     return (
 
         <div className="h-full w-full p-4 ">
             <div className="h-full border-2 border-gray-600 relative flex flex-col justify-between overflow-hidden">
 
-                {/* uppermenu */}
-                <div className="flex flex-row justify-between text-sm content-center pt-2">
-                    <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
-                        <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
-                    </Link>
-                    <Score />
-                    <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400  mr-2" >View Top 2 </button>
-                </div>
+                <ControllMenu clickHandler={onClickBackButton} btnClick={setScoreList} />
+
                 <div className={`w-full text-neon ${question !== null && question?.length > 60 ? "text-md" : "text-2xl"} uppercase text-center pt-2`}>
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
