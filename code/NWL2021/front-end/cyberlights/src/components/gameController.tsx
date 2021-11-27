@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 
 import {
@@ -7,12 +7,12 @@ import {
     findIconDefinition
 } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ArrowBtn } from "./arrowBtn";
+import ArrowsControl from './arrowsControl';
 import { socket } from "../api";
 import { gameControllerI, controllDirection, IEmoji } from "../types";
 import { categoryColor } from "../utils";
 import EmojiList from "./emojiList";
-import { GridGame } from "./gridGame";
+import GridGame from "./gridGame";
 import { ScoreList } from "./scoreList";
 import { Score } from "./score";
 
@@ -111,13 +111,14 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
             currentDirection === "void" ? "rotate-0" :
                 currentDirection === "left" ? "-rotate-45 -translate-x-8" :
                     currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
-
-    const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
+    console.log(selectHandler)
+    const onClickBackButton = useMemo(() => (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => selectHandler(null), [selectHandler]);
     return (
 
         <div className="h-full w-full p-4 ">
             <div className="h-full border-2 border-gray-600 relative flex flex-col justify-between overflow-hidden">
 
+                {/* uppermenu */}
                 <div className="flex flex-row justify-between text-sm content-center pt-2">
                     <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
                         <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
@@ -138,14 +139,8 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     <img onClick={emote} className={`cursor-pointer w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
-                <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
-                    <ArrowBtn clickEvent={emitDirection} direction="up" color={color} />
-                    <div className="flex flex-row space-x-2">
-                        <ArrowBtn clickEvent={emitDirection} direction="left" color={color} />
-                        <ArrowBtn clickEvent={emitDirection} direction="down" color={color} />
-                        <ArrowBtn clickEvent={emitDirection} direction="right" color={color} />
-                    </div>
-                </div>
+                <ArrowsControl clickHandler={emitDirection} color={color} />
+
 
                 <div className="flex flex-row w-full justify-between text-gray-400 place-self-end p-4">
                     <span className="text-xs ">Press the arrows <br /> to move </span>

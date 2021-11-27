@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { isWall, isAnswer } from "../utils";
 
 interface IGridGame {
@@ -7,7 +7,7 @@ interface IGridGame {
     answerPositions: [{ x: number, y: number }] | null
 }
 
-export const GridGame = ({ state, position, answerPositions }: React.PropsWithChildren<IGridGame>) => {
+const GridGame = ({ state, position, answerPositions }: React.PropsWithChildren<IGridGame>) => {
     const [tileSize, setTileSize] = useState(0);
 
     useEffect(() => {
@@ -31,3 +31,5 @@ export const GridGame = ({ state, position, answerPositions }: React.PropsWithCh
         {grid}
     </div>
 }
+
+export default memo(GridGame)

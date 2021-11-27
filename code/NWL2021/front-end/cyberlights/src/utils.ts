@@ -101,3 +101,13 @@ export const downloadFile = (data: any, fileName: string, fileType: string) => {
     a.dispatchEvent(clickEvt)
     a.remove()
 }
+
+export const areEqual = (prevProps: any, nextProps: any) => {
+    const { isSelected } = nextProps;
+    const { isSelected: prevIsSelected } = prevProps;
+
+    /*if the props are equal, it won't update*/
+    const isSelectedEqual = isSelected === prevIsSelected;
+
+    return isSelectedEqual;
+};
