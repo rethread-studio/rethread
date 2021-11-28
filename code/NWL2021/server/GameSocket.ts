@@ -148,7 +148,7 @@ export default class GameSocket {
       }),
       answerPositions:
         this.engine.state.answersPositions[
-          this.engine.currentIndexAnswerPosition
+        this.engine.currentIndexAnswerPosition
         ],
       questionEndDate: this.engine.questionEndDate,
       question: this.engine.currentQuestion,
@@ -177,7 +177,7 @@ export default class GameSocket {
       question: questionEvent.question.text,
       answerPositions:
         this.engine.state.answersPositions[
-          this.engine.currentIndexAnswerPosition
+        this.engine.currentIndexAnswerPosition
         ],
     });
     this.io.of("screen").emit("question", {
@@ -185,7 +185,7 @@ export default class GameSocket {
       endDate: questionEvent.endDate,
       answerPositions:
         this.engine.state.answersPositions[
-          this.engine.currentIndexAnswerPosition
+        this.engine.currentIndexAnswerPosition
         ],
     });
   }
@@ -320,7 +320,7 @@ export default class GameSocket {
     socket.on("click", (event) => {
       UserModel.findByIdAndUpdate(session.userID, {
         $inc: { "events.click": 1 },
-      }).then((user) => {}, console.error);
+      }).then((user) => { }, console.error);
 
       this.monitor.send({
         origin: "user",
@@ -411,7 +411,7 @@ export default class GameSocket {
         question: this.engine.currentQuestion.text,
         answerPositions:
           this.engine.state.answersPositions[
-            this.engine.currentIndexAnswerPosition
+          this.engine.currentIndexAnswerPosition
           ],
       });
 
