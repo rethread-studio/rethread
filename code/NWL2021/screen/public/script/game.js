@@ -5,7 +5,7 @@ const config = {
   answerSize: { small: "4.5rem", big: "6.2rem" },
   questionSize: { small: "4.5rem", big: "6.2rem" },
   resultLineSize: { small: 6, big: 8 },
-  question: { lineWidth: 6, linseSize: 3 },
+  question: { lineWidth: 10, linseSize: 3 },
   questionTime: 4,
   emojiDuration: 2,
   dialogueImagePath: "/img/dialogue.png",
