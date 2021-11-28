@@ -196,14 +196,13 @@ function drawStar(cx, cy, spikes, outerRadius, innerRadius, fillcolor) {
 
 
 async function renderWinners(players) {
-
-  const width = game.setup.unitSize;
-  const height = game.setup.unitSize;
+  const width = game.setup.unitSize + game.setup.unitSize / 2;
+  const height = width;
   const scale = 1;
   const gameW = game.setup.unitSize * game.setup.width;
 
-  let groupW = players.length >= config.max_group ? game.setup.unitSize * config.max_group : game.setup.unitSize * players.length;
-  let iniX = gameW / 2 - groupW / 2;
+  let groupW = players.length >= config.max_group ? width * config.max_group : width * players.length;
+  let iniX = gameW / 2 - groupW / 2 + width / 2;
   let yPos = 1;
   const boardState = game.gameCycle ? 1 : -1;
 
@@ -216,8 +215,8 @@ async function renderWinners(players) {
 
     //calculate the initial position in X
     if (i % config.max_group == 0 && i != 0) {
-      groupW = players.length - i >= config.max_group ? game.setup.unitSize * config.max_group : game.setup.unitSize * (players.length - i);
-      iniX = gameW / 2 - groupW / 2;
+      groupW = players.length - i >= config.max_group ? width * config.max_group : width * (players.length - i);
+      iniX = (gameW / 2) - (groupW / 2) + width / 2;
     }
 
     if (!imageCache[imagePath]) {
@@ -230,8 +229,8 @@ async function renderWinners(players) {
 
     renderImage(
       imageCache[imagePath],
-      iniX + game.setup.unitSize * (i % config.max_group),
-      game.setup.unitSize * 2 + yPos * game.setup.unitSize,
+      iniX + width * (i % config.max_group),
+      game.setup.unitSize * 2 + yPos * height,
       width,
       height,
       angle,

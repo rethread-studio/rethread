@@ -9,9 +9,9 @@ const config = {
   questionTime: 4,
   emojiDuration: 2,
   dialogueImagePath: "/img/dialogue.png",
-  max_group: 12,
+  max_group: 9,
   demoTimer: 15000,
-  renderScale: 2
+  renderScale: 2,
 };
 
 class Game {
