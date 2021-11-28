@@ -40,13 +40,13 @@ body {
   text-align: center;
   font-size: 2.8rem;
   text-transform: uppercase;
-  padding: 0 0.025em;
+  padding: 0 0.025rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-content: center;
   font-weight: 300;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.025rem;
 }
 .questionAnswer {
   position: absolute;
@@ -62,13 +62,13 @@ body {
   text-transform: uppercase;
   /* animation: pulsate 0.11s ease-in-out infinite alternate; */
 
-  padding: 0 0.025em;
+  padding: 0 0.025rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-content: center;
-  font-weight: 300;
-  letter-spacing: 0.025em;
+  font-weight: 100;
+  letter-spacing: 0.025rem;
 }
 .questionAnswer .a {
   font-size: 4.375rem;
@@ -90,10 +90,20 @@ body {
   align-content: center;
 
   /* animation: pulsate 0.11s ease-in-out infinite alternate; */
-  color: #07080a;
-  font-weight: 300;
-  letter-spacing: 0.05em;
+  color: white;
+  font-weight: 500;
+  letter-spacing: 0.05rem;
+
+    text-shadow: 
+       1px  1px     #202936, 
+      -1px  1px     #202936, 
+       1px -1px     #202936, 
+      -1px -1px     #202936,
+       1px  1px 5px #202936;
+  }
+
 }
+
 .answer1 {
   left: 6.25rem;
   top: 28,125rem;

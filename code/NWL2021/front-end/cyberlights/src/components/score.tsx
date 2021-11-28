@@ -13,6 +13,6 @@ export const Score = () => {
     }, [])
 
     return <div className={`score text-sm text-gray-200  h-8 p-2 overflow-hidden text-center `}>
-        Score:{score.toString().length > 15 ? `${score.toString().slice(0, 15)}...` : score}
+        Score: {score}
     </div>
 }

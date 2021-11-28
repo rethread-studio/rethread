@@ -3,7 +3,7 @@ async function drawPlayersShadow(players) {
   const height = game.setup.unitSize;
 
   const boardState = game.gameCycle ? 1 : -1;
-
+  ctx.save();
   // draw players
   for (const player of players) {
     if (!player.laureate) {
@@ -24,9 +24,11 @@ async function drawPlayersShadow(players) {
       const y = positions[i].y * game.setup.unitSize + game.setup.unitSize / 2;
       const side = i % 2 == 0 ? 1 : -1;
       const angle = (Math.PI / 4) * side * boardState;
+      ctx.globalCompositeOperation = 'lighter';
       renderImage(imageCache[imagePath], x, y, width, height, angle, 0.8);
     }
   }
+  ctx.restore();
 }
 
 async function drawPreviousPosition(players) {
@@ -229,24 +231,18 @@ function renderQuestion(question) {
 }
 
 function renderAnswer(question) {
+
   for (let k = 0; k < question.answers.length; k++) {
     const position = game.gameState.answerPositions[k];
-
-    const size =
-      k % 2 == 0
-        ? game.gameCycle
-          ? config.dotSize.small
-          : config.dotSize.big
-        : game.gameCycle
-          ? config.dotSize.big
-          : config.dotSize.small;
 
     const unitSize = game.setup.unitSize * config.renderScale;
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
       for (let j = 0; j < position.height + 1; j++) {
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "#c4ffff";
         ctx.beginPath();
+
+        const size = config.dotSize.small / 2 + Math.abs(Math.sin((i + (j * 100) + playConfig.animationStep) * playConfig.answerSpeed) * config.dotSize.big);
         ctx.arc(
           position.x * unitSize + unitSize * i + unitSize / 2,
           position.y * unitSize + unitSize * j + unitSize / 2,
@@ -258,6 +254,8 @@ function renderAnswer(question) {
       }
     }
   }
+
+  playConfig.animationStep++;
 }
 
 function updateQuestion(question) {
@@ -286,7 +284,9 @@ function updateQuestion(question) {
 
 const playConfig = {
   total_steps: 4,
-  step: 0
+  step: 0,
+  animationStep: 0,
+  answerSpeed: 0.03
 }
 
 function renderQuestionDecoration() {
@@ -342,10 +342,14 @@ function setTimerClass(time) {
   const element = document.getElementsByClassName("timer")[0];
   if (time <= 10) {
     element.classList.add("text-neon-pink");
+    playConfig.answerSpeed = 0.09;
   } else if (time <= 20) {
     element.classList.add("text-neon-yellow");
+    playConfig.answerSpeed = 0.03;
+
   } else {
     element.classList.add("text-neon-green");
+    playConfig.answerSpeed = 0.02;
   }
 }
 

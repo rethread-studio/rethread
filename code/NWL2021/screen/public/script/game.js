@@ -1,7 +1,7 @@
 const socket = io("/screen");
 
 const config = {
-  dotSize: { small: 4, big: 8 },
+  dotSize: { small: 10, big: 25 },
   answerSize: { small: "4.5rem", big: "6.2rem" },
   questionSize: { small: "4.5rem", big: "6.2rem" },
   resultLineSize: { small: 6, big: 8 },

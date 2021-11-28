@@ -57,10 +57,6 @@ function renderLooseDecoration() {
   let lineStep = 0;
   for (let i = unitSize; i < guideLine; i += unitSize) {
     if (lineStep <= demoStep) {
-      // ctx.shadowBlur = !game.gameCycle ? 10 : 15;
-      // ctx.shadowColor = lineStep == (total_steps - 1) ? "#00DBFF" : "white";
-      // ctx.globalAlpha = !game.gameCycle && lineStep % 2 == 0 ? 0.5 : 1;
-      // ctx.setLineDash([5, 20 + total_steps * 2]);
       ctx.lineCap = "round";
       ctx.strokeStyle = lineStep == (total_steps - 1) ? "#00DBFF" : "white";
       ctx.lineWidth = !game.gameCycle ? config.resultLineSize.small + lineStep * 4 : config.resultLineSize.big + lineStep * 2;
