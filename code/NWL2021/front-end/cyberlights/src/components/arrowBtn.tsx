@@ -32,7 +32,7 @@ export const ArrowBtn = ({ direction, clickEvent, color }: React.PropsWithChildr
             inset 0 0 2rem ${color},
             0 0 0.5rem ${color},
             inset 0 0 0.5rem ${color}`
-        }} onClick={clickHandler} className="w-20 h-20 border-2 white flex justify-center items-center neon-shadow-sm">
+        }} onClick={clickHandler} className="w-20 h-20 border-2 white flex justify-center items-center">
             <FontAwesomeIcon className="text-white text-xl" icon={chevron} />
         </button>
     )

@@ -31,7 +31,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
     const emote = () => {
         socket.emit("emote", emoji?._id)
-        window.navigator.vibrate(200);
+        // window.navigator.vibrate(200);
         setShowEmoji(true);
     }
 
@@ -64,7 +64,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
 
         socket.on("enterAnswer", ({ answer }) => {
             setAnswer(answer);
-            window.navigator.vibrate(200);
+            // window.navigator.vibrate(200);
         });
         socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
         socket.on("leave", () => { history.push("/") });
