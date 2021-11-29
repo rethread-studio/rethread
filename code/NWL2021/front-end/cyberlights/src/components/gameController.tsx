@@ -11,11 +11,11 @@ import EmojiList from "./emojiList";
 import GridGame from "./gridGame";
 import { ScoreList } from "./scoreList";
 import { useWindowHeight } from "../hooks/windowHeight";
+import { Answer } from "./answer";
 
 
 export const GameController = ({ laureate, selectHandler, iemoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
-    const [answer, setAnswer] = useState<string | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
     const [color, setColor] = useState<string>(categoryColor.physics)
     const [emoji, setEmoji] = useState<IEmoji | null>(null);
@@ -65,18 +65,12 @@ export const GameController = ({ laureate, selectHandler, iemoji, state, emojiLi
 
         socket.on("question", (data) => { setQuestion(data.question); });
 
-        socket.on("enterAnswer", ({ answer }) => {
-            setAnswer(answer);
-            // window.navigator.vibrate(200);
-        });
-        socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
+
         socket.on("leave", () => { history.push("/") });
 
         return () => {
             socket.emit("leave");
             socket.off("leave");
-            socket.off("enterAnswer");
-            socket.off("exitAnswer");
             socket.off("question");
             socket.off("move");
             window.removeEventListener("keydown", pressHandler);
@@ -120,7 +114,7 @@ export const GameController = ({ laureate, selectHandler, iemoji, state, emojiLi
                 <GridGame state={state} />
 
                 <div className="relative h-full flex flex-col justify-center content-center">
-                    {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl `}>{answer}</div> : <></>}
+                    <Answer />
                     {showEmoji === true ? <div className={`answer absolute px-6 py-2 top-1/4 left-1/4 z-20 left-0 bg-white text-black text-2xl rounded-xl `}> {emoji?.emoji}</div> : <></>}
 
                     <img onClick={emote} className={`cursor-pointer w-3/5 h-auto mx-auto `} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
