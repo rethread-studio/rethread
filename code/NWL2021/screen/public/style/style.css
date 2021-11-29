@@ -100,8 +100,6 @@ body {
        1px -1px     #202936, 
       -1px -1px     #202936,
        1px  1px 5px #202936;
-  }
-
 }
 
 .answer1 {
@@ -289,4 +287,5 @@ body {
   position:absolute;
   top:0;
   left:0;
+  max-width: 100%;
 }
