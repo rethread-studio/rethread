@@ -13,25 +13,28 @@ import { ScoreList } from "./scoreList";
 import { useWindowHeight } from "../hooks/windowHeight";
 
 
-export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
+export const GameController = ({ laureate, selectHandler, iemoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
     const [answer, setAnswer] = useState<string | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
     const [color, setColor] = useState<string>(categoryColor.physics)
-
+    const [emoji, setEmoji] = useState<IEmoji | null>(null);
     const [show, setShow] = useState(false);
     const [showScoreList, setScoreList] = useState(false);
     const [showEmoji, setShowEmoji] = useState(false);
     const { height } = useWindowHeight();
 
-    const setEmojitoLaureate = (e: IEmoji) => {
-        setEmoji(e);
-        emote();
-    }
+    useEffect(() => {
+        setEmoji(iemoji);
+    }, [iemoji])
+
+    useEffect(() => {
+        socket.emit("emote", emoji?._id);
+        setShowEmoji(true);
+    }, [emoji])
 
     const emote = () => {
         socket.emit("emote", emoji?._id)
-        // window.navigator.vibrate(200);
         setShowEmoji(true);
     }
 
@@ -131,7 +134,7 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     <button onClick={() => { setShow(true) }} className="cursor-pointer text-2xl border-2 border-yellow-300 rounded-full w-9">{emoji?.emoji}</button>
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
-                {show ? <EmojiList handleClick={setEmojitoLaureate} setShow={setShow} emojiList={emojiList} /> : <></>}
+                {show ? <EmojiList handleClick={setEmoji} setShow={setShow} emojiList={emojiList} /> : <></>}
                 {showScoreList ? <ScoreList clickHandler={setScoreList} /> : <></>}
             </div>
         </div >

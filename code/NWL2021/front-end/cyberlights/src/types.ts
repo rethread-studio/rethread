@@ -78,8 +78,7 @@ export interface laureateI {
 export interface gameControllerI {
     laureate: laureateI,
     selectHandler: React.Dispatch<React.SetStateAction<laureateI | null>>,
-    emoji: IEmoji | null,
-    setEmoji: React.Dispatch<React.SetStateAction<IEmoji | null>>;
+    iemoji: IEmoji | null,
     state: any,
     emojiList: IEmoji[] | null
 }

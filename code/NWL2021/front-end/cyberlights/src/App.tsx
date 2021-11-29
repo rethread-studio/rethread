@@ -75,7 +75,7 @@ function App() {
             {laureate ? <Redirect to="/play" /> : loading ? <Loading /> : <SelectCharacter characters={laureates} selectHandler={handleSelect} setCharacterIndex={setCharacterIndex} />}
           </Route>
           <Route path="/play">
-            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} emoji={emoji} setEmoji={setEmoji} state={state} emojiList={emojiList} />}
+            {laureate == null ? <Redirect to="/select" /> : loading ? <Loading /> : <GameController laureate={laureate} selectHandler={setLaureate} iemoji={emoji} state={state} emojiList={emojiList} />}
           </Route>
           <Route path="/about">
             {loading ? <Loading /> : <About />}
