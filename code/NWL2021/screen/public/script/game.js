@@ -151,11 +151,12 @@ socket.on("disconnect", () => {
   game.page = "demo";
 });
 socket.on("hit", ({ userID }) => {
-  console.log("hit", userID)
-  // if (!game.glitch) game.glitch = true;
-  // setTimeout(() => {
-  //   game.glitch = false;
-  // }, 2000);
+  // if (glitchConfig.glitches.length <= glitchConfig.limit) {
+  //   const glitch = newGlitch(userID);
+  //   if (glitch != null) addGlitch(glitch);
+  // } else {
+  //   clearGlitchCanvas();
+  // }
 });
 
 const emojiTimeouts = {};

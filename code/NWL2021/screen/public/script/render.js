@@ -80,3 +80,29 @@ function renderImage(image, x, y, width, height, angle, scale = 1) {
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
+
+function renderGlitchImage(image, x, y, width, height, angle, scale = 1) {
+  if (!image.complete) {
+    image.addEventListener("load", () => {
+      return renderImage(image, x, y, width, height, angle, scale);
+    });
+    return;
+  }
+  const centerX = (width * config.renderScale) / 2.0;
+  const centerY = (height * config.renderScale) / 2.0;
+
+  gctx.translate(x * config.renderScale, y * config.renderScale);
+
+  gctx.rotate(angle);
+  gctx.scale(scale, scale);
+  // gctx.translate(x,y);
+  gctx.drawImage(
+    image,
+    -centerX,
+    -centerY,
+    width * config.renderScale,
+    height * config.renderScale
+  );
+
+  gctx.setTransform(1, 0, 0, 1, 0, 0);
+}
