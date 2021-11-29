@@ -158,13 +158,13 @@ async function renderDemo() {
   if (!game.setup) return;
 
   if (demoMode == "info") {
-    await drawPreviousPosition(dummyGameState.players);
+    // await drawPreviousPosition(dummyGameState.players);
     await drawPlayersShadow(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   } else if (demoMode == "question") {
     renderQuestion(dummyGameState.question);
     renderAnswer(dummyGameState.question);
-    await drawPreviousPosition(dummyGameState.players);
+    // await drawPreviousPosition(dummyGameState.players);
     await drawPlayersShadow(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   } else if (demoMode == "laser") {
