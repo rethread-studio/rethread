@@ -69,59 +69,46 @@ function renderLooseDecoration() {
     lineStep = (lineStep + 1) % total_steps;
   }
   resetCtxSeetings();
-  renderFaces(ctxW, ctxH);
+  renderCrosses(ctxW, ctxH);
 }
 
-function renderFaces(_x, _y) {
+function renderCrosses(_x, _y) {
   ctx.lineCap = "round";
   const padding = 200 * config.renderScale;
   const faceSize = 250;
-  drawSadFace(_x - padding, _y - padding, faceSize, false);
-  drawSadFace(padding, _y - padding, faceSize, true);
+  drawIncorrect(_x - padding, _y - padding, faceSize, false);
+  drawIncorrect(padding, _y - padding, faceSize, true);
   resetCtxSeetings();
 }
 
-function drawSadFace(_x, _y, _size, _mirror = true) {
+function drawIncorrect(_x, _y, _size, _mirror = true) {
   const angle = !game.gameCycle ? 30 * Math.PI / 180 : -30 * Math.PI / 180;
+
   ctx.translate(_x, _y);
   ctx.rotate(_mirror ? angle : angle * -1);
   //background
   resetCtxSeetings();
   ctx.beginPath();
-  ctx.globalAlpha = !game.gameCycle ? 0.7 : 0.9;
-  ctx.fillStyle = "#1B222E";
-  ctx.arc(0, 0, _size + 30, 0, 2 * Math.PI);
-  ctx.fill();
-
-  //face
-  resetCtxSeetings();
-  ctx.strokeStyle = "#00DBFF";
-  ctx.lineWidth = !game.gameCycle ? 10 : 15;
-  ctx.beginPath();
+  // ctx.globalAlpha = !game.gameCycle ? 0.7 : 0.9;
+  ctx.fillStyle = "#EB5A7E";
   ctx.arc(0, 0, _size, 0, 2 * Math.PI);
-  ctx.stroke();
-
-  //eyes
-  const eyePadding = _size / 3;
-  const eyeSize = _size / 10
-  ctx.fillStyle = "#00DBFF";
-  ctx.beginPath();
-  ctx.arc(eyePadding, - eyePadding, eyeSize, 0, 2 * Math.PI);
   ctx.fill();
 
-  ctx.beginPath();
-  ctx.arc(- eyePadding, - eyePadding, eyeSize, 0, 2 * Math.PI);
-  ctx.fill();
-
-  //mouth
-  const mouthPadding = _size / 2;
-  const mouthSize = _size / 4;
+  resetCtxSeetings();
   ctx.lineCap = "round";
-  ctx.scale(1, 0.9);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = !game.gameCycle ? 40 : 35;
   ctx.beginPath();
-  ctx.arc(0, mouthPadding, mouthSize, Math.PI, 0);
+  ctx.moveTo(0, - _size / 2);
+  ctx.lineTo(0, _size / 2);
   ctx.stroke();
-  //tears
+
+  ctx.beginPath();
+  ctx.moveTo(- _size / 2, 0);
+  ctx.lineTo(_size / 2, 0);
+  ctx.stroke();
+
+  resetCtxSeetings();
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
