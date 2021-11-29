@@ -1,13 +1,28 @@
 import React, { memo, useEffect, useState } from 'react';
 import Tile from './tile';
+import { socket } from "../api";
+import { isWall, isAnswer } from "../utils";
+
 interface IGridGame {
     state: any,
-    position: { x: number, y: number },
-    answerPositions: [{ x: number, y: number }] | null
 }
 
-const GridGame = ({ state, position, answerPositions }: React.PropsWithChildren<IGridGame>) => {
+const GridGame = ({ state }: React.PropsWithChildren<IGridGame>) => {
     const [tileSize, setTileSize] = useState(0);
+    const [position, setPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
+    const [answerPositions, setAnswerPositions] = useState<[{ x: number; y: number }] | null>(null);
+
+    useEffect(() => {
+        socket.on("question", (data) => {
+            setAnswerPositions(data.answerPositions);
+        });
+        socket.on("move", setPosition);
+
+        return (() => {
+            socket.off("question");
+            socket.off("move");
+        })
+    }, [setPosition]);
 
     useEffect(() => {
         const root = document?.getElementById("root") || document?.body;
@@ -20,7 +35,7 @@ const GridGame = ({ state, position, answerPositions }: React.PropsWithChildren<
         for (let j = 0; j < state.width; j++) {
             line = <>
                 {line}
-                <Tile tileSize={tileSize} position={position} answerPositions={answerPositions} state={state} i={i} j={j} />
+                <Tile tileSize={tileSize} isActive={(position.y === i && position.x === j)} isWall={isWall(j, i, state)} isAnswer={isAnswer(j, i, answerPositions)} />
             </>
         }
         grid = <>{grid}<div className="grid-line">{line}</div></>

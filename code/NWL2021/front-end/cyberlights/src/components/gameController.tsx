@@ -15,11 +15,8 @@ import { useWindowHeight } from "../hooks/windowHeight";
 
 export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
-    const [position, setPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
     const [answer, setAnswer] = useState<string | null>(null);
-    const [answerPositions, setAnswerPositions] = useState<[{ x: number; y: number }] | null>(null);
     const [question, setQuestion] = useState<string | null>(null);
-    const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
     const [color, setColor] = useState<string>(categoryColor.physics)
 
     const [show, setShow] = useState(false);
@@ -63,18 +60,14 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
         }
         window.addEventListener("keydown", pressHandler);
 
-        socket.on("question", (data) => {
-            setQuestion(data.question);
-            setAnswerPositions(data.answerPositions);
-        });
+        socket.on("question", (data) => { setQuestion(data.question); });
+
         socket.on("enterAnswer", ({ answer }) => {
             setAnswer(answer);
             window.navigator.vibrate(200);
         });
         socket.on("exitAnswer", ({ answer, question }) => { setAnswer(null) });
         socket.on("leave", () => { history.push("/") });
-        // socket.on("score", setScore);
-        socket.on("move", setPosition);
 
         return () => {
             socket.emit("leave");
@@ -83,7 +76,6 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
             socket.off("exitAnswer");
             socket.off("question");
             socket.off("move");
-            // socket.off("score");
             window.removeEventListener("keydown", pressHandler);
         }
     }, [laureate, history, selectHandler]);
@@ -99,15 +91,16 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     }, [showEmoji])
 
     const emitDirection = (direction: controllDirection) => {
-        setCurrentDirection(direction)
+        // setCurrentDirection(direction)
         socket.emit(direction);
     }
+    // transition-all duration-200 transform ${rotation}
 
-    const rotation: string = currentDirection === "up" ? "-translate-y-3" :
-        currentDirection === "down" ? "translate-y-3" :
-            currentDirection === "void" ? "rotate-0" :
-                currentDirection === "left" ? "-rotate-45 -translate-x-8" :
-                    currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
+    // const rotation: string = currentDirection === "up" ? "-translate-y-3" :
+    //     currentDirection === "down" ? "translate-y-3" :
+    //         currentDirection === "void" ? "rotate-0" :
+    //             currentDirection === "left" ? "-rotate-45 -translate-x-8" :
+    //                 currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
 
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
     return (
@@ -121,13 +114,13 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
 
-                <GridGame state={state} position={position} answerPositions={answerPositions} />
+                <GridGame state={state} />
 
                 <div className="relative h-full flex flex-col justify-center content-center">
-                    {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl transition-all duration-200 transform ${rotation}`}>{answer}</div> : <></>}
-                    {showEmoji === true ? <div className={`answer absolute px-6 py-2 top-1/4 left-1/4 z-20 left-0 bg-white text-black text-2xl rounded-xl transition-all duration-200 transform ${rotation}`}> {emoji?.emoji}</div> : <></>}
+                    {answer !== null ? <div className={`answer absolute px-6 py-2 top-1/4 left-2/4 z-20 left-0 bg-white text-black text-xl rounded-xl `}>{answer}</div> : <></>}
+                    {showEmoji === true ? <div className={`answer absolute px-6 py-2 top-1/4 left-1/4 z-20 left-0 bg-white text-black text-2xl rounded-xl `}> {emoji?.emoji}</div> : <></>}
 
-                    <img onClick={emote} className={`cursor-pointer w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
+                    <img onClick={emote} className={`cursor-pointer w-3/5 h-auto mx-auto `} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
                 <ArrowsControl clickHandler={emitDirection} color={color} />
