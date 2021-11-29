@@ -173,3 +173,10 @@ body{
 .grid-position-item.grid-answer {
   background-color: rgba(211, 226, 145, 0.3);
 }
+
+.noSelect{
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
