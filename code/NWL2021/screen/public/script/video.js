@@ -4,7 +4,10 @@ const videoPlayer = document.getElementById("videoPlayer")
 const videoConfig = {
     width: 1920,
     height: 1080,
-    loop: false
+    loop: false,
+    src: {
+        laser: "./vid/laserDemo.mp4"
+    }
 }
 
 function initVid() {

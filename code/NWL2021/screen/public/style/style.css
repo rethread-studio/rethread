@@ -192,6 +192,7 @@ body {
   color: white;
   justify-items: center;
   place-content: center;
+  align-items: center;
   /* flex-wrap: wrap; */
   text-align: center;
   font-size: 1.5rem;
@@ -203,20 +204,30 @@ body {
 }
 
 .demo .info {
-  font-size: 2.25rem;
+  font-size: 3rem;
   line-height:2.4rem;
   font-weight: 100;
 }
 
-.demo .brand {
+.demo .brand{
+  font-weight: 100;
+  font-size: 3.5rem;
+}
+
+.demo .instructions {
   margin-top: 0.5rem;
   margin-bottom: 1.25rem;
   font-weight: 100;
-  font-size: 6rem;
+  font-size: 8rem;
   line-height: 1;
 }
 .logos {
-  margin-top: 0.625rem;
+  display: flex;
+  flex-direction: row;
+  color: white;
+  justify-items: center;
+  place-content: center;
+  align-items: center;
 }
 .logos img {
   max-height: 6.25rem;
@@ -225,9 +236,12 @@ body {
 .logos :nth-child(2) {
   margin-left: 1.8rem;
 }
+.logos :nth-child(3) {
+  margin-left: 1.8rem;
+}
 
 .himg {
-  margin-top: 1.8rem;
+
   max-width: 25rem;
   height: auto;
 }
@@ -267,6 +281,11 @@ body {
 }
 
 #videoPlayer{
+  position:absolute;
+  top:0;
+  left:0;
+}
+#glitch{
   position:absolute;
   top:0;
   left:0;

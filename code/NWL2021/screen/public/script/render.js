@@ -16,42 +16,6 @@ function clearCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function glitch() {
-
-  const ctxW = game.setup.unitSize * config.renderScale * game.setup.width;
-  const ctxH = game.setup.unitSize * config.renderScale * game.setup.height;
-
-  ctx.fillStyle = "#1a191c";
-  ctx.fillRect(0, 0, ctxW, ctxH);
-
-
-  for (let i = 0; i < 1000; i++) {
-    ctx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.01})`;
-    ctx.fillRect(
-      Math.floor(Math.random() * ctxW),
-      Math.floor(Math.random() * ctxH),
-      Math.floor(Math.random() * 30) + 1,
-      Math.floor(Math.random() * 30) + 1
-    );
-
-    ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.1})`;
-    ctx.fillRect(
-      Math.floor(Math.random() * ctxW),
-      Math.floor(Math.random() * ctxH),
-      Math.floor(Math.random() * 25) + 1,
-      Math.floor(Math.random() * 25) + 1
-    );
-  }
-
-  ctx.fillStyle = colors[Math.floor(Math.random() * 40)];
-  ctx.fillRect(
-    Math.random() * ctxW,
-    Math.random() * ctxH,
-    Math.random() * ctxW,
-    Math.random() * ctxH
-  );
-  ctx.setTransform(1, 0, 0, .8, .2, 0);
-}
 
 function initRender() {
   const width = game.setup.unitSize * game.setup.width;

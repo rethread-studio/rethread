@@ -22,7 +22,6 @@ class Game {
   _laureates = {};
   endDate = null;
   gameCycle = true;
-  glitch = false;
   emojis = {};
 
   _updateEvent = new subEvents.SubEvent();
@@ -126,17 +125,10 @@ class Game {
     this.config = await getConfig();
     this.setup = setup;
     initRender();
+    initGlitch();
     initDemo();
     initVid();
     this.page = "play";
-  }
-
-  get glitch() {
-    return this.glitch;
-  }
-
-  set glitch(_glitch) {
-    this.glitch = _glitch;
   }
 }
 
@@ -159,11 +151,11 @@ socket.on("disconnect", () => {
   game.page = "demo";
 });
 socket.on("hit", ({ userID }) => {
-  // console.log("hit", userID, game.glitch)
-  if (!game.glitch) game.glitch = true;
-  setTimeout(() => {
-    game.glitch = false;
-  }, 2000);
+  console.log("hit", userID)
+  // if (!game.glitch) game.glitch = true;
+  // setTimeout(() => {
+  //   game.glitch = false;
+  // }, 2000);
 });
 
 const emojiTimeouts = {};
