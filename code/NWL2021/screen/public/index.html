@@ -13,45 +13,51 @@
 
 <body>
   <div class="board">
+    <video id="videoPlayer" width="320" height="240" webkit-playsinline="true" playsinline="true" loop muted>
+      <source src="./vid/laserDemo.mp4" type="video/mp4">
+    </video>
     <canvas id="game"></canvas>
+    <canvas id="glitch"></canvas>
     <div class="question text-neon" style="display: none"></div>
-    <div class="answer answer1 text-neon-blue" style="display: none"></div>
-    <div class="answer answer2 text-neon-blue" style="display: none"></div>
+    <div class="answer answer1 " style="display: none"></div>
+    <div class="answer answer2 " style="display: none"></div>
     <div class="demo">
+      <div class="brand text-neon-blue">cyberglow</div>
       <div class="tittle">
-        <div class="brand text-neon-yellow">cyber|glow</div>
-      </div>
-      <div class="info">
-        <p>Learn about Nobel laureates and admire software</p>
-        <p>To join, scan the QR code behind you to play</p>
-      </div>
-      <div class="logos">
-        <div>
-          <img src="img/logo_nobel.png" alt="Nobel foundation" />
-          <img src="img/logo_kth.png" alt="KTH" />
+        <div class="instructions text-neon-yellow">play now <br> > scan the QR code < </div>
         </div>
-        <img class="himg" src="img/logo_wasp.png" alt="Wasp" />
+        <div class="info">
+          <p>To join, scan the QR code behind you to play</p>
+          <!-- <p>Learn about Nobel laureates and admire software</p> -->
+        </div>
+        <div>
+          <div class="logos">
+            <img src="img/logo_nobel.png" alt="Nobel foundation" />
+            <img class="himg" src="img/logo_wasp.png" alt="Wasp" />
+            <img src="img/logo_kth.png" alt="KTH" />
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="result">
-      <p class="q text-neon">How many nobels did Alan Turing win?</p>
-      <p class="a green-neon">None</p>
-      <div class="players">
-        <div class="group correct"></div>
-        <div class="group wrong"></div>
+      <div class="result">
+        <p class="q text-neon">How many nobels did Alan Turing win?</p>
+        <p class="a green-neon">None</p>
+        <div class="players">
+
+        </div>
       </div>
+      <div class="timer "></div>
     </div>
-    <div class="timer "></div>
-  </div>
 </body>
 <script src="/script/external/socket.io.min.js"></script>
 <script src="/script/external/sub-events.js"></script>
 <script src="script/api.js"></script>
 <script src="script/game.js"></script>
+<script src="script/video.js"></script>
 <script src="script/render.js"></script>
 <script src="script/pages/demo.js"></script>
 <script src="script/pages/play.js"></script>
 <script src="script/pages/results.js"></script>
+<script src="script/pages/glitch.js"></script>
 <script src="script/index.js"></script>
 
 </html>

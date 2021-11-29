@@ -12,6 +12,7 @@ import { InfoCard } from "./infoCard";
 import { selectCharacterProps, prize } from "../types";
 import { categoryColor } from "../utils";
 import Gallery from "./gallery";
+import { useWindowHeight } from "../hooks/windowHeight";
 
 
 
@@ -20,6 +21,7 @@ export const SelectCharacter = ({ characters, selectHandler, setCharacterIndex }
     const [viewBio, setViewBio] = useState<boolean>(false);
     const [characterPrizes, setCharacterPrizes] = useState<prize[]>([])
     const [color, selectColor] = useState<string>(categoryColor.physics)
+    const { height } = useWindowHeight();
 
     const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' }
     const chevronLookRight: IconLookup = { prefix: 'fas', iconName: 'chevron-right' }
@@ -30,7 +32,7 @@ export const SelectCharacter = ({ characters, selectHandler, setCharacterIndex }
 
 
     return (
-        <div className="h-screen w-full p-4">
+        <div style={{ height: `${height}px` }} className="w-full p-4">
             <div style={{
                 color: color,
                 boxShadow: `0 0 .3rem #fff,
@@ -43,7 +45,7 @@ export const SelectCharacter = ({ characters, selectHandler, setCharacterIndex }
 
                 <div>
                     <div className={`flex flex-row h-8 justify-between content-center transition-all duration-200 text-gray-400 px-3 pt-2 pb-1.5 text-sm font-light`}>
-                        <Link to={"/home"} className="text-gray-400  h-8 w-4/8 ">
+                        <Link to={"/home"} className="text-yellow-300  h-8 w-4/8 z-40">
                             <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Home
                         </Link>
                         <div>

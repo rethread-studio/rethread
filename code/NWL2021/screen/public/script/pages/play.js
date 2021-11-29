@@ -3,7 +3,7 @@ async function drawPlayersShadow(players) {
   const height = game.setup.unitSize;
 
   const boardState = game.gameCycle ? 1 : -1;
-
+  ctx.save();
   // draw players
   for (const player of players) {
     if (!player.laureate) {
@@ -24,13 +24,14 @@ async function drawPlayersShadow(players) {
       const y = positions[i].y * game.setup.unitSize + game.setup.unitSize / 2;
       const side = i % 2 == 0 ? 1 : -1;
       const angle = (Math.PI / 4) * side * boardState;
+      ctx.globalCompositeOperation = 'lighter';
       renderImage(imageCache[imagePath], x, y, width, height, angle, 0.8);
     }
   }
+  ctx.restore();
 }
 
 async function drawPreviousPosition(players) {
-  // ctx.shadowBlur = !game.gameCycle ? 5 : 10;
   for (const player of players) {
     if (!player.laureate) {
       const laureate = await game.getLaureate(player.laureateID);
@@ -43,30 +44,29 @@ async function drawPreviousPosition(players) {
     //DRAW LINE PATH
     ctx.beginPath();
     ctx.lineWidth = game.gameCycle ? 2 : 4;
-    ctx.strokeStyle = player.laureate?.color || "white";
+    ctx.strokeStyle = "#121826";
     ctx.moveTo(
-      positions[0].x * renderScale * game.setup.unitSize +
-      (game.setup.unitSize * renderScale) / 2,
-      positions[0].y * renderScale * game.setup.unitSize +
-      (game.setup.unitSize * renderScale) / 2
+      positions[0].x * config.renderScale * game.setup.unitSize +
+      (game.setup.unitSize * config.renderScale) / 2,
+      positions[0].y * config.renderScale * game.setup.unitSize +
+      (game.setup.unitSize * config.renderScale) / 2
     );
     for (let i = 1; i < positions.length; i++) {
       ctx.lineTo(
-        positions[i].x * renderScale * game.setup.unitSize +
-        (game.setup.unitSize * renderScale) / 2,
-        positions[i].y * renderScale * game.setup.unitSize +
-        (game.setup.unitSize * renderScale) / 2
+        positions[i].x * config.renderScale * game.setup.unitSize +
+        (game.setup.unitSize * config.renderScale) / 2,
+        positions[i].y * config.renderScale * game.setup.unitSize +
+        (game.setup.unitSize * config.renderScale) / 2
       );
     }
     ctx.lineTo(
-      player.x * renderScale * game.setup.unitSize +
-      (game.setup.unitSize * renderScale) / 2,
-      player.y * renderScale * game.setup.unitSize +
-      (game.setup.unitSize * renderScale) / 2
+      player.x * config.renderScale * game.setup.unitSize +
+      (game.setup.unitSize * config.renderScale) / 2,
+      player.y * config.renderScale * game.setup.unitSize +
+      (game.setup.unitSize * config.renderScale) / 2
     );
     ctx.stroke();
   }
-  ctx.shadowBlur = 0;
 }
 
 async function renderPlayers(players) {
@@ -133,14 +133,23 @@ function drawEmoji(player) {
   const emoji = game.emojis[player.socketID];
   const angle = getAngle(player.status);
   const x =
-    player.x * renderScale * game.setup.unitSize +
-    (game.setup.unitSize * renderScale) / 2;
+    player.x * config.renderScale * game.setup.unitSize +
+    (game.setup.unitSize * config.renderScale) / 2;
   const y =
-    player.y * renderScale * game.setup.unitSize +
-    (game.setup.unitSize * renderScale) / 2;
+    player.y * config.renderScale * game.setup.unitSize +
+    (game.setup.unitSize * config.renderScale) / 2;
+
+
   ctx.translate(x, y);
   ctx.rotate(angle);
-  ctx.font = `${!game.gameCycle ? "70px" : "90px"} serif`;
+  //background
+  ctx.fillStyle = "white";
+  ctx.beginPath();
+  ctx.arc(0, 0, config.renderScale * game.setup.unitSize / 2, 0, 2 * Math.PI
+  );
+  ctx.fill();
+  //emoji
+  ctx.font = `${!game.gameCycle ? "12.5rem" : "9.375rem"} serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(emoji, 0, 0);
@@ -149,95 +158,63 @@ function drawEmoji(player) {
 
 
 function renderQuestion(question) {
-  const size = 2.5;
+  const size = config.question.linseSize;
 
   const questionPosition = game.setup.questionPosition;
-  const unitSize = game.setup.unitSize * renderScale;
+  const unitSize = game.setup.unitSize * config.renderScale;
 
   for (let i = 0; i < questionPosition.width + 1; i++) {
     for (let j = 0; j < questionPosition.height + 1; j++) {
+      const sizeMod = game.setup.unitSize / 2 + Math.abs(Math.sin((i + (j * 100) + playConfig.questionAnimation) * playConfig.questionSpeed) * game.setup.unitSize);
+
       ctx.beginPath();
       ctx.strokeStyle = "white";
-      ctx.lineWidth = 4;
+      ctx.lineWidth = config.question.lineWidth;
       if (i % 2 == 0) {
-        if (game.gameCycle) {
-          const x = questionPosition.x * unitSize + unitSize * i + unitSize / 2;
-          ctx.moveTo(
-            x,
-            questionPosition.y * unitSize + unitSize * j + unitSize / size
-          );
-          ctx.lineTo(
-            x,
-            questionPosition.y * unitSize +
-            unitSize * j +
-            unitSize -
-            unitSize / size
-          );
-        } else {
-          ctx.moveTo(
-            questionPosition.x * unitSize + unitSize * i + unitSize / size,
-            questionPosition.y * unitSize + unitSize * j + unitSize / 2
-          );
-          ctx.lineTo(
-            questionPosition.x * unitSize +
-            unitSize * i +
-            unitSize -
-            unitSize / size,
-            questionPosition.y * unitSize + unitSize * j + unitSize / 2
-          );
-        }
+        const x = questionPosition.x * unitSize + unitSize * i + unitSize / 2;
+        ctx.moveTo(
+          x,
+          questionPosition.y * unitSize + unitSize * j + sizeMod
+        );
+        ctx.lineTo(
+          x,
+          questionPosition.y * unitSize +
+          unitSize * j +
+          unitSize
+        );
       } else {
-        if (game.gameCycle) {
-          ctx.moveTo(
-            questionPosition.x * unitSize + unitSize * i + unitSize / size,
-            questionPosition.y * unitSize + unitSize * j + unitSize / 2
-          );
-          ctx.lineTo(
-            questionPosition.x * unitSize +
-            unitSize * i +
-            unitSize -
-            unitSize / size,
-            questionPosition.y * unitSize + unitSize * j + unitSize / 2
-          );
-        } else {
-          ctx.moveTo(
-            questionPosition.x * unitSize + unitSize * i + unitSize / 2,
-            questionPosition.y * unitSize + unitSize * j + unitSize / size
-          );
-          ctx.lineTo(
-            questionPosition.x * unitSize + unitSize * i + unitSize / 2,
-            questionPosition.y * unitSize +
-            unitSize * j +
-            unitSize -
-            unitSize / size
-          );
-        }
+        ctx.moveTo(
+          questionPosition.x * unitSize + unitSize * i + unitSize / size + sizeMod,
+          questionPosition.y * unitSize + unitSize * j + unitSize / 2
+        );
+        ctx.lineTo(
+          questionPosition.x * unitSize +
+          unitSize * i +
+          unitSize -
+          unitSize / size - sizeMod,
+          questionPosition.y * unitSize + unitSize * j + unitSize / 2
+        );
       }
 
       ctx.stroke();
     }
   }
+  playConfig.questionAnimation++;
 }
 
 function renderAnswer(question) {
+
   for (let k = 0; k < question.answers.length; k++) {
     const position = game.gameState.answerPositions[k];
 
-    const size =
-      k % 2 == 0
-        ? game.gameCycle
-          ? config.dotSize.small
-          : config.dotSize.big
-        : game.gameCycle
-          ? config.dotSize.big
-          : config.dotSize.small;
-
-    const unitSize = game.setup.unitSize * renderScale;
+    const unitSize = game.setup.unitSize * config.renderScale;
     //draw the mid point
     for (let i = 0; i < position.width + 1; i++) {
       for (let j = 0; j < position.height + 1; j++) {
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "#c4ffff";
         ctx.beginPath();
+
+        const size = config.dotSize.small / 2 + Math.abs(Math.sin((i + (j * 100) + playConfig.answerAnimation) * playConfig.answerSpeed) * config.dotSize.big);
         ctx.arc(
           position.x * unitSize + unitSize * i + unitSize / 2,
           position.y * unitSize + unitSize * j + unitSize / 2,
@@ -249,6 +226,8 @@ function renderAnswer(question) {
       }
     }
   }
+
+  playConfig.answerAnimation++;
 }
 
 function updateQuestion(question) {
@@ -260,7 +239,7 @@ function updateQuestion(question) {
 
   updatePositionElement(questionE, game.setup.questionPosition);
   questionE.style.fontSize =
-    question.text.length < 10 ? config.answerSize.big : config.answerSize.small;
+    question.text.length < 10 ? config.questionSize.big : config.questionSize.small;
 
   for (let i = 0; i < question.answers.length; i++) {
     const answer = question.answers[i];
@@ -277,47 +256,18 @@ function updateQuestion(question) {
 
 const playConfig = {
   total_steps: 4,
-  step: 0
+  step: 0,
+  answerAnimation: 0,
+  questionAnimation: 0,
+  answerSpeed: 0.03,
+  questionSpeed: 0.03
 }
-
-function renderQuestionDecoration() {
-  playConfig.step = (playConfig.step + 1) % playConfig.total_steps;
-  const ctxW = game.setup.unitSize * renderScale * game.setup.width;
-  const ctxH = game.setup.unitSize * renderScale * game.setup.height;
-  const nLines = 8;
-  const lineDist = (ctxW / 5) / nLines;
-  const stepPos = ctxW / playConfig.total_steps * playConfig.step;
-  drawLineGroup(ctxW / 2, ctxW, ctxH, nLines, lineDist, stepPos, true);
-  drawLineGroup(ctxW / 2, ctxW, ctxH, nLines, lineDist, stepPos, false);
-
-}
-
-function drawLineGroup(_x, _width, _height, _nLines, _lineDist, _stepPos, _mirror = true) {
-
-  ctx.shadowBlur = !game.gameCycle ? 10 : 15;
-  ctx.shadowColor = "white";
-  ctx.globalAlpha = !game.gameCycle ? 0.5 : 0.7;
-  ctx.setLineDash([5, 20]);
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = !game.gameCycle ? 12 : 18;
-  const dir = _mirror ? 1 : -1;
-  for (let i = 0; i < _nLines; i++) {
-    ctx.beginPath();
-    const pos = (_stepPos + (i * _lineDist))
-    ctx.moveTo(_x + pos * dir, 0);
-    ctx.lineTo(_x + pos * dir, _height);
-    ctx.stroke();
-  }
-  resetCtxSeetings();
-}
-
 
 async function renderGame() {
   renderAnswer(game.question);
   renderQuestion(game.question);
 
-  await drawPreviousPosition(game.players || []);
+  // await drawPreviousPosition(game.players || []);
   await drawPlayersShadow(game.players || []);
   await renderPlayers(game.players || []);
 }
@@ -333,10 +283,14 @@ function setTimerClass(time) {
   const element = document.getElementsByClassName("timer")[0];
   if (time <= 10) {
     element.classList.add("text-neon-pink");
+    playConfig.answerSpeed = 0.09;
   } else if (time <= 20) {
     element.classList.add("text-neon-yellow");
+    playConfig.answerSpeed = 0.03;
+
   } else {
     element.classList.add("text-neon-green");
+    playConfig.answerSpeed = 0.02;
   }
 }
 

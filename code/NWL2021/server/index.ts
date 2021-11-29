@@ -8,6 +8,7 @@ import * as redis from "redis";
 import session from "express-session";
 import cors from "cors";
 import sharedSession from "express-socket.io-session";
+import basicAuth from "express-basic-auth";
 import connectRedis from "connect-redis";
 import { Server } from "socket.io";
 
@@ -82,19 +83,8 @@ export default async function start() {
   app.use("/api/users", cors(), routes.user);
 
   app.get("/qrcode", (req, res) => {
-    res.redirect('https://cyberglow.rethread.art/');
+    res.redirect("https://cyberglow.rethread.art/");
   });
-
-  app.use(
-    "/admin/",
-    express.static(path.join(__dirname, "..", "front-end", "dashboard"))
-  );
-  app.use(
-    "/admin/*",
-    express.static(
-      path.join(__dirname, "..", "front-end", "dashboard", "index.html")
-    )
-  );
 
   app.use(
     "/img/laureates/",
@@ -123,7 +113,28 @@ export default async function start() {
   await engine.init();
   const gameSocket = new GameSocket(io, engine, monitor);
 
-  app.use("/api/admin", routes.admin(engine, io));
+  const auth = basicAuth({
+    authorizer: (user: string, password: string) => {
+      if (!config.ADMIN_PASSWORD) return true;
+      return basicAuth.safeCompare(password, config.ADMIN_PASSWORD);
+    },
+    challenge: true,
+  });
+
+  app.use(
+    "/admin/",
+    auth,
+    express.static(path.join(__dirname, "..", "front-end", "dashboard"))
+  );
+  app.use(
+    "/admin/*",
+    auth,
+    express.static(
+      path.join(__dirname, "..", "front-end", "dashboard", "index.html")
+    )
+  );
+
+  app.use("/api/admin", auth, routes.admin(engine, io));
 
   app.get("*", (req, res) =>
     res.sendFile(

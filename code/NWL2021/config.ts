@@ -1,6 +1,5 @@
-import { resolve } from "path";
-
 interface Config {
+  ADMIN_PASSWORD?: string;
   MOVE_INTERVAL: number;
   DB_HOSTNAME: string;
   DB_PASSWORD: string;

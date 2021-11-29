@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
-import {
-    IconLookup,
-    IconDefinition,
-    findIconDefinition
-} from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ArrowBtn } from "./arrowBtn";
+
+import ControllMenu from './controllMenu';
+import ArrowsControl from './arrowsControl';
 import { socket } from "../api";
 import { gameControllerI, controllDirection, IEmoji } from "../types";
 import { categoryColor } from "../utils";
 import EmojiList from "./emojiList";
-import { GridGame } from "./gridGame";
+import GridGame from "./gridGame";
 import { ScoreList } from "./scoreList";
-import { Score } from "./score";
+import { useWindowHeight } from "../hooks/windowHeight";
+
 
 export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
@@ -24,11 +21,11 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const [question, setQuestion] = useState<string | null>(null);
     const [currentDirection, setCurrentDirection] = useState<controllDirection>("void")
     const [color, setColor] = useState<string>(categoryColor.physics)
-    const chevronLookLeft: IconLookup = { prefix: 'fas', iconName: 'chevron-left' };
-    const chevronLeft: IconDefinition = findIconDefinition(chevronLookLeft);
+
     const [show, setShow] = useState(false);
     const [showScoreList, setScoreList] = useState(false);
     const [showEmoji, setShowEmoji] = useState(false);
+    const { height } = useWindowHeight();
 
     const setEmojitoLaureate = (e: IEmoji) => {
         setEmoji(e);
@@ -115,16 +112,11 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
     return (
 
-        <div className="h-full w-full p-4 ">
+        <div style={{ height: `${height}px` }} className="w-full p-4 ">
             <div className="h-full border-2 border-gray-600 relative flex flex-col justify-between overflow-hidden">
 
-                <div className="flex flex-row justify-between text-sm content-center pt-2">
-                    <Link to={"/select"} onClick={onClickBackButton} className="text-gray-400  h-8 w-4/8 p-2 ">
-                        <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
-                    </Link>
-                    <Score />
-                    <button onClick={() => { setScoreList(true) }} className="text-sm text-gray-400  mr-2" >View Top 2 </button>
-                </div>
+                <ControllMenu clickHandler={onClickBackButton} btnClick={setScoreList} />
+
                 <div className={`w-full text-neon ${question !== null && question?.length > 60 ? "text-md" : "text-2xl"} uppercase text-center pt-2`}>
                     {question !== null ? <span>{question}</span> : <></>}
                 </div>
@@ -138,18 +130,12 @@ export const GameController = ({ laureate, selectHandler, emoji, setEmoji, state
                     <img onClick={emote} className={`cursor-pointer w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
-                <div className="flex w-full flex-col justify-center items-center space-y-2 place-self-end">
-                    <ArrowBtn clickEvent={emitDirection} direction="up" color={color} />
-                    <div className="flex flex-row space-x-2">
-                        <ArrowBtn clickEvent={emitDirection} direction="left" color={color} />
-                        <ArrowBtn clickEvent={emitDirection} direction="down" color={color} />
-                        <ArrowBtn clickEvent={emitDirection} direction="right" color={color} />
-                    </div>
-                </div>
+                <ArrowsControl clickHandler={emitDirection} color={color} />
+
 
                 <div className="flex flex-row w-full justify-between text-gray-400 place-self-end p-4">
                     <span className="text-xs ">Press the arrows <br /> to move </span>
-                    <button onClick={() => { setShow(true) }} className="cursor-pointer text-2xl border-2 border-gray-500 rounded-full w-9">{emoji?.emoji}</button>
+                    <button onClick={() => { setShow(true) }} className="cursor-pointer text-2xl border-2 border-yellow-300 rounded-full w-9">{emoji?.emoji}</button>
                     <span className="text-xs text-right  place-self-end ">Tap the character  <br />to emote</span>
                 </div>
                 {show ? <EmojiList handleClick={setEmojitoLaureate} setShow={setShow} emojiList={emojiList} /> : <></>}

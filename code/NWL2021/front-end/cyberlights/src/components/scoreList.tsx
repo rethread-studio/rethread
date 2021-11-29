@@ -14,7 +14,7 @@ export const ScoreList = ({ clickHandler }: React.PropsWithChildren<IScoreInterf
     const [score, setScore] = useState<IUserScore[]>([]);
     const [userEvents, setUserEvents] = useState<any>({})
     const [userData, setUserData] = useState({});
-
+    const [userScore, setUserScore] = useState<number>(0)
 
     useEffect(() => {
         getScore()
@@ -28,6 +28,7 @@ export const ScoreList = ({ clickHandler }: React.PropsWithChildren<IScoreInterf
         getPersonalScore()
             .then((myScore: IUserPersonalScore) => {
                 setUserData(myScore);
+                setUserScore(myScore.score)
                 setUserEvents(myScore.events)
             }, error => {
                 console.log(error);
@@ -39,13 +40,12 @@ export const ScoreList = ({ clickHandler }: React.PropsWithChildren<IScoreInterf
     const getUserEvents = () => {
         let e = [];
         for (const key of Object.keys(userEvents)) {
-            // e.push(`${key}:${userEvents[key]}`);
-            e.push(<div className="" >
-                <div className="flex flex-row justify-between px-4 lowercase text-neon-yellow text-sm">
+            e.push(
+                <div key={uuidv4()} className="flex flex-row justify-between px-4 lowercase text-neon-yellow text-sm">
                     <div>{key}</div>
                     <div>{userEvents[key]}</div>
                 </div>
-            </div>);
+            );
         }
         return e;
     }
@@ -61,15 +61,15 @@ export const ScoreList = ({ clickHandler }: React.PropsWithChildren<IScoreInterf
     return <div className="h-full w-full p-4 fixed top-0 left-0 bg-gray-900 z-40">
         <div className="h-full border-2 border-gray-600 relative flex flex-col justify-start overflow-hidden">
             <div className="flex flex-row justify-end text-sm content-center pt-2">
-                <button onClick={() => { clickHandler(false) }} className="text-sm text-gray-400 border-2 border-gray-500 rounded-full w-7 h-7 mr-2" >X</button>
+                <button onClick={() => { clickHandler(false) }} className="text-sm text-yellow-300 border-2 border-yellow-300 rounded-full w-7 h-7 mr-2" >X</button>
             </div>
 
-            <div className={`w-full text-neon "text-2xl" uppercase text-center pt-2 mb-2`}>Your score</div>
+            <div className={`w-full text-neon "text-2xl" normalcase text-center pt-2 mb-2`}>Your score: {userScore}</div>
             <div className="text-neon-yellow px-4 text-3xl mb-2">
                 {getUserEvents()}
             </div>
 
-            <div className={`w-full text-neon "text-2xl" uppercase text-center pt-2 mb-4`}>
+            <div className={`w-full text-neon "text-2xl" normalcase text-center pt-2 mb-4`}>
                 {`Top ${score.length} players`}
             </div>
             {score.map((s: IUserScore, i: number) => <ScoreElement key={uuidv4()} score={s.score} events={s.events} pos={i + 1} />)}

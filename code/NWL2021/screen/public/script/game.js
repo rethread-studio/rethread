@@ -1,13 +1,17 @@
 const socket = io("/screen");
 
 const config = {
-  dotSize: { small: 4, big: 8 },
-  answerSize: { small: "60px", big: "100px" },
+  dotSize: { small: 10, big: 25 },
+  answerSize: { small: "4.5rem", big: "6.2rem" },
+  questionSize: { small: "4.5rem", big: "6.2rem" },
+  resultLineSize: { small: 6, big: 8 },
+  question: { lineWidth: 10, linseSize: 3 },
   questionTime: 4,
-  dialogueImagePath: "/img/dialogue.png",
   emojiDuration: 2,
-  max_group: 12,
+  dialogueImagePath: "/img/dialogue.png",
+  max_group: 9,
   demoTimer: 15000,
+  renderScale: 2,
 };
 
 class Game {
@@ -18,7 +22,6 @@ class Game {
   _laureates = {};
   endDate = null;
   gameCycle = true;
-  glitch = false;
   emojis = {};
 
   _updateEvent = new subEvents.SubEvent();
@@ -122,16 +125,10 @@ class Game {
     this.config = await getConfig();
     this.setup = setup;
     initRender();
+    initGlitch();
     initDemo();
+    initVid();
     this.page = "play";
-  }
-
-  get glitch() {
-    return this.glitch;
-  }
-
-  set glitch(_glitch) {
-    this.glitch = _glitch;
   }
 }
 
@@ -154,11 +151,11 @@ socket.on("disconnect", () => {
   game.page = "demo";
 });
 socket.on("hit", ({ userID }) => {
-  // console.log("hit", userID, game.glitch)
-  if (!game.glitch) game.glitch = true;
-  setTimeout(() => {
-    game.glitch = false;
-  }, 2000);
+  console.log("hit", userID)
+  // if (!game.glitch) game.glitch = true;
+  // setTimeout(() => {
+  //   game.glitch = false;
+  // }, 2000);
 });
 
 const emojiTimeouts = {};

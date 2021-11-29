@@ -13,7 +13,7 @@ export const About = () => {
 
     return <div className="flex flex-col w-screen place-content-center pb-6">
         <div className="flex flex-row justify-between text-sm content-center pt-2">
-            <Link to={"/home"} className="text-gray-400  h-8 w-4/8 p-2 ">
+            <Link to={"/home"} className="text-yellow-300  h-8 w-4/8 p-2 ">
                 <FontAwesomeIcon className="yellow-300 text-xs" icon={chevronLeft} /> Back
             </Link>
         </div>
@@ -65,7 +65,7 @@ export const About = () => {
                 <source type="video/mp4" src="/video/cyberglow_ftrace1.mp4" />
             </video> <br />
             <p>The bottom left position shows the internal low level system activity of the computer creating the visuals for the game and for the laser: errors reported, requests to the operating system to access the hardware and mechanisms to harness inputs to create truly random cryptographically secure numbers.</p>
-            
+
             <br />
             <h2 className="text-yellow-300 font-thin text-2xl text-neon-yellow">re|thread</h2>
             <p>cyber|glow was designed and developed by the <a href="https://rethread.art/#" target="_blank" rel='noreferrer' className="text-neon-yellow">rethread.art</a> collective: Erik Natanael Gustafsson, Thomas Durieux, Jonathan Ramirez Mendoza, and Benoit Baudry. For cyber|glow, re|thread collective features Ambar Troya, graphic designer and game artist.</p>

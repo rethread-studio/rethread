@@ -1,13 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import { isWall, isAnswer } from "../utils";
-
+import React, { memo, useEffect, useState } from 'react';
+import Tile from './tile';
 interface IGridGame {
     state: any,
     position: { x: number, y: number },
     answerPositions: [{ x: number, y: number }] | null
 }
 
-export const GridGame = ({ state, position, answerPositions }: React.PropsWithChildren<IGridGame>) => {
+const GridGame = ({ state, position, answerPositions }: React.PropsWithChildren<IGridGame>) => {
     const [tileSize, setTileSize] = useState(0);
 
     useEffect(() => {
@@ -21,7 +20,7 @@ export const GridGame = ({ state, position, answerPositions }: React.PropsWithCh
         for (let j = 0; j < state.width; j++) {
             line = <>
                 {line}
-                <div style={{ width: `${tileSize}px`, height: `${tileSize}px` }} className={"grid-position-item " + ((position.y === i && position.x === j) ? "active " : " ") + (isWall(j, i, state) ? "wall " : " ") + (isAnswer(j, i, answerPositions) ? "grid-answer " : " ")}></div>
+                <Tile tileSize={tileSize} position={position} answerPositions={answerPositions} state={state} i={i} j={j} />
             </>
         }
         grid = <>{grid}<div className="grid-line">{line}</div></>
@@ -31,3 +30,5 @@ export const GridGame = ({ state, position, answerPositions }: React.PropsWithCh
         {grid}
     </div>
 }
+
+export default memo(GridGame)

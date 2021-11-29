@@ -25,6 +25,11 @@ function showTimer(_show) {
   results.style.display = _show ? null : "none";
 }
 
+function showVideo(_show) {
+  const video = document.getElementById("videoPlayer");
+  video.style.display = _show ? null : "none";
+}
+
 function hideAll() {
   clearCanvas();
   showAnswers(false);
@@ -32,6 +37,8 @@ function hideAll() {
   showQuestion(false);
   showDemo(false);
   showTimer(false);
+  showVideo(false);
+  videoPlay(false);
 }
 
 game.onQuestionChange((question) => {

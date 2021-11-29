@@ -46,7 +46,22 @@ const dummyGameState = {
       },
     ],
   },
+  questionLureates: {
+    text: "Learn about the Nobel Laureates",
+    answers: [
+      {
+        isCorrect: true,
+        text: "yes",
+      },
+      {
+        isCorrect: false,
+        text: "no",
+      },
+    ],
+  },
 };
+
+
 
 async function getDemoLaureates() {
   demoLaureates = await getLaureates();
@@ -123,7 +138,8 @@ function changeOrientation(player) {
           ? "right"
           : "left";
 }
-function randomPosition() {
+function restorePosition() {
+  if (game.setup == undefined) return;
   dummyPlayer1.x = 0;
   dummyPlayer1.y = 0;
   dummyPlayer1.previousPositions = [];
@@ -142,22 +158,68 @@ async function renderDemo() {
   if (!game.setup) return;
 
   if (demoMode == "info") {
-    await drawPreviousPosition(dummyGameState.players);
+    // await drawPreviousPosition(dummyGameState.players);
     await drawPlayersShadow(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   } else if (demoMode == "question") {
     renderQuestion(dummyGameState.question);
     renderAnswer(dummyGameState.question);
-    await drawPreviousPosition(dummyGameState.players);
+    // await drawPreviousPosition(dummyGameState.players);
     await drawPlayersShadow(dummyGameState.players);
     await renderPlayers(dummyGameState.players);
   } else if (demoMode == "laser") {
     renderQuestion(dummyGameState.questionLaser);
     drawLaserBg();
-    await drawPreviousPosition(dummyGameState.players);
-    await drawPlayersShadow(dummyGameState.players);
-    await renderPlayers(dummyGameState.players);
+    // await drawPreviousPosition(dummyGameState.players);
+    // await drawPlayersShadow(dummyGameState.players);
+    // await renderPlayers(dummyGameState.players);
+  } else if (demoMode == "laureates") {
+    renderQuestion(dummyGameState.questionLureates);
+    await renderAllLaureates(demoLaureates);
   }
+}
+
+async function renderAllLaureates(players) {
+  const width = game.setup.unitSize + game.setup.unitSize / 2;
+  const height = width;
+  const scale = 1;
+  const gameW = game.setup.unitSize * game.setup.width;
+
+  let groupW = players.length >= config.max_group ? width * config.max_group : width * players.length;
+  let iniX = gameW / 2 - groupW / 2 + width / 2;
+  let yPos = 0;
+  const boardState = game.gameCycle ? 1 : -1;
+
+  // draw players
+  for (let i = 0; i < players.length; i++) {
+    const laureate = players[i];
+    const imagePath = `/img/laureates/${laureate.imagePath}`;
+
+    //calculate the initial position in X
+    if (i % config.max_group == 0 && i != 0) {
+      groupW = players.length - i >= config.max_group ? width * config.max_group : width * (players.length - i);
+      iniX = (gameW / 2) - (groupW / 2) + width / 2;
+    }
+
+    if (!imageCache[imagePath]) {
+      imageCache[imagePath] = new Image(width, height);
+      imageCache[imagePath].src = imagePath;
+    }
+    const side = i % 2 == 0 ? 1 : -1;
+    const angle = (Math.PI / 4) * side * boardState;
+    if (i % config.max_group == 0 && i != 0) yPos = 3.5;
+
+    renderImage(
+      imageCache[imagePath],
+      iniX + width * (i % config.max_group),
+      game.setup.unitSize * 2 + yPos * height,
+      width,
+      height,
+      angle,
+      scale
+    );
+  }
+
 }
 
 function drawLaserBg() {
@@ -188,19 +250,25 @@ function _displayDemo() {
   hideAll();
   if (demoMode == "info") {
     showDemo(true);
+    restorePosition();
   } else if (demoMode == "question") {
     showQuestion(true);
     showAnswers(true);
     updateQuestion(dummyGameState.question);
   } else if (demoMode == "laser") {
     showQuestion(true);
+    showVideo(true);
+    videoPlay(true);
     updateQuestion(dummyGameState.questionLaser);
+  } else if (demoMode == "laureates") {
+    showQuestion(true);
+    updateQuestion(dummyGameState.questionLureates);
   }
   renderDemo();
 }
 
 let demoMode = "info";
-const demoModes = ["info", "question", "info", "laser"];
+const demoModes = ["info", "question", "info", "laser", "info", "laureates"];
 let demoPos = 0;
 
 let demoInterval = null;

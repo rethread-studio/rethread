@@ -13,7 +13,7 @@ export const CharacterCard = ({ laureate }: React.PropsWithChildren<characterCar
 
     return (
         <>
-            <img className="w-4/5 h-4/5 mx-auto mt-8" src={`/img/laureates/${laureate.imagePath}`} alt={fullName} />
+            <img className="w-4/6 h-4/6 mx-auto mt-8" src={`/img/laureates/${laureate.imagePath}`} alt={fullName} />
 
             <h2 style={{ color: `${laureate.color}` }} className={`text-center pt-4 pb-2 px-4 font-light ${fullName.length >= 14 ? "text-2xl" : "text-2xl"}`}>{`${fullName}`}</h2>
             <div className="flex flex row place-items-center place-content-center gap-6 p-4">
