@@ -61,6 +61,8 @@ const dummyGameState = {
   },
 };
 
+
+
 async function getDemoLaureates() {
   demoLaureates = await getLaureates();
   assignRandomLaureate();
@@ -136,7 +138,8 @@ function changeOrientation(player) {
           ? "right"
           : "left";
 }
-function randomPosition() {
+function restorePosition() {
+  if (game.setup == undefined) return;
   dummyPlayer1.x = 0;
   dummyPlayer1.y = 0;
   dummyPlayer1.previousPositions = [];
@@ -247,12 +250,15 @@ function _displayDemo() {
   hideAll();
   if (demoMode == "info") {
     showDemo(true);
+    restorePosition();
   } else if (demoMode == "question") {
     showQuestion(true);
     showAnswers(true);
     updateQuestion(dummyGameState.question);
   } else if (demoMode == "laser") {
     showQuestion(true);
+    showVideo(true);
+    videoPlay(true);
     updateQuestion(dummyGameState.questionLaser);
   } else if (demoMode == "laureates") {
     showQuestion(true);

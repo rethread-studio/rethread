@@ -265,3 +265,9 @@ body {
 .text-neon {
   font-weight: 300;
 }
+
+#videoPlayer{
+  position:absolute;
+  top:0;
+  left:0;
+}

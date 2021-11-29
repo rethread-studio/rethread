@@ -127,6 +127,7 @@ class Game {
     this.setup = setup;
     initRender();
     initDemo();
+    initVid();
     this.page = "play";
   }
 
