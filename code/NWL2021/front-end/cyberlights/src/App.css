@@ -49,12 +49,8 @@ body{
   text-shadow:
   0 0 4px #fff,
   0 0 11px #fff,
-  0 0 19px #fff,
-  0 0 40px #f09,
-  0 0 80px #f09,
-  0 0 90px #f09,
-  0 0 100px #f09,
-  0 0 150px #f09;
+  0 0 19px #f09,
+  0 0 250px #f09;
 }
 
 .text-neon-yellow{
@@ -62,12 +58,8 @@ body{
   text-shadow:
   0 0 4px #fff,
   0 0 11px #fff,
-  0 0 19px #fff,
-  0 0 40px #F6D465,
-  0 0 80px #F6D465,
-  0 0 90px #F6D465,
-  0 0 100px #F6D465,
-  0 0 150px #F6D465;
+  0 0 19px #F6D465,
+  0 0 25px #F6D465;
    /* animation: pulsate 0.11s ease-in-out infinite alternate; */
 }
 

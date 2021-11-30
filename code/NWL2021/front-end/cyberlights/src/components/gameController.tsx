@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-
-
 import ControllMenu from './controllMenu';
 import ArrowsControl from './arrowsControl';
 import { socket } from "../api";
@@ -12,17 +10,18 @@ import GridGame from "./gridGame";
 import { ScoreList } from "./scoreList";
 import { useWindowHeight } from "../hooks/windowHeight";
 import { Answer } from "./answer";
+import Question from "./question";
 
 
 export const GameController = ({ laureate, selectHandler, iemoji, state, emojiList }: React.PropsWithChildren<gameControllerI>) => {
     const history = useHistory();
-    const [question, setQuestion] = useState<string | null>(null);
     const [color, setColor] = useState<string>(categoryColor.physics)
     const [emoji, setEmoji] = useState<IEmoji | null>(null);
     const [show, setShow] = useState(false);
     const [showScoreList, setScoreList] = useState(false);
     const [showEmoji, setShowEmoji] = useState(false);
     const { height } = useWindowHeight();
+    const [currentDirection, setCurrentDirection] = useState<controllDirection>("void");
 
     useEffect(() => {
         setEmoji(iemoji);
@@ -63,15 +62,12 @@ export const GameController = ({ laureate, selectHandler, iemoji, state, emojiLi
         }
         window.addEventListener("keydown", pressHandler);
 
-        socket.on("question", (data) => { setQuestion(data.question); });
-
 
         socket.on("leave", () => { history.push("/") });
 
         return () => {
             socket.emit("leave");
             socket.off("leave");
-            socket.off("question");
             socket.off("move");
             window.removeEventListener("keydown", pressHandler);
         }
@@ -88,16 +84,16 @@ export const GameController = ({ laureate, selectHandler, iemoji, state, emojiLi
     }, [showEmoji])
 
     const emitDirection = (direction: controllDirection) => {
-        // setCurrentDirection(direction)
+        setCurrentDirection(direction)
         socket.emit(direction);
     }
-    // transition-all duration-200 transform ${rotation}
 
-    // const rotation: string = currentDirection === "up" ? "-translate-y-3" :
-    //     currentDirection === "down" ? "translate-y-3" :
-    //         currentDirection === "void" ? "rotate-0" :
-    //             currentDirection === "left" ? "-rotate-45 -translate-x-8" :
-    //                 currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
+
+    const rotation: string = currentDirection === "up" ? "-translate-y-3" :
+        currentDirection === "down" ? "translate-y-3" :
+            currentDirection === "void" ? "rotate-0" :
+                currentDirection === "left" ? "-rotate-45 -translate-x-8" :
+                    currentDirection === "right" ? "rotate-45 translate-x-8" : "rotate-0";
 
     const onClickBackButton = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => { selectHandler(null); };
     return (
@@ -107,9 +103,7 @@ export const GameController = ({ laureate, selectHandler, iemoji, state, emojiLi
 
                 <ControllMenu clickHandler={onClickBackButton} btnClick={setScoreList} />
 
-                <div className={`w-full text-neon ${question !== null && question?.length > 60 ? "text-md" : "text-2xl"} uppercase text-center pt-2`}>
-                    {question !== null ? <span>{question}</span> : <></>}
-                </div>
+                <Question />
 
                 <GridGame state={state} />
 
@@ -117,7 +111,7 @@ export const GameController = ({ laureate, selectHandler, iemoji, state, emojiLi
                     <Answer />
                     {showEmoji === true ? <div className={`answer absolute px-6 py-2 top-1/4 left-1/4 z-20 left-0 bg-white text-black text-2xl rounded-xl `}> {emoji?.emoji}</div> : <></>}
 
-                    <img onClick={emote} className={`cursor-pointer w-3/5 h-auto mx-auto `} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
+                    <img onClick={emote} className={`cursor-pointer w-3/5 h-auto mx-auto transition-all duration-200 transform ${rotation}`} src={`/img/laureates/${laureate.imagePath}`} alt={laureate.firstname} />
                 </div>
 
                 <ArrowsControl clickHandler={emitDirection} color={color} />
