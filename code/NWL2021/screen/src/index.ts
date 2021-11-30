@@ -61,6 +61,7 @@ export default async function start() {
   });
 
   socketMonitor.on("event", (data: MonitoringEvent) => {
+    if (!gameState) return;
     const out = data as any;
     switch (data.origin) {
       case "user":

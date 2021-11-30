@@ -211,6 +211,7 @@ export class Engine {
   }
 
   static checkCollision(player: Player, obj: Position) {
+    if (!player || !obj) return false;
     if ((obj as any).width !== undefined) {
       const position: BoxPosition = obj as BoxPosition;
       return (
