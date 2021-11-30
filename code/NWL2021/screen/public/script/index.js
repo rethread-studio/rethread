@@ -56,7 +56,7 @@ function render() {
   if (game.page == "demo") {
     renderDemo();
   } else if (game.page == "play") {
-    // renderGlitch();
+    renderGlitch();
     renderGame();
   } else if (game.page == "question") {
     // renderQuestionDecoration();
@@ -78,7 +78,7 @@ window.requestAnimationFrame(render);
 game.onPageChange((page) => {
   console.log("[PAGE]", "change", page);
   clearCanvas();
-  // clearGlitchCanvas();
+  clearGlitchCanvas();
   // page = "results";//delete
   hideAll();
   clearInterval(demoInterval);

@@ -31,17 +31,16 @@ function App() {
   //index
   const [characterIndex, setCharacterIndex] = useState<number>(-1);
   //discovery
-
   //load characters data
-  useEffect(() => {
-    socket.on("connect", () => setLaureate(null));
-    socket.on("disconnect", () => setLaureate(null));
-    socket.on("welcome", ({ laureateID, state }) => {
-      setState(state);
-      if (!laureateID) return setLaureate(null);
-      getLaureate(laureateID).then(setLaureate).catch(() => setLaureate(null));
-    })
+  socket.on("connect", () => setLaureate(null));
+  socket.on("disconnect", () => setLaureate(null));
+  socket.on("welcome", ({ laureateID, state }) => {
+    setState(state);
+    if (!laureateID) return setLaureate(null);
+    getLaureate(laureateID).then(setLaureate).catch(() => setLaureate(null));
+  })
 
+  useEffect(() => {
     getEmojis().then((emojis) => {
       setEmoji(emojis[Math.random() * emojis.length | 0]);
       setEmojiList(emojis);

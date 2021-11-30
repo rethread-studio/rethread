@@ -15,7 +15,6 @@ const GridGame = ({ state }: React.PropsWithChildren<IGridGame>) => {
     socket.on("question", (data) => setAnswerPositions(data.answerPositions));
     socket.on("move", setPosition);
     useEffect(() => {
-        console.log("new question")
         return (() => {
             socket.off("question");
             socket.off("move");
