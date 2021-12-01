@@ -42,7 +42,7 @@
     ]
   },
   {
-    "text": "Where was Martin Luther King a pastor?",
+    "text": "Where was Martin Luther King Jr. a pastor?",
     "type": "king",
     "answers": [
       {
@@ -56,7 +56,7 @@
     ]
   },
   {
-    "text": "How old was Martin Luther King when he received the Nobel Peace Prize?",
+    "text": "How old was Martin Luther King Jr. when he received the Nobel Peace Prize?",
     "type": "king",
     "answers": [
       {
@@ -65,13 +65,13 @@
       },
       {
         "text": "35",
-        "description": "Martin Luther King was the youngest man to receive a Nobel Prize.",
+        "description": "Martin Luther King Jr. was the youngest man to receive a Nobel Prize.",
         "isCorrect": true
       }
     ]
   },
   {
-    "text": "Did Martin Luther King have a dream?",
+    "text": "Did Martin Luther King Jr. have a dream?",
     "type": "king",
     "answers": [
       {
@@ -351,7 +351,7 @@
     ]
   },
   {
-    "text": "Does the X-ray have patents?",
+    "text": "Is X-ray technology patented?",
     "type": "conrad",
     "answers": [
       {
@@ -365,7 +365,7 @@
     ]
   },
   {
-    "text": "Who waitressed in a jazz club?",
+    "text": "Who was a waitress in a jazz club?",
     "type": "arnold",
     "answers": [
       {
@@ -632,7 +632,7 @@
     ]
   },
   {
-    "text": "Did Taliban leaders unanimously agree to kill Malala Yousafzai?",
+    "text": "Did Taliban leaders unanimously decide to kill Malala Yousafzai?",
     "type": "yousafzai",
     "answers": [
       {
@@ -731,7 +731,7 @@
     ]
   },
   {
-    "text": "Who developed the code to control the cyber|glow laser?",
+    "text": "Who developed the code framework to control the cyber|glow laser?",
     "type": "CS",
     "answers": [
       {
@@ -745,7 +745,7 @@
     ]
   },
   {
-    "text": "How many programming languages are used for cyber|glow?",
+    "text": "How many computer languages are used for cyber|glow?",
     "type": "CS",
     "answers": [
       {
