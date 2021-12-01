@@ -34,7 +34,7 @@ export const About = () => {
             <video autoPlay loop muted poster="/laser_ftrace1.jpg">
                 <source type="video/mp4" src="/video/cyberglow_ftrace_zoom.mp4" />
             </video> <br />
-            <p>Another part of cyber|glow is a real-time observation and visualization system producing the laser movements that create the light art projection. This projection reveals the invisible game events, database accesses, systems calls, network events and function calls that operate at high frequency to deliver the game.
+            <p>The other part of cyber|glow is a real-time observation and visualization system producing the laser movements that create the light art projection. This projection reveals the invisible game events, database accesses, systems calls, network events and function calls that operate at high frequency to deliver the game.
             </p>
             <br />
             <p>Software is the core medium that fuels our digital society, providing services to citizens, governments, activists and corporations. It is an invisible and intangible set of processes that run millions of operations per second, on top of world-wide networks. With cyber|glow, we wish to unveil these invisible processes and let citizens realize the extraordinary scale of software that surrounds them.
@@ -52,13 +52,13 @@ export const About = () => {
             <video autoPlay loop muted poster="/laser_webserver1.jpg">
                 <source type="video/mp4" src="/video/cyberglow_webcircle1.mp4" />
             </video> <br />
-            <p>Zooming in on the top middle circle revealse a laser visualisation of what is going on inside the web server: files being loaded, events being passed on, state being changed and queries to the database.</p>
+            <p>Zooming in on the top middle circle reveals a laser visualisation of what is going on inside the web server: files being loaded, events being processed, state being changed and queries to the database.</p>
             <br />
             {/* <img src="/laser_user1.jpg" alt="Laser visualisation of user data" className=" object-contain w-6/6 h-auto align-middle border-none mb-4" /> */}
             <video autoPlay loop muted poster="/laser_user1.jpg">
                 <source type="video/mp4" src="/video/cyberglow_user.mp4" />
             </video> <br />
-            <p>When the installation zooms in on the bottom right, events created by the user will be visualised, either as a text message displaying the particular action, or as a red dot representing the activation of an action.</p>
+            <p>When the installation zooms in on the bottom right, events created by the user are visualised, either as a text message displaying the particular action, or as a red dot representing the activation of an action.</p>
             <br />
             {/* <img src="/laser_ftrace1.jpg" alt="Laser visualisation of system data" className=" object-contain w-6/6 h-auto align-middle border-none mb-4" /> */}
             <video autoPlay loop muted poster="/laser_ftrace1.jpg">
@@ -68,7 +68,7 @@ export const About = () => {
 
             <br />
             <h2 className="text-yellow-300 font-thin text-2xl text-neon-yellow">re|thread</h2>
-            <p>cyber|glow was designed and developed by the <a href="https://rethread.art/#" target="_blank" rel='noreferrer' className="text-neon-yellow">rethread.art</a> collective: Erik Natanael Gustafsson, Thomas Durieux, Jonathan Ramirez Mendoza, and Benoit Baudry. For cyber|glow, re|thread collective features Ambar Troya, graphic designer and game artist.</p>
+            <p>cyber|glow was designed and developed by the <a href="https://rethread.art/#" target="_blank" rel='noreferrer' className="text-neon-yellow">rethread.art</a> collective: Erik Natanael Gustafsson, Thomas Durieux, Jonathan Ramirez Mendoza, and Benoit Baudry. For cyber|glow, the re|thread collective features Ambar Troya, graphic designer and game artist.</p>
 
             <br />
             <h2 className="text-yellow-300 font-thin text-2xl text-neon-yellow ">Acknowledgments</h2>
@@ -79,7 +79,7 @@ export const About = () => {
             <div className="flex flex-row justify-center content-center space-x-10 my-4">
                 <img src="/logo_wasp.png" alt="WASP" className=" object-contain w-5/6 h-auto align-middle border-none" />
             </div>
-            <p className="text-xs text-center">The research that this installation is based on was developed through WASP, a program supported by the Knut och Alice Wallenbergs Stiftelse
+            <p className="text-xs text-center">The cyber|glow installation is based on software technology research that was developed through <a href="https://wasp-sweden.org/"  target="_blank" rel='noreferrer' className="text-neon-yellow">WASP</a>, a program supported by the Knut och Alice Wallenbergs Stiftelse.
             </p>
         </div>
     </div>

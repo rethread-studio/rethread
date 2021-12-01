@@ -13,7 +13,7 @@
         "year": 1989,
         "category": "peace",
         "share": 1,
-        "motivation": "I was awared the Nobel prize for the struggle of the liberation of Tibet and the efforts for a peaceful resolution.",
+        "motivation": "I was awarded the Nobel peace prize for advocating peaceful solutions based upon tolerance and mutual respect in order to preserve the historical and cultural heritage of my people.",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8e9"
@@ -40,7 +40,7 @@
         "year": 1979,
         "category": "peace",
         "share": 1,
-        "motivation": "My name is Mary Teresa Bojaxhiu, my main struggle was to overcome poverty and distress. I helped those hungry, either for food or to for love.",
+        "motivation": "My name is Mary Teresa Bojaxhiu, I received the Nobel Peace Prize 1979 for my work for bringing help to suffering humanity.",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8e6"
@@ -64,7 +64,7 @@
         "year": 2014,
         "category": "peace",
         "share": 2,
-        "motivation": "I am the youngest-ever Nobel prize laureate, for my struggle against the suppression of children and young people, and the right of education for all children.",
+        "motivation": "I am the youngest-ever Nobel prize laureate, which I received for for my struggle against the suppression of children and young people and for the right of all children to education.",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8f9"
@@ -91,7 +91,7 @@
         "year": 1903,
         "category": "physics",
         "share": 4,
-        "motivation": "I am the first person to win or share two Nobel Prizes. My first award shared with my husband Pierra Curie for our research on the radiation phenomena. The second prize in  advancement of chemistry by the discovery of the elements radium and polonium.",
+        "motivation": "I am the first person to win two Nobel Prizes. In 1903 I received the Nobel prize in physics in recognition of the extraordinary services I have rendered by my researches on the radiation phenomena discovered by Professor Henri Becquerel.",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8d5"
@@ -103,7 +103,7 @@
         "year": 1911,
         "category": "chemistry",
         "share": 1,
-        "motivation": "in recognition of her services to the advancement of chemistry by the discovery of the elements radium and polonium, by the isolation of radium and the study of the nature and compounds of this remarkable element",
+        "motivation": "In 1911, I received the Nobel prize in chemistry in recognition of my services to the advancement of chemistry by the discovery of the elements radium and polonium, by the isolation of radium and the study of the nature and compounds of this remarkable element",
         "affiliations": [
           {
             "name": "Sorbonne University",
@@ -133,7 +133,7 @@
         "year": 1945,
         "category": "medicine",
         "share": 3,
-        "motivation": "One sometimes finds, what one is not looking for. When I woke up just after dawn on September 28, 1928, I certainly didn't plan to revolutionize all medicine by discovering the world's first antibiotic, or bacteria killer. But I suppose that was exactly what I did.",
+        "motivation": "I received the Nobel prize in medicine in 1945 for the discovery of penicillin and its curative effect in various infectious diseases..",
         "affiliations": [
           {
             "name": "London University",
@@ -150,7 +150,7 @@
     "_id": "615ee06a28f1bb00b8c4c8e1",
     "firstname": "Martin Luther",
     "surname": "King Jr.",
-    "imagePath": "Martin-Luther_King-Jr..png",
+    "imagePath": "Martin-Luther_King-Jr.png",
     "bornCountry": "USA",
     "bornCountryCode": "US",
     "bornCity": "Atlanta, GA",
@@ -163,7 +163,7 @@
         "year": 1964,
         "category": "peace",
         "share": 1,
-        "motivation": "I had a dream, that involved combating racial inequality through nonviolent resistance. That dream spread among others to face racism, poverty and war.",
+        "motivation": "I was 35 when I received the Nobel peace prize in 1964, for my non-violent struggle for civil rights for the Afro-American population..",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8e3"
@@ -190,7 +190,7 @@
         "year": 1993,
         "category": "literature",
         "share": 1,
-        "motivation": "I am Chloe Anthony Wofford Morrison or also known as Tony Morrison. I was awarded the Nobel Prize for my novel named Beloved. A novel that gives life to an essential aspect of American reality with poetic import and visionary force.",
+        "motivation": "I am Chloe Anthony Wofford Morrison or also known as Tony Morrison. I was awarded the Nobel Prize for my novels characterized by visionary force and poetic import, gives life to an essential aspect of American reality.",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8f2"
@@ -241,7 +241,7 @@
         "year": 1966,
         "category": "literature",
         "share": 2,
-        "motivation": "I am a German-Swedish poet and playwright that wrote about my experiences from the rise of the Nazis in World War II. Describing the fate of Jews with lyrical and dramatic writing.",
+        "motivation": "I am a German-Swedish poet and playwright writer who received the Nobel prize for my outstanding lyrical and dramatic writing, which interprets Israel's destiny with touching strength.",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8ef"
@@ -304,7 +304,7 @@
         "year": 1909,
         "category": "literature",
         "share": 1,
-        "motivation": "I am the first woman to win the Nobel Prize in Literature and have been granted membership in the Swedish Academy. My work is full of vivid imagination, lofty idealism, and spiritual perception.",
+        "motivation": "I am the first woman to win the Nobel Prize in Literature in appreciation of the lofty idealism, vivid imagination and spiritual perception that characterize her writings.",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8ec"
@@ -361,7 +361,7 @@
         "year": 1986,
         "category": "medicine",
         "share": 2,
-        "motivation": "I earned the Nobel Prize along with Stanly Cohen for our research on the nerve growth factor (NGF), the protein that causes cell growth to stimulate nerve tissue.",
+        "motivation": "I was awarded the Nobel Prize in medicine for my discoveries of growth factors.",
         "affiliations": [
           {
             "name": "Institute of Cell Biology of the C.N.R.",
@@ -388,7 +388,7 @@
         "year": 2018,
         "category": "chemistry",
         "share": 2,
-        "motivation": "I turned to nature’s method to optimize chemistry: evolution.  I introduce mutations into bacteria to produce new proteins. I breed generation after generation of bacteria until I get the variant I desire. It’s Darwin’s survival of the fittest, except that I decide what “fittest” means.",
+        "motivation": "I turned to nature’s method to optimize chemistry: evolution. I received the Nobel prize in chemistry for the directed evolution of enzymes.",
         "affiliations": [
           {
             "name": "California Institute of Technology (Caltech)",
@@ -418,7 +418,7 @@
         "year": 1901,
         "category": "physics",
         "share": 1,
-        "motivation": "I detected and produced the properties of a new ray which I temporarily named “X-rays”, these rays are also named “Röntgen-rays” after me.  My first radiographs where my friend Albert von Kölliker's hand and my wife’s skeleton.",
+        "motivation": "I was the first recipient of the Nobel prize in physics in recognition of the extraordinary services I rendered by the discovery of the remarkable rays subsequently named after him.",
         "affiliations": [
           {
             "name": "Munich University",
