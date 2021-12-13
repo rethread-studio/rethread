@@ -14,6 +14,10 @@
 	~setAllDevicesToggle.(\reverbActivityToggle, true);
 	~setAllDevicesToggle.(\spatHoverToggle, false);
 	~setAllDevicesToggle.(\spatElevationActivityToggle, false);
+	~stats.values.do{ | device |
+		device.channel.auto_reverb_min = 0.0;
+		device.channel.auto_reverb_max = 0.6;
+	};
 };
 
 // Preset ticks and whispers
@@ -33,6 +37,10 @@
 	~setAllDevicesToggle.(\reverbActivityToggle, true);
 	~setAllDevicesToggle.(\spatHoverToggle, false);
 	~setAllDevicesToggle.(\spatElevationActivityToggle, false);
+	~stats.values.do{ | device |
+		device.channel.auto_reverb_min = 0.15;
+		device.channel.auto_reverb_max = 0.5;
+	};
 };
 
 // Preset service sonification
@@ -74,7 +82,7 @@
 	~setAllDevicesToggle.(\spatElevationActivityToggle, false);
 	~stats.values.do{ | device |
 		device.channel.auto_reverb_min = 0.2;
-		device.channel.auto_reverb_max = 0.8;
+		device.channel.auto_reverb_max = 0.65;
 	};
 };
 
