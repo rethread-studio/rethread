@@ -115,18 +115,18 @@ if(~useAmbisonicsDecoder, {
 		var sig;
 		sig = In.ar(in, ~mixerChannelOutputs.asInteger);
 		if(~ambisonicsOrder == 1, {
-			sig = KMHLSDome1h1pNormal6.ar(sig[0], sig[1], sig[2], sig[3], gain:-10);
+			sig = KMHLSDome1h1pNormal6.ar(sig[0], sig[1], sig[2], sig[3], gain:0);
 		});
 		if(~ambisonicsOrder == 3, {
 			sig = KMHLSDome3h3pNormal6.ar(sig[0], sig[1], sig[2], sig[3], sig[4], sig[5], sig[6], sig[7],
-				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15], gain:-10);
+				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15], gain:0);
 		});
 		if(~ambisonicsOrder == 5, {
 			sig = KMHLSDome5h5pNormal6.ar(sig[0], sig[1], sig[2], sig[3], sig[4], sig[5], sig[6], sig[7],
 				sig[8], sig[9], sig[10], sig[11], sig[12], sig[13], sig[14], sig[15],
 				sig[16], sig[17], sig[18], sig[19], sig[20], sig[21], sig[22], sig[23],
 				sig[24], sig[25], sig[26], sig[27], sig[28], sig[29], sig[30], sig[31],
-				sig[32], sig[33], sig[34], sig[35], gain:-10);
+				sig[32], sig[33], sig[34], sig[35], gain:0);
 		});
 		Out.ar(out, sig);
 	}).add;
@@ -152,40 +152,44 @@ switch(~encoderType,
 			elevation = elevation + MouseY.kr(pi * -0.5, 0);
 		};
 			elevation = elevation - (pi/3);
-		sig = Mix(sig) * \amp.kr(0.5);
-		sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
-		sig = Limiter.ar(sig, 0.95);
-		if(~ambisonicsOrder == 1, {
-			sig = HOAEncoder1.ar(
-				sig,
-				1.0,
-				radius,
-				azimuth,
-				elevation,
-				yes
-			);
-		});
-		if(~ambisonicsOrder == 3, {
-			sig = HOAEncoder3.ar(
-				sig,
-				1.0,
-				radius,
-				azimuth,
-				elevation,
-				yes
-			);
-		});
-		if(~ambisonicsOrder == 5, {
-			sig = HOAEncoder5.ar(
-				sig,
-				1.0,
+			sig = Mix(sig) * \amp.kr(0.5);
+			sig = Compander.ar(sig, sig, 0.5, 0.9, 1/2, 0.1, 0.3);
+			sig = Limiter.ar(sig, 0.95);
+			if(~ambisonicsOrder == 1, {
+				sig = HOAEncoder1.ar(
+					sig,
+					1.0,
 					radius,
 					azimuth,
 					elevation,
 					yes
 				);
 			});
+			if(~ambisonicsOrder == 3, {
+				sig = HOAEncoder3.ar(
+					sig,
+					1.0,
+					radius,
+					azimuth,
+					elevation,
+					yes
+				);
+			});
+			if(~ambisonicsOrder == 5, {
+				sig = HOAEncoder5.ar(
+					sig,
+					1.0,
+					radius,
+					azimuth,
+					elevation,
+					yes
+				);
+			});
+
 			Out.ar(out, sig);
+			if(~sendBformat, {
+				Out.ar(~bFormatChannel, sig);
+			});
 		}).add;
 	},
 	\stereo, {
