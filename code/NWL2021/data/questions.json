@@ -56,21 +56,6 @@
     ]
   },
   {
-    "text": "How old was Martin Luther King Jr. when he received the Nobel Peace Prize?",
-    "type": "king",
-    "answers": [
-      {
-        "text": "45",
-        "isCorrect": false
-      },
-      {
-        "text": "35",
-        "description": "Martin Luther King Jr. was the youngest man to receive a Nobel Prize.",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
     "text": "Did Martin Luther King Jr. have a dream?",
     "type": "king",
     "answers": [
@@ -85,7 +70,7 @@
     ]
   },
   {
-    "text": "Did Margaret Hamilton program the flight controller for Apollo 11?",
+    "text": "Did Margaret Hamilton program the code of Apollo 11?",
     "type": "CS",
     "answers": [
       {
@@ -155,7 +140,7 @@
     ]
   },
   {
-    "text": "What type of man did Toni Morrison talk about in her Nobel lecture?",
+    "text": "Who did Toni Morrison talk about in her Nobel lecture?",
     "type": "morrison",
     "answers": [
       {
@@ -169,7 +154,7 @@
     ]
   },
   {
-    "text": "Was Toni Morrison the first black woman of any nationality to win the Nobel Prize?",
+    "text": "Was Toni Morrison the first black woman to receive a Nobel Prize?",
     "type": "morrison",
     "answers": [
       {
@@ -197,7 +182,7 @@
     ]
   },
   {
-    "text": "Which of these Nobel Laureates has had a crater on Venus named after her?",
+    "text": "Who has had a crater on Venus named after her?",
     "type": "lagerlof",
     "answers": [
       {
@@ -211,7 +196,7 @@
     ]
   },
   {
-    "text": "What was the value of the Swedish bank note featuring Selma Lagerlöf?",
+    "text": "How much was on the bank note featuring Selma Lagerlöf?",
     "type": "lagerlof",
     "answers": [
       {
@@ -323,7 +308,7 @@
     ]
   },
   {
-    "text": "Within which religion is the Dalai Lama the highest religious leader?",
+    "text": "Which religion is the Dalai Lama the highest religious leader?",
     "type": "dalai_lama",
     "answers": [
       {
@@ -393,20 +378,6 @@
     ]
   },
   {
-    "text": "What concept did Frances Arnold apply to find new proteins?",
-    "type": "arnold",
-    "answers": [
-      {
-        "text": "Natural evolution",
-        "isCorrect": true
-      },
-      {
-        "text": "Artificial intelligence",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
     "text": "Where does the Dalai Lama currently live?",
     "type": "dalai_lama",
     "answers": [
@@ -449,7 +420,7 @@
     ]
   },
   {
-    "text": "Which of the following is a recurring theme in Nelly Sachs' work?",
+    "text": "Which is a recurring theme in Nelly Sachs' work?",
     "type": "sachs",
     "answers": [
       {
@@ -477,7 +448,7 @@
     ]
   },
   {
-    "text": "Where in Stockholm are Nelly Sachs' possessions kept to this day?",
+    "text": "Where are Nelly Sachs' possessions kept to this day?",
     "type": "sachs",
     "answers": [
       {
@@ -505,7 +476,7 @@
     ]
   },
   {
-    "text": "What process did Frances Arnold apply to find new proteins?",
+    "text": "How did Frances Arnold find new proteins?",
     "type": "arnold",
     "answers": [
       {
@@ -561,7 +532,7 @@
     ]
   },
   {
-    "text": "Who was the first woman to be awarded a Nobel Memorial Prize in Economic Sciences?",
+    "text": "Who is first woman who received a Nobel Prize in Economy?",
     "type": "ostrom",
     "answers": [
       {
@@ -575,7 +546,7 @@
     ]
   },
   {
-    "text": "Did Bob Dylan play at the March on Washington in 1963, where Martin Luther King gave his \"I Have A Dream\" speech?",
+    "text": "Did Bob Dylan play at the March on Washington in 1963?",
     "type": "dylan",
     "answers": [
       {
@@ -802,20 +773,6 @@
     ]
   },
   {
-    "text": "For which ceremony does Miss Sweety Poo act as timekeeper for acceptance speeches?",
-    "type": "nobel",
-    "answers": [
-      {
-        "text": "Nobel Prize",
-        "isCorrect": true
-      },
-      {
-        "text": "Ig Nobel Prize",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
     "text": "Did Mahatma Gandhi receive a Nobel Prize?",
     "type": "nobel",
     "answers": [
@@ -872,7 +829,7 @@
     ]
   },
   {
-    "text": "In which journal did Albert Einstein publish the Annus Mirabilis papers?",
+    "text": "Where did Albert Einstein publish the Annus Mirabilis papers?",
     "type": "einstein",
     "answers": [
       {
