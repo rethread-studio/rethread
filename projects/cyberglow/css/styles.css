@@ -11636,6 +11636,15 @@ body {
     border-left: 0.5rem solid #f1d476;
   }
 }
+.projects-section .featured-text-left {
+  padding: 2rem;
+}
+@media (min-width: 992px) {
+  .projects-section .featured-text-left {
+    padding: 0 2rem 0 0;
+    border-right: 0.5rem solid #f1d476;
+  }
+}
 .projects-section .project-text {
   padding: 3rem;
   font-size: 90%;
@@ -11742,4 +11751,8 @@ max-height: 50%;
 -webkit-transform: translate(50%,30%);
 -ms-transform: translate(50%,30%);
 transform: translate(50%,30%);
+}
+
+.body-text {
+      padding: 0 15vw;
 }
