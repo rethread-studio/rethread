@@ -11712,7 +11712,7 @@ body {
 }
 
 .cyberblock {
-  background-color: #000;
+  background-color: transparent;
   display: block;
   overflow: hidden;
   top: 0;
@@ -11734,5 +11734,12 @@ body {
 
 .cyberblock > .text:hover, .cyberblock > a > .text:hover {
   color: #f1d476;
+}
 
+.cyberblock > a > img {
+max-height: 50%;
+
+-webkit-transform: translate(50%,30%);
+-ms-transform: translate(50%,30%);
+transform: translate(50%,30%);
 }
