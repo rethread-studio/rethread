@@ -11756,3 +11756,14 @@ transform: translate(50%,30%);
 .body-text {
       padding: 0 15vw;
 }
+
+.img-small {
+  max-height: 50vh;
+}
+
+@media (min-width: 992px) {
+
+  .img-small {
+    max-height: 20vh;
+  }
+}
