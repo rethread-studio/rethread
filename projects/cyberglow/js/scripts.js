@@ -52,3 +52,15 @@ window.addEventListener('DOMContentLoaded', event => {
     });
 
 });
+
+const stats = document.querySelectorAll(".stats-brick");
+var fontType = [ "Arial", "Verdana", "Helvetica", "monospace", "Georgia", "Brush Script MT"];
+stats.forEach((e) => {
+    const h = Math.random()*360.0;
+    const s = 50;
+    const l = 50;
+    e.style.backgroundColor = `hsl(${h}deg, ${s}%, ${l}%)`;
+    e.style.fontFamily = fontType[Math.floor(Math.random()*(fontType.length-1))];
+    const size = 1.2 + Math.random() * 0.5;
+    e.style.fontSize = `${size}rem`;
+});
