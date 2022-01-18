@@ -11767,3 +11767,23 @@ transform: translate(50%,30%);
     max-height: 20vh;
   }
 }
+
+#menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.0;
+  z-index: -1;
+  transition: opacity 3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+}
+
+.background-black {
+
+  background-color: #000;
+}

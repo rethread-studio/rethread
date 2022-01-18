@@ -15,23 +15,32 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css" rel="stylesheet" />
     </head>
-    <body id="page-top">
+    <body id="page-top" class="background-black">
+
+	<div style="position: relative;" class="image main">
+		<img src="../../images/cyberglow/infoText.png" alt="cyberglow"
+			style="width:400px; height:auto; position: absolute; top: calc(50% - 100px); left: calc(50% - 200px);">
+		<video width="100%" autoplay loop muted poster="../../images/cyberglow/laser_ftrace1.jpg">
+			<source type="video/mp4" src="../../images/cyberglow/video/cyberglow_ftrace_zoom.mp4" />
+		</video>
+        <button id="menu-button">Explore documentation!</button>
+	</div>
         <!-- Navigation-->
-        <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-            <div class="container px-4 px-lg-5">
-                <a class="navbar-brand" href="index.html">cyber|glow
-                <span class="navbar-text">interactive light installation</span></a>
-                <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-                    Menu
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <!--     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav"> -->
+    <!--         <div class="container px-4 px-lg-5"> -->
+    <!--             <a class="navbar-brand" href="index.html">cyber|glow -->
+    <!--             <span class="navbar-text">interactive light installation</span></a> -->
+    <!--             <button class="navbar-toggler navbar-toggler-right" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"> -->
+    <!--                 Menu -->
+    <!--                 <i class="fas fa-bars"></i> -->
+    <!--             </button> -->
+    <!--             <div class="collapse navbar-collapse" id="navbarResponsive"> -->
+    <!--             <ul class="navbar-nav ms-auto"> -->
+    <!--                 <li class="nav-item"><a class="nav-link" href="#about">About</a></li> -->
+    <!--             </ul> -->
+    <!--         </div> -->
+    <!--     </div> -->
+    <!-- </nav> -->
     <!-- Masthead-->
     <!-- <header class="masthead"> -->
     <!--     <div class="container px-4 px-lg-5 d-flex h-100 align-items-center justify-content-center"> -->
@@ -61,7 +70,8 @@
     <!--     </div> -->
     <!-- </section> -->
     <!-- Projects-->
-    <section class="projects-section" id="projects">
+    <div id="menu">
+    <section class="" id="projects">
 
         <div class="container px-4 px-lg-4">
             <!-- Project One Row-->
@@ -106,19 +116,19 @@
                     </a>
                 </div>
             </div>
-            </div>
-        </section>
-    <!-- Contact-->
-    <section class="contact-section bg-black">
-        <div class="container px-4 px-lg-5">
-            <div class="social d-flex justify-content-center">
-                <a class="mx-2" href="https://www.instagram.com/rethread.art/" target="_blank"><i class="fab fa-instagram"></i></a>
-                <a class="mx-2" href="https://github.com/castor-software/rethread/" target="_blank"><i class="fab fa-github"></i></a>
-            </div>
-        </div>
     </section>
-    <!-- Footer-->
-    <footer class="footer bg-black small text-center text-white-50"><div class="container px-4 px-lg-5">Copyright &copy; re|thread 2022</div></footer>
+    </div>
+    <!-- Contact-->
+    <!-- <section class="contact-section bg-black"> -->
+    <!--     <div class="container px-4 px-lg-5"> -->
+    <!--         <div class="social d-flex justify-content-center"> -->
+    <!--             <a class="mx-2" href="https://www.instagram.com/rethread.art/" target="_blank"><i class="fab fa-instagram"></i></a> -->
+    <!--             <a class="mx-2" href="https://github.com/castor-software/rethread/" target="_blank"><i class="fab fa-github"></i></a> -->
+    <!--         </div> -->
+    <!--     </div> -->
+    <!-- </section> -->
+    <!-- <\!-- Footer-\-> -->
+    <!-- <footer class="footer bg-black small text-center text-white-50"><div class="container px-4 px-lg-5">Copyright &copy; re|thread 2022</div></footer> -->
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
@@ -128,5 +138,14 @@
     <!-- * * Activate your form at https://startbootstrap.com/solution/contact-forms * *-->
     <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *-->
     <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
+    <script>
+        let menu = document.getElementById("menu");
+        let menuButton = document.getElementById("menu-button");
+        menuButton.addEventListener("click", function () {
+            menu.style.zIndex = 1;
+            menu.style.opacity = 1.0;
+            console.log("Button clicked")
+        });
+    </script>
 </body>
 </html>
