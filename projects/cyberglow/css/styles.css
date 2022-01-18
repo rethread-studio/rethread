@@ -11782,8 +11782,51 @@ transform: translate(50%,30%);
   align-items: center;
   background-color: #000;
 }
+.main {
+  overflow: hidden;
+}
+.main > video {
+  overflow: hidden;
+  width: 100vw;
+}
 
 .background-black {
 
   background-color: #000;
+}
+
+#menu-button {
+  position: absolute;
+  width: 300px;
+  top: 70%;
+  left: calc(50% - 150px);
+  background-color: rgba(255, 255, 255, 0.1);
+  text-align: center;
+  border: solid 2px;
+  color: white;
+  padding: 15px 32px;
+  font-size: 1.5rem;
+}
+
+.masonry-with-columns {
+  columns: 4 200px;
+  column-gap: 1rem;
+}
+.masonry-with-columns-3 {
+  columns: 3 200px;
+  column-gap: 1rem;
+}
+.masonry-with-columns-5 {
+  columns: 5 200px;
+  column-gap: 1rem;
+}
+.masonry-with-columns > div {
+    width: 150px;
+    margin: 0 1rem 1rem 0;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    font-family: system-ui;
+    font-weight: 900;
+    font-size: 2rem;
 }
