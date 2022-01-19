@@ -11832,7 +11832,8 @@ transform: translate(50%,30%);
 }
 
 .stats-brick {
-  background-color: #253760;
+  color: #7BC274;
+  background-color: #242730;
   font-size: 2rem;
   padding: 1em;
   display: inline-block;
