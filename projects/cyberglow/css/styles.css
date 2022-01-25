@@ -11626,6 +11626,7 @@ body {
 
 .projects-section {
   padding: 10rem 0;
+  /* margin-bottom: 300px; */
 }
 .projects-section .featured-text {
   padding: 2rem;
@@ -11837,4 +11838,8 @@ transform: translate(50%,30%);
   font-size: 2rem;
   padding: 1em;
   display: inline-block;
+}
+
+#gen-content {
+  position: relative;
 }
