@@ -4056,7 +4056,6 @@ textarea.form-control-lg {
 
 .nav-link {
   display: block;
-  padding: 0.5rem 1rem;
   color: #64a19d;
   text-decoration: none;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
@@ -11861,7 +11860,12 @@ transform: translate(50%,30%);
 
 h1{
   font-size: 3rem;
+}
+h1,h2,h3,h4{
   font-weight:300;
+}
+p{
+  font-weight:400;
 }
 
 h4{
@@ -11879,4 +11883,15 @@ a{
 
 section{
   border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-link{
+  padding: 0 0;
+  padding-left: 6px;
+  /* width: 100%; */
+    /* text-align: center; */
+}
+
+.nav-link small{
+  font-size: 0.75em;
 }
