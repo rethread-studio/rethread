@@ -11895,3 +11895,20 @@ section{
 .nav-link small{
   font-size: 0.75em;
 }
+
+#navbarToggleExternalContent {
+  width: 100%;
+  text-align:center;
+}
+
+@media (max-width: 575.98px) {
+  #gen-content{
+    margin-top:100px
+  }
+}
+
+#mainNav .navbar-toggler{
+  color: #F6D465;
+  border-color: #F6D465;
+}
+
