@@ -11495,7 +11495,7 @@ body {
 }
 #mainNav .navbar-brand {
   color: #f1d476;
-  font-weight: 700;
+  font-weight: 300;
   padding: 0.9rem 0;
   font-size: 2.5em;
 }
@@ -11618,7 +11618,7 @@ body {
 }
 
 .about-section {
-  padding-top: 10rem;
+  padding-top: 4rem;
   background: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.9) 75%, rgba(0, 0, 0, 0.8) 100%);
 }
 .about-section p {
@@ -11626,7 +11626,7 @@ body {
 }
 
 .projects-section {
-  padding: 10rem 0;
+  padding: 2rem 0;
   /* margin-bottom: 300px; */
 }
 .projects-section .featured-text {
@@ -11635,7 +11635,7 @@ body {
 @media (min-width: 992px) {
   .projects-section .featured-text {
     padding: 0 0 0 2rem;
-    border-left: 0.5rem solid #f1d476;
+    border-left: 0.5rem solid #F6D465;
   }
 }
 .projects-section .featured-text-left {
@@ -11644,7 +11644,7 @@ body {
 @media (min-width: 992px) {
   .projects-section .featured-text-left {
     padding: 0 2rem 0 0;
-    border-right: 0.5rem solid #f1d476;
+    border-right: 0.5rem solid #F6D465;
   }
 }
 .projects-section .project-text {
@@ -11857,4 +11857,26 @@ transform: translate(50%,30%);
 .nav-pills .nav-link.active{
   color: #121826;
     background-color: #F6D465;
+}
+
+h1{
+  font-size: 3rem;
+  font-weight:300;
+}
+
+h4{
+
+  color: #F6D465;
+}
+
+.text-cyber-yellow{
+  color: #F6D465;
+}
+
+a{
+  color: #F6D465;
+}
+
+section{
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
