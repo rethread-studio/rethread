@@ -11646,6 +11646,16 @@ body {
     border-right: 0.5rem solid #F6D465;
   }
 }
+.projects-section .featured-text-center {
+  padding: 2rem;
+}
+@media (min-width: 992px) {
+  .projects-section .featured-text-center {
+    padding: 0 2rem 0 2rem;
+    border-right: 0.5rem solid #f1d476;
+    border-left: 0.5rem solid #f1d476;
+  }
+}
 .projects-section .project-text {
   padding: 3rem;
   font-size: 90%;
