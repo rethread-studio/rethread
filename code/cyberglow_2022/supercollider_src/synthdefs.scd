@@ -38,9 +38,12 @@ SynthDef(\dist_noise, {
 	sig) * 0.3;*/
 	sig = sig + (DPW3Tri.ar(9050, mul: 0.1) * Env.perc(0.5, 0.6, curve: 3).ar(0));
 	sig = (sig * 7).tanh * 0.5;
-	sig = sig * Env.linen(0.01, 0.03, \rel.kr(0.05)).kr(2) * \amp.kr(0.5);
+	sig = AnalogVintageDistortion.ar(sig,0,0, highgain: 0.2, oversample:3);
+	sig = LeakDC.ar(sig);
+	sig = sig * \amp.kr(0.5);
 	sig = LPF.ar(sig, \lpf.kr(7000));
 	sig = Pan2.ar(sig);
+	Env.linen(0.01, 0.03, \rel.kr(0.05)).kr(2);
 	Out.ar(\out.kr(0), sig);
 }).add;
 
@@ -61,5 +64,23 @@ SynthDef(\kick, {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.8, glisstime =
 	subAmp = EnvGen.ar(Env.perc(att, rel)) * 0.25 * amp;
 	sub = SinOsc.ar(sinfreq * glissf * {SinOsc.kr(8, phase: Rand(0, pi)).range(1.0-wobble, 1.0+wobble)}!2) * subAmp;
 	snd = snd + sub;
+	snd = snd + (LeakDC.ar(AnalogVintageDistortion.ar(snd,0,2, oversample:3)) * 0.5);
+	snd = AnalogTape.ar(snd, 0.0, 0.4, 0.1, oversample: 3);
 	Out.ar(out, snd);
+}).add;
+
+SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
+	var sig, wet;
+
+	sig = In.ar(\in.kr(10), 2);
+	mix = mix.lag(\mixLag.kr(10));
+
+	wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
+	// wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);
+	// wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
+
+	sig = (sig * (1-mix)) + (wet*mix);
+	sig = Limiter.ar(sig, 0.95);
+	sig = LeakDC.ar(sig);
+	Out.ar(out, sig);
 }).add;
