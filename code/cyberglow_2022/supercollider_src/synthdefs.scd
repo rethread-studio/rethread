@@ -9,6 +9,7 @@ SynthDef(\tick2, {
 	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(20), rq.min(5)) * env;
 	sig = Pan2.ar(sig, \pan.kr(0)) * \amp.kr(1.0) * 10;
 	sig = sig.tanh; // Should never happen, but better to soft clip
+	sig = AnalogTape.ar(sig, 0.0, 0.4, 0.1, oversample: 3);
 	Out.ar(\out.kr(0), sig);
 }).add;
 
@@ -21,6 +22,7 @@ SynthDef(\tick3, {
 	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(20), rq.min(5)) * env;
 	sig = Pan2.ar(sig, \pan.kr(0)) * \amp.kr(1.0) * 10;
 	sig = (sig*7).tanh;
+	sig = AnalogTape.ar(sig, 0.0, 0.4, 0.1, oversample: 3);
 	Out.ar(\out.kr(0), sig);
 }).add;
 
@@ -56,7 +58,7 @@ SynthDef(\kick, {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.8, glisstime =
 		dur: glisstime
 	);
 	snd = SinOsc.ar(freq: ramp, mul: env);
-	clickAmp = EnvGen.ar(Env.perc(0.001, 0.01)) * 0.1 * amp;
+	clickAmp = EnvGen.ar(Env.perc(\atk.kr(0.001), 0.01)) * 0.1 * amp;
 	click = LPF.ar(Formant.ar(910 + clickAdd, 4760 + clickAdd, 2110 + clickAdd), Rand(3000, 4500)) * clickAmp;
 
 	snd = snd + click;
@@ -64,8 +66,8 @@ SynthDef(\kick, {arg out = 0, amp = 0.3, sinfreq = 60, glissf = 0.8, glisstime =
 	subAmp = EnvGen.ar(Env.perc(att, rel)) * 0.25 * amp;
 	sub = SinOsc.ar(sinfreq * glissf * {SinOsc.kr(8, phase: Rand(0, pi)).range(1.0-wobble, 1.0+wobble)}!2) * subAmp;
 	snd = snd + sub;
-	snd = snd + (LeakDC.ar(AnalogVintageDistortion.ar(snd,0,2, oversample:3)) * 0.5);
-	snd = AnalogTape.ar(snd, 0.0, 0.4, 0.1, oversample: 3);
+	snd = snd + (LeakDC.ar(AnalogVintageDistortion.ar(snd,0,1.5, oversample:3)) * 0.5);
+	// snd = AnalogTape.ar(snd, 0.0, 0.4, 0.1, oversample: 3);
 	Out.ar(out, snd);
 }).add;
 
