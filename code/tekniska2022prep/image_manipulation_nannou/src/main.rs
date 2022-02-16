@@ -1,22 +1,30 @@
 //! A simple as possible example demonstrating how to use the `draw` API to display a texture.
 
+use std::fs;
+
 use nannou::{
     image::{DynamicImage, GenericImage, GenericImageView},
     prelude::*,
     wgpu::SamplerDescriptor,
 };
+use nannou_egui::Egui;
 use nannou_osc as osc;
 
+mod egui_interface;
+use egui_interface::*;
 enum ManipulationKind {
     NegativeExponentialSpeed,
     RandomBrightnessExponentialSpeed(u8),
 }
 
-enum CameraMode {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CameraMode {
     FullImage,
     SinglePixel,
+    Text,
 }
-enum PixelDisplayMode {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PixelDisplayMode {
     Color,
     RGB,
     Numbers,
@@ -26,6 +34,7 @@ struct Camera {
     pixel_display: PixelDisplayMode,
     current_pos: Point2,
     current_vel: Vec2,
+    follow_mode: bool,
     zoom: f32,
 }
 
@@ -37,6 +46,7 @@ impl Camera {
             current_pos: pt2(0.0, 0.0),
             current_vel: vec2(0.0, 0.0),
             zoom: 1.0,
+            follow_mode: false,
         }
     }
     fn single_pixel() -> Self {
@@ -46,23 +56,27 @@ impl Camera {
             current_pos: pt2(0.0, 0.0),
             current_vel: vec2(0.0, 0.0),
             zoom: 1.0,
+            follow_mode: true,
         }
     }
     fn update(&mut self, current_pixel: Point2) {
+                self.current_pos = current_pixel;
         match self.mode {
             CameraMode::FullImage => {}
             CameraMode::SinglePixel => {
-                self.current_pos = current_pixel;
             }
+            CameraMode::Text => {}
         }
     }
 }
 
 fn main() {
-    nannou::app(model).update(update).view(view).run();
+    nannou::app(model).update(update).run();
 }
 
 struct Model {
+    egui: Egui,
+    egui_interface: EguiInterface,
     texture: wgpu::Texture,
     image_bytes: Vec<u8>,
     image: DynamicImage,
@@ -74,15 +88,24 @@ struct Model {
     manipulation: ManipulationKind,
     camera: Camera,
     sender: osc::Sender<osc::Connected>,
+    image_text: String,
+    image_text_lines: Vec<String>,
+    background_color: Rgb<u8>,
 }
 
 fn model(app: &App) -> Model {
     // Create a new window!
-    app.new_window().size(512, 512).build().unwrap();
+    let w_id = app
+        .new_window()
+        .raw_event(raw_window_event)
+        .key_pressed(key_pressed)
+        .view(view)
+        .build()
+        .unwrap();
     // Load the image from disk and upload it to a GPU texture.
     let assets = app.assets_path().unwrap();
     let img_path = assets.join("images").join("rethread(300x200).jpg");
-    let image = nannou::image::io::Reader::open(img_path)
+    let image = nannou::image::io::Reader::open(&img_path)
         .unwrap()
         .decode()
         .unwrap();
@@ -104,7 +127,49 @@ fn model(app: &App) -> Model {
         first_pixel.0[2] as f32,
     );
 
+    // let image_data = fs::read_to_string(&img_path).unwrap();
+    // println!("{image_data}");
+    // read image as text
+    let image_data = fs::read(img_path).unwrap();
+    // parse the data into a string
+    let mut image_text = String::new();
+    let mut image_text_lines = Vec::new();
+    let mut chars_since_n = 0;
+    for byte in image_data {
+        // TODO: replace \n and \t
+        let byte = byte % 127;
+        if byte as char == '\n' || chars_since_n > 490 {
+            image_text_lines.push(image_text);
+            image_text = String::new();
+            chars_since_n = 0;
+        } else if byte as char != '\n' {
+            image_text.push(byte as char);
+            chars_since_n += 1;
+        }
+    }
+    for line in &image_text_lines {
+        println!("{line}");
+    }
+
+    // egui init
+    let window = app.window(w_id).unwrap();
+    let mut egui = Egui::from_window(&window);
+    let proxy = app.create_proxy();
+    let mut egui_interface = EguiInterface {
+        camera_mode: CameraMode::FullImage,
+        pixel_display_mode: PixelDisplayMode::Numbers,
+        visible: true,
+        zoom: 1.0,
+        pixels_per_frame: 1.0 / 128.,
+        follow_mode: false,
+    };
+    egui.do_frame_with_epi_frame(proxy, |ctx, epi_frame| {
+        egui_interface.setup(&ctx, epi_frame, None);
+    });
+
     Model {
+        egui,
+        egui_interface,
         texture,
         image_bytes,
         image,
@@ -115,10 +180,13 @@ fn model(app: &App) -> Model {
         manipulation: ManipulationKind::RandomBrightnessExponentialSpeed(128),
         camera: Camera::single_pixel(),
         sender,
+        image_text,
+        image_text_lines,
+        background_color: BLACK,
     }
 }
 
-fn update(app: &App, model: &mut Model, _update: Update) {
+fn update(app: &App, model: &mut Model, update: Update) {
     let (width, height) = model.image.dimensions();
 
     let new_current_pixel = model.limit as u32 != (model.limit + model.pixels_per_frame) as u32;
@@ -142,13 +210,14 @@ fn update(app: &App, model: &mut Model, _update: Update) {
         model.current_pixel.y = pix.0[1] as f32;
         model.current_pixel.z = pix.0[2] as f32;
     }
-    let new_zoom = 1.0
-        + ((app.mouse.x + (app.window_rect().w() * 0.5)) / app.window_rect().w()).powf(3.0)
-            * 2000.0;
-    if !new_zoom.is_nan() {
-        model.camera.zoom = new_zoom;
-        model.pixels_per_frame = (40.0 / new_zoom).powi(2) as f64;
-    }
+    // zoom from mouse
+    // let new_zoom = 1.0
+    //     + ((app.mouse.x + (app.window_rect().w() * 0.5)) / app.window_rect().w()).powf(3.0)
+    //         * 2000.0;
+    // if !new_zoom.is_nan() {
+    //     model.camera.zoom = new_zoom;
+    //     model.pixels_per_frame = (40.0 / new_zoom).powi(2) as f64;
+    // }
     match model.manipulation {
         ManipulationKind::NegativeExponentialSpeed => {
             let mut i = (limit_u32 - model.pixels_per_frame as u32).max(0);
@@ -196,50 +265,75 @@ fn update(app: &App, model: &mut Model, _update: Update) {
             model.last_limit = model.limit;
         }
     }
+
+    // update egui
+    model.egui.set_elapsed_time(update.since_start);
+    let proxy = app.create_proxy();
+    model.egui.do_frame_with_epi_frame(proxy, |ctx, frame| {
+        model.egui_interface.update(&ctx, frame);
+    });
+
+    // transfer settings
+    model.camera.zoom = model.egui_interface.zoom;
+    model.camera.mode = model.egui_interface.camera_mode;
+    model.camera.pixel_display = model.egui_interface.pixel_display_mode;
+    model.pixels_per_frame = model.egui_interface.pixels_per_frame;
+    model.camera.follow_mode = model.egui_interface.follow_mode;
 }
 
 // Draw the state of your `Model` into the given `Frame` here.
 fn view(app: &App, model: &Model, frame: Frame) {
-    frame.clear(BLACK);
+    frame.clear(model.background_color);
 
     let draw = app.draw();
     match model.camera.mode {
-        CameraMode::FullImage => match model.camera.pixel_display {
-            PixelDisplayMode::Color => {
-                draw.texture(&model.texture);
-            }
+        CameraMode::FullImage => {
 
-            PixelDisplayMode::RGB => todo!(),
-            PixelDisplayMode::Numbers => {
-                let pixel_size = model.camera.zoom;
-                let x_offset = pixel_size * model.image.width() as f32 * 0.5;
-                let y_offset = pixel_size * model.image.height() as f32 * 0.5;
-                let window_rect = app.window_rect();
-                for y in 0..model.image.height() {
-                    for x in 0..model.image.width() {
-                        let pixel = model.image.get_pixel(x, y);
-                        let pixel_rect = Rect::from_x_y_w_h(
-                            pixel_size * x as f32 - x_offset,
-                            y_offset - pixel_size * y as f32,
-                            pixel_size,
-                            pixel_size,
-                        );
-                        if let Some(_) = window_rect.overlap(pixel_rect) {
-                            if pixel_size > 10.0 {
-                                let font_size = (pixel_size / 5.0) as u32;
-                                draw.text(&format!("{}", pixel.0[0]))
-                                    .xy(pixel_rect.xy() + pt2(0., pixel_size * 0.33))
-                                    .color(RED)
-                                    .font_size(font_size);
-                                draw.text(&format!("{}", pixel.0[1]))
-                                    .xy(pixel_rect.xy())
-                                    .color(GREEN)
-                                    .font_size(font_size);
-                                draw.text(&format!("{}", pixel.0[2]))
-                                    .xy(pixel_rect.xy() - pt2(0., pixel_size * 0.33))
-                                    .color(BLUE)
-                                    .font_size(font_size);
-                            } else {
+                    let zoom = model.camera.zoom;
+            // The offset to put the first pixel in the middle of the screen. The `- 0.5` is for this last alignment of pixels.
+            let top_right_offset = if model.camera.follow_mode {
+                pt2(
+                    (model.image.width() as f32 - 1.0) * zoom * 0.5,
+                    (model.image.height() as f32 - 1.0) * zoom * -0.5,
+                )
+            } else {
+                pt2(0.0, 0.0)
+            };
+            let current_pixel_pos = if model.camera.follow_mode {
+                pt2(0., 0.)
+            } else {
+                model.camera.current_pos * pt2(zoom, -zoom)
+            };
+            let current_pixel_offset = if model.camera.follow_mode {
+                model.camera.current_pos * pt2(zoom, -zoom)
+            } else {
+                pt2(0., 0.)
+            };
+            let current_pixel_offset = top_right_offset - current_pixel_offset;
+
+            match model.camera.pixel_display {
+                PixelDisplayMode::Color => {
+                    draw.texture(&model.texture).w_h(
+                        model.image.width() as f32 * zoom,
+                        model.image.height() as f32 * zoom,
+                    ).xy(current_pixel_offset);
+                }
+
+                PixelDisplayMode::RGB => {
+                    let pixel_size = model.camera.zoom;
+                    let x_offset = pixel_size * model.image.width() as f32 * 0.5;
+                    let y_offset = pixel_size * model.image.height() as f32 * 0.5;
+                    let window_rect = app.window_rect();
+                    for y in 0..model.image.height() {
+                        for x in 0..model.image.width() {
+                            let pixel = model.image.get_pixel(x, y);
+                            let pixel_rect = Rect::from_x_y_w_h(
+                                pixel_size * x as f32 - x_offset + current_pixel_offset.x,
+                                y_offset - pixel_size * y as f32 +  current_pixel_offset.y,
+                                pixel_size,
+                                pixel_size,
+                            );
+                            if let Some(_) = window_rect.overlap(pixel_rect) {
                                 draw.rect()
                                     .xy(pixel_rect.xy() + pt2(0., pixel_size * 0.33))
                                     .wh(pt2(pixel_size * 0.5, pixel_size * 0.333))
@@ -256,8 +350,55 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         }
                     }
                 }
+                PixelDisplayMode::Numbers => {
+                    let pixel_size = model.camera.zoom;
+                    let x_offset = pixel_size * model.image.width() as f32 * 0.5;
+                    let y_offset = pixel_size * model.image.height() as f32 * 0.5;
+                    let window_rect = app.window_rect();
+                    for y in 0..model.image.height() {
+                        for x in 0..model.image.width() {
+                            let pixel = model.image.get_pixel(x, y);
+                            let pixel_rect = Rect::from_x_y_w_h(
+                                pixel_size * x as f32 - x_offset + current_pixel_offset.x,
+                                y_offset - pixel_size * y as f32 +  current_pixel_offset.y,
+                                pixel_size,
+                                pixel_size,
+                            );
+                            if let Some(_) = window_rect.overlap(pixel_rect) {
+                                if pixel_size > 10.0 {
+                                    let font_size = (pixel_size / 5.0) as u32;
+                                    draw.text(&format!("{}", pixel.0[0]))
+                                        .xy(pixel_rect.xy() + pt2(0., pixel_size * 0.33))
+                                        .color(RED)
+                                        .font_size(font_size);
+                                    draw.text(&format!("{}", pixel.0[1]))
+                                        .xy(pixel_rect.xy())
+                                        .color(GREEN)
+                                        .font_size(font_size);
+                                    draw.text(&format!("{}", pixel.0[2]))
+                                        .xy(pixel_rect.xy() - pt2(0., pixel_size * 0.33))
+                                        .color(BLUE)
+                                        .font_size(font_size);
+                                } else {
+                                    draw.rect()
+                                        .xy(pixel_rect.xy() + pt2(0., pixel_size * 0.33))
+                                        .wh(pt2(pixel_size * 0.5, pixel_size * 0.333))
+                                        .color(rgba(1.0, 0.0, 0.0, pixel.0[0] as f32 / 255.0));
+                                    draw.rect()
+                                        .xy(pixel_rect.xy())
+                                        .wh(pt2(pixel_size * 0.5, pixel_size * 0.333))
+                                        .color(rgba(0.0, 1.0, 0.0, pixel.0[1] as f32 / 255.0));
+                                    draw.rect()
+                                        .xy(pixel_rect.xy() - pt2(0., pixel_size * 0.33))
+                                        .wh(pt2(pixel_size * 0.5, pixel_size * 0.333))
+                                        .color(rgba(0.0, 0.0, 1.0, pixel.0[2] as f32 / 255.0));
+                                }
+                            }
+                        }
+                    }
+                }
             }
-        },
+        }
         CameraMode::SinglePixel => {
             let draw = draw.sampler(SamplerDescriptor {
                 label: Some("Pixelated_sampler"),
@@ -275,16 +416,30 @@ fn view(app: &App, model: &Model, frame: Frame) {
             });
             let zoom = model.camera.zoom;
             // The offset to put the first pixel in the middle of the screen. The `- 0.5` is for this last alignment of pixels.
-            let top_right_offset = pt2(
-                (model.image.width() as f32 - 1.0) * zoom * 0.5,
-                (model.image.height() as f32 - 1.0) * zoom * -0.5,
-            );
+            let top_right_offset = if model.camera.follow_mode {
+                pt2(
+                    (model.image.width() as f32 - 1.0) * zoom * 0.5,
+                    (model.image.height() as f32 - 1.0) * zoom * -0.5,
+                )
+            } else {
+                pt2(0.0, 0.0)
+            };
+            let current_pixel_pos = if model.camera.follow_mode {
+                pt2(0., 0.)
+            } else {
+                model.camera.current_pos * pt2(zoom, -zoom)
+            };
+            let current_pixel_offset = if model.camera.follow_mode {
+                (model.camera.current_pos * pt2(zoom, -zoom))
+            } else {
+                pt2(0., 0.)
+            };
             draw.texture(&model.texture)
                 .w_h(
                     model.image.width() as f32 * zoom,
                     model.image.height() as f32 * zoom,
                 )
-                .xy(top_right_offset - (model.camera.current_pos * pt2(zoom, -zoom)));
+                .xy(top_right_offset - current_pixel_offset);
 
             let (width, height) = model.image.dimensions();
             let limit_u32 = (model.limit as u32).min(width * height);
@@ -304,7 +459,12 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         model.current_pixel.y as u8,
                         model.current_pixel.z as u8,
                     ]);
-                    let pixel_rect = Rect::from_x_y_w_h(0., 0., pixel_size, pixel_size);
+                    let pixel_rect = Rect::from_x_y_w_h(
+                        current_pixel_pos.x,
+                        current_pixel_pos.y,
+                        pixel_size,
+                        pixel_size,
+                    );
                     draw.rect()
                         .xy(pixel_rect.xy())
                         .wh(pixel_rect.wh())
@@ -332,7 +492,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                     .align_left_of(pixel_rect);
                     draw.rect().xy(red_rect.xy()).wh(red_rect.wh()).color(RED);
                     draw.text(&format!("{}", pixel.0[0]))
-                        .x_y(0., pixel_size * 0.33)
+                        .xy(current_pixel_pos + pt2(0., pixel_size * 0.33))
                         .color(BLACK)
                         .font_size((zoom / 10.) as u32);
                     draw.rect()
@@ -340,6 +500,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         .wh(green_rect.wh())
                         .color(GREEN);
                     draw.text(&format!("{}", pixel.0[1]))
+                        .xy(current_pixel_pos)
                         .x_y(0., 0.)
                         .color(BLACK)
                         .font_size((zoom / 10.) as u32);
@@ -348,12 +509,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         .wh(blue_rect.wh())
                         .color(BLUE);
                     draw.text(&format!("{}", pixel.0[2]))
-                        .x_y(0., pixel_size * -0.33)
+                        .xy(current_pixel_pos + pt2(0., pixel_size * -0.33))
                         .color(BLACK)
                         .font_size((zoom / 10.) as u32);
                 }
                 PixelDisplayMode::Numbers => {
-
                     // let pixel = model
                     //     .image
                     //     .get_pixel(current_pixel.x as u32, current_pixel.y as u32);
@@ -364,30 +524,51 @@ fn view(app: &App, model: &Model, frame: Frame) {
                         model.current_pixel.z as u8,
                     ]);
 
-                    let pixel_rect = Rect::from_x_y_w_h(0., 0., pixel_size, pixel_size);
+                    let pixel_rect = Rect::from_x_y_w_h(
+                        current_pixel_pos.x,
+                        current_pixel_pos.y,
+                        pixel_size,
+                        pixel_size,
+                    );
                     draw.rect()
                         .xy(pixel_rect.xy())
                         .wh(pixel_rect.wh())
                         .color(BLACK);
-                                let font_size = (pixel_size / 5.0) as u32;
-                                draw.text(&format!("{}", pixel.0[0]))
-                                    .xy(pixel_rect.xy() + pt2(0., pixel_size * 0.33))
-                                    .color(RED)
-                                    .font_size(font_size);
-                                draw.text(&format!("{}", pixel.0[1]))
-                                    .xy(pixel_rect.xy())
-                                    .color(GREEN)
-                                    .font_size(font_size);
-                                draw.text(&format!("{}", pixel.0[2]))
-                                    .xy(pixel_rect.xy() - pt2(0., pixel_size * 0.33))
-                                    .color(BLUE)
-                                    .font_size(font_size);
+                    let font_size = (pixel_size / 5.0) as u32;
+                    draw.text(&format!("{}", pixel.0[0]))
+                        .xy(pixel_rect.xy() + pt2(0., pixel_size * 0.33))
+                        .color(RED)
+                        .font_size(font_size);
+                    draw.text(&format!("{}", pixel.0[1]))
+                        .xy(pixel_rect.xy())
+                        .color(GREEN)
+                        .font_size(font_size);
+                    draw.text(&format!("{}", pixel.0[2]))
+                        .xy(pixel_rect.xy() - pt2(0., pixel_size * 0.33))
+                        .color(BLUE)
+                        .font_size(font_size);
                 }
+            }
+        }
+        CameraMode::Text => {
+            let text_size = 15;
+            let mut y = 0.;
+            let window_rect = app.window_rect();
+                let num_lines = model.image_text_lines.len();
+            let start_line = (model.limit as usize %(num_lines-1));
+            for line in &model.image_text_lines[start_line..num_lines] {
+                draw.text(line)
+                    .x_y(0.0, window_rect.h() * 0.5 - y)
+                    .w(window_rect.w() * 0.4)
+                    .font_size(text_size)
+                    .color(WHITE);
+                y += text_size as f32 * 1.5;
             }
         }
     }
 
     draw.to_frame(app, &frame).unwrap();
+    model.egui.draw_to_frame(&frame).unwrap();
 }
 
 fn quick_inaccurate_brightness(r: u8, g: u8, b: u8) -> u8 {
@@ -428,4 +609,18 @@ fn send_brightness_osc(image: &DynamicImage, sender: &mut osc::Sender<osc::Conne
     let addr = "/luma_chord_finished";
     let args = vec![];
     sender.send((addr, args)).ok();
+}
+
+fn raw_window_event(_app: &App, model: &mut Model, event: &nannou::winit::event::WindowEvent) {
+    model.egui.handle_raw_event(event);
+}
+
+
+fn key_pressed(_app: &App, model: &mut Model, key: Key) {
+    match key {
+        Key::I =>  {
+            model.egui_interface.visible = !model.egui_interface.visible;
+        }
+        _ => ()
+    }
 }
