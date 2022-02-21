@@ -383,7 +383,7 @@ Pdef(\t2_1, Pbind(\instrument, \tick2,
 )
 
 (
-Synth(\sine_sweep, [\length, 5, \start_freq, 12000, \end_freq, 10000, \atk, 3, \rel, 2, \curve, -17, \pan, 0]);
+Synth(\sine_sweep, [\length, 5, \start_freq, 12000, \end_freq, 10000, \amp, 0.1, \atk, 3, \rel, 2, \curve, -17, \pan, 0]);
 
 Pdef(\r2d2, Pbind(\instrument, \sine,
 	\dur, Pseq([0.08], inf),
@@ -412,4 +412,15 @@ Pdef(\r2d2, Pbind(\instrument, \sine,
 	\out, ~outBus,
 )).play;
 }.fork;
+)
+(
+Pdef(\r2d2).stop;
+Pdef(\t2_1).stop;
+Pdef(\t3_1).stop;
+Pdef(\t3_2).stop;
+
+Pdef(\dn4).stop;
+Pdef(\dn1).stop;
+Pdef(\dn3).stop;
+~chordRoutine2.stop;
 )
