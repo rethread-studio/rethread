@@ -40,6 +40,9 @@ Pdef(\t3_2, Pbind(\instrument, \tick3,
 )).play;
 
 )
+Pdef(\t2_1).stop
+Pdef(\t3_1).stop
+Pdef(\t3_2).stop
 
 (
 
