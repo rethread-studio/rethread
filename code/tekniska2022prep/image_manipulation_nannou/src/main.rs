@@ -59,12 +59,21 @@ impl Camera {
             follow_mode: true,
         }
     }
+    fn text() -> Self {
+        Self {
+            mode: CameraMode::Text,
+            pixel_display: PixelDisplayMode::Numbers,
+            current_pos: pt2(0.0, 0.0),
+            current_vel: vec2(0.0, 0.0),
+            zoom: 1.0,
+            follow_mode: true,
+        }
+    }
     fn update(&mut self, current_pixel: Point2) {
-                self.current_pos = current_pixel;
+        self.current_pos = current_pixel;
         match self.mode {
             CameraMode::FullImage => {}
-            CameraMode::SinglePixel => {
-            }
+            CameraMode::SinglePixel => {}
             CameraMode::Text => {}
         }
     }
@@ -127,10 +136,11 @@ fn model(app: &App) -> Model {
         first_pixel.0[2] as f32,
     );
 
+    let image_text_path = assets.join("rethread_image_text.txt");
     // let image_data = fs::read_to_string(&img_path).unwrap();
     // println!("{image_data}");
     // read image as text
-    let image_data = fs::read(img_path).unwrap();
+    let image_data = fs::read(image_text_path).unwrap();
     // parse the data into a string
     let mut image_text = String::new();
     let mut image_text_lines = Vec::new();
@@ -138,11 +148,12 @@ fn model(app: &App) -> Model {
     for byte in image_data {
         // TODO: replace \n and \t
         let byte = byte % 127;
-        if byte as char == '\n' || chars_since_n > 490 {
+
+        if byte as char == '\n' || chars_since_n > 200{
             image_text_lines.push(image_text);
             image_text = String::new();
             chars_since_n = 0;
-        } else if byte as char != '\n' {
+        } else if byte as char != '\n' && byte != 160 {
             image_text.push(byte as char);
             chars_since_n += 1;
         }
@@ -156,7 +167,7 @@ fn model(app: &App) -> Model {
     let mut egui = Egui::from_window(&window);
     let proxy = app.create_proxy();
     let mut egui_interface = EguiInterface {
-        camera_mode: CameraMode::FullImage,
+        camera_mode: CameraMode::Text,
         pixel_display_mode: PixelDisplayMode::Numbers,
         visible: true,
         zoom: 1.0,
@@ -178,7 +189,7 @@ fn model(app: &App) -> Model {
         pixels_per_frame: 1.0 / 128.0,
         current_pixel,
         manipulation: ManipulationKind::RandomBrightnessExponentialSpeed(128),
-        camera: Camera::single_pixel(),
+        camera: Camera::text(),
         sender,
         image_text,
         image_text_lines,
@@ -288,8 +299,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
     match model.camera.mode {
         CameraMode::FullImage => {
-
-                    let zoom = model.camera.zoom;
+            let zoom = model.camera.zoom;
             // The offset to put the first pixel in the middle of the screen. The `- 0.5` is for this last alignment of pixels.
             let top_right_offset = if model.camera.follow_mode {
                 pt2(
@@ -313,10 +323,12 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
             match model.camera.pixel_display {
                 PixelDisplayMode::Color => {
-                    draw.texture(&model.texture).w_h(
-                        model.image.width() as f32 * zoom,
-                        model.image.height() as f32 * zoom,
-                    ).xy(current_pixel_offset);
+                    draw.texture(&model.texture)
+                        .w_h(
+                            model.image.width() as f32 * zoom,
+                            model.image.height() as f32 * zoom,
+                        )
+                        .xy(current_pixel_offset);
                 }
 
                 PixelDisplayMode::RGB => {
@@ -329,7 +341,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             let pixel = model.image.get_pixel(x, y);
                             let pixel_rect = Rect::from_x_y_w_h(
                                 pixel_size * x as f32 - x_offset + current_pixel_offset.x,
-                                y_offset - pixel_size * y as f32 +  current_pixel_offset.y,
+                                y_offset - pixel_size * y as f32 + current_pixel_offset.y,
                                 pixel_size,
                                 pixel_size,
                             );
@@ -360,7 +372,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
                             let pixel = model.image.get_pixel(x, y);
                             let pixel_rect = Rect::from_x_y_w_h(
                                 pixel_size * x as f32 - x_offset + current_pixel_offset.x,
-                                y_offset - pixel_size * y as f32 +  current_pixel_offset.y,
+                                y_offset - pixel_size * y as f32 + current_pixel_offset.y,
                                 pixel_size,
                                 pixel_size,
                             );
@@ -554,9 +566,10 @@ fn view(app: &App, model: &Model, frame: Frame) {
             let text_size = 15;
             let mut y = 0.;
             let window_rect = app.window_rect();
-                let num_lines = model.image_text_lines.len();
-            let start_line = (model.limit as usize %(num_lines-1));
-            for line in &model.image_text_lines[start_line..num_lines] {
+            let num_lines = model.image_text_lines.len();
+            let start_line = (model.limit as usize % (num_lines - 1));
+            let end_line = start_line + (window_rect.h() / text_size as f32) as usize;
+            for line in &model.image_text_lines[start_line..end_line] {
                 draw.text(line)
                     .x_y(0.0, window_rect.h() * 0.5 - y)
                     .w(window_rect.w() * 0.4)
@@ -615,12 +628,11 @@ fn raw_window_event(_app: &App, model: &mut Model, event: &nannou::winit::event:
     model.egui.handle_raw_event(event);
 }
 
-
 fn key_pressed(_app: &App, model: &mut Model, key: Key) {
     match key {
-        Key::I =>  {
+        Key::I => {
             model.egui_interface.visible = !model.egui_interface.visible;
         }
-        _ => ()
+        _ => (),
     }
 }
