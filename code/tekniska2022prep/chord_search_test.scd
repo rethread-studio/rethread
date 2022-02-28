@@ -131,7 +131,7 @@
 	[0, chord.third, chord.fifth] + chord.root
 };
 ~chord2degrees = { |chord|
-	~chord2triad.(chord) ++ (chord.added_degrees + chord.root)
+	~chord2triad.(chord) ++ (chord.added_degrees + chord.root + 53)
 };
 // get similar chords
 ~get_similar_chords = { | chord, max_difference = 2 |
@@ -153,11 +153,63 @@
 			};
 			difference = difference + closest_diff;
 		};
-		if(difference <= max_difference && difference != 0) {
+		if(difference <= max_difference && (difference != 0)) {
 			similar_chords.add([other_chord, difference]);
 		};
 	};
 	similar_chords
+};
+
+~findClosestVoicing = { | currentChord, newDegrees, edo = 53, minNote = -22, maxNote = 106 |
+	var newChord;
+	newChord = newDegrees.collect { | degree, i |
+		var minDistance = 1000, minDistIndex = 0, minDistOctave, newNote;
+		// find the note in the current chord that is closest to the new note from above or below
+		currentChord.do { | note, i | var distance = 10000, old, new, oldOctave;
+			// In SuperCollider -22%53 == 31 so % works for negative numbers (wrapping them to positive)
+			// check octave of the chord note. The octave is stored as the offset in degrees, not number of octaves
+			oldOctave = note - (note%edo);
+			// bring both notes into the lowest octave
+			old = note%edo;
+			new = degree%edo;
+			// check distance
+			distance = abs(new-old);
+			if(distance < minDistance) {
+				minDistance = distance;
+				minDistOctave = oldOctave;
+				minDistIndex = i;
+			};
+
+			// reverse the order of the notes
+			if(old < new, {
+				// bring new note down an octave
+				new = new - edo;
+				oldOctave = oldOctave - edo;
+			}, {
+				// bring new note up an octave
+				new = new + edo;
+				oldOctave = oldOctave + edo;
+			});
+
+			// check distance again in the reversed interval
+			distance = abs(new-old);
+			if(distance < minDistance) {
+				minDistance = distance;
+				minDistOctave = oldOctave;
+				minDistIndex = i;
+			};
+		};
+		// return the new adjusted note
+		newNote = (degree%edo) + minDistOctave;
+		if(newNote > maxNote, {
+			newNote = newNote - edo;
+		});
+		if(newNote < minNote, {
+			newNote = newNote + edo;
+		});
+		newNote
+	};
+	newChord
 };
 )
 

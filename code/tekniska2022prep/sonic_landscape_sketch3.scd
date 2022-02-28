@@ -131,7 +131,7 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 		chord.do { |degree|
 			var freq = ~s53.degreeToFreq(degree, ~rootFreq, octave);
 			/*Synth(\softy, [\freq, freq, \amp, 1.0/numPitches,\atk, length*0.3, \rel, length*0.7, \out, ~revBus, \pan, rrand(-0.5, 0.5)]);*/
-			Synth(\dist_saw, [\freq, freq,\atk, 0.2, \rel, length*0.75, \amp, 0.5/numPitches, \out, ~revBus]);
+			Synth(\dist_tri, [\freq, freq,\atk, 0.2, \rel, length*0.75, \amp, 0.5/numPitches, \out, ~revBus]);
 			0.1.wait;
 		};
 	}.fork;
