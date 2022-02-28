@@ -196,9 +196,11 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
     }
 
     let mut message_index = 0;
-    // Skip the negative ts messages
-    while playback_messages[message_index].ts() < 0 {
-        message_index += 1;
+    if playback_messages.len() > 0 {
+        // Skip the negative ts messages
+        while playback_messages[message_index].ts() < 0 {
+            message_index += 1;
+        }
     }
     let mut last_message_time = Instant::now();
     'main_loop: loop {
@@ -250,11 +252,16 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                         } else {
                             None
                         }
+                    } else {
+                        None
                     };
                     // Do something with the message
                     if let Some(new_message) = new_message {
                         if args.listen {
                             pass_through_message(&sender, &new_message);
+                        }
+                        if args.sonify {
+                            sonify_message(&new_message);
                         }
                         if args.record {
                             recorded_messages.messages.push(new_message);
@@ -263,9 +270,6 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                                 recorded_messages.save_data();
                                 last_save = Instant::now();
                             }
-                        }
-                        if args.sonify {
-                            sonify_message(&new_message);
                         }
                     }
                 }
@@ -335,6 +339,7 @@ fn sonify_message(message: &Message) {
     match message {
         Message::Monitor(_monitor_message) => {
             // do nothing for now
+            println!("Received monitor message");
         }
         Message::Ftrace(ftrace_message) => {
             let _ftrace_kind = parse_ftrace(&ftrace_message.data);
