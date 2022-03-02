@@ -2,6 +2,8 @@ use chrono::{DateTime, Utc};
 use clap::Parser;
 use ctrlc;
 use nannou_osc as osc;
+use once_cell::unsync::Lazy;
+use osc::Connected;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::convert::TryInto;
@@ -107,7 +109,7 @@ struct Args {
     // The number of milliseconds to skip when playing back recorded data
     #[clap(short, long, default_value_t = 0)]
     skip_forward_ms: i64,
-    #[clap(short, long, default_value_t = String::from("127.0.0.1:57130"))]
+    #[clap(short, long, default_value_t = String::from("127.0.0.1:57131"))]
     osc_destination: String,
 }
 
@@ -128,6 +130,7 @@ fn main() {
     .expect("Error setting Ctrl-C handler");
 
     let args = Args::parse();
+    println!("Args: {:?}", args);
 
     main_loop(args, quit);
 }
@@ -169,6 +172,14 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
     let load_path = PathBuf::from(args.load_path.unwrap_or("./monitor_data.json".to_string()));
     let receiver = osc::receiver(args.listen_port).unwrap();
 
+    let mut sonifier = if args.sonify {
+        Some(Sonifier::new("127.0.0.1:57120"))
+    } else {
+        None
+    };
+
+    let mut ftrace_stats = FtraceStats::new();
+
     let sender = osc::sender()
         .unwrap()
         .connect(args.osc_destination)
@@ -203,8 +214,9 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
         }
     }
     let mut last_message_time = Instant::now();
+    let mut last_stats_update_time = Instant::now();
     'main_loop: loop {
-        if args.record {
+        if args.record || args.listen || args.sonify {
             if let Ok(Some((packet, _addr))) = receiver.try_recv() {
                 for message in packet.into_msgs() {
                     // Parse message
@@ -260,8 +272,8 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                         if args.listen {
                             pass_through_message(&sender, &new_message);
                         }
-                        if args.sonify {
-                            sonify_message(&new_message);
+                        if let Some(ref mut sonifier) = &mut sonifier {
+                            sonify_message(sonifier, &mut ftrace_stats, &new_message);
                         }
                         if args.record {
                             recorded_messages.messages.push(new_message);
@@ -290,6 +302,16 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                 }
             }
         }
+        if last_stats_update_time.elapsed().as_millis() > 10 {
+            let dt = last_stats_update_time.elapsed().as_secs_f64();
+            ftrace_stats.update(dt);
+            last_stats_update_time = Instant::now();
+            // Send a stats update
+            if let Some(ref mut sonifier) = sonifier {
+                sonifier.send_stats_update(&ftrace_stats);
+            }
+        }
+
         if quit.load(Ordering::Relaxed) {
             println!("Quitting!");
             if args.record {
@@ -335,19 +357,30 @@ fn pass_through_message(sender: &osc::Sender<osc::Connected>, message: &Message)
     }
 }
 
-fn sonify_message(message: &Message) {
+fn sonify_message(sonifier: &mut Sonifier, ftrace_stats: &mut FtraceStats, message: &Message) {
     match message {
-        Message::Monitor(_monitor_message) => {
+        Message::Monitor(monitor_message) => {
             // do nothing for now
-            println!("Received monitor message");
+            println!("Received monitor message: {monitor_message:?}");
+            sonifier.send_monitor_message(monitor_message.clone());
         }
         Message::Ftrace(ftrace_message) => {
-            let _ftrace_kind = parse_ftrace(&ftrace_message.data);
+            if let Some(ftrace_kind) = parse_ftrace(&ftrace_message.data) {
+                if ftrace_stats.register_event(ftrace_kind) {
+                    let stats = ftrace_stats.get_stats(ftrace_kind);
+                    // there was a trigger
+                    sonifier.send_ftrace_message(
+                        ftrace_kind,
+                        stats.rolling_average as f32,
+                        stats.average_events_per_second as f32,
+                    )
+                }
+            }
         }
     }
 }
 
-fn parse_ftrace<T: AsRef<str>>(data: T) -> FtraceKind {
+fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
     /*
            string event_copy = event;
            vector<string> tokens;
@@ -384,24 +417,19 @@ fn parse_ftrace<T: AsRef<str>>(data: T) -> FtraceKind {
         ""
     };
     let ftrace_kind = match event_prefix {
-        "random" | "dd" | "redit" => FtraceKind::Random,
-        "sys" | "ys" => FtraceKind::Syscall,
-        "tcp" | "cp" => FtraceKind::Tcp,
-        "irq_matrix" | "ix" => FtraceKind::IrqMatrix,
-        _ => FtraceKind::Unknown,
+        "random" | "dd" | "redit" | "mix" | "add" | "credit" | "prandom" | "urandom" => {
+            Some(FtraceKind::Random)
+        }
+        "sys" | "ys" => Some(FtraceKind::Syscall),
+        "tcp" | "cp" => Some(FtraceKind::Tcp),
+        "irq_matrix" | "ix" => Some(FtraceKind::IrqMatrix),
+        _ => None,
     };
-    println!("{ftrace_kind:?}");
+    if let None = ftrace_kind {
+        println!("Unknown ftrace:\n\"{}\"", event_type);
+    } // println!("{ftrace_kind:?}");
+
     ftrace_kind
-    // if event_prefix == "random" || event_prefix == "dd" || event_prefix == "redit" {
-    //     // random type
-    // } else if event_prefix == "ys" {
-    //     // syscall type
-    // } else if event_prefix == "cp" {
-    //     // tcp type
-    // } else if event_prefix == "ix" {
-    //     // irq_matrix type
-    // } else {
-    // }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -410,5 +438,144 @@ enum FtraceKind {
     Syscall,
     Tcp,
     IrqMatrix,
-    Unknown,
 }
+
+#[derive(Debug, Clone)]
+struct FtraceStats {
+    random: Stats,
+    syscall: Stats,
+    tcp: Stats,
+    irq_matrix: Stats,
+}
+
+impl FtraceStats {
+    pub fn new() -> Self {
+        Self {
+            random: Stats::new(),
+            syscall: Stats::new(),
+            tcp: Stats::new(),
+            irq_matrix: Stats::new(),
+        }
+    }
+    pub fn register_event(&mut self, ftrace_kind: FtraceKind) -> bool {
+        match ftrace_kind {
+            FtraceKind::Random => self.random.register_event(),
+            FtraceKind::Syscall => self.syscall.register_event(),
+            FtraceKind::Tcp => self.tcp.register_event(),
+            FtraceKind::IrqMatrix => self.irq_matrix.register_event(),
+        }
+    }
+    pub fn get_stats(&self, ftrace_kind: FtraceKind) -> &Stats {
+        match ftrace_kind {
+            FtraceKind::Random => &self.random,
+            FtraceKind::Syscall => &self.syscall,
+            FtraceKind::Tcp => &self.tcp,
+            FtraceKind::IrqMatrix => &self.irq_matrix,
+        }
+    }
+
+    pub fn update(&mut self, dt: f64) {
+        self.random.update(dt);
+        self.syscall.update(dt);
+        self.tcp.update(dt);
+        self.irq_matrix.update(dt);
+    }
+}
+
+#[derive(Debug, Clone)]
+struct Stats {
+    total_events_registered: u64,
+    events_since_last_trigger: u64,
+    trigger_threshold: u64,
+    average_events_per_second: f64,
+    rolling_average: f64,
+    start_time: Instant,
+    /// the number of times to apply the precalculated falloff ratio, with a reminder
+    num_physics_steps: f64,
+    rolloff_ratio: f64,
+}
+
+impl Stats {
+    pub fn new() -> Self {
+        Self {
+            total_events_registered: 0,
+            events_since_last_trigger: 0,
+            trigger_threshold: 10000,
+            average_events_per_second: 0.0,
+            rolling_average: 0.0,
+            start_time: Instant::now(),
+            num_physics_steps: 0.0,
+            rolloff_ratio: (0.001_f64).powf(1.0_f64 / STEPS_PER_SECOND),
+        }
+    }
+
+    pub fn register_event(&mut self) -> bool {
+        self.total_events_registered += 1;
+        self.events_since_last_trigger += 1;
+        self.rolling_average += 1.0;
+        if self.events_since_last_trigger >= self.trigger_threshold {
+            self.events_since_last_trigger = 0;
+            true
+        } else {
+            false
+        }
+    }
+    pub fn update(&mut self, dt: f64) {
+        // Recalculate the average_events_per_second
+        self.average_events_per_second =
+            self.total_events_registered as f64 / self.start_time.elapsed().as_secs_f64();
+
+        // Recalculate rolling average
+        self.num_physics_steps += dt * STEPS_PER_SECOND;
+        while self.num_physics_steps >= 1.0 {
+            self.rolling_average *= self.rolloff_ratio;
+            self.num_physics_steps -= 1.0;
+        }
+    }
+}
+
+struct Sonifier {
+    osc_sender: osc::Sender<Connected>,
+}
+impl Sonifier {
+    pub fn new(osc_destination: &str) -> Self {
+        Self {
+            osc_sender: osc::sender().unwrap().connect(osc_destination).unwrap(),
+        }
+    }
+    pub fn send_monitor_message(&mut self, m: MonitorMessage) {
+        let args = vec![
+            osc::Type::String(m.origin),
+            osc::Type::String(m.action),
+            osc::Type::String(m.arguments),
+        ];
+        self.osc_sender.send(("/monitor", args)).ok();
+    }
+    pub fn send_ftrace_message(
+        &mut self,
+        ftrace_kind: FtraceKind,
+        rolling_average: f32,
+        average_events_per_second: f32,
+    ) {
+        let args = vec![
+            osc::Type::String(format!("{ftrace_kind:?}")),
+            osc::Type::Float(rolling_average),
+            osc::Type::Float(average_events_per_second),
+        ];
+        self.osc_sender.send(("/ftrace", args)).ok();
+    }
+    pub fn send_stats_update(&mut self, ftrace_stats: &FtraceStats) {
+        let args = vec![
+            osc::Type::String("syscall".to_owned()),
+            osc::Type::Float(ftrace_stats.syscall.rolling_average as f32),
+        ];
+        self.osc_sender.send(("/ftrace_stats", args)).ok();
+        let args = vec![
+            osc::Type::String("random".to_owned()),
+            osc::Type::Float(ftrace_stats.random.rolling_average as f32),
+        ];
+        self.osc_sender.send(("/ftrace_stats", args)).ok();
+    }
+}
+
+const STEPS_PER_SECOND: f64 = 100.0;

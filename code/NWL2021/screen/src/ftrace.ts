@@ -98,6 +98,12 @@ export default class FTrace {
     );
 
     const event = line.substring(45 + pid_offset, line.length).trim();
+
+    const event_type = event.substring(0, 3);
+    // if(event_type != "sys") {
+    // console.log(line);
+    // console.log({ process, timestamp, event, pid, cpu });
+    // }
     return { process, timestamp, event, pid, cpu };
   }
 }
