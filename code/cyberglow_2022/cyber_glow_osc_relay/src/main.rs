@@ -451,10 +451,10 @@ struct FtraceStats {
 impl FtraceStats {
     pub fn new() -> Self {
         Self {
-            random: Stats::new(),
-            syscall: Stats::new(),
-            tcp: Stats::new(),
-            irq_matrix: Stats::new(),
+            random: Stats::new(1000),
+            syscall: Stats::new(20000),
+            tcp: Stats::new(100),
+            irq_matrix: Stats::new(100),
         }
     }
     pub fn register_event(&mut self, ftrace_kind: FtraceKind) -> bool {
@@ -496,11 +496,11 @@ struct Stats {
 }
 
 impl Stats {
-    pub fn new() -> Self {
+    pub fn new(trigger_threshold: u64) -> Self {
         Self {
             total_events_registered: 0,
             events_since_last_trigger: 0,
-            trigger_threshold: 10000,
+            trigger_threshold,
             average_events_per_second: 0.0,
             rolling_average: 0.0,
             start_time: Instant::now(),

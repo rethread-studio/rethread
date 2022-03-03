@@ -83,16 +83,6 @@ SynthDef(\dist_saw, {
 	var sig, env, freq = \freq.kr(220);
 	env = Env.linen(\atk.kr(0.01), \sus.kr(0.5), \rel.kr(0.2)).ar(2);
 	sig = DPW3Tri.ar(freq);
-	sig = AnalogTape.ar(sig, 0.0, 0.1, 0.2, oversample: 3);
-	sig = AnalogVintageDistortion.ar(
-		sig,
-		drivegain: 0.05,
-		bias: 0.0,
-		lowgain: 0.05,
-		highgain: 0.05,
-		shelvingfreq: 600,
-		oversample: 2,
-	);
 	sig = Pan2.ar(sig * \amp.kr(0.5) * env * AmpCompA.kr(freq, 20), \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
 }).add;
@@ -100,16 +90,6 @@ SynthDef(\dist_sine, {
 	var sig, env, freq = \freq.kr(220);
 	env = Env.linen(\atk.kr(0.01), \sus.kr(0.5), \rel.kr(0.2)).ar(2);
 	sig = SinOsc.ar(freq);
-	sig = AnalogTape.ar(sig, 0.1, 0.3, 0.2, oversample: 3);
-	sig = AnalogVintageDistortion.ar(
-		sig,
-		drivegain: 0.1,
-		bias: 0.2,
-		lowgain: 0.1,
-		highgain: 0.1,
-		shelvingfreq: 600,
-		oversample: 2,
-	);
 	sig = Pan2.ar(sig * \amp.kr(0.5) * env * AmpCompA.kr(freq, 20), \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
 }).add;
@@ -118,6 +98,13 @@ SynthDef(\dist_tri, {
 	var sig, env, freq = \freq.kr(220);
 	env = Env.linen(\atk.kr(0.01), \sus.kr(0.5), \rel.kr(0.2)).ar(2);
 	sig = DPW3Tri.ar(freq);
+
+	sig = Pan2.ar(sig * \amp.kr(0.5) * env * AmpCompA.kr(freq, 20), \pan.kr(0));
+	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\tape_dist, {
+	var sig = In.ar(\in.kr(10), 2);
 	sig = AnalogTape.ar(sig, 0.0, 0.1, 0.2, oversample: 3);
 	sig = AnalogVintageDistortion.ar(
 		sig,
@@ -128,7 +115,6 @@ SynthDef(\dist_tri, {
 		shelvingfreq: 600,
 		oversample: 2,
 	);
-	sig = Pan2.ar(sig * \amp.kr(0.5) * env * AmpCompA.kr(freq, 20), \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
 }).add;
 

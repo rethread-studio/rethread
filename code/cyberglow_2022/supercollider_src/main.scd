@@ -3,6 +3,9 @@
 s.waitForBoot({
 	var voice_path;
 
+	~enable_ftrace = true;
+	~enable_user = true;
+	~enable_server = true;
 
 	~whisper_amp = 1.5;
 	~useAmbisonicsDecoder = false;
@@ -56,10 +59,12 @@ s.waitForBoot({
 
 	~revBus = Bus.audio(s, 2);
 	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.15]);
+	~tapeBus = Bus.audio(s, 2);
+	~tape = Synth(\tape_dist, [\in, ~tapeBus, \mix, 0.15, \out, ~revBus]);
 
 	"synthdefs.scd".loadRelative;
 	"harmony.scd".loadRelative;
-	"gestures.scd".loadRelative;
+
 	"ftrace_processes.scd".loadRelative;
 
 
@@ -67,7 +72,7 @@ s.waitForBoot({
 	~makeMixerChannel = { | name, out, amp = 1 |
 		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation, reverb_mix = 0.25, pitch_offset = 0;
 		bus = Bus.audio(s, ~mixerChannelOutputs);
-		reverb_bus = Bus.audio(s, 2);
+		// reverb_bus = Bus.audio(s, 2);
 		group = Group(s);
 		azimuth = ~fixedAzimuthPositions.at(name.asSymbol);
 		if(azimuth == nil, {
@@ -116,11 +121,11 @@ s.waitForBoot({
 				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
 			}
 		);
-		reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 1.7, \damp, 0.45],
-			target: synth, addAction: \addBefore);
+		// reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 1.7, \damp, 0.45],
+		// target: synth, addAction: \addBefore);
 		(
 			my_synth: synth,
-			my_reverb_synth: reverb_synth,
+			// my_reverb_synth: reverb_synth,
 			my_group: group,
 			my_amp: amp,
 			my_send_amp: 0.0,
@@ -291,6 +296,9 @@ s.waitForBoot({
 	~channels.beep = ~makeMixerChannel.("beep", ~revBus);
 	~channels.tick = ~makeMixerChannel.("tick", ~revBus);
 	~channels.noise = ~makeMixerChannel.("tick", 0);
+	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~tapeBus);
+	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~tapeBus);
+
 
 
 	// Load buffers with voice recordings of services
@@ -329,14 +337,62 @@ s.waitForBoot({
 		);
 		if (buf != nil, {
 			channel.play_on(\service_voice, [\buf, buf, \amp, ~whisper_amp, \out, channel.bus]);
-		});
+		});y
 	};
 
+	"gestures.scd".loadRelative;
 	"osc.scd".loadRelative;
 
-	~start_tick_process.();
-	~start_beep_process.();
+	// ~start_tick_process.();
+	// ~start_beep_process.();
 });
+)
+
+(
+// "slow down" == go darker and slower
+var lead_up_time = 6, cresc_time = 2;
+
+{
+	// high pitch
+	{
+		var sig = SinOsc.ar([3500, 3520], mul: 0.1);
+		sig = sig * Env([0, 1.0, 0], [lead_up_time, 0.001]).ar(2);
+		sig
+	}.play;
+
+	// mid freq noisy tone
+	(lead_up_time - cresc_time).wait;
+	~cresc = Synth(\windy, [\freq, 100, \out, ~revBus, \amp, 0.7, \atk, cresc_time, \curve_atk, 7, \rel, 0]);
+
+	cresc_time.wait;
+	~cresc.release;
+	Synth(\tick3, [\freq, 8000, \out, ~revBus, \amp, 0.25]);
+	Synth(\tick3, [\freq, 12000, \out, ~revBus, \amp, 0.25]);
+	// new settings:
+	~ftrace_noise_freq_ratio = 0.1;
+	~freq_ratio = 0.5;
+	// low pitch rumble
+	~lowRumble = Synth(\windy, [\freq, 15, \out, ~lowBus, \amp, 0.2, \atk, 0.0, \rel, 5]);
+	// lower pitch
+	{
+		var sig = SinOsc.ar([3500, 3520]*0.25, mul: 0.125);
+		sig = sig * Env([0.5, 0], [2]).ar(2);
+		Out.ar(~revBus.index, sig);
+	}.play;
+	0.5.wait;
+	~lowRumble.release;
+}.fork;
+
+
+)
+
+~enable_ftrace = false;
+	~enable_user = false;
+	~enable_server = false;
+
+(
+~ftrace_noise_freq_ratio = 1;
+~freq_ratio = 1.0;
 )
 
 
@@ -344,3 +400,5 @@ s.waitForBoot({
 ~channels.user_whispers.play_on(\service_voice, [\buf, ~voiceBuffers.click, \amp, ~whisper_amp, \out, ~channels.user_whispers.bus]);
 
 ~start_tick_process.()
+~start_beep_process.();
+~stop_beep_process.()
