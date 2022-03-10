@@ -160,10 +160,10 @@ export default async function start() {
   server.listen(config.SCREEN_PORT);
   console.log("Screen server started on port: " + config.SCREEN_PORT);
 
-  // const ftrace = new FTrace(["tcp", "random", "syscalls"]);
-  // await ftrace.init();
-  // await ftrace.start();
-  // ftrace.readTrace();
+  const ftrace = new FTrace(["tcp", "random", "syscalls"]);
+  await ftrace.init();
+  await ftrace.start();
+  ftrace.readTrace();
 }
 
 start();
