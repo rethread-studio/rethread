@@ -8,8 +8,9 @@ class Pixel {
     status = MOVE;
     color = "#000000";
     size = { width: 1, height: 1 };
+    id = null;
 
-    constructor(posX, posY, destX, destY, velocityX, veolocityY, color) {
+    constructor(posX, posY, destX, destY, velocityX, veolocityY, color, id) {
         this.position = createVector(posX, posY);
         this.target = createVector(destX, destY);
         this.velocity = createVector(velocityX, veolocityY);
@@ -17,6 +18,15 @@ class Pixel {
         this.maxSpeed = velocityX + velocityX / 2;
         this.maxForce = 0.9;
         this.acceleration = createVector(0, 0);
+        this.id = id;
+    }
+
+    setStatus(newStatus = IDDLE) {
+        this.status = newStatus;
+    }
+
+    setTarget(newTarget) {
+        this.target = newTarget;
     }
 
     update() {
@@ -43,14 +53,11 @@ class Pixel {
         this.acceleration.add(force);
     }
 
-    seek(target) {
-        const desired = p5.Vector.sub(this.target, this.position);
-        desired.normalize();
-        desired.mult(this.maxSpeed);
-        const steer = p5.Vector.sub(desired, this.velocity);
-        steer.limit(this.maxForce);
-        this.applyForce(steer);
+    moveStep() {
+        this.position = this.target;
+        this.status = IDDLE;
     }
+
 
     arrive(target) {
         const desired = p5.Vector.sub(this.target, this.position);
