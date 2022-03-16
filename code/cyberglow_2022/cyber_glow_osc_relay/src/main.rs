@@ -25,7 +25,7 @@ struct MonitorMessage {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct FtraceMessage {
-    data: String,
+    kind: FtraceKind,
     timestamp: i64,
 }
 
@@ -42,18 +42,18 @@ impl Message {
             Message::Ftrace(m) => m.timestamp,
         }
     }
-    fn send(self, sender: &osc::Sender<osc::Connected>) {
+    fn send(&self, sender: &osc::Sender<osc::Connected>) {
         match self {
             Message::Monitor(m) => {
                 let args = vec![
-                    osc::Type::String(m.origin),
-                    osc::Type::String(m.action),
-                    osc::Type::String(m.arguments),
+                    osc::Type::String(m.origin.clone()),
+                    osc::Type::String(m.action.clone()),
+                    osc::Type::String(m.arguments.clone()),
                 ];
                 sender.send(("/cyberglow", args)).ok();
             }
             Message::Ftrace(m) => {
-                let args = vec![osc::Type::String(m.data)];
+                let args = vec![osc::Type::String(format!("{:?}", m.kind))];
                 sender.send(("/ftrace", args)).ok();
             }
         }
@@ -253,11 +253,15 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                         if let Some(args) = message.args {
                             if let osc::Type::String(data) = &args[0] {
                                 let now = Utc::now();
-                                let new_message = Message::Ftrace(FtraceMessage {
-                                    data: data.clone(),
-                                    timestamp: now.timestamp_millis(),
-                                });
-                                Some(new_message)
+                                if let Some(ftrace_kind) = parse_ftrace(data) {
+                                    let new_message = Message::Ftrace(FtraceMessage {
+                                        kind: ftrace_kind,
+                                        timestamp: now.timestamp_millis(),
+                                    });
+                                    Some(new_message)
+                                } else {
+                                    None
+                                }
                             } else {
                                 None
                             }
@@ -270,7 +274,7 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                     // Do something with the message
                     if let Some(new_message) = new_message {
                         if args.listen {
-                            pass_through_message(&sender, &new_message);
+                            new_message.send(&sender);
                         }
                         if let Some(ref mut sonifier) = &mut sonifier {
                             sonify_message(sonifier, &mut ftrace_stats, &new_message);
@@ -340,23 +344,6 @@ fn print_all_message_types(messages: &Vec<Message>) {
     }
 }
 
-fn pass_through_message(sender: &osc::Sender<osc::Connected>, message: &Message) {
-    match message {
-        Message::Monitor(m) => {
-            let args = vec![
-                osc::Type::String(m.origin.clone()),
-                osc::Type::String(m.action.clone()),
-                osc::Type::String(m.arguments.clone()),
-            ];
-            sender.send(("/cyberglow", args)).ok();
-        }
-        Message::Ftrace(m) => {
-            let args = vec![osc::Type::String(m.data.clone())];
-            sender.send(("/ftrace", args)).ok();
-        }
-    }
-}
-
 fn sonify_message(sonifier: &mut Sonifier, ftrace_stats: &mut FtraceStats, message: &Message) {
     match message {
         Message::Monitor(monitor_message) => {
@@ -365,16 +352,15 @@ fn sonify_message(sonifier: &mut Sonifier, ftrace_stats: &mut FtraceStats, messa
             sonifier.send_monitor_message(monitor_message.clone());
         }
         Message::Ftrace(ftrace_message) => {
-            if let Some(ftrace_kind) = parse_ftrace(&ftrace_message.data) {
-                if ftrace_stats.register_event(ftrace_kind) {
-                    let stats = ftrace_stats.get_stats(ftrace_kind);
-                    // there was a trigger
-                    sonifier.send_ftrace_message(
-                        ftrace_kind,
-                        stats.rolling_average as f32,
-                        stats.average_events_per_second as f32,
-                    )
-                }
+            let ftrace_kind = ftrace_message.kind;
+            if ftrace_stats.register_event(ftrace_kind) {
+                let stats = ftrace_stats.get_stats(ftrace_kind);
+                // there was a trigger
+                sonifier.send_ftrace_message(
+                    ftrace_kind,
+                    stats.rolling_average as f32,
+                    stats.average_events_per_second as f32,
+                )
             }
         }
     }
@@ -417,7 +403,7 @@ fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
         ""
     };
     let ftrace_kind = match event_prefix {
-        "random" | "dd" | "redit" | "mix" | "add" | "credit" | "prandom" | "urandom" => {
+        "random" | "dd" | "redit" | "mix" | "add" | "credit" | "prandom" | "urandom" | "et" => {
             Some(FtraceKind::Random)
         }
         "sys" | "ys" => Some(FtraceKind::Syscall),
@@ -432,7 +418,7 @@ fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
     ftrace_kind
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 enum FtraceKind {
     Random,
     Syscall,
@@ -451,8 +437,8 @@ struct FtraceStats {
 impl FtraceStats {
     pub fn new() -> Self {
         Self {
-            random: Stats::new(1000),
-            syscall: Stats::new(20000),
+            random: Stats::new(100),
+            syscall: Stats::new(60000),
             tcp: Stats::new(100),
             irq_matrix: Stats::new(100),
         }
