@@ -11,7 +11,9 @@ const glitchConfig = {
     position: {
         x: 0,
         y: 0
-    }
+    },
+    cropPositions: []
+
 }
 
 function initGlitch() {
@@ -30,6 +32,13 @@ function initGlitch() {
         x: game.setup.width - 1,
         y: game.setup.height - 1,
     }
+
+    glitchConfig.cropPositions = [
+        { x: 0, y: 0 },
+        { x: game.setup.unitSize / 2, y: 0 },
+        { x: 0, y: game.setup.unitSize / 2 },
+        { x: game.setup.unitSize / 2, y: game.setup.unitSize / 2 },
+    ]
 }
 
 function clearGlitchCanvas() {
@@ -37,12 +46,7 @@ function clearGlitchCanvas() {
     gctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-//a glictch has
-// image url
-// type: 1,2,3,4
-// posx
-// posy
-// rotation
+
 
 function getGlitchPos() {
     glitchConfig.position = {
@@ -60,12 +64,14 @@ function newGlitch(_playerId) {
     const player = game.players.find(p => p.userID == _playerId);
     if (player == undefined || player.laureate == undefined) return null;
     const { x, y } = getGlitchPos();
+
     return {
         x: x,
         y: y,
         imagePath: player.laureate.imagePath,
-        type: Math.floor(Math.random() * 4),
-        rotation: glitchConfig.rotation[Math.floor(Math.random() * glitchConfig.rotation.length)]
+        cropPos: glitchConfig.cropPositions[Math.floor(Math.random() * 4)],
+        cropSize: { w: game.setup.unitSize / 4, h: game.setup.unitSize / 4 },
+        rotation: glitchConfig.rotation[Math.floor(Math.random() * glitchConfig.rotation.length)] * Math.PI / 180,
     }
 }
 
@@ -80,21 +86,24 @@ async function renderGlitch() {
     if (glitchConfig.glitches.length == 0) return;
 
     for (const glitch of glitchConfig.glitches) {
-        // console.log(glitch)
         const imagePath = `/img/laureates/${glitch.imagePath}`;
 
-        if (!imageCache[imagePath]) {
-            imageCache[imagePath] = new Image(width, height);
-            imageCache[imagePath].src = imagePath;
+        if (!imageCache[imagePath + ".glitch"]) {
+            imageCache[imagePath + ".glitch"] = new Image(width, height);
+            imageCache[imagePath + ".glitch"].src = imagePath;
         }
-        const angle = 0;//getAngle(player.status);
+
         await renderGlitchImage(
-            imageCache[imagePath],
+            imageCache[imagePath + ".glitch"],
+            glitch.cropPos.x,
+            glitch.cropPos.y,
+            glitch.cropSize.w,
+            glitch.cropSize.h,
             glitch.x * game.setup.unitSize + game.setup.unitSize / 2,
             glitch.y * game.setup.unitSize + game.setup.unitSize / 2,
             width,
             height,
-            angle,
+            glitch.rotation,
             scale
         );
     }

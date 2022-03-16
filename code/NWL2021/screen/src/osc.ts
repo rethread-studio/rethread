@@ -70,6 +70,15 @@ export function send(
       opt?.ip ? opt?.ip : config.OSC_IP,
       opt?.port ? opt?.port : config.OSC_PORT
     );
+    // console.log(
+    //   {
+    //     address: opt?.address ? opt?.address : config.OSC_ADDRESS,
+    //     args,
+    //   },
+    //   opt?.ip ? opt?.ip : config.OSC_IP,
+    //   opt?.port ? opt?.port : config.OSC_PORT
+    // );
+
   } catch (error) {
     console.log(args, error);
   }
