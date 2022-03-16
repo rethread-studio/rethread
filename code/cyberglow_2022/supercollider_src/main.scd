@@ -46,6 +46,9 @@ s.waitForBoot({
 		};
 	};
 
+	"synthdefs.scd".loadRelative;
+	"transitions.scd".loadRelative;
+
 	~rootFreq = 60.midicps;
 	~s53 = Scale.chromatic('et53');
 	~clock = TempoClock(1, queueSize: 8192);
@@ -62,7 +65,7 @@ s.waitForBoot({
 	~tapeBus = Bus.audio(s, 2);
 	~tape = Synth(\tape_dist, [\in, ~tapeBus, \mix, 0.15, \out, ~revBus]);
 
-	"synthdefs.scd".loadRelative;
+
 	"harmony.scd".loadRelative;
 
 	"ftrace_processes.scd".loadRelative;
@@ -343,8 +346,62 @@ s.waitForBoot({
 	"gestures.scd".loadRelative;
 	"osc.scd".loadRelative;
 
-	// ~start_tick_process.();
-	// ~start_beep_process.();
+	~start_tick_process.();
+	~start_beep_process.();
+
+	{
+		// Automatic settings changing
+		var presets = [
+			{
+				~transitionSlowdown.(8, 3, rrand(0.1, 0.5), [0.5, 0.25, 1.0].choose);
+				~enable_ftrace = true;
+				~enable_user = true;
+				~enable_server = true;
+			},
+			{
+				~transitionSlowdown.(8, 3, rrand(0.1, 0.5), [0.5, 0.25, 1.0].choose);
+				~enable_ftrace = true;
+				~enable_user = true;
+				~enable_server = false;
+			},
+			{
+				~transitionSlowdown.(8, 3, rrand(0.1, 0.5), [0.5, 0.25, 1.0].choose);
+				~start_beep_process.();
+				~start_tick_process.();
+				~enable_ftrace = true;
+				~enable_user = false;
+				~enable_server = false;
+			},
+			{
+				~transitionSlowdown.(8, 3, rrand(0.1, 0.5), [0.5, 0.25, 1.0].choose);
+				~stop_beep_process.();
+				~stop_tick_process.();
+				~enable_ftrace = false;
+				~enable_user = true;
+				~enable_server = true;
+			},
+			{
+				~stop_beep_process.();
+				~stop_tick_process.();
+				~enable_ftrace = true;
+				~enable_user = false;
+				~enable_server = true;
+				~ftrace_noise_freq_ratio = rrand(0.1, 1.0);
+			},
+			{
+				~stop_beep_process.();
+				~stop_tick_process.();
+				~enable_ftrace = false;
+				~enable_user = true;
+				~enable_server = false;
+				~freq_ratio = [0.5, 1.0].choose;
+			},
+		];
+		loop {
+			presets.choose.();
+			rrand(20, 40).wait;
+		}
+	}.fork;
 });
 )
 
@@ -382,13 +439,11 @@ var lead_up_time = 6, cresc_time = 2;
 	0.5.wait;
 	~lowRumble.release;
 }.fork;
-
-
 )
 
-~enable_ftrace = false;
-	~enable_user = false;
-	~enable_server = false;
+~enable_ftrace = true;
+~enable_user = false;
+~enable_server = true;
 
 (
 ~ftrace_noise_freq_ratio = 1;
@@ -400,5 +455,6 @@ var lead_up_time = 6, cresc_time = 2;
 ~channels.user_whispers.play_on(\service_voice, [\buf, ~voiceBuffers.click, \amp, ~whisper_amp, \out, ~channels.user_whispers.bus]);
 
 ~start_tick_process.()
+~stop_tick_process.()
 ~start_beep_process.();
 ~stop_beep_process.()
