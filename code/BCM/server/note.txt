@@ -1,0 +1,13 @@
+scan network: nmap -sn 10.42.0.0/24
+
+NORTH: 10.42.0.140 
+SOUTH: 10.42.0.196
+WEST: 10.42.0.55
+EAST: 
+ROUTER: 10.42.0.67
+Coordinator: ws://10.42.0.1:8000
+
+
+Start
+node station.js -n NORTH -i wlan0 -c ws://10.42.0.1:8000
+
