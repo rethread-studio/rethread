@@ -1,12 +1,18 @@
-const IDDLE = "IDDLE";
-const MOVE = "MOVE";
+const IDDLE = "iddle";
+const MOVE = "move";
+
+const movement = {
+    "PERPIXEL": "per_pixel",
+    "ALLPIXELS": "all_pixels"
+}
 
 const state = {
     status: "PIXELDETAIL",
     backgroundCol: "#000000",
-    frameRate: 30
+    frameRate: 60
 }
 
 let pixelImage;
 let img;
+let canvas;
 
