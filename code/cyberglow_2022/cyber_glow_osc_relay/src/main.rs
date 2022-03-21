@@ -6,6 +6,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use nannou_osc as osc;
+use num_format::{SystemLocale, ToFormattedString};
 use once_cell::sync::Lazy;
 use osc::Connected;
 use serde::{Deserialize, Serialize};
@@ -27,6 +28,7 @@ use tui::{
     widgets::{Block, BorderType, Borders, List, ListItem, Paragraph, Widget},
     Terminal,
 };
+
 static SYSCALL_MAP: Lazy<Mutex<HashMap<String, usize>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 static NUM_FTRACE_EVENTS: Lazy<AtomicU64> = Lazy::new(|| AtomicU64::new(0));
 static NUM_MONITOR_EVENTS: Lazy<AtomicU64> = Lazy::new(|| AtomicU64::new(0));
@@ -187,6 +189,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
+    let locale = SystemLocale::default().unwrap();
+
     // terminal draw loop
     std::thread::spawn(move || loop {
         terminal
@@ -214,14 +218,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         Spans::from(vec![
                             Span::raw("ftrace: "),
                             Span::styled(
-                                format!("{num_ftrace}"),
+                                num_ftrace.to_formatted_string(&locale),
+                                // format!("{num_ftrace}"),
                                 Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
                             ),
                         ]),
                         Spans::from(vec![
                             Span::raw("monitor: "),
                             Span::styled(
-                                format!("{num_monitor}"),
+                                num_monitor.to_formatted_string(&locale),
+                                // format!("{num_monitor}"),
                                 Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
                             ),
                         ]),
@@ -285,15 +291,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         {
             TerminalEvent::Input(event) => match event.code {
                 KeyCode::Char('q') => {
-                    // restore terminal
-                    disable_raw_mode().expect("able to disable raw mode");
-                    execute!(
-                        terminal.backend_mut(),
-                        LeaveAlternateScreen,
-                        DisableMouseCapture
-                    )
-                    .expect("able to execute terminal exctions");
-                    terminal.show_cursor().expect("able to show cursor");
                     ctrl_c_quit.store(true, Ordering::Relaxed);
                     break;
                 }
@@ -301,10 +298,30 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             },
             TerminalEvent::Tick => {}
         }
+        if ctrl_c_quit.load(Ordering::Relaxed) {
+            // restore terminal
+            disable_raw_mode().expect("able to disable raw mode");
+            execute!(
+                terminal.backend_mut(),
+                LeaveAlternateScreen,
+                DisableMouseCapture
+            )
+            .expect("able to execute terminal exctions");
+            terminal.show_cursor().expect("able to show cursor");
+        }
+    });
+
+    let new_quit = quit.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_secs(10));
+        new_quit.store(true, Ordering::Relaxed);
+        println!("ftrace: {}", NUM_FTRACE_EVENTS.load(Ordering::SeqCst));
     });
 
     main_loop(args, quit);
 
+    // Give everything some time to properly clean up before exiting
+    std::thread::sleep(Duration::from_millis(300));
     Ok(())
 }
 
@@ -389,8 +406,8 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
     let mut last_message_time = Instant::now();
     let mut last_stats_update_time = Instant::now();
     'main_loop: loop {
-        if args.record || args.listen || args.sonify {
-            if let Ok(Some((packet, _addr))) = receiver.try_recv() {
+        while let Ok(Some((packet, _addr))) = receiver.try_recv() {
+            if args.record || args.listen || args.sonify {
                 for message in packet.into_msgs() {
                     // Parse message
                     let new_message = if message.addr == "/cyberglow" {
@@ -465,40 +482,41 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                     }
                 }
             }
-        }
-        if args.play_back {
-            if last_message_time.elapsed().as_millis()
-                >= playback_messages[message_index].ts() as u128
-            {
-                playback_messages[message_index].clone().send(&sender);
-                last_message_time = Instant::now();
-                message_index += 1;
-                if message_index >= playback_messages.len() {
-                    println!("Finished playing all events!");
-                    if !args.record && !args.listen {
-                        break 'main_loop;
+            if args.play_back {
+                if last_message_time.elapsed().as_millis()
+                    >= playback_messages[message_index].ts() as u128
+                {
+                    playback_messages[message_index].clone().send(&sender);
+                    last_message_time = Instant::now();
+                    message_index += 1;
+                    if message_index >= playback_messages.len() {
+                        println!("Finished playing all events!");
+                        if !args.record && !args.listen {
+                            break 'main_loop;
+                        }
                     }
                 }
             }
-        }
-        if last_stats_update_time.elapsed().as_millis() > 10 {
-            let dt = last_stats_update_time.elapsed().as_secs_f64();
-            ftrace_stats.update(dt);
-            last_stats_update_time = Instant::now();
-            // Send a stats update
-            if let Some(ref mut sonifier) = sonifier {
-                sonifier.send_stats_update(&ftrace_stats);
+            if last_stats_update_time.elapsed().as_millis() > 10 {
+                let dt = last_stats_update_time.elapsed().as_secs_f64();
+                ftrace_stats.update(dt);
+                last_stats_update_time = Instant::now();
+                // Send a stats update
+                if let Some(ref mut sonifier) = sonifier {
+                    sonifier.send_stats_update(&ftrace_stats);
+                }
             }
-        }
 
-        if quit.load(Ordering::Relaxed) {
-            println!("Quitting!");
-            if args.record {
-                recorded_messages.save_data();
+            if quit.load(Ordering::Relaxed) {
+                println!("Quitting!");
+                if args.record {
+                    recorded_messages.save_data();
+                }
+                break 'main_loop;
             }
-            break 'main_loop;
         }
-        // Sleep a little so we don't run at 100% CPU usage all the time
+        // Sleep a little if the message queue is empty so we don't run at 100% CPU usage all the time
+        // This seems to maintain full throughput, but it is hard to verify
         // std::thread::sleep(Duration::from_micros(1));
     }
 }

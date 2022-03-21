@@ -16,6 +16,7 @@ once_cell = "1.9.0"
 crossterm = { version = "0.19", features = [ "serde" ] }
 tui = { version = "0.14", default-features = false, features = ['crossterm', 'serde'] }
 crossbeam = "0.8.1"
+num-format = { version = "0.4", features = ["with-system-locale"] }
 
 [profile.release]
 debug = true
