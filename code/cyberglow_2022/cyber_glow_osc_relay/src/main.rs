@@ -1,20 +1,35 @@
 use chrono::{DateTime, Utc};
 use clap::Parser;
-use ctrlc;
+use crossterm::{
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
 use nannou_osc as osc;
 use once_cell::sync::Lazy;
 use osc::Connected;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::convert::TryInto;
 use std::fs;
 use std::fs::File;
+use std::io;
 use std::io::prelude::*;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::{Duration, Instant};
-
+use std::{collections::HashMap, sync::atomic::AtomicU64};
+use tui::{
+    backend::CrosstermBackend,
+    layout::{Alignment, Constraint, Direction, Layout},
+    style::{Modifier, Style},
+    text::{Span, Spans},
+    widgets::{Block, BorderType, Borders, List, ListItem, Paragraph, Widget},
+    Terminal,
+};
+static SYSCALL_MAP: Lazy<Mutex<HashMap<String, usize>>> = Lazy::new(|| Mutex::new(HashMap::new()));
+static NUM_FTRACE_EVENTS: Lazy<AtomicU64> = Lazy::new(|| AtomicU64::new(0));
+static NUM_MONITOR_EVENTS: Lazy<AtomicU64> = Lazy::new(|| AtomicU64::new(0));
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct MonitorMessage {
     origin: String,
@@ -113,26 +128,184 @@ struct Args {
     osc_destination: String,
 }
 
-fn main() {
+enum TerminalEvent {
+    Input(event::KeyEvent),
+    Tick,
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let quit = Arc::new(AtomicBool::new(false));
 
     let ctrl_c_quit = quit.clone();
-    ctrlc::set_handler(move || {
-        println!("received Ctrl+C!");
+    // ctrlc::set_handler(move || {
+    //     println!("received Ctrl+C!");
 
-        if ctrl_c_quit.load(Ordering::Relaxed) {
-            // If ctrl+c was already pressed once
-            panic!("Failed to quit gracefully");
-        } else {
-            ctrl_c_quit.store(true, Ordering::Relaxed);
-        }
-    })
-    .expect("Error setting Ctrl-C handler");
+    //     if ctrl_c_quit.load(Ordering::Relaxed) {
+    //         // If ctrl+c was already pressed once
+    //         panic!("Failed to quit gracefully");
+    //     } else {
+    //         ctrl_c_quit.store(true, Ordering::Relaxed);
+    //     }
+    // })
+    // .expect("Error setting Ctrl-C handler");
 
     let args = Args::parse();
     println!("Args: {:?}", args);
 
+    // input loop
+    let (tx, rx) = crossbeam::channel::unbounded();
+    let tick_rate = Duration::from_millis(200);
+    std::thread::spawn(move || {
+        let mut last_tick = Instant::now();
+        loop {
+            let timeout = tick_rate
+                .checked_sub(last_tick.elapsed())
+                .unwrap_or_else(|| Duration::from_secs(0));
+
+            if event::poll(timeout).expect("poll works") {
+                if let Event::Key(key) = event::read().expect("can read events") {
+                    tx.send(TerminalEvent::Input(key)).expect("can send events");
+                }
+            }
+
+            if last_tick.elapsed() >= tick_rate {
+                if let Ok(_) = tx.send(TerminalEvent::Tick) {
+                    last_tick = Instant::now();
+                }
+            }
+        }
+    });
+
+    let stdout = io::stdout();
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+
+    // setup terminal
+    enable_raw_mode()?;
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+
+    // terminal draw loop
+    std::thread::spawn(move || loop {
+        terminal
+            .draw(|f| {
+                use tui::style::Color;
+                use tui::widgets::{Row, Table};
+                let size = f.size();
+                let chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .margin(1)
+                    .constraints(
+                        [
+                            Constraint::Percentage(10),
+                            Constraint::Percentage(80),
+                            Constraint::Percentage(10),
+                        ]
+                        .as_ref(),
+                    )
+                    .split(f.size());
+                // Overall stats
+                {
+                    let num_ftrace = NUM_FTRACE_EVENTS.load(Ordering::SeqCst);
+                    let num_monitor = NUM_MONITOR_EVENTS.load(Ordering::SeqCst);
+                    let home = Paragraph::new(vec![
+                        Spans::from(vec![
+                            Span::raw("ftrace: "),
+                            Span::styled(
+                                format!("{num_ftrace}"),
+                                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                            ),
+                        ]),
+                        Spans::from(vec![
+                            Span::raw("monitor: "),
+                            Span::styled(
+                                format!("{num_monitor}"),
+                                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                            ),
+                        ]),
+                    ])
+                    .alignment(Alignment::Left)
+                    .block(
+                        Block::default()
+                            .borders(Borders::ALL)
+                            .style(Style::default().fg(Color::White))
+                            .title("cyber|glow message parsing stats")
+                            .border_type(BorderType::Plain),
+                    );
+                    f.render_widget(home, chunks[0]);
+                }
+                // Syscall table
+                let syscall_data: Vec<_> = {
+                    let map = SYSCALL_MAP.lock().unwrap();
+                    let mut syscall_vec = map
+                        .keys()
+                        .zip(map.values())
+                        .map(|(key, value)| (key.clone(), *value))
+                        .collect::<Vec<_>>();
+
+                    syscall_vec.sort_unstable_by(|a, b| b.1.cmp(&a.1));
+                    syscall_vec
+                        .into_iter()
+                        .map(|(key, value)| Row::new(vec![key, format!("{value}")]))
+                        .collect()
+                };
+                let syscall_table = Table::new(syscall_data)
+                    // You can set the style of the entire Table.
+                    .style(Style::default().fg(Color::White))
+                    // It has an optional header, which is simply a Row always visible at the top.
+                    .header(
+                        Row::new(vec!["Syscall", "Count"])
+                            .style(Style::default().fg(Color::Yellow))
+                            // If you want some space between the header and the rest of the rows, you can always
+                            // specify some margin at the bottom.
+                            .bottom_margin(1),
+                    )
+                    // As any other widget, a Table can be wrapped in a Block.
+                    .block(
+                        Block::default()
+                            .title("Syscall table")
+                            .borders(Borders::ALL),
+                    )
+                    // Columns widths are constrained in the same way as Layout...
+                    .widths(&[Constraint::Length(30), Constraint::Length(10)])
+                    // ...and they can be separated by a fixed spacing.
+                    .column_spacing(1)
+                    // If you wish to highlight a row in any specific way when it is selected...
+                    .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+                    // ...and potentially show a symbol in front of the selection.
+                    .highlight_symbol(">>");
+                f.render_widget(syscall_table, chunks[1]);
+            })
+            .expect("terminal draw function to work without error");
+        match rx
+            .recv()
+            .expect("terminal event loop to receive message from input channel")
+        {
+            TerminalEvent::Input(event) => match event.code {
+                KeyCode::Char('q') => {
+                    // restore terminal
+                    disable_raw_mode().expect("able to disable raw mode");
+                    execute!(
+                        terminal.backend_mut(),
+                        LeaveAlternateScreen,
+                        DisableMouseCapture
+                    )
+                    .expect("able to execute terminal exctions");
+                    terminal.show_cursor().expect("able to show cursor");
+                    ctrl_c_quit.store(true, Ordering::Relaxed);
+                    break;
+                }
+                _ => {}
+            },
+            TerminalEvent::Tick => {}
+        }
+    });
+
     main_loop(args, quit);
+
+    Ok(())
 }
 
 fn move_old_save_file(save_path: &PathBuf) {
@@ -221,6 +394,7 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                 for message in packet.into_msgs() {
                     // Parse message
                     let new_message = if message.addr == "/cyberglow" {
+                        NUM_MONITOR_EVENTS.fetch_add(1, Ordering::SeqCst);
                         // println!("New message to {}", message.addr);
                         if let Some(mess_args) = message.args {
                             let mut o = None;
@@ -250,6 +424,7 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                             None
                         }
                     } else if message.addr == "/ftrace" {
+                        NUM_FTRACE_EVENTS.fetch_add(1, Ordering::SeqCst);
                         if let Some(args) = message.args {
                             if let osc::Type::String(data) = &args[0] {
                                 let now = Utc::now();
@@ -368,9 +543,6 @@ fn sonify_message(sonifier: &mut Sonifier, ftrace_stats: &mut FtraceStats, messa
     }
 }
 
-use std::sync::Mutex;
-static SYSCALL_SET: Lazy<Mutex<HashMap<String, usize>>> = Lazy::new(|| Mutex::new(HashMap::new()));
-
 fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
     /*
            string event_copy = event;
@@ -408,9 +580,8 @@ fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
         ""
     };
     let ftrace_kind = match event_prefix {
-        "random" | "dd" | "redit" | "mix" | "add" | "credit" | "prandom" | "urandom" | "et" | "get" => {
-            Some(FtraceKind::Random)
-        }
+        "random" | "dd" | "redit" | "mix" | "add" | "credit" | "prandom" | "urandom" | "et"
+        | "get" => Some(FtraceKind::Random),
         "sys" | "ys" => Some(FtraceKind::Syscall),
         "tcp" | "cp" => Some(FtraceKind::Tcp),
         "irq_matrix" | "ix" => Some(FtraceKind::IrqMatrix),
@@ -421,18 +592,15 @@ fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
     } // println!("{ftrace_kind:?}");
 
     if matches!(ftrace_kind, Some(FtraceKind::Syscall)) {
-        let mut map = SYSCALL_SET.lock().unwrap();
+        let mut map = SYSCALL_MAP.lock().unwrap();
         *map.entry(event_type.to_string()).or_insert(0) += 1;
         print_map_stats(map);
-        
     }
 
     ftrace_kind
 }
 
-fn print_map_stats(map: MutexGuard<HashMap<String, usize>>) {
-    
-}
+fn print_map_stats(map: std::sync::MutexGuard<HashMap<String, usize>>) {}
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 enum FtraceKind {
