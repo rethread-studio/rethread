@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use clap::Parser;
 use ctrlc;
 use nannou_osc as osc;
-use once_cell::unsync::Lazy;
+use once_cell::sync::Lazy;
 use osc::Connected;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -350,7 +350,7 @@ fn sonify_message(sonifier: &mut Sonifier, ftrace_stats: &mut FtraceStats, messa
     match message {
         Message::Monitor(monitor_message) => {
             // do nothing for now
-            println!("Received monitor message: {monitor_message:?}");
+            // println!("Received monitor message: {monitor_message:?}");
             sonifier.send_monitor_message(monitor_message.clone());
         }
         Message::Ftrace(ftrace_message) => {
@@ -367,6 +367,9 @@ fn sonify_message(sonifier: &mut Sonifier, ftrace_stats: &mut FtraceStats, messa
         }
     }
 }
+
+use std::sync::Mutex;
+static SYSCALL_SET: Lazy<Mutex<HashMap<String, usize>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
 fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
     /*
@@ -405,7 +408,7 @@ fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
         ""
     };
     let ftrace_kind = match event_prefix {
-        "random" | "dd" | "redit" | "mix" | "add" | "credit" | "prandom" | "urandom" | "et" => {
+        "random" | "dd" | "redit" | "mix" | "add" | "credit" | "prandom" | "urandom" | "et" | "get" => {
             Some(FtraceKind::Random)
         }
         "sys" | "ys" => Some(FtraceKind::Syscall),
@@ -417,7 +420,18 @@ fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
         println!("Unknown ftrace:\n\"{}\"", event_type);
     } // println!("{ftrace_kind:?}");
 
+    if matches!(ftrace_kind, Some(FtraceKind::Syscall)) {
+        let mut map = SYSCALL_SET.lock().unwrap();
+        *map.entry(event_type.to_string()).or_insert(0) += 1;
+        print_map_stats(map);
+        
+    }
+
     ftrace_kind
+}
+
+fn print_map_stats(map: MutexGuard<HashMap<String, usize>>) {
+    
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
