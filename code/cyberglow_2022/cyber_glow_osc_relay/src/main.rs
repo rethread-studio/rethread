@@ -323,6 +323,8 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
             }
             break 'main_loop;
         }
+        // Sleep a little so we don't run at 100% CPU usage all the time
+        std::thread::sleep(Duration::from_millis(1));
     }
 }
 
