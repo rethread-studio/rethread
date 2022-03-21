@@ -24,7 +24,9 @@ iframe {
 }
 .instruction {
   position: fixed;
-  top: 50%;
+  /* top: 50%;
+  left: 50%; */
+  top: 10%;
   left: 50%;
   /* bring your own prefixes */
   transform: translate(-50%, -50%);
@@ -34,11 +36,17 @@ iframe {
 
   padding: 17px 30px;
 
-  width: 80%;
+  width: 90%;
   margin: auto;
 }
 .welcome .instruction {
-  width: 825px;
+  /* width: 825px; */
+}
+.instruction > .block > .title {
+  color: #b9b9b9;
+  font-size: 90pt;
+  margin-right: 100pt;
+  text-align: left;
 }
 .block {
   display: inline-block;
@@ -50,6 +58,7 @@ iframe {
   /* padding-left: 30px; */
   margin: 12px auto;
   margin-bottom: 1em;
+  text-align: right;
 }
 .tab {
   margin-left: 50px;
