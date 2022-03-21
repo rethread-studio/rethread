@@ -12,9 +12,29 @@
 
 ~start_beep_process = {
 	~beep_routine = Routine({
-		var amp_stream_1 = Prand([Pgeom(0.02, 1.08, 20), Pgeom(0.04, 1.1, 10),Pgeom(0.1, 0.95, 20), Pgeom(0.08, 0.92, 10)], inf).asStream,
+		var amp_stream_1 = Prand([
+			Pgeom(0.02, 1.08, 20),
+			Pgeom(0.04, 1.1, 10),
+			Pgeom(0.1, 0.95, 20),
+			Pgeom(0.08, 0.92, 10)
+		], inf).asStream,
 		amp_stream_2 =  Prand([Pgeom(0.5, 1.01, 50), Pgeom(1.0, 0.98, 40),Pgeom(0.7, 0.95, 20), Pgeom(0.7, 1.02, 15)], inf).asStream,
-		freq_stream = Prand([Pseq([1400], 7), Prand(([60, 61, 62, 63 ,64 ,65, 66, 67, 68, 69, 70, 71, 72].midicps * 4.5), 3)], inf).asStream;
+		freq_stream = Prand([Pseq([1400], 7), Prand(([60, 61, 62, 63 ,64 ,65, 66, 67, 68, 69, 70, 71, 72].midicps * 4.5), 3)], inf).asStream,
+		// A Routine can have several yield points, unlike FuncStreams
+		freq_routine = Routine({
+			loop{
+				var num_passive = ~ftrace_stats.random.rolling_average.linlin(10, 100, 3, 10),
+				num_active = ~ftrace_stats.syscall.rolling_average.linlin(2000, 10000, 3, 10);
+				num_passive.do{
+					1400.yield;
+				};
+				num_active.do{
+					// TODO: Change to 53edo
+					var freq = ~ftrace_stats.syscall.rolling_average.linlin(2000, 10000, 60, 72).round.midicps * 4.5;
+					freq.yield;
+				};
+			}
+		});
 		loop {
 			var channel = ~channels.beep,
 			dur = 0.08,
@@ -27,7 +47,7 @@
 					\sus, 0.07,
 					\rel, 0.001,
 					\amp,  amp,
-					\freq, freq_stream.next * ~ftrace_noise_freq_ratio,
+					\freq, freq_routine.next * ~ftrace_noise_freq_ratio,
 					\out, channel.bus]);
 			});
 			dur.wait;
@@ -104,7 +124,7 @@
 ~ftrace_trigger = { | type |
 	var freq = rrand(14000, 15000),
 	rel = rrand(1.0, 3.0),
-	amp = rrand(0.05, 0.1) * 0.75,
+	amp = rrand(0.05, 0.1) * 0.25,
 	channel = ~channels.noise;
 	switch(type,
 		\Syscall, {
@@ -126,6 +146,7 @@
 			rel = exprand(0.3, 0.8);
 		},
 	);
+	rel = rel * 0.5;
 	freq = freq * ~ftrace_noise_freq_ratio;
 	channel.play_on(\dist_noise, [
 		\freq, freq,
