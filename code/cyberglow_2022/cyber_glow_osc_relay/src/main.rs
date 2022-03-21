@@ -311,12 +311,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    let new_quit = quit.clone();
-    std::thread::spawn(move || {
-        std::thread::sleep(Duration::from_secs(10));
-        new_quit.store(true, Ordering::Relaxed);
-        println!("ftrace: {}", NUM_FTRACE_EVENTS.load(Ordering::SeqCst));
-    });
+    // let new_quit = quit.clone();
+    // std::thread::spawn(move || {
+    //     std::thread::sleep(Duration::from_secs(10));
+    //     new_quit.store(true, Ordering::Relaxed);
+    //     println!("ftrace: {}", NUM_FTRACE_EVENTS.load(Ordering::SeqCst));
+    // });
 
     main_loop(args, quit);
 
