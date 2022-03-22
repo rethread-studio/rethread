@@ -161,6 +161,7 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 
 SynthDef(\mixer_channel, {
 	var sig = In.ar(\in.kr(0), 2);
+	sig = Select.ar(\enable_lpf.kr(0), [sig, LPF.ar(sig, \lpf_freq.kr(5000))]);
 	Out.ar(\out.kr(0), sig * \amp.kr(1.0));
 }).add;
 SynthDef(\tick2, {
