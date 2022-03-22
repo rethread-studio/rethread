@@ -61,7 +61,7 @@ s.waitForBoot({
 	~revBus = 0;
 
 	~revBus = Bus.audio(s, 2);
-	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.15]);
+	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.10]);
 	~tapeBus = Bus.audio(s, 2);
 	~tape = Synth(\tape_dist, [\in, ~tapeBus, \mix, 0.15, \out, ~revBus]);
 
@@ -317,7 +317,8 @@ s.waitForBoot({
 	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~tapeBus);
 	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~tapeBus);
 
-	~all_channels = [~channels.user_whispers,
+	~all_channels = [
+		~channels.user_whispers,
 		~channels.beep,
 		~channels.tick,
 		~channels.noise,
@@ -368,6 +369,7 @@ s.waitForBoot({
 
 	"gestures.scd".loadRelative;
 	"osc.scd".loadRelative;
+	"channel_auto_fader.scd".loadRelative;
 
 	~start_tick_process.();
 	~start_beep_process.();
@@ -375,7 +377,8 @@ s.waitForBoot({
 
 });
 )
-
+~start_auto_fade.()
+~stop_auto_fade.()
 (
 // "slow down" == go darker and slower
 var lead_up_time = 6, cresc_time = 2;

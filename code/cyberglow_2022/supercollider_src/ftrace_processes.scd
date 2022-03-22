@@ -152,6 +152,7 @@
 		\freq, freq,
 		\rel, rel,
 		\amp, amp,
+		\out, channel.bus
 	]);
 };
 

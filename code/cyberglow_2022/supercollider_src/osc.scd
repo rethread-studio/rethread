@@ -2,7 +2,7 @@
 
 OSCdef(\ftraceOSC, { arg msg, time, addr, recvPort;
 	var type = msg[1];
-	[msg, time, addr, recvPort].postln;
+	// [msg, time, addr, recvPort].postln;
 	//
 	if(~enable_ftrace, {
 		~ftrace_trigger.(type);
@@ -20,13 +20,18 @@ OSCdef(\ftraceStatsOSC, { arg msg, time, addr, recvPort;
 
 }, '/ftrace_stats', nil);
 
+~last_user_whisper = 0;
 OSCdef(\monitorOSC, { arg msg, time, addr, recvPort;
 	var origin = msg[1].asSymbol, action = msg[2], arguments = msg[3];
 	// [msg, time, addr, recvPort].postln;
 
 	if(origin == \user, {
 		if(~enable_user, {
-		~user_whisper.(action, ~channels.user_whispers);
+			var now = Date.getDate.rawSeconds;
+			if(now - ~last_user_whisper > 0.5, {
+				~user_whisper.(action, ~channels.user_whispers);
+				~last_user_whisper = now;
+			});
 		~user_gestures.choose.(~chord, 0);
 		});
 	});
