@@ -19,7 +19,7 @@ io.emit = function () {
 app.use(express.static(__dirname + "/../ui_demo"));
 
 const buttonMap = {};
-buttonMap[process.env.REST_BUTTON] = "REST_BUTTON";
+buttonMap[process.env.RESET_BUTTON] = "RESET_BUTTON";
 buttonMap[process.env.SPEED1_BUTTON] = "SPEED1_BUTTON";
 buttonMap[process.env.SPEED2_BUTTON] = "SPEED2_BUTTON";
 buttonMap[process.env.SPEED3_BUTTON] = "SPEED3_BUTTON";
@@ -56,7 +56,7 @@ io.on("connection", (socket) => {
         // released
         if (buttonState[buttonMap[index]]) {
           setState(buttonMap[index] + "_OFF");
-          if (buttonMap[index] == "REST_BUTTON") {
+          if (buttonMap[index] == "RESET_BUTTON") {
             resetTimeout = setTimeout(() => {
               setState("PICTURE");
             }, process.env.PICTURE_TIME);

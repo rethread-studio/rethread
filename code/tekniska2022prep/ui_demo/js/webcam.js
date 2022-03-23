@@ -43,7 +43,7 @@ class Webcam {
     );
   }
 
-  screenshot() {
+  snap() {
     const canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
     if (this.width && this.height) {
