@@ -1,0 +1,17 @@
+{
+  "name": "serial-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Thomas Durieux",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "osc": "^2.4.2",
+    "socket.io": "^4.4.1"
+  }
+}

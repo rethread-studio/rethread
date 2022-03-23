@@ -160,8 +160,9 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 }).add;
 
 SynthDef(\mixer_channel, {
-	var sig = In.ar(\in.kr(0), 2);
-	Out.ar(\out.kr(0), sig * \amp.kr(1.0));
+	var sig = In.ar(\in.kr(0), 2), lag_time = \lag_time.kr(5.1);
+	sig = Select.ar(\enable_lpf.kr(0), [sig, LPF.ar(sig, Lag2.kr(\lpf_freq.kr(5000), lag_time))]);
+	Out.ar(\out.kr(0), sig * Lag.kr(\amp.kr(1.0), lag_time));
 }).add;
 SynthDef(\tick2, {
 	var sig, env, rq = \rq.kr(0.1);
@@ -185,7 +186,7 @@ SynthDef(\service_voice, {
 	));
 	trig = Dust.kr(Rand(15, 45));
 	pos = Line.ar(0, 1, BufDur.kr(buf) * Rand(0.6, 1.5));
-	sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, Rand(0.8, 1.2), pos);
+	sig = GrainBuf.ar(1, trig, Rand(0.07, 0.3), buf, Rand(0.85, 1.2), pos);
 	sig = sig * 0.05 * \amp.kr(0.5) * env;
 	sig = [DelayL.ar(sig, 0.1, Rand(0.0001, 0.03)), DelayL.ar(sig, 0.1, Rand(0.0001, 0.03))];
 	// sig = Pan2.ar(sig, Rand(-0.7, 0.7));

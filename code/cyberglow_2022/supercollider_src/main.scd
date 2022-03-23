@@ -46,6 +46,9 @@ s.waitForBoot({
 		};
 	};
 
+	"synthdefs.scd".loadRelative;
+	"transitions.scd".loadRelative;
+
 	~rootFreq = 60.midicps;
 	~s53 = Scale.chromatic('et53');
 	~clock = TempoClock(1, queueSize: 8192);
@@ -58,18 +61,18 @@ s.waitForBoot({
 	~revBus = 0;
 
 	~revBus = Bus.audio(s, 2);
-	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.15]);
+	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.10]);
 	~tapeBus = Bus.audio(s, 2);
 	~tape = Synth(\tape_dist, [\in, ~tapeBus, \mix, 0.15, \out, ~revBus]);
 
-	"synthdefs.scd".loadRelative;
+
 	"harmony.scd".loadRelative;
 
 	"ftrace_processes.scd".loadRelative;
 
 
 
-	~makeMixerChannel = { | name, out, amp = 1 |
+	~makeMixerChannel = { | name, out, amp = 1, gain = 1 |
 		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation, reverb_mix = 0.25, pitch_offset = 0;
 		bus = Bus.audio(s, ~mixerChannelOutputs);
 		// reverb_bus = Bus.audio(s, 2);
@@ -99,7 +102,7 @@ s.waitForBoot({
 				synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
 			},
 			\stereo, {
-				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, amp * gain], group, \addToTail);
 			},
 			\separate, {
 				~mixerChannelOutputs = 2;
@@ -118,7 +121,7 @@ s.waitForBoot({
 						~separateChannelOutputsNext = ~separateChannelOutputsNext + ~mixerChannelOutputs;
 					}
 				);
-				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, 1.5], group, \addToTail);
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, amp * gain], group, \addToTail);
 			}
 		);
 		// reverb_synth = Synth(\medium_reverb, [\out, bus, \in, reverb_bus, \mix, reverb_mix, \amp, 1.7, \damp, 0.45],
@@ -127,7 +130,8 @@ s.waitForBoot({
 			my_synth: synth,
 			// my_reverb_synth: reverb_synth,
 			my_group: group,
-			my_amp: amp,
+			my_amp: amp, // amp can be used to fade and for effects
+			my_gain: gain, // gain should be set depending on the material being played and not used for effects
 			my_send_amp: 0.0,
 			activity_level: 0,
 			activity_level_peak: 0,
@@ -165,7 +169,21 @@ s.waitForBoot({
 			my_clock: TempoClock(1, queueSize: 8192),
 			set_amp: {|self, amp|
 				self.my_amp = amp;
-				self.my_synth.set(\amp, amp);
+				self.my_synth.set(\amp, amp * self.my_gain);
+			},
+			set_gain: {|self, gain|
+				self.my_gain = gain;
+				self.my_synth.set(\amp, self.my_amp * self.my_gain);
+			},
+			set_lpf_freq: {|self, freq|
+				self.my_lpf_freq = freq;
+				self.my_synth.set(\lpf_freq, freq);
+			},
+			set_lag_time: {|self, lag_time|
+				self.my_synth.set(\lag_time, lag_time);
+			},
+			enable_lpf: { |self, enable = true|
+				self.my_synth.set(\enable_lpf, enable.asInteger);
 			},
 			set_send: {|self, send, send_amp = 0|
 				self.my_synth.set(\send, send);
@@ -293,11 +311,21 @@ s.waitForBoot({
 	~channels = Environment(know: true);
 
 	~channels.user_whispers = ~makeMixerChannel.("whisper", 0);
+	~channels.user_ambient = ~makeMixerChannel.("ambient", 0);
 	~channels.beep = ~makeMixerChannel.("beep", ~revBus);
 	~channels.tick = ~makeMixerChannel.("tick", ~revBus);
 	~channels.noise = ~makeMixerChannel.("tick", 0);
 	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~tapeBus);
 	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~tapeBus);
+
+	~fade_channels = [
+		~channels.user_whispers,
+		~channels.beep,
+		~channels.tick,
+		~channels.noise,
+		~channels.user_gestures,
+		~channels.server_gestures
+	];
 
 
 
@@ -342,12 +370,16 @@ s.waitForBoot({
 
 	"gestures.scd".loadRelative;
 	"osc.scd".loadRelative;
+	"channel_auto_fader.scd".loadRelative;
 
-	// ~start_tick_process.();
-	// ~start_beep_process.();
+	~start_tick_process.();
+	~start_beep_process.();
+
+
 });
 )
-
+~start_auto_fade.()
+~stop_auto_fade.()
 (
 // "slow down" == go darker and slower
 var lead_up_time = 6, cresc_time = 2;
@@ -382,13 +414,11 @@ var lead_up_time = 6, cresc_time = 2;
 	0.5.wait;
 	~lowRumble.release;
 }.fork;
-
-
 )
 
-~enable_ftrace = false;
-	~enable_user = false;
-	~enable_server = false;
+~enable_ftrace = true;
+~enable_user = false;
+~enable_server = false;
 
 (
 ~ftrace_noise_freq_ratio = 1;
@@ -400,5 +430,6 @@ var lead_up_time = 6, cresc_time = 2;
 ~channels.user_whispers.play_on(\service_voice, [\buf, ~voiceBuffers.click, \amp, ~whisper_amp, \out, ~channels.user_whispers.bus]);
 
 ~start_tick_process.()
+~stop_tick_process.()
 ~start_beep_process.();
 ~stop_beep_process.()
