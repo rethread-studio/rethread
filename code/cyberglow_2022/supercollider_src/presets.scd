@@ -1,18 +1,20 @@
+
+
 ~presets = [
 	{
-		~transitionSlowdown.(8, 3, rrand(0.1, 0.5), [0.5, 0.25, 1.0].choose);
+		~random_transition.();
 		~enable_ftrace = true;
 		~enable_user = true;
 		~enable_server = true;
 	},
 	{
-		~transitionSlowdown.(8, 3, rrand(0.1, 0.5), [0.5, 0.25, 1.0].choose);
+		~random_transition.();
 		~enable_ftrace = true;
 		~enable_user = true;
 		~enable_server = false;
 	},
 	{
-		~transitionSlowdown.(8, 3, rrand(0.1, 0.5), [0.5, 0.25, 1.0].choose);
+		~random_transition.();
 		~start_beep_process.();
 		~start_tick_process.();
 		~enable_ftrace = true;
@@ -20,7 +22,7 @@
 		~enable_server = false;
 	},
 	{
-		~transitionSlowdown.(8, 3, rrand(0.1, 0.5), [0.5, 0.25, 1.0].choose);
+		~random_transition.();
 		~stop_beep_process.();
 		~stop_tick_process.();
 		~enable_ftrace = false;
@@ -28,6 +30,7 @@
 		~enable_server = true;
 	},
 	{
+		~random_transition.();
 		~stop_beep_process.();
 		~stop_tick_process.();
 		~enable_ftrace = true;
@@ -36,6 +39,7 @@
 		~ftrace_noise_freq_ratio = rrand(0.1, 1.0);
 	},
 	{
+		~random_transition.();
 		~stop_beep_process.();
 		~stop_tick_process.();
 		~enable_ftrace = false;

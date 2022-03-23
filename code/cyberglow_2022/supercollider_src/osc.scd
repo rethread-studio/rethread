@@ -27,17 +27,23 @@ OSCdef(\monitorOSC, { arg msg, time, addr, recvPort;
 
 	if(origin == \user, {
 		if(~enable_user, {
-			var now = Date.getDate.rawSeconds;
-			if(now - ~last_user_whisper > 0.5, {
-				~user_whisper.(action, ~channels.user_whispers);
-				~last_user_whisper = now;
-			});
-		~user_gestures.choose.(~chord, 0);
+			{
+				var now = Date.getDate.rawSeconds;
+				rrand(0, 0.5).wait; // artificial spreading of the events
+				if(now - ~last_user_whisper > 0.5, {
+					~user_whisper.(action, ~channels.user_whispers);
+					~last_user_whisper = now;
+				});
+				~user_gestures.choose.(~chord, 0);
+			}.fork;
 		});
 	});
 	if(origin == \node || (origin == \gameEngine), {
 		if(~enable_server, {
+			{// artificial spreading of the events
+			rrand(0, 0.5).wait;
 			~server_gestures.choose.(~chord);
+			}.fork;
 		});
 		if(action == \newQuestion, {
 			~changeChordToRandom.();
