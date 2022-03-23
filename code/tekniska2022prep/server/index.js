@@ -45,14 +45,14 @@ io.on("connection", (socket) => {
       if (button > process.env.THRESHOLD) {
         // pressed
         if (!buttonState[buttonMap[index]]) {
-          io.emit("state", buttonMap[index]);
+          io.emit("state", buttonMap[index] + "_ON");
           resetIdle();
         }
         buttonState[buttonMap[index]] = true;
       } else {
         // released
         if (buttonState[buttonMap[index]]) {
-          io.emit("state", buttonMap[index]);
+          io.emit("state", buttonMap[index] + "_OFF");
           resetIdle();
           if (buttonMap[index] == "REST_BUTTON") {
             clearTimeout(resetTimeout);
