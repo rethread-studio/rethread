@@ -2,7 +2,7 @@
 
 
 function preload() {
-    img = loadImage('../img/portrait100.jpg');
+    img = loadImage('./img/portrait100.jpg');
 }
 
 function setup() {
