@@ -4,6 +4,12 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
+const osc = require("./osc");
+
+osc.open((port) => {
+  console.log("OSC server listening on port " + port);
+});
+
 var emit = io.emit;
 io.emit = function () {
   console.log("[DEBUG]", "emit", Array.prototype.slice.call(arguments));
@@ -31,8 +37,6 @@ io.on("connection", (socket) => {
     console.log("a client disconnected");
   });
 
-  let resetTimeout = null;
-
   socket.on("serial", (data) => {
     if (data === null) return;
     const buttonsValue = data.split(",");
@@ -45,20 +49,16 @@ io.on("connection", (socket) => {
       if (button > process.env.THRESHOLD) {
         // pressed
         if (!buttonState[buttonMap[index]]) {
-          io.emit("state", buttonMap[index] + "_ON");
-          resetIdle();
+          setState(buttonMap[index] + "_ON");
         }
         buttonState[buttonMap[index]] = true;
       } else {
         // released
         if (buttonState[buttonMap[index]]) {
-          io.emit("state", buttonMap[index] + "_OFF");
-          resetIdle();
+          setState(buttonMap[index] + "_OFF");
           if (buttonMap[index] == "REST_BUTTON") {
-            clearTimeout(resetTimeout);
             resetTimeout = setTimeout(() => {
-              state = "PICTURE";
-              io.emit("state", state);
+              setState("PICTURE");
             }, process.env.PICTURE_TIME);
           }
         }
@@ -68,12 +68,26 @@ io.on("connection", (socket) => {
   });
 });
 
+let resetTimeout = null;
 let idleTimeout = null;
+
+function setState(s) {
+  clearTimeout(resetTimeout);
+  state = s;
+  io.emit("state", state);
+  osc.send(state);
+  if (state !== "IDLE") {
+    resetIdle();
+  }
+}
+
 function resetIdle() {
+  if (state === "IDLE") {
+    return;
+  }
   clearTimeout(idleTimeout);
   idleTimeout = setTimeout(() => {
-    state = "IDLE";
-    io.emit("state", state);
+    setState("IDLE");
   }, process.env.IDLE_TIME);
 }
 server.listen(process.env.PORT);
