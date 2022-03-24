@@ -11,6 +11,7 @@
   "dependencies": {
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "mosaic-node-generator": "^1.1.5",
     "osc": "^2.4.2",
     "socket.io": "^4.4.1"
   }
