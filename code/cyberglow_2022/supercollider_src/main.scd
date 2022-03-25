@@ -47,6 +47,7 @@ s.waitForBoot({
 	};
 
 	"synthdefs.scd".loadRelative;
+	s.sync;
 	"transitions.scd".loadRelative;
 
 	~rootFreq = 60.midicps;
@@ -57,11 +58,10 @@ s.waitForBoot({
 	// If you get "late ..." messages, increase this number'
 	~latency = 0.5;
 	~nv = 0.1; // smallest note value for scheduling quantisation
-
-	~revBus = 0;
-
+	~mainBus = Bus.audio(s, 2);
+	~main_glitch = Synth(\main_out_glitch, [\in, ~mainBus, \out, 0]);
 	~revBus = Bus.audio(s, 2);
-	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.10]);
+	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.10, \out, ~mainBus]);
 	~tapeBus = Bus.audio(s, 2);
 	~tape = Synth(\tape_dist, [\in, ~tapeBus, \mix, 0.15, \out, ~revBus]);
 
@@ -310,13 +310,13 @@ s.waitForBoot({
 
 	~channels = Environment(know: true);
 
-	~channels.user_whispers = ~makeMixerChannel.("whisper", 0);
-	~channels.user_ambient = ~makeMixerChannel.("ambient", 0);
+	~channels.user_whispers = ~makeMixerChannel.("whisper", ~mainBus);
+	~channels.user_ambient = ~makeMixerChannel.("ambient", ~mainBus);
 	~channels.beep = ~makeMixerChannel.("beep", ~revBus);
 	~channels.tick = ~makeMixerChannel.("tick", ~revBus);
-	~channels.noise = ~makeMixerChannel.("tick", 0);
-	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~tapeBus);
-	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~tapeBus);
+	~channels.noise = ~makeMixerChannel.("noise", ~mainBus);
+	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~revBus);
+	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~revBus);
 
 	~fade_channels = [
 		~channels.user_whispers,
@@ -349,7 +349,6 @@ s.waitForBoot({
 
 	~user_whisper = { | action, channel |
 		var buf = nil;
-		("user_whisper action: " + action).postln;
 		switch(action,
 			\answer, { buf = ~voiceBuffers.answer },
 			\click, { buf = ~voiceBuffers.click },
@@ -371,15 +370,21 @@ s.waitForBoot({
 	"gestures.scd".loadRelative;
 	"osc.scd".loadRelative;
 	"channel_auto_fader.scd".loadRelative;
+	"presets.scd".loadRelative;
 
 	~start_tick_process.();
 	~start_beep_process.();
-
+	~start_auto_fade.();
 
 });
 )
 ~start_auto_fade.()
 ~stop_auto_fade.()
+
+~autoChangePreset.()
+
+{~presets.choose.() }.fork;
+
 (
 // "slow down" == go darker and slower
 var lead_up_time = 6, cresc_time = 2;
@@ -433,3 +438,31 @@ var lead_up_time = 6, cresc_time = 2;
 ~stop_tick_process.()
 ~start_beep_process.();
 ~stop_beep_process.()
+
+(
+{
+	~main_glitch.set(\lag_time, 5);
+	~main_glitch.set(\enable_pitch_shift, 1);
+	~main_glitch.set(\pitch_shift_ratio, 3);
+	~main_glitch.set(\pitch_dispersion, 1);
+	3.wait;
+	~cresc = Synth(\windy, [\freq, 200, \out, ~revBus, \amp, 0.7, \atk, 2, \curve_atk, 7, \rel, 0]);
+	2.wait;
+	~cresc.release;
+	~main_glitch.set(\lag_time, 0.2);
+	~main_glitch.set(\enable_pitch_shift, 0);
+	~main_glitch.set(\pitch_shift_ratio, 1.0);
+	~main_glitch.set(\pitch_dispersion, 0);
+	{
+		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2/20, mul: 0.125*0.5);
+		sig = sig * Env([0.5, 0], [5]).ar(2);
+		Out.ar(~revBus.index, sig);
+	}.play;
+}.fork;
+)
+~lowRumble.release
+~main_glitch.set(\lag_time, 5)
+~main_glitch.set(\enable_pitch_shift, 1)
+~main_glitch.set(\pitch_shift_ratio, 0.5)
+~main_glitch.set(\enable_bit_crush, 1)
+~main_glitch.set(\sample_rate, 1000)

@@ -192,123 +192,127 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let locale = SystemLocale::default().unwrap();
 
     // terminal draw loop
-    std::thread::spawn(move || loop {
-        terminal
-            .draw(|f| {
-                use tui::style::Color;
-                use tui::widgets::{Row, Table};
-                let size = f.size();
-                let chunks = Layout::default()
-                    .direction(Direction::Vertical)
-                    .margin(1)
-                    .constraints(
-                        [
-                            Constraint::Percentage(10),
-                            Constraint::Percentage(80),
-                            Constraint::Percentage(10),
-                        ]
-                        .as_ref(),
-                    )
-                    .split(f.size());
-                // Overall stats
-                {
-                    let num_ftrace = NUM_FTRACE_EVENTS.load(Ordering::SeqCst);
-                    let num_monitor = NUM_MONITOR_EVENTS.load(Ordering::SeqCst);
-                    let home = Paragraph::new(vec![
-                        Spans::from(vec![
-                            Span::raw("ftrace: "),
-                            Span::styled(
-                                num_ftrace.to_formatted_string(&locale),
-                                // format!("{num_ftrace}"),
-                                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-                            ),
-                        ]),
-                        Spans::from(vec![
-                            Span::raw("monitor: "),
-                            Span::styled(
-                                num_monitor.to_formatted_string(&locale),
-                                // format!("{num_monitor}"),
-                                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-                            ),
-                        ]),
-                    ])
-                    .alignment(Alignment::Left)
-                    .block(
-                        Block::default()
-                            .borders(Borders::ALL)
-                            .style(Style::default().fg(Color::White))
-                            .title("cyber|glow message parsing stats")
-                            .border_type(BorderType::Plain),
-                    );
-                    f.render_widget(home, chunks[0]);
-                }
-                // Syscall table
-                let syscall_data: Vec<_> = {
-                    let map = SYSCALL_MAP.lock().unwrap();
-                    let mut syscall_vec = map
-                        .keys()
-                        .zip(map.values())
-                        .map(|(key, value)| (key.clone(), *value))
-                        .collect::<Vec<_>>();
+    std::thread::spawn(move || {
+        loop {
+            terminal
+                .draw(|f| {
+                    use tui::style::Color;
+                    use tui::widgets::{Row, Table};
+                    let chunks = Layout::default()
+                        .direction(Direction::Vertical)
+                        .margin(1)
+                        .constraints(
+                            [
+                                Constraint::Percentage(10),
+                                Constraint::Percentage(80),
+                                Constraint::Percentage(10),
+                            ]
+                            .as_ref(),
+                        )
+                        .split(f.size());
+                    // Overall stats
+                    {
+                        let num_ftrace = NUM_FTRACE_EVENTS.load(Ordering::SeqCst);
+                        let num_monitor = NUM_MONITOR_EVENTS.load(Ordering::SeqCst);
+                        let home = Paragraph::new(vec![
+                            Spans::from(vec![
+                                Span::raw("ftrace: "),
+                                Span::styled(
+                                    num_ftrace.to_formatted_string(&locale),
+                                    // format!("{num_ftrace}"),
+                                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                                ),
+                            ]),
+                            Spans::from(vec![
+                                Span::raw("monitor: "),
+                                Span::styled(
+                                    num_monitor.to_formatted_string(&locale),
+                                    // format!("{num_monitor}"),
+                                    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
+                                ),
+                            ]),
+                        ])
+                        .alignment(Alignment::Left)
+                        .block(
+                            Block::default()
+                                .borders(Borders::ALL)
+                                .style(Style::default().fg(Color::White))
+                                .title("cyber|glow message parsing stats")
+                                .border_type(BorderType::Plain),
+                        );
+                        f.render_widget(home, chunks[0]);
+                    }
+                    // Syscall table
+                    let syscall_data: Vec<_> = {
+                        let map = SYSCALL_MAP.lock().unwrap();
+                        let mut syscall_vec = map
+                            .keys()
+                            .zip(map.values())
+                            .map(|(key, value)| (key.clone(), *value))
+                            .collect::<Vec<_>>();
 
-                    syscall_vec.sort_unstable_by(|a, b| b.1.cmp(&a.1));
-                    syscall_vec
-                        .into_iter()
-                        .map(|(key, value)| Row::new(vec![key, format!("{value}")]))
-                        .collect()
-                };
-                let syscall_table = Table::new(syscall_data)
-                    // You can set the style of the entire Table.
-                    .style(Style::default().fg(Color::White))
-                    // It has an optional header, which is simply a Row always visible at the top.
-                    .header(
-                        Row::new(vec!["Syscall", "Count"])
-                            .style(Style::default().fg(Color::Yellow))
-                            // If you want some space between the header and the rest of the rows, you can always
-                            // specify some margin at the bottom.
-                            .bottom_margin(1),
-                    )
-                    // As any other widget, a Table can be wrapped in a Block.
-                    .block(
-                        Block::default()
-                            .title("Syscall table")
-                            .borders(Borders::ALL),
-                    )
-                    // Columns widths are constrained in the same way as Layout...
-                    .widths(&[Constraint::Length(30), Constraint::Length(10)])
-                    // ...and they can be separated by a fixed spacing.
-                    .column_spacing(1)
-                    // If you wish to highlight a row in any specific way when it is selected...
-                    .highlight_style(Style::default().add_modifier(Modifier::BOLD))
-                    // ...and potentially show a symbol in front of the selection.
-                    .highlight_symbol(">>");
-                f.render_widget(syscall_table, chunks[1]);
-            })
-            .expect("terminal draw function to work without error");
-        match rx
-            .recv()
-            .expect("terminal event loop to receive message from input channel")
-        {
-            TerminalEvent::Input(event) => match event.code {
-                KeyCode::Char('q') => {
-                    ctrl_c_quit.store(true, Ordering::Relaxed);
-                    break;
-                }
-                _ => {}
-            },
-            TerminalEvent::Tick => {}
+                        syscall_vec.sort_unstable_by(|a, b| b.1.cmp(&a.1));
+                        syscall_vec
+                            .into_iter()
+                            .map(|(key, value)| Row::new(vec![key, format!("{value}")]))
+                            .collect()
+                    };
+                    let syscall_table = Table::new(syscall_data)
+                        // You can set the style of the entire Table.
+                        .style(Style::default().fg(Color::White))
+                        // It has an optional header, which is simply a Row always visible at the top.
+                        .header(
+                            Row::new(vec!["Syscall", "Count"])
+                                .style(Style::default().fg(Color::Yellow))
+                                // If you want some space between the header and the rest of the rows, you can always
+                                // specify some margin at the bottom.
+                                .bottom_margin(1),
+                        )
+                        // As any other widget, a Table can be wrapped in a Block.
+                        .block(
+                            Block::default()
+                                .title("Syscall table")
+                                .borders(Borders::ALL),
+                        )
+                        // Columns widths are constrained in the same way as Layout...
+                        .widths(&[Constraint::Length(30), Constraint::Length(10)])
+                        // ...and they can be separated by a fixed spacing.
+                        .column_spacing(1)
+                        // If you wish to highlight a row in any specific way when it is selected...
+                        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+                        // ...and potentially show a symbol in front of the selection.
+                        .highlight_symbol(">>");
+                    f.render_widget(syscall_table, chunks[1]);
+                })
+                .expect("terminal draw function to work without error");
+            match rx
+                .recv()
+                .expect("terminal event loop to receive message from input channel")
+            {
+                TerminalEvent::Input(event) => match event.code {
+                    KeyCode::Char('q') => {
+                        ctrl_c_quit.store(true, Ordering::Relaxed);
+                        break;
+                    }
+                    _ => {}
+                },
+                TerminalEvent::Tick => {}
+            }
+            if ctrl_c_quit.load(Ordering::Relaxed) {
+                // some other part of the program requested shutdown
+                break;
+            }
         }
-        if ctrl_c_quit.load(Ordering::Relaxed) {
-            // restore terminal
-            disable_raw_mode().expect("able to disable raw mode");
-            execute!(
-                terminal.backend_mut(),
-                LeaveAlternateScreen,
-                DisableMouseCapture
-            )
-            .expect("able to execute terminal exctions");
-            terminal.show_cursor().expect("able to show cursor");
-        }
+
+        // restore terminal when the loop is broken
+        disable_raw_mode().expect("able to disable raw mode");
+        execute!(
+            terminal.backend_mut(),
+            LeaveAlternateScreen,
+            DisableMouseCapture
+        )
+        .expect("able to execute terminal exctions");
+        terminal.show_cursor().expect("able to show cursor");
     });
 
     // let new_quit = quit.clone();

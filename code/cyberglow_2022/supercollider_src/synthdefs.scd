@@ -106,7 +106,7 @@ SynthDef(\dist_tri, {
 SynthDef(\tape_dist, {
 	var sig = In.ar(\in.kr(10), 2);
 	sig = AnalogTape.ar(sig, 0.0, 0.1, 0.2, oversample: 3);
-	sig = AnalogVintageDistortion.ar(
+	/*sig = AnalogVintageDistortion.ar(
 		sig,
 		drivegain: 0.05,
 		bias: 0.0,
@@ -114,7 +114,7 @@ SynthDef(\tape_dist, {
 		highgain: 0.05,
 		shelvingfreq: 600,
 		oversample: 2,
-	);
+	);*/
 	Out.ar(\out.kr(0), sig);
 }).add;
 
@@ -305,3 +305,11 @@ switch(~encoderType,
 		}).add;
 	}
 );
+SynthDef(\main_out_glitch, {
+	var sig = In.ar(\in.kr(10), 2), lag_time = \lag_time.kr(3);
+
+	sig = SelectX.ar(\enable_pitch_shift.kr(0, lag_time), [sig, PitchShift.ar(sig, 0.2, Ramp.kr(\pitch_shift_ratio.kr(1.0), lag_time), VarLag.kr(\pitch_dispersion.kr(0.00), lag_time, 20), \time_dispersion.kr(0.01, lag_time))]);
+	sig = SelectX.ar(\enable_bit_crush.kr(0, lag_time), [sig, Decimator.ar(sig, \sample_rate.kr(44100, lag_time), \bits.kr(24, lag_time))]);
+
+	Out.ar(\out.kr(0), sig);
+}).add;
