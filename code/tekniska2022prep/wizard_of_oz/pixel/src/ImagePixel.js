@@ -90,7 +90,7 @@ class ImagePixel {
 
     render() {
         this.renderImage();
-        // this.renderTargetSkeleton();
+        this.renderTargetSkeleton();
         if (this.status == MOVE) {
             this.renderPixels();
         } else {

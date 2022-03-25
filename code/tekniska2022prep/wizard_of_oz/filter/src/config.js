@@ -1,22 +1,19 @@
 
-
 const state = {
     backgroundCol: "#000000",
     frameRate: 60,
     intervalTime: 50,
+    sampleSize: 10,
+
 }
 
+let filters = [];
 
-
-let pixelImage;
-let empyImg1, empyImg2, empyImg3, empyImg4;
-let img;
+let photograph;
 let canvas;
-let pixelSampleSize = { width: 20, height: 20 };
-
+let pixelSampleSize = { width: state.sampleSize, height: state.sampleSize };
 
 let filter;
-
 let intervalId = null;
-
 let particles = [];
+let images;

@@ -15,4 +15,9 @@ const state = {
 let pixelImage;
 let img;
 let canvas;
+let objectsToRender = [];
 
+let speed1 = {};
+let speed2 = {};
+
+let particles = [];

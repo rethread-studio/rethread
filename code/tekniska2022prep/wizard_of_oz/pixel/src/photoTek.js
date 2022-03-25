@@ -29,6 +29,5 @@ function handleClick() {
     imagePixel.setStatus(MOVE);
     imagePixel.setPixelsStatus(MOVE);
     imagePixel.resetCurrentPixel();
-
 }
 

@@ -41,6 +41,7 @@ class Filter {
         //update pixel samples
         this.setImageIO(this.filterPos);
         this.updatePixelSamples();
+        this.setPosition();
     }
 
     updatePixelSamples() {

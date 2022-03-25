@@ -176,7 +176,6 @@ class ImageSample {
     mouseClicked() {
         //this.update();
         // this.render();
-
     }
 
 }
