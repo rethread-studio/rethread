@@ -7,20 +7,28 @@ var io = require("socket.io-client");
 const button = new Gpio(27, {
   mode: Gpio.INPUT,
   pullUpDown: Gpio.PUD_DOWN,
-});
+  edge: Gpio.EITHER_EDGE,
+}).glitchFilter(10000);
 
 const clock = new Gpio(17, {
   mode: Gpio.INPUT,
   pullUpDown: Gpio.PUD_DOWN,
-});
+  edge: Gpio.EITHER_EDGE,
+}).glitchFilter(10000);
 
 const direction = new Gpio(18, {
   mode: Gpio.INPUT,
   pullUpDown: Gpio.PUD_DOWN,
-});
+  edge: Gpio.EITHER_EDGE,
+}).glitchFilter(10000);
 
 direction.on("interrupt", (level) => {
   console.log("direction", level);
+});
+direction.alert("interrupt", (level, tick) => {
+  if (level === 0) {
+    console.log(++count);
+  }
 });
 
 clock.on("interrupt", (level) => {
