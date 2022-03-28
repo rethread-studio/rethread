@@ -1,33 +1,26 @@
 require("dotenv").config();
-const Gpio = require("pigpio").Gpio;
+const nodaryEncoder = require("nodary-encoder");
+const Gpio = require("onoff").Gpio;
 const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
 var io = require("socket.io-client");
 
-const button = new Gpio(27, {
-  mode: Gpio.INPUT,
-  pullUpDown: Gpio.PUD_DOWN,
+const myEncoder = nodaryEncoder(17, 18); // Using GPIO17 & GPIO18
+const button = new Gpio(4, "in", "rising", { debounceTimeout: 10 });
+
+button.watch((err, value) => {
+  if (err) {
+    throw err;
+  }
+  socket.emit("rotary_button", value);
 });
 
-const clock = new Gpio(17, {
-  mode: Gpio.INPUT,
-  pullUpDown: Gpio.PUD_DOWN,
-});
-
-const direction = new Gpio(18, {
-  mode: Gpio.INPUT,
-  pullUpDown: Gpio.PUD_DOWN,
-});
-
-direction.on("interrupt", (level) => {
-  console.log("direction", level);
-});
-
-clock.on("interrupt", (level) => {
-  console.log("clock", level);
-});
-button.on("interrupt", (level) => {
-  console.log("button", level);
+let previousValue = -1;
+myEncoder.on("rotation", (direction, value) => {
+  if (value != previousValue) {
+    socket.emit("rotary", { direction, value });
+  }
+  previousValue = value;
 });
 
 const port = new SerialPort({
