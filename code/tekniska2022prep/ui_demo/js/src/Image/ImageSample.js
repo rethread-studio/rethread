@@ -139,6 +139,14 @@ class ImageSample {
 
     filterImage({ filter, val }) {
         this.completeImage.filter(filter, val);
+        console.log(this.completeImage)
+        const imgObj = new Image();
+        // imgObj.src = 'input/leia.jpg';
+
+        // filterous.importImage(imgObj, options)
+        //   .applyFilter('brightness', 0.2)
+        //   .applyFilter('contrast', -0.3)
+        //then copy the image to complete image
     }
 
     renderCompleteImage() {
