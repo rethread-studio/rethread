@@ -71,11 +71,8 @@
 		var freq_stream = Pwhite(10000, 10650).asStream; // (5000, 10500) (10000, 10650)
 		loop {
 			var channel = ~channels.tick,
-			dur = 0.125,
-			amp = 0.25;
-			if(~ftrace_stats.syscall.rolling_average > 20000, {
-				dur = 0.33*0.125;
-			});
+			dur = 0.5.pow(~ftrace_stats.syscall.rolling_average.linlin(14000, 16000, 2, 6).round),
+			amp = 0.2;
 
 			if(~enable_ftrace, {
 				channel.play_on(\tick2, [
@@ -94,11 +91,8 @@
 		var freq_stream = Pwhite(100, 150).asStream;
 		loop {
 			var channel = ~channels.tick,
-			dur = 0.125,
-			amp = 0.25;
-			if(~ftrace_stats.random.rolling_average > 100, {
-				dur = 0.33*0.125;
-			});
+			dur = 0.5.pow(~ftrace_stats.random.rolling_average.linlin(10, 50, 2, 6).round),
+			amp = 0.2;
 
 			if(~enable_ftrace, {
 				channel.play_on(\tick2, [
@@ -116,6 +110,8 @@
 };
 
 
+
+
 ~stop_tick_process = {
 	~tick_routine1.stop;
 	~tick_routine2.stop;
@@ -129,12 +125,12 @@
 	switch(type,
 		\Syscall, {
 			freq = rrand(14000, 14200);
-			rel = exprand(0.05, 0.2);
+			rel = exprand(0.02, 0.06);
 			amp = amp * rrand(0.5, 1.0);
 		},
 		\Random,{
 			freq = rrand(5000, 5100);
-			rel = exprand(0.2, 0.75);
+			rel = exprand(0.1, 0.45);
 			amp = amp * rrand(0.5, 1.0);
 		},
 		\Tcp,{
