@@ -54,6 +54,10 @@ function setup() {
     { filter: BLUR, val: [0.9] }
   );
 
+  // pixels = filters.brightness.apply(this, [pixels, 0.1]);
+  // pixels = filters.contrast.apply(this, [pixels, 0.1]);
+  // pixels = filters.saturation.apply(this, [pixels, 0.15]);
+
   objectsToRender = [];
   speed1 = {};
   speed2 = {};
