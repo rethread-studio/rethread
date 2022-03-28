@@ -154,6 +154,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     println!("Args: {:?}", args);
 
+    let (stats_tx, stats_rx): (
+        crossbeam::channel::Sender<FtraceStats>,
+        crossbeam::channel::Receiver<FtraceStats>,
+    ) = crossbeam::channel::unbounded();
+
     // input loop
     let (tx, rx) = crossbeam::channel::unbounded();
     let tick_rate = Duration::from_millis(200);
@@ -193,7 +198,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // terminal draw loop
     std::thread::spawn(move || {
+        let mut ftrace_stats = None;
         loop {
+            // Get new stats to display from the channel
+            while let Ok(new_stats) = stats_rx.try_recv() {
+                ftrace_stats = Some(new_stats);
+            }
+
             terminal
                 .draw(|f| {
                     use tui::style::Color;
@@ -210,6 +221,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .as_ref(),
                         )
                         .split(f.size());
+
+                    let main_area_chunks = Layout::default()
+                        .direction(Direction::Horizontal)
+                        .margin(1)
+                        .constraints(
+                            [Constraint::Percentage(50), Constraint::Percentage(50)].as_ref(),
+                        )
+                        .split(chunks[1]);
                     // Overall stats
                     {
                         let num_ftrace = NUM_FTRACE_EVENTS.load(Ordering::SeqCst);
@@ -282,7 +301,59 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .highlight_style(Style::default().add_modifier(Modifier::BOLD))
                         // ...and potentially show a symbol in front of the selection.
                         .highlight_symbol(">>");
-                    f.render_widget(syscall_table, chunks[1]);
+                    f.render_widget(syscall_table, main_area_chunks[0]);
+                    // Display ftrace_stats
+                    if let Some(ftrace_stats) = &ftrace_stats {
+                        let constraints = vec![Constraint::Percentage(25); 4];
+                        let stats_chunks = Layout::default()
+                            .direction(Direction::Vertical)
+                            .margin(1)
+                            .constraints(constraints)
+                            .split(main_area_chunks[1]);
+                        let stats_vec = vec![
+                            (&ftrace_stats.syscall, "Syscall"),
+                            (&ftrace_stats.random, "Random"),
+                            (&ftrace_stats.tcp, "Tcp"),
+                            (&ftrace_stats.irq_matrix, "IrqMatrix"),
+                        ];
+                        for (i, stats_pair) in stats_vec.iter().enumerate() {
+                            let stats = stats_pair.0;
+                            let mut stats_data = Vec::new();
+                            stats_data.push(Row::new(vec![
+                                "rolling_average:".to_owned(),
+                                format!("{}", stats.rolling_average),
+                            ]));
+                            stats_data.push(Row::new(vec![
+                                "min_rolling_average:".to_owned(),
+                                format!("{}", stats.min_rolling_average),
+                            ]));
+                            stats_data.push(Row::new(vec![
+                                "max_rolling_average:".to_owned(),
+                                format!("{}", stats.max_rolling_average),
+                            ]));
+                            stats_data.push(Row::new(vec![
+                                "trig/s:".to_owned(),
+                                format!(
+                                    "{}",
+                                    stats.rolling_average_triggers_per_second.unwrap_or(0.)
+                                ),
+                            ]));
+                            let stats_table = Table::new(stats_data)
+                                // You can set the style of the entire Table.
+                                .style(Style::default().fg(Color::Blue))
+                                // As any other widget, a Table can be wrapped in a Block.
+                                .block(
+                                    Block::default()
+                                        .title(format!("{} stats", stats_pair.1))
+                                        .borders(Borders::ALL),
+                                )
+                                // Columns widths are constrained in the same way as Layout...
+                                .widths(&[Constraint::Length(15), Constraint::Length(10)])
+                                // ...and they can be separated by a fixed spacing.
+                                .column_spacing(1);
+                            f.render_widget(stats_table, stats_chunks[i]);
+                        }
+                    }
                 })
                 .expect("terminal draw function to work without error");
             match rx
@@ -322,7 +393,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //     println!("ftrace: {}", NUM_FTRACE_EVENTS.load(Ordering::SeqCst));
     // });
 
-    main_loop(args, quit);
+    main_loop(args, quit, stats_tx);
 
     // Give everything some time to properly clean up before exiting
     std::thread::sleep(Duration::from_millis(300));
@@ -361,7 +432,11 @@ fn load_data(path: &PathBuf, skip_ms: i64) -> Option<Vec<Message>> {
     }
 }
 
-fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
+fn main_loop(
+    mut args: Args,
+    quit: Arc<AtomicBool>,
+    stats_tx: crossbeam::channel::Sender<FtraceStats>,
+) {
     let save_path = PathBuf::from(args.save_path.unwrap_or("./monitor_data.json".to_string()));
     let load_path = PathBuf::from(args.load_path.unwrap_or("./monitor_data.json".to_string()));
     let receiver = osc::receiver(args.listen_port).unwrap();
@@ -409,6 +484,7 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
     }
     let mut last_message_time = Instant::now();
     let mut last_stats_update_time = Instant::now();
+    let mut last_time_stats_tx = Instant::now();
     'main_loop: loop {
         while let Ok(Some((packet, _addr))) = receiver.try_recv() {
             if args.record || args.listen || args.sonify {
@@ -509,6 +585,12 @@ fn main_loop(mut args: Args, quit: Arc<AtomicBool>) {
                 if let Some(ref mut sonifier) = sonifier {
                     sonifier.send_stats_update(&ftrace_stats);
                 }
+            }
+            if last_time_stats_tx.elapsed().as_millis() > 100 {
+                stats_tx
+                    .send(ftrace_stats.clone())
+                    .expect("no error when sending ftrace_stats to gui thread");
+                last_time_stats_tx = Instant::now();
             }
 
             if quit.load(Ordering::Relaxed) {
@@ -643,8 +725,8 @@ struct FtraceStats {
 impl FtraceStats {
     pub fn new() -> Self {
         Self {
-            random: Stats::new(100),
-            syscall: Stats::new(60000),
+            random: Stats::new(500),
+            syscall: Stats::new(100000),
             tcp: Stats::new(100),
             irq_matrix: Stats::new(100),
         }
@@ -681,10 +763,17 @@ struct Stats {
     trigger_threshold: u64,
     average_events_per_second: f64,
     rolling_average: f64,
+    min_rolling_average: f64,
+    max_rolling_average: f64,
+    /// when the Stats was created
     start_time: Instant,
     /// the number of times to apply the precalculated falloff ratio, with a reminder
     num_physics_steps: f64,
     rolloff_ratio: f64,
+    rolling_average_triggers_per_second: Option<f64>,
+    trigger_count_this_second: u64,
+    /// keeps track of the latest second to count in order to count triggers every second
+    second_instant: Instant,
 }
 
 impl Stats {
@@ -695,9 +784,14 @@ impl Stats {
             trigger_threshold,
             average_events_per_second: 0.0,
             rolling_average: 0.0,
+            min_rolling_average: f64::MAX,
+            max_rolling_average: 0.0,
             start_time: Instant::now(),
             num_physics_steps: 0.0,
             rolloff_ratio: (0.001_f64).powf(1.0_f64 / STEPS_PER_SECOND),
+            rolling_average_triggers_per_second: None,
+            trigger_count_this_second: 0,
+            second_instant: Instant::now(),
         }
     }
 
@@ -707,6 +801,7 @@ impl Stats {
         self.rolling_average += 1.0;
         if self.events_since_last_trigger >= self.trigger_threshold {
             self.events_since_last_trigger = 0;
+            self.trigger_count_this_second += 1;
             true
         } else {
             false
@@ -717,11 +812,40 @@ impl Stats {
         self.average_events_per_second =
             self.total_events_registered as f64 / self.start_time.elapsed().as_secs_f64();
 
+        if self.rolling_average > self.max_rolling_average {
+            self.max_rolling_average = self.rolling_average;
+        } else {
+            // Go slightly towards the current value so that the max can adjust over time
+            self.max_rolling_average =
+                self.max_rolling_average * 0.9999 + self.rolling_average * 0.0001;
+        }
         // Recalculate rolling average
         self.num_physics_steps += dt * STEPS_PER_SECOND;
         while self.num_physics_steps >= 1.0 {
             self.rolling_average *= self.rolloff_ratio;
             self.num_physics_steps -= 1.0;
+        }
+        if self.start_time.elapsed().as_secs_f32() > 5.0 {
+            if self.rolling_average < self.min_rolling_average {
+                self.min_rolling_average = self.rolling_average;
+            } else {
+                // Go slightly towards the current value so that the min can adjust over time
+                self.min_rolling_average =
+                    self.min_rolling_average * 0.99999 + self.rolling_average * 0.00001;
+            }
+        }
+        if self.second_instant.elapsed() >= Duration::from_secs(1) {
+            let triggers_per_sec =
+                self.trigger_count_this_second as f64 / self.second_instant.elapsed().as_secs_f64();
+            self.trigger_count_this_second = 0;
+            self.rolling_average_triggers_per_second = Some(
+                if let Some(prev_value) = self.rolling_average_triggers_per_second {
+                    prev_value * 0.5 + triggers_per_sec * 0.5
+                } else {
+                    triggers_per_sec
+                },
+            );
+            self.second_instant = Instant::now();
         }
     }
 }
@@ -760,11 +884,15 @@ impl Sonifier {
         let args = vec![
             osc::Type::String("syscall".to_owned()),
             osc::Type::Float(ftrace_stats.syscall.rolling_average as f32),
+            osc::Type::Float(ftrace_stats.syscall.min_rolling_average as f32),
+            osc::Type::Float(ftrace_stats.syscall.max_rolling_average as f32),
         ];
         self.osc_sender.send(("/ftrace_stats", args)).ok();
         let args = vec![
             osc::Type::String("random".to_owned()),
             osc::Type::Float(ftrace_stats.random.rolling_average as f32),
+            osc::Type::Float(ftrace_stats.random.min_rolling_average as f32),
+            osc::Type::Float(ftrace_stats.random.max_rolling_average as f32),
         ];
         self.osc_sender.send(("/ftrace_stats", args)).ok();
     }

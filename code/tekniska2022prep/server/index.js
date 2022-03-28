@@ -111,6 +111,14 @@ io.on("connection", (socket) => {
     );
   });
 
+  socket.on("rotary", (data) => {
+    if (data.direction == "R") {
+      io.emit("step", "next");
+    } else {
+      io.emit("step", "previous");
+    }
+  })
+  
   socket.on("serial", (data) => {
     if (data === null) return;
     const buttonsValue = data.split(",");

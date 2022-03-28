@@ -3,6 +3,8 @@
 ~make_stats = {
 	var env = Environment(know: true);
 	env.rolling_average = 0;
+	env.min_rolling_average = 0;
+	env.max_rolling_average = 0;
 	env
 };
 ~ftrace_stats = Environment(know: true);
@@ -24,13 +26,13 @@
 		// A Routine can have several yield points, unlike FuncStreams
 		freq_routine = Routine({
 			loop{
-				var num_passive = ~ftrace_stats.random.rolling_average.linlin(10, 120, 3, 10),
-				num_active = ~ftrace_stats.syscall.rolling_average.linlin(12000, 16000, 3, 10);
+				var num_passive = ~ftrace_stats.random.rolling_average.linlin(~ftrace_stats.random.min_rolling_average, ~ftrace_stats.random.max_rolling_average, 3, 10),
+				num_active = ~ftrace_stats.syscall.rolling_average.linlin(~ftrace_stats.syscall.min_rolling_average, ~ftrace_stats.syscall.max_rolling_average, 3, 10);
 				num_passive.do{
 					1400.yield;
 				};
 				num_active.do{
-					var freq = ~beep_scale[~ftrace_stats.syscall.rolling_average.linlin(14000, 16000, 0, ~beep_scale.size-1).round] * 4.5;
+					var freq = ~beep_scale[~ftrace_stats.syscall.rolling_average.linlin(~ftrace_stats.syscall.min_rolling_average, ~ftrace_stats.syscall.max_rolling_average, 0, ~beep_scale.size-1).round] * 4.5;
 					freq.yield;
 				};
 			}
@@ -71,11 +73,8 @@
 		var freq_stream = Pwhite(10000, 10650).asStream; // (5000, 10500) (10000, 10650)
 		loop {
 			var channel = ~channels.tick,
-			dur = 0.125,
-			amp = 0.25;
-			if(~ftrace_stats.syscall.rolling_average > 20000, {
-				dur = 0.33*0.125;
-			});
+			dur = 0.5.pow(~ftrace_stats.syscall.rolling_average.linlin(~ftrace_stats.syscall.min_rolling_average, ~ftrace_stats.syscall.max_rolling_average, 2, 6).round),
+			amp = 0.2;
 
 			if(~enable_ftrace, {
 				channel.play_on(\tick2, [
@@ -94,11 +93,8 @@
 		var freq_stream = Pwhite(100, 150).asStream;
 		loop {
 			var channel = ~channels.tick,
-			dur = 0.125,
-			amp = 0.25;
-			if(~ftrace_stats.random.rolling_average > 100, {
-				dur = 0.33*0.125;
-			});
+			dur = 0.5.pow(~ftrace_stats.random.rolling_average.linlin(~ftrace_stats.random.min_rolling_average, ~ftrace_stats.random.max_rolling_average, 2, 6).round),
+			amp = 0.2;
 
 			if(~enable_ftrace, {
 				channel.play_on(\tick2, [
@@ -116,6 +112,8 @@
 };
 
 
+
+
 ~stop_tick_process = {
 	~tick_routine1.stop;
 	~tick_routine2.stop;
@@ -129,12 +127,12 @@
 	switch(type,
 		\Syscall, {
 			freq = rrand(14000, 14200);
-			rel = exprand(0.05, 0.2);
+			rel = exprand(0.02, 0.06);
 			amp = amp * rrand(0.5, 1.0);
 		},
 		\Random,{
 			freq = rrand(5000, 5100);
-			rel = exprand(0.2, 0.75);
+			rel = exprand(0.1, 0.45);
 			amp = amp * rrand(0.5, 1.0);
 		},
 		\Tcp,{

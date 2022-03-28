@@ -11,6 +11,7 @@
   "dependencies": {
     "@serialport/parser-readline": "^10.3.0",
     "dotenv": "^16.0.0",
+    "nodary-encoder": "^0.1.4",
     "serialport": "^10.4.0",
     "socket.io-client": "^4.4.1"
   }
