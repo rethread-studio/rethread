@@ -125,10 +125,10 @@
 		{~transitionMainGlitch2.(rrand(4, 6), rrand(1.0, 1.2), [1.0, 1.5].choose); }
 	],
 	new_transition = (0..(transitions.size-1)).choose;
-	("new_transition: " + new_transition).postln;
 	while({~last_transition_used == new_transition}, { new_transition = (0..(transitions.size-1)).choose; });
-	("new_transition after a while: " + new_transition).postln;
 	transitions[new_transition].();
+	~changeChordToRandom.();
+	~enable_ambient = [false, true].wchoose([0.2, 0.8]);
 	~last_transition_used = new_transition;
 };
 

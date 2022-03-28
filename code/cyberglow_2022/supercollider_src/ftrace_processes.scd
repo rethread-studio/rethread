@@ -90,7 +90,7 @@
 	}).play;
 
 	~tick_routine2 = Routine({
-		var freq_stream = Pwhite(100, 150).asStream;
+		var freq_stream = Pwhite(8000, 9500).asStream;
 		loop {
 			var channel = ~channels.tick,
 			dur = 0.5.pow(~ftrace_stats.random.rolling_average.linlin(~ftrace_stats.random.min_rolling_average, ~ftrace_stats.random.max_rolling_average, 2, 6).round),
@@ -99,7 +99,7 @@
 			if(~enable_ftrace, {
 				channel.play_on(\tick2, [
 					\freq, freq_stream.next,
-					\rq, 0.03,
+					\rq, 0.003,
 					\amp, amp,
 					\atk, 0.001,
 					\out, channel.bus]);
@@ -108,6 +108,14 @@
 		};
 
 	}).play;
+
+	// Vary pitch dispersion over time
+	{
+		loop{
+			~tick_softener.set(\pitch_dispersion, exprand(0.002, 0.1));
+			rrand(3, 6).wait;
+		};
+	}.fork;
 
 };
 

@@ -1,13 +1,14 @@
-
 (
+s.newBusAllocators;
 s.waitForBoot({
 	var voice_path;
 
 	~enable_ftrace = true;
 	~enable_user = true;
+	~enable_ambient = true;
 	~enable_server = true;
 
-	~whisper_amp = 1.5;
+	~whisper_amp = 5.5;
 	~useAmbisonicsDecoder = false;
 	~encoderType = \stereo;
 
@@ -64,7 +65,12 @@ s.waitForBoot({
 	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.10, \out, ~mainBus]);
 	~tapeBus = Bus.audio(s, 2);
 	~tape = Synth(\tape_dist, [\in, ~tapeBus, \mix, 0.15, \out, ~revBus]);
-
+	~tickBus = Bus.audio(s, 2);
+	~tick_softener = Synth(\tick_softener, [\in, ~tickBus, \out, ~revBus]);
+	~ambientBus = Bus.audio(s, 2);
+	~ambient_reverb = Synth(\ambient_reverb, [\in, ~ambientBus, \out, 0]);
+	~serverBus = Bus.audio(s, 2);
+	~server_processing = Synth(\server_channel, [\in, ~serverBus, \out, ~revBus]);
 
 	"harmony.scd".loadRelative;
 
@@ -311,12 +317,12 @@ s.waitForBoot({
 	~channels = Environment(know: true);
 
 	~channels.user_whispers = ~makeMixerChannel.("whisper", ~mainBus);
-	~channels.user_ambient = ~makeMixerChannel.("ambient", ~mainBus);
+	~channels.user_ambient = ~makeMixerChannel.("ambient", ~ambientBus);
 	~channels.beep = ~makeMixerChannel.("beep", ~revBus);
-	~channels.tick = ~makeMixerChannel.("tick", ~revBus);
+	~channels.tick = ~makeMixerChannel.("tick", ~tickBus);
 	~channels.noise = ~makeMixerChannel.("noise", ~mainBus);
 	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~revBus);
-	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~revBus);
+	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~serverBus);
 
 	~fade_channels = [
 		~channels.user_whispers,
@@ -433,12 +439,16 @@ var lead_up_time = 6, cresc_time = 2;
 ~enable_ftrace = true;
 ~enable_user = false;
 ~enable_server = false;
-
+~server_processing.set(\bpeak_freq, 4500)
 (
 ~ftrace_noise_freq_ratio = 1;
 ~freq_ratio = 1.0;
 )
+~tick_softener.set(\pitch_dispersion, 0.005)
+~tick_softener.set(\time_dispersion, 0.0001)
 
+~tick_softener.set(\pitch_dispersion, 0.005)
+~tick_softener.set(\time_dispersion, 0.0001)
 
 ~voiceBuffers.click.play
 ~channels.user_whispers.play_on(\service_voice, [\buf, ~voiceBuffers.click, \amp, ~whisper_amp, \out, ~channels.user_whispers.bus]);

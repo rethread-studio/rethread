@@ -67,32 +67,39 @@
 	var channel = ~channels.user_gestures, ambient_channel = ~channels.user_ambient;
 	~user_gestures = [
 		{ |chord, pan|
-			var length = rrand(2.0, 5.0),
-			atk = length * 0.3,
-			extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
-			freq = ~s53.degreeToFreq(chord.root, ~rootFreq, [-2, -1, 0].choose) * ~freq_ratio,
-			amp = exprand(0.005, 0.1);
-			ambient_channel.play_on(\softy, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
+			if(~enable_ambient, {
+				var length = rrand(0.15, 0.3),
+				atk = length * 0.3,
+				extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
+				freq = ~s53.degreeToFreq(chord.root, ~rootFreq, [-2, -1, 0].choose) * ~freq_ratio,
+				amp = exprand(0.005, 0.1);
+				ambient_channel.play_on(\dist_saw, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
+			});
 		},
 		{ |chord, pan|
-			var length = rrand(2.0, 5.0),
-			atk = length * 0.3,
-			extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
-			freq = ~s53.degreeToFreq(chord.fifth + chord.root, ~rootFreq, 0) * ~freq_ratio,
-			amp = exprand(0.005, 0.1);
-			ambient_channel.play_on(\softy, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
+			if(~enable_ambient, {
+				var length = rrand(0.15, 0.3),
+				atk = length * 0.3,
+				extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
+				freq = ~s53.degreeToFreq(chord.fifth + chord.root, ~rootFreq, 0) * ~freq_ratio,
+				amp = exprand(0.005, 0.1);
+				ambient_channel.play_on(\dist_saw, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
+			});
 		},
 		{ |chord, pan|
-			var length = rrand(1.0, 2.5),
-			atk = rrand(0.02, 0.3),
-			extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
-			degree = ([chord.root, chord.fifth + chord.root].choose) % 53 - 53,
-			amp = exprand(0.005, 0.1),
-			freq = ~s53.degreeToFreq(degree, ~rootFreq, [-1, 0].choose) * ~freq_ratio;
-			ambient_channel.play_on(\dist_sine, [\freq, freq, \amp, amp,\atk, atk, \sus, length * 0.1, \rel, length*0.6, \out, ambient_channel.bus, \pan, pan], extra_latency);
+			if(~enable_ambient, {
+				var length = rrand(0.125, 0.25),
+				atk = rrand(0.02, 0.3),
+				extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
+				degree = ([chord.root, chord.fifth + chord.root].choose) % 53 - 53,
+				amp = exprand(0.005, 0.1),
+				freq = ~s53.degreeToFreq(degree, ~rootFreq, [-1, 0].choose) * ~freq_ratio;
+				ambient_channel.play_on(\dist_saw, [\freq, freq, \amp, amp,\atk, atk, \sus, length * 0.1, \rel, length*0.6, \out, ambient_channel.bus, \pan, pan],
+					extra_latency);
+			});
 		},
 		{ |chord, pan|
-			var length = rrand(0.6, 1.5),
+			var length = rrand(0.4, 0.5),
 			atk = rrand(0.1, 0.3),
 			extra_latency = atk,
 			degree = ([chord.root % 53, (chord.fifth + chord.root) % 53, ((chord.third + chord.root)%53) + 53].choose),
@@ -101,7 +108,7 @@
 			channel.play_on(\dist_sine, [\freq, freq, \amp, amp, \atk, atk, \sus, 0, \rel, length, \out, 0, \pan, pan, \out, channel.bus], extra_latency);
 		},
 		{ |chord, pan|
-			var length = rrand(0.8, 2.0),
+			var length = rrand(0.4, 1.0),
 			atk = rrand(0.1, 0.3),
 			extra_latency = atk,
 			degree = ([chord.root % 53, (chord.fifth + chord.root) % 53, ((chord.third + chord.root)%53) + 53].choose),
@@ -110,7 +117,7 @@
 			channel.play_on(\dist_sine, [\freq, freq, \amp, amp, \atk, atk, \sus, 0, \rel, length, \out, channel.bus, \pan, pan], extra_latency);
 		},
 		{ |chord, pan|
-			var length = rrand(0.8, 2.0),
+			var length = rrand(0.4, 1.0),
 			atk = 0.01,
 			extra_latency = atk,
 			degree = ([chord.root % 53, (chord.fifth + chord.root) % 53, ((chord.third + chord.root)%53) + 53].choose),
