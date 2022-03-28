@@ -1,35 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tekniska test</title>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
 
-  <body>
-    <div class="body">
-      <button id="RESET_BUTTON">Reset</button>
-      <button id="SPEED1_BUTTON">SPEED1</button>
-      <button id="SPEED2_BUTTON">SPEED2</button>
-      <button id="SPEED3_BUTTON">SPEED3</button>
-    </div>
-    <script src="./js/socket.io.min.js"></script>
-    <script src="./js/button_map.js"></script>
-    <script>
-      const socket = io();
-      document.querySelectorAll("button").forEach((button) => {
-        button.addEventListener("mousedown", (e) => {
-          const values = new Array(12).fill(0);
-          values[button_map[e.target.id]] = 10000;
-          socket.emit("serial", values.join(","));
-        });
-        button.addEventListener("mouseup", (e) => {
-          const values = new Array(12).fill(0);
-          socket.emit("serial", values.join(","));
-        });
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tekniska test</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="body">
+    <button id="RESET_BUTTON">Reset</button>
+    <button id="SPEED1_BUTTON">SPEED1</button>
+    <button id="SPEED2_BUTTON">SPEED2</button>
+    <button id="SPEED3_BUTTON">SPEED3</button>
+  </div>
+  <script src="./js/libraries/socket.io.min.js"></script>
+  <script src="./js/button_map.js"></script>
+  <script>
+    const socket = io();
+    document.querySelectorAll("button").forEach((button) => {
+      button.addEventListener("mousedown", (e) => {
+        const values = new Array(12).fill(0);
+        values[button_map[e.target.id]] = 10000;
+        socket.emit("serial", values.join(","));
       });
-    </script>
-  </body>
+      button.addEventListener("mouseup", (e) => {
+        const values = new Array(12).fill(0);
+        socket.emit("serial", values.join(","));
+      });
+    });
+  </script>
+</body>
+
 </html>
