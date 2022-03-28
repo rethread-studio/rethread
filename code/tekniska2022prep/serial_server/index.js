@@ -15,8 +15,12 @@ button.watch((err, value) => {
   socket.emit("rotary_button", value);
 });
 
+let previousValue = -1;
 myEncoder.on("rotation", (direction, value) => {
-  socket.emit("rotary", { direction, value });
+  if (value != previousValue) {
+    socket.emit("rotary", { direction, value });
+  }
+  previousValue = value;
 });
 
 const port = new SerialPort({
