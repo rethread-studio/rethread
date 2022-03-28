@@ -11,11 +11,20 @@ OSCdef(\ftraceOSC, { arg msg, time, addr, recvPort;
 }, '/ftrace', nil);
 
 OSCdef(\ftraceStatsOSC, { arg msg, time, addr, recvPort;
-	var type = msg[1], rolling_average = msg[2];
+	var type = msg[1], rolling_average = msg[2], min_rolling_average = msg[3], max_rolling_average = msg[4];
 	// [msg, time, addr, recvPort].postln;
+	if(min_rolling_average > 1000000, {
+		min_rolling_average = 0;
+	});
 	switch(type,
-		\syscall, {~ftrace_stats.syscall.rolling_average = rolling_average},
-		\random, {~ftrace_stats.random.rolling_average = rolling_average}
+		\syscall, {~ftrace_stats.syscall.rolling_average = rolling_average;
+			~ftrace_stats.syscall.min_rolling_average = min_rolling_average;
+			~ftrace_stats.syscall.max_rolling_average = max_rolling_average;
+		},
+		\random, {~ftrace_stats.random.rolling_average = rolling_average;
+			~ftrace_stats.random.min_rolling_average = min_rolling_average;
+			~ftrace_stats.random.max_rolling_average = max_rolling_average;
+		}
 	);
 
 }, '/ftrace_stats', nil);

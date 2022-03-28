@@ -324,6 +324,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 format!("{}", stats.rolling_average),
                             ]));
                             stats_data.push(Row::new(vec![
+                                "min_rolling_average:".to_owned(),
+                                format!("{}", stats.min_rolling_average),
+                            ]));
+                            stats_data.push(Row::new(vec![
+                                "max_rolling_average:".to_owned(),
+                                format!("{}", stats.max_rolling_average),
+                            ]));
+                            stats_data.push(Row::new(vec![
                                 "trig/s:".to_owned(),
                                 format!(
                                     "{}",
@@ -340,7 +348,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                         .borders(Borders::ALL),
                                 )
                                 // Columns widths are constrained in the same way as Layout...
-                                .widths(&[Constraint::Length(30), Constraint::Length(10)])
+                                .widths(&[Constraint::Length(15), Constraint::Length(10)])
                                 // ...and they can be separated by a fixed spacing.
                                 .column_spacing(1);
                             f.render_widget(stats_table, stats_chunks[i]);
@@ -755,6 +763,9 @@ struct Stats {
     trigger_threshold: u64,
     average_events_per_second: f64,
     rolling_average: f64,
+    min_rolling_average: f64,
+    max_rolling_average: f64,
+    /// when the Stats was created
     start_time: Instant,
     /// the number of times to apply the precalculated falloff ratio, with a reminder
     num_physics_steps: f64,
@@ -773,6 +784,8 @@ impl Stats {
             trigger_threshold,
             average_events_per_second: 0.0,
             rolling_average: 0.0,
+            min_rolling_average: f64::MAX,
+            max_rolling_average: 0.0,
             start_time: Instant::now(),
             num_physics_steps: 0.0,
             rolloff_ratio: (0.001_f64).powf(1.0_f64 / STEPS_PER_SECOND),
@@ -799,11 +812,27 @@ impl Stats {
         self.average_events_per_second =
             self.total_events_registered as f64 / self.start_time.elapsed().as_secs_f64();
 
+        if self.rolling_average > self.max_rolling_average {
+            self.max_rolling_average = self.rolling_average;
+        } else {
+            // Go slightly towards the current value so that the max can adjust over time
+            self.max_rolling_average =
+                self.max_rolling_average * 0.9999 + self.rolling_average * 0.0001;
+        }
         // Recalculate rolling average
         self.num_physics_steps += dt * STEPS_PER_SECOND;
         while self.num_physics_steps >= 1.0 {
             self.rolling_average *= self.rolloff_ratio;
             self.num_physics_steps -= 1.0;
+        }
+        if self.start_time.elapsed().as_secs_f32() > 5.0 {
+            if self.rolling_average < self.min_rolling_average {
+                self.min_rolling_average = self.rolling_average;
+            } else {
+                // Go slightly towards the current value so that the min can adjust over time
+                self.min_rolling_average =
+                    self.min_rolling_average * 0.99999 + self.rolling_average * 0.00001;
+            }
         }
         if self.second_instant.elapsed() >= Duration::from_secs(1) {
             let triggers_per_sec =
@@ -855,11 +884,15 @@ impl Sonifier {
         let args = vec![
             osc::Type::String("syscall".to_owned()),
             osc::Type::Float(ftrace_stats.syscall.rolling_average as f32),
+            osc::Type::Float(ftrace_stats.syscall.min_rolling_average as f32),
+            osc::Type::Float(ftrace_stats.syscall.max_rolling_average as f32),
         ];
         self.osc_sender.send(("/ftrace_stats", args)).ok();
         let args = vec![
             osc::Type::String("random".to_owned()),
             osc::Type::Float(ftrace_stats.random.rolling_average as f32),
+            osc::Type::Float(ftrace_stats.random.min_rolling_average as f32),
+            osc::Type::Float(ftrace_stats.random.max_rolling_average as f32),
         ];
         self.osc_sender.send(("/ftrace_stats", args)).ok();
     }
