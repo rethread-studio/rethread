@@ -52,11 +52,11 @@
 ~transitionSwoosh = { |swoosh_dur = 2 |
 	{
 		var sig;
-		sig = Resonz.ar(BrownNoise.ar(), XLine.kr([200, 201], [2000, 1980], swoosh_dur) * LFNoise2.kr(3).range(0.995, 1.001), 0.3, mul: 0.2);
-		sig = sig * EnvGen.kr(Env([0, 1, 0.5, 0], [swoosh_dur, 0.5, 0.5]), doneAction: 2);
+		sig = Resonz.ar(BrownNoise.ar(), XLine.kr([200, 201], [2200, 2180], swoosh_dur) * LFNoise2.kr(3).range(0.995, 1.001), 0.3, mul: 0.2);
+		sig = sig * EnvGen.kr(Env([0, 1, 0.5, 0], [swoosh_dur, 0.5, 3], [2, 0, -6]), doneAction: 2);
 		Out.ar(~revBus.index, sig);
 	}.play;
-	(swoosh_dur + 0.5).wait;
+	(swoosh_dur + 0.1).wait;
 	{
 		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2*0.125, mul: 0.125*0.5);
 		sig = sig * Env([0.5, 0], [3]).ar(2);

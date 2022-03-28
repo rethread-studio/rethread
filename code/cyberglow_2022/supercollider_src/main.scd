@@ -367,6 +367,12 @@ s.waitForBoot({
 		});y
 	};
 
+	~changeChordAction = {
+		~ambient_reverb.release;
+		~ambient_reverb = Synth(\ambient_reverb, [\in, ~ambientBus, \out, 0], target: ~main_glitch, addAction: \addBefore);
+		("change chord action").postln;
+	};
+
 	"gestures.scd".loadRelative;
 	"osc.scd".loadRelative;
 	"channel_auto_fader.scd".loadRelative;
@@ -375,6 +381,9 @@ s.waitForBoot({
 	~start_tick_process.();
 	~start_beep_process.();
 	~start_auto_fade.();
+	/*~enable_ftrace = false;
+	~enable_user = false;
+	~enable_server = false;*/
 
 });
 )
@@ -466,3 +475,5 @@ var lead_up_time = 6, cresc_time = 2;
 ~main_glitch.set(\pitch_shift_ratio, 0.5)
 ~main_glitch.set(\enable_bit_crush, 1)
 ~main_glitch.set(\sample_rate, 1000)
+
+{~random_non_transition.();}.fork
