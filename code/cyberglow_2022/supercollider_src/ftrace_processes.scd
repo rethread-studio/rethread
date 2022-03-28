@@ -9,6 +9,7 @@
 ~ftrace_stats.syscall = ~make_stats.();
 ~ftrace_stats.random = ~make_stats.();
 
+~beep_scale = [0, 5, 9, 14, 17, 22, 26, 31, 36, 39, 43, 48, 53].collect{ | degree | ~s53.degreeToFreq(degree, ~rootFreq, 0)};
 
 ~start_beep_process = {
 	~beep_routine = Routine({
@@ -23,14 +24,13 @@
 		// A Routine can have several yield points, unlike FuncStreams
 		freq_routine = Routine({
 			loop{
-				var num_passive = ~ftrace_stats.random.rolling_average.linlin(10, 100, 3, 10),
-				num_active = ~ftrace_stats.syscall.rolling_average.linlin(2000, 10000, 3, 10);
+				var num_passive = ~ftrace_stats.random.rolling_average.linlin(10, 120, 3, 10),
+				num_active = ~ftrace_stats.syscall.rolling_average.linlin(12000, 16000, 3, 10);
 				num_passive.do{
 					1400.yield;
 				};
 				num_active.do{
-					// TODO: Change to 53edo
-					var freq = ~ftrace_stats.syscall.rolling_average.linlin(2000, 10000, 60, 72).round.midicps * 4.5;
+					var freq = ~beep_scale[~ftrace_stats.syscall.rolling_average.linlin(14000, 16000, 0, ~beep_scale.size-1).round] * 4.5;
 					freq.yield;
 				};
 			}
