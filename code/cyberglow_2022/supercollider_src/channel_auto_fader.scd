@@ -35,10 +35,10 @@
 	~use_auto_fade = true;
 	// Enable LPF on all channels
 	~fade_channels.do{ | chan | chan.enable_lpf(true); };
-	~fade_to_new_channels.();
+	~fade_to_new_channels.(5.0);
 };
 
-~fade_to_new_channels = {
+~fade_to_new_channels = { | time_to_next_transition |
 	var min_amp = 0.02,
 	focus_amp = 1.0,
 	min_lpf_freq = 300,
@@ -76,7 +76,7 @@
 	var transition_time = min(rrand(min(~fade_lag_time * 0.5, 3.0), min(~fade_lag_time * 0.5, 10.0)), ~fade_lag_time * 0.75),
 	wait_time = time_to_next_transition - transition_time;
 
-	~fade_to_new_channels.();
+	~fade_to_new_channels.(time_to_next_transition);
 
 	{
 	(wait_time * 0.5).wait;
