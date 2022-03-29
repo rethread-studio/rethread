@@ -113,7 +113,8 @@
 	{
 		loop{
 			~tick_softener.set(\pitch_dispersion, exprand(0.002, 0.1));
-			rrand(3, 6).wait;
+			~tick_softener.set(\time_dispersion, exprand(0.0002, 0.01));
+			rrand(1, 2).wait;
 		};
 	}.fork;
 

@@ -210,7 +210,7 @@ SynthDef(\tick2, {
 }).add;
 
 SynthDef(\tick_softener, {
-	var sig = In.ar(\in.kr(0), 2), lag_time = \lag_time.kr(4);
+	var sig = In.ar(\in.kr(0), 2), lag_time = \lag_time.kr(2);
 	sig = PitchShift.ar(sig, 0.2, Ramp.kr(\pitch_shift_ratio.kr(1.0), lag_time), VarLag.kr(\pitch_dispersion.kr(0.005), lag_time, 5), \time_dispersion.kr(0.0001, lag_time));
 	sig = sig + DelayC.ar([sig[1], sig[0]], 0.2, {LFNoise1.ar(2).range(0.001, 0.01)}!2);
 	sig = LPF.ar(sig, 9000);
