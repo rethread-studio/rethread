@@ -42,7 +42,13 @@ async function generateMosaic() {
   // m.generateThumbs();
 }
 
-setInterval(generateMosaic, 3 * 60 * 1000);
+setInterval(() => {
+  try {
+    generateMosaic();
+  } catch (error) {
+    console.error(error);
+  }
+}, 3 * 60 * 1000);
 try {
   generateMosaic();
 } catch (error) {
@@ -60,12 +66,12 @@ app.get("/img/mosaic.jpg", async (req, res) => {
 app.get("/js/button_map.js", (req, res) => {
   res.send(
     "button_map=" +
-    JSON.stringify({
-      RESET_BUTTON: process.env.RESET_BUTTON,
-      SPEED1_BUTTON: process.env.SPEED1_BUTTON,
-      SPEED2_BUTTON: process.env.SPEED2_BUTTON,
-      SPEED3_BUTTON: process.env.SPEED3_BUTTON,
-    })
+      JSON.stringify({
+        RESET_BUTTON: process.env.RESET_BUTTON,
+        SPEED1_BUTTON: process.env.SPEED1_BUTTON,
+        SPEED2_BUTTON: process.env.SPEED2_BUTTON,
+        SPEED3_BUTTON: process.env.SPEED3_BUTTON,
+      })
   );
 });
 
@@ -117,8 +123,8 @@ io.on("connection", (socket) => {
     } else {
       io.emit("step", "previous");
     }
-  })
-  
+  });
+
   socket.on("serial", (data) => {
     if (data === null) return;
     const buttonsValue = data.split(",");
