@@ -94,6 +94,14 @@ function updateFilter() {
     filter.update();
 }
 
+function stepFilter(step) {
+    if (step == "next") {
+        filter.stepNext();
+    } else if (step == "previous") {
+        filter.stepPrevious();
+    }
+}
+
 function loadNewImage(newImage) {
     photograph = loadImage(newImage, img => {
         images = new Images(photograph, filters);

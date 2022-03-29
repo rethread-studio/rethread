@@ -2,7 +2,8 @@ const socket = io();
 const webcam = new Webcam(320, 0 /* automatic */);
 
 socket.on("step", (step) => {
-  console.log(step);
+  removeInterval();
+  stepFilter(step);
 });
 socket.on("state", (state) => {
   // IDLE, PICTURE, RESET_BUTTON_ON, SPEED1_BUTTON_ON, SPEED2_BUTTON_ON, SPEED3_BUTTON_ON
@@ -98,6 +99,7 @@ function tunOnSpeed(speed) {
       objectsToRender.push(filter);
       createInterval();
       break;
+
 
     default:
       break;
