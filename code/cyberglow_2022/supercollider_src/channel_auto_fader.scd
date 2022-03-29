@@ -61,7 +61,11 @@
 
 			focus_channels.do{|chan| chan.set_amp(focus_amp)};
 			focus_channels.do{|chan| chan.set_lpf_freq(focus_lpf_freq)};
-			(~fade_lag_time*1.5).wait;
+			(~fade_lag_time*0.75).wait;
+			if([true, false].wchoose([0.3, 0.7]), {
+				~random_non_transition.();
+			});
+			(~fade_lag_time*0.75).wait;
 			if(~fade_use_transitions, {
 				~random_transition.();
 			});

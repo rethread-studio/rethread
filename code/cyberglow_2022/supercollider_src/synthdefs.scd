@@ -147,16 +147,48 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 	mix = mix.lag(\mixLag.kr(10));
 
 	sig = HPF.ar(in, 120);
+	sig = LPF.ar(sig, 7000);
 
-	/*wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
-	wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
-	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.9));
+	wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
+	// wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);
+	// wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.9));
 
 	wet = HPF.ar(wet, 60);
 
 	sig = (in * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
 	Out.ar(out, sig);
+}).add;
+
+SynthDef(\ambient_reverb, { | out = 0, amp = 0.5, mix = 0.5  |
+	var sig, wet, in, env;
+
+	env = EnvGen.kr(Env([0, 1, 0], [4, 4], releaseNode: 1), gate: \gate.kr(1), doneAction: 2);
+
+	in = In.ar(\in.kr(10), 2);
+	mix = mix.lag(\mixLag.kr(10));
+
+	sig = HPF.ar(HPF.ar(in, 120), 50);
+	sig = BPeakEQ.ar(sig, \bpeak_freq.kr(250), \bpeak_rq.kr(2.0), \bpeak_db.kr(-10));
+
+	/*wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
+	wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
+	wet = Greyhole.ar(sig, \delayTime.kr(0.4), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
+
+	wet = HPF.ar(wet, 60);
+
+	sig = (in * (1-mix)) + (wet*mix);
+	sig = Limiter.ar(sig, 0.95);
+	Out.ar(out, sig * env * amp);
+}).add;
+
+SynthDef(\server_channel, {
+	var sig = In.ar(\in.kr(0), 2) * \amp.kr(1);
+	sig = HPF.ar(sig, 500);
+	sig = LPF.ar(sig, 5000);
+	sig = BPeakEQ.ar(sig, \bpeak_freq.kr(3800), \bpeak_rq.kr(2.0), \bpeak_db.kr(-10));
+	Out.ar(\out.kr(0), sig);
+
 }).add;
 
 SynthDef(\mixer_channel, {
@@ -173,8 +205,16 @@ SynthDef(\tick2, {
 	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(20), rq.min(5)) * env;
 	sig = Pan2.ar(sig, \pan.kr(0)) * \amp.kr(1.0) * 10;
 	sig = sig.tanh; // Should never happen, but better to soft clip
-	sig = AnalogTape.ar(sig, 0.0, 0.4, 0.1, oversample: 3);
+	// sig = AnalogTape.ar(sig, 0.0, 0.4, 0.1, oversample: 3);
 	Out.ar(\out.kr(0), sig);
+}).add;
+
+SynthDef(\tick_softener, {
+	var sig = In.ar(\in.kr(0), 2), lag_time = \lag_time.kr(4);
+	sig = PitchShift.ar(sig, 0.2, Ramp.kr(\pitch_shift_ratio.kr(1.0), lag_time), VarLag.kr(\pitch_dispersion.kr(0.005), lag_time, 5), \time_dispersion.kr(0.0001, lag_time));
+	sig = sig + DelayC.ar([sig[1], sig[0]], 0.2, {LFNoise1.ar(2).range(0.001, 0.01)}!2);
+	sig = LPF.ar(sig, 9000);
+	Out.ar(\out.kr(0), sig * 0.5);
 }).add;
 
 SynthDef(\service_voice, {

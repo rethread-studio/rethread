@@ -234,4 +234,5 @@
 ~changeChordToRandom = {
 	~chord = ~all_chords.choose;
 	~last_chord_degrees = ~chord2degrees.(~chord);
+	~changeChordAction.();
 };
