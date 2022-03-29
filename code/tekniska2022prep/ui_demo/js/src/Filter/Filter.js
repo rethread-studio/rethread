@@ -54,6 +54,10 @@ class Filter {
         this.imageOut.copySample();
     }
 
+    updateRemovePixelSample() {
+        this.imageOut.removeSample();
+    }
+
     setCallBack(call) {
         this.callBack = call;
     }
@@ -92,13 +96,28 @@ class Filter {
     }
 
     update() {
+        this.stepNext();
+    }
+
+    stepNext() {
         //Check images status
         const imgStatus = this.imageOut.getStatus();
-        this.updateFilterStep(imgStatus);
-        this.updateImageStep(imgStatus);
+        this.checkStatus(imgStatus);
+        this.checkIfComplete(imgStatus);
+        this.updateImageStep(imgStatus, "next");
+        this.updatePixelSamples();
         this.addParticles(this.imageIn);
         this.addParticles(this.imageOut);
         this.updateStatus();
+    }
+
+    stepPrevious() {
+        const imgStatus = this.imageOut.getStatus();
+        this.updateRemovePixelSample();
+        this.updateImageStep(imgStatus, "previous");
+        this.addParticles(this.imageIn);
+        this.addParticles(this.imageOut);
+        this.updatePreviousStatus();
     }
 
     addParticles(image) {
@@ -113,23 +132,50 @@ class Filter {
     }
 
     updateStatus() {
-        //TODO REFACTOR
         if (this.status != filterStatus.COMPLETE) return;
-        //reset all images
         this.filterPos = 0;
         this.status = filterStatus.FILTER;
         this.resetImages();
-        // this.updateFilterStep(this.status);
         this.setImageIO(this.filterPos);
         this.setPosition();
         this.updatePixelSamples();
     }
 
+    updatePreviousStatus() {
+
+        if (this.isFirstStep()) {
+            this.completeAllImage();
+            this.filterPos = this.images.length - 2;
+            this.setImageIO(this.filterPos);
+            this.imageOut.setLastPosition();
+            this.imageIn.setLastPosition();
+
+        } else if (this.imageOut.getStatus() == imageStatus.IDDLE) {
+            this.filterPos = this.filterPos - 1;
+            this.setImageIO(this.filterPos);
+            this.imageOut.setLastPosition();
+            this.imageIn.setLastPosition();
+        }
+        this.setPosition();
+        this.updatePixelSamples();
+    }
+
+    isFirstStep() {
+        return this.filterPos == 0 && this.imageOut.getStatus() == imageStatus.IDDLE;
+    }
+
+    completeAllImage() {
+        this.images.forEach((image) => image.complete());
+    }
     resetImages() {
         this.images.forEach((image, i) => { if (i != 0) image.reset() });
     }
 
-    updateFilterStep(status) {
+    checkStatus(imgStatus) {
+        if (imgStatus == imageStatus.IDDLE) this.imageOut.setStatus(imageStatus.FILTERING);
+    }
+
+    checkIfComplete(status) {
         if (status != imageStatus.COMPLETE) return;
         this.setImagePosStep();
         this.setImageIO(this.filterPos);
@@ -148,13 +194,15 @@ class Filter {
         return isComplete;
     }
 
-    updateImageStep(status) {
+    updateImageStep(status, state = "next") {
         if (status != imageStatus.FILTERING) return;
-        //STEP IMAGES
-        this.imageIn.step();
-        this.imageOut.step();
-        //update pixel samples
-        this.updatePixelSamples();
+        if (state == "next") {
+            this.imageIn.step();
+            this.imageOut.step();
+        } else if (state == "previous") {
+            this.imageIn.stepPrevious();
+            this.imageOut.stepPrevious();
+        }
     }
 
     render() {

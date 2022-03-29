@@ -58,7 +58,11 @@ class ImageSample {
         //reset status
 
         //
+    }
 
+    complete() {
+        this.setStatus(imageStatus.COMPLETE);
+        this.sampleImage.copy(this.completeImage, 0, 0, this.completeImage.width, this.completeImage.height, 0, 0, this.completeImage.width, this.completeImage.height);
     }
 
     resetsamplePos() {
@@ -78,8 +82,24 @@ class ImageSample {
         }
     }
 
+    stepPrevious() {
+        if (this.samplePos.x - this.sampleSize.width < 0) {
+            this.samplePos.set(this.sampleImage.width - this.sampleSize.width, this.samplePos.y - this.sampleSize.height);
+        } else {
+            this.samplePos.sub(this.sampleSize.width, 0)
+        }
+
+        if (this.samplePos.y < 0) {
+            this.samplePos.set(0, 0);
+            this.setStatus(imageStatus.IDDLE);
+        }
+    }
+
     setStatus(status = imageStatus.FILTERING) {
         this.status = status;
+    }
+    setLastPosition() {
+        this.samplePos = createVector(this.sampleImage.width - this.sampleSize.width, this.sampleImage.height - this.sampleSize.height)
     }
 
     getPosition() {
@@ -130,6 +150,20 @@ class ImageSample {
 
     copySample() {
         this.sampleImage.copy(this.completeImage, this.samplePos.x, this.samplePos.y, this.sampleSize.width, this.sampleSize.height, this.samplePos.x, this.samplePos.y, this.sampleSize.width, this.sampleSize.height);
+    }
+
+    removeSample() {
+        const initX = this.samplePos.x;
+        const initY = this.samplePos.y;
+        const maxY = initY + this.sampleSize.height;
+        const maxX = initX + this.sampleSize.width;
+        for (let y = initY; y < maxY; y++) {
+            for (let x = initX; x < maxX; x++) {
+                this.sampleImage.set(x, y, color(0, 90, 102, 0));
+            }
+        }
+
+        this.sampleImage.updatePixels();
     }
 
     render() {
