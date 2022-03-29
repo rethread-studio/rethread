@@ -30,8 +30,8 @@ socket.on("state", (state) => {
     tunOnSpeed(state);
   } else if (state == "SPEED3_BUTTON_ON") {
     tunOnSpeed(state);
-  }
-});
+
+  });
 window.addEventListener(
   "load",
   () => {
