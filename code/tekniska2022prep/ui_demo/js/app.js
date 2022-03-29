@@ -2,7 +2,11 @@ const socket = io();
 const webcam = new Webcam(320, 0 /* automatic */);
 
 socket.on("step", (step) => {
-  console.log(step);
+  if (step == "next") {
+    updateFilter();
+  } else if (step == "previous") {
+    console.log(step);
+  }
 });
 socket.on("state", (state) => {
   // IDLE, PICTURE, RESET_BUTTON_ON, SPEED1_BUTTON_ON, SPEED2_BUTTON_ON, SPEED3_BUTTON_ON
@@ -30,8 +34,8 @@ socket.on("state", (state) => {
     tunOnSpeed(state);
   } else if (state == "SPEED3_BUTTON_ON") {
     tunOnSpeed(state);
-
-  });
+  }
+});
 window.addEventListener(
   "load",
   () => {
@@ -98,6 +102,7 @@ function tunOnSpeed(speed) {
       objectsToRender.push(filter);
       createInterval();
       break;
+
 
     default:
       break;
