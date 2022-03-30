@@ -53,27 +53,6 @@
 	(
 		root: 0,
 		third: 17,
-		fifth: 26,
-		// extensions are stored as degrees
-		added_degrees: [5, 44],
-	),
-	(
-		root: 0,
-		third: 17,
-		fifth: 36,
-		// extensions are stored as degrees
-		added_degrees: [9, 44],
-	),
-	(
-		root: 0,
-		third: 17,
-		fifth: 36,
-		// extensions are stored as degrees
-		added_degrees: [44, 22],
-	),
-	(
-		root: 0,
-		third: 17,
 		fifth: 31,
 		// extensions are stored as degrees
 		added_degrees: [44, 22],
