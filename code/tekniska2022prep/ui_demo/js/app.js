@@ -75,6 +75,8 @@ function setup() {
   speed2.render = () => {
     images.renderFirstImage();
   };
+
+
 }
 
 function draw() {
@@ -105,3 +107,20 @@ function tunOnSpeed(speed) {
       break;
   }
 }
+
+
+// const imageDOM = document.querySelector(".test img");
+// const imgObj = new Image();
+// imgObj.src = document.querySelector(".test img").src;
+
+// filterous.importImage(imgObj, null)
+//   .applyFilter('brightness', 0.2)
+//   .renderHtml(imageDOM);
+
+// const imgObj2 = new Image();
+// imgObj2.src = document.querySelector(".test img").src;
+
+// const imageDOM2 = document.querySelector(".test img");
+// filterous.importImage(imgObj2, null)
+//   .applyFilter('contrast', -0.3)
+//   .renderHtml(imageDOM2);

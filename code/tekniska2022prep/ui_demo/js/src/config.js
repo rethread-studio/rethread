@@ -17,3 +17,4 @@ let filter;
 let intervalId = null;
 let particles = [];
 let images;
+
