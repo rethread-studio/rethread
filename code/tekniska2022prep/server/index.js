@@ -95,6 +95,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("picture", (image) => {
+    if (image == null) return;
     const fileName = "snap_" + new Date().getTime();
     const filePath = snapsFolder + fileName + ".png";
     // Remove header
