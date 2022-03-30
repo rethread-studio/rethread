@@ -172,28 +172,10 @@ class ImageSample {
         this.renderSampleSqueleton();
     }
 
-    filterImage({ filter, val }) {
-        this.completeImage.filter(filter, val);
-
-        //CREATE IMAGE
-        // const imageDOM = document.querySelector(".snap img");
-        // const imgObj = new Image();
-        // imgObj.src = document.querySelector(".snap img").src;
-        // imgObj.onload = () => {
-        //     filterous.importImage(imgObj, null)
-        //         .applyFilter('brightness', 0.2)
-        //         .applyFilter('contrast', -0.3)
-        //         .renderHtml(imageDOM);
-
-
-        //     // this.setCompleteImage(imgObj.src, imgObj.width, imgObj.height)
-        // }
-        //FILTER IMAGE
-
-        //CHANGE CONTENT of complete Image to the new one
-
-
-
+    filterImage({ filter: nFilter, val }) {
+        this.completeImage.loadPixels();
+        nFilter(this.completeImage.pixels, val);
+        this.completeImage.updatePixels();
     }
 
     renderCompleteImage() {

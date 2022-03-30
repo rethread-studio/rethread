@@ -104,7 +104,7 @@ function stepFilter(step) {
 
 function loadNewImage(newImage) {
     photograph = loadImage(newImage, img => {
-        images = new Images(photograph, filters);
+        images = new Images(photograph, filtersToApply);
 
         filter = createFilter(images.getImages());
 
