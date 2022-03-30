@@ -1,5 +1,6 @@
 (
 s.newBusAllocators;
+s.options.memSize = 1024*256;
 s.waitForBoot({
 	var voice_path;
 
