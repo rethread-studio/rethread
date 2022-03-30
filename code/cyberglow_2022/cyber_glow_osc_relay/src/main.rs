@@ -8,7 +8,7 @@ use crossterm::{
 use nannou_osc as osc;
 use num_format::{SystemLocale, ToFormattedString};
 use once_cell::sync::Lazy;
-use osc::Connected;
+use osc::{Connected, Type};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
@@ -25,7 +25,7 @@ use tui::{
     layout::{Alignment, Constraint, Direction, Layout},
     style::{Modifier, Style},
     text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, List, ListItem, Paragraph, Widget},
+    widgets::{Block, BorderType, Borders, Paragraph},
     Terminal,
 };
 
@@ -112,8 +112,6 @@ struct Args {
     record: bool,
     #[clap(short, long)]
     play_back: bool,
-    #[clap(short, long)]
-    sonify: bool,
     #[clap(short, long)]
     listen: bool,
     #[clap(short, long, default_value_t = 57130)]
@@ -441,18 +439,13 @@ fn main_loop(
     let load_path = PathBuf::from(args.load_path.unwrap_or("./monitor_data.json".to_string()));
     let receiver = osc::receiver(args.listen_port).unwrap();
 
-    let mut sonifier = if args.sonify {
-        Some(Sonifier::new("127.0.0.1:57120"))
+    let mut sonifier = if args.listen || args.play_back {
+        Some(Sonifier::new("127.0.0.1:57120", &args.osc_destination))
     } else {
         None
     };
 
     let mut ftrace_stats = FtraceStats::new();
-
-    let sender = osc::sender()
-        .unwrap()
-        .connect(args.osc_destination)
-        .unwrap();
 
     let playback_messages = if args.play_back {
         if let Some(messages) = load_data(&load_path, args.skip_forward_ms) {
@@ -487,7 +480,7 @@ fn main_loop(
     let mut last_time_stats_tx = Instant::now();
     'main_loop: loop {
         while let Ok(Some((packet, _addr))) = receiver.try_recv() {
-            if args.record || args.listen || args.sonify {
+            if args.record || args.listen {
                 for message in packet.into_msgs() {
                     // Parse message
                     let new_message = if message.addr == "/cyberglow" {
@@ -545,9 +538,6 @@ fn main_loop(
                     };
                     // Do something with the message
                     if let Some(new_message) = new_message {
-                        if args.listen {
-                            new_message.send(&sender);
-                        }
                         if let Some(ref mut sonifier) = &mut sonifier {
                             sonify_message(sonifier, &mut ftrace_stats, &new_message);
                         }
@@ -562,17 +552,20 @@ fn main_loop(
                     }
                 }
             }
-            if args.play_back {
-                if last_message_time.elapsed().as_millis()
-                    >= playback_messages[message_index].ts() as u128
-                {
-                    playback_messages[message_index].clone().send(&sender);
-                    last_message_time = Instant::now();
-                    message_index += 1;
-                    if message_index >= playback_messages.len() {
-                        println!("Finished playing all events!");
-                        if !args.record && !args.listen {
-                            break 'main_loop;
+            if let Some(ref mut sonifier) = &mut sonifier {
+                if args.play_back {
+                    if last_message_time.elapsed().as_millis()
+                        >= playback_messages[message_index].ts() as u128
+                    {
+                        let message = playback_messages[message_index].clone();
+                        sonify_message(sonifier, &mut ftrace_stats, &message);
+                        last_message_time = Instant::now();
+                        message_index += 1;
+                        if message_index >= playback_messages.len() {
+                            println!("Finished playing all events!");
+                            if !args.record && !args.listen {
+                                break 'main_loop;
+                            }
                         }
                     }
                 }
@@ -584,6 +577,7 @@ fn main_loop(
                 // Send a stats update
                 if let Some(ref mut sonifier) = sonifier {
                     sonifier.send_stats_update(&ftrace_stats);
+                    sonifier.update(dt);
                 }
             }
             if last_time_stats_tx.elapsed().as_millis() > 100 {
@@ -635,16 +629,12 @@ fn sonify_message(sonifier: &mut Sonifier, ftrace_stats: &mut FtraceStats, messa
         Message::Ftrace(ftrace_message) => {
             let ftrace_kind = ftrace_message.kind;
             if ftrace_stats.register_event(ftrace_kind) {
-                let stats = ftrace_stats.get_stats(ftrace_kind);
                 // there was a trigger
-                sonifier.send_ftrace_message(
-                    ftrace_kind,
-                    stats.rolling_average as f32,
-                    stats.average_events_per_second as f32,
-                )
+                sonifier.send_ftrace_trigger(ftrace_kind)
             }
         }
     }
+    message.send(&sonifier.osc_sender_openframeworks);
 }
 
 fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
@@ -698,13 +688,10 @@ fn parse_ftrace<T: AsRef<str>>(data: T) -> Option<FtraceKind> {
     if matches!(ftrace_kind, Some(FtraceKind::Syscall)) {
         let mut map = SYSCALL_MAP.lock().unwrap();
         *map.entry(event_type.to_string()).or_insert(0) += 1;
-        print_map_stats(map);
     }
 
     ftrace_kind
 }
-
-fn print_map_stats(map: std::sync::MutexGuard<HashMap<String, usize>>) {}
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 enum FtraceKind {
@@ -851,12 +838,22 @@ impl Stats {
 }
 
 struct Sonifier {
-    osc_sender: osc::Sender<Connected>,
+    osc_sender_supercollider: osc::Sender<Connected>,
+    osc_sender_openframeworks: osc::Sender<Connected>,
+    time_to_next_transition: f64,
 }
 impl Sonifier {
-    pub fn new(osc_destination: &str) -> Self {
+    pub fn new(osc_destination_supercollider: &str, osc_destination_openframeworks: &str) -> Self {
         Self {
-            osc_sender: osc::sender().unwrap().connect(osc_destination).unwrap(),
+            osc_sender_supercollider: osc::sender()
+                .unwrap()
+                .connect(osc_destination_supercollider)
+                .unwrap(),
+            osc_sender_openframeworks: osc::sender()
+                .unwrap()
+                .connect(osc_destination_openframeworks)
+                .unwrap(),
+            time_to_next_transition: 5.0,
         }
     }
     pub fn send_monitor_message(&mut self, m: MonitorMessage) {
@@ -865,20 +862,16 @@ impl Sonifier {
             osc::Type::String(m.action),
             osc::Type::String(m.arguments),
         ];
-        self.osc_sender.send(("/monitor", args)).ok();
+        self.osc_sender_supercollider.send(("/monitor", args)).ok();
     }
-    pub fn send_ftrace_message(
-        &mut self,
-        ftrace_kind: FtraceKind,
-        rolling_average: f32,
-        average_events_per_second: f32,
-    ) {
-        let args = vec![
-            osc::Type::String(format!("{ftrace_kind:?}")),
-            osc::Type::Float(rolling_average),
-            osc::Type::Float(average_events_per_second),
-        ];
-        self.osc_sender.send(("/ftrace", args)).ok();
+    pub fn send_ftrace_trigger(&mut self, ftrace_kind: FtraceKind) {
+        let args = vec![osc::Type::String(format!("{ftrace_kind:?}"))];
+        self.osc_sender_supercollider
+            .send(("/ftrace_trigger", args.clone()))
+            .ok();
+        self.osc_sender_openframeworks
+            .send(("/ftrace_trigger", args))
+            .ok();
     }
     pub fn send_stats_update(&mut self, ftrace_stats: &FtraceStats) {
         let args = vec![
@@ -887,14 +880,39 @@ impl Sonifier {
             osc::Type::Float(ftrace_stats.syscall.min_rolling_average as f32),
             osc::Type::Float(ftrace_stats.syscall.max_rolling_average as f32),
         ];
-        self.osc_sender.send(("/ftrace_stats", args)).ok();
+        self.osc_sender_supercollider
+            .send(("/ftrace_stats", args))
+            .ok();
         let args = vec![
             osc::Type::String("random".to_owned()),
             osc::Type::Float(ftrace_stats.random.rolling_average as f32),
             osc::Type::Float(ftrace_stats.random.min_rolling_average as f32),
             osc::Type::Float(ftrace_stats.random.max_rolling_average as f32),
         ];
-        self.osc_sender.send(("/ftrace_stats", args)).ok();
+        self.osc_sender_supercollider
+            .send(("/ftrace_stats", args))
+            .ok();
+    }
+    pub fn update(&mut self, dt: f64) {
+        self.time_to_next_transition -= dt;
+        if self.time_to_next_transition <= 0.0 {
+            self.time_to_next_transition = rand::random::<f64>() * 14.0 + 6.0;
+            self.send_transition_trigger(self.time_to_next_transition as f32);
+        }
+    }
+    pub fn send_transition_trigger(&mut self, time_to_next_transition: f32) {
+        self.osc_sender_supercollider
+            .send((
+                "/transition",
+                vec![osc::Type::Float(time_to_next_transition)],
+            ))
+            .ok();
+        self.osc_sender_openframeworks
+            .send((
+                "/transition",
+                vec![osc::Type::Float(time_to_next_transition)],
+            ))
+            .ok();
     }
 }
 

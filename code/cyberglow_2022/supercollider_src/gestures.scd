@@ -4,7 +4,7 @@
 	var channel = ~channels.server_gestures;
 	~server_gestures = [
 		{ |chord|
-			var length = rrand(0.07, 0.3),
+			var length = rrand(0.07, 0.2),
 			atk = 0.001,
 			extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
 			degree = ~last_chord_degrees.choose + 106,
@@ -16,7 +16,7 @@
 			].choose.();
 		},
 		{ |chord|
-			var length = rrand(0.1, 0.5),
+			var length = rrand(0.05, 0.3),
 			atk = length,
 			extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
 			degree = ~last_chord_degrees.choose + 106,
@@ -25,7 +25,7 @@
 			channel.play_on(\dist_saw, [\freq, freq, \amp, amp,\atk, 0.01, \sus, 0.0, \rel, length, \out, channel.bus, \pan, rrand(-0.5, 0.5)], extra_latency);
 		},
 		{ |chord|
-			var length = rrand(0.2, 0.4),
+			var length = rrand(0.15, 0.25),
 			atk = length,
 			extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
 			degree = ((chord.added_degrees + chord.root).choose),
@@ -41,7 +41,7 @@
 			}.fork;
 		},
 		{ |chord|
-			var length = rrand(0.1, 0.4),
+			var length = rrand(0.1, 0.3),
 			atk = length,
 			extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
 			// degree = ((chord.added_degrees + chord.root).choose),

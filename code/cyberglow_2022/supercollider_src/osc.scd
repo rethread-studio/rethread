@@ -1,4 +1,9 @@
+OSCdef(\transitionOSC, { arg msg, time, addr, recvPort;
+	var time_to_next_transition = msg[1].asFloat;
+	[msg, time, addr, recvPort].postln;
+	~trigger_transition.(time_to_next_transition);
 
+}, '/transition', nil);
 
 OSCdef(\ftraceOSC, { arg msg, time, addr, recvPort;
 	var type = msg[1];
@@ -8,7 +13,7 @@ OSCdef(\ftraceOSC, { arg msg, time, addr, recvPort;
 		~ftrace_trigger.(type);
 	});
 
-}, '/ftrace', nil);
+}, '/ftrace_trigger', nil);
 
 OSCdef(\ftraceStatsOSC, { arg msg, time, addr, recvPort;
 	var type = msg[1], rolling_average = msg[2], min_rolling_average = msg[3], max_rolling_average = msg[4];

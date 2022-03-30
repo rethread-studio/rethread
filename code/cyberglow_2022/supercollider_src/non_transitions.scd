@@ -56,13 +56,11 @@
 	var transitions = [
 		{~nonTransitionInvertedSwoosh.(rrand(1.5, 4));},
 		{~nonTransitionSwoosh.(rrand(1.5, 4));},
-		{~nonTransitionMainGlitch1.(rrand(4, 6), [0.5, 0.25, 0.1].choose); },
-		{~nonTransitionMainGlitch2.(rrand(4, 6)); }
+		{~nonTransitionMainGlitch1.(rrand(1, 2.5), [0.5, 0.25, 0.1].choose); },
+		{~nonTransitionMainGlitch2.(rrand(1, 2.5)); }
 	],
 	new_transition = (0..(transitions.size-1)).choose;
 	while({~last_non_transition_used == new_transition}, { new_transition = (0..(transitions.size-1)).choose; });
 	transitions[new_transition].();
-	~changeChordToRandom.();
-	~enable_ambient = [false, true].wchoose([0.2, 0.8]);
 	~last_non_transition_used = new_transition;
 };

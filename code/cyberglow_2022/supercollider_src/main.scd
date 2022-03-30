@@ -8,6 +8,8 @@ s.waitForBoot({
 	~enable_ambient = true;
 	~enable_server = true;
 
+	~use_auto_fade = true;
+
 	~whisper_amp = 5.5;
 	~useAmbisonicsDecoder = false;
 	~encoderType = \stereo;
@@ -380,17 +382,24 @@ s.waitForBoot({
 	};
 
 	"gestures.scd".loadRelative;
-	"osc.scd".loadRelative;
 	"channel_auto_fader.scd".loadRelative;
 	"presets.scd".loadRelative;
 
+	~enable_auto_fade.();
+
+	~trigger_transition = { | time_to_next_transition |
+		// This will be called when a /transition OSC message is received
+		if(~use_auto_fade, {
+			~trigger_auto_fade.(time_to_next_transition);
+		});
+	};
+
 	~start_tick_process.();
 	~start_beep_process.();
-	~start_auto_fade.();
 	/*~enable_ftrace = false;
 	~enable_user = false;
 	~enable_server = false;*/
-
+	"osc.scd".loadRelative; // don't receive OSC messages until everything is set up
 });
 )
 ~start_auto_fade.()
