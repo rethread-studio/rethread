@@ -17,6 +17,7 @@ class Images {
         const pixelImage = this.createFilledImage(img, { x: 100, y: img.height }, size, pixelSampleSize);
         this.images.push(pixelImage);
         let imgRef = pixelImage;
+
         this.filters.forEach(_filter => {
             const pos = imgRef.getPosition();
             const emptyImg = this.createEmptyImage({ x: pos.x + size.width + size.width / 2, y: pos.y }, size, pixelSampleSize, imgRef.getCompleteImage(), _filter);

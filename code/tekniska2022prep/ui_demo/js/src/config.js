@@ -7,7 +7,7 @@ const state = {
 
 }
 
-let filters = [];
+let filtersToApply = [];
 
 let photograph;
 let canvas;

@@ -49,11 +49,32 @@ function setup() {
   canvas = createCanvas(windowWidth, windowHeight);
   frameRate(state.frameRate);
 
-  filters.push(
-    { filter: ERODE, val: [1] },
-    { filter: GRAY, val: [1] },
-    { filter: BLUR, val: [0.9] }
+  //clarendon
+  // filtersToApply.push(
+  //   { filter: brightnessFilterous, val: 0.1 },
+  //   { filter: contrastFilterous, val: 0.1 },
+  //   { filter: saturationFilterous, val: 0.15 }
+  // );
+
+  //Moon
+  // filtersToApply.push(
+  //   { filter: grayscaleFilterous, val: 0.1 },
+  //   { filter: contrastFilterous, val: -0.4 },
+  //   { filter: brightnessFilterous, val: 0.1 }
+  // );
+
+  //Reyes
+  filtersToApply.push(
+    { filter: sepiaFilterous, val: 0.1 },
+    { filter: brightnessFilterous, val: -0.4 },
+    { filter: contrastFilterous, val: 0.1 }
   );
+
+
+
+  //brightness 0.1
+  //contrast 0.1
+  //saturation 0.15
 
   // pixels = filters.brightness.apply(this, [pixels, 0.1]);
   // pixels = filters.contrast.apply(this, [pixels, 0.1]);
@@ -63,7 +84,7 @@ function setup() {
   speed1 = {};
   speed2 = {};
 
-  images = new Images(photograph, filters);
+  images = new Images(photograph, filtersToApply);
   filter = createFilter(images.getImages());
 
   objectsToRender.push(filter);
@@ -101,26 +122,8 @@ function tunOnSpeed(speed) {
       objectsToRender.push(filter);
       createInterval();
       break;
-
-
     default:
       break;
   }
 }
 
-
-// const imageDOM = document.querySelector(".test img");
-// const imgObj = new Image();
-// imgObj.src = document.querySelector(".test img").src;
-
-// filterous.importImage(imgObj, null)
-//   .applyFilter('brightness', 0.2)
-//   .renderHtml(imageDOM);
-
-// const imgObj2 = new Image();
-// imgObj2.src = document.querySelector(".test img").src;
-
-// const imageDOM2 = document.querySelector(".test img");
-// filterous.importImage(imgObj2, null)
-//   .applyFilter('contrast', -0.3)
-//   .renderHtml(imageDOM2);
