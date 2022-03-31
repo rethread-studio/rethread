@@ -81,13 +81,14 @@ function renderImage(image, x, y, width, height, angle, scale = 1) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-function renderGlitchImage(image, x, y, width, height, angle, scale = 1) {
+function renderGlitchImage(image, sx, sy, swidth, sheight, x, y, width, height, angle, scale = 1) {
   if (!image.complete) {
     image.addEventListener("load", () => {
-      return renderImage(image, x, y, width, height, angle, scale);
+      return renderGlitchImage(image, sx, sy, swidth, sheight, x, y, width, height, angle, scale);
     });
     return;
   }
+  // console.log(sx, sy, swidth, sheight)
   const centerX = (width * config.renderScale) / 2.0;
   const centerY = (height * config.renderScale) / 2.0;
 
@@ -95,14 +96,18 @@ function renderGlitchImage(image, x, y, width, height, angle, scale = 1) {
 
   gctx.rotate(angle);
   gctx.scale(scale, scale);
-  // gctx.translate(x,y);
+  // gctx.translate(x, y);
+
   gctx.drawImage(
-    image,
-    -centerX,
+    image, 0, 0, width * config.renderScale, width * config.renderScale,
+    // sx,
+    // sy,
+    // swidth * config.renderScale,
+    // sheight * config.renderScale,
+    - centerX,
     -centerY,
     width * config.renderScale,
     height * config.renderScale
   );
-
   gctx.setTransform(1, 0, 0, 1, 0, 0);
 }

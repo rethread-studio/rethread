@@ -150,15 +150,14 @@ socket.on("answer", ({ question, answer }) => {
 socket.on("disconnect", () => {
   game.page = "demo";
 });
-socket.on("hit", ({ userID }) => {
-  // console.log(userID)
-  // if (glitchConfig.glitches.length <= glitchConfig.limit) {
-  //   const glitch = newGlitch(userID);
-  //   if (glitch != null) addGlitch(glitch);
-  // } else {
-  //   clearGlitchCanvas();
-  // }
-});
+// socket.on("hit", ({ userID }) => {
+//   if (glitchConfig.glitches.length <= glitchConfig.limit) {
+//     const glitch = newGlitch(userID);
+//     if (glitch != null) addGlitch(glitch);
+//   } else {
+//     clearGlitchCanvas();
+//   }
+// });
 
 const emojiTimeouts = {};
 socket.on("emote", ({ playerId, emoji }) => {

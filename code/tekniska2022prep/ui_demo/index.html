@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tekniska test</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="body">
+    <div class="camera">
+      <video id="webcam">Video stream not available.</video>
+    </div>
+    <div class="snap">
+      <img src="/img/portrait100.jpg">
+    </div>
+
+    <div class="current-state"></div>
+    <img class="idle" src="/img/mosaic.jpg" style="max-width: 100%;">
+  </div>
+
+  <script src="./js/libraries/socket.io.min.js"></script>
+  <script src="./js/libraries/filters.js"></script>
+  <script src="./js/libraries/p5.min.js"></script>
+  <script src="./js/src/Image/ImageSample.js"></script>
+  <script src="./js/src/Image/Images.js"></script>
+  <script src="./js/src/Particles/particle.js"></script>
+  <script src="./js/src/Particles/pixelParticle.js"></script>
+  <script src="./js/src/Filter/Filter.js"></script>
+  <script src="./js/src/config.js"></script>
+  <script src="./js/src/utils.js"></script>
+  <script src="./js/webcam.js"></script>
+  <!-- <script src="./js/src/appTekniska.js"></script> -->
+  <script src="./js/app.js"></script>
+
+</body>
+
+</html>

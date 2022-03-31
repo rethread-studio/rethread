@@ -19,6 +19,11 @@ angular
         controller: "visualizationController",
         title: "Visualization",
       })
+      .when("/notitle", {
+        templateUrl: "/partials/visualization-no-title.htm",
+        controller: "visualizationController",
+        title: "Visualization",
+      })
       .when("/404", {
         templateUrl: "/partials/404.htm",
         title: "Not Found!",
@@ -35,9 +40,9 @@ angular
 
     const visualizations = [
       "visualization1",
-      "visualization2",
-      "visualizationGlobe",
-      "visualizationSparse",
+      // "visualization2",
+      // "visualizationGlobe",
+      // "visualizationSparse",
     ];
     let currentVisualization = 0;
     $("#" + visualizations[currentVisualization]).addClass(
@@ -57,7 +62,7 @@ angular
       );
       $("#" + visualizations[currentVisualization]).show();
       let duration = 30;
-      if (currentVisualization == 0 || currentVisualization == 3) {
+      if (currentVisualization == 1 || currentVisualization == 3) {
         duration = 5;
       }
       switchTimeout = setTimeout(switchVisualization, duration * 1000);
