@@ -14,50 +14,8 @@
     ]
   },
   {
-    "text": "How many Nobel Prizes have been awarded?",
-    "type": "nobel",
-    "answers": [
-      {
-        "text": "718",
-        "isCorrect": false
-      },
-      {
-        "text": "892",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
     "text": "Is neon present in the Earth's atmosphere?",
     "type": "CS",
-    "answers": [
-      {
-        "text": "No",
-        "isCorrect": false
-      },
-      {
-        "text": "Yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Where was Martin Luther King Jr. a pastor?",
-    "type": "king",
-    "answers": [
-      {
-        "text": "In California",
-        "isCorrect": false
-      },
-      {
-        "text": "In Alabama",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Did Martin Luther King Jr. have a dream?",
-    "type": "king",
     "answers": [
       {
         "text": "No",
@@ -97,175 +55,7 @@
       }
     ]
   },
-  {
-    "text": "What scientific areas does WASP support?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "Agriculture",
-        "isCorrect": false
-      },
-      {
-        "text": "AI, software, and automatic control",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "In which topic did Toni Morrison graduate?",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "American Comics",
-        "isCorrect": false
-      },
-      {
-        "text": "American Literature",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "In what form does the daughter return in Beloved?",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "A cat",
-        "isCorrect": false
-      },
-      {
-        "text": "A ghost",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Who did Toni Morrison talk about in her Nobel lecture?",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "A marathon man",
-        "isCorrect": false
-      },
-      {
-        "text": "A blind man",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Was Toni Morrison the first black woman to receive a Nobel Prize?",
-    "type": "morrison",
-    "answers": [
-      {
-        "text": "No",
-        "isCorrect": false
-      },
-      {
-        "text": "Yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Who was the first woman to receive a Nobel Prize in Literature?",
-    "type": "lagerlof",
-    "answers": [
-      {
-        "text": "Selma Lagerlöf",
-        "isCorrect": true
-      },
-      {
-        "text": "Grazia Deledda",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Who has had a crater on Venus named after her?",
-    "type": "lagerlof",
-    "answers": [
-      {
-        "text": "Selma Lagerlöf",
-        "isCorrect": true
-      },
-      {
-        "text": "Rita Levi-Montalcini",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How much was on the bank note featuring Selma Lagerlöf?",
-    "type": "lagerlof",
-    "answers": [
-      {
-        "text": "20 kr",
-        "isCorrect": true
-      },
-      {
-        "text": "100 kr",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Who was the first woman to be elected into the Swedish Academy?",
-    "type": "lagerlof",
-    "answers": [
-      {
-        "text": "Selma Lagerlöf",
-        "isCorrect": true
-      },
-      {
-        "text": "Elin Wägner",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where was Mother Teresa born?",
-    "type": "teresa",
-    "answers": [
-      {
-        "text": "In Skopje",
-        "isCorrect": true
-      },
-      {
-        "text": "In Calcutta",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where did Mother Teresa work?",
-    "type": "teresa",
-    "answers": [
-      {
-        "text": "In the slums",
-        "isCorrect": true
-      },
-      {
-        "text": "In a convent",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What does Shanti Nagar mean?",
-    "type": "teresa",
-    "answers": [
-      {
-        "text": "City of Peace",
-        "isCorrect": true
-      },
-      {
-        "text": "Children's Home",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
+   {
     "text": "Who introduced Internet memes in 1994?",
     "type": "CS",
     "answers": [
@@ -294,409 +84,15 @@
     ]
   },
   {
-    "text": "What was the first medical X-ray?",
-    "type": "conrad",
-    "answers": [
-      {
-        "text": "Wilhelms wife's hand",
-        "isCorrect": true
-      },
-      {
-        "text": "A dog",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Which religion is the Dalai Lama the highest religious leader?",
-    "type": "dalai_lama",
-    "answers": [
-      {
-        "text": "Tibetan Buddhism",
-        "isCorrect": true
-      },
-      {
-        "text": "Zen Buddhism",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What does the X in X-ray stand for?",
-    "type": "conrad",
-    "answers": [
-      {
-        "text": "Roman number 10",
-        "isCorrect": false
-      },
-      {
-        "text": "X stands for unknown",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Is X-ray technology patented?",
-    "type": "conrad",
-    "answers": [
-      {
-        "text": "Yes :(",
-        "isCorrect": false
-      },
-      {
-        "text": "No :)",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Who was a waitress in a jazz club?",
-    "type": "arnold",
-    "answers": [
-      {
-        "text": "Frances Arnold",
-        "isCorrect": true
-      },
-      {
-        "text": "Nicola Pellow",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "When was the first appointment of a Dalai Lama?",
-    "type": "dalai_lama",
-    "answers": [
-      {
-        "text": "In June 1578",
-        "isCorrect": true
-      },
-      {
-        "text": "In December 1124",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where does the Dalai Lama currently live?",
-    "type": "dalai_lama",
-    "answers": [
-      {
-        "text": "Germany",
-        "isCorrect": false
-      },
-      {
-        "text": "India",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "What year did Nelly Sachs flee to Sweden?",
-    "type": "sachs",
-    "answers": [
-      {
-        "text": "1944",
-        "isCorrect": false
-      },
-      {
-        "text": "1940",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Is Sir Alexander a Knight?",
-    "type": "fleming",
-    "answers": [
-      {
-        "text": "Yes",
-        "isCorrect": true
-      },
-      {
-        "text": "No",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Which is a recurring theme in Nelly Sachs' work?",
-    "type": "sachs",
-    "answers": [
-      {
-        "text": "Mental health",
-        "isCorrect": false
-      },
-      {
-        "text": "Suffering of Jews",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "What was the first name of Penicillin?",
-    "type": "fleming",
-    "answers": [
-      {
-        "text": "P. rubens",
-        "isCorrect": false
-      },
-      {
-        "text": "Mould juice",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Where are Nelly Sachs' possessions kept to this day?",
-    "type": "sachs",
-    "answers": [
-      {
-        "text": "Skansen",
-        "isCorrect": false
-      },
-      {
-        "text": "Kungliga biblioteket",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "What is the ancestor of modern antibiotics?",
-    "type": "fleming",
-    "answers": [
-      {
-        "text": "Penicillin",
-        "isCorrect": true
-      },
-      {
-        "text": "Advil",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How did Frances Arnold find new proteins?",
-    "type": "arnold",
-    "answers": [
-      {
-        "text": "Natural evolution",
-        "isCorrect": true
-      },
-      {
-        "text": "Artificial intelligence",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What is the grand diversity-generating machine?",
-    "type": "arnold",
-    "answers": [
-      {
-        "text": "Evolution",
-        "isCorrect": true
-      },
-      {
-        "text": "Composition",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What did Elinor Ostrom study?",
-    "type": "ostrom",
-    "answers": [
-      {
-        "text": "Polycentric systems",
-        "isCorrect": true
-      },
-      {
-        "text": "Microtonality",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What concept does Elinor Ostrom focus on?",
-    "type": "ostrom",
-    "answers": [
-      {
-        "text": "Common Pool Resource",
-        "isCorrect": true
-      },
-      {
-        "text": "Capability",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Who is first woman who received a Nobel Prize in Economy?",
-    "type": "ostrom",
-    "answers": [
-      {
-        "text": "Elinor Ostrom",
-        "isCorrect": true
-      },
-      {
-        "text": "Esther Duflo",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Did Bob Dylan play at the March on Washington in 1963?",
-    "type": "dylan",
-    "answers": [
-      {
-        "text": "Yes",
-        "isCorrect": true
-      },
-      {
-        "text": "No",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Which Nobel Prize did Bob Dylan receive?",
-    "type": "dylan",
-    "answers": [
-      {
-        "text": "Peace",
-        "isCorrect": false
-      },
-      {
-        "text": "Literature",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Did Bob Dylan go to Stockholm to receive his Nobel Prize?",
-    "type": "dylan",
-    "answers": [
-      {
-        "text": "No",
-        "isCorrect": false
-      },
-      {
-        "text": "Yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "How old was Malala when she was awarded the Nobel Peace Prize?",
-    "type": "yousafzai",
-    "answers": [
-      {
-        "text": "25",
-        "isCorrect": false
-      },
-      {
-        "text": "17",
-        "description": "Malala is the youngest laureate to receive a Nobel Prize.",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Did Taliban leaders unanimously decide to kill Malala Yousafzai?",
-    "type": "yousafzai",
-    "answers": [
-      {
-        "text": "Yes",
-        "isCorrect": true
-      },
-      {
-        "text": "No",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Who was the second recipient of the Nobel Peace prize, with Malala?",
-    "type": "yousafzai",
-    "answers": [
-      {
-        "text": "Kailash Satyarthi",
-        "isCorrect": true
-      },
-      {
-        "text": "Barack Obama",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Which Nobel laureate has an asteroid named after her?",
-    "type": "curie",
-    "answers": [
-      {
-        "text": "Marie Curie",
-        "isCorrect": true
-      },
-      {
-        "text": "Tu Youyou",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How many times was Marie Curie awarded a Nobel Prize?",
-    "type": "curie",
-    "answers": [
-      {
-        "text": "Two",
-        "description":"She was, and still is, the only person to be awarded Nobel Prizes in two scientific categories.",
-        "isCorrect": true
-      },
-      {
-        "text": "Three",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where can we find radium?",
-    "type": "curie",
-    "answers": [
-      {
-        "text": "In thorium",
-        "isCorrect": true
-      },
-      {
-        "text": "In lokirium",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How many visitors did cyber|glow receive?",
+    "text": "How many characters can you choose from in cyber|glow?",
     "type": "CS",
     "answers": [
       {
-        "text": "[nb_users]",
+        "text": "7",
         "isCorrect": true
       },
-      {
-        "text": "[random]",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How many laureates can you choose from in cyber|glow?",
-    "type": "CS",
-    "answers": [
       {
         "text": "15",
-        "isCorrect": true
-      },
-      {
-        "text": "45",
         "isCorrect": false
       }
     ]
@@ -731,20 +127,6 @@
     ]
   },
   {
-    "text": "How many files are used for cyber|glow?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "29000",
-        "isCorrect": true
-      },
-      {
-        "text": "450000",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
     "text": "How many lines of code is cyber|glow made of?",
     "type": "CS",
     "answers": [
@@ -754,147 +136,6 @@
       },
       {
         "text": "15 million",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What is the parodic Nobel Prize?",
-    "type": "nobel",
-    "answers": [
-      {
-        "text": "Ig Nobel Prize",
-        "isCorrect": true
-      },
-      {
-        "text": "Darwin Award",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Did Mahatma Gandhi receive a Nobel Prize?",
-    "type": "nobel",
-    "answers": [
-      {
-        "text": "No",
-        "isCorrect": true
-      },
-      {
-        "text": "Yes",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Who prints the Nobel Prize medals?",
-    "type": "nobel",
-    "answers": [
-      {
-        "text": "Svenska Medalj AB",
-        "isCorrect": true
-      },
-      {
-        "text": "Central Mint",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What alternative career could Albert Einstein have considered?",
-    "type": "einstein",
-    "answers": [
-      {
-        "text": "Musician",
-        "isCorrect": true
-      },
-      {
-        "text": "Banker",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What astral phenomenon is understood through general relativity?",
-    "type": "einstein",
-    "answers": [
-      {
-        "text": "Black holes",
-        "isCorrect": true
-      },
-      {
-        "text": "Northern lights",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where did Albert Einstein publish the Annus Mirabilis papers?",
-    "type": "einstein",
-    "answers": [
-      {
-        "text": "Annalen der Physik",
-        "isCorrect": true
-      },
-      {
-        "text": "Wired",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What phenomenon intensifies nerve growth factor in the blood plasma?",
-    "type": "montalcini",
-    "answers": [
-      {
-        "text": "Romantic love",
-        "isCorrect": true
-      },
-      {
-        "text": "Ice swim",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where did Rita Levi-Montalcini work during World War II?",
-    "type": "montalcini",
-    "answers": [
-      {
-        "text": "In her bedroom",
-        "isCorrect": true
-      },
-      {
-        "text": "In co-working spaces",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How old was Rita Levi-Montalcini when she died?",
-    "type": "montalcini",
-    "answers": [
-      {
-        "text": "103",
-        "description":"Rita Levi-Montalcini was the longest-living Nobel Laureate",
-        "isCorrect": true
-      },
-      {
-        "text": "91",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What is the contribution of Stephanie Forrest to cyber security?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "Software diversity",
-        "isCorrect": true
-      },
-      {
-        "text": "# in passwords",
         "isCorrect": false
       }
     ]
@@ -943,20 +184,6 @@
     ]
   },
   {
-    "text": "Who was Grandma COBOL?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "Grace Hopper",
-        "isCorrect": true
-      },
-      {
-        "text": "Frances Allen",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
     "text": "How many levels are there in a Candy Crush episode?",
     "type": "CS",
     "answers": [
@@ -971,16 +198,314 @@
     ]
   },
   {
-    "text": "When does Android evolve?",
-    "type": "CS",
+    "text": "The Crown Princess Victoria, Duchess of Västergötland, is she part of the House of Bernadotte?",
+    "type": "karl",
     "answers": [
       {
-        "text": "Once every minute",
-        "description":"There have been 1,163,867 commits between July 2008 and May 2019",
+        "text": "yes",
+        "description":"The House of Bernadotte is the royal house of Sweden since its foundation in 1818",
         "isCorrect": true
       },
       {
-        "text": "Once every month",
+        "text": "no",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "In which year did the current French ambassador arrive in Stockholm?",
+    "type": "etienne",
+    "answers": [
+      {
+        "text": "2020",
+        "description":"",
+        "isCorrect": true
+      },
+      {
+        "text": "2015",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "In how many different countries did the current French ambassador live?",
+    "type": "etienne",
+    "answers": [
+      {
+        "text": "4",
+        "description":"",
+        "isCorrect": true
+      },
+      {
+        "text": "2",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "The current French ambassador prefers kanelbullar or croissant?",
+    "type": "etienne",
+    "answers": [
+      {
+        "text": "kanelbullar",
+        "description":"",
+        "isCorrect": true
+      },
+      {
+        "text": "croissant",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Was the palace furnished when Louis Delavaud acquired it?",
+    "type": "delavaud",
+    "answers": [
+      {
+        "text": "no",
+        "description":"The palace was completely empty and Louis Delavaud did not have enough furniture for all the rooms of the palace",
+        "isCorrect": true
+      },
+      {
+        "text": "yes",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "In which part of Stockholm did Louis Delavaud wish to install the embassy?",
+    "type": "delavaud",
+    "answers": [
+      {
+        "text": "Östermalm",
+        "description":"Louis Delavaud wanted to stay close to the other embassies.",
+        "isCorrect": true
+      },
+      {
+        "text": "Stora Essingen",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who sold Broms Palace to Louis Delavaud?",
+    "type": "delavaud",
+    "answers": [
+      {
+        "text": "Mrs Broms",
+        "description":"",
+        "isCorrect": true
+      },
+      {
+        "text": "Mr Wallenberg",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where did the French ambassadors live before the acquisition of the Broms palace?",
+    "type": "baron",
+    "answers": [
+      {
+        "text": "Nyckelvicken Palace",
+        "description":"",
+        "isCorrect": true
+      },
+      {
+        "text": "Brommaplan",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which political party did baron de Breteuil and France support in the 18th century?",
+    "type": "baron",
+    "answers": [
+      {
+        "text": "Hats (Hattpartiet)",
+        "description":"The Hats (Hattpartiet) and the Caps (Mösspartiet) are two political parties that fought for power in Sweden between 1719 and 1772.",
+        "isCorrect": true
+      },
+      {
+        "text": "Caps (Mösspartiet)",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Did the baron de Breteuil contribute to the Swedish economy?",
+    "type": "baron",
+    "answers": [
+      {
+        "text": "yes",
+        "description":"Baron de Breteuil invested in the Marieberg porcelain factory",
+        "isCorrect": true
+      },
+      {
+        "text": "no",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where did Desideria spend her last years?",
+    "type": "Desideria",
+    "answers": [
+      {
+        "text": "Rosendal",
+        "description":"",
+        "isCorrect": true
+      },
+      {
+        "text": "Drottningholm",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Desideria was she engaged to Napoleon Bonaparte?",
+    "type": "Desideria",
+    "answers": [
+      {
+        "text": "yes",
+        "description":"She was engaged to Napoleon Bonaparte between 1794 and 1795",
+        "isCorrect": true
+      },
+      {
+        "text": "no",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Desideria was she the mother of a Swedish king?",
+    "type": "Desideria",
+    "answers": [
+      {
+        "text": "yes",
+        "description":"She was the mother of Oscar I",
+        "isCorrect": true
+      },
+      {
+        "text": "no",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where was King Karl XIV born?",
+    "type": "karl",
+    "answers": [
+      {
+        "text": "Pau",
+        "description":"",
+        "isCorrect": true
+      },
+      {
+        "text": "Visby",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Did King Karl XIV visit the Broms palace?",
+    "type": "karl",
+    "answers": [
+      {
+        "text": "no",
+        "description":"Impossible. The Broms palace was built in 1900 and King Karl XIV died in 1844",
+        "isCorrect": true
+      },
+      {
+        "text": "yes",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which academia did Johan Ludvig Peterson join in 1897?",
+    "type": "architects",
+    "answers": [
+      {
+        "text": "Academy of arts",
+        "description":"",
+        "isCorrect": true
+      },
+      {
+        "text": "Academy of science",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which country inspired the architects to design the Broms palace?",
+    "type": "architects",
+    "answers": [
+      {
+        "text": "Italy",
+        "description":"The architects were inspired by a Renaissance florentine villa to design the external façade of the palace",
+        "isCorrect": true
+      },
+      {
+        "text": "France",
+        "isCorrect": false
+      }
+    ]
+  },
+    {
+    "text": "Which building on Valhallavägen did Erik Lallerstedt design?",
+    "type": "architects",
+    "answers": [
+      {
+        "text": "KTH",
+        "description":"The large brick building at KTH was erected between 1914 and 1922",
+        "isCorrect": true
+      },
+      {
+        "text": "KMH",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Was the Broms Palace built in a new neighborhood?",
+    "type": "broms",
+    "answers": [
+      {
+        "text": "yes",
+        "description":"In 1900, the area was a new part of Stockholm and construction was rare.",
+        "isCorrect": true
+      },
+      {
+        "text": "no",
+        "isCorrect": false
+      }
+    ]
+  },{
+    "text": "How many children did Gustav Broms have?",
+    "type": "broms",
+    "answers": [
+      {
+        "text": "5",
+        "description":"Gustav Broms had 5 sons who grew up in the palace.",
+        "isCorrect": true
+      },
+      {
+        "text": "1",
+        "isCorrect": false
+      }
+    ]
+  },{
+    "text": "In what type of industry did Gustav Broms make his fortune?",
+    "type": "broms",
+    "answers": [
+      {
+        "text": "minerals",
+        "description":"Gustav made a profit from the exploitation of the ore deposits in Gällivare and Kirunavaara.",
+        "isCorrect": true
+      },
+      {
+        "text": "spices",
         "isCorrect": false
       }
     ]
