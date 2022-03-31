@@ -2,6 +2,7 @@
 class Images {
     images = [];
     filters = [];
+    marginRight = 500;
 
     constructor(img, filters) {
         this.filters = filters;
@@ -14,7 +15,7 @@ class Images {
 
     setImages(img) {
         const size = { width: img.width, height: img.height };
-        const pixelImage = this.createFilledImage(img, { x: 100, y: img.height }, size, pixelSampleSize);
+        const pixelImage = this.createFilledImage(img, { x: this.marginRight, y: 100 }, size, pixelSampleSize);
         this.images.push(pixelImage);
         let imgRef = pixelImage;
 

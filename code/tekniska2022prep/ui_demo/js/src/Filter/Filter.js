@@ -207,12 +207,19 @@ class Filter {
 
     render() {
         this.renderImages();
-        this.renderSqueleton();
+        // this.renderSqueleton();
         this.renderPixelSampleI();
         this.renderIConnection();
         this.renderPixelSampleO();
         this.renderOConnection();
+        //refactor add posX and posY to pixelSampliIn and Out
+        //update it when needed
+        //do not calculate in render
+        this.renderSampleGrid(this.position.x + this.padding.right, this.position.y + this.padding.top);
+        this.renderSampleGrid(this.position.x - this.pixelSampleIn.width - this.padding.left, this.position.y + this.padding.top);
 
+        this.renderPixelDetailGrid(this.imageIn.getImageSample(), this.position.x - this.pixelSampleIn.width - this.padding.left, this.position.y + this.padding.top * 2 + this.pixelSampleIn.height);
+        this.renderPixelDetailGrid(this.imageOut.getImageCompleteSample(), this.position.x + this.padding.right, this.position.y + this.padding.top * 2 + this.pixelSampleIn.height);
     }
 
     renderImages() {
@@ -248,15 +255,62 @@ class Filter {
 
     renderPixelSampleI() {
         if (this.pixelSampleIn == null) return
-        this.pixelSampleIn.resize(100, 100);
+        const { width, height } = state.filterSampleSize;
+        this.pixelSampleIn.resize(width, height);
         image(this.pixelSampleIn, this.position.x - this.pixelSampleIn.width - this.padding.left, this.position.y + this.padding.top);
 
     }
 
     renderPixelSampleO() {
         if (this.pixelSampleOut == null) return;
-        this.pixelSampleOut.resize(100, 100);
+        const { width, height } = state.filterSampleSize;
+        this.pixelSampleOut.resize(width, height);
         image(this.pixelSampleOut, this.position.x + this.padding.right, this.position.y + this.padding.top);
+    }
+
+    renderSampleGrid(posX, posY) {
+        stroke(255);
+        noFill();
+        strokeWeight(1);
+        const { width, height } = state.filterSampleSize;
+        rect(posX, posY, width, height);
+        //draw lines
+        const nWidth = width / state.sampleSize;
+        const nHeight = height / state.sampleSize;
+        for (let i = nWidth; i < width; i += nWidth) {
+            line(posX + i, posY, posX + i, posY + height);
+        }
+        for (let j = nHeight; j < height; j += nHeight) {
+            line(posX, posY + j, posX + width, posY + j);
+        }
+    }
+
+    renderPixelDetailGrid(sample, posX, posY) {
+        stroke(255);
+        noFill();
+        strokeWeight(1);
+        const { width, height } = state.filterSampleSize;
+        rect(posX, posY, width, height);
+        const textPad = 9;
+        const pixelWidth = width / state.sampleSize;
+        const pixelHeight = height / state.sampleSize;
+
+        for (let i = 0; i < sample.width; i++) {
+            for (let j = 0; j < sample.height; j++) {
+                let color = sample.get(i, j);
+                noFill();
+                rect(posX + (i * pixelWidth), posY + (j * pixelHeight), pixelWidth, pixelHeight);
+                const initPosY = pixelHeight / 3;
+                noStroke();
+                fill(255, 0, 0);
+                text(color[0], posX + (i * pixelWidth) + state.sampleSize / 2, posY + (j * pixelHeight) + initPosY)
+                fill(0, 255, 0);
+                text(color[1], posX + (i * pixelWidth) + state.sampleSize / 2, posY + (j * pixelHeight) + initPosY + (textPad * 1))
+                fill(0, 0, 255);
+                text(color[2], posX + (i * pixelWidth) + state.sampleSize / 2, posY + (j * pixelHeight) + initPosY + (textPad * 2))
+                stroke(255);
+            }
+        }
 
     }
 
@@ -264,7 +318,8 @@ class Filter {
         strokeWeight(1);
         stroke(255);
         fill(51);
-        rect(this.position.x - this.size.width / 2, this.position.y, this.size.width, this.size.width);
+        const { width, height } = state.filterSampleSize;
+        rect(this.position.x - width - this.padding.left - this.padding.right, this.position.y, width * 2 + this.padding.left + this.padding.right, this.size.width);
     }
 
     mouseClicked() {

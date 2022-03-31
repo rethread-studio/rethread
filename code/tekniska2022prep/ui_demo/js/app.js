@@ -70,16 +70,6 @@ function setup() {
     { filter: contrastFilterous, val: 0.1 }
   );
 
-
-
-  //brightness 0.1
-  //contrast 0.1
-  //saturation 0.15
-
-  // pixels = filters.brightness.apply(this, [pixels, 0.1]);
-  // pixels = filters.contrast.apply(this, [pixels, 0.1]);
-  // pixels = filters.saturation.apply(this, [pixels, 0.15]);
-
   objectsToRender = [];
   speed1 = {};
   speed2 = {};
@@ -127,3 +117,48 @@ function tunOnSpeed(speed) {
   }
 }
 
+function keyPressed() {
+  emptyObjectsToRender();
+  emptyParticles();
+  removeInterval();
+  switch (key) {
+    case '1':
+      objectsToRender.push(speed1);
+      break;
+    case '2':
+      createPixelParticles(images.getFirstImage(), images.getLastImage())
+      objectsToRender.push(speed2);
+      break;
+    case '3':
+      objectsToRender.push(filter);
+      createInterval();
+      break;
+    case 'r':
+      document.querySelector(".camera").style.display = "block";
+      document.querySelector(".snap img").style.display = "none";
+      break;
+    case 'p':
+      const image = webcam.snap();
+      socket.emit("picture", image);
+      document.querySelector(".camera").style.display = "none";
+      document.querySelector(".snap img").style.display = "block";
+      document.querySelector(".snap img").src = image;
+      loadNewImage(image);
+
+      break;
+    case 'ArrowRight':
+      objectsToRender.push(filter);
+      stepFilter("next");
+      break;
+
+    case 'ArrowLeft':
+      objectsToRender.push(filter);
+      stepFilter("previous");
+      break;
+
+    default:
+      //speed 1
+      break;
+  }
+  return false;
+}

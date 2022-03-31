@@ -4,7 +4,7 @@ const state = {
     frameRate: 60,
     intervalTime: 50,
     sampleSize: 10,
-
+    filterSampleSize: { width: 350, height: 350 }
 }
 
 let filtersToApply = [];
