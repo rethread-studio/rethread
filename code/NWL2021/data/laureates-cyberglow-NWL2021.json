@@ -1,0 +1,434 @@
+[
+  {
+    "_id": "615ee06a28f1bb00b8c4c8e7",
+    "firstname": "14th Dalai Lama",
+    "surname": "",
+    "imagePath": "14th-Dalai Lama_.png",
+    "bornCountry": "Tibet (now China)",
+    "bornCountryCode": "CN",
+    "bornCity": "Taktser",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 1989,
+        "category": "peace",
+        "share": 1,
+        "motivation": "I was awarded the Nobel peace prize for advocating peaceful solutions based upon tolerance and mutual respect in order to preserve the historical and cultural heritage of my people.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8e9"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8e8"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8e4",
+    "firstname": "Mother Teresa",
+    "surname": "Bojaxhiu",
+    "imagePath": "Mother-Teresa_Bojaxhiu.png",
+    "bornCountry": "Ottoman Empire (now North Macedonia)",
+    "bornCountryCode": "MK",
+    "bornCity": "Uskup (now Skopje)",
+    "diedCountry": "India",
+    "diedCountryCode": "IN",
+    "diedCity": "Calcutta",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 1979,
+        "category": "peace",
+        "share": 1,
+        "motivation": "My name is Mary Teresa Bojaxhiu, I received the Nobel Peace Prize 1979 for my work for bringing help to suffering humanity.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8e6"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8e5"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8f7",
+    "firstname": "Malala",
+    "surname": "Yousafzai",
+    "imagePath": "Malala_Yousafzai.png",
+    "bornCountry": "Pakistan",
+    "bornCountryCode": "PK",
+    "bornCity": "Mingora",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 2014,
+        "category": "peace",
+        "share": 2,
+        "motivation": "I am the youngest-ever Nobel prize laureate, which I received for for my struggle against the suppression of children and young people and for the right of all children to education.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8f9"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8f8"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8d3",
+    "firstname": "Marie",
+    "surname": "Curie",
+    "imagePath": "Marie_Curie.png",
+    "bornCountry": "Russian Empire (now Poland)",
+    "bornCountryCode": "PL",
+    "bornCity": "Warsaw",
+    "diedCountry": "France",
+    "diedCountryCode": "FR",
+    "diedCity": "Sallanches",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 1903,
+        "category": "physics",
+        "share": 4,
+        "motivation": "I am the first person to win two Nobel Prizes. In 1903 I received the Nobel prize in physics in recognition of the extraordinary services I have rendered by my researches on the radiation phenomena discovered by Professor Henri Becquerel.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8d5"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8d4"
+      },
+      {
+        "year": 1911,
+        "category": "chemistry",
+        "share": 1,
+        "motivation": "In 1911, I received the Nobel prize in chemistry in recognition of my services to the advancement of chemistry by the discovery of the elements radium and polonium, by the isolation of radium and the study of the nature and compounds of this remarkable element",
+        "affiliations": [
+          {
+            "name": "Sorbonne University",
+            "city": "Paris",
+            "country": "France",
+            "_id": "615ee06a28f1bb00b8c4c8d7"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8d6"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8db",
+    "firstname": "Sir Alexander",
+    "surname": "Fleming",
+    "imagePath": "Sir-Alexander_Fleming.png",
+    "bornCountry": "Scotland",
+    "bornCountryCode": "GB",
+    "bornCity": "Lochfield",
+    "diedCountry": "United Kingdom",
+    "diedCountryCode": "GB",
+    "diedCity": "London",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 1945,
+        "category": "medicine",
+        "share": 3,
+        "motivation": "I received the Nobel prize in medicine in 1945 for the discovery of penicillin and its curative effect in various infectious diseases..",
+        "affiliations": [
+          {
+            "name": "London University",
+            "city": "London",
+            "country": "United Kingdom",
+            "_id": "615ee06a28f1bb00b8c4c8dd"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8dc"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8e1",
+    "firstname": "Martin Luther",
+    "surname": "King Jr.",
+    "imagePath": "Martin-Luther_King-Jr.png",
+    "bornCountry": "USA",
+    "bornCountryCode": "US",
+    "bornCity": "Atlanta, GA",
+    "diedCountry": "USA",
+    "diedCountryCode": "US",
+    "diedCity": "Memphis, TN",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 1964,
+        "category": "peace",
+        "share": 1,
+        "motivation": "I was 35 when I received the Nobel peace prize in 1964, for my non-violent struggle for civil rights for the Afro-American population..",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8e3"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8e2"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8f0",
+    "firstname": "Toni",
+    "surname": "Morrison",
+    "imagePath": "Toni_Morrison.png",
+    "bornCountry": "USA",
+    "bornCountryCode": "US",
+    "bornCity": "Lorain, OH",
+    "diedCountry": "USA",
+    "diedCountryCode": "US",
+    "diedCity": "New York, NY",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 1993,
+        "category": "literature",
+        "share": 1,
+        "motivation": "I am Chloe Anthony Wofford Morrison or also known as Tony Morrison. I was awarded the Nobel Prize for my novels characterized by visionary force and poetic import, gives life to an essential aspect of American reality.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8f2"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8f1"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8fa",
+    "firstname": "Bob",
+    "surname": "Dylan",
+    "imagePath": "Bob_Dylan.png",
+    "bornCountry": "USA",
+    "bornCountryCode": "US",
+    "bornCity": "Duluth, MN",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 2016,
+        "category": "literature",
+        "share": 1,
+        "motivation": "I am the the first songwriter to receive the prestigious award for having created new poetic expressions within the great American song tradition.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8fc"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8fb"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8ed",
+    "firstname": "Nelly",
+    "surname": "Sachs",
+    "imagePath": "Nelly_Sachs.png",
+    "bornCountry": "Germany",
+    "bornCountryCode": "DE",
+    "bornCity": "Berlin",
+    "diedCountry": "Sweden",
+    "diedCountryCode": "SE",
+    "diedCity": "Stockholm",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 1966,
+        "category": "literature",
+        "share": 2,
+        "motivation": "I am a German-Swedish poet and playwright writer who received the Nobel prize for my outstanding lyrical and dramatic writing, which interprets Israel's destiny with touching strength.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8ef"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8ee"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8f3",
+    "firstname": "Elinor",
+    "surname": "Ostrom",
+    "imagePath": "Elinor_Ostrom.png",
+    "bornCountry": "USA",
+    "bornCountryCode": "US",
+    "bornCity": "Los Angeles, CA",
+    "diedCountry": "USA",
+    "diedCountryCode": "US",
+    "diedCity": "Bloomington, IN",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 2009,
+        "category": "economics",
+        "share": 2,
+        "motivation": "I am the first woman to win the Nobel Prize in Economics. I received the Nobel for my analysis of economic governance. Demonstrating how common property like forests, oil fields, among others can be successfully managed by those who use it rather than corporations or governments.",
+        "affiliations": [
+          {
+            "name": "Indiana University",
+            "city": "Bloomington, IN",
+            "country": "USA",
+            "_id": "615ee06a28f1bb00b8c4c8f5"
+          },
+          {
+            "name": "Arizona State University",
+            "city": "Tempe, AZ",
+            "country": "USA",
+            "_id": "615ee06a28f1bb00b8c4c8f6"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8f4"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8ea",
+    "firstname": "Selma",
+    "surname": "Lagerlöf",
+    "imagePath": "Selma_Lagerlöf.png",
+    "bornCountry": "Sweden",
+    "bornCountryCode": "SE",
+    "bornCity": "Mårbacka",
+    "diedCountry": "Sweden",
+    "diedCountryCode": "SE",
+    "diedCity": "Mårbacka",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 1909,
+        "category": "literature",
+        "share": 1,
+        "motivation": "I am the first woman to win the Nobel Prize in Literature in appreciation of the lofty idealism, vivid imagination and spiritual perception that characterize her writings.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8ec"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8eb"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8d8",
+    "firstname": "Albert",
+    "surname": "Einstein",
+    "imagePath": "Albert_Einstein.png",
+    "bornCountry": "Germany",
+    "bornCountryCode": "DE",
+    "bornCity": "Ulm",
+    "diedCountry": "USA",
+    "diedCountryCode": "US",
+    "diedCity": "Princeton, NJ",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 1921,
+        "category": "physics",
+        "share": 1,
+        "motivation": "I was awarded the Nobel for my services to theoretical physics, and especially for my discovery of the law of the photoelectric effect.",
+        "affiliations": [
+          {
+            "name": "Kaiser-Wilhelm-Institut (now Max-Planck-Institut) für Physik",
+            "city": "Berlin",
+            "country": "Germany",
+            "_id": "615ee06a28f1bb00b8c4c8da"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8d9"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8de",
+    "firstname": "Rita",
+    "surname": "Levi-Montalcini",
+    "imagePath": "Rita_Levi-Montalcini.png",
+    "bornCountry": "Italy",
+    "bornCountryCode": "IT",
+    "bornCity": "Turin",
+    "diedCountry": "Italy",
+    "diedCountryCode": "IT",
+    "diedCity": "Rome",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 1986,
+        "category": "medicine",
+        "share": 2,
+        "motivation": "I was awarded the Nobel Prize in medicine for my discoveries of growth factors.",
+        "affiliations": [
+          {
+            "name": "Institute of Cell Biology of the C.N.R.",
+            "city": "Rome",
+            "country": "Italy",
+            "_id": "615ee06a28f1bb00b8c4c8e0"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8df"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8fd",
+    "firstname": "Frances H.",
+    "surname": "Arnold",
+    "imagePath": "Frances-H._Arnold.png",
+    "bornCountry": "USA",
+    "bornCountryCode": "US",
+    "bornCity": "Pittsburgh, PA",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 2018,
+        "category": "chemistry",
+        "share": 2,
+        "motivation": "I turned to nature’s method to optimize chemistry: evolution. I received the Nobel prize in chemistry for the directed evolution of enzymes.",
+        "affiliations": [
+          {
+            "name": "California Institute of Technology (Caltech)",
+            "city": "Pasadena, CA",
+            "country": "USA",
+            "_id": "615ee06a28f1bb00b8c4c8ff"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8fe"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8d0",
+    "firstname": "Wilhelm Conrad",
+    "surname": "Röntgen",
+    "imagePath": "Wilhelm-Conrad_Röntgen.png",
+    "bornCountry": "Prussia (now Germany)",
+    "bornCountryCode": "DE",
+    "bornCity": "Lennep (now Remscheid)",
+    "diedCountry": "Germany",
+    "diedCountryCode": "DE",
+    "diedCity": "Munich",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 1901,
+        "category": "physics",
+        "share": 1,
+        "motivation": "I was the first recipient of the Nobel prize in physics in recognition of the extraordinary services I rendered by the discovery of the remarkable rays subsequently named after him.",
+        "affiliations": [
+          {
+            "name": "Munich University",
+            "city": "Munich",
+            "country": "Germany",
+            "_id": "615ee06a28f1bb00b8c4c8d2"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8d1"
+      }
+    ]
+  }
+]

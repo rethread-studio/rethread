@@ -1,0 +1,990 @@
+[
+  {
+    "text": "Did Bill Gates win a Nobel Prize?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": false
+      },
+      {
+        "text": "No",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "How many Nobel Prizes have been awarded?",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "718",
+        "isCorrect": false
+      },
+      {
+        "text": "892",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Is neon present in the Earth's atmosphere?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Where was Martin Luther King Jr. a pastor?",
+    "type": "king",
+    "answers": [
+      {
+        "text": "In California",
+        "isCorrect": false
+      },
+      {
+        "text": "In Alabama",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Martin Luther King Jr. have a dream?",
+    "type": "king",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Margaret Hamilton program the code of Apollo 11?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "How many employees work at Microsoft?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "64000",
+        "isCorrect": false
+      },
+      {
+        "text": "182000",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "What scientific areas does WASP support?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Agriculture",
+        "isCorrect": false
+      },
+      {
+        "text": "AI, software, and automatic control",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "In which topic did Toni Morrison graduate?",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "American Comics",
+        "isCorrect": false
+      },
+      {
+        "text": "American Literature",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "In what form does the daughter return in Beloved?",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "A cat",
+        "isCorrect": false
+      },
+      {
+        "text": "A ghost",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Who did Toni Morrison talk about in her Nobel lecture?",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "A marathon man",
+        "isCorrect": false
+      },
+      {
+        "text": "A blind man",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Was Toni Morrison the first black woman to receive a Nobel Prize?",
+    "type": "morrison",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Who was the first woman to receive a Nobel Prize in Literature?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "Selma Lagerlöf",
+        "isCorrect": true
+      },
+      {
+        "text": "Grazia Deledda",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who has had a crater on Venus named after her?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "Selma Lagerlöf",
+        "isCorrect": true
+      },
+      {
+        "text": "Rita Levi-Montalcini",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How much was on the bank note featuring Selma Lagerlöf?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "20 kr",
+        "isCorrect": true
+      },
+      {
+        "text": "100 kr",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who was the first woman to be elected into the Swedish Academy?",
+    "type": "lagerlof",
+    "answers": [
+      {
+        "text": "Selma Lagerlöf",
+        "isCorrect": true
+      },
+      {
+        "text": "Elin Wägner",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where was Mother Teresa born?",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "In Skopje",
+        "isCorrect": true
+      },
+      {
+        "text": "In Calcutta",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where did Mother Teresa work?",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "In the slums",
+        "isCorrect": true
+      },
+      {
+        "text": "In a convent",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What does Shanti Nagar mean?",
+    "type": "teresa",
+    "answers": [
+      {
+        "text": "City of Peace",
+        "isCorrect": true
+      },
+      {
+        "text": "Children's Home",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who introduced Internet memes in 1994?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Mike Godwyn",
+        "isCorrect": true
+      },
+      {
+        "text": "Mike Tyson",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "The cake is a lie.",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "It's a meme",
+        "isCorrect": true
+      },
+      {
+        "text": "It's true",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What was the first medical X-ray?",
+    "type": "conrad",
+    "answers": [
+      {
+        "text": "Wilhelms wife's hand",
+        "isCorrect": true
+      },
+      {
+        "text": "A dog",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which religion is the Dalai Lama the highest religious leader?",
+    "type": "dalai_lama",
+    "answers": [
+      {
+        "text": "Tibetan Buddhism",
+        "isCorrect": true
+      },
+      {
+        "text": "Zen Buddhism",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What does the X in X-ray stand for?",
+    "type": "conrad",
+    "answers": [
+      {
+        "text": "Roman number 10",
+        "isCorrect": false
+      },
+      {
+        "text": "X stands for unknown",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Is X-ray technology patented?",
+    "type": "conrad",
+    "answers": [
+      {
+        "text": "Yes :(",
+        "isCorrect": false
+      },
+      {
+        "text": "No :)",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Who was a waitress in a jazz club?",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Frances Arnold",
+        "isCorrect": true
+      },
+      {
+        "text": "Nicola Pellow",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "When was the first appointment of a Dalai Lama?",
+    "type": "dalai_lama",
+    "answers": [
+      {
+        "text": "In June 1578",
+        "isCorrect": true
+      },
+      {
+        "text": "In December 1124",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where does the Dalai Lama currently live?",
+    "type": "dalai_lama",
+    "answers": [
+      {
+        "text": "Germany",
+        "isCorrect": false
+      },
+      {
+        "text": "India",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "What year did Nelly Sachs flee to Sweden?",
+    "type": "sachs",
+    "answers": [
+      {
+        "text": "1944",
+        "isCorrect": false
+      },
+      {
+        "text": "1940",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Is Sir Alexander a Knight?",
+    "type": "fleming",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": true
+      },
+      {
+        "text": "No",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which is a recurring theme in Nelly Sachs' work?",
+    "type": "sachs",
+    "answers": [
+      {
+        "text": "Mental health",
+        "isCorrect": false
+      },
+      {
+        "text": "Suffering of Jews",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "What was the first name of Penicillin?",
+    "type": "fleming",
+    "answers": [
+      {
+        "text": "P. rubens",
+        "isCorrect": false
+      },
+      {
+        "text": "Mould juice",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Where are Nelly Sachs' possessions kept to this day?",
+    "type": "sachs",
+    "answers": [
+      {
+        "text": "Skansen",
+        "isCorrect": false
+      },
+      {
+        "text": "Kungliga biblioteket",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "What is the ancestor of modern antibiotics?",
+    "type": "fleming",
+    "answers": [
+      {
+        "text": "Penicillin",
+        "isCorrect": true
+      },
+      {
+        "text": "Advil",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How did Frances Arnold find new proteins?",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Natural evolution",
+        "isCorrect": true
+      },
+      {
+        "text": "Artificial intelligence",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What is the grand diversity-generating machine?",
+    "type": "arnold",
+    "answers": [
+      {
+        "text": "Evolution",
+        "isCorrect": true
+      },
+      {
+        "text": "Composition",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What did Elinor Ostrom study?",
+    "type": "ostrom",
+    "answers": [
+      {
+        "text": "Polycentric systems",
+        "isCorrect": true
+      },
+      {
+        "text": "Microtonality",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What concept does Elinor Ostrom focus on?",
+    "type": "ostrom",
+    "answers": [
+      {
+        "text": "Common Pool Resource",
+        "isCorrect": true
+      },
+      {
+        "text": "Capability",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who is first woman who received a Nobel Prize in Economy?",
+    "type": "ostrom",
+    "answers": [
+      {
+        "text": "Elinor Ostrom",
+        "isCorrect": true
+      },
+      {
+        "text": "Esther Duflo",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Did Bob Dylan play at the March on Washington in 1963?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": true
+      },
+      {
+        "text": "No",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which Nobel Prize did Bob Dylan receive?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "Peace",
+        "isCorrect": false
+      },
+      {
+        "text": "Literature",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Bob Dylan go to Stockholm to receive his Nobel Prize?",
+    "type": "dylan",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "How old was Malala when she was awarded the Nobel Peace Prize?",
+    "type": "yousafzai",
+    "answers": [
+      {
+        "text": "25",
+        "isCorrect": false
+      },
+      {
+        "text": "17",
+        "description": "Malala is the youngest laureate to receive a Nobel Prize.",
+        "isCorrect": true
+      }
+    ]
+  },
+  {
+    "text": "Did Taliban leaders unanimously decide to kill Malala Yousafzai?",
+    "type": "yousafzai",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": true
+      },
+      {
+        "text": "No",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who was the second recipient of the Nobel Peace prize, with Malala?",
+    "type": "yousafzai",
+    "answers": [
+      {
+        "text": "Kailash Satyarthi",
+        "isCorrect": true
+      },
+      {
+        "text": "Barack Obama",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Which Nobel laureate has an asteroid named after her?",
+    "type": "curie",
+    "answers": [
+      {
+        "text": "Marie Curie",
+        "isCorrect": true
+      },
+      {
+        "text": "Tu Youyou",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many times was Marie Curie awarded a Nobel Prize?",
+    "type": "curie",
+    "answers": [
+      {
+        "text": "Two",
+        "description":"She was, and still is, the only person to be awarded Nobel Prizes in two scientific categories.",
+        "isCorrect": true
+      },
+      {
+        "text": "Three",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where can we find radium?",
+    "type": "curie",
+    "answers": [
+      {
+        "text": "In thorium",
+        "isCorrect": true
+      },
+      {
+        "text": "In lokirium",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many visitors did cyber|glow receive?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "[nb_users]",
+        "isCorrect": true
+      },
+      {
+        "text": "[random]",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many laureates can you choose from in cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "15",
+        "isCorrect": true
+      },
+      {
+        "text": "45",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who developed the code framework to control the cyber|glow laser?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Seb Lee-Delisle",
+        "isCorrect": true
+      },
+      {
+        "text": "Elon Musk",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many computer languages are used for cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "10",
+        "description":"javascript, typescript, C++, css, rust, html, yaml, json, python, csv",
+        "isCorrect": true
+      },
+      {
+        "text": "42",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many files are used for cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "29000",
+        "isCorrect": true
+      },
+      {
+        "text": "450000",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many lines of code is cyber|glow made of?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "4 million",
+        "isCorrect": true
+      },
+      {
+        "text": "15 million",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What is the parodic Nobel Prize?",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "Ig Nobel Prize",
+        "isCorrect": true
+      },
+      {
+        "text": "Darwin Award",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Did Mahatma Gandhi receive a Nobel Prize?",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": true
+      },
+      {
+        "text": "Yes",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who prints the Nobel Prize medals?",
+    "type": "nobel",
+    "answers": [
+      {
+        "text": "Svenska Medalj AB",
+        "isCorrect": true
+      },
+      {
+        "text": "Central Mint",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What alternative career could Albert Einstein have considered?",
+    "type": "einstein",
+    "answers": [
+      {
+        "text": "Musician",
+        "isCorrect": true
+      },
+      {
+        "text": "Banker",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What astral phenomenon is understood through general relativity?",
+    "type": "einstein",
+    "answers": [
+      {
+        "text": "Black holes",
+        "isCorrect": true
+      },
+      {
+        "text": "Northern lights",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where did Albert Einstein publish the Annus Mirabilis papers?",
+    "type": "einstein",
+    "answers": [
+      {
+        "text": "Annalen der Physik",
+        "isCorrect": true
+      },
+      {
+        "text": "Wired",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What phenomenon intensifies nerve growth factor in the blood plasma?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "Romantic love",
+        "isCorrect": true
+      },
+      {
+        "text": "Ice swim",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Where did Rita Levi-Montalcini work during World War II?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "In her bedroom",
+        "isCorrect": true
+      },
+      {
+        "text": "In co-working spaces",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How old was Rita Levi-Montalcini when she died?",
+    "type": "montalcini",
+    "answers": [
+      {
+        "text": "103",
+        "description":"Rita Levi-Montalcini was the longest-living Nobel Laureate",
+        "isCorrect": true
+      },
+      {
+        "text": "91",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What is the contribution of Stephanie Forrest to cyber security?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Software diversity",
+        "isCorrect": true
+      },
+      {
+        "text": "# in passwords",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "To which demogroup did the founders of DICE belong to?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "The Silents",
+        "isCorrect": true
+      },
+      {
+        "text": "Assert",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many 0s and 1s are there in 7?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "11",
+        "description":"There are 3 1s for a 7 in binary, which is 11 in 0s and 1s",
+        "isCorrect": true
+      },
+      {
+        "text": "111",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "What ancient Chinese text is based on taoistic duality of yin and yang?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "I Ching",
+        "isCorrect": true
+      },
+      {
+        "text": "The mythical man month",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "Who was Grandma COBOL?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Grace Hopper",
+        "isCorrect": true
+      },
+      {
+        "text": "Frances Allen",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "How many levels are there in a Candy Crush episode?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "15",
+        "isCorrect": true
+      },
+      {
+        "text": "51",
+        "isCorrect": false
+      }
+    ]
+  },
+  {
+    "text": "When does Android evolve?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Once every minute",
+        "description":"There have been 1,163,867 commits between July 2008 and May 2019",
+        "isCorrect": true
+      },
+      {
+        "text": "Once every month",
+        "isCorrect": false
+      }
+    ]
+  }
+]
+
+
