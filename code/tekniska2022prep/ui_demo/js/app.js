@@ -18,14 +18,16 @@ socket.on("state", (state) => {
   if (state == "PICTURE") {
     document.querySelector(".camera").style.display = "block";
     document.querySelector(".snap img").style.display = "none";
-    appTimer.setTimer(5, () => {
-      cleanAll();
-      snapPicture();
-    });
-    objectsToRender.push(appTimer);
+    snapPicture();
+    cleanAll();
   } else if (state == "RESET_BUTTON_ON") {
     document.querySelector(".camera").style.display = "block";
-    document.querySelector(".snap img").style.display = "none";
+      document.querySelector(".snap img").style.display = "none";
+      appTimer.setTimer(5, () => {
+        cleanAll();
+        snapPicture();
+      });
+      objectsToRender.push(appTimer);
   } else if (state == "IDLE") {
     // document.querySelector(".idle").style.display = "block";
     // document.querySelector(".camera").style.display = "none";
