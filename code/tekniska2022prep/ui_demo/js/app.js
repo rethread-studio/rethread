@@ -16,7 +16,13 @@ socket.on("state", (state) => {
   document.querySelector(".snap").style.display = "none";
 
   if (state == "PICTURE") {
-    snapPicture();
+    document.querySelector(".camera").style.display = "block";
+    document.querySelector(".snap img").style.display = "none";
+    appTimer.setTimer(5, () => {
+      cleanAll();
+      snapPicture();
+    });
+    objectsToRender.push(appTimer);
   } else if (state == "RESET_BUTTON_ON") {
     document.querySelector(".camera").style.display = "block";
     document.querySelector(".snap img").style.display = "none";
@@ -49,18 +55,18 @@ function setup() {
   frameRate(state.frameRate);
 
   //clarendon
-  // filtersToApply.push(
-  //   { filter: brightnessFilterous, val: 0.1 },
-  //   { filter: contrastFilterous, val: 0.1 },
-  //   { filter: saturationFilterous, val: 0.15 }
-  // );
+  filtersToApply.push(
+    { filter: brightnessFilterous, val: 0.1 },
+    { filter: contrastFilterous, val: 0.1 },
+    { filter: saturationFilterous, val: 0.15 }
+  );
 
   //Moon
-  filtersToApply.push(
-    { filter: grayscaleFilterous, val: 0.1 },
-    { filter: contrastFilterous, val: -0.4 },
-    { filter: brightnessFilterous, val: 0.1 }
-  );
+  // filtersToApply.push(
+  //   { filter: grayscaleFilterous, val: 0.1 },
+  //   { filter: contrastFilterous, val: -0.4 },
+  //   { filter: brightnessFilterous, val: 0.1 }
+  // );
 
   //Reyes
   // filtersToApply.push(
