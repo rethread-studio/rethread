@@ -104,16 +104,10 @@ function stepFilter(step) {
 
 function loadNewImage(newImage) {
     photograph = loadImage(newImage, img => {
+        cleanAll();
+
         images = new Images(photograph, filtersToApply);
-
         filter = createFilter(images.getImages());
-
-
-        objectsToRender = [];
-        speed1 = {};
-        speed2 = {};
-
-        objectsToRender.push(filter);
 
         speed1.render = () => {
             images.renderFirstAndLastImage();
@@ -122,9 +116,31 @@ function loadNewImage(newImage) {
         speed2.render = () => {
             images.renderFirstImage();
         }
+        objectsToRender.push(speed1);
     });
-
-
-
-
 }
+
+function snapPicture() {
+    const image = webcam.snap();
+    socket.emit("picture", image);
+    document.querySelector(".camera").style.display = "none";
+    document.querySelector(".snap img").style.display = "block";
+    document.querySelector(".snap img").src = image;
+    loadNewImage(image);
+}
+
+function cleanAll() {
+    clear();
+    emptyObjectsToRender();
+    emptyParticles();
+    removeInterval();
+    appTimer.resetTimer();
+
+    document.querySelector(".camera").style.display = "none";
+    document.querySelector(".snap img").style.display = "none";
+    document.querySelector(".snap").style.display = "none";
+    document.querySelector(".current-state").style.display = "none";
+    document.querySelector(".idle").style.display = "none";
+}
+
+

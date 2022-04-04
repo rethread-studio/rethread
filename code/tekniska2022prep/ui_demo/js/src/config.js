@@ -4,7 +4,8 @@ const state = {
     frameRate: 60,
     intervalTime: 50,
     sampleSize: 10,
-    filterSampleSize: { width: 350, height: 350 }
+    filterSampleSize: { width: 250, height: 250 },
+    counterFontSize: 900,
 }
 
 let filtersToApply = [];
@@ -17,4 +18,8 @@ let filter;
 let intervalId = null;
 let particles = [];
 let images;
+
+let appTimer = null;
+
+
 

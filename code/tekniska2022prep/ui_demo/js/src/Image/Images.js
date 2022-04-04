@@ -2,7 +2,7 @@
 class Images {
     images = [];
     filters = [];
-    marginRight = 500;
+    marginRight = 50;
 
     constructor(img, filters) {
         this.filters = filters;

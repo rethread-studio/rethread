@@ -11,20 +11,19 @@ socket.on("state", (state) => {
   document.querySelector(".current-state").innerHTML = state;
   document.querySelector(".idle").style.display = "none";
 
+  document.querySelector(".camera").style.display = "none";
+  document.querySelector(".snap img").style.display = "none";
+  document.querySelector(".snap").style.display = "none";
+
   if (state == "PICTURE") {
-    const image = webcam.snap();
-    socket.emit("picture", image);
-    document.querySelector(".camera").style.display = "none";
-    document.querySelector(".snap img").style.display = "block";
-    document.querySelector(".snap img").src = image;
-    loadNewImage(image);
+    snapPicture();
   } else if (state == "RESET_BUTTON_ON") {
     document.querySelector(".camera").style.display = "block";
     document.querySelector(".snap img").style.display = "none";
   } else if (state == "IDLE") {
-    document.querySelector(".idle").style.display = "block";
-    document.querySelector(".camera").style.display = "none";
-    document.querySelector(".snap img").style.display = "none";
+    // document.querySelector(".idle").style.display = "block";
+    // document.querySelector(".camera").style.display = "none";
+    // document.querySelector(".snap img").style.display = "none";
   } else if (state == "SPEED1_BUTTON_ON") {
     tunOnSpeed(state);
   } else if (state == "SPEED2_BUTTON_ON") {
@@ -57,18 +56,18 @@ function setup() {
   // );
 
   //Moon
-  // filtersToApply.push(
-  //   { filter: grayscaleFilterous, val: 0.1 },
-  //   { filter: contrastFilterous, val: -0.4 },
-  //   { filter: brightnessFilterous, val: 0.1 }
-  // );
+  filtersToApply.push(
+    { filter: grayscaleFilterous, val: 0.1 },
+    { filter: contrastFilterous, val: -0.4 },
+    { filter: brightnessFilterous, val: 0.1 }
+  );
 
   //Reyes
-  filtersToApply.push(
-    { filter: sepiaFilterous, val: 0.1 },
-    { filter: brightnessFilterous, val: -0.4 },
-    { filter: contrastFilterous, val: 0.1 }
-  );
+  // filtersToApply.push(
+  //   { filter: sepiaFilterous, val: 0.1 },
+  //   { filter: brightnessFilterous, val: -0.4 },
+  //   { filter: contrastFilterous, val: 0.1 }
+  // );
 
   objectsToRender = [];
   speed1 = {};
@@ -78,6 +77,8 @@ function setup() {
   filter = createFilter(images.getImages());
 
   objectsToRender.push(filter);
+
+  appTimer = new AppTimer();
 
   speed1.render = () => {
     images.renderFirstAndLastImage();
@@ -118,9 +119,9 @@ function tunOnSpeed(speed) {
 }
 
 function keyPressed() {
-  emptyObjectsToRender();
-  emptyParticles();
-  removeInterval();
+  cleanAll();
+
+
   switch (key) {
     case '1':
       objectsToRender.push(speed1);
@@ -136,15 +137,14 @@ function keyPressed() {
     case 'r':
       document.querySelector(".camera").style.display = "block";
       document.querySelector(".snap img").style.display = "none";
+      appTimer.setTimer(5, () => {
+        cleanAll();
+        snapPicture();
+      });
+      objectsToRender.push(appTimer);
       break;
     case 'p':
-      const image = webcam.snap();
-      socket.emit("picture", image);
-      document.querySelector(".camera").style.display = "none";
-      document.querySelector(".snap img").style.display = "block";
-      document.querySelector(".snap img").src = image;
-      loadNewImage(image);
-
+      snapPicture();
       break;
     case 'ArrowRight':
       objectsToRender.push(filter);

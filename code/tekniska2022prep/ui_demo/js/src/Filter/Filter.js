@@ -19,7 +19,7 @@ class Filter {
     }
 
     margin = {
-        top: 100,
+        top: 0,
     }
 
     filterCode;
@@ -289,6 +289,7 @@ class Filter {
         stroke(255);
         noFill();
         strokeWeight(1);
+        textSize(10);
         const { width, height } = state.filterSampleSize;
         rect(posX, posY, width, height);
         const textPad = 9;

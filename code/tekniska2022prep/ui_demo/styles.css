@@ -1,0 +1,25 @@
+:root{
+    --padding-top:60px;
+  }
+
+body{
+    margin:0;
+}
+
+main{
+    display: flex;
+    position: absolute;
+    top: 0;
+    z-index:0;
+ }
+
+ .body{
+    display: flex;
+    position: absolute;
+    z-index: 20;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+ }
