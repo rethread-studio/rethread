@@ -83,6 +83,29 @@ buttonMap[process.env.SPEED3_BUTTON] = "SPEED3_BUTTON";
 
 const buttonState = {};
 
+const countEvent = {};
+function countEventSec() {
+  const date = new Date().getTime() / 1000;
+  countEvent[date] = countEvent[date] ? countEvent[date] + 1 : 1;
+}
+
+/**
+ * return the average number of events in the last 5 minutes
+ * @returns {number}
+ */
+function getNbEventSec() {
+  let total = 0;
+  for (const i in countEvent) {
+    if (new Date().getTime() / 1000 - i >= 5) {
+      // keep data from the last 5 sec
+      delete countEvent[i];
+      continue;
+    }
+    total += countEvent[i];
+  }
+  return total / 5;
+}
+
 let state = "IDLE";
 io.on("connection", (socket) => {
   console.log("a client connected");
@@ -119,10 +142,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("rotary", (data) => {
+    countEventSec();
     if (data.direction == "R") {
       io.emit("step", "next");
+      osc.send({state: "next", events: getNbEventSec()});
     } else {
       io.emit("step", "previous");
+      osc.send({state: "previous", events: getNbEventSec()});
     }
   });
 
@@ -164,7 +190,7 @@ function setState(s) {
   clearTimeout(resetTimeout);
   state = s;
   io.emit("state", state);
-  osc.send(state);
+  osc.send({state, events: getNbEventSec()});
   if (state !== "IDLE") {
     resetIdle();
   }
