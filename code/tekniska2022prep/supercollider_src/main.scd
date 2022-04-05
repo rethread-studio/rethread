@@ -2,6 +2,7 @@
 s.waitForBoot({
 
 	"synthdefs.scd".loadRelative;
+	s.sync;
 	~rootFreq = 60.midicps;
 	~s53 = Scale.chromatic('et53');
 	~mainBus = Bus.audio(s, 2);
@@ -12,14 +13,17 @@ s.waitForBoot({
 	~running.speed1 = false;
 	~running.speed2 = false;
 	~running.speed3 = false;
+	~stop_functions = Environment.new(know: true);
 	s.sync;
 
 	~speed1 = {
+		~stop_functions.speed2.();
+		~stop_functions.speed3.();
 		// magic swoosh
 		var swoosh_dur = rrand(0.35, 0.6);
 		{
 			var sig, start_freq = Rand(150, 300), end_freq = Rand(2000, 2300);
-			sig = Resonz.ar(PinkNoise.ar(), XLine.kr([start_freq, start_freq * Rand(0.99, 1.02)], [end_freq, end_freq * Rand(0.99, 1.02)], swoosh_dur) * LFNoise2.kr(3).range(0.995, 1.001), 0.3, mul: 0.9);
+			sig = Resonz.ar(PinkNoise.ar(), XLine.kr([start_freq, start_freq * Rand(0.99, 1.02)], [end_freq, end_freq * Rand(0.99, 1.02)], swoosh_dur) * LFNoise2.kr(3).range(0.995, 1.001), 0.3, mul: 2);
 			sig = sig * EnvGen.kr(Env([0, 1, 0.5, 0], [swoosh_dur, 0.5, 3], [3, 0, -6]), doneAction: 2);
 			Out.ar(0, sig);
 		}.play;
@@ -34,27 +38,32 @@ s.waitForBoot({
 				\t60, 6,
 				\pitchy, 4,
 				\dur, 0.06,
-				\amp, 0.01
+				\amp, 0.02
 			).play;
 		}.fork;
 	};
 
+	~stop_functions.speed2 = {
+		if(~running.speed2, {
+			// stop all of the stuff from the previous run
+			~speed2_harmony_routine.stop();
+			~speed2_score_routine.stop();
+			~beep_loop_routines.do{ |rout| rout.stop(); };
+			~main_glitch.set(\lag_time, 0.2);
+			~main_glitch.set(\enable_pitch_shift, 0);
+			~main_glitch.set(\pitch_shift_ratio, 1.0);
+			~main_glitch.set(\pitch_dispersion, 0);
+			~rev.set(\mixLag, 0, \mix, 0);
+			~running.speed2 = false;
+			0.1.wait;
+		});
+	};
+
 	~speed2 = {
 		fork{
-			if(~running.speed2, {
-				"stop running speed2".postln;
-				// stop all of the stuff from the previous run
-				~speed2_harmony_routine.stop();
-				~speed2_score_routine.stop();
-				~beep_loop_routines.do{ |rout| rout.stop(); };
-				~main_glitch.set(\lag_time, 0.2);
-				~main_glitch.set(\enable_pitch_shift, 0);
-				~main_glitch.set(\pitch_shift_ratio, 1.0);
-				~main_glitch.set(\pitch_dispersion, 0);
-				~rev.set(\mixLag, 0, \mix, 0);
-				0.1.wait;
-				"turn down reverb".postln;
-			});
+			~stop_functions.speed2.();
+			~stop_functions.speed3.();
+
 			~running.speed2 = true;
 			~restful_chord = [-53, 0, 31, 39, 48, 53, 62, 70, 84, 77+53, 106, 115].collect{ | degree | ~s53.degreeToFreq(degree, ~rootFreq, 0)};
 			~beep_scale = (48..72).midicps * 2.5;
@@ -101,7 +110,7 @@ s.waitForBoot({
 			10.do { |k|
 				var pan = k * 0.1;
 				if( k%2 == 0, { pan = pan * -1; });
-				~beep_loop.(0.08 + (k*0.0018), k * 1, pan, 200);
+				~beep_loop.(0.08 + (k*0.0018), k * 0.8, pan, 200);
 			};
 			~speed2_harmony_routine = {
 				50.do {
@@ -113,14 +122,17 @@ s.waitForBoot({
 				~rev.set(\mixLag, 20.0); "reverb 40s".postln;
 				0.1.wait;
 				~rev.set(\mix, 0.5); "reverb 0.5 level".postln;
-				10.wait;
-				~main_glitch.set(\lag_time, 3.0);
+				5.wait;
+				~main_glitch.set(\lag_time, 6.0);
 				~main_glitch.set(\enable_pitch_shift, 1);
-				~main_glitch.set(\pitch_shift_ratio, 3);
+				~main_glitch.set(\pitch_shift_ratio, 2);
 				~main_glitch.set(\pitch_dispersion, 1);
 				~rev.set(\mixLag, 3.0); "reverb 5s".postln;
 				~rev.set(\mix, 0.1); "reverb 0.1 level".postln;
 				3.wait;
+				~cresc = Synth(\windy, [\freq, 200, \out, ~revBus, \amp, 1, \atk, 3, \curve_atk, 7, \rel, 0]);
+				3.wait;
+				~cresc.release;
 				~main_glitch.set(\lag_time, 1.2);
 				~main_glitch.set(\enable_pitch_shift, 0);
 				~main_glitch.set(\pitch_shift_ratio, 1.0);
@@ -133,6 +145,72 @@ s.waitForBoot({
 				~running.speed2 = false;
 			}.fork;
 		};
+	};
+
+	~stop_functions.speed3 = {
+		if(~running.speed3, {
+			~speed3_routine.stop();
+			~main_glitch.set(\lag_time, 0.0);
+			~main_glitch.set(\enable_pitch_shift, 0);
+			~main_glitch.set(\pitch_shift_ratio, 1);
+			~main_glitch.set(\pitch_dispersion, 0.0);
+			~main_glitch.set(\time_dispersion, 0.0);
+			~running.speed3 = false;
+			0.1.wait;
+		});
+	};
+	~speed3 = {
+		{
+			~stop_functions.speed2.();
+			~stop_functions.speed3.();
+
+
+			~running.speed3 = true;
+			~rev.set(\mixLag, 0, \mix, 0.2);
+			~main_glitch.set(\lag_time, 10.0);
+			~main_glitch.set(\enable_pitch_shift, 1);
+			~main_glitch.set(\pitch_shift_ratio, 1);
+			~main_glitch.set(\pitch_dispersion, 0.001);
+			~main_glitch.set(\time_dispersion, 0.002);{
+				var sounds = List[], num_process_iterations = 10;
+				~speed3_routine = {
+					num_process_iterations.do{
+						var num_process_elements = rrand(5, 9);
+						num_process_elements.do{
+							sounds.add(
+								(
+									duration_time: [1/4, 1/3, 1/5].choose,
+									freq_pitch: rrand(7000, 12000),
+									synth_type: [\tick2, \sine, \dist_noise].wchoose([0.5, 0.1, 0.4]),
+									sus_time: rrand(0.0, 0.1),
+									my_amp: rrand(0.7, 1.5),
+									play_func: {|self, tick_time = 0.2|
+										switch(self.synth_type,
+											\tick2, {Synth(\tick2, [\freq, self.freq_pitch, \amp, 0.15 * self.my_amp, \out, ~revBus]);},
+											\sine, {Synth(\sine, [\freq, self.freq_pitch*0.05, \amp, 0.2 * self.my_amp, \atk, 0.005, \sus, self.sus_time, \rel, self.duration_time*tick_time, \out, ~revBus ]);},
+											\dist_noise, {Synth(\dist_noise, [\freq, self.freq_pitch, \amp, 0.25 * self.my_amp, \rel, 0.02, \out, ~revBus]);},
+										);
+										(self.duration_time*tick_time).wait;
+									},
+								)
+							);
+						};
+
+						rrand(3, 8).do{
+							sounds.do{|sound|
+								sound.play_func.(0.01);
+							};
+						};
+					};
+					~main_glitch.set(\lag_time, 0.0);
+					~main_glitch.set(\enable_pitch_shift, 0);
+					~main_glitch.set(\pitch_shift_ratio, 1);
+					~main_glitch.set(\pitch_dispersion, 0.0);
+					~main_glitch.set(\time_dispersion, 0.0);
+					~running.speed3 = false;
+				}.fork;
+			}.();
+		}.fork;
 	};
 
 	"osc_from_server.scd".loadRelative;

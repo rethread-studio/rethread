@@ -9,7 +9,7 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\SPEED1_BUTTON_OFF, {},
 		\SPEED2_BUTTON_ON, {~speed2.()},
 		\SPEED2_BUTTON_OFF, {},
-		\SPEED3_BUTTON_ON, {},
+		\SPEED3_BUTTON_ON, {~speed3.()},
 		\SPEED3_BUTTON_OFF, {},
 		\RESET_BUTTON_ON, {},
 		\RESET_BUTTON_OFF, {},

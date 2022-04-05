@@ -48,10 +48,42 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 }).add;
 
 SynthDef(\main_out_glitch, {
-	var sig = In.ar(\in.kr(10), 2), lag_time = \lag_time.kr(3);
+	var sig = In.ar(\in.kr(10), 2), lag_time = \lag_time.kr(3), compander_thresh = 0.07;
+	// compander_thresh = MouseX.kr(0.01, 1);
+	// compander_thresh.poll;
 
 	sig = SelectX.ar(\enable_pitch_shift.kr(0, lag_time), [sig, PitchShift.ar(sig, 0.2, Ramp.kr(\pitch_shift_ratio.kr(1.0), lag_time), VarLag.kr(\pitch_dispersion.kr(0.00), lag_time, 20), \time_dispersion.kr(0.01, lag_time))]);
 	sig = SelectX.ar(\enable_bit_crush.kr(0, lag_time), [sig, Decimator.ar(sig, \sample_rate.kr(44100, lag_time), \bits.kr(24, lag_time))]);
 
+	sig = Compander.ar(sig, sig,
+		thresh: compander_thresh,
+		slopeBelow: 1,
+		slopeAbove: 0.5,
+		clampTime: 0.01,
+		relaxTime: 0.02);
+	sig = Limiter.ar(sig, 0.99);
+
+
 	Out.ar(\out.kr(0), sig);
+}).add;
+SynthDef(\windy, { |gate = 1, amp = 1, ampLagTime = 0.1 freq = 200, freqLagTime = 0.1 |
+	var osc = BrownNoise.ar(0.5), env, focus, outs, freqs;
+	freq = Lag3.kr(freq, freqLagTime);
+	amp = amp.lag(ampLagTime);
+	env = EnvGen.kr(Env(
+		levels: [0, 1, 0],
+		times: [\atk.kr(1), \rel.kr(1)],
+		curve: [\curve_atk.kr(0), \curve_rel.kr(0)],
+		releaseNode: 1),
+	gate: gate,
+	doneAction: 2);
+
+	freqs = [freq * [2, 2.2], freq * [1.0, 1.02], freq * 5, freq * 3 + 10];
+	focus = [LFNoise1.kr(4).range(0.001, 0.001), LFNoise2.kr(1.1).range(0.0001, 0.01), LFNoise2.kr(0.2).range(0.001, 0.05)];
+	outs = Resonz.ar(osc, freqs, focus);
+	outs = Mix.ar(outs);
+
+	outs = (outs*100).tanh * 0.1;
+
+	Out.ar(\out.kr(0), Pan2.ar(outs*env*amp));
 }).add;
