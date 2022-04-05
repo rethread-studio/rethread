@@ -5,9 +5,9 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 	msg.postln;
 
 	switch(type,
-		\SPEED1_BUTTON_ON, {},
+		\SPEED1_BUTTON_ON, {~speed1.();},
 		\SPEED1_BUTTON_OFF, {},
-		\SPEED2_BUTTON_ON, {},
+		\SPEED2_BUTTON_ON, {~speed2.()},
 		\SPEED2_BUTTON_OFF, {},
 		\SPEED3_BUTTON_ON, {},
 		\SPEED3_BUTTON_OFF, {},
