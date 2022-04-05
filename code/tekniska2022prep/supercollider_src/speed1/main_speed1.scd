@@ -29,7 +29,7 @@ var swoosh_dur = 0.5;
 ~rootFreq = 60.midicps;
 ~s53 = Scale.chromatic('et53');
 {
-	var scale = [0, 9, 17, 22, 31, 36, 39, 43, 48, 53, 62, 69].collect{ | degree | ~s53.degreeToFreq(degree, ~rootFreq, 0)};
+	var scale = [0, 9, 17, 22, 31, 36, 39, 43, 48, 53, 62, 70].collect{ | degree | ~s53.degreeToFreq(degree, ~rootFreq, 0)};
 
 	0.3.wait;
 	Pbind(
