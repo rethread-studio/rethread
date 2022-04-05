@@ -73,7 +73,7 @@ s.waitForBoot({
 				~beep_loop_routines.add({
 					num_iterations.do {
 						var time = Date.localtime.rawSeconds - start_time,
-						amp = time.linexp(0, fade_in_time, 0.0001, 1.0),
+						amp = time.linexp(0, fade_in_time, 0.0005, 1.0),
 						freq;
 						if(rrand(0, 1.0) > 0.7, {
 							freq = ~beep_scale[5];
@@ -101,7 +101,7 @@ s.waitForBoot({
 			10.do { |k|
 				var pan = k * 0.1;
 				if( k%2 == 0, { pan = pan * -1; });
-				~beep_loop.(0.08 + (k*0.0018), k * 2, pan, 400);
+				~beep_loop.(0.08 + (k*0.0018), k * 1, pan, 200);
 			};
 			~speed2_harmony_routine = {
 				50.do {
@@ -110,17 +110,17 @@ s.waitForBoot({
 				};
 			}.fork;
 			~speed2_score_routine = {
-				~rev.set(\mixLag, 40.0); "reverb 40s".postln;
+				~rev.set(\mixLag, 20.0); "reverb 40s".postln;
 				0.1.wait;
 				~rev.set(\mix, 0.5); "reverb 0.5 level".postln;
-				20.wait;
-				~main_glitch.set(\lag_time, 10.0);
+				10.wait;
+				~main_glitch.set(\lag_time, 3.0);
 				~main_glitch.set(\enable_pitch_shift, 1);
 				~main_glitch.set(\pitch_shift_ratio, 3);
 				~main_glitch.set(\pitch_dispersion, 1);
-				~rev.set(\mixLag, 5.0); "reverb 5s".postln;
+				~rev.set(\mixLag, 3.0); "reverb 5s".postln;
 				~rev.set(\mix, 0.1); "reverb 0.1 level".postln;
-				5.wait;
+				3.wait;
 				~main_glitch.set(\lag_time, 1.2);
 				~main_glitch.set(\enable_pitch_shift, 0);
 				~main_glitch.set(\pitch_shift_ratio, 1.0);
