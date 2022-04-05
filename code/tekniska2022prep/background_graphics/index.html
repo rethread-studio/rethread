@@ -14,6 +14,9 @@ var fadeFactor = 0.08;
 var canvas;
 var ctx;
 
+  var enableMatrix = false;
+  var enableCodeSnippets = true;
+
 var columns = [];
 var maxStackHeight;
   var codeSnippets = [
@@ -96,7 +99,60 @@ module.exports.contrast = (pixels, adj) => {
   }
   return pixels;
 };
-`
+`,`  importImage(image) {
+    if (typeof window === 'object') { // browser
+      this.canvas = document.createElement('canvas');
+      this.w = this.canvas.width = image.naturalWidth * this.scale;
+      this.h = this.canvas.height = image.naturalHeight * this.scale;
+      this.ctx = this.canvas.getContext('2d');
+      this.ctx.drawImage(image, 0, 0, this.w, this.h);
+    } else {
+      let img = this.initImage();
+      img.onload = () => {
+        this.w = img.width * this.scale;
+        this.h = img.height * this.scale;
+        this.canvas = new Canvas(this.w, this.h);
+        this.ctx = this.canvas.getContext('2d');
+        this.ctx.drawImage(img, 0, 0, this.w, this.h);
+      };
+      img.src = image;
+    }
+    return this;
+  }`,`  applyFilter(effect, adjustment) {
+    console.log(effect);
+    let newPixels;
+    let p = new Promise((resolve) => {
+      this.pixels = this.ctx.getImageData(0, 0, this.w, this.h);
+      newPixels = filters[effect].apply(this, [this.pixels, adjustment]);
+      resolve(newPixels);
+    });
+    p.then(this.render(newPixels));
+    return this;
+  }` , `// Clarendon: adds light to lighter areas and dark to darker areas
+module.exports.clarendon = (pixels) => {
+  pixels = filters.brightness.apply(this, [pixels, 0.1]);
+  pixels = filters.contrast.apply(this, [pixels, 0.1]);
+  pixels = filters.saturation.apply(this, [pixels, 0.15]);
+  return pixels;
+};`,
+    `// Gingham: Vintage-inspired, taking some color out
+module.exports.gingham = (pixels) => {
+  pixels = filters.sepia.apply(this, [pixels, 0.04]);
+  pixels = filters.contrast.apply(this, [pixels, -0.15]);
+  return pixels;
+};`,
+    `// Moon: B/W, increase brightness and decrease contrast
+module.exports.moon = (pixels) => {
+  pixels = filters.grayscale.apply(this, [pixels, 1]);
+  pixels = filters.contrast.apply(this, [pixels, -0.04]);
+  pixels = filters.brightness.apply(this, [pixels, 0.1]);
+  return pixels;
+};`, `// Toaster: Ages the image by "burning" the centre and adds a dramatic vignette
+module.exports.toaster = (pixels) => {
+  pixels = filters.sepia.apply(this, [pixels, 0.1]);
+  pixels = filters.colorFilter.apply(this, [pixels, [255, 145, 0, 0.2]]);
+  return pixels;
+};`
   ];
 
   var codeToDraw = "";
@@ -116,6 +172,7 @@ window.addEventListener('resize', resize)
     
     initMatrix();
 
+  setTimeout(changePreset, 3000);
     // start the main loop
     tick();
 }
@@ -149,6 +206,7 @@ function draw()
     ctx.font = (tileSize-2)+"px monospace";
     // ctx.fillStyle = " rgb(64,224,208)";
     ctx.fillStyle = textColor;
+  if(enableMatrix) {
     for ( let i = 0 ; i < columns.length ; ++i )
     {
         // pick a random ascii character (change the 94 to a higher number to include more characters)
@@ -162,7 +220,9 @@ function draw()
             columns[i].stackCounter = 0;
         }
     }
+  }
 
+  if(enableCodeSnippets) {
   const codeLines = codeToDraw.split('\n');
   let x = Math.random() * window.innerWidth * 0.8;
   let y = Math.random() * window.innerHeight* 0.8;
@@ -170,7 +230,8 @@ function draw()
     
     ctx.fillText( codeLines[i], x, y+ (i * tileSize) );
   }
-  codeToDraw = "";
+    codeToDraw = "";
+  }
 }
 
 // MAIN LOOP
@@ -196,10 +257,23 @@ function tick()
   }
   if(Math.random() > 0.8) {
     codeToDraw = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
-console.log(codeToDraw);
   }
     setTimeout( tick , 50 );
 }
+
+  function changePreset() {
+    if(enableCodeSnippets && !enableMatrix) {
+      enableCodeSnippets = false;
+      enableMatrix = true;
+    } else if (enableMatrix && !enableCodeSnippets) {
+      enableCodeSnippets = true;
+      enableMatrix = true;
+    } else {
+      enableMatrix = false;
+      enableCodeSnippets = true;
+    }
+    setTimeout(changePreset, 10000);
+  }
 </script>
 </head>
 <body onload="init();" style="margin: 0; padding: 0; background-color: #000000;">
