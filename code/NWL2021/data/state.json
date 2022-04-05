@@ -5,6 +5,7 @@
     "width": 6,
     "height": 2
   },
+  "_id": "624bf5611592d62302d1d1eb",
   "height": 8,
   "width": 16,
   "unitSize": 100,
@@ -14,13 +15,15 @@
         "x": 0,
         "y": 5,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "_id": "624bf5611592d62302d1d1ec"
       },
       {
         "x": 13,
         "y": 0,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "_id": "624bf5611592d62302d1d1ed"
       }
     ],
     [
@@ -28,13 +31,15 @@
         "x": 0,
         "y": 0,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "_id": "624bf5611592d62302d1d1ee"
       },
       {
         "x": 13,
         "y": 5,
         "width": 2,
-        "height": 2
+        "height": 2,
+        "_id": "624bf5611592d62302d1d1ef"
       }
     ]
   ],

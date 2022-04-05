@@ -1,44 +1,66 @@
 [
   {
-    "_id": "615ee06a28f1bb00b8c4c8e7",
-    "firstname": "Gustaf Emil Broms (1849-1903)",
-    "surname": "",
-    "imagePath": "",
-    "bornCountry": "",
-    "bornCountryCode": "",
+    "_id": "615ee06a28f1bb00b8c4c8f0",
+    "firstname": "Etienne",
+    "surname": "de Gonneville",
+    "imagePath": "Etienne_de-Gonneville.png",
+    "bornCountry": "France",
+    "bornCountryCode": "FR",
     "bornCity": "",
+    "diedCountry": "",
+    "diedCountryCode": "FR",
+    "diedCity": "",
     "gender": "male",
     "prizes": [
       {
         "year": 0,
-        "category": "",
+        "category": "physics",
         "share": 1,
-        "motivation": "Businessman and donator. He had the Broms Palace built in 1900.",
-        "affiliations": [
-          {
-            "_id": "615ee06a28f1bb00b8c4c8e9"
-          }
-        ],
-        "_id": "615ee06a28f1bb00b8c4c8e8"
+        "motivation": "French ambassador in Sweden since 2020.",
+        "affiliations": [],
+        "_id": "615ee06a28f1bb00b8c4c8f1"
       }
     ]
   },
   {
-    "_id": "615ee06a28f1bb00b8c4c8e4",
-    "firstname": "Johan Ludvig Peterson (1853-1931) et Erik Lallerstedt (1864-1955)",
-    "surname": "",
-    "imagePath": "",
-    "bornCountry": "",
-    "bornCountryCode": "",
+    "_id": "615ee06a28f1bb00b8c4c8d3",
+    "firstname": "Eugenia",
+    "surname": "Bernhardina Desideria",
+    "imagePath": "Eugenia_Bernhardina-Desideria.png",
+    "bornCountry": "France",
+    "bornCountryCode": "FR",
+    "bornCity": "Marseille",
+    "diedCountry": "Sweden",
+    "diedCountryCode": "",
+    "diedCity": "Stockholm",
+    "gender": "female",
+    "prizes": [
+      {
+        "year": 0,
+        "category": "peace",
+        "share": 4,
+        "motivation": "Queen of Sweden and Norway from 1818 to 1844.",
+        "affiliations": [],
+        "_id": "615ee06a28f1bb00b8c4c8d4"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8d0",
+    "firstname": "Erik ",
+    "surname": "Lallerstedt",
+    "imagePath": "Erik-_Lallerstedt.png",
+    "bornCountry": "Sweden",
+    "bornCountryCode": "SE",
     "bornCity": "",
     "diedCountry": "",
     "diedCountryCode": "",
     "diedCity": "",
-    "gender": "",
+    "gender": "male",
     "prizes": [
       {
         "year": 0,
-        "category": "",
+        "category": "chemistry",
         "share": 1,
         "motivation": "Swedish architects who designed the building",
         "affiliations": [
@@ -51,20 +73,68 @@
     ]
   },
   {
-    "_id": "615ee06a28f1bb00b8c4c8f7",
-    "firstname": "Kung Karl XIV Johan, born Jean Bernadotte (1763-1844) ",
-    "surname": "",
-    "imagePath": "",
-    "bornCountry": "",
-    "bornCountryCode": "",
+    "_id": "615ee06a28f1bb00b8c4c8e1",
+    "firstname": "Louis",
+    "surname": "Delavaud",
+    "imagePath": "Louis_Delavaud.png",
+    "bornCountry": "France",
+    "bornCountryCode": "FR",
     "bornCity": "",
-    "gender": "",
+    "diedCountry": "",
+    "diedCountryCode": "",
+    "diedCity": "",
+    "gender": "male",
     "prizes": [
       {
         "year": 0,
-        "category": "",
+        "category": "chemistry",
+        "share": 1,
+        "motivation": "French diplomat. French ambassador to Sweden from 1918 to 1923. Acquired the Broms Palace in 1920, on behalf of the French government.",
+        "affiliations": [],
+        "_id": "615ee06a28f1bb00b8c4c8e2"
+      }
+    ],
+    "used": 1
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8e7",
+    "firstname": "Gustaf",
+    "surname": "Emil Broms",
+    "imagePath": "Gustaf_Emil-Broms.png",
+    "bornCountry": "Sweden",
+    "bornCountryCode": "SE",
+    "bornCity": "",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 0,
+        "category": "chemistry",
+        "share": 1,
+        "motivation": "Businessman and donator. He had the Broms Palace built in 1900.",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8e9"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8e8"
+      }
+    ]
+  },
+  {
+    "_id": "615ee06a28f1bb00b8c4c8f7",
+    "firstname": "Kung Karl XIV Johan",
+    "surname": "",
+    "imagePath": "Kung-Karl XIV Johan_.png",
+    "bornCountry": "France",
+    "bornCountryCode": "FR",
+    "bornCity": "",
+    "gender": "male",
+    "prizes": [
+      {
+        "year": 0,
+        "category": "chemistry",
         "share": 2,
-        "motivation": "King of Sweden and Norway from 1818 to 1844.",
+        "motivation": "King of Sweden and Norway from 1818 to 1844",
         "affiliations": [
           {
             "_id": "615ee06a28f1bb00b8c4c8f9"
@@ -75,56 +145,35 @@
     ]
   },
   {
-    "_id": "615ee06a28f1bb00b8c4c8d3",
-    "firstname": "Dröttning Desideria born Désirée Clary (1777-1860)",
-    "surname": "",
-    "imagePath": "",
-    "bornCountry": "",
-    "bornCountryCode": "",
-    "bornCity": "",
-    "diedCountry": "",
-    "diedCountryCode": "",
-    "diedCity": "",
-    "gender": "female",
-    "prizes": [
-      {
-        "year": 0,
-        "category": "",
-        "share": 4,
-        "motivation": "Queen of Sweden and Norway from 1818 to 1844.",
-        "_id": "615ee06a28f1bb00b8c4c8d4"
-      }
-    ]
-  },
-  {
     "_id": "615ee06a28f1bb00b8c4c8db",
-    "firstname": "Louis Auguste Le Tonnelier - Baron de Breteuil (1730-1807)",
-    "surname": "",
-    "imagePath": "",
-    "bornCountry": "",
-    "bornCountryCode": "",
+    "firstname": "Louis",
+    "surname": "Auguste Le Tonnelier - Baron de Breteuil",
+    "imagePath": "Louis_Auguste-Le Tonnelier - Baron de Breteuil.png",
+    "bornCountry": "France",
+    "bornCountryCode": "FR",
     "bornCity": "",
     "diedCountry": " ",
     "diedCountryCode": "",
     "diedCity": "",
-    "gender": "",
+    "gender": "male",
     "prizes": [
       {
         "year": 0,
-        "category": "",
+        "category": "chemistry",
         "share": 3,
         "motivation": "French aristocrat, diplomat and statesman. French ambassador to Sweden from 1763 to 1766.",
+        "affiliations": [],
         "_id": "615ee06a28f1bb00b8c4c8dc"
       }
     ]
   },
   {
-    "_id": "615ee06a28f1bb00b8c4c8e1",
-    "firstname": "Louis Delavaud (1860-1924)",
-    "surname": "",
-    "imagePath": "",
-    "bornCountry": "",
-    "bornCountryCode": "",
+    "_id": "615ee06a28f1bb00b8c4c8e4",
+    "firstname": "Johan ",
+    "surname": "Ludvig Peterson",
+    "imagePath": "Johan-_Ludvig-Peterson.png",
+    "bornCountry": "Sweden",
+    "bornCountryCode": "SE",
     "bornCity": "",
     "diedCountry": "",
     "diedCountryCode": "",
@@ -133,32 +182,15 @@
     "prizes": [
       {
         "year": 0,
-        "category": "",
+        "category": "chemistry",
         "share": 1,
-        "motivation": "French diplomat. French ambassador to Sweden from 1918 to 1923. Acquired the Broms Palace in 1920, on behalf of the French government.",
-        "_id": "615ee06a28f1bb00b8c4c8e2"
-      }
-    ]
-  },
-  {
-    "_id": "615ee06a28f1bb00b8c4c8f0",
-    "firstname": "Etienne de Gonneville (b. 1971)",
-    "surname": "",
-    "imagePath": "",
-    "bornCountry": "",
-    "bornCountryCode": "",
-    "bornCity": "",
-    "diedCountry": "",
-    "diedCountryCode": "",
-    "diedCity": "",
-    "gender": "male",
-    "prizes": [
-      {
-        "year": 0,
-        "category": "",
-        "share": 1,
-        "motivation": "French ambassador in Sweden since 2020.",
-        "_id": "615ee06a28f1bb00b8c4c8f1"
+        "motivation": "Swedish architects who designed the building",
+        "affiliations": [
+          {
+            "_id": "615ee06a28f1bb00b8c4c8e6"
+          }
+        ],
+        "_id": "615ee06a28f1bb00b8c4c8e5"
       }
     ]
   }

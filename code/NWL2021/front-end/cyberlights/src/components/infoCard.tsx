@@ -10,7 +10,7 @@ interface infoCardProps {
 
 export const InfoCard = ({ prizes, color, clickHandler }: React.PropsWithChildren<infoCardProps>) => {
 
-    const title = prizes.map((p: prize, i: number) => <span className="block" key={uuidv4()} >{p.category} {p.year}</span>);;
+    const title = "About me";//prizes.map((p: prize, i: number) => <span className="block" key={uuidv4()} >{p.category} {p.year}</span>);;
     const motivation: string = prizes[0].motivation;
 
     return (

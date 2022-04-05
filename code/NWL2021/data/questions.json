@@ -1,515 +1,620 @@
 [
   {
-    "text": "Did Bill Gates win a Nobel Prize?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "Yes",
-        "isCorrect": false
-      },
-      {
-        "text": "No",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Is neon present in the Earth's atmosphere?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "No",
-        "isCorrect": false
-      },
-      {
-        "text": "Yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "Did Margaret Hamilton program the code of Apollo 11?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "No",
-        "isCorrect": false
-      },
-      {
-        "text": "Yes",
-        "isCorrect": true
-      }
-    ]
-  },
-  {
-    "text": "How many employees work at Microsoft?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "64000",
-        "isCorrect": false
-      },
-      {
-        "text": "182000",
-        "isCorrect": true
-      }
-    ]
-  },
-   {
-    "text": "Who introduced Internet memes in 1994?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "Mike Godwyn",
-        "isCorrect": true
-      },
-      {
-        "text": "Mike Tyson",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "The cake is a lie.",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "It's a meme",
-        "isCorrect": true
-      },
-      {
-        "text": "It's true",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How many characters can you choose from in cyber|glow?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "7",
-        "isCorrect": true
-      },
-      {
-        "text": "15",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Who developed the code framework to control the cyber|glow laser?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "Seb Lee-Delisle",
-        "isCorrect": true
-      },
-      {
-        "text": "Elon Musk",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How many computer languages are used for cyber|glow?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "10",
-        "description":"javascript, typescript, C++, css, rust, html, yaml, json, python, csv",
-        "isCorrect": true
-      },
-      {
-        "text": "42",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How many lines of code is cyber|glow made of?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "4 million",
-        "isCorrect": true
-      },
-      {
-        "text": "15 million",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "To which demogroup did the founders of DICE belong to?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "The Silents",
-        "isCorrect": true
-      },
-      {
-        "text": "Assert",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How many 0s and 1s are there in 7?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "11",
-        "description":"There are 3 1s for a 7 in binary, which is 11 in 0s and 1s",
-        "isCorrect": true
-      },
-      {
-        "text": "111",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "What ancient Chinese text is based on taoistic duality of yin and yang?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "I Ching",
-        "isCorrect": true
-      },
-      {
-        "text": "The mythical man month",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "How many levels are there in a Candy Crush episode?",
-    "type": "CS",
-    "answers": [
-      {
-        "text": "15",
-        "isCorrect": true
-      },
-      {
-        "text": "51",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "The Crown Princess Victoria, Duchess of Västergötland, is she part of the House of Bernadotte?",
-    "type": "karl",
-    "answers": [
-      {
-        "text": "yes",
-        "description":"The House of Bernadotte is the royal house of Sweden since its foundation in 1818",
-        "isCorrect": true
-      },
-      {
-        "text": "no",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "In which year did the current French ambassador arrive in Stockholm?",
-    "type": "etienne",
-    "answers": [
-      {
-        "text": "2020",
-        "description":"",
-        "isCorrect": true
-      },
-      {
-        "text": "2015",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "In how many different countries did the current French ambassador live?",
-    "type": "etienne",
-    "answers": [
-      {
-        "text": "4",
-        "description":"",
-        "isCorrect": true
-      },
-      {
-        "text": "2",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "The current French ambassador prefers kanelbullar or croissant?",
-    "type": "etienne",
-    "answers": [
-      {
-        "text": "kanelbullar",
-        "description":"",
-        "isCorrect": true
-      },
-      {
-        "text": "croissant",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Was the palace furnished when Louis Delavaud acquired it?",
-    "type": "delavaud",
-    "answers": [
-      {
-        "text": "no",
-        "description":"The palace was completely empty and Louis Delavaud did not have enough furniture for all the rooms of the palace",
-        "isCorrect": true
-      },
-      {
-        "text": "yes",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "In which part of Stockholm did Louis Delavaud wish to install the embassy?",
-    "type": "delavaud",
-    "answers": [
-      {
-        "text": "Östermalm",
-        "description":"Louis Delavaud wanted to stay close to the other embassies.",
-        "isCorrect": true
-      },
-      {
-        "text": "Stora Essingen",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Who sold Broms Palace to Louis Delavaud?",
-    "type": "delavaud",
-    "answers": [
-      {
-        "text": "Mrs Broms",
-        "description":"",
-        "isCorrect": true
-      },
-      {
-        "text": "Mr Wallenberg",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where did the French ambassadors live before the acquisition of the Broms palace?",
-    "type": "baron",
-    "answers": [
-      {
-        "text": "Nyckelvicken Palace",
-        "description":"",
-        "isCorrect": true
-      },
-      {
-        "text": "Brommaplan",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Which political party did baron de Breteuil and France support in the 18th century?",
-    "type": "baron",
-    "answers": [
-      {
-        "text": "Hats (Hattpartiet)",
-        "description":"The Hats (Hattpartiet) and the Caps (Mösspartiet) are two political parties that fought for power in Sweden between 1719 and 1772.",
-        "isCorrect": true
-      },
-      {
-        "text": "Caps (Mösspartiet)",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Did the baron de Breteuil contribute to the Swedish economy?",
-    "type": "baron",
-    "answers": [
-      {
-        "text": "yes",
-        "description":"Baron de Breteuil invested in the Marieberg porcelain factory",
-        "isCorrect": true
-      },
-      {
-        "text": "no",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where did Desideria spend her last years?",
-    "type": "Desideria",
-    "answers": [
-      {
-        "text": "Rosendal",
-        "description":"",
-        "isCorrect": true
-      },
-      {
-        "text": "Drottningholm",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
+    "_id": "624bf5611592d62302d1d24d",
     "text": "Desideria was she engaged to Napoleon Bonaparte?",
     "type": "Desideria",
     "answers": [
       {
         "text": "yes",
-        "description":"She was engaged to Napoleon Bonaparte between 1794 and 1795",
-        "isCorrect": true
+        "isCorrect": true,
+        "description": "She was engaged to Napoleon Bonaparte between 1794 and 1795",
+        "_id": "624bf5611592d62302d1d24e"
       },
       {
         "text": "no",
-        "isCorrect": false
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d24f"
       }
     ]
   },
   {
-    "text": "Desideria was she the mother of a Swedish king?",
-    "type": "Desideria",
-    "answers": [
-      {
-        "text": "yes",
-        "description":"She was the mother of Oscar I",
-        "isCorrect": true
-      },
-      {
-        "text": "no",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
-    "text": "Where was King Karl XIV born?",
-    "type": "karl",
-    "answers": [
-      {
-        "text": "Pau",
-        "description":"",
-        "isCorrect": true
-      },
-      {
-        "text": "Visby",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
+    "_id": "624bf5611592d62302d1d256",
     "text": "Did King Karl XIV visit the Broms palace?",
     "type": "karl",
     "answers": [
       {
         "text": "no",
-        "description":"Impossible. The Broms palace was built in 1900 and King Karl XIV died in 1844",
-        "isCorrect": true
+        "isCorrect": true,
+        "description": "Impossible. The Broms palace was built in 1900 and King Karl XIV died in 1844",
+        "_id": "624bf5611592d62302d1d257"
       },
       {
         "text": "yes",
-        "isCorrect": false
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d258"
       }
     ]
   },
   {
-    "text": "Which academia did Johan Ludvig Peterson join in 1897?",
-    "type": "architects",
-    "answers": [
-      {
-        "text": "Academy of arts",
-        "description":"",
-        "isCorrect": true
-      },
-      {
-        "text": "Academy of science",
-        "isCorrect": false
-      }
-    ]
-  },
-  {
+    "_id": "624bf5611592d62302d1d25c",
     "text": "Which country inspired the architects to design the Broms palace?",
     "type": "architects",
     "answers": [
       {
         "text": "Italy",
-        "description":"The architects were inspired by a Renaissance florentine villa to design the external façade of the palace",
-        "isCorrect": true
+        "isCorrect": true,
+        "description": "The architects were inspired by a Renaissance florentine villa to design the external façade of the palace",
+        "_id": "624bf5611592d62302d1d25d"
       },
       {
         "text": "France",
-        "isCorrect": false
-      }
-    ]
-  },
-    {
-    "text": "Which building on Valhallavägen did Erik Lallerstedt design?",
-    "type": "architects",
-    "answers": [
-      {
-        "text": "KTH",
-        "description":"The large brick building at KTH was erected between 1914 and 1922",
-        "isCorrect": true
-      },
-      {
-        "text": "KMH",
-        "isCorrect": false
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d25e"
       }
     ]
   },
   {
-    "text": "Was the Broms Palace built in a new neighborhood?",
-    "type": "broms",
+    "_id": "624bf5611592d62302d1d250",
+    "text": "Desideria was she the mother of a Swedish king?",
+    "type": "Desideria",
     "answers": [
       {
         "text": "yes",
-        "description":"In 1900, the area was a new part of Stockholm and construction was rare.",
-        "isCorrect": true
+        "isCorrect": true,
+        "description": "She was the mother of Oscar I",
+        "_id": "624bf5611592d62302d1d251"
       },
       {
         "text": "no",
-        "isCorrect": false
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d252"
       }
     ]
-  },{
-    "text": "How many children did Gustav Broms have?",
-    "type": "broms",
+  },
+  {
+    "_id": "624bf5611592d62302d1d21a",
+    "text": "How many computer languages are used for cyber|glow?",
+    "type": "CS",
     "answers": [
       {
-        "text": "5",
-        "description":"Gustav Broms had 5 sons who grew up in the palace.",
-        "isCorrect": true
+        "text": "10",
+        "isCorrect": true,
+        "description": "javascript, typescript, C++, css, rust, html, yaml, json, python, csv",
+        "_id": "624bf5611592d62302d1d21b"
       },
       {
-        "text": "1",
-        "isCorrect": false
+        "text": "42",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d21c"
       }
     ]
-  },{
+  },
+  {
+    "_id": "624bf5611592d62302d1d220",
+    "text": "To which demogroup did the founders of DICE belong to?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "The Silents",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d221"
+      },
+      {
+        "text": "Assert",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d222"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d23b",
+    "text": "In which part of Stockholm did Louis Delavaud wish to install the embassy?",
+    "type": "delavaud",
+    "answers": [
+      {
+        "text": "Östermalm",
+        "isCorrect": true,
+        "description": "Louis Delavaud wanted to stay close to the other embassies.",
+        "_id": "624bf5611592d62302d1d23c"
+      },
+      {
+        "text": "Stora Essingen",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d23d"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d214",
+    "text": "How many characters can you choose from in cyber|glow?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "7",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d215"
+      },
+      {
+        "text": "15",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d216"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d20b",
+    "text": "How many employees work at Microsoft?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "64000",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d20c"
+      },
+      {
+        "text": "182000",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d20d"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d244",
+    "text": "Which political party did baron de Breteuil and France support in the 18th century?",
+    "type": "baron",
+    "answers": [
+      {
+        "text": "Hats (Hattpartiet)",
+        "isCorrect": true,
+        "description": "The Hats (Hattpartiet) and the Caps (Mösspartiet) are two political parties that fought for power in Sweden between 1719 and 1772.",
+        "_id": "624bf5611592d62302d1d245"
+      },
+      {
+        "text": "Caps (Mösspartiet)",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d246"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d22c",
+    "text": "The Crown Princess Victoria, Duchess of Västergötland, is she part of the House of Bernadotte?",
+    "type": "karl",
+    "answers": [
+      {
+        "text": "yes",
+        "isCorrect": true,
+        "description": "The House of Bernadotte is the royal house of Sweden since its foundation in 1818",
+        "_id": "624bf5611592d62302d1d22d"
+      },
+      {
+        "text": "no",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d22e"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d238",
+    "text": "Was the palace furnished when Louis Delavaud acquired it?",
+    "type": "delavaud",
+    "answers": [
+      {
+        "text": "no",
+        "isCorrect": true,
+        "description": "The palace was completely empty and Louis Delavaud did not have enough furniture for all the rooms of the palace",
+        "_id": "624bf5611592d62302d1d239"
+      },
+      {
+        "text": "yes",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d23a"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d21d",
+    "text": "How many lines of code is cyber|glow made of?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "4 million",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d21e"
+      },
+      {
+        "text": "15 million",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d21f"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d202",
+    "text": "Did Bill Gates win a Nobel Prize?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Yes",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d203"
+      },
+      {
+        "text": "No",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d204"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d247",
+    "text": "Did the baron de Breteuil contribute to the Swedish economy?",
+    "type": "baron",
+    "answers": [
+      {
+        "text": "yes",
+        "isCorrect": true,
+        "description": "Baron de Breteuil invested in the Marieberg porcelain factory",
+        "_id": "624bf5611592d62302d1d248"
+      },
+      {
+        "text": "no",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d249"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d235",
+    "text": "The current French ambassador prefers kanelbullar or croissant?",
+    "type": "etienne",
+    "answers": [
+      {
+        "text": "kanelbullar",
+        "isCorrect": true,
+        "description": "",
+        "_id": "624bf5611592d62302d1d236"
+      },
+      {
+        "text": "croissant",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d237"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d253",
+    "text": "Where was King Karl XIV born?",
+    "type": "karl",
+    "answers": [
+      {
+        "text": "Pau",
+        "isCorrect": true,
+        "description": "",
+        "_id": "624bf5611592d62302d1d254"
+      },
+      {
+        "text": "Visby",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d255"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d217",
+    "text": "Who developed the code framework to control the cyber|glow laser?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Seb Lee-Delisle",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d218"
+      },
+      {
+        "text": "Elon Musk",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d219"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d211",
+    "text": "The cake is a lie.",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "It's a meme",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d212"
+      },
+      {
+        "text": "It's true",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d213"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d208",
+    "text": "Did Margaret Hamilton program the code of Apollo 11?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d209"
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d20a"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d229",
+    "text": "How many levels are there in a Candy Crush episode?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "15",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d22a"
+      },
+      {
+        "text": "51",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d22b"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d226",
+    "text": "What ancient Chinese text is based on taoistic duality of yin and yang?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "I Ching",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d227"
+      },
+      {
+        "text": "The mythical man month",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d228"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d24a",
+    "text": "Where did Desideria spend her last years?",
+    "type": "Desideria",
+    "answers": [
+      {
+        "text": "Rosendal",
+        "isCorrect": true,
+        "description": "",
+        "_id": "624bf5611592d62302d1d24b"
+      },
+      {
+        "text": "Drottningholm",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d24c"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d268",
     "text": "In what type of industry did Gustav Broms make his fortune?",
     "type": "broms",
     "answers": [
       {
         "text": "minerals",
-        "description":"Gustav made a profit from the exploitation of the ore deposits in Gällivare and Kirunavaara.",
-        "isCorrect": true
+        "isCorrect": true,
+        "description": "Gustav made a profit from the exploitation of the ore deposits in Gällivare and Kirunavaara.",
+        "_id": "624bf5611592d62302d1d269"
       },
       {
         "text": "spices",
-        "isCorrect": false
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d26a"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d22f",
+    "text": "In which year did the current French ambassador arrive in Stockholm?",
+    "type": "etienne",
+    "answers": [
+      {
+        "text": "2020",
+        "isCorrect": true,
+        "description": "",
+        "_id": "624bf5611592d62302d1d230"
+      },
+      {
+        "text": "2015",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d231"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d241",
+    "text": "Where did the French ambassadors live before the acquisition of the Broms palace?",
+    "type": "baron",
+    "answers": [
+      {
+        "text": "Nyckelvicken Palace",
+        "isCorrect": true,
+        "description": "",
+        "_id": "624bf5611592d62302d1d242"
+      },
+      {
+        "text": "Brommaplan",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d243"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d23e",
+    "text": "Who sold Broms Palace to Louis Delavaud?",
+    "type": "delavaud",
+    "answers": [
+      {
+        "text": "Mrs Broms",
+        "isCorrect": true,
+        "description": "",
+        "_id": "624bf5611592d62302d1d23f"
+      },
+      {
+        "text": "Mr Wallenberg",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d240"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d25f",
+    "text": "Which building on Valhallavägen did Erik Lallerstedt design?",
+    "type": "architects",
+    "answers": [
+      {
+        "text": "KTH",
+        "isCorrect": true,
+        "description": "The large brick building at KTH was erected between 1914 and 1922",
+        "_id": "624bf5611592d62302d1d260"
+      },
+      {
+        "text": "KMH",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d261"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d265",
+    "text": "How many children did Gustav Broms have?",
+    "type": "broms",
+    "answers": [
+      {
+        "text": "5",
+        "isCorrect": true,
+        "description": "Gustav Broms had 5 sons who grew up in the palace.",
+        "_id": "624bf5611592d62302d1d266"
+      },
+      {
+        "text": "1",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d267"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d223",
+    "text": "How many 0s and 1s are there in 7?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "11",
+        "isCorrect": true,
+        "description": "There are 3 1s for a 7 in binary, which is 11 in 0s and 1s",
+        "_id": "624bf5611592d62302d1d224"
+      },
+      {
+        "text": "111",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d225"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d259",
+    "text": "Which academia did Johan Ludvig Peterson join in 1897?",
+    "type": "architects",
+    "answers": [
+      {
+        "text": "Academy of arts",
+        "isCorrect": true,
+        "description": "",
+        "_id": "624bf5611592d62302d1d25a"
+      },
+      {
+        "text": "Academy of science",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d25b"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d20e",
+    "text": "Who introduced Internet memes in 1994?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "Mike Godwyn",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d20f"
+      },
+      {
+        "text": "Mike Tyson",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d210"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d262",
+    "text": "Was the Broms Palace built in a new neighborhood?",
+    "type": "broms",
+    "answers": [
+      {
+        "text": "yes",
+        "isCorrect": true,
+        "description": "In 1900, the area was a new part of Stockholm and construction was rare.",
+        "_id": "624bf5611592d62302d1d263"
+      },
+      {
+        "text": "no",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d264"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d232",
+    "text": "In how many different countries did the current French ambassador live?",
+    "type": "etienne",
+    "answers": [
+      {
+        "text": "4",
+        "isCorrect": true,
+        "description": "",
+        "_id": "624bf5611592d62302d1d233"
+      },
+      {
+        "text": "2",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d234"
+      }
+    ]
+  },
+  {
+    "_id": "624bf5611592d62302d1d205",
+    "text": "Is neon present in the Earth's atmosphere?",
+    "type": "CS",
+    "answers": [
+      {
+        "text": "No",
+        "isCorrect": false,
+        "_id": "624bf5611592d62302d1d206"
+      },
+      {
+        "text": "Yes",
+        "isCorrect": true,
+        "_id": "624bf5611592d62302d1d207"
       }
     ]
   }
 ]
-
-

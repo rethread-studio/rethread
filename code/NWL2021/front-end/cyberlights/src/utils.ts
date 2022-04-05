@@ -58,6 +58,8 @@ export const getFlag = (country: string): string => {
             return "flag-sweden.png";
         case "Prussia (now Germany)":
             return "flag-germany.png";
+        case "France":
+            return "flag-france.png";
         default:
             return "flag-usa.png"
     }
