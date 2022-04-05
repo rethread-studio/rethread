@@ -1,6 +1,6 @@
 
 ~sounds = Environment(know: true);
-~sounds.adding = { |  |
+~sounds.adding = { | org_value, result |
 	Synth(\tick2, [\freq, 11000, \amp, 0.01]);
 };
 ~sounds.subtract = {
