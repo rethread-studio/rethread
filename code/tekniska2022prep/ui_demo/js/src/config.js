@@ -6,6 +6,7 @@ const state = {
     sampleSize: 10,
     filterSampleSize: { width: 250, height: 250 },
     counterFontSize: 900,
+    status: "IDLE"
 }
 
 let filtersToApply = [];
@@ -20,6 +21,8 @@ let particles = [];
 let images;
 
 let appTimer = null;
+
+let isButtonOn = false;
 
 
 

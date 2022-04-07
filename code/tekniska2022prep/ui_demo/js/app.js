@@ -2,41 +2,40 @@ const socket = io();
 const webcam = new Webcam(320, 0 /* automatic */);
 
 socket.on("step", (step) => {
+  if (appTimer == null || appTimer.isTimerActive()) return;
+  if (!isFilterOn()) tunOnSpeed("SPEED3_BUTTON_ON");
   removeInterval();
   stepFilter(step);
 });
+
 socket.on("state", (state) => {
   // IDLE, PICTURE, RESET_BUTTON_ON, SPEED1_BUTTON_ON, SPEED2_BUTTON_ON, SPEED3_BUTTON_ON
   // RESET_BUTTON_OFF, SPEED1_BUTTON_OFF, SPEED2_BUTTON_OFF, SPEED3_BUTTON_OFF
-  document.querySelector(".current-state").innerHTML = state;
-  document.querySelector(".idle").style.display = "none";
-
-  document.querySelector(".camera").style.display = "none";
-  document.querySelector(".snap img").style.display = "none";
-  document.querySelector(".snap").style.display = "none";
+  if (appTimer == null || appTimer.isTimerActive()) return;
 
   if (state == "PICTURE") {
-    document.querySelector(".camera").style.display = "block";
-    document.querySelector(".snap img").style.display = "none";
+    showCamera();
     snapPicture();
     cleanAll();
-  } else if (state == "RESET_BUTTON_ON") {
-    document.querySelector(".camera").style.display = "block";
-      document.querySelector(".snap img").style.display = "none";
-      appTimer.setTimer(5, () => {
-        cleanAll();
-        snapPicture();
-      });
-      objectsToRender.push(appTimer);
+  } else if (state == "RESET_BUTTON_OFF") {
+    cleanAll();
+    showCamera();
+    appTimer.setTimer(5, () => {
+      cleanAll();
+      snapPicture();
+    });
+    objectsToRender.push(appTimer);
   } else if (state == "IDLE") {
-    // document.querySelector(".idle").style.display = "block";
-    // document.querySelector(".camera").style.display = "none";
-    // document.querySelector(".snap img").style.display = "none";
-  } else if (state == "SPEED1_BUTTON_ON") {
+    cleanAll();
+    document.querySelector(".idle").style.display = "block";
+  } else if (state == "SPEED1_BUTTON_ON" || state == "SPEED1_BUTTON_OFF") {
+    if (state == "SPEED1_BUTTON_OFF") return;
     tunOnSpeed(state);
-  } else if (state == "SPEED2_BUTTON_ON") {
+  } else if (state == "SPEED2_BUTTON_ON" || state == "SPEED2_BUTTON_OFF") {
+    if (state == "SPEED2_BUTTON_OFF") return;
     tunOnSpeed(state);
-  } else if (state == "SPEED3_BUTTON_ON") {
+  } else if (state == "SPEED3_BUTTON_ON" || state == "SPEED3_BUTTON_OFF") {
+    if (state == "SPEED3_BUTTON_OFF") return;
     tunOnSpeed(state);
   }
 });
@@ -97,6 +96,7 @@ function setup() {
   };
 
 
+  tunOnSpeed("SPEED1_BUTTON_ON");
 }
 
 function draw() {
@@ -105,68 +105,3 @@ function draw() {
   render();
 }
 
-function tunOnSpeed(speed) {
-  emptyObjectsToRender();
-  emptyParticles();
-  removeInterval();
-  switch (speed) {
-    case "SPEED1_BUTTON_ON":
-      objectsToRender.push(speed1);
-      break;
-    case "SPEED2_BUTTON_ON":
-      createPixelParticles(images.getFirstImage(), images.getLastImage());
-      objectsToRender.push(speed2);
-      break;
-    case "SPEED3_BUTTON_ON":
-      objectsToRender.push(filter);
-      createInterval();
-      break;
-    default:
-      break;
-  }
-}
-
-function keyPressed() {
-  cleanAll();
-
-
-  switch (key) {
-    case '1':
-      objectsToRender.push(speed1);
-      break;
-    case '2':
-      createPixelParticles(images.getFirstImage(), images.getLastImage())
-      objectsToRender.push(speed2);
-      break;
-    case '3':
-      objectsToRender.push(filter);
-      createInterval();
-      break;
-    case 'r':
-      document.querySelector(".camera").style.display = "block";
-      document.querySelector(".snap img").style.display = "none";
-      appTimer.setTimer(5, () => {
-        cleanAll();
-        snapPicture();
-      });
-      objectsToRender.push(appTimer);
-      break;
-    case 'p':
-      snapPicture();
-      break;
-    case 'ArrowRight':
-      objectsToRender.push(filter);
-      stepFilter("next");
-      break;
-
-    case 'ArrowLeft':
-      objectsToRender.push(filter);
-      stepFilter("previous");
-      break;
-
-    default:
-      //speed 1
-      break;
-  }
-  return false;
-}

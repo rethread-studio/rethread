@@ -130,11 +130,11 @@ function snapPicture() {
 }
 
 function cleanAll() {
+    if (canvas == null) return;
     clear();
     emptyObjectsToRender();
     emptyParticles();
     removeInterval();
-    appTimer.resetTimer();
 
     document.querySelector(".camera").style.display = "none";
     document.querySelector(".snap img").style.display = "none";
@@ -143,4 +143,30 @@ function cleanAll() {
     document.querySelector(".idle").style.display = "none";
 }
 
+function showCamera() {
+    document.querySelector(".camera").style.display = "block";
+    document.querySelector(".snap img").style.display = "none";
+}
 
+function tunOnSpeed(speed) {
+    cleanAll();
+    switch (speed) {
+        case "SPEED1_BUTTON_ON":
+            objectsToRender.push(speed1);
+            break;
+        case "SPEED2_BUTTON_ON":
+            createPixelParticles(images.getFirstImage(), images.getLastImage());
+            objectsToRender.push(speed2);
+            break;
+        case "SPEED3_BUTTON_ON":
+            objectsToRender.push(filter);
+            createInterval();
+            break;
+        default:
+            break;
+    }
+}
+
+function isFilterOn() {
+    return objectsToRender.some((obj => obj == filter));
+}

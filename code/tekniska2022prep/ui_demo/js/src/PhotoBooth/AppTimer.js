@@ -9,7 +9,7 @@ class AppTimer {
 
     setTimer(time = 5, callBackFuntion = () => { console.log("call me back") }) {
 
-        if (this.isTimerActive()) this.resetTimer();
+        if (this.isTimerActive()) return;
         this.currentTime = time;
         this.intervalId = setInterval(() => {
             this.currentTime--;
@@ -18,10 +18,6 @@ class AppTimer {
                 callBackFuntion();
             }
         }, 1000);
-
-        //get time
-        //check limit
-        //if in limit, make the call
     }
 
     resetTimer() {
