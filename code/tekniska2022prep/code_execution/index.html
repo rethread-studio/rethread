@@ -6,6 +6,23 @@
     <link type="text/css" rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div
+      style="
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+      "
+    >
+      <canvas
+        id="canvas"
+        width="100%"
+        height="100%"
+        style="display: block; margin: 0 auto"
+      ></canvas>
+    </div>
     <div class="settings">
       <label>
         Stop on
@@ -38,16 +55,20 @@
     <div class="row">
       <div class="col center">
         <h2>Input</h2>
-        <canvas id="original_image"></canvas>
+        <canvas class="image" id="original_image"></canvas>
       </div>
       <div class="col center">
         <h2>Output</h2>
-        <canvas id="transformed_image"></canvas>
+        <canvas class="image" id="transformed_image"></canvas>
       </div>
     </div>
 
     <div class="row">
-      <div class="col">
+      <div class="col-3 center">
+        <div class="pixel" id="original_pixel"></div>
+        <div class="pixel pixel-value" id="original_pixel_value"></div>
+      </div>
+      <div class="col-3">
         <div>
           <pre><code>
 function saturation(pixels, adj) {
@@ -67,25 +88,9 @@ function saturation(pixels, adj) {
       </code></pre>
         </div>
       </div>
-      <div class="col">
-        <div class="state">
-          <div class="row">
-            <div class="col center">
-              <div class="pixel" id="original_pixel"></div>
-            </div>
-            <div class="col center">
-              <div class="pixel" id="transformed_pixel"></div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col center">
-              <div class="pixel pixel-value" id="original_pixel_value"></div>
-            </div>
-            <div class="col center">
-              <div class="pixel pixel-value" id="transformed_pixel_value"></div>
-            </div>
-          </div>
-        </div>
+      <div class="col-3 center">
+        <div class="pixel" id="transformed_pixel"></div>
+        <div class="pixel pixel-value" id="transformed_pixel_value"></div>
       </div>
     </div>
     <div id="progress">
@@ -94,12 +99,14 @@ function saturation(pixels, adj) {
       </div>
       <div class="text"></div>
     </div>
+    <script src="./js/bg.js"></script>
     <script src="./js/filters.js"></script>
     <script src="./js/utils.js"></script>
 
     <script src="../js/libraries/socket.io.min.js"></script>
 
     <script>
+      initBg();
       const original_canvas = document.getElementById("original_image");
       const original_ctx = original_canvas.getContext("2d");
       const transformed_canvas = document.getElementById("transformed_image");

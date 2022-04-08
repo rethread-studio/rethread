@@ -1,4 +1,5 @@
 body {
+  position: relative;
   margin: 0;
   padding: 0;
   background-color: #000000;
@@ -15,8 +16,12 @@ body {
   float: left;
   width: 50%;
 }
+.col-3 {
+  float: left;
+  width: 33%;
+}
 
-canvas {
+canvas.image {
   width: 70%;
   border: 1px dashed #DDD;
 }
@@ -90,6 +95,7 @@ pre {
   border: 1px dashed #DDD;
   padding: 5px;
   font-size: 20px;
+  margin-top: calc(25% - 37.5px);
 }
 
 .pixel .r {
