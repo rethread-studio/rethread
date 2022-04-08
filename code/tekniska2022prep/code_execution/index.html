@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>foreach code execution</title>
+    <style>
+      .active {
+        background-color: red;
+      }
+      .active::after {
+        position: absolute;
+        right: 5px;
+        content: attr(value);
+        color: red;
+        border: 1px solid red;
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #000000; color: white">
+    <label>
+      Stop on
+      <select id="stop_on">
+        <option value="all">All</option>
+        <option value="loop">Loop</option>
+      </select>
+    </label>
+    <label>
+      Step interval (ms)
+      <input type="number" min="0" value="1000" id="step_interval" />
+    </label>
+
+    <label>
+      Jump
+      <input type="number" min="0" value="0" id="jump" />
+    </label>
+
+    <div style="width: 500px; position: relative">
+      <pre><code>
+function saturation(pixels, adj) {
+  let d = <span id="code_1">pixels.data</span>;
+  adj = <span id="code_2">adj < -1 ? -1 : adj</span>;
+  for (let <span id="code_3">i</span> = 0; i < d.length; i += 4) {
+    const r = <span id="code_4">d[i];</span>
+    const g = <span id="code_5">d[i + 1];</span>
+    const b = <span id="code_6">d[i + 2];</span>
+    // weights from CCIR 601 spec
+    const gray = <span id="code_7">0.2989 * r + 0.587 * g + 0.114 * b;</span>
+    d[i] = <span id="code_8">-gray * adj + d[i] * (1 + adj);</span>
+    d[i + 1] = <span id="code_9">-gray * adj + d[i + 1] * (1 + adj);</span>
+    d[i + 2] = <span id="code_10">-gray * adj + d[i + 2] * (1 + adj);</span>
+  }
+}
+      </code></pre>
+    </div>
+    <canvas id="original_image"></canvas>
+    <canvas id="transformed_image"></canvas>
+    <script src="./js/filters.js"></script>
+    <script src="./js/utils.js"></script>
+
+    <script>
+      const original_canvas = document.getElementById("original_image");
+      const original_ctx = original_canvas.getContext("2d");
+      const transformed_canvas = document.getElementById("transformed_image");
+      const transformed_ctx = transformed_canvas.getContext("2d");
+      const img = new Image();
+
+      let stepInterval;
+      async function init() {
+        clearInterval(stepInterval);
+        console.log("Start execution");
+        const pixels = original_ctx.getImageData(0, 0, img.width, img.height);
+
+        function runStep() {
+          transformed_ctx.putImageData(pixels, 0, 0);
+          stopOn(document.getElementById("stop_on").value);
+          jump(document.getElementById("jump").value);
+          step(true); // advance execution and display evolution
+
+          let int = document.getElementById("step_interval").value;
+          if (int == 0) {
+            runStep();
+          } else {
+            setTimeout(runStep, int);
+          }
+        }
+
+        runStep();
+
+        await saturation(pixels, -1);
+      }
+      (async () => {
+        img.onload = async () => {
+          original_canvas.width = img.width;
+          original_canvas.height = img.height;
+
+          transformed_canvas.width = img.width;
+          transformed_canvas.height = img.height;
+
+          original_ctx.drawImage(img, 0, 0);
+
+          await init();
+        };
+        img.src = "../ui_demo/img/portrait.jpg";
+      })();
+    </script>
+  </body>
+</html>
