@@ -45,6 +45,7 @@ async function wrapExp(id, type, code, value, ctx) {
       };
     });
   }
-  if (jumpValue > 0) jumpValue--;
+  if (jumpValue > 0 && (stopOnValue === "all" || stopOnValue === type))
+    jumpValue--;
   return value;
 }
