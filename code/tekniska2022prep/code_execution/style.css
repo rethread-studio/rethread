@@ -19,6 +19,9 @@ body {
 canvas {
   width: 70%;
 }
+.center {
+  text-align: center;
+}
 
 #progress {
   text-align: center;
@@ -32,12 +35,14 @@ canvas {
 .active::after {
   position: absolute;
   right: 5px;
+  margin-top: -2px;
   content: attr(value);
   color: red;
   border: 1px solid red;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 70px;
+  padding: 2px;
 }
 
 .pixel {
@@ -45,15 +50,20 @@ canvas {
   width: 75px;
   height: 75px;
   border: 1px solid white;
+  padding: 5px;
+  font-size: 20px;
 }
 .pixel .r {
   color: red;
+  text-align: right;
 }
 .pixel .g {
   color: green;
+  text-align: right;
 }
 .pixel .b {
   color: blue;
+  text-align: right;
 }
 .row {
   position: relative;

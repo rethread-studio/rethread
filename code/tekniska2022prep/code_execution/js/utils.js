@@ -29,6 +29,7 @@ function step(display) {
 }
 
 async function wrapExp(id, type, code, value, ctx) {
+  stepNum++;
   if ((stopOnValue === "all" || stopOnValue === type) && jumpValue <= 0) {
     return new Promise((resolve, _) => {
       current = {

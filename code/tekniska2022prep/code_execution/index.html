@@ -16,13 +16,17 @@
       </label>
       <label>
         Step interval (ms)
-        <input type="number" min="1" value="1000" id="step_interval" />
+        <input type="number" min="1" value="250" id="step_interval" />
       </label>
 
       <label>
         Jump
         <input type="number" min="0" value="0" id="jump" />
       </label>
+      <button onclick="pause=false;runStep();">Play</button>
+      <button onclick="pause=true;">Pause</button>
+
+      <button onclick="runStep();">Next</button>
     </div>
 
     <div class="row">
@@ -50,18 +54,18 @@ function saturation(pixels, adj) {
         <div id="progress"></div>
         <div class="state">
           <div class="row">
-            <div class="col">
+            <div class="col center">
               <div class="pixel" id="original_pixel"></div>
             </div>
-            <div class="col">
+            <div class="col center">
               <div class="pixel" id="transformed_pixel"></div>
             </div>
           </div>
           <div class="row">
-            <div class="col">
+            <div class="col center">
               <div class="pixel pixel-value" id="original_pixel_value"></div>
             </div>
-            <div class="col">
+            <div class="col center">
               <div class="pixel pixel-value" id="transformed_pixel_value"></div>
             </div>
           </div>
@@ -69,10 +73,10 @@ function saturation(pixels, adj) {
       </div>
     </div>
     <div class="row">
-      <div class="col">
+      <div class="col center">
         <canvas id="original_image"></canvas>
       </div>
-      <div class="col">
+      <div class="col center">
         <canvas id="transformed_image"></canvas>
       </div>
     </div>
@@ -87,6 +91,8 @@ function saturation(pixels, adj) {
       const img = new Image();
       let pixels;
       let o_pixels;
+      let stepNum = 0;
+      let pause = true;
 
       function render() {
         const current = getCurrent();
@@ -94,12 +100,14 @@ function saturation(pixels, adj) {
 
         if (current == null) return;
         if (current.ctx.i != null) {
-          document.getElementById("progress").innerText = `${
-            current.ctx.i / 4 + 1
-          }/${o_pixels.data.length / 4} (${(
-            ((current.ctx.i + 1) / o_pixels.data.length) *
+          const total = (o_pixels.data.length / 4) * 9 + 4;
+          document.getElementById(
+            "progress"
+          ).innerText = `${stepNum}/${total} (${(
+            (stepNum / total) *
             100
           ).toFixed(1)}%)`;
+
           const o_r = o_pixels.data[current.ctx.i];
           const o_g = o_pixels.data[current.ctx.i + 1];
           const o_b = o_pixels.data[current.ctx.i + 2];
@@ -139,15 +147,19 @@ function saturation(pixels, adj) {
         render();
 
         // execute next step
-        if (int == 0) {
-          runStep();
-        } else {
-          setTimeout(runStep, int);
-        }
+        if (pause) return;
+        setTimeout(runStep, int);
       }
 
+      window.addEventListener("keydown", function (e) {
+        if (e.key == " ") {
+          pause = !pause;
+          if (!pause) runStep();
+        } else if (e.key == "ArrowRight") runStep();
+      });
       async function init() {
         console.log("Start execution");
+        stepNum = 0;
         o_pixels = original_ctx.getImageData(0, 0, img.width, img.height);
 
         transformed_ctx.clearRect(0, 0, img.width, img.height);
