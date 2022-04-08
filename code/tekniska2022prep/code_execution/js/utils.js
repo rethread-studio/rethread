@@ -13,23 +13,12 @@ function stopOn(type) {
 function getCurrent() {
   return current;
 }
-function step(display) {
+function step() {
   if (!current) return;
-
   current.resolve();
-
-  if (display) {
-    for (const e of document.getElementsByClassName("active")) {
-      e.classList.remove("active");
-    }
-    const e = document.getElementById("code_" + current.id);
-    e.setAttribute("value", current.value);
-    e.className = "active";
-  }
 }
 
 async function wrapExp(id, type, code, value, ctx) {
-  stepNum++;
   if ((stopOnValue === "all" || stopOnValue === type) && jumpValue <= 0) {
     return new Promise((resolve, _) => {
       current = {
@@ -40,6 +29,7 @@ async function wrapExp(id, type, code, value, ctx) {
         ctx,
         resolve: () => {
           action = null;
+          stepNum++;
           resolve(value);
         },
       };
@@ -47,5 +37,6 @@ async function wrapExp(id, type, code, value, ctx) {
   }
   if (jumpValue > 0 && (stopOnValue === "all" || stopOnValue === type))
     jumpValue--;
+  stepNum++;
   return value;
 }

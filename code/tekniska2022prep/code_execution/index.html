@@ -98,16 +98,26 @@ function saturation(pixels, adj) {
         const current = getCurrent();
         transformed_ctx.putImageData(pixels, 0, 0);
 
-        if (current == null) return;
-        if (current.ctx.i != null) {
-          const total = (o_pixels.data.length / 4) * 9 + 4;
-          document.getElementById(
-            "progress"
-          ).innerText = `${stepNum}/${total} (${(
-            (stepNum / total) *
-            100
-          ).toFixed(1)}%)`;
+        // progress
+        const total = (o_pixels.data.length / 4) * 9 + 3;
+        document.getElementById(
+          "progress"
+        ).innerText = `${stepNum}/${total} (${(
+          (stepNum / total) *
+          100
+        ).toFixed()}%)`;
 
+        for (const e of document.getElementsByClassName("active")) {
+          e.classList.remove("active");
+        }
+
+        if (current == null) return;
+
+        const e = document.getElementById("code_" + current.id);
+        e.setAttribute("value", current.value);
+        e.className = "active";
+
+        if (current.ctx.i != null) {
           const o_r = o_pixels.data[current.ctx.i];
           const o_g = o_pixels.data[current.ctx.i + 1];
           const o_b = o_pixels.data[current.ctx.i + 2];
@@ -127,10 +137,6 @@ function saturation(pixels, adj) {
           document.getElementById(
             "transformed_pixel_value"
           ).innerHTML = `<div class="r">${r}</div><div class="g">${g}</div><div class="b">${b}</div>`;
-        } else {
-          document.getElementById("progress").innerText = `0/${
-            o_pixels.data.length / 4
-          } (0%)`;
         }
       }
 
@@ -141,7 +147,7 @@ function saturation(pixels, adj) {
         const int = document.getElementById("step_interval").value;
 
         // execute code
-        step(true); // advance execution and display evolution
+        step(); // advance execution and display evolution
 
         // render
         render();
@@ -165,8 +171,8 @@ function saturation(pixels, adj) {
         transformed_ctx.clearRect(0, 0, img.width, img.height);
         pixels = transformed_ctx.getImageData(0, 0, img.width, img.height);
 
-        saturation(o_pixels, pixels, -1);
         runStep();
+        saturation(o_pixels, pixels, -1);
       }
 
       (async () => {
