@@ -12,6 +12,10 @@
         <select id="stop_on">
           <option value="all">All</option>
           <option value="loop">Loop</option>
+          <option value="loop_init">Loop init</option>
+          <option value="loop_cond">Loop condition</option>
+          <option value="assignment">Assignment</option>
+          <option value="output">Output</option>
         </select>
       </label>
       <label>
@@ -27,11 +31,24 @@
       <button onclick="pause=true;">Pause</button>
 
       <button onclick="runStep();">Next</button>
+
+      <button onclick="init();">Reset</button>
+    </div>
+
+    <div class="row">
+      <div class="col center">
+        <h2>Input</h2>
+        <canvas id="original_image"></canvas>
+      </div>
+      <div class="col center">
+        <h2>Output</h2>
+        <canvas id="transformed_image"></canvas>
+      </div>
     </div>
 
     <div class="row">
       <div class="col">
-        <div style="width: 500px; position: relative">
+        <div>
           <pre><code>
 function saturation(pixels, adj) {
   let d = <span id="code_1">pixels.data</span>;
@@ -51,7 +68,6 @@ function saturation(pixels, adj) {
         </div>
       </div>
       <div class="col">
-        <div id="progress"></div>
         <div class="state">
           <div class="row">
             <div class="col center">
@@ -72,16 +88,16 @@ function saturation(pixels, adj) {
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col center">
-        <canvas id="original_image"></canvas>
+    <div id="progress">
+      <div class="bar">
+        <div class="fill"></div>
       </div>
-      <div class="col center">
-        <canvas id="transformed_image"></canvas>
-      </div>
+      <div class="text"></div>
     </div>
     <script src="./js/filters.js"></script>
     <script src="./js/utils.js"></script>
+
+    <script src="../js/libraries/socket.io.min.js"></script>
 
     <script>
       const original_canvas = document.getElementById("original_image");
@@ -100,12 +116,16 @@ function saturation(pixels, adj) {
 
         // progress
         const total = (o_pixels.data.length / 4) * 9 + 3;
-        document.getElementById(
-          "progress"
+        document.querySelector(
+          "#progress .text"
         ).innerText = `${stepNum}/${total} (${(
           (stepNum / total) *
           100
         ).toFixed()}%)`;
+        document.querySelector("#progress .fill").style.width = `${(
+          (stepNum / total) *
+          100
+        ).toFixed()}%`;
 
         for (const e of document.getElementsByClassName("active")) {
           e.classList.remove("active");
@@ -157,13 +177,8 @@ function saturation(pixels, adj) {
         setTimeout(runStep, int);
       }
 
-      window.addEventListener("keydown", function (e) {
-        if (e.key == " ") {
-          pause = !pause;
-          if (!pause) runStep();
-        } else if (e.key == "ArrowRight") runStep();
-      });
       async function init() {
+        if (getCurrent() != null) getCurrent().reject();
         console.log("Start execution");
         stepNum = 0;
         o_pixels = original_ctx.getImageData(0, 0, img.width, img.height);
@@ -172,7 +187,7 @@ function saturation(pixels, adj) {
         pixels = transformed_ctx.getImageData(0, 0, img.width, img.height);
 
         runStep();
-        saturation(o_pixels, pixels, -1);
+        saturation(o_pixels, pixels, -1).then(() => (current = null));
       }
 
       (async () => {
@@ -187,8 +202,26 @@ function saturation(pixels, adj) {
 
           await init();
         };
-        img.src = "../ui_demo/img/portrait.jpg";
+        img.src = "img/portrait.jpg";
       })();
+
+      window.addEventListener("keydown", function (e) {
+        if (e.key == " ") {
+          pause = !pause;
+          if (!pause) runStep();
+        } else if (e.key == "ArrowRight") runStep();
+      });
+      if (io !== undefined) {
+        const socket = io();
+        socket.on("state", (state) => {
+          if (state == "PICTURE") {
+            init();
+          }
+        });
+        socket.on("step", (step) => {
+          runStep();
+        });
+      }
     </script>
   </body>
 </html>

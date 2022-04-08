@@ -20,7 +20,7 @@ function step() {
 
 async function wrapExp(id, type, code, value, ctx) {
   if ((stopOnValue === "all" || stopOnValue === type) && jumpValue <= 0) {
-    return new Promise((resolve, _) => {
+    return new Promise((resolve, reject) => {
       current = {
         id,
         type,
@@ -32,6 +32,7 @@ async function wrapExp(id, type, code, value, ctx) {
           stepNum++;
           resolve(value);
         },
+        reject
       };
     });
   }

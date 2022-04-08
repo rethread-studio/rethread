@@ -19,6 +19,7 @@ io.emit = function () {
   emit.apply(io, arguments);
 };
 
+app.use("/code", express.static(__dirname + "/../code_execution"));
 app.use(express.static(__dirname + "/../ui_demo"));
 
 async function generateMosaic() {

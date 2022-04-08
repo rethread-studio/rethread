@@ -33,7 +33,7 @@ async function saturation(o_pixels, pixels, adj) {
     })
   ) {
     pixels.data[i + 3] = d[i + 3];
-    
+
     const r = d[i];
     await wrapExp("4", "assignment", "d[i]", d[i], {
       i,
@@ -84,7 +84,7 @@ async function saturation(o_pixels, pixels, adj) {
     pixels.data[i] = -gray * adj + d[i] * (1 + adj);
     await wrapExp(
       "8",
-      "assignment",
+      "output",
       "-gray * adj + d[i] * (1 + adj)",
       -gray * adj + d[i] * (1 + adj),
       {
@@ -100,7 +100,7 @@ async function saturation(o_pixels, pixels, adj) {
     pixels.data[i + 1] = -gray * adj + d[i + 1] * (1 + adj);
     await wrapExp(
       "9",
-      "assignment",
+      "output",
       "-gray * adj + d[i + 1] * (1 + adj)",
       -gray * adj + d[i + 1] * (1 + adj),
       {
@@ -116,7 +116,7 @@ async function saturation(o_pixels, pixels, adj) {
     pixels.data[i + 2] = -gray * adj + d[i + 2] * (1 + adj);
     await wrapExp(
       "10",
-      "assignment",
+      "output",
       "-gray * adj + d[i + 2] * (1 + adj)",
       -gray * adj + d[i + 2] * (1 + adj),
       {

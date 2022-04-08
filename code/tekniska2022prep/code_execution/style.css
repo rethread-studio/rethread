@@ -18,18 +18,56 @@ body {
 
 canvas {
   width: 70%;
+  border: 1px dashed #DDD;
 }
+
+pre {
+  position: relative;
+  margin: auto;
+  width: 700px;
+  font-size: 17px;
+}
+
 .center {
   text-align: center;
 }
 
 #progress {
+  position: fixed;
+  bottom: 0;
   text-align: center;
   font-weight: bolder;
+  width: 100%;
+  background: white;
+  line-height: 35px;
+
+}
+
+#progress .text {
+  display: inline;
+  padding: 2px 5px;
+  color: #000000;
+  background: white;
+}
+
+#progress .bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+
+}
+
+#progress .bar .fill {
+  height: 100%;
+  width: 50%;
+  background: black;
 }
 
 .active {
-  background-color: red;
+  background-color: rgb(135, 50, 96);
 }
 
 .active::after {
@@ -37,8 +75,8 @@ canvas {
   right: 5px;
   margin-top: -2px;
   content: attr(value);
-  color: red;
-  border: 1px solid red;
+  color: rgb(135, 50, 96);
+  border: 1px solid rgb(135, 50, 96);
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 70px;
@@ -49,25 +87,28 @@ canvas {
   display: inline-block;
   width: 75px;
   height: 75px;
-  border: 1px solid white;
+  border: 1px dashed #DDD;
   padding: 5px;
   font-size: 20px;
 }
+
 .pixel .r {
   color: red;
   text-align: right;
 }
+
 .pixel .g {
   color: green;
   text-align: right;
 }
+
 .pixel .b {
   color: blue;
   text-align: right;
 }
+
 .row {
   position: relative;
   display: block;
   clear: both;
 }
-
