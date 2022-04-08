@@ -3,43 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <title>foreach code execution</title>
-    <style>
-      .active {
-        background-color: red;
-      }
-      .active::after {
-        position: absolute;
-        right: 5px;
-        content: attr(value);
-        color: red;
-        border: 1px solid red;
-      }
-    </style>
+    <link type="text/css" rel="stylesheet" href="style.css" />
   </head>
-  <body style="margin: 0; padding: 0; background-color: #000000; color: white">
-    <label>
-      Stop on
-      <select id="stop_on">
-        <option value="all">All</option>
-        <option value="loop">Loop</option>
-      </select>
-    </label>
-    <label>
-      Step interval (ms)
-      <input type="number" min="0" value="1000" id="step_interval" />
-    </label>
+  <body>
+    <div class="settings">
+      <label>
+        Stop on
+        <select id="stop_on">
+          <option value="all">All</option>
+          <option value="loop">Loop</option>
+        </select>
+      </label>
+      <label>
+        Step interval (ms)
+        <input type="number" min="1" value="1000" id="step_interval" />
+      </label>
 
-    <label>
-      Jump
-      <input type="number" min="0" value="0" id="jump" />
-    </label>
+      <label>
+        Jump
+        <input type="number" min="0" value="0" id="jump" />
+      </label>
+    </div>
 
-    <div style="width: 500px; position: relative">
-      <pre><code>
+    <div class="row">
+      <div class="col">
+        <div style="width: 500px; position: relative">
+          <pre><code>
 function saturation(pixels, adj) {
   let d = <span id="code_1">pixels.data</span>;
   adj = <span id="code_2">adj < -1 ? -1 : adj</span>;
-  for (let <span id="code_3">i</span> = 0; i < d.length; i += 4) {
+  for (<span id="code_11">let i = 0</span>; <span id="code_12">i < d.length</span>; <span id="code_3">i += 4</span>) {
     const r = <span id="code_4">d[i];</span>
     const g = <span id="code_5">d[i + 1];</span>
     const b = <span id="code_6">d[i + 2];</span>
@@ -51,9 +44,38 @@ function saturation(pixels, adj) {
   }
 }
       </code></pre>
+        </div>
+      </div>
+      <div class="col">
+        <div id="progress"></div>
+        <div class="state">
+          <div class="row">
+            <div class="col">
+              <div class="pixel" id="original_pixel"></div>
+            </div>
+            <div class="col">
+              <div class="pixel" id="transformed_pixel"></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="pixel pixel-value" id="original_pixel_value"></div>
+            </div>
+            <div class="col">
+              <div class="pixel pixel-value" id="transformed_pixel_value"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <canvas id="original_image"></canvas>
-    <canvas id="transformed_image"></canvas>
+    <div class="row">
+      <div class="col">
+        <canvas id="original_image"></canvas>
+      </div>
+      <div class="col">
+        <canvas id="transformed_image"></canvas>
+      </div>
+    </div>
     <script src="./js/filters.js"></script>
     <script src="./js/utils.js"></script>
 
@@ -63,31 +85,78 @@ function saturation(pixels, adj) {
       const transformed_canvas = document.getElementById("transformed_image");
       const transformed_ctx = transformed_canvas.getContext("2d");
       const img = new Image();
+      let pixels;
+      let o_pixels;
 
-      let stepInterval;
-      async function init() {
-        clearInterval(stepInterval);
-        console.log("Start execution");
-        const pixels = original_ctx.getImageData(0, 0, img.width, img.height);
+      function render() {
+        const current = getCurrent();
+        transformed_ctx.putImageData(pixels, 0, 0);
 
-        function runStep() {
-          transformed_ctx.putImageData(pixels, 0, 0);
-          stopOn(document.getElementById("stop_on").value);
-          jump(document.getElementById("jump").value);
-          step(true); // advance execution and display evolution
+        if (current == null) return;
+        if (current.ctx.i != null) {
+          document.getElementById("progress").innerText = `${
+            current.ctx.i / 4 + 1
+          }/${o_pixels.data.length / 4} (${(
+            ((current.ctx.i + 1) / o_pixels.data.length) *
+            100
+          ).toFixed(1)}%)`;
+          const o_r = o_pixels.data[current.ctx.i];
+          const o_g = o_pixels.data[current.ctx.i + 1];
+          const o_b = o_pixels.data[current.ctx.i + 2];
+          document.getElementById(
+            "original_pixel"
+          ).style.backgroundColor = `rgb(${o_r}, ${o_g}, ${o_b})`;
+          document.getElementById(
+            "original_pixel_value"
+          ).innerHTML = `<div class="r">${o_r}</div><div class="g">${o_g}</div><div class="b">${o_b}</div>`;
 
-          let int = document.getElementById("step_interval").value;
-          if (int == 0) {
-            runStep();
-          } else {
-            setTimeout(runStep, int);
-          }
+          const r = pixels.data[current.ctx.i];
+          const g = pixels.data[current.ctx.i + 1];
+          const b = pixels.data[current.ctx.i + 2];
+          document.getElementById(
+            "transformed_pixel"
+          ).style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+          document.getElementById(
+            "transformed_pixel_value"
+          ).innerHTML = `<div class="r">${r}</div><div class="g">${g}</div><div class="b">${b}</div>`;
+        } else {
+          document.getElementById("progress").innerText = `0/${
+            o_pixels.data.length / 4
+          } (0%)`;
         }
-
-        runStep();
-
-        await saturation(pixels, -1);
       }
+
+      function runStep() {
+        // update options
+        stopOn(document.getElementById("stop_on").value);
+        jump(document.getElementById("jump").value);
+        const int = document.getElementById("step_interval").value;
+
+        // execute code
+        step(true); // advance execution and display evolution
+
+        // render
+        render();
+
+        // execute next step
+        if (int == 0) {
+          runStep();
+        } else {
+          setTimeout(runStep, int);
+        }
+      }
+
+      async function init() {
+        console.log("Start execution");
+        o_pixels = original_ctx.getImageData(0, 0, img.width, img.height);
+
+        transformed_ctx.clearRect(0, 0, img.width, img.height);
+        pixels = transformed_ctx.getImageData(0, 0, img.width, img.height);
+
+        saturation(o_pixels, pixels, -1);
+        runStep();
+      }
+
       (async () => {
         img.onload = async () => {
           original_canvas.width = img.width;

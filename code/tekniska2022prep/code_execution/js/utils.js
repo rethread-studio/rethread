@@ -10,6 +10,9 @@ function stopOn(type) {
   stopOnValue = type;
 }
 
+function getCurrent() {
+  return current;
+}
 function step(display) {
   if (!current) return;
 
@@ -25,7 +28,7 @@ function step(display) {
   }
 }
 
-async function wrapExp(id, type, code, value) {
+async function wrapExp(id, type, code, value, ctx) {
   if ((stopOnValue === "all" || stopOnValue === type) && jumpValue <= 0) {
     return new Promise((resolve, _) => {
       current = {
@@ -33,6 +36,7 @@ async function wrapExp(id, type, code, value) {
         type,
         code,
         value,
+        ctx,
         resolve: () => {
           action = null;
           resolve(value);

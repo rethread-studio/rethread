@@ -1,0 +1,63 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000000;
+  color: white
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.col {
+  float: left;
+  width: 50%;
+}
+
+canvas {
+  width: 70%;
+}
+
+#progress {
+  text-align: center;
+  font-weight: bolder;
+}
+
+.active {
+  background-color: red;
+}
+
+.active::after {
+  position: absolute;
+  right: 5px;
+  content: attr(value);
+  color: red;
+  border: 1px solid red;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70px;
+}
+
+.pixel {
+  display: inline-block;
+  width: 75px;
+  height: 75px;
+  border: 1px solid white;
+}
+.pixel .r {
+  color: red;
+}
+.pixel .g {
+  color: green;
+}
+.pixel .b {
+  color: blue;
+}
+.row {
+  position: relative;
+  display: block;
+  clear: both;
+}
+
