@@ -13,33 +13,39 @@ s.waitForBoot({
 	~running.speed1 = false;
 	~running.speed2 = false;
 	~running.speed3 = false;
+	~running.infinite = false;
+	~crank_speed = 0;
 	~stop_functions = Environment.new(know: true);
 	s.sync;
 
 	~speed1 = {
-		~stop_functions.speed2.();
-		~stop_functions.speed3.();
-		// magic swoosh
-		var swoosh_dur = rrand(0.35, 0.6);
 		{
-			var sig, start_freq = Rand(150, 300), end_freq = Rand(2000, 2300);
-			sig = Resonz.ar(PinkNoise.ar(), XLine.kr([start_freq, start_freq * Rand(0.99, 1.02)], [end_freq, end_freq * Rand(0.99, 1.02)], swoosh_dur) * LFNoise2.kr(3).range(0.995, 1.001), 0.3, mul: 2);
-			sig = sig * EnvGen.kr(Env([0, 1, 0.5, 0], [swoosh_dur, 0.5, 3], [3, 0, -6]), doneAction: 2);
-			Out.ar(0, sig);
-		}.play;
+			var swoosh_dur = rrand(0.35, 0.6);
+			~stop_functions.speed2.();
+			~stop_functions.speed3.();
+			~stop_functions.infinite.();
+			// magic swoosh
 
-		{
-			var scale = [0, 9, 17, 22, 31, 36, 39, 43, 48, 53, 62, 70].collect{ | degree | ~s53.degreeToFreq(degree, ~rootFreq, 0)};
+			{
+				var sig, start_freq = Rand(150, 300), end_freq = Rand(2000, 2300);
+				sig = Resonz.ar(PinkNoise.ar(), XLine.kr([start_freq, start_freq * Rand(0.99, 1.02)], [end_freq, end_freq * Rand(0.99, 1.02)], swoosh_dur) * LFNoise2.kr(3).range(0.995, 1.001), 0.3, mul: 2);
+				sig = sig * EnvGen.kr(Env([0, 1, 0.5, 0], [swoosh_dur, 0.5, 3], [3, 0, -6]), doneAction: 2);
+				Out.ar(0, sig);
+			}.play;
 
-			0.3.wait;
-			Pbind(
-				\instrument, \bell,
-				\fs, Pseq( scale.scramble[0..rrand(4, scale.size-3)], 1),
-				\t60, 6,
-				\pitchy, 4,
-				\dur, 0.06,
-				\amp, 0.02
-			).play;
+			{
+				var scale = [0, 9, 17, 22, 31, 36, 39, 43, 48, 53, 62, 70].collect{ | degree | ~s53.degreeToFreq(degree, ~rootFreq, 0)};
+
+				0.3.wait;
+				Pbind(
+					\instrument, \bell,
+					\fs, Pseq( scale.scramble[0..rrand(4, scale.size-3)], 1),
+					\t60, 6,
+					\pitchy, 4,
+					\dur, 0.06,
+					\amp, 0.02
+				).play;
+			}.fork;
 		}.fork;
 	};
 
@@ -49,10 +55,7 @@ s.waitForBoot({
 			~speed2_harmony_routine.stop();
 			~speed2_score_routine.stop();
 			~beep_loop_routines.do{ |rout| rout.stop(); };
-			~main_glitch.set(\lag_time, 0.2);
-			~main_glitch.set(\enable_pitch_shift, 0);
-			~main_glitch.set(\pitch_shift_ratio, 1.0);
-			~main_glitch.set(\pitch_dispersion, 0);
+			~main_glitch.set(\lag_time, 0.2, \enable_pitch_shift, 0, \pitch_dispersion, 0, \pitch_shift_ratio, 1.0);
 			~rev.set(\mixLag, 0, \mix, 0);
 			~running.speed2 = false;
 			0.1.wait;
@@ -63,6 +66,7 @@ s.waitForBoot({
 		fork{
 			~stop_functions.speed2.();
 			~stop_functions.speed3.();
+			~stop_functions.infinite.();
 
 			~running.speed2 = true;
 			~restful_chord = [-53, 0, 31, 39, 48, 53, 62, 70, 84, 77+53, 106, 115].collect{ | degree | ~s53.degreeToFreq(degree, ~rootFreq, 0)};
@@ -121,17 +125,19 @@ s.waitForBoot({
 			~speed2_score_routine = {
 				~rev.set(\mixLag, 20.0); "reverb 40s".postln;
 				0.1.wait;
-				~rev.set(\mix, 0.5); "reverb 0.5 level".postln;
+				~rev.set(\mix, 0.5);
 				5.wait;
 				~main_glitch.set(\lag_time, 6.0);
 				~main_glitch.set(\enable_pitch_shift, 1);
 				~main_glitch.set(\pitch_shift_ratio, 2);
 				~main_glitch.set(\pitch_dispersion, 1);
-				~rev.set(\mixLag, 3.0); "reverb 5s".postln;
-				~rev.set(\mix, 0.1); "reverb 0.1 level".postln;
+				~rev.set(\mixLag, 3.0);
+				~rev.set(\mix, 0.2);
 				3.wait;
 				~cresc = Synth(\windy, [\freq, 200, \out, ~revBus, \amp, 1, \atk, 3, \curve_atk, 7, \rel, 0]);
 				3.wait;
+				~rev.set(\mixLag, 12.0);
+				~rev.set(\mix, 0.7);
 				~cresc.release;
 				~main_glitch.set(\lag_time, 1.2);
 				~main_glitch.set(\enable_pitch_shift, 0);
@@ -163,6 +169,7 @@ s.waitForBoot({
 		{
 			~stop_functions.speed2.();
 			~stop_functions.speed3.();
+			~stop_functions.infinite.();
 
 
 			~running.speed3 = true;
@@ -198,8 +205,11 @@ s.waitForBoot({
 
 						rrand(3, 8).do{
 							sounds.do{|sound|
-								sound.play_func.(0.01);
+								sound.play_func(0.1);
 							};
+							if(rrand(0.0, 1.0) > 0.7, {
+								~rev.set(\mixLag, rrand(0.4, 2.0), \mix, exprand(0.15, 0.8));
+							});
 						};
 					};
 					~main_glitch.set(\lag_time, 0.0);
@@ -208,6 +218,81 @@ s.waitForBoot({
 					~main_glitch.set(\pitch_dispersion, 0.0);
 					~main_glitch.set(\time_dispersion, 0.0);
 					~running.speed3 = false;
+				}.fork;
+			}.();
+		}.fork;
+	};
+
+	~stop_functions.infinite = {
+		if(~running.infinite, {
+			~infinite_routine.stop();
+			~main_glitch.set(\lag_time, 0.0);
+			~main_glitch.set(\enable_pitch_shift, 0);
+			~main_glitch.set(\pitch_shift_ratio, 1);
+			~main_glitch.set(\pitch_dispersion, 0.0);
+			~main_glitch.set(\time_dispersion, 0.0);
+			~running.infinite = false;
+			0.1.wait;
+		});
+	};
+	~crank_speed_to_wait_time = {
+		(0.2/~crank_speed.pow(1.5)).min(0.5)
+	};
+	~infinite_mode = {
+		{
+			~stop_functions.speed2.();
+			~stop_functions.speed3.();
+			~stop_functions.infinite.();
+
+
+			~running.infinite = true;
+			~rev.set(\mixLag, 0, \mix, 0.2);
+			~main_glitch.set(\lag_time, 10.0);
+			~main_glitch.set(\enable_pitch_shift, 1);
+			~main_glitch.set(\pitch_shift_ratio, 1);
+			~main_glitch.set(\pitch_dispersion, 0.001);
+			~main_glitch.set(\time_dispersion, 0.002);
+			{
+
+				~infinite_routine = {
+					loop{
+						var sounds = List[],
+						num_process_elements = rrand(5, 9);
+						num_process_elements.do{
+							sounds.add(
+								(
+									duration_time: [1/4, 1/3, 1/5].choose,
+									freq_pitch: rrand(7000, 12000),
+									synth_type: [\tick2, \sine, \dist_noise].wchoose([0.5, 0.1, 0.4]),
+									sus_time: rrand(0.0, 0.1),
+									my_amp: rrand(0.7, 1.5),
+									play_func: {|self, tick_time = 0.2|
+										("tick_tim: " + tick_time).postln;
+										switch(self.synth_type,
+											\tick2, {Synth(\tick2, [\freq, self.freq_pitch, \amp, 0.15 * self.my_amp, \out, ~revBus]);},
+											\sine, {Synth(\sine, [\freq, self.freq_pitch*0.05, \amp, 0.2 * self.my_amp, \atk, 0.005, \sus, self.sus_time, \rel, self.duration_time*tick_time, \out, ~revBus ]);},
+											\dist_noise, {Synth(\dist_noise, [\freq, self.freq_pitch, \amp, 0.25 * self.my_amp, \rel, 0.02, \out, ~revBus]);},
+										);
+										(self.duration_time*tick_time).wait;
+									},
+								)
+							);
+						};
+
+						rrand(3, 8).do{
+							sounds.do{|sound|
+								sound.play_func(~crank_speed_to_wait_time.());
+							};
+							if(rrand(0.0, 1.0) > 0.7, {
+								~rev.set(\mixLag, rrand(0.4, 2.0), \mix, exprand(0.15, 0.8));
+							});
+						};
+					};
+					~main_glitch.set(\lag_time, 0.0);
+					~main_glitch.set(\enable_pitch_shift, 0);
+					~main_glitch.set(\pitch_shift_ratio, 1);
+					~main_glitch.set(\pitch_dispersion, 0.0);
+					~main_glitch.set(\time_dispersion, 0.0);
 				}.fork;
 			}.();
 		}.fork;
