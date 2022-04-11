@@ -19,6 +19,7 @@ io.emit = function () {
   emit.apply(io, arguments);
 };
 
+app.use("/code", express.static(__dirname + "/../code_execution"));
 app.use(express.static(__dirname + "/../ui_demo"));
 
 async function generateMosaic() {
@@ -85,19 +86,19 @@ const buttonState = {};
 
 const countEvent = {};
 function countEventSec() {
-  const date = new Date().getTime() / 1000;
+  const date = new Date().getTime() / 100;
   countEvent[date] = countEvent[date] ? countEvent[date] + 1 : 1;
 }
 
 /**
- * return the average number of events in the last 5 minutes
+ * return the average number of events in the last 500 milliseconds
  * @returns {number}
  */
 function getNbEventSec() {
   let total = 0;
   for (const i in countEvent) {
-    if (new Date().getTime() / 1000 - i >= 5) {
-      // keep data from the last 5 sec
+    if (new Date().getTime() / 100 - i >= 5) {
+      // keep data from the last 500 milliseconds
       delete countEvent[i];
       continue;
     }
@@ -143,12 +144,13 @@ io.on("connection", (socket) => {
 
   socket.on("rotary", (data) => {
     countEventSec();
+    const speed = getNbEventSec();
     if (data.direction == "R") {
-      io.emit("step", "next");
-      osc.send({state: "next", events: getNbEventSec()});
+      io.emit("step", { direction: "next", speed });
+      osc.send({ state: "next", events: speed });
     } else {
-      io.emit("step", "previous");
-      osc.send({state: "previous", events: getNbEventSec()});
+      io.emit("step", { direction: "previous", speed });
+      osc.send({ state: "previous", events: speed });
     }
   });
 
@@ -190,7 +192,7 @@ function setState(s) {
   clearTimeout(resetTimeout);
   state = s;
   io.emit("state", state);
-  osc.send({state, events: getNbEventSec()});
+  osc.send({ state, events: getNbEventSec() });
   if (state !== "IDLE") {
     resetIdle();
   }

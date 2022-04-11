@@ -1,0 +1,191 @@
+:root {
+  --main-color: #03A062;
+}
+
+body {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  background-color: #000000;
+  color: var(--main-color);
+}
+
+.w-70 {
+  width: 70%;
+}
+
+h3 {
+  margin: 0;
+  margin-bottom: 5px;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.col {
+  float: left;
+  width: 50%;
+}
+
+.col-3 {
+  float: left;
+  width: 33%;
+}
+
+canvas.image {
+  width: 70%;
+  border: 1px dashed var(--main-color);
+}
+
+.box {
+  position: relative;
+  margin: auto;
+  border: 1px solid var(--main-color);
+}
+
+.box .title {
+  font-size: 20px;
+  padding: 3px 5px;
+  border-bottom: 1px solid var(--main-color);
+  text-align: center;
+  font-weight: bold;
+}
+
+.box .content {
+  padding: 3px 5px;
+}
+
+pre {
+  font-size: 17px;
+  margin: 0;
+}
+
+#bg {
+  display: block;
+  margin: 0 auto;
+  opacity: 0.3;
+}
+
+.center {
+  text-align: center;
+}
+
+#progress {
+  position: fixed;
+  bottom: 0;
+  text-align: center;
+  font-weight: bolder;
+  width: 100%;
+  border-top: 1px solid var(--main-color);
+  line-height: 35px;
+}
+
+#progress .text {
+  display: inline;
+  padding: 2px 5px;
+  background: var(--main-color);
+  color: #32683f;
+}
+
+#progress .bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+#progress .bar .fill {
+  height: 100%;
+  width: 50%;
+  background: var(--main-color);
+}
+
+.active {
+  color: white;
+  background-color: var(--main-color);
+}
+
+.active::after {
+  position: absolute;
+  right: 5px;
+  margin-top: -2px;
+  content: attr(value);
+  color: var(--main-color);
+  border: 1px solid var(--main-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70px;
+  padding: 2px;
+}
+
+.pixel {
+  display: inline-block;
+  width: 35px;
+  height: 35px;
+  border: 1px dashed var(--main-color);
+  padding: 5px;
+  font-size: 20px;
+  overflow: hidden;
+}
+
+.label {
+  display: inline-block;
+  width: 33%;
+}
+
+.r,
+.g,
+.b {
+  display: inline-block;
+  width: 35px;
+  text-align: right;
+}
+
+.r {
+  color: red;
+}
+
+.g {
+  color: green;
+}
+
+.b {
+  color: blue;
+}
+
+.row {
+  position: relative;
+  display: block;
+  clear: both;
+}
+
+
+.capture {
+  position: fixed;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+#webcam {
+  margin: auto;
+  width: 100%;
+  height: 100%;
+}
+
+.timer {
+  position: absolute;
+  top: calc(50% - 50px);
+  left: calc(50% - 50px);
+  font-size: 100px;
+  text-align: center;
+  border: 1px solid var(--main-color);
+  border-radius: 25px;
+}

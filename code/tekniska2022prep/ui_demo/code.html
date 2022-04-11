@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>foreach code execution</title>
+    <link type="text/css" rel="stylesheet" href="code.css" />
+  </head>
+  <body>
+    <div
+      style="
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+      "
+    >
+      <canvas id="bg" width="100%" height="100%"></canvas>
+    </div>
+    <div class="settings">
+      <label>
+        Stop on
+        <select id="stop_on">
+          <option value="all">All</option>
+          <option value="loop">Loop</option>
+          <option value="loop_init">Loop init</option>
+          <option value="loop_cond">Loop condition</option>
+          <option value="assignment">Assignment</option>
+          <option value="output">Output</option>
+        </select>
+      </label>
+      <label>
+        Step interval (ms)
+        <input type="number" min="1" value="250" id="step_interval" />
+      </label>
+
+      <label>
+        Jump
+        <input type="number" min="0" value="0" id="jump" />
+      </label>
+      <button onclick="pause=false;runStep();">Play</button>
+      <button onclick="pause=true;">Pause</button>
+
+      <button onclick="runStep();">Next</button>
+
+      <button onclick="init();">Reset</button>
+    </div>
+    <div class="capture">
+      <video id="webcam" style="transform: rotateY(180deg)"></video>
+      <div class="timer">1</div>
+    </div>
+    <div class="row">
+      <div class="col center">
+        <!-- <h2>Input</h2> -->
+        <canvas class="image" id="original_image"></canvas>
+      </div>
+      <div class="col center">
+        <!-- <h2>Output</h2> -->
+        <canvas class="image" id="transformed_image"></canvas>
+      </div>
+    </div>
+
+    <div class="row w-70" style="margin: auto">
+      <div class="col">
+        <div class="box code">
+          <div class="title">Code: saturation</div>
+          <pre class="content"><code>function saturation(pixels, adj) {
+  let d = <span id="code_1">pixels.data</span>;
+  adj = <span id="code_2">adj < -1 ? -1 : adj</span>;
+  for (<span id="code_11">let i = 0</span>; <span id="code_12">i < d.length</span>; <span id="code_3">i += 4</span>) {
+    const r = <span id="code_4">d[i];</span>
+    const g = <span id="code_5">d[i + 1];</span>
+    const b = <span id="code_6">d[i + 2];</span>
+    // weights from CCIR 601 spec
+    const gray = <span id="code_7">0.2989 * r + 0.587 * g + 0.114 * b;</span>
+    d[i] = <span id="code_8">-gray * adj + d[i] * (1 + adj);</span>
+    d[i + 1] = <span id="code_9">-gray * adj + d[i + 1] * (1 + adj);</span>
+    d[i + 2] = <span id="code_10">-gray * adj + d[i + 2] * (1 + adj);</span>
+  }
+}</code></pre>
+        </div>
+      </div>
+      <div class="col-3" style="border-left: none; width: 25%; height: 100%">
+        <div class="box">
+          <div class="title">State</div>
+          <div class="content row">
+            <div class="col">
+              <h3 class="center">Before</h3>
+              <div class="center">
+                <div class="pixel" id="original_pixel"></div>
+              </div>
+              <span class="label">red:</span><span class="r" id="o_r">N.A</span
+              ><br />
+              <span class="label">green:</span
+              ><span class="g" id="o_g">N.A</span><br />
+              <span class="label">blue:</span
+              ><span class="b" id="o_b">N.A</span>
+            </div>
+            <div class="col">
+              <h3 class="center">Current</h3>
+              <div class="center">
+                <div class="pixel" id="transformed_pixel"></div>
+              </div>
+              <span class="label">red:</span><span class="r" id="t_r">N.A</span
+              ><br />
+              <span class="label">green:</span
+              ><span class="g" id="t_g">N.A</span><br />
+              <span class="label">blue:</span
+              ><span class="b" id="t_b">N.A</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="progress">
+      <div class="bar">
+        <div class="fill"></div>
+      </div>
+      <div class="text"></div>
+    </div>
+    <script src="./code/bg.js"></script>
+    <script src="./code/filters.js"></script>
+    <script src="./code/utils.js"></script>
+
+    <script src="./js/webcam.js"></script>
+    <script src="./js/libraries/socket.io.min.js"></script>
+
+    <script>
+      initBg();
+
+      const webcam = new Webcam(320, 0 /* automatic */);
+      webcam.init();
+      let snapTime = 3;
+      let timerInterval = setInterval(() => {
+        document.querySelector(".timer").innerText = snapTime--;
+        if (snapTime == 0) {
+          snap();
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+
+      function snap() {
+        const img = new Image();
+        document.querySelector(".capture").style.display = "none";
+        loadImage(webcam.snap());
+      }
+
+      const original_canvas = document.getElementById("original_image");
+      const original_ctx = original_canvas.getContext("2d");
+      const transformed_canvas = document.getElementById("transformed_image");
+      const transformed_ctx = transformed_canvas.getContext("2d");
+      const img = new Image();
+      let pixels;
+      let o_pixels;
+      let stepNum = 0;
+      let pause = true;
+
+      function render() {
+        const current = getCurrent();
+        transformed_ctx.putImageData(pixels, 0, 0);
+
+        // progress
+        const total = (o_pixels.data.length / 4) * 9 + 3;
+        document.querySelector(
+          "#progress .text"
+        ).innerText = `${stepNum}/${total} (${(
+          (stepNum / total) *
+          100
+        ).toFixed()}%)`;
+        document.querySelector("#progress .fill").style.width = `${(
+          (stepNum / total) *
+          100
+        ).toFixed()}%`;
+
+        for (const e of document.getElementsByClassName("active")) {
+          e.classList.remove("active");
+        }
+
+        if (current == null) return;
+
+        const e = document.getElementById("code_" + current.id);
+        e.setAttribute("value", current.value);
+        e.className = "active";
+
+        if (current.ctx.i != null) {
+          const o_r = o_pixels.data[current.ctx.i];
+          const o_g = o_pixels.data[current.ctx.i + 1];
+          const o_b = o_pixels.data[current.ctx.i + 2];
+          document.getElementById(
+            "original_pixel"
+          ).style.backgroundColor = `rgb(${o_r}, ${o_g}, ${o_b})`;
+          document.getElementById("o_r").innerText = o_r;
+          document.getElementById("o_g").innerText = o_g;
+          document.getElementById("o_b").innerText = o_b;
+
+          const r = pixels.data[current.ctx.i];
+          const g = pixels.data[current.ctx.i + 1];
+          const b = pixels.data[current.ctx.i + 2];
+          document.getElementById(
+            "transformed_pixel"
+          ).style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+          document.getElementById("t_r").innerText = r;
+          document.getElementById("t_g").innerText = g;
+          document.getElementById("t_b").innerText = b;
+        }
+      }
+
+      function runStep() {
+        // update options
+        stopOn(document.getElementById("stop_on").value);
+        jump(document.getElementById("jump").value);
+        const int = document.getElementById("step_interval").value;
+
+        // execute code
+        step(); // advance execution and display evolution
+
+        // render
+        render();
+
+        // execute next step
+        if (pause) return;
+        setTimeout(runStep, int);
+      }
+
+      async function init() {
+        if (getCurrent() != null) getCurrent().reject("stop execution");
+        console.log("Start execution");
+        stepNum = 0;
+        o_pixels = original_ctx.getImageData(0, 0, img.width, img.height);
+
+        transformed_ctx.clearRect(0, 0, img.width, img.height);
+        pixels = transformed_ctx.getImageData(0, 0, img.width, img.height);
+
+        runStep();
+        saturation(o_pixels, pixels, -1).then(
+          () => (current = null),
+          (_) => console.log("Stop filter")
+        );
+      }
+
+      async function loadImage(imgPath) {
+        img.onload = async () => {
+          original_canvas.width = img.width;
+          original_canvas.height = img.height;
+
+          transformed_canvas.width = img.width;
+          transformed_canvas.height = img.height;
+
+          original_ctx.drawImage(img, 0, 0);
+
+          await init();
+        };
+        img.src = imgPath || "img/portrait.jpg";
+      }
+      loadImage();
+
+      window.addEventListener("keydown", function (e) {
+        if (e.key == " ") {
+          pause = !pause;
+          if (!pause) runStep();
+        } else if (e.key == "ArrowRight") runStep();
+      });
+      if (io !== undefined) {
+        const socket = io();
+        socket.on("state", (state) => {
+          if (state == "PICTURE") {
+            snap();
+          }
+        });
+        socket.on("step", (step) => {
+          runStep();
+        });
+      }
+    </script>
+  </body>
+</html>
