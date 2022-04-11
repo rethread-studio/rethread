@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>foreach code execution</title>
-    <link type="text/css" rel="stylesheet" href="style.css" />
+    <link type="text/css" rel="stylesheet" href="code.css" />
   </head>
   <body>
     <div
@@ -46,21 +46,24 @@
 
       <button onclick="init();">Reset</button>
     </div>
-
+    <div class="capture">
+      <video id="webcam" style="transform: rotateY(180deg)"></video>
+      <div class="timer">1</div>
+    </div>
     <div class="row">
       <div class="col center">
-        <h2>Input</h2>
+        <!-- <h2>Input</h2> -->
         <canvas class="image" id="original_image"></canvas>
       </div>
       <div class="col center">
-        <h2>Output</h2>
+        <!-- <h2>Output</h2> -->
         <canvas class="image" id="transformed_image"></canvas>
       </div>
     </div>
 
-    <div class="row">
+    <div class="row w-70" style="margin: auto">
       <div class="col">
-        <div class="box code w-70">
+        <div class="box code">
           <div class="title">Code: saturation</div>
           <pre class="content"><code>function saturation(pixels, adj) {
   let d = <span id="code_1">pixels.data</span>;
@@ -75,29 +78,36 @@
     d[i + 1] = <span id="code_9">-gray * adj + d[i + 1] * (1 + adj);</span>
     d[i + 2] = <span id="code_10">-gray * adj + d[i + 2] * (1 + adj);</span>
   }
-}
-      </code></pre>
+}</code></pre>
         </div>
       </div>
-      <div class="col">
-        <div class="box w-70">
+      <div class="col-3" style="border-left: none; width: 25%; height: 100%">
+        <div class="box">
           <div class="title">State</div>
           <div class="content row">
             <div class="col">
-              <h3>Before</h3>
-              <div class="pixel" id="original_pixel"></div>
-              <br />
-              Red: <span class="r" id="o_r">N.A</span><br />
-              Green: <span class="g" id="o_g">N.A</span><br />
-              Blue: <span class="b" id="o_b">N.A</span>
+              <h3 class="center">Before</h3>
+              <div class="center">
+                <div class="pixel" id="original_pixel"></div>
+              </div>
+              <span class="label">red:</span><span class="r" id="o_r">N.A</span
+              ><br />
+              <span class="label">green:</span
+              ><span class="g" id="o_g">N.A</span><br />
+              <span class="label">blue:</span
+              ><span class="b" id="o_b">N.A</span>
             </div>
             <div class="col">
-              <h3>Current</h3>
-              <div class="pixel" id="transformed_pixel"></div>
-              <br />
-              Red: <span class="r" id="t_r">N.A</span><br />
-              Green: <span class="g" id="t_g">N.A</span><br />
-              Blue: <span class="b" id="t_b">N.A</span>
+              <h3 class="center">Current</h3>
+              <div class="center">
+                <div class="pixel" id="transformed_pixel"></div>
+              </div>
+              <span class="label">red:</span><span class="r" id="t_r">N.A</span
+              ><br />
+              <span class="label">green:</span
+              ><span class="g" id="t_g">N.A</span><br />
+              <span class="label">blue:</span
+              ><span class="b" id="t_b">N.A</span>
             </div>
           </div>
         </div>
@@ -109,14 +119,33 @@
       </div>
       <div class="text"></div>
     </div>
-    <script src="./js/bg.js"></script>
-    <script src="./js/filters.js"></script>
-    <script src="./js/utils.js"></script>
+    <script src="./code/bg.js"></script>
+    <script src="./code/filters.js"></script>
+    <script src="./code/utils.js"></script>
 
-    <script src="../js/libraries/socket.io.min.js"></script>
+    <script src="./js/webcam.js"></script>
+    <script src="./js/libraries/socket.io.min.js"></script>
 
     <script>
       initBg();
+
+      const webcam = new Webcam(320, 0 /* automatic */);
+      webcam.init();
+      let snapTime = 3;
+      let timerInterval = setInterval(() => {
+        document.querySelector(".timer").innerText = snapTime--;
+        if (snapTime == 0) {
+          snap();
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+
+      function snap() {
+        const img = new Image();
+        document.querySelector(".capture").style.display = "none";
+        loadImage(webcam.snap());
+      }
+
       const original_canvas = document.getElementById("original_image");
       const original_ctx = original_canvas.getContext("2d");
       const transformed_canvas = document.getElementById("transformed_image");
@@ -195,7 +224,7 @@
       }
 
       async function init() {
-        if (getCurrent() != null) getCurrent().reject();
+        if (getCurrent() != null) getCurrent().reject("stop execution");
         console.log("Start execution");
         stepNum = 0;
         o_pixels = original_ctx.getImageData(0, 0, img.width, img.height);
@@ -204,10 +233,13 @@
         pixels = transformed_ctx.getImageData(0, 0, img.width, img.height);
 
         runStep();
-        saturation(o_pixels, pixels, -1).then(() => (current = null));
+        saturation(o_pixels, pixels, -1).then(
+          () => (current = null),
+          (_) => console.log("Stop filter")
+        );
       }
 
-      (async () => {
+      async function loadImage(imgPath) {
         img.onload = async () => {
           original_canvas.width = img.width;
           original_canvas.height = img.height;
@@ -219,8 +251,9 @@
 
           await init();
         };
-        img.src = "img/portrait.jpg";
-      })();
+        img.src = imgPath || "img/portrait.jpg";
+      }
+      loadImage();
 
       window.addEventListener("keydown", function (e) {
         if (e.key == " ") {
@@ -232,7 +265,7 @@
         const socket = io();
         socket.on("state", (state) => {
           if (state == "PICTURE") {
-            init();
+            snap();
           }
         });
         socket.on("step", (step) => {
