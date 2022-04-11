@@ -47,7 +47,7 @@ const dummyGameState = {
     ],
   },
   questionLureates: {
-    text: "Learn about the Nobel Laureates",
+    text: "Learn about the history of Bromska Palaset",
     answers: [
       {
         isCorrect: true,
@@ -268,7 +268,7 @@ function _displayDemo() {
 }
 
 let demoMode = "info";
-const demoModes = ["info", "question", "info", "laser", "info", "laureates"];
+const demoModes = ["info", "question", "info", "laureates"];
 let demoPos = 0;
 
 let demoInterval = null;

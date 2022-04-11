@@ -15,7 +15,7 @@ export const Home = () => {
                 <img className="w-32 h-32 mx-auto" src={LOGO} alt="turing lights 2021" />
                 <h1 className="text-white text-xl text-center lowercase font-light">Welcome to <br /><span className="text-yellow-300 font-thin text-5xl ">cyber|glow</span></h1>
                 <div className="text-white  text-center w-5/6 text-base">
-                    <p>cyber|glow is an interactive diptych: a multi-player game, and real time laser visualization of code. It is part of the Kulturnatt Stockholm 2022. Make sure to be at <a href="https://goo.gl/maps/ww2zidTxKLKSKHgM8" target="_blank" rel='noreferrer' className="underline">Résidence de France / Broms Palace. Narvavägen 26, Stockholm</a> for the complete experience.</p>
+                    <p>cyber|glow is an interactive diptych: a multi-player game, and real time visualization of code. It is part of the Kulturnatt Stockholm 2022. Make sure to be at <a href="https://goo.gl/maps/ww2zidTxKLKSKHgM8" target="_blank" rel='noreferrer' className="underline">Résidence de France / Broms Palace. Narvavägen 26, Stockholm</a> for the complete experience.</p>
                 </div>
 
                 <div className="flex flex-row content-center mb-6 space-x-3">
