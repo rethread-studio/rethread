@@ -5,7 +5,7 @@ socket.on("step", (step) => {
   if (appTimer == null || appTimer.isTimerActive()) return;
   if (!isFilterOn()) tunOnSpeed("SPEED3_BUTTON_ON");
   removeInterval();
-  stepFilter(step);
+  stepFilter(step.direction);
 });
 
 socket.on("state", (state) => {
