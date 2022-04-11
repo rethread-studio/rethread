@@ -1,9 +1,17 @@
+:root {
+  --main-color: #03A062;
+}
+
 body {
   position: relative;
   margin: 0;
   padding: 0;
   background-color: #000000;
-  color: white
+  color: var(--main-color);
+}
+
+.w-70 {
+  width: 70%;
 }
 
 .row:after {
@@ -16,6 +24,7 @@ body {
   float: left;
   width: 50%;
 }
+
 .col-3 {
   float: left;
   width: 33%;
@@ -23,14 +32,35 @@ body {
 
 canvas.image {
   width: 70%;
-  border: 1px dashed #DDD;
+  border: 1px dashed var(--main-color);
+}
+
+.box {
+  position: relative;
+  margin: auto;
+  border: 1px solid var(--main-color);
+}
+
+.box .title {
+  font-size: 20px;
+  padding: 3px 5px;
+  border-bottom: 1px solid var(--main-color);
+  text-align: center;
+}
+
+.box .content {
+  padding: 3px 5px;
 }
 
 pre {
-  position: relative;
-  margin: auto;
-  width: 700px;
   font-size: 17px;
+  margin: 0;
+}
+
+#bg {
+  display: block;
+  margin: 0 auto;
+  opacity: 0.3;
 }
 
 .center {
@@ -72,7 +102,8 @@ pre {
 }
 
 .active {
-  background-color: rgb(135, 50, 96);
+  color: white;
+  background-color: var(--main-color);
 }
 
 .active::after {
@@ -80,8 +111,8 @@ pre {
   right: 5px;
   margin-top: -2px;
   content: attr(value);
-  color: rgb(135, 50, 96);
-  border: 1px solid rgb(135, 50, 96);
+  color: var(--main-color);
+  border: 1px solid var(--main-color);
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 70px;
@@ -90,25 +121,25 @@ pre {
 
 .pixel {
   display: inline-block;
-  width: 75px;
-  height: 75px;
-  border: 1px dashed #DDD;
+  width: 35px;
+  height: 35px;
+  border: 1px dashed var(--main-color);
   padding: 5px;
   font-size: 20px;
-  margin-top: calc(25% - 37.5px);
+  overflow: hidden;
 }
 
-.pixel .r {
+.r {
   color: red;
   text-align: right;
 }
 
-.pixel .g {
+.g {
   color: green;
   text-align: right;
 }
 
-.pixel .b {
+.b {
   color: blue;
   text-align: right;
 }

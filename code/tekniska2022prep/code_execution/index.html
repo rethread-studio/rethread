@@ -16,12 +16,7 @@
         z-index: -1;
       "
     >
-      <canvas
-        id="canvas"
-        width="100%"
-        height="100%"
-        style="display: block; margin: 0 auto"
-      ></canvas>
+      <canvas id="bg" width="100%" height="100%"></canvas>
     </div>
     <div class="settings">
       <label>
@@ -64,14 +59,10 @@
     </div>
 
     <div class="row">
-      <div class="col-3 center">
-        <div class="pixel" id="original_pixel"></div>
-        <div class="pixel pixel-value" id="original_pixel_value"></div>
-      </div>
-      <div class="col-3">
-        <div>
-          <pre><code>
-function saturation(pixels, adj) {
+      <div class="col">
+        <div class="box code w-70">
+          <div class="title">Code: saturation</div>
+          <pre class="content"><code>function saturation(pixels, adj) {
   let d = <span id="code_1">pixels.data</span>;
   adj = <span id="code_2">adj < -1 ? -1 : adj</span>;
   for (<span id="code_11">let i = 0</span>; <span id="code_12">i < d.length</span>; <span id="code_3">i += 4</span>) {
@@ -88,9 +79,28 @@ function saturation(pixels, adj) {
       </code></pre>
         </div>
       </div>
-      <div class="col-3 center">
-        <div class="pixel" id="transformed_pixel"></div>
-        <div class="pixel pixel-value" id="transformed_pixel_value"></div>
+      <div class="col">
+        <div class="box w-70">
+          <div class="title">State</div>
+          <div class="content row">
+            <div class="col">
+              <h3>Before</h3>
+              <div class="pixel" id="original_pixel"></div>
+              <br />
+              Red: <span class="r" id="o_r">N.A</span><br />
+              Green: <span class="g" id="o_g">N.A</span><br />
+              Blue: <span class="b" id="o_b">N.A</span>
+            </div>
+            <div class="col">
+              <h3>Current</h3>
+              <div class="pixel" id="transformed_pixel"></div>
+              <br />
+              Red: <span class="r" id="t_r">N.A</span><br />
+              Green: <span class="g" id="t_g">N.A</span><br />
+              Blue: <span class="b" id="t_b">N.A</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div id="progress">
@@ -151,9 +161,9 @@ function saturation(pixels, adj) {
           document.getElementById(
             "original_pixel"
           ).style.backgroundColor = `rgb(${o_r}, ${o_g}, ${o_b})`;
-          document.getElementById(
-            "original_pixel_value"
-          ).innerHTML = `<div class="r">${o_r}</div><div class="g">${o_g}</div><div class="b">${o_b}</div>`;
+          document.getElementById("o_r").innerText = o_r;
+          document.getElementById("o_g").innerText = o_g;
+          document.getElementById("o_b").innerText = o_b;
 
           const r = pixels.data[current.ctx.i];
           const g = pixels.data[current.ctx.i + 1];
@@ -161,9 +171,9 @@ function saturation(pixels, adj) {
           document.getElementById(
             "transformed_pixel"
           ).style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-          document.getElementById(
-            "transformed_pixel_value"
-          ).innerHTML = `<div class="r">${r}</div><div class="g">${g}</div><div class="b">${b}</div>`;
+          document.getElementById("t_r").innerText = r;
+          document.getElementById("t_g").innerText = g;
+          document.getElementById("t_b").innerText = b;
         }
       }
 

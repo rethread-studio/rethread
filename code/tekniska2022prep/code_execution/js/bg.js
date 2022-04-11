@@ -156,7 +156,7 @@ module.exports.toaster = (pixels) => {
 var codeToDraw = "";
 
 function initBg() {
-  canvas = document.querySelector("#canvas");
+  canvas = document.querySelector("#bg");
 
   const resize = () => {
     canvas.width = window.innerWidth;
