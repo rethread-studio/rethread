@@ -8,6 +8,7 @@ body {
   padding: 0;
   background-color: #000000;
   color: var(--main-color);
+  overflow: hidden;
 }
 
 .w-70 {
@@ -164,6 +165,10 @@ pre {
   clear: both;
 }
 
+
+#parent-container {
+  
+}
 
 .capture {
   position: fixed;

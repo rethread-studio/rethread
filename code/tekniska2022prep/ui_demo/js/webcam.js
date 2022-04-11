@@ -9,7 +9,7 @@ class Webcam {
     this.video = document.querySelector("#webcam");
   }
 
-  init() {
+  init(cb) {
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: false })
       .then((stream) => {
@@ -38,6 +38,7 @@ class Webcam {
           this.video.setAttribute("height", this.height);
           this.streaming = true;
         }
+        if (cb) cb();
       },
       false
     );
