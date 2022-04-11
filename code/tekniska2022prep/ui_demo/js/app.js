@@ -1,5 +1,5 @@
 const socket = io();
-const webcam = new Webcam(320, 0 /* automatic */);
+const webcam = new Webcam(600, 0 /* automatic */);
 
 socket.on("step", (step) => {
   if (appTimer == null || appTimer.isTimerActive()) return;

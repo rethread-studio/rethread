@@ -40,6 +40,18 @@ class AppTimer {
         textSize(state.counterFontSize);
         fill(255, 255, 255);
         text(this.currentTime, windowWidth / 2, windowHeight / 2);
+
+        rectMode(CORNER);
+        textAlign(LEFT);
+        textAlign(CENTER, CENTER);
+        text(this.currentTime, 40, windowHeight / 2);
+
+
+        textAlign(RIGHT);
+        textAlign(CENTER, CENTER);
+        text(this.currentTime, windowWidth - 40, windowHeight / 2);
+
+
         rectMode(CORNER);
         textAlign(LEFT);
     }
