@@ -7,16 +7,17 @@ const filterStatus = {
 class Filter {
     filterPos = 0;
     position = createVector(0, 0);
-    size = { width: 300, height: 300 };
+    size = { width: 200, height: 200 };
     status = filterStatus.FILTER;
     pixelSampleSize = null;
     images = [];
     padding = {
-        top: 50,
-        right: 20,
-        left: 20,
+        top: 10,
+        right: 10,
+        left: 10,
         buttom: 50
     }
+
 
     margin = {
         top: 0,
@@ -212,14 +213,14 @@ class Filter {
         this.renderIConnection();
         this.renderPixelSampleO();
         this.renderOConnection();
-        //refactor add posX and posY to pixelSampliIn and Out
-        //update it when needed
-        //do not calculate in render
-        this.renderSampleGrid(this.position.x + this.padding.right, this.position.y + this.padding.top);
-        this.renderSampleGrid(this.position.x - this.pixelSampleIn.width - this.padding.left, this.position.y + this.padding.top);
 
-        this.renderPixelDetailGrid(this.imageIn.getImageSample(), this.position.x - this.pixelSampleIn.width - this.padding.left, this.position.y + this.padding.top * 2 + this.pixelSampleIn.height);
-        this.renderPixelDetailGrid(this.imageOut.getImageCompleteSample(), this.position.x + this.padding.right, this.position.y + this.padding.top * 2 + this.pixelSampleIn.height);
+        const topPosY = this.position.y + this.padding.top;
+        this.renderSampleGrid(this.position.x + this.padding.right, topPosY);
+        this.renderSampleGrid(this.position.x - this.pixelSampleIn.width - this.padding.left, topPosY);
+
+        const gridPosX = this.padding.right + this.pixelSampleIn.width
+        this.renderPixelDetailGrid(this.imageIn.getImageSample(), this.position.x - (gridPosX * 2), topPosY);
+        this.renderPixelDetailGrid(this.imageOut.getImageCompleteSample(), this.position.x + gridPosX + this.padding.left, topPosY);
     }
 
     renderImages() {

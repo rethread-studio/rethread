@@ -101,7 +101,9 @@ function setup() {
 
 function draw() {
   background(state.backgroundCol);
+  // drawAvailableSpaceBg();
   update();
   render();
+
 }
 

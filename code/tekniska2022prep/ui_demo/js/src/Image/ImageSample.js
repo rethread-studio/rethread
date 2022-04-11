@@ -43,6 +43,7 @@ class ImageSample {
             this.sampleImage = createImage(width, height);
         } else {
             this.sampleImage = _img;
+            this.sampleImage.resize(width, height);
         }
     }
 
@@ -150,6 +151,13 @@ class ImageSample {
 
     copySample() {
         this.sampleImage.copy(this.completeImage, this.samplePos.x, this.samplePos.y, this.sampleSize.width, this.sampleSize.height, this.samplePos.x, this.samplePos.y, this.sampleSize.width, this.sampleSize.height);
+    }
+
+    getImageSize() {
+        return {
+            width: this.completeImage.width,
+            height: this.completeImage.height
+        }
     }
 
     removeSample() {

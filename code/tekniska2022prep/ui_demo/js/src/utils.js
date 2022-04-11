@@ -18,6 +18,13 @@ function updateParticles() {
     removeCompleteParticles();
 }
 
+function drawAvailableSpaceBg() {
+    stroke(255);
+    noFill();
+    // fill(0, 255, 0);
+    rect(0, getPaddingTop(), windowWidth, getHeightAvailable());
+}
+
 function removeCompleteParticles() {
     particles = particles.filter(particle => particleStatus.MOVING == particle.getStatus());
 }
@@ -169,4 +176,42 @@ function tunOnSpeed(speed) {
 
 function isFilterOn() {
     return objectsToRender.some((obj => obj == filter));
+}
+
+function getPaddingTop() {
+    return windowHeight * state.paddingTopPercent;
+}
+
+function getHeightAvailable() {
+    return windowHeight * state.heightPercent;
+}
+
+//numImages = filters applyied plus original image
+function getImageSize(imageWidth, imageHeight, numImages = 3) {
+    const padding = 50;
+    let width = (windowWidth - (padding * numImages)) / numImages;
+    let scalePercent = ((100 / imageWidth) * width) / 100;
+    let height = imageHeight * scalePercent;
+    //if height is bigger than limit then height is limit, and calculate width again
+    const heightLimit = getHeightAvailable() / 2 + 100;
+
+    if (height > heightLimit) {
+        height = roundUpNearest10(heightLimit - 80);
+        scalePercent = ((100 / imageHeight) * height) / 100;
+        width = imageWidth * scalePercent;
+    }
+
+    return {
+        width,
+        height
+    }
+}
+
+function roundUpNearest10(num) {
+    return Math.ceil(num / 10) * 10;
+}
+
+function calculatePosition(width, numElements) {
+    const numberSpots = numElements + 1;
+    return width / numberSpots;
 }

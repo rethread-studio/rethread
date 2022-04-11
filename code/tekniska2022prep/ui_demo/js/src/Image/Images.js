@@ -14,8 +14,8 @@ class Images {
     }
 
     setImages(img) {
-        const size = { width: img.width, height: img.height };
-        const pixelImage = this.createFilledImage(img, { x: this.marginRight, y: 100 }, size, pixelSampleSize);
+        const size = getImageSize(img.width, img.height, this.filters.length + 1);
+        const pixelImage = this.createFilledImage(img, { x: this.marginRight, y: getPaddingTop() }, size, pixelSampleSize);
         this.images.push(pixelImage);
         let imgRef = pixelImage;
 
@@ -25,6 +25,27 @@ class Images {
             imgRef = emptyImg;
             this.images.push(emptyImg);
         });
+
+        this.calculatePositions();
+    }
+
+    calculatePositions() {
+        const lastPos = this.images[this.images.length - 1].getPosition();
+        const lastImage = this.images[this.images.length - 1];
+        const lastImageSize = lastImage.getImageSize()
+        lastImage.setPosition(windowWidth - lastImageSize.width - this.marginRight, lastPos.y)
+
+        const initPos = this.images[0]
+            .getPosition()
+            .copy();
+
+        if (this.images.length == 2) return;
+        const widthPos = Math.floor((lastImage.getPosition().x - initPos.x) / (this.images.length - 1));
+
+        for (let i = 1; i < this.images.length - 1; i++) {
+            this.images[i].setPosition(this.images[i - 1].getPosition().x + widthPos, lastPos.y)
+        }
+
     }
 
     getFirstImage() {

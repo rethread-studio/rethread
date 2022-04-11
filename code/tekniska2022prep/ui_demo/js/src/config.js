@@ -6,7 +6,12 @@ const state = {
     sampleSize: 10,
     filterSampleSize: { width: 250, height: 250 },
     counterFontSize: 900,
-    status: "IDLE"
+    status: "IDLE",
+    paddingTopPercent: 0.2175,
+    heightPercent: 0.5648,
+    imagePadding: {
+        paddingRight: 30,
+    }
 }
 
 let filtersToApply = [];
