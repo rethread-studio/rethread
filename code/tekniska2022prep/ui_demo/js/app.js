@@ -26,6 +26,7 @@ socket.on("state", (state) => {
     });
     objectsToRender.push(appTimer);
   } else if (state == "IDLE") {
+    if (isFilterOn()) return;
     cleanAll();
     document.querySelector(".idle").style.display = "block";
   } else if (state == "SPEED1_BUTTON_ON" || state == "SPEED1_BUTTON_OFF") {
@@ -93,7 +94,7 @@ function setup() {
   };
 
   speed2.render = () => {
-    // images.renderFirstImage();
+    images.renderFirstImage();
   };
 
 
