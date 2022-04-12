@@ -88,11 +88,12 @@ function setup() {
   appTimer = new AppTimer();
 
   speed1.render = () => {
-    images.renderFirstAndLastImage();
+    // images.renderFirstAndLastImage();
+    images.renderFirstImage();
   };
 
   speed2.render = () => {
-    images.renderFirstImage();
+    // images.renderFirstImage();
   };
 
 
@@ -101,7 +102,7 @@ function setup() {
 
 function draw() {
   background(state.backgroundCol);
-  // drawAvailableSpaceBg();
+  drawAvailableSpaceBg();
   update();
   render();
 
