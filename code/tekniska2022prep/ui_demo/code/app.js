@@ -19,13 +19,29 @@ function showAll() {
 }
 
 function showIdle() {
+  hideAll();
   document.querySelector("#idle").style.display = "";
+}
+
+function showCapture() {
+  hideAll();
+  document.querySelector(".capture").style.display = "";
+}
+
+function showFilter() {
+  hideAll();
+  document.querySelector("#filters").style.display = "";
+  document.querySelector("#execution").style.display = "";
+  document.querySelector("#progress").style.display = "";
 }
 
 function renderCode(filter) {
   if (!filter) filter = codeExecutor.currentFilter;
-  document.querySelector("code").innerHTML = filter.sourceCode;
   document.querySelector(".code .title").innerHTML = `Code: ${filter.name}`;
+  document.querySelector("code").innerHTML = filter.sourceCode;
+  document.querySelector(".code .lines").innerHTML = "";
+  for (let i = 0; i < filter.sourceCode.split("\n").length; i++)
+    document.querySelector(".code .lines").innerHTML += `${i + 1}<br>`;
 }
 
 function renderProgress(filter) {
@@ -79,7 +95,7 @@ function renderHexa(ctx, str, maxWidth) {
 function render(filter) {
   const current = codeExecutor.getCurrent();
 
-  if (codeExecutor.transformed_pixels)
+  if (codeExecutor.transformed_pixels && codeExecutor.currentCxt())
     codeExecutor
       .currentCxt()
       .putImageData(codeExecutor.transformed_pixels, 0, 0);
@@ -99,7 +115,34 @@ function render(filter) {
     e.className = "active";
   }
 
+  renderState(filter);
+}
+
+function renderState(filter) {
+  const current = codeExecutor.getCurrent();
   if (current.ctx.i != null) {
+    document.getElementById("state").innerHTML = `<div class="col">
+    <h3 class="center">Before</h3>
+    <div class="center">
+      <div class="pixel" id="original_pixel"></div>
+    </div>
+    <span class="label">red:</span
+    ><span class="r" id="o_r">N.A</span><br />
+    <span class="label">green:</span
+    ><span class="g" id="o_g">N.A</span><br />
+    <span class="label">blue:</span
+    ><span class="b" id="o_b">N.A</span>
+  </div>
+  <div class="col">
+    <h3 class="center">Current</h3>
+    <div class="center">
+      <div class="pixel" id="transformed_pixel"></div>
+    </div>
+    <span class="r" id="t_r">N.A</span><br />
+    <span class="g" id="t_g">N.A</span><br />
+    <span class="b" id="t_b">N.A</span>
+  </div>`;
+
     const o_r = codeExecutor.original_pixels.data[current.ctx.i];
     const o_g = codeExecutor.original_pixels.data[current.ctx.i + 1];
     const o_b = codeExecutor.original_pixels.data[current.ctx.i + 2];
@@ -119,5 +162,22 @@ function render(filter) {
     document.getElementById("t_r").innerText = r;
     document.getElementById("t_g").innerText = g;
     document.getElementById("t_b").innerText = b;
+  } else {
+    let content = ``;
+    for (const i in current.ctx) {
+      content += `<span class="label">${i}:</span
+      ><span>${renderValue(current.ctx[i])}</span><br />`;
+    }
+    document.getElementById("state").innerHTML = content;
   }
+}
+
+function renderValue(value) {
+  if (Array.isArray()) {
+    return `Array(${value.length})`;
+  }
+  if (value instanceof Object) {
+    return `${value.constructor.name}(${Object.keys(value).length})`;
+  }
+  return JSON.stringify(value);
 }

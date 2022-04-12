@@ -51,9 +51,11 @@
       <div id="idle">
         <!-- <img class="bg" src="/img/mosaic.jpg" /> -->
         <div class="content">
-          <div class="title">foreach</div>
+          <div class="title">for|each</div>
           <div class="description">
-            1. Take a picture <br />2. Turn the wheel
+            Navigate and controler a filter just by:<br /><br />
+            1. Taking a picture <br />
+            2. Turning the wheel to control the machine
           </div>
           <div class="hand-wheel">
             <img src="./img/CrankWheel.svg" />
@@ -73,7 +75,10 @@
           <div class="col">
             <div class="box code">
               <div class="title"></div>
-              <pre class="content"><code></code></pre>
+              <div class="content" style="padding: 0">
+                <div class="lines"></div>
+                <pre><code></code></pre>
+              </div>
             </div>
           </div>
           <div
@@ -82,29 +87,7 @@
           >
             <div class="box">
               <div class="title">State</div>
-              <div class="content row">
-                <div class="col">
-                  <h3 class="center">Before</h3>
-                  <div class="center">
-                    <div class="pixel" id="original_pixel"></div>
-                  </div>
-                  <span class="label">red:</span
-                  ><span class="r" id="o_r">N.A</span><br />
-                  <span class="label">green:</span
-                  ><span class="g" id="o_g">N.A</span><br />
-                  <span class="label">blue:</span
-                  ><span class="b" id="o_b">N.A</span>
-                </div>
-                <div class="col">
-                  <h3 class="center">Current</h3>
-                  <div class="center">
-                    <div class="pixel" id="transformed_pixel"></div>
-                  </div>
-                  <span class="r" id="t_r">N.A</span><br />
-                  <span class="g" id="t_g">N.A</span><br />
-                  <span class="b" id="t_b">N.A</span>
-                </div>
-              </div>
+              <div id="state" class="content row"></div>
             </div>
           </div>
         </div>

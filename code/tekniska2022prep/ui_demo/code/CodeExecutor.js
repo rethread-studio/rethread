@@ -137,6 +137,7 @@ class CodeExecutor {
   }
 
   currentCxt() {
+    if (!this.currentFilter) return null;
     return this.contexts[this.currentFilter.name];
   }
 
@@ -152,6 +153,14 @@ class CodeExecutor {
       this.current.resolve();
     } finally {
       this.isRunning = false;
+    }
+  }
+
+  stopFilter() {
+    if (this.current) {
+      this.current.reject();
+      this.current = null;
+      this.stepNum = 0;
     }
   }
 

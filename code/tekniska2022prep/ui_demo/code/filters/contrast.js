@@ -1,6 +1,6 @@
 filters.contrast = new Filter(
   "contrast",
-  `function contrast (pixels, adj) => {
+  `function contrast (pixels, adj) {
     adj <span id="code_1">*= 255</span>;
     let d = <span id="code_2">pixels.data</span>;
     let factor = <span id="code_3">(259 * (adj + 255)) / (255 * (259 - adj))</span>;
@@ -13,13 +13,12 @@ filters.contrast = new Filter(
 };`,
   async function (o_pixels, pixels, adj) {
     await wrapExp("1", "assignment", "*= 255", (adj *= 255), {
-      i: null,
       adj,
     });
     let d = o_pixels.data;
     await wrapExp("2", "assignment", "pixels.data", o_pixels.data, {
-      i: null,
       adj,
+      d,
     });
     let factor = (259 * (adj + 255)) / (255 * (259 - adj));
     await wrapExp(
@@ -28,25 +27,30 @@ filters.contrast = new Filter(
       "(259 * (adj + 255)) / (255 * (259 - adj))",
       (259 * (adj + 255)) / (255 * (259 - adj)),
       {
-        i: null,
         adj,
+        d,
+        factor,
       }
     );
     for (
       let i = await wrapExp("4", "loop_init", "i = 0", 0, {
-        i: null,
-        pixels,
         adj,
+        d,
+        factor,
       });
       await wrapExp("5", "loop_cond", "i < d.length", i < d.length, {
-        i,
-        pixels,
         adj,
+        d,
+        factor,
+        i,
+        "d.length": d.length,
       });
       i = await wrapExp("6", "loop", "i += 4", i + 4, {
-        i,
-        pixels,
         adj,
+        d,
+        factor,
+        i,
+        "d.length": d.length,
       })
     ) {
       pixels.data[i + 3] = d[i + 3];
@@ -57,8 +61,12 @@ filters.contrast = new Filter(
         "factor * (d[i] - 128) + 128",
         factor * (d[i] - 128) + 128,
         {
-          i,
           adj,
+          d,
+          factor,
+          i,
+          "d.length": d.length,
+          "d[i]": factor * (d[i] - 128) + 128,
         }
       );
       pixels.data[i + 1] = factor * (d[i + 1] - 128) + 128;
@@ -68,8 +76,13 @@ filters.contrast = new Filter(
         "factor * (d[i + 1] - 128) + 128",
         factor * (d[i + 1] - 128) + 128,
         {
-          i,
           adj,
+          d,
+          factor,
+          i,
+          "d.length": d.length,
+          "d[i]": factor * (d[i] - 128) + 128,
+          "d[i + 1]": factor * (d[i + 1] - 128) + 128,
         }
       );
       pixels.data[i + 2] = factor * (d[i + 2] - 128) + 128;
@@ -79,8 +92,14 @@ filters.contrast = new Filter(
         "factor * (d[i + 2] - 128) + 128",
         factor * (d[i + 2] - 128) + 128,
         {
-          i,
           adj,
+          d,
+          factor,
+          i,
+          "d.length": d.length,
+          "d[i]": factor * (d[i] - 128) + 128,
+          "d[i + 1]": factor * (d[i + 1] - 128) + 128,
+          "d[i + 2]": factor * (d[i + 2] - 128) + 128,
         }
       );
     }

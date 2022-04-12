@@ -34,29 +34,37 @@ filters.capture = new Filter(
     await wrapExp("3", "assignment", "video.width", 0, {
       canvas,
       context,
+      "video.width": 0,
     });
     await wrapExp("4", "assignment", "video.height", 0, {
       canvas,
       context,
+      "video.width": 0,
+      "video.height": 0,
     });
     await wrapExp(
       "5",
-      "assignment",
+      "invocation",
       "context.drawImage(video, 0, 0, video.width, video.height)",
       null,
       {
         canvas,
         context,
+        "video.width": 0,
+        "video.height": 0,
       }
     );
 
     return await wrapExp(
       "6",
-      "assignment",
+      "return",
       'canvas.toDataURL("image/png")',
       canvas.toDataURL("image/png"),
       {
         canvas,
+        context,
+        "video.width": 0,
+        "video.height": 0,
       }
     );
   },

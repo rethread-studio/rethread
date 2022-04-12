@@ -72,9 +72,21 @@ canvas.image {
   padding: 3px 5px;
 }
 
-pre {
+.code {
   font-family: monospace;
   font-size: 17px;
+}
+
+.code .lines {
+  display: inline-block;
+  border-right: 1px solid var(--main-color);
+  width: 25px;
+  text-align: right;
+  padding: 3px;
+}
+
+.code pre {
+  display: inline-block;
   margin: 0;
 }
 
@@ -152,7 +164,7 @@ pre {
 .label {
   display: inline-block;
   width: 33%;
-  font-size: 30px;
+  font-size: 20px;
 }
 
 .r,
@@ -161,7 +173,7 @@ pre {
   display: inline-block;
   width: 85px;
   text-align: right;
-  font-size: 35px;
+  font-size: 25px;
 }
 
 .r {
@@ -236,6 +248,8 @@ pre {
 #idle .title {
   font-family: monospace;
   font-size: 200px;
+  margin-bottom: 55px;
+  margin-left: -5%;
 }
 
 #idle .description {
@@ -243,9 +257,11 @@ pre {
 }
 
 .hand-wheel {
-  position: relative;
-  width: 500px;
-  height: 500px;
+  position: absolute;
+  right: 10%;
+  bottom: -130px;
+  width: 300px;
+  height: 300px;
   float: right;
   animation: rotation 10s infinite linear;
 }
