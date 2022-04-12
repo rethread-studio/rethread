@@ -89,7 +89,6 @@ function setup() {
   appTimer = new AppTimer();
 
   speed1.render = () => {
-    // images.renderFirstAndLastImage();
     images.renderFirstImage();
   };
 

@@ -10,8 +10,6 @@ class ImageParticle {
     position;
     target;
 
-    color;
-    colorO;
     size = { width: 1, height: 1 };
 
     velocity;
@@ -22,17 +20,20 @@ class ImageParticle {
 
     imgRefI = null;
     imgRefO = null;
+    imgToRender = null;
 
-    constructor(position, target, color, colorO, velocity) {
+    constructor(position, target, imgRefI, imgRefO, velocity) {
         this.position = position.copy();
         this.target = target.copy();
-        this.color = color;
-        this.colorO = colorO;
+        this.imgRefI = imgRefI;
+        this.imgRefO = imgRefO;
         this.velocity = velocity.copy();
         this.status = imageParticleStatus.MOVING;
         this.maxSpeed = this.velocity.x + this.velocity.y / 2;
         this.maxForce = 0.9;
         this.acceleration = createVector(0, 0);
+        this.imgToRender = this.imgRefI;
+        //set size
     }
     setStatus(newStatus = imageParticleStatus.MOVING) {
         this.status = newStatus;
@@ -42,8 +43,8 @@ class ImageParticle {
         return this.status;
     }
 
-    setColor(color) {
-        this.color = color;
+    setImageToRender(img) {
+        this.imgToRender = img;
     }
 
     update() {
@@ -64,7 +65,7 @@ class ImageParticle {
         if (d < distance) {
             const m = map(d, 0, distance, 0, this.maxSpeed);
             desired.mult(m);
-            this.setColor(this.colorO);
+            this.setImageToRender(this.imgRefO);
         } else {
             desired.mult(this.maxSpeed);
         }
@@ -80,8 +81,6 @@ class ImageParticle {
     }
 
     render() {
-        noStroke();
-        fill(this.color);
-        rect(this.position.x, this.position.y, this.size.width, this.size.height);
+        image(this.imgToRender, this.position.x, this.position.y);
     }
 }
