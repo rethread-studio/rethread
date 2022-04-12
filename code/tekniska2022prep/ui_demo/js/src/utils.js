@@ -145,7 +145,7 @@ function loadNewImage(newImage) {
         filter = createFilter(images.getImages());
 
         speed1.render = () => {
-            images.renderFirstAndLastImage();
+            images.renderFirstImage();
         }
 
         speed2.render = () => {
