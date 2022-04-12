@@ -135,6 +135,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("rotary", (data) => {
+    resetIdle();
     countEventSec();
     const speed = getNbEventSec();
     if (data.direction == "R") {
