@@ -3,7 +3,7 @@ initBg();
 hideAll();
 showIdle();
 
-const webcam = new Webcam(320, 0 /* automatic */);
+const webcam = new Webcam(8, 0 /* automatic */);
 webcam.init(() => {
   // capture();
 });
@@ -57,6 +57,7 @@ async function snap() {
   showFilter();
 
   const img = webcam.snap();
+  if (socket) socket.emit("picture", img);
 
   codeExecutor.stepNum = 0;
 
@@ -83,7 +84,15 @@ async function snap() {
       codeExecutor.jump(0);
       await codeExecutor.runFilter();
     }
-    showIdle();
+
+    // done
+    if (socket) socket.emit("state", "DONE");
+
+    document.getElementById("execution").style.display = "none";
+    document.getElementById("progress").style.display = "none";
+    setTimeout(() => {
+      document.getElementById("filters").className = "done";
+    }, 500);
   });
 }
 
@@ -140,6 +149,7 @@ function reset() {
   );
   document.getElementById("parent-container").style.transform =
     "translateX(0%)";
+  document.getElementById("filters").className = "";
   showIdle();
 }
 

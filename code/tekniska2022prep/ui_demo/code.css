@@ -52,6 +52,7 @@ h3 {
 canvas.image {
   width: 70%;
   border: 1px dashed var(--main-color);
+  image-rendering: pixelated;
 }
 
 .box {
@@ -195,12 +196,24 @@ canvas.image {
 }
 
 #idle,
-#execution {
+#execution,
+#filters {
   width: 100%;
 }
 
 #parent-container {
   transition: 1s ease-in-out;
+}
+
+#filters.done .col {
+  transition: .25s ease-in-out;
+  opacity: 0;
+}
+
+#filters.done .col:last-child {
+  opacity: 1;
+  transform: scale(1.5);
+  transform: translate(-50%, 0%);
 }
 
 .capture {
