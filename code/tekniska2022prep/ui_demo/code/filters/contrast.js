@@ -85,5 +85,6 @@ filters.contrast = new Filter(
       );
     }
   },
-  100
+  100,
+  "<nb_pixel> * 5 + 3"
 );

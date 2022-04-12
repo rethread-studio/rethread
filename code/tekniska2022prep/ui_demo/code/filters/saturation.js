@@ -147,5 +147,6 @@ filters.saturation = new Filter(
       );
     }
   },
-  -1
+  -1,
+  "<nb_pixel> * 9 + 3"
 );

@@ -19,7 +19,7 @@ function displayCode() {
 }
 displayCode();
 
-const elems = ["#parent-container", ".capture", "#execution", "#progress"];
+const elems = ["#parent-container", ".capture", "#execution", "#progress", ".settings"];
 function hideAll() {
   for (const e of elems) {
     document.querySelector(e).style.display = "none";

@@ -3,7 +3,12 @@ function render() {
   codeExecutor.currentCxt().putImageData(codeExecutor.transformed_pixels, 0, 0);
 
   // progress
-  const total = (codeExecutor.original_pixels.data.length / 4) * 9 + 3;
+  const total = eval(
+    codeExecutor.currentFilter.nbStepStr.replace(
+      "<nb_pixel>",
+      codeExecutor.original_pixels.data.length / 4
+    )
+  );
   document.querySelector("#progress .text").innerText = `${
     codeExecutor.stepNum
   }/${total} (${((codeExecutor.stepNum / total) * 100).toFixed()}%)`;
