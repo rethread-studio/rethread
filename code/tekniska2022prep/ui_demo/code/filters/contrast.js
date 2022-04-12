@@ -10,7 +10,7 @@ filters.contrast = new Filter(
       d[i + 2] = <span id="code_9">factor * (d[i + 2] - 128) + 128</span>;
     }
     return pixels;
-  };`,
+};`,
   async function (o_pixels, pixels, adj) {
     await wrapExp("1", "assignment", "*= 255", (adj *= 255), {
       i: null,

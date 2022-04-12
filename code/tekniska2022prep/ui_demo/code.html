@@ -6,101 +6,120 @@
     <link type="text/css" rel="stylesheet" href="code.css" />
   </head>
   <body>
-    <div
-      style="
-        width: 100%;
-        height: 100%;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: -1;
-      "
-    >
-      <canvas id="bg" width="100%" height="100%"></canvas>
-    </div>
-    <div class="settings">
-      <label>
-        Stop on
-        <select id="stop_on">
-          <option value="all">All</option>
-          <option value="loop">Loop</option>
-          <option value="loop_init">Loop init</option>
-          <option value="loop_cond">Loop condition</option>
-          <option value="assignment">Assignment</option>
-          <option value="output">Output</option>
-        </select>
-      </label>
-      <label>
-        Step interval (ms)
-        <input type="number" min="1" value="25" id="step_interval" />
-      </label>
+    <div id="body">
+      <div
+        style="
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          z-index: 0;
+        "
+      >
+        <canvas id="bg" width="100%" height="100%"></canvas>
+      </div>
 
-      <label>
-        Jump
-        <input type="number" min="0" value="10000" id="jump" />
-      </label>
-      <button onclick="pause=false;play();">Play</button>
-      <button onclick="pause=true;">Pause</button>
+      <div class="settings" style="display: none">
+        <label>
+          Stop on
+          <select id="stop_on">
+            <option value="all">All</option>
+            <option value="loop">Loop</option>
+            <option value="loop_init">Loop init</option>
+            <option value="loop_cond">Loop condition</option>
+            <option value="assignment">Assignment</option>
+            <option value="output">Output</option>
+          </select>
+        </label>
+        <label>
+          Step interval (ms)
+          <input type="number" min="1" value="25" id="step_interval" />
+        </label>
 
-      <button onclick="step();">Next</button>
+        <label>
+          Jump
+          <input type="number" min="0" value="0" id="jump" />
+        </label>
+        <button onclick="pause=false;play();">Play</button>
+        <button onclick="pause=true;">Pause</button>
 
-      <button onclick="capture();">Reset</button>
-    </div>
-    <div class="capture">
-      <video id="webcam" style="transform: rotateY(180deg)"></video>
-      <div class="timer">1</div>
-    </div>
-    <div class="row" id="parent-container"></div>
+        <button onclick="step();">Next</button>
 
-    <div id="execution">
-      <div class="row w-70" style="margin: auto">
-        <div class="col">
-          <div class="box code">
-            <div class="title">Code: saturation</div>
-            <pre class="content"><code></code></pre>
+        <button onclick="capture();">Reset</button>
+      </div>
+      <div id="idle">
+        <!-- <img class="bg" src="/img/mosaic.jpg" /> -->
+        <div class="content">
+          <div class="title">foreach</div>
+          <div class="description">
+            1. Take a picture <br />2. Turn the wheel
+          </div>
+          <div class="hand-wheel">
+            <img src="./img/CrankWheel.svg" />
           </div>
         </div>
-        <div class="col-3" style="border-left: none; width: 25%; height: 100%">
-          <div class="box">
-            <div class="title">State</div>
-            <div class="content row">
-              <div class="col">
-                <h3 class="center">Before</h3>
-                <div class="center">
-                  <div class="pixel" id="original_pixel"></div>
+      </div>
+      <div class="capture">
+        <video id="webcam" style="transform: rotateY(180deg)"></video>
+        <div class="timer">1</div>
+      </div>
+      <div id="filters">
+        <div class="row" id="parent-container"></div>
+      </div>
+
+      <div id="execution">
+        <div class="row w-70" style="margin: auto">
+          <div class="col">
+            <div class="box code">
+              <div class="title"></div>
+              <pre class="content"><code></code></pre>
+            </div>
+          </div>
+          <div
+            class="col-3"
+            style="border-left: none; width: 25%; height: 100%"
+          >
+            <div class="box">
+              <div class="title">State</div>
+              <div class="content row">
+                <div class="col">
+                  <h3 class="center">Before</h3>
+                  <div class="center">
+                    <div class="pixel" id="original_pixel"></div>
+                  </div>
+                  <span class="label">red:</span
+                  ><span class="r" id="o_r">N.A</span><br />
+                  <span class="label">green:</span
+                  ><span class="g" id="o_g">N.A</span><br />
+                  <span class="label">blue:</span
+                  ><span class="b" id="o_b">N.A</span>
                 </div>
-                <span class="label">red:</span
-                ><span class="r" id="o_r">N.A</span><br />
-                <span class="label">green:</span
-                ><span class="g" id="o_g">N.A</span><br />
-                <span class="label">blue:</span
-                ><span class="b" id="o_b">N.A</span>
-              </div>
-              <div class="col">
-                <h3 class="center">Current</h3>
-                <div class="center">
-                  <div class="pixel" id="transformed_pixel"></div>
+                <div class="col">
+                  <h3 class="center">Current</h3>
+                  <div class="center">
+                    <div class="pixel" id="transformed_pixel"></div>
+                  </div>
+                  <span class="r" id="t_r">N.A</span><br />
+                  <span class="g" id="t_g">N.A</span><br />
+                  <span class="b" id="t_b">N.A</span>
                 </div>
-                <span class="label">red:</span
-                ><span class="r" id="t_r">N.A</span><br />
-                <span class="label">green:</span
-                ><span class="g" id="t_g">N.A</span><br />
-                <span class="label">blue:</span
-                ><span class="b" id="t_b">N.A</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div id="progress">
-      <div class="bar">
-        <div class="fill"></div>
+      <div id="progress">
+        <div class="bar">
+          <div class="fill"></div>
+        </div>
+        <div class="text"></div>
       </div>
-      <div class="text"></div>
     </div>
+    <script src="/js/button_map.js"></script>
     <script src="./code/bg.js"></script>
     <script src="./code/filter.js"></script>
+    <script src="./code/filters/capture.js"></script>
     <script src="./code/filters/contrast.js"></script>
     <script src="./code/filters/saturation.js"></script>
     <script src="./code/utils.js"></script>

@@ -280,8 +280,8 @@ function initBg() {
   canvas = document.querySelector("#bg");
 
   const resize = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
   };
 
   resize();
