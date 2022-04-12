@@ -59,23 +59,11 @@ function setup() {
   //clarendon
   filtersToApply.push(
     { filter: brightnessFilterous, val: 0.1 },
-    { filter: contrastFilterous, val: 0.1 },
-    { filter: saturationFilterous, val: 0.15 }
+    { filter: grayscaleFilterous, val: 0.1 },
+    { filter: invertFilterous, val: 0.1 },
+    // { filter: contrastFilterous, val: 0.1 },
+    // { filter: saturationFilterous, val: 0.15 }
   );
-
-  //Moon
-  // filtersToApply.push(
-  //   { filter: grayscaleFilterous, val: 0.1 },
-  //   { filter: contrastFilterous, val: -0.4 },
-  //   { filter: brightnessFilterous, val: 0.1 }
-  // );
-
-  //Reyes
-  // filtersToApply.push(
-  //   { filter: sepiaFilterous, val: 0.1 },
-  //   { filter: brightnessFilterous, val: -0.4 },
-  //   { filter: contrastFilterous, val: 0.1 }
-  // );
 
   objectsToRender = [];
   speed1 = {};
