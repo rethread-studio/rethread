@@ -65,15 +65,7 @@ app.get("/img/mosaic.jpg", async (req, res) => {
 });
 
 app.get("/js/button_map.js", (req, res) => {
-  res.send(
-    "button_map=" +
-      JSON.stringify({
-        RESET_BUTTON: process.env.RESET_BUTTON,
-        SPEED1_BUTTON: process.env.SPEED1_BUTTON,
-        SPEED2_BUTTON: process.env.SPEED2_BUTTON,
-        SPEED3_BUTTON: process.env.SPEED3_BUTTON,
-      })
-  );
+  res.send("button_map=" + JSON.stringify(process.env));
 });
 
 const buttonMap = {};
