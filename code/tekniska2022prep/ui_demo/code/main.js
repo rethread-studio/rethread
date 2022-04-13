@@ -5,7 +5,7 @@ showIdle();
 
 const webcam = new Webcam(320, 0 /* automatic */);
 webcam.init(() => {
-  // capture();
+  capture();
 });
 
 const codeExecutor = new CodeExecutor(
@@ -82,6 +82,11 @@ async function snap() {
       (await nextFilter(filterIndex++, codeExecutor.filters.length + 2)) != null
     ) {
       codeExecutor.jump(0);
+      document.getElementById("transformation").innerHTML = "";
+      document
+        .querySelector("#canvas_overlay")
+        .getContext("2d")
+        .clearRect(0, 0, 100000, 100000);
       await codeExecutor.runFilter();
     }
 
@@ -90,6 +95,11 @@ async function snap() {
 
     document.getElementById("execution").style.display = "none";
     document.getElementById("progress").style.display = "none";
+    document.getElementById("transformation").innerHTML = "";
+    document
+      .querySelector("#canvas_overlay")
+      .getContext("2d")
+      .clearRect(0, 0, 100000, 100000);
     setTimeout(() => {
       document.getElementById("filters").className = "done";
     }, 500);
@@ -150,6 +160,11 @@ function reset() {
   document.getElementById("parent-container").style.transform =
     "translateX(0%)";
   document.getElementById("filters").className = "";
+  document.getElementById("transformation").innerHTML = "";
+  document
+    .querySelector("#canvas_overlay")
+    .getContext("2d")
+    .clearRect(0, 0, 100000, 100000);
   showIdle();
 }
 
@@ -158,7 +173,7 @@ socket.on("state", (state) => {
   if (state == "PICTURE") {
     if (webcam.streaming) snap();
   } else if (state == "IDLE") {
-    // reset();
+    reset();
   } else if (state == "RESET_BUTTON_OFF") {
     capture();
   }
