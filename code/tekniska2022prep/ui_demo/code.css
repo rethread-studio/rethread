@@ -79,6 +79,10 @@ canvas.image {
   line-height: 30px;
 }
 
+.code .keyword {
+  font-weight: bold;
+}
+
 .code .lines {
   font-family: sans-serif;
   display: inline-block;

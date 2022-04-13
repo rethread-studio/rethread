@@ -3,14 +3,14 @@ initBg();
 hideAll();
 showIdle();
 
-const webcam = new Webcam(5, 0 /* automatic */);
+const webcam = new Webcam(320, 0 /* automatic */);
 webcam.init(() => {
   // capture();
 });
 
 const codeExecutor = new CodeExecutor(
   document.getElementById("parent-container"),
-  [filters.contrast, filters.saturation]
+  [filters.brightness, filters.saturation, filters.invert]
 );
 
 let timerInterval;
