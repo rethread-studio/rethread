@@ -151,6 +151,7 @@ function loadNewImage(newImage) {
         speed2.render = () => {
             images.renderFirstImage();
         }
+
         objectsToRender.push(speed0);
     });
 }
