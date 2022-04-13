@@ -82,6 +82,10 @@ class Images {
         this.images[this.images.length - 1].renderCompleteImage();
     }
 
+    renderLastImage() {
+        this.images[this.images.length - 1].renderCompleteImage();
+    }
+
     renderFirstImage() {
         this.images[0].renderCompleteImage();
     }
