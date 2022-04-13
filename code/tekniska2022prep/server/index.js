@@ -22,24 +22,78 @@ io.emit = function () {
 app.use("/code", express.static(__dirname + "/../code_execution"));
 app.use(express.static(__dirname + "/../ui_demo"));
 
+function shuffle(array) {
+  let currentIndex = array.length,
+    randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+}
+
 async function generateMosaic() {
   console.log("Generating mosaic...");
-  const m = new mosaic.MosaicImage(
-    new mosaic.JimpImage(
-      await mosaic.JimpImage.read(__dirname + "/img/idle.jpeg")
-    ),
-    snapsFolder,
-    mosaic.CONFIG.cell_width,
-    mosaic.CONFIG.cell_height,
-    10,
-    10,
-    __dirname + "/thumbs",
-    __dirname + "/thumbs",
-    false
+
+  const image = new mosaic.JimpImage(
+    await mosaic.JimpImage.read(__dirname + "/img/idle.jpeg")
   );
-  await m.readTiles();
-  await m.processRowsAndColumns(0, 0, m.rows, m.columns);
-  await m.image.save(__dirname + "/img/mosaic");
+  const columns = 45;
+  const rows = 25;
+  image.resize(
+    mosaic.CONFIG.cell_width * columns,
+    mosaic.CONFIG.cell_height * rows
+  );
+  const images = (await fs.promises.readdir(__dirname + "/thumbs"))
+    .filter((f) => f.endsWith(".jpg"))
+    .map((f) => __dirname + "/thumbs/" + f);
+  let index = 0;
+  let i = 0;
+  while (true) {
+    i++;
+    index++;
+    if (i >= images.length) {
+      i = 0;
+      shuffle(images);
+    }
+    const img = new mosaic.JimpImage(await mosaic.JimpImage.read(images[i]));
+    const x = index % columns;
+    const y = Math.floor(index / columns);
+    image.composite(
+      img,
+      x * mosaic.CONFIG.cell_width,
+      y * mosaic.CONFIG.cell_height
+    );
+    if (index > columns * rows) break;
+  }
+  await image.save(__dirname + "/img/mosaic");
+  console.log("Generating mosaic Done...");
+  // const m = new mosaic.MosaicImage(
+  //   new mosaic.JimpImage(
+  //     await mosaic.JimpImage.read(__dirname + "/img/idle.jpeg")
+  //   ),
+  //   snapsFolder,
+  //   mosaic.CONFIG.cell_width,
+  //   mosaic.CONFIG.cell_height,
+  //   10,
+  //   10,
+  //   __dirname + "/thumbs",
+  //   __dirname + "/thumbs",
+  //   false
+  // );
+  // await m.readTiles();
+  // await m.processRowsAndColumns(0, 0, m.rows, m.columns);
+  // await m.image.save(__dirname + "/img/mosaic");
   // m.generateThumbs();
 }
 
