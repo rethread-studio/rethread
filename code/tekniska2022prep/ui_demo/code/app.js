@@ -237,8 +237,23 @@ function renderState(filter) {
   }
   let content = ``;
   for (const i in currentState.ctx) {
-    content += `<span class="label">${i}:</span
-      ><span>${renderValue(currentState.ctx[i])}</span><br />`;
+    const className = i
+      .replace(/\+/g, "")
+      .replace(/\./g, "")
+      .replace(/ /g, "_")
+      .replace(/\[/g, "")
+      .replace(/\]/g, "")
+      .replace(/\(/g, "")
+      .replace(/\)/g, "");
+
+    const previousE = document.querySelector(".value." + className);
+    const isNew =
+      !previousE || previousE.innerHTML != renderValue(currentState.ctx[i]);
+
+    content += `<span class="variable">${i}</span
+      >=<span class="value ${className} ${isNew ? "new" : ""}">${renderValue(
+      currentState.ctx[i]
+    )}</span><br />`;
   }
   document.getElementById("state").innerHTML = content;
 }

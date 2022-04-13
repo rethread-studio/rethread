@@ -37,6 +37,7 @@ filters.contrast = new Filter(
         adj,
         d,
         factor,
+        i: 0,
       });
       await wrapExp("5", "loop_cond", "i < d.length", i < d.length, {
         adj,

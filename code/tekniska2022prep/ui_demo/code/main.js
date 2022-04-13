@@ -3,7 +3,7 @@ initBg();
 hideAll();
 showIdle();
 
-const webcam = new Webcam(320, 0 /* automatic */);
+const webcam = new Webcam(5, 0 /* automatic */);
 webcam.init(() => {
   // capture();
 });
@@ -45,7 +45,7 @@ async function nextFilter(index, total) {
     const nextFilter = codeExecutor.hasNextFilter();
     if (nextFilter) {
       renderMessage(
-        `Step 1/${codeExecutor.filters.length + 1}: Apply filter '${
+        `Step ${index + 1}/${codeExecutor.filters.length + 1}: Apply filter '${
           nextFilter.name
         }'...`
       );
