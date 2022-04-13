@@ -182,6 +182,7 @@ class Filter {
         this.setImageIO(this.filterPos);
         this.setPosition();
         this.updatePixelSamples();
+        if (socket) socket.emit("stage", "DONE");
     }
 
     setImagePosStep() {
