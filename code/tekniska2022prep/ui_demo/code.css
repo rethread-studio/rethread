@@ -2,6 +2,7 @@
   --main-color: #03A062;
 }
 
+html,
 body {
   position: relative;
   margin: 0;
@@ -9,6 +10,18 @@ body {
   background-color: #000000;
   color: var(--main-color);
   overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+.body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 850px;
+  margin-top: calc((100vh - 850px)/2);
 }
 
 .w-70 {
@@ -39,6 +52,7 @@ h3 {
 canvas.image {
   width: 70%;
   border: 1px dashed var(--main-color);
+  image-rendering: pixelated;
 }
 
 .box {
@@ -59,15 +73,28 @@ canvas.image {
   padding: 3px 5px;
 }
 
-pre {
+.code {
+  font-family: monospace;
   font-size: 17px;
+}
+
+.code .lines {
+  display: inline-block;
+  border-right: 1px solid var(--main-color);
+  width: 25px;
+  text-align: right;
+  padding: 3px;
+}
+
+.code pre {
+  display: inline-block;
   margin: 0;
 }
 
 #bg {
   display: block;
   margin: 0 auto;
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 .center {
@@ -75,7 +102,7 @@ pre {
 }
 
 #progress {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   text-align: center;
   font-weight: bolder;
@@ -88,7 +115,7 @@ pre {
   display: inline;
   padding: 2px 5px;
   background: var(--main-color);
-  color: #32683f;
+  color: white;
 }
 
 #progress .bar {
@@ -106,12 +133,12 @@ pre {
   background: var(--main-color);
 }
 
-.active {
+span.active {
   color: white;
   background-color: var(--main-color);
 }
 
-.active::after {
+span.active::after {
   position: absolute;
   right: 5px;
   margin-top: -2px;
@@ -126,25 +153,28 @@ pre {
 
 .pixel {
   display: inline-block;
-  width: 35px;
-  height: 35px;
+  width: 55px;
+  height: 55px;
   border: 1px dashed var(--main-color);
   padding: 5px;
   font-size: 20px;
   overflow: hidden;
+  border-radius: 50%;
 }
 
 .label {
   display: inline-block;
   width: 33%;
+  font-size: 20px;
 }
 
 .r,
 .g,
 .b {
   display: inline-block;
-  width: 35px;
+  width: 85px;
   text-align: right;
+  font-size: 25px;
 }
 
 .r {
@@ -165,13 +195,56 @@ pre {
   clear: both;
 }
 
+#idle,
+#execution,
+#filters {
+  width: 100%;
+}
+
+#transformation {
+  position: absolute;
+  top: 0;
+  margin-top: 100px;
+  left: calc(50% - 140px);
+  width: 270px;
+  height: 200px;
+  padding: 5px;
+}
+
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+}
+
+#canvas_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 
 #parent-container {
-  
+  transition: 1s ease-in-out;
+}
+
+#filters.done .col {
+  transition: .25s ease-in-out;
+  opacity: 0;
+}
+
+#filters.done .col:last-child {
+  opacity: 1;
+  transform: scale(1.5);
+  transform: translate(-50%, 0%);
 }
 
 .capture {
-  position: fixed;
+  position: absolute;
   z-index: 9999;
   width: 100%;
   height: 100%;
@@ -189,8 +262,70 @@ pre {
   position: absolute;
   top: calc(50% - 50px);
   left: calc(50% - 50px);
-  font-size: 100px;
+  font-size: 150px;
+  padding: 0 20px;
   text-align: center;
   border: 1px solid var(--main-color);
   border-radius: 25px;
+}
+
+#idle {
+  position: relative;
+  width: 100%;
+}
+
+#idle .bg {
+  display: absolute;
+  top: 0;
+  left: 0;
+  max-width: 100%;
+}
+
+#idle .content {
+  padding-left: 25%;
+}
+
+#idle .title {
+  font-family: monospace;
+  font-size: 200px;
+  margin-bottom: 55px;
+  margin-left: -5%;
+}
+
+#idle .description {
+  font-size: 50px;
+}
+
+.hand-wheel {
+  position: absolute;
+  right: 10%;
+  bottom: -130px;
+  width: 300px;
+  height: 300px;
+  float: right;
+  animation: rotation 10s infinite linear;
+}
+
+#overlay_body {
+  font-size: 100px;
+  visibility: hidden;
+}
+
+#overlay_body.active {
+  visibility: inherit;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.hand-wheel img {
+  width: 100%;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(359deg);
+  }
 }

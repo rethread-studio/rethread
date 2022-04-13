@@ -85,6 +85,34 @@ function createPixelParticles(imgRefI, imgRefO) {
     }
 }
 
+function createImageParticle(imgRefI, imgRefO) {
+    const imgI = imgRefI.getCompleteImage();
+    const imgO = imgRefO.getCompleteImage();
+    imgI.loadPixels();
+    imgO.loadPixels();
+    const pixelI = imgI.pixels;
+    const pixelO = imgO.pixels;
+    const { width, height } = pixelSampleSize;
+
+    for (let y = 0; y < imgI.height; y += height) {
+        for (let x = 0; x < imgI.width; x += width) {
+            const newImageI = createImage(width, height);
+            const newImageO = createImage(width, height);
+            newImageI.copy(imgI, x, y, width, height, 0, 0, width, height);
+            newImageO.copy(imgO, x, y, width, height, 0, 0, width, height);
+            const velocity = createVector(random(20, 30), random(-5, 5));
+            const position = imgRefI.getPosition()
+                .copy()
+                .add(x, y);
+            const target = imgRefO.getPosition()
+                .copy()
+                .add(x, y);
+            const nParticle = new ImageParticle(position, target, newImageI, newImageO, velocity);
+            particles.push(nParticle);
+        }
+    }
+}
+
 
 
 function createInterval() {
@@ -117,7 +145,7 @@ function loadNewImage(newImage) {
         filter = createFilter(images.getImages());
 
         speed1.render = () => {
-            images.renderFirstAndLastImage();
+            images.renderFirstImage();
         }
 
         speed2.render = () => {
@@ -162,7 +190,7 @@ function tunOnSpeed(speed) {
             objectsToRender.push(speed1);
             break;
         case "SPEED2_BUTTON_ON":
-            createPixelParticles(images.getFirstImage(), images.getLastImage());
+            createImageParticle(images.getFirstImage(), images.getLastImage());
             objectsToRender.push(speed2);
             break;
         case "SPEED3_BUTTON_ON":

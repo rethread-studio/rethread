@@ -26,6 +26,7 @@ socket.on("state", (state) => {
     });
     objectsToRender.push(appTimer);
   } else if (state == "IDLE") {
+    if (isFilterOn()) return;
     cleanAll();
     document.querySelector(".idle").style.display = "block";
   } else if (state == "SPEED1_BUTTON_ON" || state == "SPEED1_BUTTON_OFF") {
@@ -58,23 +59,11 @@ function setup() {
   //clarendon
   filtersToApply.push(
     { filter: brightnessFilterous, val: 0.1 },
-    { filter: contrastFilterous, val: 0.1 },
-    { filter: saturationFilterous, val: 0.15 }
+    { filter: grayscaleFilterous, val: 0.1 },
+    { filter: invertFilterous, val: 0.1 },
+    // { filter: contrastFilterous, val: 0.1 },
+    // { filter: saturationFilterous, val: 0.15 }
   );
-
-  //Moon
-  // filtersToApply.push(
-  //   { filter: grayscaleFilterous, val: 0.1 },
-  //   { filter: contrastFilterous, val: -0.4 },
-  //   { filter: brightnessFilterous, val: 0.1 }
-  // );
-
-  //Reyes
-  // filtersToApply.push(
-  //   { filter: sepiaFilterous, val: 0.1 },
-  //   { filter: brightnessFilterous, val: -0.4 },
-  //   { filter: contrastFilterous, val: 0.1 }
-  // );
 
   objectsToRender = [];
   speed1 = {};
@@ -88,7 +77,7 @@ function setup() {
   appTimer = new AppTimer();
 
   speed1.render = () => {
-    images.renderFirstAndLastImage();
+    images.renderFirstImage();
   };
 
   speed2.render = () => {
@@ -101,7 +90,7 @@ function setup() {
 
 function draw() {
   background(state.backgroundCol);
-  // drawAvailableSpaceBg();
+  drawAvailableSpaceBg();
   update();
   render();
 

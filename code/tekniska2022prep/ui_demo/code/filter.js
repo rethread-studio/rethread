@@ -1,9 +1,10 @@
 class Filter {
-  constructor(name, sourceCode, code, adj) {
+  constructor(name, sourceCode, code, adj, nbStepStr) {
     this.name = name;
     this.sourceCode = sourceCode;
     this.code = code;
     this.adj = adj;
+    this.nbStepStr = nbStepStr;
   }
 
   async run(originalPixels, transformedPixels) {
