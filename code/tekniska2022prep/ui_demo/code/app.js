@@ -118,10 +118,18 @@ function render(filter) {
   renderState(filter);
 }
 
+function getOffset(el) {
+  const rect = el.getBoundingClientRect();
+  return {
+    left: rect.left + window.scrollX,
+    top: rect.top + window.scrollY,
+  };
+}
+
 function renderState(filter) {
-  const current = codeExecutor.getCurrent();
-  if (current.ctx.i != null) {
-    document.getElementById("state").innerHTML = `<div class="col">
+  const currentState = codeExecutor.getCurrent();
+  if (currentState.ctx.i != null) {
+    document.getElementById("transformation").innerHTML = `<div class="col">
     <h3 class="center">Before</h3>
     <div class="center">
       <div class="pixel" id="original_pixel"></div>
@@ -143,9 +151,9 @@ function renderState(filter) {
     <span class="b" id="t_b">N.A</span>
   </div>`;
 
-    const o_r = codeExecutor.original_pixels.data[current.ctx.i];
-    const o_g = codeExecutor.original_pixels.data[current.ctx.i + 1];
-    const o_b = codeExecutor.original_pixels.data[current.ctx.i + 2];
+    const o_r = codeExecutor.original_pixels.data[currentState.ctx.i];
+    const o_g = codeExecutor.original_pixels.data[currentState.ctx.i + 1];
+    const o_b = codeExecutor.original_pixels.data[currentState.ctx.i + 2];
     document.getElementById(
       "original_pixel"
     ).style.backgroundColor = `rgb(${o_r}, ${o_g}, ${o_b})`;
@@ -153,23 +161,75 @@ function renderState(filter) {
     document.getElementById("o_g").innerText = o_g;
     document.getElementById("o_b").innerText = o_b;
 
-    const r = codeExecutor.transformed_pixels.data[current.ctx.i];
-    const g = codeExecutor.transformed_pixels.data[current.ctx.i + 1];
-    const b = codeExecutor.transformed_pixels.data[current.ctx.i + 2];
+    const r = codeExecutor.transformed_pixels.data[currentState.ctx.i];
+    const g = codeExecutor.transformed_pixels.data[currentState.ctx.i + 1];
+    const b = codeExecutor.transformed_pixels.data[currentState.ctx.i + 2];
     document.getElementById(
       "transformed_pixel"
     ).style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
     document.getElementById("t_r").innerText = r;
     document.getElementById("t_g").innerText = g;
     document.getElementById("t_b").innerText = b;
-  } else {
-    let content = ``;
-    for (const i in current.ctx) {
-      content += `<span class="label">${i}:</span
-      ><span>${renderValue(current.ctx[i])}</span><br />`;
+
+    const leftCanvas = codeExecutor.previousCanvas();
+    const leftPos = getOffset(leftCanvas);
+    const width = leftCanvas.width;
+    const height = leftCanvas.height;
+    const rWidth = leftCanvas.clientWidth;
+    const pSize = rWidth / width;
+    const rightCanvas = codeExecutor.currentCanvas();
+    const rightPos = getOffset(rightCanvas);
+
+    const index = currentState.ctx.i / 4;
+    const x = index % width;
+    const y = Math.floor(index / width);
+
+    const overlay = document.querySelector("#overlay");
+    const overlayCanvas = document.querySelector("#canvas_overlay");
+    overlayCanvas.width = overlay.clientWidth;
+    overlayCanvas.height = overlay.clientHeight;
+    const ctx = overlayCanvas.getContext("2d");
+    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+    if (y < height) {
+      ctx.beginPath();
+      ctx.lineWidth = "3";
+      ctx.strokeStyle = "#03A062";
+      ctx.rect(leftPos.left + x * pSize, leftPos.top + y * pSize, pSize, pSize);
+      ctx.rect(
+        rightPos.left + x * pSize,
+        rightPos.top + y * pSize,
+        pSize,
+        pSize
+      );
+
+      const oPOffset = getOffset(document.getElementById("original_pixel"));
+      const tPOffset = getOffset(document.getElementById("transformed_pixel"));
+      ctx.moveTo(
+        leftPos.left + x * pSize + pSize,
+        leftPos.top + y * pSize + pSize / 2
+      );
+      ctx.lineTo(oPOffset.left, oPOffset.top + 33.5);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(
+        rightPos.left + x * pSize,
+        rightPos.top + y * pSize + pSize / 2
+      );
+      ctx.lineTo(tPOffset.left + 67, tPOffset.top + 33.5);
+
+      ctx.stroke();
     }
-    document.getElementById("state").innerHTML = content;
+  } else {
+    document.getElementById("transformation").innerHTML = "";
   }
+  let content = ``;
+  for (const i in currentState.ctx) {
+    content += `<span class="label">${i}:</span
+      ><span>${renderValue(currentState.ctx[i])}</span><br />`;
+  }
+  document.getElementById("state").innerHTML = content;
 }
 
 function renderValue(value) {

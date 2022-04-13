@@ -141,6 +141,19 @@ class CodeExecutor {
     return this.contexts[this.currentFilter.name];
   }
 
+  currentCanvas() {
+    if (!this.currentFilter) return null;
+    return this.canvas[this.currentFilter.name];
+  }
+
+  previousCanvas() {
+    const index = this.filters.indexOf(this.currentFilter);
+    if (index > 0) {
+      return this.canvas[this.filters[index - 1].name];
+    }
+    return this.canvas.original;
+  }
+
   isRunning = false;
 
   runStep() {

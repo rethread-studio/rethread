@@ -3,7 +3,7 @@ initBg();
 hideAll();
 showIdle();
 
-const webcam = new Webcam(8, 0 /* automatic */);
+const webcam = new Webcam(320, 0 /* automatic */);
 webcam.init(() => {
   // capture();
 });
@@ -158,7 +158,7 @@ socket.on("state", (state) => {
   if (state == "PICTURE") {
     if (webcam.streaming) snap();
   } else if (state == "IDLE") {
-    reset();
+    // reset();
   } else if (state == "RESET_BUTTON_OFF") {
     capture();
   }
