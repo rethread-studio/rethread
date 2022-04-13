@@ -15,6 +15,8 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\RESET_BUTTON_OFF, {},
 		\PICTURE, {},
 		\IDLE, {},
+		\NEW_FILTER, { ~next_filter.(); },
+		\DONE, { ~filter_finished.()}, // One filter application has completed
 		\previous, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds },
 		\next, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds }
 	);

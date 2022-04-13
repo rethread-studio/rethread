@@ -17,6 +17,7 @@ s.waitForBoot({
 	~crank_speed = 0;
 	~last_crank_update = 0;
 	~stop_functions = Environment.new(know: true);
+	~freq_ratio = 1.0;
 	s.sync;
 
 	~speed1 = {
@@ -163,6 +164,7 @@ s.waitForBoot({
 			~main_glitch.set(\pitch_dispersion, 0.0);
 			~main_glitch.set(\time_dispersion, 0.0);
 			~running.speed3 = false;
+			~freq_ratio = 1.0;
 			0.1.wait;
 		});
 	};
@@ -233,6 +235,7 @@ s.waitForBoot({
 			~main_glitch.set(\pitch_dispersion, 0.0);
 			~main_glitch.set(\time_dispersion, 0.0);
 			~running.infinite = false;
+			~freq_ratio = 1.0;
 			0.1.wait;
 		});
 	};
@@ -260,6 +263,7 @@ s.waitForBoot({
 			~main_glitch.set(\pitch_shift_ratio, 1);
 			~main_glitch.set(\pitch_dispersion, 0.001);
 			~main_glitch.set(\time_dispersion, 0.002);
+			~freq_ratio = 1.0;
 			{
 
 				~infinite_routine = {
@@ -277,9 +281,9 @@ s.waitForBoot({
 									play_func: {|self, tick_time = 0.2|
 										("tick_tim: " + tick_time).postln;
 										switch(self.synth_type,
-											\tick2, {Synth(\tick2, [\freq, self.freq_pitch, \amp, 0.15 * self.my_amp, \out, ~revBus]);},
-											\sine, {Synth(\sine, [\freq, self.freq_pitch*0.05, \amp, 0.2 * self.my_amp, \atk, 0.005, \sus, self.sus_time, \rel, self.duration_time*tick_time, \out, ~revBus ]);},
-											\dist_noise, {Synth(\dist_noise, [\freq, self.freq_pitch, \amp, 0.25 * self.my_amp, \rel, 0.02, \out, ~revBus]);},
+											\tick2, {Synth(\tick2, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.15 * self.my_amp, \out, ~revBus]);},
+											\sine, {Synth(\sine, [\freq, self.freq_pitch*0.05 * ~freq_ratio, \amp, 0.2 * self.my_amp, \atk, 0.005, \sus, self.sus_time, \rel, self.duration_time*tick_time, \out, ~revBus ]);},
+											\dist_noise, {Synth(\dist_noise, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.25 * self.my_amp, \rel, 0.02, \out, ~revBus]);},
 										);
 										(self.duration_time*tick_time).wait;
 									},
@@ -292,7 +296,7 @@ s.waitForBoot({
 								sound.play_func(~crank_speed_to_wait_time.());
 							};
 							if(rrand(0.0, 1.0) > 0.7, {
-								~rev.set(\mixLag, rrand(0.4, 2.0), \mix, exprand(0.15, 0.8));
+								~rev.set(\mixLag, rrand(0.4, 2.0), \mix, exprand(0.01, 0.6) + 0.05);
 							});
 						};
 					};
@@ -306,8 +310,32 @@ s.waitForBoot({
 		}.fork;
 	};
 
+	~filter_finished = {
+		{
+			~stop_functions.speed2.();
+			~stop_functions.speed3.();
+			~stop_functions.infinite.();
+		}.fork;
+	};
+
+	~next_filter = {
+		if(~running.infinite, {
+			~main_glitch.set(\pitch_dispersion, rrand(0, 0.001));
+			~main_glitch.set(\time_dispersion, rrand(0, 0.003));
+			if(rrand(0, 1.0) > 0.5, {
+				~main_glitch.set(\enable_bit_crush, 1);
+				~main_glitch.set(\sample_rate, rrand(10000, 1000));
+			}, {
+				~main_glitch.set(\enable_bit_crush, 0);
+			});
+			~freq_ratio = rrand(0.5, 1.5);
+		});
+	};
+
 	"osc_from_server.scd".loadRelative;
 });
 )
 
 ~infinite_mode.()
+~next_filter.()
+~filter_finished.()
