@@ -103,7 +103,7 @@ function render(filter) {
   // progress
   renderProgress(filter);
 
-  for (const e of document.getElementsByClassName("active")) {
+  for (const e of document.querySelectorAll("span.active")) {
     e.classList.remove("active");
   }
 
@@ -124,6 +124,17 @@ function getOffset(el) {
     left: rect.left + window.scrollX,
     top: rect.top + window.scrollY,
   };
+}
+
+function renderMessage(message) {
+  const overlayE = document.querySelector("#overlay_body");
+  if (!overlayE) return;
+  overlayE.innerHTML = message;
+  overlayE.classList.add("active");
+  setTimeout(() => {
+    // overlayE.innerHTML = "";
+    overlayE.classList.remove("active");
+  }, 3500);
 }
 
 function renderState(filter) {

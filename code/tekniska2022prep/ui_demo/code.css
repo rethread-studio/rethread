@@ -20,8 +20,8 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 750px;
-  margin-top: calc((100vh - 750px)/2);
+  height: 850px;
+  margin-top: calc((100vh - 850px)/2);
 }
 
 .w-70 {
@@ -133,12 +133,12 @@ canvas.image {
   background: var(--main-color);
 }
 
-.active {
+span.active {
   color: white;
   background-color: var(--main-color);
 }
 
-.active::after {
+span.active::after {
   position: absolute;
   right: 5px;
   margin-top: -2px;
@@ -304,6 +304,16 @@ canvas.image {
   height: 300px;
   float: right;
   animation: rotation 10s infinite linear;
+}
+
+#overlay_body {
+  font-size: 100px;
+  visibility: hidden;
+}
+
+#overlay_body.active {
+  visibility: inherit;
+  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .hand-wheel img {

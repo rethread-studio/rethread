@@ -238,4 +238,12 @@ class CodeExecutor {
     }
     return this.currentFilter;
   }
+
+  hasNextFilter() {
+    const index = this.filters.indexOf(this.currentFilter);
+    if (index < this.filters.length - 1) {
+      return this.filters[index + 1];
+    }
+    return false;
+  }
 }

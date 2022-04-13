@@ -5,7 +5,7 @@ showIdle();
 
 const webcam = new Webcam(320, 0 /* automatic */);
 webcam.init(() => {
-  capture();
+  // capture();
 });
 
 const codeExecutor = new CodeExecutor(
@@ -13,13 +13,15 @@ const codeExecutor = new CodeExecutor(
   [filters.contrast, filters.saturation]
 );
 
+let timerInterval;
 function capture() {
+  clearInterval(timerInterval);
   reset();
   showCapture();
 
   let snapTime = Math.round(button_map.PICTURE_TIME / 1000);
   document.querySelector(".timer").innerText = snapTime;
-  let timerInterval = setInterval(() => {
+  timerInterval = setInterval(() => {
     if (snapTime == 0) {
       clearInterval(timerInterval);
       if (!socket) snap();
@@ -40,10 +42,17 @@ async function nextFilter(index, total) {
   codeExecutor.stopFilter();
   codeExecutor.jump(0);
   return new Promise((resolve) => {
-    if (index < total - 1)
+    const nextFilter = codeExecutor.hasNextFilter();
+    if (nextFilter) {
+      renderMessage(
+        `Step 1/${codeExecutor.filters.length + 1}: Apply filter '${
+          nextFilter.name
+        }'...`
+      );
       document.getElementById(
         "parent-container"
       ).style.transform = `translateX(-${(index * 100) / total}%)`;
+    }
     setTimeout(() => {
       const next = codeExecutor.nextFilter();
       if (next != null) codeExecutor.init();
@@ -74,6 +83,7 @@ async function snap() {
   renderHexa(ctx, img, codeExecutor.canvas.hex_image.width);
 
   let filterIndex = 0;
+  renderMessage(`Step 1/${codeExecutor.filters.length + 1}: Load image...`);
   codeExecutor.runFilter(filters.capture).then(async () => {
     filterIndex++;
     await codeExecutor.setImage(img);
@@ -81,6 +91,7 @@ async function snap() {
     while (
       (await nextFilter(filterIndex++, codeExecutor.filters.length + 2)) != null
     ) {
+      if (socket) socket.emit("stage", "NEW_FILTER");
       codeExecutor.jump(0);
       document.getElementById("transformation").innerHTML = "";
       document
@@ -91,7 +102,7 @@ async function snap() {
     }
 
     // done
-    if (socket) socket.emit("state", "DONE");
+    if (socket) socket.emit("stage", "DONE");
 
     document.getElementById("execution").style.display = "none";
     document.getElementById("progress").style.display = "none";
@@ -178,11 +189,22 @@ socket.on("state", (state) => {
     capture();
   }
 });
+
+let timeoutHelp;
+
 socket.on("step", (step) => {
+  clearTimeout(timeoutHelp);
   if (step.speed) {
     step.speed = Math.round(step.speed);
     const speed = Math.min(Math.pow(step.speed, 4.5), 1000);
     codeExecutor.jump(speed);
   }
   codeExecutor.runStep();
+  if (codeExecutor.current) {
+    timeoutHelp = setTimeout(() => {
+      renderMessage(
+        `Turn the wheel to make progress ...<div class="hand-wheel"><img src="./img/CrankWheel.svg" /></div>`
+      );
+    }, 10000);
+  }
 });
