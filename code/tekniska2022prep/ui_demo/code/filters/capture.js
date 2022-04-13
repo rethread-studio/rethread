@@ -17,6 +17,7 @@ filters.capture = new Filter(
       'document.createElement("canvas")',
       document.createElement("canvas"),
       {
+        video: document.getElementById("webcam"),
         canvas,
       }
     );
@@ -27,31 +28,47 @@ filters.capture = new Filter(
       'canvas.getContext("2d")',
       canvas.getContext("2d"),
       {
+        video: document.getElementById("webcam"),
         canvas,
         context,
       }
     );
-    await wrapExp("3", "assignment", "video.width", 0, {
-      canvas,
-      context,
-      "video.width": 0,
-    });
-    await wrapExp("4", "assignment", "video.height", 0, {
-      canvas,
-      context,
-      "video.width": 0,
-      "video.height": 0,
-    });
+    await wrapExp(
+      "3",
+      "assignment",
+      "video.width",
+      document.getElementById("webcam").width,
+      {
+        video: document.getElementById("webcam"),
+        canvas,
+        context,
+        "video.width": document.getElementById("webcam").width,
+      }
+    );
+    await wrapExp(
+      "4",
+      "assignment",
+      "video.height",
+      document.getElementById("webcam").height,
+      {
+        video: document.getElementById("webcam"),
+        canvas,
+        context,
+        "video.width": document.getElementById("webcam").width,
+        "video.height": document.getElementById("webcam").height,
+      }
+    );
     await wrapExp(
       "5",
       "invocation",
       "context.drawImage(video, 0, 0, video.width, video.height)",
-      null,
+      undefined,
       {
+        video: document.getElementById("webcam"),
         canvas,
         context,
-        "video.width": 0,
-        "video.height": 0,
+        "video.width": document.getElementById("webcam").width,
+        "video.height": document.getElementById("webcam").height,
       }
     );
 
@@ -61,10 +78,11 @@ filters.capture = new Filter(
       'canvas.toDataURL("image/png")',
       canvas.toDataURL("image/png"),
       {
+        video: document.getElementById("webcam"),
         canvas,
         context,
-        "video.width": 0,
-        "video.height": 0,
+        "video.width": document.getElementById("webcam").width,
+        "video.height": document.getElementById("webcam").height,
       }
     );
   },

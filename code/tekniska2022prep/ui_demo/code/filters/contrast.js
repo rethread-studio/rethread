@@ -44,6 +44,9 @@ filters.contrast = new Filter(
         factor,
         i,
         "d.length": d.length,
+        "d[i]": d[i],
+        "d[i + 1]": d[i + 1],
+        "d[i + 2]": d[i + 2],
       });
       i = await wrapExp("6", "loop", "i += 4", i + 4, {
         adj,
@@ -51,6 +54,9 @@ filters.contrast = new Filter(
         factor,
         i,
         "d.length": d.length,
+        "d[i]": d[i],
+        "d[i + 1]": d[i + 1],
+        "d[i + 2]": d[i + 2],
       })
     ) {
       pixels.data[i + 3] = d[i + 3];
@@ -67,6 +73,8 @@ filters.contrast = new Filter(
           i,
           "d.length": d.length,
           "d[i]": factor * (d[i] - 128) + 128,
+          "d[i + 1]": d[i + 1],
+          "d[i + 2]": d[i + 2],
         }
       );
       pixels.data[i + 1] = factor * (d[i + 1] - 128) + 128;
@@ -83,6 +91,7 @@ filters.contrast = new Filter(
           "d.length": d.length,
           "d[i]": factor * (d[i] - 128) + 128,
           "d[i + 1]": factor * (d[i + 1] - 128) + 128,
+          "d[i + 2]": d[i + 2],
         }
       );
       pixels.data[i + 2] = factor * (d[i + 2] - 128) + 128;
