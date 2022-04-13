@@ -92,7 +92,7 @@ function createImageParticle(imgRefI, imgRefO) {
     imgO.loadPixels();
     const pixelI = imgI.pixels;
     const pixelO = imgO.pixels;
-    const { width, height } = pixelSampleSize;
+    const { width, height } = { width: 50, height: 50 };//pixelSampleSize;
 
     for (let y = 0; y < imgI.height; y += height) {
         for (let x = 0; x < imgI.width; x += width) {
