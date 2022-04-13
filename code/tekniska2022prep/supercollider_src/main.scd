@@ -15,6 +15,7 @@ s.waitForBoot({
 	~running.speed3 = false;
 	~running.infinite = false;
 	~crank_speed = 0;
+	~last_crank_update = 0;
 	~stop_functions = Environment.new(know: true);
 	s.sync;
 
@@ -236,7 +237,14 @@ s.waitForBoot({
 		});
 	};
 	~crank_speed_to_wait_time = {
-		(0.2/~crank_speed.pow(1.5)).min(0.5)
+		var speed =
+		(0.2/~crank_speed.pow(1.5)).min(0.5);
+		if(Date.localtime.rawSeconds - ~last_crank_update < 0.7, {
+			speed
+		}, {
+			0.5
+		});
+
 	};
 	~infinite_mode = {
 		{
@@ -301,3 +309,5 @@ s.waitForBoot({
 	"osc_from_server.scd".loadRelative;
 });
 )
+
+~infinite_mode.()
