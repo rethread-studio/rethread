@@ -145,13 +145,13 @@ function loadNewImage(newImage) {
         filter = createFilter(images.getImages());
 
         speed1.render = () => {
-            images.renderLastImage();
+            images.renderFirstAndLastImage();
         }
 
         speed2.render = () => {
             images.renderFirstImage();
         }
-        objectsToRender.push(speed1);
+        objectsToRender.push(speed0);
     });
 }
 

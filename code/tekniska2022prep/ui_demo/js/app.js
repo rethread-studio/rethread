@@ -68,6 +68,7 @@ function setup() {
   objectsToRender = [];
   speed1 = {};
   speed2 = {};
+  speed0 = {};
 
   images = new Images(photograph, filtersToApply);
   filter = createFilter(images.getImages());
@@ -83,6 +84,10 @@ function setup() {
   speed2.render = () => {
     images.renderFirstImage();
   };
+
+  speed0.render = () => {
+    images.renderFirstImage();
+  }
 
 
   tunOnSpeed("SPEED1_BUTTON_ON");
