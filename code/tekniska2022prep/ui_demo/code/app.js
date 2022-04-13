@@ -133,15 +133,21 @@ function getOffset(el) {
   };
 }
 
-function renderMessage(message) {
+function renderMessage(message, timeout) {
   const overlayE = document.querySelector("#overlay_body");
   if (!overlayE) return;
   overlayE.innerHTML = message;
   overlayE.classList.add("active");
-  setTimeout(() => {
-    // overlayE.innerHTML = "";
-    overlayE.classList.remove("active");
-  }, 3500);
+  if (timeout == null) timeout = 2500;
+  if (Number.isInteger(timeout)) {
+    setTimeout(() => {
+      overlayE.classList.remove("active");
+    }, timeout);
+  } else {
+    timeout().then(() => {
+      overlayE.classList.remove("active");
+    });
+  }
 }
 
 function renderState(filter) {

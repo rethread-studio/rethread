@@ -34,6 +34,7 @@ function capture() {
 codeExecutor.on("filter_start", (filter) => {
   renderCode(filter);
   render(filter);
+  help();
 });
 codeExecutor.on("filter_end", (filter) => render(filter));
 codeExecutor.on("step", (filter) => render(filter));
@@ -103,6 +104,7 @@ async function snap() {
 
     // done
     if (socket) socket.emit("stage", "DONE");
+    codeExecutor.current = null;
 
     document.getElementById("execution").style.display = "none";
     document.getElementById("progress").style.display = "none";
@@ -191,20 +193,31 @@ socket.on("state", (state) => {
 });
 
 let timeoutHelp;
+let stepResolve;
 
+function help() {
+  if (codeExecutor.current) {
+    clearTimeout(timeoutHelp);
+    timeoutHelp = setTimeout(() => {
+      if (!codeExecutor.current) return;
+      renderMessage(
+        `Turn the wheel to make progress ...<div class="hand-wheel"><img src="./img/CrankWheel.svg" /></div>`,
+        () => {
+          return new Promise((resolve) => {
+            stepResolve = resolve;
+          });
+        }
+      );
+    }, 10000);
+  }
+}
 socket.on("step", (step) => {
-  clearTimeout(timeoutHelp);
+  if (stepResolve) stepResolve();
   if (step.speed) {
     step.speed = Math.round(step.speed);
     const speed = Math.min(Math.pow(step.speed, 4.5), 1000);
     codeExecutor.jump(speed);
   }
   codeExecutor.runStep();
-  if (codeExecutor.current) {
-    timeoutHelp = setTimeout(() => {
-      renderMessage(
-        `Turn the wheel to make progress ...<div class="hand-wheel"><img src="./img/CrankWheel.svg" /></div>`
-      );
-    }, 10000);
-  }
+  help();
 });

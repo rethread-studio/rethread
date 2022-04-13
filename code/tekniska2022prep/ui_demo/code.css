@@ -281,7 +281,9 @@ span.active::after {
 }
 
 #parent-container {
+  display: flex;
   transition: 1s ease-in-out;
+  justify-content: center;
 }
 
 #filters.done .col {
