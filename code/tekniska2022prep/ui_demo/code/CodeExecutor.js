@@ -210,9 +210,7 @@ class CodeExecutor {
       return value;
     };
 
-    this._emit("filter_start", filter);
-    console.log("Started filter", filter.name);
-    return new Promise((resolve) => {
+    const p = new Promise((resolve) => {
       filter.run(this.original_pixels, this.transformed_pixels).then(
         () => {
           this._emit("filter_end", filter);
@@ -227,6 +225,9 @@ class CodeExecutor {
         }
       );
     });
+    this._emit("filter_start", filter);
+    console.log("Started filter", filter.name);
+    return p;
   }
 
   nextFilter() {
@@ -237,5 +238,13 @@ class CodeExecutor {
       this.currentFilter = null;
     }
     return this.currentFilter;
+  }
+
+  hasNextFilter() {
+    const index = this.filters.indexOf(this.currentFilter);
+    if (index < this.filters.length - 1) {
+      return this.filters[index + 1];
+    }
+    return false;
   }
 }

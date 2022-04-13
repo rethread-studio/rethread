@@ -2,8 +2,8 @@ filters.contrast = new Filter(
   "contrast",
   `function contrast (pixels, adj) {
     adj <span id="code_1">*= 255</span>;
-    let d = <span id="code_2">pixels.data</span>;
-    let factor = <span id="code_3">(259 * (adj + 255)) / (255 * (259 - adj))</span>;
+    const d = <span id="code_2">pixels.data</span>;
+    const factor = <span id="code_3">(259 * (adj + 255)) / (255 * (259 - adj))</span>;
     for (<span id="code_4">let i = 0</span>; <span id="code_5">i < d.length</span>; <span id="code_6">i += 4</span>) {
       d[i] = <span id="code_7">factor * (d[i] - 128) + 128</span>;
       d[i + 1] = <span id="code_8">factor * (d[i + 1] - 128) + 128</span>;
@@ -37,6 +37,7 @@ filters.contrast = new Filter(
         adj,
         d,
         factor,
+        i: 0,
       });
       await wrapExp("5", "loop_cond", "i < d.length", i < d.length, {
         adj,

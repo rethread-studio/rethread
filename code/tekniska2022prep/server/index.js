@@ -188,6 +188,10 @@ io.on("connection", (socket) => {
     );
   });
 
+  socket.on("stage", (data) => {
+    osc.send({ state: data, events: getNbEventSec() });
+  });
+
   socket.on("rotary", (data) => {
     resetIdle();
     countEventSec();

@@ -36,11 +36,18 @@ function showFilter() {
 }
 
 function renderCode(filter) {
+  const sourceCode = filter.sourceCode
+    .replace(/for/g, "<span class='keyword for'>for</span>")
+    .replace(/function/g, "<span class='keyword function'>function</span>")
+    .replace(/if/g, "<span class='keyword if'>if</span>")
+    .replace(/return/g, "<span class='keyword return'>return</span>")
+    .replace(/const/g, "<span class='keyword const'>const</span>")
+    .replace(/let/g, "<span class='keyword let'>let</span>");
   if (!filter) filter = codeExecutor.currentFilter;
   document.querySelector(".code .title").innerHTML = `Code: ${filter.name}`;
-  document.querySelector("code").innerHTML = filter.sourceCode;
+  document.querySelector("code").innerHTML = sourceCode;
   document.querySelector(".code .lines").innerHTML = "";
-  for (let i = 0; i < filter.sourceCode.split("\n").length; i++)
+  for (let i = 0; i < sourceCode.split("\n").length; i++)
     document.querySelector(".code .lines").innerHTML += `${i + 1}<br>`;
 }
 
@@ -103,7 +110,7 @@ function render(filter) {
   // progress
   renderProgress(filter);
 
-  for (const e of document.getElementsByClassName("active")) {
+  for (const e of document.querySelectorAll("span.active")) {
     e.classList.remove("active");
   }
 
@@ -126,11 +133,27 @@ function getOffset(el) {
   };
 }
 
+function renderMessage(message, timeout) {
+  const overlayE = document.querySelector("#overlay_body");
+  if (!overlayE) return;
+  overlayE.innerHTML = message;
+  overlayE.classList.add("active");
+  if (timeout == null) timeout = 2500;
+  if (Number.isInteger(timeout)) {
+    setTimeout(() => {
+      overlayE.classList.remove("active");
+    }, timeout);
+  } else {
+    timeout().then(() => {
+      overlayE.classList.remove("active");
+    });
+  }
+}
+
 function renderState(filter) {
   const currentState = codeExecutor.getCurrent();
   if (currentState.ctx.i != null) {
     document.getElementById("transformation").innerHTML = `<div class="col">
-    <h3 class="center">Before</h3>
     <div class="center">
       <div class="pixel" id="original_pixel"></div>
     </div>
@@ -142,7 +165,6 @@ function renderState(filter) {
     ><span class="b" id="o_b">N.A</span>
   </div>
   <div class="col">
-    <h3 class="center">Current</h3>
     <div class="center">
       <div class="pixel" id="transformed_pixel"></div>
     </div>
@@ -226,8 +248,23 @@ function renderState(filter) {
   }
   let content = ``;
   for (const i in currentState.ctx) {
-    content += `<span class="label">${i}:</span
-      ><span>${renderValue(currentState.ctx[i])}</span><br />`;
+    const className = i
+      .replace(/\+/g, "")
+      .replace(/\./g, "")
+      .replace(/ /g, "_")
+      .replace(/\[/g, "")
+      .replace(/\]/g, "")
+      .replace(/\(/g, "")
+      .replace(/\)/g, "");
+
+    const previousE = document.querySelector(".value." + className);
+    const isNew =
+      !previousE || previousE.innerHTML != renderValue(currentState.ctx[i]);
+
+    content += `<span class="variable">${i}</span
+      >=<span class="value ${className} ${isNew ? "new" : ""}">${renderValue(
+      currentState.ctx[i]
+    )}</span><br />`;
   }
   document.getElementById("state").innerHTML = content;
 }
