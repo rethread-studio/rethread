@@ -15,6 +15,45 @@ s.waitForBoot({
 	~useAmbisonicsDecoder = false;
 	~encoderType = \stereo;
 
+	~synthesis_mode = \active_mode;
+	~ftrace_beep_dur = 0.08;
+
+	~set_synthesis_mode = { | new_mode |
+		switch(new_mode,
+			\active_mode, {
+				~synthesis_mode = new_mode;
+				~fade_channels = [
+					~channels.user_whispers,
+					~channels.beep,
+					~channels.tick,
+					~channels.noise,
+					~channels.user_gestures,
+					~channels.server_gestures
+				];
+				~ftrace_beep_dur = 0.08;
+				~rev.set(\mix, 0.1);
+				~delay.set(\enable_delay, 0);
+				~server_processing.set(\enable_delay, 0);
+			},
+			\soft_mode, {
+				~synthesis_mode = new_mode;
+				~fade_channels = [
+					~channels.user_whispers,
+					~channels.beep,
+					~channels.user_gestures,
+					~channels.server_gestures
+				];
+				~channels.tick.set_amp(0);
+				~channels.noise.set_amp(0);
+				~ftrace_beep_dur = 0.15;
+				~rev.set(\mix, 0.3);
+				~delay.set(\enable_delay, 1);
+				~server_processing.set(\enable_delay, 1);
+			},
+			{("tried to set invalid synthesis mode: \"" + new_mode + "\"").postln;}
+		);
+	};
+
 	~ambisonicsOrder = 1; // Currently 1, 3 or 5 are supported
 	switch(~encoderType,
 		\ambisonic, {
@@ -66,8 +105,9 @@ s.waitForBoot({
 	~main_glitch = Synth(\main_out_glitch, [\in, ~mainBus, \out, 0]);
 	~revBus = Bus.audio(s, 2);
 	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.10, \out, ~mainBus]);
-	~tapeBus = Bus.audio(s, 2);
-	~tape = Synth(\tape_dist, [\in, ~tapeBus, \mix, 0.15, \out, ~revBus]);
+
+	~delayFxBus = Bus.audio(s, 2);
+	~delay = Synth(\delay_fx, [\in, ~delayFxBus, \out, ~revBus]);
 	~tickBus = Bus.audio(s, 2);
 	~tick_softener = Synth(\tick_softener, [\in, ~tickBus, \out, ~revBus]);
 	~ambientBus = Bus.audio(s, 2);
@@ -321,10 +361,10 @@ s.waitForBoot({
 
 	~channels.user_whispers = ~makeMixerChannel.("whisper", ~mainBus);
 	~channels.user_ambient = ~makeMixerChannel.("ambient", ~ambientBus);
-	~channels.beep = ~makeMixerChannel.("beep", ~revBus);
+	~channels.beep = ~makeMixerChannel.("beep", ~delayFxBus);
 	~channels.tick = ~makeMixerChannel.("tick", ~tickBus);
 	~channels.noise = ~makeMixerChannel.("noise", ~mainBus);
-	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~revBus);
+	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~delayFxBus);
 	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~serverBus);
 
 	~fade_channels = [
@@ -410,42 +450,6 @@ s.waitForBoot({
 
 {~presets.choose.() }.fork;
 
-(
-// "slow down" == go darker and slower
-var lead_up_time = 6, cresc_time = 2;
-
-{
-	// high pitch
-	{
-		var sig = SinOsc.ar([3500, 3520], mul: 0.1);
-		sig = sig * Env([0, 1.0, 0], [lead_up_time, 0.001]).ar(2);
-		sig
-	}.play;
-
-	// mid freq noisy tone
-	(lead_up_time - cresc_time).wait;
-	~cresc = Synth(\windy, [\freq, 100, \out, ~revBus, \amp, 0.7, \atk, cresc_time, \curve_atk, 7, \rel, 0]);
-
-	cresc_time.wait;
-	~cresc.release;
-	Synth(\tick3, [\freq, 8000, \out, ~revBus, \amp, 0.25]);
-	Synth(\tick3, [\freq, 12000, \out, ~revBus, \amp, 0.25]);
-	// new settings:
-	~ftrace_noise_freq_ratio = 0.1;
-	~freq_ratio = 0.5;
-	// low pitch rumble
-	~lowRumble = Synth(\windy, [\freq, 15, \out, ~lowBus, \amp, 0.2, \atk, 0.0, \rel, 5]);
-	// lower pitch
-	{
-		var sig = SinOsc.ar([3500, 3520]*0.25, mul: 0.125);
-		sig = sig * Env([0.5, 0], [2]).ar(2);
-		Out.ar(~revBus.index, sig);
-	}.play;
-	0.5.wait;
-	~lowRumble.release;
-}.fork;
-)
-
 ~enable_ftrace = true;
 ~enable_user = false;
 ~enable_server = false;
@@ -468,28 +472,6 @@ var lead_up_time = 6, cresc_time = 2;
 ~start_beep_process.();
 ~stop_beep_process.()
 
-(
-{
-	~main_glitch.set(\lag_time, 5);
-	~main_glitch.set(\enable_pitch_shift, 1);
-	~main_glitch.set(\pitch_shift_ratio, 3);
-	~main_glitch.set(\pitch_dispersion, 1);
-	3.wait;
-	~cresc = Synth(\windy, [\freq, 200, \out, ~revBus, \amp, 0.7, \atk, 2, \curve_atk, 7, \rel, 0]);
-	2.wait;
-	~cresc.release;
-	~main_glitch.set(\lag_time, 0.2);
-	~main_glitch.set(\enable_pitch_shift, 0);
-	~main_glitch.set(\pitch_shift_ratio, 1.0);
-	~main_glitch.set(\pitch_dispersion, 0);
-	{
-		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2/20, mul: 0.125*0.5);
-		sig = sig * Env([0.5, 0], [5]).ar(2);
-		Out.ar(~revBus.index, sig);
-	}.play;
-}.fork;
-)
-~lowRumble.release
 ~main_glitch.set(\lag_time, 5)
 ~main_glitch.set(\enable_pitch_shift, 1)
 ~main_glitch.set(\pitch_shift_ratio, 0.5)
@@ -497,3 +479,6 @@ var lead_up_time = 6, cresc_time = 2;
 ~main_glitch.set(\sample_rate, 1000)
 
 {~random_non_transition.();}.fork
+~set_synthesis_mode.(\active_mode);
+~set_synthesis_mode.(\soft_mode);
+~rev.set(\mix, 0.3)

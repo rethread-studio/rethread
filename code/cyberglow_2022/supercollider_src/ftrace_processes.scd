@@ -39,7 +39,7 @@
 		});
 		loop {
 			var channel = ~channels.beep,
-			dur = 0.08,
+			dur = ~ftrace_beep_dur,
 			amp = amp_stream_1.next * amp_stream_2.next
 			;
 
