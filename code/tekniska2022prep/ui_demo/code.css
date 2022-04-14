@@ -7,7 +7,7 @@ body {
   position: relative;
   margin: 0;
   padding: 0;
-  background-color: #000000;
+  background-color: #9dbfd4;
   color: var(--main-color);
   overflow: hidden;
   height: 100%;
@@ -22,6 +22,9 @@ body {
   align-items: center;
   height: 850px;
   margin-top: calc((100vh - 850px)/2);
+
+  height: 100%;
+  margin-top: 0;
 }
 
 .w-70 {
@@ -71,6 +74,7 @@ canvas.image {
 
 .box .content {
   padding: 3px 5px;
+  width: 100%;
 }
 
 .code {
@@ -95,6 +99,9 @@ canvas.image {
 .code pre {
   display: inline-block;
   margin: 0;
+  padding: 0;
+  width: calc(100% - 45px);
+  white-space: pre-wrap;
 }
 
 #bg {
@@ -113,11 +120,13 @@ canvas.image {
   text-align: center;
   font-weight: bolder;
   width: 100%;
+  height: 50px;
   border-top: 1px solid var(--main-color);
-  line-height: 35px;
+  line-height: 50px;
 }
 
 #progress .text {
+  position: absolute;
   display: inline;
   padding: 2px 5px;
   background: var(--main-color);
@@ -130,7 +139,6 @@ canvas.image {
   top: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
 }
 
 #progress .bar .fill {
@@ -171,7 +179,12 @@ span.active::after {
 .label {
   display: inline-block;
   width: 33%;
-  font-size: 20px;
+  font-size: 30px;
+}
+
+#transformation {
+  font-size: 30px;
+  color: var(--main-color)
 }
 
 #transformation .r,
@@ -263,15 +276,6 @@ span.active::after {
   padding: 5px;
 }
 
-#overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-}
-
 #canvas_overlay {
   position: absolute;
   top: 0;
@@ -360,14 +364,27 @@ span.active::after {
   animation: rotation 10s infinite linear;
 }
 
+#overlay {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+}
+
+
 #overlay_body {
+  display: block;
+  width: 100%;
+  text-align: center;
   font-size: 100px;
   visibility: hidden;
 }
 
 #overlay_body.active {
   visibility: inherit;
-  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .hand-wheel img {

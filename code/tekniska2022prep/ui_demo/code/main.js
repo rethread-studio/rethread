@@ -1,4 +1,4 @@
-initBg();
+// initBg();
 
 hideAll();
 showIdle();
@@ -115,7 +115,10 @@ async function snap() {
       .clearRect(0, 0, 100000, 100000);
     setTimeout(() => {
       document.getElementById("filters").className = "done";
-    }, 500);
+    }, 250);
+    renderMessage(
+      `Well done you finish to apply the filter!<br>Take a new picture!`
+    );
   });
 }
 
@@ -161,6 +164,7 @@ window.addEventListener("keydown", function (e) {
 
 function reset() {
   codeExecutor.stopFilter();
+  codeExecutor.current = null;
   codeExecutor.currentFilter = null;
   codeExecutor.transformed_pixels = null;
   codeExecutor.original_pixels = null;

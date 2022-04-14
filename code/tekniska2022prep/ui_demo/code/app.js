@@ -118,7 +118,7 @@ function render(filter) {
 
   const e = document.getElementById("code_" + current.id);
   if (e != null) {
-    e.setAttribute("value", current.value);
+    e.setAttribute("value", renderValue(current.value));
     e.className = "active";
   }
 
@@ -258,23 +258,24 @@ function renderState(filter) {
       .replace(/\)/g, "");
 
     const previousE = document.querySelector(".value." + className);
-    const isNew =
-      !previousE || previousE.innerHTML != renderValue(currentState.ctx[i]);
+    const renderedValue = renderValue(currentState.ctx[i]);
+    const isNew = !previousE || previousE.innerHTML != renderedValue;
 
     content += `<span class="variable">${i}</span
-      >=<span class="value ${className} ${isNew ? "new" : ""}">${renderValue(
-      currentState.ctx[i]
-    )}</span><br />`;
+      >=<span class="value ${className} ${
+      isNew ? "new" : ""
+    }">${renderedValue}</span><br />`;
   }
   document.getElementById("state").innerHTML = content;
 }
 
 function renderValue(value) {
-  if (Array.isArray()) {
-    return `Array(${value.length})`;
+  if (value == null) return '';
+  if (value.length) {
+    return `${value.constructor.name}[${value.length}]`;
   }
   if (value instanceof Object) {
-    return `${value.constructor.name}(${Object.keys(value).length})`;
+    return `${value.constructor.name}`;
   }
   return JSON.stringify(value);
 }
