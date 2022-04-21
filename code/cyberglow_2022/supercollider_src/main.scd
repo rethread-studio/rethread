@@ -302,10 +302,8 @@ s.waitForBoot({
 	];
 
 
-
 	// Load buffers with voice recordings of services
 	voice_path = "./sounds/".resolveRelative;
-
 
 	~voiceBuffers = Environment(know: true);
 	~voiceBuffers.answer = Buffer.readChannel(s, voice_path ++ "answer.wav", 0, -1, [0]);

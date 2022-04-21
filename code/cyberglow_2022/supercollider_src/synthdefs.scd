@@ -135,7 +135,7 @@ SynthDef(\dist_noise, {
 	sig = LeakDC.ar(sig);
 	sig = sig * \amp.kr(0.5);
 	sig = LPF.ar(sig, \lpf.kr(7000));
-	sig = Pan2.ar(sig);
+	sig = Pan2.ar(sig, \pan.kr(0));
 	Env.linen(0.01, 0.03, \rel.kr(0.05)).kr(2);
 	Out.ar(\out.kr(0), sig);
 }).add;

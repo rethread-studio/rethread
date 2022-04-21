@@ -126,8 +126,6 @@
 };
 
 
-
-
 ~stop_tick_process = {
 	~tick_routine1.stop;
 	~tick_routine2.stop;
@@ -137,25 +135,30 @@
 	var freq = rrand(14000, 15000),
 	rel = rrand(1.0, 3.0),
 	amp = rrand(0.05, 0.1) * 0.25,
+	pan = 0,
 	channel = ~channels.noise;
 	switch(type,
 		\Syscall, {
 			freq = rrand(14000, 14200);
 			rel = exprand(0.02, 0.06);
 			amp = amp * rrand(0.5, 1.0);
+			pan = -0.35;
 		},
 		\Random,{
 			freq = rrand(5000, 5100);
 			rel = exprand(0.1, 0.45);
 			amp = amp * rrand(0.5, 1.0);
+			pan = 0.35;
 		},
 		\Tcp,{
 			freq = rrand(12000, 12500);
 			rel = exprand(0.2, 0.55);
+			pan = 0.75;
 		},
 		\IrqMatrix,{
 			freq = rrand(7000, 7100);
 			rel = exprand(0.3, 0.8);
+			pan = -0.75;
 		},
 	);
 	rel = rel * 0.5;
@@ -164,12 +167,7 @@
 		\freq, freq,
 		\rel, rel,
 		\amp, amp,
+		\pan, pan,
 		\out, channel.bus
 	]);
 };
-
-/*
-~start_beep_process.()
-~stop_beep_process.()
-~start_tick_process.()
-*/
