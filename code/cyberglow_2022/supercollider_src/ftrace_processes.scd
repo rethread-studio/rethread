@@ -22,7 +22,6 @@
 			Pgeom(0.08, 0.92, 10)
 		], inf).asStream,
 		amp_stream_2 =  Prand([Pgeom(0.5, 1.01, 50), Pgeom(1.0, 0.98, 40),Pgeom(0.7, 0.95, 20), Pgeom(0.7, 1.02, 15)], inf).asStream,
-		freq_stream = Prand([Pseq([1400], 7), Prand(([60, 61, 62, 63 ,64 ,65, 66, 67, 68, 69, 70, 71, 72].midicps * 4.5), 3)], inf).asStream,
 		// A Routine can have several yield points, unlike FuncStreams
 		freq_routine = Routine({
 			loop{
@@ -40,8 +39,13 @@
 		loop {
 			var channel = ~channels.beep,
 			dur = 0.08,
-			amp = amp_stream_1.next * amp_stream_2.next
+			amp = amp_stream_1.next * amp_stream_2.next,
+			freq = freq_routine.next,
+			pan = rrand(-1, 1)
 			;
+			if(freq == 1400) {
+				pan = 0;
+			};
 
 			if(~enable_ftrace, {
 				channel.play_on(\sine, [
@@ -49,7 +53,8 @@
 					\sus, 0.07,
 					\rel, 0.001,
 					\amp,  amp,
-					\freq, freq_routine.next * ~ftrace_noise_freq_ratio,
+					\freq, freq * ~ftrace_noise_freq_ratio,
+					\pan, pan,
 					\out, channel.bus]);
 			});
 			dur.wait;

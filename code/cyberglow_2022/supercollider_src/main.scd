@@ -23,6 +23,9 @@ s.waitForBoot({
 		\stereo, {
 			~mixerChannelOutputs = 2;
 		},
+		\quad, {
+			~mixerChannelOutputs = 4;
+		},
 		\separate, {
 			~mixerChannelOutputs = 1;
 			~separateChannelOutputsNext = ~mixerChannelOutputs * 4; // we want NORTH, EAST, SOUTH and WEST on the same channel always
@@ -51,6 +54,7 @@ s.waitForBoot({
 	};
 
 	"synthdefs.scd".loadRelative;
+
 	s.sync;
 	"transitions.scd".loadRelative;
 
@@ -62,55 +66,41 @@ s.waitForBoot({
 	// If you get "late ..." messages, increase this number'
 	~latency = 0.5;
 	~nv = 0.1; // smallest note value for scheduling quantisation
-	~mainBus = Bus.audio(s, 2);
+	~mainBus = Bus.audio(s, ~mixerChannelOutputs);
 	~main_glitch = Synth(\main_out_glitch, [\in, ~mainBus, \out, 0]);
-	~revBus = Bus.audio(s, 2);
+	~revBus = Bus.audio(s, ~mixerChannelOutputs);
 	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.10, \out, ~mainBus]);
-	~tapeBus = Bus.audio(s, 2);
+	~tapeBus = Bus.audio(s, ~mixerChannelOutputs);
 	~tape = Synth(\tape_dist, [\in, ~tapeBus, \mix, 0.15, \out, ~revBus]);
-	~tickBus = Bus.audio(s, 2);
-	~tick_softener = Synth(\tick_softener, [\in, ~tickBus, \out, ~revBus]);
-	~ambientBus = Bus.audio(s, 2);
+	~tickBus = Bus.audio(s, ~mixerChannelOutputs);
+	if(~encoderType == \quad, {
+		~tick_softener = Synth(\tick_softener, [\in, ~tickBus, \out, ~revBus.index+2]);
+	}, {
+		~tick_softener = Synth(\tick_softener, [\in, ~tickBus, \out, ~revBus]);
+	});
+	~ambientBus = Bus.audio(s, ~mixerChannelOutputs);
 	~ambient_reverb = Synth(\ambient_reverb, [\in, ~ambientBus, \out, 0]);
-	~serverBus = Bus.audio(s, 2);
+	~serverBus = Bus.audio(s, ~mixerChannelOutputs);
 	~server_processing = Synth(\server_channel, [\in, ~serverBus, \out, ~revBus]);
+
+	s.sync;
 
 	"harmony.scd".loadRelative;
 
 	"ftrace_processes.scd".loadRelative;
 
-
-
 	~makeMixerChannel = { | name, out, amp = 1, gain = 1 |
 		var bus, synth, reverb_synth, reverb_bus, group, azimuth, elevation, reverb_mix = 0.25, pitch_offset = 0;
-		bus = Bus.audio(s, ~mixerChannelOutputs);
+		bus = Bus.audio(s, 2);
 		// reverb_bus = Bus.audio(s, 2);
 		group = Group(s);
-		azimuth = ~fixedAzimuthPositions.at(name.asSymbol);
-		if(azimuth == nil, {
-			azimuth = ~azimuthPosition;
-			~azimuthPosition = ~azimuthPosition + ~azimuthStep;
-			if(~azimuthPosition > pi) {
-				~azimuthPosition = ~azimuthPosition - 2pi;
-			};
-			if(~azimuthPosition < -pi) {
-				~azimuthPosition = ~azimuthPosition + 2pi;
-			};
-		});
 
-		switch(name.asSymbol,
-			\NORTH, { pitch_offset = 31 }, // 31
-			\SOUTH,  { pitch_offset = 0 }, // 0
-			\EAST, { pitch_offset = 9 }, // 9
-			\WEST, { pitch_offset = -31 }, // -31
-		);
-		elevation = ~elevationPosition;
-		~elevationPosition = ~elevationPosition + ~elevationStep;
 		switch(~encoderType,
-			\ambisonic, {
-				synth = Synth(\mixer_channel, [\in, bus, \out, out, \azimuth, azimuth, \elevation, elevation], group, \addToTail);
-			},
+
 			\stereo, {
+				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, amp * gain], group, \addToTail);
+			},
+			\quad, {
 				synth = Synth(\mixer_channel, [\in, bus, \out, out, \amp, amp * gain], group, \addToTail);
 			},
 			\separate, {
@@ -149,17 +139,6 @@ s.waitForBoot({
 			reverb_mix: reverb_mix,
 			auto_reverb_min: 0.0,
 			auto_reverb_max: 1.0,
-			azimuth: azimuth,
-			elevation: elevation,
-			// Hover spat movement
-			hover_vel: [0.0, 0.0], // [relative_azimuth, relative_elevation]
-			hover_pos: [0.0, 0.0],
-			hover_acc: [0.0, 0.0],
-			hover_ticks_since_random: 0,
-			azimuth_rotation: 0.0,
-			azimuth_rotation_step: 0.0,
-			azimuth_rotate: false,
-			activity_elevation: 0.0,
 			// Toggles for how to sonify the device
 			sonifyInstantlyToggle: true, // sonify right away
 			sonifyServicesToneToggle: true,
@@ -213,80 +192,10 @@ s.waitForBoot({
 					self.activity_level_peak = activity;
 				});
 			},
-			spat_rotate: {|self, length |
-				// Convert length to rotation per update tick
-				self.azimuth_rotation_step = (2*pi)/(length*100);
-				self.azimuth_rotate = true;
-			},
 			// Use play on to make sure that the
 			play_on: {|self, synth_name, args, extra_latency = 0 |
 				// s.makeBundle(~latency, {Synth(synth_name, args, self.my_group)} );
 				self.my_clock.sched(~latency + extra_latency, Synth(synth_name, args, self.my_group, addAction: \addToHead));
-			},
-
-			// Update spatial effects, combine their results and apply them to the synth
-			update_spat: {|self|
-				var random_hover_point,
-				activity_spat_fx = self.activity_level * 0.7 + 0.3 // how dramatic the effects on spatialisation will be
-				;
-				// Hover (movement towards randomised points)
-				// Every x ticks a new random position is chosen and used to calculate an acceleration vector.
-				// Acceleration changes velocity which creates a smooth change.
-				if(self.spatHoverToggle, {
-					if(self.hover_ticks_since_random > 3, {
-						var acc_mag;
-						self.hover_ticks_since_random = 0;
-						random_hover_point = [rrand(-0.3, 0.3), rrand(-0.1, 0.1)];
-						self.hover_acc = [random_hover_point[0]-self.hover_pos[0], random_hover_point[1]-self.hover_pos[1]];
-						// normalize the vector; doesn't make sense since the azimuth and elevation aren't the same scale
-						/*acc_mag = sqrt(self.hover_acc[0].pow(2) + self.hover_acc[1].pow(2));
-						self.hover_acc = [self.hover_acc[0]/acc_mag, self.hover_acc[1]/acc_mag];*/
-					}, {
-						self.hover_ticks_since_random = self.hover_ticks_since_random + 1;
-					});
-					self.hover_vel[0] = self.hover_vel[0] + (self.hover_acc[0] * 0.001);
-					self.hover_vel[1] = self.hover_vel[1] + (self.hover_acc[1] * 0.001);
-					// TODO: Limit velocity
-					self.hover_vel[0] = max(min(self.hover_vel[0], 0.15), -0.15);
-					self.hover_vel[1] = max(min(self.hover_vel[1], 0.05), -0.05);
-
-					self.hover_pos[0] = self.hover_pos[0] + (self.hover_vel[0] * activity_spat_fx);
-					self.hover_pos[1] = self.hover_pos[1] + (self.hover_vel[1] * activity_spat_fx);
-					// Limit hover_pos to reasonable positions
-					self.hover_pos[0] = max(min(self.hover_pos[0], 0.5), -0.5);
-					self.hover_pos[1] = max(min(self.hover_pos[1], pi*0.125), pi * (-0.125));
-					// ("a: " + self.hover_pos[0] + " e: " + self.hover_pos[1]).postln;
-				}, {
-					self.hover_pos[0] = 0.0;
-					self.hover_pos[1] = 0.0;
-				});
-
-				// spatial rotation
-				if(self.azimuth_rotate, {
-					self.azimuth_rotation = self.azimuth_rotation + self.azimuth_rotation_step;
-					if(self.azimuth_rotation > (pi*2)
-						|| (self.azimuth_rotation < (pi*(-2))), {
-							self.azimuth_rotate = false;
-							self.azimuth_rotation = 0.0;
-					});
-				});
-
-				// elevation based on activity level
-				if(self.spatElevationActivityToggle, {
-					self.activity_elevation = self.activity_level * pi * 0.5;
-				}, {
-					self.activity_elevation = 0.0;
-				});
-
-				self.my_synth.set(\azimuth, self.azimuth + self.azimuth_rotation + self.hover_pos[0]);
-				self.my_synth.set(\elevation, self.elevation + self.hover_pos[1] + self.activity_elevation);
-			},
-			update_gui: { |self, gui|
-				{
-					gui.spat_text_azimuth.string = "azimuth: " + (self.azimuth + self.azimuth_rotation + self.hover_pos[0]).round(0.001);
-					gui.spat_text_elevation.string = "elevation: " + (self.elevation + self.hover_pos[1] + self.activity_elevation).round(0.001);
-					gui.rev_mix_slider.valueAction = self.reverb_mix;
-				}.defer;
 			},
 			update_first: { |self|
 				if(self.sonifyActivityTickToggle, {
@@ -319,13 +228,26 @@ s.waitForBoot({
 
 	~channels = Environment(know: true);
 
-	~channels.user_whispers = ~makeMixerChannel.("whisper", ~mainBus);
-	~channels.user_ambient = ~makeMixerChannel.("ambient", ~ambientBus);
-	~channels.beep = ~makeMixerChannel.("beep", ~revBus);
-	~channels.tick = ~makeMixerChannel.("tick", ~tickBus);
-	~channels.noise = ~makeMixerChannel.("noise", ~mainBus);
-	~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~revBus);
-	~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~serverBus);
+	switch(~encoderType,
+		\quad, {
+			~channels.user_whispers = ~makeMixerChannel.("whisper", ~mainBus);
+			~channels.user_ambient = ~makeMixerChannel.("ambient", ~ambientBus);
+			~channels.beep = ~makeMixerChannel.("beep", ~revBus.index + 2);
+			~channels.tick = ~makeMixerChannel.("tick", ~tickBus);
+			~channels.noise = ~makeMixerChannel.("noise", ~mainBus.index + 2);
+			~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~revBus);
+			~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~serverBus);
+		},
+		\stereo, {
+			~channels.user_whispers = ~makeMixerChannel.("whisper", ~mainBus);
+			~channels.user_ambient = ~makeMixerChannel.("ambient", ~ambientBus);
+			~channels.beep = ~makeMixerChannel.("beep", ~revBus);
+			~channels.tick = ~makeMixerChannel.("tick", ~tickBus);
+			~channels.noise = ~makeMixerChannel.("noise", ~mainBus);
+			~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~revBus);
+			~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~serverBus);
+		}
+	);
 
 	~fade_channels = [
 		~channels.user_whispers,
@@ -402,6 +324,7 @@ s.waitForBoot({
 	~enable_server = false;*/
 	"osc.scd".loadRelative; // don't receive OSC messages until everything is set up
 });
+
 )
 ~start_auto_fade.()
 ~stop_auto_fade.()
@@ -467,6 +390,31 @@ var lead_up_time = 6, cresc_time = 2;
 ~stop_tick_process.()
 ~start_beep_process.();
 ~stop_beep_process.()
+
+/*
+# Panning
+
+Back speakers: 2 and 3
+Front speakers: 0 and 1
+
+Reverb in all speakers
+Direct sound more directed
+
+
+## ftrace
+~channels.beep = ~makeMixerChannel.("beep", ~revBus);
+~channels.tick = ~makeMixerChannel.("tick", ~tickBus);
+~channels.noise = ~makeMixerChannel.("noise", ~mainBus);
+
+## user and server
+~channels.user_whispers = ~makeMixerChannel.("whisper", ~mainBus);
+~channels.user_ambient = ~makeMixerChannel.("ambient", ~ambientBus);
+~channels.user_gestures = ~makeMixerChannel.("user_gestures", ~revBus);
+~channels.server_gestures = ~makeMixerChannel.("server_gestures", ~serverBus);
+
+
+*/
+
 
 (
 {

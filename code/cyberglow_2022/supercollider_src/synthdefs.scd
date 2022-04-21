@@ -143,10 +143,19 @@ SynthDef(\dist_noise, {
 SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 	var sig, wet, in;
 
-	in = In.ar(\in.kr(10), 2);
+	switch(~encoderType,
+		\quad, {
+			in = In.ar(\in.kr(10), 4);
+			sig = [in[0] + in[2], in[1] + in[3]];
+		},
+		\stereo, {
+			in = In.ar(\in.kr(10), 2);
+			sig = in;
+		}
+	);
 	mix = mix.lag(\mixLag.kr(10));
 
-	sig = HPF.ar(in, 120);
+	sig = HPF.ar(sig, 120);
 	sig = LPF.ar(sig, 7000);
 
 	wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
@@ -155,6 +164,15 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 
 	wet = HPF.ar(wet, 60);
 
+	switch(~encoderType,
+		\quad, {
+			// expand the reverb to all four channels
+			sig = (in * (1-mix)) + ([wet[0], wet[1], wet[0], wet[1]]*mix);
+		},
+		\stereo, {
+			sig = (in * (1-mix)) + (wet*mix);
+		}
+	);
 	sig = (in * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
 	Out.ar(out, sig);
@@ -327,6 +345,16 @@ switch(~encoderType,
 			Out.ar(send, sig * send_amp);
 		}).add;
 	},
+	\quad, {
+		SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0, activity = 0 |
+			var sig = In.ar(in, 2);
+			sig = sig * \amp.kr(0.8);
+			sig = Balance2.ar(sig[0], sig[1], pan);
+			// sig = Decimator.ar(sig, SampleRate.ir, activity.linlin(0, 1, 16, 8));
+			Out.ar(out, sig);
+			Out.ar(send, sig * send_amp);
+		}).add;
+	},
 	\separate, {
 		SynthDef(\mixer_channel, { | in = 10, out = 0, send = 12, send_amp = 0, pan = 0, activity = 0 |
 			var sig;
@@ -343,10 +371,20 @@ switch(~encoderType,
 			Out.ar(out, sig);
 			Out.ar(send, sig * send_amp);
 		}).add;
-	}
+	},
 );
+
 SynthDef(\main_out_glitch, {
-	var sig = In.ar(\in.kr(10), 2), lag_time = \lag_time.kr(3);
+	var sig, lag_time = \lag_time.kr(3);
+
+	switch(~encoderType,
+		\quad, {
+			sig = In.ar(\in.kr(10), 4);
+		},
+		\stereo, {
+			sig = In.ar(\in.kr(10), 2);
+		}
+	);
 
 	sig = SelectX.ar(\enable_pitch_shift.kr(0, lag_time), [sig, PitchShift.ar(sig, 0.2, Ramp.kr(\pitch_shift_ratio.kr(1.0), lag_time), VarLag.kr(\pitch_dispersion.kr(0.00), lag_time, 20), \time_dispersion.kr(0.01, lag_time))]);
 	sig = SelectX.ar(\enable_bit_crush.kr(0, lag_time), [sig, Decimator.ar(sig, \sample_rate.kr(44100, lag_time), \bits.kr(24, lag_time))]);
