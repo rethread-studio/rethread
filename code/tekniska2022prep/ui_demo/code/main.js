@@ -1,4 +1,4 @@
-initBg();
+// initBg();
 
 hideAll();
 showIdle();
@@ -10,7 +10,7 @@ webcam.init(() => {
 
 const codeExecutor = new CodeExecutor(
   document.getElementById("parent-container"),
-  [filters.contrast, filters.saturation]
+  [filters.brightness, filters.saturation, filters.invert]
 );
 
 let timerInterval;
@@ -34,6 +34,7 @@ function capture() {
 codeExecutor.on("filter_start", (filter) => {
   renderCode(filter);
   render(filter);
+  help();
 });
 codeExecutor.on("filter_end", (filter) => render(filter));
 codeExecutor.on("step", (filter) => render(filter));
@@ -45,7 +46,7 @@ async function nextFilter(index, total) {
     const nextFilter = codeExecutor.hasNextFilter();
     if (nextFilter) {
       renderMessage(
-        `Step 1/${codeExecutor.filters.length + 1}: Apply filter '${
+        `Step ${index + 1}/${codeExecutor.filters.length + 1}: Apply filter '${
           nextFilter.name
         }'...`
       );
@@ -103,6 +104,7 @@ async function snap() {
 
     // done
     if (socket) socket.emit("stage", "DONE");
+    codeExecutor.current = null;
 
     document.getElementById("execution").style.display = "none";
     document.getElementById("progress").style.display = "none";
@@ -113,7 +115,10 @@ async function snap() {
       .clearRect(0, 0, 100000, 100000);
     setTimeout(() => {
       document.getElementById("filters").className = "done";
-    }, 500);
+    }, 250);
+    renderMessage(
+      `Well done you finish to apply the filter!<br>Take a new picture!`
+    );
   });
 }
 
@@ -159,6 +164,7 @@ window.addEventListener("keydown", function (e) {
 
 function reset() {
   codeExecutor.stopFilter();
+  codeExecutor.current = null;
   codeExecutor.currentFilter = null;
   codeExecutor.transformed_pixels = null;
   codeExecutor.original_pixels = null;
@@ -191,20 +197,31 @@ socket.on("state", (state) => {
 });
 
 let timeoutHelp;
+let stepResolve;
 
+function help() {
+  if (codeExecutor.current) {
+    clearTimeout(timeoutHelp);
+    timeoutHelp = setTimeout(() => {
+      if (!codeExecutor.current) return;
+      renderMessage(
+        `Turn the wheel to make progress ...<div class="hand-wheel"><img src="./img/CrankWheel.svg" /></div>`,
+        () => {
+          return new Promise((resolve) => {
+            stepResolve = resolve;
+          });
+        }
+      );
+    }, 10000);
+  }
+}
 socket.on("step", (step) => {
-  clearTimeout(timeoutHelp);
+  if (stepResolve) stepResolve();
   if (step.speed) {
     step.speed = Math.round(step.speed);
     const speed = Math.min(Math.pow(step.speed, 4.5), 1000);
     codeExecutor.jump(speed);
   }
   codeExecutor.runStep();
-  if (codeExecutor.current) {
-    timeoutHelp = setTimeout(() => {
-      renderMessage(
-        `Turn the wheel to make progress ...<div class="hand-wheel"><img src="./img/CrankWheel.svg" /></div>`
-      );
-    }, 10000);
-  }
+  help();
 });

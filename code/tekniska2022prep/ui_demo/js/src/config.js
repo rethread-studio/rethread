@@ -2,12 +2,12 @@
 const state = {
     backgroundCol: "#000000",
     frameRate: 60,
-    intervalTime: 50,
+    intervalTime: 10,
     sampleSize: 10,
     filterSampleSize: { width: 250, height: 250 },
     counterFontSize: 900,
     status: "IDLE",
-    paddingTopPercent: 0.2175,
+    paddingTopPercent: 0.15,// 0.2175,
     heightPercent: 0.5648,
     imagePadding: {
         paddingRight: 30,

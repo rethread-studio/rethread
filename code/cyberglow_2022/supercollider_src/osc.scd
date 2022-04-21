@@ -1,6 +1,25 @@
+thisProcess.openUDPPort(57121); // attempt to open 1121
+
+~next_transition_vis_transition_from = nil;
+OSCdef(\transition_from_vis_OSC, { arg msg, time, addr, recvPort;
+	var transitions_from = msg[1];
+	// [msg, time, addr, recvPort].postln;
+	// record this to be used for the next transition which will transition into the next type
+	~next_transition_vis_transition_from = transitions_from;
+
+}, '/transition_from_vis', nil);
+
 OSCdef(\transitionOSC, { arg msg, time, addr, recvPort;
 	var time_to_next_transition = msg[1].asFloat;
-	[msg, time, addr, recvPort].postln;
+	// [msg, time, addr, recvPort].postln;
+	// if there was a visualisation transition, change synthesis mode
+	if(~next_transition_vis_transition_from != nil, {
+		switch(~next_transition_vis_transition_from,
+			\ftrace, {~set_synthesis_mode.(\active_mode);},
+			\overview, {~set_synthesis_mode.(\soft_mode);},
+			{}
+		);
+	});
 	~trigger_transition.(time_to_next_transition);
 
 }, '/transition', nil);

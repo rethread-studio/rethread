@@ -140,6 +140,15 @@ SynthDef(\dist_noise, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 
+SynthDef(\delay_fx, { | out = 0, amp = 1, mix = 0.3  |
+	var sig, wet, in;
+
+	sig = In.ar(\in.kr(10), 2);
+	sig = Select.ar(\enable_delay.kr(0), [sig, sig * (1.0-mix) + (AllpassC.ar(sig, 0.5, LFNoise1.kr(0.1).range(0.2, 0.5), 4.0, mix))]);
+	Out.ar(out, sig);
+}).add;
+
+
 SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 	var sig, wet, in;
 
@@ -157,6 +166,8 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 
 	sig = HPF.ar(sig, 120);
 	sig = LPF.ar(sig, 7000);
+
+
 
 	wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
 	// wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);
@@ -201,10 +212,11 @@ SynthDef(\ambient_reverb, { | out = 0, amp = 0.5, mix = 0.5  |
 }).add;
 
 SynthDef(\server_channel, {
-	var sig = In.ar(\in.kr(0), 2) * \amp.kr(1);
+	var sig = In.ar(\in.kr(0), 2) * \amp.kr(1), mix = \mix.kr(0.4);
 	sig = HPF.ar(sig, 500);
 	sig = LPF.ar(sig, 5000);
 	sig = BPeakEQ.ar(sig, \bpeak_freq.kr(3800), \bpeak_rq.kr(2.0), \bpeak_db.kr(-10));
+	sig = Select.ar(\enable_delay.kr(0), [sig, sig * (1.0-mix) + (AllpassC.ar(sig, 0.5, LFNoise1.kr(0.1).range(0.2, 0.5), 4.0, mix))]);
 	Out.ar(\out.kr(0), sig);
 
 }).add;
