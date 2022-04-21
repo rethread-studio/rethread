@@ -34,6 +34,7 @@ s.waitForBoot({
 				~rev.set(\mix, 0.1);
 				~delay.set(\enable_delay, 0);
 				~server_processing.set(\enable_delay, 0);
+				~main_glitch.set(\lpf_freq, 14900);
 			},
 			\soft_mode, {
 				~synthesis_mode = new_mode;
@@ -49,6 +50,7 @@ s.waitForBoot({
 				~rev.set(\mix, 0.3);
 				~delay.set(\enable_delay, 1);
 				~server_processing.set(\enable_delay, 1);
+				~main_glitch.set(\lpf_freq, 3000);
 			},
 			{("tried to set invalid synthesis mode: \"" + new_mode + "\"").postln;}
 		);

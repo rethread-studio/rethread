@@ -143,7 +143,7 @@ SynthDef(\dist_noise, {
 SynthDef(\delay_fx, { | out = 0, amp = 1, mix = 0.3  |
 	var sig, wet, in;
 
-	sig = In.ar(\in.kr(10), 2);
+	sig = In.ar(\in.kr(10), ~mixerChannelOutputs);
 	sig = Select.ar(\enable_delay.kr(0), [sig, sig * (1.0-mix) + (AllpassC.ar(sig, 0.5, LFNoise1.kr(0.1).range(0.2, 0.5), 4.0, mix))]);
 	Out.ar(out, sig);
 }).add;
@@ -400,6 +400,7 @@ SynthDef(\main_out_glitch, {
 
 	sig = SelectX.ar(\enable_pitch_shift.kr(0, lag_time), [sig, PitchShift.ar(sig, 0.2, Ramp.kr(\pitch_shift_ratio.kr(1.0), lag_time), VarLag.kr(\pitch_dispersion.kr(0.00), lag_time, 20), \time_dispersion.kr(0.01, lag_time))]);
 	sig = SelectX.ar(\enable_bit_crush.kr(0, lag_time), [sig, Decimator.ar(sig, \sample_rate.kr(44100, lag_time), \bits.kr(24, lag_time))]);
+	sig = LPF.ar(sig, \lpf_freq.kr(14000, lag_time));
 
 	Out.ar(\out.kr(0), sig);
 }).add;
