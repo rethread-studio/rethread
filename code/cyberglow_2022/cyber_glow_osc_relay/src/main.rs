@@ -896,7 +896,7 @@ impl Sonifier {
     pub fn update(&mut self, dt: f64) {
         self.time_to_next_transition -= dt;
         if self.time_to_next_transition <= 0.0 {
-            self.time_to_next_transition = rand::random::<f64>() * 14.0 + 6.0;
+            self.time_to_next_transition = rand::random::<f64>().powf(0.5) * 30.0 + 4.0;
             self.send_transition_trigger(self.time_to_next_transition as f32);
         }
     }
