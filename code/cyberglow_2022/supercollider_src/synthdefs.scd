@@ -82,7 +82,8 @@ SynthDef(\sine_sweep, {
 SynthDef(\dist_saw, {
 	var sig, env, freq = \freq.kr(220);
 	env = Env.linen(\atk.kr(0.01), \sus.kr(0.5), \rel.kr(0.2)).ar(2);
-	sig = DPW3Tri.ar(freq);
+	freq = freq + [0, 1.5, -1.5];
+	sig = Mix(DPW3Tri.ar(freq) * [0.5, 0.25, 0.25]);
 	sig = Pan2.ar(sig * \amp.kr(0.5) * env * AmpCompA.kr(freq, 20), \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
 }).add;
@@ -184,6 +185,7 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 			sig = (in * (1-mix)) + (wet*mix);
 		}
 	);
+	wet = HPF.ar(HPF.ar(wet, 100), 60);
 	sig = (in * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
 	Out.ar(out, sig);
@@ -196,23 +198,36 @@ SynthDef(\ambient_reverb, { | out = 0, amp = 0.5, mix = 0.5  |
 
 	in = In.ar(\in.kr(10), 2);
 	mix = mix.lag(\mixLag.kr(10));
+	in = in * LFNoise1.kr(0.3).range(0.5, 1.5);
 
-	sig = HPF.ar(HPF.ar(in, 120), 50);
+	sig = HPF.ar(HPF.ar(in, 180), 80);
 	sig = BPeakEQ.ar(sig, \bpeak_freq.kr(250), \bpeak_rq.kr(2.0), \bpeak_db.kr(-10));
+	sig = BPeakEQ.ar(sig, 500, 2.0, -6);
 
 	/*wet = JPverb.ar(sig, 3.0, 0.9, 4.0, 0.8);
 	wet = GVerb.ar(sig, 300, 103, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
-	wet = Greyhole.ar(sig, \delayTime.kr(0.4), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
+	wet = Greyhole.ar(sig, \delayTime.kr(0.35), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.6));
 
-	wet = HPF.ar(wet, 60);
+	wet = HPF.ar(wet, 100);
+
+
 
 	sig = (in * (1-mix)) + (wet*mix);
 	sig = Limiter.ar(sig, 0.95);
+	switch(~encoderType,
+		\quad, {
+			// expand the reverb to all four channels
+			sig = [sig[0], sig[1], sig[0], sig[1]];
+		},
+		\stereo, {
+		}
+	);
 	Out.ar(out, sig * env * amp);
 }).add;
 
 SynthDef(\server_channel, {
 	var sig = In.ar(\in.kr(0), 2) * \amp.kr(1), mix = \mix.kr(0.4);
+	sig = sig * LFNoise1.kr(LFNoise1.kr(0.2).range(0.3, 0.7)).range(0.35, 1.0);
 	sig = HPF.ar(sig, 500);
 	sig = LPF.ar(sig, 5000);
 	sig = BPeakEQ.ar(sig, \bpeak_freq.kr(3800), \bpeak_rq.kr(2.0), \bpeak_db.kr(-10));
@@ -401,6 +416,7 @@ SynthDef(\main_out_glitch, {
 	sig = SelectX.ar(\enable_pitch_shift.kr(0, lag_time), [sig, PitchShift.ar(sig, 0.2, Ramp.kr(\pitch_shift_ratio.kr(1.0), lag_time), VarLag.kr(\pitch_dispersion.kr(0.00), lag_time, 20), \time_dispersion.kr(0.01, lag_time))]);
 	sig = SelectX.ar(\enable_bit_crush.kr(0, lag_time), [sig, Decimator.ar(sig, \sample_rate.kr(44100, lag_time), \bits.kr(24, lag_time))]);
 	sig = LPF.ar(sig, \lpf_freq.kr(14000, lag_time));
+	sig = HPF.ar(sig, 60);
 
 	Out.ar(\out.kr(0), sig);
 }).add;

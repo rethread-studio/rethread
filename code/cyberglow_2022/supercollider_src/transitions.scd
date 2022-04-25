@@ -23,7 +23,7 @@
 	low_rumble = Synth(\windy, [\freq, 15, \out, ~lowBus, \amp, 0.2, \atk, 0.0, \rel, 5]);
 	// lower pitch
 	{
-		var sig = SinOsc.ar([3500, 3520]*0.25, mul: 0.125);
+		var sig = SinOsc.ar([3500, 3520]*0.25, mul: 0.125*0.5);
 		sig = sig * Env([0.5, 0], [2]).ar(2);
 		Out.ar(~revBus.index, sig);
 	}.play;
@@ -79,7 +79,7 @@
 	~main_glitch.set(\enable_bit_crush, 1);
 	~main_glitch.set(\sample_rate, 1000);
 	(time - cresc_time).wait;
-	~cresc = Synth(\windy, [\freq, 100, \out, ~revBus, \amp, 0.4, \atk, cresc_time, \curve_atk, 7, \rel, 0]);
+	~cresc = Synth(\windy, [\freq, 100, \out, ~revBus, \amp, 0.2, \atk, cresc_time, \curve_atk, 7, \rel, 0]);
 	cresc_time.wait;
 	~cresc.release;
 	~main_glitch.set(\lag_time, 0.2);
@@ -88,7 +88,7 @@
 	~main_glitch.set(\enable_bit_crush, 0);
 	~main_glitch.set(\sample_rate, 441000);
 	{
-		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2/20, mul: 0.125*0.5);
+		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2/20, mul: 0.125*0.35);
 		sig = sig * Env([0.5, 0], [5]).ar(2);
 		Out.ar(~revBus.index, sig);
 	}.play;
@@ -104,7 +104,7 @@
 	~main_glitch.set(\pitch_shift_ratio, 3);
 	~main_glitch.set(\pitch_dispersion, 1);
 	(time - cresc_time).wait;
-	~cresc = Synth(\windy, [\freq, 200, \out, ~revBus, \amp, 0.4, \atk, cresc_time, \curve_atk, 7, \rel, 0]);
+	~cresc = Synth(\windy, [\freq, 200, \out, ~revBus, \amp, 0.2, \atk, cresc_time, \curve_atk, 7, \rel, 0]);
 	cresc_time.wait;
 	~cresc.release;
 	~main_glitch.set(\lag_time, 0.2);
@@ -112,7 +112,7 @@
 	~main_glitch.set(\pitch_shift_ratio, 1.0);
 	~main_glitch.set(\pitch_dispersion, 0);
 	{
-		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2/20, mul: 0.125*0.5);
+		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2/20, mul: 0.125*0.35);
 		sig = sig * Env([0.5, 0], [5]).ar(2);
 		Out.ar(~revBus.index, sig);
 	}.play;
@@ -134,7 +134,7 @@
 	while({~last_transition_used == new_transition}, { new_transition = (0..(transitions.size-1)).choose; });
 	transitions[new_transition].();
 	~changeChordToRandom.();
-	~enable_ambient = [false, true].wchoose([0.2, 0.8]);
+	~enable_ambient = [false, true].wchoose([0.4, 0.6]);
 	~last_transition_used = new_transition;
 };
 

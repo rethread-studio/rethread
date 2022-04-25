@@ -23,7 +23,7 @@
 			var length = rrand(0.05, 0.3),
 			atk,
 			extra_latency,
-			degree = ~last_chord_degrees.choose + 106,
+			degree = ~last_chord_degrees.choose + [159, 106].choose,
 			amp = rrand(0.01, 0.1),
 			freq = ~s53.degreeToFreq(degree, ~rootFreq, 0) * ~freq_ratio;
 			if(~synthesis_mode == \soft_mode, {
@@ -62,7 +62,7 @@
 			// degree = ((chord.added_degrees + chord.root).choose),
 			degree = ~last_chord_degrees.choose + 106,
 			amp = exprand(0.005, 0.02),
-			temp_chord = ([0, 31] + degree) % 53 + 106;
+			temp_chord = ([0, 31] + degree) % 53 + 159;
 			if(~synthesis_mode == \soft_mode, {
 				length = rrand(0.2, 0.5);
 				rel = 0.1;
@@ -90,9 +90,9 @@
 		{ |chord, pan|
 			if(~enable_ambient, {
 				var length = rrand(0.15, 0.3),
-				atk = length * 0.3,
+				atk = 0.3,
 				extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
-				freq = ~s53.degreeToFreq(chord.root, ~rootFreq, [-2, -1, 0].choose) * ~freq_ratio,
+				freq = ~s53.degreeToFreq(chord.root, ~rootFreq, [-2, -1, 0, 1].wchoose([0.05, 0.4, 0.5, 0.3].normalizeSum)) * ~freq_ratio,
 				amp = exprand(0.005, 0.1);
 				ambient_channel.play_on(\dist_saw, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
 			});
@@ -100,26 +100,28 @@
 		{ |chord, pan|
 			if(~enable_ambient, {
 				var length = rrand(0.15, 0.3),
-				atk = length * 0.3,
+				atk = 0.3,
 				extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
 				freq = ~s53.degreeToFreq(chord.fifth + chord.root, ~rootFreq, 0) * ~freq_ratio,
 				amp = exprand(0.005, 0.1);
-				ambient_channel.play_on(\dist_saw, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
+				while({freq < 60}, { freq = freq * 2});
+				ambient_channel.play_on(\sine, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
 			});
 		},
 		{ |chord, pan|
 			if(~enable_ambient, {
 				var length = rrand(0.125, 0.25),
-				atk = rrand(0.02, 0.3),
+				atk = rrand(0.2, 0.5),
 				extra_latency,
 				degree = ([chord.root, chord.fifth + chord.root].choose) % 53 - 53,
 				amp = exprand(0.005, 0.1),
 				freq = ~s53.degreeToFreq(degree, ~rootFreq, [-1, 0].choose) * ~freq_ratio;
+				while({freq < 80}, { freq = freq * 2});
 				if(~synthesis_mode == \soft_mode, {
 					atk = rrand(0.2, 0.4);
 				});
 				extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv;
-				ambient_channel.play_on(\dist_saw, [\freq, freq, \amp, amp,\atk, atk, \sus, length * 0.1, \rel, length*0.6, \out, ambient_channel.bus, \pan, pan],
+				ambient_channel.play_on(\sine, [\freq, freq, \amp, amp,\atk, atk, \sus, length * 0.1, \rel, length*0.6, \out, ambient_channel.bus, \pan, pan],
 					extra_latency);
 			});
 		},

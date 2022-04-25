@@ -11,9 +11,9 @@ s.waitForBoot({
 
 	~use_auto_fade = true;
 
-	~whisper_amp = 5.5;
+	~whisper_amp = 2.5;
 	~useAmbisonicsDecoder = false;
-	~encoderType = \stereo;
+	~encoderType = \quad;
 
 	~synthesis_mode = \active_mode;
 	~ftrace_beep_dur = 0.08;
@@ -34,7 +34,7 @@ s.waitForBoot({
 				~rev.set(\mix, 0.1);
 				~delay.set(\enable_delay, 0);
 				~server_processing.set(\enable_delay, 0);
-				~main_glitch.set(\lpf_freq, 14900);
+				~main_glitch.set(\lpf_freq, 12900);
 			},
 			\soft_mode, {
 				~synthesis_mode = new_mode;
@@ -124,7 +124,7 @@ s.waitForBoot({
 	~delay = Synth(\delay_fx, [\in, ~delayFxBus, \out, ~revBus]);
 	~ambient_reverb = Synth(\ambient_reverb, [\in, ~ambientBus, \out, 0]);
 	~serverBus = Bus.audio(s, ~mixerChannelOutputs);
-	~server_processing = Synth(\server_channel, [\in, ~serverBus, \out, ~revBus]);
+	~server_processing = Synth(\server_channel, [\in, ~serverBus, \out, ~revBus, \amp, 0.5]);
 
 	s.sync;
 
@@ -364,6 +364,8 @@ s.waitForBoot({
 	~enable_user = false;
 	~enable_server = false;*/
 	"osc.scd".loadRelative; // don't receive OSC messages until everything is set up
+
+	~set_synthesis_mode.(~synthesis_mode);
 });
 
 )

@@ -22,6 +22,7 @@
 			Pgeom(0.08, 0.92, 10)
 		], inf).asStream,
 		amp_stream_2 =  Prand([Pgeom(0.5, 1.01, 50), Pgeom(1.0, 0.98, 40),Pgeom(0.7, 0.95, 20), Pgeom(0.7, 1.02, 15)], inf).asStream,
+		freq_stream = Prand([Pseq([1400], 7), Prand(([60, 61, 62, 63 ,64 ,65, 66, 67, 68, 69, 70, 71, 72].midicps * 4.5), 3)], inf).asStream,
 		// A Routine can have several yield points, unlike FuncStreams
 		freq_routine = Routine({
 			loop{
@@ -39,22 +40,16 @@
 		loop {
 			var channel = ~channels.beep,
 			dur = ~ftrace_beep_dur,
-			amp = amp_stream_1.next * amp_stream_2.next,
-			freq = freq_routine.next,
-			pan = rrand(-1, 1)
+			amp = amp_stream_1.next * amp_stream_2.next
 			;
-			if(freq == 1400) {
-				pan = 0;
-			};
 
 			if(~enable_ftrace, {
 				channel.play_on(\sine, [
 					\atk, 0.0001,
 					\sus, 0.07,
 					\rel, 0.001,
-					\amp,  amp,
-					\freq, freq * ~ftrace_noise_freq_ratio,
-					\pan, pan,
+					\amp,  amp * 0.7,
+					\freq, freq_routine.next * ~ftrace_noise_freq_ratio,
 					\out, channel.bus]);
 			});
 			dur.wait;
@@ -77,9 +72,16 @@
 	~tick_routine1 = Routine({
 		var freq_stream = Pwhite(10000, 10650).asStream; // (5000, 10500) (10000, 10650)
 		loop {
-			var channel = ~channels.tick,
+			var amp_stream_1 = Prand([
+				Pgeom(0.02, 1.08, 20),
+				Pgeom(0.04, 1.1, 10),
+				Pgeom(0.1, 0.95, 20),
+				Pgeom(0.08, 0.92, 10)
+			], inf).asStream,
+			amp_stream_2 =  Prand([Pgeom(0.5, 1.01, 50), Pgeom(1.0, 0.98, 40),Pgeom(0.7, 0.95, 20), Pgeom(0.7, 1.02, 15)], inf).asStream,
+			channel = ~channels.tick,
 			dur = 0.5.pow(~ftrace_stats.syscall.rolling_average.linlin(~ftrace_stats.syscall.min_rolling_average, ~ftrace_stats.syscall.max_rolling_average, 2, 6).round),
-			amp = 0.2;
+			amp = amp_stream_1.next * amp_stream_2.next * 0.7;
 
 			if(~enable_ftrace, {
 				channel.play_on(\tick2, [
@@ -97,9 +99,16 @@
 	~tick_routine2 = Routine({
 		var freq_stream = Pwhite(8000, 9500).asStream;
 		loop {
-			var channel = ~channels.tick,
+			var amp_stream_1 = Prand([
+				Pgeom(0.02, 1.08, 20),
+				Pgeom(0.04, 1.1, 10),
+				Pgeom(0.1, 0.95, 20),
+				Pgeom(0.08, 0.92, 10)
+			], inf).asStream,
+			amp_stream_2 =  Prand([Pgeom(0.5, 1.01, 50), Pgeom(1.0, 0.98, 40),Pgeom(0.7, 0.95, 20), Pgeom(0.7, 1.02, 15)], inf).asStream,
+			channel = ~channels.tick,
 			dur = 0.5.pow(~ftrace_stats.random.rolling_average.linlin(~ftrace_stats.random.min_rolling_average, ~ftrace_stats.random.max_rolling_average, 2, 6).round),
-			amp = 0.2;
+			amp = amp_stream_1.next * amp_stream_2.next * 0.7;
 
 			if(~enable_ftrace, {
 				channel.play_on(\tick2, [
@@ -126,6 +135,8 @@
 };
 
 
+
+
 ~stop_tick_process = {
 	~tick_routine1.stop;
 	~tick_routine2.stop;
@@ -134,31 +145,26 @@
 ~ftrace_trigger = { | type |
 	var freq = rrand(14000, 15000),
 	rel = rrand(1.0, 3.0),
-	amp = rrand(0.05, 0.1) * 0.25,
-	pan = 0,
+	amp = rrand(0.05, 0.1) * 0.15,
 	channel = ~channels.noise;
 	switch(type,
 		\Syscall, {
 			freq = rrand(14000, 14200);
 			rel = exprand(0.02, 0.06);
 			amp = amp * rrand(0.5, 1.0);
-			pan = -0.35;
 		},
 		\Random,{
 			freq = rrand(5000, 5100);
 			rel = exprand(0.1, 0.45);
 			amp = amp * rrand(0.5, 1.0);
-			pan = 0.35;
 		},
 		\Tcp,{
 			freq = rrand(12000, 12500);
 			rel = exprand(0.2, 0.55);
-			pan = 0.75;
 		},
 		\IrqMatrix,{
 			freq = rrand(7000, 7100);
 			rel = exprand(0.3, 0.8);
-			pan = -0.75;
 		},
 	);
 	rel = rel * 0.5;
@@ -167,7 +173,12 @@
 		\freq, freq,
 		\rel, rel,
 		\amp, amp,
-		\pan, pan,
 		\out, channel.bus
 	]);
 };
+
+/*
+~start_beep_process.()
+~stop_beep_process.()
+~start_tick_process.()
+*/
