@@ -13,7 +13,14 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\SPEED3_BUTTON_OFF, {},
 		\RESET_BUTTON_ON, {},
 		\RESET_BUTTON_OFF, {},
-		\PICTURE, {},
+		\COUNTDOWN_TRIGGER, {
+			// a countdown beep
+			Synth(\sine, [\freq, 1000, \amp, 0.2 , \atk, 0.005, \sus, 0.12, \rel, 0.01, \out, 0 ]);
+		},
+		\PICTURE, {
+			Synth(\sine, [\freq, 2000, \amp, 0.2 , \atk, 0.005, \sus, 0.12, \rel, 0.01, \out, 0 ]);
+			Synth(\play_buffer, [\buf, ~bufs.camera_shutter, \amp, 1.0]);
+		},
 		\IDLE, {},
 		\NEW_FILTER, { ~next_filter.(); },
 		\DONE, { ~filter_finished.()}, // One filter application has completed

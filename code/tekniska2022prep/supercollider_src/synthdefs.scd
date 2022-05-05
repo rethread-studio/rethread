@@ -130,3 +130,15 @@ SynthDef(\dist_noise, {
 	Env.linen(0.01, 0.03, \rel.kr(0.05)).kr(2);
 	Out.ar(\out.kr(0), sig);
 }).add;
+
+SynthDef(\play_buffer, {
+	var buf = \buf.kr(0), sig, trig, pos, env;
+	sig = PlayBuf.ar(1, buf, BufRateScale.kr(buf), doneAction: 2);
+	env = EnvGen.kr(Env(
+		levels: [0, 1, 1, 0],
+		times: [0.01, BufDur.kr(buf)-0.02, 0.01]
+	));
+	sig = sig * \amp.kr(0.5) * env;
+	sig = Pan2.ar(sig, \pan.kr(0));
+	Out.ar(\out.kr(0), sig);
+}).add;
