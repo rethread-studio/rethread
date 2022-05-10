@@ -18,7 +18,7 @@ button.watch((err, value) => {
 let previousValue = -1;
 myEncoder.on("rotation", (direction, value) => {
   if (value != previousValue) {
-    socket.emit("rotary", { direction, value });
+    socket.emit("rotary", { direction });
   }
   previousValue = value;
 });
@@ -56,7 +56,7 @@ if (process.env.WS_URL) {
         console.log(response); // "got it"
       });
     }
-  }, 100);
+  }, 70);
 } else {
   console.warn("WS_URLnot provided");
 }
