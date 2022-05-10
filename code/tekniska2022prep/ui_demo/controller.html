@@ -1,44 +1,110 @@
-<!DOCTYPE html>
+../ui_demo/<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+
     <title>Tekniska test</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <!-- <link rel="stylesheet" href="./styles.css" /> -->
+    <style>
+      body {
+        background-color: #fafafa;
+        color: #333;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        user-select: none !important;
+        text-align: center;
+      }
+      select,
+      button,
+      input {
+        display: block;
+        height: 50px;
+        width: 250px;
+        font-size: 25px;
+        margin: 10px auto;
+      }
+    </style>
   </head>
 
   <body>
     <div class="body">
-      <button id="RESET_BUTTON">Reset</button>
-      <button id="SPEED1_BUTTON">SPEED1</button>
-      <button id="SPEED2_BUTTON">SPEED2</button>
-      <button id="SPEED3_BUTTON">SPEED3</button><br />
-
-      <button id="L">PREVIOUS</button>
-      <button id="R">NEXT</button>
+      <label for="zoom-input"
+        >Zoom
+        <input
+          type="range"
+          min="1"
+          max="1000"
+          value="1"
+          id="zoom-input"
+        /> </label
+      ><br />
+      <label for="speed-input"
+        >Speed
+        <input
+          type="range"
+          min="0"
+          max="10000"
+          value="1"
+          id="speed-input"
+        /> </label
+      ><br />
+      <label for="filter-input"
+        >Filter
+        <select id="filter-input">
+          <option value="contrast">contrast</option>
+          <option value="saturation">saturation</option>
+          <option value="invert">invert</option>
+          <option value="brightness">brightness</option>
+          <option value="sepia">sepia</option>
+          <option value="colorFilter">colorFilter</option>
+        </select>
+      </label>
+      <button id="capture">Capture</button>
+      <button id="step">STEP</button>
     </div>
     <script src="./js/libraries/socket.io.min.js"></script>
     <script src="./js/button_map.js"></script>
+
     <script>
       const socket = io();
-      document.querySelectorAll("button").forEach((button) => {
-        if (button.id.indexOf("_BUTTON") > -1) {
-          button.addEventListener("mousedown", (e) => {
-            const values = new Array(12).fill(0);
-            values[button_map[e.target.id]] = 10000;
-            socket.emit("serial", values.join(","));
-          });
-          button.addEventListener("mouseup", (e) => {
-            const values = new Array(12).fill(0);
-            socket.emit("serial", values.join(","));
-          });
-        } else {
-          button.addEventListener("click", (e) => {
-            socket.emit("rotary", { direction: e.target.id, value: 0 });
-          });
-        }
+      document.getElementById("capture").addEventListener("click", () => {
+        socket.emit("capture");
       });
+      let stepInterval = null;
+      document.getElementById("step").onmousedown = document.getElementById(
+        "step"
+      ).ontouchstart = () => {
+        clearInterval(stepInterval);
+        stepInterval = setInterval(() => socket.emit("step"), 75);
+        socket.emit("step");
+      };
+      document.getElementById("step").onmouseup = document.getElementById(
+        "step"
+      ).ontouchend = () => {
+        clearInterval(stepInterval);
+      };
+      document
+        .getElementById("filter-input")
+        .addEventListener("input", function () {
+          socket.emit("filter", this.value);
+        });
+      document
+        .getElementById("speed-input")
+        .addEventListener("input", function () {
+          socket.emit("speed", this.value);
+        });
+      document
+        .getElementById("zoom-input")
+        .addEventListener("input", function () {
+          socket.emit("zoom", this.value);
+        });
     </script>
   </body>
 </html>

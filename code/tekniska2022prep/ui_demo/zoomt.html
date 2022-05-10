@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>foreach code execution</title>
+    <link type="text/css" rel="stylesheet" href="code.css" />
+    <style>
+      body,
+      html {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #9dbfd4;
+        image-rendering: pixelated;
+        position: relative;
+        overflow: hidden;
+      }
+      .body {
+        /* opacity: 0; */
+      }
+      #c {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+      img {
+        transform-origin: 0 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #code {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        z-index: -1;
+        font-size: 40px;
+        line-height: initial;
+      }
+      #filters {
+        width: 85% !important;
+        z-index: 99;
+        display: none;
+      }
+      .code .lines {
+        width: initial !important;
+      }
+      .code pre {
+        width: initial !important;
+      }
+      span.active::after {
+        display: none;
+      }
+      #state-box {
+        position: absolute;
+        height: 100%;
+        top: 0;
+        right: 0;
+        float: none !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: end;
+        width: 33% !important;
+      }
+      #state {
+        text-align: right;
+      }
+      #canvas_overlay,
+      #execution {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div class="body">
+      <div class="capture">
+        <video id="webcam"></video>
+        <!-- <div class="timer">1</div> -->
+      </div>
+      <div id="filters" class="">
+        <div class="row" id="parent-container"></div>
+      </div>
+      <div id="code" class="box code">
+        <div class="title"></div>
+        <div class="content" style="padding: 0">
+          <div class="lines"></div>
+          <pre><code></code></pre>
+        </div>
+        <div id="state-box">
+          <div id="state"></div>
+        </div>
+      </div>
+
+      <div id="execution">
+        <div id="transformation"></div>
+      </div>
+      <div id="progress">
+        <div class="bar">
+          <div class="fill"></div>
+        </div>
+        <div class="text"></div>
+      </div>
+    </div>
+    <div id="overlay">
+      <canvas width="100%" height="100%" id="canvas_overlay"></canvas>
+      <div id="overlay_body" class="body"></div>
+    </div>
+
+    <script src="/js/button_map.js"></script>
+    <script src="./code/bg.js"></script>
+    <script src="./code/filter.js"></script>
+    <script src="./code/filters/capture.js"></script>
+    <script src="./code/filters/contrast.js"></script>
+    <script src="./code/filters/saturation.js"></script>
+    <script src="./code/filters/invert.js"></script>
+    <script src="./code/filters/brightness.js"></script>
+    <script src="./code/utils.js"></script>
+
+    <script src="./js/webcam.js"></script>
+    <script src="./js/libraries/socket.io.min.js"></script>
+
+    <script src="./code/CodeExecutor.js"></script>
+    <script src="./code/app.js"></script>
+
+    <script>
+      const settings = {
+        canvasRatio: 1,
+        image: {
+          start: 0,
+          end: 300,
+          alfaStart: 1,
+          alfaEnd: 300,
+          canvas: true,
+        },
+        line: {
+          start: 30,
+          end: 3000,
+          alfaStart: 30,
+          alfaEnd: 100,
+          color: "#000000",
+        },
+        value: {
+          start: 30,
+          end: 5000,
+          alfaStart: 30,
+          alfaEnd: 100,
+        },
+        zoom: {
+          maxZoom: 250,
+          factor: 1.06,
+          progressionStart: 0,
+          progressionEnd: 100000,
+        },
+        picture: {
+          width: 640,
+          height: 480,
+        },
+      };
+      let scale = window.innerHeight / settings.picture.height;
+
+      async function loadImage(path) {
+        var img = new Image();
+        img.src = path;
+        return new Promise((resolve) => {
+          img.onload = () => {
+            img.style.width = `${img.width}px`;
+            img.style.height = `${img.height}px`;
+            resolve(img);
+          };
+        });
+      }
+      const cE = document.getElementById("c");
+      cE.width = window.innerWidth / settings.canvasRatio;
+      cE.height = window.innerHeight / settings.canvasRatio;
+
+      const introCtx = cE.getContext("2d");
+      introCtx.imageSmoothingEnabled = false;
+
+      function opacity(current, min, max) {
+        if (current < min) return 0;
+        if (current > max) return 1;
+
+        const range = max - min;
+        return (current - min) / range;
+      }
+      const webcam = new Webcam(
+        settings.picture.width,
+        settings.picture.height,
+        document.getElementById("webcam")
+      );
+
+      const codeExecutor = new CodeExecutor(
+        document.getElementById("parent-container"),
+        [filters.invert]
+      );
+
+      codeExecutor.on("filter_start", (filter) => {
+        renderCode(filter);
+        render(filter);
+      });
+      codeExecutor.on("filter_end", (filter) => render(filter));
+      codeExecutor.on("step", (filter) => {
+        if (codeExecutor.stepNum > 100 && codeExecutor.jumpValue == 0) {
+          renderMessage("Speed: x100");
+          codeExecutor.jump(100);
+        } else if (
+          codeExecutor.stepNum > 10000 &&
+          codeExecutor.jumpValue == 100
+        ) {
+          renderMessage("Speed: x1000");
+          codeExecutor.jump(1000);
+        } else if (
+          codeExecutor.stepNum > 100000 &&
+          codeExecutor.jumpValue == 1000
+        ) {
+          renderMessage("Speed: x10000");
+          codeExecutor.jump(10000);
+        }
+        render(filter);
+      });
+
+      (async () => {
+        await webcam.init();
+        let img = await loadImage(webcam.snap());
+        await codeExecutor.setImage(img);
+
+        if (!settings.image.canvas) document.body.appendChild(img);
+
+        introCtx.drawImage(img, 0, 0, img.width, img.height);
+        const pixelData = introCtx.getImageData(
+          0,
+          0,
+          img.width,
+          img.height
+        ).data;
+        introCtx.clearRect(0, 0, img.width, img.height);
+
+        function renderLines(scale) {
+          if (settings.line.start && scale < settings.line.start) return;
+          if (settings.line.end && scale > settings.line.end) return;
+
+          const canvasScale = scale / settings.canvasRatio;
+
+          const imgWidth = webcam.width * scale;
+          const imgHeight = webcam.height * scale;
+          const imgX = (0.5 + cE.clientWidth / 2 - imgWidth / 2) | 0;
+          const imgY = (0.5 + cE.clientHeight / 2 - imgHeight / 2) | 0;
+          const lineOffsetX = (imgX % scale) / settings.canvasRatio;
+          const lineOffsetY = (imgY % scale) / settings.canvasRatio;
+
+          introCtx.globalAlpha = 1;
+          if (canvasScale < settings.line.alfaEnd)
+            introCtx.globalAlpha = opacity(
+              scale,
+              settings.line.alfaStart,
+              settings.line.alfaEnd
+            );
+          introCtx.strokeStyle = settings.line.color;
+          introCtx.beginPath();
+
+          for (let i = lineOffsetX; i < cE.width; i += canvasScale) {
+            introCtx.moveTo(i, 0);
+            introCtx.lineTo(i, cE.height);
+          }
+          for (let j = lineOffsetY; j < cE.height; j += canvasScale) {
+            introCtx.moveTo(0, j);
+            introCtx.lineTo(cE.width, j);
+          }
+          introCtx.stroke();
+          introCtx.globalAlpha = 1;
+        }
+
+        function renderPicture(img, scale) {
+          if (settings.image.start && scale < settings.image.start) return;
+          if (settings.image.end && scale > settings.image.end) return;
+
+          const imgWidth = webcam.width * scale;
+          const imgHeight = webcam.height * scale;
+          const imgX = (0.5 + cE.clientWidth / 2 - imgWidth / 2) | 0;
+          const imgY = (0.5 + cE.clientHeight / 2 - imgHeight / 2) | 0;
+
+          img.style.left = `${imgX}px`;
+          img.style.top = `${imgY}px`;
+          img.style.transform = `scale(${scale})`;
+
+          if (scale > settings.image.alfaStart)
+            img.style.opacity =
+              1 -
+              opacity(scale, settings.image.alfaStart, settings.image.alfaEnd);
+        }
+        function renderPictureCanvas(img, scale) {
+          if (settings.image.start && scale < settings.image.start) return;
+          if (settings.image.end && scale > settings.image.end) return;
+
+          const canvasScale = scale / settings.canvasRatio;
+
+          const imgWidth = webcam.width * canvasScale;
+          const imgHeight = webcam.height * canvasScale;
+          const imgX = (0.5 + cE.clientWidth / 2 - imgWidth / 2) | 0;
+          const imgY = (0.5 + cE.clientHeight / 2 - imgHeight / 2) | 0;
+
+          if (scale > settings.image.alfaStart)
+            introCtx.globalAlpha =
+              1 -
+              opacity(scale, settings.image.alfaStart, settings.image.alfaEnd);
+          introCtx.drawImage(img, imgX, imgY, imgWidth, imgHeight);
+
+          introCtx.globalAlpha = 1;
+        }
+        function renderValues(scale) {
+          if (settings.value.start && scale < settings.value.start) return;
+          if (settings.value.end && scale > settings.value.end) return;
+
+          const canvasScale = scale / settings.canvasRatio;
+
+          const imgWidth = webcam.width * scale;
+          const imgHeight = webcam.height * scale;
+          const imgX = (0.5 + cE.clientWidth / 2 - imgWidth / 2) | 0;
+          const imgY = (0.5 + cE.clientHeight / 2 - imgHeight / 2) | 0;
+          const lineOffsetX = (imgX % scale) / settings.canvasRatio;
+          const lineOffsetY = (imgY % scale) / settings.canvasRatio;
+
+          introCtx.globalAlpha = 1;
+          if (canvasScale < settings.value.alfaEnd)
+            introCtx.globalAlpha = opacity(
+              scale,
+              settings.value.alfaStart,
+              settings.value.alfaEnd
+            );
+
+          introCtx.textAlign = "right";
+          introCtx.font = canvasScale * 0.3 + "px sarif";
+
+          for (let i = lineOffsetX; i < cE.width; i += canvasScale) {
+            const x = (i * settings.canvasRatio - imgX) / scale;
+            for (let j = lineOffsetY; j < cE.height; j += canvasScale) {
+              const y = (j * settings.canvasRatio - imgY) / scale;
+
+              const r = pixelData[(y * img.width + x) * 4];
+              const g = pixelData[(y * img.width + x) * 4 + 1];
+              const b = pixelData[(y * img.width + x) * 4 + 2];
+
+              introCtx.fillStyle = `rgb(${r}, 0, 0)`;
+              introCtx.fillText(
+                r,
+                i + canvasScale * 0.95,
+                j + canvasScale * 0.25
+              );
+              introCtx.fillStyle = `rgb(0, ${g}, 0)`;
+              introCtx.fillText(
+                g,
+                i + canvasScale * 0.95,
+                j + canvasScale * 0.6
+              );
+              introCtx.fillStyle = `rgb(0, 0, ${b})`;
+              introCtx.fillText(
+                b,
+                i + canvasScale * 0.95,
+                j + canvasScale * 0.95
+              );
+            }
+          }
+        }
+        
+        function renderImage(img, scale) {
+          const canvasScale = scale / settings.canvasRatio;
+          introCtx.clearRect(0, 0, cE.width, cE.height);
+
+          if (!settings.image.canvas) renderPicture(img, scale);
+          else renderPictureCanvas(img, scale);
+
+          renderLines(scale);
+          renderValues(scale);
+        }
+
+        function renderIntro() {
+          // document.querySelector("#filters").style.display = "block";
+          // document.querySelector(".body").style.opacity = opacity(
+          //   scale,
+          //   1000,
+          //   10000
+          // );
+          // document.querySelector(".body").style.transform = `scale(${opacity(
+          //   scale,
+          //   100,
+          //   10000
+          // )})`;
+
+          if (scale > settings.zoom.maxZoom) {
+            renderMessage("Turn the wheel to apply a filter...");
+            // codeExecutor.nextFilter();
+            // codeExecutor.init();
+            // codeExecutor.jump(0);
+
+            // codeExecutor.runFilter();
+            return true; // stop
+          }
+
+          scale *=
+            settings.zoom.factor +
+            opacity(
+              scale,
+              settings.zoom.progressionStart,
+              settings.zoom.progressionEnd
+            );
+
+          renderImage(
+            img,
+            scale > settings.value.start ? Math.round(scale) : scale
+          );
+        }
+
+        let firstTime = true;
+        function animate() {
+          if (renderIntro()) return;
+          if (false && firstTime && scale >= settings.line.alfaEnd) {
+            renderMessage("Look at the individual pixels...");
+            firstTime = false;
+            setTimeout(animate, 2500);
+          } else {
+            requestAnimationFrame(animate);
+          }
+        }
+
+        window.document.onwheel = (e) => {
+          if (e.deltaY > 0) {
+            scale *=
+              settings.zoom.factor +
+              opacity(
+                scale,
+                settings.zoom.progressionStart,
+                settings.zoom.progressionEnd
+              );
+          } else {
+            scale /=
+              settings.zoom.factor +
+              opacity(
+                scale,
+                settings.zoom.progressionStart,
+                settings.zoom.progressionEnd
+              );
+          }
+          if (scale < 1) {
+            scale = 1;
+          }
+          if (scale > settings.zoom.maxZoom) {
+            scale = settings.zoom.maxZoom;
+          }
+          renderImage(
+            img,
+            scale > settings.value.start ? Math.round(scale) : scale
+          );
+        };
+
+        function snap() {
+          document.querySelector(".capture").style.display = "";
+          document.querySelector("#filters").style.display = "none";
+          renderMessage("Take a picture");
+          firstTime = true;
+          setTimeout(async () => {
+            renderMessage("Navigate in the picture");
+            img = await loadImage(webcam.snap());
+            document.querySelector(".capture").style.display = "none";
+            await codeExecutor.setImage(img);
+            requestAnimationFrame(animate);
+          }, 2500);
+        }
+        snap();
+
+        let pause = true;
+        window.addEventListener("keydown", function (e) {
+          if (e.key == " ") {
+            pause = !pause;
+            if (!pause) play();
+          } else if (e.key == "r") {
+            scale = 1;
+            snap();
+          } else if (e.key == "ArrowRight" || e.key == "LeftRight") {
+            codeExecutor.runStep();
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

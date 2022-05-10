@@ -138,7 +138,7 @@ function renderMessage(message, timeout) {
   if (!overlayE) return;
   overlayE.innerHTML = message;
   overlayE.classList.add("active");
-  if (timeout == null) timeout = 2500;
+  if (timeout == null) return;
   if (Number.isInteger(timeout)) {
     setTimeout(() => {
       overlayE.classList.remove("active");

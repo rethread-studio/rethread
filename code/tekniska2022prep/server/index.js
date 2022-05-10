@@ -97,18 +97,18 @@ async function generateMosaic() {
   // m.generateThumbs();
 }
 
-setInterval(() => {
-  try {
-    generateMosaic();
-  } catch (error) {
-    console.error(error);
-  }
-}, 3 * 60 * 1000);
-try {
-  generateMosaic();
-} catch (error) {
-  console.error(error);
-}
+// setInterval(() => {
+//   try {
+//     generateMosaic();
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }, 3 * 60 * 1000);
+// try {
+//   generateMosaic();
+// } catch (error) {
+//   console.error(error);
+// }
 
 app.get("/img/mosaic.jpg", async (req, res) => {
   if (fs.existsSync(__dirname + "/img/mosaic.jpg")) {
@@ -157,6 +157,8 @@ let state = "IDLE";
 io.on("connection", (socket) => {
   console.log("a client connected");
 
+  socket.onAny(console.log);
+
   // send the current state to the new client
   socket.emit("state", state);
 
@@ -190,6 +192,25 @@ io.on("connection", (socket) => {
 
   socket.on("stage", (data) => {
     osc.send({ state: data, events: getNbEventSec() });
+  });
+
+  socket.on("zoom", (data) => {
+    io.emit("zoom", data);
+  });
+  socket.on("speed", (data) => {
+    io.emit("speed", data);
+  });
+  socket.on("capture", (data) => {
+    io.emit("capture", data);
+  });
+  socket.on("filter", (data) => {
+    io.emit("filter", data);
+  });
+  socket.on("onStep", (data) => {
+    osc.send({ state: "step", events: getNbEventSec() });
+  });
+  socket.on("step", (data) => {
+    io.emit("step", { direction: "next", speed: getNbEventSec() });
   });
 
   socket.on("rotary", (data) => {
@@ -258,4 +279,6 @@ function resetIdle() {
     setState("IDLE");
   }, process.env.IDLE_TIME);
 }
-server.listen(process.env.PORT);
+server.listen(process.env.PORT, () =>
+  console.log("Server listening on *:" + process.env.PORT)
+);

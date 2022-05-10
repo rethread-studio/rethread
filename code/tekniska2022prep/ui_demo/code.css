@@ -127,10 +127,11 @@ canvas.image {
 
 #progress .text {
   position: absolute;
-  display: inline;
-  padding: 2px 5px;
-  background: var(--main-color);
-  color: white;
+  color: #444;
+  width: 100%;
+  text-align: center;
+  left: 0;
+  top: 0;
 }
 
 #progress .bar {
@@ -229,12 +230,12 @@ span.active::after {
 }
 
 #execution #code,
-#execution #state-box {
+#state-box {
   width: 20%;
   float: left;
 }
 
-#execution #state-box {
+#state-box {
   float: right;
 }
 

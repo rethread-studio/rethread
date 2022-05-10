@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>foreach code execution</title>
+    <link type="text/css" rel="stylesheet" href="zoom.css" />
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <div id="content"></div>
+    
+    <script src="./js/libraries/socket.io.min.js"></script>
+
+    <script src="./zoom/ZoomImage.js"></script>
+    <script src="./zoom/util.js"></script>
+    <script src="./js/webcam.js"></script>
+
+    <script src="./zoom/CodeExecutor.js"></script>
+    <script src="./zoom/filter.js"></script>
+    <script src="./zoom/filters/contrast.js"></script>
+    <script src="./zoom/filters/saturation.js"></script>
+    <script src="./zoom/filters/invert.js"></script>
+    <script src="./zoom/filters/brightness.js"></script>
+    <script src="./zoom/filters/sepia.js"></script>
+    <script src="./zoom/filters/colorFilter.js"></script>
+
+    <script src="./zoom/scenes/capture.js"></script>
+    <script src="./zoom/scenes/rgb.js"></script>
+    <script src="./zoom/scenes/zoomTransition.js"></script>
+    <script src="./zoom/scenes/filter.js"></script>
+    <script src="./zoom/main.js"></script>
+    <script>
+      (async () => {
+        window.requestAnimationFrame(animate);
+        window.addEventListener("resize", init);
+        await init();
+      })();
+    </script>
+  </body>
+</html>

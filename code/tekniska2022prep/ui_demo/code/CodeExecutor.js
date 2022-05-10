@@ -23,21 +23,23 @@ class CodeExecutor {
       return { parent: e, canvas };
     }
 
-    parentContainer.style.width = 50 * (this.filters.length + 2) + "%";
+    const nbFilters = this.filters.length + 1;
+    
+    parentContainer.style.width = 50 * nbFilters + "%";
 
-    const h = createCanvas("hex_image");
-    parentContainer.appendChild(h.parent);
-    h.parent.style.width = 100 / (this.filters.length + 2) + "%";
-    h.canvas.width = 1200;
-    h.canvas.height = 900;
-    this.canvas.hex_image = h.canvas;
-    this.contexts.hex_image = h.canvas.getContext("2d");
+    // const h = createCanvas("hex_image");
+    // parentContainer.appendChild(h.parent);
+    // h.parent.style.width = 100 / nbFilters + "%";
+    // h.canvas.width = 1200;
+    // h.canvas.height = 900;
+    // this.canvas.hex_image = h.canvas;
+    // this.contexts.hex_image = h.canvas.getContext("2d");
 
     const o = createCanvas("original_image");
     o.canvas.width = 600;
     o.canvas.height = 450;
     parentContainer.appendChild(o.parent);
-    o.parent.style.width = 100 / (this.filters.length + 2) + "%";
+    o.parent.style.width = 100 / nbFilters + "%";
 
     this.canvas.original = o.canvas;
     this.contexts.original = o.canvas.getContext("2d");
@@ -47,7 +49,7 @@ class CodeExecutor {
       f.canvas.width = 600;
       f.canvas.height = 450;
       parentContainer.appendChild(f.parent);
-      f.parent.style.width = 100 / (this.filters.length + 2) + "%";
+      f.parent.style.width = 100 / nbFilters + "%";
 
       this.canvas[this.filters[i].name] = f.canvas;
       this.contexts[this.filters[i].name] = f.canvas.getContext("2d");
@@ -55,6 +57,21 @@ class CodeExecutor {
   }
 
   async setImage(imgPath) {
+    if (imgPath instanceof Image) {
+      const img = imgPath;
+      this.canvas.original.width = img.width;
+      this.canvas.original.height = img.height;
+
+      this.contexts.original.drawImage(img, 0, 0);
+
+      for (const i in this.filters) {
+        this.canvas[this.filters[i].name].width = img.width;
+        this.canvas[this.filters[i].name].height = img.height;
+      }
+
+      this._emit("image", img);
+      return img;
+    }
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = async () => {
@@ -128,7 +145,7 @@ class CodeExecutor {
   _emit(event, obj) {
     if (!this.listeners[event]) return;
     for (const i in this.listeners[event]) {
-      this.listeners[event][i](obj);
+      setTimeout(() => this.listeners[event][i](obj), 0);
     }
   }
 
@@ -218,7 +235,8 @@ class CodeExecutor {
           this.current = null;
           resolve();
         },
-        (_) => {
+        (error) => {
+          if (error) console.error(error);
           this._emit("filter_end", filter);
           console.log("Stoped filter", filter.name);
           resolve();

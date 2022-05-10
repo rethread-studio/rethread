@@ -205,7 +205,7 @@ function help() {
     timeoutHelp = setTimeout(() => {
       if (!codeExecutor.current) return;
       renderMessage(
-        `Turn the wheel to make progress ...<div class="hand-wheel"><img src="./img/CrankWheel.svg" /></div>`,
+        `<div style="position:relative">Turn the wheel to make progress ...<div class="hand-wheel"><img src="./img/CrankWheel.svg" /></div></div>`,
         () => {
           return new Promise((resolve) => {
             stepResolve = resolve;
