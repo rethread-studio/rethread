@@ -168,6 +168,7 @@ io.on("connection", (socket) => {
 
   socket.on("picture", (image) => {
     if (image == null) return;
+    osc.send({ state: "picture" });
     const fileName = "snap_" + new Date().getTime();
     const filePath = snapsFolder + fileName + ".png";
     // Remove header
@@ -196,18 +197,33 @@ io.on("connection", (socket) => {
 
   socket.on("zoom", (data) => {
     io.emit("zoom", data);
+    osc.send({ state: "zoom", data });
   });
   socket.on("speed", (data) => {
     io.emit("speed", data);
+    osc.send({ state: "speed", data });
+  });
+  socket.on("transition", (data) => {
+    osc.send({ state: "transition", data });
   });
   socket.on("capture", (data) => {
     io.emit("capture", data);
+    osc.send({ state: "capture" });
   });
   socket.on("filter", (data) => {
     io.emit("filter", data);
+    osc.send({ state: "filter", data });
+  });
+  socket.on("timer", (data) => {
+    osc.send({ state: "timer", data });
   });
   socket.on("onStep", (data) => {
-    osc.send({ state: "step", events: getNbEventSec() });
+    osc.send({
+      state: "step",
+      events: getNbEventSec(),
+      index: data.index,
+      total: data.total,
+    });
   });
   socket.on("step", (data) => {
     io.emit("step", { direction: "next", speed: getNbEventSec() });

@@ -12,6 +12,8 @@ class ZoomTransitionScene {
     this.step = 0;
     this.isDone = false;
 
+    if (window.socket) window.socket.emit("transition", "start");
+
     this.zoomImage.zoom(this.canvas.clientHeight / this.img.height).center();
     return this;
   }
@@ -23,7 +25,6 @@ class ZoomTransitionScene {
   }
 
   async render() {
-    if (window.socket) window.socket.emit("transition", "start");
     this.step++;
 
     this.zoomImage.zoom(this.zoomImage.scale * 1.05).center();

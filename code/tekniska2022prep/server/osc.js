@@ -25,7 +25,20 @@ module.exports.close = function () {
 module.exports.send = function send(value, opt) {
   const args = [];
   args.push({ type: "s", value: value.state });
-  args.push({ type: "f", value: value.events });
+  if (value.events) args.push({ type: "f", value: value.events });
+  if (value.data !== undefined) {
+    if (typeof value.data === "string") {
+      args.push({ type: "s", value: value.data });
+    } else {
+      args.push({ type: "f", value: value.data });
+    }
+  }
+  if (value.index) {
+    args.push({ type: "f", value: value.index });
+  }
+  if (value.total) {
+    args.push({ type: "f", value: value.total });
+  }
 
   if (!udpPort) {
     return;

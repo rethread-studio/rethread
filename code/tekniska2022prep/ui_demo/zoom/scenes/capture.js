@@ -52,6 +52,7 @@ class CaptureScene {
     timerE.innerText = timer;
     this.triggerInterval = setInterval(() => {
       timerE.innerText = --timer;
+      if (window.socket) window.socket.emit("timer", timer);
       if (timer == 0) {
         document.getElementById("content").removeChild(timerE);
         clearInterval(this.triggerInterval);
