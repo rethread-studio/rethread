@@ -22,6 +22,7 @@ myEncoder.on("rotation", (direction, value) => {
   }
   previousValue = value;
 });
+let lastData;
 
 if (process.env.TTY) {
   const port = new SerialPort({
@@ -32,7 +33,6 @@ if (process.env.TTY) {
   port.on("open", () => {
     console.log("Connected to serial port: " + process.env.TTY);
   });
-  let lastData;
   const parser = port.pipe(new ReadlineParser({ delimiter: "\n" }));
   parser.on("data", (data) => {
     lastData = data;
