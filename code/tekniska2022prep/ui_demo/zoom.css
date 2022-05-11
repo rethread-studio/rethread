@@ -68,11 +68,27 @@ html {
   width: 50%;
   height: 100%;
   background-color: var(--main-bg);
+  padding-left: 25px;
 }
 
 span.active {
-  color: white;
-  background-color: var(--main-color);
+  color: var(--main-color);
+  /* background-color: white; */
+  font-size: 20px;
+  font-weight: bold;
+}
+
+span::after {
+  position: fixed;
+  right: 5px;
+  margin-top: -2px;
+  content: attr(value);
+  color: var(--main-color);
+  border: 1px solid var(--main-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  padding: 2px;
 }
 
 #code {
@@ -80,6 +96,7 @@ span.active {
   font-size: 13px;
   line-height: 15px;
   tab-size: 3px;
+  margin-top: 15px;
 }
 
 #code .keyword {
@@ -206,6 +223,7 @@ span.active {
   text-align: center;
   opacity: 0;
 }
+
 #overlay.active {
   opacity: 1;
 }

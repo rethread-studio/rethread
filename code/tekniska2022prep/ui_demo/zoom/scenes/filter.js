@@ -194,9 +194,25 @@ class FilterScene {
       e.classList.remove("active");
     }
 
+    function renderValue(value) {
+      if (value == null) return '';
+      if (value.length) {
+        return `${value.constructor.name}[${value.length}]`;
+      }
+      if (value instanceof Object) {
+        return `${value.constructor.name}`;
+      }
+      return JSON.stringify(value);
+    }
+
+    
     const e = document.getElementById("code_" + current.id);
     if (e != null) {
       e.className = "active";
+      // e.innerHTML = renderValue(current.value);
+      console.log(current)
+      e.setAttribute("value", renderValue(current.value));
+      // e.innerText = current.value;
     }
     this.centerToCurrentPixels();
   }
