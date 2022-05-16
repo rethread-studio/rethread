@@ -52,6 +52,8 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		},
 		\zoom, {
 			~zoom_setting = msg[2].asFloat/1000.0;
+			~freq_ratio = (1.0 - ~zoom_setting) .pow(2)* 0.8 + 0.2;
+			("freq_ratio:" + ~freq_ratio).postln;
 		},
 	);
 

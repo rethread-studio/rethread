@@ -287,9 +287,12 @@ s.waitForBoot({
 											(0.1 * self.duration_time).wait;
 										}, {
 											switch(self.synth_type,
-												\tick2, {Synth(\tick2, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.15 * self.my_amp, \out, ~revBus]);},
-												\sine, {Synth(\sine, [\freq, self.freq_pitch*0.05 * ~freq_ratio, \amp, 0.2 * self.my_amp, \atk, 0.005, \sus, self.sus_time, \rel, self.duration_time*tick_time, \out, ~revBus ]);},
-												\dist_noise, {Synth(\dist_noise, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.25 * self.my_amp, \rel, 0.02, \out, ~revBus]);},
+												\tick2, {Synth(\tick2, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.15 * self.my_amp, \out, ~revBus]); },
+												\sine, {Synth(\sine, [\freq, self.freq_pitch*0.05 * ~freq_ratio,
+													\amp, 0.2 * self.my_amp, \atk, 0.005, \sus, self.sus_time, \rel, self.duration_time*tick_time,
+													\out, ~revBus ]); },
+												\dist_noise, {Synth(\dist_noise, [\freq, self.freq_pitch * ~freq_ratio.pow(1.5),
+													\amp, 0.25 * self.my_amp, \rel, 0.02, \out, ~revBus]); },
 											);
 											(self.duration_time*tick_time).wait;
 										});
@@ -340,6 +343,7 @@ s.waitForBoot({
 	};
 
 	"osc_from_server.scd".loadRelative;
+	~infinite_mode.();
 });
 )
 
