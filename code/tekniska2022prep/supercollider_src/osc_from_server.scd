@@ -1,5 +1,5 @@
 
-
+~last_total_number_of_step = 0;
 OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 	var type = msg[1];
 	msg.postln;
@@ -13,11 +13,12 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\SPEED3_BUTTON_OFF, {},
 		\RESET_BUTTON_ON, {},
 		\RESET_BUTTON_OFF, {},
-		\COUNTDOWN_TRIGGER, {
+		\timer, {
 			// a countdown beep
 			Synth(\sine, [\freq, 1000, \amp, 0.2 , \atk, 0.005, \sus, 0.12, \rel, 0.01, \out, 0 ]);
 		},
-		\PICTURE, {
+		\picture, {
+			// when the picture is taken
 			Synth(\sine, [\freq, 2000, \amp, 0.2 , \atk, 0.005, \sus, 0.12, \rel, 0.01, \out, 0 ]);
 			Synth(\play_buffer, [\buf, ~bufs.camera_shutter, \amp, 1.0]);
 		},
@@ -25,7 +26,33 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\NEW_FILTER, { ~next_filter.(); },
 		\DONE, { ~filter_finished.()}, // One filter application has completed
 		\previous, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds },
-		\next, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds }
+		\next, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds },
+		\step, {
+			// [current_index, total_number_of_step]
+			var total_number_of_steps = msg[3].asFloat,
+			steps_since_last = total_number_of_steps - ~last_total_number_of_step,
+			now = Date.localtime.rawSeconds,
+			time_since_last = now - ~last_crank_update;
+			~crank_speed = steps_since_last / time_since_last;
+			("crank_speed: " + ~crank_speed).postln;
+			~last_crank_update = Date.localtime.rawSeconds;
+		},
+		\capture, {
+			// when someone presses the capture button
+		},
+		\filter, {},
+		\filter_start, {
+
+		},
+		\filter_end, {
+			// done with applying the filter
+		},
+		\speed, {
+			~speed_setting = msg[2].asFloat/10000.0;
+		},
+		\zoom, {
+			~zoom_setting = msg[2].asFloat/1000.0;
+		},
 	);
 
 }, '/foreach'); // def style

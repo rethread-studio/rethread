@@ -15,6 +15,8 @@ s.waitForBoot({
 	~running.speed2 = false;
 	~running.speed3 = false;
 	~running.infinite = false;
+	~speed_setting = 0.0; // 0-1
+	~zoom_setting = 0.0; // 0-1
 	~crank_speed = 0;
 	~last_crank_update = 0;
 	~stop_functions = Environment.new(know: true);
@@ -243,10 +245,11 @@ s.waitForBoot({
 	~crank_speed_to_wait_time = {
 		var speed =
 		(0.2/~crank_speed.pow(1.5)).min(0.5);
+		speed = speed + ((1.0-~speed_setting) * 0.2);
 		if(Date.localtime.rawSeconds - ~last_crank_update < 0.7, {
 			speed
 		}, {
-			0.5
+			inf
 		});
 
 	};
@@ -280,12 +283,16 @@ s.waitForBoot({
 									sus_time: rrand(0.0, 0.1),
 									my_amp: rrand(0.7, 1.5),
 									play_func: {|self, tick_time = 0.2|
-										switch(self.synth_type,
-											\tick2, {Synth(\tick2, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.15 * self.my_amp, \out, ~revBus]);},
-											\sine, {Synth(\sine, [\freq, self.freq_pitch*0.05 * ~freq_ratio, \amp, 0.2 * self.my_amp, \atk, 0.005, \sus, self.sus_time, \rel, self.duration_time*tick_time, \out, ~revBus ]);},
-											\dist_noise, {Synth(\dist_noise, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.25 * self.my_amp, \rel, 0.02, \out, ~revBus]);},
-										);
-										(self.duration_time*tick_time).wait;
+										if(tick_time == inf, {
+											(0.1 * self.duration_time).wait;
+										}, {
+											switch(self.synth_type,
+												\tick2, {Synth(\tick2, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.15 * self.my_amp, \out, ~revBus]);},
+												\sine, {Synth(\sine, [\freq, self.freq_pitch*0.05 * ~freq_ratio, \amp, 0.2 * self.my_amp, \atk, 0.005, \sus, self.sus_time, \rel, self.duration_time*tick_time, \out, ~revBus ]);},
+												\dist_noise, {Synth(\dist_noise, [\freq, self.freq_pitch * ~freq_ratio, \amp, 0.25 * self.my_amp, \rel, 0.02, \out, ~revBus]);},
+											);
+											(self.duration_time*tick_time).wait;
+										});
 									},
 								)
 							);
