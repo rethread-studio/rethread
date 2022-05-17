@@ -98,12 +98,12 @@
       document
         .getElementById("speed-input")
         .addEventListener("input", function () {
-          socket.emit("speed", this.value);
+          socket.emit("speed",  Math.pow(this.value/10000.0, 3) * 10000.0);
         });
       document
         .getElementById("zoom-input")
         .addEventListener("input", function () {
-          socket.emit("zoom", this.value);
+          socket.emit("zoom", Math.pow(this.value/1000.0, 3) * 1000.0);
         });
     </script>
   </body>
