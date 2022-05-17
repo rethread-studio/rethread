@@ -109,6 +109,25 @@ SynthDef(\sine, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 
+SynthDef(\speed_effect, {
+	var sig, env, freq = \freq.kr(220, 0.2), gate = \gate.kr(1);
+	env = EnvGen.ar(Env.adsr(\atk.kr(0.01), \decay_time.kr(0.01), \sus.kr(1.0), \rel.kr(0.5)), gate: gate, doneAction: 2);
+	sig = SinOsc.ar(freq*[1, 1.02, 1.5, 2].scramble * ({LFNoise1.ar(3).range(0.999, 1.001)}!4), mul: \amp.kr(0.1));
+	sig = Splay.ar(sig) * env * SinOsc.ar(freq * 0.03).range(0.5, 1.0);
+	sig = Pan2.ar(sig, \pan.kr(0));
+	Out.ar(\out.kr(0), sig);
+}).add;
+SynthDef(\zoom_effect, {
+	var sig, env, freq = \freq.kr(220), effect = \effect.kr(0.5), gate = \gate.kr(1);
+	env = EnvGen.ar(Env.adsr(\atk.kr(0.05), \decay_time.kr(0.01), \sus.kr(1.0), \rel.kr(1.0)), gate: gate, doneAction: 2);
+	sig = SinOsc.ar(freq*([1, 1.01, 1.02, 1.5, 2, 2.02, 2.5, 3.5, 4] + ({Rand(0.5, 1.0)}!9 * effect)) * ({LFNoise1.ar(3).range(0.999, 1.001)}!9) + SinOsc.ar(freq*effect.pow(2)*5.0, mul: freq*effect*15), mul: \amp.kr(0.07));
+	sig = Mix(sig);
+	// sig = sig + AllpassL.ar((BrownNoise.ar(effect.lag(0.1) * 0.05) * Decay.ar(Dust.ar(effect.pow(2)*300 + 1), 0.15)), 0.2, 0.1, 0.5);
+	sig = sig * env;
+	sig = Pan2.ar(sig, \pan.kr(0));
+	Out.ar(\out.kr(0), sig);
+}).add;
+
 SynthDef(\dist_noise, {
 	var sig, env, trig = Dust.ar(700), freq = \freq.kr(12500);
 	sig = PinkNoise.ar() * Decay2.ar(trig, 0.0001, 0.1);

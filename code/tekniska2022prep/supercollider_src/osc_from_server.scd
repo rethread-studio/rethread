@@ -1,5 +1,7 @@
 
 ~last_total_number_of_step = 0;
+~last_speed_update = 0;
+~last_zoom_update = 0;
 OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 	var type = msg[1];
 	msg.postln;
@@ -49,11 +51,14 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		},
 		\speed, {
 			~speed_setting = msg[2].asFloat/10000.0;
+			~last_speed_update = Date.localtime.rawSeconds;
 		},
 		\zoom, {
 			~zoom_setting = msg[2].asFloat/1000.0;
 			~freq_ratio = (1.0 - ~zoom_setting) .pow(2)* 0.8 + 0.2;
 			("freq_ratio:" + ~freq_ratio).postln;
+						~last_zoom_update = Date.localtime.rawSeconds;
+
 		},
 	);
 

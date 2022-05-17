@@ -245,7 +245,7 @@ s.waitForBoot({
 	~crank_speed_to_wait_time = {
 		var speed =
 		(0.2/~crank_speed.pow(1.5)).min(0.5);
-		speed = speed + ((1.0-~speed_setting) * 0.2);
+		speed = speed + ((1.0-~speed_setting.pow(0.33)) * 0.2);
 		if(Date.localtime.rawSeconds - ~last_crank_update < 0.7, {
 			speed
 		}, {
@@ -341,6 +341,45 @@ s.waitForBoot({
 			~freq_ratio = rrand(0.5, 1.5);
 		});
 	};
+
+	// sound effects update
+	~speed_effect = nil;
+	~zoom_effect = nil;
+	{
+		loop {
+			var now = Date.localtime.rawSeconds;
+			if((now - ~last_speed_update) < 0.3, {
+				var freq = ~speed_setting.pow(2) * 2000 + 50;
+				// play sound effect
+				if(~speed_effect == nil, {
+					~speed_effect = Synth(\speed_effect, [\freq, freq]);
+				});
+				~speed_effect.set(\freq, freq);
+			}, {
+				// stop sound effect if it's playing
+				if(~speed_effect != nil, {
+					~speed_effect.release;
+					~speed_effect = nil;
+				});
+			});
+			if((now - ~last_zoom_update) < 0.3, {
+				var freq = (1.0-~zoom_setting).pow(4) * 100 + 50,
+				effect = 1.0 - ~zoom_setting;
+				// play sound effect
+				if(~zoom_effect == nil, {
+					~zoom_effect = Synth(\zoom_effect, [\effect, effect, \freq, freq, \out, ~revBus]);
+				});
+				~zoom_effect.set(\effect, effect, \freq, freq, \out, ~revBus);
+			}, {
+				// stop sound effect if it's playing
+				if(~zoom_effect != nil, {
+					~zoom_effect.release;
+					~zoom_effect = nil;
+				});
+			});
+			0.05.wait;
+		}
+	}.fork;
 
 	"osc_from_server.scd".loadRelative;
 	~infinite_mode.();
