@@ -94,7 +94,7 @@
 				extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv,
 				freq = ~s53.degreeToFreq(chord.root, ~rootFreq, [-2, -1, 0, 1].wchoose([0.05, 0.4, 0.5, 0.3].normalizeSum)) * ~freq_ratio,
 				amp = exprand(0.005, 0.1);
-				ambient_channel.play_on(\dist_saw, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
+				ambient_channel.play_on(\dist_saw, [\freq, freq, \amp, 0.1,\atk, atk, \rel, 0.1, \out, ambient_channel.bus, \pan, pan], extra_latency);
 			});
 		},
 		{ |chord, pan|
@@ -105,7 +105,7 @@
 				freq = ~s53.degreeToFreq(chord.fifth + chord.root, ~rootFreq, 0) * ~freq_ratio,
 				amp = exprand(0.005, 0.1);
 				while({freq < 60}, { freq = freq * 2});
-				ambient_channel.play_on(\sine, [\freq, freq, \amp, 0.1,\atk, atk, \rel, length-atk, \out, ambient_channel.bus, \pan, pan], extra_latency);
+				ambient_channel.play_on(\sine, [\freq, freq, \amp, 0.1,\atk, atk, \rel, 0.1, \out, ambient_channel.bus, \pan, pan], extra_latency);
 			});
 		},
 		{ |chord, pan|
@@ -121,7 +121,7 @@
 					atk = rrand(0.2, 0.4);
 				});
 				extra_latency = ((atk/~nv) - (atk/~nv).floor) * ~nv;
-				ambient_channel.play_on(\sine, [\freq, freq, \amp, amp,\atk, atk, \sus, length * 0.1, \rel, length*0.6, \out, ambient_channel.bus, \pan, pan],
+				ambient_channel.play_on(\sine, [\freq, freq, \amp, amp,\atk, atk, \sus, length * 0.1, \rel, length*0.6 + 0.1, \out, ambient_channel.bus, \pan, pan],
 					extra_latency);
 			});
 		},
