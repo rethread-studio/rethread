@@ -119,6 +119,7 @@
   },
   draw: function() {
     fill(255);
+    stroke(0);
     ellipse(this.x, this.y, this.size, this.size);
     let dip_offset = this.size * this.dip_offset * 0.5;
     let dip_x = this.x + (cos(this.rotation) * dip_offset);
@@ -168,6 +169,7 @@ let setting_wheel = {
   },
   draw: function() {
     fill(255);
+    stroke(0);
     strokeWeight(1);
     ellipse(this.x, encoder.y, this.size, this.size);
     let rotation = this.rotation + this.pull_rotation;
@@ -221,7 +223,8 @@ function setup() {
 }
 
 function draw() {
-  clear();
+  // clear();
+  background(255, 5);
   
   encoder.draw();
   setting_wheel.draw();
@@ -256,6 +259,9 @@ function touchMoved() {
     // prevent default
     return false;
   }
+  fill(0, 255, 0, 100);
+  noStroke();
+  ellipse(mouseX, mouseY, 20, 20);
   return true;
 }
 function touchEnded() {
