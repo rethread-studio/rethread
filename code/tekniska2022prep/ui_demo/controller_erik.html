@@ -39,6 +39,7 @@
           width: 15vw;
           position: absolute;
           left: 30%;
+          z-index: 1;
       }
       #speed-input {
           height: 80vh;
@@ -46,6 +47,7 @@
       }
       #speed-input-div {
           position: absolute;
+          z-index: 1;
       }
       canvas {
           position: absolute;
@@ -219,7 +221,7 @@ function setup() {
 }
 
 function draw() {
-  background(255, 0);
+  clear();
   
   encoder.draw();
   setting_wheel.draw();
@@ -260,6 +262,16 @@ function touchEnded() {
   console.log("touch ended")
   encoder.pressed = false;
   setting_wheel.pressed = false;
+}
+function windowResized() {
+      
+    resizeCanvas(window.innerWidth, window.innerHeight);
+  encoder.size = height * 0.7;
+  encoder.x = width*0.7;
+  encoder.y = height/2;
+  setting_wheel.size = height * 0.2;
+  setting_wheel.x = width*0.2;
+  setting_wheel.y = height/2;
 }
       </script>
   </body>
