@@ -248,6 +248,9 @@ function mousePressed() {
   }
   return true;
 }
+function touchStarted() {
+mousePressed();
+}
 function touchMoved() {
   if(encoder.pressed) {
     encoder.update_rotation(mouseX, mouseY);
