@@ -13,7 +13,7 @@
     <!-- <link rel="stylesheet" href="./styles.css" /> -->
     <style>
       body {
-        background-color: #ea6464;
+          background-color: #6f8877;
         color: #333;
         width: 100%;
         height: 100%;
@@ -96,8 +96,9 @@
   y: 0,
   rotation: 0,
   touch_angle: 0,
+  pull_rotation: 0,
   size: 200,
-  dip_size: 20,
+  dip_size: 30,
   dip_offset: 0.8,
   update_rotation: function(x, y) {
     // calculate the angle of the mouse position and change rotation the amount of the difference since the last angle
@@ -111,22 +112,51 @@
     if (change < -PI) {
       change += TAU;
     }
-    if(change > 0.2) {
-      this.rotation += change;
-      this.touch_angle = new_touch_angle;
+      let step = TAU/30;
+      if(change > step) {
+          this.rotation += step * Math.floor(change/step);
+          this.touch_angle = step * Math.floor(new_touch_angle/step);
+        this.pull_rotation = 0;
       socket.emit("step");
+    } else if (change > 0) {
+        this.pull_rotation = change*0.5;
     }
   },
   draw: function() {
-    fill(255);
+      noStroke();
+    fill(200);
+    ellipse(this.x, this.y, this.size * 1.05, this.size*1.05);
     stroke(0);
+
+    push();
+      let num_outer_lines = 30;
+    translate(this.x, this.y);
+    let outer_rotation = TAU/num_outer_lines;
+    for (let i = 0; i < num_outer_lines; i++) {
+      rotate(outer_rotation);
+      line(this.size*0.5, 0, this.size*0.525, 0);
+    }
+    pop();
+
+    fill(255);
     ellipse(this.x, this.y, this.size, this.size);
     let dip_offset = this.size * this.dip_offset * 0.5;
-    let dip_x = this.x + (cos(this.rotation) * dip_offset);
-    let dip_y = this.y + (sin(this.rotation)* dip_offset);
+      let rotation = this.rotation + this.pull_rotation;
+    let dip_x = this.x + (cos(rotation) * dip_offset);
+    let dip_y = this.y + (sin(rotation)* dip_offset);
     fill(10);
     ellipse(dip_x, dip_y, this.dip_size, this.dip_size);
     ellipse(this.x, this.y, this.size*0.01, this.size*0.01);
+    push();
+      let num_lines = 12;
+    translate(this.x, this.y);
+      rotate(rotation);
+    let option_rotation = TAU/num_lines;
+    for (let i = 0; i < num_lines; i++) {
+      rotate(option_rotation);
+      line(this.size*0.4, 0, this.size*0.5, 0);
+    }
+    pop();
   }
 };
 
@@ -162,16 +192,20 @@ let setting_wheel = {
       while(option < 0) {
         option += this.num_options;
       }
+        this.pull_rotation = 0;
       socket.emit("filter", this.option_names[option]);
     } else {
-      this.pull_rotation = change * 0.1;
+        this.pull_rotation = change * 0.2;
     }
   },
   draw: function() {
+      noStroke();
+    fill(200);
+    ellipse(this.x, this.y, this.size * 1.05, this.size*1.05);
     fill(255);
     stroke(0);
     strokeWeight(1);
-    ellipse(this.x, encoder.y, this.size, this.size);
+    ellipse(this.x, this.y, this.size, this.size);
     let rotation = this.rotation + this.pull_rotation;
     let arrow_offset = this.size * this.dip_offset * 0.5;
     let dir = createVector(cos(rotation), sin(rotation));
@@ -214,17 +248,18 @@ let fader = {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   encoder.size = height * 0.7;
-  encoder.x = width*0.7;
+    encoder.dip_size = encoder.size * 0.1;
+  encoder.x = width*0.73;
   encoder.y = height/2;
   setting_wheel.size = height * 0.2;
-  setting_wheel.x = width*0.2;
-  setting_wheel.y = height/2;
+  setting_wheel.x = width*0.25;
+  setting_wheel.y = height * 0.6;
 
 }
 
 function draw() {
-  // clear();
-  background(255, 5);
+  clear();
+  //background(255, 5);
   
   encoder.draw();
   setting_wheel.draw();
@@ -270,7 +305,9 @@ function touchMoved() {
 function touchEnded() {
   console.log("touch ended")
   encoder.pressed = false;
+    encoder.pull_rotation = 0;
   setting_wheel.pressed = false;
+    setting_wheel.pull_rotation = 0;
 }
 function windowResized() {
       
