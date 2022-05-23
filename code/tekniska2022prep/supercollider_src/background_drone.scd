@@ -20,6 +20,7 @@ SynthDef(\unstable_sine, {
 	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.3, \out, 0]);*/
 	chord = [-53, 17, -22, 48, 9+53, 26+53];
 	chord = [-53, -22, 53, 9+53, 22+53, 31+53];
+	~transposition = 0;
 
 	~background_drone_synths = chord.collect{ |degree|
 		var freq = s53.degreeToFreq(degree, 36.midicps, 0);
@@ -36,7 +37,9 @@ SynthDef(\unstable_sine, {
 	};
 	~set_background_drone_amplitudes.(~speed_setting); // init from speed_setting
 	~change_background_drone_root = {
-		var transposed_chord = chord + rrand(-17, 31).floor;
+		var transposed_chord;
+		~transposition = rrand(-17, 31).floor;
+		transposed_chord = chord + ~transposition;
 		~background_drone_synths.do{ |synth, i|
 			var degree = transposed_chord[i], freq = s53.degreeToFreq(degree, 36.midicps, 0);
 			synth.set(\freq, freq);

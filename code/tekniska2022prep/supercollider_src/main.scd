@@ -245,9 +245,9 @@ s.waitForBoot({
 	~crank_speed_to_wait_time = {
 		var speed =
 		(0.2/~crank_speed.pow(1.5)).min(0.5);
-		speed = speed + ((1.0-~speed_setting.pow(0.33)) * 0.5);
+		speed = speed + ((1.0-~speed_setting.pow(0.33)) * 0.7);
 		if(Date.localtime.rawSeconds - ~last_crank_update < 0.7, {
-			speed
+			speed.max(0.005).min(1.0)
 		}, {
 			inf
 		});

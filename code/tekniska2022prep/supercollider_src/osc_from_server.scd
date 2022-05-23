@@ -2,9 +2,22 @@
 ~last_total_number_of_step = 0;
 ~last_speed_update = 0;
 ~last_zoom_update = 0;
+
+~sonifySuccess = {
+	var chord = [-53, -22, 53, 9+53, 22+53, 31+53] + ~transposition;
+	{
+		var sig, env, freq = ~s53.degreeToFreq(chord.choose%53, 36.midicps, 2);
+
+		freq = freq * (Line.kr(0, 30, 2).floor + 1);
+		sig = Pulse.ar(freq) * 0.05;
+		sig = sig * Env.perc(1.0, 1.0).kr(2);
+		sig = Pan2.ar(sig, Rand(-1.0, 1.0));
+		Out.ar(0, sig);
+	}.play;
+};
+
 OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 	var type = msg[1];
-	msg.postln;
 
 	switch(type,
 		\SPEED1_BUTTON_ON, {~speed1.();},
@@ -37,7 +50,7 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 				now = Date.localtime.rawSeconds,
 				time_since_last = now - ~last_crank_update;
 				~crank_speed = steps_since_last / time_since_last;
-				("crank_speed: " + ~crank_speed).postln;
+				// ("crank_speed: " + ~crank_speed).postln;
 				~last_crank_update = Date.localtime.rawSeconds;
 			});
 
@@ -45,12 +58,17 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\capture, {
 			// when someone presses the capture button
 		},
-		\filter, {},
+		\filter, {
+			msg.postln;
+			~change_background_drone_root.();
+		},
 		\filter_start, {
 
 		},
 		\filter_end, {
+			msg.postln;
 			// done with applying the filter
+			~sonifySuccess.();
 		},
 		\speed, {
 			~speed_setting = msg[2].asFloat/10000.0;
@@ -64,6 +82,7 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 						~last_zoom_update = Date.localtime.rawSeconds;
 
 		},
+		{("unhandeled: " + msg).postln;}
 	);
 
 }, '/foreach'); // def style
