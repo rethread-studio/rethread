@@ -168,7 +168,7 @@ function initBg() {
 
   // setTimeout(changePreset, 3000);
   // start the main loop
-  tick();
+  tick(0);
   console.log("background initiated");
 }
 
@@ -234,8 +234,11 @@ function draw() {
   }
 }
 
+var prevTimestamp = 0;
 // MAIN LOOP
-function tick() {
+function tick(timestamp) {
+  if(timestamp - prevTimestamp > 40) {
+    prevTimestamp = timestamp;
   draw();
   if (Math.random() > 0.99) {
     textColor = textColors[Math.floor(Math.random() * textColors.length)];
@@ -248,7 +251,8 @@ function tick() {
       image_hexdump_offset_y = 0;
     }
   }
-  setTimeout(tick, 50);
+  }
+  window.requestAnimationFrame(tick);
 }
 
 function changePreset() {
