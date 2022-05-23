@@ -50,6 +50,7 @@ class CaptureScene {
     timerE.id = "timer";
     document.getElementById("content").appendChild(timerE);
     timerE.innerText = timer;
+      if (window.socket) window.socket.emit("timer", timer);
     this.triggerInterval = setInterval(() => {
       timerE.innerText = --timer;
       if (window.socket) window.socket.emit("timer", timer);
