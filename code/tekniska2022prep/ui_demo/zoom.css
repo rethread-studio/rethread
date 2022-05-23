@@ -1,6 +1,7 @@
 :root {
   --main-color: #0102E0;
   --main-bg: #040824;
+  --main-bg-transparent: rgba(4, 8, 36, 0.6);
   --secondary-color: #FFFFFF;
 }
 
@@ -70,7 +71,7 @@ canvas {
   bottom: 0;
   width: 100%;
   height: 45%;
-  background-color: var(--main-bg);
+  background-color: var(--main-bg-transparent);
   padding-left: 25px;
 }
 
