@@ -25,7 +25,7 @@ async function init() {
 
 
   const bg = document.getElementById("bg");
-  bg.style.hidden = "true";
+  bg.style.opacity = "0";
 
   const captureScene = new CaptureScene(c1, null);
   const img = await loadScene(captureScene);

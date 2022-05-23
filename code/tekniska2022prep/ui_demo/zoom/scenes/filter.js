@@ -46,7 +46,7 @@ class FilterScene {
 
 
     const bg = document.getElementById("bg");
-    bg.style.hidden = "false";
+    bg.style.opacity = "1";
 
 
     this.onwheel = (e) => {
