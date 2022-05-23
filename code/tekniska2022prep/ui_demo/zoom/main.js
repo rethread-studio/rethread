@@ -7,10 +7,18 @@ async function init() {
   document.getElementById("content").innerText = "";
 
   const backupImg = await loadImage("./img/portrait.jpg");
-  const cE = document.getElementById("c");
-  cE.width = window.innerWidth * 2;
-  cE.height = window.innerHeight * 2;
-  cE.style.width = "100%";
+  const c1 = document.getElementById("c1");
+  c1.width = window.innerWidth * 2;
+  c1.height = window.innerHeight * 2;
+  //cE.style.width = "100%";
+
+  const c2 = document.getElementById("c2");
+  c2.width = window.innerWidth * 2;
+  c2.height = window.innerHeight * 2;
+
+  const c3 = document.getElementById("c3");
+  c3.width = window.innerWidth * 2;
+  c3.height = window.innerHeight * 2;
 
   // const captureScene = new CaptureScene(cE, null);
   // const img = await loadScene(captureScene);
@@ -18,7 +26,7 @@ async function init() {
   // const zoomTransitionScene = new ZoomTransitionScene(cE, img, null);
   // const rgbTransitionScene = new RGBScene(cE, img, null);
   // await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
-  const filterScene = new FilterScene(cE, backupImg);
+  const filterScene = new FilterScene(c1, c2, c3, backupImg);
   await loadScene(filterScene);
 }
 

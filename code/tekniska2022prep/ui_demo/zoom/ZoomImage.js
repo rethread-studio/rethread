@@ -282,7 +282,7 @@ class ZoomImage {
     this.ctx.globalAlpha = opt?.valuesOpacity || 1;
 
     this.ctx.textAlign = "right";
-    this.ctx.font = canvasScale * 0.3 + "px serif";
+    this.ctx.font = canvasScale * 0.3 + "px monospace";
 
     for (let i = startX; i < endX; i += canvasScale) {
       const x = (i - this.offsetX) / canvasScale;
@@ -293,15 +293,15 @@ class ZoomImage {
         const g = this.changedPixels.data[(y * this.img.width + x) * 4 + 1];
         const b = this.changedPixels.data[(y * this.img.width + x) * 4 + 2];
 
-        if (r) {
+        if (r != null) {
           this.ctx.fillStyle = `rgb(${r}, 0, 0)`;
           this.ctx.fillText(r, i + canvasScale * 0.95, j + canvasScale * 0.25);
         }
-        if (g) {
+        if (g != null) {
           this.ctx.fillStyle = `rgb(0, ${g}, 0)`;
           this.ctx.fillText(g, i + canvasScale * 0.95, j + canvasScale * 0.6);
         }
-        if (b) {
+        if (b != null) {
           this.ctx.fillStyle = `rgb(0, 0, ${b})`;
           this.ctx.fillText(b, i + canvasScale * 0.95, j + canvasScale * 0.95);
         }
