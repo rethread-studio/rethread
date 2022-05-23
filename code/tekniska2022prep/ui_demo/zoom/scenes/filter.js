@@ -232,9 +232,9 @@ class FilterScene {
 
   onStep() {
     const current = this.codeExecutor.getCurrent();
-    if (current.ctx.i) this.codeExecutor.iterationIndex = current.ctx.i;
-
     if (current == null) return;
+
+    if (current.ctx.i) this.codeExecutor.iterationIndex = current.ctx.i;
 
     if (window.socket)
       window.socket.emit("onStep", {
@@ -282,7 +282,7 @@ class FilterScene {
   }
 
   onFilterEnd() {
-    this.zoom(0);
+    this.zoom(0, this.canvas, this.zoomImage);
     if (window.socket) window.socket.emit("stage", "filter_end");
   }
 

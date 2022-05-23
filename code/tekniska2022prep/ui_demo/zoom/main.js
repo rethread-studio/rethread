@@ -11,17 +11,22 @@ async function init() {
   c1.width = window.innerWidth * 2;
   c1.height = window.innerHeight * 2;
   c1.style.zIndex = "0";
-  //cE.style.width = "100%";
+  c1.style.width = "100%";
+  c1.style.height = "100%";
 
   const c2 = document.getElementById("c2");
   c2.width = window.innerWidth * 2;
   c2.height = window.innerHeight * 2;
   c2.style.zIndex = "0";
+  // c2.style.width = "0";
+  // c2.style.height = "0";
 
   const c3 = document.getElementById("c3");
   c3.width = window.innerWidth * 2;
   c3.height = window.innerHeight * 2;
   c3.style.zIndex = "0";
+  // c3.style.width = "0%;
+  // c3.style.height = "0%";
 
 
   const bg = document.getElementById("bg");
