@@ -20,12 +20,12 @@ async function init() {
   c3.width = window.innerWidth * 2;
   c3.height = window.innerHeight * 2;
 
-  // const captureScene = new CaptureScene(cE, null);
-  // const img = await loadScene(captureScene);
+  const captureScene = new CaptureScene(cE, null);
+  const img = await loadScene(captureScene);
 
-  // const zoomTransitionScene = new ZoomTransitionScene(cE, img, null);
-  // const rgbTransitionScene = new RGBScene(cE, img, null);
-  // await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
+  const zoomTransitionScene = new ZoomTransitionScene(c1, img, null);
+  const rgbTransitionScene = new RGBScene(c1, img, null);
+  await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
   const filterScene = new FilterScene(c1, c2, c3, backupImg);
   await loadScene(filterScene);
 }
@@ -52,6 +52,12 @@ async function animate() {
 
 window.addEventListener("keydown", (e) => {
   if (e.key == "i") {
+    init();
+  }
+});
+
+if (window.socket) window.socket.on("capture", () => {
+  if(currentScene.name != "capture") {
     init();
   }
 });

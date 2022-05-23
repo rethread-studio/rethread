@@ -383,6 +383,7 @@ s.waitForBoot({
 
 	"osc_from_server.scd".loadRelative;
 	~infinite_mode.();
+	"background_drone.scd".loadRelative;
 });
 )
 

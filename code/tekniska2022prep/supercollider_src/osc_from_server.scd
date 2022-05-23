@@ -31,13 +31,16 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\next, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds },
 		\step, {
 			// [current_index, total_number_of_step]
-			var total_number_of_steps = msg[3].asFloat,
-			steps_since_last = total_number_of_steps - ~last_total_number_of_step,
-			now = Date.localtime.rawSeconds,
-			time_since_last = now - ~last_crank_update;
-			~crank_speed = steps_since_last / time_since_last;
-			("crank_speed: " + ~crank_speed).postln;
-			~last_crank_update = Date.localtime.rawSeconds;
+			if(msg[3] != nil, {
+				var total_number_of_steps = msg[3].asFloat,
+				steps_since_last = total_number_of_steps - ~last_total_number_of_step,
+				now = Date.localtime.rawSeconds,
+				time_since_last = now - ~last_crank_update;
+				~crank_speed = steps_since_last / time_since_last;
+				("crank_speed: " + ~crank_speed).postln;
+				~last_crank_update = Date.localtime.rawSeconds;
+			});
+
 		},
 		\capture, {
 			// when someone presses the capture button
