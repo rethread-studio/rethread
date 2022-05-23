@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 :root {
   --main-color: #0102E0;
   --main-bg: #040824;
@@ -34,7 +38,6 @@ canvas {
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
-  top: 20px;
 }
 
 
@@ -72,7 +75,7 @@ canvas {
   width: 100%;
   height: 45%;
   background-color: var(--main-bg-transparent);
-  padding-left: 25px;
+  padding: 0 25px;
 }
 
 span.active {
@@ -83,7 +86,7 @@ span.active {
 }
 
 span::after {
-  position: fixed;
+  position: absolute;
   right: 5px;
   margin-top: -2px;
   content: attr(value);

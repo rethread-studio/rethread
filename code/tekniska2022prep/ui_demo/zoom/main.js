@@ -17,14 +17,14 @@ async function init() {
   const c2 = document.getElementById("c2");
   c2.width = window.innerWidth * 2;
   c2.height = window.innerHeight * 2;
-  c2.style.zIndex = "0";
+  c2.style.zIndex = "-1";
   // c2.style.width = "0";
   // c2.style.height = "0";
 
   const c3 = document.getElementById("c3");
   c3.width = window.innerWidth * 2;
   c3.height = window.innerHeight * 2;
-  c3.style.zIndex = "0";
+  c3.style.zIndex = "-1";
   // c3.style.width = "0%;
   // c3.style.height = "0%";
 
