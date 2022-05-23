@@ -9,10 +9,10 @@
 		var sig, env, freq = ~s53.degreeToFreq(chord.choose%53, 36.midicps, 2);
 
 		freq = freq * (Line.kr(0, 30, 2).floor + 1);
-		sig = Pulse.ar(freq) * 0.05;
+		sig = Pulse.ar(freq) * 0.07;
 		sig = sig * Env.perc(1.0, 1.0).kr(2);
-		sig = Pan2.ar(sig, Rand(-1.0, 1.0));
-		Out.ar(0, sig);
+		sig = Pan2.ar(sig, 0.0);
+		Out.ar(~revBus, sig);
 	}.play;
 };
 
