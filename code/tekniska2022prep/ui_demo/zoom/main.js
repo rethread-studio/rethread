@@ -12,13 +12,13 @@ async function init() {
   cE.height = window.innerHeight * 2;
   cE.style.width = "100%";
 
-  // const captureScene = new CaptureScene(cE, null);
-  // const img = await loadScene(captureScene);
+  const captureScene = new CaptureScene(cE, null);
+  const img = await loadScene(captureScene);
 
-  // const zoomTransitionScene = new ZoomTransitionScene(cE, img, null);
-  // const rgbTransitionScene = new RGBScene(cE, img, null);
-  // await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
-  const filterScene = new FilterScene(cE, backupImg);
+  const zoomTransitionScene = new ZoomTransitionScene(cE, img, null);
+  const rgbTransitionScene = new RGBScene(cE, img, null);
+  await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
+  const filterScene = new FilterScene(cE, img);
   await loadScene(filterScene);
 }
 
