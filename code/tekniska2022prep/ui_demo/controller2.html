@@ -189,11 +189,12 @@ let setting_wheel = {
       this.rotation += max(min(change, option_rotation), -option_rotation);
       this.rotation %= TAU;
       this.touch_angle = new_touch_angle;
-      let option = (this.rotation * this.num_options) / TAU;
+      let option = Math.round((this.rotation * this.num_options) / TAU) % this.num_options;
       while(option < 0) {
         option += this.num_options;
       }
         this.pull_rotation = 0;
+      console.log("option: " + option + this.option_names[option]);
       socket.emit("filter", this.option_names[option]);
     } else {
         this.pull_rotation = change * 0.2;
@@ -233,12 +234,23 @@ let setting_wheel = {
     fill(255);
     let option_rotation = TAU/this.num_options;
     for (let i = 0; i < this.num_options; i++) {
-      rotate(option_rotation);
     stroke(255);
       line(this.size*0.6, 0, this.size*0.8, 0);
       textSize(20);
       noStroke();
-      text(this.option_names[i], this.size*0.8, 0);
+      push();
+      let text_x = this.size*0.8;
+      if(option_rotation * i >= Math.PI * 0.75 && option_rotation * i <= Math.PI*1.2) {
+        text_x += textWidth(this.option_names[i]);
+      }
+      translate( text_x , 0);
+        rotate(-option_rotation*i);
+      if(i == 2 || i == 4) {
+        translate(-textWidth(this.option_names[i]), 0);
+      }
+      text(this.option_names[i], 0, 0);
+      pop();
+      rotate(option_rotation);
     }
     pop();
   }
