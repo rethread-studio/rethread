@@ -20,7 +20,7 @@ async function init() {
   c3.width = window.innerWidth * 2;
   c3.height = window.innerHeight * 2;
 
-  const captureScene = new CaptureScene(cE, null);
+  const captureScene = new CaptureScene(c1, null);
   const img = await loadScene(captureScene);
 
   const zoomTransitionScene = new ZoomTransitionScene(c1, img, null);
