@@ -13,6 +13,7 @@ async function init() {
   c1.style.zIndex = "0";
   c1.style.width = "100%";
   c1.style.height = "100%";
+  c1.style.left = "0";
 
   const c2 = document.getElementById("c2");
   c2.width = window.innerWidth * 2;
@@ -28,7 +29,6 @@ async function init() {
   // c3.style.width = "0%;
   // c3.style.height = "0%";
 
-
   const bg = document.getElementById("bg");
   bg.style.opacity = "0";
 
@@ -41,7 +41,6 @@ async function init() {
   const filterScene = new FilterScene(c1, c2, c3, img);
   await loadScene(filterScene);
 }
-
 
 async function loadScene(scene) {
   if (currentScene) await currentScene.unload();
@@ -69,10 +68,11 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-if (window.socket) window.socket.on("capture", () => {
-  if(currentScene.name != "capture") {
-    init();
-  }
-});
+if (window.socket)
+  window.socket.on("capture", () => {
+    if (currentScene.name != "capture") {
+      init();
+    }
+  });
 
 initBg();
