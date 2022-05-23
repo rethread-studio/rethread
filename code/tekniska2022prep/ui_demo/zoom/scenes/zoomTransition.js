@@ -31,7 +31,7 @@ class ZoomTransitionScene {
     this.zoomImage.render({
       clear: true,
       lines: this.zoomImage.scale > 25 && this.zoomImage.scale < 100,
-      values: this.zoomImage.scale > 20 && this.zoomImage.scale < 100,
+      values: this.zoomImage.scale > 30 && this.zoomImage.scale < 100,
       subPixels: this.zoomImage.scale >= 100,
       picture: this.zoomImage.scale < 100,
     });
