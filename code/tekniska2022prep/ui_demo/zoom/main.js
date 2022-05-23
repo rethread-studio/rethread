@@ -10,15 +10,22 @@ async function init() {
   const c1 = document.getElementById("c1");
   c1.width = window.innerWidth * 2;
   c1.height = window.innerHeight * 2;
+  c1.style.zIndex = "0";
   //cE.style.width = "100%";
 
   const c2 = document.getElementById("c2");
   c2.width = window.innerWidth * 2;
   c2.height = window.innerHeight * 2;
+  c2.style.zIndex = "0";
 
   const c3 = document.getElementById("c3");
   c3.width = window.innerWidth * 2;
   c3.height = window.innerHeight * 2;
+  c3.style.zIndex = "0";
+
+
+  const bg = document.getElementById("bg");
+  bg.style.hidden = "true";
 
   const captureScene = new CaptureScene(c1, null);
   const img = await loadScene(captureScene);
@@ -29,6 +36,7 @@ async function init() {
   const filterScene = new FilterScene(c1, c2, c3, backupImg);
   await loadScene(filterScene);
 }
+
 
 async function loadScene(scene) {
   if (currentScene) await currentScene.unload();
@@ -61,3 +69,5 @@ if (window.socket) window.socket.on("capture", () => {
     init();
   }
 });
+
+initBg();

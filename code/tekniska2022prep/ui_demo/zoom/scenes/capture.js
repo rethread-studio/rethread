@@ -77,6 +77,7 @@ class CaptureScene {
       subPixels: true,
       picture: false,
       clear: true,
+      pictureOpacity: 0.8,
     });
 
     zoomImage.zoom(1).center().render({ clear: false });

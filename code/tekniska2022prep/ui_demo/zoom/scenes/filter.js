@@ -28,18 +28,25 @@ class FilterScene {
     this.canvas.style.width = "25%";
     this.canvas.style.height = "50%";
     this.canvas.style.left = "20px";
+    this.canvas.style.zIndex = "1";
 
     this.canvas2.height = window.innerHeight * 1;
     this.canvas2.width = window.innerWidth / 2;
     this.canvas2.style.width = "25%";
     this.canvas2.style.height = "50%";
     this.canvas2.style.left = window.innerWidth / 2 - this.canvas2.width / 4 + "px";
+    this.canvas2.style.zIndex = "1";
 
     this.canvas3.height = window.innerHeight * 1;
     this.canvas3.width = window.innerWidth / 2;
     this.canvas3.style.width = "25%";
     this.canvas3.style.height = "50%";
     this.canvas3.style.right = "20px";
+    this.canvas3.style.zIndex = "1";
+
+
+    const bg = document.getElementById("bg");
+    bg.style.hidden = "false";
 
 
     this.onwheel = (e) => {
@@ -366,6 +373,7 @@ class FilterScene {
       subPixels: this.zoomImage.scale >= 85,
       picture: this.zoomImage.scale < 100,
       clear: true,
+      pictureOpacity: 0.8,
     });
     this.zoomImage2.render({
       lines: false,
@@ -373,6 +381,8 @@ class FilterScene {
       subPixels: this.zoomImage.scale >= 85,
       picture: this.zoomImage.scale < 100,
       clear: true,
+      pictureOpacity: 0.8,
+      valuesOpacity: 0.8,
     });
     this.zoomImage2.renderValues();
     this.zoomImage3.render({
@@ -381,6 +391,8 @@ class FilterScene {
       subPixels: this.zoomImage.scale >= 85,
       picture: this.zoomImage.scale < 100,
       clear: true,
+      pictureOpacity: 0.8,
+      valuesOpacity: 0.8,
     });
     this.zoomImage3.renderValues();
     //this.zoomImage3.renderSubPixel();
