@@ -381,7 +381,7 @@ class FilterScene {
       subPixels: this.zoomImage.scale >= 85,
       picture: this.zoomImage.scale < 100,
       clear: true,
-      pictureOpacity: 0.8,
+      pictureOpacity: 0.9,
       valuesOpacity: 0.8,
     });
     this.zoomImage2.renderValues();
@@ -391,7 +391,7 @@ class FilterScene {
       subPixels: this.zoomImage.scale >= 85,
       picture: this.zoomImage.scale < 100,
       clear: true,
-      pictureOpacity: 0.8,
+      pictureOpacity: 0.9,
       valuesOpacity: 0.8,
     });
     this.zoomImage3.renderValues();

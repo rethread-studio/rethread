@@ -1,9 +1,15 @@
 // Matrix text effect from here: https://betterprogramming.pub/how-to-create-the-matrix-text-effect-with-javascript-325c6bb7d96e
 var tileSize = 15;
 // a higher fade factor will make the characters fade quicker
-var fadeFactor = 0.01;
-var fadeColor = "0, 0, 0";
-var textColor = "rgb(135,50,96)";
+var fadeFactor = 0.03;
+// var fadeColor = "0, 0, 0";
+var fadeColor = "4, 8, 36";
+var textColors = [
+      "rgb(255, 255, 255)",
+      // "rgb(255,193,204)",
+      // "rgb(64,224,208)",
+];
+var textColor = textColors[0];
 
 var canvas;
 var ctx;
@@ -232,26 +238,7 @@ function draw() {
 function tick() {
   draw();
   if (Math.random() > 0.99) {
-    if (Math.random() > 0.5) {
-      textColor = "rgb(255,193,204)";
-    } else {
-      textColor = "rgb(64,224,208)";
-    }
-    // if (fadeColor == "255, 255, 255") {
-    //   fadeColor = "0, 0, 0";
-    //   if (Math.random() > 0.5) {
-    //     textColor = "rgb(255,193,204)";
-    //   } else {
-    //     textColor = "rgb(64,224,208)";
-    //   }
-    // } else {
-    //   fadeColor = "255, 255, 255";
-    //   if (Math.random() > 0.5) {
-    //     textColor = "rgb(54,117,136)";
-    //   } else {
-    //     textColor = " rgb(135,50,96)";
-    //   }
-    // }
+    textColor = textColors[Math.floor(Math.random() * textColors.length)];
   }
   image_hexdump_offset_counter += 1;
   if(image_hexdump_offset_counter >= 50) {
