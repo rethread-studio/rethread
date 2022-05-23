@@ -15,16 +15,34 @@ SynthDef(\unstable_sine, {
 (*/
 //
 {
-var s53 = Scale.chromatic('et53'), chord;
-/*~revBus = Bus.audio(s, 2);
-~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.3, \out, 0]);*/
-chord = [-53, 17, -22, 48, 9+53, 26+53];
-chord = [-53, -22, 53, 9+53, 22+53, 31+53];
+	var s53 = Scale.chromatic('et53'), chord;
+	/*~revBus = Bus.audio(s, 2);
+	~rev = Synth(\medium_reverb, [\in, ~revBus, \mix, 0.3, \out, 0]);*/
+	chord = [-53, 17, -22, 48, 9+53, 26+53];
+	chord = [-53, -22, 53, 9+53, 22+53, 31+53];
 
-chord.do{ |degree|
-	var freq = s53.degreeToFreq(degree, 36.midicps, 0);
-	Synth(\unstable_sine, [\freq, freq, \mod_ratio, 4.0, \mod_mul, 5, \amp, 0.05, \out, ~revBus]);
-};
+	~background_drone_synths = chord.collect{ |degree|
+		var freq = s53.degreeToFreq(degree, 36.midicps, 0);
+		Synth(\unstable_sine, [\freq, freq, \mod_ratio, 4.0, \mod_mul, 5, \amp, 0.05, \out, ~revBus])
+	};
+
+	~set_background_drone_amplitudes = { |speed|
+		~background_drone_synths.do { | synth, i|
+			var speed_amp = speed.pow(i*0.05);
+			synth.set(\amp, 0.015 + (0.035 * speed_amp));
+			synth.set(\speed, 1 + (speed * 10));
+			synth.set(\mod_mul, 5 + (speed * 5 * (i/chord.size)));
+		};
+	};
+	~set_background_drone_amplitudes.(~speed_setting); // init from speed_setting
+	~change_background_drone_root = {
+		var transposed_chord = chord + rrand(-17, 31).floor;
+		~background_drone_synths.do{ |synth, i|
+			var degree = transposed_chord[i], freq = s53.degreeToFreq(degree, 36.midicps, 0);
+			synth.set(\freq, freq);
+		};
+		~set_background_drone_amplitudes.(~speed_setting);
+	};
+
 }.();
 
-//)

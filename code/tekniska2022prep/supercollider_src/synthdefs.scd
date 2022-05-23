@@ -128,9 +128,9 @@ SynthDef(\zoom_effect, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 SynthDef(\unstable_sine, {
-	var sig, env, mod, freq = \freq.kr(220);
+	var sig, env, mod, freq = \freq.kr(220), speed = \speed.kr(1.0);
 	env = Env.adsr(\atk.kr(0.1), \decay.kr(0.01), \sus.kr(1.0), \rel.kr(2.2)).ar(2);
-	mod = SinOsc.ar(freq * \mod_ratio.kr(1.0), mul: freq * \mod_mul.kr(1.0) * LFNoise1.kr(LFNoise1.kr(0.2).range(0.5, 3)).range(0.1, 1.01).pow(4));
+	mod = SinOsc.ar(freq * \mod_ratio.kr(1.0), mul: freq * \mod_mul.kr(1.0) * LFNoise1.kr(LFNoise1.kr(0.2).range(0.5 * speed, 3 * speed)).range(0.1, 1.01).pow(4));
 	sig = SinOsc.ar(freq + mod, mul: \amp.kr(0.5)) * env * LFNoise1.kr(4).range(0.3, 1.0);
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);

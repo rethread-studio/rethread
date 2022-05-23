@@ -55,6 +55,7 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\speed, {
 			~speed_setting = msg[2].asFloat/10000.0;
 			~last_speed_update = Date.localtime.rawSeconds;
+			~set_background_drone_amplitudes.(~speed_setting);
 		},
 		\zoom, {
 			~zoom_setting = msg[2].asFloat/1000.0;
