@@ -1,6 +1,7 @@
 class CaptureScene {
   webcam = null;
   canvas = null;
+  name = "capture";
 
   constructor(canvas, cb) {
     this.canvas = canvas;

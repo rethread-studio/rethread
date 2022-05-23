@@ -47,3 +47,9 @@ window.addEventListener("keydown", (e) => {
     init();
   }
 });
+
+if (window.socket) window.socket.on("capture", () => {
+  if(currentScene.name != "capture") {
+    init();
+  }
+});
