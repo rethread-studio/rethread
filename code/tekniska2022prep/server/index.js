@@ -6,6 +6,7 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 const osc = require("./osc");
+const { exec } = require('node:child_process')
 
 const snapsFolder = __dirname + "/snaps/";
 
@@ -181,11 +182,29 @@ io.on("connection", (socket) => {
         if (err) {
           console.log(err);
         } else {
+
           const img = new mosaic.JimpImage(
             await mosaic.JimpImage.read(filePath)
           );
           img.image.cover(mosaic.CONFIG.cell_width, mosaic.CONFIG.cell_height);
           await img.save(__dirname + "/thumbs/" + fileName);
+
+          // run hexdump on filePath
+
+// run the `ls` command using exec
+exec('hexdump -C ' + filePath, (err, output) => {
+
+    // once the command has completed, the callback function is called
+    if (err) {
+        // log and return if we encounter an error
+        console.error("could not execute command: ", err)
+        return
+    }
+    // log the output received from the command
+    // console.log("Output: \n", output)
+
+          socket.emit("picture_hexdump", output);
+})
         }
       }
     );
