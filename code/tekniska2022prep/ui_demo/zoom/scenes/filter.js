@@ -356,7 +356,11 @@ class FilterScene {
   async renderProgress() {
     const total = this.nbStep();
 
-    document.querySelector("#progress .text").innerText = `Progress: ${
+    const progressText = document.querySelector("#progress .text");
+    if(progressText == null) {
+      return;
+    }
+    progressText.innerText = `Progress: ${
       this.codeExecutor.stepNum
     }/${total} (${((this.codeExecutor.stepNum / total) * 100).toFixed()}%)`;
     document.querySelector("#progress .fill").style.width = `${(
