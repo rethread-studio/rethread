@@ -209,6 +209,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("stage", (data) => {
+    io.emit("stage", data);
     osc.send({ state: data, events: getNbEventSec() });
   });
 
@@ -221,6 +222,7 @@ io.on("connection", (socket) => {
     osc.send({ state: "speed", data });
   });
   socket.on("transition", (data) => {
+    io.emit("transition", data);
     osc.send({ state: "transition", data });
   });
   socket.on("capture", (data) => {
