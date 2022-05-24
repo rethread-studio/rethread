@@ -105,7 +105,8 @@ span.active::after {
   display: block;
 }
 
-#code, #execution {
+#code,
+#execution {
   display: inline-block;
   font-family: monospace;
   font-size: 13px;
@@ -186,6 +187,19 @@ span.active::after {
   height: 100%;
   width: 50%;
   background: var(--main-color);
+}
+
+#speed {
+  position: relative;
+  z-index: 0;
+}
+
+#speed.active {
+  transition: top 0.2s linear;
+  position: fixed;
+  z-index: 9999;
+  margin: 0 25px;
+  width: calc(100% - 50px);
 }
 
 #timer {

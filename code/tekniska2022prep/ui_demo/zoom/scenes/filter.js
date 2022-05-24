@@ -273,9 +273,26 @@ class FilterScene {
 
       document.getElementById("era_image").src = imageSrc;
 
+      const speedE = document.getElementById("speed");
+      if (!speedE.classList.contains("active")) {
+        const rect = speedE.getBoundingClientRect();
+        speedE.oTop = rect.top + "px";
+        speedE.style.position = "fixed";
+        speedE.style.top = rect.top + "px";
+        setTimeout(() => {
+          speedE.classList.add("active");
+          speedE.style.top = "25px";
+        }, 10);
+      }
       this.overlayTimeout = setTimeout(() => {
         //overlay.innerHTML = "";
         overlay.classList.remove("active");
+        setTimeout(() => {
+          speedE.classList.remove("active");
+          speedE.style.top = null;
+          speedE.style.position = null;
+        }, 50);
+        speedE.style.top = speedE.oTop;
       }, 3500);
     }
 
@@ -283,7 +300,6 @@ class FilterScene {
     // document.getElementById("speed-input").value = value;
 
     let timeEstimate = Math.round(50000 / (value + 1));
-
     document.querySelector("#speed .text").innerText = `Speed: x${Math.round(
       value
     )} (${timeEstimate} seconds to complete)`;
