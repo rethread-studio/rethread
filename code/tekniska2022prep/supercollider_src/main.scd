@@ -246,7 +246,7 @@ s.waitForBoot({
 		var speed =
 		(0.2/~crank_speed.pow(1.5)).min(0.5);
 		speed = speed + ((1.0-~speed_setting.pow(0.33)) * 0.7);
-		if(Date.localtime.rawSeconds - ~last_crank_update < 0.7, {
+		if(Date.localtime.rawSeconds - ~last_crank_update < 0.4, {
 			speed.max(0.005).min(1.0)
 		}, {
 			inf
@@ -349,7 +349,7 @@ s.waitForBoot({
 		loop {
 			var now = Date.localtime.rawSeconds;
 			if((now - ~last_speed_update) < 0.3, {
-				var freq = ~speed_setting.pow(2) * 2000 + 50;
+				var freq = ~speed_setting.pow(2) * 1200 + 50;
 				// play sound effect
 				if(~speed_effect == nil, {
 					~speed_effect = Synth(\speed_effect, [\freq, freq]);
