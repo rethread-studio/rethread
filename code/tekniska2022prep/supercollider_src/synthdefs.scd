@@ -110,9 +110,10 @@ SynthDef(\sine, {
 }).add;
 
 SynthDef(\speed_effect, {
-	var sig, env, freq = \freq.kr(220, 0.2), gate = \gate.kr(1);
+	var sig, env, freq = \freq.kr(220, 0.2), gate = \gate.kr(1), wobble = \wobble.kr(0.0);
 	env = EnvGen.ar(Env.adsr(\atk.kr(0.01), \decay_time.kr(0.01), \sus.kr(1.0), \rel.kr(0.5)), gate: gate, doneAction: 2);
-	sig = SinOsc.ar(freq*[1, 1.02, 1.5, 2].scramble * ({LFNoise1.ar(3).range(0.999, 1.001)}!4), mul: \amp.kr(0.1));
+	sig = SinOsc.ar(freq*[1, 1.02, 1.5, 2].scramble * ({LFNoise1.ar(3).range(0.999, 1.001)}!4),
+		mul: \amp.kr(0.1) * ({LFNoise1.kr(15).range(1.0-wobble, 1.0)}!4));
 	sig = Splay.ar(sig) * env * SinOsc.ar(freq * 0.03).range(0.5, 1.0);
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);

@@ -349,10 +349,10 @@ s.waitForBoot({
 		loop {
 			var now = Date.localtime.rawSeconds;
 			if((now - ~last_speed_update) < 0.3, {
-				var freq = ~speed_setting.pow(2) * 1200 + 50;
+				var freq = ~speed_setting.pow(2) * 1200 + 50, wobble = ~speed_setting.pow(3);
 				// play sound effect
 				if(~speed_effect == nil, {
-					~speed_effect = Synth(\speed_effect, [\freq, freq]);
+					~speed_effect = Synth(\speed_effect, [\freq, freq, \wobble, wobble]);
 				});
 				~speed_effect.set(\freq, freq);
 			}, {
