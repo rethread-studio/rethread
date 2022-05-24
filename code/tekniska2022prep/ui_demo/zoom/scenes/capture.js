@@ -44,6 +44,8 @@ class CaptureScene {
     console.log("TRIGGER");
     clearInterval(this.triggerInterval);
     let timer = 3;
+    if (document.getElementById("timer"))
+      document.getElementById("timer").remove();
     const timerE = document.createElement("div");
     timerE.id = "timer";
     document.getElementById("content").appendChild(timerE);

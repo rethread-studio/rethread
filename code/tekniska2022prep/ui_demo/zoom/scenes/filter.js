@@ -7,7 +7,9 @@ class FilterScene {
     this.statementsToRender = [];
 
     this.codeExecutor = new CodeExecutor();
-    this.codeExecutor.on("step", () => this.onStep());
+    this.codeExecutor.on("step", () => {
+      this.onStep();
+    });
     this.codeExecutor.on("statement", (data) => this.onStatement(data));
     this.codeExecutor.on("filter_end", () => this.onFilterEnd());
 
@@ -66,7 +68,11 @@ class FilterScene {
       window.socket.on("speed", (speed) => this.speed(parseInt(speed)));
     if (window.socket)
       window.socket.on("filter", (filter) => this.selectFilter(filter));
-    if (window.socket) window.socket.on("step", () => this.step());
+    if (window.socket)
+      window.socket.on("step", () => {
+        clearInterval(this.automaticStart);
+        this.step();
+      });
 
     this.onKeydown = (e) => {
       if (e.key == "ArrowRight" || e.key == "LeftRight") {
@@ -74,6 +80,8 @@ class FilterScene {
       }
     };
     window.addEventListener("keydown", this.onKeydown);
+
+    // this.automaticStart = setInterval(this.step, 750);
 
     let content = `
 <div class="panel right-panel">
@@ -128,7 +136,7 @@ class FilterScene {
     // };
 
     this.codeExecutor.init();
-    this.selectFilter("contrast");
+    this.selectFilter("invert");
     this.zoom(0, this.canvas, this.zoomImage);
     this.zoom(15, this.canvas2, this.zoomImage2);
     this.zoom(75, this.canvas3, this.zoomImage3);
@@ -139,7 +147,7 @@ class FilterScene {
     this.execInterval = setInterval(() => {
       if (this.statementsToRender.length == 0) return;
 
-      const maxElement = 15;
+      const maxElement = 35;
       const execE = document.getElementById("execution");
       for (const current of this.statementsToRender.splice(
         this.statementsToRender.length - maxElement
@@ -166,7 +174,7 @@ class FilterScene {
       execE.scrollTop = execE.scrollHeight;
 
       this.statementsToRender = [];
-    }, 10);
+    }, 30);
 
     return this;
   }
@@ -346,6 +354,8 @@ class FilterScene {
   }
 
   onFilterEnd() {
+    if (window.socket) window.socket.emit("stage", "filter_end");
+
     this.canvas.width = window.innerWidth * 2;
     this.canvas.height = window.innerHeight * 2;
     this.canvas.style.zIndex = "1";
@@ -354,12 +364,10 @@ class FilterScene {
 
     this.canvas2.style.zIndex = "0";
     this.canvas3.style.zIndex = "0";
-
-    this.unload();
-    document.getElementById("content").innerHTML = "";
-
+    
     this.zoom(0, this.canvas, this.zoomImage);
-    if (window.socket) window.socket.emit("stage", "filter_end");
+    this.unload();
+    // document.getElementById("content").innerHTML = "";    
   }
 
   centerToCurrentPixels(canvas, zoomImage) {

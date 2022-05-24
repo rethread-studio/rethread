@@ -158,7 +158,7 @@ let state = "IDLE";
 io.on("connection", (socket) => {
   console.log("a client connected");
 
-  socket.onAny(console.log);
+  // socket.onAny(console.log);
 
   // send the current state to the new client
   socket.emit("state", state);

@@ -350,7 +350,7 @@ function windowResized() {
 }
 
 function setPositions() {
-  encoder.size = height * 0.7;
+  encoder.size = height * 0.6;
   encoder.dip_size = encoder.size * 0.1;
   encoder.x = width - encoder.size * 0.55;
   encoder.y = height / 2;
@@ -367,8 +367,10 @@ function setPositions() {
   button.size = height * 0.4;
 }
 
-socket.on("filter_start", () => {
-  console.log("filter start, sending values");
-  fader.send_value();
-  setting_wheel.send_value();
+socket.on("stage", (data) => {
+  if (data == "filter_start") {
+    console.log("filter start, sending values");
+    fader.send_value();
+    setting_wheel.send_value();
+  }
 });

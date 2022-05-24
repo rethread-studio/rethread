@@ -3,7 +3,7 @@
 }
 
 :root {
-  --main-color: #0102E0;
+  --main-color: rgba(0, 200, 255, 1);
   --main-bg: #040824;
   --main-bg-transparent: rgba(4, 8, 36, 0.6);
   --secondary-color: #FFFFFF;
@@ -90,7 +90,7 @@ span::after {
   display: none;
   position: absolute;
   right: 5px;
-  margin-top: -2px;
+  margin-top: -15px;
   content: attr(value);
   color: var(--main-color);
   /*border: 1px solid var(--main-color);*/
@@ -98,7 +98,7 @@ span::after {
   text-overflow: ellipsis;
   max-width: 100px;
   padding: 2px;
-  font-size: 18px;
+  font-size: 25px;
 }
 
 span.active::after {
@@ -109,11 +109,11 @@ span.active::after {
 #execution {
   display: inline-block;
   font-family: monospace;
-  font-size: 13px;
-  line-height: 15px;
+  font-size: 25px;
+  line-height: 35px;
   tab-size: 3px;
   margin-top: 15px;
-  width: calc(70% - 4px);
+  width: calc(60% - 4px);
 
   color: var(--secondary-color);
 }
@@ -121,9 +121,8 @@ span.active::after {
 #execution {
   position: absolute;
 
-  width: calc(30% - 4px);
+  width: calc(40% - 4px);
   right: 0;
-  max-height: 185px;
   overflow: scroll;
   padding: 4px;
   text-align: left;
@@ -137,7 +136,7 @@ span.active::after {
   /*font-family: sans-serif;*/
   display: inline-block;
   border-right: 1px solid var(--main-color);
-  width: 25px;
+  width: 35px;
   text-align: right;
   padding: 3px;
 }
@@ -146,7 +145,7 @@ span.active::after {
   display: inline-block;
   margin: 0;
   padding: 0;
-  width: calc(100% - 45px);
+  width: calc(100% - 55px);
   white-space: pre-wrap;
 }
 
@@ -162,7 +161,7 @@ span.active::after {
   border: 1px solid var(--secondary-color);
   line-height: 50px;
   font-family: monospace;
-  font-size: 16px;
+  font-size: 36px;
 }
 
 .progress .text {
@@ -262,7 +261,7 @@ span.active::after {
   top: 0;
   bottom: 0;
   z-index: 999;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
   color: rgba(255, 255, 255, 0.5);
   font-size: 50px;
   text-align: center;
