@@ -114,6 +114,14 @@ let setting_wheel = {
       this.pull_rotation = change * 0.2;
     }
   },
+  send_value: function () {
+    let option =
+      Math.round((this.rotation * this.num_options) / TAU) % this.num_options;
+    while (option < 0) {
+      option += this.num_options;
+    }
+    socket.emit("filter", this.option_names[option]);
+  },
   draw: function () {
     noStroke();
     fill(200);
@@ -224,6 +232,9 @@ let fader = {
     }
     socket.emit("speed", Math.pow(this.value, 3) * 10000.0);
   },
+  send_value: function () {
+    socket.emit("speed", Math.pow(this.value, 3) * 10000.0);
+  },
 };
 
 function setup() {
@@ -320,3 +331,8 @@ function setPositions() {
   fader.x = fader.width + fader.knobWidth * 0.5;
   fader.y = height / 2;
 }
+
+socket.on("filter_start", () => {
+  fader.send_value();
+  setting_wheel.send_value();
+});
