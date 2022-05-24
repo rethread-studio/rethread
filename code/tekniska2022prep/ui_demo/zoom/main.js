@@ -6,7 +6,6 @@ let currentScene;
 async function init() {
   document.getElementById("content").innerText = "";
 
-  const backupImg = await loadImage("./img/portrait.jpg");
   const c1 = document.getElementById("c1");
   c1.width = window.innerWidth * 2;
   c1.height = window.innerHeight * 2;
@@ -38,6 +37,8 @@ async function init() {
   const zoomTransitionScene = new ZoomTransitionScene(c1, img, null);
   const rgbTransitionScene = new RGBScene(c1, img, null);
   await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
+
+  const backupImg = await loadImage("./img/portrait.jpg");
   const filterScene = new FilterScene(c1, c2, c3, img);
   await loadScene(filterScene);
 }

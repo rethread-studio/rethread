@@ -4,9 +4,11 @@ class FilterScene {
     this.canvas2 = canvas2;
     this.canvas3 = canvas3;
     this.img = img;
+    this.statementsToRender = [];
 
     this.codeExecutor = new CodeExecutor();
     this.codeExecutor.on("step", () => this.onStep());
+    this.codeExecutor.on("statement", (data) => this.onStatement(data));
     this.codeExecutor.on("filter_end", () => this.onFilterEnd());
 
     // this.zoomImage = new ZoomImage(img, this.canvas).zoom(
@@ -34,7 +36,8 @@ class FilterScene {
     this.canvas2.width = window.innerWidth / 2;
     this.canvas2.style.width = "25%";
     this.canvas2.style.height = "50%";
-    this.canvas2.style.left = window.innerWidth / 2 - this.canvas2.width / 4 + "px";
+    this.canvas2.style.left =
+      window.innerWidth / 2 - this.canvas2.width / 4 + "px";
     this.canvas2.style.zIndex = "1";
 
     this.canvas3.height = window.innerHeight * 1;
@@ -44,10 +47,8 @@ class FilterScene {
     this.canvas3.style.right = "20px";
     this.canvas3.style.zIndex = "1";
 
-
     const bg = document.getElementById("bg");
     bg.style.opacity = "1";
-
 
     this.onwheel = (e) => {
       let newSpeed = this.codeExecutor.jumpValue + 100;
@@ -98,6 +99,7 @@ class FilterScene {
       <pre><code></code></pre>
     </div>
   </div>
+  <div id="execution" class="box"></div>
 </div>
 <div id="overlay">
 <div class="selected">Speed back in</div>
@@ -131,6 +133,41 @@ class FilterScene {
     this.zoom(15, this.canvas2, this.zoomImage2);
     this.zoom(60, this.canvas3, this.zoomImage3);
     this.speed(0);
+
+    this.statementsToRender = [];
+
+    this.execInterval = setInterval(() => {
+      if (this.statementsToRender.length == 0) return;
+
+      const maxElement = 15;
+      const execE = document.getElementById("execution");
+      for (const current of this.statementsToRender.splice(
+        this.statementsToRender.length - maxElement
+      )) {
+        for (const e of document.querySelectorAll("span.active")) {
+          e.classList.remove("active");
+        }
+        const e = document.getElementById("code_" + current.id);
+        if (e != null) {
+          e.className = "active";
+          e.setAttribute("value", FilterScene.renderValue(current.value));
+        }
+
+        const newValueE = document.createElement("div");
+        newValueE.className = "value";
+        // newValueE.innerHTML = FilterScene.renderValue(current.value);
+        newValueE.innerHTML = `${current.code}: ${FilterScene.renderValue(
+          current.value
+        )}`;
+        execE.appendChild(newValueE);
+        if (execE.childElementCount > maxElement)
+          execE.removeChild(execE.firstChild);
+      }
+      execE.scrollTop = execE.scrollHeight;
+
+      this.statementsToRender = [];
+    }, 10);
+
     return this;
   }
 
@@ -139,6 +176,8 @@ class FilterScene {
     if (window.socket) window.socket.removeListener("speed", this.speed);
     if (window.socket) window.socket.removeListener("filter", this.filter);
     if (window.socket) window.socket.removeListener("step", this.step);
+
+    clearInterval(this.execInterval);
 
     window.document.removeEventListener("wheel", this.onwheel);
     window.removeEventListener("keydown", this.onKeydown);
@@ -196,34 +235,38 @@ class FilterScene {
       overlay.classList.add("active");
 
       let dateNb = 1;
-      let imageSrc = "https://inteng-storage.s3.amazonaws.com/img/iea/ZKwJepv36M/sizes/ada-n-the-machine_resize_md.jpg";
-      if (value > total/5) {
+      let imageSrc =
+        "https://inteng-storage.s3.amazonaws.com/img/iea/ZKwJepv36M/sizes/ada-n-the-machine_resize_md.jpg";
+      if (value > total / 5) {
         // 1940: Enigma
         dateNb++;
-        imageSrc = "https://2.bp.blogspot.com/-GG09AfmLSIM/WqHbU4aBrMI/AAAAAAABrL0/fGLsaQJ1kyYm1rG-yOUpqV4Lkfiqu9niACLcBGAs/s640/p00v2b0b.jpg";
+        imageSrc =
+          "https://2.bp.blogspot.com/-GG09AfmLSIM/WqHbU4aBrMI/AAAAAAABrL0/fGLsaQJ1kyYm1rG-yOUpqV4Lkfiqu9niACLcBGAs/s640/p00v2b0b.jpg";
       }
-      if (value > 2*total/5) {
+      if (value > (2 * total) / 5) {
         // 1969: Apollo 11
         dateNb++;
-        imageSrc = "https://www.herodote.net/_image/margaret_hamilton1_apollo_maxi.jpg";
+        imageSrc =
+          "https://www.herodote.net/_image/margaret_hamilton1_apollo_maxi.jpg";
       }
-      if (value > 3*total/5) {
+      if (value > (3 * total) / 5) {
         // 1990: Internet
         dateNb++;
-        imageSrc = "https://mediastream.cern.ch/MediaArchive/Photo/Public/1999/9902031/9902031_01/9902031_01-A5-at-72-dpi.jpg";
+        imageSrc =
+          "https://mediastream.cern.ch/MediaArchive/Photo/Public/1999/9902031/9902031_01/9902031_01-A5-at-72-dpi.jpg";
       }
-      if (value > 4*total/5) {
+      if (value > (4 * total) / 5) {
         // 2007: Touchscreen smartphones
         dateNb++;
-        imageSrc = "https://i.cbc.ca/1.2883789.1419450784!/fileImage/httpImage/image.jpg_gen/derivatives/16x9_780/cellphone.jpg";
-
+        imageSrc =
+          "https://i.cbc.ca/1.2883789.1419450784!/fileImage/httpImage/image.jpg_gen/derivatives/16x9_780/cellphone.jpg";
       }
-      let theDate = document.getElementById("date_"+dateNb);
+      let theDate = document.getElementById("date_" + dateNb);
       theDate.classList.add("selected");
 
       for (let i = 1; i < 6; i++) {
         if (i != dateNb) {
-          let otherDate = document.getElementById("date_"+i);
+          let otherDate = document.getElementById("date_" + i);
           otherDate.classList.remove("selected");
         }
       }
@@ -239,7 +282,7 @@ class FilterScene {
     this.codeExecutor.jump(value);
     // document.getElementById("speed-input").value = value;
 
-    let timeEstimate = Math.round(50000 / (value+1));
+    let timeEstimate = Math.round(50000 / (value + 1));
 
     document.querySelector("#speed .text").innerText = `Speed: x${Math.round(
       value
@@ -254,6 +297,17 @@ class FilterScene {
     this.codeExecutor.runStep();
   }
 
+  static renderValue(value) {
+    if (value == null) return "";
+    if (value.length) {
+      return `${value.constructor.name}[${value.length}]`;
+    }
+    if (value instanceof Object) {
+      return `${value.constructor.name}`;
+    }
+    return JSON.stringify(value);
+  }
+
   onStep() {
     const current = this.codeExecutor.getCurrent();
     if (current == null) return;
@@ -265,44 +319,14 @@ class FilterScene {
         index: this.codeExecutor.stepNum,
         total: this.nbStep(),
       });
-    for (const e of document.querySelectorAll("span.active")) {
-      e.classList.remove("active");
-    }
 
-    function renderValue(value) {
-      if (value == null) return '';
-      if (value.length) {
-        return `${value.constructor.name}[${value.length}]`;
-      }
-      if (value instanceof Object) {
-        return `${value.constructor.name}`;
-      }
-      return JSON.stringify(value);
-    }
-
-
-    /*
-    const e = document.getElementById("code_" + current.id);
-    if (e != null) {
-      e.className = "active";
-      // e.innerHTML = renderValue(current.value);
-      //console.log(current)
-      e.setAttribute("value", renderValue(current.value));
-      // e.innerText = current.value;
-    }
-    */
-    for (let i = 1; i < 11; i++) {
-      const e = document.getElementById("code_" + i);
-      if (e != null) {
-        if (i == current.id ) e.className = "active";
-        // e.innerHTML = renderValue(current.value);
-        e.setAttribute("value", renderValue(i == current.id ? current.value : null));
-        // e.innerText = current.value;
-      }
-    }
     //this.centerToCurrentPixels(this.canvas, this.zoomImage);
     this.centerToCurrentPixels(this.canvas2, this.zoomImage2);
     this.centerToCurrentPixels(this.canvas3, this.zoomImage3);
+  }
+
+  onStatement(current) {
+    this.statementsToRender.push(current);
   }
 
   onFilterEnd() {
@@ -340,7 +364,7 @@ class FilterScene {
   selectFilter(filterName) {
     if (!filters[filterName]) throw new Error(`Filter ${filterName} not found`);
     this.filter = filters[filterName];
-    console.log(this.filter)
+    console.log(this.filter);
     this.codeExecutor.runFilter(this.filter, this.zoomImage.changedPixels);
     this.zoomImage2.changedPixels = this.zoomImage.changedPixels;
     this.zoomImage3.changedPixels = this.zoomImage.changedPixels;
@@ -363,6 +387,9 @@ class FilterScene {
     document.querySelector("#code .lines").innerHTML = "";
     for (let i = 0; i < sourceCode.split("\n").length; i++)
       document.querySelector("#code .lines").innerHTML += `${i + 1}<br>`;
+
+    document.getElementById("execution").style.height =
+      document.getElementById("code").clientHeight + "px";
   }
 
   nbStep() {
@@ -381,7 +408,7 @@ class FilterScene {
     const total = this.nbStep();
 
     const progressText = document.querySelector("#progress .text");
-    if(progressText == null) {
+    if (progressText == null) {
       return;
     }
     progressText.innerText = `Progress: ${
