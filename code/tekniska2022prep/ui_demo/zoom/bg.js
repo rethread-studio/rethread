@@ -1,13 +1,12 @@
 // Matrix text effect from here: https://betterprogramming.pub/how-to-create-the-matrix-text-effect-with-javascript-325c6bb7d96e
-var tileSize = 15;
 // a higher fade factor will make the characters fade quicker
 var fadeFactor = 0.03;
 // var fadeColor = "0, 0, 0";
 var fadeColor = "4, 8, 36";
 var textColors = [
-      "rgb(255, 255, 255)",
-      // "rgb(255,193,204)",
-      // "rgb(64,224,208)",
+  "rgb(255, 255, 255)",
+  // "rgb(255,193,204)",
+  // "rgb(64,224,208)",
 ];
 var textColor = textColors[0];
 
@@ -136,28 +135,32 @@ var image_hexdump = `00002b30  73 75 72 65 4d 6f 64 65  3e 0a 20 20 3c 65 78 69 
 
 var image_hexdump_matrix = [];
 var numColumns = 78;
+var tileSize = 15;
 var image_hexdump_offset_y = 0;
 var image_hexdump_offset_counter = 0;
 
 function initBg() {
-  const hex_lines = image_hexdump.split('\n');
-  for(let line of hex_lines) {
-    image_hexdump_matrix.push(line.split(''));
+  const hex_lines = image_hexdump.split("\n");
+  for (let line of hex_lines) {
+    image_hexdump_matrix.push(line.split(""));
   }
 
-  if (window.socket) window.socket.on("picture_hexdump", (data) => {
-    image_hexdump = data;
-    const hex_lines = image_hexdump.split('\n');
-    image_hexdump_matrix = [];
-    for(let line of hex_lines) {
-      image_hexdump_matrix.push(line.split(''));
-    }
-  });
+  if (window.socket)
+    window.socket.on("picture_hexdump", (data) => {
+      image_hexdump = data;
+      const hex_lines = image_hexdump.split("\n");
+      image_hexdump_matrix = [];
+      for (let line of hex_lines) {
+        image_hexdump_matrix.push(line.split(""));
+      }
+    });
   canvas = document.querySelector("#bg");
 
   const resize = () => {
     canvas.width = canvas.parentElement.clientWidth;
     canvas.height = canvas.parentElement.clientHeight;
+
+    tileSize = Math.floor(canvas.width / numColumns);
   };
 
   resize();
@@ -172,14 +175,12 @@ function initBg() {
   console.log("background initiated");
 }
 
-
-
 function initMatrix() {
   maxStackHeight = Math.ceil(canvas.height / tileSize);
 
   // numColumns = canvas.width / tileSize;
-  let column_offset_x = ((canvas.width / tileSize) - numColumns) * 0.5;
-  if(column_offset_x < 0) {
+  let column_offset_x = (canvas.width / tileSize - numColumns) * 0.5;
+  if (column_offset_x < 0) {
     column_offset_x = 0;
   }
   // divide the canvas into columns
@@ -212,11 +213,12 @@ function draw() {
       //   33 + Math.floor(Math.random() * 94)
       // );
       var randomCharacter = "";
-      const line = image_hexdump_matrix[columns[i].stackCounter + image_hexdump_offset_y]
-      if(line != undefined) {
+      const line =
+        image_hexdump_matrix[columns[i].stackCounter + image_hexdump_offset_y];
+      if (line != undefined) {
         randomCharacter = line[i];
       }
-      if(randomCharacter == undefined) {
+      if (randomCharacter == undefined) {
         randomCharacter = "";
       }
       ctx.fillText(
@@ -237,20 +239,23 @@ function draw() {
 var prevTimestamp = 0;
 // MAIN LOOP
 function tick(timestamp) {
-  if(timestamp - prevTimestamp > 40) {
+  if (timestamp - prevTimestamp > 40) {
     prevTimestamp = timestamp;
-  draw();
-  if (Math.random() > 0.99) {
-    textColor = textColors[Math.floor(Math.random() * textColors.length)];
-  }
-  image_hexdump_offset_counter += 1;
-  if(image_hexdump_offset_counter >= 50) {
-    image_hexdump_offset_counter = 0;
-    image_hexdump_offset_y += 1;
-    if(image_hexdump_offset_y + maxStackHeight + 10 >= image_hexdump_matrix.length) {
-      image_hexdump_offset_y = 0;
+    draw();
+    if (Math.random() > 0.99) {
+      textColor = textColors[Math.floor(Math.random() * textColors.length)];
     }
-  }
+    image_hexdump_offset_counter += 1;
+    if (image_hexdump_offset_counter >= 50) {
+      image_hexdump_offset_counter = 0;
+      image_hexdump_offset_y += 1;
+      if (
+        image_hexdump_offset_y + maxStackHeight + 10 >=
+        image_hexdump_matrix.length
+      ) {
+        image_hexdump_offset_y = 0;
+      }
+    }
   }
   window.requestAnimationFrame(tick);
 }

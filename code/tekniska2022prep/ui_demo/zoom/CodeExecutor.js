@@ -39,7 +39,8 @@ class CodeExecutor {
   _emit(event, obj) {
     if (!this.listeners[event]) return;
     for (const i in this.listeners[event]) {
-      setTimeout(() => this.listeners[event][i](obj), 0);
+      this.listeners[event][i](obj)
+      // setTimeout(() => this.listeners[event][i](obj), 0);
     }
   }
 
@@ -72,6 +73,15 @@ class CodeExecutor {
 
   async runFilter(filter, imageData) {
     window.wrapExp = async (id, type, code, value, ctx) => {
+      // setTimeout(() => {
+      this._emit("statement", {
+        id,
+        type,
+        code,
+        value,
+        ctx,
+      });
+      // }, 0);
       if (
         (this.stopOnValue === "all" || this.stopOnValue === type) &&
         this.currentJumpValue <= 0
