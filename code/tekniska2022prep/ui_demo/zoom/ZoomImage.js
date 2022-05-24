@@ -147,9 +147,8 @@ class ZoomImage {
 
     this.ctx.globalAlpha = opt?.linesOpacity || 1;
 
-    this.ctx.strokeStyle = this.opt.colorLine;
-
     this.ctx.beginPath();
+    this.ctx.strokeStyle = this.opt.colorLine;
     for (let i = startX; i < endX; i += canvasScale) {
       this.ctx.moveTo(i, startY);
       this.ctx.lineTo(i, endY);
