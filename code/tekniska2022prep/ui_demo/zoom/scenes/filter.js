@@ -363,22 +363,29 @@ class FilterScene {
   }
 
   centerToCurrentPixels(canvas, zoomImage) {
+    const currentIndex = this.codeExecutor.iterationIndex / 4;
+    const x = currentIndex % this.img.width;
+    const y = Math.floor(currentIndex / this.img.width);
+
     if (
       zoomImage.imgWidth - 1 > canvas.width ||
       zoomImage.imgHeight - 1 > canvas.height
     ) {
-      const currentIndex = this.codeExecutor.iterationIndex / 4;
-      const x = currentIndex % this.img.width;
-      const y = Math.floor(currentIndex / this.img.width);
-
-      const offsetX =
+      let offsetX =
         canvas.width / 2 -
         (x * (zoomImage.scale / zoomImage.canvasRatio) +
           zoomImage.scale / zoomImage.canvasRatio / 2);
-      const offsetY =
-        canvas.height / 4 -
+      let offsetY =
+        canvas.height / 2 -
         (y * (zoomImage.scale / zoomImage.canvasRatio) +
           zoomImage.scale / zoomImage.canvasRatio / 2);
+
+      if (offsetX < 0 && zoomImage.imgWidth + offsetX < canvas.width) {
+        offsetX = zoomImage.imgWidth - canvas.width;
+      }
+      if (offsetY < 0 && zoomImage.imgHeight + offsetY < canvas.height) {
+        offsetY = zoomImage.imgHeight - canvas.height;
+      }
 
       zoomImage.offset(Math.min(offsetX, 0), Math.min(offsetY, 0));
     } else {
@@ -448,6 +455,28 @@ class FilterScene {
     ).toFixed()}%`;
   }
 
+  drawCurrentPixel(zoomImage) {
+    if (this.codeExecutor && this.codeExecutor.iterationIndex != undefined) {
+      const currentIndex = this.codeExecutor.iterationIndex / 4;
+      const x = currentIndex % this.img.width;
+      const y = Math.floor(currentIndex / this.img.width);
+      const pX =
+        x * (zoomImage.scale / zoomImage.canvasRatio) + zoomImage.offsetX;
+      const pY =
+        y * (zoomImage.scale / zoomImage.canvasRatio) + zoomImage.offsetY;
+
+      zoomImage.ctx.rect(
+        pX,
+        pY,
+        zoomImage.scale / zoomImage.canvasRatio,
+        zoomImage.scale / zoomImage.canvasRatio
+      );
+      zoomImage.ctx.strokeStyle = "white";
+      zoomImage.ctx.lineWidth = 3;
+      zoomImage.ctx.stroke();
+    }
+  }
+
   async render() {
     this.renderProgress();
     this.zoomImage.render({
@@ -464,6 +493,7 @@ class FilterScene {
       subPixels: true,
       picture: true,
       clear: true,
+      colorLine: "black",
       pictureOpacity: 1,
       valuesOpacity: 0.8,
       subPixelOpacity: 0.1,
@@ -477,6 +507,9 @@ class FilterScene {
       pictureOpacity: 0.9,
       valuesOpacity: 0.8,
     });
+
+    // this.drawCurrentPixel(this.zoomImage2);
+    this.drawCurrentPixel(this.zoomImage3);
     return this;
   }
 }
