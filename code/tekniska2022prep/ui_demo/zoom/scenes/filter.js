@@ -131,7 +131,7 @@ class FilterScene {
     this.selectFilter("contrast");
     this.zoom(0, this.canvas, this.zoomImage);
     this.zoom(15, this.canvas2, this.zoomImage2);
-    this.zoom(60, this.canvas3, this.zoomImage3);
+    this.zoom(75, this.canvas3, this.zoomImage3);
     this.speed(0);
 
     this.statementsToRender = [];
@@ -156,9 +156,9 @@ class FilterScene {
         const newValueE = document.createElement("div");
         newValueE.className = "value";
         // newValueE.innerHTML = FilterScene.renderValue(current.value);
-        newValueE.innerHTML = `${current.code}: ${FilterScene.renderValue(
+        newValueE.innerHTML = `${current.code}: <strong>${FilterScene.renderValue(
           current.value
-        )}`;
+        )}</strong>`;
         execE.appendChild(newValueE);
         if (execE.childElementCount > maxElement)
           execE.removeChild(execE.firstChild);
@@ -293,7 +293,7 @@ class FilterScene {
           speedE.style.position = null;
         }, 50);
         speedE.style.top = speedE.oTop;
-      }, 3500);
+      }, 2500);
     }
 
     this.codeExecutor.jump(value);
@@ -447,18 +447,19 @@ class FilterScene {
       pictureOpacity: 0.9,
     });
     this.zoomImage2.render({
-      lines: false,
-      values: true,
-      subPixels: false,
+      lines: true,
+      values: false,
+      subPixels: true,
       picture: true,
       clear: true,
-      pictureOpacity: 0.9,
+      pictureOpacity: 1,
       valuesOpacity: 0.8,
+      subPixelOpacity: 0.1,
     });
     this.zoomImage3.render({
       lines: false,
       values: true,
-      subPixels: false,
+      subPixels: true,
       picture: true,
       clear: true,
       pictureOpacity: 0.9,

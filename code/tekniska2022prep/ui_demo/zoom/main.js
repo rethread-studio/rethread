@@ -31,15 +31,15 @@ async function init() {
   const bg = document.getElementById("bg");
   bg.style.opacity = "0";
 
-  // const captureScene = new CaptureScene(c1, null);
-  // const img = await loadScene(captureScene);
+  const captureScene = new CaptureScene(c1, null);
+  const img = await loadScene(captureScene);
 
-  // const zoomTransitionScene = new ZoomTransitionScene(c1, img, null);
-  // const rgbTransitionScene = new RGBScene(c1, img, null);
-  // await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
+  const zoomTransitionScene = new ZoomTransitionScene(c1, img, null);
+  const rgbTransitionScene = new RGBScene(c1, img, null);
+  await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
 
   const backupImg = await loadImage("./img/portrait.jpg");
-  const filterScene = new FilterScene(c1, c2, c3, backupImg);
+  const filterScene = new FilterScene(c1, c2, c3, img);
   await loadScene(filterScene);
 }
 
