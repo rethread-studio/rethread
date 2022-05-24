@@ -22,10 +22,7 @@ class CaptureScene {
     window.addEventListener("keydown", this.onKeydown);
 
     let o = `<div id="welcome">
-  <div class="title">for|each</div>  
-  <div class="hand-wheel">
-    <img src="./img/CrankWheel.svg" />
-  </div>
+  <div class="title">for|each</div>
 </div>`;
     document.getElementById("content").innerHTML = o;
     return this;
@@ -51,7 +48,7 @@ class CaptureScene {
     timerE.id = "timer";
     document.getElementById("content").appendChild(timerE);
     timerE.innerText = timer;
-      if (window.socket) window.socket.emit("timer", timer);
+    if (window.socket) window.socket.emit("timer", timer);
     this.triggerInterval = setInterval(() => {
       timerE.innerText = --timer;
       if (window.socket) window.socket.emit("timer", timer);

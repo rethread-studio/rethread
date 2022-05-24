@@ -122,7 +122,6 @@ span.active::after {
   position: absolute;
 
   width: calc(30% - 4px);
-  font-size: 10px;
   right: 0;
   max-height: 185px;
   overflow: scroll;
@@ -220,7 +219,6 @@ span.active::after {
   font-family: monospace;
   font-size: 200px;
   margin-bottom: 55px;
-  margin-left: -8%;
 }
 
 #welcome .description {

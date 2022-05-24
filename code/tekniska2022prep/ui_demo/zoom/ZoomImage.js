@@ -173,9 +173,11 @@ class ZoomImage {
 
     this.ctx.globalAlpha = opt?.subPixelOpacity || 1;
 
-    this.ctx.rect(0, 0, endX, this.canvas.height);
-    this.ctx.fillStyle = "black";
-    this.ctx.fill();
+    if (!opt?.picture) {
+      this.ctx.rect(0, 0, endX, this.canvas.height);
+      this.ctx.fillStyle = "black";
+      this.ctx.fill();
+    }
 
     this.ctx.beginPath();
     // this.ctx.fillStyle = `rgb(0, 0, 0)`;
@@ -295,14 +297,38 @@ class ZoomImage {
 
         if (r != null) {
           this.ctx.fillStyle = `rgb(${r}, 0, 0)`;
+          if (opt?.subPixels) {
+            var yiq = (r * 299 + 0 * 587 + 0 * 114) / 1000;
+            if (yiq >= 128) {
+              this.ctx.fillStyle = "black";
+            } else {
+              this.ctx.fillStyle = "white";
+            }
+          }
           this.ctx.fillText(r, i + canvasScale * 0.95, j + canvasScale * 0.25);
         }
         if (g != null) {
           this.ctx.fillStyle = `rgb(0, ${g}, 0)`;
+          if (opt?.subPixels) {
+            var yiq = (0 * 299 + g * 587 + 0 * 114) / 1000;
+            if (yiq >= 128) {
+              this.ctx.fillStyle = "black";
+            } else {
+              this.ctx.fillStyle = "white";
+            }
+          }
           this.ctx.fillText(g, i + canvasScale * 0.95, j + canvasScale * 0.6);
         }
         if (b != null) {
           this.ctx.fillStyle = `rgb(0, 0, ${b})`;
+          if (opt?.subPixels) {
+            var yiq = (0 * 299 + 0 * 587 + b * 114) / 1000;
+            if (yiq >= 128) {
+              this.ctx.fillStyle = "black";
+            } else {
+              this.ctx.fillStyle = "white";
+            }
+          }
           this.ctx.fillText(b, i + canvasScale * 0.95, j + canvasScale * 0.95);
         }
       }
