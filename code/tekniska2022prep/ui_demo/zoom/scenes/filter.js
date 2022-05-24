@@ -100,11 +100,15 @@ class FilterScene {
   </div>
 </div>
 <div id="overlay">
-  <div id="date_1"> 1837: Analytical Engine </div>
-  <div id="date_2"> 1940: Enigma </div>
-  <div id="date_3"> 1969: Apollo 11 </div>
-  <div id="date_4"> 1990: Internet </div>
-  <div id="date_5"> 2007: Touchscreen smartphones </div>
+<div class="selected">Speed back in</div>
+<br>
+<div id="date_1"> 1837: Analytical Engine </div>
+<div id="date_2"> 1940: Enigma </div>
+<div id="date_3"> 1969: Apollo 11 </div>
+<div id="date_4"> 1990: Internet </div>
+<div id="date_5"> 2007: Touchscreen smartphones </div>
+<br>
+<img id="era_image" height=30%>
 </div>`;
 
     document.getElementById("content").innerHTML = content;
@@ -192,10 +196,28 @@ class FilterScene {
       overlay.classList.add("active");
 
       let dateNb = 1;
-      if (value > total/5) dateNb++;
-      if (value > 2*total/5) dateNb++;
-      if (value > 3*total/5) dateNb++;
-      if (value > 4*total/5) dateNb++;
+      let imageSrc = "https://inteng-storage.s3.amazonaws.com/img/iea/ZKwJepv36M/sizes/ada-n-the-machine_resize_md.jpg";
+      if (value > total/5) {
+        // 1940: Enigma
+        dateNb++;
+        imageSrc = "https://2.bp.blogspot.com/-GG09AfmLSIM/WqHbU4aBrMI/AAAAAAABrL0/fGLsaQJ1kyYm1rG-yOUpqV4Lkfiqu9niACLcBGAs/s640/p00v2b0b.jpg";
+      }
+      if (value > 2*total/5) {
+        // 1969: Apollo 11
+        dateNb++;
+        imageSrc = "https://www.herodote.net/_image/margaret_hamilton1_apollo_maxi.jpg";
+      }
+      if (value > 3*total/5) {
+        // 1990: Internet
+        dateNb++;
+        imageSrc = "https://mediastream.cern.ch/MediaArchive/Photo/Public/1999/9902031/9902031_01/9902031_01-A5-at-72-dpi.jpg";
+      }
+      if (value > 4*total/5) {
+        // 2007: Touchscreen smartphones
+        dateNb++;
+        imageSrc = "https://i.cbc.ca/1.2883789.1419450784!/fileImage/httpImage/image.jpg_gen/derivatives/16x9_780/cellphone.jpg";
+
+      }
       let theDate = document.getElementById("date_"+dateNb);
       theDate.classList.add("selected");
 
@@ -205,6 +227,8 @@ class FilterScene {
           otherDate.classList.remove("selected");
         }
       }
+
+      document.getElementById("era_image").src = imageSrc;
 
       this.overlayTimeout = setTimeout(() => {
         //overlay.innerHTML = "";
