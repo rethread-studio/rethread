@@ -35,6 +35,7 @@
           // background-color: rgb(96, 219, 96);
           border-radius: 50%;
           color: white;
+          font-size: 3em;
           box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.1);
           height: 15vw;
           width: 15vw;
@@ -60,19 +61,19 @@
 
   <body>
     <div class="body">
-      <div id="speed-input-div">
-      <label for="speed-input"
-        >Speed
-        <input
-          type="range"
-          min="0"
-          max="10000"
-          value="1"
-          orient="vertical"
-          id="speed-input"
-        /> </label
-      >
-      </div>
+      <!-- <div id="speed-input-div"> -->
+      <!-- <label for="speed-input" -->
+      <!--   >Speed -->
+      <!--   <input -->
+      <!--     type="range" -->
+      <!--     min="0" -->
+      <!--     max="10000" -->
+      <!--     value="1" -->
+      <!--     orient="vertical" -->
+      <!--     id="speed-input" -->
+      <!--   /> </label -->
+      <!-- > -->
+      <!-- </div> -->
       <br />
       <button id="start">START</button>
     </div>
@@ -85,11 +86,11 @@
       document.getElementById("start").addEventListener("click", () => {
         socket.emit("capture");
       });
-      document
-        .getElementById("speed-input")
-        .addEventListener("input", function () {
-          socket.emit("speed",  Math.pow(this.value/10000.0, 3) * 10000.0);
-        });
+      // document
+      //   .getElementById("speed-input")
+      //   .addEventListener("input", function () {
+      //     socket.emit("speed",  Math.pow(this.value/10000.0, 3) * 10000.0);
+      //   });
     </script>
     <script src="./controller2.js"></script>
   </body>

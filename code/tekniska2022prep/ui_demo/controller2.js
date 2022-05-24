@@ -174,19 +174,61 @@ let setting_wheel = {
 };
 
 let fader = {
+  // center x and y
   x: 0,
   y: 0,
+  value: 0.0,
+  width: 50,
+  height: 500,
+  knobHeight: 30,
+  knobWidth: 80,
+  touchY: 0,
+  touchValue: 0.0,
+  draw: function () {
+    let upper_x = this.x - this.width / 2;
+    let upper_y = this.y - this.height / 2;
+    fill(0, 200, 255);
+    rect(upper_x, upper_y, this.width, this.height, 20);
+    let track_width = 2;
+    let track_x = this.x - track_width / 2;
+    fill(0);
+    rect(track_x, upper_y, track_width, this.height);
+    let knob_margin = this.knobHeight / 2;
+    let knob_x = this.x - this.knobWidth / 2;
+    let knob_y = upper_y + (this.height - this.knobHeight) * (1.0 - this.value);
+    fill(0);
+    stroke(0, 200, 255);
+    rect(knob_x, knob_y, this.knobWidth, this.knobHeight);
+  },
+  isInside: function (x, y) {
+    let upper_x = this.x - this.knobWidth / 2;
+    let upper_y = this.y - this.height / 2;
+    if (
+      x >= upper_x &&
+      x <= upper_x + this.knobWidth &&
+      y >= upper_y &&
+      y <= upper_y + this.height
+    ) {
+      return true;
+    }
+    return false;
+  },
+  update: function (x, y) {
+    let value_change = (this.touchY - y) / this.height;
+    this.value = this.touchValue + value_change;
+    if (this.value > 1.0) {
+      this.value = 1.0;
+    }
+    if (this.value < 0.0) {
+      this.value = 0.0;
+    }
+    socket.emit("speed", Math.pow(this.value, 3) * 10000.0);
+  },
 };
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  encoder.size = height * 0.7;
-  encoder.dip_size = encoder.size * 0.1;
-  encoder.x = width * 0.73;
-  encoder.y = height / 2;
-  setting_wheel.size = height * 0.2;
-  setting_wheel.x = width * 0.25;
-  setting_wheel.y = height * 0.6;
+  setPositions();
 }
 
 function draw() {
@@ -195,6 +237,7 @@ function draw() {
 
   encoder.draw();
   setting_wheel.draw();
+  fader.draw();
 }
 
 function mousePressed() {
@@ -219,6 +262,12 @@ function mousePressed() {
     // prevent default
     return false;
   }
+  if (fader.isInside(mouseX, mouseY)) {
+    fader.pressed = true;
+    fader.touchY = mouseY;
+    fader.touchValue = fader.value;
+    return false;
+  }
   return true;
 }
 function touchStarted() {
@@ -235,9 +284,14 @@ function touchMoved() {
     // prevent default
     return false;
   }
-  fill(0, 255, 0, 100);
-  noStroke();
-  ellipse(mouseX, mouseY, 20, 20);
+  if (fader.pressed) {
+    fader.update(mouseX, mouseY);
+    // prevent default
+    return false;
+  }
+  // fill(0, 255, 0, 100);
+  // noStroke();
+  // ellipse(mouseX, mouseY, 20, 20);
   return true;
 }
 function touchEnded() {
@@ -249,10 +303,20 @@ function touchEnded() {
 }
 function windowResized() {
   resizeCanvas(window.innerWidth, window.innerHeight);
+  setPositions();
+}
+
+function setPositions() {
   encoder.size = height * 0.7;
-  encoder.x = width * 0.7;
+  encoder.dip_size = encoder.size * 0.1;
+  encoder.x = width - encoder.size * 0.55;
   encoder.y = height / 2;
   setting_wheel.size = height * 0.2;
-  setting_wheel.x = width * 0.2;
-  setting_wheel.y = height / 2;
+  setting_wheel.x = encoder.x - encoder.size * 0.5 - setting_wheel.size * 1.7;
+  setting_wheel.y = height * 0.7;
+  fader.width = width * 0.02;
+  fader.height = height * 0.8;
+  fader.knobWidth = fader.width * 4;
+  fader.x = fader.width + fader.knobWidth * 0.5;
+  fader.y = height / 2;
 }
