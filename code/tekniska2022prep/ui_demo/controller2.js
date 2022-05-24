@@ -237,6 +237,28 @@ let fader = {
   },
 };
 
+let button = {
+  x: 0,
+  y: 0,
+  size: 200,
+  pressed: false,
+  draw: function () {
+    strokeWeight(3);
+    if (this.pressed) {
+      fill(0, 0, 200);
+    } else {
+      fill(0, 0, 255);
+    }
+    ellipse(this.x, this.y, this.size, this.size);
+    strokeWeight(1);
+    textSize(this.size * 0.2);
+    let text_width = textWidth("START");
+    let text_height = this.size * 0.1;
+    fill(255);
+    text("START", this.x - text_width * 0.5, this.y + text_height * 0.5);
+  },
+};
+
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   setPositions();
@@ -249,6 +271,7 @@ function draw() {
   encoder.draw();
   setting_wheel.draw();
   fader.draw();
+  button.draw();
 }
 
 function mousePressed() {
@@ -270,6 +293,13 @@ function mousePressed() {
       setting_wheel.x - mouseX,
       mouseY - setting_wheel.y
     );
+    // prevent default
+    return false;
+  }
+  if (abs(dist(button.x, button.y, mouseX, mouseY)) < button.size * 0.5) {
+    console.log("pressed button");
+    button.pressed = true;
+    socket.emit("capture");
     // prevent default
     return false;
   }
@@ -311,6 +341,8 @@ function touchEnded() {
   encoder.pull_rotation = 0;
   setting_wheel.pressed = false;
   setting_wheel.pull_rotation = 0;
+  fader.pressed = false;
+  button.pressed = false;
 }
 function windowResized() {
   resizeCanvas(window.innerWidth, window.innerHeight);
@@ -330,9 +362,13 @@ function setPositions() {
   fader.knobWidth = fader.width * 4;
   fader.x = fader.width + fader.knobWidth * 0.5;
   fader.y = height / 2;
+  button.x = setting_wheel.x;
+  button.y = height * 0.25;
+  button.size = height * 0.4;
 }
 
 socket.on("filter_start", () => {
+  console.log("filter start, sending values");
   fader.send_value();
   setting_wheel.send_value();
 });
