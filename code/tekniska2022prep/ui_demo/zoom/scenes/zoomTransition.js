@@ -36,7 +36,7 @@ class ZoomTransitionScene {
       picture: this.zoomImage.scale < 100,
     });
 
-    if (this.zoomImage.scale >= 1000) {
+    if (this.zoomImage.scale >= 5500) {
       this.isDone = true;
 
       if (this.cb) this.cb();
