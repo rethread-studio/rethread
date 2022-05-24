@@ -424,33 +424,30 @@ class FilterScene {
     this.renderProgress();
     this.zoomImage.render({
       lines: false,
-      values: this.zoomImage.scale > 20 && this.zoomImage.scale < 100,
-      subPixels: this.zoomImage.scale >= 85,
-      picture: this.zoomImage.scale < 100,
+      values: false,
+      subPixels: false,
+      picture: true,
       clear: true,
-      pictureOpacity: 0.8,
+      pictureOpacity: 0.9,
     });
     this.zoomImage2.render({
       lines: false,
-      values: this.zoomImage.scale > 20 && this.zoomImage.scale < 100,
-      subPixels: this.zoomImage.scale >= 85,
-      picture: this.zoomImage.scale < 100,
+      values: true,
+      subPixels: false,
+      picture: true,
       clear: true,
       pictureOpacity: 0.9,
       valuesOpacity: 0.8,
     });
-    this.zoomImage2.renderValues();
     this.zoomImage3.render({
       lines: false,
-      values: this.zoomImage.scale > 20 && this.zoomImage.scale < 100,
-      subPixels: this.zoomImage.scale >= 85,
-      picture: this.zoomImage.scale < 100,
+      values: true,
+      subPixels: false,
+      picture: true,
       clear: true,
       pictureOpacity: 0.9,
       valuesOpacity: 0.8,
     });
-    this.zoomImage3.renderValues();
-    //this.zoomImage3.renderSubPixel();
     return this;
   }
 }
