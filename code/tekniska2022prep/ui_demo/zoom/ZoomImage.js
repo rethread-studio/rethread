@@ -107,6 +107,8 @@ class ZoomImage {
   }
 
   zoom(scale, opt) {
+    this.canvasRatio = this.canvas.clientWidth / this.canvas.width;
+
     if (scale > 10) scale = (0.5 + scale) | 0;
 
     this.imgWidth = (this.img.width * scale) / this.canvasRatio;

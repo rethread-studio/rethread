@@ -156,9 +156,9 @@ class FilterScene {
         const newValueE = document.createElement("div");
         newValueE.className = "value";
         // newValueE.innerHTML = FilterScene.renderValue(current.value);
-        newValueE.innerHTML = `${current.code}: <strong>${FilterScene.renderValue(
-          current.value
-        )}</strong>`;
+        newValueE.innerHTML = `${
+          current.code
+        }: <strong>${FilterScene.renderValue(current.value)}</strong>`;
         execE.appendChild(newValueE);
         if (execE.childElementCount > maxElement)
           execE.removeChild(execE.firstChild);
@@ -293,7 +293,7 @@ class FilterScene {
           speedE.style.position = null;
         }, 50);
         speedE.style.top = speedE.oTop;
-      }, 2500);
+      }, 1500);
     }
 
     this.codeExecutor.jump(value);
@@ -346,6 +346,18 @@ class FilterScene {
   }
 
   onFilterEnd() {
+    this.canvas.width = window.innerWidth * 2;
+    this.canvas.height = window.innerHeight * 2;
+    this.canvas.style.zIndex = "1";
+    this.canvas.style.width = "100%";
+    this.canvas.style.height = "100%";
+
+    this.canvas2.style.zIndex = "0";
+    this.canvas3.style.zIndex = "0";
+
+    this.unload();
+    document.getElementById("content").innerHTML = "";
+
     this.zoom(0, this.canvas, this.zoomImage);
     if (window.socket) window.socket.emit("stage", "filter_end");
   }
