@@ -155,6 +155,7 @@ function getNbEventSec() {
 }
 
 let state = "IDLE";
+let lastImage = null;
 io.on("connection", (socket) => {
   console.log("a client connected");
 
@@ -163,6 +164,14 @@ io.on("connection", (socket) => {
   // send the current state to the new client
   socket.emit("state", state);
 
+  socket.on("code_display", () => {
+    socket.join("code_display");
+
+    if (lastImage != null) {
+      io.to("code_display").emit("image", lastImage);
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("a client disconnected");
   });
@@ -170,10 +179,13 @@ io.on("connection", (socket) => {
   socket.on("picture", (image) => {
     if (image == null) return;
     osc.send({ state: "picture" });
+    io.to("code_display").emit("image", image);
+    lastImage = image;
     const fileName = "snap_" + new Date().getTime();
     const filePath = snapsFolder + fileName + ".png";
     // Remove header
     let base64Image = image.split(";base64,").pop();
+    // io.to("code_display").emit("image", base64Image);
     fs.writeFile(
       filePath,
       base64Image,
@@ -242,6 +254,10 @@ io.on("connection", (socket) => {
       events: getNbEventSec(),
       index: data.index,
       total: data.total,
+    });
+    io.to("code_display").emit("step", {
+      direction: "next",
+      speed: getNbEventSec(),
     });
   });
   socket.on("step", (data) => {

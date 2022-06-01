@@ -6,7 +6,7 @@
   --main-color: rgba(0, 200, 255, 1);
   --main-bg: #040824;
   --main-bg-transparent: rgba(4, 8, 36, 0.6);
-  --secondary-color: #FFFFFF;
+  --secondary-color: #ffffff;
 }
 
 body,
@@ -40,7 +40,6 @@ canvas {
   image-rendering: pixelated;
 }
 
-
 .box {
   position: relative;
   margin: auto;
@@ -60,7 +59,6 @@ canvas {
   width: 100%;
 }
 
-
 .panel {
   position: relative;
   width: 100%;
@@ -73,7 +71,7 @@ canvas {
   right: 0;
   bottom: 0;
   width: calc(100% - 50px);
-  height: 45%;
+  height: auto;
   background-color: var(--main-bg-transparent);
   margin: 0 25px;
   padding: 0;

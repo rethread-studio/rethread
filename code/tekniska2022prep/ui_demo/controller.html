@@ -103,7 +103,7 @@
       document
         .getElementById("zoom-input")
         .addEventListener("input", function () {
-          socket.emit("zoom", Math.pow(this.value/1000.0, 3) * 1000.0);
+          socket.emit("zoom", Math.pow(this.value/1000.0, 4) * 1000.0);
         });
     </script>
   </body>

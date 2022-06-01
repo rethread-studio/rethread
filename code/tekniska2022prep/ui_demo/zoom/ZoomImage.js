@@ -352,29 +352,6 @@ class ZoomImage {
       this.changedPixels.height
     );
 
-    // if (opt?.onlyBlue) {
-    //   for (let i = 0; i < imageDataCopy.data.length; i += 4) {
-    //     imageDataCopy.data[i] = 0;
-    //     imageDataCopy.data[i + 1] = 0;
-    //     // imageDataCopy.data[i + 2] = 0;
-    //     imageDataCopy.data[i + 3] = 255 - imageDataCopy.data[i + 2];
-    //   }
-    // } else if (opt?.onlyRed) {
-    //   for (let i = 0; i < imageDataCopy.data.length; i += 4) {
-    //     // imageDataCopy.data[i] = 0;
-    //     imageDataCopy.data[i + 1] = 0;
-    //     imageDataCopy.data[i + 2] = 0;
-    //     imageDataCopy.data[i + 3] = 255 - imageDataCopy.data[i];
-    //   }
-    // } else if (opt?.onlyGreen) {
-    //   for (let i = 0; i < imageDataCopy.data.length; i += 4) {
-    //     imageDataCopy.data[i] = 0;
-    //     // imageDataCopy.data[i + 1] = 0;
-    //     imageDataCopy.data[i + 2] = 0;
-    //     imageDataCopy.data[i + 3] = 255 - imageDataCopy.data[i + 1];
-    //   }
-    // }
-
     const tmpCtx = tmp.getContext("2d");
     tmpCtx.imageSmoothingEnabled = false;
     tmpCtx.globalAlpha = opt?.pictureOpacity || 1;
