@@ -87,8 +87,8 @@ class FilterScene {
 
     this.codeExecutor.init();
     this.selectFilter("invert");
-    this.zoom(0, this.canvas, this.zoomImage);
-    this.speed(1000);
+    this.zoom(1, this.canvas, this.zoomImage);
+    this.speed(2941);
 
     // this.execInterval = setInterval(() => {
     //   if (this.statementsToRender.length == 0) return;
@@ -289,9 +289,15 @@ class FilterScene {
     if (progressText == null) {
       return;
     }
-    progressText.innerText = `Progress: ${
-      this.codeExecutor.stepNum
-    }/${total} (${((this.codeExecutor.stepNum / total) * 100).toFixed()}%)`;
+    // progressText.innerText = `Progress: ${
+    //   this.codeExecutor.stepNum
+    // }/${total} (${((this.codeExecutor.stepNum / total) * 100).toFixed()}%)`;
+    let steps_done = this.codeExecutor.stepNum.toLocaleString("sv");
+    let total_steps = total.toLocaleString("sv");
+    progressText.innerText = `${steps_done}/${total_steps}\n(${(
+      (this.codeExecutor.stepNum / total) *
+      100
+    ).toFixed()}%)`;
     document.querySelector("#progress .fill").style.width = `${(
       (this.codeExecutor.stepNum / total) *
       100

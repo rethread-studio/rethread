@@ -18,12 +18,20 @@ class CaptureScene {
       if (e.key == "r") {
         this.trigger();
       }
+      if (e.key == "h") {
+        document.getElementById("instruction").classList.add("fade-out");
+        document.getElementById("welcome").classList.add("fade-out");
+      }
     };
     window.addEventListener("keydown", this.onKeydown);
 
     let o = `<div id="welcome">
   <div class="title">for|each</div>
-</div>`;
+</div>
+<div id="instruction">
+Ta en selfie!
+</div>
+`;
     document.getElementById("content").innerHTML = o;
     return this;
   }
@@ -42,6 +50,10 @@ class CaptureScene {
 
   async trigger() {
     console.log("TRIGGER");
+
+    // fade out the text
+    document.getElementById("instruction").classList.add("fade-out");
+    document.getElementById("welcome").classList.add("fade-out");
     clearInterval(this.triggerInterval);
     let timer = 3;
     if (document.getElementById("timer"))

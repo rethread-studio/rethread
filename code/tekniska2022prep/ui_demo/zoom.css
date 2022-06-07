@@ -2,10 +2,17 @@
   box-sizing: border-box;
 }
 
+@font-face {
+  font-family: "FT88";
+  src: local(fonts/FT88-Regular.otf);
+}
+
 :root {
   --main-color: rgba(0, 200, 255, 1);
+  --transparent-dark-grey: rgba(30, 30, 30, 0.85);
   --main-bg: #040824;
-  --main-bg-transparent: rgba(4, 8, 36, 0.6);
+  /* --main-bg-transparent: rgba(4, 8, 36, 0.6); */
+  --main-bg-transparent: rgba(255, 255, 255, 0.5);
   --secondary-color: #ffffff;
 }
 
@@ -49,7 +56,7 @@ canvas {
 .box .title {
   font-size: 30px;
   padding: 3px 5px;
-  border-bottom: 1px solid var(--main-color);
+  /* border-bottom: 1px solid var(--main-color); */
   text-align: center;
   font-weight: bold;
 }
@@ -70,10 +77,10 @@ canvas {
   position: absolute;
   right: 0;
   bottom: 0;
-  width: calc(100% - 50px);
+  width: 100%;
   height: auto;
   background-color: var(--main-bg-transparent);
-  margin: 0 25px;
+  /* margin: 0 25px; */
   padding: 0;
 }
 
@@ -155,8 +162,8 @@ span.active::after {
   text-align: center;
   font-weight: bolder;
   width: 100%;
-  height: 50px;
-  border: 1px solid var(--secondary-color);
+  height: 25px;
+  /* border: 1px solid var(--secondary-color); */
   line-height: 50px;
   font-family: monospace;
   font-size: 36px;
@@ -168,7 +175,10 @@ span.active::after {
   width: 100%;
   text-align: center;
   left: 0;
-  top: 0;
+  top: -100px;
+  font-family: "FT88", monospace, sans-serif;
+  font-weight: 200;
+  letter-spacing: 6px;
 }
 
 .progress .bar {
@@ -182,7 +192,7 @@ span.active::after {
 .progress .bar .fill {
   height: 100%;
   width: 50%;
-  background: var(--main-color);
+  background: var(--transparent-dark-grey);
 }
 
 #speed {
@@ -201,6 +211,15 @@ span.active::after {
 #timer {
   color: white;
   font-size: 100px;
+  animation: anim-bigger-text 1s infinite;
+}
+@keyframes anim-bigger-text {
+  0% {
+    font-size: 100px;
+  }
+  70% {
+    font-size: 3000px;
+  }
 }
 
 #welcome {
@@ -216,6 +235,8 @@ span.active::after {
   font-family: monospace;
   font-size: 200px;
   margin-bottom: 55px;
+  transition: opacity 2s;
+  opacity: 1;
 }
 
 #welcome .description {
@@ -273,4 +294,18 @@ span.active::after {
 div.selected {
   font-size: 70px;
   color: rgba(255, 255, 255, 1);
+}
+
+#instruction {
+  color: white;
+  font-size: 7em;
+  font-family: FT88;
+  bottom: 60px;
+  position: absolute;
+  opacity: 1;
+}
+
+.fade-out {
+  transition: opacity 2s !important;
+  opacity: 0 !important;
 }
