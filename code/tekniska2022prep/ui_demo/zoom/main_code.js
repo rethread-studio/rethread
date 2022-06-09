@@ -63,4 +63,4 @@ if (window.socket)
     }
   });
 
-initBg();
+// initBg();

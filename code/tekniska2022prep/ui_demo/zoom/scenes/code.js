@@ -3,6 +3,7 @@ class CodeScene {
     this.canvas = canvas;
     this.img = img;
     this.statementsToRender = [];
+    this.executionTrace = [];
 
     this.codeExecutor = new CodeExecutor();
     this.codeExecutor.on("step", () => {
@@ -62,34 +63,25 @@ class CodeScene {
     // this.automaticStart = setInterval(this.step, 750);
 
     let content = `
-<div class="panel right-panel">
-  <div id="progress" class="progress">
-    <div class="bar">
-      <div class="fill"></div>
-    </div>
-    <div class="text">50%</div>
-  </div>
-
-  <div id="speed" class="progress">
-    <div class="bar">
-      <div class="fill"></div>
-    </div>
-    <div class="text"></div>
-  </div>
-
-  <br>
-
-  <div id="code" class="box">
-    <div class="content" style="padding: 0">
-      <div class="lines"></div>
-      <pre><code></code></pre>
-    </div>
-  </div>
+<div class="panel code-panel">
   <div id="execution" class="box"></div>
 </div>
 `;
 
     document.getElementById("content").innerHTML = content;
+
+    let line_height = 20;
+    let columns = 5;
+    const execution = document.getElementById("execution");
+    execution.style.lineHeight = `${line_height}px`;
+    execution.style.columnCount = `${columns}`;
+    execution.style.fontSize = "15px";
+    this.numExecutionLinesPerColumn = Math.floor(
+      execution.offsetHeight / line_height
+    );
+    this.numExecutionLines = this.numExecutionLinesPerColumn * columns;
+    console.log(execution.offsetHeight);
+    console.log("num lines: " + this.numExecutionLines);
 
     // document.getElementById("zoom-input").oninput = (e) => {
     //   this.zoom(parseInt(e.target.value));
@@ -126,16 +118,30 @@ class CodeScene {
           e.setAttribute("value", CodeScene.renderValue(current.value));
         }
 
-        const newValueE = document.createElement("div");
-        newValueE.className = "value";
-        // newValueE.innerHTML = FilterScene.renderValue(current.value);
-        newValueE.innerHTML = `${current.code}: <strong>${CodeScene.renderValue(
+        let executionText = `${current.code}: <strong>${CodeScene.renderValue(
           current.value
         )}</strong>`;
-        execE.appendChild(newValueE);
-        if (execE.childElementCount > maxElement)
-          execE.removeChild(execE.firstChild);
+        this.executionTrace.push(executionText);
+        // const newValueE = document.createElement("div");
+        // newValueE.className = "value";
+        // // newValueE.innerHTML = FilterScene.renderValue(current.value);
+        // newValueE.innerHTML = `${current.code}: <strong>${CodeScene.renderValue(
+        //   current.value
+        // )}</strong>`;
+        // execE.appendChild(newValueE);
+        // if (execE.childElementCount > maxElement)
+        //   execE.removeChild(execE.firstChild);
       }
+      while (this.executionTrace.length - this.numExecutionLines > 0) {
+        this.executionTrace.splice(0, this.numExecutionLinesPerColumn);
+      }
+      let allExecution = "";
+      for (let et of this.executionTrace) {
+        allExecution += et;
+        allExecution += "<br/>";
+      }
+      execE.innerHTML = allExecution;
+
       execE.scrollTop = execE.scrollHeight;
 
       this.statementsToRender = [];
@@ -203,13 +209,6 @@ class CodeScene {
     // document.getElementById("speed-input").value = value;
 
     let timeEstimate = Math.round(50000 / (value + 1));
-    document.querySelector("#speed .text").innerText = `Speed: x${Math.round(
-      value
-    )} (${timeEstimate} seconds to complete)`;
-    document.querySelector("#speed .fill").style.width = `${(
-      (value / total) *
-      100
-    ).toFixed()}%`;
   }
 
   step() {
@@ -306,15 +305,6 @@ class CodeScene {
       .replace(/return/g, "<span class='keyword return'>return</span>")
       .replace(/const/g, "<span class='keyword const'>const</span>")
       .replace(/let/g, "<span class='keyword let'>let</span>");
-
-    document.querySelector("#code pre code").innerHTML = sourceCode;
-
-    document.querySelector("#code .lines").innerHTML = "";
-    for (let i = 0; i < sourceCode.split("\n").length; i++)
-      document.querySelector("#code .lines").innerHTML += `${i + 1}<br>`;
-
-    document.getElementById("execution").style.height =
-      document.getElementById("code").clientHeight + "px";
   }
 
   nbStep() {
