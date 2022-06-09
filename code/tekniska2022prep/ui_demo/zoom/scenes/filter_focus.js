@@ -67,11 +67,22 @@ class FilterScene {
     <div class="bar">
       <div class="fill"></div>
     </div>
-    <div class="text">50%</div>
   </div>
 `;
 
     document.getElementById("content").innerHTML = content;
+
+    const progress = document.getElementById("progress");
+    this.progressInstructions = document.createElement("div");
+    this.progressInstructions.classList.add("text");
+    this.progressPixels = document.createElement("div");
+    this.progressPixels.classList.add("text");
+    const separator = document.createElement("div");
+    separator.classList.add("text");
+    separator.innerText = "|";
+    progress.appendChild(this.progressInstructions);
+    progress.appendChild(separator);
+    progress.appendChild(this.progressPixels);
 
     // document.getElementById("zoom-input").oninput = (e) => {
     //   this.zoom(parseInt(e.target.value));
@@ -285,7 +296,7 @@ class FilterScene {
   async renderProgress() {
     const total = this.nbStep();
 
-    const progressText = document.querySelector("#progress .text");
+    const progressText = this.progressInstructions;
     if (progressText == null) {
       return;
     }
@@ -294,10 +305,8 @@ class FilterScene {
     // }/${total} (${((this.codeExecutor.stepNum / total) * 100).toFixed()}%)`;
     let steps_done = this.codeExecutor.stepNum.toLocaleString("sv");
     let total_steps = total.toLocaleString("sv");
-    progressText.innerText = `${steps_done}/${total_steps}\n(${(
-      (this.codeExecutor.stepNum / total) *
-      100
-    ).toFixed()}%)`;
+    progressText.innerText = `${steps_done}/${total_steps} instructions`;
+    this.progressPixels.innerText = "4238/293273 pixels";
     document.querySelector("#progress .fill").style.width = `${(
       (this.codeExecutor.stepNum / total) *
       100

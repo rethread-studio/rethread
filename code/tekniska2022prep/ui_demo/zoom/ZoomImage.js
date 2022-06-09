@@ -39,10 +39,12 @@ class ZoomImage {
     return this;
   }
 
-  center() {
+  center(amount = 1.0) {
+    let center_pos_x = Math.floor(this.canvas.width / 2 - this.imgWidth / 2);
+    let center_pos_y = Math.floor(this.canvas.height / 2 - this.imgHeight / 2);
     this.offset(
-      Math.floor(this.canvas.width / 2 - this.imgWidth / 2),
-      Math.floor(this.canvas.height / 2 - this.imgHeight / 2)
+      this.offsetX + (center_pos_x - this.offsetX) * amount,
+      this.offsetY + (center_pos_y - this.offsetY) * amount
     );
     return this;
   }
@@ -107,9 +109,10 @@ class ZoomImage {
   }
 
   zoom(scale, opt) {
+    console.log("zoom image: " + scale);
     this.canvasRatio = this.canvas.clientWidth / this.canvas.width;
 
-    if (scale > 10) scale = (0.5 + scale) | 0;
+    // if (scale > 10) scale = (0.5 + scale) | 0;
 
     this.imgWidth = (this.img.width * scale) / this.canvasRatio;
     this.imgHeight = (this.img.height * scale) / this.canvasRatio;
