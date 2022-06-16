@@ -77,12 +77,44 @@ class FilterScene {
     this.progressInstructions.classList.add("text");
     this.progressPixels = document.createElement("div");
     this.progressPixels.classList.add("text");
-    const separator = document.createElement("div");
+    let separator = document.createElement("div");
     separator.classList.add("text");
     separator.innerText = "|";
     progress.appendChild(this.progressInstructions);
     progress.appendChild(separator);
     progress.appendChild(this.progressPixels);
+    separator = document.createElement("div");
+    separator.classList.add("text");
+    separator.innerText = "|";
+    progress.appendChild(separator);
+
+    const cpu_widget_container = document.createElement("div");
+    cpu_widget_container.id = "cpu-widget-container";
+    const cpu_text = document.createElement("span");
+    cpu_text.innerText = "CPU";
+    cpu_text.style.marginRight = "15px";
+    cpu_widget_container.appendChild(cpu_text);
+    const cpu_widget = document.createElement("div");
+    cpu_widget.id = "cpu-widget";
+    for (let i = 0; i < 8; i++) {
+      const bar = document.createElement("div");
+      bar.classList.add("cpu-bar");
+      cpu_widget.appendChild(bar);
+    }
+    cpu_widget_container.appendChild(cpu_widget);
+
+    progress.appendChild(cpu_widget_container);
+
+    this.current_cpu_bar = 0;
+    this.cpuWidgetInterval = () => {
+      this.current_cpu_bar = Math.floor(Math.random() * 8);
+
+      const cpu_bar = document.querySelector(
+        `#cpu-widget :nth-child(${this.current_cpu_bar + 1})`
+      );
+      cpu_bar.style.height = `${Math.floor(Math.random() * 100)}%`;
+    };
+    setInterval(this.cpuWidgetInterval, 100);
 
     // document.getElementById("zoom-input").oninput = (e) => {
     //   this.zoom(parseInt(e.target.value));
@@ -143,6 +175,7 @@ class FilterScene {
     if (window.socket) window.socket.removeListener("step", this.step);
 
     clearInterval(this.execInterval);
+    clearInterval(this.cpuWidgetInterval);
 
     window.document.removeEventListener("wheel", this.onwheel);
     window.removeEventListener("keydown", this.onKeydown);
