@@ -109,7 +109,7 @@ class ZoomImage {
   }
 
   zoom(scale, opt) {
-    console.log("zoom image: " + scale);
+    // console.trace("zoom image: " + scale);
     this.canvasRatio = this.canvas.clientWidth / this.canvas.width;
 
     // if (scale > 10) scale = (0.5 + scale) | 0;
