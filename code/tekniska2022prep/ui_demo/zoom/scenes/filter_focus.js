@@ -2,6 +2,7 @@ class FilterScene {
   constructor(canvas, canvas2, canvas3, img) {
     this.canvas = canvas;
     this.img = img;
+    this.total_pixels = img.width * img.height;
 
     this.codeExecutor = new CodeExecutor();
     this.codeExecutor.on("step", () => {
@@ -339,7 +340,9 @@ class FilterScene {
     let steps_done = this.codeExecutor.stepNum.toLocaleString("sv");
     let total_steps = total.toLocaleString("sv");
     progressText.innerText = `${steps_done}/${total_steps} instructions`;
-    this.progressPixels.innerText = "4238/293273 pixels";
+    this.progressPixels.innerText = `${this.codeExecutor.pixelCount.toLocaleString(
+      "sv"
+    )}/${this.total_pixels.toLocaleString("sv")} pixels`;
     document.querySelector("#progress .fill").style.width = `${(
       (this.codeExecutor.stepNum / total) *
       100

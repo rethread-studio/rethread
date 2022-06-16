@@ -1,5 +1,6 @@
 class CodeExecutor {
   stepNum = 0;
+  pixelCount = 0;
   original_pixels = null;
   canvas = {};
   contexts = {};
@@ -39,7 +40,7 @@ class CodeExecutor {
   _emit(event, obj) {
     if (!this.listeners[event]) return;
     for (const i in this.listeners[event]) {
-      this.listeners[event][i](obj)
+      this.listeners[event][i](obj);
       // setTimeout(() => this.listeners[event][i](obj), 0);
     }
   }
@@ -82,6 +83,11 @@ class CodeExecutor {
         ctx,
       });
       // }, 0);
+      if (type == "loop") {
+        // This is where the index is incremented i.e. "i += 4"
+        // Increment pixel count
+        this.pixelCount++;
+      }
       if (
         (this.stopOnValue === "all" || this.stopOnValue === type) &&
         this.currentJumpValue <= 0
