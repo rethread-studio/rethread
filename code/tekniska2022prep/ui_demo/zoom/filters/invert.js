@@ -43,7 +43,7 @@ filters.invert = new Filter(
       pixels.data[i + 3] = d[i + 3];
 
       pixels.data[i] = 255 - d[i];
-      await wrapExp("5", "assignment", "255 - d[i]", 255 - d[i], {
+      await wrapExp("5", "assignment", "\t255 - d[i]", 255 - d[i], {
         adj,
         d,
         i,
@@ -54,7 +54,7 @@ filters.invert = new Filter(
       });
 
       pixels.data[i + 1] = 255 - d[i + 1];
-      await wrapExp("6", "assignment", "255 - d[i + 1]", 255 - d[i + 1], {
+      await wrapExp("6", "assignment", "\t255 - d[i + 1]", 255 - d[i + 1], {
         adj,
         d,
         i,
@@ -64,7 +64,7 @@ filters.invert = new Filter(
         "d[i + 2]": d[i + 2],
       });
       pixels.data[i + 2] = 255 - d[i + 2];
-      await wrapExp("7", "assignment", "255 - d[i + 2]", 255 - d[i + 2], {
+      await wrapExp("7", "assignment", "\t255 - d[i + 2]", 255 - d[i + 2], {
         adj,
         d,
         i,

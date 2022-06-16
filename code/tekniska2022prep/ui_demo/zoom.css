@@ -352,3 +352,13 @@ div.selected {
   transition: opacity 2s !important;
   opacity: 0 !important;
 }
+
+pre {
+  margin: 0;
+  display: inline;
+}
+pre code.hljs {
+  padding: 0;
+  background: inherit;
+  tab-size: 3;
+}

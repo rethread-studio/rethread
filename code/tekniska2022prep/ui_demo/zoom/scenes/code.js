@@ -28,6 +28,7 @@ class CodeScene {
   }
 
   async init() {
+    console.log("code init");
     const bg = document.getElementById("bg");
     bg.style.opacity = "1";
 
@@ -101,6 +102,7 @@ class CodeScene {
 
     this.statementsToRender = [];
 
+    // Run this in a loop to update the code listing, but return early if there's nothing to update.
     this.execInterval = setInterval(() => {
       if (this.statementsToRender.length == 0) return;
 
@@ -118,9 +120,9 @@ class CodeScene {
           e.setAttribute("value", CodeScene.renderValue(current.value));
         }
 
-        let executionText = `${current.code}: <strong>${CodeScene.renderValue(
+        let executionText = `${current.code}: ${CodeScene.renderValue(
           current.value
-        )}</strong>`;
+        )}`;
         this.executionTrace.push(executionText);
         // const newValueE = document.createElement("div");
         // newValueE.className = "value";
@@ -137,10 +139,15 @@ class CodeScene {
       }
       let allExecution = "";
       for (let et of this.executionTrace) {
+        allExecution += '<pre><code class="language-javascript">';
         allExecution += et;
-        allExecution += "<br/>";
+        allExecution += "</code></pre>";
+        // allExecution += "<br/>";
       }
       execE.innerHTML = allExecution;
+
+      hljs.highlightAll();
+      // hljs.highlightElement(execE);
 
       execE.scrollTop = execE.scrollHeight;
 
