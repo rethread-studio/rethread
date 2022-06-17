@@ -10,6 +10,42 @@ const { exec } = require("node:child_process");
 
 const snapsFolder = __dirname + "/snaps/";
 
+const { SerialPort } = require("serialport");
+var port = "/dev/ttyACM0";
+
+console.log(SerialPort.list());
+var serialPort = new SerialPort({
+  path: port,
+  baudRate: 9600,
+});
+
+serialPort.on("open", function () {
+  console.log("-- Connection opened --");
+  serialPort.on("data", function (data) {
+    console.log("Data received: " + data);
+
+    for (let byte of data) {
+      let char = String.fromCharCode(byte);
+      if (char == "d" || char == "u") {
+        resetIdle();
+        countEventSec();
+        const speed = getNbEventSec();
+        if (char == "d") {
+          io.emit("step", { direction: "next", speed });
+          osc.send({ state: "next", events: speed });
+        } else {
+          io.emit("step", { direction: "previous", speed });
+          osc.send({ state: "previous", events: speed });
+        }
+      } else if (char == "b") {
+        // button pressed
+        io.emit("capture", data);
+        osc.send({ state: "capture" });
+      }
+    }
+  });
+});
+
 osc.open((port) => {
   console.log("OSC server listening on port " + port);
 });
