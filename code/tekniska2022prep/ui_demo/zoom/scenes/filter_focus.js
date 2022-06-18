@@ -115,10 +115,13 @@ class FilterScene {
     this.cpuWidgetInterval = setInterval(() => {
       this.current_cpu_bar = Math.floor(Math.random() * 8);
 
+      let activity = Math.pow(this.stepsSinceLastCPU / 50.0, 0.5) * 100;
+      this.stepsSinceLastCPU = 0;
+
       const cpu_bar = document.querySelector(
         `#cpu-widget :nth-child(${this.current_cpu_bar + 1})`
       );
-      cpu_bar.style.height = `${Math.floor(Math.random() * 100)}%`;
+      cpu_bar.style.height = `${Math.floor(activity)}%`;
     }, 100);
 
     // document.getElementById("zoom-input").oninput = (e) => {
@@ -259,6 +262,7 @@ class FilterScene {
         index: this.codeExecutor.stepNum,
         total: this.nbStep(),
       });
+    this.stepsSinceLastCPU += 1;
 
     //this.centerToCurrentPixels(this.canvas, this.zoomImage);
   }
