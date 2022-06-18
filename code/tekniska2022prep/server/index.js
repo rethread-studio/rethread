@@ -13,10 +13,12 @@ const snapsFolder = __dirname + "/snaps/";
 const { SerialPort } = require("serialport");
 var port = "/dev/ttyACM0";
 
-console.log(SerialPort.list());
+console.log("serial ports: " + JSON.stringify(SerialPort.list()));
 var serialPort = new SerialPort({
   path: port,
   baudRate: 9600,
+}).on("error", () => {
+  console.error("Serial port connection error");
 });
 
 serialPort.on("open", function () {
