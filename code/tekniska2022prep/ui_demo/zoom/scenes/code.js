@@ -2,8 +2,12 @@ class CodeScene {
   constructor(canvas, img) {
     this.canvas = canvas;
     this.img = img;
+    this.imgNumbers = "";
+    this.codeSteppingEnabled = true;
     this.statementsToRender = [];
     this.executionTrace = [];
+
+    this.transitionCharacters = 0;
 
     this.codeExecutor = new CodeExecutor();
     this.codeExecutor.on("step", () => {
@@ -18,11 +22,18 @@ class CodeScene {
         const img = document.createElement("img");
         img.src = image;
         img.onload = () => {
+          console.log("received image");
           img.width = img.naturalWidth;
           img.height = img.naturalHeight;
           this.zoomImage = new ZoomImage(img, this.canvas);
-          console.log("received iamge");
+          this.imgNumbers = this.zoomImage.toBinaryString();
+          this.imgNumbers = this.imgNumbers.substring(0, 20000);
+          this.onTransition("start");
         };
+      });
+      window.socket.on("transition", (data) => this.onTransition(data));
+      window.socket.on("capture", () => {
+        this.reset_everything();
       });
     }
   }
@@ -241,8 +252,9 @@ class CodeScene {
   }
 
   step() {
-    console.trace("step");
-    this.codeExecutor.runStep();
+    if (this.codeSteppingEnabled) {
+      this.codeExecutor.runStep();
+    }
   }
 
   static renderValue(value) {
@@ -278,6 +290,28 @@ class CodeScene {
   onFilterEnd() {
     // TODO: Go into idle code display?
     // document.getElementById("content").innerHTML = "";
+  }
+
+  onTransition(state) {
+    console.log("transition: " + state);
+    if (state == "start") {
+      const execE = document.getElementById("execution");
+      execE.innerHTML = "";
+
+      this.codeSteppingEnabled = false;
+      this.transitionCharacters = 0;
+
+      this.transitionInterval = setInterval(() => {
+        execE.innerHTML =
+          '<div class="binary">' +
+          this.imgNumbers.substring(0, this.transitionCharacters) +
+          "</div>";
+        this.transitionCharacters += 20;
+      }, 10);
+    } else if (state == "end") {
+      this.codeSteppingEnabled = true;
+      clearInterval(this.transitionInterval);
+    }
   }
 
   centerToCurrentPixels(canvas, zoomImage) {

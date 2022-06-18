@@ -362,4 +362,9 @@ pre code.hljs {
   padding: 0;
   background: inherit;
   tab-size: 3;
+  overflow: hidden;
+}
+
+.binary {
+  line-break: anywhere;
 }

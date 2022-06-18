@@ -49,6 +49,19 @@ class ZoomImage {
     return this;
   }
 
+  toBinaryString() {
+    let str = "";
+    for (let y = 0; y < this.img.height; y++) {
+      for (let x = 0; x < this.img.width; x++) {
+        let index = (y * this.img.width + x) * 4;
+        str += this.pixelData[index].toString(2) + " ";
+        str += this.pixelData[index + 1].toString(2) + " ";
+        str += this.pixelData[index + 2].toString(2) + " ";
+      }
+    }
+    return str;
+  }
+
   offset(x, y) {
     this.offsetX = x;
     this.offsetY = y;
