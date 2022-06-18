@@ -7,9 +7,11 @@ class ZoomTransitionScene {
     this.cb = cb;
     this.zoomImage = new ZoomImage(img, this.canvas);
     this.zoomImage.zoom(1).center();
-    this.zoomCoeff = 1.05;
+    this.zoomCoeff = 1.07;
     this.wasIn = false;
     this.move = true;
+    this.phase = 0.0;
+    this.startScale = 1;
   }
 
   async init() {
@@ -46,31 +48,53 @@ class ZoomTransitionScene {
     if (this.move) {
       this.step++;
 
-      this.zoomImage.zoom(this.zoomImage.scale * this.zoomCoeff); //.center();
-      if (this.zoomCoeff < 1.0) {
+      let max_zoom = 500;
+      let end_zoom = window.full_size_zoom(this.canvas, this.img);
+      let new_zoom = Math.cos(this.phase * Math.PI * 2 + Math.PI) * 0.5 + 0.5;
+      new_zoom = Math.pow(new_zoom, 2.0);
+      if (this.phase < 0.5) {
+        new_zoom = new_zoom * (max_zoom - this.startScale) + this.startScale;
+      } else {
+        new_zoom = new_zoom * (max_zoom - end_zoom) + end_zoom;
+      }
+
+      this.zoomImage.zoom(new_zoom).center();
+      // this.zoomImage.zoom(this.zoomImage.scale * this.zoomCoeff).center();
+      let full_size_zoom = window.full_size_zoom(this.canvas, this.img);
+      if (this.zoomCoeff < full_size_zoom) {
         // slowly move towards the center
-        // this.zoomImage.center(0.001);
+        this.zoomImage.center(0.0001);
       }
       console.log("zoom: " + this.zoomImage.scale);
     }
     this.zoomImage.render({
       clear: true,
       lines: this.zoomImage.scale > 25 && this.zoomImage.scale < 100,
-      // values: this.zoomImage.scale > 30,
+      // values: this.zoomImage.scale > 300,
       values: false,
       subPixels: this.zoomImage.scale >= 100,
       picture: this.zoomImage.scale < 100,
     });
 
-    if (this.zoomImage.scale >= 2500 && !this.wasIn) {
-      this.wasIn = true;
-      this.zoomCoeff = 0.95;
-    } else if (this.wasIn && this.zoomImage.scale * this.zoomCoeff <= 1.1) {
-      this.isDone = true;
+    // let full_size_zoom = window.full_size_zoom(this.canvas, this.img);
+    // if (this.zoomImage.scale >= 500 && !this.wasIn) {
+    //   this.wasIn = true;
+    //   this.zoomCoeff = 0.93;
+    // } else if (
+    //   this.wasIn &&
+    //   this.zoomImage.scale * this.zoomCoeff <= full_size_zoom
+    // ) {
+    //   this.isDone = true;
 
+    //   if (this.cb) this.cb();
+    // }
+
+    if (this.phase > 1.0) {
+      this.isDone = true;
       if (this.cb) this.cb();
     }
 
+    this.phase += 1.0 / (60 * 7);
     return this;
   }
 }

@@ -27,81 +27,26 @@ class CodeScene {
     }
   }
 
-  async init() {
-    console.log("code init");
-    const bg = document.getElementById("bg");
-    bg.style.opacity = "1";
+  reset_everything() {
+    clearInterval(this.execInterval);
 
-    this.onwheel = (e) => {
-      let newSpeed = this.codeExecutor.jumpValue + 100;
-      if (e.deltaY < 0) {
-        newSpeed = this.codeExecutor.jumpValue - 100;
-      }
-      this.speed(newSpeed);
-    };
-    window.document.addEventListener("wheel", this.onwheel);
+    this.statementsToRender = [];
+    this.executionTrace = [];
 
-    if (window.socket) window.socket.emit("stage", "filter_start");
-    //if (window.socket)
-    //  window.socket.on("zoom", (zoom) => this.zoom(parseInt(zoom)));
-    if (window.socket)
-      window.socket.on("speed", (speed) => this.speed(parseInt(speed)));
-    if (window.socket)
-      window.socket.on("filter", (filter) => this.selectFilter(filter));
-    if (window.socket)
-      window.socket.on("step", () => {
-        clearInterval(this.automaticStart);
-        this.step();
-      });
-
-    this.onKeydown = (e) => {
-      if (e.key == "ArrowRight" || e.key == "LeftRight") {
-        this.step();
-      }
-    };
-    window.addEventListener("keydown", this.onKeydown);
-
-    // this.automaticStart = setInterval(this.step, 750);
-
-    let content = `
-<div class="panel code-panel">
-  <div id="execution" class="box"></div>
-</div>
-`;
-
-    document.getElementById("content").innerHTML = content;
-
-    let line_height = 20;
-    let columns = 5;
-    const execution = document.getElementById("execution");
-    execution.style.lineHeight = `${line_height}px`;
-    execution.style.columnCount = `${columns}`;
-    execution.style.fontSize = "15px";
-    this.numExecutionLinesPerColumn = Math.floor(
-      execution.offsetHeight / line_height
-    );
-    this.numExecutionLines = this.numExecutionLinesPerColumn * columns;
-    console.log(execution.offsetHeight);
-    console.log("num lines: " + this.numExecutionLines);
-
-    // document.getElementById("zoom-input").oninput = (e) => {
-    //   this.zoom(parseInt(e.target.value));
-    // };
-
-    // document.getElementById("speed-input").oninput = (e) => {
-    //   this.speed(parseInt(e.target.value));
-    // };
-
-    // document.getElementById("filter-input").onchange = (e) => {
-    //   this.selectFilter(e.target.value);
-    // };
-
+    this.codeExecutor = new CodeExecutor();
+    this.codeExecutor.on("step", () => {
+      this.onStep();
+    });
+    this.codeExecutor.on("statement", (data) => this.onStatement(data));
+    this.codeExecutor.on("filter_end", () => this.onFilterEnd());
     this.codeExecutor.init();
     this.selectFilter("invert");
-    this.speed(1000);
+    this.speed(2941);
 
     this.statementsToRender = [];
 
+    const execE = document.getElementById("execution");
+    execE.innerHTML = "";
     // Run this in a loop to update the code listing, but return early if there's nothing to update.
     this.execInterval = setInterval(() => {
       if (this.statementsToRender.length == 0) return;
@@ -153,6 +98,83 @@ class CodeScene {
 
       this.statementsToRender = [];
     }, 30);
+  }
+
+  async init() {
+    console.log("code init");
+    const bg = document.getElementById("bg");
+    bg.style.opacity = "1";
+
+    this.onwheel = (e) => {
+      let newSpeed = this.codeExecutor.jumpValue + 100;
+      if (e.deltaY < 0) {
+        newSpeed = this.codeExecutor.jumpValue - 100;
+      }
+      this.speed(newSpeed);
+    };
+    window.document.addEventListener("wheel", this.onwheel);
+
+    // if (window.socket) window.socket.emit("stage", "filter_start");
+    //if (window.socket)
+    //  window.socket.on("zoom", (zoom) => this.zoom(parseInt(zoom)));
+    if (window.socket)
+      window.socket.on("filter", (filter) => this.selectFilter(filter));
+    if (window.socket)
+      window.socket.on("step", () => {
+        this.step();
+      });
+    if (window.socket)
+      window.socket.on("stage", (data) => {
+        if (data == "filter_start") {
+          console.log("Filter start");
+          this.reset_everything();
+        } else if (data == "filter_end") {
+          console.log("Filter end");
+          this.onFilterEnd();
+        }
+      });
+
+    this.onKeydown = (e) => {
+      if (e.key == "ArrowRight" || e.key == "LeftRight") {
+        this.step();
+      }
+    };
+    window.addEventListener("keydown", this.onKeydown);
+
+    let content = `
+<div class="panel code-panel">
+  <div id="execution" class="box"></div>
+</div>
+`;
+
+    document.getElementById("content").innerHTML = content;
+
+    let line_height = 20;
+    let columns = 5;
+    const execution = document.getElementById("execution");
+    execution.style.lineHeight = `${line_height}px`;
+    execution.style.columnCount = `${columns}`;
+    execution.style.fontSize = "15px";
+    this.numExecutionLinesPerColumn = Math.floor(
+      execution.offsetHeight / line_height
+    );
+    this.numExecutionLines = this.numExecutionLinesPerColumn * columns;
+    console.log(execution.offsetHeight);
+    console.log("num lines: " + this.numExecutionLines);
+
+    // document.getElementById("zoom-input").oninput = (e) => {
+    //   this.zoom(parseInt(e.target.value));
+    // };
+
+    // document.getElementById("speed-input").oninput = (e) => {
+    //   this.speed(parseInt(e.target.value));
+    // };
+
+    // document.getElementById("filter-input").onchange = (e) => {
+    //   this.selectFilter(e.target.value);
+    // };
+
+    this.reset_everything();
 
     return this;
   }
@@ -219,7 +241,7 @@ class CodeScene {
   }
 
   step() {
-    console.log("step");
+    console.trace("step");
     this.codeExecutor.runStep();
   }
 
@@ -254,9 +276,7 @@ class CodeScene {
   }
 
   onFilterEnd() {
-    if (window.socket) window.socket.emit("stage", "filter_end");
-
-    this.unload();
+    // TODO: Go into idle code display?
     // document.getElementById("content").innerHTML = "";
   }
 

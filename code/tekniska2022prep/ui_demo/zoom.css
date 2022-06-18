@@ -10,7 +10,8 @@
 :root {
   --main-color: rgba(0, 200, 255, 1);
   --transparent-dark-grey: rgba(30, 30, 30, 0.85);
-  --main-bg: #040824;
+  /* --main-bg: #040824; */
+  --main-bg: #000;
   /* --main-bg-transparent: rgba(4, 8, 36, 0.6); */
   --main-bg-transparent: rgba(255, 255, 255, 0.5);
   --secondary-color: #ffffff;
@@ -138,7 +139,7 @@ span.active::after {
 #execution {
   display: block;
   width: 100%;
-  overflow: scroll;
+  overflow: hidden;
   padding: 4px;
   text-align: left;
   margin: 1em;

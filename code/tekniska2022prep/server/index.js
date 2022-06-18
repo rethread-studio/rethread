@@ -302,48 +302,48 @@ io.on("connection", (socket) => {
     io.emit("step", { direction: "next", speed: getNbEventSec() });
   });
 
-  socket.on("rotary", (data) => {
-    resetIdle();
-    countEventSec();
-    const speed = getNbEventSec();
-    if (data.direction == "R") {
-      io.emit("step", { direction: "next", speed });
-      osc.send({ state: "next", events: speed });
-    } else {
-      io.emit("step", { direction: "previous", speed });
-      osc.send({ state: "previous", events: speed });
-    }
-  });
+  // socket.on("rotary", (data) => {
+  //   resetIdle();
+  //   countEventSec();
+  //   const speed = getNbEventSec();
+  //   if (data.direction == "R") {
+  //     io.emit("step", { direction: "next", speed });
+  //     osc.send({ state: "next", events: speed });
+  //   } else {
+  //     io.emit("step", { direction: "previous", speed });
+  //     osc.send({ state: "previous", events: speed });
+  //   }
+  // });
 
-  socket.on("serial", (data) => {
-    if (data === null) return;
-    const buttonsValue = data.split(",");
-    for (let index = 0; index < buttonsValue.length; index++) {
-      if (buttonMap[index] === undefined) {
-        // the button is not assigned
-        continue;
-      }
-      const button = parseInt(buttonsValue[index]);
-      if (button > process.env.THRESHOLD) {
-        // pressed
-        if (!buttonState[buttonMap[index]]) {
-          setState(buttonMap[index] + "_ON");
-        }
-        buttonState[buttonMap[index]] = true;
-      } else {
-        // released
-        if (buttonState[buttonMap[index]]) {
-          setState(buttonMap[index] + "_OFF");
-          if (buttonMap[index] == "RESET_BUTTON") {
-            resetTimeout = setTimeout(() => {
-              setState("PICTURE");
-            }, process.env.PICTURE_TIME);
-          }
-        }
-        buttonState[buttonMap[index]] = false;
-      }
-    }
-  });
+  // socket.on("serial", (data) => {
+  //   if (data === null) return;
+  //   const buttonsValue = data.split(",");
+  //   for (let index = 0; index < buttonsValue.length; index++) {
+  //     if (buttonMap[index] === undefined) {
+  //       // the button is not assigned
+  //       continue;
+  //     }
+  //     const button = parseInt(buttonsValue[index]);
+  //     if (button > process.env.THRESHOLD) {
+  //       // pressed
+  //       if (!buttonState[buttonMap[index]]) {
+  //         setState(buttonMap[index] + "_ON");
+  //       }
+  //       buttonState[buttonMap[index]] = true;
+  //     } else {
+  //       // released
+  //       if (buttonState[buttonMap[index]]) {
+  //         setState(buttonMap[index] + "_OFF");
+  //         if (buttonMap[index] == "RESET_BUTTON") {
+  //           resetTimeout = setTimeout(() => {
+  //             setState("PICTURE");
+  //           }, process.env.PICTURE_TIME);
+  //         }
+  //       }
+  //       buttonState[buttonMap[index]] = false;
+  //     }
+  //   }
+  // });
 });
 
 let resetTimeout = null;
