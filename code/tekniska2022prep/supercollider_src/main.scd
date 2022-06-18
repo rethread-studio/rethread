@@ -15,7 +15,8 @@ s.waitForBoot({
 	~running.speed2 = false;
 	~running.speed3 = false;
 	~running.infinite = false;
-	~speed_setting = 0.0; // 0-1
+	~crank_activated = false;
+	~speed_setting = 0.8; // 0-1
 	~zoom_setting = 0.0; // 0-1
 	~crank_speed = 0;
 	~last_crank_update = 0;
@@ -246,7 +247,7 @@ s.waitForBoot({
 		var speed =
 		(0.2/~crank_speed.pow(1.5)).min(0.5);
 		speed = speed + ((1.0-~speed_setting.pow(0.33)) * 0.7);
-		if(Date.localtime.rawSeconds - ~last_crank_update < 0.4, {
+		if((~crank_activated == true) && (Date.localtime.rawSeconds - ~last_crank_update < 0.4), {
 			speed.max(0.005).min(1.0)
 		}, {
 			inf

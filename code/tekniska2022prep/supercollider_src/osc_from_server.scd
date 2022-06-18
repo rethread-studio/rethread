@@ -21,6 +21,25 @@
 	};
 };
 
+~sonifyButton = {
+	{
+		var sig, env,
+		chord = [-53, -22] + ~transposition,
+		freq = ~s53.degreeToFreq(chord.choose + (53*2), 36.midicps, 0),
+		fundamental = ~s53.degreeToFreq(chord[0], 36.midicps, 1),
+		mod;
+
+		freq = freq * (Line.kr(0, 10, 0.5).floor + 1);
+		mod = SinOsc.ar(freq * Rand(0.5, 8.0)) * freq * Rand(0.5, 3.0);
+		sig = Pulse.ar(min(max(freq + mod, 20), 20000)) * 0.02;
+		sig = sig + Mix(DPW3Tri.ar([fundamental, fundamental*2], mul: 0.4));
+		sig = sig * Env.perc(0.05, 0.5).kr(2);
+		sig = sig + (BrownNoise.ar(0.1) * Env.perc(0.002, 0.1).ar(0));
+		sig = Pan2.ar(sig, 0);
+		Out.ar(0, sig);
+	}.play;
+};
+
 OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 	var type = msg[1];
 
@@ -45,8 +64,16 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\IDLE, {},
 		\NEW_FILTER, { ~next_filter.(); },
 		\DONE, { ~filter_finished.()}, // One filter application has completed
-		\previous, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds },
-		\next, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds },
+		\previous, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds;
+			if(~crank_activated == false, {
+					Synth(\sine, [\freq, rrand(3000, 3100), \amp, 0.1, \sus, 0.0, \atk, 0.001]);
+				});
+		},
+		\next, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds;
+			if(~crank_activated == false, {
+					Synth(\sine, [\freq, rrand(3000, 3100), \amp, 0.1, \sus, 0.0, \atk, 0.001]);
+				});
+		},
 		\step, {
 			// [current_index, total_number_of_step]
 			if(msg[3] != nil, {
@@ -57,23 +84,29 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 				~crank_speed = steps_since_last / time_since_last;
 				// ("crank_speed: " + ~crank_speed).postln;
 				~last_crank_update = Date.localtime.rawSeconds;
+				if(~crank_activated == false, {
+					Synth(\sine, [\freq, rrand(3000, 3100), \amp, 0.1, \sus, 0.0, \atk, 0.001]);
+				});
 			});
 
 		},
 		\capture, {
 			// when someone presses the capture button
+			~sonifyButton.();
+			~crank_activated = false;
 		},
 		\filter, {
 			msg.postln;
 			~change_background_drone_root.();
 		},
 		\filter_start, {
-
+~crank_activated = true;
 		},
 		\filter_end, {
 			msg.postln;
 			// done with applying the filter
 			~sonifySuccess.();
+			~crank_activated = false;
 		},
 		\speed, {
 			~speed_setting = msg[2].asFloat/10000.0;
