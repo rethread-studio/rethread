@@ -278,7 +278,7 @@ class FilterScene {
 
     let zoom = window.full_size_zoom(this.canvas, this.img);
     this.zoom(zoom, this.canvas, this.zoomImage);
-    this.unload();
+    // this.unload();
     // document.getElementById("content").innerHTML = "";
   }
 
@@ -346,7 +346,9 @@ class FilterScene {
     // progressText.innerText = `Progress: ${
     //   this.codeExecutor.stepNum
     // }/${total} (${((this.codeExecutor.stepNum / total) * 100).toFixed()}%)`;
-    let steps_done = this.codeExecutor.stepNum.toLocaleString("sv");
+    let steps_done = Math.min(this.codeExecutor.stepNum, total).toLocaleString(
+      "sv"
+    );
     let total_steps = total.toLocaleString("sv");
     progressText.innerText = `${steps_done}/${total_steps} instructions`;
     this.progressPixels.innerText = `${this.codeExecutor.pixelCount.toLocaleString(

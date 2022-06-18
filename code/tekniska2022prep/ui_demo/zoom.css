@@ -3,8 +3,12 @@
 }
 
 @font-face {
-  font-family: "FT88";
-  src: local(fonts/FT88-Regular.otf);
+  font-family: FT88;
+  src: url(fonts/FT88-Regular.otf);
+}
+@font-face {
+  font-family: Terminess;
+  src: url(./fonts/Terminess.ttf) format("truetype");
 }
 
 :root {
@@ -342,9 +346,10 @@ div.selected {
 
 #instruction {
   color: white;
-  font-size: 7em;
-  font-family: FT88;
-  bottom: 60px;
+  font-size: 15em;
+  font-family: Terminess;
+  bottom: 100px;
+  left: calc(50% - 120px);
   position: absolute;
   opacity: 1;
 }

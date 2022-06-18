@@ -301,6 +301,7 @@ class CodeScene {
       this.codeSteppingEnabled = false;
       this.transitionCharacters = 0;
 
+      if (this.transitionInterval) clearInterval(this.transitionInterval);
       this.transitionInterval = setInterval(() => {
         execE.innerHTML =
           '<div class="binary">' +

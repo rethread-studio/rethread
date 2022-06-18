@@ -29,7 +29,7 @@ class CaptureScene {
   <div class="title">for|each</div>
 </div>
 <div id="instruction">
-Ta en selfie!
+
 </div>
 `;
     document.getElementById("content").innerHTML = o;
@@ -66,7 +66,7 @@ Ta en selfie!
     this.triggerInterval = setInterval(() => {
       timerE.innerText = --timer;
       if (window.socket) window.socket.emit("timer", timer);
-      if (timer == 0) {
+      if (timer <= 0) {
         document.getElementById("content").removeChild(timerE);
         clearInterval(this.triggerInterval);
         const picture = this.webcam.snap();

@@ -65,7 +65,6 @@ class ZoomTransitionScene {
         // slowly move towards the center
         this.zoomImage.center(0.0001);
       }
-      console.log("zoom: " + this.zoomImage.scale);
     }
     this.zoomImage.render({
       clear: true,

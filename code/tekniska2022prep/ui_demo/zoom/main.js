@@ -37,8 +37,9 @@ async function init() {
   const zoomTransitionScene = new ZoomTransitionScene(c1, img, null);
   const rgbTransitionScene = new RGBScene(c1, img, null);
   await loadScene(Math.random() < 0 ? rgbTransitionScene : zoomTransitionScene);
+  // await loadScene(zoomTransitionScene);
 
-  // const img= await loadImage("./img/portrait.jpg");
+  // const img = await loadImage("./img/portrait.jpg");
   const filterScene = new FilterScene(c1, c2, c3, img);
   await loadScene(filterScene);
 }
@@ -65,6 +66,7 @@ async function animate() {
 
 window.addEventListener("keydown", (e) => {
   if (e.key == "i") {
+    if (currentScene) currentScene.unload();
     init();
   }
 });
