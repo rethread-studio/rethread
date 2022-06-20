@@ -66,12 +66,12 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\DONE, { ~filter_finished.()}, // One filter application has completed
 		\previous, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds;
 			if(~crank_activated == false, {
-					Synth(\sine, [\freq, rrand(3000, 3100), \amp, 0.1, \sus, 0.0, \atk, 0.001]);
+					Synth(\sine, [\freq, rrand(3000, 3200), \amp, 0.05, \sus, 0.0, \atk, 0.1]);
 				});
 		},
 		\next, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds;
 			if(~crank_activated == false, {
-					Synth(\sine, [\freq, rrand(3000, 3100), \amp, 0.1, \sus, 0.0, \atk, 0.001]);
+					Synth(\sine, [\freq, rrand(3000, 3200), \amp, 0.05, \sus, 0.0, \atk, 0.1]);
 				});
 		},
 		\step, {
@@ -100,13 +100,29 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 			~change_background_drone_root.();
 		},
 		\filter_start, {
-~crank_activated = true;
+			~crank_activated = true;
 		},
 		\filter_end, {
 			msg.postln;
 			// done with applying the filter
 			~sonifySuccess.();
 			~crank_activated = false;
+		},
+		\transition, {
+			msg.postln;
+			if(msg[2] == \start, {
+				{
+					var tick_time = 0.01, num_ticks = 7.0/tick_time;
+					num_ticks.do{ |i|
+						var speed = 1.0 - (i / num_ticks);
+
+						~zoom_setting = speed;
+						~freq_ratio = (1.0 - ~zoom_setting) .pow(2)* 0.8 + 0.2;
+						~last_zoom_update = Date.localtime.rawSeconds;
+						tick_time.wait;
+					};
+				}.fork;
+			});
 		},
 		\speed, {
 			~speed_setting = msg[2].asFloat/10000.0;
