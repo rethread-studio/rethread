@@ -1,0 +1,307 @@
+<!DOCTYPE HTML>
+<!--
+	Fractal by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/p5@0.10.2/lib/p5.js"></script>
+  <script src="sketch.js"></script>
+  <title>re|thread - transmediale 2023</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <noscript>
+    <link rel="stylesheet" href="../assets/css/noscript.css" />
+  </noscript>
+  <style>
+    /* @import url('https://fonts.googleapis.com/css?family=Abhaya+Libre|Space+Mono&display=swap'); */
+    /* @import url('https://fonts.googleapis.com/css?family=Hind:300,400,500,600,700&display=swap'); */
+
+    @font-face {
+      font-family: 'SpaceGrotesk';
+      src: url('../assets/webfonts/SpaceGrotesk-Bold.woff') format('woff');
+      font-weight: bold;
+    }
+
+    @font-face {
+      font-family: 'SpaceGrotesk';
+      src: url('../assets/webfonts/SpaceGrotesk-Regular.woff') format('woff');
+    }
+  </style>
+</head>
+
+<body class="is-preload">
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/725287686?h=cde53f055b&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="microtraces_mockup"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+
+  <!-- Two -->
+  <section id="two" class="wrapper">
+    <div class="inner alt">
+      <section class="spotlight">
+        <!-- <div class="image"><img src="images/request1.png" alt="" /></div> -->
+        <div id="concept" class="content">
+          <h3>Concept</h3>
+          <p>For the Nobel Week Lights 2021, re|thread proposes a real time generative light work with software
+            activity at the very core. Computer science is not a category for which Nobel Prizes are awarded. Meanwhile,
+            <a href="https://www.nature.com/articles/d41586-021-00075-2">computers and software are the heart of the
+              recent scientific
+              breakthroughs</a>, which have been rewarded by Nobel prizes.
+          </p>
+
+          <p> At this early stage we propose two options for a software art installation at the Nobel Week Lights
+            2021.
+            These options, entitled <a href="#variant1">re|1</a> and <a href="#variant2">re|2</a>, share the same
+            concept
+            and are adapted to different locations. Common for
+            both options is the desire to convey the <b>sublimity and texture</b> of core high frequency
+            <b>software</b> operations
+            using <b>laser projection</b> technology through fine grained <b>live generated visuals</b>.
+          </p>
+
+          <p>The term "laser projector" can have several meanings. What we mean for <a href="#variant1">re|1</a> and <a
+              href="#variant2">re|2</a>
+            is the type
+            of fast
+            scanning laser projector used for works such as <a href="https://www.youtube.com/watch?v=P9UQqTqGcHs">DEEP
+              WEB by Christopher Bauder</a>, <a href="https://roberthenke.com/concerts/lumiere.html">Lumière</a> and <a
+              href="https://roberthenke.com/installations/fragile_territories.html">Fragile Territories</a> by Robert
+            Henke</a> or this <a href="https://vimeo.com/342449199">live performance by TUNDRA</a>.
+            Images on the right are stills from these previous works using laser projection, which illustrate the kind
+            of light we plan to use.</p>
+
+        </div>
+        <div class="image">
+          <img src="../images/nobel2021proposal/Robert_Henke_Lumiere_III_by_Fons_Artois_1920x1080.jpg" alt="" />
+          <img src="../images/nobel2021proposal/Christopher_Bauder-DEEP_WEB.jpg" alt="" />
+          <img src="../images/nobel2021proposal/TUNDRA-NOMAD.jpg" alt="" />
+
+        </div>
+
+      </section>
+  </section>
+
+  <section id="two" class="wrapper">
+    <div class="inner alt">
+      <section class="spotlight">
+        <!-- <div class="image"><img src="images/request1.png" alt="" /></div> -->
+        <div id="toc" class="content">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#concept">Concept</a></li>
+            <li><a href="#toc">Table of Contents</a></li>
+            <li><a href="#variant1">re|1: Interactive generative light projection installation</a></li>
+            <li><a href="#variant2">re|2: Real time generative light installation powered by real science
+                experiments</a></li>
+            <li><a href="#tech">Tech requirements</a></li>
+          </ul>
+        </div>
+
+      </section>
+  </section>
+
+  <section id="two" class="wrapper">
+    <div class="inner alt">
+      <section class="spotlight">
+        <!-- <div class="image"><img src="images/request1.png" alt="" /></div> -->
+        <div id="variant1" class="content">
+          <h3>re|1: Interactive generative light projection installation</h3>
+
+          <p>The first option allows for an interactive component to the work. It means that
+            the audience must be able to come somehow close to the projection to read instructions for how to access the
+            installation.</p>
+
+          <p>The installation will have two modes. On one side, the installation will display the visitor's interaction.
+            Secondly, the installation displays the software activity generated by the visitors actions.
+            These two modes will ideally require two separate, possibly overlapping, projections.</p>
+
+          <p>Interaction will made available through a web app in which visitors can choose among a range Nobel
+            laureates. A short text that describes the discovery that earned them their
+            prize will be shown. After selecting a laureate, their face will be projected on a wall.
+            The visitor can then move their 'avatar' around the wall, through the app.</p>
+
+
+
+          <h4>Software: interactive digital Nobel party</h4>
+          <p>In the web app that we will develop, visitors can recreate a virtual meeting between past and present Nobel
+            laureates. By picking their favourite Nobel prize winner and moving their photo around on a projection, the
+            visitors will create an illusory mingle with some of the top scientists of all time.</p>
+          <p>This, in one sense, rather simple interaction requires a lot of software to work. The software activity
+            that we want to display through the light projections is the very software that runs the installation. To
+            power the interactive element we will have a web server handle communication between the visitors'
+            smartphones and the
+            visual interface controlling the projections. This web server, while controlling this communication, will
+            produce tons of software activity: millions of events every second. We will use the most relevant subset of
+            this acitivty to feed a generative art algorithm, producing the laser movements that create the final light
+            art projection.</p>
+
+
+          <h4>Relation to Nobel</h4>
+
+          <p>The installation will celebrate past and present Nobel laureates through the interactive part of the
+            installations. Photos of the prize winners and a short and accessible description of their work will be
+            integrated into the experience through a web interface.</p>
+
+          <h4>Location</h4>
+
+          <p>This option for the re|thread installation is well-suited for a projection on a wall, without windows and
+            which
+            the audience can approach easily. The following locations will work well:</p>
+
+          <em>Kulturhuset, concrete wall on the back</em>
+          <p>The back side of Kulturhuset has this wonderful industrial looking concrete wall:</p>
+          <img src="../images/nobel2021proposal/Kulturhuset_wall.jpg" alt="" style="width: 100%" />
+          <p>The flat wall and the lack of windows make it relatively easy to use this wall for laser projection. The
+            location is very central and accessible. There are ample opportunities for placing projectors.</p>
+
+          <em>Medborgarhuset, Medborgasplatsen</em>
+          <img src="../images/nobel2021proposal/Medborgarhuset_July_2020.jpg" alt="" style="width: 100%" />
+          <small>Photo: Arild Vågen</small>
+          <p>Medborgarhuset has 3 front facing wall sections, each divided into two with windows in the middle. Either
+            all three or the middle wall could be used. The windows would likely have to be covered to stop stray laser
+            beams from reaching inside.</p>
+        </div>
+
+      </section>
+  </section>
+
+  <section id="two" class="wrapper">
+    <div class="inner alt">
+      <section class="spotlight">
+        <!-- <div class="image"><img src="images/request1.png" alt="" /></div> -->
+        <div id="variant2" class="content">
+          <h3>re|2: Real time generative light installation powered by science experiments</h3>
+          <p>In the second option there is no interaction. Instead, the software activity that powers the generative
+            art algorithm will be taken directly from computers running real, often very demanding, science experiments.
+          </p>
+
+
+
+          <p>Similar to the <a href="#variant1">option above</a>, the software activity will be fed into a generative
+            algorithm that produces an
+            abstract and fine-grained textural light installation through the use of several light projectors. Unlike
+            it, however, this one will not have an interactive component. Meanwhile, this option will be performed at a
+            larger scale, on
+            iconic, full building facades, which must be observed from a distance to grasp the whole complexity of
+            software and to appreciate
+            the light installation in its entirety.</p>
+
+          <h4>Software: code and data that made for Nobel-winning breakthroughs</h4>
+          <p>
+            Software is necessary for modern scientific discoveries. The most recent breakthroughs in physics are
+            evidenced through <a href="https://www.nature.com/articles/s41598-020-72889-5">software simulations</a>,
+            and all modern medicine and chemistry bleeding edge research is assessed
+            through <a
+              href="https://www.sciencedirect.com/science/article/pii/S1931312820305151/pdfft?casa_token=vNLGQbnwyUgAAAAA:Gl2Z15G-8BbVY5FGJRbf06hAImUsGzVPIQAnkYoc_6bseQxapD89EcS2AK7i14s4hmZulWO74w&md5=730d8b88439a3fb7ea8475e2d777f671&pid=1-s2.0-S1931312820305151-main.pdf">advanced
+              data analytics</a>.
+            re|2 reveals the extraordinary complexity of the computational complexity that supports the scientific
+            research of the latest Nobel prize laureates.
+            For example, this installation unveils the rich interconnections between communities of mathematicians,
+            software engineers and biologists that have build the software infrastructure for DNA data analysis,
+            as well as the deep levels of code that allow Emmanuelle Charpentier to explore the mysteries of genomics.
+          </p>
+
+          <h4>Relation to Nobel</h4>
+          <p>In a wide range of scientific fields, computers have become indispensable tools for carrying the research
+            forward. They may be carrying out simulations of natural systems, analyze data from massive space
+            telescopes, or <a href="https://foldingathome.org/diseases/infectious-diseases/covid-19/">help develop new
+              treatments for serious diseases such as COVID-19</a>. This is true, also of the research done for present
+            and future Nobel Prize laureates. By offering a window into this software realm, we unveil parts of the very
+            foundation of tomorrow's great scientific discoveries.</p>
+
+          <h4>Location</h4>
+          <em>White buildings facing Hötorget</em>
+          <img src="../images/nobel2021proposal/white_buildings_hötorget.jpg" alt="" style="width: 100%" />
+          <p>This location is central, and it has huge white walls that would provide a good surface for laser
+            projections. Mounting projectors should be easy if access to buildings facing the wall is possible.</p>
+          <em>Katarinahuset, Slussen</em>
+          <img src="../images/nobel2021proposal/Katarinahuset.JPG" alt="" style="width: 100%" />
+          <p>Highly visible from far away. Mounting laser projectors may be possible on top of the pedestrian bridges.
+          </p>
+          <em>Bridge over Kungsgatan</em>
+          <img src="../images/nobel2021proposal/Kungsgatans_bridge.jpg" alt="" style="width: 100%" />
+          <p>Both a tunnel and a bridge, this prominent city feature embodies the metaphor of connection that is so
+            pervasive for software at all levels.</p>
+
+        </div>
+
+      </section>
+  </section>
+
+  <section id="two" class="wrapper">
+    <div class="inner alt">
+      <section class="spotlight">
+        <!-- <div class="image"><img src="images/request1.png" alt="" /></div> -->
+        <div id="tech" class="content">
+          <h3>Tech</h3>
+          <p>The location is the most important determining factor for exactly what equipment will be needed. The
+            following diagram provides an overview of the setup we imagine:</p>
+          <img src="../images/nobel2021proposal/Tech_blueprint5_with_overlay.jpg" alt="" style="width: 100%" />
+          <h4>On site</h4>
+          <p><b>Laser projector(s)</b> of sufficient brightness will need to be rented, as well as necessary housing for
+            such a projector e.g. a container. 3 projectors
+            will be required for ideal results, although we can make it work with fewer for some locations. An example
+            of a suitable laser projector is the <a
+              href="https://www.kvantlasers.sk/collections/kvant-atom-lasers/products/ld-33-atom-rgby">KVANT LD 33 Atom
+              RGBY</a>.</p>
+          <p><b>Laser DAC</b> to control the laser projector from a computer, such as the <a
+              href="https://ether-dream.com/">Ether Dream 2</a> or the <a
+              href="https://bitlasers.com/helios-laser-dac/">Helios Laser DAC</a>.</p>
+          <p><b>Computer</b> generating the visuals and encoding them in the correct format for the projectors. Ideally,
+            this computer will be placed inside a building with wired connectivity to the laser projectors.</p>
+          <p><b>Stable and fast internet</b> to connect the installation to the web interface that
+            the visitors can access. This will ideally be a wired connection to the computer inside a building (see
+            above). Other solutions, such as a 4G mobile broadband connection, can be made to work, but will likely hurt
+            the responsiveness of the interactive element.</p>
+          <p><b>Power</b> for both the projectors and the computer controlling them.</p>
+          <h4>Off site</h4>
+          <p>A <b>web server</b> to connect the installation to its data source as well as provide the
+            interactive experience in <a href="#variant1">re|1</a>.</p>
+          <h4>Safety and security</h4>
+          <p>Laser beams pointing directly towards people can in most cases be a safety hazard. To avoid this,
+            precautions must be taken, both in the design of the piece and to make the laser projectors physically
+            inaccessible to a curious audience. The projectors can be raised above human reachable height in a raised
+            container, or by mounting them on/in a facing building if available.</p>
+          <p>In the first option there is an interactive aspect to the work. This means that the projection has to be
+            remotely controlled which opens it up to potential cybersecurity issues. We will therefore have to build
+            fail safes into the code such that a malicious attacker cannot gain complete control of the projection or
+            disable any safety features.</p>
+        </div>
+
+      </section>
+  </section>
+
+
+
+  <!-- Three -->
+  <section id="three" class="wrapper style2 special">
+    <ul class="actions special">
+      <!-- <li><a href="../index.html" class="button">HOME</a></li> -->
+      <!-- <li><a href="#" class="button">Learn More</a></li> -->
+    </ul>
+  </section>
+
+
+
+  <!-- Footer -->
+  <!-- <footer id="footer">
+				<ul class="icons">
+					<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+					<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+					<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+				</ul>
+				<p class="copyright">&copy; Untitled. Credits: <a href="http://html5up.net">HTML5 UP</a></p>
+			</footer> -->
+
+  <!-- Scripts -->
+  <script src="/assets/js/jquery.min.js"></script>
+  <script src="/assets/js/jquery.scrolly.min.js"></script>
+  <script src="/assets/js/browser.min.js"></script>
+  <script src="/assets/js/breakpoints.min.js"></script>
+  <script src="/assets/js/util.js"></script>
+  <script src="/assets/js/main.js"></script>
+
+</body>
+
+</html>
