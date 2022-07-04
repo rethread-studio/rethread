@@ -10,6 +10,8 @@ use nannou::{
 use nannou_egui::Egui;
 use nannou_osc as osc;
 
+use image::ImageBuffer;
+use nokhwa::{query_devices, CaptureAPIBackend};
 mod egui_interface;
 use egui_interface::*;
 enum ManipulationKind {
@@ -83,6 +85,10 @@ fn main() {
     nannou::app(model).update(update).run();
 }
 
+fn webcam_callback(image: ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
+    println!("{}x{} {}", image.width(), image.height(), image.len());
+}
+
 struct Model {
     egui: Egui,
     egui_interface: EguiInterface,
@@ -121,6 +127,36 @@ fn model(app: &App) -> Model {
     let image_bytes = image.to_bytes();
     let texture = wgpu::Texture::from_image(app, &image);
 
+    // nokhwa camera stuff
+    match query_devices(CaptureAPIBackend::Auto) {
+        Ok(devs) => {
+            for (idx, camera) in devs.iter().enumerate() {
+                println!("Camera device at index {}: {}", idx, camera)
+            }
+        }
+        Err(why) => {
+            println!("Failed to query: {why}")
+        }
+    }
+
+    // Retrieve the wgpu device.
+    let window = app.window(w_id).unwrap();
+    let device = window.device();
+    let queue = window.queue();
+
+    let mut camera = nokhwa::Camera::new(0, None).unwrap();
+    camera.open_stream().unwrap();
+    let image_data = camera.frame().unwrap();
+    let frame = &image_data;
+    println!(
+        "Captured frame {}x{} @ size {}",
+        frame.width(),
+        frame.height(),
+        frame.len()
+    );
+    let image = DynamicImage::ImageRgb8(image_data);
+    let texture = wgpu::Texture::from_image((device, queue), &image);
+
     // Bind an `osc::Sender` and connect it to the target address.
     let mut sender = osc::Sender::bind()
         .unwrap()
@@ -149,7 +185,7 @@ fn model(app: &App) -> Model {
         // TODO: replace \n and \t
         let byte = byte % 127;
 
-        if byte as char == '\n' || chars_since_n > 200{
+        if byte as char == '\n' || chars_since_n > 200 {
             image_text_lines.push(image_text);
             image_text = String::new();
             chars_since_n = 0;
@@ -158,9 +194,9 @@ fn model(app: &App) -> Model {
             chars_since_n += 1;
         }
     }
-    for line in &image_text_lines {
-        println!("{line}");
-    }
+    // for line in &image_text_lines {
+    //     println!("{line}");
+    // }
 
     // egui init
     let window = app.window(w_id).unwrap();
@@ -189,7 +225,7 @@ fn model(app: &App) -> Model {
         pixels_per_frame: 1.0 / 128.0,
         current_pixel,
         manipulation: ManipulationKind::RandomBrightnessExponentialSpeed(128),
-        camera: Camera::text(),
+        camera: Camera::full_image(),
         sender,
         image_text,
         image_text_lines,
