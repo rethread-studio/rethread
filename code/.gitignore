@@ -1,0 +1,13 @@
+.DS_Store
+.idea
+*.log
+tmp/
+
+!OF
+OF/*
+!OF/apps/
+OF/apps/*
+!OF/apps/myApps/
+!OF/apps/myApps/**/*
+!OF/apps/foreachApps/
+!OF/apps/foreachApps/**/*
