@@ -31,10 +31,16 @@ void ofApp::setup() {
   ofSetVerticalSync(true);
 
   pixelShader.load("shaders/pixel_shader/shader");
+  filterShader.load("shaders/filter_shader/shader");
   imageFbo.allocate(vidGrabber.getWidth(), vidGrabber.getHeight());
 
   gui.setup("parameters");
   gui.add(pixelZoom.set("pixel zoom", 10.0, 0.2, 30.0));
+  gui.add(showFeed.set("show feed", false));
+  gui.add(showPixels.set("show pixels", true));
+  gui.add(showFilterShader.set("show filter shader", true));
+  gui.add(filterGain.set("filter gain", 0.0, -0.2, 0.2));
+  gui.add(filterExponent.set("filter exponent", 1.0, 0.25, 4.0));
 
   receiver.setup(PORT);
 }
@@ -62,22 +68,41 @@ void ofApp::draw() {
   imageFbo.begin();
   vidGrabber.draw(0, 0);
   imageFbo.end();
-  pixelShader.begin();
-  pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
-                           imageFbo.getHeight());
-  pixelShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
-  pixelShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-  // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) * 500.0);
-  pixelShader.setUniform1f("zoom", pow(float(pixelZoom), 2.0));
-  ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-  pixelShader.end();
-  ofSetHexColor(0xffffff);
-  float camZoom = 2.0;
-  glm::vec2 camPos =
-      glm::vec2((ofGetWidth() - vidGrabber.getWidth() * 2.0) * 0.5,
-                (ofGetHeight() - vidGrabber.getHeight() * 2.0) * 0.5);
-  vidGrabber.draw(camPos.x, camPos.y, vidGrabber.getWidth() * camZoom,
-                  vidGrabber.getHeight() * camZoom);
+  if (showPixels) {
+    pixelShader.begin();
+    pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
+                             imageFbo.getHeight());
+    pixelShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
+    pixelShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+    // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
+    // 500.0);
+    pixelShader.setUniform1f("zoom", pow(float(pixelZoom), 2.0));
+    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    pixelShader.end();
+  }
+  if (showFeed) {
+    ofSetHexColor(0xffffff);
+    float camZoom = 2.0;
+    glm::vec2 camPos =
+        glm::vec2((ofGetWidth() - vidGrabber.getWidth() * 2.0) * 0.5,
+                  (ofGetHeight() - vidGrabber.getHeight() * 2.0) * 0.5);
+    vidGrabber.draw(camPos.x, camPos.y, vidGrabber.getWidth() * camZoom,
+                    vidGrabber.getHeight() * camZoom);
+  }
+  if (showFilterShader) {
+    filterShader.begin();
+    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                              imageFbo.getHeight());
+    filterShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
+    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+    // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
+    // 500.0);
+    filterShader.setUniform1f("zoom", 2.5);
+    filterShader.setUniform1f("exponent", filterExponent);
+    filterShader.setUniform1f("gain", filterGain);
+    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    filterShader.end();
+  }
   videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
 
   gui.draw();

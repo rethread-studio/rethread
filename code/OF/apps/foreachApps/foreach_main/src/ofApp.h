@@ -38,10 +38,16 @@ public:
   int camHeight;
 
   ofShader pixelShader;
+  ofShader filterShader;
   ofFbo imageFbo; // the live or captured image
 
   ofxPanel gui;
   ofParameter<float> pixelZoom;
+  ofParameter<bool> showFeed;
+  ofParameter<bool> showFilterShader;
+  ofParameter<bool> showPixels;
+  ofParameter<float> filterGain;
+  ofParameter<float> filterExponent;
 
   ofxOscReceiver receiver;
   void checkOscMessages();
