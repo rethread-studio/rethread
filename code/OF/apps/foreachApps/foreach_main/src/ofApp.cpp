@@ -35,10 +35,13 @@ void ofApp::setup() {
 
   gui.setup("parameters");
   gui.add(pixelZoom.set("pixel zoom", 10.0, 0.2, 30.0));
+
+  receiver.setup(PORT);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
+  checkOscMessages();
   ofBackground(100, 100, 100);
   vidGrabber.update();
 
@@ -100,6 +103,53 @@ void ofApp::keyPressed(int key) {
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {}
 
+void ofApp::checkOscMessages() {
+
+  // check for waiting messages
+  while (receiver.hasWaitingMessages()) {
+
+    // get the next message
+    ofxOscMessage m;
+    receiver.getNextMessage(m);
+
+    // check for mouse moved message
+    if (m.getAddress() == "/pixelsToProcess") {
+      int pixelsToProcess = m.getArgAsInt(0);
+    }
+    // check for an image being sent
+    // note: the size of the image depends greatly on your network buffer
+    // sizes, if an image is too big the message won't come through
+    else if (m.getAddress() == "/image") {
+      ofBuffer buffer = m.getArgAsBlob(0);
+    } else {
+
+      // unrecognized message: display on the bottom of the screen
+      string msgString;
+      msgString = m.getAddress();
+      msgString += ":";
+      for (size_t i = 0; i < m.getNumArgs(); i++) {
+
+        // get the argument type
+        msgString += " ";
+        msgString += m.getArgTypeName(i);
+        msgString += ":";
+
+        // display the argument - make sure we get the right type
+        if (m.getArgType(i) == OFXOSC_TYPE_INT32) {
+          msgString += ofToString(m.getArgAsInt32(i));
+        } else if (m.getArgType(i) == OFXOSC_TYPE_FLOAT) {
+          msgString += ofToString(m.getArgAsFloat(i));
+        } else if (m.getArgType(i) == OFXOSC_TYPE_STRING) {
+          msgString += m.getArgAsString(i);
+        } else {
+          msgString += "unhandled argument type " + m.getArgTypeName(i);
+        }
+      }
+
+      ofLogVerbose() << msgString;
+    }
+  }
+}
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y) {}
 

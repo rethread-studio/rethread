@@ -2,6 +2,10 @@
 
 #include "ofMain.h"
 #include "ofxGui.h"
+#include "ofxOsc.h"
+
+// listening port
+#define PORT 12345
 
 // This openFrameworks example is designed to demonstrate how to access the
 // webcam.
@@ -38,4 +42,7 @@ public:
 
   ofxPanel gui;
   ofParameter<float> pixelZoom;
+
+  ofxOscReceiver receiver;
+  void checkOscMessages();
 };
