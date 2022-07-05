@@ -11,6 +11,11 @@
 // webcam.
 //
 // For more information regarding this example take a look at the README.md.
+//
+
+enum class State { IDLE, COUNTDOWN, TRANSITION, APPLY_FILTER, END_SCREEN };
+
+static map<string, State> string_state_map;
 
 class ofApp : public ofBaseApp {
 
@@ -30,6 +35,10 @@ public:
   void windowResized(int w, int h);
   void dragEvent(ofDragInfo dragInfo);
   void gotMessage(ofMessage msg);
+
+  void transition_to_state(State new_state);
+
+  State state = State::IDLE;
 
   ofVideoGrabber vidGrabber;
   ofPixels videoInverted;

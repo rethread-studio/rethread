@@ -3,6 +3,12 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
 
+  string_state_map["idle"] = State::IDLE;
+  string_state_map["countdown"] = State::COUNTDOWN;
+  string_state_map["transition_to_filter"] = State::TRANSITION;
+  string_state_map["apply_filter"] = State::APPLY_FILTER;
+  string_state_map["end_screen"] = State::END_SCREEN;
+
   // try to grab at this size.
   camWidth = 640;
   camHeight = 480;
@@ -21,9 +27,9 @@ void ofApp::setup() {
     }
   }
 
-  vidGrabber.setDeviceID(0);
-  vidGrabber.setDesiredFrameRate(30);
-  vidGrabber.initGrabber(camWidth, camHeight);
+  // vidGrabber.setDeviceID(0);
+  // vidGrabber.setDesiredFrameRate(30);
+  // vidGrabber.initGrabber(camWidth, camHeight);
 
   videoInverted.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(),
                          OF_PIXELS_RGB);
@@ -43,6 +49,7 @@ void ofApp::setup() {
   gui.add(filterExponent.set("filter exponent", 1.0, 0.25, 4.0));
 
   receiver.setup(PORT);
+  ofLog() << "Setup finished";
 }
 
 //--------------------------------------------------------------
@@ -128,6 +135,8 @@ void ofApp::keyPressed(int key) {
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {}
 
+void ofApp::transition_to_state(State new_state) { state = new_state; }
+
 void ofApp::checkOscMessages() {
 
   // check for waiting messages
@@ -140,6 +149,32 @@ void ofApp::checkOscMessages() {
     // check for mouse moved message
     if (m.getAddress() == "/pixelsToProcess") {
       int pixelsToProcess = m.getArgAsInt(0);
+    } else if (m.getAddress() == "/transition_to_state") {
+      string state_name = m.getArgAsString(0);
+      auto it = string_state_map.find(state_name);
+      if (it != string_state_map.end()) {
+        transition_to_state(it->second);
+      } else {
+        ofLog() << "ERROR: unparsable state name: " << state_name;
+      }
+      // State new_state = string_state_map[state_name];
+      // switch (state_name) {
+      // case "idle":
+      //   new_state = State::IDLE;
+      //   break;
+      // case "transition_to_filter":
+      //   new_state = State::TRANSITION;
+      //   break;
+      // case "countdown":
+      //   new_state = State::COUNTDOWN;
+      //   break;
+      // case "apply_filter":
+      //   new_state = State::APPLY_FILTER;
+      //   break;
+      // case "end_screen":
+      //   new_state = State::END_SCREEN;
+      //   break;
+      // }
     }
     // check for an image being sent
     // note: the size of the image depends greatly on your network buffer
