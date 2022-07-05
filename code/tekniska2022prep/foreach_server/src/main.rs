@@ -5,6 +5,41 @@ use std::time::{Duration, Instant};
 use nannou_osc as osc;
 use nannou_osc::Type;
 
+#[derive(Debug, Clone)]
+struct CodeExecutor {
+    total_num_instructions: u64,
+    instructions_performed: u64,
+    instructions_per_loop: u64,
+    instructions_per_step: u64,
+}
+
+impl CodeExecutor {
+    fn new(width: u64, height: u64) -> Self {
+        let instructions_per_loop = 5;
+        println!(
+            "new CodeExecutor! pixels: {}, instructions: {}",
+            width * height,
+            instructions_per_loop * width * height
+        );
+        Self {
+            total_num_instructions: instructions_per_loop * width * height,
+            instructions_performed: 0,
+            instructions_per_loop,
+            instructions_per_step: 3000,
+        }
+    }
+    fn step(&mut self, num_steps: u64) {
+        self.instructions_performed += self.instructions_per_step * num_steps;
+        self.instructions_performed = self.instructions_performed.min(self.total_num_instructions);
+    }
+    fn pixels_processed(&self) -> u64 {
+        self.instructions_performed / self.instructions_per_loop
+    }
+    fn finished_executing(&self) -> bool {
+        self.instructions_performed == self.total_num_instructions
+    }
+}
+
 #[derive(Clone, Debug)]
 enum StateMachine {
     Idle,
@@ -16,18 +51,24 @@ enum StateMachine {
         start: Instant,
         duration: Duration,
     },
-    ApplyFilter,
+    ApplyFilter {
+        executor: CodeExecutor,
+    },
     EndScreen,
 }
 
 struct State {
     state_machine: StateMachine,
     communication: Communication,
+    last_interaction: Instant,
+    timeout: Duration,
 }
 
 impl State {
-    fn transition_to_apply_filter(&mut self) {
-        self.state_machine = StateMachine::ApplyFilter;
+    fn transition_to_apply_filter(&mut self, width: u64, height: u64) {
+        self.state_machine = StateMachine::ApplyFilter {
+            executor: CodeExecutor::new(width, height),
+        };
         self.communication
             .send_transition_to_state(&self.state_machine);
     }
@@ -44,6 +85,11 @@ impl State {
         self.communication
             .send_transition_to_state(&self.state_machine);
     }
+    fn transition_to_end_screen(&mut self) {
+        self.state_machine = StateMachine::EndScreen;
+        self.communication
+            .send_transition_to_state(&self.state_machine);
+    }
     fn transition_to_countdown(&mut self) {
         self.state_machine = StateMachine::Countdown {
             counts_left: 3,
@@ -54,23 +100,31 @@ impl State {
         self.communication.send_countdown_tick(3);
     }
     fn button_pressed(&mut self) {
+        self.last_interaction = Instant::now();
         match self.state_machine {
             StateMachine::Idle => self.transition_to_countdown(),
             StateMachine::TransitionToFilter { .. } => (),
-            StateMachine::ApplyFilter => (),
-            StateMachine::EndScreen => (),
+            StateMachine::ApplyFilter { .. } => (),
+            StateMachine::EndScreen => self.transition_to_idle(),
             StateMachine::Countdown {
                 counts_left: _,
                 last_tick: _,
             } => (),
         }
     }
-    fn perform_steps(&mut self, num_steps: usize) {
-        if matches!(self.state_machine, StateMachine::ApplyFilter) {
-            // TODO: simulate running the code
-            // TODO: count the number of new pixels having been processed
-            // TODO: send the number of pixels processed
-            // TODO: send the number of instructions performed to the code screen
+    fn perform_steps(&mut self, num_steps: u64) {
+        self.last_interaction = Instant::now();
+        match &mut self.state_machine {
+            StateMachine::ApplyFilter { executor } => {
+                // TODO: simulate running the code
+                executor.step(num_steps);
+                self.communication
+                    .send_step(executor.instructions_performed, executor.pixels_processed());
+                if executor.finished_executing() {
+                    self.transition_to_end_screen();
+                }
+            }
+            _ => (),
         }
     }
     // Run periodically to update time based state
@@ -92,11 +146,15 @@ impl State {
             }
             StateMachine::TransitionToFilter { start, duration } => {
                 if start.elapsed() > *duration {
-                    self.transition_to_apply_filter();
+                    // TODO: Get the actual size of the image taken from the main_screen
+                    self.transition_to_apply_filter(640, 480);
                 }
             }
-            StateMachine::ApplyFilter => (),
-            StateMachine::EndScreen => (),
+            StateMachine::ApplyFilter { .. } | StateMachine::EndScreen => {
+                if self.last_interaction.elapsed() > self.timeout {
+                    self.transition_to_idle();
+                }
+            }
         }
     }
 }
@@ -112,7 +170,7 @@ impl Communication {
         let state_str = match state {
             StateMachine::Idle => "idle",
             StateMachine::TransitionToFilter { .. } => "transition_to_filter",
-            StateMachine::ApplyFilter => "apply_filter",
+            StateMachine::ApplyFilter { .. } => "apply_filter",
             StateMachine::EndScreen => "end_screen",
             StateMachine::Countdown { .. } => "countdown",
         };
@@ -129,6 +187,17 @@ impl Communication {
         let addr = "/countdown";
         let args = vec![Type::Int(count as i32)];
         self.send_to_all(addr, args);
+    }
+    fn send_step(&mut self, instructions_performed: u64, pixels_processed: u64) {
+        println!("step: {instructions_performed} instructions, {pixels_processed} pixels");
+        let addr = "/instructions_performed";
+        let args = vec![Type::Int(instructions_performed as i32)];
+        self.code_screen_sender.send((addr, args)).ok();
+        let addr = "/pixels_processed";
+        let args = vec![Type::Int(pixels_processed as i32)];
+        self.main_screen_sender.send((addr, args)).ok();
+        let addr = "/step";
+        self.supercollider_sender.send((addr, vec![])).ok();
     }
     fn send_to_all(&mut self, addr: &str, args: Vec<Type>) {
         println!("sending {addr} {args:?}");
@@ -165,6 +234,8 @@ fn main() -> Result<()> {
             code_screen_sender,
             supercollider_sender,
         },
+        last_interaction: Instant::now(),
+        timeout: Duration::from_secs_f32(20.0),
     };
 
     let mut serial_buf: Vec<u8> = vec![0; 32];
@@ -175,7 +246,7 @@ fn main() -> Result<()> {
             if let Ok(bytes_read) = sp.read(serial_buf.as_mut_slice()) {
                 for byte in serial_buf.iter().take(bytes_read) {
                     match *byte as char {
-                        'u' => println!("up"),
+                        'u' => state.perform_steps(1),
                         'd' => println!("down"),
                         'b' => state.button_pressed(),
                         _ => (),
