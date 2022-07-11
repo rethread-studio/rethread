@@ -2,6 +2,7 @@
 node_modules
 temp
 .tmp
+target/
 extension-dist
 .sass-cache
 extension/bower_components
