@@ -45,6 +45,8 @@ public:
   ofTexture videoTexture;
   int camWidth;
   int camHeight;
+  ofImage staticImage;
+  bool useStaticImage = true;
 
   ofShader pixelShader;
   ofShader filterShader;
@@ -57,6 +59,24 @@ public:
   ofParameter<bool> showPixels;
   ofParameter<float> filterGain;
   ofParameter<float> filterExponent;
+
+  ofTrueTypeFont numberFont;
+
+  struct {
+    int num = -1;
+    float size = 0;
+  } countdownData;
+
+  struct {
+    float duration;
+    float startTime;
+    float zoom;
+    float maxZoom = 10.0;
+  } transitionData;
+
+  struct {
+    long pixelsProcessed = 0;
+  } applyFilterData;
 
   ofxOscReceiver receiver;
   void checkOscMessages();

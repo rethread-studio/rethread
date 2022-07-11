@@ -10,7 +10,7 @@ void ofApp::setup() {
   string_state_map["end_screen"] = State::END_SCREEN;
 
   // try to grab at this size.
-  camWidth = 640;
+  camWidth = 720;
   camHeight = 480;
 
   // get back a list of devices.
@@ -27,22 +27,34 @@ void ofApp::setup() {
     }
   }
 
-  // vidGrabber.setDeviceID(0);
-  // vidGrabber.setDesiredFrameRate(30);
-  // vidGrabber.initGrabber(camWidth, camHeight);
+  numberFont.load("fonts/Millimetre-Regular_web.ttf", 80);
 
-  videoInverted.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(),
-                         OF_PIXELS_RGB);
-  videoTexture.allocate(videoInverted);
+  if (!useStaticImage) {
+    vidGrabber.setDeviceID(0);
+    vidGrabber.setDesiredFrameRate(30);
+    vidGrabber.setup(camWidth, camHeight);
+
+    videoInverted.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(),
+                           OF_PIXELS_RGB);
+    videoTexture.allocate(videoInverted);
+    imageFbo.allocate(vidGrabber.getWidth(), vidGrabber.getHeight());
+  } else {
+
+    staticImage.load("static_image.jpg");
+    videoInverted.allocate(staticImage.getWidth(), staticImage.getHeight(),
+                           OF_PIXELS_RGB);
+    videoTexture.allocate(videoInverted);
+    imageFbo.allocate(staticImage.getWidth(), staticImage.getHeight());
+  }
+
   ofSetVerticalSync(true);
 
   pixelShader.load("shaders/pixel_shader/shader");
   filterShader.load("shaders/filter_shader/shader");
-  imageFbo.allocate(vidGrabber.getWidth(), vidGrabber.getHeight());
 
   gui.setup("parameters");
   gui.add(pixelZoom.set("pixel zoom", 10.0, 0.2, 30.0));
-  gui.add(showFeed.set("show feed", false));
+  gui.add(showFeed.set("show feed", true));
   gui.add(showPixels.set("show pixels", true));
   gui.add(showFilterShader.set("show filter shader", true));
   gui.add(filterGain.set("filter gain", 0.0, -0.2, 0.2));
@@ -56,26 +68,75 @@ void ofApp::setup() {
 void ofApp::update() {
   checkOscMessages();
   ofBackground(100, 100, 100);
-  vidGrabber.update();
+  if (!useStaticImage) {
+    vidGrabber.update();
 
-  if (vidGrabber.isFrameNew()) {
-    ofPixels &pixels = vidGrabber.getPixels();
-    for (size_t i = 0; i < pixels.size(); i++) {
-      // invert the color of the pixel
-      videoInverted[i] = 255 - pixels[i];
+    if (vidGrabber.isFrameNew()) {
+      ofPixels &pixels = vidGrabber.getPixels();
+      for (size_t i = 0; i < pixels.size(); i++) {
+        // invert the color of the pixel
+        videoInverted[i] = 255 - pixels[i];
+      }
+      // load the inverted pixels
+      videoTexture.loadData(videoInverted);
     }
-    // load the inverted pixels
-    videoTexture.loadData(videoInverted);
   }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
   ofSetColor(255);
-  imageFbo.begin();
-  vidGrabber.draw(0, 0);
-  imageFbo.end();
-  if (showPixels) {
+  if (state == State::IDLE || state == State::COUNTDOWN) {
+    // Draw the live image on the imageFbo
+    imageFbo.begin();
+    if (useStaticImage) {
+      staticImage.draw(0, 0);
+    } else {
+      vidGrabber.draw(0, 0);
+    }
+    imageFbo.end();
+
+    if (showPixels) {
+      pixelShader.begin();
+      pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
+                               imageFbo.getHeight());
+      pixelShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
+      pixelShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+      // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
+      // 500.0);
+      pixelShader.setUniform1f("zoom", pow(float(pixelZoom), 2.0));
+      ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+      pixelShader.end();
+    }
+    if (showFeed) {
+      ofSetHexColor(0xffffff);
+      float camZoom = 2.0;
+      if (!useStaticImage) {
+        glm::vec2 camPos =
+            glm::vec2((ofGetWidth() - vidGrabber.getWidth() * 2.0) * 0.5,
+                      (ofGetHeight() - vidGrabber.getHeight() * 2.0) * 0.5);
+        vidGrabber.draw(camPos.x, camPos.y, vidGrabber.getWidth() * camZoom,
+                        vidGrabber.getHeight() * camZoom);
+      } else {
+        glm::vec2 camPos =
+            glm::vec2((ofGetWidth() - staticImage.getWidth() * 2.0) * 0.5,
+                      (ofGetHeight() - staticImage.getHeight() * 2.0) * 0.5);
+        staticImage.draw(camPos.x, camPos.y, staticImage.getWidth() * camZoom,
+                         staticImage.getHeight() * camZoom);
+      }
+    }
+    if (state == State::COUNTDOWN) {
+      ostringstream s;
+      s << countdownData.num;
+      float w = numberFont.stringWidth(s.str());
+      numberFont.drawString(s.str(), (ofGetWidth() - w) * 0.5,
+                            ofGetHeight() * 0.5);
+    }
+  } else if (state == State::TRANSITION) {
+    float phase = (ofGetElapsedTimef() - transitionData.startTime) /
+                  transitionData.duration;
+    pixelZoom = 1 + phase * (transitionData.maxZoom - 1);
+
     pixelShader.begin();
     pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
                              imageFbo.getHeight());
@@ -86,31 +147,30 @@ void ofApp::draw() {
     pixelShader.setUniform1f("zoom", pow(float(pixelZoom), 2.0));
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
     pixelShader.end();
+  } else if (state == State::APPLY_FILTER) {
+    imageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+    if (showFilterShader) {
+      filterShader.begin();
+      filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                                imageFbo.getHeight());
+      filterShader.setUniform2f("outputResolution", ofGetWidth(),
+                                ofGetHeight());
+      filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+      // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
+      // 500.0);
+      filterShader.setUniform1f("zoom", 2.5);
+      filterShader.setUniform1f("exponent", filterExponent);
+      filterShader.setUniform1f("gain", filterGain);
+      filterShader.setUniform1f("pixelsProcessed",
+                                applyFilterData.pixelsProcessed);
+
+      ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+      filterShader.end();
+    }
+
+  } else if (state == State::END_SCREEN) {
   }
-  if (showFeed) {
-    ofSetHexColor(0xffffff);
-    float camZoom = 2.0;
-    glm::vec2 camPos =
-        glm::vec2((ofGetWidth() - vidGrabber.getWidth() * 2.0) * 0.5,
-                  (ofGetHeight() - vidGrabber.getHeight() * 2.0) * 0.5);
-    vidGrabber.draw(camPos.x, camPos.y, vidGrabber.getWidth() * camZoom,
-                    vidGrabber.getHeight() * camZoom);
-  }
-  if (showFilterShader) {
-    filterShader.begin();
-    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
-                              imageFbo.getHeight());
-    filterShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
-    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-    // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
-    // 500.0);
-    filterShader.setUniform1f("zoom", 2.5);
-    filterShader.setUniform1f("exponent", filterExponent);
-    filterShader.setUniform1f("gain", filterGain);
-    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-    filterShader.end();
-  }
-  videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
+  // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
 
   gui.draw();
 }
@@ -154,6 +214,14 @@ void ofApp::checkOscMessages() {
       auto it = string_state_map.find(state_name);
       if (it != string_state_map.end()) {
         transition_to_state(it->second);
+        if (it->second == State::TRANSITION) {
+          transitionData.duration = m.getArgAsFloat(1);
+          transitionData.zoom = 1;
+          transitionData.startTime = ofGetElapsedTimef();
+        } else if (it->second == State::APPLY_FILTER) {
+          applyFilterData.pixelsProcessed = 0;
+        }
+        ofLog() << "Changed state to " << state_name;
       } else {
         ofLog() << "ERROR: unparsable state name: " << state_name;
       }
@@ -175,6 +243,10 @@ void ofApp::checkOscMessages() {
       //   new_state = State::END_SCREEN;
       //   break;
       // }
+    } else if (m.getAddress() == "/countdown") {
+      countdownData.num = m.getArgAsInt(0);
+    } else if (m.getAddress() == "/pixels_processed") {
+      applyFilterData.pixelsProcessed = m.getArgAsInt(0);
     }
     // check for an image being sent
     // note: the size of the image depends greatly on your network buffer
