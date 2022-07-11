@@ -61,6 +61,18 @@ void ofApp::setup() {
   gui.add(filterExponent.set("filter exponent", 1.0, 0.25, 4.0));
 
   receiver.setup(PORT);
+  sender.setup("localhost", 12371);
+  // send image resolution to the server
+  ofxOscMessage m;
+  m.setAddress("/image_resolution");
+  if (!useStaticImage) {
+    m.addIntArg(vidGrabber.getWidth());
+    m.addIntArg(vidGrabber.getHeight());
+  } else {
+    m.addIntArg(staticImage.getWidth());
+    m.addIntArg(staticImage.getHeight());
+  }
+  sender.sendMessage(m, false);
   ofLog() << "Setup finished";
 }
 
@@ -218,6 +230,17 @@ void ofApp::checkOscMessages() {
           transitionData.duration = m.getArgAsFloat(1);
           transitionData.zoom = 1;
           transitionData.startTime = ofGetElapsedTimef();
+          // send image resolution to the server
+          ofxOscMessage m;
+          m.setAddress("/image_resolution");
+          if (!useStaticImage) {
+            m.addIntArg(vidGrabber.getWidth());
+            m.addIntArg(vidGrabber.getHeight());
+          } else {
+            m.addIntArg(staticImage.getWidth());
+            m.addIntArg(staticImage.getHeight());
+          }
+          sender.sendMessage(m, false);
         } else if (it->second == State::APPLY_FILTER) {
           applyFilterData.pixelsProcessed = 0;
         }

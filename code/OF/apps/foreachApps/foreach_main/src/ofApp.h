@@ -79,5 +79,6 @@ public:
   } applyFilterData;
 
   ofxOscReceiver receiver;
+  ofxOscSender sender;
   void checkOscMessages();
 };

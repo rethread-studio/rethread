@@ -61,6 +61,7 @@ struct State {
     state_machine: StateMachine,
     communication: Communication,
     last_interaction: Instant,
+    resolution: (i32, i32),
     timeout: Duration,
 }
 
@@ -147,12 +148,46 @@ impl State {
             StateMachine::TransitionToFilter { start, duration } => {
                 if start.elapsed() > *duration {
                     // TODO: Get the actual size of the image taken from the main_screen
-                    self.transition_to_apply_filter(640, 480);
+                    self.transition_to_apply_filter(
+                        self.resolution.0 as u64,
+                        self.resolution.1 as u64,
+                    );
                 }
             }
             StateMachine::ApplyFilter { .. } | StateMachine::EndScreen => {
                 if self.last_interaction.elapsed() > self.timeout {
                     self.transition_to_idle();
+                }
+            }
+        }
+        for (packet, _addr) in self.communication.main_screen_receiver.try_iter() {
+            for message in packet.into_msgs() {
+                match message.addr.as_ref() {
+                    "/image_resolution" => {
+                        if let Some(args) = message.args {
+                            for (i, arg) in args.into_iter().enumerate() {
+                                match i {
+                                    0 => {
+                                        if let Some(width) = arg.int() {
+                                            self.resolution.0 = width;
+                                        } else {
+                                            eprintln!("Wrong argument {i} for /image_resolution",);
+                                        }
+                                    }
+                                    1 => {
+                                        if let Some(height) = arg.int() {
+                                            self.resolution.1 = height;
+                                        } else {
+                                            eprintln!("Wrong argument {i} for /image_resolution");
+                                        }
+                                    }
+                                    _ => (),
+                                }
+                            }
+                            println!("received resolution: {:?}", self.resolution);
+                        }
+                    }
+                    _ => (),
                 }
             }
         }
@@ -163,6 +198,7 @@ struct Communication {
     main_screen_sender: osc::Sender<osc::Connected>,
     code_screen_sender: osc::Sender<osc::Connected>,
     supercollider_sender: osc::Sender<osc::Connected>,
+    main_screen_receiver: osc::Receiver,
 }
 
 impl Communication {
@@ -226,6 +262,7 @@ fn main() -> Result<()> {
     let code_screen_sender = osc::sender()?.connect(format!("127.0.0.1:{}", code_screen_port))?;
     let supercollider_sender =
         osc::sender()?.connect(format!("127.0.0.1:{}", supercollider_port))?;
+    let main_screen_receiver = osc::receiver(12371)?;
 
     let mut state = State {
         state_machine: StateMachine::Idle,
@@ -233,7 +270,9 @@ fn main() -> Result<()> {
             main_screen_sender,
             code_screen_sender,
             supercollider_sender,
+            main_screen_receiver,
         },
+        resolution: (640, 480),
         last_interaction: Instant::now(),
         timeout: Duration::from_secs_f32(20.0),
     };
