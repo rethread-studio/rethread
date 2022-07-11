@@ -9,6 +9,7 @@ uniform vec2 outputResolution;
 uniform float zoom;
 uniform float gain;
 uniform float exponent;
+uniform float invertY;
 uniform float pixelsProcessed;
 
 in vec2 texCoordVarying;
@@ -32,7 +33,7 @@ float luma(vec4 color) {
 void main()
 {
 	vec2 st = ((gl_FragCoord.xy/outputResolution)-0.5);
-  st.y *= -1.0;
+  st.y += st.y * -2.0 * invertY;
   st *= outputResolution;
   float zoom2 = outputResolution.y/resolution.y;
   vec2 imageSize = resolution * zoom2;

@@ -27,7 +27,8 @@ void ofApp::setup() {
     }
   }
 
-  numberFont.load("fonts/Millimetre-Regular_web.ttf", 80);
+  numberFont.load("fonts/Millimetre-Regular_web.ttf", 100);
+  endScreenFont.load("fonts/Millimetre-Light_web.ttf", 50);
 
   if (!useStaticImage) {
     vidGrabber.setDeviceID(0);
@@ -46,6 +47,7 @@ void ofApp::setup() {
     videoTexture.allocate(videoInverted);
     imageFbo.allocate(staticImage.getWidth(), staticImage.getHeight());
   }
+  filteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
 
   ofSetVerticalSync(true);
 
@@ -74,6 +76,30 @@ void ofApp::setup() {
   }
   sender.sendMessage(m, false);
   ofLog() << "Setup finished";
+
+  imageFbo.begin();
+  if (useStaticImage) {
+    staticImage.draw(0, 0);
+  } else {
+    vidGrabber.draw(0, 0);
+  }
+  imageFbo.end();
+  filteredImageFbo.begin();
+  filterShader.begin();
+  filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                            imageFbo.getHeight());
+  filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
+                            filteredImageFbo.getHeight());
+  filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+  filterShader.setUniform1f("zoom", 1);
+  filterShader.setUniform1f("invertY", 0);
+  filterShader.setUniform1f("exponent", filterExponent);
+  filterShader.setUniform1f("gain", filterGain);
+  filterShader.setUniform1f("pixelsProcessed", 99999999);
+  ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                  filteredImageFbo.getHeight());
+  filterShader.end();
+  filteredImageFbo.end();
 }
 
 //--------------------------------------------------------------
@@ -160,7 +186,6 @@ void ofApp::draw() {
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
     pixelShader.end();
   } else if (state == State::APPLY_FILTER) {
-    imageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
     if (showFilterShader) {
       filterShader.begin();
       filterShader.setUniform2f("resolution", imageFbo.getWidth(),
@@ -171,6 +196,7 @@ void ofApp::draw() {
       // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
       // 500.0);
       filterShader.setUniform1f("zoom", 2.5);
+      filterShader.setUniform1f("invertY", 1);
       filterShader.setUniform1f("exponent", filterExponent);
       filterShader.setUniform1f("gain", filterGain);
       filterShader.setUniform1f("pixelsProcessed",
@@ -181,6 +207,35 @@ void ofApp::draw() {
     }
 
   } else if (state == State::END_SCREEN) {
+    ofBackground(0);
+    ofSetColor(255);
+    float camZoom = 1.7;
+    float margin = imageFbo.getWidth() * 0.1;
+    glm::vec2 r =
+        glm::vec2(imageFbo.getWidth() * camZoom + (margin * 2), ofGetHeight());
+    ofDrawRectangle((ofGetWidth() - r.x) * 0.5, (ofGetHeight() - r.y) * 0.5,
+                    r.x, r.y);
+    // draw unaltered image
+    glm::vec2 camPos =
+        glm::vec2((ofGetWidth() - imageFbo.getWidth() * camZoom) * 0.5, margin);
+    imageFbo.draw(camPos.x, camPos.y, imageFbo.getWidth() * camZoom,
+                  imageFbo.getHeight() * camZoom);
+    camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
+    filteredImageFbo.draw(camPos.x, camPos.y,
+                          filteredImageFbo.getWidth() * camZoom,
+                          filteredImageFbo.getHeight() * camZoom);
+    camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
+
+    // endScreenFont.drawString(
+    //     "Du applicerade filtret på\nbilden genom att köra\n"
+    //     "1 728 000 instruktioner!",
+    //     50, ofGetHeight() * 0.5);
+    ostringstream s;
+    long pixels = imageFbo.getWidth() * imageFbo.getHeight();
+    ofSetColor(0);
+    s << pixels * 5 << " instruktioner       " << pixels << " pixlar";
+    endScreenFont.drawString(s.str(), camPos.x,
+                             (ofGetHeight() - camPos.y) * 0.5 + camPos.y);
   }
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
 

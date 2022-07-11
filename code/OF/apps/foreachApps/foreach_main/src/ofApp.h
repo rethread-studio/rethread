@@ -6,6 +6,7 @@
 
 // listening port
 #define PORT 12345
+#define SEND_PORT 12371
 
 // This openFrameworks example is designed to demonstrate how to access the
 // webcam.
@@ -38,7 +39,7 @@ public:
 
   void transition_to_state(State new_state);
 
-  State state = State::IDLE;
+  State state = State::END_SCREEN;
 
   ofVideoGrabber vidGrabber;
   ofPixels videoInverted;
@@ -50,7 +51,8 @@ public:
 
   ofShader pixelShader;
   ofShader filterShader;
-  ofFbo imageFbo; // the live or captured image
+  ofFbo imageFbo;         // the live or captured image
+  ofFbo filteredImageFbo; // the live or captured image
 
   ofxPanel gui;
   ofParameter<float> pixelZoom;
@@ -61,6 +63,7 @@ public:
   ofParameter<float> filterExponent;
 
   ofTrueTypeFont numberFont;
+  ofTrueTypeFont endScreenFont;
 
   struct {
     int num = -1;
