@@ -233,7 +233,8 @@ void ofApp::draw() {
     ostringstream s;
     long pixels = imageFbo.getWidth() * imageFbo.getHeight();
     ofSetColor(0);
-    s << pixels * 5 << " instruktioner       " << pixels << " pixlar";
+    s << "#" << pixels * 5 << " instruktioner     #" << pixels
+      << " pixlar\n#filter";
     endScreenFont.drawString(s.str(), camPos.x,
                              (ofGetHeight() - camPos.y) * 0.5 + camPos.y);
   }
