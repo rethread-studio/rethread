@@ -33,7 +33,7 @@ float luma(vec4 color) {
 void main()
 {
 	vec2 st = ((gl_FragCoord.xy/outputResolution)-0.5);
-  st.y += st.y * -2.0 * invertY;
+  st.y += st.y * -1.0 * invertY;
   st *= outputResolution;
   float zoom2 = outputResolution.y/resolution.y;
   vec2 imageSize = resolution * zoom2;
@@ -45,9 +45,14 @@ void main()
 
   float luma = luma(org_color);
   vec3 c0 = vec3(1.0, 0.2, 0.7) * 1.3;
+  // vec3 c0 = vec3(1.1, 0.1, 0.3) * 1.3;
   vec3 c1 = vec3(0.1, 0.7, 1.2) * 1.5;
 
-  vec3 color = mix(c1, c0, smoothstep(0.2, 0.8, pow(luma + gain, exponent))) * (pow(luma + 0.1, 2.0) + 0.1);
+  float linear_luma = pow(luma + gain, exponent);
+  vec3 color = mix(c1, c0, smoothstep(0.1, 1.0, linear_luma));
+  color = mix(org_color, color, smoothstep(0.0, 0.1, linear_luma));
+  color = mix(color, c0, smoothstep(0.7, 1.0, linear_luma));
+  color*= (pow(luma + 0.1, 1.5) + 0.1);
 
   // float alpha = float(pixelIndex <= pixelsProcessed);
   float alpha = 1.0;
