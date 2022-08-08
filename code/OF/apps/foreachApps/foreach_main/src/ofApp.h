@@ -39,7 +39,7 @@ public:
 
   void transition_to_state(State new_state);
 
-  State state = State::END_SCREEN;
+  State state = State::IDLE;
 
   ofVideoGrabber vidGrabber;
   ofPixels videoInverted;
@@ -47,7 +47,7 @@ public:
   int camWidth;
   int camHeight;
   ofImage staticImage;
-  bool useStaticImage = true;
+  bool useStaticImage = false;
 
   ofShader pixelShader;
   ofShader filterShader;

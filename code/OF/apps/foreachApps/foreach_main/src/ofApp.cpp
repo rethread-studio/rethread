@@ -10,8 +10,8 @@ void ofApp::setup() {
   string_state_map["end_screen"] = State::END_SCREEN;
 
   // try to grab at this size.
-  camWidth = 720;
-  camHeight = 480;
+  camWidth = 1920;
+  camHeight = 1080;
 
   // get back a list of devices.
   vector<ofVideoDevice> devices = vidGrabber.listDevices();
@@ -148,17 +148,17 @@ void ofApp::draw() {
     }
     if (showFeed) {
       ofSetHexColor(0xffffff);
-      float camZoom = 2.0;
+      float camZoom = (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth());
       if (!useStaticImage) {
         glm::vec2 camPos =
-            glm::vec2((ofGetWidth() - vidGrabber.getWidth() * 2.0) * 0.5,
-                      (ofGetHeight() - vidGrabber.getHeight() * 2.0) * 0.5);
+            glm::vec2((ofGetWidth() - vidGrabber.getWidth() * camZoom) * 0.5,
+                      (ofGetHeight() - vidGrabber.getHeight() * camZoom) * 0.5);
         vidGrabber.draw(camPos.x, camPos.y, vidGrabber.getWidth() * camZoom,
                         vidGrabber.getHeight() * camZoom);
       } else {
-        glm::vec2 camPos =
-            glm::vec2((ofGetWidth() - staticImage.getWidth() * 2.0) * 0.5,
-                      (ofGetHeight() - staticImage.getHeight() * 2.0) * 0.5);
+        glm::vec2 camPos = glm::vec2(
+            (ofGetWidth() - staticImage.getWidth() * camZoom) * 0.5,
+            (ofGetHeight() - staticImage.getHeight() * camZoom) * 0.5);
         staticImage.draw(camPos.x, camPos.y, staticImage.getWidth() * camZoom,
                          staticImage.getHeight() * camZoom);
       }
