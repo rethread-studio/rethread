@@ -9,10 +9,12 @@ void ofApp::setup() {
   string_state_map["apply_filter"] = State::APPLY_FILTER;
   string_state_map["end_screen"] = State::END_SCREEN;
 
-  numberFont.load("fonts/Millimetre-Regular_web.ttf", 100);
-  endScreenFont.load("fonts/Millimetre-Light_web.ttf", 50);
+  numberFont.load("fonts/Millimetre-Regular_web.ttf", 50);
+  endScreenFont.load("fonts/Millimetre-Light_web.ttf", 25);
+  traceFont.load("fonts/Millimetre-Light_web.ttf", 10);
 
   ofSetVerticalSync(true);
+  ofEnableAlphaBlending();
 
   postprocessingShader.load("shaders/postprocessing/shader");
 
@@ -20,34 +22,105 @@ void ofApp::setup() {
 
   receiver.setup(PORT);
   sender.setup("localhost", SEND_PORT);
+
+  ofSetBackgroundAuto(false);
+  ofBackground(0);
+
+  float w = 50;
+  float h = 70;
+  float x = 0.0;
+  float y = 0.0;
+  int num = (ofGetWidth() / w) * (ofGetHeight() / h);
+  for (int i = 0; i < num; i++) {
+    string s = "0";
+    if (ofRandom(1.0) > 0.5) {
+      s = "1";
+    }
+    binaryData.push_back(BinaryChar{s, x, y});
+    x += w;
+    if (x >= ofGetWidth() - w) {
+      y += h;
+      x = 0.0;
+    }
+  }
+
+  executionCode.push_back("pixels[i].r += c.r");
+  executionCode.push_back("pixels[i].g += c.g");
+  executionCode.push_back("pixels[i].b += c.b");
+  executionCode.push_back("float luminosity = luma(pixel[i]);");
+  executionCode.push_back("if(luminosity > 0.5) {");
+  executionCode.push_back("pixels[i].r = c.r * luminosity");
+  executionCode.push_back("pixels[i].g = c.g * luminosity");
+  executionCode.push_back("pixels[i].b = c.b * luminosity");
+  executionCode.push_back("");
+  executionCode.push_back("}");
 }
 
 //--------------------------------------------------------------
-void ofApp::update() {
-  checkOscMessages();
-  ofBackground(100, 100, 100);
-}
+void ofApp::update() { checkOscMessages(); }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-  ofBackground(0);
+  ofSetColor(0, 6);
+  ofRect(0, 0, ofGetWidth(), ofGetHeight());
   ofSetColor(255);
-  ofSetColor(0, 255, 0);
-  float lineHeight = endScreenFont.getLineHeight();
-  for (int i = 0; i < executionTrace.size(); i++) {
-    auto &s = executionTrace[i];
-    endScreenFont.drawString(s, 20, i * lineHeight);
-  }
+  // drawBinaryData();
   if (state == State::IDLE || state == State::COUNTDOWN) {
+    numberFont.drawString("IDLE", ofGetWidth() * 0.75, ofGetHeight() * 0.9);
+    executionTrace.push_back(
+        executionCode[ofRandom(0, executionCode.size() - 1)]);
+    drawExecutionTrace();
     if (state == State::COUNTDOWN) {
     }
   } else if (state == State::TRANSITION) {
+    numberFont.drawString("TRANSITION", ofGetWidth() * 0.75,
+                          ofGetHeight() * 0.9);
+    drawBinaryData();
   } else if (state == State::APPLY_FILTER) {
+    numberFont.drawString("APPLY FILTER", ofGetWidth() * 0.75,
+                          ofGetHeight() * 0.9);
+    drawExecutionTrace();
   } else if (state == State::END_SCREEN) {
+    numberFont.drawString("END_SCREEN", ofGetWidth() * 0.75,
+                          ofGetHeight() * 0.9);
+    drawBinaryData();
   }
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
+  if (executionTrace.size() * traceFont.getLineHeight() > ofGetHeight()) {
+    executionTrace.clear();
+    executionTraceColumn++;
+    if (executionTraceColumn >= numExecutionTraceColumns) {
+      executionTraceColumn = 0;
+    }
+  }
 
   gui.draw();
+}
+
+void ofApp::drawBinaryData() {
+
+  ofSetColor(0, 255, 0);
+  // for (int i = 0; i < binaryData.size(); i++) {
+  //   numberFont.drawString(binaryData[i].s, binaryData[i].x, binaryData[i].y);
+  // }
+  int i = ofRandom(0, binaryData.size());
+  numberFont.drawString(binaryData[i].s, binaryData[i].x, binaryData[i].y);
+}
+
+void ofApp::drawExecutionTrace() {
+  ofSetColor(0, 255, 0);
+  float lineHeight = traceFont.getLineHeight();
+  float x = ofGetWidth() * 0.1 + (ofGetWidth() * 0.15 * executionTraceColumn);
+  float y = 0.0;
+  for (int i = 0; i < executionTrace.size(); i++) {
+    auto &s = executionTrace[i];
+    traceFont.drawString(s, x, y);
+    y += lineHeight;
+    if (y > ofGetHeight()) {
+      x += ofGetWidth() * 0.2;
+      y = 0.0;
+    }
+  }
 }
 
 //--------------------------------------------------------------
@@ -86,6 +159,7 @@ void ofApp::checkOscMessages() {
         } else if (it->second == State::APPLY_FILTER) {
           applyFilterData.pixelsProcessed = 0;
           applyFilterData.instructionsPerformed = 0;
+          executionTraceColumn = 0;
         }
         ofLog() << "Changed state to " << state_name;
       } else {
@@ -97,7 +171,9 @@ void ofApp::checkOscMessages() {
       applyFilterData.pixelsProcessed = m.getArgAsInt(0);
     } else if (m.getAddress() == "/instructions_performed") {
       applyFilterData.instructionsPerformed = m.getArgAsInt(0);
-      executionTrace.push_back("pixels[i] += c.r;");
+      for (int i = 0; i < m.getArgAsInt(0) * 0.01; i++)
+        executionTrace.push_back(
+            executionCode[ofRandom(0, executionCode.size() - 1)]);
     }
     // check for an image being sent
     // note: the size of the image depends greatly on your network buffer
@@ -106,7 +182,7 @@ void ofApp::checkOscMessages() {
       ofBuffer buffer = m.getArgAsBlob(0);
     } else {
 
-      // unrecognized message: display on the bottom of the screen
+      // unrecognized message: log it
       string msgString;
       msgString = m.getAddress();
       msgString += ":";

@@ -18,6 +18,12 @@ enum class State { IDLE, COUNTDOWN, TRANSITION, APPLY_FILTER, END_SCREEN };
 
 static map<string, State> string_state_map;
 
+struct BinaryChar {
+  string s;
+  float x = 0.0;
+  float y = 0.0;
+};
+
 class ofApp : public ofBaseApp {
 
 public:
@@ -37,6 +43,9 @@ public:
   void dragEvent(ofDragInfo dragInfo);
   void gotMessage(ofMessage msg);
 
+  void drawBinaryData();
+  void drawExecutionTrace();
+
   void transition_to_state(State new_state);
 
   State state = State::IDLE;
@@ -54,8 +63,14 @@ public:
 
   ofTrueTypeFont numberFont;
   ofTrueTypeFont endScreenFont;
+  ofTrueTypeFont traceFont;
+
+  vector<string> executionCode;
 
   vector<string> executionTrace;
+  int executionTraceColumn = 0;
+  int numExecutionTraceColumns = 5;
+  vector<BinaryChar> binaryData;
 
   struct {
     int num = -1;

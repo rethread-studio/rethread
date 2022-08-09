@@ -10,8 +10,8 @@ int main() {
   settings.width = 1920;
   settings.height = 1080;
 #else
-  // settings.setSize(1920, 1080);
-  settings.setSize(3840, 2160);
+  settings.setSize(1920, 1080);
+  // settings.setSize(3840, 2160);
 #endif
   settings.numSamples = 4;
 
