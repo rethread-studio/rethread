@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Context, Result};
 use serialport::SerialPort;
+use std::io::ErrorKind;
 use std::time::{Duration, Instant};
 
 use nannou_osc as osc;
@@ -25,7 +26,7 @@ impl CodeExecutor {
             total_num_instructions: instructions_per_loop * width * height,
             instructions_performed: 0,
             instructions_per_loop,
-            instructions_per_step: 3000,
+            instructions_per_step: 30000,
         }
     }
     fn step(&mut self, num_steps: u64) {
@@ -136,7 +137,7 @@ impl State {
                 counts_left,
                 last_tick,
             } => {
-                if last_tick.elapsed().as_secs() > 1 {
+                if last_tick.elapsed().as_secs() >= 1 {
                     *counts_left -= 1;
                     *last_tick = Instant::now();
                     self.communication.send_countdown_tick(*counts_left);
@@ -246,6 +247,7 @@ impl Communication {
 fn main() -> Result<()> {
     println!("Hello, world!");
     // Set up serialport communication
+    let mut last_serial_reconnect = Instant::now();
     let mut serial_port = match open_serial() {
         Ok(port) => Some(port),
         Err(e) => {
@@ -280,20 +282,66 @@ fn main() -> Result<()> {
     let mut serial_buf: Vec<u8> = vec![0; 32];
     // main loop
     loop {
+        let mut serial_port_disconnected = false;
         if let Some(sp) = &mut serial_port {
             // try reading serial data
-            if let Ok(bytes_read) = sp.read(serial_buf.as_mut_slice()) {
-                for byte in serial_buf.iter().take(bytes_read) {
-                    match *byte as char {
-                        'u' => state.perform_steps(1),
-                        'd' => println!("down"),
-                        'b' => state.button_pressed(),
-                        _ => (),
+            match sp.bytes_to_read() {
+                Ok(num_bytes) => {
+                    if num_bytes > 0 {
+                        match sp.read(serial_buf.as_mut_slice()) {
+                            Ok(bytes_read) => {
+                                for byte in serial_buf.iter().take(bytes_read) {
+                                    match *byte as char {
+                                        'u' => state.perform_steps(1),
+                                        'd' => println!("down"),
+                                        'b' => state.button_pressed(),
+                                        _ => (),
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                use std::io::ErrorKind;
+                                match e.kind() {
+                                    ErrorKind::NotFound
+                                    | ErrorKind::ConnectionRefused
+                                    | ErrorKind::BrokenPipe
+                                    | ErrorKind::NotConnected => serial_port_disconnected = true,
+                                    _ => eprintln!("Unhandled read error: {e}"),
+                                }
+                            }
+                        }
                     }
                 }
+                Err(e) => match e.kind() {
+                    serialport::ErrorKind::NoDevice => serial_port_disconnected = true,
+                    serialport::ErrorKind::InvalidInput => (),
+                    serialport::ErrorKind::Unknown => {
+                        eprintln!("Unknown error getting bytes_to_read()");
+                        serial_port_disconnected = true;
+                    }
+                    serialport::ErrorKind::Io(ioe) => {
+                        eprintln!("IO error: {ioe}");
+                    }
+                },
             }
         } else {
             // Maybe sometimes try to reconnect to the serial port?
+            if last_serial_reconnect.elapsed() > Duration::from_secs(1) {
+                serial_port = match open_serial() {
+                    Ok(port) => {
+                        println!("Opened serial port connection");
+                        Some(port)
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to open port: {e}");
+                        None
+                    }
+                };
+                last_serial_reconnect = Instant::now();
+            }
+        }
+        if serial_port_disconnected {
+            serial_port = None;
         }
         state.update();
     }
