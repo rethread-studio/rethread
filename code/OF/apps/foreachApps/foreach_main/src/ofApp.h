@@ -74,7 +74,7 @@ public:
     float duration;
     float startTime;
     float zoom;
-    float maxZoom = 10.0;
+    float maxZoom = 100.0;
   } transitionData;
 
   struct {

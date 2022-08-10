@@ -6,7 +6,6 @@ uniform sampler2DRect tex0;
 uniform vec2 mouse;
 uniform vec2 resolution;
 uniform vec2 outputResolution;
-uniform float zoom;
 uniform float gain;
 uniform float exponent;
 uniform float invertY;
@@ -33,7 +32,7 @@ float luma(vec4 color) {
 void main()
 {
 	vec2 st = ((gl_FragCoord.xy/outputResolution)-0.5);
-  st.y += st.y * -1.0 * invertY;
+  st.y = ((st.y * -1.0) * invertY) + (st.y * (1.0 - invertY));
   st *= outputResolution;
   float zoom2 = outputResolution.y/resolution.y;
   vec2 imageSize = resolution * zoom2;

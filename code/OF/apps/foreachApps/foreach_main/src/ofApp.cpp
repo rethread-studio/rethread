@@ -91,7 +91,6 @@ void ofApp::setup() {
   filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
                             filteredImageFbo.getHeight());
   filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-  filterShader.setUniform1f("zoom", 1);
   filterShader.setUniform1f("invertY", 0);
   filterShader.setUniform1f("exponent", filterExponent);
   filterShader.setUniform1f("gain", filterGain);
@@ -135,6 +134,9 @@ void ofApp::draw() {
     imageFbo.end();
 
     if (showPixels) {
+      pixelZoom = sin(ofGetElapsedTimef()) * 0.25 + 0.25 +
+                  (sin(ofGetElapsedTimef() * 0.43374) * 0.75 + 0.75);
+      pixelZoom = 1 + pow(float(pixelZoom), 3.0) * transitionData.maxZoom;
       pixelShader.begin();
       pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
                                imageFbo.getHeight());
@@ -142,7 +144,7 @@ void ofApp::draw() {
       pixelShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
       // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
       // 500.0);
-      pixelShader.setUniform1f("zoom", pow(float(pixelZoom), 2.0));
+      pixelShader.setUniform1f("zoom", pixelZoom);
       ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
       pixelShader.end();
     }
@@ -173,44 +175,62 @@ void ofApp::draw() {
   } else if (state == State::TRANSITION) {
     float phase = (ofGetElapsedTimef() - transitionData.startTime) /
                   transitionData.duration;
-    pixelZoom = 1 + phase * (transitionData.maxZoom - 1);
+    pixelZoom = 1 + pow(phase, 3) * (transitionData.maxZoom - 1);
 
     pixelShader.begin();
     pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
                              imageFbo.getHeight());
     pixelShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
     pixelShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-    // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
-    // 500.0);
-    pixelShader.setUniform1f("zoom", pow(float(pixelZoom), 2.0));
+    pixelShader.setUniform1f("zoom", pixelZoom);
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
     pixelShader.end();
   } else if (state == State::APPLY_FILTER) {
-    if (showFilterShader) {
-      filterShader.begin();
-      filterShader.setUniform2f("resolution", imageFbo.getWidth(),
-                                imageFbo.getHeight());
-      filterShader.setUniform2f("outputResolution", ofGetWidth(),
-                                ofGetHeight());
-      filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-      // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
-      // 500.0);
-      filterShader.setUniform1f("zoom", 2.5);
-      filterShader.setUniform1f("invertY", 1);
-      filterShader.setUniform1f("exponent", filterExponent);
-      filterShader.setUniform1f("gain", filterGain);
-      filterShader.setUniform1f("pixelsProcessed",
-                                applyFilterData.pixelsProcessed);
 
-      ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-      filterShader.end();
-    }
+    // filteredImageFbo.begin();
+    filterShader.begin();
+    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                              imageFbo.getHeight());
+    filterShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
+    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+    filterShader.setUniform1f("invertY", 1);
+    filterShader.setUniform1f("exponent", filterExponent);
+    filterShader.setUniform1f("gain", filterGain);
+    filterShader.setUniform1f("pixelsProcessed",
+                              applyFilterData.pixelsProcessed);
+
+    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    filterShader.end();
+    // filteredImageFbo.end();
+    // filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
 
   } else if (state == State::END_SCREEN) {
+
+    // TEMP this can be removed when we are sure the states are progressed
+    // through in order
+
+    filteredImageFbo.begin();
+    filterShader.begin();
+    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                              imageFbo.getHeight());
+    filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
+                              filteredImageFbo.getHeight());
+    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+    filterShader.setUniform1f("invertY", 0);
+    filterShader.setUniform1f("exponent", filterExponent);
+    filterShader.setUniform1f("gain", filterGain);
+    filterShader.setUniform1f("pixelsProcessed", 99999999);
+    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                    filteredImageFbo.getHeight());
+    filterShader.end();
+    filteredImageFbo.end();
+
     ofBackground(0);
     ofSetColor(255);
-    float camZoom = 1.7;
-    float margin = imageFbo.getWidth() * 0.1;
+
+    float camZoom =
+        (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth()) * 0.8;
+    float margin = imageFbo.getWidth() * 0.05;
     glm::vec2 r =
         glm::vec2(imageFbo.getWidth() * camZoom + (margin * 2), ofGetHeight());
     ofDrawRectangle((ofGetWidth() - r.x) * 0.5, (ofGetHeight() - r.y) * 0.5,
@@ -299,6 +319,25 @@ void ofApp::checkOscMessages() {
           sender.sendMessage(m, false);
         } else if (it->second == State::APPLY_FILTER) {
           applyFilterData.pixelsProcessed = 0;
+        } else if (it->second == State::END_SCREEN) {
+          // Draw filtered image to fbo
+          filteredImageFbo.begin();
+          filterShader.begin();
+          filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                                    imageFbo.getHeight());
+          filterShader.setUniform2f("outputResolution",
+                                    filteredImageFbo.getWidth(),
+                                    filteredImageFbo.getHeight());
+          filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(),
+                                         1);
+          filterShader.setUniform1f("invertY", 0);
+          filterShader.setUniform1f("exponent", filterExponent);
+          filterShader.setUniform1f("gain", filterGain);
+          filterShader.setUniform1f("pixelsProcessed", 99999999);
+          ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                          filteredImageFbo.getHeight());
+          filterShader.end();
+          filteredImageFbo.end();
         }
         ofLog() << "Changed state to " << state_name;
       } else {
