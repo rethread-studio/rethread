@@ -62,6 +62,7 @@ struct State {
     state_machine: StateMachine,
     communication: Communication,
     last_interaction: Instant,
+    last_button_press: Instant,
     resolution: (i32, i32),
     timeout: Duration,
 }
@@ -112,6 +113,24 @@ impl State {
                 counts_left: _,
                 last_tick: _,
             } => (),
+        }
+        if self.last_button_press.elapsed() < Duration::from_millis(500) {
+            self.force_transition_to_next();
+        }
+        self.last_button_press = Instant::now();
+    }
+    fn force_transition_to_next(&mut self) {
+        match self.state_machine {
+            StateMachine::Idle => self.transition_to_countdown(),
+            StateMachine::TransitionToFilter { .. } => {
+                self.transition_to_apply_filter(self.resolution.0 as u64, self.resolution.1 as u64)
+            }
+            StateMachine::ApplyFilter { .. } => self.transition_to_end_screen(),
+            StateMachine::EndScreen => self.transition_to_idle(),
+            StateMachine::Countdown {
+                counts_left: _,
+                last_tick: _,
+            } => self.transition_to_transition_to_filter(),
         }
     }
     fn perform_steps(&mut self, num_steps: u64) {
@@ -276,6 +295,7 @@ fn main() -> Result<()> {
         },
         resolution: (640, 480),
         last_interaction: Instant::now(),
+        last_button_press: Instant::now(),
         timeout: Duration::from_secs_f32(20.0),
     };
 
