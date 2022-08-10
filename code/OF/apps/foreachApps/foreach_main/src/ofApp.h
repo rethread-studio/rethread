@@ -65,6 +65,7 @@ public:
   ofTrueTypeFont numberFont;
   ofTrueTypeFont endScreenFont;
 
+  ofParameter<float> idleMaxZoom = 50.0;
   struct {
     int num = -1;
     float size = 0;
@@ -74,7 +75,7 @@ public:
     float duration;
     float startTime;
     float zoom;
-    float maxZoom = 100.0;
+    float maxZoom = 5000.0;
   } transitionData;
 
   struct {

@@ -7,6 +7,7 @@ uniform vec2 mouse;
 uniform vec2 resolution;
 uniform vec2 outputResolution;
 uniform float zoom;
+uniform float alpha;
 
 in vec2 texCoordVarying;
 
@@ -27,10 +28,13 @@ void main()
 
   float fx = fract(texCoord.x);
   float fy = fract(texCoord.y);
-  color *= vec3(fy < 0.33, fy >= 0.33 && fy < 0.66, fy >= 0.66);
-  color *= vec3(fx > 0.04 && fx < 0.96);
+  // Split into pixels
+  vec3 split_color = color * vec3(fy < 0.33, fy >= 0.33 && fy < 0.66, fy >= 0.66);
+  split_color *= vec3(fx > 0.04 && fx < 0.96); // Apply border
 
-  float alpha = 1.0;
+  float apply_fx = float(zoom > 1.2);
+  color = split_color * apply_fx + color * (1.0-apply_fx);
+
 
   outputColor = vec4(color, alpha);
 }

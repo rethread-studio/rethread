@@ -171,7 +171,7 @@ void ofApp::checkOscMessages() {
       applyFilterData.pixelsProcessed = m.getArgAsInt(0);
     } else if (m.getAddress() == "/instructions_performed") {
       applyFilterData.instructionsPerformed = m.getArgAsInt(0);
-      for (int i = 0; i < m.getArgAsInt(0) * 0.01; i++)
+      for (int i = 0; i < 10; i++)
         executionTrace.push_back(
             executionCode[ofRandom(0, executionCode.size() - 1)]);
     }

@@ -27,8 +27,8 @@ void ofApp::setup() {
     }
   }
 
-  numberFont.load("fonts/Millimetre-Regular_web.ttf", 100);
-  endScreenFont.load("fonts/Millimetre-Light_web.ttf", 50);
+  numberFont.load("fonts/Millimetre-Regular_web.ttf", 350);
+  endScreenFont.load("fonts/Millimetre-Light_web.ttf", 25);
 
   if (!useStaticImage) {
     vidGrabber.setDeviceID(0);
@@ -56,6 +56,7 @@ void ofApp::setup() {
 
   gui.setup("parameters");
   gui.add(pixelZoom.set("pixel zoom", 10.0, 0.2, 30.0));
+  gui.add(idleMaxZoom.set("idle pixel max zoom", 100.0, 10.0, 1000.0));
   gui.add(showFeed.set("show feed", true));
   gui.add(showPixels.set("show pixels", true));
   gui.add(showFilterShader.set("show filter shader", true));
@@ -134,9 +135,9 @@ void ofApp::draw() {
     imageFbo.end();
 
     if (showPixels) {
-      pixelZoom = sin(ofGetElapsedTimef()) * 0.25 + 0.25 +
+      pixelZoom = sin(ofGetElapsedTimef() * 1.7) * 0.125 + 0.125 +
                   (sin(ofGetElapsedTimef() * 0.43374) * 0.75 + 0.75);
-      pixelZoom = 1 + pow(float(pixelZoom), 3.0) * transitionData.maxZoom;
+      pixelZoom = 2 + pow(float(pixelZoom), 3.0) * idleMaxZoom;
       pixelShader.begin();
       pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
                                imageFbo.getHeight());
@@ -145,6 +146,7 @@ void ofApp::draw() {
       // pixelShader.setUniform1f("zoom", (sin(ofGetElapsedTimef()) + 1.0) *
       // 500.0);
       pixelShader.setUniform1f("zoom", pixelZoom);
+      pixelShader.setUniform1f("alpha", 1.0);
       ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
       pixelShader.end();
     }
@@ -169,13 +171,32 @@ void ofApp::draw() {
       ostringstream s;
       s << countdownData.num;
       float w = numberFont.stringWidth(s.str());
+      float h = numberFont.getLineHeight();
       numberFont.drawString(s.str(), (ofGetWidth() - w) * 0.5,
-                            ofGetHeight() * 0.5);
+                            (ofGetHeight() + h * 0.75) * 0.5);
     }
   } else if (state == State::TRANSITION) {
+
+    // Draw the filter shader in the background
+    filterShader.begin();
+    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                              imageFbo.getHeight());
+    filterShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
+    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+    filterShader.setUniform1f("invertY", 1);
+    filterShader.setUniform1f("exponent", filterExponent);
+    filterShader.setUniform1f("gain", filterGain);
+    filterShader.setUniform1f("pixelsProcessed",
+                              applyFilterData.pixelsProcessed);
+
+    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    filterShader.end();
+
+    // Draw the star of the show, the pixels
     float phase = (ofGetElapsedTimef() - transitionData.startTime) /
                   transitionData.duration;
-    pixelZoom = 1 + pow(phase, 3) * (transitionData.maxZoom - 1);
+    float s_phase = atan(phase);
+    pixelZoom = 1 + pow(phase, 8) * (transitionData.maxZoom);
 
     pixelShader.begin();
     pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
@@ -183,6 +204,7 @@ void ofApp::draw() {
     pixelShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
     pixelShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
     pixelShader.setUniform1f("zoom", pixelZoom);
+    pixelShader.setUniform1f("alpha", 1.0 - pow(phase, 10));
     ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
     pixelShader.end();
   } else if (state == State::APPLY_FILTER) {
