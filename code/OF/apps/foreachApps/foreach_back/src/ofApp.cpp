@@ -110,7 +110,8 @@ void ofApp::drawBinaryData() {
 void ofApp::drawExecutionTrace() {
   ofSetColor(0, 255, 0);
   float lineHeight = traceFont.getLineHeight();
-  float x = ofGetWidth() * 0.1 + (ofGetWidth() * 0.15 * executionTraceColumn);
+  float x =
+      ofGetWidth() * 0.05 + (ofGetWidth() * (0.9 / 4.0) * executionTraceColumn);
   float y = 0.0;
   for (int i = 0; i < executionTrace.size(); i++) {
     auto &s = executionTrace[i];
