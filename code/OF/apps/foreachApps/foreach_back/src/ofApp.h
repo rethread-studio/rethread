@@ -70,6 +70,7 @@ public:
   vector<string> executionTrace;
   int executionTraceColumn = 0;
   int numExecutionTraceColumns = 4;
+  int maxNumExecutionTraceLines = 0;
   vector<BinaryChar> binaryData;
 
   struct {
