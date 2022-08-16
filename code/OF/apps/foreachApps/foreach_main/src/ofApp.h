@@ -59,6 +59,7 @@ public:
   ofParameter<bool> showFeed;
   ofParameter<bool> showFilterShader;
   ofParameter<bool> showPixels;
+  bool flipWebcam = true;
   ofParameter<float> filterGain;
   ofParameter<float> filterExponent;
 
