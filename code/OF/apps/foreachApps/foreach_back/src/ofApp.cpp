@@ -86,7 +86,7 @@ void ofApp::draw() {
     drawBinaryData();
   }
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
-  if (executionTrace.size() * traceFont.getLineHeight() > ofGetHeight()) {
+  if (executionTrace.size() > maxNumExecutionTraceLines) {
     executionTrace.clear();
     executionTraceColumn++;
     if (executionTraceColumn >= numExecutionTraceColumns) {
@@ -108,15 +108,34 @@ void ofApp::drawBinaryData() {
 }
 
 void ofApp::drawExecutionTrace() {
+
+  float border_margin = ofGetWidth() * 0.02;
+  ofRectangle myRect;
+  myRect.x = border_margin;
+  myRect.y = border_margin;
+  myRect.width = ofGetWidth() - (border_margin * 2);
+  myRect.height = ofGetHeight() - (border_margin * 2);
+
   ofSetColor(0, 255, 0);
+  ofNoFill();
+  ofDrawRectRounded(myRect, 30);
+
+  ofSetColor(0, 255, 0);
+  ofFill();
   float lineHeight = traceFont.getLineHeight();
-  float x = ofGetWidth() * 0.1 + (ofGetWidth() * 0.15 * executionTraceColumn);
-  float y = 0.0;
+  float text_margin = border_margin * 2;
+  maxNumExecutionTraceLines =
+      (ofGetHeight() - (text_margin * 2)) / traceFont.getLineHeight();
+
+  float x = text_margin + (ofGetWidth() - text_margin * 2) *
+                              (1.0 / numExecutionTraceColumns) *
+                              executionTraceColumn;
+  float y = text_margin;
   for (int i = 0; i < executionTrace.size(); i++) {
     auto &s = executionTrace[i];
     traceFont.drawString(s, x, y);
     y += lineHeight;
-    if (y > ofGetHeight()) {
+    if (y > ofGetHeight() - text_margin) {
       x += ofGetWidth() * 0.2;
       y = 0.0;
     }

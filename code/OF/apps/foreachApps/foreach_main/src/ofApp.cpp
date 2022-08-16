@@ -13,6 +13,15 @@ void ofApp::setup() {
   camWidth = 1920;
   camHeight = 1080;
 
+  gui.setup("parameters");
+  gui.add(pixelZoom.set("pixel zoom", 10.0, 0.2, 30.0));
+  gui.add(idleMaxZoom.set("idle pixel max zoom", 100.0, 10.0, 1000.0));
+  gui.add(showFeed.set("show feed", true));
+  gui.add(showPixels.set("show pixels", true));
+  gui.add(showFilterShader.set("show filter shader", true));
+  gui.add(filterGain.set("filter gain", 0.0, -0.2, 0.2));
+  gui.add(filterExponent.set("filter exponent", 1.0, 0.25, 4.0));
+
   // get back a list of devices.
   vector<ofVideoDevice> devices = vidGrabber.listDevices();
 
@@ -38,14 +47,23 @@ void ofApp::setup() {
     videoInverted.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(),
                            OF_PIXELS_RGB);
     videoTexture.allocate(videoInverted);
-    imageFbo.allocate(vidGrabber.getWidth(), vidGrabber.getHeight());
+    if (!flipWebcam) {
+      imageFbo.allocate(vidGrabber.getWidth(), vidGrabber.getHeight());
+    } else {
+      imageFbo.allocate(vidGrabber.getHeight(), vidGrabber.getWidth());
+    }
   } else {
 
     staticImage.load("static_image.jpg");
     videoInverted.allocate(staticImage.getWidth(), staticImage.getHeight(),
                            OF_PIXELS_RGB);
     videoTexture.allocate(videoInverted);
-    imageFbo.allocate(staticImage.getWidth(), staticImage.getHeight());
+
+    if (!flipWebcam) {
+      imageFbo.allocate(staticImage.getWidth(), staticImage.getHeight());
+    } else {
+      imageFbo.allocate(staticImage.getHeight(), staticImage.getWidth());
+    }
   }
   filteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
 
@@ -53,15 +71,6 @@ void ofApp::setup() {
 
   pixelShader.load("shaders/pixel_shader/shader");
   filterShader.load("shaders/filter_shader/shader");
-
-  gui.setup("parameters");
-  gui.add(pixelZoom.set("pixel zoom", 10.0, 0.2, 30.0));
-  gui.add(idleMaxZoom.set("idle pixel max zoom", 100.0, 10.0, 1000.0));
-  gui.add(showFeed.set("show feed", true));
-  gui.add(showPixels.set("show pixels", true));
-  gui.add(showFilterShader.set("show filter shader", true));
-  gui.add(filterGain.set("filter gain", 0.0, -0.2, 0.2));
-  gui.add(filterExponent.set("filter exponent", 1.0, 0.25, 4.0));
 
   receiver.setup(PORT);
   sender.setup("localhost", 12371);
@@ -86,6 +95,10 @@ void ofApp::setup() {
   }
   imageFbo.end();
   filteredImageFbo.begin();
+  ofPushMatrix();
+  if (flipWebcam) {
+    ofRotateDeg(180);
+  }
   filterShader.begin();
   filterShader.setUniform2f("resolution", imageFbo.getWidth(),
                             imageFbo.getHeight());
@@ -99,6 +112,7 @@ void ofApp::setup() {
   ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
                   filteredImageFbo.getHeight());
   filterShader.end();
+  ofPopMatrix();
   filteredImageFbo.end();
 }
 
@@ -127,11 +141,18 @@ void ofApp::draw() {
   if (state == State::IDLE || state == State::COUNTDOWN) {
     // Draw the live image on the imageFbo
     imageFbo.begin();
+    ofPushMatrix();
+    if (flipWebcam) {
+      ofTranslate(imageFbo.getWidth() / 2, imageFbo.getHeight() / 2);
+      ofRotateDeg(-90);
+      ofTranslate(imageFbo.getHeight() / -2, imageFbo.getWidth() / -2);
+    }
     if (useStaticImage) {
       staticImage.draw(0, 0);
     } else {
       vidGrabber.draw(0, 0);
     }
+    ofPopMatrix();
     imageFbo.end();
 
     if (showPixels) {
@@ -153,19 +174,11 @@ void ofApp::draw() {
     if (showFeed) {
       ofSetHexColor(0xffffff);
       float camZoom = (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth());
-      if (!useStaticImage) {
-        glm::vec2 camPos =
-            glm::vec2((ofGetWidth() - vidGrabber.getWidth() * camZoom) * 0.5,
-                      (ofGetHeight() - vidGrabber.getHeight() * camZoom) * 0.5);
-        vidGrabber.draw(camPos.x, camPos.y, vidGrabber.getWidth() * camZoom,
-                        vidGrabber.getHeight() * camZoom);
-      } else {
-        glm::vec2 camPos = glm::vec2(
-            (ofGetWidth() - staticImage.getWidth() * camZoom) * 0.5,
-            (ofGetHeight() - staticImage.getHeight() * camZoom) * 0.5);
-        staticImage.draw(camPos.x, camPos.y, staticImage.getWidth() * camZoom,
-                         staticImage.getHeight() * camZoom);
-      }
+      glm::vec2 camPos =
+          glm::vec2((ofGetWidth() - imageFbo.getWidth() * camZoom) * 0.5,
+                    (ofGetHeight() - imageFbo.getHeight() * camZoom) * 0.5);
+      imageFbo.draw(camPos.x, camPos.y, imageFbo.getWidth() * camZoom,
+                    imageFbo.getHeight() * camZoom);
     }
     if (state == State::COUNTDOWN) {
       ostringstream s;
