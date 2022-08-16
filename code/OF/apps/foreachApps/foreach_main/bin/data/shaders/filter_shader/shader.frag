@@ -44,7 +44,6 @@ void main()
 
   float luma = luma(org_color);
   vec3 c0 = vec3(1.0, 0.2, 0.7) * 1.3;
-  // vec3 c0 = vec3(1.1, 0.1, 0.3) * 1.3;
   vec3 c1 = vec3(0.1, 0.7, 1.2) * 1.5;
 
   float linear_luma = pow(luma + gain, exponent);
@@ -53,7 +52,6 @@ void main()
   color = mix(color, c0, smoothstep(0.7, 1.0, linear_luma));
   color*= (pow(luma + 0.1, 1.5) + 0.1);
 
-  // float alpha = float(pixelIndex <= pixelsProcessed);
   float alpha = 1.0;
   color = mix(org_color, color, float(pixelIndex <= pixelsProcessed));
 
