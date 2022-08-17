@@ -44,16 +44,18 @@ void ofApp::setup() {
     }
   }
 
-  executionCode.push_back("pixels[i].r += c.r");
-  executionCode.push_back("pixels[i].g += c.g");
-  executionCode.push_back("pixels[i].b += c.b");
-  executionCode.push_back("float luminosity = luma(pixel[i]);");
-  executionCode.push_back("if(luminosity > 0.5) {");
-  executionCode.push_back("pixels[i].r = c.r * luminosity");
-  executionCode.push_back("pixels[i].g = c.g * luminosity");
-  executionCode.push_back("pixels[i].b = c.b * luminosity");
-  executionCode.push_back("");
-  executionCode.push_back("}");
+  executionCode =
+      vector<string>{"Color original_color =  image[pixel].rgb;",
+                     "let brightness = luma(orignal_color);",
+                     "Color purple = rgb(1.0, 0.2, 0.7);",
+                     "Color blue = rgb(0.1, 0.7, 1.2);",
+                     "let linear_brightness = (luma + gain).pow(exponent);",
+                     "Color new_color;",
+                     "new_color = mix(blue, purple, linear_brightness);",
+                     "new_color *= (luma + 0.1).pow(1.5) + 0.1;",
+                     "image[pixel] = new_color;",
+                     "pixel = pixel + 1;",
+                     "--------------------------------------"};
 }
 
 //--------------------------------------------------------------
@@ -67,8 +69,9 @@ void ofApp::draw() {
   // drawBinaryData();
   if (state == State::IDLE || state == State::COUNTDOWN) {
     numberFont.drawString("IDLE", ofGetWidth() * 0.75, ofGetHeight() * 0.9);
-    executionTrace.push_back(
-        executionCode[ofRandom(0, executionCode.size() - 1)]);
+    executionTrace.push_back(executionCode[executionCodeCurrentIndex]);
+    executionCodeCurrentIndex =
+        (executionCodeCurrentIndex + 1) % executionCode.size();
     drawExecutionTrace();
     if (state == State::COUNTDOWN) {
     }
@@ -109,7 +112,7 @@ void ofApp::drawBinaryData() {
 
 void ofApp::drawExecutionTrace() {
 
-  float border_margin = ofGetWidth() * 0.02;
+  float border_margin = ofGetWidth() * 0.025;
   ofRectangle myRect;
   myRect.x = border_margin;
   myRect.y = border_margin;
@@ -118,7 +121,10 @@ void ofApp::drawExecutionTrace() {
 
   ofSetColor(0, 255, 0);
   ofNoFill();
-  ofDrawRectRounded(myRect, 30);
+  ofDrawRectRounded(myRect, 40);
+
+  traceFont.drawString("forEach", border_margin * 3,
+                       border_margin - traceFont.getLineHeight() / 2);
 
   ofSetColor(0, 255, 0);
   ofFill();

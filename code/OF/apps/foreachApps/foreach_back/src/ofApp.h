@@ -66,10 +66,10 @@ public:
   ofTrueTypeFont traceFont;
 
   vector<string> executionCode;
-
+  int executionCodeCurrentIndex = 0;
   vector<string> executionTrace;
   int executionTraceColumn = 0;
-  int numExecutionTraceColumns = 4;
+  int numExecutionTraceColumns = 3;
   int maxNumExecutionTraceLines = 0;
   vector<BinaryChar> binaryData;
 
