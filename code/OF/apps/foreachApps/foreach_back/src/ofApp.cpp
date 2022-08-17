@@ -97,7 +97,7 @@ void ofApp::draw() {
     }
   }
 
-  gui.draw();
+  // gui.draw();
 }
 
 void ofApp::drawBinaryData() {
