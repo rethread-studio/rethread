@@ -172,6 +172,7 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+  ofBackground(0);
   ofSetColor(255);
   if (state == State::IDLE || state == State::COUNTDOWN) {
     // Draw the live image on the imageFbo
@@ -203,6 +204,7 @@ void ofApp::draw() {
       // 500.0);
       pixelShader.setUniform1f("zoom", pixelZoom);
       pixelShader.setUniform1f("alpha", 1.0);
+      pixelShader.setUniform1f("invertY", 1);
       ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
       pixelShader.end();
     }
@@ -225,36 +227,53 @@ void ofApp::draw() {
     }
   } else if (state == State::TRANSITION) {
 
-    // Draw the filter shader in the background
-    filterShader.begin();
-    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
-                              imageFbo.getHeight());
-    filterShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
-    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-    filterShader.setUniform1f("invertY", 1);
-    filterShader.setUniform1f("exponent", filterExponent);
-    filterShader.setUniform1f("gain", filterGain);
-    filterShader.setUniform1f("pixelsProcessed",
-                              applyFilterData.pixelsProcessed);
-
-    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-    filterShader.end();
+    if (ofGetElapsedTimef() - transitionData.lastDotTs > 0.5) {
+      transitionData.numDots =
+          (transitionData.numDots + 1) % (transitionData.maxNumDots + 1);
+      transitionData.lastDotTs = ofGetElapsedTimef();
+    }
 
     // Draw the star of the show, the pixels
     float phase = (ofGetElapsedTimef() - transitionData.startTime) /
                   transitionData.duration;
     float s_phase = atan(phase);
-    pixelZoom = 1 + pow(phase, 8) * (transitionData.maxZoom);
+    pixelZoom = pow(sin(phase * PI), 8) * (transitionData.maxZoom);
 
+    filteredImageFbo.begin();
     pixelShader.begin();
     pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
                              imageFbo.getHeight());
-    pixelShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
+    pixelShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
+                             filteredImageFbo.getHeight());
     pixelShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
     pixelShader.setUniform1f("zoom", pixelZoom);
-    pixelShader.setUniform1f("alpha", 1.0 - pow(phase, 10));
-    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    pixelShader.setUniform1f("invertY", 0);
+    // pixelShader.setUniform1f("alpha", 1.0 - pow(phase, 10));
+    pixelShader.setUniform1f("alpha", 1.0);
+    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                    filteredImageFbo.getHeight());
     pixelShader.end();
+    filteredImageFbo.end();
+
+    if (squareImage) {
+      filteredImageFbo.draw(0, ofGetHeight() * 0.5 - ofGetWidth() * 0.5,
+                            ofGetWidth(), ofGetWidth());
+    } else {
+      filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+    }
+
+    float dotSize = ofGetWidth() * 0.1;
+    float dotMargin = dotSize * 0.3;
+    float y = ofGetHeight() * 0.5 - dotSize * 0.5;
+    float x =
+        ofGetWidth() * 0.5 - (dotSize * transitionData.maxNumDots +
+                              dotMargin * (transitionData.maxNumDots - 1)) *
+                                 0.5;
+    ofSetColor(255);
+    for (int i = 0; i < transitionData.numDots; i++) {
+      ofDrawEllipse(x, y, dotSize, dotSize);
+      x += dotSize + dotMargin;
+    }
   } else if (state == State::APPLY_FILTER) {
 
     filteredImageFbo.begin();

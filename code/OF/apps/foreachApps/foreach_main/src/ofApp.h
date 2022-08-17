@@ -94,6 +94,9 @@ public:
     float startTime;
     float zoom;
     float maxZoom = 5000.0;
+    int numDots;
+    int maxNumDots = 3;
+    float lastDotTs = 0;
   } transitionData;
 
   struct {
