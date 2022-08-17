@@ -65,6 +65,7 @@ public:
 
   ofTrueTypeFont numberFont;
   ofTrueTypeFont endScreenFont;
+  ofTrueTypeFont titleFont;
 
   ofParameter<float> idleMaxZoom = 50.0;
   struct {
@@ -83,6 +84,12 @@ public:
     long pixelsProcessed = 0;
   } applyFilterData;
 
+  struct {
+    ofImage filter;
+    ofImage resend;
+    ofImage foreach_icon;
+    ofImage heart;
+  } icons;
   ofxOscReceiver receiver;
   ofxOscSender sender;
   void checkOscMessages();

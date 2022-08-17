@@ -9,6 +9,11 @@ void ofApp::setup() {
   string_state_map["apply_filter"] = State::APPLY_FILTER;
   string_state_map["end_screen"] = State::END_SCREEN;
 
+  icons.foreach_icon.load("icons/foreach_logo.png");
+  icons.filter.load("icons/filter.png");
+  icons.heart.load("icons/heart.png");
+  icons.resend.load("icons/resend.png");
+
   // try to grab at this size.
   camWidth = 1920;
   camHeight = 1080;
@@ -37,7 +42,8 @@ void ofApp::setup() {
   }
 
   numberFont.load("fonts/Millimetre-Regular_web.ttf", 350);
-  endScreenFont.load("fonts/Millimetre-Light_web.ttf", 25);
+  endScreenFont.load("fonts/Millimetre-Bold_web.ttf", 25);
+  titleFont.load("fonts/Millimetre-Bold_web.ttf", 35);
 
   if (!useStaticImage) {
     vidGrabber.setDeviceID(0);
@@ -238,6 +244,44 @@ void ofApp::draw() {
     filterShader.end();
     // filteredImageFbo.end();
     // filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+
+    float black_bar_height = ofGetHeight() * 0.1;
+    float left_margin = ofGetWidth() * 0.05;
+    ofSetColor(0);
+    ofDrawRectangle(0, 0, ofGetWidth(), black_bar_height);
+    ofDrawRectangle(0, ofGetHeight() - black_bar_height, ofGetWidth(),
+                    ofGetHeight());
+
+    // Draw icons
+    ofSetColor(255);
+    float y = black_bar_height * 0.5 - (icons.foreach_icon.getHeight() * 0.5);
+    float x = left_margin;
+    icons.foreach_icon.draw(x, y);
+    y = ofGetHeight() - black_bar_height + 10;
+    icons.heart.draw(x, y);
+    x += icons.heart.getWidth() + 5;
+    icons.resend.draw(x, y);
+    x += icons.resend.getWidth() + 5;
+    icons.filter.draw(x, y);
+    y += icons.resend.getHeight() + 10;
+    // Draw stats
+
+    ostringstream s;
+    int loops = applyFilterData.pixelsProcessed;
+    ofSetColor(255);
+    if (loops == 0) {
+      s << "#nofilter";
+    } else {
+      s << "#" << loops << "loops";
+    }
+    endScreenFont.drawString(s.str(), left_margin,
+                             y + endScreenFont.getLineHeight());
+
+    ostringstream top_text;
+    top_text << "ForEach pixel the code loops";
+    titleFont.drawString(
+        top_text.str(), left_margin + icons.foreach_icon.getWidth() + 10,
+        black_bar_height * 0.5 + titleFont.getLineHeight() * 0.5);
 
   } else if (state == State::END_SCREEN) {
 
