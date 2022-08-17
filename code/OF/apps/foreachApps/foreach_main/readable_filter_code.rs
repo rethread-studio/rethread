@@ -25,7 +25,7 @@ fn apply_filter_to_pixel(coordinate: Position) {
 
 
 
-for each pixel in image {
+for|each pixel in image {
   Color original_color =  image[pixel].rgb;
 
   let brightness = luma(orignal_color);
