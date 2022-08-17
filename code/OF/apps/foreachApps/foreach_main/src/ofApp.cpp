@@ -75,6 +75,14 @@ void ofApp::setup() {
   }
   filteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
   halfFilteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+  ofImage codeImg;
+  codeImg.load("code_image.jpg");
+  codeDisplayFbo.allocate(imageFbo.getWidth(),
+                          codeImg.getHeight() * (float(imageFbo.getWidth()) /
+                                                 float(codeImg.getWidth())));
+  codeDisplayFbo.begin();
+  codeImg.draw(0, 0, codeDisplayFbo.getWidth(), codeDisplayFbo.getHeight());
+  codeDisplayFbo.end();
 
   endScreen.left_margin = ofGetWidth() * 0.15;
   endScreen.scroll_position = 0.0;
@@ -338,18 +346,19 @@ void ofApp::draw() {
 
     float x = endScreen.left_margin;
     float y = endScreen.left_margin - endScreen.scroll_position;
-    drawEndScreenCard(x, y, imageFbo, vector<string>{"#selfie", "#nofilter"});
-    y += endScreen.height;
+    y = drawEndScreenCard(x, y, imageFbo,
+                          vector<string>{"#selfie", "#nofilter"});
+    y = drawEndScreenCard(x, y, codeDisplayFbo,
+                          vector<string>{"#code", "#loop", "#foreach"});
     ostringstream halfNumPixels;
     halfNumPixels << "#" << halfProcessedNumPixels << "loops";
-    drawEndScreenCard(x, y, halfFilteredImageFbo,
-                      vector<string>{halfNumPixels.str(), "#filter"});
-    y += endScreen.height;
-    drawEndScreenCard(x, y, filteredImageFbo,
-                      vector<string>{"#behindthefilter"});
+    y = drawEndScreenCard(x, y, halfFilteredImageFbo,
+                          vector<string>{halfNumPixels.str(), "#filter"});
+    y = drawEndScreenCard(x, y, filteredImageFbo,
+                          vector<string>{"#behindthefilter"});
 
     endScreen.max_scroll_position =
-        endScreen.height * 3 - ofGetHeight() + endScreen.left_margin;
+        y + endScreen.scroll_position - ofGetHeight() + endScreen.left_margin;
 
     // float camZoom =
     //     (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth()) * 0.8;
@@ -388,8 +397,8 @@ void ofApp::draw() {
   // gui.draw();
 }
 
-void ofApp::drawEndScreenCard(int startx, int starty, ofFbo fbo,
-                              vector<string> tags) {
+int ofApp::drawEndScreenCard(int startx, int starty, ofFbo fbo,
+                             vector<string> tags) {
   float x = startx;
   float y = starty;
   float zoom = endScreen.width / float(fbo.getWidth());
@@ -409,6 +418,8 @@ void ofApp::drawEndScreenCard(int startx, int starty, ofFbo fbo,
     endScreenFont.drawString(tag, x, y);
     x += endScreenFont.stringWidth(tag) + 10;
   }
+  y += ofGetHeight() * 0.07;
+  return y;
 }
 
 //--------------------------------------------------------------

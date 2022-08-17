@@ -38,7 +38,7 @@ public:
   void gotMessage(ofMessage msg);
 
   void transition_to_state(State new_state);
-  void drawEndScreenCard(int x, int y, ofFbo fbo, vector<string> tags);
+  int drawEndScreenCard(int x, int y, ofFbo fbo, vector<string> tags);
 
   State state = State::IDLE;
 
