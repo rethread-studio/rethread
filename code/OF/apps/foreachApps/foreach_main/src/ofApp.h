@@ -38,7 +38,8 @@ public:
   void gotMessage(ofMessage msg);
 
   void transition_to_state(State new_state);
-  int drawEndScreenCard(int x, int y, ofFbo fbo, vector<string> tags);
+  int drawEndScreenCard(int x, int y, ofFbo fbo, ofFbo mask,
+                        vector<string> tags);
 
   State state = State::IDLE;
 
@@ -53,6 +54,8 @@ public:
   ofShader pixelShader;
   ofShader filterShader;
   ofFbo imageFbo; // the live or captured image
+  ofFbo roundedCornersMaskFbo;
+  ofFbo roundedCornersMaskCodeFbo;
   ofFbo filteredImageFbo;
   ofFbo halfFilteredImageFbo;
   ofFbo codeDisplayFbo;

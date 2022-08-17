@@ -75,14 +75,30 @@ void ofApp::setup() {
   }
   filteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
   halfFilteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+  roundedCornersMaskFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
   ofImage codeImg;
   codeImg.load("code_image.jpg");
   codeDisplayFbo.allocate(imageFbo.getWidth(),
                           codeImg.getHeight() * (float(imageFbo.getWidth()) /
                                                  float(codeImg.getWidth())));
+  roundedCornersMaskCodeFbo.allocate(codeDisplayFbo.getWidth(),
+                                     codeDisplayFbo.getHeight());
   codeDisplayFbo.begin();
   codeImg.draw(0, 0, codeDisplayFbo.getWidth(), codeDisplayFbo.getHeight());
   codeDisplayFbo.end();
+
+  roundedCornersMaskFbo.begin();
+  ofClear(0, 0, 0);
+  ofSetColor(255);
+  ofDrawRectRounded(0, 0, roundedCornersMaskFbo.getWidth(),
+                    roundedCornersMaskFbo.getHeight(), 50);
+  roundedCornersMaskFbo.end();
+  roundedCornersMaskCodeFbo.begin();
+  ofClear(0, 0, 0);
+  ofSetColor(255);
+  ofDrawRectRounded(0, 0, roundedCornersMaskCodeFbo.getWidth(),
+                    roundedCornersMaskCodeFbo.getHeight(), 50);
+  roundedCornersMaskCodeFbo.end();
 
   endScreen.left_margin = ofGetWidth() * 0.15;
   endScreen.scroll_position = 0.0;
@@ -346,15 +362,15 @@ void ofApp::draw() {
 
     float x = endScreen.left_margin;
     float y = endScreen.left_margin - endScreen.scroll_position;
-    y = drawEndScreenCard(x, y, imageFbo,
+    y = drawEndScreenCard(x, y, imageFbo, roundedCornersMaskFbo,
                           vector<string>{"#selfie", "#nofilter"});
-    y = drawEndScreenCard(x, y, codeDisplayFbo,
+    y = drawEndScreenCard(x, y, codeDisplayFbo, roundedCornersMaskCodeFbo,
                           vector<string>{"#code", "#loop", "#foreach"});
     ostringstream halfNumPixels;
     halfNumPixels << "#" << halfProcessedNumPixels << "loops";
-    y = drawEndScreenCard(x, y, halfFilteredImageFbo,
+    y = drawEndScreenCard(x, y, halfFilteredImageFbo, roundedCornersMaskFbo,
                           vector<string>{halfNumPixels.str(), "#filter"});
-    y = drawEndScreenCard(x, y, filteredImageFbo,
+    y = drawEndScreenCard(x, y, filteredImageFbo, roundedCornersMaskFbo,
                           vector<string>{"#behindthefilter"});
 
     endScreen.max_scroll_position =
@@ -397,11 +413,12 @@ void ofApp::draw() {
   // gui.draw();
 }
 
-int ofApp::drawEndScreenCard(int startx, int starty, ofFbo fbo,
+int ofApp::drawEndScreenCard(int startx, int starty, ofFbo fbo, ofFbo mask,
                              vector<string> tags) {
   float x = startx;
   float y = starty;
   float zoom = endScreen.width / float(fbo.getWidth());
+  fbo.getTexture().setAlphaMask(mask.getTexture());
   fbo.draw(x, y, fbo.getWidth() * zoom, fbo.getHeight() * zoom);
   y += fbo.getHeight() * zoom + 20;
 
