@@ -267,7 +267,9 @@ impl Communication {
         let args = vec![Type::Int(pixels_processed as i32)];
         self.main_screen_sender.send((addr, args)).ok();
         let addr = "/step";
-        self.supercollider_sender.send((addr, vec![])).ok();
+        self.supercollider_sender
+            .send((addr, vec![Type::Int(pixels_processed as i32)]))
+            .ok();
     }
     fn send_scroll_forward(&mut self) {
         let addr = "/scroll";
