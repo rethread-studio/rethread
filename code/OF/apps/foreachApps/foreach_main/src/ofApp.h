@@ -38,6 +38,7 @@ public:
   void gotMessage(ofMessage msg);
 
   void transition_to_state(State new_state);
+  void drawEndScreenCard(int x, int y, ofFbo fbo, vector<string> tags);
 
   State state = State::IDLE;
 
@@ -51,8 +52,18 @@ public:
 
   ofShader pixelShader;
   ofShader filterShader;
-  ofFbo imageFbo;         // the live or captured image
-  ofFbo filteredImageFbo; // the live or captured image
+  ofFbo imageFbo; // the live or captured image
+  ofFbo filteredImageFbo;
+  ofFbo halfFilteredImageFbo;
+  ofFbo codeDisplayFbo;
+
+  struct {
+    float width;
+    float height;
+    float left_margin;
+    float scroll_position;
+    float max_scroll_position;
+  } endScreen;
 
   ofxPanel gui;
   ofParameter<float> pixelZoom;
@@ -60,6 +71,7 @@ public:
   ofParameter<bool> showFilterShader;
   ofParameter<bool> showPixels;
   bool flipWebcam = true;
+  bool squareImage = true;
   ofParameter<float> filterGain;
   ofParameter<float> filterExponent;
 
@@ -68,6 +80,7 @@ public:
   ofTrueTypeFont titleFont;
 
   ofParameter<float> idleMaxZoom = 50.0;
+
   struct {
     int num = -1;
     float size = 0;

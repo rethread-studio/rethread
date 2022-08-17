@@ -134,7 +134,6 @@ impl State {
         }
     }
     fn perform_steps(&mut self, num_steps: u64) {
-        self.last_interaction = Instant::now();
         match &mut self.state_machine {
             StateMachine::ApplyFilter { executor } => {
                 // TODO: simulate running the code
@@ -146,6 +145,21 @@ impl State {
                 }
             }
             _ => (),
+        }
+    }
+    fn turn_forward(&mut self) {
+        self.last_interaction = Instant::now();
+        match &mut self.state_machine {
+            StateMachine::Idle => (),
+            StateMachine::Countdown {
+                counts_left,
+                last_tick,
+            } => (),
+            StateMachine::TransitionToFilter { start, duration } => (),
+            StateMachine::ApplyFilter { executor } => self.perform_steps(1),
+            StateMachine::EndScreen => {
+                self.communication.send_scroll_forward();
+            }
         }
     }
     // Run periodically to update time based state
@@ -255,6 +269,11 @@ impl Communication {
         let addr = "/step";
         self.supercollider_sender.send((addr, vec![])).ok();
     }
+    fn send_scroll_forward(&mut self) {
+        let addr = "/scroll";
+        let args = vec![Type::Int(1)];
+        self.main_screen_sender.send((addr, args)).ok();
+    }
     fn send_to_all(&mut self, addr: &str, args: Vec<Type>) {
         println!("sending {addr} {args:?}");
         self.main_screen_sender.send((addr, args.clone())).ok();
@@ -312,7 +331,7 @@ fn main() -> Result<()> {
                             Ok(bytes_read) => {
                                 for byte in serial_buf.iter().take(bytes_read) {
                                     match *byte as char {
-                                        'u' => state.perform_steps(1),
+                                        'u' => state.turn_forward(),
                                         'd' => println!("down"),
                                         'b' => state.button_pressed(),
                                         _ => (),

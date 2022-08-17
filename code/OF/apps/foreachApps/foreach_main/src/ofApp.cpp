@@ -45,6 +45,7 @@ void ofApp::setup() {
   endScreenFont.load("fonts/Millimetre-Bold_web.ttf", 25);
   titleFont.load("fonts/Millimetre-Bold_web.ttf", 35);
 
+  int w, h;
   if (!useStaticImage) {
     vidGrabber.setDeviceID(0);
     vidGrabber.setDesiredFrameRate(30);
@@ -53,25 +54,34 @@ void ofApp::setup() {
     videoInverted.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(),
                            OF_PIXELS_RGB);
     videoTexture.allocate(videoInverted);
-    if (!flipWebcam) {
-      imageFbo.allocate(vidGrabber.getWidth(), vidGrabber.getHeight());
-    } else {
-      imageFbo.allocate(vidGrabber.getHeight(), vidGrabber.getWidth());
-    }
+    w = vidGrabber.getWidth();
+    h = vidGrabber.getHeight();
   } else {
 
     staticImage.load("static_image.jpg");
     videoInverted.allocate(staticImage.getWidth(), staticImage.getHeight(),
                            OF_PIXELS_RGB);
     videoTexture.allocate(videoInverted);
-
-    if (!flipWebcam) {
-      imageFbo.allocate(staticImage.getWidth(), staticImage.getHeight());
-    } else {
-      imageFbo.allocate(staticImage.getHeight(), staticImage.getWidth());
-    }
+    w = staticImage.getWidth();
+    h = staticImage.getHeight();
+  }
+  if (squareImage) {
+    w = h;
+  }
+  if (!flipWebcam) {
+    imageFbo.allocate(w, h);
+  } else {
+    imageFbo.allocate(h, w);
   }
   filteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+  halfFilteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+
+  endScreen.left_margin = ofGetWidth() * 0.15;
+  endScreen.scroll_position = 0.0;
+  endScreen.width = ofGetWidth() - (endScreen.left_margin * 2);
+  endScreen.height =
+      imageFbo.getHeight() * (endScreen.width / float(imageFbo.getWidth())) +
+      ofGetHeight() * 0.1;
 
   ofSetVerticalSync(true);
 
@@ -83,13 +93,8 @@ void ofApp::setup() {
   // send image resolution to the server
   ofxOscMessage m;
   m.setAddress("/image_resolution");
-  if (!useStaticImage) {
-    m.addIntArg(vidGrabber.getWidth());
-    m.addIntArg(vidGrabber.getHeight());
-  } else {
-    m.addIntArg(staticImage.getWidth());
-    m.addIntArg(staticImage.getHeight());
-  }
+  m.addIntArg(imageFbo.getWidth());
+  m.addIntArg(imageFbo.getHeight());
   sender.sendMessage(m, false);
   ofLog() << "Setup finished";
 
@@ -179,7 +184,7 @@ void ofApp::draw() {
     }
     if (showFeed) {
       ofSetHexColor(0xffffff);
-      float camZoom = (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth());
+      float camZoom = (float(ofGetWidth()) * 0.8) / float(imageFbo.getWidth());
       glm::vec2 camPos =
           glm::vec2((ofGetWidth() - imageFbo.getWidth() * camZoom) * 0.5,
                     (ofGetHeight() - imageFbo.getHeight() * camZoom) * 0.5);
@@ -228,24 +233,31 @@ void ofApp::draw() {
     pixelShader.end();
   } else if (state == State::APPLY_FILTER) {
 
-    // filteredImageFbo.begin();
+    filteredImageFbo.begin();
     filterShader.begin();
     filterShader.setUniform2f("resolution", imageFbo.getWidth(),
                               imageFbo.getHeight());
-    filterShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
+    filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
+                              filteredImageFbo.getHeight());
     filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-    filterShader.setUniform1f("invertY", 1);
+    filterShader.setUniform1f("invertY", 0);
     filterShader.setUniform1f("exponent", filterExponent);
     filterShader.setUniform1f("gain", filterGain);
     filterShader.setUniform1f("pixelsProcessed",
                               applyFilterData.pixelsProcessed);
 
-    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                    filteredImageFbo.getHeight());
     filterShader.end();
-    // filteredImageFbo.end();
-    // filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+    filteredImageFbo.end();
+    if (squareImage) {
+      filteredImageFbo.draw(0, ofGetHeight() * 0.5 - ofGetWidth() * 0.5,
+                            ofGetWidth(), ofGetWidth());
+    } else {
+      filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+    }
 
-    float black_bar_height = ofGetHeight() * 0.1;
+    float black_bar_height = ofGetHeight() * 0.2;
     float left_margin = ofGetWidth() * 0.05;
     ofSetColor(0);
     ofDrawRectangle(0, 0, ofGetWidth(), black_bar_height);
@@ -265,7 +277,6 @@ void ofApp::draw() {
     icons.filter.draw(x, y);
     y += icons.resend.getHeight() + 10;
     // Draw stats
-
     ostringstream s;
     int loops = applyFilterData.pixelsProcessed;
     ofSetColor(255);
@@ -303,43 +314,101 @@ void ofApp::draw() {
                     filteredImageFbo.getHeight());
     filterShader.end();
     filteredImageFbo.end();
+    halfFilteredImageFbo.begin();
+    filterShader.begin();
+    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                              imageFbo.getHeight());
+    filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
+                              filteredImageFbo.getHeight());
+    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+    filterShader.setUniform1f("invertY", 0);
+    filterShader.setUniform1f("exponent", filterExponent);
+    filterShader.setUniform1f("gain", filterGain);
+    int halfProcessedNumPixels =
+        imageFbo.getWidth() * imageFbo.getHeight() * 0.6;
+    filterShader.setUniform1f("pixelsProcessed", halfProcessedNumPixels);
+    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                    filteredImageFbo.getHeight());
+    filterShader.end();
+    halfFilteredImageFbo.end();
+    // END TEMP
 
     ofBackground(0);
     ofSetColor(255);
 
-    float camZoom =
-        (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth()) * 0.8;
-    float margin = imageFbo.getWidth() * 0.05;
-    glm::vec2 r =
-        glm::vec2(imageFbo.getWidth() * camZoom + (margin * 2), ofGetHeight());
-    ofDrawRectangle((ofGetWidth() - r.x) * 0.5, (ofGetHeight() - r.y) * 0.5,
-                    r.x, r.y);
-    // draw unaltered image
-    glm::vec2 camPos =
-        glm::vec2((ofGetWidth() - imageFbo.getWidth() * camZoom) * 0.5, margin);
-    imageFbo.draw(camPos.x, camPos.y, imageFbo.getWidth() * camZoom,
-                  imageFbo.getHeight() * camZoom);
-    camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
-    filteredImageFbo.draw(camPos.x, camPos.y,
-                          filteredImageFbo.getWidth() * camZoom,
-                          filteredImageFbo.getHeight() * camZoom);
-    camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
+    float x = endScreen.left_margin;
+    float y = endScreen.left_margin - endScreen.scroll_position;
+    drawEndScreenCard(x, y, imageFbo, vector<string>{"#selfie", "#nofilter"});
+    y += endScreen.height;
+    ostringstream halfNumPixels;
+    halfNumPixels << "#" << halfProcessedNumPixels << "loops";
+    drawEndScreenCard(x, y, halfFilteredImageFbo,
+                      vector<string>{halfNumPixels.str(), "#filter"});
+    y += endScreen.height;
+    drawEndScreenCard(x, y, filteredImageFbo,
+                      vector<string>{"#behindthefilter"});
 
-    // endScreenFont.drawString(
-    //     "Du applicerade filtret på\nbilden genom att köra\n"
-    //     "1 728 000 instruktioner!",
-    //     50, ofGetHeight() * 0.5);
-    ostringstream s;
-    long pixels = imageFbo.getWidth() * imageFbo.getHeight();
-    ofSetColor(0);
-    s << "#" << pixels * 5 << " instruktioner     #" << pixels
-      << " pixlar\n#filter";
-    endScreenFont.drawString(s.str(), camPos.x,
-                             (ofGetHeight() - camPos.y) * 0.5 + camPos.y);
+    endScreen.max_scroll_position =
+        endScreen.height * 3 - ofGetHeight() + endScreen.left_margin;
+
+    // float camZoom =
+    //     (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth()) * 0.8;
+    // float margin = imageFbo.getWidth() * 0.05;
+    // glm::vec2 r =
+    //     glm::vec2(imageFbo.getWidth() * camZoom + (margin * 2),
+    //     ofGetHeight());
+    // ofDrawRectangle((ofGetWidth() - r.x) * 0.5, (ofGetHeight() - r.y) * 0.5,
+    //                 r.x, r.y);
+    // // draw unaltered image
+    // glm::vec2 camPos =
+    //     glm::vec2((ofGetWidth() - imageFbo.getWidth() * camZoom) * 0.5,
+    //     margin);
+    // imageFbo.draw(camPos.x, camPos.y, imageFbo.getWidth() * camZoom,
+    //               imageFbo.getHeight() * camZoom);
+    // camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
+    // filteredImageFbo.draw(camPos.x, camPos.y,
+    //                       filteredImageFbo.getWidth() * camZoom,
+    //                       filteredImageFbo.getHeight() * camZoom);
+    // camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
+
+    // // endScreenFont.drawString(
+    // //     "Du applicerade filtret på\nbilden genom att köra\n"
+    // //     "1 728 000 instruktioner!",
+    // //     50, ofGetHeight() * 0.5);
+    // ostringstream s;
+    // long pixels = imageFbo.getWidth() * imageFbo.getHeight();
+    // ofSetColor(0);
+    // s << "#" << pixels * 5 << " instruktioner     #" << pixels
+    //   << " pixlar\n#filter";
+    // endScreenFont.drawString(s.str(), camPos.x,
+    //                          (ofGetHeight() - camPos.y) * 0.5 + camPos.y);
   }
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
 
-  gui.draw();
+  // gui.draw();
+}
+
+void ofApp::drawEndScreenCard(int startx, int starty, ofFbo fbo,
+                              vector<string> tags) {
+  float x = startx;
+  float y = starty;
+  float zoom = endScreen.width / float(fbo.getWidth());
+  fbo.draw(x, y, fbo.getWidth() * zoom, fbo.getHeight() * zoom);
+  y += fbo.getHeight() * zoom + 20;
+
+  icons.heart.draw(x, y);
+  x += icons.heart.getWidth() + 5;
+  icons.resend.draw(x, y);
+  x += icons.resend.getWidth() + 5;
+  icons.filter.draw(x, y);
+  y += icons.resend.getHeight() + 10;
+  x = startx;
+
+  y += endScreenFont.getLineHeight();
+  for (auto &tag : tags) {
+    endScreenFont.drawString(tag, x, y);
+    x += endScreenFont.stringWidth(tag) + 10;
+  }
 }
 
 //--------------------------------------------------------------
@@ -388,17 +457,13 @@ void ofApp::checkOscMessages() {
           // send image resolution to the server
           ofxOscMessage m;
           m.setAddress("/image_resolution");
-          if (!useStaticImage) {
-            m.addIntArg(vidGrabber.getWidth());
-            m.addIntArg(vidGrabber.getHeight());
-          } else {
-            m.addIntArg(staticImage.getWidth());
-            m.addIntArg(staticImage.getHeight());
-          }
+          m.addIntArg(imageFbo.getWidth());
+          m.addIntArg(imageFbo.getHeight());
           sender.sendMessage(m, false);
         } else if (it->second == State::APPLY_FILTER) {
           applyFilterData.pixelsProcessed = 0;
         } else if (it->second == State::END_SCREEN) {
+          endScreen.scroll_position = 0;
           // Draw filtered image to fbo
           filteredImageFbo.begin();
           filterShader.begin();
@@ -444,6 +509,11 @@ void ofApp::checkOscMessages() {
       countdownData.num = m.getArgAsInt(0);
     } else if (m.getAddress() == "/pixels_processed") {
       applyFilterData.pixelsProcessed = m.getArgAsInt(0);
+    } else if (m.getAddress() == "/scroll") {
+      endScreen.scroll_position += float(m.getArgAsInt(0) * 20);
+      endScreen.scroll_position =
+          ofClamp(endScreen.scroll_position, 0, endScreen.max_scroll_position);
+
     }
     // check for an image being sent
     // note: the size of the image depends greatly on your network buffer
