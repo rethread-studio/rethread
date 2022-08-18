@@ -59,6 +59,8 @@ public:
   ofFbo filteredImageFbo;
   ofFbo halfFilteredImageFbo;
   ofFbo codeDisplayFbo;
+  ofFbo endScreenFbo;
+  float endScreenFade = 255.0;
 
   struct {
     float width;
@@ -95,7 +97,7 @@ public:
     float duration;
     float startTime;
     float zoom;
-    float maxZoom = 5000.0;
+    float maxZoom = 1000.0;
     int numDots;
     int maxNumDots = 3;
     float lastDotTs = 0;
