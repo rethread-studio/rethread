@@ -108,6 +108,7 @@ public:
     ofImage resend;
     ofImage foreach_icon;
     ofImage heart;
+    ofImage camera;
   } icons;
   ofxOscReceiver receiver;
   ofxOscSender sender;

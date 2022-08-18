@@ -13,6 +13,7 @@ void ofApp::setup() {
   icons.filter.load("icons/filter.png");
   icons.heart.load("icons/heart.png");
   icons.resend.load("icons/resend.png");
+  icons.camera.load("icons/camera.png");
 
   // try to grab at this size.
   camWidth = 1920;
@@ -43,7 +44,7 @@ void ofApp::setup() {
 
   numberFont.load("fonts/Millimetre-Regular_web.ttf", 350);
   endScreenFont.load("fonts/Millimetre-Bold_web.ttf", 25);
-  titleFont.load("fonts/Millimetre-Bold_web.ttf", 35);
+  titleFont.load("fonts/Noto Mono Nerd Font Complete.ttf", 35);
 
   int w, h;
   if (!useStaticImage) {
@@ -173,6 +174,12 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
   ofBackground(0);
+  float x = 0, y = 0;
+  float black_bar_height = ofGetHeight() * 0.1;
+  float left_margin = ofGetWidth() * 0.05;
+  ostringstream top_text;
+  ostringstream bottom_text;
+
   ofSetColor(255);
   if (state == State::IDLE || state == State::COUNTDOWN) {
     // Draw the live image on the imageFbo
@@ -225,8 +232,21 @@ void ofApp::draw() {
       numberFont.drawString(s.str(), (ofGetWidth() - w) * 0.5,
                             (ofGetHeight() + h * 0.75) * 0.5);
     }
-  } else if (state == State::TRANSITION) {
+    top_text << "for|each: take a selfie";
+    // bottom bar
+    ofSetColor(0);
+    ofDrawRectangle(0, ofGetHeight() - black_bar_height, ofGetWidth(),
+                    ofGetHeight());
 
+    float cameraw = icons.camera.getWidth() * 2.0;
+    float camerah = icons.camera.getHeight() * 2.0;
+    float camerax = ofGetWidth() * 0.5 - cameraw * 0.5;
+    float cameray = ofGetHeight() * 0.5 + ofGetWidth() * 0.4;
+    cameray = cameray + (ofGetHeight() - cameray - black_bar_height) * 0.5 -
+              camerah * 0.5;
+    ofSetColor(255);
+    icons.camera.draw(camerax, cameray, cameraw, camerah);
+  } else if (state == State::TRANSITION) {
     if (ofGetElapsedTimef() - transitionData.lastDotTs > 0.5) {
       transitionData.numDots =
           (transitionData.numDots + 1) % (transitionData.maxNumDots + 1);
@@ -265,15 +285,16 @@ void ofApp::draw() {
     float dotSize = ofGetWidth() * 0.1;
     float dotMargin = dotSize * 0.3;
     float y = ofGetHeight() * 0.5 - dotSize * 0.5;
-    float x =
-        ofGetWidth() * 0.5 - (dotSize * transitionData.maxNumDots +
-                              dotMargin * (transitionData.maxNumDots - 1)) *
-                                 0.5;
+    float x = ofGetWidth() * 0.5 -
+              (dotSize * transitionData.maxNumDots +
+               dotMargin * (transitionData.maxNumDots - 1) - dotSize) *
+                  0.5;
     ofSetColor(255);
     for (int i = 0; i < transitionData.numDots; i++) {
       ofDrawEllipse(x, y, dotSize, dotSize);
       x += dotSize + dotMargin;
     }
+    top_text << "for|each: loading pixels...";
   } else if (state == State::APPLY_FILTER) {
 
     filteredImageFbo.begin();
@@ -300,19 +321,10 @@ void ofApp::draw() {
       filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
     }
 
-    float black_bar_height = ofGetHeight() * 0.2;
-    float left_margin = ofGetWidth() * 0.05;
-    ofSetColor(0);
-    ofDrawRectangle(0, 0, ofGetWidth(), black_bar_height);
-    ofDrawRectangle(0, ofGetHeight() - black_bar_height, ofGetWidth(),
-                    ofGetHeight());
-
     // Draw icons
     ofSetColor(255);
-    float y = black_bar_height * 0.5 - (icons.foreach_icon.getHeight() * 0.5);
-    float x = left_margin;
-    icons.foreach_icon.draw(x, y);
-    y = ofGetHeight() - black_bar_height + 10;
+    x = left_margin;
+    y = ofGetHeight() * 0.5 + ofGetWidth() * 0.5 + 20;
     icons.heart.draw(x, y);
     x += icons.heart.getWidth() + 5;
     icons.resend.draw(x, y);
@@ -331,12 +343,7 @@ void ofApp::draw() {
     endScreenFont.drawString(s.str(), left_margin,
                              y + endScreenFont.getLineHeight());
 
-    ostringstream top_text;
-    top_text << "ForEach pixel the code loops";
-    titleFont.drawString(
-        top_text.str(), left_margin + icons.foreach_icon.getWidth() + 10,
-        black_bar_height * 0.5 + titleFont.getLineHeight() * 0.5);
-
+    top_text << "for|each: loop through every pixel";
   } else if (state == State::END_SCREEN) {
 
     // TEMP this can be removed when we are sure the states are progressed
@@ -377,23 +384,32 @@ void ofApp::draw() {
     // END TEMP
 
     ofBackground(0);
+
     ofSetColor(255);
+    while (endScreen.scroll_position > endScreen.max_scroll_position) {
+      endScreen.scroll_position -= endScreen.max_scroll_position;
+    }
 
-    float x = endScreen.left_margin;
-    float y = endScreen.left_margin - endScreen.scroll_position;
-    y = drawEndScreenCard(x, y, imageFbo, roundedCornersMaskFbo,
-                          vector<string>{"#selfie", "#nofilter"});
-    y = drawEndScreenCard(x, y, codeDisplayFbo, roundedCornersMaskCodeFbo,
-                          vector<string>{"#code", "#loop", "#foreach"});
-    ostringstream halfNumPixels;
-    halfNumPixels << "#" << halfProcessedNumPixels << "loops";
-    y = drawEndScreenCard(x, y, halfFilteredImageFbo, roundedCornersMaskFbo,
-                          vector<string>{halfNumPixels.str(), "#filter"});
-    y = drawEndScreenCard(x, y, filteredImageFbo, roundedCornersMaskFbo,
-                          vector<string>{"#behindthefilter"});
-
-    endScreen.max_scroll_position =
-        y + endScreen.scroll_position - ofGetHeight() + endScreen.left_margin;
+    x = endScreen.left_margin;
+    y = endScreen.left_margin - endScreen.scroll_position;
+    int i = 0;
+    while (y < ofGetHeight()) {
+      y = drawEndScreenCard(x, y, imageFbo, roundedCornersMaskFbo,
+                            vector<string>{"#selfie", "#nofilter"});
+      y = drawEndScreenCard(x, y, codeDisplayFbo, roundedCornersMaskCodeFbo,
+                            vector<string>{"#code", "#loop", "#foreach"});
+      ostringstream halfNumPixels;
+      halfNumPixels << "#" << halfProcessedNumPixels << "loops";
+      y = drawEndScreenCard(x, y, halfFilteredImageFbo, roundedCornersMaskFbo,
+                            vector<string>{halfNumPixels.str(), "#filter"});
+      y = drawEndScreenCard(x, y, filteredImageFbo, roundedCornersMaskFbo,
+                            vector<string>{"#behindthefilter"});
+      if (i == 0) {
+        endScreen.max_scroll_position = y + endScreen.scroll_position -
+                                        ofGetHeight() + endScreen.left_margin;
+      }
+    }
+    top_text << "for|each: thank you for applying a filter";
 
     // float camZoom =
     //     (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth()) * 0.8;
@@ -427,6 +443,21 @@ void ofApp::draw() {
     // endScreenFont.drawString(s.str(), camPos.x,
     //                          (ofGetHeight() - camPos.y) * 0.5 + camPos.y);
   }
+
+  // Draw header
+  ofSetColor(0);
+  ofDrawRectangle(0, 0, ofGetWidth(), black_bar_height);
+
+  ofSetColor(255);
+  float height = titleFont.getLineHeight() * 1.5;
+  float width =
+      icons.foreach_icon.getWidth() * (height / icons.foreach_icon.getHeight());
+  y = black_bar_height * 0.5 - (height * 0.5);
+  x = left_margin;
+  icons.foreach_icon.draw(x, y, width, height);
+  titleFont.drawString(top_text.str(), left_margin + width + left_margin,
+                       black_bar_height * 0.5 +
+                           titleFont.getLineHeight() * 0.3);
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
 
   // gui.draw();
