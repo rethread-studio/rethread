@@ -11,7 +11,7 @@ void ofApp::setup() {
 
   numberFont.load("fonts/Millimetre-Regular_web.ttf", 50);
   endScreenFont.load("fonts/Millimetre-Light_web.ttf", 25);
-  traceFont.load("fonts/Millimetre-Light_web.ttf", 10);
+  traceFont.load("fonts/Noto Mono Nerd Font Complete.ttf", 10);
 
   ofSetVerticalSync(true);
   ofEnableAlphaBlending();
@@ -45,17 +45,20 @@ void ofApp::setup() {
   }
 
   executionCode =
-      vector<string>{"Color original_color =  image[pixel].rgb;",
-                     "let brightness = luma(orignal_color);",
-                     "Color purple = rgb(1.0, 0.2, 0.7);",
-                     "Color blue = rgb(0.1, 0.7, 1.2);",
-                     "let linear_brightness = (luma + gain).pow(exponent);",
-                     "Color new_color;",
-                     "new_color = mix(blue, purple, linear_brightness);",
-                     "new_color *= (luma + 0.1).pow(1.5) + 0.1;",
-                     "image[pixel] = new_color;",
-                     "pixel = pixel + 1;",
-                     "--------------------------------------"};
+      vector<string>{" ---",
+                     "|   |",
+                     "| Color original_color =  image[pixel].rgb;",
+                     "| let brightness = luma(orignal_color);",
+                     "| Color purple = rgb(1.0, 0.2, 0.7);",
+                     "| Color blue = rgb(0.1, 0.7, 1.2);",
+                     "| let linear_brightness = (luma + gain).pow(exponent);",
+                     "| Color new_color;",
+                     "| new_color = mix(blue, purple, linear_brightness);",
+                     "| new_color *= (luma + 0.1).pow(1.5) + 0.1;",
+                     "| image[pixel] = new_color;",
+                     "| pixel = pixel + 1;",
+                     "|   ^",
+                     "°---| "};
 }
 
 //--------------------------------------------------------------
@@ -63,12 +66,12 @@ void ofApp::update() { checkOscMessages(); }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-  ofSetColor(0, 6);
-  ofRect(0, 0, ofGetWidth(), ofGetHeight());
-  ofSetColor(255);
   // drawBinaryData();
   if (state == State::IDLE || state == State::COUNTDOWN) {
-    numberFont.drawString("IDLE", ofGetWidth() * 0.75, ofGetHeight() * 0.9);
+    ofSetColor(0, 255);
+    ofRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(255);
+    // numberFont.drawString("IDLE", ofGetWidth() * 0.75, ofGetHeight() * 0.9);
     executionTrace.push_back(executionCode[executionCodeCurrentIndex]);
     executionCodeCurrentIndex =
         (executionCodeCurrentIndex + 1) % executionCode.size();
@@ -76,25 +79,35 @@ void ofApp::draw() {
     if (state == State::COUNTDOWN) {
     }
   } else if (state == State::TRANSITION) {
-    numberFont.drawString("TRANSITION", ofGetWidth() * 0.75,
-                          ofGetHeight() * 0.9);
+    // numberFont.drawString("TRANSITION", ofGetWidth() * 0.75,
+    //                       ofGetHeight() * 0.9);
+    ofSetColor(0, 6);
+    ofRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(255);
     drawBinaryData();
   } else if (state == State::APPLY_FILTER) {
-    numberFont.drawString("APPLY FILTER", ofGetWidth() * 0.75,
-                          ofGetHeight() * 0.9);
+    ofSetColor(0, 255);
+    ofRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(255);
+    // numberFont.drawString("APPLY FILTER", ofGetWidth() * 0.75,
+    //                       ofGetHeight() * 0.9);
     drawExecutionTrace();
   } else if (state == State::END_SCREEN) {
-    numberFont.drawString("END_SCREEN", ofGetWidth() * 0.75,
-                          ofGetHeight() * 0.9);
+    ofSetColor(0, 6);
+    ofRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(255);
+    // numberFont.drawString("END_SCREEN", ofGetWidth() * 0.75,
+    //                       ofGetHeight() * 0.9);
     drawBinaryData();
   }
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
-  if (executionTrace.size() > maxNumExecutionTraceLines) {
-    executionTrace.clear();
-    executionTraceColumn++;
-    if (executionTraceColumn >= numExecutionTraceColumns) {
-      executionTraceColumn = 0;
-    }
+  while (executionTrace.size() > maxNumExecutionTraceLines) {
+    executionTrace.erase(executionTrace.begin());
+    // executionTrace.clear();
+    // executionTraceColumn++;
+    // if (executionTraceColumn >= numExecutionTraceColumns) {
+    //   executionTraceColumn = 0;
+    // }
   }
 
   // gui.draw();
@@ -133,9 +146,10 @@ void ofApp::drawExecutionTrace() {
   maxNumExecutionTraceLines =
       (ofGetHeight() - (text_margin * 2)) / traceFont.getLineHeight();
 
-  float x = text_margin + (ofGetWidth() - text_margin * 2) *
-                              (1.0 / numExecutionTraceColumns) *
-                              executionTraceColumn;
+  // float x = text_margin + (ofGetWidth() - text_margin * 2) *
+  //                             (1.0 / numExecutionTraceColumns) *
+  //                             executionTraceColumn;
+  float x = ofGetWidth() * 0.3;
   float y = text_margin;
   for (int i = 0; i < executionTrace.size(); i++) {
     auto &s = executionTrace[i];
@@ -182,6 +196,7 @@ void ofApp::checkOscMessages() {
           transitionData.startTime = ofGetElapsedTimef();
           // send image resolution to the server
         } else if (it->second == State::APPLY_FILTER) {
+          executionTrace.clear();
           applyFilterData.pixelsProcessed = 0;
           applyFilterData.instructionsPerformed = 0;
           executionTraceColumn = 0;
@@ -196,9 +211,10 @@ void ofApp::checkOscMessages() {
       applyFilterData.pixelsProcessed = m.getArgAsInt(0);
     } else if (m.getAddress() == "/instructions_performed") {
       applyFilterData.instructionsPerformed = m.getArgAsInt(0);
-      for (int i = 0; i < 10; i++)
-        executionTrace.push_back(
-            executionCode[ofRandom(0, executionCode.size() - 1)]);
+
+      executionTrace.push_back(executionCode[executionCodeCurrentIndex]);
+      executionCodeCurrentIndex =
+          (executionCodeCurrentIndex + 1) % executionCode.size();
     }
     // check for an image being sent
     // note: the size of the image depends greatly on your network buffer

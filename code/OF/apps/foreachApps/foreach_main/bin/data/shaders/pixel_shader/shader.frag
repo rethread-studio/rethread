@@ -8,6 +8,7 @@ uniform vec2 resolution;
 uniform vec2 outputResolution;
 uniform float zoom;
 uniform float alpha;
+uniform float invertY;
 
 in vec2 texCoordVarying;
 
@@ -18,12 +19,20 @@ out vec4 outputColor;
 void main()
 {
 	vec2 st = ((gl_FragCoord.xy/outputResolution)-0.5);
-  st.y *= -1.0;
+  st.y = ((st.y * -1.0) * invertY) + (st.y * (1.0 - invertY));
   st *= outputResolution;
-  vec2 imageSize = resolution * zoom;
+  float zoom2 = outputResolution.y/resolution.y + zoom;
+  vec2 imageSize = resolution * zoom2;
   st += imageSize * 0.5;
-  st /= zoom;
+  st /= zoom2;
 	vec2 texCoord = st;
+	// vec2 st = ((gl_FragCoord.xy/outputResolution)-0.5);
+  // st.y = ((st.y * -1.0) * invertY) + (st.y * (1.0 - invertY));
+  // st *= outputResolution;
+  // vec2 imageSize = resolution * zoom;
+  // st += imageSize * 0.5;
+  // st /= zoom;
+	// vec2 texCoord = st;
   vec3 color = texture(tex0, texCoord).rgb;
 
   float fx = fract(texCoord.x);

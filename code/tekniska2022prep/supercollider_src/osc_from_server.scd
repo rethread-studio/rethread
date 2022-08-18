@@ -11,7 +11,7 @@
 				var sig, env, freq = ~s53.degreeToFreq(degree, 36.midicps, 0);
 
 				freq = freq * (Line.kr(0, 30, 2).floor + 1);
-				sig = Pulse.ar(freq) * 0.07;
+				sig = Pulse.ar(freq) * 0.17;
 				sig = sig * Env.perc(1.0, 1.0).kr(2);
 				sig = Pan2.ar(sig, 0.0);
 				Out.ar(~revBus, sig);
@@ -40,8 +40,64 @@
 	}.play;
 };
 
+OSCdef(\foreach_countdown, {|msg, time, addr, recvPort|
+				Synth(\sine, [\freq, 1000, \amp, 0.2 , \atk, 0.005, \sus, 0.12, \rel, 0.01, \out, 0 ]);
+}, \countdown);
+
+OSCdef(\foreach_transition, {|msg, time, addr, recvPort|
+	var state = msg[1];
+
+	if(state == \apply_filter, {
+		// ~next_filter.();
+		~crank_activated = true;
+	});
+	if(state == \end_screen, {
+			~sonifySuccess.();
+		~crank_activated = false;
+
+	});
+	if(state == \countdown, {
+		~sonifyButton.();
+	});
+	if(state == \transition_to_filter, {
+		// when the picture is taken
+		Synth(\sine, [\freq, 2000, \amp, 0.2 , \atk, 0.005, \sus, 0.12, \rel, 0.01, \out, 0 ]);
+		Synth(\play_buffer, [\buf, ~bufs.camera_shutter, \amp, 1.0]);
+		{
+			var tick_time = 0.01, num_ticks = 7.0/tick_time;
+			num_ticks.do{ |i|
+				var speed = 1.0 - (i / num_ticks);
+
+				~zoom_setting = speed;
+				~freq_ratio = (1.0 - ~zoom_setting) .pow(2)* 0.8 + 0.2;
+				~last_zoom_update = Date.localtime.rawSeconds;
+				tick_time.wait;
+			};
+		}.fork;
+	});
+}, \transition_to_state);
+
+OSCdef(\foreach_step, {|msg, time, addr, recvPort|
+	msg.postln;
+				// [current_index, total_number_of_step]
+			if(msg[1] != nil, {
+				var total_number_of_steps = msg[1].asFloat,
+				steps_since_last = total_number_of_steps - ~last_total_number_of_step,
+				now = Date.localtime.rawSeconds,
+				time_since_last = now - ~last_crank_update;
+				~crank_speed = steps_since_last / time_since_last;
+				// ("crank_speed: " + ~crank_speed).postln;
+				~last_crank_update = Date.localtime.rawSeconds;
+				if(~crank_activated == false, {
+					Synth(\sine, [\freq, rrand(3000, 3100), \amp, 0.1, \sus, 0.0, \atk, 0.001]);
+				});
+			});
+}, \step);
+
+// old:
 OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 	var type = msg[1];
+	msg.postln;
 
 	switch(type,
 		\SPEED1_BUTTON_ON, {~speed1.();},
@@ -52,7 +108,7 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 		\SPEED3_BUTTON_OFF, {},
 		\RESET_BUTTON_ON, {},
 		\RESET_BUTTON_OFF, {},
-		\timer, {
+		\countdown, {
 			// a countdown beep
 			Synth(\sine, [\freq, 1000, \amp, 0.2 , \atk, 0.005, \sus, 0.12, \rel, 0.01, \out, 0 ]);
 		},
@@ -61,19 +117,32 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 			Synth(\sine, [\freq, 2000, \amp, 0.2 , \atk, 0.005, \sus, 0.12, \rel, 0.01, \out, 0 ]);
 			Synth(\play_buffer, [\buf, ~bufs.camera_shutter, \amp, 1.0]);
 		},
+		\transition_to_state, {
+			var state = msg[2];
+			if(state == \apply_filter, {
+				~next_filter.();
+			});
+			if(state == \end_screen, {
+				~filter_finished.();
+			});
+			if(state == \transition_to_filter, {
+				{
+					var tick_time = 0.01, num_ticks = 7.0/tick_time;
+					num_ticks.do{ |i|
+						var speed = 1.0 - (i / num_ticks);
+
+						~zoom_setting = speed;
+						~freq_ratio = (1.0 - ~zoom_setting) .pow(2)* 0.8 + 0.2;
+						~last_zoom_update = Date.localtime.rawSeconds;
+						tick_time.wait;
+					};
+				}.fork;
+			});
+
+		},
 		\IDLE, {},
 		\NEW_FILTER, { ~next_filter.(); },
 		\DONE, { ~filter_finished.()}, // One filter application has completed
-		\previous, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds;
-			if(~crank_activated == false, {
-					Synth(\sine, [\freq, rrand(3000, 3200), \amp, 0.05, \sus, 0.0, \atk, 0.1]);
-				});
-		},
-		\next, { ~crank_speed = msg[2].asFloat; ~last_crank_update = Date.localtime.rawSeconds;
-			if(~crank_activated == false, {
-					Synth(\sine, [\freq, rrand(3000, 3200), \amp, 0.05, \sus, 0.0, \atk, 0.1]);
-				});
-		},
 		\step, {
 			// [current_index, total_number_of_step]
 			if(msg[3] != nil, {
@@ -133,10 +202,10 @@ OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 			~zoom_setting = msg[2].asFloat/1000.0;
 			~freq_ratio = (1.0 - ~zoom_setting) .pow(2)* 0.8 + 0.2;
 			("freq_ratio:" + ~freq_ratio).postln;
-						~last_zoom_update = Date.localtime.rawSeconds;
+			~last_zoom_update = Date.localtime.rawSeconds;
 
 		},
 		{("unhandeled: " + msg).postln;}
 	);
 
-}, '/foreach'); // def style
+}, nil); // def style

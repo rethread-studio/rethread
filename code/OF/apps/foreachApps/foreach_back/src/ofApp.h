@@ -69,7 +69,7 @@ public:
   int executionCodeCurrentIndex = 0;
   vector<string> executionTrace;
   int executionTraceColumn = 0;
-  int numExecutionTraceColumns = 3;
+  int numExecutionTraceColumns = 1;
   int maxNumExecutionTraceLines = 0;
   vector<BinaryChar> binaryData;
 
