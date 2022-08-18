@@ -429,38 +429,6 @@ void ofApp::draw() {
     if (timeToTimeout < 6.0) {
       bottom_text << "Restarting in " << timeToTimeout << " seconds";
     }
-
-    // float camZoom =
-    //     (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth()) * 0.8;
-    // float margin = imageFbo.getWidth() * 0.05;
-    // glm::vec2 r =
-    //     glm::vec2(imageFbo.getWidth() * camZoom + (margin * 2),
-    //     ofGetHeight());
-    // ofDrawRectangle((ofGetWidth() - r.x) * 0.5, (ofGetHeight() - r.y) * 0.5,
-    //                 r.x, r.y);
-    // // draw unaltered image
-    // glm::vec2 camPos =
-    //     glm::vec2((ofGetWidth() - imageFbo.getWidth() * camZoom) * 0.5,
-    //     margin);
-    // imageFbo.draw(camPos.x, camPos.y, imageFbo.getWidth() * camZoom,
-    //               imageFbo.getHeight() * camZoom);
-    // camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
-    // filteredImageFbo.draw(camPos.x, camPos.y,
-    //                       filteredImageFbo.getWidth() * camZoom,
-    //                       filteredImageFbo.getHeight() * camZoom);
-    // camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
-
-    // // endScreenFont.drawString(
-    // //     "Du applicerade filtret på\nbilden genom att köra\n"
-    // //     "1 728 000 instruktioner!",
-    // //     50, ofGetHeight() * 0.5);
-    // ostringstream s;
-    // long pixels = imageFbo.getWidth() * imageFbo.getHeight();
-    // ofSetColor(0);
-    // s << "#" << pixels * 5 << " instruktioner     #" << pixels
-    //   << " pixlar\n#filter";
-    // endScreenFont.drawString(s.str(), camPos.x,
-    //                          (ofGetHeight() - camPos.y) * 0.5 + camPos.y);
   }
 
   // Draw header
