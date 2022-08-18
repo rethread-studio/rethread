@@ -84,6 +84,8 @@ public:
 
   ofParameter<float> idleMaxZoom = 50.0;
 
+  float timeToTimeout = 20.0;
+
   struct {
     int num = -1;
     float size = 0;
@@ -101,6 +103,7 @@ public:
 
   struct {
     long pixelsProcessed = 0;
+    long crankSteps = 0;
   } applyFilterData;
 
   struct {

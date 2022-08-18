@@ -180,6 +180,9 @@ void ofApp::draw() {
   ostringstream top_text;
   ostringstream bottom_text;
 
+  bottom_text.precision(2);
+  bottom_text << fixed;
+
   ofSetColor(255);
   if (state == State::IDLE || state == State::COUNTDOWN) {
     // Draw the live image on the imageFbo
@@ -334,16 +337,20 @@ void ofApp::draw() {
     // Draw stats
     ostringstream s;
     int loops = applyFilterData.pixelsProcessed;
+    int turns = float(applyFilterData.crankSteps) / 48.0;
     ofSetColor(255);
     if (loops == 0) {
       s << "#nofilter";
     } else {
-      s << "#" << loops << "loops";
+      s << "#" << loops << "loops #" << turns << "turns";
     }
     endScreenFont.drawString(s.str(), left_margin,
                              y + endScreenFont.getLineHeight());
 
     top_text << "for|each: loop through every pixel";
+    if (timeToTimeout < 6.0) {
+      bottom_text << "Restarting in " << timeToTimeout << " seconds";
+    }
   } else if (state == State::END_SCREEN) {
 
     // TEMP this can be removed when we are sure the states are progressed
@@ -411,6 +418,10 @@ void ofApp::draw() {
     }
     top_text << "for|each: thank you for applying a filter";
 
+    if (timeToTimeout < 6.0) {
+      bottom_text << "Restarting in " << timeToTimeout << " seconds";
+    }
+
     // float camZoom =
     //     (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth()) * 0.8;
     // float margin = imageFbo.getWidth() * 0.05;
@@ -457,6 +468,10 @@ void ofApp::draw() {
   icons.foreach_icon.draw(x, y, width, height);
   titleFont.drawString(top_text.str(), left_margin + width + left_margin,
                        black_bar_height * 0.5 +
+                           titleFont.getLineHeight() * 0.3);
+  float bottom_width = titleFont.stringWidth(bottom_text.str());
+  titleFont.drawString(bottom_text.str(), (ofGetWidth() - bottom_width) * 0.5,
+                       ofGetHeight() - black_bar_height * 0.5 +
                            titleFont.getLineHeight() * 0.3);
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
 
@@ -540,6 +555,7 @@ void ofApp::checkOscMessages() {
           sender.sendMessage(m, false);
         } else if (it->second == State::APPLY_FILTER) {
           applyFilterData.pixelsProcessed = 0;
+          applyFilterData.crankSteps = 0;
         } else if (it->second == State::END_SCREEN) {
           endScreen.scroll_position = 0;
           // Draw filtered image to fbo
@@ -585,8 +601,11 @@ void ofApp::checkOscMessages() {
       // }
     } else if (m.getAddress() == "/countdown") {
       countdownData.num = m.getArgAsInt(0);
+    } else if (m.getAddress() == "/timeout") {
+      timeToTimeout = m.getArgAsFloat(0);
     } else if (m.getAddress() == "/pixels_processed") {
       applyFilterData.pixelsProcessed = m.getArgAsInt(0);
+      applyFilterData.crankSteps = m.getArgAsInt(1);
     } else if (m.getAddress() == "/scroll") {
       endScreen.scroll_position += float(m.getArgAsInt(0) * 20);
       endScreen.scroll_position =
