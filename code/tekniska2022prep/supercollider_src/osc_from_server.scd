@@ -11,7 +11,7 @@
 				var sig, env, freq = ~s53.degreeToFreq(degree, 36.midicps, 0);
 
 				freq = freq * (Line.kr(0, 30, 2).floor + 1);
-				sig = Pulse.ar(freq) * 0.07;
+				sig = Pulse.ar(freq) * 0.17;
 				sig = sig * Env.perc(1.0, 1.0).kr(2);
 				sig = Pan2.ar(sig, 0.0);
 				Out.ar(~revBus, sig);
@@ -48,11 +48,13 @@ OSCdef(\foreach_transition, {|msg, time, addr, recvPort|
 	var state = msg[1];
 
 	if(state == \apply_filter, {
-		~next_filter.();
+		// ~next_filter.();
 		~crank_activated = true;
 	});
 	if(state == \end_screen, {
-		~filter_finished.();
+			~sonifySuccess.();
+		~crank_activated = false;
+
 	});
 	if(state == \countdown, {
 		~sonifyButton.();
@@ -92,6 +94,7 @@ OSCdef(\foreach_step, {|msg, time, addr, recvPort|
 			});
 }, \step);
 
+// old:
 OSCdef(\foreach_state, {|msg, time, addr, recvPort|
 	var type = msg[1];
 	msg.postln;
