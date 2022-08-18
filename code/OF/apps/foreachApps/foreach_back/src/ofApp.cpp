@@ -66,12 +66,12 @@ void ofApp::update() { checkOscMessages(); }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-  ofSetColor(0, 255);
-  ofRect(0, 0, ofGetWidth(), ofGetHeight());
-  ofSetColor(255);
   // drawBinaryData();
   if (state == State::IDLE || state == State::COUNTDOWN) {
-    numberFont.drawString("IDLE", ofGetWidth() * 0.75, ofGetHeight() * 0.9);
+    ofSetColor(0, 255);
+    ofRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(255);
+    // numberFont.drawString("IDLE", ofGetWidth() * 0.75, ofGetHeight() * 0.9);
     executionTrace.push_back(executionCode[executionCodeCurrentIndex]);
     executionCodeCurrentIndex =
         (executionCodeCurrentIndex + 1) % executionCode.size();
@@ -79,16 +79,25 @@ void ofApp::draw() {
     if (state == State::COUNTDOWN) {
     }
   } else if (state == State::TRANSITION) {
-    numberFont.drawString("TRANSITION", ofGetWidth() * 0.75,
-                          ofGetHeight() * 0.9);
+    // numberFont.drawString("TRANSITION", ofGetWidth() * 0.75,
+    //                       ofGetHeight() * 0.9);
+    ofSetColor(0, 6);
+    ofRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(255);
     drawBinaryData();
   } else if (state == State::APPLY_FILTER) {
-    numberFont.drawString("APPLY FILTER", ofGetWidth() * 0.75,
-                          ofGetHeight() * 0.9);
+    ofSetColor(0, 255);
+    ofRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(255);
+    // numberFont.drawString("APPLY FILTER", ofGetWidth() * 0.75,
+    //                       ofGetHeight() * 0.9);
     drawExecutionTrace();
   } else if (state == State::END_SCREEN) {
-    numberFont.drawString("END_SCREEN", ofGetWidth() * 0.75,
-                          ofGetHeight() * 0.9);
+    ofSetColor(0, 6);
+    ofRect(0, 0, ofGetWidth(), ofGetHeight());
+    ofSetColor(255);
+    // numberFont.drawString("END_SCREEN", ofGetWidth() * 0.75,
+    //                       ofGetHeight() * 0.9);
     drawBinaryData();
   }
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
@@ -137,9 +146,10 @@ void ofApp::drawExecutionTrace() {
   maxNumExecutionTraceLines =
       (ofGetHeight() - (text_margin * 2)) / traceFont.getLineHeight();
 
-  float x = text_margin + (ofGetWidth() - text_margin * 2) *
-                              (1.0 / numExecutionTraceColumns) *
-                              executionTraceColumn;
+  // float x = text_margin + (ofGetWidth() - text_margin * 2) *
+  //                             (1.0 / numExecutionTraceColumns) *
+  //                             executionTraceColumn;
+  float x = ofGetWidth() * 0.3;
   float y = text_margin;
   for (int i = 0; i < executionTrace.size(); i++) {
     auto &s = executionTrace[i];
@@ -186,6 +196,7 @@ void ofApp::checkOscMessages() {
           transitionData.startTime = ofGetElapsedTimef();
           // send image resolution to the server
         } else if (it->second == State::APPLY_FILTER) {
+          executionTrace.clear();
           applyFilterData.pixelsProcessed = 0;
           applyFilterData.instructionsPerformed = 0;
           executionTraceColumn = 0;
