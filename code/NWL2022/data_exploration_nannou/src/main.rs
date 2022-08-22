@@ -106,6 +106,14 @@ struct Model {
     zoom: f32,
     offset: f32,
     class_colors: HashMap<String, Hsla>,
+    method_colors: HashMap<String, Hsla>,
+    color_source: ColorSource,
+}
+
+#[derive(Debug)]
+enum ColorSource {
+    Method,
+    Class,
 }
 
 fn model(app: &App) -> Model {
@@ -148,6 +156,7 @@ fn model(app: &App) -> Model {
 
     let mut max_depth = 0;
     let mut class_colors = HashMap::new();
+    let mut method_colors = HashMap::new();
     let mut rng = thread_rng();
     for call in &trace {
         if call.call_depth > max_depth {
@@ -155,6 +164,9 @@ fn model(app: &App) -> Model {
         }
         class_colors
             .entry(call.class.clone())
+            .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+        method_colors
+            .entry(call.method.clone())
             .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
     }
 
@@ -164,6 +176,8 @@ fn model(app: &App) -> Model {
         zoom: 1.0,
         offset: 0.0,
         class_colors,
+        method_colors,
+        color_source: ColorSource::Class,
     };
     println!("model: {m:?}");
     m
@@ -204,7 +218,10 @@ fn view(app: &App, model: &Model, frame: Frame) {
     if true {
         let mut lines = vec![];
         for (i, call) in model.trace.iter().enumerate() {
-            let color = model.class_colors.get(&call.class).unwrap().clone();
+            let color = match model.color_source {
+                ColorSource::Method => model.method_colors.get(&call.method).unwrap().clone(),
+                ColorSource::Class => model.class_colors.get(&call.class).unwrap().clone(),
+            };
             lines.push((
                 pt2(
                     win.left() + i as f32 * call_w - offset_x,
@@ -232,7 +249,187 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
 fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     match event {
-        KeyPressed(_key) => {}
+        KeyPressed(key) => match key {
+            Key::Key1 => todo!(),
+            Key::Key2 => todo!(),
+            Key::Key3 => todo!(),
+            Key::Key4 => todo!(),
+            Key::Key5 => todo!(),
+            Key::Key6 => todo!(),
+            Key::Key7 => todo!(),
+            Key::Key8 => todo!(),
+            Key::Key9 => todo!(),
+            Key::Key0 => todo!(),
+            Key::A => todo!(),
+            Key::B => todo!(),
+            Key::C => model.color_source = ColorSource::Class,
+            Key::D => todo!(),
+            Key::E => todo!(),
+            Key::F => todo!(),
+            Key::G => todo!(),
+            Key::H => todo!(),
+            Key::I => todo!(),
+            Key::J => todo!(),
+            Key::K => todo!(),
+            Key::L => todo!(),
+            Key::M => model.color_source = ColorSource::Method,
+            Key::N => todo!(),
+            Key::O => todo!(),
+            Key::P => todo!(),
+            Key::Q => todo!(),
+            Key::R => {
+                println!("Rerandomising colors");
+                model.class_colors.clear();
+                model.method_colors.clear();
+
+                let mut rng = thread_rng();
+                for call in &model.trace {
+                    model
+                        .class_colors
+                        .entry(call.class.clone())
+                        .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+                    model
+                        .method_colors
+                        .entry(call.method.clone())
+                        .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+                }
+            }
+            Key::S => todo!(),
+            Key::T => todo!(),
+            Key::U => todo!(),
+            Key::V => todo!(),
+            Key::W => todo!(),
+            Key::X => todo!(),
+            Key::Y => todo!(),
+            Key::Z => todo!(),
+            Key::Escape => todo!(),
+            Key::F1 => todo!(),
+            Key::F2 => todo!(),
+            Key::F3 => todo!(),
+            Key::F4 => todo!(),
+            Key::F5 => todo!(),
+            Key::F6 => todo!(),
+            Key::F7 => todo!(),
+            Key::F8 => todo!(),
+            Key::F9 => todo!(),
+            Key::F10 => todo!(),
+            Key::F11 => todo!(),
+            Key::F12 => todo!(),
+            Key::F13 => todo!(),
+            Key::F14 => todo!(),
+            Key::F15 => todo!(),
+            Key::F16 => todo!(),
+            Key::F17 => todo!(),
+            Key::F18 => todo!(),
+            Key::F19 => todo!(),
+            Key::F20 => todo!(),
+            Key::F21 => todo!(),
+            Key::F22 => todo!(),
+            Key::F23 => todo!(),
+            Key::F24 => todo!(),
+            Key::Snapshot => todo!(),
+            Key::Scroll => todo!(),
+            Key::Pause => todo!(),
+            Key::Insert => todo!(),
+            Key::Home => todo!(),
+            Key::Delete => todo!(),
+            Key::End => todo!(),
+            Key::PageDown => todo!(),
+            Key::PageUp => todo!(),
+            Key::Left => todo!(),
+            Key::Up => todo!(),
+            Key::Right => todo!(),
+            Key::Down => todo!(),
+            Key::Back => todo!(),
+            Key::Return => todo!(),
+            Key::Space => todo!(),
+            Key::Compose => todo!(),
+            Key::Caret => todo!(),
+            Key::Numlock => todo!(),
+            Key::Numpad0 => todo!(),
+            Key::Numpad1 => todo!(),
+            Key::Numpad2 => todo!(),
+            Key::Numpad3 => todo!(),
+            Key::Numpad4 => todo!(),
+            Key::Numpad5 => todo!(),
+            Key::Numpad6 => todo!(),
+            Key::Numpad7 => todo!(),
+            Key::Numpad8 => todo!(),
+            Key::Numpad9 => todo!(),
+            Key::NumpadAdd => todo!(),
+            Key::NumpadDivide => todo!(),
+            Key::NumpadDecimal => todo!(),
+            Key::NumpadComma => todo!(),
+            Key::NumpadEnter => todo!(),
+            Key::NumpadEquals => todo!(),
+            Key::NumpadMultiply => todo!(),
+            Key::NumpadSubtract => todo!(),
+            Key::AbntC1 => todo!(),
+            Key::AbntC2 => todo!(),
+            Key::Apostrophe => todo!(),
+            Key::Apps => todo!(),
+            Key::Asterisk => todo!(),
+            Key::At => todo!(),
+            Key::Ax => todo!(),
+            Key::Backslash => todo!(),
+            Key::Calculator => todo!(),
+            Key::Capital => todo!(),
+            Key::Colon => todo!(),
+            Key::Comma => todo!(),
+            Key::Convert => todo!(),
+            Key::Equals => todo!(),
+            Key::Grave => todo!(),
+            Key::Kana => todo!(),
+            Key::Kanji => todo!(),
+            Key::LAlt => todo!(),
+            Key::LBracket => todo!(),
+            Key::LControl => todo!(),
+            Key::LShift => todo!(),
+            Key::LWin => todo!(),
+            Key::Mail => todo!(),
+            Key::MediaSelect => todo!(),
+            Key::MediaStop => todo!(),
+            Key::Minus => todo!(),
+            Key::Mute => todo!(),
+            Key::MyComputer => todo!(),
+            Key::NavigateForward => todo!(),
+            Key::NavigateBackward => todo!(),
+            Key::NextTrack => todo!(),
+            Key::NoConvert => todo!(),
+            Key::OEM102 => todo!(),
+            Key::Period => todo!(),
+            Key::PlayPause => todo!(),
+            Key::Plus => todo!(),
+            Key::Power => todo!(),
+            Key::PrevTrack => todo!(),
+            Key::RAlt => todo!(),
+            Key::RBracket => todo!(),
+            Key::RControl => todo!(),
+            Key::RShift => todo!(),
+            Key::RWin => todo!(),
+            Key::Semicolon => todo!(),
+            Key::Slash => todo!(),
+            Key::Sleep => todo!(),
+            Key::Stop => todo!(),
+            Key::Sysrq => todo!(),
+            Key::Tab => todo!(),
+            Key::Underline => todo!(),
+            Key::Unlabeled => todo!(),
+            Key::VolumeDown => todo!(),
+            Key::VolumeUp => todo!(),
+            Key::Wake => todo!(),
+            Key::WebBack => todo!(),
+            Key::WebFavorites => todo!(),
+            Key::WebForward => todo!(),
+            Key::WebHome => todo!(),
+            Key::WebRefresh => todo!(),
+            Key::WebSearch => todo!(),
+            Key::WebStop => todo!(),
+            Key::Yen => todo!(),
+            Key::Copy => todo!(),
+            Key::Paste => todo!(),
+            Key::Cut => todo!(),
+        },
         KeyReleased(_key) => {}
         ReceivedCharacter(_char) => {}
         MouseMoved(pos) => {
