@@ -1,6 +1,9 @@
-use std::fs;
+use std::{collections::HashMap, fs, hash::Hash};
 
-use nannou::prelude::*;
+use nannou::{
+    prelude::*,
+    rand::{thread_rng, Rng},
+};
 use serde::{Deserialize, Serialize};
 
 mod calltrace {
@@ -17,17 +20,19 @@ mod calltrace {
         sequence::tuple,
         IResult,
     };
-    enum Direction {
+    #[derive(Debug)]
+    pub enum Direction {
         In,
         Out,
     }
+    #[derive(Debug)]
     pub struct Call {
-        direction: Direction,
-        call_depth: u32,
-        thread_id: u32,
-        class: String,
-        method: String,
-        timestamp: u64,
+        pub direction: Direction,
+        pub call_depth: u32,
+        pub thread_id: u32,
+        pub class: String,
+        pub method: String,
+        pub timestamp: u64,
     }
     fn direction(input: &str) -> IResult<&str, &str> {
         alt((tag("<"), tag(">")))(input)
@@ -94,8 +99,13 @@ fn main() {
         .run();
 }
 
+#[derive(Debug)]
 struct Model {
     trace: Vec<calltrace::Call>,
+    max_depth: u32,
+    zoom: f32,
+    offset: f32,
+    class_colors: HashMap<String, Hsla>,
 }
 
 fn model(app: &App) -> Model {
@@ -136,7 +146,27 @@ fn model(app: &App) -> Model {
     }
     println!("num calls: {}", trace.len());
 
-    Model { trace }
+    let mut max_depth = 0;
+    let mut class_colors = HashMap::new();
+    let mut rng = thread_rng();
+    for call in &trace {
+        if call.call_depth > max_depth {
+            max_depth = call.call_depth;
+        }
+        class_colors
+            .entry(call.class.clone())
+            .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+    }
+
+    let m = Model {
+        trace,
+        max_depth,
+        zoom: 1.0,
+        offset: 0.0,
+        class_colors,
+    };
+    println!("model: {m:?}");
+    m
 }
 
 fn event(_app: &App, _model: &mut Model, event: Event) {
@@ -155,16 +185,60 @@ fn event(_app: &App, _model: &mut Model, event: Event) {
 
 fn update(_app: &App, _model: &mut Model, _update: Update) {}
 
-fn view(_app: &App, _model: &Model, frame: Frame) {
-    frame.clear(SKYBLUE);
+fn view(app: &App, model: &Model, frame: Frame) {
+    frame.clear(BLACK);
+
+    let draw = app.draw();
+
+    let zoom_x = 10.;
+    let zoom_x = model.zoom;
+
+    let win = app.window_rect();
+    let call_w = win.w() / model.trace.len() as f32 * zoom_x;
+    // let offset_x =
+    //     (app.elapsed_frames() as f32 / 500.0) % 1.0 * call_w * model.trace.len() as f32 - win.w();
+    let offset_x = model.offset * call_w * model.trace.len() as f32 - win.w();
+    let mut y = win.bottom() + win.h() * 0.02;
+    let depth_height = (win.h() / model.max_depth as f32) * 0.5;
+
+    if true {
+        let mut lines = vec![];
+        for (i, call) in model.trace.iter().enumerate() {
+            let color = model.class_colors.get(&call.class).unwrap().clone();
+            lines.push((
+                pt2(
+                    win.left() + i as f32 * call_w - offset_x,
+                    y + depth_height * call.call_depth as f32,
+                ),
+                color,
+            ));
+        }
+        draw.polyline().points_colored(lines);
+    } else {
+        let mut lines = vec![];
+        for (i, call) in model.trace.iter().enumerate() {
+            lines.push(pt2(
+                win.left() + i as f32 * call_w - offset_x,
+                y + depth_height * call.call_depth as f32,
+            ));
+        }
+        draw.polyline()
+            .color(hsla(0.0, 1.0, 0.7, 0.8))
+            .points(lines);
+    }
+
+    draw.to_frame(app, &frame).unwrap();
 }
 
-fn window_event(_app: &App, _model: &mut Model, event: WindowEvent) {
+fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     match event {
         KeyPressed(_key) => {}
         KeyReleased(_key) => {}
         ReceivedCharacter(_char) => {}
-        MouseMoved(_pos) => {}
+        MouseMoved(pos) => {
+            model.zoom = (pos.y / app.window_rect().h() + 0.5) * 100.0;
+            model.offset = pos.x / app.window_rect().w() + 0.5;
+        }
         MousePressed(_button) => {}
         MouseReleased(_button) => {}
         MouseEntered => {}
