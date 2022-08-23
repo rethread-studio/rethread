@@ -172,12 +172,12 @@ s.waitForBoot({
 
 	{
 		loop {
-			~main_glitch.set(\lag_time, 0.2);
+			~main_glitch.set(\lag_time, rrand(2.2, 10.5));
 			~main_glitch.set(\enable_pitch_shift, 1);
 			~main_glitch.set(\pitch_shift_ratio, [1, 2, 3].choose);
 			~main_glitch.set(\pitch_dispersion, exprand(0.00001, 0.01));
 			~main_glitch.set(\time_dispersion, rrand(0.0, 0.3).pow(2));
-			(21 - exprand(0.5, 20.0)).wait;
+			(16 - exprand(0.5, 15.0)).wait;
 		}
 	}.fork;
 

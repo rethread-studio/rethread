@@ -54,6 +54,10 @@ SynthDef(\background_channel, {
 
 	sig = AnalogVintageDistortion.ar(sig * 0.3, 0.1, 0.0, lowgain: 0.01, highgain: 0.1, oversample: 1);
 	sig = BPeakEQ.ar(sig, 5000, 1.0, 4.0);
+	sig = BPeakEQ.ar(sig, 10000, 1.0, -10.0);
+	sig = BPeakEQ.ar(sig, 500, 1.0, -4.0);
+	sig = BPeakEQ.ar(sig, 130, 1.0, 3.0);
+	sig = BPeakEQ.ar(sig, 40, 1.0, -9.0);
 
 
 	Out.ar(\out.kr(0), sig);
