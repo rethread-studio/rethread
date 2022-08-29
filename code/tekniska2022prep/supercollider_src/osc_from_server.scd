@@ -4,19 +4,20 @@
 ~last_zoom_update = 0;
 
 ~sonifySuccess = {
-	var chord = [-53, -22, 53, 9+53, 22+53, 31+53] + ~transposition;
+	var chord = [-53, -22, 53, 9+53, 22+53, 31+53] + (~transposition % 53);
 	fork{
 		chord.do{ | degree|
 			{
-				var sig, env, freq = ~s53.degreeToFreq(degree, 36.midicps, 0);
+				var sig, env, freq = ~s53.degreeToFreq(degree, 24.midicps, 0);
 
-				freq = freq * (Line.kr(0, 30, 2).floor + 1);
+				//freq = freq * (Line.kr(1, 30, 3).floor) * 0.5;
+				freq = freq * (EnvGen.kr(Env([1, 30], [2.5], curve:0.7)).floor) * 0.5;
 				sig = Pulse.ar(freq) * 0.17;
-				sig = sig * Env.perc(1.0, 1.0).kr(2);
+				sig = sig * Env.perc(1.0, 2.0).kr(2);
 				sig = Pan2.ar(sig, 0.0);
 				Out.ar(~revBus, sig);
 			}.play;
-			0.3.wait;
+			0.4.wait;
 		};
 	};
 };
@@ -57,7 +58,7 @@ OSCdef(\foreach_transition, {|msg, time, addr, recvPort|
 
 	});
 	if(state == \countdown, {
-		~sonifyButton.();
+		// ~sonifyButton.();
 	});
 	if(state == \transition_to_filter, {
 		// when the picture is taken
