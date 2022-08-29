@@ -77,6 +77,7 @@ void ofApp::setup() {
   filteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
   halfFilteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
   roundedCornersMaskFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+  easterEggFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
   ofImage codeImg;
   codeImg.load("code_image.jpg");
   codeDisplayFbo.allocate(imageFbo.getWidth(),
@@ -258,7 +259,7 @@ void ofApp::draw() {
       numberFont.drawString(s.str(), (ofGetWidth() - w) * 0.5,
                             (ofGetHeight() + h * 0.75) * 0.5);
     }
-    top_text << "for|each: take a selfie";
+    top_text << "for|each  take a selfie";
     // bottom bar
     ofSetColor(0);
     ofDrawRectangle(0, ofGetHeight() - black_bar_height, ofGetWidth(),
@@ -321,7 +322,7 @@ void ofApp::draw() {
       ofDrawEllipse(x, y, dotSize, dotSize);
       x += dotSize + dotMargin;
     }
-    top_text << "for|each: loading pixels...";
+    top_text << "for|each  loading pixels...";
   } else if (state == State::APPLY_FILTER) {
     endScreenFbo.begin();
 
@@ -419,12 +420,17 @@ void ofApp::draw() {
                             vector<string>{halfNumPixels.str(), "#filter"});
       y = drawEndScreenCard(x, y, filteredImageFbo, roundedCornersMaskFbo,
                             vector<string>{"#behindthefilter"});
+      if (endScreen.display_easter_egg) {
+        y = drawEndScreenCard(
+            x, y, easterEggFbo, roundedCornersMaskFbo,
+            vector<string>{"#behindbehindthefilter", "#hidden"});
+      }
       if (i == 0) {
         endScreen.max_scroll_position = y + endScreen.scroll_position -
                                         ofGetHeight() + endScreen.left_margin;
       }
     }
-    top_text << "for|each: thank you for applying a filter";
+    top_text << "thank you for applying a filter";
 
     if (timeToTimeout < 6.0) {
       bottom_text << "Restarting in " << timeToTimeout << " seconds";
@@ -546,6 +552,7 @@ void ofApp::checkOscMessages() {
           applyFilterData.crankSteps = 0;
         } else if (it->second == State::END_SCREEN) {
           endScreen.scroll_position = 0;
+          endScreen.display_easter_egg = false;
           endScreenFade = 255.0;
           // Draw filtered image to fbo
           filteredImageFbo.begin();
@@ -565,6 +572,26 @@ void ofApp::checkOscMessages() {
                           filteredImageFbo.getHeight());
           filterShader.end();
           filteredImageFbo.end();
+
+          easterEggFbo.begin();
+          filterShader.begin();
+          filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                                    imageFbo.getHeight());
+          filterShader.setUniform2f("outputResolution",
+                                    filteredImageFbo.getWidth(),
+                                    filteredImageFbo.getHeight());
+          filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(),
+                                         1);
+          filterShader.setUniform1f("invertY", 1);
+          filterShader.setUniform1f("exponent", filterExponent);
+          filterShader.setUniform1f("gain", filterGain);
+          filterShader.setUniform1f("pixelsProcessed", 99999999);
+          ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                          filteredImageFbo.getHeight());
+          filterShader.end();
+          titleFont.drawString("easter egg placeholder", 0,
+                               easterEggFbo.getHeight() * 0.5);
+          easterEggFbo.end();
         }
         ofLog() << "Changed state to " << state_name;
       } else {
@@ -599,7 +626,7 @@ void ofApp::checkOscMessages() {
       endScreen.scroll_position += float(m.getArgAsInt(0) * 20);
       endScreen.scroll_position =
           ofClamp(endScreen.scroll_position, 0, endScreen.max_scroll_position);
-
+      endScreen.display_easter_egg = m.getArgAsBool(1);
     }
     // check for an image being sent
     // note: the size of the image depends greatly on your network buffer

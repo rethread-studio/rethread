@@ -55,7 +55,9 @@ enum StateMachine {
     ApplyFilter {
         executor: CodeExecutor,
     },
-    EndScreen,
+    EndScreen {
+        distance_scrolled: f32,
+    },
 }
 
 struct State {
@@ -63,6 +65,7 @@ struct State {
     communication: Communication,
     last_interaction: Instant,
     last_button_press: Instant,
+    num_button_presses_in_a_row: usize,
     resolution: (i32, i32),
     timeout: Duration,
     num_steps: usize,
@@ -91,7 +94,9 @@ impl State {
             .send_transition_to_state(&self.state_machine);
     }
     fn transition_to_end_screen(&mut self) {
-        self.state_machine = StateMachine::EndScreen;
+        self.state_machine = StateMachine::EndScreen {
+            distance_scrolled: 0.0,
+        };
         self.communication
             .send_transition_to_state(&self.state_machine);
     }
@@ -110,14 +115,22 @@ impl State {
             StateMachine::Idle => self.transition_to_countdown(),
             StateMachine::TransitionToFilter { .. } => (),
             StateMachine::ApplyFilter { .. } => (),
-            StateMachine::EndScreen => self.transition_to_idle(),
+            StateMachine::EndScreen { .. } => self.transition_to_idle(),
             StateMachine::Countdown {
                 counts_left: _,
                 last_tick: _,
             } => (),
         }
         if self.last_button_press.elapsed() < Duration::from_millis(500) {
-            self.force_transition_to_next();
+            self.num_button_presses_in_a_row += 1;
+            if self.num_button_presses_in_a_row == 2 {
+                self.force_transition_to_next();
+            } else if self.num_button_presses_in_a_row == 16 {
+                println!("Display easter egg!");
+                self.communication.send_easter_egg(0);
+            }
+        } else {
+            self.num_button_presses_in_a_row = 1;
         }
         self.last_button_press = Instant::now();
     }
@@ -128,7 +141,7 @@ impl State {
                 self.transition_to_apply_filter(self.resolution.0 as u64, self.resolution.1 as u64)
             }
             StateMachine::ApplyFilter { .. } => self.transition_to_end_screen(),
-            StateMachine::EndScreen => self.transition_to_idle(),
+            StateMachine::EndScreen { .. } => self.transition_to_idle(),
             StateMachine::Countdown {
                 counts_left: _,
                 last_tick: _,
@@ -163,8 +176,10 @@ impl State {
             } => (),
             StateMachine::TransitionToFilter { start, duration } => (),
             StateMachine::ApplyFilter { executor } => self.perform_steps(1),
-            StateMachine::EndScreen => {
-                self.communication.send_scroll_forward();
+            StateMachine::EndScreen { distance_scrolled } => {
+                *distance_scrolled += 1.0;
+                self.communication
+                    .send_scroll_forward(*distance_scrolled > 500.0);
             }
         }
     }
@@ -194,7 +209,7 @@ impl State {
                     );
                 }
             }
-            StateMachine::ApplyFilter { .. } | StateMachine::EndScreen => {
+            StateMachine::ApplyFilter { .. } | StateMachine::EndScreen { .. } => {
                 if self.last_interaction.elapsed() > self.timeout {
                     self.transition_to_idle();
                 }
@@ -250,7 +265,7 @@ impl Communication {
             StateMachine::Idle => "idle",
             StateMachine::TransitionToFilter { .. } => "transition_to_filter",
             StateMachine::ApplyFilter { .. } => "apply_filter",
-            StateMachine::EndScreen => "end_screen",
+            StateMachine::EndScreen { .. } => "end_screen",
             StateMachine::Countdown { .. } => "countdown",
         };
         let arg2 = match state {
@@ -288,15 +303,20 @@ impl Communication {
             .send((addr, vec![Type::Int(pixels_processed as i32)]))
             .ok();
     }
-    fn send_scroll_forward(&mut self) {
+    fn send_scroll_forward(&mut self, display_easter_egg: bool) {
         let addr = "/scroll";
-        let args = vec![Type::Int(1)];
+        let args = vec![Type::Int(1), Type::Bool(display_easter_egg)];
         self.main_screen_sender.send((addr, args)).ok();
     }
     fn send_timeout(&mut self, seconds_left: f32) {
         let addr = "/timeout";
         let args = vec![Type::Float(seconds_left)];
         self.send_to_all(addr, args);
+    }
+    fn send_easter_egg(&mut self, kind: usize) {
+        let addr = "/easteregg";
+        let args = vec![Type::Int(kind)];
+        self.send_to_all(adds, args);
     }
     fn send_to_all(&mut self, addr: &str, args: Vec<Type>) {
         println!("sending {addr} {args:?}");
@@ -341,6 +361,7 @@ fn main() -> Result<()> {
         last_button_press: Instant::now(),
         timeout: Duration::from_secs_f32(20.0),
         num_steps: 0,
+        num_button_presses_in_a_row: 0,
     };
 
     let mut serial_buf: Vec<u8> = vec![0; 32];
