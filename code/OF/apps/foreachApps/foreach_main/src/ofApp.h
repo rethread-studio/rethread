@@ -59,6 +59,7 @@ public:
   ofFbo filteredImageFbo;
   ofFbo halfFilteredImageFbo;
   ofFbo codeDisplayFbo;
+  ofFbo easterEggFbo;
   ofFbo endScreenFbo;
   float endScreenFade = 255.0;
 
@@ -68,6 +69,7 @@ public:
     float left_margin;
     float scroll_position;
     float max_scroll_position;
+    bool display_easter_egg = false;
   } endScreen;
 
   ofxPanel gui;
@@ -75,7 +77,7 @@ public:
   ofParameter<bool> showFeed;
   ofParameter<bool> showFilterShader;
   ofParameter<bool> showPixels;
-  bool flipWebcam = true;
+  bool flipWebcam = false;
   bool squareImage = true;
   ofParameter<float> filterGain;
   ofParameter<float> filterExponent;
