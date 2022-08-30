@@ -9,6 +9,12 @@ void ofApp::setup() {
   string_state_map["apply_filter"] = State::APPLY_FILTER;
   string_state_map["end_screen"] = State::END_SCREEN;
 
+  icons.foreach_icon.load("icons/foreach_logo.png");
+  icons.filter.load("icons/filter.png");
+  icons.heart.load("icons/heart.png");
+  icons.resend.load("icons/resend.png");
+  icons.camera.load("icons/camera.png");
+
   // try to grab at this size.
   camWidth = 1920;
   camHeight = 1080;
@@ -37,8 +43,10 @@ void ofApp::setup() {
   }
 
   numberFont.load("fonts/Millimetre-Regular_web.ttf", 350);
-  endScreenFont.load("fonts/Millimetre-Light_web.ttf", 25);
+  endScreenFont.load("fonts/Millimetre-Bold_web.ttf", 25);
+  titleFont.load("fonts/Noto Mono Nerd Font Complete.ttf", 35);
 
+  int w, h;
   if (!useStaticImage) {
     vidGrabber.setDeviceID(0);
     vidGrabber.setDesiredFrameRate(30);
@@ -47,28 +55,61 @@ void ofApp::setup() {
     videoInverted.allocate(vidGrabber.getWidth(), vidGrabber.getHeight(),
                            OF_PIXELS_RGB);
     videoTexture.allocate(videoInverted);
-    if (!flipWebcam) {
-      imageFbo.allocate(vidGrabber.getWidth(), vidGrabber.getHeight());
-    } else {
-      imageFbo.allocate(vidGrabber.getHeight(), vidGrabber.getWidth());
-    }
+    w = vidGrabber.getWidth();
+    h = vidGrabber.getHeight();
   } else {
 
     staticImage.load("static_image.jpg");
     videoInverted.allocate(staticImage.getWidth(), staticImage.getHeight(),
                            OF_PIXELS_RGB);
     videoTexture.allocate(videoInverted);
-
-    if (!flipWebcam) {
-      imageFbo.allocate(staticImage.getWidth(), staticImage.getHeight());
-    } else {
-      imageFbo.allocate(staticImage.getHeight(), staticImage.getWidth());
-    }
+    w = staticImage.getWidth();
+    h = staticImage.getHeight();
+  }
+  if (squareImage) {
+    w = h;
+  }
+  if (!flipWebcam) {
+    imageFbo.allocate(w, h);
+  } else {
+    imageFbo.allocate(h, w);
   }
   filteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+  halfFilteredImageFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+  roundedCornersMaskFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+  easterEggFbo.allocate(imageFbo.getWidth(), imageFbo.getHeight());
+  ofImage codeImg;
+  codeImg.load("code_image.jpg");
+  codeDisplayFbo.allocate(imageFbo.getWidth(),
+                          codeImg.getHeight() * (float(imageFbo.getWidth()) /
+                                                 float(codeImg.getWidth())));
+  roundedCornersMaskCodeFbo.allocate(codeDisplayFbo.getWidth(),
+                                     codeDisplayFbo.getHeight());
+  codeDisplayFbo.begin();
+  codeImg.draw(0, 0, codeDisplayFbo.getWidth(), codeDisplayFbo.getHeight());
+  codeDisplayFbo.end();
 
-  ofSetVerticalSync(true);
+  roundedCornersMaskFbo.begin();
+  ofClear(0, 0, 0);
+  ofSetColor(255);
+  ofDrawRectRounded(0, 0, roundedCornersMaskFbo.getWidth(),
+                    roundedCornersMaskFbo.getHeight(), 50);
+  roundedCornersMaskFbo.end();
+  roundedCornersMaskCodeFbo.begin();
+  ofClear(0, 0, 0);
+  ofSetColor(255);
+  ofDrawRectRounded(0, 0, roundedCornersMaskCodeFbo.getWidth(),
+                    roundedCornersMaskCodeFbo.getHeight(), 50);
+  roundedCornersMaskCodeFbo.end();
 
+  endScreen.left_margin = ofGetWidth() * 0.15;
+  endScreen.scroll_position = 0.0;
+  endScreen.width = ofGetWidth() - (endScreen.left_margin * 2);
+  endScreen.height =
+      imageFbo.getHeight() * (endScreen.width / float(imageFbo.getWidth())) +
+      ofGetHeight() * 0.1;
+
+  endScreenFbo.allocate(ofGetWidth(), ofGetHeight());
   pixelShader.load("shaders/pixel_shader/shader");
   filterShader.load("shaders/filter_shader/shader");
 
@@ -77,13 +118,8 @@ void ofApp::setup() {
   // send image resolution to the server
   ofxOscMessage m;
   m.setAddress("/image_resolution");
-  if (!useStaticImage) {
-    m.addIntArg(vidGrabber.getWidth());
-    m.addIntArg(vidGrabber.getHeight());
-  } else {
-    m.addIntArg(staticImage.getWidth());
-    m.addIntArg(staticImage.getHeight());
-  }
+  m.addIntArg(imageFbo.getWidth());
+  m.addIntArg(imageFbo.getHeight());
   sender.sendMessage(m, false);
   ofLog() << "Setup finished";
 
@@ -114,12 +150,15 @@ void ofApp::setup() {
   filterShader.end();
   ofPopMatrix();
   filteredImageFbo.end();
+
+  ofSetVerticalSync(true);
+  ofEnableAlphaBlending();
+  ofSetBackgroundAuto(false);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
   checkOscMessages();
-  ofBackground(100, 100, 100);
   if (!useStaticImage) {
     vidGrabber.update();
 
@@ -137,8 +176,39 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
+  float x = 0, y = 0;
+  float black_bar_height = ofGetHeight() * 0.1;
+  float left_margin = ofGetWidth() * 0.05;
+  ostringstream top_text;
+  ostringstream bottom_text;
+
+  bottom_text.precision(2);
+  bottom_text << fixed;
+  if (state == State::APPLY_FILTER) {
+
+    filteredImageFbo.begin();
+    filterShader.begin();
+    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                              imageFbo.getHeight());
+    filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
+                              filteredImageFbo.getHeight());
+    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+    filterShader.setUniform1f("invertY", 0);
+    filterShader.setUniform1f("exponent", filterExponent);
+    filterShader.setUniform1f("gain", filterGain);
+    filterShader.setUniform1f("pixelsProcessed",
+                              applyFilterData.pixelsProcessed);
+
+    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                    filteredImageFbo.getHeight());
+    filterShader.end();
+    filteredImageFbo.end();
+  }
+
   ofSetColor(255);
   if (state == State::IDLE || state == State::COUNTDOWN) {
+
+    ofBackground(0);
     // Draw the live image on the imageFbo
     imageFbo.begin();
     ofPushMatrix();
@@ -168,12 +238,13 @@ void ofApp::draw() {
       // 500.0);
       pixelShader.setUniform1f("zoom", pixelZoom);
       pixelShader.setUniform1f("alpha", 1.0);
+      pixelShader.setUniform1f("invertY", 1);
       ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
       pixelShader.end();
     }
     if (showFeed) {
       ofSetHexColor(0xffffff);
-      float camZoom = (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth());
+      float camZoom = (float(ofGetWidth()) * 0.8) / float(imageFbo.getWidth());
       glm::vec2 camPos =
           glm::vec2((ofGetWidth() - imageFbo.getWidth() * camZoom) * 0.5,
                     (ofGetHeight() - imageFbo.getHeight() * camZoom) * 0.5);
@@ -188,58 +259,110 @@ void ofApp::draw() {
       numberFont.drawString(s.str(), (ofGetWidth() - w) * 0.5,
                             (ofGetHeight() + h * 0.75) * 0.5);
     }
+    top_text << "for|each  take a selfie";
+    // bottom bar
+    ofSetColor(0);
+    ofDrawRectangle(0, ofGetHeight() - black_bar_height, ofGetWidth(),
+                    ofGetHeight());
+
+    float cameraw = icons.camera.getWidth() * 2.0;
+    float camerah = icons.camera.getHeight() * 2.0;
+    float camerax = ofGetWidth() * 0.5 - cameraw * 0.5;
+    float cameray = ofGetHeight() * 0.5 + ofGetWidth() * 0.4;
+    cameray = cameray + (ofGetHeight() - cameray - black_bar_height) * 0.5 -
+              camerah * 0.5;
+    ofSetColor(255);
+    icons.camera.draw(camerax, cameray, cameraw, camerah);
   } else if (state == State::TRANSITION) {
-
-    // Draw the filter shader in the background
-    filterShader.begin();
-    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
-                              imageFbo.getHeight());
-    filterShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
-    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-    filterShader.setUniform1f("invertY", 1);
-    filterShader.setUniform1f("exponent", filterExponent);
-    filterShader.setUniform1f("gain", filterGain);
-    filterShader.setUniform1f("pixelsProcessed",
-                              applyFilterData.pixelsProcessed);
-
-    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-    filterShader.end();
+    ofBackground(0);
+    if (ofGetElapsedTimef() - transitionData.lastDotTs > 0.5) {
+      transitionData.numDots =
+          (transitionData.numDots + 1) % (transitionData.maxNumDots + 1);
+      transitionData.lastDotTs = ofGetElapsedTimef();
+    }
 
     // Draw the star of the show, the pixels
     float phase = (ofGetElapsedTimef() - transitionData.startTime) /
                   transitionData.duration;
     float s_phase = atan(phase);
-    pixelZoom = 1 + pow(phase, 8) * (transitionData.maxZoom);
+    pixelZoom = pow(sin(phase * PI), 8) * (transitionData.maxZoom);
 
+    filteredImageFbo.begin();
     pixelShader.begin();
     pixelShader.setUniform2f("resolution", imageFbo.getWidth(),
                              imageFbo.getHeight());
-    pixelShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
+    pixelShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
+                             filteredImageFbo.getHeight());
     pixelShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
     pixelShader.setUniform1f("zoom", pixelZoom);
-    pixelShader.setUniform1f("alpha", 1.0 - pow(phase, 10));
-    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+    pixelShader.setUniform1f("invertY", 0);
+    // pixelShader.setUniform1f("alpha", 1.0 - pow(phase, 10));
+    pixelShader.setUniform1f("alpha", 1.0);
+    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                    filteredImageFbo.getHeight());
     pixelShader.end();
+    filteredImageFbo.end();
+
+    if (squareImage) {
+      filteredImageFbo.draw(0, ofGetHeight() * 0.5 - ofGetWidth() * 0.5,
+                            ofGetWidth(), ofGetWidth());
+    } else {
+      filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+    }
+
+    float dotSize = ofGetWidth() * 0.1;
+    float dotMargin = dotSize * 0.3;
+    float y = ofGetHeight() * 0.5 - dotSize * 0.5;
+    float x = ofGetWidth() * 0.5 -
+              (dotSize * transitionData.maxNumDots +
+               dotMargin * (transitionData.maxNumDots - 1) - dotSize) *
+                  0.5;
+    ofSetColor(255);
+    for (int i = 0; i < transitionData.numDots; i++) {
+      ofDrawEllipse(x, y, dotSize, dotSize);
+      x += dotSize + dotMargin;
+    }
+    top_text << "for|each  loading pixels...";
   } else if (state == State::APPLY_FILTER) {
+    endScreenFbo.begin();
 
-    // filteredImageFbo.begin();
-    filterShader.begin();
-    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
-                              imageFbo.getHeight());
-    filterShader.setUniform2f("outputResolution", ofGetWidth(), ofGetHeight());
-    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-    filterShader.setUniform1f("invertY", 1);
-    filterShader.setUniform1f("exponent", filterExponent);
-    filterShader.setUniform1f("gain", filterGain);
-    filterShader.setUniform1f("pixelsProcessed",
-                              applyFilterData.pixelsProcessed);
+    ofBackground(0);
+    if (squareImage) {
+      filteredImageFbo.draw(0, ofGetHeight() * 0.5 - ofGetWidth() * 0.5,
+                            ofGetWidth(), ofGetWidth());
+    } else {
+      filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+    }
 
-    ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
-    filterShader.end();
-    // filteredImageFbo.end();
-    // filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+    // Draw icons
+    ofSetColor(255);
+    x = left_margin;
+    y = ofGetHeight() * 0.5 + ofGetWidth() * 0.5 + 20;
+    icons.heart.draw(x, y);
+    x += icons.heart.getWidth() + 5;
+    icons.resend.draw(x, y);
+    x += icons.resend.getWidth() + 5;
+    icons.filter.draw(x, y);
+    y += icons.resend.getHeight() + 10;
+    // Draw stats
+    ostringstream s;
+    int loops = applyFilterData.pixelsProcessed;
+    int turns = float(applyFilterData.crankSteps) / 48.0;
+    ofSetColor(255);
+    if (loops == 0) {
+      s << "#nofilter";
+    } else {
+      s << "#" << loops << "loops #" << turns << "turns";
+    }
+    endScreenFont.drawString(s.str(), left_margin,
+                             y + endScreenFont.getLineHeight());
 
+    top_text << "for|each: loop through every pixel";
+    if (timeToTimeout < 6.0) {
+      bottom_text << "Restarting in " << timeToTimeout << " seconds";
+    }
   } else if (state == State::END_SCREEN) {
+    ofBackground(0);
 
     // TEMP this can be removed when we are sure the states are progressed
     // through in order
@@ -259,43 +382,120 @@ void ofApp::draw() {
                     filteredImageFbo.getHeight());
     filterShader.end();
     filteredImageFbo.end();
+    halfFilteredImageFbo.begin();
+    filterShader.begin();
+    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                              imageFbo.getHeight());
+    filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
+                              filteredImageFbo.getHeight());
+    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
+    filterShader.setUniform1f("invertY", 0);
+    filterShader.setUniform1f("exponent", filterExponent);
+    filterShader.setUniform1f("gain", filterGain);
+    int halfProcessedNumPixels =
+        imageFbo.getWidth() * imageFbo.getHeight() * 0.6;
+    filterShader.setUniform1f("pixelsProcessed", halfProcessedNumPixels);
+    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                    filteredImageFbo.getHeight());
+    filterShader.end();
+    halfFilteredImageFbo.end();
+    // END TEMP
 
-    ofBackground(0);
     ofSetColor(255);
+    while (endScreen.scroll_position > endScreen.max_scroll_position) {
+      endScreen.scroll_position -= endScreen.max_scroll_position;
+    }
 
-    float camZoom =
-        (float(ofGetWidth()) * 0.5) / float(imageFbo.getWidth()) * 0.8;
-    float margin = imageFbo.getWidth() * 0.05;
-    glm::vec2 r =
-        glm::vec2(imageFbo.getWidth() * camZoom + (margin * 2), ofGetHeight());
-    ofDrawRectangle((ofGetWidth() - r.x) * 0.5, (ofGetHeight() - r.y) * 0.5,
-                    r.x, r.y);
-    // draw unaltered image
-    glm::vec2 camPos =
-        glm::vec2((ofGetWidth() - imageFbo.getWidth() * camZoom) * 0.5, margin);
-    imageFbo.draw(camPos.x, camPos.y, imageFbo.getWidth() * camZoom,
-                  imageFbo.getHeight() * camZoom);
-    camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
-    filteredImageFbo.draw(camPos.x, camPos.y,
-                          filteredImageFbo.getWidth() * camZoom,
-                          filteredImageFbo.getHeight() * camZoom);
-    camPos.y += filteredImageFbo.getHeight() * camZoom + margin;
+    x = endScreen.left_margin;
+    y = endScreen.left_margin - endScreen.scroll_position;
+    int i = 0;
+    while (y < ofGetHeight()) {
+      y = drawEndScreenCard(x, y, imageFbo, roundedCornersMaskFbo,
+                            vector<string>{"#selfie", "#nofilter"});
+      y = drawEndScreenCard(x, y, codeDisplayFbo, roundedCornersMaskCodeFbo,
+                            vector<string>{"#code", "#loop", "#foreach"});
+      ostringstream halfNumPixels;
+      halfNumPixels << "#" << halfProcessedNumPixels << "loops";
+      y = drawEndScreenCard(x, y, halfFilteredImageFbo, roundedCornersMaskFbo,
+                            vector<string>{halfNumPixels.str(), "#filter"});
+      y = drawEndScreenCard(x, y, filteredImageFbo, roundedCornersMaskFbo,
+                            vector<string>{"#behindthefilter"});
+      if (endScreen.display_easter_egg) {
+        y = drawEndScreenCard(
+            x, y, easterEggFbo, roundedCornersMaskFbo,
+            vector<string>{"#behindbehindthefilter", "#hidden"});
+      }
+      if (i == 0) {
+        endScreen.max_scroll_position = y + endScreen.scroll_position -
+                                        ofGetHeight() + endScreen.left_margin;
+      }
+    }
+    top_text << "thank you for applying a filter";
 
-    // endScreenFont.drawString(
-    //     "Du applicerade filtret på\nbilden genom att köra\n"
-    //     "1 728 000 instruktioner!",
-    //     50, ofGetHeight() * 0.5);
-    ostringstream s;
-    long pixels = imageFbo.getWidth() * imageFbo.getHeight();
-    ofSetColor(0);
-    s << "#" << pixels * 5 << " instruktioner     #" << pixels
-      << " pixlar\n#filter";
-    endScreenFont.drawString(s.str(), camPos.x,
-                             (ofGetHeight() - camPos.y) * 0.5 + camPos.y);
+    if (timeToTimeout < 6.0) {
+      bottom_text << "Restarting in " << timeToTimeout << " seconds";
+    }
   }
+
+  // Draw header
+  ofSetColor(0);
+  ofDrawRectangle(0, 0, ofGetWidth(), black_bar_height);
+
+  ofSetColor(255);
+  float height = titleFont.getLineHeight() * 1.5;
+  float width =
+      icons.foreach_icon.getWidth() * (height / icons.foreach_icon.getHeight());
+  y = black_bar_height * 0.5 - (height * 0.5);
+  x = left_margin;
+  icons.foreach_icon.draw(x, y, width, height);
+  titleFont.drawString(top_text.str(), left_margin + width + left_margin,
+                       black_bar_height * 0.5 +
+                           titleFont.getLineHeight() * 0.3);
+  float bottom_width = titleFont.stringWidth(bottom_text.str());
+  titleFont.drawString(bottom_text.str(), (ofGetWidth() - bottom_width) * 0.5,
+                       ofGetHeight() - black_bar_height * 0.5 +
+                           titleFont.getLineHeight() * 0.3);
+  if (state == State::APPLY_FILTER) {
+    endScreenFbo.end();
+    ofSetColor(255, 255);
+    endScreenFbo.draw(0, 0);
+  }
+
+  if (state == State::END_SCREEN && endScreenFade > 1) {
+    ofSetColor(255, int(endScreenFade));
+    endScreenFbo.draw(0, 0);
+    endScreenFade *= 0.98;
+  }
+
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
 
-  gui.draw();
+  // gui.draw();
+}
+
+int ofApp::drawEndScreenCard(int startx, int starty, ofFbo fbo, ofFbo mask,
+                             vector<string> tags) {
+  float x = startx;
+  float y = starty;
+  float zoom = endScreen.width / float(fbo.getWidth());
+  fbo.getTexture().setAlphaMask(mask.getTexture());
+  fbo.draw(x, y, fbo.getWidth() * zoom, fbo.getHeight() * zoom);
+  y += fbo.getHeight() * zoom + 20;
+
+  icons.heart.draw(x, y);
+  x += icons.heart.getWidth() + 5;
+  icons.resend.draw(x, y);
+  x += icons.resend.getWidth() + 5;
+  icons.filter.draw(x, y);
+  y += icons.resend.getHeight() + 10;
+  x = startx;
+
+  y += endScreenFont.getLineHeight();
+  for (auto &tag : tags) {
+    endScreenFont.drawString(tag, x, y);
+    x += endScreenFont.stringWidth(tag) + 10;
+  }
+  y += ofGetHeight() * 0.07;
+  return y;
 }
 
 //--------------------------------------------------------------
@@ -344,17 +544,16 @@ void ofApp::checkOscMessages() {
           // send image resolution to the server
           ofxOscMessage m;
           m.setAddress("/image_resolution");
-          if (!useStaticImage) {
-            m.addIntArg(vidGrabber.getWidth());
-            m.addIntArg(vidGrabber.getHeight());
-          } else {
-            m.addIntArg(staticImage.getWidth());
-            m.addIntArg(staticImage.getHeight());
-          }
+          m.addIntArg(imageFbo.getWidth());
+          m.addIntArg(imageFbo.getHeight());
           sender.sendMessage(m, false);
         } else if (it->second == State::APPLY_FILTER) {
           applyFilterData.pixelsProcessed = 0;
+          applyFilterData.crankSteps = 0;
         } else if (it->second == State::END_SCREEN) {
+          endScreen.scroll_position = 0;
+          endScreen.display_easter_egg = false;
+          endScreenFade = 255.0;
           // Draw filtered image to fbo
           filteredImageFbo.begin();
           filterShader.begin();
@@ -373,6 +572,26 @@ void ofApp::checkOscMessages() {
                           filteredImageFbo.getHeight());
           filterShader.end();
           filteredImageFbo.end();
+
+          easterEggFbo.begin();
+          filterShader.begin();
+          filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                                    imageFbo.getHeight());
+          filterShader.setUniform2f("outputResolution",
+                                    filteredImageFbo.getWidth(),
+                                    filteredImageFbo.getHeight());
+          filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(),
+                                         1);
+          filterShader.setUniform1f("invertY", 1);
+          filterShader.setUniform1f("exponent", filterExponent);
+          filterShader.setUniform1f("gain", filterGain);
+          filterShader.setUniform1f("pixelsProcessed", 99999999);
+          ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                          filteredImageFbo.getHeight());
+          filterShader.end();
+          titleFont.drawString("easter egg placeholder", 0,
+                               easterEggFbo.getHeight() * 0.5);
+          easterEggFbo.end();
         }
         ofLog() << "Changed state to " << state_name;
       } else {
@@ -398,8 +617,16 @@ void ofApp::checkOscMessages() {
       // }
     } else if (m.getAddress() == "/countdown") {
       countdownData.num = m.getArgAsInt(0);
+    } else if (m.getAddress() == "/timeout") {
+      timeToTimeout = m.getArgAsFloat(0);
     } else if (m.getAddress() == "/pixels_processed") {
       applyFilterData.pixelsProcessed = m.getArgAsInt(0);
+      applyFilterData.crankSteps = m.getArgAsInt(1);
+    } else if (m.getAddress() == "/scroll") {
+      endScreen.scroll_position += float(m.getArgAsInt(0) * 20);
+      endScreen.scroll_position =
+          ofClamp(endScreen.scroll_position, 0, endScreen.max_scroll_position);
+      endScreen.display_easter_egg = m.getArgAsBool(1);
     }
     // check for an image being sent
     // note: the size of the image depends greatly on your network buffer
@@ -454,7 +681,7 @@ void ofApp::mouseEntered(int x, int y) {}
 void ofApp::mouseExited(int x, int y) {}
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h) {}
+void ofApp::windowResized(int w, int h) { endScreenFbo.allocate(w, h); }
 
 //--------------------------------------------------------------
 void ofApp::gotMessage(ofMessage msg) {}

@@ -38,6 +38,8 @@ public:
   void gotMessage(ofMessage msg);
 
   void transition_to_state(State new_state);
+  int drawEndScreenCard(int x, int y, ofFbo fbo, ofFbo mask,
+                        vector<string> tags);
 
   State state = State::IDLE;
 
@@ -51,22 +53,43 @@ public:
 
   ofShader pixelShader;
   ofShader filterShader;
-  ofFbo imageFbo;         // the live or captured image
-  ofFbo filteredImageFbo; // the live or captured image
+  ofFbo imageFbo; // the live or captured image
+  ofFbo roundedCornersMaskFbo;
+  ofFbo roundedCornersMaskCodeFbo;
+  ofFbo filteredImageFbo;
+  ofFbo halfFilteredImageFbo;
+  ofFbo codeDisplayFbo;
+  ofFbo easterEggFbo;
+  ofFbo endScreenFbo;
+  float endScreenFade = 255.0;
+
+  struct {
+    float width;
+    float height;
+    float left_margin;
+    float scroll_position;
+    float max_scroll_position;
+    bool display_easter_egg = false;
+  } endScreen;
 
   ofxPanel gui;
   ofParameter<float> pixelZoom;
   ofParameter<bool> showFeed;
   ofParameter<bool> showFilterShader;
   ofParameter<bool> showPixels;
-  bool flipWebcam = true;
+  bool flipWebcam = false;
+  bool squareImage = true;
   ofParameter<float> filterGain;
   ofParameter<float> filterExponent;
 
   ofTrueTypeFont numberFont;
   ofTrueTypeFont endScreenFont;
+  ofTrueTypeFont titleFont;
 
   ofParameter<float> idleMaxZoom = 50.0;
+
+  float timeToTimeout = 20.0;
+
   struct {
     int num = -1;
     float size = 0;
@@ -76,13 +99,24 @@ public:
     float duration;
     float startTime;
     float zoom;
-    float maxZoom = 5000.0;
+    float maxZoom = 1000.0;
+    int numDots;
+    int maxNumDots = 3;
+    float lastDotTs = 0;
   } transitionData;
 
   struct {
     long pixelsProcessed = 0;
+    long crankSteps = 0;
   } applyFilterData;
 
+  struct {
+    ofImage filter;
+    ofImage resend;
+    ofImage foreach_icon;
+    ofImage heart;
+    ofImage camera;
+  } icons;
   ofxOscReceiver receiver;
   ofxOscSender sender;
   void checkOscMessages();

@@ -47,13 +47,43 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 	Out.ar(out, sig);
 }).add;
 
+SynthDef(\background_channel, {
+	var sig = In.ar(\in.kr(10), 2), lag_time = \lag_time.kr(1);
+	// compander_thresh = MouseX.kr(0.01, 1);
+	// compander_thresh.poll;
+
+	sig = AnalogVintageDistortion.ar(sig * 0.3, 0.1, 0.0, lowgain: 0.01, highgain: 0.1, oversample: 1);
+	sig = BPeakEQ.ar(sig, 5000, 1.0, 3.0);
+	// sig = BPeakEQ.ar(sig, 10000, 1.0, -12.0);
+	sig = BPeakEQ.ar(sig, 500, 1.0, -4.0);
+	sig = BPeakEQ.ar(sig, 130, 1.0, 3.5);
+	sig = BPeakEQ.ar(sig, 40, 1.0, -9.0);
+	sig = LPF.ar(sig, 1500);
+
+
+	Out.ar(\out.kr(0), sig);
+}).add;
+
 SynthDef(\main_out_glitch, {
-	var sig = In.ar(\in.kr(10), 2), lag_time = \lag_time.kr(3), compander_thresh = 0.07;
+	var sig = In.ar(\in.kr(10), 2), lag_time = \lag_time.kr(3), compander_thresh = 0.07, wet;
 	// compander_thresh = MouseX.kr(0.01, 1);
 	// compander_thresh.poll;
 
 	sig = SelectX.ar(\enable_pitch_shift.kr(0, lag_time), [sig, PitchShift.ar(sig, 0.2, Ramp.kr(\pitch_shift_ratio.kr(1.0), lag_time), VarLag.kr(\pitch_dispersion.kr(0.00), lag_time, 20), \time_dispersion.kr(0.01, lag_time))]);
 	sig = SelectX.ar(\enable_bit_crush.kr(0, lag_time), [sig, Decimator.ar(sig, \sample_rate.kr(44100, lag_time), \bits.kr(24, lag_time))]);
+
+	wet = sig.sum + PitchShift.ar(sig, 0.2, 2);
+	wet = DelayN.ar(wet, 0.25, 0.25);
+	wet = HPF.ar(wet, 100);
+	wet = LPF.ar(wet, 7000);
+	sig = sig + (wet * 0.1);
+
+	// tape flutter
+	sig = DelayC.ar(sig, 0.2, LFNoise2.kr(1).range(0, 0.005));
+
+	sig = sig + (tanh(sig*2)*0.2);
+
+	sig = LPF.ar(sig, 10000);
 
 	sig = Compander.ar(sig, sig,
 		thresh: compander_thresh,
@@ -129,10 +159,11 @@ SynthDef(\zoom_effect, {
 	Out.ar(\out.kr(0), sig);
 }).add;
 SynthDef(\unstable_sine, {
-	var sig, env, mod, freq = \freq.kr(220), speed = \speed.kr(1.0);
+	var sig, env, mod, freq = \freq.kr(220, LFNoise1.kr(0.5).range(0.1, 0.9)), speed = \speed.kr(1.0);
 	env = Env.adsr(\atk.kr(0.1), \decay.kr(0.01), \sus.kr(1.0), \rel.kr(2.2)).ar(2);
 	mod = SinOsc.ar(freq * \mod_ratio.kr(1.0), mul: freq * \mod_mul.kr(1.0) * LFNoise1.kr(LFNoise1.kr(0.2).range(0.5 * speed, 3 * speed)).range(0.1, 1.01).pow(4));
 	sig = SinOsc.ar(freq + mod, mul: \amp.kr(0.5)) * env * LFNoise1.kr(4).range(0.3, 1.0);
+	sig = sig * AmpCompA.kr(freq);
 	sig = Pan2.ar(sig, \pan.kr(0));
 	Out.ar(\out.kr(0), sig);
 }).add;

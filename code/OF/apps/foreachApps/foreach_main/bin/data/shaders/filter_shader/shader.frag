@@ -53,7 +53,9 @@ void main()
   color*= (pow(luma + 0.1, 1.5) + 0.1);
 
   float alpha = 1.0;
+  vec3 line_green = vec3(0.2, 1.0, 0.2);
   color = mix(org_color, color, float(pixelIndex <= pixelsProcessed));
+  color = mix(color, line_green, float(pixelIndex > pixelsProcessed && pixelIndex < pixelsProcessed + resolution.x*3));
 
   outputColor = vec4(color, alpha);
 }

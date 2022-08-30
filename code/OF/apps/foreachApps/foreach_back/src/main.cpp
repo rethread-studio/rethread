@@ -10,6 +10,7 @@ int main() {
   // settings.setSize(3840, 2160);
   settings.setSize(1080, 1920);
   settings.numSamples = 4;
+  settings.windowMode = OF_FULLSCREEN;
 
   ofCreateWindow(settings);
 
