@@ -40,6 +40,8 @@ The data is of the following format:
 Sample TXT datasets for method calls during dynamic execution can be found:
 - for the inversion of a 42 x 42 matrix the **calltrace** is [here](https://kth-my.sharepoint.com/:t:/g/personal/cesarsv_ug_kth_se/EW4EL-_DEolAmRB93lBkcmQBxRn3kY88HLCGB_tbKkuAZQ)
 - for the inversion of a 42 x 42 matrix **method calls** are [here](https://kth-my.sharepoint.com/:t:/g/personal/cesarsv_ug_kth_se/ESyJw9xuyrFLi6jiFDCQFWsBFFachyPJx90k8Ap1k5Gibg)
+- for copying and pasting [`AUG`](https://en.wikipedia.org/wiki/Start_codon) in [VARNA](http://varna.lri.fr/) the **calltrace** is  [here](./varna-traces/calltrace.txt)
+- for copying and pasting [`AUG`](https://en.wikipedia.org/wiki/Start_codon) in [VARNA](http://varna.lri.fr/) the **methods calls** are  [here](./varna-traces/methods-call.txt)
 
 The **calltrace** shows method call pairs as shown below:
 
@@ -57,6 +59,9 @@ It then writes the stack depth, thread id and the class and method name, followe
 
 ### How to reproduce
 
+
+#### Minvert
+
 Build the Docker image for the minvert Maven project using the [Dockerfile](code/NWL2022/minvert/Dockerfile) and then run the container.
 
 To copy the minvert `jar-with-dependencies.jar` to the local filesystem (>1.3GB), run the following command:
@@ -73,3 +78,6 @@ java -javaagent:javacg-0.1-SNAPSHOT-dycg-agent.jar="incl=org.*;excl=org.apache.c
 
 Note that we are using Java 8 for building the minvert artifact, the agent, and the JVM execution. 
 
+#### Copying and pasting
+
+Execute the shell script [run-varna-with-jcg.sh](./varna-traces/run-varna-with-jcg.sh).
