@@ -4,6 +4,8 @@ use nannou::{
     prelude::*,
     rand::{thread_rng, Rng},
 };
+use strum::EnumCount;
+use strum_macros::{EnumCount as EnumCountMacro, FromRepr};
 
 mod calltrace {
     use nom::branch::alt;
@@ -224,7 +226,7 @@ mod calltrace {
 
 mod pdfbox {
     use serde::{Deserialize, Serialize};
-    use std::fs;
+    use std::{collections::HashMap, fs};
 
     use nannou::{
         prelude::*,
@@ -244,76 +246,163 @@ mod pdfbox {
     }
 
     #[derive(Debug)]
+    pub struct CallDrawData {
+        depth: i32,
+        callee_supplier: String,
+        callee_dependency: String,
+        callee_name: String,
+        caller_name: String,
+    }
+
+    #[derive(Debug)]
+    enum ColorSource {
+        Supplier,
+        Dependency,
+        Function,
+    }
+
+    #[derive(Debug)]
     pub struct PDFBoxTrace {
-        trace: Vec<Call>,
-        depth_graph: Vec<i32>,
+        draw_trace: Vec<CallDrawData>,
         max_depth: i32,
         zoom: f32,
         offset: f32,
+        supplier_colors: HashMap<String, Hsla>,
+        dependency_colors: HashMap<String, Hsla>,
+        function_colors: HashMap<String, Hsla>,
+        color_source: ColorSource,
     }
 
     impl PDFBoxTrace {
         pub fn new() -> Self {
+            // let data =
+            //     fs::read_to_string("/home/erik/Hämtningar/nwl2022/data-pdfbox-new-format.json")
+            //         .unwrap();
             let data =
-                fs::read_to_string("/home/erik/Hämtningar/nwl2022/data-pdfbox-new-format.json")
+                fs::read_to_string("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste.json")
                     .unwrap();
-            let trace: Vec<Call> = serde_json::from_str(&data).unwrap();
-            let depth_graph_change: Vec<i32> = trace
-                .iter()
-                .zip(trace.iter().skip(1))
-                .map(|(a, b)| {
-                    if a.callee.fqn == b.caller.fqn {
-                        1
-                    } else if a.caller.fqn == b.caller.fqn {
-                        0
-                    } else {
-                        -1
+            // let data =
+            //     fs::read_to_string("/home/erik/Hämtningar/nwl2022/data-minvert-100.json").unwrap();
+            let trace_data: Vec<Call> = serde_json::from_str(&data).unwrap();
+
+            // let trace_data: Vec<Call> = trace_data
+            //     .into_iter()
+            //     .map(|mut call| {
+            //         std::mem::swap(&mut call.callee, &mut call.caller);
+            //         call
+            //     })
+            //     .collect();
+
+            let mut draw_trace = vec![];
+            let call = &trace_data[0];
+            draw_trace.push(CallDrawData {
+                depth: 0,
+                callee_supplier: call.callee.supplier.clone(),
+                callee_dependency: call.callee.dependency.clone(),
+                callee_name: call.callee.fqn.clone(),
+                caller_name: call.caller.fqn.clone(),
+            });
+            let mut last_depth = 0;
+            let mut lowest_depth = 0;
+            let mut i = 0;
+            while i < trace_data.len() - 1 {
+                let a = &trace_data[i];
+                let b = &trace_data[i + 1];
+
+                let new_depth = if a.callee.fqn == b.caller.fqn {
+                    last_depth + 1
+                } else if a.caller.fqn == b.caller.fqn {
+                    last_depth
+                } else {
+                    // backtrack to find the last known depth of this function
+                    let mut j = i;
+                    loop {
+                        if draw_trace[j].caller_name == b.caller.fqn {
+                            break draw_trace[j].depth;
+                        }
+                        if j == 0 {
+                            lowest_depth -= 1;
+                            break lowest_depth;
+                        }
+                        j -= 1;
                     }
-                })
-                .collect();
-            let mut depth_graph = vec![];
-            let mut level = 0;
-            let mut num_ones = 0;
+                };
+                draw_trace.push(CallDrawData {
+                    depth: new_depth,
+                    callee_supplier: b.callee.supplier.clone(),
+                    callee_dependency: b.callee.dependency.clone(),
+                    callee_name: b.callee.fqn.clone(),
+                    caller_name: b.caller.fqn.clone(),
+                });
+                last_depth = new_depth;
+                i += 1;
+            }
             let mut min_depth = 999999;
             let mut max_depth = 0;
-            for change in depth_graph_change {
+            for call in &draw_trace {
+                let level = call.depth;
                 if level < min_depth {
                     min_depth = level;
                 }
                 if level > max_depth {
                     max_depth = level;
                 }
-                depth_graph.push(level);
-                level += change;
-                if change == 1 {
-                    num_ones += 1;
-                }
             }
-            let depth_graph = depth_graph.into_iter().map(|a| a - min_depth).collect();
+            for call in &mut draw_trace {
+                call.depth -= min_depth;
+            }
             max_depth -= min_depth;
+
+            let mut rng = thread_rng();
+
+            let mut supplier_colors = HashMap::new();
+            let mut dependency_colors = HashMap::new();
+            let mut function_colors = HashMap::new();
+
+            for call in &draw_trace {
+                supplier_colors
+                    .entry(call.callee_supplier.clone())
+                    .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+                dependency_colors
+                    .entry(call.callee_dependency.clone())
+                    .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+                function_colors
+                    .entry(call.callee_name.clone())
+                    .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+            }
             println!("PDFBox!");
             // println!("depth_graph: {depth_graph:?}");
-            println!("num_ones: {num_ones}");
             println!("max_depth: {max_depth}");
-            println!("num_calls: {}", trace.len());
+            println!("min_depth: {min_depth}");
+            println!("num_calls: {}", draw_trace.len());
 
             Self {
-                trace,
-                depth_graph,
+                draw_trace,
                 max_depth,
                 zoom: 1.0,
                 offset: 0.0,
+                supplier_colors,
+                dependency_colors,
+                function_colors,
+                color_source: ColorSource::Dependency,
             }
         }
         pub fn event(&mut self, app: &App, event: WindowEvent) {
             match event {
                 KeyPressed(key) => match key {
+                    Key::C => {
+                        self.color_source = match self.color_source {
+                            ColorSource::Supplier => ColorSource::Dependency,
+                            ColorSource::Dependency => ColorSource::Function,
+                            ColorSource::Function => ColorSource::Supplier,
+                        }
+                    }
                     _ => (),
                 },
                 KeyReleased(_key) => {}
                 ReceivedCharacter(_char) => {}
                 MouseMoved(pos) => {
-                    self.zoom = (pos.y / app.window_rect().h() + 0.5) * 100.0;
+                    self.zoom = (pos.y / app.window_rect().h() + 0.5) * 2000.0;
                     self.offset = pos.x / app.window_rect().w() + 0.5;
                 }
                 MousePressed(_button) => {}
@@ -336,23 +425,47 @@ mod pdfbox {
         pub fn draw(&self, draw: &Draw, win: Rect) {
             let zoom_x = self.zoom;
 
-            let call_w = win.w() / self.depth_graph.len() as f32 * zoom_x;
+            let call_w = win.w() / self.draw_trace.len() as f32 * zoom_x;
             // let offset_x =
             //     (app.elapsed_frames() as f32 / 500.0) % 1.0 * call_w * model.trace.len() as f32 - win.w();
-            let offset_x = self.offset * call_w * self.depth_graph.len() as f32 - win.w();
+            let offset_x = self.offset * call_w * self.draw_trace.len() as f32 - win.w();
+
+            // Get the local max_depth and min_depth to zoom in on the curve
+            //
+            let mut local_max_depth = 0;
+            let mut local_min_depth = i32::MAX;
+            for (i, call) in self.draw_trace.iter().enumerate() {
+                let x = win.left() + i as f32 * call_w - offset_x;
+                if x >= win.left() && x <= win.right() {
+                    local_max_depth = local_max_depth.max(call.depth);
+                    local_min_depth = local_min_depth.min(call.depth);
+                }
+            }
+            let local_depth_width = local_max_depth - local_min_depth;
             let mut y = win.bottom() + win.h() * 0.02;
-            let depth_height = (win.h() / self.max_depth as f32) * 0.5;
+            let depth_height = (win.h() / local_depth_width as f32) * 0.96;
 
             let mut lines = vec![];
-            for (i, depth) in self.depth_graph.iter().enumerate() {
-                lines.push(pt2(
-                    win.left() + i as f32 * call_w - offset_x,
-                    y + depth_height * *depth as f32,
+            for (i, call) in self.draw_trace.iter().enumerate() {
+                let color = match self.color_source {
+                    ColorSource::Supplier => {
+                        self.supplier_colors.get(&call.callee_supplier).unwrap()
+                    }
+                    ColorSource::Dependency => {
+                        self.dependency_colors.get(&call.callee_dependency).unwrap()
+                    }
+                    ColorSource::Function => self.function_colors.get(&call.callee_name).unwrap(),
+                }
+                .clone();
+                lines.push((
+                    pt2(
+                        win.left() + i as f32 * call_w - offset_x,
+                        y + depth_height * (call.depth - local_min_depth) as f32,
+                    ),
+                    color,
                 ));
             }
-            draw.polyline()
-                .color(hsla(0.0, 1.0, 0.7, 0.8))
-                .points(lines);
+            draw.polyline().stroke_weight(2.0).points_colored(lines);
         }
     }
 
@@ -363,7 +476,7 @@ mod pdfbox {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, EnumCountMacro, FromRepr, PartialEq)]
 enum TraceToShow {
     Calltrace,
     PdfBox,
@@ -390,6 +503,7 @@ struct Model {
     calltrace: calltrace::Calltrace,
     pdfbox_trace: pdfbox::PDFBoxTrace,
     trace_to_show: TraceToShow,
+    trace_to_show_num: usize,
 }
 
 fn model(app: &App) -> Model {
@@ -426,7 +540,8 @@ fn model(app: &App) -> Model {
     let m = Model {
         pdfbox_trace,
         calltrace,
-        trace_to_show: TraceToShow::PdfBox,
+        trace_to_show: TraceToShow::from_repr(0).unwrap(),
+        trace_to_show_num: 0,
     };
     // println!("model: {m:?}");
     m
@@ -465,7 +580,16 @@ fn window_event(app: &App, model: &mut Model, event: WindowEvent) {
     match &event {
         KeyPressed(key) => match key {
             Key::Left => {
-                model.trace_to_show = model.trace_to_show.next();
+                model.trace_to_show_num = (model.trace_to_show_num + 1) % TraceToShow::COUNT;
+                model.trace_to_show = TraceToShow::from_repr(model.trace_to_show_num).unwrap();
+            }
+            Key::Right => {
+                if model.trace_to_show_num == 0 {
+                    model.trace_to_show_num = TraceToShow::COUNT - 1;
+                } else {
+                    model.trace_to_show_num -= 1;
+                }
+                model.trace_to_show = TraceToShow::from_repr(model.trace_to_show_num).unwrap();
             }
             _ => (),
         },
