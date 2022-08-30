@@ -467,6 +467,7 @@ version = "0.1.0"
 dependencies = [
  "nannou",
  "nom",
+ "parser",
  "serde",
  "serde_json",
  "strum",
@@ -1475,6 +1476,15 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "winapi",
+]
+
+[[package]]
+name = "parser"
+version = "0.1.0"
+dependencies = [
+ "nom",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
