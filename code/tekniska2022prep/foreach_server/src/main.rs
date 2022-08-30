@@ -315,8 +315,8 @@ impl Communication {
     }
     fn send_easter_egg(&mut self, kind: usize) {
         let addr = "/easteregg";
-        let args = vec![Type::Int(kind)];
-        self.send_to_all(adds, args);
+        let args = vec![Type::Int(kind as i32)];
+        self.send_to_all(addr, args);
     }
     fn send_to_all(&mut self, addr: &str, args: Vec<Type>) {
         println!("sending {addr} {args:?}");
