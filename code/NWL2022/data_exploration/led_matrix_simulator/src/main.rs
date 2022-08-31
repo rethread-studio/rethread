@@ -13,6 +13,7 @@ use rand::prelude::*;
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.2)))
+        .insert_resource(AnimationTimer(Timer::from_seconds(0.4, true)))
         .add_plugins(DefaultPlugins)
         .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(setup)
@@ -32,21 +33,27 @@ struct MatrixPosition {
 #[derive(Component)]
 struct OnOff(bool);
 
+struct AnimationTimer(Timer);
+
 fn random_onoff(
+    time: Res<Time>,
+    mut timer: ResMut<AnimationTimer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut query: Query<(&MatrixPosition, &mut Handle<StandardMaterial>, &mut OnOff)>,
 ) {
-    let mut rng = thread_rng();
-    for (matrix_position, mut material, mut onoff) in query.iter_mut() {
-        if rng.gen::<f32>() > 0.99 {
-            let material = materials.get_mut(&material);
-            if let Some(material) = material {
-                if onoff.0 == true {
-                    material.emissive = Color::hex("000").unwrap();
-                } else {
-                    material.emissive = Color::hex("fff").unwrap();
+    if timer.0.tick(time.delta()).just_finished() {
+        let mut rng = thread_rng();
+        for (matrix_position, mut material, mut onoff) in query.iter_mut() {
+            if rng.gen::<f32>() > 0.99 {
+                let material = materials.get_mut(&material);
+                if let Some(material) = material {
+                    if onoff.0 == true {
+                        material.emissive = Color::hex("000").unwrap();
+                    } else {
+                        material.emissive = Color::hex("fff").unwrap();
+                    }
+                    onoff.0 = !onoff.0;
                 }
-                onoff.0 = !onoff.0;
             }
         }
     }

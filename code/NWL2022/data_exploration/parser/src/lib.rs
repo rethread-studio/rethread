@@ -83,8 +83,7 @@ pub mod calltrace {
     impl Calltrace {
         pub fn new() -> Self {
             let data =
-                fs::read_to_string("/home/erik/Hämtningar/nwl2022/minvert-calltrace.txt.txt")
-                    .unwrap();
+                fs::read_to_string("/home/erik/Hämtningar/nwl2022/varna_calltrace.txt").unwrap();
             let mut trace = vec![];
             for line in data.lines() {
                 trace.push(parse_call_trace_line(line).unwrap().1);
@@ -236,6 +235,145 @@ pub mod deepika1 {
     }
 
     impl Default for Deepika1 {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+}
+
+pub mod deepika2 {
+    use serde::{Deserialize, Serialize};
+    use serde_json::Result;
+    use std::{collections::HashMap, fs};
+
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct Function {
+        fqn: String,
+        supplier: String,
+        dependency: String,
+    }
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct Call {
+        callee: Function,
+        caller: Function,
+        timestamp: u64,
+        length: i32,
+        #[serde(alias = "stackTrace")]
+        stack_trace: String,
+    }
+
+    #[derive(Debug)]
+    pub struct CallDrawData {
+        pub depth: i32,
+        pub callee_supplier: String,
+        pub callee_dependency: String,
+        pub callee_name: String,
+        pub caller_name: String,
+    }
+
+    #[derive(Debug)]
+    pub enum ColorSource {
+        Supplier,
+        Dependency,
+        Function,
+    }
+
+    #[derive(Debug)]
+    pub struct Deepika2 {
+        pub draw_trace: Vec<CallDrawData>,
+        pub max_depth: i32,
+    }
+
+    impl Deepika2 {
+        pub fn new() -> Self {
+            let data = fs::read_to_string(
+                "/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json",
+            )
+            .unwrap();
+            let trace_data: Vec<Call> = serde_json::from_str(&data).unwrap();
+
+            // let trace_data: Vec<Call> = trace_data
+            //     .into_iter()
+            //     .map(|mut call| {
+            //         std::mem::swap(&mut call.callee, &mut call.caller);
+            //         call
+            //     })
+            //     .collect();
+
+            let mut draw_trace = vec![];
+            for call in trace_data {
+                draw_trace.push(CallDrawData {
+                    depth: call.length,
+                    callee_supplier: call.callee.supplier.clone(),
+                    callee_dependency: call.callee.dependency.clone(),
+                    callee_name: call.callee.fqn.clone(),
+                    caller_name: call.caller.fqn.clone(),
+                });
+            }
+            // let mut last_depth = 0;
+            // let mut lowest_depth = 0;
+            // let mut i = 0;
+            // while i < trace_data.len() - 1 {
+            //     let a = &trace_data[i];
+            //     let b = &trace_data[i + 1];
+
+            //     let new_depth = if a.callee.fqn == b.caller.fqn {
+            //         last_depth + 1
+            //     } else if a.caller.fqn == b.caller.fqn {
+            //         last_depth
+            //     } else {
+            //         // backtrack to find the last known depth of this function
+            //         let mut j = i;
+            //         loop {
+            //             if draw_trace[j].caller_name == b.caller.fqn {
+            //                 break draw_trace[j].depth;
+            //             }
+            //             if j == 0 {
+            //                 lowest_depth -= 1;
+            //                 break lowest_depth;
+            //             }
+            //             j -= 1;
+            //         }
+            //     };
+            //     draw_trace.push(CallDrawData {
+            //         depth: new_depth,
+            //         callee_supplier: b.callee.supplier.clone(),
+            //         callee_dependency: b.callee.dependency.clone(),
+            //         callee_name: b.callee.fqn.clone(),
+            //         caller_name: b.caller.fqn.clone(),
+            //     });
+            //     last_depth = new_depth;
+            //     i += 1;
+            // }
+            let mut min_depth = 999999;
+            let mut max_depth = 0;
+            for call in &draw_trace {
+                let level = call.depth;
+                if level < min_depth {
+                    min_depth = level;
+                }
+                if level > max_depth {
+                    max_depth = level;
+                }
+            }
+            println!("max_depth: {max_depth}");
+            println!("min_depth: {min_depth}");
+            for call in &mut draw_trace {
+                call.depth -= min_depth;
+            }
+            max_depth -= min_depth;
+
+            // println!("depth_graph: {depth_graph:?}");
+            println!("num_calls: {}", draw_trace.len());
+
+            Self {
+                draw_trace,
+                max_depth,
+            }
+        }
+    }
+
+    impl Default for Deepika2 {
         fn default() -> Self {
             Self::new()
         }
