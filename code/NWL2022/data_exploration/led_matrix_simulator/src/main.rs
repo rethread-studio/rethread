@@ -6,14 +6,50 @@ use bevy::{
     render::render_resource::{AsBindGroup, ShaderRef},
     window::CursorMoved,
 };
+use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 
+use bevy_inspector_egui::WorldInspectorPlugin;
+use rand::prelude::*;
 fn main() {
     App::new()
+        .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.2)))
         .add_plugins(DefaultPlugins)
+        .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(setup)
         .add_startup_system(spawn_camera)
         .add_system(pan_orbit_camera)
+        .add_system(random_onoff)
         .run();
+}
+
+#[derive(Component)]
+struct MatrixPosition {
+    x: i32,
+    y: i32,
+    z: i32,
+}
+
+#[derive(Component)]
+struct OnOff(bool);
+
+fn random_onoff(
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut query: Query<(&MatrixPosition, &mut Handle<StandardMaterial>, &mut OnOff)>,
+) {
+    let mut rng = thread_rng();
+    for (matrix_position, mut material, mut onoff) in query.iter_mut() {
+        if rng.gen::<f32>() > 0.99 {
+            let material = materials.get_mut(&material);
+            if let Some(material) = material {
+                if onoff.0 == true {
+                    material.emissive = Color::hex("000").unwrap();
+                } else {
+                    material.emissive = Color::hex("fff").unwrap();
+                }
+                onoff.0 = !onoff.0;
+            }
+        }
+    }
 }
 
 /// set up a simple 3D scene
@@ -23,26 +59,32 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // add entities to the world
-    for y in -2..=2 {
-        for x in -5..=5 {
-            let x01 = (x + 5) as f32 / 10.0;
-            let y01 = (y + 2) as f32 / 4.0;
-            // sphere
-            commands.spawn_bundle(PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Icosphere {
-                    radius: 0.45,
-                    subdivisions: 32,
-                })),
-                material: materials.add(StandardMaterial {
-                    base_color: Color::hex("ffd891").unwrap(),
-                    // vary key PBR parameters on a grid of spheres to show the effect
-                    metallic: y01,
-                    perceptual_roughness: x01,
-                    ..default()
-                }),
-                transform: Transform::from_xyz(x as f32, y as f32 + 0.5, 0.0),
-                ..default()
-            });
+    for z in 0..10 {
+        for y in -2..=2 {
+            for x in -5..=5 {
+                let x01 = (x + 5) as f32 / 10.0;
+                let y01 = (y + 2) as f32 / 4.0;
+                // sphere
+                commands
+                    .spawn_bundle(PbrBundle {
+                        mesh: meshes.add(Mesh::from(shape::Icosphere {
+                            radius: 0.05,
+                            subdivisions: 32,
+                        })),
+                        material: materials.add(StandardMaterial {
+                            base_color: Color::hex("ffd891").unwrap(),
+                            // vary key PBR parameters on a grid of spheres to show the effect
+                            metallic: y01,
+                            // emissive: Color::hsl(z as f32 * 36.0, 0.8, 0.8),
+                            perceptual_roughness: x01,
+                            ..default()
+                        }),
+                        transform: Transform::from_xyz(x as f32, y as f32 + 0.5, z as f32),
+                        ..default()
+                    })
+                    .insert(MatrixPosition { x, y, z })
+                    .insert(OnOff(false));
+            }
         }
     }
     // unlit sphere

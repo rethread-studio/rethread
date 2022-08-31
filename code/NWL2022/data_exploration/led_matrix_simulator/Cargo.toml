@@ -7,6 +7,9 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.8.0"}
+bevy-inspector-egui = "0.12.1"
+fastrand = "1.8"
+rand = "0.8.5"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
