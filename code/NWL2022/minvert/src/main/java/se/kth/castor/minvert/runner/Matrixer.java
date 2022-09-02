@@ -1,6 +1,7 @@
 package se.kth.castor.minvert.runner;
 
 import java.util.Random;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.inverse.InvertMatrix;
@@ -25,11 +26,8 @@ public class Matrixer {
 
   public void doStuff() {
     INDArray original = Nd4j.create(Matrixer.generateRandomMatrix());
-    //System.out.println("Original matrix:");
-    //printMatrix(original.toIntMatrix());
-    INDArray inverted = InvertMatrix.invert(original, false);
-    //System.out.println("Inverted matrix:");
-    //printMatrix(inverted.toIntMatrix());
+    INDArray inverted = InvertMatrix.invert(original, true);
+    System.out.println(inverted.length());
   }
 
   public static void main(String[] args) {
