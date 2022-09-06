@@ -94,16 +94,22 @@ impl NannouTrace {
         let mut function_colors = HashMap::new();
 
         for call in &trace.draw_trace {
-            supplier_colors
-                .entry(call.callee_supplier.clone())
-                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
-            dependency_colors
-                .entry(call.callee_dependency.clone())
-                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+            if let Some(supplier) = &call.supplier {
+                supplier_colors
+                    .entry(supplier.clone())
+                    .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+            }
+            if let Some(dependency) = &call.dependency {
+                dependency_colors
+                    .entry(dependency.clone())
+                    .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
+            }
             function_colors
-                .entry(call.callee_name.clone())
+                .entry(call.name.clone())
                 .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
         }
+        println!("suppliers: {supplier_colors:#?}");
+        println!("num dependencies: {}", dependency_colors.len());
         Self::Deepika2 {
             trace,
             zoom: 1.0,
@@ -258,17 +264,24 @@ impl NannouTrace {
                 let depth_height = (win.h() / local_depth_width as f32) * 0.96;
 
                 let mut lines = vec![];
+                let default_color = hsla(0.0, 0.0, 0.5, 1.0);
                 for (i, call) in trace.iter().enumerate() {
                     let color = match color_source {
                         deepika2::ColorSource::Supplier => {
-                            supplier_colors.get(&call.callee_supplier).unwrap()
+                            if let Some(supplier) = &call.supplier {
+                                supplier_colors.get(supplier).unwrap()
+                            } else {
+                                &default_color
+                            }
                         }
                         deepika2::ColorSource::Dependency => {
-                            dependency_colors.get(&call.callee_dependency).unwrap()
+                            if let Some(dependency) = &call.dependency {
+                                dependency_colors.get(dependency).unwrap()
+                            } else {
+                                &default_color
+                            }
                         }
-                        deepika2::ColorSource::Function => {
-                            function_colors.get(&call.callee_name).unwrap()
-                        }
+                        deepika2::ColorSource::Function => function_colors.get(&call.name).unwrap(),
                     }
                     .clone();
                     lines.push((
@@ -279,6 +292,9 @@ impl NannouTrace {
                         color,
                     ));
                 }
+                // for point in &lines {
+                //     draw.ellipse().w_h(5., 5.).color(point.1).xy(point.0);
+                // }
                 draw.polyline().stroke_weight(2.0).points_colored(lines);
             }
         }
@@ -380,7 +396,9 @@ impl NannouTrace {
                     _ => (),
                 },
                 MouseMoved(pos) => {
-                    *zoom = (pos.y / app.window_rect().h() + 0.5) * 2000.0;
+                    let max_zoom = trace.draw_trace.len() as f32 / 1000.;
+                    // let max_zoom = 10.;
+                    *zoom = ((pos.y / app.window_rect().h() + 0.5) * max_zoom).max(1.0);
                     *offset = pos.x / app.window_rect().w() + 0.5;
                 }
                 _ => (),
@@ -431,10 +449,10 @@ fn model(app: &App) -> Model {
 
     // println!("num calls: {}", trace.len());
 
-    let deepika1_trace = NannouTrace::from_deepika1(deepika1::Deepika1::new());
-    let calltrace = NannouTrace::from_calltrace(calltrace::Calltrace::new());
+    // let deepika1_trace = NannouTrace::from_deepika1(deepika1::Deepika1::new());
+    // let calltrace = NannouTrace::from_calltrace(calltrace::Calltrace::new());
     let deepika2_trace = NannouTrace::from_deepika2(deepika2::Deepika2::new());
-    let traces = vec![deepika1_trace, deepika2_trace, calltrace];
+    let traces = vec![deepika2_trace];
 
     let m = Model {
         traces,

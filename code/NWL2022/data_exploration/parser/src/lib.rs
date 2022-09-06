@@ -265,10 +265,21 @@ pub mod deepika2 {
     #[derive(Debug)]
     pub struct CallDrawData {
         pub depth: i32,
-        pub callee_supplier: String,
-        pub callee_dependency: String,
-        pub callee_name: String,
-        pub caller_name: String,
+        pub supplier: Option<String>,
+        pub dependency: Option<String>,
+        pub name: String,
+        pub caller_name: Option<String>,
+    }
+    impl Default for CallDrawData {
+        fn default() -> Self {
+            Self {
+                depth: 0,
+                supplier: None,
+                dependency: None,
+                name: Default::default(),
+                caller_name: None,
+            }
+        }
     }
 
     #[derive(Debug)]
@@ -290,6 +301,9 @@ pub mod deepika2 {
                 "/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json",
             )
             .unwrap();
+            // let data =
+            //     fs::read_to_string("/media/erik/Erik Work 073079/data-varna-startup-shutdown.json")
+            //         .unwrap();
             let trace_data: Vec<Call> = serde_json::from_str(&data).unwrap();
 
             // let trace_data: Vec<Call> = trace_data
@@ -300,51 +314,67 @@ pub mod deepika2 {
             //     })
             //     .collect();
 
-            let mut draw_trace = vec![];
+            let mut draw_trace: Vec<CallDrawData> = vec![];
             for call in trace_data {
+                if call.callee.fqn == "java.awt.event.InputEvent$1.canAccessSystemClipboard" {
+                    continue;
+                }
+                let stack_functions: Vec<&str> = call.stack_trace.split(", ").collect();
+                // println!("stack_functions: {:#?}", stack_functions);
+                let mut first_nonadded_function = stack_functions.len() - 1;
+                let mut i = 1; // Skip first because it is the same as the current callee function
+                'find_nonadded: while i < stack_functions.len() {
+                    let depth = call.length - (i) as i32;
+                    let name_parts: Vec<&str> = stack_functions[i].split("/").collect();
+                    let function_name = if name_parts.len() == 2 {
+                        name_parts[1].split("(").collect::<Vec<&str>>()[0]
+                    } else {
+                        name_parts[0].split("(").collect::<Vec<&str>>()[0]
+                    };
+                    for draw_call in draw_trace.iter().rev() {
+                        if draw_call.name == function_name && draw_call.depth == depth {
+                            // This was already added, set the first nonadded to be the previous
+                            first_nonadded_function = i - 1;
+                            // println!("first nonadded: {}", first_nonadded_function);
+                            break 'find_nonadded;
+                        } else if draw_call.depth == 0 {
+                            break;
+                        }
+                    }
+                    i += 1;
+                }
+                for (i, function) in stack_functions
+                    .iter()
+                    .skip(1)
+                    .take(first_nonadded_function)
+                    .enumerate()
+                    .rev()
+                {
+                    let depth = call.length - (i + 1) as i32;
+                    let name_parts: Vec<&str> = function.split("/").collect();
+                    let (supplier, function_name) = if name_parts.len() == 2 {
+                        let supplier = name_parts[0];
+                        let function_name = name_parts[1].split("(").collect::<Vec<&str>>()[0];
+                        (Some(supplier.to_string()), function_name)
+                    } else {
+                        let function_name = name_parts[0].split("(").collect::<Vec<&str>>()[0];
+                        (None, function_name)
+                    };
+                    draw_trace.push(CallDrawData {
+                        name: function_name.to_string(),
+                        depth,
+                        supplier,
+                        ..Default::default()
+                    })
+                }
                 draw_trace.push(CallDrawData {
                     depth: call.length,
-                    callee_supplier: call.callee.supplier.clone(),
-                    callee_dependency: call.callee.dependency.clone(),
-                    callee_name: call.callee.fqn.clone(),
-                    caller_name: call.caller.fqn.clone(),
+                    supplier: Some(call.callee.supplier.clone()),
+                    dependency: Some(call.callee.dependency.clone()),
+                    name: call.callee.fqn.clone(),
+                    caller_name: Some(call.caller.fqn.clone()),
                 });
             }
-            // let mut last_depth = 0;
-            // let mut lowest_depth = 0;
-            // let mut i = 0;
-            // while i < trace_data.len() - 1 {
-            //     let a = &trace_data[i];
-            //     let b = &trace_data[i + 1];
-
-            //     let new_depth = if a.callee.fqn == b.caller.fqn {
-            //         last_depth + 1
-            //     } else if a.caller.fqn == b.caller.fqn {
-            //         last_depth
-            //     } else {
-            //         // backtrack to find the last known depth of this function
-            //         let mut j = i;
-            //         loop {
-            //             if draw_trace[j].caller_name == b.caller.fqn {
-            //                 break draw_trace[j].depth;
-            //             }
-            //             if j == 0 {
-            //                 lowest_depth -= 1;
-            //                 break lowest_depth;
-            //             }
-            //             j -= 1;
-            //         }
-            //     };
-            //     draw_trace.push(CallDrawData {
-            //         depth: new_depth,
-            //         callee_supplier: b.callee.supplier.clone(),
-            //         callee_dependency: b.callee.dependency.clone(),
-            //         callee_name: b.callee.fqn.clone(),
-            //         caller_name: b.caller.fqn.clone(),
-            //     });
-            //     last_depth = new_depth;
-            //     i += 1;
-            // }
             let mut min_depth = 999999;
             let mut max_depth = 0;
             for call in &draw_trace {
