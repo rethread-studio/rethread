@@ -18,7 +18,7 @@ use parser::deepika2::Deepika2;
 use rand::prelude::*;
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.2)))
+        .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
         .insert_resource(Trace::new())
         .add_plugins(DefaultPlugins)
@@ -78,9 +78,9 @@ struct Trace {
 
 impl Trace {
     pub fn new() -> Self {
-        // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
-        let trace =
-            Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
+        let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
+        // let trace =
+        //     Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
 
         let mut supplier_index = HashMap::new();
         let mut dependency_index = HashMap::new();
@@ -96,6 +96,12 @@ impl Trace {
                     dependency_map
                         .entry(dependency.clone())
                         .or_insert(new_index);
+                } else {
+                    let dependency_map = dependency_index
+                        .entry(supplier.clone())
+                        .or_insert(HashMap::new());
+                    let new_index = dependency_map.len();
+                    dependency_map.entry(String::new()).or_insert(new_index);
                 }
             }
         }
@@ -130,8 +136,7 @@ fn led_animation_from_trace(
         if timer.0.tick(time.delta()).just_finished() {
             // Set old lights to white
             for old_light in &trace.lit_leds {
-                for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut()
-                {
+                for (matrix_position, mut material, onoff, entity, children) in query.iter_mut() {
                     if entity == *old_light {
                         let material = materials.get_mut(&material).unwrap();
                         material.base_color = Color::WHITE;
@@ -175,8 +180,8 @@ fn led_animation_from_trace(
                 0
             };
             let new_matrix_position = MatrixPosition {
-                x: supplier as i32,
-                y: dependency as i32,
+                x: dependency as i32,
+                y: supplier as i32,
                 z: call.depth % 10,
             };
             for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut() {
@@ -190,8 +195,8 @@ fn led_animation_from_trace(
                                 .spawn_bundle(PointLightBundle {
                                     // transform: transform.clone(),
                                     point_light: PointLight {
-                                        intensity: 600.,
-                                        range: 3.,
+                                        intensity: 60.,
+                                        range: 50.,
                                         color: settings.current_led_colour.clone(),
                                         ..default()
                                     },
@@ -299,12 +304,14 @@ struct LedMatrix {
 
 /// set up a simple 3D scene
 fn setup(
+    trace: Res<Trace>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    // TODO: Create the grid based on the trace size. Make the supplier/dependency order deterministic.
+    let size_y = trace.supplier_index.len() as i32;
     let size_x = 10;
-    let size_y = 10;
     let size_z = 10;
     let parent = commands
         // For the hierarchy to work certain Components need to exist. SpatialBundle provides those.
@@ -317,10 +324,15 @@ fn setup(
         .id();
     // add entities to the world
     for z in 0..size_z {
-        for y in 0..size_y {
-            for x in 0..size_x {
-                let x01 = x as f32 / size_x as f32;
-                let y01 = (y + 2) as f32 / 4.0;
+        let mut suppliers: Vec<(&String, &usize)> = trace.supplier_index.iter().collect();
+        suppliers.sort_unstable_by_key(|a| a.1);
+
+        for (supplier, y) in suppliers {
+            let dependency_map = trace.dependency_index.get(supplier).unwrap();
+            let size_x = dependency_map.len() as i32;
+            let mut dependencies: Vec<(&String, &usize)> = dependency_map.iter().collect();
+            dependencies.sort_unstable_by_key(|a| a.1);
+            for (dependency, x) in dependencies {
                 // sphere
                 let child = commands
                     .spawn_bundle(PbrBundle {
@@ -334,18 +346,19 @@ fn setup(
                             metallic: 0.5,
                             // emissive: Color::hsl(z as f32 * 36.0, 0.8, 0.8),
                             perceptual_roughness: 0.5,
+                            unlit: true,
                             ..default()
                         }),
                         transform: Transform::from_xyz(
-                            x as f32 - size_x as f32 * 0.5 + 0.5,
-                            y as f32 + 0.5,
-                            z as f32 - size_z as f32 * 0.5,
+                            ((*x as f32 + 0.5) / size_x as f32) * 10. - 5. + 0.5,
+                            (*y as f32 / size_y as f32) * 10.0 + 0.5,
+                            ((z as f32 + 0.5) / size_z as f32) * 10. - 5.,
                         ),
                         ..default()
                     })
                     .insert(MatrixPosition {
-                        x,
-                        y,
+                        x: *x as i32,
+                        y: *y as i32,
                         z: size_z - z - 1,
                     })
                     .insert(OnOff(false))
@@ -575,8 +588,9 @@ fn bevy_ui(
     query: Query<Entity, With<LedMatrix>>,
     mut egui_context: ResMut<EguiContext>,
 ) {
-    egui::Window::new("Hello")
+    egui::Window::new("Settings")
         .id(egui::Id::new(777333))
+        .default_pos(egui::pos2(200., 0.))
         .show(egui_context.ctx_mut(), |ui| {
             ui.checkbox(&mut settings.play, "Play");
             let mut seconds = timer.0.duration().as_secs_f32();
