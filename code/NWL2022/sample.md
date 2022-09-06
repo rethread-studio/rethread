@@ -43,12 +43,12 @@ Sample TXT datasets for method calls during dynamic execution can be found:
 - for copying and pasting [`AUG`](https://en.wikipedia.org/wiki/Start_codon) in [VARNA](http://varna.lri.fr/) the **calltrace** is  [here](./varna-traces/calltrace.txt)
 - for copying and pasting [`AUG`](https://en.wikipedia.org/wiki/Start_codon) in [VARNA](http://varna.lri.fr/) the **methods calls** are  [here](./varna-traces/methods-call.txt)
 
-The **calltrace** shows method call pairs as shown below:
+The **method calls** shows method call pairs as shown below:
 
 ```text
 class1:method1 class2:method2 numcalls
 ```
-The **method calls**, which writes the entry and exit timestamps for methods, is of the following format:
+The **calltrace**, which writes the entry and exit timestamps for methods, is of the following format:
 
 ```text
 <>[stack_depth][thread_id]fqdn.class:method=timestamp_nanos
