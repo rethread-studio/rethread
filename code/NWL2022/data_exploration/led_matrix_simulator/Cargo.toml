@@ -11,6 +11,7 @@ bevy-inspector-egui = "0.12.1"
 bevy_egui = "0.16"
 fastrand = "1.8"
 rand = "0.8.5"
+parser = { path = "../parser" }
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

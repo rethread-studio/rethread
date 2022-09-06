@@ -1,32 +1,40 @@
+use std::time::Duration;
+
 use bevy::{
+    ecs::entity::Entities,
     input::mouse::{MouseButtonInput, MouseMotion, MouseWheel},
     prelude::*,
     reflect::TypeUuid,
     render::camera::Projection,
     render::render_resource::{AsBindGroup, ShaderRef},
+    utils::HashMap,
     window::CursorMoved,
 };
 use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 
 use bevy_inspector_egui::WorldInspectorPlugin;
+use parser::deepika2::Deepika2;
 use rand::prelude::*;
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.2)))
-        .insert_resource(AnimationTimer(Timer::from_seconds(0.4, true)))
+        .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
+        .insert_resource(Trace::new())
+        .insert_resource(GlobalSettings::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         // .add_plugin(WorldInspectorPlugin::new()
         .add_startup_system(setup)
         .add_startup_system(spawn_camera)
         .add_system(pan_orbit_camera)
-        .add_system(random_onoff)
+        // .add_system(random_onoff)
+        .add_system(led_animation_from_trace)
         .add_system(bevy_ui)
         .run();
 }
 
-#[derive(Component)]
+#[derive(Component, PartialEq, Eq, Copy, Clone)]
 struct MatrixPosition {
     x: i32,
     y: i32,
@@ -38,24 +46,188 @@ struct OnOff(bool);
 
 struct AnimationTimer(Timer);
 
+struct GlobalSettings {
+    play: bool,
+}
+impl Default for GlobalSettings {
+    fn default() -> Self {
+        Self { play: false }
+    }
+}
+
+struct Trace {
+    trace: Deepika2,
+    current_index: usize,
+    supplier_index: HashMap<String, usize>,
+    // dependency per supplier
+    dependency_index: HashMap<String, HashMap<String, usize>>,
+}
+
+impl Trace {
+    pub fn new() -> Self {
+        let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
+
+        let mut supplier_index = HashMap::new();
+        let mut dependency_index = HashMap::new();
+        for call in &trace.draw_trace {
+            if let Some(supplier) = &call.supplier {
+                let new_index = supplier_index.len();
+                supplier_index.entry(supplier.clone()).or_insert(new_index);
+                if let Some(dependency) = &call.dependency {
+                    let dependency_map = dependency_index
+                        .entry(supplier.clone())
+                        .or_insert(HashMap::new());
+                    let new_index = dependency_map.len();
+                    dependency_map
+                        .entry(dependency.clone())
+                        .or_insert(new_index);
+                }
+            }
+        }
+
+        Self {
+            trace,
+            current_index: 0,
+            supplier_index,
+            dependency_index,
+        }
+    }
+}
+
+fn led_animation_from_trace(
+    time: Res<Time>,
+    settings: Res<GlobalSettings>,
+    mut commands: Commands,
+    mut timer: ResMut<AnimationTimer>,
+    mut trace: ResMut<Trace>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+
+    mut query: Query<(
+        &MatrixPosition,
+        &mut Handle<StandardMaterial>,
+        &mut OnOff,
+        Entity,
+        Option<&Children>,
+    )>,
+) {
+    if settings.play {
+        if timer.0.tick(time.delta()).just_finished() {
+            // Turn off the last light
+            for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut() {
+                if onoff.0 {
+                    let material = materials.get_mut(&material).unwrap();
+                    material.base_color = Color::hex("000").unwrap();
+                    material.emissive = Color::hex("000").unwrap();
+                    if let Some(children) = children {
+                        for child in children {
+                            // despawn_recursive also removes the child from the parent
+                            commands.entity(*child).despawn_recursive();
+                        }
+                    }
+                    onoff.0 = false;
+                }
+            }
+            // Turn on the new light
+            trace.current_index += 1;
+            if trace.current_index >= trace.trace.draw_trace.len() {
+                trace.current_index = 0;
+            }
+            let call = &trace.trace.draw_trace[trace.current_index];
+            let supplier = if let Some(supplier) = &call.supplier {
+                *trace.supplier_index.get(supplier).unwrap_or(&0)
+            } else {
+                0
+            };
+            let dependency_map = if let Some(supplier) = &call.supplier {
+                trace.dependency_index.get(supplier)
+            } else {
+                None
+            };
+            let dependency = if let Some(map) = dependency_map {
+                if let Some(dep) = &call.dependency {
+                    *map.get(dep).unwrap_or(&0)
+                } else {
+                    0
+                }
+            } else {
+                0
+            };
+            let new_matrix_position = MatrixPosition {
+                x: supplier as i32,
+                y: dependency as i32,
+                z: call.depth % 10,
+            };
+            for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut() {
+                if *matrix_position == new_matrix_position {
+                    let material = materials.get_mut(&material).unwrap();
+                    material.base_color = Color::hex("fff").unwrap();
+                    material.emissive = Color::hex("fff").unwrap();
+                    let light = commands
+                        .spawn_bundle(PointLightBundle {
+                            // transform: transform.clone(),
+                            point_light: PointLight {
+                                intensity: 600.,
+                                range: 3.,
+                                ..default()
+                            },
+                            ..default()
+                        })
+                        .id();
+                    commands.entity(entity).add_child(light);
+                    onoff.0 = true;
+                }
+            }
+        }
+    }
+}
+
 fn random_onoff(
     time: Res<Time>,
+    mut commands: Commands,
     mut timer: ResMut<AnimationTimer>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut query: Query<(&MatrixPosition, &mut Handle<StandardMaterial>, &mut OnOff)>,
+    mut query: Query<(
+        &MatrixPosition,
+        &mut Handle<StandardMaterial>,
+        &mut OnOff,
+        &Transform,
+        Entity,
+        Option<&Children>,
+    )>,
 ) {
     if timer.0.tick(time.delta()).just_finished() {
         let mut rng = thread_rng();
-        for (matrix_position, mut material, mut onoff) in query.iter_mut() {
+        for (matrix_position, mut material, mut onoff, transform, entity, children) in
+            query.iter_mut()
+        {
             if rng.gen::<f32>() > 0.99 {
                 let material = materials.get_mut(&material);
                 if let Some(material) = material {
                     if onoff.0 == true {
                         // material.emissive = Color::hex("000").unwrap();
                         material.base_color = Color::hex("000").unwrap();
+                        if let Some(children) = children {
+                            for child in children {
+                                // despawn_recursive also removes the child from the parent
+                                commands.entity(*child).despawn_recursive();
+                            }
+                        }
                     } else {
                         // material.emissive = Color::hex("fff").unwrap();
                         material.base_color = Color::hex("fff").unwrap();
+
+                        let light = commands
+                            .spawn_bundle(PointLightBundle {
+                                // transform: transform.clone(),
+                                point_light: PointLight {
+                                    intensity: 600.,
+                                    range: 3.,
+                                    ..default()
+                                },
+                                ..default()
+                            })
+                            .id();
+                        commands.entity(entity).add_child(light);
                     }
                     onoff.0 = !onoff.0;
                 }
@@ -65,7 +237,11 @@ fn random_onoff(
 }
 
 #[derive(Component)]
-struct LedMatrixParent;
+struct LedMatrix {
+    size_x: i32,
+    size_y: i32,
+    size_z: i32,
+}
 
 /// set up a simple 3D scene
 fn setup(
@@ -73,14 +249,26 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let size_x = 10;
+    let size_y = 10;
+    let size_z = 10;
+    let parent = commands
+        // For the hierarchy to work certain Components need to exist. SpatialBundle provides those.
+        .spawn_bundle(SpatialBundle::default())
+        .insert(LedMatrix {
+            size_x,
+            size_y,
+            size_z,
+        })
+        .id();
     // add entities to the world
-    for z in 0..10 {
-        for y in -2..=2 {
-            for x in -5..=5 {
-                let x01 = (x + 5) as f32 / 10.0;
+    for z in 0..size_z {
+        for y in 0..size_y {
+            for x in 0..size_x {
+                let x01 = x as f32 / size_x as f32;
                 let y01 = (y + 2) as f32 / 4.0;
                 // sphere
-                commands
+                let child = commands
                     .spawn_bundle(PbrBundle {
                         mesh: meshes.add(Mesh::from(shape::Icosphere {
                             radius: 0.05,
@@ -89,29 +277,105 @@ fn setup(
                         material: materials.add(StandardMaterial {
                             base_color: Color::hex("000").unwrap(),
                             // vary key PBR parameters on a grid of spheres to show the effect
-                            metallic: y01,
+                            metallic: 0.5,
                             // emissive: Color::hsl(z as f32 * 36.0, 0.8, 0.8),
-                            perceptual_roughness: x01,
+                            perceptual_roughness: 0.,
                             ..default()
                         }),
-                        transform: Transform::from_xyz(x as f32, y as f32 + 0.5, z as f32),
+                        transform: Transform::from_xyz(
+                            x as f32 - size_x as f32 * 0.5 + 0.5,
+                            y as f32 + 0.5,
+                            z as f32 - size_z as f32 * 0.5,
+                        ),
                         ..default()
                     })
                     .insert(MatrixPosition { x, y, z })
-                    .insert(OnOff(false));
+                    .insert(OnOff(false))
+                    .id();
+
+                commands.entity(parent).push_children(&[child]);
             }
         }
     }
-    // light
-    commands.spawn_bundle(PointLightBundle {
-        transform: Transform::from_xyz(50.0, 50.0, 50.0),
-        point_light: PointLight {
-            intensity: 600000.,
-            range: 100.,
+    // ground plane
+    commands.spawn_bundle(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Plane { size: 12.0 })),
+        material: materials.add(StandardMaterial {
+            base_color: Color::BLACK,
+            reflectance: 0.8,
+            perceptual_roughness: 0.0,
             ..default()
-        },
+        }),
         ..default()
     });
+    let mut transform = Transform::from_xyz(0., size_y as f32 + 3.0, 0.);
+    transform.rotate_x(std::f32::consts::PI * 0.95);
+    commands.spawn_bundle(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Plane { size: 12.0 })),
+        material: materials.add(StandardMaterial {
+            base_color: Color::BLACK,
+            reflectance: 0.8,
+            perceptual_roughness: 0.0,
+            ..default()
+        }),
+        transform,
+        ..default()
+    });
+    commands.spawn_bundle(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Box::new(
+            size_x as f32 + 2.0,
+            size_y as f32,
+            0.1,
+        ))),
+        transform: Transform::from_xyz(0., size_y as f32 * 0.5, size_z as f32 * -0.5 - 1.0),
+        material: materials.add(StandardMaterial {
+            base_color: Color::BLACK,
+            reflectance: 1.0,
+            perceptual_roughness: 0.0,
+            ..default()
+        }),
+        ..default()
+    });
+    commands.spawn_bundle(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Box::new(
+            0.1,
+            size_y as f32,
+            size_z as f32 + 1.0,
+        ))),
+        transform: Transform::from_xyz(size_x as f32 * 0.6, size_y as f32 * 0.5, 0.),
+        material: materials.add(StandardMaterial {
+            base_color: Color::BLACK,
+            reflectance: 1.0,
+            perceptual_roughness: 0.0,
+            ..default()
+        }),
+        ..default()
+    });
+    commands.spawn_bundle(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Box::new(
+            0.1,
+            size_y as f32,
+            size_z as f32 + 1.0,
+        ))),
+        transform: Transform::from_xyz(size_x as f32 * -0.6, size_y as f32 * 0.5, 0.),
+        material: materials.add(StandardMaterial {
+            base_color: Color::BLACK,
+            reflectance: 1.0,
+            perceptual_roughness: 0.0,
+            ..default()
+        }),
+        ..default()
+    });
+    // // light
+    // commands.spawn_bundle(PointLightBundle {
+    //     transform: Transform::from_xyz(50.0, 50.0, 50.0),
+    //     point_light: PointLight {
+    //         intensity: 600000.,
+    //         range: 100.,
+    //         ..default()
+    //     },
+    //     ..default()
+    // });
 }
 
 /// Tags an entity as capable of panning and orbiting.
@@ -245,8 +509,32 @@ fn spawn_camera(mut commands: Commands) {
         });
 }
 
-fn bevy_ui(mut egui_context: ResMut<EguiContext>) {
+fn bevy_ui(
+    mut commands: Commands,
+    mut settings: ResMut<GlobalSettings>,
+    mut timer: ResMut<AnimationTimer>,
+    trace: Res<Trace>,
+    query: Query<Entity, With<LedMatrix>>,
+    mut egui_context: ResMut<EguiContext>,
+) {
     egui::Window::new("Hello").show(egui_context.ctx_mut(), |ui| {
-        ui.label("world");
+        ui.checkbox(&mut settings.play, "Play");
+        let mut seconds = timer.0.duration().as_secs_f32();
+        ui.add(
+            egui::Slider::new(&mut seconds, 0.001..=1.0)
+                .logarithmic(true)
+                .text("Step duration"),
+        );
+        timer.0.set_duration(Duration::from_secs_f32(seconds));
+        ui.label(&format!("Current call({}):", trace.current_index));
+        let call = &trace.trace.draw_trace[trace.current_index];
+        ui.label(&format!("{:#?}:", call));
+
+        if ui.button("Remove lights").clicked() {
+            for entity in query.iter() {
+                // despawn the entity and its children
+                commands.entity(entity).despawn_recursive();
+            }
+        }
     });
 }

@@ -2088,6 +2088,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_egui 0.16.0",
  "fastrand",
+ "parser",
  "rand",
 ]
 
@@ -2671,6 +2672,15 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "windows-sys",
+]
+
+[[package]]
+name = "parser"
+version = "0.1.0"
+dependencies = [
+ "nom",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
