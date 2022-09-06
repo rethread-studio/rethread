@@ -18,7 +18,7 @@ use parser::deepika2::Deepika2;
 use rand::prelude::*;
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
+        .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
         .insert_resource(Trace::new())
         .add_plugins(DefaultPlugins)
@@ -26,7 +26,7 @@ fn main() {
         .add_plugin(InspectorPlugin::<GlobalSettings>::new())
         // .insert_resource(GlobalSettings::default())
         // .add_plugin(EguiPlugin)
-        // .add_plugin(WorldInspectorPlugin::new()
+        .add_plugin(WorldInspectorPlugin::new())
         .add_startup_system(setup)
         .add_startup_system(spawn_camera)
         .add_system(pan_orbit_camera)
@@ -195,7 +195,7 @@ fn led_animation_from_trace(
                                 .spawn_bundle(PointLightBundle {
                                     // transform: transform.clone(),
                                     point_light: PointLight {
-                                        intensity: 60.,
+                                        intensity: 6.,
                                         range: 50.,
                                         color: settings.current_led_colour.clone(),
                                         ..default()
@@ -310,7 +310,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // TODO: Create the grid based on the trace size. Make the supplier/dependency order deterministic.
-    let size_y = trace.supplier_index.len() as i32;
+    let size_y = 10;
     let size_x = 10;
     let size_z = 10;
     let parent = commands
@@ -379,8 +379,8 @@ fn setup(
         }),
         ..default()
     });
-    let mut transform = Transform::from_xyz(0., size_y as f32 + 3.0, 0.);
-    transform.rotate_x(std::f32::consts::PI * 0.95);
+    let mut transform = Transform::from_xyz(0., size_y as f32 + 1.0, -5.);
+    transform.rotate_x(std::f32::consts::PI * 0.75);
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Plane { size: 12.0 })),
         material: materials.add(StandardMaterial {
@@ -398,7 +398,7 @@ fn setup(
             size_y as f32,
             0.1,
         ))),
-        transform: Transform::from_xyz(0., size_y as f32 * 0.5, size_z as f32 * -0.5 - 1.0),
+        transform: Transform::from_xyz(0., size_y as f32 * 0.5, size_z as f32 * -0.5 - 4.0),
         material: materials.add(StandardMaterial {
             base_color: Color::BLACK,
             reflectance: 1.0,
