@@ -244,7 +244,7 @@ pub mod deepika1 {
 pub mod deepika2 {
     use serde::{Deserialize, Serialize};
     use serde_json::Result;
-    use std::{collections::HashMap, fs};
+    use std::{collections::HashMap, fs, path::PathBuf};
 
     #[derive(Serialize, Deserialize, Debug)]
     pub struct Function {
@@ -296,11 +296,8 @@ pub mod deepika2 {
     }
 
     impl Deepika2 {
-        pub fn new() -> Self {
-            let data = fs::read_to_string(
-                "/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json",
-            )
-            .unwrap();
+        pub fn new(path: impl Into<PathBuf>) -> Self {
+            let data = fs::read_to_string(path.into()).unwrap();
             // let data =
             //     fs::read_to_string("/media/erik/Erik Work 073079/data-varna-startup-shutdown.json")
             //         .unwrap();
@@ -400,12 +397,6 @@ pub mod deepika2 {
                 draw_trace,
                 max_depth,
             }
-        }
-    }
-
-    impl Default for Deepika2 {
-        fn default() -> Self {
-            Self::new()
         }
     }
 }
