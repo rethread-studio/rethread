@@ -21,9 +21,11 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.2)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
         .insert_resource(Trace::new())
-        .insert_resource(GlobalSettings::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
+        .add_plugin(InspectorPlugin::<GlobalSettings>::new())
+        // .insert_resource(GlobalSettings::default())
+        // .add_plugin(EguiPlugin)
         // .add_plugin(WorldInspectorPlugin::new()
         .add_startup_system(setup)
         .add_startup_system(spawn_camera)
@@ -46,12 +48,22 @@ struct OnOff(bool);
 
 struct AnimationTimer(Timer);
 
+#[derive(Inspectable)]
 struct GlobalSettings {
     play: bool,
+    use_point_lights: bool,
+    #[inspectable(min = 1, max = 100)]
+    num_leds_in_trace: usize,
+    current_led_colour: Color,
 }
 impl Default for GlobalSettings {
     fn default() -> Self {
-        Self { play: false }
+        Self {
+            play: false,
+            use_point_lights: true,
+            num_leds_in_trace: 3,
+            current_led_colour: Color::RED,
+        }
     }
 }
 
@@ -61,11 +73,14 @@ struct Trace {
     supplier_index: HashMap<String, usize>,
     // dependency per supplier
     dependency_index: HashMap<String, HashMap<String, usize>>,
+    lit_leds: Vec<Entity>,
 }
 
 impl Trace {
     pub fn new() -> Self {
-        let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
+        // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
+        let trace =
+            Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
 
         let mut supplier_index = HashMap::new();
         let mut dependency_index = HashMap::new();
@@ -90,6 +105,7 @@ impl Trace {
             current_index: 0,
             supplier_index,
             dependency_index,
+            lit_leds: Vec::new(),
         }
     }
 }
@@ -101,7 +117,6 @@ fn led_animation_from_trace(
     mut timer: ResMut<AnimationTimer>,
     mut trace: ResMut<Trace>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-
     mut query: Query<(
         &MatrixPosition,
         &mut Handle<StandardMaterial>,
@@ -109,22 +124,29 @@ fn led_animation_from_trace(
         Entity,
         Option<&Children>,
     )>,
+    mut lights: Query<(&mut PointLight, Entity)>,
 ) {
     if settings.play {
         if timer.0.tick(time.delta()).just_finished() {
-            // Turn off the last light
-            for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut() {
-                if onoff.0 {
-                    let material = materials.get_mut(&material).unwrap();
-                    material.base_color = Color::hex("000").unwrap();
-                    material.emissive = Color::hex("000").unwrap();
-                    if let Some(children) = children {
-                        for child in children {
-                            // despawn_recursive also removes the child from the parent
-                            commands.entity(*child).despawn_recursive();
+            // Set old lights to white
+            for old_light in &trace.lit_leds {
+                for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut()
+                {
+                    if entity == *old_light {
+                        let material = materials.get_mut(&material).unwrap();
+                        material.base_color = Color::WHITE;
+                        material.emissive = Color::WHITE;
+
+                        if let Some(children) = children {
+                            for child in children {
+                                for (mut pl, pl_entity) in lights.iter_mut() {
+                                    if pl_entity == *child {
+                                        pl.color = Color::WHITE;
+                                    }
+                                }
+                            }
                         }
                     }
-                    onoff.0 = false;
                 }
             }
             // Turn on the new light
@@ -159,22 +181,54 @@ fn led_animation_from_trace(
             };
             for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut() {
                 if *matrix_position == new_matrix_position {
-                    let material = materials.get_mut(&material).unwrap();
-                    material.base_color = Color::hex("fff").unwrap();
-                    material.emissive = Color::hex("fff").unwrap();
-                    let light = commands
-                        .spawn_bundle(PointLightBundle {
-                            // transform: transform.clone(),
-                            point_light: PointLight {
-                                intensity: 600.,
-                                range: 3.,
-                                ..default()
-                            },
-                            ..default()
-                        })
-                        .id();
-                    commands.entity(entity).add_child(light);
-                    onoff.0 = true;
+                    if !trace.lit_leds.contains(&entity) {
+                        let material = materials.get_mut(&material).unwrap();
+                        material.base_color = settings.current_led_colour.clone();
+                        material.emissive = settings.current_led_colour.clone();
+                        if settings.use_point_lights {
+                            let light = commands
+                                .spawn_bundle(PointLightBundle {
+                                    // transform: transform.clone(),
+                                    point_light: PointLight {
+                                        intensity: 600.,
+                                        range: 3.,
+                                        color: settings.current_led_colour.clone(),
+                                        ..default()
+                                    },
+                                    ..default()
+                                })
+                                .id();
+                            commands.entity(entity).add_child(light);
+                        }
+                        onoff.0 = true;
+                    }
+                    trace.lit_leds.push(entity);
+                }
+            }
+
+            while trace.lit_leds.len() > settings.num_leds_in_trace {
+                let removed = trace.lit_leds.remove(0);
+                if !trace.lit_leds.contains(&removed) {
+                    // The same function can be called many times in close succession. Don't turn the LED off if it is still in the list of LEDs that should be lit.
+                    // Turn off the last light
+                    for (matrix_position, mut material, mut onoff, entity, children) in
+                        query.iter_mut()
+                    {
+                        if entity == removed {
+                            if onoff.0 {
+                                let material = materials.get_mut(&material).unwrap();
+                                material.base_color = Color::hex("000").unwrap();
+                                material.emissive = Color::hex("000").unwrap();
+                                if let Some(children) = children {
+                                    for child in children {
+                                        // despawn_recursive also removes the child from the parent
+                                        commands.entity(*child).despawn_recursive();
+                                    }
+                                }
+                                onoff.0 = false;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -279,7 +333,7 @@ fn setup(
                             // vary key PBR parameters on a grid of spheres to show the effect
                             metallic: 0.5,
                             // emissive: Color::hsl(z as f32 * 36.0, 0.8, 0.8),
-                            perceptual_roughness: 0.,
+                            perceptual_roughness: 0.5,
                             ..default()
                         }),
                         transform: Transform::from_xyz(
@@ -289,7 +343,11 @@ fn setup(
                         ),
                         ..default()
                     })
-                    .insert(MatrixPosition { x, y, z })
+                    .insert(MatrixPosition {
+                        x,
+                        y,
+                        z: size_z - z - 1,
+                    })
                     .insert(OnOff(false))
                     .id();
 
@@ -517,24 +575,26 @@ fn bevy_ui(
     query: Query<Entity, With<LedMatrix>>,
     mut egui_context: ResMut<EguiContext>,
 ) {
-    egui::Window::new("Hello").show(egui_context.ctx_mut(), |ui| {
-        ui.checkbox(&mut settings.play, "Play");
-        let mut seconds = timer.0.duration().as_secs_f32();
-        ui.add(
-            egui::Slider::new(&mut seconds, 0.001..=1.0)
-                .logarithmic(true)
-                .text("Step duration"),
-        );
-        timer.0.set_duration(Duration::from_secs_f32(seconds));
-        ui.label(&format!("Current call({}):", trace.current_index));
-        let call = &trace.trace.draw_trace[trace.current_index];
-        ui.label(&format!("{:#?}:", call));
+    egui::Window::new("Hello")
+        .id(egui::Id::new(777333))
+        .show(egui_context.ctx_mut(), |ui| {
+            ui.checkbox(&mut settings.play, "Play");
+            let mut seconds = timer.0.duration().as_secs_f32();
+            ui.add(
+                egui::Slider::new(&mut seconds, 0.001..=1.0)
+                    .logarithmic(true)
+                    .text("Step duration"),
+            );
+            timer.0.set_duration(Duration::from_secs_f32(seconds));
+            ui.label(&format!("Current call({}):", trace.current_index));
+            let call = &trace.trace.draw_trace[trace.current_index];
+            ui.label(&format!("{:#?}:", call));
 
-        if ui.button("Remove lights").clicked() {
-            for entity in query.iter() {
-                // despawn the entity and its children
-                commands.entity(entity).despawn_recursive();
+            if ui.button("Remove lights").clicked() {
+                for entity in query.iter() {
+                    // despawn the entity and its children
+                    commands.entity(entity).despawn_recursive();
+                }
             }
-        }
-    });
+        });
 }
