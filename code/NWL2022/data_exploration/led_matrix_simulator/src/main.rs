@@ -6,6 +6,7 @@ use bevy::{
     render::render_resource::{AsBindGroup, ShaderRef},
     window::CursorMoved,
 };
+use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 
 use bevy_inspector_egui::WorldInspectorPlugin;
@@ -15,11 +16,13 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.2)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.4, true)))
         .add_plugins(DefaultPlugins)
-        .add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(EguiPlugin)
+        // .add_plugin(WorldInspectorPlugin::new()
         .add_startup_system(setup)
         .add_startup_system(spawn_camera)
         .add_system(pan_orbit_camera)
         .add_system(random_onoff)
+        .add_system(bevy_ui)
         .run();
 }
 
@@ -48,9 +51,11 @@ fn random_onoff(
                 let material = materials.get_mut(&material);
                 if let Some(material) = material {
                     if onoff.0 == true {
-                        material.emissive = Color::hex("000").unwrap();
+                        // material.emissive = Color::hex("000").unwrap();
+                        material.base_color = Color::hex("000").unwrap();
                     } else {
-                        material.emissive = Color::hex("fff").unwrap();
+                        // material.emissive = Color::hex("fff").unwrap();
+                        material.base_color = Color::hex("fff").unwrap();
                     }
                     onoff.0 = !onoff.0;
                 }
@@ -58,6 +63,9 @@ fn random_onoff(
         }
     }
 }
+
+#[derive(Component)]
+struct LedMatrixParent;
 
 /// set up a simple 3D scene
 fn setup(
@@ -79,7 +87,7 @@ fn setup(
                             subdivisions: 32,
                         })),
                         material: materials.add(StandardMaterial {
-                            base_color: Color::hex("ffd891").unwrap(),
+                            base_color: Color::hex("000").unwrap(),
                             // vary key PBR parameters on a grid of spheres to show the effect
                             metallic: y01,
                             // emissive: Color::hsl(z as f32 * 36.0, 0.8, 0.8),
@@ -94,21 +102,6 @@ fn setup(
             }
         }
     }
-    // unlit sphere
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Icosphere {
-            radius: 0.45,
-            subdivisions: 32,
-        })),
-        material: materials.add(StandardMaterial {
-            base_color: Color::hex("ffd891").unwrap(),
-            // vary key PBR parameters on a grid of spheres to show the effect
-            unlit: true,
-            ..default()
-        }),
-        transform: Transform::from_xyz(-5.0, -2.5, 0.0),
-        ..default()
-    });
     // light
     commands.spawn_bundle(PointLightBundle {
         transform: Transform::from_xyz(50.0, 50.0, 50.0),
@@ -250,4 +243,10 @@ fn spawn_camera(mut commands: Commands) {
             radius,
             ..Default::default()
         });
+}
+
+fn bevy_ui(mut egui_context: ResMut<EguiContext>) {
+    egui::Window::new("Hello").show(egui_context.ctx_mut(), |ui| {
+        ui.label("world");
+    });
 }
