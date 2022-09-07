@@ -186,10 +186,10 @@ fn led_animation_from_trace(
             };
             for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut() {
                 if *matrix_position == new_matrix_position {
+                    let material = materials.get_mut(&material).unwrap();
+                    material.base_color = settings.current_led_colour.clone();
+                    material.emissive = settings.current_led_colour.clone();
                     if !trace.lit_leds.contains(&entity) {
-                        let material = materials.get_mut(&material).unwrap();
-                        material.base_color = settings.current_led_colour.clone();
-                        material.emissive = settings.current_led_colour.clone();
                         if settings.use_point_lights {
                             let light = commands
                                 .spawn_bundle(PointLightBundle {
@@ -205,8 +205,19 @@ fn led_animation_from_trace(
                                 .id();
                             commands.entity(entity).add_child(light);
                         }
-                        onoff.0 = true;
+                    } else {
+                        // The light already exists, but we want to set it to the active colour
+                        if let Some(children) = children {
+                            for child in children {
+                                for (mut pl, pl_entity) in lights.iter_mut() {
+                                    if pl_entity == *child {
+                                        pl.color = settings.current_led_colour.clone();
+                                    }
+                                }
+                            }
+                        }
                     }
+                    onoff.0 = true;
                     trace.lit_leds.push(entity);
                 }
             }
@@ -478,7 +489,7 @@ fn pan_orbit_camera(
 ) {
     // change input mapping for orbit and panning here
     let orbit_button = MouseButton::Right;
-    let pan_button = MouseButton::Middle;
+    let pan_button = MouseButton::Left;
 
     let mut pan = Vec2::ZERO;
     let mut rotation_move = Vec2::ZERO;
@@ -604,11 +615,11 @@ fn bevy_ui(
             let call = &trace.trace.draw_trace[trace.current_index];
             ui.label(&format!("{:#?}:", call));
 
-            if ui.button("Remove lights").clicked() {
-                for entity in query.iter() {
-                    // despawn the entity and its children
-                    commands.entity(entity).despawn_recursive();
-                }
-            }
+            // if ui.button("Remove lights").clicked() {
+            //     for entity in query.iter() {
+            //         // despawn the entity and its children
+            //         commands.entity(entity).despawn_recursive();
+            //     }
+            // }
         });
 }
