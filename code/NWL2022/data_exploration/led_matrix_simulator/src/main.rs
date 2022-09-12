@@ -3,6 +3,7 @@ use std::time::Duration;
 use bevy::{
     ecs::entity::Entities,
     input::mouse::{MouseButtonInput, MouseMotion, MouseWheel},
+    math::vec3,
     prelude::*,
     reflect::TypeUuid,
     render::camera::Projection,
@@ -52,17 +53,25 @@ struct AnimationTimer(Timer);
 struct GlobalSettings {
     play: bool,
     use_point_lights: bool,
+    interpolate_depth: bool,
     #[inspectable(min = 1, max = 100)]
     num_leds_in_trace: usize,
     current_led_colour: Color,
+    led_radius: f32,
+    led_intensity: f32,
+    led_depth: usize,
 }
 impl Default for GlobalSettings {
     fn default() -> Self {
         Self {
             play: false,
             use_point_lights: true,
+            interpolate_depth: false,
             num_leds_in_trace: 3,
             current_led_colour: Color::RED,
+            led_depth: 10,
+            led_radius: 0.,
+            led_intensity: 1000.,
         }
     }
 }
@@ -78,9 +87,10 @@ struct Trace {
 
 impl Trace {
     pub fn new() -> Self {
-        let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
-        // let trace =
-        //     Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
+        // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste.json");
+        // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
+        let trace =
+            Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
 
         let mut supplier_index = HashMap::new();
         let mut dependency_index = HashMap::new();
@@ -127,6 +137,7 @@ fn led_animation_from_trace(
         &MatrixPosition,
         &mut Handle<StandardMaterial>,
         &mut OnOff,
+        &mut Transform,
         Entity,
         Option<&Children>,
     )>,
@@ -134,13 +145,17 @@ fn led_animation_from_trace(
 ) {
     if settings.play {
         if timer.0.tick(time.delta()).just_finished() {
+            let max_depth = trace.trace.max_depth as f32;
             // Set old lights to white
             for old_light in &trace.lit_leds {
-                for (matrix_position, mut material, onoff, entity, children) in query.iter_mut() {
+                for (matrix_position, mut material, onoff, mut transform, entity, children) in
+                    query.iter_mut()
+                {
                     if entity == *old_light {
                         let material = materials.get_mut(&material).unwrap();
-                        material.base_color = Color::WHITE;
-                        material.emissive = Color::WHITE;
+                        // material.base_color = Color::WHITE;
+                        material.base_color = Color::rgba(1., 1., 1., 0.5);
+                        // material.emissive = Color::WHITE;
 
                         if let Some(children) = children {
                             for child in children {
@@ -179,12 +194,17 @@ fn led_animation_from_trace(
             } else {
                 0
             };
+            let z_pos = (call.depth as f32 / max_depth) * settings.led_depth as f32;
+
             let new_matrix_position = MatrixPosition {
-                x: dependency as i32,
-                y: supplier as i32,
+                x: dependency as i32 % 7,
+                y: supplier as i32 % 7,
                 z: call.depth % 10,
+                // z: z_pos.floor() as i32,
             };
-            for (matrix_position, mut material, mut onoff, entity, children) in query.iter_mut() {
+            for (matrix_position, mut material, mut onoff, mut transform, entity, children) in
+                query.iter_mut()
+            {
                 if *matrix_position == new_matrix_position {
                     let material = materials.get_mut(&material).unwrap();
                     material.base_color = settings.current_led_colour.clone();
@@ -195,15 +215,19 @@ fn led_animation_from_trace(
                                 .spawn_bundle(PointLightBundle {
                                     // transform: transform.clone(),
                                     point_light: PointLight {
-                                        intensity: 6.,
+                                        intensity: settings.led_intensity,
                                         range: 50.,
+                                        radius: settings.led_radius,
                                         color: settings.current_led_colour.clone(),
+                                        shadows_enabled: true,
                                         ..default()
                                     },
                                     ..default()
                                 })
                                 .id();
                             commands.entity(entity).add_child(light);
+
+                            transform.scale = vec3(3., 3., 3.);
                         }
                     } else {
                         // The light already exists, but we want to set it to the active colour
@@ -227,14 +251,21 @@ fn led_animation_from_trace(
                 if !trace.lit_leds.contains(&removed) {
                     // The same function can be called many times in close succession. Don't turn the LED off if it is still in the list of LEDs that should be lit.
                     // Turn off the last light
-                    for (matrix_position, mut material, mut onoff, entity, children) in
-                        query.iter_mut()
+                    for (
+                        matrix_position,
+                        mut material,
+                        mut onoff,
+                        mut transform,
+                        entity,
+                        children,
+                    ) in query.iter_mut()
                     {
                         if entity == removed {
                             if onoff.0 {
                                 let material = materials.get_mut(&material).unwrap();
                                 material.base_color = Color::hex("000").unwrap();
                                 material.emissive = Color::hex("000").unwrap();
+                                transform.scale = vec3(1., 1., 1.);
                                 if let Some(children) = children {
                                     for child in children {
                                         // despawn_recursive also removes the child from the parent
@@ -316,14 +347,15 @@ struct LedMatrix {
 /// set up a simple 3D scene
 fn setup(
     trace: Res<Trace>,
+    settings: Res<GlobalSettings>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // TODO: Create the grid based on the trace size. Make the supplier/dependency order deterministic.
-    let size_y = 10;
-    let size_x = 10;
-    let size_z = 10;
+    let size_y = 7;
+    let size_x = 7;
+    let size_z = settings.led_depth as i32;
     let parent = commands
         // For the hierarchy to work certain Components need to exist. SpatialBundle provides those.
         .spawn_bundle(SpatialBundle::default())
@@ -335,21 +367,24 @@ fn setup(
         .id();
     // add entities to the world
     for z in 0..size_z {
-        let mut suppliers: Vec<(&String, &usize)> = trace.supplier_index.iter().collect();
-        suppliers.sort_unstable_by_key(|a| a.1);
+        // let mut suppliers: Vec<(&String, &usize)> = trace.supplier_index.iter().collect();
+        // suppliers.sort_unstable_by_key(|a| a.1);
+        let start_y = ((size_y - 1) as f32 / size_z as f32 * z as f32).floor() as i32;
 
-        for (supplier, y) in suppliers {
-            let dependency_map = trace.dependency_index.get(supplier).unwrap();
-            let size_x = dependency_map.len() as i32;
-            let mut dependencies: Vec<(&String, &usize)> = dependency_map.iter().collect();
-            dependencies.sort_unstable_by_key(|a| a.1);
-            for (dependency, x) in dependencies {
+        for y in start_y..size_y {
+            // for (supplier, y) in suppliers {
+            // let dependency_map = trace.dependency_index.get(supplier).unwrap();
+            // let size_x = dependency_map.len() as i32;
+            // let mut dependencies: Vec<(&String, &usize)> = dependency_map.iter().collect();
+            // dependencies.sort_unstable_by_key(|a| a.1);
+            // for (dependency, x) in dependencies {
+            for x in 0..size_x {
                 // sphere
                 let child = commands
                     .spawn_bundle(PbrBundle {
                         mesh: meshes.add(Mesh::from(shape::Icosphere {
-                            radius: 0.05,
-                            subdivisions: 32,
+                            radius: 0.015,
+                            subdivisions: 16,
                         })),
                         material: materials.add(StandardMaterial {
                             base_color: Color::hex("000").unwrap(),
@@ -361,15 +396,15 @@ fn setup(
                             ..default()
                         }),
                         transform: Transform::from_xyz(
-                            ((*x as f32 + 0.5) / size_x as f32) * 10. - 5. + 0.5,
-                            (*y as f32 / size_y as f32) * 10.0 + 0.5,
-                            ((z as f32 + 0.5) / size_z as f32) * 10. - 5.,
+                            ((x as f32 + 0.5) / size_x as f32) * 10. - 5. + 0.5,
+                            (y as f32 / size_y as f32) * 10.0 + 0.5,
+                            ((z as f32 + 0.5) / size_z as f32) * -10. + 5.,
                         ),
                         ..default()
                     })
                     .insert(MatrixPosition {
-                        x: *x as i32,
-                        y: *y as i32,
+                        x: x as i32,
+                        y: y as i32,
                         z: size_z - z - 1,
                     })
                     .insert(OnOff(false))
@@ -379,18 +414,23 @@ fn setup(
             }
         }
     }
+    let box_y = 10.;
+    let box_x = 10.;
+    let box_z = 14.;
+    let box_z_offset = -2.;
     // ground plane
     commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Plane { size: 12.0 })),
+        mesh: meshes.add(Mesh::from(shape::Plane { size: 14.0 })),
         material: materials.add(StandardMaterial {
             base_color: Color::BLACK,
             reflectance: 0.8,
             perceptual_roughness: 0.0,
             ..default()
         }),
+        transform: Transform::from_xyz(0., 0., box_z_offset),
         ..default()
     });
-    let mut transform = Transform::from_xyz(0., size_y as f32 + 1.0, -5.);
+    let mut transform = Transform::from_xyz(0., box_y + 2.0, -5.);
     transform.rotate_x(std::f32::consts::PI * 0.75);
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Plane { size: 12.0 })),
@@ -405,11 +445,11 @@ fn setup(
     });
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Box::new(
-            size_x as f32 + 2.0,
-            size_y as f32,
+            box_x as f32 + 2.0,
+            box_y as f32,
             0.1,
         ))),
-        transform: Transform::from_xyz(0., size_y as f32 * 0.5, size_z as f32 * -0.5 - 4.0),
+        transform: Transform::from_xyz(0., box_y as f32 * 0.5, box_z * -0.5 + box_z_offset),
         material: materials.add(StandardMaterial {
             base_color: Color::BLACK,
             reflectance: 1.0,
@@ -419,12 +459,8 @@ fn setup(
         ..default()
     });
     commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(
-            0.1,
-            size_y as f32,
-            size_z as f32 + 1.0,
-        ))),
-        transform: Transform::from_xyz(size_x as f32 * 0.6, size_y as f32 * 0.5, 0.),
+        mesh: meshes.add(Mesh::from(shape::Box::new(0.1, box_y as f32, box_z as f32))),
+        transform: Transform::from_xyz(box_x as f32 * 0.6, box_y * 0.5, box_z_offset),
         material: materials.add(StandardMaterial {
             base_color: Color::BLACK,
             reflectance: 1.0,
@@ -434,12 +470,8 @@ fn setup(
         ..default()
     });
     commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(
-            0.1,
-            size_y as f32,
-            size_z as f32 + 1.0,
-        ))),
-        transform: Transform::from_xyz(size_x as f32 * -0.6, size_y as f32 * 0.5, 0.),
+        mesh: meshes.add(Mesh::from(shape::Box::new(0.1, box_y as f32, box_z as f32))),
+        transform: Transform::from_xyz(box_x as f32 * -0.6, box_y * 0.5, box_z_offset),
         material: materials.add(StandardMaterial {
             base_color: Color::BLACK,
             reflectance: 1.0,
