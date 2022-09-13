@@ -19,7 +19,8 @@ use parser::deepika2::Deepika2;
 use rand::prelude::*;
 fn main() {
     App::new()
-        .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
+        // .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
+        .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
         .insert_resource(Trace::new())
         .add_plugins(DefaultPlugins)
@@ -87,10 +88,10 @@ struct Trace {
 
 impl Trace {
     pub fn new() -> Self {
-        // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste.json");
+        let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste.json");
         // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
-        let trace =
-            Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
+        // let trace =
+        //     Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
 
         let mut supplier_index = HashMap::new();
         let mut dependency_index = HashMap::new();
@@ -351,6 +352,7 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     // TODO: Create the grid based on the trace size. Make the supplier/dependency order deterministic.
     let size_y = 7;
@@ -383,7 +385,7 @@ fn setup(
                 let child = commands
                     .spawn_bundle(PbrBundle {
                         mesh: meshes.add(Mesh::from(shape::Icosphere {
-                            radius: 0.015,
+                            radius: 0.020,
                             subdivisions: 16,
                         })),
                         material: materials.add(StandardMaterial {
@@ -415,14 +417,15 @@ fn setup(
         }
     }
     let box_y = 10.;
-    let box_x = 10.;
+    let box_x = 12.;
     let box_z = 14.;
     let box_z_offset = -2.;
+    let wall_color = Color::rgba(5. / 255., 6. / 255., 14. / 255., 1.0);
     // ground plane
     commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Plane { size: 14.0 })),
+        mesh: meshes.add(Mesh::from(shape::Box::new(box_x, 0.1, box_z))),
         material: materials.add(StandardMaterial {
-            base_color: Color::BLACK,
+            base_color: wall_color,
             reflectance: 0.8,
             perceptual_roughness: 0.0,
             ..default()
@@ -430,28 +433,24 @@ fn setup(
         transform: Transform::from_xyz(0., 0., box_z_offset),
         ..default()
     });
-    let mut transform = Transform::from_xyz(0., box_y + 2.0, -5.);
-    transform.rotate_x(std::f32::consts::PI * 0.75);
+    // let mut transform = Transform::from_xyz(0., box_y + 2.0, -5.);
+    // transform.rotate_x(std::f32::consts::PI * 0.75);
+    // commands.spawn_bundle(PbrBundle {
+    //     mesh: meshes.add(Mesh::from(shape::Plane { size: 12.0 })),
+    //     material: materials.add(StandardMaterial {
+    //         base_color: wall_color,
+    //         reflectance: 0.8,
+    //         perceptual_roughness: 0.0,
+    //         ..default()
+    //     }),
+    //     transform,
+    //     ..default()
+    // });
     commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Plane { size: 12.0 })),
-        material: materials.add(StandardMaterial {
-            base_color: Color::BLACK,
-            reflectance: 0.8,
-            perceptual_roughness: 0.0,
-            ..default()
-        }),
-        transform,
-        ..default()
-    });
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(
-            box_x as f32 + 2.0,
-            box_y as f32,
-            0.1,
-        ))),
+        mesh: meshes.add(Mesh::from(shape::Box::new(box_x as f32, box_y as f32, 0.1))),
         transform: Transform::from_xyz(0., box_y as f32 * 0.5, box_z * -0.5 + box_z_offset),
         material: materials.add(StandardMaterial {
-            base_color: Color::BLACK,
+            base_color: wall_color,
             reflectance: 1.0,
             perceptual_roughness: 0.0,
             ..default()
@@ -460,9 +459,9 @@ fn setup(
     });
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Box::new(0.1, box_y as f32, box_z as f32))),
-        transform: Transform::from_xyz(box_x as f32 * 0.6, box_y * 0.5, box_z_offset),
+        transform: Transform::from_xyz(box_x as f32 * 0.5, box_y * 0.5, box_z_offset),
         material: materials.add(StandardMaterial {
-            base_color: Color::BLACK,
+            base_color: wall_color,
             reflectance: 1.0,
             perceptual_roughness: 0.0,
             ..default()
@@ -471,13 +470,20 @@ fn setup(
     });
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Box::new(0.1, box_y as f32, box_z as f32))),
-        transform: Transform::from_xyz(box_x as f32 * -0.6, box_y * 0.5, box_z_offset),
+        transform: Transform::from_xyz(box_x as f32 * -0.5, box_y * 0.5, box_z_offset),
         material: materials.add(StandardMaterial {
-            base_color: Color::BLACK,
+            base_color: wall_color,
             reflectance: 1.0,
             perceptual_roughness: 0.0,
             ..default()
         }),
+        ..default()
+    });
+    let mut transform = Transform::from_xyz(0., 0., -8.);
+    transform.rotate_x(-0.3);
+    commands.spawn_bundle(SceneBundle {
+        scene: asset_server.load("curved_mirror.glb#Scene0"),
+        transform,
         ..default()
     });
     // // light
@@ -634,6 +640,7 @@ fn bevy_ui(
     egui::Window::new("Settings")
         .id(egui::Id::new(777333))
         .default_pos(egui::pos2(200., 0.))
+        .resizable(true)
         .show(egui_context.ctx_mut(), |ui| {
             ui.checkbox(&mut settings.play, "Play");
             let mut seconds = timer.0.duration().as_secs_f32();
@@ -644,8 +651,17 @@ fn bevy_ui(
             );
             timer.0.set_duration(Duration::from_secs_f32(seconds));
             ui.label(&format!("Current call({}):", trace.current_index));
-            let call = &trace.trace.draw_trace[trace.current_index];
-            ui.label(&format!("{:#?}:", call));
+            egui::Grid::new("Current call:").show(ui, |ui| {
+                ui.label("Num:");
+                ui.label(&format!("{}", trace.current_index));
+                ui.end_row();
+                ui.label("Data:");
+                egui::ScrollArea::horizontal().show(ui, |ui| {
+                    let call = &trace.trace.draw_trace[trace.current_index];
+                    ui.label(&format!("{:#?}:", call));
+                });
+                ui.end_row();
+            })
 
             // if ui.button("Remove lights").clicked() {
             //     for entity in query.iter() {
