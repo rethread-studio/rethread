@@ -88,7 +88,8 @@ struct Trace {
 
 impl Trace {
     pub fn new() -> Self {
-        let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste.json");
+        let trace = Deepika2::open_or_parse("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
+            .unwrap();
         // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
         // let trace =
         //     Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");

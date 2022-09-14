@@ -244,7 +244,12 @@ pub mod deepika1 {
 pub mod deepika2 {
     use serde::{Deserialize, Serialize};
     use serde_json::Result;
-    use std::{collections::HashMap, fs, path::PathBuf};
+    use std::{
+        collections::HashMap,
+        fs::{self, File},
+        io::{BufReader, Read, Write},
+        path::PathBuf,
+    };
 
     #[derive(Serialize, Deserialize, Debug)]
     pub struct Function {
@@ -262,7 +267,7 @@ pub mod deepika2 {
         stack_trace: String,
     }
 
-    #[derive(Debug)]
+    #[derive(Serialize, Deserialize, Debug)]
     pub struct CallDrawData {
         pub depth: i32,
         pub supplier: Option<String>,
@@ -282,26 +287,60 @@ pub mod deepika2 {
         }
     }
 
-    #[derive(Debug)]
+    #[derive(Serialize, Deserialize, Debug)]
     pub enum ColorSource {
         Supplier,
         Dependency,
         Function,
     }
 
-    #[derive(Debug)]
+    #[derive(Serialize, Deserialize, Debug)]
     pub struct Deepika2 {
         pub draw_trace: Vec<CallDrawData>,
         pub max_depth: i32,
     }
 
     impl Deepika2 {
-        pub fn new(path: impl Into<PathBuf>) -> Self {
-            let data = fs::read_to_string(path.into()).unwrap();
+        pub fn open_or_parse(path: impl Into<PathBuf>) -> anyhow::Result<Self> {
+            let path = path.into();
+            let mut postcard_path = path.clone();
+            postcard_path.set_extension("postcard");
+            match Deepika2::from_file_postcard(&postcard_path) {
+                Ok(s) => return Ok(s),
+                Err(e) => {
+                    eprintln!(
+                        "Failed to read postcard format from path {:?} with error {e}",
+                        postcard_path
+                    );
+                    let mut raw_path = path.clone();
+                    raw_path.set_extension("json");
+                    let me = Deepika2::parse_from_raw_file(raw_path)?;
+                    me.save_to_file_postcard(&postcard_path);
+                    return Ok(me);
+                }
+            }
+        }
+        pub fn from_file_postcard(path: impl Into<PathBuf>) -> anyhow::Result<Self> {
+            let file = File::open(path.into())?;
+            let mut reader = BufReader::new(file);
+            let mut buffer = Vec::new();
+
+            // Read file into vector.
+            reader.read_to_end(&mut buffer)?;
+            let me = postcard::from_bytes::<Deepika2>(&buffer).unwrap();
+            Ok(me)
+        }
+        pub fn save_to_file_postcard(&self, path: impl Into<PathBuf>) {
+            let output: Vec<u8> = postcard::to_allocvec(self).unwrap();
+            let mut file = File::create(path.into()).unwrap();
+            file.write_all(&output).unwrap();
+        }
+        pub fn parse_from_raw_file(path: impl Into<PathBuf>) -> anyhow::Result<Self> {
+            let data = fs::read_to_string(path.into())?;
             // let data =
             //     fs::read_to_string("/media/erik/Erik Work 073079/data-varna-startup-shutdown.json")
             //         .unwrap();
-            let trace_data: Vec<Call> = serde_json::from_str(&data).unwrap();
+            let trace_data: Vec<Call> = serde_json::from_str(&data)?;
 
             // let trace_data: Vec<Call> = trace_data
             //     .into_iter()
@@ -393,10 +432,10 @@ pub mod deepika2 {
             // println!("depth_graph: {depth_graph:?}");
             println!("num_calls: {}", draw_trace.len());
 
-            Self {
+            Ok(Self {
                 draw_trace,
                 max_depth,
-            }
+            })
         }
     }
 }
