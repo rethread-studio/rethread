@@ -245,7 +245,7 @@ pub mod deepika2 {
     use serde::{Deserialize, Serialize};
     use serde_json::Result;
     use std::{
-        collections::HashMap,
+        collections::{HashMap, HashSet},
         fs::{self, File},
         io::{BufReader, Read, Write},
         path::PathBuf,
@@ -305,6 +305,16 @@ pub mod deepika2 {
             let path = path.into();
             let mut postcard_path = path.clone();
             postcard_path.set_extension("postcard");
+            let mut parsed_json_path = path.clone();
+            let mut file_name = parsed_json_path
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string();
+            file_name.push_str("_parsed");
+            parsed_json_path.set_file_name(file_name);
+            parsed_json_path.set_extension("json");
             match Deepika2::from_file_postcard(&postcard_path) {
                 Ok(s) => return Ok(s),
                 Err(e) => {
@@ -316,6 +326,7 @@ pub mod deepika2 {
                     raw_path.set_extension("json");
                     let me = Deepika2::parse_from_raw_file(raw_path)?;
                     me.save_to_file_postcard(&postcard_path);
+                    me.save_to_file_json(&parsed_json_path);
                     return Ok(me);
                 }
             }
@@ -335,8 +346,18 @@ pub mod deepika2 {
             let mut file = File::create(path.into()).unwrap();
             file.write_all(&output).unwrap();
         }
+        pub fn save_to_file_json(&self, path: impl Into<PathBuf>) {
+            let path = path.into();
+            println!("Saving to json path: {path:?}");
+            let output = serde_json::to_string(self).unwrap();
+            let mut file = File::create(path).unwrap();
+            write!(file, "{}", output).unwrap();
+        }
         pub fn parse_from_raw_file(path: impl Into<PathBuf>) -> anyhow::Result<Self> {
-            let data = fs::read_to_string(path.into())?;
+            let path = path.into();
+            println!("Parsing file {path:?}");
+            let mut supplier_set = HashSet::new();
+            let data = fs::read_to_string(path)?;
             // let data =
             //     fs::read_to_string("/media/erik/Erik Work 073079/data-varna-startup-shutdown.json")
             //         .unwrap();
@@ -352,9 +373,6 @@ pub mod deepika2 {
 
             let mut draw_trace: Vec<CallDrawData> = vec![];
             for call in trace_data {
-                if call.callee.fqn == "java.awt.event.InputEvent$1.canAccessSystemClipboard" {
-                    continue;
-                }
                 let stack_functions: Vec<&str> = call.stack_trace.split(", ").collect();
                 // println!("stack_functions: {:#?}", stack_functions);
                 let mut first_nonadded_function = stack_functions.len() - 1;
@@ -388,20 +406,22 @@ pub mod deepika2 {
                 {
                     let depth = call.length - (i + 1) as i32;
                     let name_parts: Vec<&str> = function.split("/").collect();
-                    let (supplier, function_name) = if name_parts.len() == 2 {
-                        let supplier = name_parts[0];
-                        let function_name = name_parts[1].split("(").collect::<Vec<&str>>()[0];
-                        (Some(supplier.to_string()), function_name)
-                    } else {
-                        let function_name = name_parts[0].split("(").collect::<Vec<&str>>()[0];
-                        (None, function_name)
-                    };
-                    draw_trace.push(CallDrawData {
-                        name: function_name.to_string(),
-                        depth,
-                        supplier,
-                        ..Default::default()
-                    })
+                    if name_parts.len() == 2 {
+                        let name_parts = name_parts[1];
+                        let function = name_parts.split("(").collect::<Vec<&str>>()[0];
+                        let name_parts: Vec<&str> = name_parts.splitn(4, ".").collect();
+                        if name_parts.len() == 4 {
+                            let supplier = format!("{}.{}", name_parts[0], name_parts[1]);
+                            let dependency = name_parts[2];
+                            draw_trace.push(CallDrawData {
+                                name: function.to_string(),
+                                depth,
+                                supplier: Some(supplier),
+                                dependency: Some(dependency.to_string()),
+                                ..Default::default()
+                            });
+                        }
+                    }
                 }
                 draw_trace.push(CallDrawData {
                     depth: call.length,
@@ -421,7 +441,11 @@ pub mod deepika2 {
                 if level > max_depth {
                     max_depth = level;
                 }
+                if let Some(supplier) = &call.supplier {
+                    supplier_set.insert(supplier);
+                }
             }
+            println!("Suppliers: {supplier_set:#?}");
             println!("max_depth: {max_depth}");
             println!("min_depth: {min_depth}");
             for call in &mut draw_trace {
