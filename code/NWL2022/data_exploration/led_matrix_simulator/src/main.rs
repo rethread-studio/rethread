@@ -14,15 +14,21 @@ use bevy::{
 use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 
+mod audio;
+use audio::AudioEngine;
+
 use bevy_inspector_egui::WorldInspectorPlugin;
 use parser::deepika2::{Call, CallDrawData, Deepika2};
 use rand::prelude::*;
+
 fn main() {
     App::new()
         // .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
         .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
         .insert_resource(Trace::new())
+        // .insert_resource(audio::AudioEngine::new())
+        .insert_non_send_resource(AudioEngine::new())
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         .add_plugin(InspectorPlugin::<GlobalSettings>::new())
@@ -103,6 +109,7 @@ impl Trace {
         // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
         // let trace =
         //     Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
+        // trace.save_to_file_json("/home/erik/Hämtningar/nwl2022/data-jedit-copy-paste_parsed.json");
 
         let mut supplier_index = HashMap::new();
         let mut dependency_index = HashMap::new();
@@ -206,6 +213,7 @@ fn led_animation_from_trace(
         Option<&Children>,
     )>,
     mut lights: Query<(&mut PointLight, Entity)>,
+    mut audio_engine: NonSendMut<AudioEngine>,
 ) {
     if settings.play {
         if timer.0.tick(time.delta()).just_finished() {
@@ -238,6 +246,8 @@ fn led_animation_from_trace(
             if trace.current_index >= trace.trace.draw_trace.len() {
                 trace.current_index = 0;
             }
+            audio_engine
+                .spawn_sine(trace.trace.draw_trace[trace.current_index].depth as f32 * 10.0 + 20.0);
             let num_calls_into_the_future = match settings.call_to_coordinate_mapping {
                 CallToCoordinateMapping::DepthSupplierDependency => 1,
                 CallToCoordinateMapping::SupplierDependencyDepth => 1,
