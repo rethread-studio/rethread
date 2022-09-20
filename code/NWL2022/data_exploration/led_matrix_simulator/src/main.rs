@@ -453,6 +453,7 @@ fn setup(
     let size_y = 7;
     let size_x = 7;
     let size_z = 10;
+    let y_offset = 4.9;
     let parent = commands
         // For the hierarchy to work certain Components need to exist. SpatialBundle provides those.
         .spawn_bundle(SpatialBundle::default())
@@ -493,9 +494,9 @@ fn setup(
                             ..default()
                         }),
                         transform: Transform::from_xyz(
-                            ((x as f32 + 0.5) / size_x as f32) * 10. - 5. + 0.5,
-                            (y as f32 / size_y as f32) * 10.0 + 0.5,
-                            ((z as f32 + 0.5) / size_z as f32) * -10. + 5.,
+                            ((x as f32 + 0.5) / size_x as f32) * 4. - 2. + 0.5,
+                            (y as f32 / size_y as f32) * 4.0 + y_offset,
+                            ((z as f32 + 0.5) / size_z as f32) * -7.,
                         ),
                         ..default()
                     })
@@ -517,17 +518,17 @@ fn setup(
     let box_z_offset = -2.;
     let wall_color = Color::rgba(5. / 255., 6. / 255., 14. / 255., 1.0);
     // ground plane
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(box_x, 0.1, box_z))),
-        material: materials.add(StandardMaterial {
-            base_color: wall_color,
-            reflectance: 0.8,
-            perceptual_roughness: 0.0,
-            ..default()
-        }),
-        transform: Transform::from_xyz(0., 0., box_z_offset),
-        ..default()
-    });
+    // commands.spawn_bundle(PbrBundle {
+    //     mesh: meshes.add(Mesh::from(shape::Box::new(box_x, 0.1, box_z))),
+    //     material: materials.add(StandardMaterial {
+    //         base_color: wall_color,
+    //         reflectance: 0.8,
+    //         perceptual_roughness: 0.0,
+    //         ..default()
+    //     }),
+    //     transform: Transform::from_xyz(0., 0., box_z_offset),
+    //     ..default()
+    // });
     // let mut transform = Transform::from_xyz(0., box_y + 2.0, -5.);
     // transform.rotate_x(std::f32::consts::PI * 0.75);
     // commands.spawn_bundle(PbrBundle {
@@ -541,39 +542,39 @@ fn setup(
     //     transform,
     //     ..default()
     // });
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(box_x as f32, box_y as f32, 0.1))),
-        transform: Transform::from_xyz(0., box_y as f32 * 0.5, box_z * -0.5 + box_z_offset),
-        material: materials.add(StandardMaterial {
-            base_color: wall_color,
-            reflectance: 1.0,
-            perceptual_roughness: 0.0,
-            ..default()
-        }),
-        ..default()
-    });
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(0.1, box_y as f32, box_z as f32))),
-        transform: Transform::from_xyz(box_x as f32 * 0.5, box_y * 0.5, box_z_offset),
-        material: materials.add(StandardMaterial {
-            base_color: wall_color,
-            reflectance: 1.0,
-            perceptual_roughness: 0.0,
-            ..default()
-        }),
-        ..default()
-    });
-    commands.spawn_bundle(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Box::new(0.1, box_y as f32, box_z as f32))),
-        transform: Transform::from_xyz(box_x as f32 * -0.5, box_y * 0.5, box_z_offset),
-        material: materials.add(StandardMaterial {
-            base_color: wall_color,
-            reflectance: 1.0,
-            perceptual_roughness: 0.0,
-            ..default()
-        }),
-        ..default()
-    });
+    // commands.spawn_bundle(PbrBundle {
+    //     mesh: meshes.add(Mesh::from(shape::Box::new(box_x as f32, box_y as f32, 0.1))),
+    //     transform: Transform::from_xyz(0., box_y as f32 * 0.5, box_z * -0.5 + box_z_offset),
+    //     material: materials.add(StandardMaterial {
+    //         base_color: wall_color,
+    //         reflectance: 1.0,
+    //         perceptual_roughness: 0.0,
+    //         ..default()
+    //     }),
+    //     ..default()
+    // });
+    // commands.spawn_bundle(PbrBundle {
+    //     mesh: meshes.add(Mesh::from(shape::Box::new(0.1, box_y as f32, box_z as f32))),
+    //     transform: Transform::from_xyz(box_x as f32 * 0.5, box_y * 0.5, box_z_offset),
+    //     material: materials.add(StandardMaterial {
+    //         base_color: wall_color,
+    //         reflectance: 1.0,
+    //         perceptual_roughness: 0.0,
+    //         ..default()
+    //     }),
+    //     ..default()
+    // });
+    // commands.spawn_bundle(PbrBundle {
+    //     mesh: meshes.add(Mesh::from(shape::Box::new(0.1, box_y as f32, box_z as f32))),
+    //     transform: Transform::from_xyz(box_x as f32 * -0.5, box_y * 0.5, box_z_offset),
+    //     material: materials.add(StandardMaterial {
+    //         base_color: wall_color,
+    //         reflectance: 1.0,
+    //         perceptual_roughness: 0.0,
+    //         ..default()
+    //     }),
+    //     ..default()
+    // });
     let mut transform = Transform::from_xyz(0., 0., -8.);
     transform.rotate_x(-0.3);
     commands.spawn_bundle(SceneBundle {
@@ -581,16 +582,23 @@ fn setup(
         transform,
         ..default()
     });
-    // // light
-    // commands.spawn_bundle(PointLightBundle {
-    //     transform: Transform::from_xyz(50.0, 50.0, 50.0),
-    //     point_light: PointLight {
-    //         intensity: 600000.,
-    //         range: 100.,
-    //         ..default()
-    //     },
-    //     ..default()
-    // });
+    // Hall
+    let mut transform = Transform::default();
+    commands.spawn_bundle(SceneBundle {
+        scene: asset_server.load("turbine_hall_from_obj.glb#Scene0"),
+        transform,
+        ..default()
+    });
+    // light
+    commands.spawn_bundle(PointLightBundle {
+        transform: Transform::from_xyz(50.0, 50.0, 50.0),
+        point_light: PointLight {
+            intensity: 600000.,
+            range: 100.,
+            ..default()
+        },
+        ..default()
+    });
 }
 
 /// Tags an entity as capable of panning and orbiting.

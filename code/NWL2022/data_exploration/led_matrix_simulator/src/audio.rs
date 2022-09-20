@@ -40,7 +40,7 @@ impl AudioEngine {
     pub fn spawn_sine(&mut self, freq: f32) {
         let node = self
             .graph
-            .push_graph(sine_tone_graph(freq, 0.01, 0.1, 2.0, self.graph_settings).unwrap());
+            .push_graph(sine_tone_graph(freq, 0.01, 0.01, 2.0, self.graph_settings).unwrap());
         self.graph.connect(node.to_graph_out());
         self.graph.connect(node.to_graph_out().to_index(1));
         self.graph.commit_changes();
