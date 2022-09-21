@@ -5,74 +5,120 @@ const diam = 5; // diameter of each sphere (LED)
 const s = 25; // space between two spheres
 
 let data; // data from the json
+let trace; // array with the trace
 let len; // length of the json file, size of data
-let maxLength; // max value of length
+let maxDepth; // max depth
 let allDeps; // array with all dependencies
 let allSups; // array with all suppliers
 let nDeps; // number of dependencies
 let nSups; // number of suppliers
 
+let currentFrame = 0;
+let frames = [];
+
 function preload() {
-  //data = loadJSON("data-varna-copy-paste-isolated.json", getLength);
-  //data = loadJSON("data-jedit-copy-paste-shorter.json", getLength);
-  data = loadJSON("data-imagej-copy-paste-shorter.json", getLength);
+  //data = loadJSON("data-varna-copy-paste-isolated.json");
+  //data = loadJSON("data-jedit-copy-paste-shorter.json");
+  //data = loadJSON("data-imagej-copy-paste-shorter.json");
+  //data = loadJSON("data-imagej-copy-paste_parsed.json");
+  data = loadJSON("data-varna-startup-shutdown_parsed.json");
+  //data = loadJSON("data-varna-copy-paste-isolated_parsed.json");
 }
 
 function setup() {
   createCanvas(500, 500, WEBGL);
   noStroke();
   colorMode(HSB);
+  //frameRate(10)
   //ortho();
-  
-  //console.log(getAllSuppliers());
-  //console.log(getStacktrace(0));
-  
-  maxLength = getMaxLength();
-  console.log("Max length: ", getMaxLength());
-  console.log("Mean length: ", getMeanLength());
-  allDeps = getAllDependencies().sort();
-  allSups = getAllSuppliers().sort();
+
+  trace = data.draw_trace;
+  maxDepth = data.max_depth;
+  getLength();
+  //maxDepth = getMaxDepth();
+  console.log("Max length: ", maxDepth);
+  console.log("Mean length: ", getMeanDepth());
+  getAllSuppliersAndDependencies();
+  allDeps.sort();
+  allSups.sort();
   nDeps = allDeps.length;
   nSups = allSups.length;
   console.log("Number of dependencies: ", nDeps);
   console.log("Numer of suppliers: ", nSups);
+
+  for (let k = 0; k < Nz; k++) {
+    let matrix = [];
+    for (let j = 0; j < Ny; j++) {
+      let line = [];
+      for (let i = 0; i < Nx; i++) {
+        line.push([0, 0, 0]);
+      }
+      matrix.push(line);
+    }
+    frames.push(matrix);
+  }
 }
 
 function draw() {
   background(30);
-  
+
   orbitControl(); // allow movement around the sketch using a mouse or trackpad
   lights(); // add lights to the scene
   //rotateX(PI/12);
   //rotateY(PI/12);
   translate((s-Nx*s)/2, (s-Ny*s)/2, (s-Nz*s)/2); // center the cube
-  
-  
+
+  if (frameCount % 2 == 0) updateFrames();
   drawLEDs();
+}
+
+function updateFrames() {
+  let newFrame = [];
+  // deep copy of the first frame
+  for (let j = 0; j < Ny; j++) {
+    let line = [];
+    for (let i = 0; i < Nx; i++) {
+      let f0 = frames[0][j][i];
+      line.push([f0[0], f0[1], f0[2]]);
+    }
+    newFrame.push(line);
+  }
+
+  let t = trace[currentFrame%len];
+  let lineIdx = ~~(t.depth*Ny/(maxDepth+1));
+  let [sup, dep] = getSupAndDep(t.name);
+  let limitI = ~~map(allDeps.indexOf(dep), 0, allDeps.length, 1, Nx/2);
+  let hu = allSups.indexOf(sup)*360/allSups.length;
+  let sa = 100;
+  for (let i = 0; i < Nx; i++) {
+    let br = (i < Nx/2 + limitI && i >= Nx/2 - limitI) ? 100 : 0;
+    newFrame[lineIdx][i] = [hu, sa, br];
+  }
+  for (let j = lineIdx+1; j < Ny; j++) {
+    for (let i = 0; i < Nx; i++) {
+      newFrame[j][i] = [0, 0, 0];
+    }
+  }
+
+  //console.log(newFrame)
+
+  frames.pop();
+  frames.unshift(newFrame);
+  currentFrame++;
 }
 
 function drawLEDs() {
   for (let k = 0; k < Nz; k++) { // z axis
-    let idx = abs(k-~~(frameCount/3))%len;
-    let d = data[idx];
-    let st = getStacktrace(idx);
     push();
     for (let j = 0; j < Ny; j++) { // y axis
-      let limitJ = ~~(d.length*j/Ny);
-      let call = st[~~(d.length*j/Ny)];
-      let [supplier, dependency] = getSupAndDep(call);
-      let limitI = ~~map(allDeps.indexOf(dependency), 0, allDeps.length, 1, Nx/2);
       push();
       for (let i = 0; i < Nx; i++) { // x axis
-        //let hu = (cos(3*i/Nx + frameCount/15)+1)*128;
-        //let sa = (cos(3*j/Ny + frameCount/15)+1)*128;
-        //let br = (cos(3*k/Nz + frameCount/15)+1)*128;
-        
-        let hu = allSups.indexOf(supplier)*255/allSups.length;
-        let sa = 255;
-        let br = (i < Nx/2 + limitI && i >= Nx/2 - limitI) ? 255 : 0;
+        let hu = (cos(3*i/Nx + frameCount/15)+1)*128;
+        let sa = (cos(3*j/Ny + frameCount/15)+1)*128;
+        let br = (cos(3*k/Nz + frameCount/15)+1)*128;
+        [hu, sa, br] = frames[k][j][i];
         fill(hu, sa, br);
-        sphere(diam*map(br, 0, 255, 1/2, 1));
+        sphere(diam*map(br, 0, 100, 1/2, 1));
         translate(s, 0, 0);
       }
       pop();
@@ -89,106 +135,34 @@ function drawLEDs() {
 
 function getLength() {
   // gets the lengths of data and stores it in variable "len"
-  len = Object.keys(data).length;
+  len = Object.keys(trace).length;
 }
 
-function countCalleeCaller(callee, caller) {
-  // find how many have that particular callee and caller, and find their max and min length
-  let count = 0;
-  let min = 50, max = 0;
+function getAllSuppliersAndDependencies() {
+  // find all suppliers, all dependencies, and save them in the global variables allSups and allDeps
+  allSups = [];
+  allDeps = [];
   for (let i = 0; i < len; i++) {
-    let d = data[i];
-    if (d.callee.fqn == callee && d.caller.fqn == caller) {
-      count++;
-      let l = d.length;
-      if (l < min) min = l;
-      if (l > max) max = l;
-    }
+    let t = trace[i];
+    let [sup, dep] = getSupAndDep(t.name);
+    if (allSups.indexOf(sup) == -1) allSups.push(sup);
+    if (allDeps.indexOf(dep) == -1) allDeps.push(dep);
   }
-  console.log(count);
-  console.log("Min length: ", min);
-  console.log("Max length: ", max);
 }
 
-function getAllSuppliers() {
-  // find all suppliers
-  let allSuppliers = [];
-  for (let i = 0; i < len; i++) {
-    let d = data[i];
-    let sup1 = d.callee.supplier, sup2 = d.caller.supplier;
-    if (allSuppliers.indexOf(sup1) == -1) allSuppliers.push(sup1);
-    if (allSuppliers.indexOf(sup2) == -1) allSuppliers.push(sup2);
-    
-    // check in the stacktrace as well
-    let stacktrace = getStacktrace(i);
-    for (let s of stacktrace) {
-      let func = (s.indexOf("/") == -1) ? s : s.split("/")[1]; // find the function
-      let idx = func.indexOf(".", func.indexOf(".")+1); // find the second occurence of "."
-      let sup = func.slice(0, idx); // find the supplier
-      if (allSuppliers.indexOf(sup) == -1) allSuppliers.push(sup);
-    }
-  }
-  return allSuppliers;
-}
-
-function countStacktrace(stacktrace) {
-  // count how many have that particular stacktrace
-  let count = 0;
-  let min = 50, max = 0;
-  for (let i = 0; i < len; i++) {
-    let d = data[i];
-    if (d.stackTrace == stacktrace) {
-      count++;
-    }
-  }
-  console.log(count);
-}
-
-function getStacktrace(i) {
-  // get the stacktrace of element i in a proper javascript array
-  let el = data[i];
-  let stackTrace = el.stackTrace;
-  stackTrace = stackTrace.substring(1, stackTrace.length-1).split(", ");
-  return stackTrace;
-}
-
-function getAllDependencies() {
-  // find all dependencies
-  let allDependencies = [];
-  for (let i = 0; i < len; i++) {
-    let d = data[i];
-    let dep1 = d.callee.dependency, dep2 = d.caller.dependency;
-    if (allDependencies.indexOf(dep1) == -1) allDependencies.push(dep1);
-    if (allDependencies.indexOf(dep2) == -1) allDependencies.push(dep2);
-    
-    // check in the stacktrace as well
-    let stacktrace = getStacktrace(i);
-    for (let s of stacktrace) {
-      let func = (s.indexOf("/") == -1) ? s : s.split("/")[1]; // find the function
-      let idx1 = func.indexOf(".", func.indexOf(".")+1); // find the second occurence of "."
-      let idx2 = func.indexOf(".", idx1+1); // find the first occurence of "." after idx1
-      let idx3 = func.indexOf("$", idx1+1); // find the first occurence of "$" after idx1
-      if (idx3 == -1) idx3 = idx2; // ignore idx3 if there is no "$" found
-      let dep = func.slice(idx1+1, min(idx2, idx3)); // find the supplier
-      if (allDependencies.indexOf(dep) == -1) allDependencies.push(dep);
-    }
-  }
-  return allDependencies;
-}
-
-function getMaxLength() {
+function getMaxDepth() {
   let max = 0;
   for (let i = 0; i < len; i++) {
-    let l = data[i].length;
-    if (l > max) max = l;
+    let d = trace[i].depth;
+    if (d > max) max = d;
   }
   return max;
 }
 
-function getMeanLength() {
+function getMeanDepth() {
   let sum = 0;
   for (let i = 0; i < len; i++) {
-    sum += data[i].length;
+    sum += trace[i].depth;
   }
   return sum/len;
 }
