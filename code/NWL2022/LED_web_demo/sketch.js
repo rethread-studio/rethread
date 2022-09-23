@@ -21,8 +21,8 @@ function preload() {
   //data = loadJSON("data-jedit-copy-paste-shorter.json");
   //data = loadJSON("data-imagej-copy-paste-shorter.json");
   //data = loadJSON("data-imagej-copy-paste_parsed.json");
-  data = loadJSON("data-varna-startup-shutdown_parsed.json");
-  //data = loadJSON("data-varna-copy-paste-isolated_parsed.json");
+  //data = loadJSON("data-varna-startup-shutdown_parsed.json");
+  data = loadJSON("data-varna-copy-paste-isolated_parsed.json");
 }
 
 function setup() {
