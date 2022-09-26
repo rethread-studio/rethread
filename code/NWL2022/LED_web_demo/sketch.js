@@ -14,7 +14,13 @@ let nDeps; // number of dependencies
 let nSups; // number of suppliers
 
 let currentFrame = 0;
-let frames = [];
+let frames = []; // array containing the Nz frames of the animation (from the new one, the one at the front of the LED cube, to the last one, at the back). Each frame is a Ny*Nx matrix containing an array with the hue, saturation, value of each LED
+
+let slider; // speed slider
+let checkbox; // checkbox that determines whether the cube is complete or cut in half
+let completeCube = true;
+
+// change LEDs on top that don't change much, change hue, brightness, pulse
 
 function preload() {
   //data = loadJSON("data-varna-copy-paste-isolated.json");
@@ -32,6 +38,10 @@ function setup() {
   //frameRate(10)
   //ortho();
 
+  slider = createSlider(1, 20, 3, 1);
+  checkbox = createCheckbox('Complete cube', false);
+  checkbox.changed(() => completeCube = !completeCube);
+
   trace = data.draw_trace;
   maxDepth = data.max_depth;
   getLength();
@@ -46,6 +56,7 @@ function setup() {
   console.log("Number of dependencies: ", nDeps);
   console.log("Numer of suppliers: ", nSups);
 
+  // build the frames array
   for (let k = 0; k < Nz; k++) {
     let matrix = [];
     for (let j = 0; j < Ny; j++) {
@@ -63,12 +74,11 @@ function draw() {
   background(30);
 
   orbitControl(); // allow movement around the sketch using a mouse or trackpad
-  lights(); // add lights to the scene
-  //rotateX(PI/12);
-  //rotateY(PI/12);
+  lights(); // add global lights to the scene
+  rotateY(PI); // put it in the right direction
   translate((s-Nx*s)/2, (s-Ny*s)/2, (s-Nz*s)/2); // center the cube
 
-  if (frameCount % 2 == 0) updateFrames();
+  if (frameCount % slider.value() == 0) updateFrames();
   drawLEDs();
 }
 
@@ -84,6 +94,7 @@ function updateFrames() {
     newFrame.push(line);
   }
 
+  // modify the new frame with the latest data point
   let t = trace[currentFrame%len];
   let lineIdx = ~~(t.depth*Ny/(maxDepth+1));
   let [sup, dep] = getSupAndDep(t.name);
@@ -102,8 +113,9 @@ function updateFrames() {
 
   //console.log(newFrame)
 
-  frames.pop();
-  frames.unshift(newFrame);
+  // add the new frame at the top and delete oldest one
+  frames.shift();
+  frames.push(newFrame);
   currentFrame++;
 }
 
@@ -113,12 +125,11 @@ function drawLEDs() {
     for (let j = 0; j < Ny; j++) { // y axis
       push();
       for (let i = 0; i < Nx; i++) { // x axis
-        let hu = (cos(3*i/Nx + frameCount/15)+1)*128;
-        let sa = (cos(3*j/Ny + frameCount/15)+1)*128;
-        let br = (cos(3*k/Nz + frameCount/15)+1)*128;
+        let hu, sa, br;
         [hu, sa, br] = frames[k][j][i];
         fill(hu, sa, br);
-        sphere(diam*map(br, 0, 100, 1/2, 1));
+        if (j+k < (Ny+Nz)/2 || completeCube)
+          sphere(diam*map(br, 0, 100, 1/2, 1));
         translate(s, 0, 0);
       }
       pop();
