@@ -38,6 +38,7 @@ fn main() {
         .add_startup_system(setup)
         .add_startup_system(spawn_camera)
         .add_system(pan_orbit_camera)
+        .add_system(cursor_position)
         // .add_system(random_onoff)
         .add_system(led_animation_from_trace)
         .add_system(bevy_ui)
@@ -76,6 +77,7 @@ struct GlobalSettings {
     led_intensity: f32,
     led_depth: usize,
     call_to_coordinate_mapping: CallToCoordinateMapping,
+    mouse_position: Vec2,
 }
 impl Default for GlobalSettings {
     fn default() -> Self {
@@ -89,6 +91,7 @@ impl Default for GlobalSettings {
             led_radius: 0.,
             led_intensity: 1000.,
             call_to_coordinate_mapping: CallToCoordinateMapping::DepthSupplierDependency,
+            mouse_position: bevy::math::vec2(0., 0.),
         }
     }
 }
@@ -99,6 +102,9 @@ struct Trace {
     supplier_index: HashMap<String, usize>,
     // dependency per supplier
     dependency_index: HashMap<String, HashMap<String, usize>>,
+    num_calls_per_supplier: HashMap<String, usize>,
+    num_calls_per_dependency: HashMap<String, HashMap<String, usize>>,
+    num_calls_per_depth: Vec<usize>,
     lit_leds: Vec<Entity>,
 }
 
@@ -111,12 +117,17 @@ impl Trace {
         //     Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
         // trace.save_to_file_json("/home/erik/Hämtningar/nwl2022/data-jedit-copy-paste_parsed.json");
 
+        let mut num_calls_per_depth = vec![0; trace.max_depth as usize + 1];
         let mut supplier_index = HashMap::new();
         let mut dependency_index = HashMap::new();
+        let mut num_calls_per_supplier = HashMap::new();
+        let mut num_calls_per_dependency = HashMap::new();
         for call in &trace.draw_trace {
             if let Some(supplier) = &call.supplier {
+                num_calls_per_depth[call.depth as usize] += 1;
                 let new_index = supplier_index.len();
                 supplier_index.entry(supplier.clone()).or_insert(new_index);
+                *(num_calls_per_supplier.entry(supplier.clone()).or_insert(0)) += 1;
                 if let Some(dependency) = &call.dependency {
                     let dependency_map = dependency_index
                         .entry(supplier.clone())
@@ -125,6 +136,11 @@ impl Trace {
                     dependency_map
                         .entry(dependency.clone())
                         .or_insert(new_index);
+
+                    let mut calls_per_dep = num_calls_per_dependency
+                        .entry(supplier.clone())
+                        .or_insert(HashMap::new());
+                    *calls_per_dep.entry(dependency.clone()).or_insert(0) += 1;
                 } else {
                     let dependency_map = dependency_index
                         .entry(supplier.clone())
@@ -141,6 +157,9 @@ impl Trace {
             supplier_index,
             dependency_index,
             lit_leds: Vec::new(),
+            num_calls_per_supplier,
+            num_calls_per_dependency,
+            num_calls_per_depth,
         }
     }
 }
@@ -246,8 +265,10 @@ fn led_animation_from_trace(
             if trace.current_index >= trace.trace.draw_trace.len() {
                 trace.current_index = 0;
             }
-            audio_engine
-                .spawn_sine(trace.trace.draw_trace[trace.current_index].depth as f32 * 10.0 + 20.0);
+            audio_engine.spawn_sine(
+                trace.trace.draw_trace[trace.current_index].depth as f32 * 10.0 + 20.0,
+                settings.mouse_position.x,
+            );
             let num_calls_into_the_future = match settings.call_to_coordinate_mapping {
                 CallToCoordinateMapping::DepthSupplierDependency => 1,
                 CallToCoordinateMapping::SupplierDependencyDepth => 1,
@@ -376,6 +397,23 @@ fn num_in_layer_z_at_coordinate(x: i32, y: i32) -> i32 {
     // this is the number of strata in the y direction in reverse.
     let size_z = 10;
     size_z - ((size_z as f32 / 7.) * y as f32).floor() as i32
+}
+fn cursor_position(windows: Res<Windows>, mut settings: ResMut<GlobalSettings>) {
+    // Games typically only have one window (the primary window).
+    // For multi-window applications, you need to use a specific window ID here.
+    let window = windows.get_primary().unwrap();
+
+    if let Some(position) = window.cursor_position() {
+        // cursor is inside the window, position given
+        settings.mouse_position = position / Vec2::new(window.width(), window.height());
+
+        let pan_pos_radians = settings.mouse_position.x * std::f32::consts::FRAC_PI_2;
+        let left_gain = (pan_pos_radians).cos();
+        let right_gain = (pan_pos_radians).sin();
+        // println!("left: {left_gain:.3} right: {right_gain:.3}");
+    } else {
+        // cursor is not inside the window
+    }
 }
 
 fn random_onoff(
@@ -512,11 +550,11 @@ fn setup(
             }
         }
     }
-    let box_y = 10.;
-    let box_x = 12.;
-    let box_z = 14.;
-    let box_z_offset = -2.;
-    let wall_color = Color::rgba(5. / 255., 6. / 255., 14. / 255., 1.0);
+    // let box_y = 10.;
+    // let box_x = 12.;
+    // let box_z = 14.;
+    // let box_z_offset = -2.;
+    // let wall_color = Color::rgba(5. / 255., 6. / 255., 14. / 255., 1.0);
     // ground plane
     // commands.spawn_bundle(PbrBundle {
     //     mesh: meshes.add(Mesh::from(shape::Box::new(box_x, 0.1, box_z))),
@@ -768,6 +806,32 @@ fn bevy_ui(
                 let matrix_position = matrix_position(call, &*trace, 0, 7, 7, 10, &*settings);
                 ui.label("Position:");
                 ui.label(&format!("{matrix_position:#?}"));
+                ui.end_row();
+                ui.label("Depth:");
+                let depth = call.depth;
+                ui.label(&format!("{depth}"));
+                ui.end_row();
+                ui.label("Calls this depth: ");
+                let calls_this_depth = trace.num_calls_per_depth[call.depth as usize];
+                ui.label(&format!("{calls_this_depth}"));
+                ui.end_row();
+                if let Some(supplier) = &call.supplier {
+                    let calls_per_supplier = trace.num_calls_per_supplier.get(supplier).unwrap();
+                    ui.label("Calls in this supplier");
+                    ui.label(&format!("{calls_per_supplier}"));
+                    ui.end_row();
+                    if let Some(dependency) = &call.dependency {
+                        let calls_per_dependency = trace
+                            .num_calls_per_dependency
+                            .get(supplier)
+                            .unwrap()
+                            .get(dependency)
+                            .unwrap();
+                        ui.label("Calls in this dependency");
+                        ui.label(&format!("{calls_per_dependency}"));
+                        ui.end_row();
+                    }
+                }
                 ui.end_row();
             })
 

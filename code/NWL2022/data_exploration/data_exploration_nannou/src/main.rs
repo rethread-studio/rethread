@@ -242,17 +242,17 @@ impl NannouTrace {
                 let zoom_x = zoom;
 
                 let max_depth = trace.max_depth;
-                let trace = &trace.draw_trace;
-                let call_w = win.w() / trace.len() as f32 * zoom_x;
+                let draw_trace = &trace.draw_trace;
+                let call_w = win.w() / draw_trace.len() as f32 * zoom_x;
                 // let offset_x =
                 //     (app.elapsed_frames() as f32 / 500.0) % 1.0 * call_w * model.trace.len() as f32 - win.w();
-                let offset_x = offset * call_w * trace.len() as f32 - win.w();
+                let offset_x = offset * call_w * draw_trace.len() as f32 - win.w();
 
                 // Get the local max_depth and min_depth to zoom in on the curve
                 //
                 let mut local_max_depth = 0;
                 let mut local_min_depth = i32::MAX;
-                for (i, call) in trace.iter().enumerate() {
+                for (i, call) in draw_trace.iter().enumerate() {
                     let x = win.left() + i as f32 * call_w - offset_x;
                     if x >= win.left() && x <= win.right() {
                         local_max_depth = local_max_depth.max(call.depth);
@@ -265,7 +265,7 @@ impl NannouTrace {
 
                 let mut lines = vec![];
                 let default_color = hsla(0.0, 0.0, 0.5, 1.0);
-                for (i, call) in trace.iter().enumerate() {
+                for (i, call) in draw_trace.iter().enumerate() {
                     let color = match color_source {
                         deepika2::ColorSource::Supplier => {
                             if let Some(supplier) = &call.supplier {
@@ -296,6 +296,45 @@ impl NannouTrace {
                 //     draw.ellipse().w_h(5., 5.).color(point.1).xy(point.0);
                 // }
                 draw.polyline().stroke_weight(2.0).points_colored(lines);
+
+                // Draw envelope
+                let mut points = Vec::new();
+                let mut last_known_value = 0.0;
+                let total_depth_height = win.h() / max_depth as f32;
+                for p in &trace.depth_envelope.sections {
+                    let color = match p.state {
+                        deepika2::DepthState::Stable => hsl(0.6, 0.5, 0.8),
+                        deepika2::DepthState::Increasing => hsl(0.0, 0.9, 0.6),
+                        deepika2::DepthState::Decreasing => hsl(0.7, 0.9, 0.6),
+                    };
+                    let value = p.average;
+                    let x = win.left() + p.start_index as f32 * call_w - offset_x;
+                    let x_end = win.left() + p.end_index as f32 * call_w - offset_x;
+                    let y = y + total_depth_height * value;
+                    points.push((pt2(x, y), color));
+                    points.push((pt2(x_end, y), color));
+                }
+                draw.polyline().stroke_weight(2.0).points_colored(points);
+
+                // Draw n-gram analysis
+                if let Some(ngram_analysis) = &trace.ngram_analysis {
+                    for (key, section) in &ngram_analysis.sections {
+                        for start_index in &section.start_indices {
+                            let x = win.left() + *start_index as f32 * call_w - offset_x;
+                            let end_x = win.left()
+                                + (*start_index + section.section_length) as f32 * call_w
+                                - offset_x;
+                            if end_x > win.left() && x < win.right() {
+                                let y = win.bottom() + (section.section_length as f32 * 2.);
+                                let hue = (key.len() as f32 * 5073.9823) % 1.0;
+                                draw.line()
+                                    .start(pt2(x, y))
+                                    .end(pt2(end_x, y))
+                                    .color(hsla(hue, 1.0, 0.5, 1.0));
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -451,7 +490,14 @@ fn model(app: &App) -> Model {
 
     // let deepika1_trace = NannouTrace::from_deepika1(deepika1::Deepika1::new());
     // let calltrace = NannouTrace::from_calltrace(calltrace::Calltrace::new());
-    let deepika2_trace = NannouTrace::from_deepika2(deepika2::Deepika2::new());
+    let trace =
+        deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
+            .unwrap();
+    // let trace = deepika2::Deepika2::parse_and_save(
+    //     "/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated",
+    // )
+    // .unwrap();
+    let deepika2_trace = NannouTrace::from_deepika2(trace);
     let traces = vec![deepika2_trace];
 
     let m = Model {

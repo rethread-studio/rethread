@@ -6,6 +6,7 @@ use knyst::{
     prelude::*,
     wavetable::{Wavetable, WavetableOscillatorOwned},
 };
+use rand::{thread_rng, Rng};
 
 pub struct AudioEngine {
     graph: Graph,
@@ -20,11 +21,15 @@ impl AudioEngine {
         let sample_rate = backend.sample_rate() as f32;
         let block_size = backend.block_size().unwrap_or(64);
         println!("sr: {sample_rate}, block: {block_size}");
-        let resources = Resources::new(sample_rate);
+        let resources = Resources::new(ResourcesSettings {
+            sample_rate,
+            ..Default::default()
+        });
         let graph_settings = GraphSettings {
             block_size,
             sample_rate,
             latency: Duration::from_millis(50),
+            num_outputs: 2,
             ..Default::default()
         };
         let mut graph: Graph = Graph::new(graph_settings);
@@ -37,12 +42,11 @@ impl AudioEngine {
         }
     }
 
-    pub fn spawn_sine(&mut self, freq: f32) {
+    pub fn spawn_sine(&mut self, freq: f32, pan: f32) {
         let node = self
             .graph
-            .push_graph(sine_tone_graph(freq, 0.01, 0.01, 2.0, self.graph_settings).unwrap());
-        self.graph.connect(node.to_graph_out());
-        self.graph.connect(node.to_graph_out().to_index(1));
+            .push_graph(sine_tone_graph(freq, 0.01, 0.05, 2.0, pan, self.graph_settings).unwrap());
+        self.graph.connect(node.to_graph_out().channels(2));
         self.graph.commit_changes();
         self.graph.update();
     }
@@ -59,6 +63,7 @@ fn sine_tone_graph(
     attack: f32,
     amp: f32,
     duration_secs: f32,
+    pan_value: f32,
     graph_settings: GraphSettings,
 ) -> anyhow::Result<Graph> {
     let mut g = Graph::new(graph_settings);
@@ -77,8 +82,13 @@ fn sine_tone_graph(
     let mult = g.push_gen(Mult);
     g.connect(sin.to(mult))?;
     g.connect(env.to(mult).to_index(1))?;
-    g.connect(Connection::graph_output(mult))?;
-    g.connect(Connection::graph_output(mult).to_index(1))?;
+    let pan = g.push_gen(PanMonoToStereo);
+    g.connect(mult.to(pan))?;
+    // let mut rng = thread_rng();
+    g.connect(constant(pan_value).to(pan).to_label("pan"))?;
+    // g.connect(Connection::graph_output(pan).channels(2))?;
+    g.connect(Connection::graph_output(pan))?;
+    g.connect(Connection::graph_output(pan).from_index(1).to_index(1))?;
     g.commit_changes();
     Ok(g)
 }
