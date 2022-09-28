@@ -27,6 +27,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
         .insert_resource(Trace::new())
+        .insert_resource(OscCommunicator::new())
         // .insert_resource(audio::AudioEngine::new())
         .insert_non_send_resource(AudioEngine::new())
         .add_plugins(DefaultPlugins)
@@ -63,6 +64,25 @@ enum CallToCoordinateMapping {
     DepthSupplierDependency,
     SupplierDependencyDepth,
     TimeSupplierDependency,
+}
+
+struct OscCommunicator {
+    sender: nannou_osc::Sender<nannou_osc::Connected>,
+}
+impl OscCommunicator {
+    pub fn new() -> Self {
+        let sender = nannou_osc::sender()
+            .unwrap()
+            .connect("localhost:57120")
+            .unwrap();
+        Self { sender }
+    }
+    pub fn send_call(&mut self, depth: i32) {
+        use nannou_osc::Type;
+        let addr = "/call/";
+        let args = vec![Type::Int(depth)];
+        self.sender.send((addr, args)).ok();
+    }
 }
 
 #[derive(Inspectable)]
@@ -222,6 +242,7 @@ fn led_animation_from_trace(
     mut commands: Commands,
     mut timer: ResMut<AnimationTimer>,
     mut trace: ResMut<Trace>,
+    mut osc_communicator: ResMut<OscCommunicator>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut query: Query<(
         &MatrixPosition,
@@ -269,6 +290,11 @@ fn led_animation_from_trace(
                 trace.trace.draw_trace[trace.current_index].depth as f32 * 10.0 + 20.0,
                 settings.mouse_position.x,
             );
+            // Send osc message to SuperCollider
+            {
+                let call = &trace.trace.draw_trace[trace.current_index];
+                osc_communicator.send_call(call.depth);
+            }
             let num_calls_into_the_future = match settings.call_to_coordinate_mapping {
                 CallToCoordinateMapping::DepthSupplierDependency => 1,
                 CallToCoordinateMapping::SupplierDependencyDepth => 1,

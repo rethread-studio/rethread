@@ -14,6 +14,7 @@ rand = "0.8.5"
 parser = { path = "../parser" }
 knyst = { path = "../../../../../../rust/audio/knyst", features = ["jack"] }
 anyhow = "1.0"
+nannou_osc = "0.18"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
