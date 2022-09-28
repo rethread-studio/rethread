@@ -1,7 +1,4 @@
 (
-
-
-
 SynthDef(\tick3, {
 	var sig, env, rq = \rq.kr(0.3);
 	env = Env.perc(\atk.kr(0), \rel.kr(0.5), curve: [\c0.kr(-4), \c1.kr(-4)]).ar(2);
@@ -11,7 +8,7 @@ SynthDef(\tick3, {
 	sig = RHPF.ar(sig, \freq.kr(1000).min(18000).max(20), rq.min(5)) * env;
 	sig = Pan2.ar(sig, \pan.kr(0)) * \amp.kr(1.0) * 10;
 	sig = (sig*7).tanh;
-	sig = AnalogTape.ar(sig, 0.0, 0.4, 0.1, oversample: 3);
+	// sig = AnalogTape.ar(sig, 0.0, 0.4, 0.1, oversample: 3);
 	Out.ar(\out.kr(0), sig);
 }).add;
 SynthDef(\long_reverb, {
@@ -216,10 +213,6 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 // NOISE
 
 (
-
-)
-
-(
 {
 	~rev2Bus = Bus.audio(s, 2);
 	~rev2 = Synth(\medium_reverb, [\in, ~rev2Bus, \mix, 0.4, \feedback, 0.3, \size, 0.7, \damp, 0.65, \diff, 0.6]);
@@ -267,18 +260,19 @@ SynthDef(\kick,  { | dur2 = 0.3, atk = 0.0001, amp = 0.8, pan = 0 |
 	Out.ar(\out.kr(0), sig);
 }).add.play;
 )
+~rbps = 0.1;
 (
 Pdef(\tick, Pbind(\instrument, \tick3,
-	\dur, Pseq([0.5]*0.25, inf),
+	\dur, Pseq([1], inf) * Pfunc({~rbps}) * 4,
 	\freq, Pwhite(1000, 10000),
 	\amp, 0.01,
-	\rq, 0.01,
+	\rq, 0.1,
 	\out, ~rev2Bus,
 )).play;
 )
 (
 Pdef(\kick, Pbind(\instrument, \kick,
-	\dur, Pseq([9,1,7,7,1,7]*0.25, inf),
+	\dur, Pseq([9,1,7,7,1,7], inf) * Pfunc({~rbps}) * 4,
 	\amp, Pseq([1, 0.5, 0.7, 1, 0.7, 0.5]*0.5, inf),
 	\out, ~revBus,
 )).play;
@@ -293,7 +287,14 @@ OSCdef(\test, {|msg, time, addr, recvPort|
 	Synth(\osc, [\freq, freq, \atk, 0.001, \sus, 0.1,\rel, 0.05, \buf, ~wt_buf[0..2].choose, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
 	msg.postln
 
-}, '/call/', nil); // def style
+}, '/call', nil); // def style
+
+OSCdef(\test, {|msg, time, addr, recvPort|
+	~rbps = msg[1].asFloat;
+	// Synth(\tick3, [\freq, msg[1]* 20 + 100, \out, ~rev2Bus]);
+	msg.postln
+
+}, '/speed', nil); // def style
 
 )
 OSCFunc.trace(false); // Turn posting on

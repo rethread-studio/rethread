@@ -79,8 +79,14 @@ impl OscCommunicator {
     }
     pub fn send_call(&mut self, depth: i32) {
         use nannou_osc::Type;
-        let addr = "/call/";
+        let addr = "/call";
         let args = vec![Type::Int(depth)];
+        self.sender.send((addr, args)).ok();
+    }
+    pub fn send_speed(&mut self, time_between_events: f32) {
+        use nannou_osc::Type;
+        let addr = "/speed";
+        let args = vec![Type::Float(time_between_events)];
         self.sender.send((addr, args)).ok();
     }
 }
@@ -799,6 +805,7 @@ fn spawn_camera(mut commands: Commands) {
 fn bevy_ui(
     mut commands: Commands,
     mut settings: ResMut<GlobalSettings>,
+    mut osc_communicator: ResMut<OscCommunicator>,
     mut timer: ResMut<AnimationTimer>,
     trace: Res<Trace>,
     query: Query<Entity, With<LedMatrix>>,
@@ -817,6 +824,7 @@ fn bevy_ui(
                     .logarithmic(true)
                     .text("Step duration"),
             );
+            osc_communicator.send_speed(seconds);
             timer.0.set_duration(Duration::from_secs_f32(seconds));
             ui.label(&format!("Current call({}):", trace.current_index));
             egui::Grid::new("Current call:").show(ui, |ui| {
