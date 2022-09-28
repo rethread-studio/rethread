@@ -52,9 +52,6 @@ SynthDef(\softy, {
 
 
 
-)
-(
-
 //10 wavetables with increasing complexitymovementRecord
 ~wt_sig = 10.collect({
 	arg i;
@@ -131,6 +128,22 @@ SynthDef(\sus_osc, {
 	Out.ar(rout, sig * rsend.dbamp); //"post-fader" send to reverb
 }).add;
 
+SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
+	var sig, wet;
+
+	sig = In.ar(\in.kr(10), 2);
+	mix = mix.lag(\mixLag.kr(10));
+
+	/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
+	wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
+	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
+
+	sig = (sig * (1-mix)) + (wet*mix);
+	sig = Limiter.ar(sig, 0.95);
+	sig = LeakDC.ar(sig);
+	Out.ar(out, sig);
+}).add;
+
 )
 
 (
@@ -203,21 +216,7 @@ SynthDef(\sus_osc, {
 // NOISE
 
 (
-SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
-	var sig, wet;
 
-	sig = In.ar(\in.kr(10), 2);
-	mix = mix.lag(\mixLag.kr(10));
-
-	/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
-	wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
-	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
-
-	sig = (sig * (1-mix)) + (wet*mix);
-	sig = Limiter.ar(sig, 0.95);
-	sig = LeakDC.ar(sig);
-	Out.ar(out, sig);
-}).add;
 )
 
 (
@@ -270,18 +269,20 @@ SynthDef(\kick,  { | dur2 = 0.3, atk = 0.000, amp = 0.8, pan = 0 |
 )
 (
 Pdef(\tick, Pbind(\instrument, \tick3,
-	\dur, Pseq([0.25]*0.6, inf),
+	\dur, Pseq([0.5]*0.25, inf),
 	\freq, Pwhite(1000, 10000),
 	\amp, 0.01,
 	\rq, 0.01,
-)).play;
-Pdef(\kick, Pbind(\instrument, \kick,
-	\dur, Pseq([3, 5]*0.6, inf),
-	\amp, 0.5,
-	\out, 0,
+	\out, ~rev2Bus,
 )).play;
 )
-
+(
+Pdef(\kick, Pbind(\instrument, \kick,
+	\dur, Pseq([9,1,7,7,1,7]*0.25, inf),
+	\amp, Pseq([1, 0.5, 0.7, 1, 0.7, 0.5]*0.5, inf),
+	\out, ~revBus,
+)).play;
+)
 
 // OSC
 (
