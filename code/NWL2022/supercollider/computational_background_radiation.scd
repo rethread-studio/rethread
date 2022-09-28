@@ -254,9 +254,9 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 //
 
 (
-SynthDef(\kick,  { | dur2 = 0.3, atk = 0.000, amp = 0.8, pan = 0 |
+SynthDef(\kick,  { | dur2 = 0.3, atk = 0.0001, amp = 0.8, pan = 0 |
 	var sig, freq;
-	freq = EnvGen.ar(Env(\freq_l.kr([2960, 68, 46]), \freq_d.kr([0.04, 0.2]), \freq_c.kr([-13, -1])));
+	freq = EnvGen.ar(Env(\freq_l.kr([2960, 68, 46]), \freq_d.kr([0.03, 0.2]), \freq_c.kr([-13, -1])));
 	sig = SinOsc.ar(
 		freq,
 		mul:EnvGen.ar(
@@ -288,7 +288,9 @@ Pdef(\kick, Pbind(\instrument, \kick,
 (
 
 OSCdef(\test, {|msg, time, addr, recvPort|
-	Synth(\tick3, [\freq, msg[1]* 20 + 100, \out, ~rev2Bus]);
+	var freq = msg[1] * 10 + 20;
+	// Synth(\tick3, [\freq, msg[1]* 20 + 100, \out, ~rev2Bus]);
+	Synth(\osc, [\freq, freq, \atk, 0.001, \sus, 0.1,\rel, 0.05, \buf, ~wt_buf[0..2].choose, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
 	msg.postln
 
 }, '/call/', nil); // def style
