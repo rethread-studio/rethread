@@ -1,20 +1,10 @@
-use std::collections::HashMap;
-
 pub mod calltrace {
     use nom::branch::alt;
     use nom::bytes::complete::{is_a, is_not};
-    use nom::character::complete::{char, one_of};
-    use nom::combinator::recognize;
-    use nom::error::Error;
-    use nom::multi::{many0, many1};
-    use nom::sequence::{delimited, terminated};
-    use nom::{
-        bytes::complete::{tag, take, take_while_m_n},
-        combinator::map_res,
-        sequence::tuple,
-        IResult,
-    };
-    use std::{collections::HashMap, fs, hash::Hash};
+
+    use nom::sequence::terminated;
+    use nom::{bytes::complete::tag, combinator::map_res, IResult};
+    use std::fs;
 
     #[derive(Debug)]
     pub enum Direction {
@@ -106,8 +96,7 @@ pub mod calltrace {
 
 pub mod deepika1 {
     use serde::{Deserialize, Serialize};
-    use serde_json::Result;
-    use std::{collections::HashMap, fs};
+    use std::fs;
 
     #[derive(Serialize, Deserialize, Debug)]
     pub struct Function {
@@ -428,6 +417,24 @@ pub mod deepika2 {
         pub end_index: usize,
         pub state: DepthState,
         pub average: f32,
+        pub num_suppliers: usize,
+        pub num_dependencies: usize,
+        pub min_depth: i32,
+        pub max_depth: i32,
+    }
+    impl Default for DepthEnvelopePoint {
+        fn default() -> Self {
+            Self {
+                start_index: Default::default(),
+                end_index: Default::default(),
+                state: DepthState::Stable,
+                average: Default::default(),
+                num_suppliers: Default::default(),
+                num_dependencies: Default::default(),
+                min_depth: Default::default(),
+                max_depth: Default::default(),
+            }
+        }
     }
     #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
     pub enum DepthState {
@@ -464,6 +471,7 @@ pub mod deepika2 {
                 end_index: window_size,
                 state: DepthState::Stable,
                 average: averages[0],
+                ..Default::default()
             });
             for (i, (avg0, avg1)) in averages.iter().zip(averages.iter().skip(1)).enumerate() {
                 // Compare avg1 the previous avg0 to see if it's stable or not
@@ -479,6 +487,7 @@ pub mod deepika2 {
                         end_index: start_index + window_size,
                         state,
                         average: *avg1,
+                        ..Default::default()
                     });
                 } else {
                     points.push(DepthEnvelopePoint {
@@ -486,12 +495,13 @@ pub mod deepika2 {
                         end_index: start_index + window_size,
                         state: DepthState::Stable,
                         average: *avg1,
+                        ..Default::default()
                     });
                 }
             }
             Self { sections: points }
         }
-        pub fn from_depth_list2(list: Vec<i32>) -> Self {
+        pub fn from_depth_list2(list: Vec<i32>, calls: &[CallDrawData]) -> Self {
             let max_window_size = 128;
             let min_window_size = 8;
             let max_diff = 3.0_f32;
@@ -504,6 +514,7 @@ pub mod deepika2 {
                 average: last_average,
                 start_index: 0,
                 end_index: 0,
+                ..Default::default()
             }];
             while index_pointer < list.len() {
                 let mut current_window_size = max_window_size.min(list.len() - index_pointer);
@@ -525,6 +536,7 @@ pub mod deepika2 {
                                     average,
                                     start_index: index_pointer,
                                     end_index: index_pointer + current_window_size,
+                                    ..Default::default()
                                 });
                             }
                         }
@@ -551,11 +563,35 @@ pub mod deepika2 {
                         average,
                         start_index: index_pointer,
                         end_index: index_pointer + current_window_size,
+                        ..Default::default()
                     });
                     last_average = average;
                     last_slope = state;
                 }
                 index_pointer += current_window_size;
+            }
+            // We now have sections. Analyse those sections
+            for section in &mut sections {
+                let mut min_depth = i32::MAX;
+                let mut max_depth = i32::MIN;
+                let mut supplier_set = HashSet::new();
+                let mut dependency_set = HashSet::new();
+                for call in &calls[section.start_index..section.end_index] {
+                    if call.depth < min_depth {
+                        min_depth = call.depth;
+                    }
+                    max_depth = max_depth.max(call.depth);
+                    if let Some(s) = &call.supplier {
+                        supplier_set.insert(s.clone());
+                    }
+                    if let Some(d) = &call.dependency {
+                        dependency_set.insert(d.clone());
+                    }
+                }
+                section.min_depth = min_depth;
+                section.max_depth = max_depth;
+                section.num_suppliers = supplier_set.len();
+                section.num_dependencies = dependency_set.len();
             }
             Self { sections }
         }
@@ -821,7 +857,7 @@ pub mod deepika2 {
             // println!("Num ngram sections: {}", ngram_analysis.sections.len());
 
             let depth_list = draw_trace.iter().map(|call| call.depth).collect();
-            let depth_envelope = DepthEnvelope::from_depth_list2(depth_list);
+            let depth_envelope = DepthEnvelope::from_depth_list2(depth_list, &draw_trace);
 
             println!("depth_envelope: {depth_envelope:#?}");
 
