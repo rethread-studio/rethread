@@ -39,7 +39,7 @@ function setup() {
   //ortho();
 
   slider = createSlider(1, 20, 3, 1);
-  checkbox = createCheckbox('Complete cube', false);
+  checkbox = createCheckbox('Cut in half', false);
   checkbox.changed(() => completeCube = !completeCube);
 
   trace = data.draw_trace;
