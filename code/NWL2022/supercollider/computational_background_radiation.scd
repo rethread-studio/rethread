@@ -125,6 +125,14 @@ SynthDef(\sus_osc, {
 	Out.ar(rout, sig * rsend.dbamp); //"post-fader" send to reverb
 }).add;
 
+SynthDef(\sine, {
+	var sig, env;
+	env = Env.perc(\attack_time.kr(0.01), \release_time.kr(2.0)).kr(2);
+	sig = SinOsc.ar(\freq.kr(220)) * env * \amp.kr(0.5);
+	sig = Pan2.ar(sig, \pan.kr(0));
+	Out.ar(\out.kr(0), sig);
+}).add;
+
 SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 	var sig, wet;
 
@@ -140,7 +148,6 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
 	sig = LeakDC.ar(sig);
 	Out.ar(out, sig);
 }).add;
-
 )
 
 (
@@ -280,11 +287,28 @@ Pdef(\kick, Pbind(\instrument, \kick,
 
 // OSC
 (
-
+~chord = ([0, 4, 7, 11]-24).midicps;
 OSCdef(\test, {|msg, time, addr, recvPort|
-	var freq = msg[1] * 10 + 20;
+	var
+	// freq = msg[1] * 10 + 20,
+	freq = ~chord[(msg[1] %~chord.size)] * 2.pow((msg[1]/~chord.size).floor()),
+	buf, amp = 0.2, atk = 0.001;
 	// Synth(\tick3, [\freq, msg[1]* 20 + 100, \out, ~rev2Bus]);
-	Synth(\osc, [\freq, freq, \atk, 0.001, \sus, 0.1,\rel, 0.05, \buf, ~wt_buf[0..2].choose, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
+	if(msg[2] == 0, {
+		buf = ~wt_buf[0..2].choose;
+		amp = 0.1;
+	});
+	if(msg[2] == 1 || msg[2] == -1, {
+		buf = ~wt_buf[7..9].choose;
+		atk = 0.05;
+		freq = msg[1] * 10 + 20;
+	});
+	if(msg[2] == -1, {
+		freq = freq * 0.5;
+	});
+	Synth(\osc, [\freq, freq, \atk, atk, \sus, 0.1,\rel, 0.05, \amp, amp, \buf, buf, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
+	Synth(\sine, [\freq, freq, \amp, 0.05]);
+
 	msg.postln
 
 }, '/call', nil); // def style

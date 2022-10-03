@@ -77,10 +77,15 @@ impl OscCommunicator {
             .unwrap();
         Self { sender }
     }
-    pub fn send_call(&mut self, depth: i32) {
+    pub fn send_call(&mut self, depth: i32, state: parser::deepika2::DepthState) {
         use nannou_osc::Type;
-        let addr = "/call";
-        let args = vec![Type::Int(depth)];
+        let state = match state {
+            parser::deepika2::DepthState::Stable => 0,
+            parser::deepika2::DepthState::Increasing => 1,
+            parser::deepika2::DepthState::Decreasing => -1,
+        };
+        let addr = "/call/";
+        let args = vec![Type::Int(depth), Type::Int(state)];
         self.sender.send((addr, args)).ok();
     }
     pub fn send_speed(&mut self, time_between_events: f32) {
@@ -125,6 +130,7 @@ impl Default for GlobalSettings {
 struct Trace {
     trace: Deepika2,
     current_index: usize,
+    current_depth_envelope_index: usize,
     supplier_index: HashMap<String, usize>,
     // dependency per supplier
     dependency_index: HashMap<String, HashMap<String, usize>>,
@@ -180,6 +186,7 @@ impl Trace {
         Self {
             trace,
             current_index: 0,
+            current_depth_envelope_index: 0,
             supplier_index,
             dependency_index,
             lit_leds: Vec::new(),
@@ -292,6 +299,16 @@ fn led_animation_from_trace(
             if trace.current_index >= trace.trace.draw_trace.len() {
                 trace.current_index = 0;
             }
+            let num_depth_points = trace.trace.depth_envelope.sections.len();
+            let mut depth_point =
+                trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+            while trace.current_index > depth_point.end_index {
+                trace.current_depth_envelope_index += 1;
+                trace.current_depth_envelope_index %= num_depth_points;
+                depth_point =
+                    trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+            }
+            let state = depth_point.state;
             audio_engine.spawn_sine(
                 trace.trace.draw_trace[trace.current_index].depth as f32 * 10.0 + 20.0,
                 settings.mouse_position.x,
@@ -299,7 +316,7 @@ fn led_animation_from_trace(
             // Send osc message to SuperCollider
             {
                 let call = &trace.trace.draw_trace[trace.current_index];
-                osc_communicator.send_call(call.depth);
+                osc_communicator.send_call(call.depth, state);
             }
             let num_calls_into_the_future = match settings.call_to_coordinate_mapping {
                 CallToCoordinateMapping::DepthSupplierDependency => 1,

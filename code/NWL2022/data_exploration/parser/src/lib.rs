@@ -422,7 +422,7 @@ pub mod deepika2 {
         }
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone)]
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
     pub struct DepthEnvelopePoint {
         pub start_index: usize,
         pub end_index: usize,
