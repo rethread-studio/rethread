@@ -660,15 +660,15 @@ fn setup(
         ..default()
     });
     // light
-    commands.spawn_bundle(PointLightBundle {
-        transform: Transform::from_xyz(50.0, 50.0, 50.0),
-        point_light: PointLight {
-            intensity: 600000.,
-            range: 100.,
-            ..default()
-        },
-        ..default()
-    });
+    // commands.spawn_bundle(PointLightBundle {
+    //     transform: Transform::from_xyz(50.0, 50.0, 50.0),
+    //     point_light: PointLight {
+    //         intensity: 600000.,
+    //         range: 100.,
+    //         ..default()
+    //     },
+    //     ..default()
+    // });
 }
 
 /// Tags an entity as capable of panning and orbiting.
