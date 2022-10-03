@@ -131,6 +131,28 @@ SynthDef(\sus_osc, {
 	Out.ar(rout, sig * rsend.dbamp); //"post-fader" send to reverb
 }).add;
 
+SynthDef(\sine, {
+	var sig, env;
+	env = Env.perc(\attack_time.kr(0.01), \release_time.kr(2.0)).kr(2);
+	sig = SinOsc.ar(\freq.kr(220)) * env * \amp.kr(0.5);
+	sig = Pan2.ar(sig, \pan.kr(0));
+	Out.ar(\out.kr(0), sig);
+}).add;
+SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
+	var sig, wet;
+
+	sig = In.ar(\in.kr(10), 2);
+	mix = mix.lag(\mixLag.kr(10));
+
+	/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
+	wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
+	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
+
+	sig = (sig * (1-mix)) + (wet*mix);
+	sig = Limiter.ar(sig, 0.95);
+	sig = LeakDC.ar(sig);
+	Out.ar(out, sig);
+}).add;
 )
 
 (
@@ -203,24 +225,6 @@ SynthDef(\sus_osc, {
 // NOISE
 
 (
-SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3, rt = 3.0  |
-	var sig, wet;
-
-	sig = In.ar(\in.kr(10), 2);
-	mix = mix.lag(\mixLag.kr(10));
-
-	/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
-	wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
-	wet = Greyhole.ar(sig, \delayTime.kr(0.1), \damp.kr(0.7), \size.kr(1.0), \diff.kr(0.8), \feedback.kr(0.7));
-
-	sig = (sig * (1-mix)) + (wet*mix);
-	sig = Limiter.ar(sig, 0.95);
-	sig = LeakDC.ar(sig);
-	Out.ar(out, sig);
-}).add;
-)
-
-(
 {
 	~rev2Bus = Bus.audio(s, 2);
 	~rev2 = Synth(\medium_reverb, [\in, ~rev2Bus, \mix, 0.4, \feedback, 0.3, \size, 0.7, \damp, 0.65, \diff, 0.6]);
@@ -285,11 +289,28 @@ Pdef(\kick, Pbind(\instrument, \kick,
 
 // OSC
 (
-
+~chord = ([0, 4, 7, 11]-24).midicps;
 OSCdef(\test, {|msg, time, addr, recvPort|
-	var freq = msg[1] * 10 + 20;
+	var
+	// freq = msg[1] * 10 + 20,
+	freq = ~chord[(msg[1] %~chord.size)] * 2.pow((msg[1]/~chord.size).floor()),
+	buf, amp = 0.2, atk = 0.001;
 	// Synth(\tick3, [\freq, msg[1]* 20 + 100, \out, ~rev2Bus]);
-	Synth(\osc, [\freq, freq, \atk, 0.001, \sus, 0.1,\rel, 0.05, \buf, ~wt_buf[0..2].choose, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
+	if(msg[2] == 0, {
+		buf = ~wt_buf[0..2].choose;
+		amp = 0.1;
+	});
+	if(msg[2] == 1 || msg[2] == -1, {
+		buf = ~wt_buf[7..9].choose;
+		atk = 0.05;
+		freq = msg[1] * 10 + 20;
+	});
+	if(msg[2] == -1, {
+		freq = freq * 0.5;
+	});
+	Synth(\osc, [\freq, freq, \atk, atk, \sus, 0.1,\rel, 0.05, \amp, amp, \buf, buf, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
+		Synth(\sine, [\freq, freq, \amp, 0.05]);
+
 	msg.postln
 
 }, '/call/', nil); // def style
