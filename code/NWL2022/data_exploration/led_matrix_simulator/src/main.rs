@@ -865,7 +865,15 @@ fn bevy_ui(
                 ui.label("Num:");
                 ui.label(&format!("{}", trace.current_index));
                 ui.end_row();
-                ui.label("Data:");
+                ui.label("Section:");
+                // egui::ScrollArea::horizontal().show(ui, |ui| {
+                ui.label(&format!(
+                    "{:#?}:",
+                    trace.trace.depth_envelope.sections[trace.current_depth_envelope_index]
+                ));
+                // });
+                ui.end_row();
+                ui.label("Call data:");
                 // egui::ScrollArea::horizontal().show(ui, |ui| {
                 ui.label(&format!("{:#?}:", call));
                 // });
