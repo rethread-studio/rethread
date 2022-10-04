@@ -418,7 +418,9 @@ pub mod deepika2 {
         pub state: DepthState,
         pub average: f32,
         pub num_suppliers: usize,
+        pub supplier_dist_evenness: f32,
         pub num_dependencies: usize,
+        pub dependency_dist_evenness: f32,
         pub min_depth: i32,
         pub max_depth: i32,
     }
@@ -430,7 +432,9 @@ pub mod deepika2 {
                 state: DepthState::Stable,
                 average: Default::default(),
                 num_suppliers: Default::default(),
+                supplier_dist_evenness: 1.0,
                 num_dependencies: Default::default(),
+                dependency_dist_evenness: 1.0,
                 min_depth: Default::default(),
                 max_depth: Default::default(),
             }
@@ -516,8 +520,12 @@ pub mod deepika2 {
                 end_index: 0,
                 ..Default::default()
             }];
+            println!("from_depth_list2 len: {}", list.len());
             while index_pointer < list.len() {
                 let mut current_window_size = max_window_size.min(list.len() - index_pointer);
+                if index_pointer > 296900 {
+                    dbg!(index_pointer, current_window_size);
+                }
                 while current_window_size >= min_window_size {
                     let average = list[index_pointer..index_pointer + current_window_size]
                         .iter()
@@ -547,7 +555,7 @@ pub mod deepika2 {
                     current_window_size -= min_window_size;
                 }
                 if current_window_size < min_window_size {
-                    current_window_size = min_window_size;
+                    current_window_size = min_window_size.min(list.len() - index_pointer);
                     let average = list[index_pointer..index_pointer + current_window_size]
                         .iter()
                         .sum::<i32>() as f32
@@ -570,31 +578,63 @@ pub mod deepika2 {
                 }
                 index_pointer += current_window_size;
             }
-            // We now have sections. Analyse those sections
-            for section in &mut sections {
+            Self::analyse_sections(&mut sections, calls);
+            Self { sections }
+        }
+        fn analyse_sections(sections: &mut Vec<DepthEnvelopePoint>, calls: &[CallDrawData]) {
+            for section in sections {
                 let mut min_depth = i32::MAX;
                 let mut max_depth = i32::MIN;
-                let mut supplier_set = HashSet::new();
-                let mut dependency_set = HashSet::new();
+                let mut supplier_map: HashMap<String, i32> = HashMap::new();
+                let mut dependency_map: HashMap<String, i32> = HashMap::new();
                 for call in &calls[section.start_index..section.end_index] {
                     if call.depth < min_depth {
                         min_depth = call.depth;
                     }
                     max_depth = max_depth.max(call.depth);
                     if let Some(s) = &call.supplier {
-                        supplier_set.insert(s.clone());
+                        *supplier_map.entry(s.clone()).or_insert(0) += 1;
                     }
                     if let Some(d) = &call.dependency {
-                        dependency_set.insert(d.clone());
+                        *dependency_map.entry(d.clone()).or_insert(0) += 1;
                     }
                 }
                 section.min_depth = min_depth;
                 section.max_depth = max_depth;
-                section.num_suppliers = supplier_set.len();
-                section.num_dependencies = dependency_set.len();
+                section.num_suppliers = supplier_map.len();
+                section.num_dependencies = dependency_map.len();
+                let calls_per_supplier: Vec<i32> = supplier_map.values().map(|v| *v).collect();
+                let supplier_distances = distance_from_mean(&calls_per_supplier);
+                section.supplier_dist_evenness = average_distance_from_mean(&supplier_distances);
+                let calls_per_dependency: Vec<i32> = dependency_map.values().map(|v| *v).collect();
+                let dependency_distances = distance_from_mean(&calls_per_dependency);
+                section.dependency_dist_evenness =
+                    average_distance_from_mean(&dependency_distances);
             }
-            Self { sections }
+            println!("sections:#?");
         }
+    }
+
+    fn mean(list: &[i32]) -> f32 {
+        list.iter().sum::<i32>() as f32 / list.len() as f32
+    }
+
+    fn distance_from_mean(list: &[i32]) -> Vec<f32> {
+        let mean = mean(list);
+        list.iter()
+            .map(|&v| {
+                let v = v as f32;
+                if v > mean {
+                    mean / v
+                } else {
+                    v / mean
+                }
+            })
+            .collect()
+    }
+
+    fn average_distance_from_mean(distances: &[f32]) -> f32 {
+        distances.iter().sum::<f32>() as f32 / distances.len() as f32
     }
 
     // One approach is to run the curve through an FFT analysis and

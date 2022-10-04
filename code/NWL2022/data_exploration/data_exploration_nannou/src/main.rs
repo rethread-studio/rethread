@@ -260,7 +260,7 @@ impl NannouTrace {
                     }
                 }
                 let local_depth_width = local_max_depth - local_min_depth;
-                let mut y = win.bottom() + win.h() * 0.02;
+                let y = win.bottom() + win.h() * 0.02;
                 let depth_height = (win.h() / local_depth_width as f32) * 0.96;
 
                 let mut lines = vec![];
@@ -311,8 +311,23 @@ impl NannouTrace {
                     let x = win.left() + p.start_index as f32 * call_w - offset_x;
                     let x_end = win.left() + p.end_index as f32 * call_w - offset_x;
                     let y = y + total_depth_height * value;
-                    points.push((pt2(x, y), color));
-                    points.push((pt2(x_end, y), color));
+                    if x < win.right() && x_end >= win.left() {
+                        points.push((pt2(x, y), color));
+                        points.push((pt2(x_end, y), color));
+
+                        draw.ellipse().x_y(x, y + 30.).w_h(15.0, 15.).color(hsla(
+                            p.dependency_dist_evenness * 0.6,
+                            0.5,
+                            0.6,
+                            0.8,
+                        ));
+                        draw.ellipse().x_y(x, y + 60.).w_h(15.0, 15.).color(hsla(
+                            p.supplier_dist_evenness * 0.6,
+                            0.5,
+                            0.6,
+                            0.8,
+                        ));
+                    }
                 }
                 draw.polyline().stroke_weight(2.0).points_colored(points);
 
@@ -490,13 +505,27 @@ fn model(app: &App) -> Model {
 
     // let deepika1_trace = NannouTrace::from_deepika1(deepika1::Deepika1::new());
     // let calltrace = NannouTrace::from_calltrace(calltrace::Calltrace::new());
-    let trace =
-        deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
-            .unwrap();
+    // let trace =
+    //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
+    //         .unwrap();
     // let trace = deepika2::Deepika2::parse_and_save(
     //     "/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated",
     // )
     // .unwrap();
+    // let trace =
+    //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-copy-paste")
+    //         .unwrap();
+    // let trace =
+    //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-find-replace")
+    //         .unwrap();
+    // let trace = deepika2::Deepika2::parse_and_save(
+    //     "/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown",
+    // )
+    // .unwrap();
+    let trace =
+        deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-find-replace")
+            .unwrap();
+
     let deepika2_trace = NannouTrace::from_deepika2(trace);
     let traces = vec![deepika2_trace];
 
