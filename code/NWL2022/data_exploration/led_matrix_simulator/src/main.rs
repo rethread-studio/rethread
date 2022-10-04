@@ -18,7 +18,7 @@ mod audio;
 use audio::AudioEngine;
 
 use bevy_inspector_egui::WorldInspectorPlugin;
-use parser::deepika2::{Call, CallDrawData, Deepika2};
+use parser::deepika2::{self, Call, CallDrawData, Deepika2};
 use rand::prelude::*;
 
 fn main() {
@@ -77,6 +77,19 @@ impl OscCommunicator {
             .unwrap();
         Self { sender }
     }
+    pub fn send_section(&mut self, section: deepika2::DepthEnvelopePoint) {
+        use nannou_osc::Type;
+        let addr = "/section";
+        let args = vec![
+            Type::Int(section.min_depth),
+            Type::Int(section.max_depth),
+            Type::Int(section.num_suppliers as i32),
+            Type::Int(section.num_dependencies as i32),
+            Type::Float(section.supplier_dist_evenness),
+            Type::Float(section.dependency_dist_evenness),
+        ];
+        self.sender.send((addr, args)).ok();
+    }
     pub fn send_call(&mut self, depth: i32, state: parser::deepika2::DepthState) {
         use nannou_osc::Type;
         let state = match state {
@@ -84,7 +97,7 @@ impl OscCommunicator {
             parser::deepika2::DepthState::Increasing => 1,
             parser::deepika2::DepthState::Decreasing => -1,
         };
-        let addr = "/call/";
+        let addr = "/call";
         let args = vec![Type::Int(depth), Type::Int(state)];
         self.sender.send((addr, args)).ok();
     }
@@ -307,6 +320,7 @@ fn led_animation_from_trace(
                 trace.current_depth_envelope_index %= num_depth_points;
                 depth_point =
                     trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+                osc_communicator.send_section(depth_point);
             }
             let state = depth_point.state;
             audio_engine.spawn_sine(
@@ -541,6 +555,8 @@ fn setup(
     let size_x = 7;
     let size_z = 10;
     let y_offset = 4.9;
+    let length_x = 3.5;
+    let length_y = 3.5;
     let parent = commands
         // For the hierarchy to work certain Components need to exist. SpatialBundle provides those.
         .spawn_bundle(SpatialBundle::default())
@@ -581,8 +597,8 @@ fn setup(
                             ..default()
                         }),
                         transform: Transform::from_xyz(
-                            ((x as f32 + 0.5) / size_x as f32) * 4. - 2. + 0.5,
-                            (y as f32 / size_y as f32) * 4.0 + y_offset,
+                            ((x as f32 + 0.5) / size_x as f32) * length_x - (length_x / 2.0) + 0.5,
+                            (y as f32 / size_y as f32) * length_y + y_offset,
                             ((z as f32 + 0.5) / size_z as f32) * -7.,
                         ),
                         ..default()
