@@ -423,6 +423,7 @@ pub mod deepika2 {
         pub dependency_dist_evenness: f32,
         pub min_depth: i32,
         pub max_depth: i32,
+        pub shannon_wiener_diversity_index: f32,
     }
     impl Default for DepthEnvelopePoint {
         fn default() -> Self {
@@ -437,6 +438,7 @@ pub mod deepika2 {
                 dependency_dist_evenness: 1.0,
                 min_depth: Default::default(),
                 max_depth: Default::default(),
+                shannon_wiener_diversity_index: 0.0,
             }
         }
     }
@@ -610,6 +612,15 @@ pub mod deepika2 {
                 let dependency_distances = distance_from_mean(&calls_per_dependency);
                 section.dependency_dist_evenness =
                     average_distance_from_mean(&dependency_distances);
+
+                // Shannon-Wiener Diversity Index
+                let num_calls = (section.end_index - section.start_index) as f32;
+                section.shannon_wiener_diversity_index = dependency_map
+                    .values()
+                    .map(|v| *v as f32 / num_calls)
+                    .map(|p| p * p.ln())
+                    .sum()
+                    .abs(); // should be the negative of the sum I think, but we want to avoid -0.0
             }
             println!("sections:#?");
         }
