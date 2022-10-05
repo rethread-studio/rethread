@@ -619,7 +619,7 @@ pub mod deepika2 {
                     .values()
                     .map(|v| *v as f32 / num_calls)
                     .map(|p| p * p.ln())
-                    .sum()
+                    .sum::<f32>()
                     .abs(); // should be the negative of the sum I think, but we want to avoid -0.0
             }
             println!("sections:#?");
@@ -654,13 +654,13 @@ pub mod deepika2 {
     // will be important in this case.
     struct DepthFFT {}
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Function {
         fqn: String,
         supplier: String,
         dependency: String,
     }
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Call {
         callee: Function,
         caller: Function,
@@ -670,7 +670,7 @@ pub mod deepika2 {
         stack_trace: String,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct CallDrawData {
         pub depth: i32,
         pub supplier: Option<String>,
@@ -697,7 +697,7 @@ pub mod deepika2 {
         Function,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Deepika2 {
         pub draw_trace: Vec<CallDrawData>,
         pub max_depth: i32,
