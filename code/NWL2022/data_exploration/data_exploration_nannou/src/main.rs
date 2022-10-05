@@ -505,23 +505,23 @@ fn model(app: &App) -> Model {
 
     // let deepika1_trace = NannouTrace::from_deepika1(deepika1::Deepika1::new());
     // let calltrace = NannouTrace::from_calltrace(calltrace::Calltrace::new());
-    // let trace =
-    //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
-    //         .unwrap();
-    // let trace = deepika2::Deepika2::parse_and_save(
-    //     "/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated",
-    // )
-    // .unwrap();
-    // let trace =
-    //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-copy-paste")
-    //         .unwrap();
-    // let trace =
-    //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-find-replace")
-    //         .unwrap();
-    // let trace = deepika2::Deepika2::parse_and_save(
-    //     "/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown",
-    // )
-    // .unwrap();
+    let trace =
+        deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
+            .unwrap();
+    let trace = deepika2::Deepika2::parse_and_save(
+        "/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated",
+    )
+    .unwrap();
+    let trace =
+        deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-copy-paste")
+            .unwrap();
+    let trace =
+        deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-find-replace")
+            .unwrap();
+    let trace = deepika2::Deepika2::parse_and_save(
+        "/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown",
+    )
+    .unwrap();
     let trace =
         deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-find-replace")
             .unwrap();
