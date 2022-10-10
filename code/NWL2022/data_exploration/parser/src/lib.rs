@@ -423,6 +423,7 @@ pub mod deepika2 {
         pub dependency_dist_evenness: f32,
         pub min_depth: i32,
         pub max_depth: i32,
+        pub shannon_wiener_diversity_index: f32,
     }
     impl Default for DepthEnvelopePoint {
         fn default() -> Self {
@@ -437,6 +438,7 @@ pub mod deepika2 {
                 dependency_dist_evenness: 1.0,
                 min_depth: Default::default(),
                 max_depth: Default::default(),
+                shannon_wiener_diversity_index: 0.0,
             }
         }
     }
@@ -610,6 +612,15 @@ pub mod deepika2 {
                 let dependency_distances = distance_from_mean(&calls_per_dependency);
                 section.dependency_dist_evenness =
                     average_distance_from_mean(&dependency_distances);
+
+                // Shannon-Wiener Diversity Index
+                let num_calls = (section.end_index - section.start_index) as f32;
+                section.shannon_wiener_diversity_index = dependency_map
+                    .values()
+                    .map(|v| *v as f32 / num_calls)
+                    .map(|p| p * p.ln())
+                    .sum::<f32>()
+                    .abs(); // should be the negative of the sum I think, but we want to avoid -0.0
             }
             println!("sections:#?");
         }
@@ -643,13 +654,13 @@ pub mod deepika2 {
     // will be important in this case.
     struct DepthFFT {}
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Function {
         fqn: String,
         supplier: String,
         dependency: String,
     }
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Call {
         callee: Function,
         caller: Function,
@@ -659,7 +670,7 @@ pub mod deepika2 {
         stack_trace: String,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct CallDrawData {
         pub depth: i32,
         pub supplier: Option<String>,
@@ -686,7 +697,7 @@ pub mod deepika2 {
         Function,
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Deepika2 {
         pub draw_trace: Vec<CallDrawData>,
         pub max_depth: i32,

@@ -15,11 +15,15 @@ use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 
 mod audio;
+mod scheduler;
 use audio::AudioEngine;
+use scheduler::SchedulerCom;
 
 use bevy_inspector_egui::WorldInspectorPlugin;
 use parser::deepika2::{self, Call, CallDrawData, Deepika2};
 use rand::prelude::*;
+
+use crate::scheduler::start_scheduler;
 
 fn main() {
     App::new()
@@ -27,9 +31,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
         .insert_resource(Trace::new())
-        .insert_resource(OscCommunicator::new())
         // .insert_resource(audio::AudioEngine::new())
-        .insert_non_send_resource(AudioEngine::new())
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         .add_plugin(InspectorPlugin::<GlobalSettings>::new())
@@ -66,51 +68,9 @@ enum CallToCoordinateMapping {
     TimeSupplierDependency,
 }
 
-struct OscCommunicator {
-    sender: nannou_osc::Sender<nannou_osc::Connected>,
-}
-impl OscCommunicator {
-    pub fn new() -> Self {
-        let sender = nannou_osc::sender()
-            .unwrap()
-            .connect("localhost:57120")
-            .unwrap();
-        Self { sender }
-    }
-    pub fn send_section(&mut self, section: deepika2::DepthEnvelopePoint) {
-        use nannou_osc::Type;
-        let addr = "/section";
-        let args = vec![
-            Type::Int(section.min_depth),
-            Type::Int(section.max_depth),
-            Type::Int(section.num_suppliers as i32),
-            Type::Int(section.num_dependencies as i32),
-            Type::Float(section.supplier_dist_evenness),
-            Type::Float(section.dependency_dist_evenness),
-        ];
-        self.sender.send((addr, args)).ok();
-    }
-    pub fn send_call(&mut self, depth: i32, state: parser::deepika2::DepthState) {
-        use nannou_osc::Type;
-        let state = match state {
-            parser::deepika2::DepthState::Stable => 0,
-            parser::deepika2::DepthState::Increasing => 1,
-            parser::deepika2::DepthState::Decreasing => -1,
-        };
-        let addr = "/call";
-        let args = vec![Type::Int(depth), Type::Int(state)];
-        self.sender.send((addr, args)).ok();
-    }
-    pub fn send_speed(&mut self, time_between_events: f32) {
-        use nannou_osc::Type;
-        let addr = "/speed";
-        let args = vec![Type::Float(time_between_events)];
-        self.sender.send((addr, args)).ok();
-    }
-}
-
 #[derive(Inspectable)]
 struct GlobalSettings {
+    old_play: bool,
     play: bool,
     use_point_lights: bool,
     interpolate_depth: bool,
@@ -127,6 +87,7 @@ impl Default for GlobalSettings {
     fn default() -> Self {
         Self {
             play: false,
+            old_play: false,
             use_point_lights: true,
             interpolate_depth: false,
             num_leds_in_trace: 3,
@@ -142,6 +103,7 @@ impl Default for GlobalSettings {
 
 struct Trace {
     trace: Deepika2,
+    scheduler_com: SchedulerCom,
     current_index: usize,
     current_depth_envelope_index: usize,
     supplier_index: HashMap<String, usize>,
@@ -196,6 +158,8 @@ impl Trace {
             }
         }
 
+        let scheduler_com = start_scheduler(trace.clone());
+
         Self {
             trace,
             current_index: 0,
@@ -206,6 +170,7 @@ impl Trace {
             num_calls_per_supplier,
             num_calls_per_dependency,
             num_calls_per_depth,
+            scheduler_com,
         }
     }
 }
@@ -268,7 +233,6 @@ fn led_animation_from_trace(
     mut commands: Commands,
     mut timer: ResMut<AnimationTimer>,
     mut trace: ResMut<Trace>,
-    mut osc_communicator: ResMut<OscCommunicator>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut query: Query<(
         &MatrixPosition,
@@ -279,125 +243,66 @@ fn led_animation_from_trace(
         Option<&Children>,
     )>,
     mut lights: Query<(&mut PointLight, Entity)>,
-    mut audio_engine: NonSendMut<AudioEngine>,
 ) {
-    if settings.play {
-        if timer.0.tick(time.delta()).just_finished() {
-            let max_depth = trace.trace.max_depth as f32;
-            // Set old lights to white
-            for old_light in &trace.lit_leds {
-                for (matrix_position, mut material, onoff, mut transform, entity, children) in
-                    query.iter_mut()
-                {
-                    if entity == *old_light {
-                        let material = materials.get_mut(&material).unwrap();
-                        // material.base_color = Color::WHITE;
-                        material.base_color = Color::rgba(1., 1., 1., 0.5);
-                        // material.emissive = Color::WHITE;
+    // Set old lights to white
+    for old_light in &trace.lit_leds {
+        for (matrix_position, mut material, onoff, mut transform, entity, children) in
+            query.iter_mut()
+        {
+            if entity == *old_light {
+                let material = materials.get_mut(&material).unwrap();
+                // material.base_color = Color::WHITE;
+                material.base_color = Color::rgba(1., 1., 1., 0.5);
+                // material.emissive = Color::WHITE;
 
-                        if let Some(children) = children {
-                            for child in children {
-                                for (mut pl, pl_entity) in lights.iter_mut() {
-                                    if pl_entity == *child {
-                                        pl.color = Color::WHITE;
-                                    }
-                                }
+                if let Some(children) = children {
+                    for child in children {
+                        for (mut pl, pl_entity) in lights.iter_mut() {
+                            if pl_entity == *child {
+                                pl.color = Color::WHITE;
                             }
                         }
                     }
                 }
             }
-            // Turn on the new light
-            trace.current_index += 1;
-            if trace.current_index >= trace.trace.draw_trace.len() {
-                trace.current_index = 0;
-            }
-            let num_depth_points = trace.trace.depth_envelope.sections.len();
-            let mut depth_point =
-                trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
-            while trace.current_index > depth_point.end_index {
-                trace.current_depth_envelope_index += 1;
-                trace.current_depth_envelope_index %= num_depth_points;
-                depth_point =
+        }
+    }
+    while let Ok(new_index) = trace.scheduler_com.index_increase_rx.try_recv() {
+        trace.current_index = new_index;
+        if settings.play {
+            if timer.0.tick(time.delta()).just_finished() {
+                let max_depth = trace.trace.max_depth as f32;
+                // Turn on the new light
+                trace.current_index += 1;
+                if trace.current_index >= trace.trace.draw_trace.len() {
+                    trace.current_index = 0;
+                }
+                let num_depth_points = trace.trace.depth_envelope.sections.len();
+                let mut depth_point =
                     trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
-                osc_communicator.send_section(depth_point);
-            }
-            let state = depth_point.state;
-            audio_engine.spawn_sine(
-                trace.trace.draw_trace[trace.current_index].depth as f32 * 10.0 + 20.0,
-                settings.mouse_position.x,
-            );
-            // Send osc message to SuperCollider
-            {
-                let call = &trace.trace.draw_trace[trace.current_index];
-                osc_communicator.send_call(call.depth, state);
-            }
-            let num_calls_into_the_future = match settings.call_to_coordinate_mapping {
-                CallToCoordinateMapping::DepthSupplierDependency => 1,
-                CallToCoordinateMapping::SupplierDependencyDepth => 1,
-                CallToCoordinateMapping::TimeSupplierDependency => 7,
-            };
-            for call_num in 0..num_calls_into_the_future {
-                let call = &trace.trace.draw_trace[trace.current_index + call_num];
-                let new_matrix_position =
-                    matrix_position(call, &*trace, call_num, 7, 7, 10, &*settings);
-
-                // Test the matrix
-                // let x = trace.current_index as i32 % 7;
-                // let y = trace.current_index as i32 / 7 % 7;
-                // let z = trace.current_index as i32 / 49 % num_in_layer_z_at_coordinate(x, y);
-                // let new_matrix_position = MatrixPosition { x, y, z };
-                // println!("{new_matrix_position:?}");
-                for (matrix_position, mut material, mut onoff, mut transform, entity, children) in
-                    query.iter_mut()
-                {
-                    if *matrix_position == new_matrix_position {
-                        let material = materials.get_mut(&material).unwrap();
-                        material.base_color = settings.current_led_colour.clone();
-                        material.emissive = settings.current_led_colour.clone();
-                        if !trace.lit_leds.contains(&entity) {
-                            if settings.use_point_lights {
-                                let light = commands
-                                    .spawn_bundle(PointLightBundle {
-                                        // transform: transform.clone(),
-                                        point_light: PointLight {
-                                            intensity: settings.led_intensity,
-                                            range: 50.,
-                                            radius: settings.led_radius,
-                                            color: settings.current_led_colour.clone(),
-                                            shadows_enabled: true,
-                                            ..default()
-                                        },
-                                        ..default()
-                                    })
-                                    .id();
-                                commands.entity(entity).add_child(light);
-
-                                transform.scale = vec3(3., 3., 3.);
-                            }
-                        } else {
-                            // The light already exists, but we want to set it to the active colour
-                            if let Some(children) = children {
-                                for child in children {
-                                    for (mut pl, pl_entity) in lights.iter_mut() {
-                                        if pl_entity == *child {
-                                            pl.color = settings.current_led_colour.clone();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        onoff.0 = true;
-                        trace.lit_leds.push(entity);
-                    }
+                while trace.current_index > depth_point.end_index {
+                    trace.current_depth_envelope_index += 1;
+                    trace.current_depth_envelope_index %= num_depth_points;
+                    depth_point =
+                        trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
                 }
-            }
+                let state = depth_point.state;
+                let num_calls_into_the_future = match settings.call_to_coordinate_mapping {
+                    CallToCoordinateMapping::DepthSupplierDependency => 1,
+                    CallToCoordinateMapping::SupplierDependencyDepth => 1,
+                    CallToCoordinateMapping::TimeSupplierDependency => 7,
+                };
+                for call_num in 0..num_calls_into_the_future {
+                    let call = &trace.trace.draw_trace[trace.current_index + call_num];
+                    let new_matrix_position =
+                        matrix_position(call, &*trace, call_num, 7, 7, 10, &*settings);
 
-            while trace.lit_leds.len() > settings.num_leds_in_trace {
-                let removed = trace.lit_leds.remove(0);
-                if !trace.lit_leds.contains(&removed) {
-                    // The same function can be called many times in close succession. Don't turn the LED off if it is still in the list of LEDs that should be lit.
-                    // Turn off the last light
+                    // Test the matrix
+                    // let x = trace.current_index as i32 % 7;
+                    // let y = trace.current_index as i32 / 7 % 7;
+                    // let z = trace.current_index as i32 / 49 % num_in_layer_z_at_coordinate(x, y);
+                    // let new_matrix_position = MatrixPosition { x, y, z };
+                    // println!("{new_matrix_position:?}");
                     for (
                         matrix_position,
                         mut material,
@@ -407,40 +312,97 @@ fn led_animation_from_trace(
                         children,
                     ) in query.iter_mut()
                     {
-                        if entity == removed {
-                            if onoff.0 {
-                                // let material = materials.get_mut(&material).unwrap();
-                                // material.base_color = Color::hex("000").unwrap();
-                                // material.emissive = Color::hex("000").unwrap();
-                                // transform.scale = vec3(1., 1., 1.);
+                        if *matrix_position == new_matrix_position {
+                            let material = materials.get_mut(&material).unwrap();
+                            material.base_color = settings.current_led_colour.clone();
+                            material.emissive = settings.current_led_colour.clone();
+                            if !trace.lit_leds.contains(&entity) {
+                                if settings.use_point_lights {
+                                    let light = commands
+                                        .spawn_bundle(PointLightBundle {
+                                            // transform: transform.clone(),
+                                            point_light: PointLight {
+                                                intensity: settings.led_intensity,
+                                                range: 50.,
+                                                radius: settings.led_radius,
+                                                color: settings.current_led_colour.clone(),
+                                                shadows_enabled: true,
+                                                ..default()
+                                            },
+                                            ..default()
+                                        })
+                                        .id();
+                                    commands.entity(entity).add_child(light);
+
+                                    transform.scale = vec3(3., 3., 3.);
+                                }
+                            } else {
+                                // The light already exists, but we want to set it to the active colour
                                 if let Some(children) = children {
                                     for child in children {
-                                        // despawn_recursive also removes the child from the parent
-                                        commands.entity(*child).despawn_recursive();
+                                        for (mut pl, pl_entity) in lights.iter_mut() {
+                                            if pl_entity == *child {
+                                                pl.color = settings.current_led_colour.clone();
+                                            }
+                                        }
                                     }
                                 }
-                                onoff.0 = false;
+                            }
+                            onoff.0 = true;
+                            trace.lit_leds.push(entity);
+                        }
+                    }
+                }
+
+                while trace.lit_leds.len() > settings.num_leds_in_trace {
+                    let removed = trace.lit_leds.remove(0);
+                    if !trace.lit_leds.contains(&removed) {
+                        // The same function can be called many times in close succession. Don't turn the LED off if it is still in the list of LEDs that should be lit.
+                        // Turn off the last light
+                        for (
+                            matrix_position,
+                            mut material,
+                            mut onoff,
+                            mut transform,
+                            entity,
+                            children,
+                        ) in query.iter_mut()
+                        {
+                            if entity == removed {
+                                if onoff.0 {
+                                    // let material = materials.get_mut(&material).unwrap();
+                                    // material.base_color = Color::hex("000").unwrap();
+                                    // material.emissive = Color::hex("000").unwrap();
+                                    // transform.scale = vec3(1., 1., 1.);
+                                    if let Some(children) = children {
+                                        for child in children {
+                                            // despawn_recursive also removes the child from the parent
+                                            commands.entity(*child).despawn_recursive();
+                                        }
+                                    }
+                                    onoff.0 = false;
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            for (matrix_position, mut material, mut onoff, mut transform, entity, children) in
-                query.iter_mut()
-            {
-                if onoff.0 == false {
-                    const FALLOFF: f32 = 0.95;
-                    let material = materials.get_mut(&material).unwrap();
-                    let mut color = material.base_color.as_hsla_f32();
-                    color[2] *= FALLOFF;
-                    transform.scale *= FALLOFF;
+                for (matrix_position, mut material, mut onoff, mut transform, entity, children) in
+                    query.iter_mut()
+                {
+                    if onoff.0 == false {
+                        const FALLOFF: f32 = 0.95;
+                        let material = materials.get_mut(&material).unwrap();
+                        let mut color = material.base_color.as_hsla_f32();
+                        color[2] *= FALLOFF;
+                        transform.scale *= FALLOFF;
 
-                    // transform.scale = vec3(1., 1., 1.);
-                    if let Some(children) = children {
-                        for child in children {
-                            // despawn_recursive also removes the child from the parent
-                            commands.entity(*child).despawn_recursive();
+                        // transform.scale = vec3(1., 1., 1.);
+                        if let Some(children) = children {
+                            for child in children {
+                                // despawn_recursive also removes the child from the parent
+                                commands.entity(*child).despawn_recursive();
+                            }
                         }
                     }
                 }
@@ -838,9 +800,8 @@ fn spawn_camera(mut commands: Commands) {
 fn bevy_ui(
     mut commands: Commands,
     mut settings: ResMut<GlobalSettings>,
-    mut osc_communicator: ResMut<OscCommunicator>,
     mut timer: ResMut<AnimationTimer>,
-    trace: Res<Trace>,
+    mut trace: ResMut<Trace>,
     query: Query<Entity, With<LedMatrix>>,
     mut egui_context: ResMut<EguiContext>,
 ) {
@@ -851,13 +812,17 @@ fn bevy_ui(
         .default_width(500.)
         .show(egui_context.ctx_mut(), |ui| {
             ui.checkbox(&mut settings.play, "Play");
+            if settings.play != settings.old_play {
+                settings.old_play = settings.play;
+                trace.scheduler_com.play_tx.send(settings.play).unwrap();
+            }
             let mut seconds = timer.0.duration().as_secs_f32();
             ui.add(
                 egui::Slider::new(&mut seconds, 0.001..=1.0)
                     .logarithmic(true)
                     .text("Step duration"),
             );
-            osc_communicator.send_speed(seconds);
+            trace.scheduler_com.event_duration_tx.send(seconds).unwrap();
             timer.0.set_duration(Duration::from_secs_f32(seconds));
             ui.label(&format!("Current call({}):", trace.current_index));
             egui::Grid::new("Current call:").show(ui, |ui| {
