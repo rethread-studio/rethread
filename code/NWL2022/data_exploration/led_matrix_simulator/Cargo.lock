@@ -2194,7 +2194,7 @@ dependencies = [
 
 [[package]]
 name = "knyst"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "dasp_sample",
  "downcast-rs",
