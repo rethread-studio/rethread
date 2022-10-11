@@ -1,6 +1,5 @@
-const Nx = 10; // number of LEDs in the x-direction
-const Ny = 7; // number of LEDs in the y-direction
-const Nz = 7; // number of LEDs in the z-direction
+const Nx = 5; // number of LEDs in the x-direction
+const Ny = 15; // number of LEDs in the y-direction
 const diam = 5; // diameter of each sphere (LED)
 const s = 25; // space between two spheres
 
@@ -13,12 +12,12 @@ let allSups; // array with all suppliers
 let nDeps; // number of dependencies
 let nSups; // number of suppliers
 
-let currentFrame = 0;
-let frames = []; // array containing the Nz frames of the animation (from the new one, the one at the front of the LED cube, to the last one, at the back). Each frame is a Ny*Nx matrix containing an array with the hue, saturation, value of each LED
+let t = 0; // time
+let ledsLeft = [], ledsRight = []; // leds on the left, and on the right. Both are
 
-let slider; // speed slider
-let checkbox; // checkbox that determines whether the cube is complete or cut in half
-let completeCube = true;
+let speedSlider; // animation speed
+let sepSlider; // separation between the two curtains
+let angleSlider; // angle they make with the camera plane
 
 // change LEDs on top that don't change much, change hue, brightness, pulse
 
@@ -38,14 +37,13 @@ function setup() {
   //frameRate(10)
   //ortho();
 
-  slider = createSlider(1, 20, 3, 1);
-  checkbox = createCheckbox('Cut in half', false);
-  checkbox.changed(() => completeCube = !completeCube);
+  speedSlider = createSlider(1, 20, 3, 1);
+  sepSlider = createSlider(0, 64, 0, 1);
+  angleSlider = createSlider(0, PI, PI/4, 0.01);
 
   trace = data.draw_trace;
   maxDepth = data.max_depth;
   getLength();
-  //maxDepth = getMaxDepth();
   console.log("Max length: ", maxDepth);
   console.log("Mean length: ", getMeanDepth());
   getAllSuppliersAndDependencies();
@@ -56,17 +54,15 @@ function setup() {
   console.log("Number of dependencies: ", nDeps);
   console.log("Numer of suppliers: ", nSups);
 
-  // build the frames array
-  for (let k = 0; k < Nz; k++) {
-    let matrix = [];
-    for (let j = 0; j < Ny; j++) {
-      let line = [];
-      for (let i = 0; i < Nx; i++) {
-        line.push([0, 0, 0]);
-      }
-      matrix.push(line);
+  // build the leds arrays
+  for (let j = 0; j < Ny; j++) {
+    let lineLeft = [], lineRight = [];
+    for (let i = 0; i < Nx; i++) {
+      lineLeft.push([0, 0, 0]);
+      lineRight.push([0, 0, 0]);
     }
-    frames.push(matrix);
+    ledsLeft.push(lineLeft);
+    ledsRight.push(lineRight);
   }
 }
 
@@ -75,69 +71,59 @@ function draw() {
 
   orbitControl(); // allow movement around the sketch using a mouse or trackpad
   lights(); // add global lights to the scene
-  rotateY(PI); // put it in the right direction
-  translate((s-Nx*s)/2, (s-Ny*s)/2, (s-Nz*s)/2); // center the cube
+  translate(-Nx*s/2, -Ny*s/2);
 
-  if (frameCount % slider.value() == 0) updateFrames();
-  drawLEDs();
-}
-
-function updateFrames() {
-  let newFrame = [];
-  // deep copy of the first frame
-  for (let j = 0; j < Ny; j++) {
-    let line = [];
-    for (let i = 0; i < Nx; i++) {
-      let f0 = frames[0][j][i];
-      line.push([f0[0], f0[1], f0[2]]);
-    }
-    newFrame.push(line);
+  if (frameCount % speedSlider.value() == 0) {
+    updateLeds();
+    t++;
   }
 
-  // modify the new frame with the latest data point
-  let t = trace[currentFrame%len];
-  let lineIdx = ~~(t.depth*Ny/(maxDepth+1));
-  let [sup, dep] = getSupAndDep(t.name);
-  let limitI = ~~map(allDeps.indexOf(dep), 0, allDeps.length, 1, Nx/2);
-  let hu = allSups.indexOf(sup)*360/allSups.length;
-  let sa = 100;
+  push();
+  translate(-sepSlider.value(), 0, 0);
+  rotateY(angleSlider.value());
+  translate((1-Nx)*s/2, 0, 0);
+  drawLEDs(ledsLeft);
+  pop();
+
+  push();
+  translate(Nx*s+sepSlider.value(), 0, 0);
+  rotateY(-angleSlider.value());
+  translate((1-Nx)*s/2, 0, 0);
+  drawLEDs(ledsRight);
+  pop();
+}
+
+function updateLeds() {
   for (let i = 0; i < Nx; i++) {
-    let br = (i < Nx/2 + limitI && i >= Nx/2 - limitI) ? 100 : 0;
-    newFrame[lineIdx][i] = [hu, sa, br];
-  }
-  for (let j = lineIdx+1; j < Ny; j++) {
-    for (let i = 0; i < Nx; i++) {
-      newFrame[j][i] = [0, 0, 0];
+    let tr = trace[(i+t)%len];
+    let [sup, dep] = getSupAndDep(tr.name);
+    let depth = ~~(tr.depth*Ny/(maxDepth+1));
+    for (let j = 0; j < Ny; j++) {
+      let huLeft = allDeps.indexOf(dep)*360/allDeps.length;;
+      let huRight = allSups.indexOf(sup)*360/allSups.length;
+      let sa = 100;
+      let br = (j < depth) ? 100 : 0;
+      ledsLeft[j][i] = [huLeft, sa, br];
+      ledsRight[j][Nx-i-1] = [huRight, sa, br];
     }
   }
-
-  //console.log(newFrame)
-
-  // add the new frame at the top and delete oldest one
-  frames.shift();
-  frames.push(newFrame);
-  currentFrame++;
 }
 
-function drawLEDs() {
-  for (let k = 0; k < Nz; k++) { // z axis
+function drawLEDs(leds) {
+  push();
+  for (let j = 0; j < Ny; j++) { // y axis
     push();
-    for (let j = 0; j < Ny; j++) { // y axis
-      push();
-      for (let i = 0; i < Nx; i++) { // x axis
-        let hu, sa, br;
-        [hu, sa, br] = frames[k][j][i];
-        fill(hu, sa, br);
-        if (j+k < (Ny+Nz)/2 || completeCube)
-          sphere(diam*map(br, 0, 100, 1/2, 1));
-        translate(s, 0, 0);
-      }
-      pop();
-      translate(0, s, 0);
+    for (let i = 0; i < Nx; i++) { // x axis
+      let hu, sa, br;
+      [hu, sa, br] = leds[j][i];
+      fill(hu, sa, br);
+      sphere(diam*map(br, 0, 100, 1/2, 1));
+      translate(s, 0, 0);
     }
     pop();
-    translate(0, 0, s);
+    translate(0, s, 0);
   }
+  pop();
 }
 
 
