@@ -19,7 +19,19 @@ let speedSlider; // animation speed
 let sepSlider; // separation between the two curtains
 let angleSlider; // angle they make with the camera plane
 
-// change LEDs on top that don't change much, change hue, brightness, pulse
+// GUI
+let params = {
+  speed: 3,
+  separation: 0,
+  angle: Math.PI/4,
+  vizStyle: 0
+}
+
+let gui = new dat.GUI();
+gui.add(params, "speed", 1, 20, 1).name("Slowness")
+gui.add(params, "separation", 0, 64, 1).name("Separation");
+gui.add(params, "angle", 0, Math.PI, Math.PI/16).name("Angle");
+gui.add(params, "vizStyle", [0, 1, 2]).name("Style");
 
 function preload() {
   //data = loadJSON("data-varna-copy-paste-isolated.json");
@@ -36,10 +48,6 @@ function setup() {
   colorMode(HSB);
   //frameRate(10)
   //ortho();
-
-  speedSlider = createSlider(1, 20, 3, 1);
-  sepSlider = createSlider(0, 64, 0, 1);
-  angleSlider = createSlider(0, PI, PI/4, 0.01);
 
   trace = data.draw_trace;
   maxDepth = data.max_depth;
@@ -73,21 +81,21 @@ function draw() {
   lights(); // add global lights to the scene
   translate(-Nx*s/2, -Ny*s/2);
 
-  if (frameCount % speedSlider.value() == 0) {
+  if (frameCount % params.speed == 0) {
     updateLeds();
     t++;
   }
 
   push();
-  translate(-sepSlider.value(), 0, 0);
-  rotateY(angleSlider.value());
+  translate(-params.separation, 0, 0);
+  rotateY(params.angle);
   translate((1-Nx)*s/2, 0, 0);
   drawLEDs(ledsLeft);
   pop();
 
   push();
-  translate(Nx*s+sepSlider.value(), 0, 0);
-  rotateY(-angleSlider.value());
+  translate(Nx*s+params.separation, 0, 0);
+  rotateY(-params.angle);
   translate((1-Nx)*s/2, 0, 0);
   drawLEDs(ledsRight);
   pop();
