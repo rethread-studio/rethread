@@ -2,8 +2,8 @@
 
 const Nx = 5; // number of LEDs in the x-direction
 const Ny = 15; // number of LEDs in the y-direction
-const diam = 5; // diameter of each sphere (LED)
-const s = 25; // space between two spheres
+const diam = 6; // diameter of each sphere (LED)
+const s = 24; // space between two spheres
 
 let data; // data from the json
 let trace; // array with the trace
