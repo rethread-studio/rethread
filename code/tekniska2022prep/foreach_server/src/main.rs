@@ -215,7 +215,9 @@ impl State {
                 }
                 let time_to_timeout =
                     self.timeout.as_secs_f32() - self.last_interaction.elapsed().as_secs_f32();
-                self.communication.send_timeout(time_to_timeout);
+                if time_to_timeout < 6.0 {
+                    self.communication.send_timeout(time_to_timeout);
+                }
             }
         }
         for (packet, _addr) in self.communication.main_screen_receiver.try_iter() {
@@ -429,6 +431,7 @@ fn main() -> Result<()> {
             serial_port = None;
         }
         state.update();
+        std::thread::sleep(Duration::from_millis(1));
     }
     #[allow(unreachable_code)]
     Ok(())

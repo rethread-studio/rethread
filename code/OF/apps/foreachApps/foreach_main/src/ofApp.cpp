@@ -18,6 +18,8 @@ void ofApp::setup() {
   // try to grab at this size.
   camWidth = 1920;
   camHeight = 1080;
+  // camWidth = 1280;
+  // camHeight = 720;
 
   gui.setup("parameters");
   gui.add(pixelZoom.set("pixel zoom", 10.0, 0.2, 30.0));
@@ -172,6 +174,7 @@ void ofApp::update() {
       videoTexture.loadData(videoInverted);
     }
   }
+  ofSetWindowTitle(ofToString(ofGetFrameRate(), 2));
 }
 
 //--------------------------------------------------------------
@@ -364,10 +367,12 @@ void ofApp::draw() {
   } else if (state == State::END_SCREEN) {
     ofBackground(0);
 
+    int halfProcessedNumPixels =
+        imageFbo.getWidth() * imageFbo.getHeight() * 0.6;
     // TEMP this can be removed when we are sure the states are progressed
     // through in order
 
-    filteredImageFbo.begin();
+    /*filteredImageFbo.begin();
     filterShader.begin();
     filterShader.setUniform2f("resolution", imageFbo.getWidth(),
                               imageFbo.getHeight());
@@ -392,13 +397,11 @@ void ofApp::draw() {
     filterShader.setUniform1f("invertY", 0);
     filterShader.setUniform1f("exponent", filterExponent);
     filterShader.setUniform1f("gain", filterGain);
-    int halfProcessedNumPixels =
-        imageFbo.getWidth() * imageFbo.getHeight() * 0.6;
     filterShader.setUniform1f("pixelsProcessed", halfProcessedNumPixels);
     ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
                     filteredImageFbo.getHeight());
     filterShader.end();
-    halfFilteredImageFbo.end();
+    halfFilteredImageFbo.end();*/
     // END TEMP
 
     ofSetColor(255);
