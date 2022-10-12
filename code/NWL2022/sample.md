@@ -7,6 +7,12 @@ Sample JSON datasets for method calls occurring during execution can be found:
 - for copying and pasting [`AUG`](https://en.wikipedia.org/wiki/Start_codon) in [VARNA](http://varna.lri.fr/) [here](https://kth-my.sharepoint.com/:u:/g/personal/deepikat_ug_kth_se/EXRotVN2q6dPn_oZDE5-bDoBQ0aGYDhXCXp4ZsoIDwqauw?e=BoUj7Y)
 - for copying and pasting in [JEdit](http://www.jedit.org/) [here](https://kth-my.sharepoint.com/:u:/g/personal/deepikat_ug_kth_se/EeMvbnAfmH5MsMdbnAQXDPcBwsAyB4N7p0zN4XNywdb4pg?e=dAwE90)
 - for finding and replacing all in JEdit [here](https://kth-my.sharepoint.com/:u:/g/personal/deepikat_ug_kth_se/EVZtmyG61NtNggM50S_fhFsB1p9expeGvixcP9v1vaumjg?e=KhQA7s)
+- for copy-paste, and find-replace-replaceall, with markers, in JEdit [here](https://kth-my.sharepoint.com/:u:/g/personal/deepikat_ug_kth_se/EZ5VK6Z2T1NDkcsuAn-ukfcBr40SQCvUaBcrLt4sZoQq6A?e=VBRnRB)
+  - marker `==== COPY ====` if `org.gjt.sp.jedit.Registers.copy()` is in stack trace
+  - marker `==== PASTE ====` if `org.gjt.sp.jedit.Registers.paste()` is in stack trace
+  - marker `==== FIND ====` if `org.gjt.sp.jedit.search.SearchAndReplace.find()` is in stack trace
+  - marker `==== REPLACE ====` if `org.gjt.sp.jedit.search.SearchAndReplace.replace()` is in stack trace
+  - marker `==== REPLACEALL ====` if `org.gjt.sp.jedit.search.SearchAndReplace.replaceAll()` is in stack trace
 
 The data is of the following format:
 ```
