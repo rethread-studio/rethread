@@ -26,15 +26,17 @@ let params = {
   separation: 0,
   angle: Math.PI/4,
   hueGradient: 5,
-  vizStyle: "In/out"
+  vizStyle: "In/out",
+  invert: false
 }
 
 let gui = new dat.GUI();
-gui.add(params, "speed", 1, 20, 1).name("Slowness")
+gui.add(params, "speed", 1, 20, 1).name("Slowness");
 gui.add(params, "separation", 0, 100, 1).name("Separation");
-gui.add(params, "angle", 0, 2*Math.PI, Math.PI/16).name("Angle");
+gui.add(params, "angle", 0, Math.PI, Math.PI/8).name("Angle");
 gui.add(params, "hueGradient", 0, 360/Ny, 1).name("Hue gradient");
 gui.add(params, "vizStyle", ["In/out", "Right/left", "Up/down"]).name("Style");
+gui.add(params, "invert").name("Invert time");
 
 
 
@@ -114,7 +116,7 @@ function updateLeds() {
 
     case "In/out":
       for (let i = 0; i < Nx; i++) {
-        let tr = trace[(i+t)%len];
+        let tr = trace[abs(i + t*(params.invert ? -1 : 1)) % len];
         let [sup, dep] = getSupAndDep(tr.name);
         let depth = ~~(tr.depth*Ny/(maxDepth+1));
         for (let j = 0; j < Ny; j++) {
@@ -130,7 +132,7 @@ function updateLeds() {
 
     case "Right/left":
       for (let i = 0; i < Nx; i++) {
-        let tr = trace[abs(i-t)%len];
+        let tr = trace[abs(i + t*(params.invert ? -1 : 1)) % len];
         let [sup, dep] = getSupAndDep(tr.name);
         let depth = ~~(tr.depth*Ny/(maxDepth+1));
         for (let j = 0; j < Ny; j++) {
@@ -141,7 +143,7 @@ function updateLeds() {
         }
       }
       for (let i = 0; i < Nx; i++) {
-        let tr = trace[abs(i-t+Nx)%len];
+        let tr = trace[abs(i + t*(params.invert ? -1 : 1) + Nx) % len];
         let [sup, dep] = getSupAndDep(tr.name);
         let depth = ~~(tr.depth*Ny/(maxDepth+1));
         for (let j = 0; j < Ny; j++) {
@@ -155,7 +157,7 @@ function updateLeds() {
 
     case "Up/down":
       for (let j = 0; j < Ny; j++) {
-        let tr = trace[abs(j+t)%len];
+        let tr = trace[abs(j + t*(params.invert ? -1 : 1)) % len];
         let [sup, dep] = getSupAndDep(tr.name);
         let depth = ~~(tr.depth*Nx/(maxDepth+1));
         for (let i = 0; i < Nx; i++) {
