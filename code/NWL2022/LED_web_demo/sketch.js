@@ -25,7 +25,7 @@ let params = {
   speed: 3,
   separation: 0,
   angle: Math.PI/4,
-  hueGradient: 5,
+  hueGradient: 0.2,
   vizStyle: "In/out",
   invert: false
 }
@@ -34,7 +34,7 @@ let gui = new dat.GUI();
 gui.add(params, "speed", 1, 20, 1).name("Slowness");
 gui.add(params, "separation", 0, 100, 1).name("Separation");
 gui.add(params, "angle", 0, Math.PI, Math.PI/8).name("Angle");
-gui.add(params, "hueGradient", 0, 360/Ny, 1).name("Hue gradient");
+gui.add(params, "hueGradient", 0, 1, 0.05).name("Hue gradient");
 gui.add(params, "vizStyle", ["In/out", "Right/left", "Up/down"]).name("Style");
 gui.add(params, "invert").name("Invert time");
 
@@ -120,10 +120,14 @@ function updateLeds() {
         let [sup, dep] = getSupAndDep(tr.name);
         let depth = ~~(tr.depth*Ny/(maxDepth+1));
         for (let j = 0; j < Ny; j++) {
-          let huLeft = (allDeps.indexOf(dep)*360/allDeps.length + j*params.hueGradient)%360;
-          let huRight = (allSups.indexOf(sup)*360/allSups.length + j*params.hueGradient)%360;
+          // hue
+          let huLeft = (allDeps.indexOf(dep)/allDeps.length + j/Ny*params.hueGradient)*360 % 360;
+          let huRight = (allSups.indexOf(sup)/allSups.length + j/Ny*params.hueGradient)*360 % 360;
+          // saturation
           let sa = 100;
+          // brightness
           let br = (j < depth) ? 100 : 0;
+
           ledsLeft[j][i] = [huLeft, sa, br];
           ledsRight[j][Nx-i-1] = [huRight, sa, br];
         }
@@ -132,25 +136,24 @@ function updateLeds() {
 
     case "Right/left":
       for (let i = 0; i < Nx; i++) {
-        let tr = trace[abs(i + t*(params.invert ? -1 : 1)) % len];
-        let [sup, dep] = getSupAndDep(tr.name);
-        let depth = ~~(tr.depth*Ny/(maxDepth+1));
+        let trLeft = trace[abs(i + t*(params.invert ? -1 : 1)) % len];
+        let dep = getSupAndDep(trLeft.name)[1];
+        let depthLeft = ~~(trLeft.depth*Ny/(maxDepth+1));
+        let trRight = trace[abs(i + t*(params.invert ? -1 : 1) + Nx) % len];
+        let sup = getSupAndDep(trRight.name)[0];
+        let depthRight = ~~(trRight.depth*Ny/(maxDepth+1));
         for (let j = 0; j < Ny; j++) {
-          let huLeft = (allDeps.indexOf(dep)*360/allDeps.length + j*params.hueGradient)%360;
+          // hue
+          let huLeft = (allDeps.indexOf(dep)/allDeps.length + j/Ny*params.hueGradient)*360 % 360;
+          let huRight = (allSups.indexOf(sup)/allSups.length + j/Ny*params.hueGradient)*360 % 360;
+          // saturation
           let sa = 100;
-          let br = (j < depth) ? 100 : 0;
-          ledsLeft[j][i] = [huLeft, sa, br];
-        }
-      }
-      for (let i = 0; i < Nx; i++) {
-        let tr = trace[abs(i + t*(params.invert ? -1 : 1) + Nx) % len];
-        let [sup, dep] = getSupAndDep(tr.name);
-        let depth = ~~(tr.depth*Ny/(maxDepth+1));
-        for (let j = 0; j < Ny; j++) {
-          let huRight = (allSups.indexOf(sup)*360/allSups.length + j*params.hueGradient)%360;
-          let sa = 100;
-          let br = (j <= depth) ? 100 : 0;
-          ledsRight[j][i] = [huRight, sa, br];
+          // brightness
+          let brLeft = (j < depthLeft) ? 100 : 0;
+          let brRight = (j < depthRight) ? 100 : 0;
+
+          ledsLeft[j][i] = [huLeft, sa, brLeft];
+          ledsRight[j][i] = [huRight, sa, brRight];
         }
       }
       break;
@@ -161,10 +164,14 @@ function updateLeds() {
         let [sup, dep] = getSupAndDep(tr.name);
         let depth = ~~(tr.depth*Nx/(maxDepth+1));
         for (let i = 0; i < Nx; i++) {
-          let huLeft = (allDeps.indexOf(dep)*360/allDeps.length + i*params.hueGradient)%360;
-          let huRight = (allSups.indexOf(sup)*360/allSups.length + i*params.hueGradient)%360;
+          // hue
+          let huLeft = (allDeps.indexOf(dep)/allDeps.length + i/Nx*params.hueGradient/2)*360 % 360;
+          let huRight = (allSups.indexOf(sup)/allSups.length + i/Nx*params.hueGradient/2)*360 % 360;
+          // saturation
           let sa = 100;
+          // brightness
           let br = (i <= depth) ? 100 : 0;
+
           ledsLeft[j][Nx-i-1] = [huLeft, sa, br];
           ledsRight[j][i] = [huRight, sa, br];
         }
@@ -176,11 +183,10 @@ function updateLeds() {
 
 function drawLEDs(leds) {
   push();
-  for (let j = 0; j < Ny; j++) { // y axis
+  for (let j = 0; j < Ny; j++) { // y-axis
     push();
-    for (let i = 0; i < Nx; i++) { // x axis
-      let hu, sa, br;
-      [hu, sa, br] = leds[j][i];
+    for (let i = 0; i < Nx; i++) { // x-axis
+      let [hu, sa, br] = leds[j][i];
       fill(hu, sa, br);
       sphere(diam*map(br, 0, 100, 1/2, 1));
       translate(s, 0, 0);
@@ -196,7 +202,7 @@ function drawLEDs(leds) {
 // data analysis 🧮
 
 function getLength() {
-  // gets the lengths of data and stores it in variable "len"
+  // get the lengths of data and stores it in variable "len"
   len = Object.keys(trace).length;
 }
 
@@ -238,6 +244,6 @@ function getSupAndDep(s) {
   let idx3 = func.indexOf("$", idx1+1); // find the first occurence of "$" after idx1
   if (idx3 == -1) idx3 = idx2; // ignore idx3 if there is no "$" found
   let supplier = func.slice(0, idx1); // find the supplier
-  let dependency = func.slice(idx1+1, min(idx2, idx3)); // find the supplier
+  let dependency = func.slice(idx1+1, min(idx2, idx3)); // find the dependency
   return [supplier, dependency];
 }
