@@ -428,6 +428,14 @@ pub struct Call {
     length: i32,
     #[serde(alias = "stackTrace")]
     stack_trace: String,
+    marker: Option<String>,
+}
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum MarkerKind {
+    Copy,
+    Paste,
+    Find,
+    ReplaceAll,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -437,6 +445,7 @@ pub struct CallDrawData {
     pub dependency: Option<String>,
     pub name: String,
     pub caller_name: Option<String>,
+    pub marker: Option<MarkerKind>,
 }
 impl Default for CallDrawData {
     fn default() -> Self {
@@ -446,6 +455,7 @@ impl Default for CallDrawData {
             dependency: None,
             name: Default::default(),
             caller_name: None,
+            marker: None,
         }
     }
 }
@@ -542,6 +552,7 @@ impl Deepika2 {
     pub fn parse_from_raw_file(path: impl Into<PathBuf>) -> anyhow::Result<Self> {
         let path = path.into();
         println!("Parsing file {path:?}");
+        let mut marker_set = HashSet::new();
         let mut supplier_set = HashSet::new();
         let data = fs::read_to_string(path)?;
         // let data =
@@ -609,12 +620,27 @@ impl Deepika2 {
                     }
                 }
             }
+            let marker = match call.marker {
+                Some(marker) => {
+                    marker_set.insert(marker.clone());
+                    match marker.as_str() {
+                        "==== FIND =====" => Some(MarkerKind::Find),
+                        "==== REPLACEALL =====" => Some(MarkerKind::ReplaceAll),
+                        "==== PASTE =====" => Some(MarkerKind::Paste),
+                        "==== REPLACE =====" => Some(MarkerKind::Replace),
+                        "==== COPY =====" => Some(MarkerKind::Copy),
+                        _ => None,
+                    }
+                }
+                None => None,
+            };
             draw_trace.push(CallDrawData {
                 depth: call.length,
                 supplier: Some(call.callee.supplier.clone()),
                 dependency: Some(call.callee.dependency.clone()),
                 name: call.callee.fqn.clone(),
                 caller_name: Some(call.caller.fqn.clone()),
+                marker,
             });
         }
         let mut min_depth = 999999;
@@ -634,6 +660,7 @@ impl Deepika2 {
         println!("Suppliers: {supplier_set:#?}");
         println!("max_depth: {max_depth}");
         println!("min_depth: {min_depth}");
+        println!("markers: {marker_set:#?}");
         for call in &mut draw_trace {
             call.depth -= min_depth;
         }
@@ -670,7 +697,7 @@ impl Deepika2 {
         let depth_list = draw_trace.iter().map(|call| call.depth).collect();
         let depth_envelope = DepthEnvelope::from_depth_list2(depth_list, &draw_trace);
 
-        println!("depth_envelope: {depth_envelope:#?}");
+        // println!("depth_envelope: {depth_envelope:#?}");
 
         // println!("depth_graph: {depth_graph:?}");
         println!("num_calls: {}", draw_trace.len());
@@ -681,5 +708,26 @@ impl Deepika2 {
             ngram_analysis: None,
             depth_envelope,
         })
+    }
+    pub fn save_depth_as_wave(&self, path: impl Into<PathBuf>) {
+        use hound;
+        use std::f32::consts::PI;
+        use std::i16;
+
+        let depth_list: Vec<i16> = self
+            .draw_trace
+            .iter()
+            .map(|call| call.depth as i16)
+            .collect();
+        let spec = hound::WavSpec {
+            channels: 1,
+            sample_rate: 44100,
+            bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int,
+        };
+        let mut writer = hound::WavWriter::create(path.into(), spec).unwrap();
+        for depth in depth_list {
+            writer.write_sample(depth as i16).unwrap();
+        }
     }
 }
