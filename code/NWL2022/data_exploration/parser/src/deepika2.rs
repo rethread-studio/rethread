@@ -435,6 +435,7 @@ pub enum MarkerKind {
     Copy,
     Paste,
     Find,
+    Replace,
     ReplaceAll,
 }
 
