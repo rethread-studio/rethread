@@ -1,13 +1,15 @@
 let data;
 let trace_len; // length of trace
-let w, h; // width and height of each rectangle
-let hGap; // gap between rectangles vertically
-let wMargin = 10; // margin on the sides
+let n_sections; // number of sections
+let hGap = 10; // gap between rectangles vertically
+let wMargin = 10, hMargin = 10; // margins inside each window
+let i0Max;
+let i0; // index of the section in the first window
 
 const SCALE = 2;
 const WINDOW_WIDTH = 57*SCALE;
 const WINDOW_HEIGHT = 112*SCALE;
-let mWindows = 1; // how many windows in width
+let mWindows = 3; // how many windows in width
 let nWindows = 2; // how many windows in height
 let showWindowFrame = true;
 
@@ -25,12 +27,19 @@ function preload() {
 }
 
 function setup() {
-  cnv = createCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows, WEBGL);
+  cnv = createCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
   noStroke();
   colorMode(HSB);
   ctx = canvas.getContext("2d");
 
   trace_len = data.draw_trace.length;
+  n_sections = data.depth_envelope.sections.length;
+
+  max_section_size = 0;
+  for (let s of data.depth_envelope.sections) {
+    let section_size = s.end_index - s.start_index;
+    if (section_size > max_section_size) max_section_size = section_size;
+  }
 
   initParams();
 
@@ -43,31 +52,35 @@ function setup() {
 
 function draw() {
   background(0);
-  translate(-width/2, -height/2);
 
-  let x = wMargin, y = -(frameCount/2)%h-height/3, i = floor(frameCount/(2*h));
-  while (y < height+height/3) {
-    let d = data.draw_trace[(i++)%trace_len];
-    let [sup, dep] = getSupAndDep(d.name);
-    let hu1 = 360*allDeps.indexOf(dep)/allDeps.length;
-    let hu2 = 360*allSups.indexOf(sup)/allSups.length;
-    let sa = 90;
-    let va = 90;
+  if (frameCount % 200 == 0) i0 = floor(random(i0Max));
+  let w = WINDOW_WIDTH;
+  for (let i = 0; i < mWindows; i++) {
+    let section = data.depth_envelope.sections[i+i0];
+    let section_size = section.end_index - section.start_index;
+    let x = i*w;
 
-    push();
-    translate(x+w/2, y+h/2);
-    rotateY(frameCount/50 + y/50);
-    fill(hu1, sa, va);
-    beginShape();
-    vertex(-w/2+wMargin, -h/2+hGap/2);
-    vertex(-w/2+wMargin, h/2-hGap/2);
-    fill(hu2, sa, va);
-    vertex(w/2-wMargin, h/2-hGap/2);
-    vertex(w/2-wMargin, -h/2+hGap/2);
-    endShape();
-    pop();
-
-    y += h;
+    let t = (frameCount+100*section.shannon_wiener_diversity_index)/100;
+    let hMax = (height-2*hMargin)/section_size;
+    let hMin = hMax/(nWindows == 1 ? 2 : nWindows);
+    let h = map(sin(t), -1, 1, hMin, hMax);
+    hGap = h/10;
+    for (let j = 0; j < section_size; j++) {
+      let y = height - hMargin - h*(j+1);
+      let d = data.draw_trace[j+section.start_index];
+      let [sup, dep] = getSupAndDep(d.name);
+      let hu1 = 360*allDeps.indexOf(dep)/allDeps.length;
+      let hu2 = 360*allSups.indexOf(sup)/allSups.length;
+      let sa = 90;
+      let va = 90;
+      //fill(hu1, sa, va);
+      let grd = ctx.createLinearGradient(x+wMargin, 0, x+w-wMargin, 0);
+      grd.addColorStop(0, color(hu1, sa, va));
+      grd.addColorStop(1, color(hu2, sa, va));
+      ctx.fillStyle = grd;
+      rect(x+wMargin, y+hGap/2, w-2*wMargin, h-hGap, hGap/2);
+      y -= h;
+    }
   }
 
   //console.log(frameRate());
@@ -80,22 +93,22 @@ function initParams() {
   let y = (windowHeight - height) / 2;
   cnv.position(x, y);
 
-  w = width-wMargin*2;
-  h = 20;
-  hGap = h/8;
+  i0Max = n_sections - mWindows;
+  i0 = floor(random(i0Max));
 }
 
 function drawWindowsOutline() {
   stroke(255);
   strokeWeight(2);
   for (let x = WINDOW_WIDTH; x < width; x += WINDOW_WIDTH) {
-    line(x, 0, 0, x, height, 0);
+    line(x, 0, x, height);
   }
   for (let y = WINDOW_HEIGHT; y < height; y += WINDOW_HEIGHT) {
-    line(0, y, 0, width, y, 0);
+    line(0, y, width, y);
   }
   noStroke();
 }
+
 
 function getSupAndDep(s) {
   // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[method name]"
@@ -128,7 +141,7 @@ function keyPressed() {
     return;
   }
   if (keyCode == LEFT_ARROW && mWindows > 1) mWindows--;
-  if (keyCode == RIGHT_ARROW && mWindows < 14) mWindows++;
+  if (keyCode == RIGHT_ARROW && mWindows < n_sections) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 5) nWindows++;
   resizeCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
