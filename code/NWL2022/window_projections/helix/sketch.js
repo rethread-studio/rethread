@@ -2,7 +2,7 @@ let data;
 let trace_len; // length of trace
 let w, h; // width and height of each rectangle
 let hGap; // gap between rectangles vertically
-let wMargin = 10; // margin on the sides
+let wMargin; // margin on the sides
 
 const SCALE = 2;
 const WINDOW_WIDTH = 57*SCALE;
@@ -30,7 +30,9 @@ function setup() {
   colorMode(HSB);
   ctx = canvas.getContext("2d");
 
+  //console.log(data)
   trace_len = data.draw_trace.length;
+  wMargin = WINDOW_WIDTH/10;
 
   initParams();
 
@@ -45,7 +47,8 @@ function draw() {
   background(0);
   translate(-width/2, -height/2);
 
-  let x = wMargin, y = -(frameCount/2)%h-height/3, i = floor(frameCount/(2*h));
+  let t = frameCount/2;
+  let x = wMargin, y = -t%h-height/3, i = floor(t/h);
   while (y < height+height/3) {
     let d = data.draw_trace[(i++)%trace_len];
     let [sup, dep] = getSupAndDep(d.name);
