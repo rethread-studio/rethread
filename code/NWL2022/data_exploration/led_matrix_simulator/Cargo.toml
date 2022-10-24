@@ -12,10 +12,20 @@ bevy_egui = "0.16"
 fastrand = "1.8"
 rand = "0.8.5"
 parser = { path = "../parser" }
-knyst = { path = "../../../../../../rust/audio/knyst", features = ["jack"] }
+# knyst = { path = "../../../../../../rust/audio/knyst", features = ["jack"] }
+knyst = { version = "0.2", features = ["jack"] }
 anyhow = "1.0"
 nannou_osc = "0.18"
 crossbeam = "0.8.2"
+tokio-tungstenite = "0.17.2"
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+tokio = { version = "1.0.0", default-features = false, features = ["io-util", "io-std", "macros", "net", "rt-multi-thread", "time"] }
+futures-channel = "0.3"
+hyper = { version = "0.14", default-features = false, features = ["http1", "server", "tcp"] }
+url = "2.0.0"
+env_logger = "0.9"
+serde = "1.0"
+serde_json = "1.0"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

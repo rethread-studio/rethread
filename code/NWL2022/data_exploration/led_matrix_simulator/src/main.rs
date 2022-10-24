@@ -16,12 +16,14 @@ use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 
 mod audio;
 mod scheduler;
+mod websocket;
 use audio::AudioEngine;
 use scheduler::SchedulerCom;
 
 use bevy_inspector_egui::WorldInspectorPlugin;
 use parser::deepika2::{self, Call, CallDrawData, Deepika2};
 use rand::prelude::*;
+use websocket::WebsocketCom;
 
 use crate::scheduler::start_scheduler;
 
@@ -117,8 +119,12 @@ struct Trace {
 
 impl Trace {
     pub fn new() -> Self {
-        let trace = Deepika2::open_or_parse("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
-            .unwrap();
+        // let trace = Deepika2::open_or_parse("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
+        //     .unwrap();
+        let trace = deepika2::Deepika2::open_or_parse(
+            "/home/erik/Hämtningar/nwl2022/data-jedit-with-marker",
+        )
+        .unwrap();
         // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
         // let trace =
         //     Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
