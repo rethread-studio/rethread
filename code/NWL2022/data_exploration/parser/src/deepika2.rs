@@ -215,6 +215,9 @@ pub struct DepthEnvelope {
     pub sections: Vec<DepthEnvelopePoint>,
 }
 impl DepthEnvelope {
+    pub fn empty() -> Self {
+        Self { sections: vec![] }
+    }
     pub fn from_depth_list(list: Vec<i32>) -> Self {
         // The challenge of creating a good depth envelope is choosing a good window size that represents the curve.
         //
@@ -477,6 +480,14 @@ pub struct Deepika2 {
 }
 
 impl Deepika2 {
+    pub fn empty_trace() -> Self {
+        Self {
+            draw_trace: Vec::new(),
+            max_depth: 0,
+            ngram_analysis: None,
+            depth_envelope: DepthEnvelope::empty(),
+        }
+    }
     pub fn open_or_parse(path: impl Into<PathBuf>) -> anyhow::Result<Self> {
         let path = path.into();
         let mut postcard_path = path.clone();
