@@ -2,10 +2,11 @@ use std::time::Duration;
 use std::{net::TcpListener, thread::spawn};
 
 use crossbeam::channel::{unbounded, Receiver, Sender};
+use serde::Serialize;
 
 use crate::audio::AudioEngine;
 use crate::websocket::WebsocketCom;
-use parser::deepika2::Deepika2;
+use parser::deepika2::{CallDrawData, Deepika2, DepthEnvelopePoint};
 //
 // Send to GUI:
 // - index increases
@@ -18,6 +19,12 @@ pub struct SchedulerCom {
     pub index_increase_rx: Receiver<usize>,
     pub play_tx: Sender<bool>,
     pub event_duration_tx: Sender<f32>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+enum Event<'a> {
+    Section(&'a DepthEnvelopePoint),
+    Call(&'a CallDrawData),
 }
 
 pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
@@ -58,7 +65,8 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
                 current_depth_envelope_index %= num_depth_points;
                 current_section = trace.depth_envelope.sections[current_depth_envelope_index];
                 osc_communicator.send_section(current_section);
-                let section_json = serde_json::to_string(&current_section).unwrap();
+                let section_json =
+                    serde_json::to_string(&Event::Section(&current_section)).unwrap();
                 ws_communicator.sender.send(section_json);
             }
             let state = current_section.state;
@@ -70,6 +78,8 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
             {
                 let call = &trace.draw_trace[current_index];
                 osc_communicator.send_call(call.depth, state);
+                let call_json = serde_json::to_string(&Event::Call(call)).unwrap();
+                ws_communicator.sender.send(call_json);
             }
         }
         std::thread::sleep(Duration::from_secs_f32(seconds_between_calls));

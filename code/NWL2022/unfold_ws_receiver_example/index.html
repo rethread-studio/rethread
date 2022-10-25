@@ -5,14 +5,19 @@
 <title>Html5 WebSockets Example</title>
     <style>
       .block{
-        display:block; 
+          flex-grow: 1;
         margin-top: 10px;
+        width: 50%;
         }
     </style>
 </head>
-<body>
+<body style="background-color: #011; color: white;">
 <h3>un|fold websockets example.</h3>
-<div id="messages" class="block"></div>
+
+<div style="display: flex; flex-direction: row; width: 100vw;">
+    <div id="section_messages" class="block"></div>
+    <div id="call_messages" class="block"></div>
+</div>
 <script type="text/javascript" src="index.js" charset="utf-8"></script>
 </body>
 </html>
