@@ -735,7 +735,7 @@ fn setup(
             scene: asset_server.load("turbine_hall_from_obj.glb#Scene0"),
             transform,
             visibility: Visibility { is_visible: false },
-            ..default(),
+            ..default()
         })
         .insert(TurbineHall);
     // light
