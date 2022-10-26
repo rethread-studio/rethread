@@ -160,8 +160,16 @@ SynthDef(\kick,  { | dur2 = 0.3, atk = 0.0001, amp = 0.8, pan = 0 |
 	sig = Pan2.ar(sig, pan, amp);
 	Out.ar(\out.kr(0), sig);
 }).add;
-)
+~chord = ([0, 3, 7, 8, 11, 12] + 36).midicps;
 
+~from_53 = { | degrees |
+	var s = Scale.chromatic('et53'), list = List[];
+	degrees.do{|degree| list.add(s.degreeToFreq(degree, 0.midicps, 0))};
+	list
+
+};
+)
+~from_53.([0, 17])
 (
 {
 	([0, 3, 7, 8, 11, 12] + 36).midicps.do{|freq|
@@ -205,10 +213,10 @@ SynthDef(\kick,  { | dur2 = 0.3, atk = 0.0001, amp = 0.8, pan = 0 |
 		((32-num_notes_in_gesture) * beat_time).wait;
 	};
 }.fork;
-)
-(
+
 {
 	var beat_time = 0.15;
+	(4 * beat_time).wait;
 	loop {
 		var num_notes_in_gesture = [3, 5, 9].choose;
 
@@ -223,22 +231,28 @@ SynthDef(\kick,  { | dur2 = 0.3, atk = 0.0001, amp = 0.8, pan = 0 |
 )
 
 
-
-
+(
+fork{
+	~revBus = Bus.audio(s, 2);
+	~rev3Bus = Bus.audio(s, 2);
+	s.sync;
+	~rev = Synth(\long_reverb, [\in, ~revBus, \out, 0, \wetness, 0.1]);
+	~rev3 = Synth(\medium_reverb, [\in, ~rev3Bus, \mix, 0.4, \feedback, 0.95, \size, 0.9, \damp, 0.65, \diff, 0.6]);
+}
+)
+~rev3.set(\feedback, 0.95, \size, 0.9)
 // NOISE
+n = NdefMixer(s);
+n.parent.alwaysOnTop_(true); // show mixer in front of IDE
+if (\ProxyMeter.asClass.notNil) { ProxyMeter.addMixer(n); };
 
 (
-~revBus = Bus.audio(s, 2);
-~rev = Synth(\long_reverb, [\in, ~revBus, \out, 0, \wetness, 0.1]);
 {
-	~rev2Bus = Bus.audio(s, 2);
-	~rev2 = Synth(\medium_reverb, [\in, ~rev2Bus, \mix, 0.4, \feedback, 0.3, \size, 0.7, \damp, 0.65, \diff, 0.6]);
-	s.sync;
-	play{
-		var length = 48000*3.0, seq = Demand.ar(Impulse.ar(0.25), 0, Dseq([[0, length, 100], [length, 0, 2000]], inf)), read_phase, reader, reader2, buffer,
-		freq = LFNoise1.ar(2).range(500, 5000), sig;
+	Ndef(\glitch,{
+		var length = 48000*1.0, seq = Demand.ar(Impulse.ar(0.05), 0, Dseq([[0, length, 100], [length, 0, 2000]], inf)), read_phase, reader, reader2, buffer,
+		freq = LFNoise0.ar(2).range(500, 5000), sig;
 		buffer=LocalBuf(length,2).clear;
-		read_phase = LFNoise1.ar(1.5).range(0, length);
+		read_phase = LFNoise1.ar(200.5).range(0, length);
 		// read_phase = Phasor.ar(Dust.ar(2), 1.0, 0.0, length, LFNoise1.kr(3).range(0, length));
 
 		reader=BufRd.ar(2, buffer, read_phase)*0.7;
@@ -246,7 +260,7 @@ SynthDef(\kick,  { | dur2 = 0.3, atk = 0.0001, amp = 0.8, pan = 0 |
 
 		r=LFNoise0.ar(0.01).unipolar;
 		BufWr.ar(
-			SinOsc.ar(freq, 0, Decay.ar(Impulse.ar(0.125), 2, 0.5))+((reader + reader2)*0.7),
+			SinOsc.ar(freq, 0, Decay.ar(Impulse.ar(0.125), 1, 0.5))+((reader + reader2)*0.7),
 			buffer,
 			(LFNoise1.ar(0.5+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
 		);
@@ -256,10 +270,25 @@ SynthDef(\kick,  { | dur2 = 0.3, atk = 0.0001, amp = 0.8, pan = 0 |
 			(LFNoise1.ar(0.4+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
 		);
 		sig = (reader).tanh;
-		Out.ar(~rev2Bus, sig);
-	};
+		sig
+	});
+	Ndef(\glitch_out, {
+		var out = 0, delayTime = 0.1, amp = 1, mix = 0.4, rt = 3.0, feedback = 0.3, size = 0.7, damp = 0.65, diff = 0.6,
+		sig, wet;
+
+		sig = Ndef(\glitch).ar();
+		/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
+		wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
+		wet = Greyhole.ar(sig, delayTime, damp, size, diff, feedback);
+
+		sig = (sig * (1-mix)) + (wet*mix);
+		sig = Limiter.ar(sig, 0.95);
+		sig = LeakDC.ar(sig);
+		sig
+	}).play();
 }.fork;
 )
+Ndef(\glitch_out).stop
 
 //
 
@@ -284,37 +313,63 @@ Pdef(\kick, Pbind(\instrument, \kick,
 )).play;
 )
 
+~chord = ([0, 3, 7, 8, 11, 12] + 36).midicps;
+~chord = ([0, 4, 7, 9, 11, 12] + 36 + -5).midicps;
+~chord = ([0, 3, 7, 8, 11, 12] + 36).midicps;
+~chord = ([0, 3, 6, 9, 11, 12] + 36).midicps;
+
+~chord = ~from_53.([0, 9, 17, 22, 31, 39] + 159);
+~chord = ~from_53.([0, 9, 17, 31, 43] + 106);
+~chord = ~from_53.([0, 5, 14, 31, 36, 45] + 159);
+
+~chord = ~from_53.([0, 12, 31, 39, 43] + 106);
+~chord = ~from_53.([0, 12, 13, 14, 15, 16, 17, 31, 39, 43] + 212);
+
+
 // OSC
 (
 ~section = Environment.new(know: true);
 ~section.min_depth = 0;
+~section.average = 50;
+~section.diversity = 0.0;
 ~section.max_depth = 100;
+~section.depth_width = ~section.max_depth - ~section.min_depth;
 ~section.num_suppliers = 1;
 ~section.num_dependencies = 1;
 ~section.supplier_dist_evenness = 1.0;
 ~section.dependency_dist_evenness = 1.0;
 
 ~chord = ([0, 4, 7, 11]+12).midicps;
+~chord = ~from_53.([0, 17, 31, 48] + 53);
+~chord = ~from_53.([0, 17, 31, 39, 48] + 53);
+
 OSCdef(\call, {|msg, time, addr, recvPort|
-	var depth = msg[1]-~section.min_depth,
+	var depth = msg[1]-~section.min_depth, sine_mix,
 	// freq = msg[1] * 10 + 20,
+	// freq = (msg[1] + 12).midicps,
 	freq = ~chord[(depth %~chord.size)] * 2.pow((depth/~chord.size).floor()),
-	buf, amp = 0.2, atk = 0.001;
-	// Synth(\tick3, [\freq, msg[1]* 20 + 100, \out, ~rev2Bus]);
+	buf, amp = 1.0, atk = 0.001;
 	if(msg[2] == 0, {
-		buf = ~wt_buf[0..2].choose;
-		amp = 0.1;
+		buf = ~wt_buf[0..4].choose;
+		amp = 0.5;
 	});
 	if(msg[2] == 1 || msg[2] == -1, {
 		buf = ~wt_buf[7..9].choose;
-		atk = 0.05;
-		freq = msg[1] * 10 + 20;
+		atk = 0.25;
+		// freq = msg[1] * 10 + 20;
 	});
 	if(msg[2] == -1, {
 		freq = freq * 0.5;
 	});
-	Synth(\osc, [\freq, freq, \atk, atk, \sus, 0.1,\rel, 0.05, \amp, amp, \buf, buf, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
-	Synth(\sine, [\freq, freq, \amp, 0.05]);
+
+	// amp = ~section.depth_width.linlin(0, 100, 0.05, 0.2);
+	// buf = ~wt_buf[((1.0-~section.supplier_dist_evenness) * 9).floor];
+	// Synth(\tick3, [\freq, msg[1]* 20 + 100, \out, ~rev2Bus]);
+	// TODO: Vary mix between wavetable and sine based on the section
+	sine_mix = ((~section.diversity-0.5)*0.25).min(1).max(0);
+	sine_mix.postln;
+	Synth(\osc, [\freq, freq, \atk, atk, \sus, 0.1,\rel, 0.15, \amp, amp * 0.2 * sine_mix, \buf, buf, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
+	Synth(\sine, [\freq, freq, \amp, 0.05 * amp * (1.0-sine_mix)]);
 
 	// msg.postln
 
@@ -334,13 +389,23 @@ OSCdef(\section, {|msg, time, addr, recvPort|
 	num_suppliers = msg[3].asInteger,
 	num_dependencies = msg[4].asInteger,
 	supplier_dist_evenness = msg[5].asFloat,
-	dependency_dist_evenness = msg[6].asFloat;
+	dependency_dist_evenness = msg[6].asFloat,
+	average = msg[7].asFloat,
+	diversity = msg[8].asFloat;
 	~section.min_depth = min_depth;
 	~section.max_depth = max_depth;
+	~section.depth_width = ~section.max_depth - ~section.min_depth;
 	~section.num_suppliers = num_suppliers;
 	~section.num_dependencies = num_dependencies;
 	~section.supplier_dist_evenness = supplier_dist_evenness;
+	~section.average = average;
 	~section.dependency_dist_evenness = dependency_dist_evenness;
+	~section.diversity = diversity;
+
+
+	Synth(\osc, [\freq, 1000, \atk, 0.01, \sus, 0.00,\rel, 0.05, \amp, 0.2, \buf, ~wt_buf[0], \out, ~rev3Bus, \pan, 0, \detune, 0.3]);
+	Synth(\sine, [\freq, 2000, \amp, 0.1, \atk, 0.07, \sus, 0.02,\rel, 6.5, \out, ~rev3Bus, \pan, 0]);
+
 
 	msg.postln
 
