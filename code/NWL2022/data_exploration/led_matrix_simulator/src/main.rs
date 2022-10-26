@@ -588,6 +588,8 @@ struct LedMatrix {
     size_y: i32,
     size_z: i32,
 }
+#[derive(Component)]
+struct TurbineHall;
 
 /// set up a simple 3D scene
 fn setup(
@@ -726,20 +728,16 @@ fn setup(
     //     }),
     //     ..default()
     // });
-    let mut transform = Transform::from_xyz(0., 0., -8.);
-    transform.rotate_x(-0.3);
-    commands.spawn_bundle(SceneBundle {
-        scene: asset_server.load("curved_mirror.glb#Scene0"),
-        transform,
-        ..default()
-    });
     // Hall
     let mut transform = Transform::default();
-    commands.spawn_bundle(SceneBundle {
-        scene: asset_server.load("turbine_hall_from_obj.glb#Scene0"),
-        transform,
-        ..default()
-    });
+    commands
+        .spawn_bundle(SceneBundle {
+            scene: asset_server.load("turbine_hall_from_obj.glb#Scene0"),
+            transform,
+            visibility: Visibility { is_visible: false },
+            ..default(),
+        })
+        .insert(TurbineHall);
     // light
     // commands.spawn_bundle(PointLightBundle {
     //     transform: Transform::from_xyz(50.0, 50.0, 50.0),
@@ -897,11 +895,21 @@ fn spawn_camera(mut commands: Commands) {
         });
 }
 
+fn iter_hierarchy(entity: Entity, children_query: &Query<&Children>, f: &mut impl FnMut(Entity)) {
+    (f)(entity);
+    if let Ok(children) = children_query.get(entity) {
+        for child in children.iter().copied() {
+            iter_hierarchy(child, children_query, f);
+        }
+    }
+}
+
 fn bevy_ui(
     mut commands: Commands,
     mut settings: ResMut<GlobalSettings>,
     mut timer: ResMut<AnimationTimer>,
     mut trace: ResMut<Trace>,
+    mut turbine_hall_visibility: Query<&mut Visibility, With<TurbineHall>>,
     query: Query<Entity, With<LedMatrix>>,
     mut egui_context: ResMut<EguiContext>,
 ) {
@@ -917,6 +925,10 @@ fn bevy_ui(
                 if let Some(scheduler_com) = &mut trace.scheduler_com {
                     scheduler_com.play_tx.send(settings.play).unwrap();
                 }
+            }
+            if ui.button("Toggle hall visibility").clicked() {
+                let mut v = turbine_hall_visibility.single_mut();
+                v.is_visible = !v.is_visible;
             }
             ui.collapsing("Open trace", |ui| {
                 if ui.button("Open trace").clicked() {
