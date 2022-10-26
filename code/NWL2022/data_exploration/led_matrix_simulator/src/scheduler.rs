@@ -28,6 +28,7 @@ enum Event<'a> {
 }
 
 pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
+    #[cfg(not(target_os = "windows"))]
     let mut osc_communicator = OscCommunicator::new();
     let mut ws_communicator = WebsocketCom::default();
     let mut current_index = 0;
@@ -46,6 +47,7 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
     spawn(move || loop {
         while let Ok(new_duration) = event_duration_rx.try_recv() {
             seconds_between_calls = new_duration;
+            #[cfg(not(target_os = "windows"))]
             osc_communicator.send_speed(new_duration);
         }
         while let Ok(new_play) = play_rx.try_recv() {
@@ -64,6 +66,7 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
                 current_depth_envelope_index += 1;
                 current_depth_envelope_index %= num_depth_points;
                 current_section = trace.depth_envelope.sections[current_depth_envelope_index];
+                #[cfg(not(target_os = "windows"))]
                 osc_communicator.send_section(current_section);
                 let section_json =
                     serde_json::to_string(&Event::Section(&current_section)).unwrap();
@@ -77,6 +80,7 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
             // Send osc message to SuperCollider
             {
                 let call = &trace.draw_trace[current_index];
+                #[cfg(not(target_os = "windows"))]
                 osc_communicator.send_call(call.depth, state);
                 let call_json = serde_json::to_string(&Event::Call(call)).unwrap();
                 ws_communicator.sender.send(call_json);
