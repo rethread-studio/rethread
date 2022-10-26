@@ -116,6 +116,8 @@ impl OscCommunicator {
             Type::Int(section.num_dependencies as i32),
             Type::Float(section.supplier_dist_evenness),
             Type::Float(section.dependency_dist_evenness),
+            Type::Float(section.average),
+            Type::Float(section.shannon_wiener_diversity_index),
         ];
         self.sender.send((addr, args)).ok();
     }
