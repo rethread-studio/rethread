@@ -36,7 +36,7 @@ fn main() {
     App::new()
         // .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
         .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
-        .insert_resource(AnimationTimer(Timer::from_seconds(0.1, true)))
+        .insert_resource(AnimationTimer(Timer::from_seconds(0.025, true)))
         .insert_resource(Trace::new())
         // .insert_resource(audio::AudioEngine::new())
         .add_plugins(DefaultPlugins)
@@ -95,7 +95,7 @@ impl Default for GlobalSettings {
         Self {
             play: false,
             old_play: false,
-            use_point_lights: true,
+            use_point_lights: false,
             interpolate_depth: false,
             num_leds_in_trace: 3,
             current_led_colour: Color::RED,
