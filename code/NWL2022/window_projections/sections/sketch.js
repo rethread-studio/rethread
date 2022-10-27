@@ -44,6 +44,7 @@ function setup() {
     if (section_size > max_section_size) max_section_size = section_size;
   }
 
+  centerCanvas();
   initParams();
 
   getAllSuppliersAndDependencies();
@@ -91,13 +92,15 @@ function draw() {
 }
 
 function initParams() {
+  i0Max = n_sections - mWindows;
+  i0 = floor(random(i0Max));
+}
+
+function centerCanvas() {
   // centering canvas
   let x = (windowWidth - width) / 2;
   let y = (windowHeight - height) / 2;
   cnv.position(x, y);
-
-  i0Max = n_sections - mWindows;
-  i0 = floor(random(i0Max));
 }
 
 function drawWindowsOutline() {
@@ -146,7 +149,12 @@ function keyPressed() {
   if (keyCode == LEFT_ARROW && mWindows > 1) mWindows--;
   if (keyCode == RIGHT_ARROW && mWindows < n_sections) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
-  if (keyCode == UP_ARROW && nWindows < 5) nWindows++;
+  if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
   resizeCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
+  centerCanvas();
   initParams();
+}
+
+function windowResized() {
+  centerCanvas();
 }

@@ -43,9 +43,6 @@ gui.add(params, "invert").name("Invert time");
 // p5.js 🎨
 
 function preload() {
-  //data = loadJSON("data-varna-copy-paste-isolated.json");
-  //data = loadJSON("data-jedit-copy-paste-shorter.json");
-  //data = loadJSON("data-imagej-copy-paste-shorter.json");
   //data = loadJSON("data-imagej-copy-paste_parsed.json");
   //data = loadJSON("data-varna-startup-shutdown_parsed.json");
   data = loadJSON("data-varna-copy-paste-isolated_parsed.json");
@@ -60,8 +57,9 @@ function setup() {
   trace = data.draw_trace;
   maxDepth = data.max_depth;
   getLength();
-  console.log("Max length: ", maxDepth);
-  console.log("Mean length: ", getMeanDepth());
+  console.log("Trace length: ", len);
+  console.log("Max depth: ", maxDepth);
+  console.log("Mean depth: ", getMeanDepth());
   getAllSuppliersAndDependencies();
   allDeps.sort();
   allSups.sort();

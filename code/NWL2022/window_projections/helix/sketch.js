@@ -34,6 +34,7 @@ function setup() {
   trace_len = data.draw_trace.length;
   wMargin = WINDOW_WIDTH/10;
 
+  centerCanvas();
   initParams();
 
   getAllSuppliersAndDependencies();
@@ -78,14 +79,16 @@ function draw() {
 }
 
 function initParams() {
+  w = width-wMargin*2;
+  h = 20;
+  hGap = h/8;
+}
+
+function centerCanvas() {
   // centering canvas
   let x = (windowWidth - width) / 2;
   let y = (windowHeight - height) / 2;
   cnv.position(x, y);
-
-  w = width-wMargin*2;
-  h = 20;
-  hGap = h/8;
 }
 
 function drawWindowsOutline() {
@@ -131,9 +134,14 @@ function keyPressed() {
     return;
   }
   if (keyCode == LEFT_ARROW && mWindows > 1) mWindows--;
-  if (keyCode == RIGHT_ARROW && mWindows < 14) mWindows++;
+  if (keyCode == RIGHT_ARROW && mWindows < 5) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
-  if (keyCode == UP_ARROW && nWindows < 5) nWindows++;
+  if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
   resizeCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
+  centerCanvas();
   initParams();
+}
+
+function windowResized() {
+  centerCanvas();
 }

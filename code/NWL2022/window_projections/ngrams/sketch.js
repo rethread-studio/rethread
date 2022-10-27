@@ -32,7 +32,7 @@ function setup() {
   trace_len = data.draw_trace.length;
   wMargin = WINDOW_WIDTH/10;
 
-  initParams();
+  centerCanvas();
 
   getAllSuppliersAndDependencies();
   allDeps.sort();
@@ -47,8 +47,9 @@ function draw() {
   let t = 2*frameCount/(4-nWindows);
   let nh = 61;
   let w = WINDOW_WIDTH, h = height/nh;
+  let eps = 1;
   for (let i = 0; i < mWindows; i++) {
-    let x = i*w, j = 0, y = h-0.5, k = i*nh + floor(t/h);
+    let x = i*w, j = 0, y = h-eps/2, k = i*nh + floor(t/h);
 
     while (y < height) {
       let d = data.draw_trace[k%trace_len];
@@ -68,7 +69,7 @@ function draw() {
       let tr = (idx > 0 && i > 0) ? 0 : h/2;
       let br = (idx < i && i > 0) ? 0 : h/2;
       let bl = (idx < i && i > 0) ? 0 : h/2;
-      rect(x+wMargin, y, w-2*wMargin, h+1, tl, tr, br, bl);
+      rect(x+wMargin, y, w-2*wMargin, h+eps, tl, tr, br, bl);
 
       y += (idx == i) ? 2*h : h;
       j++;
@@ -80,7 +81,7 @@ function draw() {
   if (showWindowFrame) drawWindowsOutline();
 }
 
-function initParams() {
+function centerCanvas() {
   // centering canvas
   let x = (windowWidth - width) / 2;
   let y = (windowHeight - height) / 2;
@@ -136,4 +137,8 @@ function keyPressed() {
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
   resizeCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
   initParams();
+}
+
+function windowResized() {
+  centerCanvas();
 }
