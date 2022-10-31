@@ -7,7 +7,6 @@ uniform vec2 mouse;
 uniform vec2 resolution;
 uniform vec2 outputResolution;
 uniform float zoom;
-uniform float alpha;
 uniform float invertY;
 
 in vec2 texCoordVarying;
@@ -34,6 +33,8 @@ void main()
   // st /= zoom;
 	// vec2 texCoord = st;
   vec3 color = texture(tex0, texCoord).rgb;
+
+  float alpha = float(st.x >= 0 && st.x <= resolution.x && st.y >= 0 && st.y <= resolution.y);
 
   float fx = fract(texCoord.x);
   float fy = fract(texCoord.y);

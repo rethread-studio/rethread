@@ -190,6 +190,7 @@ void ofApp::update() {
 void ofApp::draw() {
   float x = 0, y = 0;
   float black_bar_height = ofGetHeight() * 0.1;
+  int short_side = min(ofGetWidth(), ofGetHeight()) - (black_bar_height * 2);
   float left_margin = ofGetWidth() * 0.05;
   ostringstream top_text;
   ostringstream bottom_text;
@@ -278,11 +279,14 @@ void ofApp::draw() {
       transitionData.lastDotTs = ofGetElapsedTimef();
     }
 
+    float side_zoom_ratio =
+        float(ofGetWidth() - short_side) / float(ofGetWidth());
     // Draw the star of the show, the pixels
     float phase = (ofGetElapsedTimef() - transitionData.startTime) /
                   transitionData.duration;
     float s_phase = atan(phase);
-    pixelZoom = pow(sin(phase * PI), 8) * (transitionData.maxZoom);
+    pixelZoom =
+        pow(sin(phase * PI), 8) * (transitionData.maxZoom) - side_zoom_ratio;
 
     filteredImageFbo.begin();
     pixelShader.begin();
@@ -306,6 +310,14 @@ void ofApp::draw() {
     } else {
       filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
     }
+    // if (squareImage) {
+    //   filteredImageFbo.draw(ofGetWidth() * 0.5 - short_side * 0.5,
+    //                         ofGetHeight() * 0.5 - short_side * 0.5,
+    //                         short_side, short_side);
+    // } else {
+    //   filteredImageFbo.draw(0, black_bar_height, ofGetWidth(),
+    //                         ofGetHeight() - (black_bar_height * 2));
+    // }
 
     float dotSize = ofGetWidth() * 0.1;
     float dotMargin = dotSize * 0.3;
@@ -325,10 +337,12 @@ void ofApp::draw() {
 
     ofBackground(0);
     if (squareImage) {
-      filteredImageFbo.draw(0, ofGetHeight() * 0.5 - ofGetWidth() * 0.5,
-                            ofGetWidth(), ofGetWidth());
+      filteredImageFbo.draw(ofGetWidth() * 0.5 - short_side * 0.5,
+                            ofGetHeight() * 0.5 - short_side * 0.5, short_side,
+                            short_side);
     } else {
-      filteredImageFbo.draw(0, 0, ofGetWidth(), ofGetHeight());
+      filteredImageFbo.draw(0, black_bar_height, ofGetWidth(),
+                            ofGetHeight() - (black_bar_height * 2));
     }
 
     // Draw icons
