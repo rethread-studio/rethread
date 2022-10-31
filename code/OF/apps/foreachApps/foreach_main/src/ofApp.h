@@ -8,12 +8,7 @@
 #define PORT 12345
 #define SEND_PORT 12371
 
-// This openFrameworks example is designed to demonstrate how to access the
-// webcam.
-//
-// For more information regarding this example take a look at the README.md.
-//
-
+// This state enum must be in sync with the foreach_server state values
 enum class State { IDLE, COUNTDOWN, TRANSITION, APPLY_FILTER, END_SCREEN };
 
 static map<string, State> string_state_map;

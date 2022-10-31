@@ -361,43 +361,6 @@ void ofApp::draw() {
   } else if (state == State::END_SCREEN) {
     ofBackground(0);
 
-    // TEMP this can be removed when we are sure the states are progressed
-    // through in order
-
-    /*filteredImageFbo.begin();
-    filterShader.begin();
-    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
-                              imageFbo.getHeight());
-    filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
-                              filteredImageFbo.getHeight());
-    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-    filterShader.setUniform1f("invertY", 0);
-    filterShader.setUniform1f("exponent", filterExponent);
-    filterShader.setUniform1f("gain", filterGain);
-    filterShader.setUniform1f("pixelsProcessed", 99999999);
-    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
-                    filteredImageFbo.getHeight());
-    filterShader.end();
-    filteredImageFbo.end();
-    halfFilteredImageFbo.begin();
-    filterShader.begin();
-    filterShader.setUniform2f("resolution", imageFbo.getWidth(),
-                              imageFbo.getHeight());
-    filterShader.setUniform2f("outputResolution", filteredImageFbo.getWidth(),
-                              filteredImageFbo.getHeight());
-    filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(), 1);
-    filterShader.setUniform1f("invertY", 0);
-    filterShader.setUniform1f("exponent", filterExponent);
-    filterShader.setUniform1f("gain", filterGain);
-    int halfProcessedNumPixels =
-        imageFbo.getWidth() * imageFbo.getHeight() * 0.6;
-    filterShader.setUniform1f("pixelsProcessed", halfProcessedNumPixels);
-    ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
-                    filteredImageFbo.getHeight());
-    filterShader.end();
-    halfFilteredImageFbo.end();*/
-    // END TEMP
-
     ofSetColor(255);
     while (endScreen.scroll_position > endScreen.max_scroll_position) {
       endScreen.scroll_position -= endScreen.max_scroll_position;
@@ -623,24 +586,6 @@ void ofApp::checkOscMessages() {
       } else {
         ofLog() << "ERROR: unparsable state name: " << state_name;
       }
-      // State new_state = string_state_map[state_name];
-      // switch (state_name) {
-      // case "idle":
-      //   new_state = State::IDLE;
-      //   break;
-      // case "transition_to_filter":
-      //   new_state = State::TRANSITION;
-      //   break;
-      // case "countdown":
-      //   new_state = State::COUNTDOWN;
-      //   break;
-      // case "apply_filter":
-      //   new_state = State::APPLY_FILTER;
-      //   break;
-      // case "end_screen":
-      //   new_state = State::END_SCREEN;
-      //   break;
-      // }
     } else if (m.getAddress() == "/countdown") {
       countdownData.num = m.getArgAsInt(0);
     } else if (m.getAddress() == "/timeout") {
@@ -650,16 +595,7 @@ void ofApp::checkOscMessages() {
       applyFilterData.crankSteps = m.getArgAsInt(1);
     } else if (m.getAddress() == "/scroll") {
       endScreen.scroll_position += float(m.getArgAsInt(0) * 20);
-      // endScreen.scroll_position =
-      //     ofClamp(endScreen.scroll_position, 0,
-      //     endScreen.max_scroll_position);
       endScreen.prepare_display_easter_egg = m.getArgAsBool(1);
-    }
-    // check for an image being sent
-    // note: the size of the image depends greatly on your network buffer
-    // sizes, if an image is too big the message won't come through
-    else if (m.getAddress() == "/image") {
-      ofBuffer buffer = m.getArgAsBlob(0);
     } else {
 
       // unrecognized message: display on the bottom of the screen
