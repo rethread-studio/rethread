@@ -653,11 +653,6 @@ void ofApp::checkOscMessages() {
       // endScreen.scroll_position =
       //     ofClamp(endScreen.scroll_position, 0,
       //     endScreen.max_scroll_position);
-      if (endScreen.display_easter_egg == false && m.getArgAsBool(1)) {
-        cout << "esater egg. endSceen.scrollPosition: "
-             << endScreen.scroll_position << "\nendScreen.max_scroll_position: "
-             << endScreen.max_scroll_position << endl;
-      }
       endScreen.prepare_display_easter_egg = m.getArgAsBool(1);
     }
     // check for an image being sent
