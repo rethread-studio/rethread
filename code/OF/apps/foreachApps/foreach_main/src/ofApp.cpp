@@ -164,14 +164,23 @@ void ofApp::update() {
   if (!useStaticImage) {
     vidGrabber.update();
 
-    if (vidGrabber.isFrameNew()) {
-      ofPixels &pixels = vidGrabber.getPixels();
-      for (size_t i = 0; i < pixels.size(); i++) {
-        // invert the color of the pixel
-        videoInverted[i] = 255 - pixels[i];
+    if (vidGrabber.isFrameNew() &&
+        (state == State::IDLE || state == State::COUNTDOWN)) {
+      // Draw the live image on the imageFbo
+      imageFbo.begin();
+      ofPushMatrix();
+      if (flipWebcam) {
+        ofTranslate(imageFbo.getWidth() / 2, imageFbo.getHeight() / 2);
+        ofRotateDeg(-90);
+        ofTranslate(imageFbo.getHeight() / -2, imageFbo.getWidth() / -2);
       }
-      // load the inverted pixels
-      videoTexture.loadData(videoInverted);
+      if (useStaticImage) {
+        staticImage.draw(0, 0);
+      } else {
+        vidGrabber.draw(0, 0);
+      }
+      ofPopMatrix();
+      imageFbo.end();
     }
   }
   ofSetWindowTitle(ofToString(ofGetFrameRate(), 2));
@@ -212,21 +221,6 @@ void ofApp::draw() {
   if (state == State::IDLE || state == State::COUNTDOWN) {
 
     ofBackground(0);
-    // Draw the live image on the imageFbo
-    imageFbo.begin();
-    ofPushMatrix();
-    if (flipWebcam) {
-      ofTranslate(imageFbo.getWidth() / 2, imageFbo.getHeight() / 2);
-      ofRotateDeg(-90);
-      ofTranslate(imageFbo.getHeight() / -2, imageFbo.getWidth() / -2);
-    }
-    if (useStaticImage) {
-      staticImage.draw(0, 0);
-    } else {
-      vidGrabber.draw(0, 0);
-    }
-    ofPopMatrix();
-    imageFbo.end();
 
     if (showPixels) {
       pixelZoom = sin(ofGetElapsedTimef() * 1.7) * 0.125 + 0.125 +

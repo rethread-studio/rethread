@@ -49,7 +49,7 @@ public:
   int camWidth;
   int camHeight;
   ofImage staticImage;
-  bool useStaticImage = true;
+  bool useStaticImage = false;
 
   ofShader pixelShader;
   ofShader filterShader;
