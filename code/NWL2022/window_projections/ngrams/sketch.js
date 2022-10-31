@@ -136,6 +136,7 @@ function keyPressed() {
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
   resizeCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
+  centerCanvas();
   initParams();
 }
 

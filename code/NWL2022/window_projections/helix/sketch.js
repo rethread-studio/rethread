@@ -4,9 +4,9 @@ let w, h; // width and height of each rectangle
 let hGap; // gap between rectangles vertically
 let wMargin; // margin on the sides
 
-const SCALE = 2;
-const WINDOW_WIDTH = 57*SCALE;
-const WINDOW_HEIGHT = 112*SCALE;
+let scale;
+const WINDOW_WIDTH = 57;
+const WINDOW_HEIGHT = 112;
 let mWindows = 1; // how many windows in width
 let nWindows = 2; // how many windows in height
 let showWindowFrame = true;
@@ -25,14 +25,15 @@ function preload() {
 }
 
 function setup() {
-  cnv = createCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows, WEBGL);
+  determineScale();
+  cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale, WEBGL);
   noStroke();
   colorMode(HSB);
   ctx = canvas.getContext("2d");
 
   //console.log(data)
   trace_len = data.draw_trace.length;
-  wMargin = WINDOW_WIDTH/10;
+  wMargin = WINDOW_WIDTH*scale/10;
 
   centerCanvas();
   initParams();
@@ -78,6 +79,10 @@ function draw() {
   if (showWindowFrame) drawWindowsOutline();
 }
 
+function determineScale() {
+  scale = windowHeight/(WINDOW_HEIGHT*nWindows);
+}
+
 function initParams() {
   w = width-wMargin*2;
   h = 20;
@@ -94,10 +99,10 @@ function centerCanvas() {
 function drawWindowsOutline() {
   stroke(255);
   strokeWeight(2);
-  for (let x = WINDOW_WIDTH; x < width; x += WINDOW_WIDTH) {
+  for (let x = WINDOW_WIDTH*scale; x < width; x += WINDOW_WIDTH*scale) {
     line(x, 0, 0, x, height, 0);
   }
-  for (let y = WINDOW_HEIGHT; y < height; y += WINDOW_HEIGHT) {
+  for (let y = WINDOW_HEIGHT*scale; y < height; y += WINDOW_HEIGHT*scale) {
     line(0, y, 0, width, y, 0);
   }
   noStroke();
@@ -134,14 +139,15 @@ function keyPressed() {
     return;
   }
   if (keyCode == LEFT_ARROW && mWindows > 1) mWindows--;
-  if (keyCode == RIGHT_ARROW && mWindows < 5) mWindows++;
+  if (keyCode == RIGHT_ARROW && mWindows < 4) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
-  resizeCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
-  centerCanvas();
-  initParams();
+  windowResized();
 }
 
 function windowResized() {
+  determineScale();
+  resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   centerCanvas();
+  initParams();
 }
