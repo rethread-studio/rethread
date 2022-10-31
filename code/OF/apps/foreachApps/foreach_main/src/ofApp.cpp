@@ -407,6 +407,9 @@ void ofApp::draw() {
     ofSetColor(255);
     while (endScreen.scroll_position > endScreen.max_scroll_position) {
       endScreen.scroll_position -= endScreen.max_scroll_position;
+      if (endScreen.prepare_display_easter_egg) {
+        endScreen.display_easter_egg = true;
+      }
     }
 
     x = endScreen.left_margin;
@@ -426,12 +429,13 @@ void ofApp::draw() {
       if (endScreen.display_easter_egg) {
         y = drawEndScreenCard(
             x, y, easterEggFbo, roundedCornersMaskFbo,
-            vector<string>{"#behindbehindthefilter", "#hidden"});
+            vector<string>{"#behindbehindthefilter", "#hidden", "#easteregg"});
       }
       if (i == 0) {
-        endScreen.max_scroll_position = y + endScreen.scroll_position -
-                                        ofGetHeight() + endScreen.left_margin;
+        endScreen.max_scroll_position =
+            y + endScreen.scroll_position - endScreen.left_margin;
       }
+      i++;
     }
     top_text << "thank you for applying a filter";
 
@@ -560,6 +564,7 @@ void ofApp::checkOscMessages() {
         } else if (it->second == State::END_SCREEN) {
           endScreen.scroll_position = 0;
           endScreen.display_easter_egg = false;
+          endScreen.prepare_display_easter_egg = false;
           endScreenFade = 255.0;
           // Draw filtered image to fbo
           filteredImageFbo.begin();
@@ -651,9 +656,15 @@ void ofApp::checkOscMessages() {
       applyFilterData.crankSteps = m.getArgAsInt(1);
     } else if (m.getAddress() == "/scroll") {
       endScreen.scroll_position += float(m.getArgAsInt(0) * 20);
-      endScreen.scroll_position =
-          ofClamp(endScreen.scroll_position, 0, endScreen.max_scroll_position);
-      endScreen.display_easter_egg = m.getArgAsBool(1);
+      // endScreen.scroll_position =
+      //     ofClamp(endScreen.scroll_position, 0,
+      //     endScreen.max_scroll_position);
+      if (endScreen.display_easter_egg == false && m.getArgAsBool(1)) {
+        cout << "esater egg. endSceen.scrollPosition: "
+             << endScreen.scroll_position << "\nendScreen.max_scroll_position: "
+             << endScreen.max_scroll_position << endl;
+      }
+      endScreen.prepare_display_easter_egg = m.getArgAsBool(1);
     }
     // check for an image being sent
     // note: the size of the image depends greatly on your network buffer

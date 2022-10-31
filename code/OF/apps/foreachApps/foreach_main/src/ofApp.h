@@ -49,7 +49,7 @@ public:
   int camWidth;
   int camHeight;
   ofImage staticImage;
-  bool useStaticImage = false;
+  bool useStaticImage = true;
 
   ofShader pixelShader;
   ofShader filterShader;
@@ -71,6 +71,7 @@ public:
     float scroll_position;
     float max_scroll_position;
     bool display_easter_egg = false;
+    bool prepare_display_easter_egg = false;
   } endScreen;
 
   ofxPanel gui;
