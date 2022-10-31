@@ -79,7 +79,7 @@ impl State {
         self.num_steps = 0;
         self.communication
             .send_transition_to_state(&self.state_machine);
-        self.last_interaction = Instant::now();
+        self.reset_timeout();
     }
     fn transition_to_transition_to_filter(&mut self) {
         self.state_machine = StateMachine::TransitionToFilter {
@@ -111,7 +111,7 @@ impl State {
         self.communication.send_countdown_tick(3);
     }
     fn button_pressed(&mut self) {
-        self.last_interaction = Instant::now();
+        self.reset_timeout();
         match self.state_machine {
             StateMachine::Idle => self.transition_to_countdown(),
             StateMachine::TransitionToFilter { .. } => (),
@@ -168,7 +168,7 @@ impl State {
     }
     fn turn_forward(&mut self) {
         self.num_steps += 1;
-        self.last_interaction = Instant::now();
+        self.reset_timeout();
         match &mut self.state_machine {
             StateMachine::Idle => (),
             StateMachine::Countdown {
@@ -183,6 +183,14 @@ impl State {
                     .send_scroll_forward(*distance_scrolled > 500.0);
             }
         }
+    }
+    fn reset_timeout(&mut self) {
+        let time_to_timeout =
+            self.timeout.as_secs_f32() - self.last_interaction.elapsed().as_secs_f32();
+        if time_to_timeout < 6.0 {
+            self.communication.send_timeout_reset();
+        }
+        self.last_interaction = Instant::now();
     }
     // Run periodically to update time based state
     fn update(&mut self) {
@@ -314,6 +322,11 @@ impl Communication {
     fn send_timeout(&mut self, seconds_left: f32) {
         let addr = "/timeout";
         let args = vec![Type::Float(seconds_left)];
+        self.send_to_all(addr, args);
+    }
+    fn send_timeout_reset(&mut self) {
+        let addr = "/timeout_reset";
+        let args = vec![];
         self.send_to_all(addr, args);
     }
     fn send_easter_egg(&mut self, kind: usize) {

@@ -590,6 +590,8 @@ void ofApp::checkOscMessages() {
       countdownData.num = m.getArgAsInt(0);
     } else if (m.getAddress() == "/timeout") {
       timeToTimeout = m.getArgAsFloat(0);
+    } else if (m.getAddress() == "/timeout_reset") {
+      timeToTimeout = 9999.0;
     } else if (m.getAddress() == "/pixels_processed") {
       applyFilterData.pixelsProcessed = m.getArgAsInt(0);
       applyFilterData.crankSteps = m.getArgAsInt(1);
