@@ -79,6 +79,7 @@ impl State {
         self.num_steps = 0;
         self.communication
             .send_transition_to_state(&self.state_machine);
+        self.last_interaction = Instant::now();
     }
     fn transition_to_transition_to_filter(&mut self) {
         self.state_machine = StateMachine::TransitionToFilter {
