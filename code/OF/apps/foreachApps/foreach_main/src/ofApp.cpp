@@ -367,8 +367,6 @@ void ofApp::draw() {
   } else if (state == State::END_SCREEN) {
     ofBackground(0);
 
-    int halfProcessedNumPixels =
-        imageFbo.getWidth() * imageFbo.getHeight() * 0.6;
     // TEMP this can be removed when we are sure the states are progressed
     // through in order
 
@@ -397,6 +395,8 @@ void ofApp::draw() {
     filterShader.setUniform1f("invertY", 0);
     filterShader.setUniform1f("exponent", filterExponent);
     filterShader.setUniform1f("gain", filterGain);
+    int halfProcessedNumPixels =
+        imageFbo.getWidth() * imageFbo.getHeight() * 0.6;
     filterShader.setUniform1f("pixelsProcessed", halfProcessedNumPixels);
     ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
                     filteredImageFbo.getHeight());
@@ -472,7 +472,9 @@ void ofApp::draw() {
 
   // videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
 
-  // gui.draw();
+  if (showGui) {
+    gui.draw();
+  }
 }
 
 int ofApp::drawEndScreenCard(int startx, int starty, ofFbo fbo, ofFbo mask,
@@ -515,6 +517,8 @@ void ofApp::keyPressed(int key) {
   // installing the SDK http://forum.openframeworks.cc/index.php?topic=10343
   if (key == 's' || key == 'S') {
     vidGrabber.videoSettings();
+  } else if (key == 'h') {
+    showGui = !showGui;
   }
 }
 
@@ -575,6 +579,26 @@ void ofApp::checkOscMessages() {
                           filteredImageFbo.getHeight());
           filterShader.end();
           filteredImageFbo.end();
+
+          halfFilteredImageFbo.begin();
+          filterShader.begin();
+          filterShader.setUniform2f("resolution", imageFbo.getWidth(),
+                                    imageFbo.getHeight());
+          filterShader.setUniform2f("outputResolution",
+                                    filteredImageFbo.getWidth(),
+                                    filteredImageFbo.getHeight());
+          filterShader.setUniformTexture("tex0", imageFbo.getTextureReference(),
+                                         1);
+          filterShader.setUniform1f("invertY", 0);
+          filterShader.setUniform1f("exponent", filterExponent);
+          filterShader.setUniform1f("gain", filterGain);
+          halfProcessedNumPixels =
+              imageFbo.getWidth() * imageFbo.getHeight() * 0.6;
+          filterShader.setUniform1f("pixelsProcessed", halfProcessedNumPixels);
+          ofDrawRectangle(0, 0, filteredImageFbo.getWidth(),
+                          filteredImageFbo.getHeight());
+          filterShader.end();
+          halfFilteredImageFbo.end();
 
           easterEggFbo.begin();
           filterShader.begin();

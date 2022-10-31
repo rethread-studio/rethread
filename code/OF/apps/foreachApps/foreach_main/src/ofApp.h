@@ -62,6 +62,7 @@ public:
   ofFbo easterEggFbo;
   ofFbo endScreenFbo;
   float endScreenFade = 255.0;
+  int halfProcessedNumPixels = 0;
 
   struct {
     float width;
@@ -81,6 +82,7 @@ public:
   bool squareImage = true;
   ofParameter<float> filterGain;
   ofParameter<float> filterExponent;
+  bool showGui = false;
 
   ofTrueTypeFont numberFont;
   ofTrueTypeFont endScreenFont;
