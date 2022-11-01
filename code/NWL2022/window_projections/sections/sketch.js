@@ -6,9 +6,9 @@ let wMargin, hMargin; // margins inside each window
 let i0Max;
 let i0; // index of the section in the first window
 
-const SCALE = 2;
-const WINDOW_WIDTH = 57*SCALE;
-const WINDOW_HEIGHT = 112*SCALE;
+let scale;
+const WINDOW_WIDTH = 57;
+const WINDOW_HEIGHT = 112;
 let mWindows = 3; // how many windows in width
 let nWindows = 2; // how many windows in height
 let showWindowFrame = true;
@@ -27,7 +27,8 @@ function preload() {
 }
 
 function setup() {
-  cnv = createCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
+  determineScale();
+  cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   noStroke();
   colorMode(HSB);
   ctx = canvas.getContext("2d");
@@ -35,8 +36,8 @@ function setup() {
   //console.log(data)
   trace_len = data.draw_trace.length;
   n_sections = data.depth_envelope.sections.length;
-  wMargin = WINDOW_WIDTH/10;
-  hMargin = WINDOW_WIDTH/10;
+  wMargin = WINDOW_WIDTH*scale/10;
+  hMargin = WINDOW_WIDTH*scale/10;
 
   max_section_size = 0;
   for (let s of data.depth_envelope.sections) {
@@ -52,13 +53,15 @@ function setup() {
   allSups.sort();
   nDeps = allDeps.length;
   nSups = allSups.length;
+
+  console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window separations");
 }
 
 function draw() {
   background(0);
 
   if (frameCount % 200 == 0) i0 = floor(random(i0Max));
-  let w = WINDOW_WIDTH;
+  let w = WINDOW_WIDTH*scale;
   for (let i = 0; i < mWindows; i++) {
     let section = data.depth_envelope.sections[i+i0];
     let section_size = section.end_index - section.start_index;
@@ -91,6 +94,10 @@ function draw() {
   if (showWindowFrame) drawWindowsOutline();
 }
 
+function determineScale() {
+  scale = windowHeight/(WINDOW_HEIGHT*nWindows);
+}
+
 function initParams() {
   i0Max = n_sections - mWindows;
   i0 = floor(random(i0Max));
@@ -106,10 +113,10 @@ function centerCanvas() {
 function drawWindowsOutline() {
   stroke(255);
   strokeWeight(2);
-  for (let x = WINDOW_WIDTH; x < width; x += WINDOW_WIDTH) {
+  for (let x = WINDOW_WIDTH*scale; x < width; x += WINDOW_WIDTH*scale) {
     line(x, 0, x, height);
   }
-  for (let y = WINDOW_HEIGHT; y < height; y += WINDOW_HEIGHT) {
+  for (let y = WINDOW_HEIGHT*scale; y < height; y += WINDOW_HEIGHT*scale) {
     line(0, y, width, y);
   }
   noStroke();
@@ -117,7 +124,7 @@ function drawWindowsOutline() {
 
 
 function getSupAndDep(s) {
-  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[method name]"
+  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
   // return: an array, the first value is the supplier, the second is the dependency
   let func = (s.indexOf("/") == -1) ? s : s.split("/")[1]; // remove the eventual prefix, find the interesting part
   let idx1 = func.indexOf(".", func.indexOf(".")+1); // find the second occurence of "."
@@ -147,14 +154,15 @@ function keyPressed() {
     return;
   }
   if (keyCode == LEFT_ARROW && mWindows > 1) mWindows--;
-  if (keyCode == RIGHT_ARROW && mWindows < n_sections) mWindows++;
+  if (keyCode == RIGHT_ARROW && mWindows < 4) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
-  resizeCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
-  centerCanvas();
-  initParams();
+  windowResized();
 }
 
 function windowResized() {
+  determineScale();
+  resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   centerCanvas();
+  initParams();
 }
