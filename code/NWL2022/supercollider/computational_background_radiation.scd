@@ -282,7 +282,7 @@ if (\ProxyMeter.asClass.notNil) { ProxyMeter.addMixer(n); };
 		wet = Greyhole.ar(sig, delayTime, damp, size, diff, feedback);
 
 		sig = (sig * (1-mix)) + (wet*mix);
-		sig = Limiter.ar(sig, 0.95);
+		sig = Limiter.ar(sig, 0.95) * 0.5;
 		sig = LeakDC.ar(sig);
 		sig
 	}).play();
@@ -290,6 +290,117 @@ if (\ProxyMeter.asClass.notNil) { ProxyMeter.addMixer(n); };
 )
 Ndef(\glitch_out).stop
 
+(
+~glitches = (
+	bleepbloop: {
+	Ndef(\glitch,{
+	var length = 48000*1.0, seq = Demand.ar(Impulse.ar(0.05), 0, Dseq([[0, length, 100], [length, 0, 2000]], inf)), read_phase, reader, reader2, buffer,
+	freq = LFNoise0.ar(2).range(500, 5000), sig;
+	buffer=LocalBuf(length,2).clear;
+	read_phase = LFNoise1.ar(20.5).range(0, length);
+	// read_phase = Phasor.ar(Dust.ar(2), 1.0, 0.0, length, LFNoise1.kr(3).range(0, length));
+
+	reader=BufRd.ar(2, buffer, read_phase)*0.7;
+	reader2=BufRd.ar(2, buffer, length-read_phase-1)*0.7;
+
+	r=LFNoise0.ar(0.01).unipolar;
+	BufWr.ar(
+		SinOsc.ar(freq, 0, Decay.ar(Impulse.ar(0.125), 1, 0.5))+((reader + reader2)*0.7),
+		buffer,
+		(LFNoise1.ar(0.5+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
+	);
+	BufWr.ar(
+		SinOsc.ar(LFNoise1.ar(0.2).range(500, 5000), 0, Decay.ar(Impulse.ar(0.125), 2, 0.5)),
+		buffer,
+		(LFNoise1.ar(0.4+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
+	);
+	sig = (reader).tanh;
+	sig
+});
+	},
+	mechabirds: {
+		Ndef(\glitch,{
+	var length = 48000*3.0, seq = Demand.ar(Impulse.ar(0.05), 0, Dseq([[0, length, 100], [length, 0, 2000]], inf)), read_phase, reader, reader2, buffer,
+	freq = LFNoise1.ar(2).range(500, 5000), sig;
+	buffer=LocalBuf(length,2).clear;
+	read_phase = LFNoise1.ar(2.5).range(0, length);
+	// read_phase = Phasor.ar(Dust.ar(2), 1.0, 0.0, length, LFNoise1.kr(3).range(0, length));
+
+	reader=BufRd.ar(2, buffer, read_phase)*0.7;
+	reader2=BufRd.ar(2, buffer, length-read_phase-1)*0.7;
+
+	r=LFNoise0.ar(0.01).unipolar;
+	BufWr.ar(
+		SinOsc.ar(freq, 0, Decay.ar(Impulse.ar(0.125), 1, 0.5))+((reader + reader2)*0.7),
+		buffer,
+		(LFNoise1.ar(0.5+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
+	);
+	BufWr.ar(
+		SinOsc.ar(LFNoise1.ar(0.2).range(500, 5000), 0, Decay.ar(Impulse.ar(0.125), 2, 0.5)),
+		buffer,
+		(LFNoise1.ar(0.4+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
+	);
+	sig = (reader).tanh;
+	sig
+});
+	},
+	rain: {
+			Ndef(\glitch,{
+		var length = 48000*1.0, seq = Demand.ar(Impulse.ar(0.05), 0, Dseq([[0, length, 100], [length, 0, 2000]], inf)), read_phase, reader, reader2, buffer,
+		freq = LFNoise0.ar(2).range(500, 5000), sig;
+		buffer=LocalBuf(length,2).clear;
+		read_phase = LFNoise1.ar(200.5).range(0, length);
+		// read_phase = Phasor.ar(Dust.ar(2), 1.0, 0.0, length, LFNoise1.kr(3).range(0, length));
+
+		reader=BufRd.ar(2, buffer, read_phase)*0.7;
+		reader2=BufRd.ar(2, buffer, length-read_phase-1)*0.7;
+
+		r=LFNoise0.ar(0.01).unipolar;
+		BufWr.ar(
+			SinOsc.ar(freq, 0, Decay.ar(Impulse.ar(0.125), 1, 0.5))+((reader + reader2)*0.7),
+			buffer,
+			(LFNoise1.ar(0.5+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
+		);
+		BufWr.ar(
+			SinOsc.ar(LFNoise1.ar(0.2).range(500, 5000), 0, Decay.ar(Impulse.ar(0.125), 2, 0.5)),
+			buffer,
+			(LFNoise1.ar(0.4+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
+		);
+		sig = (reader).tanh;
+		sig
+	});
+	},
+	rain2: {
+		Ndef(\glitch,{
+	var length = 48000*1.0, seq = Demand.ar(Impulse.ar(0.05), 0, Dseq([[0, length, 100], [length, 0, 2000]], inf)), read_phase, reader, reader2, buffer,
+	freq = LFNoise0.ar(2).range(500, 5000), sig;
+	buffer=LocalBuf(length,2).clear;
+	read_phase = LFNoise1.ar(200.5).range(0, length);
+	// read_phase = Phasor.ar(Dust.ar(2), 1.0, 0.0, length, LFNoise1.kr(3).range(0, length));
+
+	reader=BufRd.ar(2, buffer, read_phase)*0.7;
+	reader2=BufRd.ar(2, buffer, length-read_phase-1)*0.7;
+
+	r=LFNoise0.ar(0.01).unipolar;
+	BufWr.ar(
+		SinOsc.ar(freq, 0, Decay.ar(Impulse.ar(0.125), 1, 0.5))+((reader + reader2)*0.7),
+		buffer,
+		(LFNoise1.ar(0.5+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
+	);
+	BufWr.ar(
+		SinOsc.ar(LFNoise1.ar(0.2).range(500, 5000), 0, Decay.ar(Impulse.ar(0.125), 2, 0.5)),
+		buffer,
+		(LFNoise1.ar(0.4+LFPulse.ar([0.0125, 0.013], 0, 0.9, 0.01))+1)*(length/2)
+	);
+	sig = (reader).tanh;
+	sig
+});
+	}
+);
+)
+~glitches.bleepbloop.()
+~glitches.mechabirds.()
+~glitches.rain2.()
 //
 
 (
@@ -344,11 +455,17 @@ Pdef(\kick, Pbind(\instrument, \kick,
 ~chord = ~from_53.([0, 17, 31, 39, 48] + 53);
 
 OSCdef(\call, {|msg, time, addr, recvPort|
-	var depth = msg[1]-~section.min_depth, sine_mix,
+	var depth = msg[1]-~section.min_depth, sine_mix, freq, buf, amp, atk;
 	// freq = msg[1] * 10 + 20,
 	// freq = (msg[1] + 12).midicps,
-	freq = ~chord[(depth %~chord.size)] * 2.pow((depth/~chord.size).floor()),
-	buf, amp = 1.0, atk = 0.001;
+	freq = ~chord[(depth %~chord.size)] * 2.pow((depth/~chord.size).floor());
+	if(~section.depth_width < (~chord.size) || (~section.average < ~chord.size)) {
+		freq = freq * 2;
+	};
+	if(~section.depth_width < (~chord.size*2)) {
+		freq = freq * 2;
+	};
+	amp = 1.0; atk = 0.001;
 	if(msg[2] == 0, {
 		buf = ~wt_buf[0..4].choose;
 		amp = 0.5;
