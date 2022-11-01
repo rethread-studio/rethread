@@ -14,11 +14,27 @@ use parser::deepika2::{CallDrawData, Deepika2, DepthEnvelopePoint};
 // Send to Scheduler:
 // - time between events
 // - play/pause
+//
+
+pub enum Message {
+    JumpNextMarker,
+    JumpPreviousMarker,
+}
 
 pub struct SchedulerCom {
     pub index_increase_rx: Receiver<usize>,
     pub play_tx: Sender<bool>,
     pub event_duration_tx: Sender<f32>,
+    pub message_tx: Sender<Message>,
+}
+
+impl SchedulerCom {
+    pub fn jump_to_next_marker(&mut self) {
+        self.message_tx.send(Message::JumpNextMarker).unwrap()
+    }
+    pub fn jump_to_previous_marker(&mut self) {
+        self.message_tx.send(Message::JumpPreviousMarker).unwrap()
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -41,6 +57,7 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
     let (index_increase_tx, index_increase_rx) = unbounded();
     let (event_duration_tx, event_duration_rx) = unbounded();
     let (play_tx, play_rx) = unbounded();
+    let (message_tx, message_rx) = unbounded();
 
     let server = TcpListener::bind("127.0.0.1:3012").unwrap();
 
@@ -52,6 +69,40 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
         }
         while let Ok(new_play) = play_rx.try_recv() {
             play = new_play;
+        }
+        while let Ok(new_message) = message_rx.try_recv() {
+            match new_message {
+                Message::JumpNextMarker => {
+                    let old_index = current_index;
+                    let current_marker = trace.draw_trace[current_index].marker.clone();
+                    while current_marker == trace.draw_trace[current_index].marker {
+                        current_index += 1;
+                        if current_index >= trace.draw_trace.len() {
+                            current_index = 0;
+                        }
+                        if current_index == old_index {
+                            // We've gone all the way around
+                            break;
+                        }
+                    }
+                    index_increase_tx.send(current_index).unwrap();
+                }
+                Message::JumpPreviousMarker => {
+                    let old_index = current_index;
+                    let current_marker = trace.draw_trace[current_index].marker.clone();
+                    while current_marker == trace.draw_trace[current_index].marker {
+                        if current_index == 0 {
+                            current_index = trace.draw_trace.len();
+                        }
+                        current_index -= 1;
+                        if current_index == old_index {
+                            // We've gone all the way around
+                            break;
+                        }
+                    }
+                    index_increase_tx.send(current_index).unwrap();
+                }
+            }
         }
         if play {
             current_index += 1;
@@ -92,6 +143,7 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
         index_increase_rx,
         event_duration_tx,
         play_tx,
+        message_tx,
     }
 }
 
