@@ -9,7 +9,7 @@ const WINDOW_WIDTH = 57;
 const WINDOW_HEIGHT = 112;
 let mWindows = 1; // how many windows in width
 let nWindows = 2; // how many windows in height
-let showWindowFrame = true, orthoMode = false;
+let showWindowFrame = true, orthoMode = false, showText = true;
 
 let allDeps; // array with all dependencies
 let allSups; // array with all suppliers
@@ -18,10 +18,14 @@ let nSups; // number of suppliers
 
 let cnv, ctx; // canvas and its context
 
+let myFont;
+let keywords = ["copy", "paste", "search", "replace", "find"];
+
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
   //data = loadJSON("../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
   data = loadJSON("../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
+  myFont = loadFont("IBMPlexMono-Medium.ttf");
 }
 
 function setup() {
@@ -44,6 +48,11 @@ function setup() {
   allSups.sort();
   nDeps = allDeps.length;
   nSups = allSups.length;
+
+  textFont(myFont);
+  textAlign(CENTER, CENTER);
+
+  console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window separations\n- p to change projection mode\n- t to show/hide text keywords");
 }
 
 function draw() {
@@ -61,16 +70,34 @@ function draw() {
     let va = 90;
 
     push();
-    translate(x+w/2, y+h/2);
+
+    translate(x+w/2, y+h/2, 0);
     rotateY(frameCount/50 + y/50);
     fill(hu1, sa, va);
     beginShape();
-    vertex(-w/2+wMargin, -h/2+hGap/2);
-    vertex(-w/2+wMargin, h/2-hGap/2);
+    vertex(-w/2+wMargin, -h/2+hGap/2, 0);
+    vertex(-w/2+wMargin, h/2-hGap/2, 0);
     fill(hu2, sa, va);
-    vertex(w/2-wMargin, h/2-hGap/2);
-    vertex(w/2-wMargin, -h/2+hGap/2);
+    vertex(w/2-wMargin, h/2-hGap/2, 0);
+    vertex(w/2-wMargin, -h/2+hGap/2, 0);
     endShape();
+
+    if (showText) {
+      let funcName = getActualName(d.name);
+      for (let wo of keywords) {
+        let idx = funcName.toLowerCase().indexOf(wo);
+        if (idx >= 0) {
+          fill(255);
+          //text(wo, w/2-wMargin/2, -hGap/2);
+          translate(0, -hGap, 1);
+          text(wo, 0, 0);
+          translate(0, 0, -2);
+          text(wo, 0, 0);
+          break;
+        }
+      }
+    }
+
     pop();
 
     y += h;
@@ -88,6 +115,7 @@ function initParams() {
   w = width-wMargin*2;
   h = 20;
   hGap = h/8;
+  textSize(h*3/4);
 }
 
 function centerCanvas() {
@@ -110,7 +138,7 @@ function drawWindowsOutline() {
 }
 
 function getSupAndDep(s) {
-  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[method name]"
+  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
   // return: an array, the first value is the supplier, the second is the dependency
   let func = (s.indexOf("/") == -1) ? s : s.split("/")[1]; // remove the eventual prefix, find the interesting part
   let idx1 = func.indexOf(".", func.indexOf(".")+1); // find the second occurence of "."
@@ -134,6 +162,12 @@ function getAllSuppliersAndDependencies() {
   }
 }
 
+function getActualName(s) {
+  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
+  // return: the actual name of the function
+  return s.slice(s.lastIndexOf(".")+1, s.length);
+}
+
 function keyPressed() {
   if (key == " ") {
     showWindowFrame = !showWindowFrame;
@@ -144,6 +178,7 @@ function keyPressed() {
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
   if (key == "p") orthoMode = !orthoMode; // "p" like "projection"
+  if (key == "t") showText = !showText;
   windowResized();
 }
 

@@ -40,6 +40,8 @@ function setup() {
   allSups.sort();
   nDeps = allDeps.length;
   nSups = allSups.length;
+
+  console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window separations");
 }
 
 function draw() {
@@ -107,7 +109,7 @@ function drawWindowsOutline() {
 
 
 function getSupAndDep(s) {
-  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[method name]"
+  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
   // return: an array, the first value is the supplier, the second is the dependency
   let func = (s.indexOf("/") == -1) ? s : s.split("/")[1]; // remove the eventual prefix, find the interesting part
   let idx1 = func.indexOf(".", func.indexOf(".")+1); // find the second occurence of "."
