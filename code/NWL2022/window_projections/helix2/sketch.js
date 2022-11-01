@@ -25,7 +25,7 @@ function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
   //data = loadJSON("../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
   data = loadJSON("../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
-  myFont = loadFont("IBMPlexMono-Medium.ttf");
+  myFont = loadFont("../helix/IBMPlexMono-Medium.ttf");
 }
 
 function setup() {
@@ -50,7 +50,7 @@ function setup() {
   nSups = allSups.length;
 
   textFont(myFont);
-  textAlign(CENTER, CENTER);
+  textAlign(LEFT, CENTER);
 
   console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window separations\n- p to change projection mode\n- t to show/hide text keywords");
 }
@@ -73,26 +73,35 @@ function draw() {
 
     translate(x+w/2, y+h/2, 0);
     rotateY(frameCount/50 + y/50);
+
+    fill(94);
+    rotateX(3*PI/2);
+    cylinder(h/5, w-2*wMargin);
+    rotate(PI/2);
+
+    push();
     fill(hu1, sa, va);
-    beginShape();
-    vertex(-w/2+wMargin, -h/2+hGap/2, 0);
-    vertex(-w/2+wMargin, h/2-hGap/2, 0);
+    translate(-w/2+wMargin, 0);
+    sphere(h/2);
     fill(hu2, sa, va);
-    vertex(w/2-wMargin, h/2-hGap/2, 0);
-    vertex(w/2-wMargin, -h/2+hGap/2, 0);
-    endShape();
+    translate(w-2*wMargin, 0);
+    sphere(h/2);
+    pop();
 
     if (showText) {
+      rotateX(-3*PI/2);
       let funcName = getActualName(d.name);
       for (let wo of keywords) {
         let idx = funcName.toLowerCase().indexOf(wo);
         if (idx >= 0) {
           fill(94);
-          //text(wo, w/2-wMargin/2, -hGap/2);
-          translate(0, -hGap, 1);
+          text(wo, w/2-wMargin/2+h/4, -hGap*2);
+          /*
+          translate(0, -hGap, 10);
           text(wo, 0, 0);
-          translate(0, 0, -2);
+          translate(0, 0, -20);
           text(wo, 0, 0);
+          */
           break;
         }
       }
@@ -115,7 +124,7 @@ function initParams() {
   w = width-wMargin*2;
   h = 20;
   hGap = h/8;
-  textSize(h*3/4);
+  textSize(h);
 }
 
 function centerCanvas() {
