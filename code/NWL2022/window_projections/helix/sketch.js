@@ -9,7 +9,7 @@ const WINDOW_WIDTH = 57;
 const WINDOW_HEIGHT = 112;
 let mWindows = 1; // how many windows in width
 let nWindows = 2; // how many windows in height
-let showWindowFrame = true;
+let showWindowFrame = true, orthoMode = false;
 
 let allDeps; // array with all dependencies
 let allSups; // array with all suppliers
@@ -27,9 +27,10 @@ function preload() {
 function setup() {
   determineScale();
   cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale, WEBGL);
+  if (orthoMode) ortho();
   noStroke();
   colorMode(HSB);
-  ctx = canvas.getContext("2d");
+  ctx = canvas.getContext("webgl");
 
   //console.log(data)
   trace_len = data.draw_trace.length;
@@ -142,6 +143,7 @@ function keyPressed() {
   if (keyCode == RIGHT_ARROW && mWindows < 4) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
+  if (key == "p") orthoMode = !orthoMode; // "p" like "projection"
   windowResized();
 }
 
@@ -150,4 +152,5 @@ function windowResized() {
   resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   centerCanvas();
   initParams();
+  if (orthoMode) ortho();
 }

@@ -2,9 +2,9 @@ let data;
 let trace_len; // length of trace
 let wMargin; // margins inside each window horizontally
 
-const SCALE = 2;
-const WINDOW_WIDTH = 57*SCALE;
-const WINDOW_HEIGHT = 112*SCALE;
+let scale;
+const WINDOW_WIDTH = 57;
+const WINDOW_HEIGHT = 112;
 let mWindows = 3; // how many windows in width
 let nWindows = 2; // how many windows in height
 let showWindowFrame = true;
@@ -23,14 +23,15 @@ function preload() {
 }
 
 function setup() {
-  cnv = createCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
+  determineScale();
+  cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   noStroke();
   colorMode(HSB);
   ctx = canvas.getContext("2d");
 
   //console.log(data)
   trace_len = data.draw_trace.length;
-  wMargin = WINDOW_WIDTH/10;
+  wMargin = WINDOW_WIDTH*scale/10;
 
   centerCanvas();
 
@@ -44,9 +45,9 @@ function setup() {
 function draw() {
   background(0);
 
-  let t = 2*frameCount/(4-nWindows);
+  let t = 3*frameCount/(4-nWindows);
   let nh = 61;
-  let w = WINDOW_WIDTH, h = height/nh;
+  let w = WINDOW_WIDTH*scale, h = height/nh;
   let eps = 1;
   for (let i = 0; i < mWindows; i++) {
     let x = i*w, j = 0, y = h-eps/2, k = i*nh + floor(t/h);
@@ -81,6 +82,10 @@ function draw() {
   if (showWindowFrame) drawWindowsOutline();
 }
 
+function determineScale() {
+  scale = windowHeight/(WINDOW_HEIGHT*nWindows);
+}
+
 function centerCanvas() {
   // centering canvas
   let x = (windowWidth - width) / 2;
@@ -91,10 +96,10 @@ function centerCanvas() {
 function drawWindowsOutline() {
   stroke(255);
   strokeWeight(2);
-  for (let x = WINDOW_WIDTH; x < width; x += WINDOW_WIDTH) {
+  for (let x = WINDOW_WIDTH*scale; x < width; x += WINDOW_WIDTH*scale) {
     line(x, 0, x, height);
   }
-  for (let y = WINDOW_HEIGHT; y < height; y += WINDOW_HEIGHT) {
+  for (let y = WINDOW_HEIGHT*scale; y < height; y += WINDOW_HEIGHT*scale) {
     line(0, y, width, y);
   }
   noStroke();
@@ -132,14 +137,14 @@ function keyPressed() {
     return;
   }
   if (keyCode == LEFT_ARROW && mWindows > 1) mWindows--;
-  if (keyCode == RIGHT_ARROW && mWindows < 5) mWindows++;
+  if (keyCode == RIGHT_ARROW && mWindows < 4) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
-  resizeCanvas(WINDOW_WIDTH*mWindows, WINDOW_HEIGHT*nWindows);
-  centerCanvas();
-  initParams();
+  windowResized();
 }
 
 function windowResized() {
+  determineScale();
+  resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   centerCanvas();
 }
