@@ -20,6 +20,18 @@ Compile and run using
 cargo run --release
 ```
 
+Get current usage info for CLI:
+
+```sh
+cargo run --release -- --help
+```
+
+CLI parameters go after a double dash when using cargo, e.g. for a headless server opening a trace in `~/trace_name.postcard`:
+
+```sh
+cargo run --release -- --headless --trace ~/trace_name.postcard
+```
+
 First time will take a long time to compile, subsequent runs will be fast.
 
 Open a trace using the button in the Settings window. Select a .postcard file or an unparsed trace. Unparsed traces will be parsed and analysed, producing a .postcard file in the same directory so that the next load will be fast. Parsing can take up to several minutes.
