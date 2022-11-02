@@ -35,6 +35,13 @@ use crate::scheduler::start_scheduler;
 static NUM_LEDS_X: usize = 5;
 static NUM_LEDS_Y: usize = 15;
 
+use clap::Parser;
+
+/// Simple program to greet a person
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {}
+
 fn main() {
     App::new()
         // .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
@@ -212,6 +219,14 @@ impl Trace {
         // .unwrap();
         let trace = deepika2::Deepika2::open_or_parse(path)?;
 
+        // Show data about the trace
+        // - number of calls per marker
+        // - first appearence of marker
+        // - last appearance of marker
+        let mut calls_per_marker = HashMap::new();
+        let mut first_appearance_of_marker = HashMap::new();
+        let mut last_appearance_of_marker = HashMap::new();
+
         let mut num_calls_per_depth = vec![0; trace.max_depth as usize + 1];
         let mut supplier_index = HashMap::new();
         let mut supplier_colors = HashMap::new();
@@ -220,9 +235,16 @@ impl Trace {
         let mut num_calls_per_supplier = HashMap::new();
         let mut num_calls_per_dependency = HashMap::new();
         let mut max_depth = 0;
-        for call in &trace.draw_trace {
+        for (i, call) in trace.draw_trace.iter().enumerate() {
             if call.depth > max_depth {
                 max_depth = call.depth;
+            }
+            if let Some(marker) = &call.marker {
+                *calls_per_marker.entry(marker.clone()).or_insert(0) += 1;
+                first_appearance_of_marker
+                    .entry(marker.clone())
+                    .or_insert(i);
+                *last_appearance_of_marker.entry(marker.clone()).or_insert(0) = i;
             }
             if let Some(supplier) = &call.supplier {
                 num_calls_per_depth[call.depth as usize] += 1;
@@ -251,6 +273,11 @@ impl Trace {
                 }
             }
         }
+        let mut marker_width = vec![];
+        for (marker, first_index) in &first_appearance_of_marker {
+            let last_index = last_appearance_of_marker.get(marker).unwrap();
+            marker_width.push((marker.clone(), last_index - first_index));
+        }
 
         // Generate the supplier and dependency colors
         for (supplier, index) in supplier_index.iter() {
@@ -276,7 +303,16 @@ impl Trace {
         self.dependency_index = dependency_index;
         self.supplier_index = supplier_index;
         self.scheduler_com = Some(scheduler_com);
-        println!("Opened and initialised new trace");
+        println!(
+            "Opened and initialised new trace with {} calls",
+            self.trace.draw_trace.len()
+        );
+        dbg!(calls_per_marker);
+        dbg!(first_appearance_of_marker);
+        dbg!(last_appearance_of_marker);
+        dbg!(marker_width);
+        dbg!(&self.num_calls_per_supplier);
+        dbg!(&self.num_calls_per_dependency);
         Ok(())
     }
     pub fn get_animation_call_data(&self, call_index: usize) -> AnimationCallData {

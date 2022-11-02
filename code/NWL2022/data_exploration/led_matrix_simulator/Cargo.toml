@@ -27,6 +27,7 @@ env_logger = "0.9"
 serde = "1.0"
 serde_json = "1.0"
 rfd = "0.10"
+clap = { version = "4.0.18", features = ["derive"] }
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

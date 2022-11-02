@@ -433,7 +433,7 @@ pub struct Call {
     stack_trace: String,
     marker: Option<String>,
 }
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum MarkerKind {
     Copy,
     Paste,
