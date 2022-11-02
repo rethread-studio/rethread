@@ -1,4 +1,11 @@
-use std::{path::PathBuf, time::Duration};
+use std::{
+    path::PathBuf,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    time::Duration,
+};
 
 use bevy::{
     ecs::entity::Entities,
@@ -40,28 +47,63 @@ use clap::Parser;
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-struct Args {}
+struct Args {
+    #[arg(long, default_value_t = false)]
+    headless: bool,
+    #[arg(long, value_name = "FILE")]
+    trace: Option<PathBuf>,
+}
 
 fn main() {
-    App::new()
-        // .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
-        .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
-        .insert_resource(AnimationTimer(Timer::from_seconds(0.025, true)))
-        .insert_resource(Trace::new())
-        // .insert_resource(audio::AudioEngine::new())
-        .add_plugins(DefaultPlugins)
-        .add_plugin(EguiPlugin)
-        .add_plugin(InspectorPlugin::<GlobalSettings>::new())
-        // .insert_resource(GlobalSettings::default())
-        // .add_plugin(EguiPlugin)
-        .add_plugin(WorldInspectorPlugin::new())
-        .add_startup_system(setup)
-        .add_startup_system(spawn_camera)
-        .add_system(pan_orbit_camera)
-        .add_system(cursor_position)
-        .add_system(led_animation_from_trace)
-        .add_system(bevy_ui)
-        .run();
+    let args = Args::parse();
+    dbg!(&args);
+    if !args.headless {
+        App::new()
+            .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
+            .insert_resource(AnimationTimer(Timer::from_seconds(0.025, true)))
+            .insert_resource(Trace::new(args.trace))
+            .add_plugins(DefaultPlugins)
+            .add_plugin(EguiPlugin)
+            .add_plugin(InspectorPlugin::<GlobalSettings>::new())
+            // .insert_resource(GlobalSettings::default())
+            // .add_plugin(EguiPlugin)
+            .add_plugin(WorldInspectorPlugin::new())
+            .add_startup_system(setup)
+            .add_startup_system(spawn_camera)
+            .add_system(pan_orbit_camera)
+            .add_system(cursor_position)
+            .add_system(led_animation_from_trace)
+            .add_system(bevy_ui)
+            .run();
+    } else {
+        if args.trace.is_some() {
+            // Run in headless mode without a GUI
+            let running = Arc::new(AtomicBool::new(true));
+            let r = running.clone();
+
+            ctrlc::set_handler(move || {
+                r.store(false, Ordering::SeqCst);
+            })
+            .expect("Error setting Ctrl-C handler");
+
+            // Creating a trace from a real path, i.e. not an empty trace, starts the scheduler
+            let mut trace = Trace::new(args.trace);
+            // Press play
+            if let Some(scheduler_com) = &mut trace.scheduler_com {
+                scheduler_com.play_tx.send(true);
+            }
+
+            println!("Waiting for Ctrl-C...");
+            while running.load(Ordering::SeqCst) {
+                std::thread::sleep(Duration::from_millis(2));
+            }
+            println!("Got it! Exiting...");
+            drop(trace); // Not necessary, but gives us a compile time error if
+                         // we do something that causes trace to be dropped too soon
+        } else {
+            println!("No trace given as argument in headless mode, exiting.");
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -153,71 +195,17 @@ struct Trace {
 }
 
 impl Trace {
-    pub fn new() -> Self {
+    pub fn new(path: Option<PathBuf>) -> Self {
         // let trace = Deepika2::open_or_parse("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
         //     .unwrap();
-        let trace = deepika2::Deepika2::empty_trace();
-        // let trace = Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown.json");
-        // let trace =
-        //     Deepika2::new("/home/erik/Hämtningar/nwl2022/data-varna-copy-paste-isolated.json");
-        // trace.save_to_file_json("/home/erik/Hämtningar/nwl2022/data-jedit-copy-paste_parsed.json");
 
-        let mut num_calls_per_depth = vec![0; trace.max_depth as usize + 1];
-        let mut supplier_index = HashMap::new();
-        let mut dependency_index = HashMap::new();
-        let mut num_calls_per_supplier = HashMap::new();
-        let mut num_calls_per_dependency = HashMap::new();
-        for call in &trace.draw_trace {
-            if let Some(supplier) = &call.supplier {
-                num_calls_per_depth[call.depth as usize] += 1;
-                let new_index = supplier_index.len();
-                supplier_index.entry(supplier.clone()).or_insert(new_index);
-                *(num_calls_per_supplier.entry(supplier.clone()).or_insert(0)) += 1;
-                if let Some(dependency) = &call.dependency {
-                    let dependency_map = dependency_index
-                        .entry(supplier.clone())
-                        .or_insert(HashMap::new());
-                    let new_index = dependency_map.len();
-                    dependency_map
-                        .entry(dependency.clone())
-                        .or_insert(new_index);
-
-                    let mut calls_per_dep = num_calls_per_dependency
-                        .entry(supplier.clone())
-                        .or_insert(HashMap::new());
-                    *calls_per_dep.entry(dependency.clone()).or_insert(0) += 1;
-                } else {
-                    let dependency_map = dependency_index
-                        .entry(supplier.clone())
-                        .or_insert(HashMap::new());
-                    let new_index = dependency_map.len();
-                    dependency_map.entry(String::new()).or_insert(new_index);
-                }
-            }
-        }
-
-        Self {
-            trace,
-            current_index: 0,
-            current_depth_envelope_index: 0,
-            max_depth: 0,
-            supplier_index,
-            dependency_index,
-            lit_leds: Vec::new(),
-            num_calls_per_supplier,
-            num_calls_per_dependency,
-            num_calls_per_depth,
-            scheduler_com: None,
-            supplier_colors: HashMap::new(),
-            dependency_colors: HashMap::new(),
-        }
-    }
-    pub fn open_new_trace(&mut self, path: PathBuf) -> Result<()> {
-        // let trace = deepika2::Deepika2::open_or_parse(
-        //     "/home/erik/Hämtningar/nwl2022/data-jedit-with-marker",
-        // )
-        // .unwrap();
-        let trace = deepika2::Deepika2::open_or_parse(path)?;
+        let mut empty_trace = true;
+        let trace = if let Some(path) = path {
+            empty_trace = false;
+            deepika2::Deepika2::open_or_parse(path).unwrap()
+        } else {
+            deepika2::Deepika2::empty_trace()
+        };
 
         // Show data about the trace
         // - number of calls per marker
@@ -292,32 +280,145 @@ impl Trace {
             }
         }
 
-        let scheduler_com = start_scheduler(trace.clone());
-        self.trace = trace;
-        self.max_depth = max_depth;
-        self.supplier_colors = supplier_colors;
-        self.dependency_colors = dependency_colors;
-        self.num_calls_per_depth = num_calls_per_depth;
-        self.num_calls_per_dependency = num_calls_per_dependency;
-        self.num_calls_per_supplier = num_calls_per_supplier;
-        self.dependency_index = dependency_index;
-        self.supplier_index = supplier_index;
-        self.scheduler_com = Some(scheduler_com);
+        let scheduler_com = if empty_trace {
+            None
+        } else {
+            let scheduler_com = start_scheduler(trace.clone());
+            Some(scheduler_com)
+        };
         println!(
             "Opened and initialised new trace with {} calls",
-            self.trace.draw_trace.len()
+            trace.draw_trace.len()
         );
         dbg!(calls_per_marker);
         dbg!(first_appearance_of_marker);
         dbg!(last_appearance_of_marker);
         dbg!(marker_width);
-        dbg!(&self.num_calls_per_supplier);
-        dbg!(&self.num_calls_per_dependency);
-        Ok(())
+        dbg!(&num_calls_per_supplier);
+        dbg!(&num_calls_per_dependency);
+
+        Self {
+            trace,
+            current_index: 0,
+            current_depth_envelope_index: 0,
+            max_depth,
+            supplier_index,
+            dependency_index,
+            lit_leds: Vec::new(),
+            num_calls_per_supplier,
+            num_calls_per_dependency,
+            num_calls_per_depth,
+            scheduler_com,
+            supplier_colors,
+            dependency_colors,
+        }
     }
+    // pub fn open_new_trace(&mut self, path: PathBuf) -> Result<()> {
+    //     // let trace = deepika2::Deepika2::open_or_parse(
+    //     //     "/home/erik/Hämtningar/nwl2022/data-jedit-with-marker",
+    //     // )
+    //     // .unwrap();
+    //     let trace = deepika2::Deepika2::open_or_parse(path)?;
+
+    //     // Show data about the trace
+    //     // - number of calls per marker
+    //     // - first appearence of marker
+    //     // - last appearance of marker
+    //     let mut calls_per_marker = HashMap::new();
+    //     let mut first_appearance_of_marker = HashMap::new();
+    //     let mut last_appearance_of_marker = HashMap::new();
+
+    //     let mut num_calls_per_depth = vec![0; trace.max_depth as usize + 1];
+    //     let mut supplier_index = HashMap::new();
+    //     let mut supplier_colors = HashMap::new();
+    //     let mut dependency_colors = HashMap::new();
+    //     let mut dependency_index = HashMap::new();
+    //     let mut num_calls_per_supplier = HashMap::new();
+    //     let mut num_calls_per_dependency = HashMap::new();
+    //     let mut max_depth = 0;
+    //     for (i, call) in trace.draw_trace.iter().enumerate() {
+    //         if call.depth > max_depth {
+    //             max_depth = call.depth;
+    //         }
+    //         if let Some(marker) = &call.marker {
+    //             *calls_per_marker.entry(marker.clone()).or_insert(0) += 1;
+    //             first_appearance_of_marker
+    //                 .entry(marker.clone())
+    //                 .or_insert(i);
+    //             *last_appearance_of_marker.entry(marker.clone()).or_insert(0) = i;
+    //         }
+    //         if let Some(supplier) = &call.supplier {
+    //             num_calls_per_depth[call.depth as usize] += 1;
+    //             let new_index = supplier_index.len();
+    //             supplier_index.entry(supplier.clone()).or_insert(new_index);
+    //             *(num_calls_per_supplier.entry(supplier.clone()).or_insert(0)) += 1;
+    //             if let Some(dependency) = &call.dependency {
+    //                 let dependency_map = dependency_index
+    //                     .entry(supplier.clone())
+    //                     .or_insert(HashMap::new());
+    //                 let new_index = dependency_map.len();
+    //                 dependency_map
+    //                     .entry(dependency.clone())
+    //                     .or_insert(new_index);
+
+    //                 let mut calls_per_dep = num_calls_per_dependency
+    //                     .entry(supplier.clone())
+    //                     .or_insert(HashMap::new());
+    //                 *calls_per_dep.entry(dependency.clone()).or_insert(0) += 1;
+    //             } else {
+    //                 let dependency_map = dependency_index
+    //                     .entry(supplier.clone())
+    //                     .or_insert(HashMap::new());
+    //                 let new_index = dependency_map.len();
+    //                 dependency_map.entry(String::new()).or_insert(new_index);
+    //             }
+    //         }
+    //     }
+    //     let mut marker_width = vec![];
+    //     for (marker, first_index) in &first_appearance_of_marker {
+    //         let last_index = last_appearance_of_marker.get(marker).unwrap();
+    //         marker_width.push((marker.clone(), last_index - first_index));
+    //     }
+
+    //     // Generate the supplier and dependency colors
+    //     for (supplier, index) in supplier_index.iter() {
+    //         let mut supplier_hue = (*index as f32 * 17.7) % 360.0;
+    //         supplier_colors.insert(supplier.clone(), Color::hsl(supplier_hue, 1.0, 0.5));
+    //         if let Some(dependencies) = dependency_index.get(supplier) {
+    //             for (dependency, dep_index) in dependencies.iter() {
+    //                 supplier_hue += 2.0;
+    //                 dependency_colors
+    //                     .insert(dependency.clone(), Color::hsl(supplier_hue, 1.0, 0.5));
+    //             }
+    //         }
+    //     }
+
+    //     let scheduler_com = start_scheduler(trace.clone());
+    //     self.trace = trace;
+    //     self.max_depth = max_depth;
+    //     self.supplier_colors = supplier_colors;
+    //     self.dependency_colors = dependency_colors;
+    //     self.num_calls_per_depth = num_calls_per_depth;
+    //     self.num_calls_per_dependency = num_calls_per_dependency;
+    //     self.num_calls_per_supplier = num_calls_per_supplier;
+    //     self.dependency_index = dependency_index;
+    //     self.supplier_index = supplier_index;
+    //     self.scheduler_com = Some(scheduler_com);
+    //     println!(
+    //         "Opened and initialised new trace with {} calls",
+    //         self.trace.draw_trace.len()
+    //     );
+    //     dbg!(calls_per_marker);
+    //     dbg!(first_appearance_of_marker);
+    //     dbg!(last_appearance_of_marker);
+    //     dbg!(marker_width);
+    //     dbg!(&self.num_calls_per_supplier);
+    //     dbg!(&self.num_calls_per_dependency);
+    //     Ok(())
+    // }
     pub fn get_animation_call_data(&self, call_index: usize) -> AnimationCallData {
         let call = &self.trace.draw_trace[call_index];
-        let num_leds = ((call.depth as f32 / self.max_depth as f32)
+        let num_leds = ((call.depth as f32 / self.max_depth as f32).powf(0.3)
             * (NUM_LEDS_X as i32 - 1) as f32) as usize
             + 1;
         let left_color = if let Some(supplier) = &call.supplier {
@@ -423,10 +524,13 @@ fn led_animation_from_trace(
             transform.scale *= FALLOFF;
 
             // transform.scale = vec3(1., 1., 1.);
-            if let Some(children) = children {
-                for child in children {
-                    // despawn_recursive also removes the child from the parent
-                    commands.entity(*child).despawn_recursive();
+            if transform.scale.x < 0.1 {
+                if let Some(children) = children {
+                    for child in children {
+                        // despawn_recursive also removes the child from the parent
+                        commands.entity(*child).despawn_recursive();
+                    }
+                    onoff.0 = false;
                 }
             }
         }
@@ -472,7 +576,7 @@ fn led_animation_from_trace(
                             material.base_color = new_color.clone();
                             material.emissive = new_color.clone();
                             transform.scale = vec3(3., 3., 3.);
-                            if !trace.lit_leds.contains(&entity) {
+                            if !onoff.0 && led_position.x == 0 {
                                 if settings.use_point_lights {
                                     let light = commands
                                         .spawn_bundle(PointLightBundle {
@@ -489,6 +593,7 @@ fn led_animation_from_trace(
                                         })
                                         .id();
                                     commands.entity(entity).add_child(light);
+                                    onoff.0 = true;
                                 }
                             } else {
                                 // The light already exists, but we want to set it to the active colour
@@ -503,8 +608,6 @@ fn led_animation_from_trace(
                                     }
                                 }
                             }
-                            onoff.0 = true;
-                            trace.lit_leds.push(entity);
                         }
                     }
                 }
@@ -900,7 +1003,7 @@ fn bevy_ui(
                         .pick_file();
 
                     if let Some(path) = file {
-                        trace.open_new_trace(path);
+                        *trace = Trace::new(Some(path));
                     }
                 }
                 ui.label("Open a .postcard or original unparsed .json trace file");
