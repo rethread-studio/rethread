@@ -1,5 +1,5 @@
 supplier,colors
 java.awt,#ff0000
-java.security,#7b00ff
-javax.swing,#00fff6
-sun.awt,#8cff00
+java.security,#7f00ff
+javax.swing,#00ffff
+sun.awt,#7fff00

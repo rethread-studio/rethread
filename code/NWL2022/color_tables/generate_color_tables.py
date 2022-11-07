@@ -43,7 +43,7 @@ def rgb_to_hex(r, g, b):
 
 def generate_colors(array):
     colors = []
-    hue_step = 360/len(array)+1
+    hue_step = 360/len(array)
     hue = 0
     saturation = 1
     brightness = 1
