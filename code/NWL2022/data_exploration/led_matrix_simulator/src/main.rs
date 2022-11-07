@@ -45,17 +45,17 @@ pub fn get_args() -> &'static Args {
 fn main() {
     let args = get_args();
     info!("Arguments: {args:#?}");
-    // Set up logging
-    simple_logger::SimpleLogger::new()
-        .with_level(log::LevelFilter::max())
-        // .env()
-        .with_colors(true)
-        .init()
-        .unwrap();
     if !args.headless {
         gui::run_gui();
     } else {
         if args.trace.is_some() {
+            // Set up logging
+            simple_logger::SimpleLogger::new()
+                .with_level(log::LevelFilter::max())
+                // .env()
+                .with_colors(true)
+                .init()
+                .unwrap();
             log::info!("Starting headless");
             // Run in headless mode without a GUI
             let running = Arc::new(AtomicBool::new(true));
@@ -88,6 +88,7 @@ fn main() {
     }
 }
 
+#[derive(Clone)]
 pub struct Trace {
     trace: Deepika2,
     scheduler_com: Option<SchedulerCom>,
@@ -190,12 +191,6 @@ impl Trace {
             }
         }
 
-        let scheduler_com = if empty_trace {
-            None
-        } else {
-            let scheduler_com = start_scheduler(trace.clone());
-            Some(scheduler_com)
-        };
         println!(
             "Opened and initialised new trace with {} calls",
             trace.draw_trace.len()
@@ -207,7 +202,7 @@ impl Trace {
         // dbg!(&num_calls_per_supplier);
         // dbg!(&num_calls_per_dependency);
 
-        Self {
+        let mut s = Self {
             trace,
             current_index: 0,
             current_depth_envelope_index: 0,
@@ -217,10 +212,18 @@ impl Trace {
             num_calls_per_supplier,
             num_calls_per_dependency,
             num_calls_per_depth,
-            scheduler_com,
+            scheduler_com: None,
             supplier_colors,
             dependency_colors,
-        }
+        };
+        let scheduler_com = if empty_trace {
+            None
+        } else {
+            let scheduler_com = start_scheduler(s.clone());
+            Some(scheduler_com)
+        };
+        s.scheduler_com = scheduler_com;
+        s
     }
     pub fn get_animation_call_data(&self, call_index: usize) -> AnimationCallData {
         let call = &self.trace.draw_trace[call_index];
@@ -269,7 +272,7 @@ impl Trace {
 }
 
 pub struct AnimationCallData {
-    num_leds: usize,
-    left_color: Color,
-    right_color: Color,
+    pub num_leds: usize,
+    pub left_color: Color,
+    pub right_color: Color,
 }

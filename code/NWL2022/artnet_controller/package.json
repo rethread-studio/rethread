@@ -11,6 +11,7 @@
   "dependencies": {
     "artnet": "^1.4.0",
     "ctrl-c": "^2.3.2",
-    "node-cleanup": "^2.1.2"
+    "node-cleanup": "^2.1.2",
+    "osc": "^2.4.3"
   }
 }

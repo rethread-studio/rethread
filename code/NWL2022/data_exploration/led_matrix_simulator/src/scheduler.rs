@@ -5,8 +5,8 @@ use crossbeam::channel::{unbounded, Receiver, Sender};
 use log::*;
 use serde::Serialize;
 
-use crate::{get_args, websocket::WebsocketCom};
-use parser::deepika2::{CallDrawData, Deepika2, DepthEnvelopePoint};
+use crate::{get_args, websocket::WebsocketCom, AnimationCallData, Trace};
+use parser::deepika2::{CallDrawData, DepthEnvelopePoint};
 //
 // Send to GUI:
 // - index increases
@@ -21,6 +21,7 @@ pub enum Message {
     JumpPreviousMarker,
 }
 
+#[derive(Clone)]
 pub struct SchedulerCom {
     pub index_increase_rx: Receiver<usize>,
     pub play_tx: Sender<bool>,
@@ -43,7 +44,7 @@ enum Event<'a> {
     Call(&'a CallDrawData),
 }
 
-pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
+pub fn start_scheduler(trace: Trace) -> SchedulerCom {
     let args = get_args();
     #[cfg(not(target_os = "windows"))]
     let mut osc_communicator = if args.osc {
@@ -54,7 +55,7 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
     let ws_communicator = WebsocketCom::default();
     let mut current_index = 0;
     let mut current_depth_envelope_index = 0;
-    let mut current_section = trace.depth_envelope.sections[0];
+    let mut current_section = trace.trace.depth_envelope.sections[0];
     let mut seconds_between_calls = 0.025;
     let mut play = false;
     // let mut audio_engine = AudioEngine::new();
@@ -79,10 +80,10 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
             match new_message {
                 Message::JumpNextMarker => {
                     let old_index = current_index;
-                    let current_marker = trace.draw_trace[current_index].marker.clone();
-                    while current_marker == trace.draw_trace[current_index].marker {
+                    let current_marker = trace.trace.draw_trace[current_index].marker.clone();
+                    while current_marker == trace.trace.draw_trace[current_index].marker {
                         current_index += 1;
-                        if current_index >= trace.draw_trace.len() {
+                        if current_index >= trace.trace.draw_trace.len() {
                             current_index = 0;
                         }
                         if current_index == old_index {
@@ -94,10 +95,10 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
                 }
                 Message::JumpPreviousMarker => {
                     let old_index = current_index;
-                    let current_marker = trace.draw_trace[current_index].marker.clone();
-                    while current_marker == trace.draw_trace[current_index].marker {
+                    let current_marker = trace.trace.draw_trace[current_index].marker.clone();
+                    while current_marker == trace.trace.draw_trace[current_index].marker {
                         if current_index == 0 {
-                            current_index = trace.draw_trace.len();
+                            current_index = trace.trace.draw_trace.len();
                         }
                         current_index -= 1;
                         if current_index == old_index {
@@ -111,17 +112,17 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
         }
         if play {
             current_index += 1;
-            if current_index >= trace.draw_trace.len() {
+            if current_index >= trace.trace.draw_trace.len() {
                 current_index = 0;
             }
             index_increase_tx.send(current_index).unwrap();
 
-            let num_depth_points = trace.depth_envelope.sections.len();
-            let _depth_point = trace.depth_envelope.sections[current_depth_envelope_index];
+            let num_depth_points = trace.trace.depth_envelope.sections.len();
+            let _depth_point = trace.trace.depth_envelope.sections[current_depth_envelope_index];
             while current_index > current_section.end_index {
                 current_depth_envelope_index += 1;
                 current_depth_envelope_index %= num_depth_points;
-                current_section = trace.depth_envelope.sections[current_depth_envelope_index];
+                current_section = trace.trace.depth_envelope.sections[current_depth_envelope_index];
                 #[cfg(not(target_os = "windows"))]
                 if let Some(osc_communicator) = &mut osc_communicator {
                     osc_communicator.send_section(current_section);
@@ -139,7 +140,7 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
             // );
             // Send osc message to SuperCollider
             {
-                let call = &trace.draw_trace[current_index];
+                let call = &trace.trace.draw_trace[current_index];
                 #[cfg(not(target_os = "windows"))]
                 if let Some(osc_communicator) = &mut osc_communicator {
                     osc_communicator.send_call(call.depth, state);
@@ -147,6 +148,13 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
                 let call_json = serde_json::to_string(&Event::Call(call)).unwrap();
                 if let Err(e) = ws_communicator.sender.send(call_json) {
                     error!("Unable to send call over websocket: {e:?}");
+                }
+            }
+            {
+                let row_data = trace.get_animation_call_data(current_index);
+                #[cfg(not(target_os = "windows"))]
+                if let Some(osc_communicator) = &mut osc_communicator {
+                    osc_communicator.send_new_row(row_data);
                 }
             }
         }
@@ -161,7 +169,8 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
 }
 
 struct OscCommunicator {
-    sender: nannou_osc::Sender<nannou_osc::Connected>,
+    supercollider_sender: nannou_osc::Sender<nannou_osc::Connected>,
+    artnet_sender: nannou_osc::Sender<nannou_osc::Connected>,
 }
 impl OscCommunicator {
     pub fn new() -> Self {
@@ -169,7 +178,14 @@ impl OscCommunicator {
             .unwrap()
             .connect("localhost:57120")
             .unwrap();
-        Self { sender }
+        let artnet_sender = nannou_osc::sender()
+            .unwrap()
+            .connect("localhost:57122")
+            .unwrap();
+        Self {
+            supercollider_sender: sender,
+            artnet_sender,
+        }
     }
     pub fn send_section(&mut self, section: parser::deepika2::DepthEnvelopePoint) {
         use nannou_osc::Type;
@@ -184,7 +200,7 @@ impl OscCommunicator {
             Type::Float(section.average),
             Type::Float(section.shannon_wiener_diversity_index),
         ];
-        if let Err(e) = self.sender.send((addr, args)) {
+        if let Err(e) = self.supercollider_sender.send((addr, args)) {
             warn!("OSC error: failed to send: {e:?}");
         }
     }
@@ -197,7 +213,7 @@ impl OscCommunicator {
         };
         let addr = "/call";
         let args = vec![Type::Int(depth), Type::Int(state)];
-        if let Err(e) = self.sender.send((addr, args)) {
+        if let Err(e) = self.supercollider_sender.send((addr, args)) {
             warn!("OSC error: failed to send: {e:?}");
         }
     }
@@ -205,8 +221,32 @@ impl OscCommunicator {
         use nannou_osc::Type;
         let addr = "/speed";
         let args = vec![Type::Float(time_between_events)];
-        if let Err(e) = self.sender.send((addr, args)) {
+        if let Err(e) = self.supercollider_sender.send((addr, args)) {
             warn!("OSC error: failed to send: {e:?}");
+        }
+    }
+    pub fn send_new_row(&mut self, data: AnimationCallData) {
+        use nannou_osc::Type;
+        let AnimationCallData {
+            num_leds,
+            left_color,
+            right_color,
+        } = data;
+        let addr = "/row";
+        let mut args = vec![Type::Int(num_leds as i32)];
+        for col in [left_color, right_color].iter() {
+            let c = col.as_rgba_f32();
+            let c: Vec<u8> = c.iter().map(|v| (v * 255.) as u8).collect();
+            args.push(Type::Color(nannou_osc::Color {
+                red: c[0],
+                green: c[1],
+                blue: c[2],
+                alpha: 255,
+            }));
+        }
+
+        if let Err(e) = self.artnet_sender.send((addr, args)) {
+            warn!("OSC error: failed to send to artnet: {e:?}");
         }
     }
 }
