@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use serde_json::Result;
+
 use std::{
     collections::{HashMap, HashSet},
     fs::{self, File},
@@ -7,7 +7,7 @@ use std::{
     path::PathBuf,
 };
 
-fn is_power_of_2(num: i32) -> bool {
+fn _is_power_of_2(num: i32) -> bool {
     if (num & (num - 1)) != 0 {
         false
     } else {
@@ -68,7 +68,7 @@ impl NGramAnalysis {
                 continue;
             }
 
-            let (key_smaller, key_larger, len_smaller) = if len1 > len0 {
+            let (key_smaller, key_larger, _len_smaller) = if len1 > len0 {
                 (key0, key1, len0)
             } else {
                 (key1, key0, len1)
@@ -411,12 +411,6 @@ fn average_distance_from_mean(distances: &[f32]) -> f32 {
     distances.iter().sum::<f32>() as f32 / distances.len() as f32
 }
 
-// One approach is to run the curve through an FFT analysis and
-// compare the bins to each other. If they are very different, we
-// may decide that this is a new section. Especially the DC offset
-// will be important in this case.
-struct DepthFFT {}
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Function {
     fqn: String,
@@ -722,8 +716,6 @@ impl Deepika2 {
         })
     }
     pub fn save_depth_as_wave(&self, path: impl Into<PathBuf>) {
-        use hound;
-        use std::f32::consts::PI;
         use std::i16;
 
         let depth_list: Vec<i16> = self
