@@ -5,7 +5,7 @@ use crossbeam::channel::{unbounded, Receiver, Sender};
 use log::*;
 use serde::Serialize;
 
-use crate::websocket::WebsocketCom;
+use crate::{get_args, websocket::WebsocketCom};
 use parser::deepika2::{CallDrawData, Deepika2, DepthEnvelopePoint};
 //
 // Send to GUI:
@@ -44,8 +44,13 @@ enum Event<'a> {
 }
 
 pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
+    let args = get_args();
     #[cfg(not(target_os = "windows"))]
-    let mut osc_communicator = OscCommunicator::new();
+    let mut osc_communicator = if args.osc {
+        Some(OscCommunicator::new())
+    } else {
+        None
+    };
     let ws_communicator = WebsocketCom::default();
     let mut current_index = 0;
     let mut current_depth_envelope_index = 0;
@@ -63,7 +68,9 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
         while let Ok(new_duration) = event_duration_rx.try_recv() {
             seconds_between_calls = new_duration;
             #[cfg(not(target_os = "windows"))]
-            osc_communicator.send_speed(new_duration);
+            if let Some(osc_communicator) = &mut osc_communicator {
+                osc_communicator.send_speed(new_duration);
+            }
         }
         while let Ok(new_play) = play_rx.try_recv() {
             play = new_play;
@@ -116,7 +123,9 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
                 current_depth_envelope_index %= num_depth_points;
                 current_section = trace.depth_envelope.sections[current_depth_envelope_index];
                 #[cfg(not(target_os = "windows"))]
-                osc_communicator.send_section(current_section);
+                if let Some(osc_communicator) = &mut osc_communicator {
+                    osc_communicator.send_section(current_section);
+                }
                 let section_json =
                     serde_json::to_string(&Event::Section(&current_section)).unwrap();
                 if let Err(e) = ws_communicator.sender.send(section_json) {
@@ -132,7 +141,9 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
             {
                 let call = &trace.draw_trace[current_index];
                 #[cfg(not(target_os = "windows"))]
-                osc_communicator.send_call(call.depth, state);
+                if let Some(osc_communicator) = &mut osc_communicator {
+                    osc_communicator.send_call(call.depth, state);
+                }
                 let call_json = serde_json::to_string(&Event::Call(call)).unwrap();
                 if let Err(e) = ws_communicator.sender.send(call_json) {
                     error!("Unable to send call over websocket: {e:?}");

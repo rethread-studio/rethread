@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use std::time::Duration;
 
 use bevy::{
@@ -12,14 +11,17 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 use rfd::FileDialog;
 
+use crate::get_args;
+
 use super::Trace;
 use super::{AnimationCallData, NUM_LEDS_X, NUM_LEDS_Y};
 
-pub fn run_gui(trace_path: Option<PathBuf>) {
+pub fn run_gui() {
+    let args = get_args();
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.025, true)))
-        .insert_resource(Trace::new(trace_path))
+        .insert_resource(Trace::new(&args.trace))
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         .add_plugin(InspectorPlugin::<GlobalSettings>::new())
@@ -627,7 +629,7 @@ fn bevy_ui(
                         .pick_file();
 
                     if let Some(path) = file {
-                        *trace = Trace::new(Some(path));
+                        *trace = Trace::new(&Some(path));
                     }
                 }
                 ui.label("Open a .postcard or original unparsed .json trace file");

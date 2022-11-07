@@ -1,3 +1,4 @@
+use once_cell::sync::OnceCell;
 use std::{
     path::PathBuf,
     sync::{
@@ -27,16 +28,23 @@ use clap::Parser;
 /// Simple program to greet a person
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-struct Args {
+pub struct Args {
     #[arg(long, default_value_t = false)]
     headless: bool,
+    #[arg(long, default_value_t = false)]
+    osc: bool,
     #[arg(long, value_name = "FILE")]
     trace: Option<PathBuf>,
 }
 
+pub fn get_args() -> &'static Args {
+    static ARGS: OnceCell<Args> = OnceCell::new();
+    ARGS.get_or_init(|| Args::parse())
+}
+
 fn main() {
-    let args = Args::parse();
-    dbg!(&args);
+    let args = get_args();
+    info!("Arguments: {args:#?}");
     // Set up logging
     simple_logger::SimpleLogger::new()
         .with_level(log::LevelFilter::max())
@@ -45,7 +53,7 @@ fn main() {
         .init()
         .unwrap();
     if !args.headless {
-        gui::run_gui(args.trace);
+        gui::run_gui();
     } else {
         if args.trace.is_some() {
             log::info!("Starting headless");
@@ -59,7 +67,7 @@ fn main() {
             .expect("Error setting Ctrl-C handler");
 
             // Creating a trace from a real path, i.e. not an empty trace, starts the scheduler
-            let mut trace = Trace::new(args.trace);
+            let mut trace = Trace::new(&args.trace);
             // Press play
             if let Some(scheduler_com) = &mut trace.scheduler_com {
                 if let Err(e) = scheduler_com.play_tx.send(true) {
@@ -97,7 +105,7 @@ pub struct Trace {
 }
 
 impl Trace {
-    pub fn new(path: Option<PathBuf>) -> Self {
+    pub fn new(path: &Option<PathBuf>) -> Self {
         // let trace = Deepika2::open_or_parse("/home/erik/Hämtningar/nwl2022/data-imagej-copy-paste")
         //     .unwrap();
 
