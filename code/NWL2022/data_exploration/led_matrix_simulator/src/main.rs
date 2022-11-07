@@ -7,18 +7,15 @@ use std::{
     time::Duration,
 };
 
-use anyhow::Result;
-mod audio;
 mod gui;
 mod scheduler;
 mod websocket;
-use audio::AudioEngine;
-use bevy::{prelude::*, utils::HashMap};
+
+use bevy::{prelude::Color, utils::HashMap};
+use log::*;
 use scheduler::SchedulerCom;
 
-use parser::deepika2::{self, Call, CallDrawData, Deepika2};
-use rand::prelude::*;
-use websocket::WebsocketCom;
+use parser::deepika2::{self, Deepika2};
 
 use crate::scheduler::start_scheduler;
 
@@ -40,10 +37,18 @@ struct Args {
 fn main() {
     let args = Args::parse();
     dbg!(&args);
+    // Set up logging
+    simple_logger::SimpleLogger::new()
+        .with_level(log::LevelFilter::max())
+        // .env()
+        .with_colors(true)
+        .init()
+        .unwrap();
     if !args.headless {
         gui::run_gui(args.trace);
     } else {
         if args.trace.is_some() {
+            log::info!("Starting headless");
             // Run in headless mode without a GUI
             let running = Arc::new(AtomicBool::new(true));
             let r = running.clone();
@@ -57,7 +62,9 @@ fn main() {
             let mut trace = Trace::new(args.trace);
             // Press play
             if let Some(scheduler_com) = &mut trace.scheduler_com {
-                scheduler_com.play_tx.send(true);
+                if let Err(e) = scheduler_com.play_tx.send(true) {
+                    error!("Failed to set scheduler play to true: {e:?}");
+                }
             }
 
             println!("Waiting for Ctrl-C...");
@@ -79,15 +86,14 @@ pub struct Trace {
     current_index: usize,
     current_depth_envelope_index: usize,
     max_depth: i32,
-    supplier_index: HashMap<String, usize>,
+    _supplier_index: HashMap<String, usize>,
     // dependency per supplier
-    dependency_index: HashMap<String, HashMap<String, usize>>,
+    _dependency_index: HashMap<String, HashMap<String, usize>>,
     supplier_colors: HashMap<String, Color>,
     dependency_colors: HashMap<String, Color>,
     num_calls_per_supplier: HashMap<String, usize>,
     num_calls_per_dependency: HashMap<String, HashMap<String, usize>>,
     num_calls_per_depth: Vec<usize>,
-    lit_leds: Vec<Entity>,
 }
 
 impl Trace {
@@ -144,7 +150,7 @@ impl Trace {
                         .entry(dependency.clone())
                         .or_insert(new_index);
 
-                    let mut calls_per_dep = num_calls_per_dependency
+                    let calls_per_dep = num_calls_per_dependency
                         .entry(supplier.clone())
                         .or_insert(HashMap::new());
                     *calls_per_dep.entry(dependency.clone()).or_insert(0) += 1;
@@ -168,7 +174,7 @@ impl Trace {
             let mut supplier_hue = (*index as f32 * 17.7) % 360.0;
             supplier_colors.insert(supplier.clone(), Color::hsl(supplier_hue, 1.0, 0.5));
             if let Some(dependencies) = dependency_index.get(supplier) {
-                for (dependency, dep_index) in dependencies.iter() {
+                for (dependency, _dep_index) in dependencies.iter() {
                     supplier_hue += 2.0;
                     dependency_colors
                         .insert(dependency.clone(), Color::hsl(supplier_hue, 1.0, 0.5));
@@ -186,21 +192,20 @@ impl Trace {
             "Opened and initialised new trace with {} calls",
             trace.draw_trace.len()
         );
-        dbg!(calls_per_marker);
-        dbg!(first_appearance_of_marker);
-        dbg!(last_appearance_of_marker);
-        dbg!(marker_width);
-        dbg!(&num_calls_per_supplier);
-        dbg!(&num_calls_per_dependency);
+        // dbg!(calls_per_marker);
+        // dbg!(first_appearance_of_marker);
+        // dbg!(last_appearance_of_marker);
+        // dbg!(marker_width);
+        // dbg!(&num_calls_per_supplier);
+        // dbg!(&num_calls_per_dependency);
 
         Self {
             trace,
             current_index: 0,
             current_depth_envelope_index: 0,
             max_depth,
-            supplier_index,
-            dependency_index,
-            lit_leds: Vec::new(),
+            _supplier_index: supplier_index,
+            _dependency_index: dependency_index,
             num_calls_per_supplier,
             num_calls_per_dependency,
             num_calls_per_depth,

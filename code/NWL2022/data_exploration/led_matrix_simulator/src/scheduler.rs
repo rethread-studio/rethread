@@ -1,10 +1,10 @@
+use std::thread::spawn;
 use std::time::Duration;
-use std::{net::TcpListener, thread::spawn};
 
 use crossbeam::channel::{unbounded, Receiver, Sender};
+use log::*;
 use serde::Serialize;
 
-use crate::audio::AudioEngine;
 use crate::websocket::WebsocketCom;
 use parser::deepika2::{CallDrawData, Deepika2, DepthEnvelopePoint};
 //
@@ -46,7 +46,7 @@ enum Event<'a> {
 pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
     #[cfg(not(target_os = "windows"))]
     let mut osc_communicator = OscCommunicator::new();
-    let mut ws_communicator = WebsocketCom::default();
+    let ws_communicator = WebsocketCom::default();
     let mut current_index = 0;
     let mut current_depth_envelope_index = 0;
     let mut current_section = trace.depth_envelope.sections[0];
@@ -58,8 +58,6 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
     let (event_duration_tx, event_duration_rx) = unbounded();
     let (play_tx, play_rx) = unbounded();
     let (message_tx, message_rx) = unbounded();
-
-    let server = TcpListener::bind("127.0.0.1:3012").unwrap();
 
     spawn(move || loop {
         while let Ok(new_duration) = event_duration_rx.try_recv() {
@@ -112,7 +110,7 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
             index_increase_tx.send(current_index).unwrap();
 
             let num_depth_points = trace.depth_envelope.sections.len();
-            let mut depth_point = trace.depth_envelope.sections[current_depth_envelope_index];
+            let _depth_point = trace.depth_envelope.sections[current_depth_envelope_index];
             while current_index > current_section.end_index {
                 current_depth_envelope_index += 1;
                 current_depth_envelope_index %= num_depth_points;
@@ -121,7 +119,9 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
                 osc_communicator.send_section(current_section);
                 let section_json =
                     serde_json::to_string(&Event::Section(&current_section)).unwrap();
-                ws_communicator.sender.send(section_json);
+                if let Err(e) = ws_communicator.sender.send(section_json) {
+                    error!("Unable to send section over websocket: {e:?}");
+                }
             }
             let state = current_section.state;
             // audio_engine.spawn_sine(
@@ -134,7 +134,9 @@ pub fn start_scheduler(trace: Deepika2) -> SchedulerCom {
                 #[cfg(not(target_os = "windows"))]
                 osc_communicator.send_call(call.depth, state);
                 let call_json = serde_json::to_string(&Event::Call(call)).unwrap();
-                ws_communicator.sender.send(call_json);
+                if let Err(e) = ws_communicator.sender.send(call_json) {
+                    error!("Unable to send call over websocket: {e:?}");
+                }
             }
         }
         std::thread::sleep(Duration::from_secs_f32(seconds_between_calls));
@@ -171,7 +173,9 @@ impl OscCommunicator {
             Type::Float(section.average),
             Type::Float(section.shannon_wiener_diversity_index),
         ];
-        self.sender.send((addr, args)).ok();
+        if let Err(e) = self.sender.send((addr, args)) {
+            warn!("OSC error: failed to send: {e:?}");
+        }
     }
     pub fn send_call(&mut self, depth: i32, state: parser::deepika2::DepthState) {
         use nannou_osc::Type;
@@ -182,12 +186,16 @@ impl OscCommunicator {
         };
         let addr = "/call";
         let args = vec![Type::Int(depth), Type::Int(state)];
-        self.sender.send((addr, args)).ok();
+        if let Err(e) = self.sender.send((addr, args)) {
+            warn!("OSC error: failed to send: {e:?}");
+        }
     }
     pub fn send_speed(&mut self, time_between_events: f32) {
         use nannou_osc::Type;
         let addr = "/speed";
         let args = vec![Type::Float(time_between_events)];
-        self.sender.send((addr, args)).ok();
+        if let Err(e) = self.sender.send((addr, args)) {
+            warn!("OSC error: failed to send: {e:?}");
+        }
     }
 }

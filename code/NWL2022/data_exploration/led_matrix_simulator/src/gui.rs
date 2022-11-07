@@ -2,18 +2,10 @@ use std::path::PathBuf;
 use std::time::Duration;
 
 use bevy::{
-    ecs::entity::Entities,
-    input::{
-        keyboard::KeyboardInput,
-        mouse::{MouseButtonInput, MouseMotion, MouseWheel},
-    },
+    input::mouse::{MouseMotion, MouseWheel},
     math::vec3,
     prelude::*,
-    reflect::TypeUuid,
     render::camera::Projection,
-    render::render_resource::{AsBindGroup, ShaderRef},
-    utils::HashMap,
-    window::CursorMoved,
 };
 use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::WorldInspectorPlugin;
@@ -120,10 +112,10 @@ impl Default for GlobalSettings {
 // The right color depends on the supplier
 //
 fn led_animation_from_trace(
-    time: Res<Time>,
+    _time: Res<Time>,
     settings: Res<GlobalSettings>,
     mut commands: Commands,
-    mut timer: ResMut<AnimationTimer>,
+    _timer: ResMut<AnimationTimer>,
     mut trace: ResMut<Trace>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut query: Query<(
@@ -159,12 +151,12 @@ fn led_animation_from_trace(
     //         }
     //     }
     // }
-    while let Some(new_index) = trace.get_new_index() {
-        for (matrix_position, mut material, mut onoff, mut transform, entity, children) in
+    while let Some(_new_index) = trace.get_new_index() {
+        for (_matrix_position, material, mut onoff, mut transform, _entity, children) in
             query.iter_mut()
         {
             const FALLOFF: f32 = 0.55;
-            let material = materials.get_mut(&material).unwrap();
+            let _material = materials.get_mut(&material).unwrap();
             transform.scale *= FALLOFF;
 
             // transform.scale = vec3(1., 1., 1.);
@@ -188,7 +180,7 @@ fn led_animation_from_trace(
                 depth_point =
                     trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
             }
-            let state = depth_point.state;
+            let _state = depth_point.state;
             for y_pos in 0..NUM_LEDS_Y {
                 let index = trace.current_index as i32 - y_pos as i32;
                 if index >= 0 {
@@ -206,7 +198,7 @@ fn led_animation_from_trace(
                         });
                     }
 
-                    for (led_position, mut material, mut onoff, mut transform, entity, children) in
+                    for (led_position, material, mut onoff, mut transform, entity, children) in
                         query.iter_mut()
                     {
                         if led_positions.contains(led_position) {
@@ -270,8 +262,8 @@ fn cursor_position(windows: Res<Windows>, mut settings: ResMut<GlobalSettings>) 
         settings.mouse_position = position / Vec2::new(window.width(), window.height());
 
         let pan_pos_radians = settings.mouse_position.x * std::f32::consts::FRAC_PI_2;
-        let left_gain = (pan_pos_radians).cos();
-        let right_gain = (pan_pos_radians).sin();
+        let _left_gain = (pan_pos_radians).cos();
+        let _right_gain = (pan_pos_radians).sin();
         // println!("left: {left_gain:.3} right: {right_gain:.3}");
     } else {
         // cursor is not inside the window
@@ -279,17 +271,14 @@ fn cursor_position(windows: Res<Windows>, mut settings: ResMut<GlobalSettings>) 
 }
 
 #[derive(Component)]
-struct LedMatrix {
-    size_x: i32,
-    size_y: i32,
-}
+struct LedMatrix;
 #[derive(Component)]
 struct TurbineHall;
 
 /// set up a simple 3D scene
 fn setup(
-    trace: Res<Trace>,
-    settings: Res<GlobalSettings>,
+    _trace: Res<Trace>,
+    _settings: Res<GlobalSettings>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -306,7 +295,7 @@ fn setup(
     let parent = commands
         // For the hierarchy to work certain Components need to exist. SpatialBundle provides those.
         .spawn_bundle(SpatialBundle::default())
-        .insert(LedMatrix { size_x, size_y })
+        .insert(LedMatrix)
         .id();
 
     for side in 0..2 {
@@ -431,7 +420,7 @@ fn setup(
     //     ..default()
     // });
     // Hall
-    let mut transform = Transform::default();
+    let transform = Transform::default();
     commands
         .spawn_bundle(SceneBundle {
             scene: asset_server.load("turbine_hall_from_obj.glb#Scene0"),
@@ -597,22 +586,13 @@ fn spawn_camera(mut commands: Commands) {
         });
 }
 
-fn iter_hierarchy(entity: Entity, children_query: &Query<&Children>, f: &mut impl FnMut(Entity)) {
-    (f)(entity);
-    if let Ok(children) = children_query.get(entity) {
-        for child in children.iter().copied() {
-            iter_hierarchy(child, children_query, f);
-        }
-    }
-}
-
 fn bevy_ui(
-    mut commands: Commands,
+    _commands: Commands,
     mut settings: ResMut<GlobalSettings>,
     mut timer: ResMut<AnimationTimer>,
     mut trace: ResMut<Trace>,
     mut turbine_hall_visibility: Query<&mut Visibility, With<TurbineHall>>,
-    query: Query<Entity, With<LedMatrix>>,
+    _query: Query<Entity, With<LedMatrix>>,
     mut egui_context: ResMut<EguiContext>,
 ) {
     egui::Window::new("Settings")
@@ -672,8 +652,7 @@ fn bevy_ui(
                         trace,
                         current_depth_envelope_index,
                         current_index,
-                        supplier_index,
-                        dependency_index,
+
                         num_calls_per_dependency,
                         num_calls_per_supplier,
                         num_calls_per_depth,

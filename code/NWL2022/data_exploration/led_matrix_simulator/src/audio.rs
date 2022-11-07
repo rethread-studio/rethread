@@ -6,7 +6,7 @@ use knyst::{
     prelude::*,
     wavetable::{Wavetable, WavetableOscillatorOwned},
 };
-use rand::{thread_rng, Rng};
+
 
 pub struct AudioEngine {
     graph: Graph,
