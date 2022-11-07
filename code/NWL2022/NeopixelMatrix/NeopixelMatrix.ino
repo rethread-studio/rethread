@@ -11,10 +11,10 @@
 #define LED_PIN     6
 
 // How many NeoPixels are attached to the Arduino?
-#define LED_COUNT  100
+#define LED_COUNT  300
 
 // NeoPixel brightness, 0 (min) to 255 (max)
-#define BRIGHTNESS 60 // Set BRIGHTNESS to about 1/5 (max = 255)
+#define BRIGHTNESS 255 // Set BRIGHTNESS to about 1/5 (max = 255)
 
 uint16_t g_hue = 0;
 
@@ -55,7 +55,8 @@ void loop() {
 
   rainbowFade2White(3, 3, 1);*/
 
-  swipes();
+  //swipes();
+  every_n_pixels(10, 5);
 }
 
 // Fill strip pixels one after another with a color. Strip is NOT cleared
@@ -211,6 +212,21 @@ void swipes() {
   delay(wait);
  }
 
+}
+
+void every_n_pixels(int interval, int max_num_pixels) {
+  for(int offset = 0; offset < 10; offset++) {
+     strip.fill(strip.Color(0, 0, 0, strip.gamma8(0)));
+
+  for(int i = 0; i < max_num_pixels; i++) {
+    int index = i*interval + offset;
+    strip.setPixelColor(index, strip.Color(255, 255, 255, strip.gamma8(255)));
+    //strip.setPixelColor(index, strip.gamma32(strip.ColorHSV(0, 255, 255)));
+  
+  }
+  strip.show();
+  delay(100);
+  }
 }
 
 int xy_to_pixel(int x, int y) {
