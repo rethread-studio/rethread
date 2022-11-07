@@ -315,15 +315,13 @@ impl NannouTrace {
                         points.push((pt2(x, y), color));
                         points.push((pt2(x_end, y), color));
 
-                        draw.ellipse().x_y(x, y + 30.).w_h(15.0, 15.).color(hsla(
-                            p.dependency_dist_evenness * 0.6,
-                            0.5,
-                            0.6,
-                            0.8,
-                        ));
+                        draw.ellipse()
+                            .x_y(x, y + 30.)
+                            .w_h(15.0 * p.dependency_dist_evenness, 15.)
+                            .color(hsla(p.dependency_dist_evenness * 0.6, 1.0, 0.6, 0.8));
                         draw.ellipse().x_y(x, y + 60.).w_h(15.0, 15.).color(hsla(
                             p.supplier_dist_evenness * 0.6,
-                            0.5,
+                            1.0,
                             0.6,
                             0.8,
                         ));
@@ -522,9 +520,16 @@ fn model(app: &App) -> Model {
     //     "/home/erik/Hämtningar/nwl2022/data-varna-startup-shutdown",
     // )
     // .unwrap();
+    // let trace =
+    //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-find-replace")
+    //         .unwrap();
+    // let trace =
+    //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-with-marker")
+    //         .unwrap();
     let trace =
-        deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-find-replace")
+        deepika2::Deepika2::open_or_parse("/home/erik/Hämtningar/nwl2022/data-jedit-with-marker")
             .unwrap();
+    // trace.save_depth_as_wave("/home/erik/Hämtningar/nwl2022/data-jedit-with-marker-depth.wav");
 
     let deepika2_trace = NannouTrace::from_deepika2(trace);
     let traces = vec![deepika2_trace];
