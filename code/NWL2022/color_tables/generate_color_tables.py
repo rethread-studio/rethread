@@ -9,6 +9,7 @@ def get_array(filename, prop):
         if (el not in arr):
             arr.append(trace[i][prop])
     f.close()
+    arr.sort()
     return arr
 
 def hsv_to_rgb(h, s, v):
@@ -55,13 +56,16 @@ def generate_colors(array):
 
 def write_file(filename, prop, array, colors):
     f = open(filename, "w")
-    f.write(prop + ",colors\n")
+    f.write(prop + ",color\n")
     for i in range(len(array)):
         f.write(array[i] + "," + colors[i] + "\n")
     f.close()
 
 path = "../LED_web_demo/"
 filename = "data-varna-copy-paste-isolated_parsed"
+
+#path = "./"
+#filename = "data-jedit-with-marker"
 
 for prop in ["supplier", "dependency"]:
     array = get_array(path+filename+".json", prop)
