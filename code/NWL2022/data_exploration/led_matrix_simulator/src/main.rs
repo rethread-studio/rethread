@@ -263,9 +263,16 @@ impl Trace {
     }
     pub fn get_animation_call_data(&self, call_index: usize) -> AnimationCallData {
         let call = &self.trace.draw_trace[call_index];
-        let num_leds = ((call.depth as f32 / self.max_depth as f32).powf(0.3)
-            * (NUM_LEDS_X as i32 - 1) as f32) as usize
-            + 1;
+        // num leds from global depth
+        // let num_leds = ((call.depth as f32 / self.max_depth as f32).powf(0.3)
+        //     * (NUM_LEDS_X as i32 - 1) as f32) as usize
+        //     + 1;
+        // num leds from section depth
+        let depth_point = self.trace.depth_envelope.sections[self.current_depth_envelope_index];
+        let num_leds =
+            (((call.depth - depth_point.min_depth) as f32 / depth_point.max_depth as f32).powf(0.3)
+                * (NUM_LEDS_X as i32 - 1) as f32) as usize
+                + 1;
         let left_color = if let Some(supplier) = &call.supplier {
             self.supplier_colors.get(supplier).unwrap().clone()
         } else {
