@@ -1,5 +1,7 @@
 use once_cell::sync::OnceCell;
 use std::{
+    fs::File,
+    io::{self, BufRead},
     path::PathBuf,
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -12,6 +14,7 @@ mod gui;
 mod scheduler;
 mod websocket;
 
+use anyhow::Result;
 use bevy::{prelude::Color, utils::HashMap};
 use log::*;
 use scheduler::SchedulerCom;
@@ -128,8 +131,6 @@ impl Trace {
 
         let mut num_calls_per_depth = vec![0; trace.max_depth as usize + 1];
         let mut supplier_index = HashMap::new();
-        let mut supplier_colors = HashMap::new();
-        let mut dependency_colors = HashMap::new();
         let mut dependency_index = HashMap::new();
         let mut num_calls_per_supplier = HashMap::new();
         let mut num_calls_per_dependency = HashMap::new();
@@ -178,18 +179,53 @@ impl Trace {
             marker_width.push((marker.clone(), last_index - first_index));
         }
 
-        // Generate the supplier and dependency colors
-        for (supplier, index) in supplier_index.iter() {
-            let mut supplier_hue = (*index as f32 * 17.7) % 360.0;
-            supplier_colors.insert(supplier.clone(), Color::hsl(supplier_hue, 1.0, 0.5));
-            if let Some(dependencies) = dependency_index.get(supplier) {
-                for (dependency, _dep_index) in dependencies.iter() {
-                    supplier_hue += 2.0;
-                    dependency_colors
-                        .insert(dependency.clone(), Color::hsl(supplier_hue, 1.0, 0.5));
+        // Load supplier and dependency colors from .csv files
+        let (supplier_colors, dependency_colors) = {
+            if let Some(path) = path {
+                let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
+                let mut supplier_filename = file_name.clone();
+                supplier_filename.push_str("_supplier_colors");
+                let mut supplier_path = path.clone();
+                supplier_path.set_file_name(supplier_filename);
+                supplier_path.set_extension(".csv");
+                let mut dependency_filename = file_name.clone();
+                dependency_filename.push_str("_dependency_colors");
+                let mut dependency_path = path.clone();
+                dependency_path.set_file_name(dependency_filename);
+                dependency_path.set_extension(".csv");
+                match (
+                    read_colors_from_csv(supplier_path),
+                    read_colors_from_csv(dependency_path),
+                ) {
+                    (Ok(sc), Ok(dc)) => (sc, dc),
+                    (Err(e), Err(_)) | (Ok(_), Err(e)) | (Err(e), Ok(_)) => {
+                        warn!(
+                            "Failed to read supplier colors from csv: {e:?}, will generate colors"
+                        );
+                        let mut supplier_colors = HashMap::new();
+                        let mut dependency_colors = HashMap::new();
+                        // Generate the supplier and dependency colors
+                        for (supplier, index) in supplier_index.iter() {
+                            let mut supplier_hue = (*index as f32 * 17.7) % 360.0;
+                            supplier_colors
+                                .insert(supplier.clone(), Color::hsl(supplier_hue, 1.0, 0.5));
+                            if let Some(dependencies) = dependency_index.get(supplier) {
+                                for (dependency, _dep_index) in dependencies.iter() {
+                                    supplier_hue += 2.0;
+                                    dependency_colors.insert(
+                                        dependency.clone(),
+                                        Color::hsl(supplier_hue, 1.0, 0.5),
+                                    );
+                                }
+                            }
+                        }
+                        (supplier_colors, dependency_colors)
+                    }
                 }
+            } else {
+                (HashMap::new(), HashMap::new())
             }
-        }
+        };
 
         println!(
             "Opened and initialised new trace with {} calls",
@@ -275,4 +311,26 @@ pub struct AnimationCallData {
     pub num_leds: usize,
     pub left_color: Color,
     pub right_color: Color,
+}
+
+pub fn read_colors_from_csv(path: impl Into<PathBuf>) -> Result<HashMap<String, Color>> {
+    let mut m = HashMap::new();
+    let file = File::open(path.into())?;
+    let lines = io::BufReader::new(file).lines();
+    for line in lines.skip(1) {
+        match line {
+            Ok(line) => {
+                let mut parts = line.split(',');
+                let name = parts.next().unwrap().to_string();
+                let hex_color = parts.next().unwrap();
+                dbg!(hex_color);
+                let c = Color::hex(&hex_color[1..])?;
+                m.insert(name, c);
+            }
+            Err(e) => {
+                return Err(e.into());
+            }
+        }
+    }
+    Ok(m)
 }
