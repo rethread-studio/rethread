@@ -19,7 +19,7 @@ let nSups; // number of suppliers
 let cnv, ctx; // canvas and its context
 
 let myFont;
-let keywords = ["copy", "paste", "search", "replace", "find"];
+let keywords = ["copy", "paste", "search", "replace", "find", "write"];
 
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
