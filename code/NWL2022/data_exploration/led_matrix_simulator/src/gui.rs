@@ -650,58 +650,67 @@ fn bevy_ui(
             ui.label(&format!("Current call({}):", trace.current_index));
             if trace.trace.draw_trace.len() > 0 {
                 egui::Grid::new("Current call:").show(ui, |ui| {
-                    let Trace {
-                        trace,
-                        current_depth_envelope_index,
-                        current_index,
-
-                        num_calls_per_dependency,
-                        num_calls_per_supplier,
-                        num_calls_per_depth,
-                        ..
-                    } = &mut *trace;
-                    let call = &trace.draw_trace[*current_index];
-                    ui.label("Num:");
-                    ui.label(&format!("{}", *current_index));
-                    ui.end_row();
-                    ui.label("Section:");
-                    // egui::ScrollArea::horizontal().show(ui, |ui| {
+                    ui.label("Animation data:");
+                    let current_index = trace.current_index;
                     ui.label(&format!(
                         "{:#?}:",
-                        trace.depth_envelope.sections[*current_depth_envelope_index]
+                        trace.get_animation_call_data(current_index)
                     ));
-                    // });
                     ui.end_row();
-                    ui.label("Call data:");
-                    // egui::ScrollArea::horizontal().show(ui, |ui| {
-                    ui.label(&format!("{:#?}:", call));
-                    // });
-                    ui.end_row();
-                    ui.label("Depth:");
-                    let depth = call.depth;
-                    ui.label(&format!("{depth}"));
-                    ui.end_row();
-                    ui.label("Calls this depth: ");
-                    let calls_this_depth = num_calls_per_depth[call.depth as usize];
-                    ui.label(&format!("{calls_this_depth}"));
-                    ui.end_row();
-                    if let Some(supplier) = &call.supplier {
-                        let calls_per_supplier = num_calls_per_supplier.get(supplier).unwrap();
-                        ui.label("Calls in this supplier");
-                        ui.label(&format!("{calls_per_supplier}"));
+                    {
+                        let Trace {
+                            trace,
+                            current_depth_envelope_index,
+                            current_index,
+
+                            num_calls_per_dependency,
+                            num_calls_per_supplier,
+                            num_calls_per_depth,
+                            ..
+                        } = &mut *trace;
+                        let call = &trace.draw_trace[*current_index];
+                        ui.label("Num:");
+                        ui.label(&format!("{}", *current_index));
                         ui.end_row();
-                        if let Some(dependency) = &call.dependency {
-                            let calls_per_dependency = num_calls_per_dependency
-                                .get(supplier)
-                                .unwrap()
-                                .get(dependency)
-                                .unwrap();
-                            ui.label("Calls in this dependency");
-                            ui.label(&format!("{calls_per_dependency}"));
+                        ui.label("Section:");
+                        // egui::ScrollArea::horizontal().show(ui, |ui| {
+                        ui.label(&format!(
+                            "{:#?}:",
+                            trace.depth_envelope.sections[*current_depth_envelope_index]
+                        ));
+                        // });
+                        ui.end_row();
+                        ui.label("Call data:");
+                        // egui::ScrollArea::horizontal().show(ui, |ui| {
+                        ui.label(&format!("{:#?}:", call));
+                        // });
+                        ui.end_row();
+                        ui.label("Depth:");
+                        let depth = call.depth;
+                        ui.label(&format!("{depth}"));
+                        ui.end_row();
+                        ui.label("Calls this depth: ");
+                        let calls_this_depth = num_calls_per_depth[call.depth as usize];
+                        ui.label(&format!("{calls_this_depth}"));
+                        ui.end_row();
+                        if let Some(supplier) = &call.supplier {
+                            let calls_per_supplier = num_calls_per_supplier.get(supplier).unwrap();
+                            ui.label("Calls in this supplier");
+                            ui.label(&format!("{calls_per_supplier}"));
                             ui.end_row();
+                            if let Some(dependency) = &call.dependency {
+                                let calls_per_dependency = num_calls_per_dependency
+                                    .get(supplier)
+                                    .unwrap()
+                                    .get(dependency)
+                                    .unwrap();
+                                ui.label("Calls in this dependency");
+                                ui.label(&format!("{calls_per_dependency}"));
+                                ui.end_row();
+                            }
                         }
+                        ui.end_row();
                     }
-                    ui.end_row();
                 });
 
                 // if ui.button("Remove lights").clicked() {

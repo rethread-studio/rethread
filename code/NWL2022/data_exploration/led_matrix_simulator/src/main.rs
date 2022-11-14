@@ -314,6 +314,7 @@ impl Trace {
     }
 }
 
+#[derive(Debug)]
 pub struct AnimationCallData {
     pub num_leds: usize,
     pub left_color: Color,
