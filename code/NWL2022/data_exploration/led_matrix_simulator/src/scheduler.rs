@@ -46,7 +46,7 @@ enum Event<'a> {
 
 pub fn start_scheduler(trace: Trace) -> SchedulerCom {
     let args = get_args();
-    #[cfg(not(target_os = "windows"))]
+    // #[cfg(not(target_os = "windows"))]
     let mut osc_communicator = if args.osc {
         Some(OscCommunicator::new())
     } else {
@@ -68,7 +68,7 @@ pub fn start_scheduler(trace: Trace) -> SchedulerCom {
     spawn(move || loop {
         while let Ok(new_duration) = event_duration_rx.try_recv() {
             seconds_between_calls = new_duration;
-            #[cfg(not(target_os = "windows"))]
+            // #[cfg(not(target_os = "windows"))]
             if let Some(osc_communicator) = &mut osc_communicator {
                 osc_communicator.send_speed(new_duration);
             }
@@ -123,7 +123,7 @@ pub fn start_scheduler(trace: Trace) -> SchedulerCom {
                 current_depth_envelope_index += 1;
                 current_depth_envelope_index %= num_depth_points;
                 current_section = trace.trace.depth_envelope.sections[current_depth_envelope_index];
-                #[cfg(not(target_os = "windows"))]
+                // #[cfg(not(target_os = "windows"))]
                 if let Some(osc_communicator) = &mut osc_communicator {
                     osc_communicator.send_section(current_section);
                 }
@@ -141,7 +141,7 @@ pub fn start_scheduler(trace: Trace) -> SchedulerCom {
             // Send osc message to SuperCollider
             {
                 let call = &trace.trace.draw_trace[current_index];
-                #[cfg(not(target_os = "windows"))]
+                // #[cfg(not(target_os = "windows"))]
                 if let Some(osc_communicator) = &mut osc_communicator {
                     osc_communicator.send_call(call.depth, state);
                 }
@@ -152,7 +152,7 @@ pub fn start_scheduler(trace: Trace) -> SchedulerCom {
             }
             {
                 let row_data = trace.get_animation_call_data(current_index);
-                #[cfg(not(target_os = "windows"))]
+                // #[cfg(not(target_os = "windows"))]
                 if let Some(osc_communicator) = &mut osc_communicator {
                     osc_communicator.send_new_row(row_data);
                 }
