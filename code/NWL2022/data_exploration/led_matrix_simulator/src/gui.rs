@@ -157,9 +157,12 @@ fn led_animation_from_trace(
         for (_matrix_position, material, mut onoff, mut transform, _entity, children) in
             query.iter_mut()
         {
+            const DEFAULT_COLOR: Color = Color::WHITE;
             const FALLOFF: f32 = 0.55;
-            let _material = materials.get_mut(&material).unwrap();
-            transform.scale *= FALLOFF;
+            let material = materials.get_mut(&material).unwrap();
+            material.base_color = DEFAULT_COLOR;
+            material.emissive = DEFAULT_COLOR;
+            // transform.scale *= FALLOFF;
 
             // transform.scale = vec3(1., 1., 1.);
             if transform.scale.x < 0.1 {

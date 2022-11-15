@@ -44,7 +44,7 @@ enum Event<'a> {
     Call(&'a CallDrawData),
 }
 
-pub fn start_scheduler(trace: Trace) -> SchedulerCom {
+pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
     let args = get_args();
     // #[cfg(not(target_os = "windows"))]
     let mut osc_communicator = if args.osc {
@@ -53,8 +53,8 @@ pub fn start_scheduler(trace: Trace) -> SchedulerCom {
         None
     };
     let ws_communicator = WebsocketCom::default();
-    let mut current_index = 0;
-    let mut current_depth_envelope_index = 0;
+    // let mut current_index = 0;
+    // let mut current_depth_envelope_index = 0;
     let mut current_section = trace.trace.depth_envelope.sections[0];
     let mut seconds_between_calls = 0.025;
     let mut play = false;
@@ -79,50 +79,52 @@ pub fn start_scheduler(trace: Trace) -> SchedulerCom {
         while let Ok(new_message) = message_rx.try_recv() {
             match new_message {
                 Message::JumpNextMarker => {
-                    let old_index = current_index;
-                    let current_marker = trace.trace.draw_trace[current_index].marker.clone();
-                    while current_marker == trace.trace.draw_trace[current_index].marker {
-                        current_index += 1;
-                        if current_index >= trace.trace.draw_trace.len() {
-                            current_index = 0;
+                    let old_index = trace.current_index;
+                    let current_marker = trace.trace.draw_trace[trace.current_index].marker.clone();
+                    while current_marker == trace.trace.draw_trace[trace.current_index].marker {
+                        trace.current_index += 1;
+                        if trace.current_index >= trace.trace.draw_trace.len() {
+                            trace.current_index = 0;
                         }
-                        if current_index == old_index {
+                        if trace.current_index == old_index {
                             // We've gone all the way around
                             break;
                         }
                     }
-                    index_increase_tx.send(current_index).unwrap();
+                    index_increase_tx.send(trace.current_index).unwrap();
                 }
                 Message::JumpPreviousMarker => {
-                    let old_index = current_index;
-                    let current_marker = trace.trace.draw_trace[current_index].marker.clone();
-                    while current_marker == trace.trace.draw_trace[current_index].marker {
-                        if current_index == 0 {
-                            current_index = trace.trace.draw_trace.len();
+                    let old_index = trace.current_index;
+                    let current_marker = trace.trace.draw_trace[trace.current_index].marker.clone();
+                    while current_marker == trace.trace.draw_trace[trace.current_index].marker {
+                        if trace.current_index == 0 {
+                            trace.current_index = trace.trace.draw_trace.len();
                         }
-                        current_index -= 1;
-                        if current_index == old_index {
+                        trace.current_index -= 1;
+                        if trace.current_index == old_index {
                             // We've gone all the way around
                             break;
                         }
                     }
-                    index_increase_tx.send(current_index).unwrap();
+                    index_increase_tx.send(trace.current_index).unwrap();
                 }
             }
         }
         if play {
-            current_index += 1;
-            if current_index >= trace.trace.draw_trace.len() {
-                current_index = 0;
+            trace.current_index += 1;
+            if trace.current_index >= trace.trace.draw_trace.len() {
+                trace.current_index = 0;
             }
-            index_increase_tx.send(current_index).unwrap();
+            index_increase_tx.send(trace.current_index).unwrap();
 
             let num_depth_points = trace.trace.depth_envelope.sections.len();
-            let _depth_point = trace.trace.depth_envelope.sections[current_depth_envelope_index];
-            while current_index > current_section.end_index {
-                current_depth_envelope_index += 1;
-                current_depth_envelope_index %= num_depth_points;
-                current_section = trace.trace.depth_envelope.sections[current_depth_envelope_index];
+            let _depth_point =
+                trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+            while trace.current_index > current_section.end_index {
+                trace.current_depth_envelope_index += 1;
+                trace.current_depth_envelope_index %= num_depth_points;
+                current_section =
+                    trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
                 // #[cfg(not(target_os = "windows"))]
                 if let Some(osc_communicator) = &mut osc_communicator {
                     osc_communicator.send_section(current_section);
@@ -140,7 +142,7 @@ pub fn start_scheduler(trace: Trace) -> SchedulerCom {
             // );
             // Send osc message to SuperCollider
             {
-                let call = &trace.trace.draw_trace[current_index];
+                let call = &trace.trace.draw_trace[trace.current_index];
                 // #[cfg(not(target_os = "windows"))]
                 if let Some(osc_communicator) = &mut osc_communicator {
                     osc_communicator.send_call(call.depth, state);
@@ -151,7 +153,7 @@ pub fn start_scheduler(trace: Trace) -> SchedulerCom {
                 }
             }
             {
-                let row_data = trace.get_animation_call_data(current_index);
+                let row_data = trace.get_animation_call_data(trace.current_index);
                 // #[cfg(not(target_os = "windows"))]
                 if let Some(osc_communicator) = &mut osc_communicator {
                     osc_communicator.send_new_row(row_data);
@@ -214,7 +216,7 @@ impl OscCommunicator {
         let addr = "/call";
         let args = vec![Type::Int(depth), Type::Int(state)];
         if let Err(e) = self.supercollider_sender.send((addr, args)) {
-            warn!("OSC error: failed to send: {e:?}");
+            warn!("OSC error: failed to send call: {e:?}");
         }
     }
     pub fn send_speed(&mut self, time_between_events: f32) {
