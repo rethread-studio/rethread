@@ -39,8 +39,8 @@ function setup() {
 
   console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window frames");
 
-  zones.push(helix(0, 0, 1, 1, false));
-  zones.push(helix(1*WINDOW_WIDTH*scale, 0, 2, 1, true));
+  zones.push(helix2(0, 0, 1, 1, true));
+  zones.push(helix(1, 0, 2, 1, true));
 }
 
 function draw() {
@@ -48,14 +48,14 @@ function draw() {
 
   let t = frameCount/2;
   for (let z of zones) {
-    image(z.cnv, z.x, z.y);
+    image(z.cnv, z.x0, z.y0);
     z.update(t);
   }
 
   if (showWindowFrame) drawWindowsOutline();
 }
 
-function helix(x, y, m, n, ortho) {
+function helix(i, j, m, n, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
   cnv.colorMode(HSB);
@@ -70,8 +70,8 @@ function helix(x, y, m, n, ortho) {
   cnv.textAlign(CENTER, CENTER);
 
   return {
-    x: x,
-    y: y,
+    x0: i*WINDOW_WIDTH*scale,
+    y0: j*WINDOW_HEIGHT*scale,
     m: m,
     n: n,
     cnv: cnv,
@@ -91,7 +91,7 @@ function helix(x, y, m, n, ortho) {
         cnv.push();
 
         cnv.translate(x+this.w/2, y+this.h/2, 0);
-        cnv.rotateY(t*0*2 + y/50);
+        cnv.rotateY(y/50);
         cnv.fill(get_sup_color(sup));
         cnv.beginShape();
         cnv.vertex(-this.w/2+this.wMargin, -this.h/2+this.hGap/2, 0);
@@ -105,12 +105,82 @@ function helix(x, y, m, n, ortho) {
         for (let wo of keywords) {
           let idx = funcName.toLowerCase().indexOf(wo);
           if (idx >= 0) {
-            cnv.fill(94);
+            cnv.fill(240);
             //text(wo, w/2-wMargin/2, -hGap/2);
             cnv.translate(0, -this.hGap, 1);
             cnv.text(wo, 0, 0);
             cnv.translate(0, 0, -2);
             cnv.text(wo, 0, 0);
+            break;
+          }
+        }
+
+        cnv.pop();
+
+        y += this.h;
+      }
+    }
+  }
+}
+
+function helix2(i, j, m, n, ortho) {
+  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
+  cnv.noStroke();
+  cnv.colorMode(HSB);
+  cnv.translate(-cnv.width/2, -cnv.height/2);
+  if (ortho) cnv.ortho();
+  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+  let w = cnv.width-wMargin*2; // width of each function call rectangle
+  let h = 20; // height of each function call rectangle
+  let hGap = h/8; // gap between rectangles vertically
+  cnv.textSize(h);
+  cnv.textFont(myFont);
+  cnv.textAlign(CENTER, CENTER);
+
+  return {
+    x0: i*WINDOW_WIDTH*scale,
+    y0: j*WINDOW_HEIGHT*scale,
+    m: m,
+    n: n,
+    cnv: cnv,
+    wMargin: wMargin,
+    w: w,
+    h: h,
+    hGap: hGap,
+    update: function(t) {
+      cnv.clear();
+
+      let x = this.wMargin, y = -t%this.h-height/3, i = floor(t/this.h);
+
+      while (y < cnv.height+cnv.height/3) {
+        let d = data.draw_trace[(i++)%trace_len];
+        let [sup, dep] = getSupAndDep(d.name);
+
+        cnv.push();
+
+        cnv.translate(x+this.w/2, y+this.h/2, 0);
+        cnv.rotateY(y/50);
+
+        cnv.fill(240);
+        cnv.rotateX(3*PI/2);
+        cnv.cylinder(this.h/5, this.w-2*this.wMargin);
+        cnv.rotate(PI/2);
+
+        cnv.push();
+        cnv.fill(get_sup_color(sup));
+        cnv.translate(-this.w/2+this.wMargin, 0);
+        cnv.sphere(this.h/2);
+        cnv.fill(get_dep_color(dep));
+        cnv.translate(this.w-2*this.wMargin, 0);
+        cnv.sphere(this.h/2);
+        cnv.pop();
+
+        let funcName = getActualName(d.name);
+        for (let wo of keywords) {
+          let idx = funcName.toLowerCase().indexOf(wo);
+          if (idx >= 0) {
+            cnv.fill(240);
+            cnv.text(wo, this.w/2-this.wMargin/2+this.h/4, -this.hGap*2);
             break;
           }
         }
