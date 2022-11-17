@@ -39,8 +39,9 @@ function setup() {
 
   console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window frames");
 
-  zones.push(helix2(0, 0, 1, 1, true));
-  zones.push(helix(1, 0, 2, 1, true));
+  zones.push(helix(0, 0, 1, 1, false));
+  zones.push(helix2(1, 0, 1, 1, true));
+  zones.push(ngrams(2, 0, 1, 1, 4));
 }
 
 function draw() {
@@ -58,7 +59,6 @@ function draw() {
 function helix(i, j, m, n, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
-  cnv.colorMode(HSB);
   cnv.translate(-cnv.width/2, -cnv.height/2);
   if (ortho) cnv.ortho();
   let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
@@ -91,7 +91,7 @@ function helix(i, j, m, n, ortho) {
         cnv.push();
 
         cnv.translate(x+this.w/2, y+this.h/2, 0);
-        cnv.rotateY(y/50);
+        cnv.rotateY(y/60);
         cnv.fill(get_sup_color(sup));
         cnv.beginShape();
         cnv.vertex(-this.w/2+this.wMargin, -this.h/2+this.hGap/2, 0);
@@ -126,7 +126,6 @@ function helix(i, j, m, n, ortho) {
 function helix2(i, j, m, n, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
-  cnv.colorMode(HSB);
   cnv.translate(-cnv.width/2, -cnv.height/2);
   if (ortho) cnv.ortho();
   let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
@@ -152,14 +151,14 @@ function helix2(i, j, m, n, ortho) {
 
       let x = this.wMargin, y = -t%this.h-height/3, i = floor(t/this.h);
 
-      while (y < cnv.height+cnv.height/3) {
+      while (y < cnv.height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
         let [sup, dep] = getSupAndDep(d.name);
 
         cnv.push();
 
         cnv.translate(x+this.w/2, y+this.h/2, 0);
-        cnv.rotateY(y/50);
+        cnv.rotateY(y/60-PI/2);
 
         cnv.fill(240);
         cnv.rotateX(3*PI/2);
@@ -188,6 +187,64 @@ function helix2(i, j, m, n, ortho) {
         cnv.pop();
 
         y += this.h;
+      }
+    }
+  }
+}
+
+function ngrams(i, j, m, n, group_by) {
+  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  cnv.noStroke();
+  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+
+  return {
+    x0: i*WINDOW_WIDTH*scale,
+    y0: j*WINDOW_HEIGHT*scale,
+    m: m,
+    n: n,
+    group_by: group_by,
+    cnv: cnv,
+    ctx: cnv.drawingContext,
+    wMargin: wMargin,
+    update: function(t) {
+      cnv.clear();
+
+      let w = WINDOW_WIDTH*scale, h = 20, hGap = h/4;
+      let eps = 0.1;
+
+      let x = 0, j = 0, y = -cnv.height/3, k = floor(t/h);
+
+      while (y < cnv.height*1.1) {
+        let d = data.draw_trace[k%trace_len];
+        let [sup, dep] = getSupAndDep(d.name);
+
+        let grd = this.ctx.createLinearGradient(x+wMargin, 0, x+w-wMargin, 0);
+        grd.addColorStop(0, color(get_sup_color(sup)));
+        grd.addColorStop(1, color(get_dep_color(dep)));
+        this.ctx.fillStyle = grd;
+
+        /*
+        let tl = (idx > 0 && i > 0) ? 0 : h/2;
+        let tr = (idx > 0 && i > 0) ? 0 : h/2;
+        let br = (idx < i && i > 0) ? 0 : h/2;
+        let bl = (idx < i && i > 0) ? 0 : h/2;
+        */
+
+        let idx = j % this.group_by;
+        if (idx == 0) {
+          // bottom
+          cnv.rect(x+wMargin, y-eps, w-2*wMargin, h-hGap+2*eps, 0, 0, h, h);
+        } else if (idx == 1) {
+          // top
+          cnv.rect(x+wMargin, y+hGap, w-2*wMargin, h-hGap+eps, h, h, 0, 0);
+        } else {
+          // middle
+          cnv.rect(x+wMargin, y-eps, w-2*wMargin, h+2*eps);
+        }
+
+        y += h;
+        j++;
+        k++;
       }
     }
   }
