@@ -16,7 +16,8 @@ let showWindowFrame = true;
 
 let cnv; // canvas
 
-let zones = [];
+let arrangement;
+let zones;
 
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
@@ -39,9 +40,14 @@ function setup() {
 
   console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window frames");
 
-  zones.push(helix(0, 0, 1, 1, false));
-  zones.push(helix2(1, 0, 1, 1, true));
+  /*
+  zones.push(helixBars(0, 0, 1, 1, false));
+  zones.push(helixBalls(1, 0, 1, 1, true));
   zones.push(ngrams(2, 0, 1, 1, 4));
+  */
+
+  generateArrangement();
+  makeArrangement();
 }
 
 function draw() {
@@ -53,10 +59,91 @@ function draw() {
     z.update(t);
   }
 
+  if (frameCount % 500 == 0) {
+    generateArrangement();
+    makeArrangement();
+  }
+
   if (showWindowFrame) drawWindowsOutline();
 }
 
-function helix(i, j, m, n, ortho) {
+function generateArrangement() {
+  let subdivision = [1, 1, 1];
+  let choice_possibilities = shuffle(["helixBars", "helixBalls", "ngrams", "ngrams"]);
+  choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "infotext";
+  let group_by_possibilities = [2, 4, 8];
+  arrangement = [];
+
+  let i = 0;
+  for (let k = 0; k < subdivision.length; k++) {
+    let m = subdivision[k];
+    let choice = choice_possibilities.pop();
+    let arr = {
+      choice: choice,
+      i: i,
+      j: 0,
+      m: m,
+      n: 1
+    };
+
+    if (choice == "helixBars" || choice == "helixBalls") {
+      arr.ortho = random([true, false]);
+    } else if (choice == "ngrams") {
+      shuffle(group_by_possibilities, true);
+      arr.group_by = group_by_possibilities.pop();
+    }
+
+    i += m;
+    arrangement.push(arr);
+  }
+  //console.log(arrangement)
+}
+
+function makeArrangement() {
+  zones = [];
+  for (let arr of arrangement) {
+    switch (arr.choice) {
+      case "infotext":
+        zones.push(infotext(arr.i, arr.j, arr.m, arr.n));
+        break;
+      case "helixBars":
+        zones.push(helixBars(arr.i, arr.j, arr.m, arr.n, arr.ortho));
+        break;
+      case "helixBalls":
+        zones.push(helixBalls(arr.i, arr.j, arr.m, arr.n, arr.ortho));
+        break;
+      case "ngrams":
+        zones.push(ngrams(arr.i, arr.j, arr.m, arr.n, arr.group_by));
+        break;
+    }
+  }
+}
+
+function infotext(i, j, m, n) {
+  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  cnv.noStroke();
+  cnv.textSize(cnv.width/10);
+  cnv.textFont(myFont);
+  cnv.textStyle(BOLD);
+  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+  cnv.fill(255);
+  cnv.text("SEARCH", wMargin, cnv.height/3);
+  cnv.text("REPLACE", wMargin, 2*cnv.height/3);
+
+  return {
+    x0: i*WINDOW_WIDTH*scale,
+    y0: j*WINDOW_HEIGHT*scale,
+    m: m,
+    n: n,
+    cnv: cnv,
+    wMargin: wMargin,
+    update: function(t) {
+
+    }
+  };
+}
+
+function helixBars(i, j, m, n, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
   cnv.translate(-cnv.width/2, -cnv.height/2);
@@ -84,7 +171,7 @@ function helix(i, j, m, n, ortho) {
 
       let x = this.wMargin, y = -t%this.h-height/3, i = floor(t/this.h);
 
-      while (y < cnv.height+cnv.height/3) {
+      while (y < cnv.height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
         let [sup, dep] = getSupAndDep(d.name);
 
@@ -120,10 +207,10 @@ function helix(i, j, m, n, ortho) {
         y += this.h;
       }
     }
-  }
+  };
 }
 
-function helix2(i, j, m, n, ortho) {
+function helixBalls(i, j, m, n, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
   cnv.translate(-cnv.width/2, -cnv.height/2);
@@ -189,7 +276,7 @@ function helix2(i, j, m, n, ortho) {
         y += this.h;
       }
     }
-  }
+  };
 }
 
 function ngrams(i, j, m, n, group_by) {
@@ -210,7 +297,7 @@ function ngrams(i, j, m, n, group_by) {
       cnv.clear();
 
       let w = WINDOW_WIDTH*scale, h = 20, hGap = h/4;
-      let eps = 0.1;
+      let eps = 1;
 
       let x = 0, j = 0, y = -cnv.height/3, k = floor(t/h);
 
@@ -222,13 +309,6 @@ function ngrams(i, j, m, n, group_by) {
         grd.addColorStop(0, color(get_sup_color(sup)));
         grd.addColorStop(1, color(get_dep_color(dep)));
         this.ctx.fillStyle = grd;
-
-        /*
-        let tl = (idx > 0 && i > 0) ? 0 : h/2;
-        let tr = (idx > 0 && i > 0) ? 0 : h/2;
-        let br = (idx < i && i > 0) ? 0 : h/2;
-        let bl = (idx < i && i > 0) ? 0 : h/2;
-        */
 
         let idx = j % this.group_by;
         if (idx == 0) {
@@ -247,7 +327,7 @@ function ngrams(i, j, m, n, group_by) {
         k++;
       }
     }
-  }
+  };
 }
 
 function determineScale() {
@@ -317,5 +397,6 @@ function keyPressed() {
 function windowResized() {
   determineScale();
   resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
+  makeArrangement();
   centerCanvas();
 }
