@@ -182,17 +182,17 @@ impl Trace {
         // Load supplier and dependency colors from .csv files
         let (supplier_colors, dependency_colors) = {
             if let Some(path) = path {
-                let file_name = path.file_name().unwrap().to_str().unwrap().to_string();
+                let file_name = path.file_stem().unwrap().to_str().unwrap().to_string();
                 let mut supplier_filename = file_name.clone();
                 supplier_filename.push_str("_supplier_colors");
                 let mut supplier_path = path.clone();
                 supplier_path.set_file_name(supplier_filename);
-                supplier_path.set_extension(".csv");
+                supplier_path.set_extension("csv");
                 let mut dependency_filename = file_name.clone();
                 dependency_filename.push_str("_dependency_colors");
                 let mut dependency_path = path.clone();
                 dependency_path.set_file_name(dependency_filename);
-                dependency_path.set_extension(".csv");
+                dependency_path.set_extension("csv");
                 match (
                     read_colors_from_csv(supplier_path.clone()),
                     read_colors_from_csv(dependency_path.clone()),
@@ -333,7 +333,6 @@ pub fn read_colors_from_csv(path: impl Into<PathBuf>) -> Result<HashMap<String, 
                 let mut parts = line.split(',');
                 let name = parts.next().unwrap().to_string();
                 let hex_color = parts.next().unwrap();
-                dbg!(hex_color);
                 let c = Color::hex(&hex_color[1..])?;
                 m.insert(name, c);
             }
