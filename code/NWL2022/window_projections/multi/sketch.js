@@ -1,5 +1,6 @@
 let data;
 let trace_len; // length of trace
+let max_name_length;
 
 let keywords = ["copy", "paste", "search", "replace", "find", "write"];
 let dep_colors, sup_colors;
@@ -34,6 +35,7 @@ function setup() {
 
   //console.log(data)
   trace_len = data.draw_trace.length;
+  max_name_length = get_max_name_length();
   all_deps = dep_colors.getColumn(0);
   all_sups = sup_colors.getColumn(0);
   centerCanvas();
@@ -46,8 +48,8 @@ function setup() {
   zones.push(ngrams(2, 0, 1, 1, 4));
   */
 
-  generateArrangement();
-  makeArrangement();
+  generate_window_composition();
+  make_window_composition();
 }
 
 function draw() {
@@ -60,14 +62,14 @@ function draw() {
   }
 
   if (frameCount % 500 == 0) {
-    generateArrangement();
-    makeArrangement();
+    generate_window_composition();
+    make_window_composition();
   }
 
   if (showWindowFrame) drawWindowsOutline();
 }
 
-function generateArrangement() {
+function generate_window_composition() {
   let subdivision = [1, 1, 1];
   let choice_possibilities = shuffle(["helixBars", "helixBalls", "ngrams", "ngrams"]);
   choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "infotext";
@@ -99,7 +101,7 @@ function generateArrangement() {
   //console.log(window_composition)
 }
 
-function makeArrangement() {
+function make_window_composition() {
   zones = [];
   for (let arr of window_composition) {
     switch (arr.choice) {
@@ -120,6 +122,7 @@ function makeArrangement() {
 }
 
 function infotext(i, j, m, n) {
+  // add easter egg text randomly 1/100
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
   cnv.noStroke();
   cnv.textSize(cnv.width/10);
@@ -221,7 +224,7 @@ function helixBalls(i, j, m, n, ortho) {
   let hGap = h/8; // gap between rectangles vertically
   cnv.textSize(h);
   cnv.textFont(myFont);
-  cnv.textAlign(CENTER, CENTER);
+  cnv.textAlign(LEFT, CENTER);
 
   return {
     x0: i*WINDOW_WIDTH*scale,
@@ -262,6 +265,7 @@ function helixBalls(i, j, m, n, ortho) {
         cnv.pop();
 
         let funcName = getActualName(d.name);
+        cnv.rotateX(PI/2);
         for (let wo of keywords) {
           let idx = funcName.toLowerCase().indexOf(wo);
           if (idx >= 0) {
@@ -280,9 +284,9 @@ function helixBalls(i, j, m, n, ortho) {
 }
 
 function ngrams(i, j, m, n, group_by) {
+  // width of rectangle changes with depth, mean of group
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
   cnv.noStroke();
-  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
 
   return {
     x0: i*WINDOW_WIDTH*scale,
@@ -292,7 +296,6 @@ function ngrams(i, j, m, n, group_by) {
     group_by: group_by,
     cnv: cnv,
     ctx: cnv.drawingContext,
-    wMargin: wMargin,
     update: function(t) {
       cnv.clear();
 
@@ -300,9 +303,22 @@ function ngrams(i, j, m, n, group_by) {
       let eps = 1;
 
       let x = 0, j = 0, y = -cnv.height/3, k = floor(t/h);
+      let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+      let wUnit = (w-wMargin)/(4*max_name_length);
 
       while (y < cnv.height*1.1) {
         let d = data.draw_trace[k%trace_len];
+
+        let idx = j % this.group_by;
+        if (idx == 1) {
+          let mean_name_length = 0;
+          for (let ii = 0; ii < this.group_by; ii++) {
+            mean_name_length += getActualName(data.draw_trace[(k+ii)%trace_len].name).length + noise(k+ii)*10;
+          }
+          mean_name_length /= this.group_by;
+          wMargin = WINDOW_WIDTH*scale/10 + wUnit*(max_name_length-mean_name_length);
+        }
+
         let [sup, dep] = getSupAndDep(d.name);
 
         let grd = this.ctx.createLinearGradient(x+wMargin, 0, x+w-wMargin, 0);
@@ -310,7 +326,6 @@ function ngrams(i, j, m, n, group_by) {
         grd.addColorStop(1, color(get_dep_color(dep)));
         this.ctx.fillStyle = grd;
 
-        let idx = j % this.group_by;
         if (idx == 0) {
           // bottom
           cnv.rect(x+wMargin, y-eps, w-2*wMargin, h-hGap+2*eps, 0, 0, h, h);
@@ -355,6 +370,15 @@ function drawWindowsOutline() {
   noStroke();
 }
 
+function get_max_name_length() {
+  let max_l = 0;
+  for (let i = 0; i < trace_len; i++) {
+    let l = getActualName(data.draw_trace[i].name).length;
+    if (l > max_l) max_l = l;
+  }
+  return max_l;
+}
+
 function get_dep_color(dep) {
   return dep_colors.get(all_deps.indexOf(dep), 1);
 }
@@ -397,6 +421,6 @@ function keyPressed() {
 function windowResized() {
   determineScale();
   resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
-  makeArrangement();
+  make_window_composition();
   centerCanvas();
 }
