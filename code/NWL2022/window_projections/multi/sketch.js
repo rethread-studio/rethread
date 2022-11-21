@@ -16,7 +16,7 @@ let showWindowFrame = true;
 
 let cnv; // canvas
 
-let arrangement;
+let window_composition;
 let zones;
 
 function preload() {
@@ -72,7 +72,7 @@ function generateArrangement() {
   let choice_possibilities = shuffle(["helixBars", "helixBalls", "ngrams", "ngrams"]);
   choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "infotext";
   let group_by_possibilities = [2, 4, 8];
-  arrangement = [];
+  window_composition = [];
 
   let i = 0;
   for (let k = 0; k < subdivision.length; k++) {
@@ -94,14 +94,14 @@ function generateArrangement() {
     }
 
     i += m;
-    arrangement.push(arr);
+    window_composition.push(arr);
   }
-  //console.log(arrangement)
+  //console.log(window_composition)
 }
 
 function makeArrangement() {
   zones = [];
-  for (let arr of arrangement) {
+  for (let arr of window_composition) {
     switch (arr.choice) {
       case "infotext":
         zones.push(infotext(arr.i, arr.j, arr.m, arr.n));
