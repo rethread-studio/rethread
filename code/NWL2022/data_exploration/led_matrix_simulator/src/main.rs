@@ -194,14 +194,16 @@ impl Trace {
                 dependency_path.set_file_name(dependency_filename);
                 dependency_path.set_extension(".csv");
                 match (
-                    read_colors_from_csv(supplier_path),
-                    read_colors_from_csv(dependency_path),
+                    read_colors_from_csv(supplier_path.clone()),
+                    read_colors_from_csv(dependency_path.clone()),
                 ) {
                     (Ok(sc), Ok(dc)) => (sc, dc),
                     (Err(e), Err(_)) | (Ok(_), Err(e)) | (Err(e), Ok(_)) => {
                         warn!(
                             "Failed to read supplier colors from csv: {e:?}, will generate colors"
                         );
+                        warn!("Supplier colors path: {supplier_path:?}");
+                        warn!("Dependency colors path: {dependency_path:?}");
                         let mut supplier_colors = HashMap::new();
                         let mut dependency_colors = HashMap::new();
                         // Generate the supplier and dependency colors
