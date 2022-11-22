@@ -106,16 +106,16 @@
 );
 ~glitches.rain2.();
 Ndef(\glitch_out, {
-		var out = 0, delayTime = 0.1, amp = 1, mix = 0.4, rt = 3.0, feedback = 0.3, size = 0.7, damp = 0.65, diff = 0.6,
-		sig, wet;
+	var out = 0, delayTime = 0.1, amp = 1, mix = 0.4, rt = 3.0, feedback = 0.3, size = 0.7, damp = 0.65, diff = 0.6,
+	sig, wet;
 
-		sig = Ndef(\glitch).ar() * LFNoise1.kr(LFNoise1.kr(1).range(0.03, 1)).range(0.2, 1.0);
-		/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
-		wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
-		wet = Greyhole.ar(sig, delayTime, damp, size, diff, feedback);
+	sig = Ndef(\glitch).ar() * LFNoise1.kr(LFNoise1.kr(1).range(0.03, 1)).range(0.2, 1.0);
+	/*wet = JPverb.ar(sig, rt, 0.9, 4.0, 0.8);
+	wet = GVerb.ar(sig, 300, 3, 0.43, 0.51, 15, -5.dbamp, -26.dbamp, -20.dbamp);*/
+	wet = Greyhole.ar(sig, delayTime, damp, size, diff, feedback);
 
-		sig = (sig * (1-mix)) + (wet*mix);
-		sig = Limiter.ar(sig, 0.95) * 0.3;
-		sig = LeakDC.ar(sig);
-		sig
-	}).play();
+	sig = (sig * (1-mix)) + (wet*mix);
+	sig = Limiter.ar(sig, 0.95) * 0.20;
+	sig = LeakDC.ar(sig);
+	sig
+}).play();

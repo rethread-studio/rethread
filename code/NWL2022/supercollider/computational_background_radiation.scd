@@ -161,7 +161,15 @@ s.waitForBoot({
 		sig = Pan2.ar(sig, pan, amp);
 		Out.ar(\out.kr(0), sig);
 	}).add;
+	SynthDef(\mainchannel,  { | in |
+		var sig;
+		sig = In.ar(in, 2);
+		sig = BPeakEQ.ar(sig, 290, 0.8, -3.7);
+		sig = BPeakEQ.ar(sig, 760, 0.8, -7.6);
+		sig = BLowShelf.ar(sig, 100, 1.0, -6);
 
+		Out.ar(\out.kr(0), sig);
+	}).add;
 
 	~from_53 = { | degrees |
 		var s = Scale.chromatic('et53'), list = List[];
@@ -169,11 +177,13 @@ s.waitForBoot({
 		list
 
 	};
+	~mainBus = Bus.audio(s, 2);
 	~revBus = Bus.audio(s, 2);
 	~rev3Bus = Bus.audio(s, 2);
 	s.sync;
-	~rev = Synth(\long_reverb, [\in, ~revBus, \out, 0, \wetness, 0.1, \lpf_freq, 10000, \predelay, 0.05, \rt, 1.0, \wetness, 0.05]);
-	~rev3 = Synth(\medium_reverb, [\in, ~rev3Bus, \mix, 0.4, \feedback, 0.95, \size, 0.9, \damp, 0.65, \diff, 0.6]);
+	~main = Synth(\mainchannel, [\out, 0, \in, ~mainBus]);
+	~rev = Synth(\long_reverb, [\in, ~revBus, \out, ~mainBus, \wetness, 0.1, \lpf_freq, 10000, \predelay, 0.05, \rt, 1.0, \wetness, 0.05]);
+	~rev3 = Synth(\medium_reverb, [\in, ~rev3Bus, \out, ~mainBus, \mix, 0.4, \feedback, 0.95, \size, 0.9, \damp, 0.65, \diff, 0.6]);
 
 	~section = Environment.new(know: true);
 	~section.min_depth = 0;
@@ -205,7 +215,7 @@ s.waitForBoot({
 				~chord = ~from_53.([0, 17, 31, 39, 48] + 53);
 			});
 		});
-		~call_sus = 0.1/~section.diversity;
+		~call_sus = (0.1/~section.diversity).min(0.15);
 		if((~section.average - ~section.min_depth) > 30.0, {
 			~call_sus = 0.01;
 		});

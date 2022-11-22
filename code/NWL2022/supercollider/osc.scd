@@ -30,16 +30,16 @@ OSCdef(\call, {|msg, time, addr, recvPort|
 	sine_mix = ((~section.diversity-0.5)*0.25).min(1).max(0);
 	// sine_mix.postln;
 	Synth(\osc, [\freq, freq, \atk, atk, \sus, ~call_sus,\rel, ~call_sus*2.0, \amp, amp * 0.2 * sine_mix, \buf, buf, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
-	Synth(\sine, [\freq, freq, \amp, 0.05 * amp * (1.0-sine_mix), \release_time, ~call_sus*5.0]);
+	Synth(\sine, [\freq, freq, \amp, 0.05 * amp * (1.0-sine_mix), \release_time, ~call_sus*5.0, \out, ~mainBus,]);
 
 	if(depth == ~section.min_depth && (~now.() - ~last_min > 1.0), {
 		var freq = ~chord[0] * 2;
-		Synth(\sine, [\freq, freq, \atk, 0.1, \amp, 0.03, \release_time, 0.5, \out, ~rev3Bus]);
+		Synth(\sine, [\freq, freq, \atk, 0.1, \sus, 0, \amp, 0.03, \release_time, 0.5, \out, ~rev3Bus]);
 		~last_min = ~now.();
 	});
 	if(depth == ~section.max_depth && (~now.() - ~last_max > 1.0), {
 		var freq = ~chord[0] * 32.0;
-		Synth(\sine, [\freq, freq, \atk, 0.1, \amp, 0.03, \release_time, 0.5, \out, ~rev3Bus]);
+		Synth(\sine, [\freq, freq, \atk, 0.1, \sus, 0, \amp, 0.03, \release_time, 0.5, \out, ~rev3Bus]);
 		~last_max = ~now.();
 	});
 
@@ -78,6 +78,16 @@ OSCdef(\section, {|msg, time, addr, recvPort|
 		~section.pitch_index_offset =  (~chord.size*2) - (~section.average - ~section.min_depth);
 	}, {
 		~section.pitch_index_offset = 0;
+	});
+
+	if(~section.diversity < 0.8, {
+		~glitches.rain.();
+	}, {
+		if(~section.diversity < 1.5, {
+			~glitches.bleepbloop.();
+		}, {
+			~glitches.mechabirds.();
+		});
 	});
 
 	~updateChord.();
