@@ -18,7 +18,7 @@ let showWindowFrame = true;
 let cnv; // canvas
 
 let window_composition;
-let zones;
+let zones, textLoop_zone;
 
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
@@ -48,6 +48,7 @@ function setup() {
   zones.push(ngrams(2, 0, 1, 1, 4));
   */
 
+  textLoop_zone = textLoop(1, 0, 1, 1);
   generate_window_composition();
   make_window_composition();
 }
@@ -70,21 +71,19 @@ function draw() {
 }
 
 function generate_window_composition() {
-  let subdivision = [1, 1, 1];
   let choice_possibilities = shuffle(["helixBars", "helixBalls", "ngrams", "ngrams"]);
-  choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "infotext";
+  //choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "textLoop";
   let group_by_possibilities = [2, 4, 8];
   window_composition = [];
 
-  let i = 0;
-  for (let k = 0; k < subdivision.length; k++) {
-    let m = subdivision[k];
+  let is = [0, 2];
+  for (let i of is) {
     let choice = choice_possibilities.pop();
     let arr = {
       choice: choice,
       i: i,
       j: 0,
-      m: m,
+      m: 1,
       n: 1
     };
 
@@ -95,19 +94,15 @@ function generate_window_composition() {
       arr.group_by = group_by_possibilities.pop();
     }
 
-    i += m;
     window_composition.push(arr);
   }
   //console.log(window_composition)
 }
 
 function make_window_composition() {
-  zones = [];
+  zones = [textLoop_zone];
   for (let arr of window_composition) {
     switch (arr.choice) {
-      case "infotext":
-        zones.push(infotext(arr.i, arr.j, arr.m, arr.n));
-        break;
       case "helixBars":
         zones.push(helixBars(arr.i, arr.j, arr.m, arr.n, arr.ortho));
         break;
@@ -121,17 +116,16 @@ function make_window_composition() {
   }
 }
 
-function infotext(i, j, m, n) {
-  // add easter egg text randomly 1/100
+function textLoop(i, j, m, n) {
+  // adapted from Maria's code
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
   cnv.noStroke();
   cnv.textSize(cnv.width/10);
   cnv.textFont(myFont);
-  cnv.textStyle(BOLD);
-  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
-  cnv.fill(255);
-  cnv.text("SEARCH", wMargin, cnv.height/3);
-  cnv.text("REPLACE", wMargin, 2*cnv.height/3);
+  cnv.textAlign(TOP, CENTER);
+  //cnv.textStyle(BOLD);
+  //cnv.text("SEARCH", wMargin, cnv.height/3);
+  //cnv.text("REPLACE", wMargin, 2*cnv.height/3);
 
   return {
     x0: i*WINDOW_WIDTH*scale,
@@ -139,9 +133,102 @@ function infotext(i, j, m, n) {
     m: m,
     n: n,
     cnv: cnv,
-    wMargin: wMargin,
+    keywords: ["CRISPR", "genome editing", "text editing", "copy & paste", "search & replace", "1 millisecond", "200 000 system\n\ncalls", "2000\n\ndependencies", "20 suppliers", "complex software\n\nsystem", "complex\n\ninformation", "DNA"], // textable in Maria's code
+    timeUnit: 50, // x in Maria's code
+    keyword_idx: 0, // z in Maria's code
+    currentCharacter: 0, // same name in Maria's code
+    baseFinished: false, // whether the base is finished ("search" and "replace" are written)
     update: function(t) {
+      let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+      let string1 = "search";
+      let string2 = "replace";
+      let ti = (t/this.timeUnit) % 6; // i in Maria's code
+      if (this.baseFinished) ti = ti%6 + 4;
 
+      if (ti < 1) {
+        this.keyword_idx = 1;
+        cnv.background(0);
+        cnv.textSize(cnv.width/8);
+      } else if (ti >= 1 && ti < 2) {
+        let currentString1 = string1.substring(0, this.currentCharacter);
+        cnv.fill(250);
+        cnv.text(
+          currentString1,
+          wMargin,
+          cnv.height/3
+        );
+        this.currentCharacter += 0.5;
+      } else if (ti == 2) {
+        this.currentCharacter = 0;
+        //fill(10);
+        //rect(247.5, 200.4, 47, 10);
+      } else if (ti > 2 && ti < 3) {
+        let currentString2 = string2.substring(0, this.currentCharacter);
+        cnv.fill(250);
+        cnv.text(
+          currentString2,
+          wMargin,
+          2*cnv.height/3,
+        );
+        this.currentCharacter += 0.5;
+      } else if (ti == 4) {
+        this.currentCharacter = 0;
+        this.keyword_idx++;
+        this.baseFinished = true;
+        cnv.fill(150);
+        cnv.textSize(cnv.width/10);
+
+        cnv.fill(0);
+        cnv.rect(0, cnv.height/3 + cnv.width/5 - cnv.height/20, width, cnv.height/5);
+        cnv.rect(0, 2*cnv.height/3 + cnv.width/5 - cnv.height/20, width, cnv.height/5);
+      } else if (ti > 4 && ti < 5) {
+        let r = this.keyword_idx - 1;
+        let currentStrings = this.keywords[r].substring(0, this.currentCharacter);
+        cnv.fill(150);
+        cnv.text(
+          currentStrings,
+          wMargin,
+          cnv.height/3 + cnv.width/5
+        );
+        this.currentCharacter++;
+      } else if (ti == 5) {
+        this.currentCharacter = 0;
+      } else if (ti > 5 && ti < 6) {
+        let r = this.keyword_idx;
+        currentStrings = this.keywords[r].substring(0, this.currentCharacter);
+        cnv.fill(150);
+        cnv.text(
+          currentStrings,
+          wMargin,
+          2*cnv.height/3 + cnv.width/5
+        );
+        this.currentCharacter++;
+      } else if (ti > 6) {
+        this.currentCharacter = 0;
+      }
+
+      if (this.keyword_idx > this.keywords.length - 1) {
+        this.baseFinished = false;
+      }
+
+      // blinking cursor in front of "search" and "replace"
+      if (ti > 1.5) {
+        if (t % 30 <= 15) {
+          cnv.fill(0);
+        } else {
+          cnv.fill(250);
+        }
+        cnv.rect(cnv.width*0.49, cnv.height/3 + cnv.width/15, cnv.width*0.06, cnv.height*0.003);
+      }
+      if (ti > 2.5) {
+        if (t % 30 <= 15) {
+          cnv.fill(0);
+        } else {
+          cnv.fill(250);
+        }
+
+        cnv.rect(cnv.width*0.55, 2*cnv.height/3 + cnv.width/15, cnv.width*0.06, cnv.height*0.003);
+      }
     }
   };
 }
@@ -305,6 +392,7 @@ function ngrams(i, j, m, n, group_by) {
       let x = 0, j = 0, y = -cnv.height/3, k = floor(t/h);
       let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
       let wUnit = (w-wMargin)/(4*max_name_length);
+      let xOffset = 0;
 
       while (y < cnv.height*1.1) {
         let d = data.draw_trace[k%trace_len];
@@ -312,29 +400,33 @@ function ngrams(i, j, m, n, group_by) {
         let idx = j % this.group_by;
         if (idx == 1) {
           let mean_name_length = 0;
+          let mean_noise = 0;
           for (let ii = 0; ii < this.group_by; ii++) {
-            mean_name_length += getActualName(data.draw_trace[(k+ii)%trace_len].name).length + noise(k+ii)*10;
+            mean_name_length += getActualName(data.draw_trace[(k+ii)%trace_len].name).length;
+            mean_noise += noise(k+ii);
           }
           mean_name_length /= this.group_by;
+          mean_noise /= this.group_by;
           wMargin = WINDOW_WIDTH*scale/10 + wUnit*(max_name_length-mean_name_length);
+          xOffset = (mean_noise-0.5)*wMargin;
         }
 
         let [sup, dep] = getSupAndDep(d.name);
 
-        let grd = this.ctx.createLinearGradient(x+wMargin, 0, x+w-wMargin, 0);
+        let grd = this.ctx.createLinearGradient(x+wMargin+xOffset, 0, x+w-wMargin+xOffset, 0);
         grd.addColorStop(0, color(get_sup_color(sup)));
         grd.addColorStop(1, color(get_dep_color(dep)));
         this.ctx.fillStyle = grd;
 
         if (idx == 0) {
           // bottom
-          cnv.rect(x+wMargin, y-eps, w-2*wMargin, h-hGap+2*eps, 0, 0, h, h);
+          cnv.rect(x+wMargin+xOffset, y-eps, w-2*wMargin, h-hGap+2*eps, 0, 0, h, h);
         } else if (idx == 1) {
           // top
-          cnv.rect(x+wMargin, y+hGap, w-2*wMargin, h-hGap+eps, h, h, 0, 0);
+          cnv.rect(x+wMargin+xOffset, y+hGap, w-2*wMargin, h-hGap+eps, h, h, 0, 0);
         } else {
           // middle
-          cnv.rect(x+wMargin, y-eps, w-2*wMargin, h+2*eps);
+          cnv.rect(x+wMargin+xOffset, y-eps, w-2*wMargin, h+2*eps);
         }
 
         y += h;
