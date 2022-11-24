@@ -15,10 +15,11 @@ let mWindows = 3; // how many windows in width
 let nWindows = 1; // how many windows in height
 let showWindowFrame = true;
 
-let cnv; // canvas
+let cnv; // global canvas
 
 let window_composition;
 let zones, textLoop_zone;
+let glitch_amount = 0;
 
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
@@ -58,13 +59,21 @@ function draw() {
 
   let t = frameCount/2;
   for (let z of zones) {
-    image(z.cnv, z.x0, z.y0);
+    let img = z.cnv;
+    if (glitch_amount > 0 && !z.no_glitch) img = glitch_it(img, glitch_amount);
+    image(img, z.x0, z.y0);
     z.update(t);
   }
 
-  if (frameCount % 500 == 0) {
+  let f = (frameCount/500) % 2;
+  let glitch_duration = 0.03;
+  if (f == 1) {
     generate_window_composition();
     make_window_composition();
+  } else if (f > 1-glitch_duration && f < 1) {
+    glitch_amount++;
+  } else if (f > 1 && f < 1+glitch_duration) {
+    glitch_amount--;
   }
 
   if (showWindowFrame) drawWindowsOutline();
@@ -116,6 +125,18 @@ function make_window_composition() {
   }
 }
 
+function glitch_it(img, amount) {
+  let grph = createGraphics(img.width, img.height);
+  let bh = img.height/16
+  for (let y = 0; y < img.height; y += bh) {
+    let xOffset = random(-amount, amount)*img.width/100;
+    grph.image(img, xOffset, y, img.width, bh, 0, y, img.width, bh);
+    //grph.image(img, xOffset-img.width, y, img.width, bh, 0, y, img.width, bh);
+    //grph.image(img, xOffset+img.width, y, img.width, bh, 0, y, img.width, bh);
+  }
+  return grph;
+}
+
 function textLoop(i, j, m, n) {
   // adapted from Maria's code
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
@@ -133,6 +154,7 @@ function textLoop(i, j, m, n) {
     m: m,
     n: n,
     cnv: cnv,
+    no_glitch: true,
     keywords: ["CRISPR", "genome editing", "text editing", "copy & paste", "search & replace", "1 millisecond", "200 000 system\n\ncalls", "2000\n\ndependencies", "20 suppliers", "complex software\n\nsystem", "complex\n\ninformation", "DNA"], // textable in Maria's code
     timeUnit: 50, // x in Maria's code
     keyword_idx: 0, // z in Maria's code
