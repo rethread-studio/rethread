@@ -18,7 +18,7 @@ let showWindowFrame = true;
 let cnv; // global canvas
 
 let window_composition;
-let zones, textLoop_zone;
+let zones, text_loop_zone;
 let glitch_amount = 0;
 
 function preload() {
@@ -44,12 +44,13 @@ function setup() {
   console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window frames");
 
   /*
-  zones.push(helixBars(0, 0, 1, 1, false));
-  zones.push(helixBalls(1, 0, 1, 1, true));
+  zones.push(helix_bars(0, 0, 1, 1, false));
+  zones.push(helix_balls(1, 0, 1, 1, true));
   zones.push(ngrams(2, 0, 1, 1, 4));
   */
 
-  textLoop_zone = textLoop(1, 0, 1, 1);
+  text_loop_zone = text_loop(1, 0, 1, 1);
+  text_loop_zone = info_text(1, 0, 1, 1);
   generate_window_composition();
   make_window_composition();
 }
@@ -80,8 +81,8 @@ function draw() {
 }
 
 function generate_window_composition() {
-  let choice_possibilities = shuffle(["helixBars", "helixBalls", "ngrams", "ngrams"]);
-  //choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "textLoop";
+  let choice_possibilities = shuffle(["helix_bars", "helix_balls", "ngrams", "ngrams"]);
+  //choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "text_loop";
   let group_by_possibilities = [2, 4, 8];
   window_composition = [];
 
@@ -96,7 +97,7 @@ function generate_window_composition() {
       n: 1
     };
 
-    if (choice == "helixBars" || choice == "helixBalls") {
+    if (choice == "helix_bars" || choice == "helix_balls") {
       arr.ortho = random([true, false]);
     } else if (choice == "ngrams") {
       shuffle(group_by_possibilities, true);
@@ -109,14 +110,14 @@ function generate_window_composition() {
 }
 
 function make_window_composition() {
-  zones = [textLoop_zone];
+  zones = [text_loop_zone];
   for (let arr of window_composition) {
     switch (arr.choice) {
-      case "helixBars":
-        zones.push(helixBars(arr.i, arr.j, arr.m, arr.n, arr.ortho));
+      case "helix_bars":
+        zones.push(helix_bars(arr.i, arr.j, arr.m, arr.n, arr.ortho));
         break;
-      case "helixBalls":
-        zones.push(helixBalls(arr.i, arr.j, arr.m, arr.n, arr.ortho));
+      case "helix_balls":
+        zones.push(helix_balls(arr.i, arr.j, arr.m, arr.n, arr.ortho));
         break;
       case "ngrams":
         zones.push(ngrams(arr.i, arr.j, arr.m, arr.n, arr.group_by));
@@ -137,7 +138,7 @@ function glitch_it(img, amount) {
   return grph;
 }
 
-function textLoop(i, j, m, n) {
+function text_loop(i, j, m, n) {
   // adapted from Maria's code
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
   cnv.noStroke();
@@ -255,7 +256,207 @@ function textLoop(i, j, m, n) {
   };
 }
 
-function helixBars(i, j, m, n, ortho) {
+function info_text(i, j, m, n) {
+  // adapted from Maria's code
+  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  cnv.noStroke();
+  cnv.textFont(myFont);
+  cnv.textAlign(LEFT, CENTER);
+  //cnv.textStyle(BOLD);
+
+  return {
+    x0: i*WINDOW_WIDTH*scale,
+    y0: j*WINDOW_HEIGHT*scale,
+    m: m,
+    n: n,
+    cnv: cnv,
+    no_glitch: true,
+    update: function(t) {
+      let wMargin = cnv.width*40/570; // pageMargin in Maria's code
+      let d = cnv.width*100/570;
+
+      let sissor = `\n()                                            ()\nOO                                            OO\n`;
+      let helixstring0 = `                    <><><><>                  `;
+      let helixstring00 = `<><><><><><><><><><>        <><><><><><><><><><>`;
+      let CRISPR = `                    <CRISPR>                    `;
+
+      let helixstring = `><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><`;
+
+      let helixstring1 = `                           <><><><>                                               `;
+      let helixstring2 = `                                              <><><><>                            `;
+      let helixstring3 = `               <><><><>                                 `;
+
+      let string0 = `><><nobelprice2020.chemistry<>CRISPR<>genome.editing<>describe.as:text.editing><><`;
+
+      let string1 = `run_search & replace\n><>0.1 ms`;
+
+      let string2 = `>1000000<><><>trace<\n>2000<>dependencies<\n>20<><><><suppliers<`;
+
+      let string3 = `>view_50.traces.per.second><1.5h>`;
+
+      // the following should get linked to the running trace
+
+      let timer1 = `><>current.time<><><><><><><1.2h>`;
+
+      let progressbar = `[<><><><><><>.............] 40%`;
+
+      let col1 = "#00FF00";
+      let col2 = "#FFAAEE";
+      if (t % 600 > 300) [col1, col2] = [col2, col1];
+
+
+      cnv.background(0);
+      cnv.fill(200);
+      cnv.textSize(cnv.width*12/570);
+      cnv.text(
+        helixstring,
+        wMargin,
+        wMargin - 10*cnv.height/1120 + d
+      );
+      cnv.text(
+        helixstring,
+        wMargin,
+        wMargin + 10*cnv.height/1120 + d
+      );
+      cnv.text(
+        helixstring,
+        wMargin,
+        wMargin + 220*cnv.height/1120 + d
+      );
+      cnv.text(
+        helixstring,
+        wMargin,
+        wMargin + 450*cnv.height/1120 + d
+      );
+      cnv.text(
+        string0,
+        wMargin,
+        wMargin + 460*cnv.height/1120 + d
+      );
+      cnv.text(
+        helixstring,
+        wMargin,
+        wMargin + 470*cnv.height/1120 + d
+      );
+      cnv.text(
+        helixstring,
+        wMargin,
+        wMargin + 800*cnv.height/1120 + d
+      );
+      cnv.text(
+        string0,
+        wMargin,
+        wMargin + 810*cnv.height/1120 + d
+      );
+      cnv.text(
+        helixstring,
+        wMargin,
+        wMargin + 820*cnv.height/1120 + d
+      );
+      cnv.textSize(cnv.width*12/570);
+      cnv.text(
+        string0,
+        wMargin,
+        wMargin + d
+      );
+      cnv.text(
+        helixstring,
+        wMargin,
+        wMargin + 650*cnv.height/1120 + d
+      );
+      cnv.textSize(cnv.width*40/570);
+      cnv.text(
+        string1,
+        wMargin,
+        wMargin + 24*cnv.height/1120 + d,
+        width,
+        wMargin + 24*cnv.height/1120 + d
+      );
+
+      cnv.textSize(cnv.width*30/570);
+      cnv.text(
+        string2,
+        wMargin,
+        wMargin + 180*cnv.height/1120 + d,
+        wMargin,
+        wMargin + 180*cnv.height/1120 + d
+      );
+      cnv.textSize(cnv.width*30/570);
+      cnv.text(
+        string3,
+        wMargin,
+        wMargin + 550*cnv.height/1120 + d
+      );
+      cnv.textSize(cnv.width*30/570);
+      cnv.text(
+        timer1,
+        wMargin,
+        wMargin + 720*cnv.height/1120 + d
+      );
+
+      cnv.textSize(cnv.width*30/570);
+      cnv.text(
+        progressbar,
+        wMargin,
+        wMargin + 1000*cnv.height/1120
+      );
+      cnv.push();
+      {
+        cnv.fill(col1);
+        cnv.textSize(cnv.width*12/570);
+        cnv.text(
+          helixstring1,
+          wMargin,
+          wMargin + 10*cnv.height/1120 + d
+        );
+
+        cnv.text(
+          helixstring2,
+          wMargin,
+          wMargin + 470*cnv.height/1120 + d
+        );
+        cnv.text(
+          helixstring3,
+          wMargin,
+          wMargin + 650*cnv.height/1120 + d
+        );
+        cnv.textSize(cnv.width*20/570);
+        cnv.text(
+          helixstring0,
+          wMargin,
+          wMargin
+        );
+        cnv.text(
+          sissor,
+          wMargin,
+          wMargin,
+          width,
+          wMargin*2
+        );
+      }
+      cnv.pop();
+      cnv.push();
+      {
+        cnv.textSize(cnv.width*20/570);
+
+        cnv.text(
+          helixstring00,
+          wMargin,
+          wMargin
+        );
+        cnv.fill(col2);
+        cnv.text(
+          helixstring0,
+          wMargin,
+          wMargin + 40*cnv.height/1120
+        );
+      }
+      cnv.pop();
+    }
+  };
+}
+
+function helix_bars(i, j, m, n, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
   cnv.translate(-cnv.width/2, -cnv.height/2);
@@ -322,7 +523,7 @@ function helixBars(i, j, m, n, ortho) {
   };
 }
 
-function helixBalls(i, j, m, n, ortho) {
+function helix_balls(i, j, m, n, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
   cnv.translate(-cnv.width/2, -cnv.height/2);
