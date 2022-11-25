@@ -15,11 +15,17 @@ let mWindows = 3; // how many windows in width
 let nWindows = 1; // how many windows in height
 let showWindowFrame = true;
 
+let where = "right"; // whether it's the left or right windows
+
 let cnv; // global canvas
 
 let window_composition;
-let zones, text_loop_zone;
+let zones, text_zone;
 let glitch_amount = 0;
+
+// TODO:
+// have a global h
+// sync all columns by having the same initial y
 
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
@@ -49,8 +55,7 @@ function setup() {
   zones.push(ngrams(2, 0, 1, 1, 4));
   */
 
-  text_loop_zone = text_loop(1, 0, 1, 1);
-  text_loop_zone = info_text(1, 0, 1, 1);
+
   generate_window_composition();
   make_window_composition();
 }
@@ -69,6 +74,7 @@ function draw() {
   let f = (frameCount/500) % 2;
   let glitch_duration = 0.03;
   if (f == 1) {
+    purge_window_composition();
     generate_window_composition();
     make_window_composition();
   } else if (f > 1-glitch_duration && f < 1) {
@@ -80,7 +86,52 @@ function draw() {
   if (showWindowFrame) drawWindowsOutline();
 }
 
-function generate_window_composition() {
+function generate_window_composition(where) {
+  window_composition = [];
+
+  if (where == "left") {
+    let arr = {
+      choice: random(["helix_bars", "helix_balls"]),
+      i: 0,
+      j: 0,
+      m: 1,
+      n: 1,
+      ortho: random([true, false])
+    };
+    window_composition.push(arr);
+    text_zone = text_loop(1, 0, 1, 1);
+    arr = {
+      choice: "ngrams",
+      i: 2,
+      j: 0,
+      m: 1,
+      n: 1,
+      group_by: ~~random(2, 10)
+    };
+    window_composition.push(arr);
+  } else {
+    let arr = {
+      choice: "trace_print",
+      i: 0,
+      j: 0,
+      m: 1,
+      n: 1,
+      mode: random(["dep", "sup", "name"])
+    };
+    window_composition.push(arr);
+    text_zone = text_info(1, 0, 1, 1);
+    arr = {
+      choice: "ngrams",
+      i: 2,
+      j: 0,
+      m: 1,
+      n: 1,
+      group_by: ~~random(2, 10)
+    };
+    window_composition.push(arr);
+  }
+
+  /*
   let choice_possibilities = shuffle(["helix_bars", "helix_balls", "ngrams", "ngrams"]);
   //choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "text_loop";
   let group_by_possibilities = [2, 4, 8];
@@ -107,10 +158,11 @@ function generate_window_composition() {
     window_composition.push(arr);
   }
   //console.log(window_composition)
+  */
 }
 
 function make_window_composition() {
-  zones = [text_loop_zone];
+  zones = [text_zone];
   for (let arr of window_composition) {
     switch (arr.choice) {
       case "helix_bars":
@@ -122,7 +174,17 @@ function make_window_composition() {
       case "ngrams":
         zones.push(ngrams(arr.i, arr.j, arr.m, arr.n, arr.group_by));
         break;
+      case "trace_print":
+        zones.push(trace_print(arr.i, arr.j, arr.m, arr.n, arr.mode));
+        break;
     }
+  }
+}
+
+function purge_window_composition() {
+  // TODO: actually purge
+  for (let z of zones) {
+    z.cnv.remove();
   }
 }
 
@@ -137,6 +199,7 @@ function glitch_it(img, amount) {
   }
   return grph;
 }
+
 
 function text_loop(i, j, m, n) {
   // adapted from Maria's code
@@ -256,7 +319,7 @@ function text_loop(i, j, m, n) {
   };
 }
 
-function info_text(i, j, m, n) {
+function text_info(i, j, m, n) {
   // adapted from Maria's code
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
   cnv.noStroke();
@@ -594,7 +657,6 @@ function helix_balls(i, j, m, n, ortho) {
 }
 
 function ngrams(i, j, m, n, group_by) {
-  // width of rectangle changes with depth, mean of group
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
   cnv.noStroke();
 
@@ -659,6 +721,68 @@ function ngrams(i, j, m, n, group_by) {
     }
   };
 }
+
+function trace_print(i, j, m, n, mode) {
+  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  cnv.noStroke();
+  cnv.textAlign(LEFT, TOP);
+  cnv.textFont(myFont);
+
+  return {
+    x0: i*WINDOW_WIDTH*scale,
+    y0: j*WINDOW_HEIGHT*scale,
+    m: m,
+    n: n,
+    mode: mode,
+    cnv: cnv,
+    ctx: cnv.drawingContext,
+    update: function(t) {
+      cnv.clear();
+
+      let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+      let h = 20;
+      cnv.textSize(h);
+      let k = floor(t/h);
+
+      let str = "> print(";
+      if (this.mode == "sup") {
+        str += "suppliers)"
+      } else if (this.mode == "dep") {
+        str += "dependencies)"
+      } else {
+        str += "function names)"
+      }
+      cnv.fill(250);
+      cnv.text(str, wMargin, 0);
+
+      for (let y = h; y < cnv.height; y += h) {
+        let d = data.draw_trace[k%trace_len];
+        let [sup, dep] = getSupAndDep(d.name);
+        if (this.mode == "sup") {
+          cnv.fill(get_sup_color(sup));
+          cnv.text(sup, wMargin, y);
+        } else if (this.mode == "dep") {
+          cnv.fill(get_dep_color(dep));
+          cnv.text(dep, wMargin, y);
+        } else {
+          let name = getActualName(d.name);
+          let w = textWidth(name);
+          let grd = this.ctx.createLinearGradient(wMargin, y, w+wMargin, y+h);
+          grd.addColorStop(0, color(get_sup_color(sup)));
+          grd.addColorStop(1, color(get_dep_color(dep)));
+          this.ctx.fillStyle = grd;
+          cnv.text(name, wMargin, y);
+        }
+
+        k++;
+      }
+    }
+  };
+}
+
+
+
+
 
 function determineScale() {
   scale = 0.99*windowHeight/(WINDOW_HEIGHT*nWindows);
