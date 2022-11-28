@@ -2,7 +2,6 @@ let data;
 let trace_len; // length of trace
 let max_name_length;
 
-let keywords = ["copy", "paste", "search", "replace", "find", "write"];
 let dep_colors, sup_colors;
 let all_deps, all_sups;
 let myFont;
@@ -14,6 +13,7 @@ const SMOL_WINDOW_HEIGHT = 47;
 let mWindows = 3; // how many windows in width
 let nWindows = 1; // how many windows in height
 let showWindowFrame = true;
+let h = 20; // height of 1 bloc (DNA helix, ngram unit...)
 
 let where = "right"; // whether it's the left or right windows
 
@@ -24,8 +24,7 @@ let left_zone, text_zone, right_zone;
 let glitch_amount = 0;
 
 // TODO:
-// have a global h
-// sync all columns by having the same initial y
+// fix progress bar (sync to LEDs?)
 
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
@@ -47,7 +46,7 @@ function setup() {
   all_sups = sup_colors.getColumn(0);
   centerCanvas();
 
-  console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window frames");
+  console.log("Press space to show/hide window frames");
 
   let params = getURLParams();
   where = params.where;
@@ -96,13 +95,46 @@ function generate_window_composition(update_text_zone) {
   if (where == "left") {
     let choice = random(["helix_bars", "helix_balls"]);
     let ortho = random([true, false]);
-    left_zone = (choice == "helix_bars") ? helix_bars(0, 0, 1, 1, ortho) : helix_balls(0, 0, 1, 1, ortho)
+    if (left_zone) {
+      let prev_choice = left_zone.choice;
+      let prev_ortho = left_zone.ortho;
+      while (choice == prev_choice && ortho == prev_ortho) {
+        choice = random(["helix_bars", "helix_balls"]);
+        ortho = random([true, false]);
+      }
+    }
+    left_zone = (choice == "helix_bars") ? helix_bars(0, 0, 1, 1, choice, ortho) : helix_balls(0, 0, 1, 1, choice, ortho);
+
     if (update_text_zone) text_zone = text_loop(1, 0, 1, 1);
-    right_zone = ngrams(2, 0, 1, 1, ~~random(2, 10));
+
+    let section_idx = ~~random(data.depth_envelope.sections.length);
+    if (right_zone) {
+      let prev_section_idx = right_zone.section_idx;
+      while (section_idx == prev_section_idx) {
+        section_idx = ~~random(data.depth_envelope.sections.length);
+      }
+    }
+    right_zone = section_profile(2, 0, 1, 1, section_idx);
   } else { // where == "right"
-    left_zone = trace_print(0, 0, 1, 1, random(["sup", "dep", "name"]));
+    let group_by = ~~random(2, 10);
+    if (left_zone) {
+      let prev_group_by = left_zone.group_by;
+      while (group_by == prev_group_by) {
+        group_by = ~~random(2, 10);
+      }
+    }
+    left_zone = ngrams(0, 0, 1, 1, group_by);
+
     text_zone = text_info(1, 0, 1, 1);
-    right_zone = ngrams(2, 0, 1, 1, ~~random(2, 10));
+
+    let mode = random(["sup", "dep", "name"]);
+    if (right_zone) {
+      let prev_mode = right_zone.mode;
+      while (mode == prev_mode) {
+        mode = random(["sup", "dep", "name"]);
+      }
+    }
+    right_zone = trace_print(2, 0, 1, 1, mode);
   }
 }
 
@@ -433,24 +465,22 @@ function text_info(i, j, m, n) {
   };
 }
 
-function helix_bars(i, j, m, n, ortho) {
+function helix_bars(i, j, m, n, choice, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
   cnv.translate(-cnv.width/2, -cnv.height/2);
   if (ortho) cnv.ortho();
   let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
   let w = cnv.width-wMargin*2; // width of each function call rectangle
-  let h = 20; // height of each function call rectangle
   let hGap = h/8; // gap between rectangles vertically
-  cnv.textSize(h*3/4);
-  cnv.textFont(myFont);
-  cnv.textAlign(CENTER, CENTER);
 
   return {
     x0: i*WINDOW_WIDTH*scale,
     y0: j*WINDOW_HEIGHT*scale,
     m: m,
     n: n,
+    choice: choice,
+    ortho: ortho,
     cnv: cnv,
     wMargin: wMargin,
     w: w,
@@ -459,65 +489,49 @@ function helix_bars(i, j, m, n, ortho) {
     update: function(t) {
       cnv.clear();
 
-      let x = this.wMargin, y = -t%this.h-height/3, i = floor(t/this.h);
+      let x = this.wMargin, y = -t%h-height/3, i = floor(t/h);
 
       while (y < cnv.height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
-        let [sup, dep] = getSupAndDep(d.name);
+        let [sup, dep] = [d.supplier, d.dependency];
 
         cnv.push();
 
-        cnv.translate(x+this.w/2, y+this.h/2, 0);
+        cnv.translate(x+this.w/2, y+h/2, 0);
         cnv.rotateY(y/60);
         cnv.fill(get_sup_color(sup));
         cnv.beginShape();
-        cnv.vertex(-this.w/2+this.wMargin, -this.h/2+this.hGap/2, 0);
-        cnv.vertex(-this.w/2+this.wMargin, this.h/2-this.hGap/2, 0);
+        cnv.vertex(-this.w/2+this.wMargin, -h/2+this.hGap/2, 0);
+        cnv.vertex(-this.w/2+this.wMargin, h/2-this.hGap/2, 0);
         cnv.fill(get_dep_color(dep));
-        cnv.vertex(this.w/2-this.wMargin, this.h/2-this.hGap/2, 0);
-        cnv.vertex(this.w/2-this.wMargin, -this.h/2+this.hGap/2, 0);
+        cnv.vertex(this.w/2-this.wMargin, h/2-this.hGap/2, 0);
+        cnv.vertex(this.w/2-this.wMargin, -h/2+this.hGap/2, 0);
         cnv.endShape();
-
-        let funcName = getActualName(d.name);
-        for (let wo of keywords) {
-          let idx = funcName.toLowerCase().indexOf(wo);
-          if (idx >= 0) {
-            cnv.fill(240);
-            //text(wo, w/2-wMargin/2, -hGap/2);
-            cnv.translate(0, -this.hGap, 1);
-            cnv.text(wo, 0, 0);
-            cnv.translate(0, 0, -2);
-            cnv.text(wo, 0, 0);
-            break;
-          }
-        }
 
         cnv.pop();
 
-        y += this.h;
+        y += h;
       }
     }
   };
 }
 
-function helix_balls(i, j, m, n, ortho) {
+function helix_balls(i, j, m, n, choice, ortho) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
   cnv.noStroke();
   cnv.translate(-cnv.width/2, -cnv.height/2);
   if (ortho) cnv.ortho();
   let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
   let w = cnv.width-wMargin*2; // width of each function call rectangle
-  let h = 20; // height of each function call rectangle
   let hGap = h/8; // gap between rectangles vertically
-  cnv.textSize(h);
-  cnv.textFont(myFont);
-  cnv.textAlign(LEFT, CENTER);
 
   return {
     x0: i*WINDOW_WIDTH*scale,
     y0: j*WINDOW_HEIGHT*scale,
     m: m,
     n: n,
+    choice: choice,
+    ortho: ortho,
     cnv: cnv,
     wMargin: wMargin,
     w: w,
@@ -526,45 +540,34 @@ function helix_balls(i, j, m, n, ortho) {
     update: function(t) {
       cnv.clear();
 
-      let x = this.wMargin, y = -t%this.h-height/3, i = floor(t/this.h);
+      let x = this.wMargin, y = -t%h-height/3, i = floor(t/h);
 
       while (y < cnv.height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
-        let [sup, dep] = getSupAndDep(d.name);
+        let [sup, dep] = [d.supplier, d.dependency];
 
         cnv.push();
 
-        cnv.translate(x+this.w/2, y+this.h/2, 0);
+        cnv.translate(x+this.w/2, y+h/2, 0);
         cnv.rotateY(y/60-PI/2);
 
         cnv.fill(240);
         cnv.rotateX(3*PI/2);
-        cnv.cylinder(this.h/5, this.w-2*this.wMargin);
+        cnv.cylinder(h/5, this.w-2*this.wMargin);
         cnv.rotate(PI/2);
 
         cnv.push();
         cnv.fill(get_sup_color(sup));
         cnv.translate(-this.w/2+this.wMargin, 0);
-        cnv.sphere(this.h/2);
+        cnv.sphere(h/2);
         cnv.fill(get_dep_color(dep));
         cnv.translate(this.w-2*this.wMargin, 0);
-        cnv.sphere(this.h/2);
+        cnv.sphere(h/2);
         cnv.pop();
-
-        let funcName = getActualName(d.name);
-        cnv.rotateX(PI/2);
-        for (let wo of keywords) {
-          let idx = funcName.toLowerCase().indexOf(wo);
-          if (idx >= 0) {
-            cnv.fill(240);
-            cnv.text(wo, this.w/2-this.wMargin/2+this.h/4, -this.hGap*2);
-            break;
-          }
-        }
 
         cnv.pop();
 
-        y += this.h;
+        y += h;
       }
     }
   };
@@ -585,7 +588,7 @@ function ngrams(i, j, m, n, group_by) {
     update: function(t) {
       cnv.clear();
 
-      let w = WINDOW_WIDTH*scale, h = 20, hGap = h/4;
+      let w = WINDOW_WIDTH*scale, hGap = h/4;
       let eps = 1;
 
       let x = 0, j = 0, y = -cnv.height/3, k = floor(t/h);
@@ -599,18 +602,18 @@ function ngrams(i, j, m, n, group_by) {
         let idx = j % this.group_by;
         if (idx == 1) {
           let mean_name_length = 0;
-          let mean_noise = 0;
+          //let mean_noise = 0;
           for (let ii = 0; ii < this.group_by; ii++) {
             mean_name_length += getActualName(data.draw_trace[(k+ii)%trace_len].name).length;
-            mean_noise += noise(k+ii);
+            //mean_noise += noise(k+ii);
           }
           mean_name_length /= this.group_by;
-          mean_noise /= this.group_by;
+          //mean_noise /= this.group_by;
           wMargin = WINDOW_WIDTH*scale/10 + wUnit*(max_name_length-mean_name_length);
-          xOffset = (mean_noise-0.5)*wMargin;
+          //xOffset = (mean_noise-0.5)*wMargin;
         }
 
-        let [sup, dep] = getSupAndDep(d.name);
+        let [sup, dep] = [d.supplier, d.dependency];
 
         let grd = this.ctx.createLinearGradient(x+wMargin+xOffset, 0, x+w-wMargin+xOffset, 0);
         grd.addColorStop(0, color(get_sup_color(sup)));
@@ -657,7 +660,33 @@ function trace_print(i, j, m, n, mode) {
       let h = 20;
       cnv.textSize(h);
       let k = floor(t/h);
+      let y0 = -t%h-height/3+h/2;
 
+      for (let y = y0; y < cnv.height; y += h) {
+        let d = data.draw_trace[k%trace_len];
+        let [sup, dep] = [d.supplier, d.dependency];
+        if (this.mode == "sup") {
+          cnv.fill(get_sup_color(sup));
+          cnv.text(sup, wMargin, y);
+        } else if (this.mode == "dep") {
+          cnv.fill(get_dep_color(dep));
+          cnv.text(dep, wMargin, y);
+        } else {
+          let name = getActualName(d.name);
+          let w = textWidth(name);
+          let grd = this.ctx.createLinearGradient(wMargin, 0, w+wMargin, 0);
+          grd.addColorStop(0, color(get_sup_color(sup)));
+          grd.addColorStop(1, color(get_dep_color(dep)));
+          this.ctx.fillStyle = grd;
+          cnv.text(name, wMargin, y);
+        }
+
+        k++;
+      }
+
+      cnv.erase();
+      cnv.rect(0, 0, cnv.width, h*1.5);
+      cnv.noErase();
       let str = "> print(";
       if (this.mode == "sup") {
         str += "suppliers)"
@@ -668,32 +697,69 @@ function trace_print(i, j, m, n, mode) {
       }
       cnv.fill(250);
       cnv.text(str, wMargin, 0);
-
-      for (let y = h; y < cnv.height; y += h) {
-        let d = data.draw_trace[k%trace_len];
-        let [sup, dep] = getSupAndDep(d.name);
-        if (this.mode == "sup") {
-          cnv.fill(get_sup_color(sup));
-          cnv.text(sup, wMargin, y);
-        } else if (this.mode == "dep") {
-          cnv.fill(get_dep_color(dep));
-          cnv.text(dep, wMargin, y);
-        } else {
-          let name = getActualName(d.name);
-          let w = textWidth(name);
-          let grd = this.ctx.createLinearGradient(wMargin, y, w+wMargin, y+h);
-          grd.addColorStop(0, color(get_sup_color(sup)));
-          grd.addColorStop(1, color(get_dep_color(dep)));
-          this.ctx.fillStyle = grd;
-          cnv.text(name, wMargin, y);
-        }
-
-        k++;
-      }
     }
   };
 }
 
+function section_profile(i, j, m, n, section_idx) {
+  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  cnv.noStroke();
+  cnv.rectMode(CENTER);
+  let ctx = cnv.drawingContext;
+  let section = data.depth_envelope.sections[section_idx];
+  //console.log(section);
+
+  let min_depth = Infinity;
+  let max_depth = 0;
+  for (let i = section.start_index; i < section.end_index; i++) {
+    let d = data.draw_trace[i];
+    let depth = d.depth;
+    if (depth < min_depth) min_depth = depth;
+    if (depth > max_depth) max_depth = depth;
+  }
+  let max_offset = section.shannon_wiener_diversity_index*50;
+
+  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+  let hMargin = wMargin;
+  let section_size = section.end_index - section.start_index;
+  let w = cnv.width-2*wMargin;
+  let h = (cnv.height-2*hMargin)/section_size;
+
+  for (let i = section.start_index; i < section.end_index; i++) {
+    let y = hMargin + (i-section.start_index+1/2)*h;
+    let d = data.draw_trace[i];
+    let [sup, dep] = [d.supplier, d.dependency];
+
+    let col1 = color(get_sup_color(sup));
+    let col2 = color(get_dep_color(dep));
+    let thickness = map(d.depth, min_depth, max_depth, 1/3, 2/3)*h;
+
+    for (let x = wMargin; x < cnv.width-wMargin; x++) {
+      let alpha = 255;
+      if (x < cnv.width/3) alpha = map(x, wMargin, cnv.width/3, 0, 1);
+      else if (x > 2*cnv.width/3) alpha = map(x, 2*cnv.width/3, cnv.width-wMargin, 1, 0);
+      let col = lerpColor(col1, col2, x/cnv.width);
+      cnv.fill(red(col), green(col), blue(col), alpha*255);
+
+      let y_offset = (noise(x/500, y/1000)-1/2)*max_offset;
+      let factor = 1;
+      if (x < cnv.width/2) factor = pow(map(x, wMargin, cnv.width/2, 0, 1), 1/8);
+      else factor = pow(map(x, cnv.width/2, cnv.width-wMargin, 1, 0), 1/8);
+      cnv.circle(x, y+y_offset, thickness*factor);
+    }
+  }
+
+  return {
+    x0: i*WINDOW_WIDTH*scale,
+    y0: j*WINDOW_HEIGHT*scale,
+    m: m,
+    n: n,
+    cnv: cnv,
+    update: function(t) {
+      // nothing lol
+    }
+  };
+}
 
 
 
@@ -740,6 +806,7 @@ function get_sup_color(sup) {
   return sup_colors.get(all_sups.indexOf(sup), 1);
 }
 
+/*
 function getSupAndDep(s) {
   // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
   // return: an array, the first value is the supplier, the second is the dependency
@@ -752,6 +819,7 @@ function getSupAndDep(s) {
   let dependency = func.slice(idx1+1, min(idx2, idx3)); // find the dependency
   return [supplier, dependency];
 }
+*/
 
 function getActualName(s) {
   // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
@@ -762,13 +830,7 @@ function getActualName(s) {
 function keyPressed() {
   if (key == " ") {
     showWindowFrame = !showWindowFrame;
-    return;
   }
-  if (keyCode == LEFT_ARROW && mWindows > 1) mWindows--;
-  if (keyCode == RIGHT_ARROW && mWindows < 4) mWindows++;
-  if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
-  if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
-  windowResized();
 }
 
 function windowResized() {
