@@ -20,7 +20,7 @@ let where = "right"; // whether it's the left or right windows
 let cnv; // global canvas
 
 let window_composition;
-let zones, text_zone;
+let left_zone, text_zone, right_zone;
 let glitch_amount = 0;
 
 // TODO:
@@ -49,34 +49,38 @@ function setup() {
 
   console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window frames");
 
-  /*
-  zones.push(helix_bars(0, 0, 1, 1, false));
-  zones.push(helix_balls(1, 0, 1, 1, true));
-  zones.push(ngrams(2, 0, 1, 1, 4));
-  */
-
-
-  generate_window_composition();
-  make_window_composition();
+  let params = getURLParams();
+  where = params.where;
+  generate_window_composition(true);
 }
 
 function draw() {
   background(0);
 
   let t = frameCount/2;
-  for (let z of zones) {
-    let img = z.cnv;
-    if (glitch_amount > 0 && !z.no_glitch) img = glitch_it(img, glitch_amount);
-    image(img, z.x0, z.y0);
-    z.update(t);
+  let left_img = left_zone.cnv, right_img = right_zone.cnv;
+  if (glitch_amount > 0) {
+    left_img = glitch_it(left_img, glitch_amount);
+    right_img = glitch_it(right_img, glitch_amount);
   }
+  image(left_img, left_zone.x0, left_zone.y0);
+  image(text_zone.cnv, text_zone.x0, text_zone.y0);
+  image(right_img, right_zone.x0, right_zone.y0);
+  if (glitch_amount > 0) {
+    left_img.remove();
+    right_img.remove();
+  }
+  left_zone.update(t);
+  text_zone.update(t);
+  right_zone.update(t);
+
 
   let f = (frameCount/500) % 2;
   let glitch_duration = 0.03;
   if (f == 1) {
-    purge_window_composition();
-    generate_window_composition();
-    make_window_composition();
+    left_zone.cnv.remove();
+    right_zone.cnv.remove();
+    generate_window_composition(false);
   } else if (f > 1-glitch_duration && f < 1) {
     glitch_amount++;
   } else if (f > 1 && f < 1+glitch_duration) {
@@ -86,105 +90,19 @@ function draw() {
   if (showWindowFrame) drawWindowsOutline();
 }
 
-function generate_window_composition(where) {
+function generate_window_composition(update_text_zone) {
   window_composition = [];
 
   if (where == "left") {
-    let arr = {
-      choice: random(["helix_bars", "helix_balls"]),
-      i: 0,
-      j: 0,
-      m: 1,
-      n: 1,
-      ortho: random([true, false])
-    };
-    window_composition.push(arr);
-    text_zone = text_loop(1, 0, 1, 1);
-    arr = {
-      choice: "ngrams",
-      i: 2,
-      j: 0,
-      m: 1,
-      n: 1,
-      group_by: ~~random(2, 10)
-    };
-    window_composition.push(arr);
-  } else {
-    let arr = {
-      choice: "trace_print",
-      i: 0,
-      j: 0,
-      m: 1,
-      n: 1,
-      mode: random(["dep", "sup", "name"])
-    };
-    window_composition.push(arr);
+    let choice = random(["helix_bars", "helix_balls"]);
+    let ortho = random([true, false]);
+    left_zone = (choice == "helix_bars") ? helix_bars(0, 0, 1, 1, ortho) : helix_balls(0, 0, 1, 1, ortho)
+    if (update_text_zone) text_zone = text_loop(1, 0, 1, 1);
+    right_zone = ngrams(2, 0, 1, 1, ~~random(2, 10));
+  } else { // where == "right"
+    left_zone = trace_print(0, 0, 1, 1, random(["sup", "dep", "name"]));
     text_zone = text_info(1, 0, 1, 1);
-    arr = {
-      choice: "ngrams",
-      i: 2,
-      j: 0,
-      m: 1,
-      n: 1,
-      group_by: ~~random(2, 10)
-    };
-    window_composition.push(arr);
-  }
-
-  /*
-  let choice_possibilities = shuffle(["helix_bars", "helix_balls", "ngrams", "ngrams"]);
-  //choice_possibilities[choice_possibilities.length - random([0, 1, 2])] = "text_loop";
-  let group_by_possibilities = [2, 4, 8];
-  window_composition = [];
-
-  let is = [0, 2];
-  for (let i of is) {
-    let choice = choice_possibilities.pop();
-    let arr = {
-      choice: choice,
-      i: i,
-      j: 0,
-      m: 1,
-      n: 1
-    };
-
-    if (choice == "helix_bars" || choice == "helix_balls") {
-      arr.ortho = random([true, false]);
-    } else if (choice == "ngrams") {
-      shuffle(group_by_possibilities, true);
-      arr.group_by = group_by_possibilities.pop();
-    }
-
-    window_composition.push(arr);
-  }
-  //console.log(window_composition)
-  */
-}
-
-function make_window_composition() {
-  zones = [text_zone];
-  for (let arr of window_composition) {
-    switch (arr.choice) {
-      case "helix_bars":
-        zones.push(helix_bars(arr.i, arr.j, arr.m, arr.n, arr.ortho));
-        break;
-      case "helix_balls":
-        zones.push(helix_balls(arr.i, arr.j, arr.m, arr.n, arr.ortho));
-        break;
-      case "ngrams":
-        zones.push(ngrams(arr.i, arr.j, arr.m, arr.n, arr.group_by));
-        break;
-      case "trace_print":
-        zones.push(trace_print(arr.i, arr.j, arr.m, arr.n, arr.mode));
-        break;
-    }
-  }
-}
-
-function purge_window_composition() {
-  // TODO: actually purge
-  for (let z of zones) {
-    z.cnv.remove();
+    right_zone = ngrams(2, 0, 1, 1, ~~random(2, 10));
   }
 }
 
@@ -209,8 +127,6 @@ function text_loop(i, j, m, n) {
   cnv.textFont(myFont);
   cnv.textAlign(TOP, CENTER);
   //cnv.textStyle(BOLD);
-  //cnv.text("SEARCH", wMargin, cnv.height/3);
-  //cnv.text("REPLACE", wMargin, 2*cnv.height/3);
 
   return {
     x0: i*WINDOW_WIDTH*scale,
@@ -218,7 +134,6 @@ function text_loop(i, j, m, n) {
     m: m,
     n: n,
     cnv: cnv,
-    no_glitch: true,
     keywords: ["CRISPR", "genome editing", "text editing", "copy & paste", "search & replace", "1 millisecond", "200 000 system\n\ncalls", "2000\n\ndependencies", "20 suppliers", "complex software\n\nsystem", "complex\n\ninformation", "DNA"], // textable in Maria's code
     timeUnit: 50, // x in Maria's code
     keyword_idx: 0, // z in Maria's code
@@ -333,7 +248,6 @@ function text_info(i, j, m, n) {
     m: m,
     n: n,
     cnv: cnv,
-    no_glitch: true,
     update: function(t) {
       let wMargin = cnv.width*40/570; // pageMargin in Maria's code
       let d = cnv.width*100/570;
@@ -750,7 +664,7 @@ function trace_print(i, j, m, n, mode) {
       } else if (this.mode == "dep") {
         str += "dependencies)"
       } else {
-        str += "function names)"
+        str += "function_names)"
       }
       cnv.fill(250);
       cnv.text(str, wMargin, 0);
@@ -860,6 +774,5 @@ function keyPressed() {
 function windowResized() {
   determineScale();
   resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
-  make_window_composition();
   centerCanvas();
 }
