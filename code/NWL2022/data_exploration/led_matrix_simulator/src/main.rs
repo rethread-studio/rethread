@@ -309,6 +309,11 @@ impl Trace {
             scheduler_com.jump_to_next_marker();
         }
     }
+    pub fn jump_close_to_end(&mut self) {
+        if let Some(scheduler_com) = &mut self.scheduler_com {
+            scheduler_com.jump_close_to_end();
+        }
+    }
     pub fn jump_to_previous_marker(&mut self) {
         if let Some(scheduler_com) = &mut self.scheduler_com {
             scheduler_com.jump_to_previous_marker();

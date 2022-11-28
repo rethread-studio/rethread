@@ -179,7 +179,9 @@ fn led_animation_from_trace(
             let num_depth_points = trace.trace.depth_envelope.sections.len();
             let mut depth_point =
                 trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
-            while trace.current_index > depth_point.end_index {
+            while trace.current_index > depth_point.end_index
+                || trace.current_index < depth_point.start_index
+            {
                 trace.current_depth_envelope_index += 1;
                 trace.current_depth_envelope_index %= num_depth_points;
                 depth_point =
@@ -622,6 +624,9 @@ fn bevy_ui(
             }
             if ui.button("Jump to next marker ->").clicked() {
                 trace.jump_to_next_marker();
+            }
+            if ui.button("Jump to end").clicked() {
+                trace.jump_close_to_end();
             }
             ui.collapsing("Open trace", |ui| {
                 if ui.button("Open trace").clicked() {
