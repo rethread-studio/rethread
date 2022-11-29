@@ -94,13 +94,13 @@ function generate_window_composition(update_text_zone) {
 
   if (where == "left") {
     let choice = random(["helix_bars", "helix_balls"]);
-    let ortho = random([true, false]);
+    let ortho = random() < 1/2;
     if (left_zone) {
       let prev_choice = left_zone.choice;
       let prev_ortho = left_zone.ortho;
       while (choice == prev_choice && ortho == prev_ortho) {
         choice = random(["helix_bars", "helix_balls"]);
-        ortho = random([true, false]);
+        ortho = random() < 1/2;
       }
     }
     left_zone = (choice == "helix_bars") ? helix_bars(0, 0, 1, 1, choice, ortho) : helix_balls(0, 0, 1, 1, choice, ortho);
@@ -128,13 +128,16 @@ function generate_window_composition(update_text_zone) {
     text_zone = text_info(1, 0, 1, 1);
 
     let mode = random(["sup", "dep", "name"]);
+    let dna = random() < 1/2;
     if (right_zone) {
       let prev_mode = right_zone.mode;
-      while (mode == prev_mode) {
+      let prev_dna = right_zone.dna;
+      while (mode == prev_mode && dna == prev_dna) {
         mode = random(["sup", "dep", "name"]);
+        dna = random() < 1/2;
       }
     }
-    right_zone = trace_print(2, 0, 1, 1, mode);
+    right_zone = trace_print(2, 0, 1, 1, mode, dna);
   }
 }
 
@@ -639,7 +642,7 @@ function ngrams(i, j, m, n, group_by) {
   };
 }
 
-function trace_print(i, j, m, n, mode) {
+function trace_print(i, j, m, n, mode, dna) {
   let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
   cnv.noStroke();
   cnv.textAlign(LEFT, TOP);
@@ -651,6 +654,7 @@ function trace_print(i, j, m, n, mode) {
     m: m,
     n: n,
     mode: mode,
+    dna: dna,
     cnv: cnv,
     ctx: cnv.drawingContext,
     update: function(t) {
@@ -660,17 +664,18 @@ function trace_print(i, j, m, n, mode) {
       let h = 20;
       cnv.textSize(h);
       let k = floor(t/h);
-      let y0 = -t%h-height/3+h/2;
+      let y0 = -height/3;
 
       for (let y = y0; y < cnv.height; y += h) {
         let d = data.draw_trace[k%trace_len];
         let [sup, dep] = [d.supplier, d.dependency];
+        let str;
         if (this.mode == "sup") {
           cnv.fill(get_sup_color(sup));
-          cnv.text(sup, wMargin, y);
+          str = sup;
         } else if (this.mode == "dep") {
           cnv.fill(get_dep_color(dep));
-          cnv.text(dep, wMargin, y);
+          str = dep;
         } else {
           let name = getActualName(d.name);
           let w = textWidth(name);
@@ -678,27 +683,39 @@ function trace_print(i, j, m, n, mode) {
           grd.addColorStop(0, color(get_sup_color(sup)));
           grd.addColorStop(1, color(get_dep_color(dep)));
           this.ctx.fillStyle = grd;
-          cnv.text(name, wMargin, y);
+          str = name;
         }
+        if (this.dna) str = turn_into_dna(str);
+        cnv.text(str, wMargin, y);
 
         k++;
       }
 
       cnv.erase();
-      cnv.rect(0, 0, cnv.width, h*1.5);
+      cnv.rect(0, 0, cnv.width, h*1.7);
       cnv.noErase();
-      let str = "> print(";
+      let str = "> print ";
       if (this.mode == "sup") {
-        str += "suppliers)"
+        str += "suppliers"
       } else if (this.mode == "dep") {
-        str += "dependencies)"
+        str += "dependencies"
       } else {
-        str += "function_names)"
+        str += "function_names"
       }
+      if (this.dna) str += ".dna";
+      else str += ".txt";
       cnv.fill(250);
-      cnv.text(str, wMargin, 0);
+      cnv.text(str, wMargin, h*0.3);
     }
   };
+}
+
+function turn_into_dna(str) {
+  let new_str = "";
+  for (let i = 0; i < str.length; i++) {
+    new_str += ["A", "T", "G", "C"][str.charCodeAt(i)%4];
+  }
+  return new_str;
 }
 
 function section_profile(i, j, m, n, section_idx) {
@@ -732,7 +749,7 @@ function section_profile(i, j, m, n, section_idx) {
 
     let col1 = color(get_sup_color(sup));
     let col2 = color(get_dep_color(dep));
-    let thickness = map(d.depth, min_depth, max_depth, 1/3, 2/3)*h;
+    let thickness = map(d.depth, min_depth, max_depth, 1/9, 2/3)*h;
 
     for (let x = wMargin; x < cnv.width-wMargin; x++) {
       let alpha = 255;
