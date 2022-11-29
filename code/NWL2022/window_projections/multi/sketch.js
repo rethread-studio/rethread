@@ -749,7 +749,7 @@ function section_profile(i, j, m, n, section_idx) {
 
     let col1 = color(get_sup_color(sup));
     let col2 = color(get_dep_color(dep));
-    let thickness = map(d.depth, min_depth, max_depth, 1/9, 2/3)*h;
+    let thickness = map(d.depth, min_depth, max_depth, 1/6, 2/3)*h;
 
     for (let x = wMargin; x < cnv.width-wMargin; x++) {
       let alpha = 255;
