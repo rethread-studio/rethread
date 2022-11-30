@@ -169,6 +169,7 @@ s.waitForBoot({
 		sig = BLowShelf.ar(sig, 100, 1.0, -6);
 
 		Out.ar(\out.kr(0), sig);
+		Out.ar(2, sig * \secondary_amp.kr(0.06));
 	}).add;
 
 	~from_53 = { | degrees |
@@ -177,11 +178,13 @@ s.waitForBoot({
 		list
 
 	};
+	~postGroup = Group.tail(s);
+	~glitchGroup = Group.before(~postGroup);
 	~mainBus = Bus.audio(s, 2);
 	~revBus = Bus.audio(s, 2);
 	~rev3Bus = Bus.audio(s, 2);
 	s.sync;
-	~main = Synth(\mainchannel, [\out, 0, \in, ~mainBus]);
+	~main = Synth(\mainchannel, [\out, 0, \in, ~mainBus], addAction: \addToTail, target: ~postGroup);
 	~rev = Synth(\long_reverb, [\in, ~revBus, \out, ~mainBus, \wetness, 0.1, \lpf_freq, 10000, \predelay, 0.05, \rt, 1.0, \wetness, 0.05]);
 	~rev3 = Synth(\medium_reverb, [\in, ~rev3Bus, \out, ~mainBus, \mix, 0.4, \feedback, 0.95, \size, 0.9, \damp, 0.65, \diff, 0.6]);
 
