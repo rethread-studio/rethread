@@ -164,7 +164,7 @@ function rows_to_led_values() {
       // if (x >= num_leds_x) {
       //   break;
       // }
-      let left_index = xy_to_index(x, i, 2);
+      let left_index = xy_to_index(num_leds_x -x -1, i, 1);
       let right_index = xy_to_index(num_leds_x - x-1, i, 1);
       // console.log("x: " + x + " y: " + i + " index: " + index);
       leds[left_index] = row_leds[i].left_color.r;
@@ -175,7 +175,7 @@ function rows_to_led_values() {
       leds_right[right_index + 2] = row_leds[i].right_color.b;
     }
     for (let x = row_leds[i].num_leds; x < num_leds_x; x++) {
-      let left_index = xy_to_index(x, i, 2);
+      let left_index = xy_to_index(num_leds_x -x -1, i, 1);
       let right_index = xy_to_index(num_leds_x - x-1, i, 1);
       // console.log("x: " + x + " y: " + i + " index: " + index);
       leds[left_index] = default_color.r;
