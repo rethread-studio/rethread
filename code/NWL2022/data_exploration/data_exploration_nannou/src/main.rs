@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use nannou::{
+    color::IntoLinSrgba,
+    image::{DynamicImage, GenericImage, GenericImageView, Rgba, RgbaImage},
     prelude::*,
     rand::{thread_rng, Rng},
 };
@@ -8,23 +10,6 @@ use parser::{calltrace, deepika1, deepika2};
 
 #[derive(Debug)]
 enum NannouTrace {
-    Calltrace {
-        trace: calltrace::Calltrace,
-        zoom: f32,
-        offset: f32,
-        class_colors: HashMap<String, Hsla>,
-        method_colors: HashMap<String, Hsla>,
-        color_source: calltrace::ColorSource,
-    },
-    Deepika1 {
-        trace: deepika1::Deepika1,
-        zoom: f32,
-        offset: f32,
-        supplier_colors: HashMap<String, Hsla>,
-        dependency_colors: HashMap<String, Hsla>,
-        function_colors: HashMap<String, Hsla>,
-        color_source: deepika1::ColorSource,
-    },
     Deepika2 {
         trace: deepika2::Deepika2,
         zoom: f32,
@@ -37,55 +22,6 @@ enum NannouTrace {
 }
 
 impl NannouTrace {
-    pub fn from_calltrace(trace: calltrace::Calltrace) -> Self {
-        let mut class_colors = HashMap::new();
-        let mut method_colors = HashMap::new();
-        let mut rng = thread_rng();
-        for call in &trace.trace {
-            class_colors
-                .entry(call.class.clone())
-                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
-            method_colors
-                .entry(call.method.clone())
-                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
-        }
-        Self::Calltrace {
-            trace,
-            zoom: 1.0,
-            offset: 0.0,
-            class_colors,
-            method_colors,
-            color_source: calltrace::ColorSource::Class,
-        }
-    }
-    pub fn from_deepika1(trace: deepika1::Deepika1) -> Self {
-        let mut rng = thread_rng();
-
-        let mut supplier_colors = HashMap::new();
-        let mut dependency_colors = HashMap::new();
-        let mut function_colors = HashMap::new();
-
-        for call in &trace.draw_trace {
-            supplier_colors
-                .entry(call.callee_supplier.clone())
-                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
-            dependency_colors
-                .entry(call.callee_dependency.clone())
-                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
-            function_colors
-                .entry(call.callee_name.clone())
-                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
-        }
-        Self::Deepika1 {
-            trace,
-            zoom: 1.0,
-            offset: 0.0,
-            supplier_colors,
-            dependency_colors,
-            function_colors,
-            color_source: deepika1::ColorSource::Dependency,
-        }
-    }
     pub fn from_deepika2(trace: deepika2::Deepika2) -> Self {
         let mut rng = thread_rng();
 
@@ -122,114 +58,6 @@ impl NannouTrace {
     }
     pub fn draw(&self, draw: &Draw, win: Rect) {
         match self {
-            NannouTrace::Calltrace {
-                trace,
-                zoom,
-                offset,
-                class_colors,
-                method_colors,
-                color_source,
-            } => {
-                let zoom_x = zoom;
-
-                let max_depth = trace.max_depth;
-                let call_w = win.w() / trace.trace.len() as f32 * zoom_x;
-                // let offset_x =
-                //     (app.elapsed_frames() as f32 / 500.0) % 1.0 * call_w * model.trace.len() as f32 - win.w();
-                let offset_x = offset * call_w * trace.trace.len() as f32 - win.w();
-                let mut y = win.bottom() + win.h() * 0.02;
-                let depth_height = (win.h() / max_depth as f32) * 0.5;
-
-                if true {
-                    let mut lines = vec![];
-                    for (i, call) in trace.trace.iter().enumerate() {
-                        let color = match color_source {
-                            calltrace::ColorSource::Method => {
-                                method_colors.get(&call.method).unwrap().clone()
-                            }
-                            calltrace::ColorSource::Class => {
-                                class_colors.get(&call.class).unwrap().clone()
-                            }
-                        };
-                        lines.push((
-                            pt2(
-                                win.left() + i as f32 * call_w - offset_x,
-                                y + depth_height * call.call_depth as f32,
-                            ),
-                            color,
-                        ));
-                    }
-                    draw.polyline().points_colored(lines);
-                } else {
-                    let mut lines = vec![];
-                    for (i, call) in trace.trace.iter().enumerate() {
-                        lines.push(pt2(
-                            win.left() + i as f32 * call_w - offset_x,
-                            y + depth_height * call.call_depth as f32,
-                        ));
-                    }
-                    draw.polyline()
-                        .color(hsla(0.0, 1.0, 0.7, 0.8))
-                        .points(lines);
-                }
-            }
-            NannouTrace::Deepika1 {
-                trace,
-                zoom,
-                offset,
-                supplier_colors,
-                dependency_colors,
-                function_colors,
-                color_source,
-            } => {
-                let zoom_x = zoom;
-
-                let max_depth = trace.max_depth;
-                let trace = &trace.draw_trace;
-                let call_w = win.w() / trace.len() as f32 * zoom_x;
-                // let offset_x =
-                //     (app.elapsed_frames() as f32 / 500.0) % 1.0 * call_w * model.trace.len() as f32 - win.w();
-                let offset_x = offset * call_w * trace.len() as f32 - win.w();
-
-                // Get the local max_depth and min_depth to zoom in on the curve
-                //
-                let mut local_max_depth = 0;
-                let mut local_min_depth = i32::MAX;
-                for (i, call) in trace.iter().enumerate() {
-                    let x = win.left() + i as f32 * call_w - offset_x;
-                    if x >= win.left() && x <= win.right() {
-                        local_max_depth = local_max_depth.max(call.depth);
-                        local_min_depth = local_min_depth.min(call.depth);
-                    }
-                }
-                let local_depth_width = local_max_depth - local_min_depth;
-                let mut y = win.bottom() + win.h() * 0.02;
-                let depth_height = (win.h() / local_depth_width as f32) * 0.96;
-
-                let mut lines = vec![];
-                for (i, call) in trace.iter().enumerate() {
-                    let color = match color_source {
-                        deepika1::ColorSource::Supplier => {
-                            supplier_colors.get(&call.callee_supplier).unwrap()
-                        }
-                        deepika1::ColorSource::Dependency => {
-                            dependency_colors.get(&call.callee_dependency).unwrap()
-                        }
-                        deepika1::ColorSource::Function => {
-                            function_colors.get(&call.callee_name).unwrap()
-                        }
-                    }
-                    .clone();
-                    lines.push((
-                        pt2(
-                            win.left() + i as f32 * call_w - offset_x,
-                            y + depth_height * (call.depth - local_min_depth) as f32,
-                        ),
-                        color,
-                    ));
-                }
-                draw.polyline().stroke_weight(2.0).points_colored(lines);
-            }
             NannouTrace::Deepika2 {
                 trace,
                 zoom,
@@ -353,81 +181,6 @@ impl NannouTrace {
     }
     pub fn event(&mut self, app: &App, event: WindowEvent) {
         match self {
-            NannouTrace::Calltrace {
-                trace,
-                zoom,
-                offset,
-                class_colors,
-                method_colors,
-                color_source,
-            } => match event {
-                KeyPressed(key) => match key {
-                    Key::C => *color_source = calltrace::ColorSource::Class,
-                    Key::M => *color_source = calltrace::ColorSource::Method,
-                    Key::R => {
-                        println!("Rerandomising colors");
-                        class_colors.clear();
-                        method_colors.clear();
-
-                        let mut rng = thread_rng();
-                        for call in &trace.trace {
-                            class_colors
-                                .entry(call.class.clone())
-                                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
-                            method_colors
-                                .entry(call.method.clone())
-                                .or_insert_with(|| hsla(rng.gen(), 1.0, 0.6, 1.0));
-                        }
-                    }
-                    _ => (),
-                },
-                KeyReleased(_key) => {}
-                ReceivedCharacter(_char) => {}
-                MouseMoved(pos) => {
-                    *zoom = (pos.y / app.window_rect().h() + 0.5) * 100.0;
-                    *offset = pos.x / app.window_rect().w() + 0.5;
-                }
-                MousePressed(_button) => {}
-                MouseReleased(_button) => {}
-                MouseEntered => {}
-                MouseExited => {}
-                MouseWheel(_amount, _phase) => {}
-                Moved(_pos) => {}
-                Resized(_size) => {}
-                Touch(_touch) => {}
-                TouchPressure(_pressure) => {}
-                HoveredFile(_path) => {}
-                DroppedFile(_path) => {}
-                HoveredFileCancelled => {}
-                Focused => {}
-                Unfocused => {}
-                Closed => {}
-            },
-            NannouTrace::Deepika1 {
-                trace,
-                zoom,
-                offset,
-                supplier_colors,
-                dependency_colors,
-                function_colors,
-                color_source,
-            } => match event {
-                KeyPressed(key) => match key {
-                    Key::C => {
-                        *color_source = match color_source {
-                            deepika1::ColorSource::Supplier => deepika1::ColorSource::Dependency,
-                            deepika1::ColorSource::Dependency => deepika1::ColorSource::Function,
-                            deepika1::ColorSource::Function => deepika1::ColorSource::Supplier,
-                        }
-                    }
-                    _ => (),
-                },
-                MouseMoved(pos) => {
-                    *zoom = (pos.y / app.window_rect().h() + 0.5) * 2000.0;
-                    *offset = pos.x / app.window_rect().w() + 0.5;
-                }
-                _ => (),
-            },
             NannouTrace::Deepika2 {
                 trace,
                 zoom,
@@ -458,7 +211,11 @@ impl NannouTrace {
         }
     }
 }
-
+#[derive(Debug)]
+enum DrawMode {
+    Graph,
+    Pixels(wgpu::Texture),
+}
 fn main() {
     nannou::app(model)
         .event(event)
@@ -471,6 +228,7 @@ fn main() {
 struct Model {
     traces: Vec<NannouTrace>,
     trace_to_show: usize,
+    draw_mode: DrawMode,
 }
 
 fn model(app: &App) -> Model {
@@ -530,6 +288,114 @@ fn model(app: &App) -> Model {
         deepika2::Deepika2::open_or_parse("/home/erik/Hämtningar/nwl2022/data-jedit-with-marker")
             .unwrap();
     // trace.save_depth_as_wave("/home/erik/Hämtningar/nwl2022/data-jedit-with-marker-depth.wav");
+    //
+
+    let mut supplier_index = HashMap::new();
+    let mut dependency_index = HashMap::new();
+    for (i, call) in trace.draw_trace.iter().enumerate() {
+        if let Some(supplier) = &call.supplier {
+            let new_index = supplier_index.len();
+            supplier_index.entry(supplier.clone()).or_insert(new_index);
+            if let Some(dependency) = &call.dependency {
+                let dependency_map = dependency_index
+                    .entry(supplier.clone())
+                    .or_insert(HashMap::new());
+                let new_index = dependency_map.len();
+                dependency_map
+                    .entry(dependency.clone())
+                    .or_insert(new_index);
+            } else {
+                let dependency_map = dependency_index
+                    .entry(supplier.clone())
+                    .or_insert(HashMap::new());
+                let new_index = dependency_map.len();
+                dependency_map.entry(String::new()).or_insert(new_index);
+            }
+        }
+    }
+    let (supplier_colors, dependency_colors) = {
+        let mut supplier_colors: HashMap<String, Rgba<u8>> = HashMap::new();
+        let mut dependency_colors: HashMap<String, Rgba<u8>> = HashMap::new();
+        // Generate the supplier and dependency colors
+        for (supplier, index) in supplier_index.iter() {
+            let mut supplier_hue = (360. - (*index as f32 * 12.0)) % 360.0;
+
+            let c = hsl(supplier_hue / 360.0, 1.0, 0.5).into_lin_srgba();
+            supplier_colors.insert(
+                supplier.clone(),
+                Rgba([
+                    (c.red * 255.) as u8,
+                    (c.green * 255.) as u8,
+                    (c.blue * 255.) as u8,
+                    (c.alpha * 255.) as u8,
+                ]),
+            );
+            if let Some(dependencies) = dependency_index.get(supplier) {
+                let mut dependency_hue = supplier_hue;
+                let mut dependency_lightness = 0.30;
+                for (dependency, _dep_index) in dependencies.iter() {
+                    let c = hsl(supplier_hue / 360.0, 1.0, dependency_lightness).into_lin_srgba();
+                    dependency_lightness += 0.005;
+                    dependency_colors.insert(
+                        dependency.clone(),
+                        Rgba([
+                            (c.red * 255.) as u8,
+                            (c.green * 255.) as u8,
+                            (c.blue * 255.) as u8,
+                            (c.alpha * 255.) as u8,
+                        ]),
+                    );
+                }
+            }
+        }
+        (supplier_colors, dependency_colors)
+    };
+
+    // 210:594
+    // x * (x*0.353535) = num_calls
+    // xx*0.353535 = num_calls
+    // xx = num_calls /0.353535
+    // x = sqrt(num_calls/0.353535)
+    // calculate the closest size to the aspect ratio
+    let q = (trace.draw_trace.len() as f64 / 0.35353535).sqrt();
+    let width = q.ceil() as u32;
+    let height = (q * 0.353535).ceil() as u32;
+    let mut image = DynamicImage::new_rgba8(width, height);
+    println!(
+        "num calls: {}, num pixels: {}",
+        trace.draw_trace.len(),
+        image.width() * image.height()
+    );
+    let mut start_x = 0;
+    let mut start_y = 0;
+    let mut current_x = 0;
+    let mut current_y = 0;
+    for (i, call) in trace.draw_trace.iter().enumerate() {
+        // let x = i as u32 % image.width();
+        // let y = i as u32 / image.width();
+        let x = current_x;
+        let y = current_y;
+        if current_x == image.width() - 1 || current_y == 0 {
+            if start_y < image.height() - 1 {
+                start_y += 1;
+            } else {
+                start_x += 1;
+            }
+            current_x = start_x;
+            current_y = start_y;
+        } else {
+            current_x += 1;
+            current_y -= 1;
+        }
+        let color = if let Some(dep) = &call.dependency {
+            dependency_colors.get(dep).unwrap().clone()
+        } else {
+            Rgba([(call.depth % 255) as u8, 100, 255, 255])
+        };
+        image.put_pixel(x as u32, y as u32, color)
+    }
+    image.save("trace_as_pixels.png");
+    let texture = wgpu::Texture::from_image(app, &image);
 
     let deepika2_trace = NannouTrace::from_deepika2(trace);
     let traces = vec![deepika2_trace];
@@ -537,6 +403,7 @@ fn model(app: &App) -> Model {
     let m = Model {
         traces,
         trace_to_show: 0,
+        draw_mode: DrawMode::Pixels(texture),
     };
     // println!("model: {m:?}");
     m
@@ -563,7 +430,14 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     let draw = app.draw();
     let win = app.window_rect();
-    model.traces[model.trace_to_show].draw(&draw, win);
+    match &model.draw_mode {
+        DrawMode::Graph => {
+            model.traces[model.trace_to_show].draw(&draw, win);
+        }
+        DrawMode::Pixels(texture) => {
+            draw.texture(texture);
+        }
+    }
 
     draw.to_frame(app, &frame).unwrap();
 }
