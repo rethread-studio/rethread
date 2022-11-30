@@ -11,5 +11,7 @@ tmux send-keys -t $session:$window "cd data_exploration/led_matrix_simulator && 
 " C-m
 tmux split-window -t $session:$window -v
 tmux send-keys -t $session:$window "cd supercollider && sclang main.scd" C-m
+tmux split-window -t $session:$window -v
+tmux send-keys -t $session:$window "cd ../../ && python3 -m http.server 8800" C-m
 
 tmux attach-session -t $session
