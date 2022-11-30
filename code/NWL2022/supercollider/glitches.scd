@@ -118,4 +118,4 @@ Ndef(\glitch_out, {
 	sig = Limiter.ar(sig, 0.95) * 0.20;
 	sig = LeakDC.ar(sig);
 	sig
-}).play();
+}).play(out: ~mainBus.index, group: ~glitchGroup);

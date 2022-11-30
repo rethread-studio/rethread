@@ -19,6 +19,7 @@ use parser::deepika2::{CallDrawData, DepthEnvelopePoint};
 pub enum Message {
     JumpNextMarker,
     JumpPreviousMarker,
+    JumpCloseToEnd,
 }
 
 #[derive(Clone)]
@@ -30,6 +31,9 @@ pub struct SchedulerCom {
 }
 
 impl SchedulerCom {
+    pub fn jump_close_to_end(&mut self) {
+        self.message_tx.send(Message::JumpCloseToEnd).unwrap()
+    }
     pub fn jump_to_next_marker(&mut self) {
         self.message_tx.send(Message::JumpNextMarker).unwrap()
     }
@@ -108,19 +112,25 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
                     }
                     index_increase_tx.send(trace.current_index).unwrap();
                 }
+                Message::JumpCloseToEnd => {
+                    trace.current_index = (trace.trace.draw_trace.len() - 100).max(0);
+                }
             }
         }
         if play {
             trace.current_index += 1;
             if trace.current_index >= trace.trace.draw_trace.len() {
                 trace.current_index = 0;
+                trace.current_depth_envelope_index = 0;
             }
             index_increase_tx.send(trace.current_index).unwrap();
 
             let num_depth_points = trace.trace.depth_envelope.sections.len();
             let _depth_point =
                 trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
-            while trace.current_index > current_section.end_index {
+            while trace.current_index > current_section.end_index
+                || trace.current_index < current_section.start_index
+            {
                 trace.current_depth_envelope_index += 1;
                 trace.current_depth_envelope_index %= num_depth_points;
                 current_section =
