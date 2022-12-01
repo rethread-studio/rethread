@@ -318,6 +318,8 @@ fn model(app: &App) -> Model {
         let mut dependency_colors: HashMap<String, Rgba<u8>> = HashMap::new();
         // Generate the supplier and dependency colors
         for (supplier, index) in supplier_index.iter() {
+            // the multiplication factor can be anything.
+            // we use 23, as the number of chromosomes for humans, and 42, as the answer
             let mut supplier_hue = (360. - (*index as f32 * 23.0)) % 360.0;
 
             let c = hsl(supplier_hue / 360.0, 1.0, 0.8).into_lin_srgba();
