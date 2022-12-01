@@ -285,7 +285,7 @@ fn model(app: &App) -> Model {
     //     deepika2::Deepika2::parse_and_save("/home/erik/Hämtningar/nwl2022/data-jedit-with-marker")
     //         .unwrap();
     let trace =
-        deepika2::Deepika2::open_or_parse("/home/erik/Hämtningar/nwl2022/data-jedit-with-marker")
+        deepika2::Deepika2::open_or_parse("./data-jedit-with-marker")
             .unwrap();
     // trace.save_depth_as_wave("/home/erik/Hämtningar/nwl2022/data-jedit-with-marker-depth.wav");
     //
@@ -318,9 +318,9 @@ fn model(app: &App) -> Model {
         let mut dependency_colors: HashMap<String, Rgba<u8>> = HashMap::new();
         // Generate the supplier and dependency colors
         for (supplier, index) in supplier_index.iter() {
-            let mut supplier_hue = (360. - (*index as f32 * 12.0)) % 360.0;
+            let mut supplier_hue = (360. - (*index as f32 * 42.0)) % 360.0;
 
-            let c = hsl(supplier_hue / 360.0, 1.0, 0.5).into_lin_srgba();
+            let c = hsl(supplier_hue / 360.0, 1.0, 0.6).into_lin_srgba();
             supplier_colors.insert(
                 supplier.clone(),
                 Rgba([
@@ -360,7 +360,8 @@ fn model(app: &App) -> Model {
     let q = (trace.draw_trace.len() as f64 / 0.35353535).sqrt();
     let width = q.ceil() as u32;
     let height = (q * 0.353535).ceil() as u32;
-    let mut image = DynamicImage::new_rgba8(width, height);
+    let res = 3;
+    let mut image = DynamicImage::new_rgba8(width*res, height*res);
     println!(
         "num calls: {}, num pixels: {}",
         trace.draw_trace.len(),
@@ -375,24 +376,28 @@ fn model(app: &App) -> Model {
         // let y = i as u32 / image.width();
         let x = current_x;
         let y = current_y;
-        if current_x == image.width() - 1 || current_y == 0 {
-            if start_y < image.height() - 1 {
-                start_y += 1;
+        if current_x == image.width() - res || current_y == 0 {
+            if start_y < image.height() - res {
+                start_y += res;
             } else {
-                start_x += 1;
+                start_x += res;
             }
             current_x = start_x;
             current_y = start_y;
         } else {
-            current_x += 1;
-            current_y -= 1;
+            current_x += res;
+            current_y -= res;
         }
         let color = if let Some(dep) = &call.dependency {
             dependency_colors.get(dep).unwrap().clone()
         } else {
             Rgba([(call.depth % 255) as u8, 100, 255, 255])
         };
-        image.put_pixel(x as u32, y as u32, color)
+        for i in 0..res{
+            for j in 0..res{
+                image.put_pixel(x+i as u32, y+j as u32, color);
+            }
+        }
     }
     image.save("trace_as_pixels.png");
     let texture = wgpu::Texture::from_image(app, &image);
