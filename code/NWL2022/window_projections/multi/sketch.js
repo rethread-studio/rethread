@@ -13,8 +13,9 @@ const SMOL_WINDOW_HEIGHT = 47;
 let mWindows = 3; // how many windows in width
 let nWindows = 1; // how many windows in height
 let showWindowFrame = true;
-let h = 20; // height of 1 bloc (DNA helix, ngram unit...)
+let h; // height of 1 bloc (DNA helix, ngram unit...)
 
+const N_FRAMES = 500; // how many frames before changing
 let where = "right"; // whether it's the left or right windows
 
 let cnv; // global canvas
@@ -44,6 +45,7 @@ function setup() {
   max_name_length = get_max_name_length();
   all_deps = dep_colors.getColumn(0);
   all_sups = sup_colors.getColumn(0);
+  h = 20/931*height;
   centerCanvas();
 
   console.log("Press space to show/hide window frames");
@@ -74,7 +76,7 @@ function draw() {
   right_zone.update(t);
 
 
-  let f = (frameCount/500) % 2;
+  let f = (frameCount/N_FRAMES) % 2;
   let glitch_duration = 0.03;
   if (f == 1) {
     left_zone.cnv.remove();
@@ -143,13 +145,14 @@ function generate_window_composition(update_text_zone) {
 
 function glitch_it(img, amount) {
   let grph = createGraphics(img.width, img.height);
-  let bh = img.height/16
+  let bh = img.height/random([8, 16, 32]);
   for (let y = 0; y < img.height; y += bh) {
     let xOffset = random(-amount, amount)*img.width/100;
     grph.image(img, xOffset, y, img.width, bh, 0, y, img.width, bh);
     //grph.image(img, xOffset-img.width, y, img.width, bh, 0, y, img.width, bh);
     //grph.image(img, xOffset+img.width, y, img.width, bh, 0, y, img.width, bh);
   }
+  if (random() < 1/10) grph.filter(random([GRAY, INVERT]));
   return grph;
 }
 
@@ -300,25 +303,23 @@ function text_info(i, j, m, n) {
 
       let string0 = `><><nobelprice2020.chemistry<>CRISPR<>genome.editing<>describe.as:text.editing><><`;
 
-      let string1 = `run_search & replace\n><>0.1 ms`;
+      let string1 = `> run ./search_&_replace\n><>0.1 ms<`;
 
-      let string2 = `>1000000<><><>trace<\n>2000<>dependencies<\n>20<><><><suppliers<`;
+      let string2 = `>${data.draw_trace.length}<><><>events<\n>${all_deps.length}<>dependencies<\n>${all_sups.length}<><><><suppliers<`;
 
-      let string3 = `>view_50.traces.per.second><1.5h>`;
+      let string3 = `>25_events_per_ms<>2h10min40.25s<`;
 
-      // the following should get linked to the running trace
+      //let timer1 = `><>current.time<><><><><><><1.2h>`;
 
-      let timer1 = `><>current.time<><><><><><><1.2h>`;
+      //let progressbar = `[<><><><><><>.............] 40%`;
 
-      let progressbar = `[<><><><><><>.............] 40%`;
-
-      let col1 = "#00FF00";
-      let col2 = "#FFAAEE";
-      if (t % 600 > 300) [col1, col2] = [col2, col1];
+      let col1 = dep_colors.get(0, 1);
+      let col2 = sup_colors.get(floor(all_sups.length/2), 1);
+      if ((t+N_FRAMES/2) % (N_FRAMES*2) > N_FRAMES) [col1, col2] = [col2, col1];
 
 
       cnv.background(0);
-      cnv.fill(200);
+      cnv.fill(250);
       cnv.textSize(cnv.width*12/570);
       cnv.text(
         helixstring,
@@ -371,11 +372,13 @@ function text_info(i, j, m, n) {
         wMargin,
         wMargin + d
       );
+      /*
       cnv.text(
         helixstring,
         wMargin,
         wMargin + 650*cnv.height/1120 + d
       );
+      */
       cnv.textSize(cnv.width*40/570);
       cnv.text(
         string1,
@@ -397,21 +400,30 @@ function text_info(i, j, m, n) {
       cnv.text(
         string3,
         wMargin,
-        wMargin + 550*cnv.height/1120 + d
+        wMargin + 558*cnv.height/1120 + d
       );
+      /*
       cnv.textSize(cnv.width*30/570);
       cnv.text(
         timer1,
         wMargin,
         wMargin + 720*cnv.height/1120 + d
       );
+      */
 
       cnv.textSize(cnv.width*30/570);
       cnv.text(
-        progressbar,
+        "// un|fold by re|thread",
         wMargin,
         wMargin + 1000*cnv.height/1120
       );
+      cnv.fill(col1);
+      cnv.text(
+        "<><><><>",
+        wMargin + cnv.width*0.65,
+        wMargin + 1000*cnv.height/1120
+      );
+
       cnv.push();
       {
         cnv.fill(col1);
@@ -422,6 +434,35 @@ function text_info(i, j, m, n) {
           wMargin + 10*cnv.height/1120 + d
         );
 
+        cnv.text(
+          helixstring2,
+          wMargin,
+          wMargin + 470*cnv.height/1120 + d
+        );
+        cnv.textSize(cnv.width*20/570);
+        cnv.text(
+          helixstring0,
+          wMargin,
+          wMargin
+        );
+        cnv.text(
+          sissor,
+          wMargin,
+          wMargin,
+          width,
+          wMargin*2
+        );
+
+        cnv.translate(0, 0.68*cnv.height);
+        cnv.fill(col2);
+        /*
+        cnv.textSize(cnv.width*12/570);
+        cnv.text(
+          helixstring1,
+          wMargin,
+          wMargin + 10*cnv.height/1120 + d
+        );
+        */
         cnv.text(
           helixstring2,
           wMargin,
@@ -445,12 +486,26 @@ function text_info(i, j, m, n) {
           width,
           wMargin*2
         );
+
+        cnv.textSize(cnv.width*20/570);
+        cnv.fill(250);
+        cnv.text(
+          helixstring00,
+          wMargin,
+          wMargin
+        );
+        cnv.fill(col1);
+        cnv.text(
+          helixstring0,
+          wMargin,
+          wMargin + 40*cnv.height/1120
+        );
       }
       cnv.pop();
       cnv.push();
       {
         cnv.textSize(cnv.width*20/570);
-
+        cnv.fill(250);
         cnv.text(
           helixstring00,
           wMargin,
@@ -592,7 +647,7 @@ function ngrams(i, j, m, n, group_by) {
       cnv.clear();
 
       let w = WINDOW_WIDTH*scale, hGap = h/4;
-      let eps = 1;
+      let eps = cnv.height/1000;
 
       let x = 0, j = 0, y = -cnv.height/3, k = floor(t/h);
       let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
@@ -625,13 +680,13 @@ function ngrams(i, j, m, n, group_by) {
 
         if (idx == 0) {
           // bottom
-          cnv.rect(x+wMargin+xOffset, y-eps, w-2*wMargin, h-hGap+2*eps, 0, 0, h, h);
+          cnv.rect(x+wMargin+xOffset, y, w-2*wMargin, h-hGap+eps, 0, 0, h, h);
         } else if (idx == 1) {
           // top
           cnv.rect(x+wMargin+xOffset, y+hGap, w-2*wMargin, h-hGap+eps, h, h, 0, 0);
         } else {
           // middle
-          cnv.rect(x+wMargin+xOffset, y-eps, w-2*wMargin, h+2*eps);
+          cnv.rect(x+wMargin+xOffset, y, w-2*wMargin, h+eps);
         }
 
         y += h;
@@ -661,7 +716,6 @@ function trace_print(i, j, m, n, mode, dna) {
       cnv.clear();
 
       let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
-      let h = 20;
       cnv.textSize(h);
       let k = floor(t/h);
       let y0 = -height/3;
@@ -726,14 +780,8 @@ function section_profile(i, j, m, n, section_idx) {
   let section = data.depth_envelope.sections[section_idx];
   //console.log(section);
 
-  let min_depth = Infinity;
-  let max_depth = 0;
-  for (let i = section.start_index; i < section.end_index; i++) {
-    let d = data.draw_trace[i];
-    let depth = d.depth;
-    if (depth < min_depth) min_depth = depth;
-    if (depth > max_depth) max_depth = depth;
-  }
+  let min_depth = section.min_depth;
+  let max_depth = section.max_depth+1;
   let max_offset = section.shannon_wiener_diversity_index*50;
 
   let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
@@ -850,8 +898,10 @@ function keyPressed() {
   }
 }
 
+/*
 function windowResized() {
   determineScale();
   resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   centerCanvas();
 }
+*/
