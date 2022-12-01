@@ -318,9 +318,9 @@ fn model(app: &App) -> Model {
         let mut dependency_colors: HashMap<String, Rgba<u8>> = HashMap::new();
         // Generate the supplier and dependency colors
         for (supplier, index) in supplier_index.iter() {
-            let mut supplier_hue = (360. - (*index as f32 * 42.0)) % 360.0;
+            let mut supplier_hue = (360. - (*index as f32 * 23.0)) % 360.0;
 
-            let c = hsl(supplier_hue / 360.0, 1.0, 0.6).into_lin_srgba();
+            let c = hsl(supplier_hue / 360.0, 1.0, 0.8).into_lin_srgba();
             supplier_colors.insert(
                 supplier.clone(),
                 Rgba([
