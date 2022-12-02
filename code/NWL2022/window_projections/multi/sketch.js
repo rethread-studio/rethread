@@ -223,7 +223,7 @@ function text_loop(i, j, m, n) {
         this.currentCharacter = 0;
         this.keyword_idx++;
         this.baseFinished = true;
-        cnv.fill(150);
+        cnv.fill(200);
         cnv.textSize(cnv.width/10);
 
         cnv.fill(0);
@@ -232,7 +232,7 @@ function text_loop(i, j, m, n) {
       } else if (ti > 4 && ti < 5) {
         let r = this.keyword_idx - 1;
         let currentStrings = this.keywords[r].substring(0, this.currentCharacter);
-        cnv.fill(150);
+        cnv.fill(200);
         cnv.text(
           currentStrings,
           wMargin,
@@ -244,7 +244,7 @@ function text_loop(i, j, m, n) {
       } else if (ti > 5 && ti < 6) {
         let r = this.keyword_idx;
         currentStrings = this.keywords[r].substring(0, this.currentCharacter);
-        cnv.fill(150);
+        cnv.fill(200);
         cnv.text(
           currentStrings,
           wMargin,
