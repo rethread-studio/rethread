@@ -13,6 +13,7 @@ const SMOL_WINDOW_HEIGHT = 47;
 let mWindows = 3; // how many windows in width
 let nWindows = 1; // how many windows in height
 let showWindowFrame = false;
+let max_section_length = 256;
 let h; // height of 1 bloc (DNA helix, ngram unit...)
 
 const N_FRAMES = 500; // how many frames before changing
@@ -107,12 +108,23 @@ function generate_window_composition(update_text_zone) {
     if (update_text_zone) text_zone = text_loop(1, 0, 1, 1);
 
     let section_idx = ~~random(data.depth_envelope.sections.length);
+    let section_length = data.depth_envelope.sections[section_idx].end_index - data.depth_envelope.sections[section_idx].start_index;
+    while (section_length > max_section_length) {
+      section_idx = ~~random(data.depth_envelope.sections.length);
+      section_length = data.depth_envelope.sections[section_idx].end_index - data.depth_envelope.sections[section_idx].start_index;
+    }
     if (right_zone) {
       let prev_section_idx = right_zone.section_idx;
       while (section_idx == prev_section_idx) {
         section_idx = ~~random(data.depth_envelope.sections.length);
+        let section_length = data.depth_envelope.sections[section_idx].end_index - data.depth_envelope.sections[section_idx].start_index;
+        while (section_length > max_section_length) {
+          section_idx = ~~random(data.depth_envelope.sections.length);
+          section_length = data.depth_envelope.sections[section_idx].end_index - data.depth_envelope.sections[section_idx].start_index;
+        }
       }
     }
+    //console.log(data.depth_envelope.sections[section_idx].end_index - data.depth_envelope.sections[section_idx].start_index);
     right_zone = section_profile(2, 0, 1, 1, section_idx);
   } else { // where == "right"
     let group_by = ~~random(2, 10);
