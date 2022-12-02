@@ -12,7 +12,7 @@ const WINDOW_HEIGHT = 112;
 const SMOL_WINDOW_HEIGHT = 47;
 let mWindows = 3; // how many windows in width
 let nWindows = 1; // how many windows in height
-let showWindowFrame = true;
+let showWindowFrame = false;
 let h; // height of 1 bloc (DNA helix, ngram unit...)
 
 const N_FRAMES = 500; // how many frames before changing
@@ -23,9 +23,6 @@ let cnv; // global canvas
 let window_composition;
 let left_zone, text_zone, right_zone;
 let glitch_amount = 0;
-
-// TODO:
-// fix progress bar (sync to LEDs?)
 
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
