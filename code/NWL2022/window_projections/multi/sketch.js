@@ -139,13 +139,13 @@ function generate_window_composition(update_text_zone) {
     text_zone = text_info(1, 0, 1, 1);
 
     let mode = random(["sup", "dep", "name"]);
-    let dna = random() < 1/2;
+    let dna = random() < 1/3;
     if (right_zone) {
       let prev_mode = right_zone.mode;
       let prev_dna = right_zone.dna;
       while (mode == prev_mode && dna == prev_dna) {
         mode = random(["sup", "dep", "name"]);
-        dna = random() < 1/2;
+        dna = random() < 1/3;
       }
     }
     right_zone = trace_print(2, 0, 1, 1, mode, dna);
@@ -181,7 +181,7 @@ function text_loop(i, j, m, n) {
     m: m,
     n: n,
     cnv: cnv,
-    keywords: ["CRISPR", "genome editing", "text editing", "copy & paste", "search & replace", "1 millisecond", "200 000 system\n\ncalls", "2000\n\ndependencies", "20 suppliers", "complex software\n\nsystem", "complex\n\ninformation", "DNA"], // textable in Maria's code
+    keywords: ["CRISPR", "genome editing", "text editing", "copy & paste", "search & replace", "1 millisecond", `${data.draw_trace.length} events`, `${all_deps.length}\n\ndependencies`, `${all_sups.length} suppliers`, "complex software\n\nsystem", "complex\n\ninformation", "DNA"], // textable in Maria's code
     timeUnit: 50, // x in Maria's code
     keyword_idx: 0, // z in Maria's code
     currentCharacter: 0, // same name in Maria's code
@@ -755,7 +755,7 @@ function trace_print(i, j, m, n, mode, dna) {
       }
 
       cnv.erase();
-      cnv.rect(0, 0, cnv.width, h*1.7);
+      cnv.rect(0, 0, cnv.width, h*2.7);
       cnv.noErase();
       let str = "> print ";
       if (this.mode == "sup") {
@@ -768,7 +768,7 @@ function trace_print(i, j, m, n, mode, dna) {
       if (this.dna) str += ".dna";
       else str += ".txt";
       cnv.fill(250);
-      cnv.text(str, wMargin, h*0.3);
+      cnv.text(str, wMargin, h*1.2);
     }
   };
 }
