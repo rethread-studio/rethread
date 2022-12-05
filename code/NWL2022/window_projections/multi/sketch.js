@@ -16,13 +16,17 @@ let showWindowFrame = false;
 let max_section_length = 256;
 let h; // height of 1 bloc (DNA helix, ngram unit...)
 
-const N_FRAMES = 500; // how many frames before changing
+let N_FRAMES = 500; // how many frames before changing
+let glitch_duration = 0.03; // percentage, for how many of the N_FRAMES frames does the glitch effect last
 let where = "left"; // whether it's the left or right windows
 
 let cnv; // global canvas
 
 let left_zone, text_zone, right_zone;
 let glitch_amount = 0;
+
+// used for mobile version
+let prev_viz = -1;
 
 function preload() {
   //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
@@ -36,7 +40,11 @@ function preload() {
 function setup() {
   let params = getURLParams();
   where = params.where;
-  if (where == "mobile") mWindows = 1;
+  if (where == "mobile") {
+    mWindows = 1;
+    N_FRAMES = 100;
+    glitch_duration = 0.1;
+  }
 
   determineScale();
   cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
@@ -67,7 +75,7 @@ function draw() {
     if (glitch_amount > 0) {
       left_img.remove();
     }
-    left_zone.update(t);
+    //left_zone.update(t);
   } else {
     let left_img = left_zone.cnv, right_img = right_zone.cnv;
     if (glitch_amount > 0) {
@@ -88,7 +96,6 @@ function draw() {
 
 
   let f = (frameCount/N_FRAMES) % 2;
-  let glitch_duration = 0.03;
   if (f == 1) {
     left_zone.cnv.remove();
     if (where != "mobile") right_zone.cnv.remove();
@@ -161,13 +168,15 @@ function generate_window_composition(update_text_zone) {
     }
     right_zone = trace_print(2, 0, 1, 1, mode, dna);
   } else { // where = "mobile"
-    let r = random(5);
-    if (r < 1) {
+    let viz = ~~random(5);
+    while (viz == prev_viz) viz = ~~random(5)
+    prev_viz = viz;
+    if (viz == 0) {
       // helix
       let choice = random(["helix_bars", "helix_balls"]);
       let ortho = random() < 1/2;
       left_zone = (choice == "helix_bars") ? helix_bars(0, 0, 1, 1, choice, ortho) : helix_balls(0, 0, 1, 1, choice, ortho);
-    } else if (r < 2) {
+    } else if (viz == 1) {
       // section profile
       let section_idx = ~~random(data.depth_envelope.sections.length);
       let section_length = data.depth_envelope.sections[section_idx].end_index - data.depth_envelope.sections[section_idx].start_index;
@@ -176,11 +185,11 @@ function generate_window_composition(update_text_zone) {
         section_length = data.depth_envelope.sections[section_idx].end_index - data.depth_envelope.sections[section_idx].start_index;
       }
       left_zone = section_profile(0, 0, 1, 1, section_idx);
-    } else if (r < 3) {
+    } else if (viz == 2) {
       // ngrams
       let group_by = ~~random(2, 10);
       left_zone = ngrams(0, 0, 1, 1, group_by);
-    } else if (r < 4) {
+    } else if (viz == 3) {
       // trace print
       let mode = random(["sup", "dep", "name"]);
       let dna = random() < 1/3;
@@ -188,6 +197,8 @@ function generate_window_composition(update_text_zone) {
     } else {
       left_zone = text_info(0, 0, 1, 1);
     }
+
+    left_zone.update(~~random(trace_len));
   }
 }
 
