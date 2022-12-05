@@ -796,6 +796,7 @@ function trace_print(i, j, m, n, mode, dna) {
           grd.addColorStop(0, color(get_sup_color(sup)));
           grd.addColorStop(1, color(get_dep_color(dep)));
           this.ctx.fillStyle = grd;
+          if (where == "mobile") cnv.fill([color(get_sup_color(sup)), color(get_dep_color(dep))][~~noise(t)]);
           str = name;
         }
         if (this.dna) str = turn_into_dna(str);
