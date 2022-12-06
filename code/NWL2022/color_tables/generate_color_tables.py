@@ -40,7 +40,6 @@ def rgb_to_hex(r, g, b):
     if (len(hex_g) == 1): hex_g = "0" + hex_g
     hex_b = str(hex(b)[2:])
     if (len(hex_b) == 1): hex_b = "0" + hex_b
-    print(r, hex_r, g, hex_g, b, hex_b)
     return "#"+hex_r+hex_g+hex_b
 
 def generate_colors(array):
@@ -63,7 +62,7 @@ def write_file(filename, prop, array, colors):
     f.close()
 
 path = "../LED_web_demo/"
-filename = "data-varna-copy-paste-isolated_parsed"
+filename = "data-varna-startup-shutdown_parsed"
 
 #path = "./"
 #filename = "data-jedit-with-marker"

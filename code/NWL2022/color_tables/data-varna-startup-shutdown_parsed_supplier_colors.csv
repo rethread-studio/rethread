@@ -1,0 +1,14 @@
+supplier,color
+com.sun,#ff0000
+fr.orsay,#ff0075
+java.awt,#ff00eb
+java.beans,#9c00ff
+java.lang,#2700ff
+java.security,#004eff
+java.util,#00c4ff
+javax.swing,#00ffc4
+jdk.internal,#00ff4e
+sun.awt,#27ff00
+sun.font,#9cff00
+sun.java2d,#ffeb00
+sun.swing,#ff7500
