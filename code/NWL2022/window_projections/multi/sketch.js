@@ -1,3 +1,4 @@
+let dataset = "data-varna-startup-shutdown_parsed";
 let data;
 let trace_len; // length of trace
 let max_name_length;
@@ -29,12 +30,10 @@ let glitch_amount = 0;
 let prev_viz = -1;
 
 function preload() {
-  //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
-  //data = loadJSON("../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
-  data = loadJSON("../../LED_web_demo/data-jedit-with-marker.json");
+  data = loadJSON(`../../LED_web_demo/${dataset}.json`);
   myFont = loadFont("../MPLUS1Code-VariableFont_wght.ttf");
-  sup_colors = loadTable("../../color_tables/data-jedit-with-marker_supplier_colors.csv", "csv", "header");
-  dep_colors = loadTable("../../color_tables/data-jedit-with-marker_dependency_colors.csv", "csv", "header");
+  sup_colors = loadTable(`../../color_tables/${dataset}_supplier_colors.csv`, "csv", "header");
+  dep_colors = loadTable(`../../color_tables/${dataset}_dependency_colors.csv`, "csv", "header");
 }
 
 function setup() {
@@ -366,7 +365,9 @@ function text_info(i, j, m, n) {
 
       let string2 = `>${data.draw_trace.length}<><><>events<\n>${all_deps.length}<>dependencies<\n>${all_sups.length}<><><><suppliers<`;
 
-      let string3 = `>25_events_per_ms<>2h10min40.25s<`;
+      let duration = "2h_10min_40.25s";
+      if (dataset == "data-varna-startup-shutdown_parsed") duration = "1h_22min_12.90s"
+      let string3 = `>25ms_per_event<>${duration}<`;
 
       //let timer1 = `><>current.time<><><><><><><1.2h>`;
 
