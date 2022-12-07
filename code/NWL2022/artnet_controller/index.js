@@ -28,9 +28,9 @@ for (let i = 0; i < num_channels_total; i += 3) {
 }
 var row_leds = new Array();
 var default_color = {
-  r: 255,
-  g: 255,
-  b: 255,
+  r: 0,
+  g: 0,
+  b: 0,
 };
 
 row_leds.push({
