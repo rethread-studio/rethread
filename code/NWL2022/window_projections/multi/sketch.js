@@ -43,6 +43,7 @@ function setup() {
     mWindows = 1;
     N_FRAMES = 100;
     glitch_duration = 0.1;
+    dataset = "data-varna-copy-paste-isolated_parsed";
   }
 
   determineScale();
