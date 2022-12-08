@@ -244,15 +244,15 @@ function text_loop(i, j, m, n) {
 
       if (ti < 1) {
         this.keyword_idx = 1;
-        cnv.background(0);
-        cnv.textSize(cnv.width/8);
+        this.cnv.background(0);
+        this.cnv.textSize(this.cnv.width/8);
       } else if (ti >= 1 && ti < 2) {
         let currentString1 = string1.substring(0, this.currentCharacter);
-        cnv.fill(250);
-        cnv.text(
+        this.cnv.fill(250);
+        this.cnv.text(
           currentString1,
           wMargin,
-          cnv.height/3
+          this.cnv.height/3
         );
         this.currentCharacter += 0.5;
       } else if (ti == 2) {
@@ -261,31 +261,31 @@ function text_loop(i, j, m, n) {
         //rect(247.5, 200.4, 47, 10);
       } else if (ti > 2 && ti < 3) {
         let currentString2 = string2.substring(0, this.currentCharacter);
-        cnv.fill(250);
-        cnv.text(
+        this.cnv.fill(250);
+        this.cnv.text(
           currentString2,
           wMargin,
-          2*cnv.height/3,
+          2*this.cnv.height/3,
         );
         this.currentCharacter += 0.5;
       } else if (ti == 4) {
         this.currentCharacter = 0;
         this.keyword_idx++;
         this.baseFinished = true;
-        cnv.fill(200);
-        cnv.textSize(cnv.width/10);
+        this.cnv.fill(200);
+        this.cnv.textSize(this.cnv.width/10);
 
-        cnv.fill(0);
-        cnv.rect(0, cnv.height/3 + cnv.width/5 - cnv.height/20, width, cnv.height/5);
-        cnv.rect(0, 2*cnv.height/3 + cnv.width/5 - cnv.height/20, width, cnv.height/5);
+        this.cnv.fill(0);
+        this.cnv.rect(0, this.cnv.height/3 + this.cnv.width/5 - this.cnv.height/20, width, this.cnv.height/5);
+        this.cnv.rect(0, 2*this.cnv.height/3 + this.cnv.width/5 - this.cnv.height/20, width, this.cnv.height/5);
       } else if (ti > 4 && ti < 5) {
         let r = this.keyword_idx - 1;
         let currentStrings = this.keywords[r].substring(0, this.currentCharacter);
-        cnv.fill(200);
-        cnv.text(
+        this.cnv.fill(200);
+        this.cnv.text(
           currentStrings,
           wMargin,
-          cnv.height/3 + cnv.width/5
+          this.cnv.height/3 + this.cnv.width/5
         );
         this.currentCharacter++;
       } else if (ti == 5) {
@@ -293,11 +293,11 @@ function text_loop(i, j, m, n) {
       } else if (ti > 5 && ti < 6) {
         let r = this.keyword_idx;
         currentStrings = this.keywords[r].substring(0, this.currentCharacter);
-        cnv.fill(200);
-        cnv.text(
+        this.cnv.fill(200);
+        this.cnv.text(
           currentStrings,
           wMargin,
-          2*cnv.height/3 + cnv.width/5
+          2*this.cnv.height/3 + this.cnv.width/5
         );
         this.currentCharacter++;
       } else if (ti > 6) {
@@ -311,20 +311,20 @@ function text_loop(i, j, m, n) {
       // blinking cursor in front of "search" and "replace"
       if (ti > 1.5) {
         if (t % 30 <= 15) {
-          cnv.fill(0);
+          this.cnv.fill(0);
         } else {
-          cnv.fill(250);
+          this.cnv.fill(250);
         }
-        cnv.rect(cnv.width*0.49, cnv.height/3 + cnv.width/15, cnv.width*0.06, cnv.height*0.003);
+        this.cnv.rect(this.cnv.width*0.49, this.cnv.height/3 + this.cnv.width/15, this.cnv.width*0.06, this.cnv.height*0.003);
       }
       if (ti > 2.5) {
         if (t % 30 <= 15) {
-          cnv.fill(0);
+          this.cnv.fill(0);
         } else {
-          cnv.fill(250);
+          this.cnv.fill(250);
         }
 
-        cnv.rect(cnv.width*0.55, 2*cnv.height/3 + cnv.width/15, cnv.width*0.06, cnv.height*0.003);
+        this.cnv.rect(this.cnv.width*0.55, 2*this.cnv.height/3 + this.cnv.width/15, this.cnv.width*0.06, this.cnv.height*0.003);
       }
     }
   };
@@ -345,8 +345,8 @@ function text_info(i, j, m, n) {
     n: n,
     cnv: cnv,
     update: function(t) {
-      let wMargin = cnv.width*40/570; // pageMargin in Maria's code
-      let d = cnv.width*100/570;
+      let wMargin = this.cnv.width*40/570; // pageMargin in Maria's code
+      let d = this.cnv.width*100/570;
 
       let sissor = `\n()                                            ()\nOO                                            OO\n`;
       let helixstring0 = `                    <><><><>                  `;
@@ -378,134 +378,134 @@ function text_info(i, j, m, n) {
       if ((t+N_FRAMES/2) % (N_FRAMES*2) > N_FRAMES) [col1, col2] = [col2, col1];
 
 
-      cnv.background(0);
-      cnv.fill(250);
-      cnv.textSize(cnv.width*12/570);
-      cnv.text(
+      this.cnv.background(0);
+      this.cnv.fill(250);
+      this.cnv.textSize(this.cnv.width*12/570);
+      this.cnv.text(
         helixstring,
         wMargin,
-        wMargin - 10*cnv.height/1120 + d
+        wMargin - 10*this.cnv.height/1120 + d
       );
-      cnv.text(
+      this.cnv.text(
         helixstring,
         wMargin,
-        wMargin + 10*cnv.height/1120 + d
+        wMargin + 10*this.cnv.height/1120 + d
       );
-      cnv.text(
+      this.cnv.text(
         helixstring,
         wMargin,
-        wMargin + 220*cnv.height/1120 + d
+        wMargin + 220*this.cnv.height/1120 + d
       );
-      cnv.text(
+      this.cnv.text(
         helixstring,
         wMargin,
-        wMargin + 450*cnv.height/1120 + d
+        wMargin + 450*this.cnv.height/1120 + d
       );
-      cnv.text(
+      this.cnv.text(
         string0,
         wMargin,
-        wMargin + 460*cnv.height/1120 + d
+        wMargin + 460*this.cnv.height/1120 + d
       );
-      cnv.text(
+      this.cnv.text(
         helixstring,
         wMargin,
-        wMargin + 470*cnv.height/1120 + d
+        wMargin + 470*this.cnv.height/1120 + d
       );
-      cnv.text(
+      this.cnv.text(
         helixstring,
         wMargin,
-        wMargin + 800*cnv.height/1120 + d
+        wMargin + 800*this.cnv.height/1120 + d
       );
-      cnv.text(
+      this.cnv.text(
         string0,
         wMargin,
-        wMargin + 810*cnv.height/1120 + d
+        wMargin + 810*this.cnv.height/1120 + d
       );
-      cnv.text(
+      this.cnv.text(
         helixstring,
         wMargin,
-        wMargin + 820*cnv.height/1120 + d
+        wMargin + 820*this.cnv.height/1120 + d
       );
-      cnv.textSize(cnv.width*12/570);
-      cnv.text(
+      this.cnv.textSize(this.cnv.width*12/570);
+      this.cnv.text(
         string0,
         wMargin,
         wMargin + d
       );
       /*
-      cnv.text(
+      this.cnv.text(
         helixstring,
         wMargin,
-        wMargin + 650*cnv.height/1120 + d
+        wMargin + 650*this.cnv.height/1120 + d
       );
       */
-      cnv.textSize(cnv.width*40/570);
-      cnv.text(
+      this.cnv.textSize(this.cnv.width*40/570);
+      this.cnv.text(
         string1,
         wMargin,
-        wMargin + 24*cnv.height/1120 + d,
+        wMargin + 24*this.cnv.height/1120 + d,
         width,
-        wMargin + 24*cnv.height/1120 + d
+        wMargin + 24*this.cnv.height/1120 + d
       );
 
-      cnv.textSize(cnv.width*30/570);
-      cnv.text(
+      this.cnv.textSize(this.cnv.width*30/570);
+      this.cnv.text(
         string2,
         wMargin,
-        wMargin + 180*cnv.height/1120 + d,
+        wMargin + 180*this.cnv.height/1120 + d,
         wMargin,
-        wMargin + 180*cnv.height/1120 + d
+        wMargin + 180*this.cnv.height/1120 + d
       );
-      cnv.textSize(cnv.width*30/570);
-      cnv.text(
+      this.cnv.textSize(this.cnv.width*30/570);
+      this.cnv.text(
         string3,
         wMargin,
-        wMargin + 558*cnv.height/1120 + d
+        wMargin + 558*this.cnv.height/1120 + d
       );
       /*
-      cnv.textSize(cnv.width*30/570);
-      cnv.text(
+      this.cnv.textSize(this.cnv.width*30/570);
+      this.cnv.text(
         timer1,
         wMargin,
-        wMargin + 720*cnv.height/1120 + d
+        wMargin + 720*this.cnv.height/1120 + d
       );
       */
 
-      cnv.textSize(cnv.width*30/570);
-      cnv.text(
+      this.cnv.textSize(this.cnv.width*30/570);
+      this.cnv.text(
         "// un|fold by re|thread",
         wMargin,
-        wMargin + 1000*cnv.height/1120
+        wMargin + 1000*this.cnv.height/1120
       );
-      cnv.fill(col1);
-      cnv.text(
+      this.cnv.fill(col1);
+      this.cnv.text(
         "<><><><>",
-        wMargin + cnv.width*0.65,
-        wMargin + 1000*cnv.height/1120
+        wMargin + this.cnv.width*0.65,
+        wMargin + 1000*this.cnv.height/1120
       );
 
-      cnv.push();
+      this.cnv.push();
       {
-        cnv.fill(col1);
-        cnv.textSize(cnv.width*12/570);
-        cnv.text(
+        this.cnv.fill(col1);
+        this.cnv.textSize(this.cnv.width*12/570);
+        this.cnv.text(
           helixstring1,
           wMargin,
-          wMargin + 10*cnv.height/1120 + d
+          wMargin + 10*this.cnv.height/1120 + d
         );
 
-        cnv.text(
+        this.cnv.text(
           helixstring2,
           wMargin,
-          wMargin + 470*cnv.height/1120 + d
+          wMargin + 470*this.cnv.height/1120 + d
         );
-        cnv.textSize(cnv.width*20/570);
-        cnv.text(
+        this.cnv.textSize(this.cnv.width*20/570);
+        this.cnv.text(
           helixstring0,
           wMargin,
           wMargin
         );
-        cnv.text(
+        this.cnv.text(
           sissor,
           wMargin,
           wMargin,
@@ -513,33 +513,33 @@ function text_info(i, j, m, n) {
           wMargin*2
         );
 
-        cnv.translate(0, 0.68*cnv.height);
-        cnv.fill(col2);
+        this.cnv.translate(0, 0.68*this.cnv.height);
+        this.cnv.fill(col2);
         /*
-        cnv.textSize(cnv.width*12/570);
-        cnv.text(
+        this.cnv.textSize(this.cnv.width*12/570);
+        this.cnv.text(
           helixstring1,
           wMargin,
-          wMargin + 10*cnv.height/1120 + d
+          wMargin + 10*this.cnv.height/1120 + d
         );
         */
-        cnv.text(
+        this.cnv.text(
           helixstring2,
           wMargin,
-          wMargin + 470*cnv.height/1120 + d
+          wMargin + 470*this.cnv.height/1120 + d
         );
-        cnv.text(
+        this.cnv.text(
           helixstring3,
           wMargin,
-          wMargin + 650*cnv.height/1120 + d
+          wMargin + 650*this.cnv.height/1120 + d
         );
-        cnv.textSize(cnv.width*20/570);
-        cnv.text(
+        this.cnv.textSize(this.cnv.width*20/570);
+        this.cnv.text(
           helixstring0,
           wMargin,
           wMargin
         );
-        cnv.text(
+        this.cnv.text(
           sissor,
           wMargin,
           wMargin,
@@ -547,38 +547,38 @@ function text_info(i, j, m, n) {
           wMargin*2
         );
 
-        cnv.textSize(cnv.width*20/570);
-        cnv.fill(250);
-        cnv.text(
+        this.cnv.textSize(this.cnv.width*20/570);
+        this.cnv.fill(250);
+        this.cnv.text(
           helixstring00,
           wMargin,
           wMargin
         );
-        cnv.fill(col1);
-        cnv.text(
+        this.cnv.fill(col1);
+        this.cnv.text(
           helixstring0,
           wMargin,
-          wMargin + 40*cnv.height/1120
+          wMargin + 40*this.cnv.height/1120
         );
       }
-      cnv.pop();
-      cnv.push();
+      this.cnv.pop();
+      this.cnv.push();
       {
-        cnv.textSize(cnv.width*20/570);
-        cnv.fill(250);
-        cnv.text(
+        this.cnv.textSize(this.cnv.width*20/570);
+        this.cnv.fill(250);
+        this.cnv.text(
           helixstring00,
           wMargin,
           wMargin
         );
-        cnv.fill(col2);
-        cnv.text(
+        this.cnv.fill(col2);
+        this.cnv.text(
           helixstring0,
           wMargin,
-          wMargin + 40*cnv.height/1120
+          wMargin + 40*this.cnv.height/1120
         );
       }
-      cnv.pop();
+      this.cnv.pop();
     }
   };
 }
@@ -605,28 +605,28 @@ function helix_bars(i, j, m, n, choice, ortho) {
     h: h,
     hGap: hGap,
     update: function(t) {
-      cnv.clear();
+      this.cnv.clear();
 
       let x = this.wMargin, y = -t%h-height/3, i = floor(t/h);
 
-      while (y < cnv.height*1.1) {
+      while (y < this.cnv.height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
         let [sup, dep] = [d.supplier, d.dependency];
 
-        cnv.push();
+        this.cnv.push();
 
-        cnv.translate(x+this.w/2, y+h/2, 0);
-        cnv.rotateY(y/60);
-        cnv.fill(get_sup_color(sup));
-        cnv.beginShape();
-        cnv.vertex(-this.w/2+this.wMargin, -h/2+this.hGap/2, 0);
-        cnv.vertex(-this.w/2+this.wMargin, h/2-this.hGap/2, 0);
-        cnv.fill(get_dep_color(dep));
-        cnv.vertex(this.w/2-this.wMargin, h/2-this.hGap/2, 0);
-        cnv.vertex(this.w/2-this.wMargin, -h/2+this.hGap/2, 0);
-        cnv.endShape();
+        this.cnv.translate(x+this.w/2, y+h/2, 0);
+        this.cnv.rotateY(y/60);
+        this.cnv.fill(get_sup_color(sup));
+        this.cnv.beginShape();
+        this.cnv.vertex(-this.w/2+this.wMargin, -h/2+this.hGap/2, 0);
+        this.cnv.vertex(-this.w/2+this.wMargin, h/2-this.hGap/2, 0);
+        this.cnv.fill(get_dep_color(dep));
+        this.cnv.vertex(this.w/2-this.wMargin, h/2-this.hGap/2, 0);
+        this.cnv.vertex(this.w/2-this.wMargin, -h/2+this.hGap/2, 0);
+        this.cnv.endShape();
 
-        cnv.pop();
+        this.cnv.pop();
 
         y += h;
       }
@@ -656,34 +656,34 @@ function helix_balls(i, j, m, n, choice, ortho) {
     h: h,
     hGap: hGap,
     update: function(t) {
-      cnv.clear();
+      this.cnv.clear();
 
       let x = this.wMargin, y = -t%h-height/3, i = floor(t/h);
 
-      while (y < cnv.height*1.1) {
+      while (y < this.cnv.height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
         let [sup, dep] = [d.supplier, d.dependency];
 
-        cnv.push();
+        this.cnv.push();
 
-        cnv.translate(x+this.w/2, y+h/2, 0);
-        cnv.rotateY(y/60-PI/2);
+        this.cnv.translate(x+this.w/2, y+h/2, 0);
+        this.cnv.rotateY(y/60-PI/2);
 
-        cnv.fill(240);
-        cnv.rotateX(3*PI/2);
-        cnv.cylinder(h/5, this.w-2*this.wMargin);
-        cnv.rotate(PI/2);
+        this.cnv.fill(240);
+        this.cnv.rotateX(3*PI/2);
+        this.cnv.cylinder(h/5, this.w-2*this.wMargin);
+        this.cnv.rotate(PI/2);
 
-        cnv.push();
-        cnv.fill(get_sup_color(sup));
-        cnv.translate(-this.w/2+this.wMargin, 0);
-        cnv.sphere(h/2);
-        cnv.fill(get_dep_color(dep));
-        cnv.translate(this.w-2*this.wMargin, 0);
-        cnv.sphere(h/2);
-        cnv.pop();
+        this.cnv.push();
+        this.cnv.fill(get_sup_color(sup));
+        this.cnv.translate(-this.w/2+this.wMargin, 0);
+        this.cnv.sphere(h/2);
+        this.cnv.fill(get_dep_color(dep));
+        this.cnv.translate(this.w-2*this.wMargin, 0);
+        this.cnv.sphere(h/2);
+        this.cnv.pop();
 
-        cnv.pop();
+        this.cnv.pop();
 
         y += h;
       }
@@ -704,17 +704,17 @@ function ngrams(i, j, m, n, group_by) {
     cnv: cnv,
     ctx: cnv.drawingContext,
     update: function(t) {
-      cnv.clear();
+      this.cnv.clear();
 
       let w = WINDOW_WIDTH*scale, hGap = h/4;
-      let eps = cnv.height/1000;
+      let eps = this.cnv.height/1000;
 
-      let x = 0, j = 0, y = -cnv.height/3, k = floor(t/h);
+      let x = 0, j = 0, y = -this.cnv.height/3, k = floor(t/h);
       let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
       let wUnit = (w-wMargin)/(4*max_name_length);
       let xOffset = 0;
 
-      while (y < cnv.height*1.1) {
+      while (y < this.cnv.height*1.1) {
         let d = data.draw_trace[k%trace_len];
 
         let idx = j % this.group_by;
@@ -740,13 +740,13 @@ function ngrams(i, j, m, n, group_by) {
 
         if (idx == 0) {
           // bottom
-          cnv.rect(x+wMargin+xOffset, y, w-2*wMargin, h-hGap+eps, 0, 0, h, h);
+          this.cnv.rect(x+wMargin+xOffset, y, w-2*wMargin, h-hGap+eps, 0, 0, h, h);
         } else if (idx == 1) {
           // top
-          cnv.rect(x+wMargin+xOffset, y+hGap, w-2*wMargin, h-hGap+eps, h, h, 0, 0);
+          this.cnv.rect(x+wMargin+xOffset, y+hGap, w-2*wMargin, h-hGap+eps, h, h, 0, 0);
         } else {
           // middle
-          cnv.rect(x+wMargin+xOffset, y, w-2*wMargin, h+eps);
+          this.cnv.rect(x+wMargin+xOffset, y, w-2*wMargin, h+eps);
         }
 
         y += h;
@@ -773,22 +773,22 @@ function trace_print(i, j, m, n, mode, dna) {
     cnv: cnv,
     ctx: cnv.drawingContext,
     update: function(t) {
-      cnv.clear();
+      this.cnv.clear();
 
       let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
-      cnv.textSize(h);
+      this.cnv.textSize(h);
       let k = floor(t/h);
       let y0 = -height/3;
 
-      for (let y = y0; y < cnv.height; y += h) {
+      for (let y = y0; y < this.cnv.height; y += h) {
         let d = data.draw_trace[k%trace_len];
         let [sup, dep] = [d.supplier, d.dependency];
         let str;
         if (this.mode == "sup") {
-          cnv.fill(get_sup_color(sup));
+          this.cnv.fill(get_sup_color(sup));
           str = sup;
         } else if (this.mode == "dep") {
-          cnv.fill(get_dep_color(dep));
+          this.cnv.fill(get_dep_color(dep));
           str = dep;
         } else {
           let name = getActualName(d.name);
@@ -797,18 +797,18 @@ function trace_print(i, j, m, n, mode, dna) {
           grd.addColorStop(0, color(get_sup_color(sup)));
           grd.addColorStop(1, color(get_dep_color(dep)));
           this.ctx.fillStyle = grd;
-          if (where == "mobile") cnv.fill([color(get_sup_color(sup)), color(get_dep_color(dep))][~~noise(t)]);
+          if (where == "mobile") this.cnv.fill([color(get_sup_color(sup)), color(get_dep_color(dep))][~~noise(t)]);
           str = name;
         }
         if (this.dna) str = turn_into_dna(str);
-        cnv.text(str, wMargin, y);
+        this.cnv.text(str, wMargin, y);
 
         k++;
       }
 
-      cnv.erase();
-      cnv.rect(0, 0, cnv.width, h*2.7);
-      cnv.noErase();
+      this.cnv.erase();
+      this.cnv.rect(0, 0, this.cnv.width, h*2.7);
+      this.cnv.noErase();
       let str = "> print ";
       if (this.mode == "sup") {
         str += "suppliers"
@@ -819,8 +819,8 @@ function trace_print(i, j, m, n, mode, dna) {
       }
       if (this.dna) str += ".dna";
       else str += ".txt";
-      cnv.fill(250);
-      cnv.text(str, wMargin, h*1.2);
+      this.cnv.fill(250);
+      this.cnv.text(str, wMargin, h*1.2);
     }
   };
 }
