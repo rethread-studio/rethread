@@ -7,7 +7,7 @@ let dep_colors, sup_colors;
 let all_deps, all_sups;
 let myFont;
 
-let scale;
+let my_scale;
 const WINDOW_WIDTH = 57;
 const WINDOW_HEIGHT = 112;
 const SMOL_WINDOW_HEIGHT = 47;
@@ -46,7 +46,8 @@ function setup() {
   }
 
   determineScale();
-  cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
+  cnv = createCanvas(WINDOW_WIDTH*mWindows*my_scale, WINDOW_HEIGHT*nWindows*my_scale);
+  //pixelDensity(1);
 
   //console.log(data)
   trace_len = data.draw_trace.length;
@@ -217,7 +218,7 @@ function glitch_it(img, amount) {
 
 function text_loop(i, j, m, n) {
   // adapted from Maria's code
-  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  let cnv = createGraphics(m*WINDOW_WIDTH*my_scale, n*WINDOW_HEIGHT*my_scale);
   cnv.noStroke();
   cnv.textSize(cnv.width/10);
   cnv.textFont(myFont);
@@ -225,8 +226,8 @@ function text_loop(i, j, m, n) {
   //cnv.textStyle(BOLD);
 
   return {
-    x0: i*WINDOW_WIDTH*scale,
-    y0: j*WINDOW_HEIGHT*scale,
+    x0: i*WINDOW_WIDTH*my_scale,
+    y0: j*WINDOW_HEIGHT*my_scale,
     m: m,
     n: n,
     cnv: cnv,
@@ -236,7 +237,7 @@ function text_loop(i, j, m, n) {
     currentCharacter: 0, // same name in Maria's code
     baseFinished: false, // whether the base is finished ("search" and "replace" are written)
     update: function(t) {
-      let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+      let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
       let string1 = "search";
       let string2 = "replace";
       let ti = (t/this.timeUnit) % 6; // i in Maria's code
@@ -332,15 +333,15 @@ function text_loop(i, j, m, n) {
 
 function text_info(i, j, m, n) {
   // adapted from Maria's code
-  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  let cnv = createGraphics(m*WINDOW_WIDTH*my_scale, n*WINDOW_HEIGHT*my_scale);
   cnv.noStroke();
   cnv.textFont(myFont);
   cnv.textAlign(LEFT, CENTER);
   //cnv.textStyle(BOLD);
 
   return {
-    x0: i*WINDOW_WIDTH*scale,
-    y0: j*WINDOW_HEIGHT*scale,
+    x0: i*WINDOW_WIDTH*my_scale,
+    y0: j*WINDOW_HEIGHT*my_scale,
     m: m,
     n: n,
     cnv: cnv,
@@ -584,17 +585,17 @@ function text_info(i, j, m, n) {
 }
 
 function helix_bars(i, j, m, n, choice, ortho) {
-  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
+  let cnv = createGraphics(m*WINDOW_WIDTH*my_scale, n*WINDOW_HEIGHT*my_scale, WEBGL);
   cnv.noStroke();
   cnv.translate(-cnv.width/2, -cnv.height/2);
   if (ortho) cnv.ortho();
-  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+  let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
   let w = cnv.width-wMargin*2; // width of each function call rectangle
   let hGap = h/8; // gap between rectangles vertically
 
   return {
-    x0: i*WINDOW_WIDTH*scale,
-    y0: j*WINDOW_HEIGHT*scale,
+    x0: i*WINDOW_WIDTH*my_scale,
+    y0: j*WINDOW_HEIGHT*my_scale,
     m: m,
     n: n,
     choice: choice,
@@ -635,17 +636,17 @@ function helix_bars(i, j, m, n, choice, ortho) {
 }
 
 function helix_balls(i, j, m, n, choice, ortho) {
-  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale, WEBGL);
+  let cnv = createGraphics(m*WINDOW_WIDTH*my_scale, n*WINDOW_HEIGHT*my_scale, WEBGL);
   cnv.noStroke();
   cnv.translate(-cnv.width/2, -cnv.height/2);
   if (ortho) cnv.ortho();
-  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+  let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
   let w = cnv.width-wMargin*2; // width of each function call rectangle
   let hGap = h/8; // gap between rectangles vertically
 
   return {
-    x0: i*WINDOW_WIDTH*scale,
-    y0: j*WINDOW_HEIGHT*scale,
+    x0: i*WINDOW_WIDTH*my_scale,
+    y0: j*WINDOW_HEIGHT*my_scale,
     m: m,
     n: n,
     choice: choice,
@@ -692,12 +693,12 @@ function helix_balls(i, j, m, n, choice, ortho) {
 }
 
 function ngrams(i, j, m, n, group_by) {
-  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  let cnv = createGraphics(m*WINDOW_WIDTH*my_scale, n*WINDOW_HEIGHT*my_scale);
   cnv.noStroke();
 
   return {
-    x0: i*WINDOW_WIDTH*scale,
-    y0: j*WINDOW_HEIGHT*scale,
+    x0: i*WINDOW_WIDTH*my_scale,
+    y0: j*WINDOW_HEIGHT*my_scale,
     m: m,
     n: n,
     group_by: group_by,
@@ -706,11 +707,11 @@ function ngrams(i, j, m, n, group_by) {
     update: function(t) {
       this.cnv.clear();
 
-      let w = WINDOW_WIDTH*scale, hGap = h/4;
+      let w = WINDOW_WIDTH*my_scale, hGap = h/4;
       let eps = this.cnv.height/1000;
 
       let x = 0, j = 0, y = -this.cnv.height/3, k = floor(t/h);
-      let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+      let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
       let wUnit = (w-wMargin)/(4*max_name_length);
       let xOffset = 0;
 
@@ -727,7 +728,7 @@ function ngrams(i, j, m, n, group_by) {
           }
           mean_name_length /= this.group_by;
           //mean_noise /= this.group_by;
-          wMargin = WINDOW_WIDTH*scale/10 + wUnit*(max_name_length-mean_name_length);
+          wMargin = WINDOW_WIDTH*my_scale/10 + wUnit*(max_name_length-mean_name_length);
           //xOffset = (mean_noise-0.5)*wMargin;
         }
 
@@ -758,14 +759,14 @@ function ngrams(i, j, m, n, group_by) {
 }
 
 function trace_print(i, j, m, n, mode, dna) {
-  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  let cnv = createGraphics(m*WINDOW_WIDTH*my_scale, n*WINDOW_HEIGHT*my_scale);
   cnv.noStroke();
   cnv.textAlign(LEFT, TOP);
   cnv.textFont(myFont);
 
   return {
-    x0: i*WINDOW_WIDTH*scale,
-    y0: j*WINDOW_HEIGHT*scale,
+    x0: i*WINDOW_WIDTH*my_scale,
+    y0: j*WINDOW_HEIGHT*my_scale,
     m: m,
     n: n,
     mode: mode,
@@ -775,7 +776,7 @@ function trace_print(i, j, m, n, mode, dna) {
     update: function(t) {
       this.cnv.clear();
 
-      let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+      let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
       this.cnv.textSize(h);
       let k = floor(t/h);
       let y0 = -height/3;
@@ -834,7 +835,7 @@ function turn_into_dna(str) {
 }
 
 function section_profile(i, j, m, n, section_idx) {
-  let cnv = createGraphics(m*WINDOW_WIDTH*scale, n*WINDOW_HEIGHT*scale);
+  let cnv = createGraphics(m*WINDOW_WIDTH*my_scale, n*WINDOW_HEIGHT*my_scale);
   cnv.noStroke();
   cnv.rectMode(CENTER);
   let ctx = cnv.drawingContext;
@@ -845,7 +846,7 @@ function section_profile(i, j, m, n, section_idx) {
   let max_depth = section.max_depth+1;
   let max_offset = section.shannon_wiener_diversity_index*50;
 
-  let wMargin = WINDOW_WIDTH*scale/10; // margin on the sides
+  let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
   let hMargin = wMargin;
   let section_size = section.end_index - section.start_index;
   let w = cnv.width-2*wMargin;
@@ -876,8 +877,8 @@ function section_profile(i, j, m, n, section_idx) {
   }
 
   return {
-    x0: i*WINDOW_WIDTH*scale,
-    y0: j*WINDOW_HEIGHT*scale,
+    x0: i*WINDOW_WIDTH*my_scale,
+    y0: j*WINDOW_HEIGHT*my_scale,
     m: m,
     n: n,
     cnv: cnv,
@@ -891,7 +892,7 @@ function section_profile(i, j, m, n, section_idx) {
 
 
 function determineScale() {
-  scale = 0.99*windowHeight/(WINDOW_HEIGHT*nWindows);
+  my_scale = 0.99*windowHeight/(WINDOW_HEIGHT*nWindows);
 }
 
 function centerCanvas() {
@@ -904,10 +905,10 @@ function centerCanvas() {
 function drawWindowsOutline() {
   stroke(255);
   strokeWeight(2);
-  for (let x = WINDOW_WIDTH*scale; x < width; x += WINDOW_WIDTH*scale) {
+  for (let x = WINDOW_WIDTH*my_scale; x < width; x += WINDOW_WIDTH*my_scale) {
     line(x, 0, x, height);
   }
-  for (let y = WINDOW_HEIGHT*scale; y < height; y += WINDOW_HEIGHT*scale) {
+  for (let y = WINDOW_HEIGHT*my_scale; y < height; y += WINDOW_HEIGHT*my_scale) {
     line(0, y, width, y);
   }
   noFill();
@@ -962,7 +963,7 @@ function keyPressed() {
 /*
 function windowResized() {
   determineScale();
-  resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
+  resizeCanvas(WINDOW_WIDTH*mWindows*my_scale, WINDOW_HEIGHT*nWindows*my_scale);
   centerCanvas();
 }
 */
