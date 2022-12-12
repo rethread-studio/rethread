@@ -609,7 +609,7 @@ function helix_bars(i, j, m, n, choice, ortho) {
     update: function(t) {
       this.cnv.clear();
 
-      let x = this.wMargin, y = -t%h-height/3, i = floor(t/h);
+      let x = this.wMargin, y = -t%h-this.cnv.height/10, i = floor(t/h);
 
       while (y < this.cnv.height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
@@ -660,7 +660,7 @@ function helix_balls(i, j, m, n, choice, ortho) {
     update: function(t) {
       this.cnv.clear();
 
-      let x = this.wMargin, y = -t%h-height/3, i = floor(t/h);
+      let x = this.wMargin, y = -t%h-this.cnv.height/10, i = floor(t/h);
 
       while (y < this.cnv.height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
@@ -673,16 +673,16 @@ function helix_balls(i, j, m, n, choice, ortho) {
 
         this.cnv.fill(240);
         this.cnv.rotateX(3*PI/2);
-        this.cnv.cylinder(h/5, this.w-2*this.wMargin);
+        this.cnv.cylinder(h/5, this.w-2*this.wMargin, 6, 1);
         this.cnv.rotate(PI/2);
 
         this.cnv.push();
         this.cnv.fill(get_sup_color(sup));
         this.cnv.translate(-this.w/2+this.wMargin, 0);
-        this.cnv.sphere(h/2);
+        this.cnv.sphere(h/2, 12, 8);
         this.cnv.fill(get_dep_color(dep));
         this.cnv.translate(this.w-2*this.wMargin, 0);
-        this.cnv.sphere(h/2);
+        this.cnv.sphere(h/2, 12, 8);
         this.cnv.pop();
 
         this.cnv.pop();
