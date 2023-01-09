@@ -1,3 +1,6 @@
+// Inspiration:
+// https://observablehq.com/@d3/icicle
+
 let data;
 let queue = []; // queue used for the breadth-first search
 
@@ -6,15 +9,18 @@ let hu1 = 75, hu2 = 113;
 let sa1 = 100, sa2 = 50;
 let br1 = 95, br2 = 85;
 
+// parameters
 let fixedWidth = false;
 let fixedHeight = false;
+let strokeCol = 90;
 
 function preload() {
-  data = loadJSON("repo_data.json");
+  data = loadJSON("../data/repo_data.json");
 }
 
 function setup() {
-  //createCanvas(705, 500);
+  //createCanvas(705, 500, WEBGL);
+  //createCanvas(1080, 720, WEBGL);
   createCanvas(windowWidth, windowHeight, WEBGL);
   noStroke();
   colorMode(HSB, 100);
@@ -73,7 +79,7 @@ function drawNode(node) {
   rect(node.x, node.y, node.w, height - node.y);
 
   if (node.parent) {
-    stroke(90, 42);
+    stroke(strokeCol, 42);
     noFill();
     let x1 = node.parent.x + node.parent.w/2;
     let y1 = node.parent.y;
