@@ -7,19 +7,34 @@ let mySize;
 
 // parameters
 let diskOffset = 1; // 0 => perfect disk, 1 => deformed disk
+// editable via the URL
 let backgroundCol = 98;
+let multicolor = true;
 
 function preload() {
   data = loadJSON("../data/repo_data.json");
 }
 
 function setup() {
-  //createCanvas(705, 500);
-  createCanvas(windowWidth, windowHeight);
-  mySize = min(width, height)*0.8;
+  let params = getURLParams();
+  if (params.background != undefined && params.background == "black") {
+    backgroundCol = 2;
+  }
+  if (params.color != undefined && params.color == "no") {
+    multicolor = false;
+  }
+  let w = (params.width != undefined) ? params.width : windowWidth;
+  let h = (params.height != undefined) ? params.height : windowHeight;
+  createCanvas(w, h);
+
+  if (params.width != undefined || params.height != undefined) pixelDensity(1);
   colorMode(HSB, 100);
   noFill();
-  background(backgroundCol);
+  
+  mySize = min(width, height)*0.8;
+  if (params.background == undefined || params.background != "transparent") {
+    background(backgroundCol);
+  }
   
   //noLoop();
   data.x = width/2;
@@ -85,6 +100,7 @@ function drawNode(node) {
   let x4 = width/2 + (node.parent.diam)/2*cos(node.middle);
   let y4 = height/2 + (node.parent.diam)/2*sin(node.middle);
   
-  stroke(node.hu, node.sa, node.br);
+  if (multicolor) stroke(node.hu, node.sa, node.br);
+  else stroke(100-backgroundCol, 90);
   bezier(x1, y1, x2, y2, x3, y3, x4, y4);
 }

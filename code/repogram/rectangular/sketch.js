@@ -13,16 +13,23 @@ let br1 = 95, br2 = 85;
 let fixedWidth = false;
 let fixedHeight = false;
 let strokeCol = 90;
+// editable via the URL
+let drawLines = true;
 
 function preload() {
   data = loadJSON("../data/repo_data.json");
 }
 
 function setup() {
-  //createCanvas(705, 500, WEBGL);
-  //createCanvas(1080, 720, WEBGL);
-  createCanvas(windowWidth, windowHeight, WEBGL);
-  noStroke();
+  let params = getURLParams();
+  if (params.lines != undefined && params.lines == "no") {
+    drawLines = false;
+  }
+  let w = (params.width != undefined) ? params.width : windowWidth;
+  let h = (params.height != undefined) ? params.height : windowHeight;
+  createCanvas(w, h, WEBGL);
+
+  if (params.width != undefined || params.height != undefined) pixelDensity(1);
   colorMode(HSB, 100);
 
   data.w = width;
@@ -75,10 +82,11 @@ function draw() {
 }
 
 function drawNode(node) {
+  noStroke();
   fill(node.hu, node.sa, node.br);
   rect(node.x, node.y, node.w, height - node.y);
 
-  if (node.parent) {
+  if (drawLines && node.parent) {
     stroke(strokeCol, 42);
     noFill();
     let x1 = node.parent.x + node.parent.w/2;
@@ -90,6 +98,5 @@ function drawNode(node) {
     let x4 = x3;
     let y4 = y3 + node.parent.h/2;
     bezier(x1, y1, x2, y2, x3, y3, x4, y4);
-    noStroke();
   }
 }
