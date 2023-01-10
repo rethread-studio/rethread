@@ -17,9 +17,9 @@ mod websocket;
 use anyhow::Result;
 use bevy::{prelude::Color, utils::HashMap};
 use log::*;
-use scheduler::SchedulerCom;
+use scheduler::{SchedulerCom, SchedulerMessage};
 
-use parser::deepika2::{self, Deepika2};
+use parser::deepika2::{self, Deepika2, DepthState};
 
 use crate::scheduler::start_scheduler;
 
@@ -263,6 +263,66 @@ impl Trace {
         s.scheduler_com = scheduler_com;
         s
     }
+    pub fn find_deepest_section(&self, min_length: usize) -> (usize, usize) {
+        let mut max_depth = 0;
+        let mut index = 0;
+        for (i, section) in self.trace.depth_envelope.sections.iter().enumerate() {
+            if section.end_index - section.start_index > min_length
+                && matches!(section.state, DepthState::Stable)
+            {
+                if section.max_depth - section.min_depth > max_depth {
+                    max_depth = section.max_depth - section.min_depth;
+                    index = i;
+                }
+            }
+        }
+        (self.trace.depth_envelope.sections[index].start_index, index)
+    }
+    pub fn find_shallowest_section(&self, min_length: usize) -> (usize, usize) {
+        let mut min_depth = i32::MAX;
+        let mut index = 0;
+        for (i, section) in self.trace.depth_envelope.sections.iter().enumerate() {
+            if section.end_index - section.start_index > min_length
+                && matches!(section.state, DepthState::Stable)
+            {
+                if section.max_depth - section.min_depth < min_depth {
+                    min_depth = section.max_depth - section.min_depth;
+                    index = i;
+                }
+            }
+        }
+        (self.trace.depth_envelope.sections[index].start_index, index)
+    }
+    pub fn find_most_diverse_section(&self, min_length: usize) -> (usize, usize) {
+        let mut max_diversity = 0.;
+        let mut index = 0;
+        for (i, section) in self.trace.depth_envelope.sections.iter().enumerate() {
+            if section.end_index - section.start_index > min_length
+                && matches!(section.state, DepthState::Stable)
+            {
+                if section.shannon_wiener_diversity_index > max_diversity {
+                    max_diversity = section.shannon_wiener_diversity_index;
+                    index = i;
+                }
+            }
+        }
+        (self.trace.depth_envelope.sections[index].start_index, index)
+    }
+    pub fn find_least_diverse_section(&self, min_length: usize) -> (usize, usize) {
+        let mut min_diversity = f32::MAX;
+        let mut index = 0;
+        for (i, section) in self.trace.depth_envelope.sections.iter().enumerate() {
+            if section.end_index - section.start_index > min_length
+                && matches!(section.state, DepthState::Stable)
+            {
+                if section.shannon_wiener_diversity_index < min_diversity {
+                    min_diversity = section.shannon_wiener_diversity_index;
+                    index = i;
+                }
+            }
+        }
+        (self.trace.depth_envelope.sections[index].start_index, index)
+    }
     pub fn get_animation_call_data(&self, call_index: usize) -> AnimationCallData {
         let call = &self.trace.draw_trace[call_index];
         // num leds from global depth
@@ -304,19 +364,9 @@ impl Trace {
             None
         }
     }
-    pub fn jump_to_next_marker(&mut self) {
+    pub fn send_scheduler_message(&mut self, message: SchedulerMessage) {
         if let Some(scheduler_com) = &mut self.scheduler_com {
-            scheduler_com.jump_to_next_marker();
-        }
-    }
-    pub fn jump_close_to_end(&mut self) {
-        if let Some(scheduler_com) = &mut self.scheduler_com {
-            scheduler_com.jump_close_to_end();
-        }
-    }
-    pub fn jump_to_previous_marker(&mut self) {
-        if let Some(scheduler_com) = &mut self.scheduler_com {
-            scheduler_com.jump_to_previous_marker();
+            scheduler_com.send_message(message);
         }
     }
 }

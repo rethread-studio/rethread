@@ -16,7 +16,13 @@ use parser::deepika2::{CallDrawData, DepthEnvelopePoint};
 // - play/pause
 //
 
-pub enum Message {
+#[derive(Copy, Clone, Debug)]
+pub enum SchedulerMessage {
+    JumpToStart,
+    JumpToDeepestSection(usize),
+    JumpToShallowestSection(usize),
+    JumpToMostDiverseSection(usize),
+    JumpToLeastDiverseSection(usize),
     JumpNextMarker,
     JumpPreviousMarker,
     JumpCloseToEnd,
@@ -27,18 +33,12 @@ pub struct SchedulerCom {
     pub index_increase_rx: Receiver<usize>,
     pub play_tx: Sender<bool>,
     pub event_duration_tx: Sender<f32>,
-    pub message_tx: Sender<Message>,
+    pub message_tx: Sender<SchedulerMessage>,
 }
 
 impl SchedulerCom {
-    pub fn jump_close_to_end(&mut self) {
-        self.message_tx.send(Message::JumpCloseToEnd).unwrap()
-    }
-    pub fn jump_to_next_marker(&mut self) {
-        self.message_tx.send(Message::JumpNextMarker).unwrap()
-    }
-    pub fn jump_to_previous_marker(&mut self) {
-        self.message_tx.send(Message::JumpPreviousMarker).unwrap()
+    pub fn send_message(&mut self, message: SchedulerMessage) {
+        self.message_tx.send(message).unwrap()
     }
 }
 
@@ -82,7 +82,7 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
         }
         while let Ok(new_message) = message_rx.try_recv() {
             match new_message {
-                Message::JumpNextMarker => {
+                SchedulerMessage::JumpNextMarker => {
                     let old_index = trace.current_index;
                     let current_marker = trace.trace.draw_trace[trace.current_index].marker.clone();
                     while current_marker == trace.trace.draw_trace[trace.current_index].marker {
@@ -97,7 +97,7 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
                     }
                     index_increase_tx.send(trace.current_index).unwrap();
                 }
-                Message::JumpPreviousMarker => {
+                SchedulerMessage::JumpPreviousMarker => {
                     let old_index = trace.current_index;
                     let current_marker = trace.trace.draw_trace[trace.current_index].marker.clone();
                     while current_marker == trace.trace.draw_trace[trace.current_index].marker {
@@ -112,8 +112,68 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
                     }
                     index_increase_tx.send(trace.current_index).unwrap();
                 }
-                Message::JumpCloseToEnd => {
+                SchedulerMessage::JumpCloseToEnd => {
                     trace.current_index = (trace.trace.draw_trace.len() - 100).max(0);
+                    current_section =
+                        trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_section(current_section);
+                    }
+                    index_increase_tx.send(trace.current_index).unwrap();
+                }
+                SchedulerMessage::JumpToStart => {
+                    trace.current_index = 0;
+                    trace.current_depth_envelope_index = 0;
+                    current_section =
+                        trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_section(current_section);
+                    }
+                    index_increase_tx.send(trace.current_index).unwrap();
+                }
+                SchedulerMessage::JumpToDeepestSection(min_length) => {
+                    let (call_index, section_index) = trace.find_deepest_section(min_length);
+                    trace.current_depth_envelope_index = section_index;
+                    trace.current_index = call_index;
+                    current_section =
+                        trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_section(current_section);
+                    }
+                    index_increase_tx.send(trace.current_index).unwrap();
+                }
+                SchedulerMessage::JumpToShallowestSection(min_length) => {
+                    let (call_index, section_index) = trace.find_shallowest_section(min_length);
+                    trace.current_depth_envelope_index = section_index;
+                    trace.current_index = call_index;
+                    current_section =
+                        trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_section(current_section);
+                    }
+                    index_increase_tx.send(trace.current_index).unwrap();
+                }
+                SchedulerMessage::JumpToMostDiverseSection(min_length) => {
+                    let (call_index, section_index) = trace.find_most_diverse_section(min_length);
+                    trace.current_depth_envelope_index = section_index;
+                    trace.current_index = call_index;
+                    current_section =
+                        trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_section(current_section);
+                    }
+                    index_increase_tx.send(trace.current_index).unwrap();
+                }
+                SchedulerMessage::JumpToLeastDiverseSection(min_length) => {
+                    let (call_index, section_index) = trace.find_least_diverse_section(min_length);
+                    trace.current_depth_envelope_index = section_index;
+                    trace.current_index = call_index;
+                    current_section =
+                        trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_section(current_section);
+                    }
+                    index_increase_tx.send(trace.current_index).unwrap();
                 }
             }
         }

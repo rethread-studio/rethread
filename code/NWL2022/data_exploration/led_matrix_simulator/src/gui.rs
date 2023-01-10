@@ -11,7 +11,7 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 use rfd::FileDialog;
 
-use crate::get_args;
+use crate::{get_args, scheduler::SchedulerMessage};
 
 use super::Trace;
 use super::{AnimationCallData, NUM_LEDS_X, NUM_LEDS_Y};
@@ -87,6 +87,7 @@ struct GlobalSettings {
     led_depth: usize,
     call_to_coordinate_mapping: CallToCoordinateMapping,
     mouse_position: Vec2,
+    min_length: usize,
 }
 impl Default for GlobalSettings {
     fn default() -> Self {
@@ -102,6 +103,7 @@ impl Default for GlobalSettings {
             led_intensity: 1000.,
             call_to_coordinate_mapping: CallToCoordinateMapping::DepthSupplierDependency,
             mouse_position: bevy::math::vec2(0., 0.),
+            min_length: 100,
         }
     }
 }
@@ -619,15 +621,42 @@ fn bevy_ui(
                 let mut v = turbine_hall_visibility.single_mut();
                 v.is_visible = !v.is_visible;
             }
-            if ui.button("<- Jump to previous marker").clicked() {
-                trace.jump_to_previous_marker();
-            }
-            if ui.button("Jump to next marker ->").clicked() {
-                trace.jump_to_next_marker();
-            }
-            if ui.button("Jump to end").clicked() {
-                trace.jump_close_to_end();
-            }
+            ui.collapsing("Jump", |ui| {
+                if ui.button("<- previous marker").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::JumpPreviousMarker);
+                }
+                if ui.button("next marker ->").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::JumpNextMarker);
+                }
+                if ui.button("Start").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::JumpToStart);
+                }
+                if ui.button("End").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::JumpCloseToEnd);
+                }
+
+                ui.add(egui::Slider::new(&mut settings.min_length, 0..=1000).text("min length"));
+                let min_length = settings.min_length;
+                if ui.button("Deepest section").clicked() {
+                    trace
+                        .send_scheduler_message(SchedulerMessage::JumpToDeepestSection(min_length));
+                }
+                if ui.button("Shallowest section").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::JumpToShallowestSection(
+                        min_length,
+                    ));
+                }
+                if ui.button("Most diverse section").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::JumpToMostDiverseSection(
+                        min_length,
+                    ));
+                }
+                if ui.button("Least diverse section").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::JumpToLeastDiverseSection(
+                        min_length,
+                    ));
+                }
+            });
             ui.collapsing("Open trace", |ui| {
                 if ui.button("Open trace").clicked() {
                     let file = FileDialog::new()
