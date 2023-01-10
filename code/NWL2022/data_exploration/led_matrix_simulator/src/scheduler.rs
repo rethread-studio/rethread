@@ -122,7 +122,10 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
             if trace.current_index >= trace.trace.draw_trace.len() {
                 trace.current_index = 0;
                 trace.current_depth_envelope_index = 0;
+                play = false;
             }
+        }
+        if play {
             index_increase_tx.send(trace.current_index).unwrap();
 
             let num_depth_points = trace.trace.depth_envelope.sections.len();
