@@ -6,7 +6,7 @@ The repogram is a generative visualization of a directory tree. Here it is run o
 
 The data is extracted and analyzed with the [``data/tree_extraction.py``](data/tree_extraction.py) script, and stored in the [``data/repo_data.json``](data/repo_data.json) file.
 
-To create or update the JSON file, run ``py `` in the ``repogram/data`` folder. Python needs to be installed.
+To create or update the JSON file, run ``py tree_extraction.py`` in the ``repogram/data`` folder. Python needs to be installed.
 
 ## Visualization
 
