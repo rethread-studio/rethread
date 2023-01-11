@@ -1,18 +1,18 @@
 # Repogram
 
-The repogram is a generative visualization of a directory tree. Here it is run on the re|thread repo.
+The repogram is a generative visualization of a directory tree. Here, it's the re|thread repo.
 
 ## Data
 
 The data is extracted and analyzed with the [``data/tree_extraction.py``](data/tree_extraction.py) script, and stored in the [``data/repo_data.json``](data/repo_data.json) file.
 
-To create or update the JSON file, run ``py tree_extraction.py`` in the ``repogram/data`` folder. Python needs to be installed.
+To create or update the JSON file, run ``py tree_extraction.py`` in the ``data`` folder. Python needs to be installed.
 
 ## Visualization
 
-There are two visualizations. They represent the same data with the same logic, but in different shapes. They are web-based, created with [p5.js](https://p5js.org).
+There are two visualizations. They represent the same data with the same logic (an animated breadth-first search), but in different shapes. They are web-based, created with [p5.js](https://p5js.org).
 
-In both cases, the order of the directories and files is shuffled (recursively), so that the visualization changes a bit each time we load it: it's generative!
+In both cases, the order of the directories and files is shuffled (recursively), so that the visualization changes each time the page is loaded: it's generative!
 
 ### Rectangular
 
@@ -20,7 +20,7 @@ In the [rectangular](rectangular) version, each directory or file is drawn as on
 
 Live view: [https://rethread.art/code/repogram/rectangular](https://rethread.art/code/repogram/rectangular).
 
-#### URL parameters:
+#### URL parameters
 - ``lines``: whether we also draw the white tree lines on top (``yes`` or ``no``, default is ``yes``)
 - ``width``: the width of the image (default is the width of the browser window)
 - ``height``: the height of the image (default is the height of the browser window)
@@ -50,7 +50,7 @@ Live view: [https://rethread.art/code/repogram/rectangular](https://rethread.art
 
 Live view: [https://rethread.art/code/repogram/circular](https://rethread.art/code/repogram/circular).
 
-#### URL parameters:
+#### URL parameters
 - ``background``: the color of the background (``white``, ``black`` or ``transparent``, default is ``white``)
 - ``color``: whether the lines are multicolored or not (``yes`` or ``no``, default is ``yes``)
 - ``width``: the width of the image (default is the width of the browser window)
