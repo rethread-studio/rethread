@@ -1,0 +1,6 @@
+ofxNetwork
+ofxOpenCv
+ofxOsc
+ofxPoco
+ofxFastParticleSystem
+ofxSvg
