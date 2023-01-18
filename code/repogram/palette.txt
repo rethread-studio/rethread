@@ -1,0 +1,2 @@
+#e516b8,#8f16e5,#165be5,#168be5,#16e5e5,#16e5aa
+write all the hex codes on the line above, spearated with commas, without quotes or spaces

@@ -4,10 +4,10 @@
 let data;
 let queue = []; // queue used for the breadth-first search
 
-// limit values for hue, saturation and brightness
-let hu1 = 75, hu2 = 113;
-let sa1 = 100, sa2 = 50;
-let br1 = 95, br2 = 85;
+// limit values for saturation and brightness
+let palette, colScale;
+let sa1 = 0.9, sa2 = 0.5;
+let br1 = 0.9, br2 = 0.7;
 
 // parameters
 let fixedWidth = false;
@@ -18,6 +18,7 @@ let drawLines = true;
 
 function preload() {
   data = loadJSON("../data/repo_data.json");
+  palette = loadStrings("../palette.txt");
 }
 
 function setup() {
@@ -32,13 +33,16 @@ function setup() {
   if (params.width != undefined || params.height != undefined) pixelDensity(1);
   colorMode(HSB, 100);
 
+  palette = palette[0].split(",");
+  colScale = chroma.bezier(palette);
+
   data.w = width;
   data.h = fixedHeight ? height/data.max_depth : height/(data.max_depth + 1);
   data.x = 0;
   data.y = 0;
-  data.hu = map(data.y + data.h/2, 0, height, hu1, hu2) % 100;
-  data.sa = (sa1 + sa2)/2;
-  data.br = map(data.y + data.h/2, 0, height, br1, br2);
+  data.col = colScale(map(data.y, 0, height, 0, 1)).hex();
+  data.sa = sa1*1/2 + sa2*1/2;
+  data.br = br1;
   //console.log(data);
   queue = [data];
 }
@@ -63,6 +67,7 @@ function draw() {
   let children = shuffle(node.children);
   //children.sort((n1, n2) => (n2.leaves_count - n1.leaves_count));
   let nChildren = children.length;
+
   for (let i = 0; i < nChildren; i++) {
     let c = children[i];
     if (!c.explored) {
@@ -71,9 +76,9 @@ function draw() {
       c.h = fixedHeight ? height/data.max_depth : max_height/(c.max_depth + 1);
       c.x = x;
       c.y = y;
-      c.hu = map(c.y + c.h/2, 0, height, hu1, hu2) % 100;
-      c.sa = map(i, 0, nChildren, sa1, sa2);
-      c.br = map(c.y + c.h/2, 0, height, br1, br2);
+      let sa = map(i, 0, nChildren, sa1, sa2);
+      let br = map(c.y, 0, height, br1, br2);
+      c.col = colScale(map(c.y, 0, height, 0, 1)).set("hsv.s", sa).set("hsv.v", br).hex();
       c.parent = node;
       x += c.w;
       queue.push(c);
@@ -83,7 +88,7 @@ function draw() {
 
 function drawNode(node) {
   noStroke();
-  fill(node.hu, node.sa, node.br);
+  fill(node.col);
   rect(node.x, node.y, node.w, height - node.y);
 
   if (drawLines && node.parent) {

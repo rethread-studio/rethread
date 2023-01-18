@@ -51,7 +51,7 @@ Live view: [https://rethread.art/code/repogram/rectangular](https://rethread.art
 Live view: [https://rethread.art/code/repogram/circular](https://rethread.art/code/repogram/circular).
 
 #### URL parameters
-- ``background``: the color of the background (``white``, ``black`` or ``transparent``, default is ``white``)
+- ``background``: the color of the background (``white``, ``black`` or ``transparent``, default is ``black``)
 - ``color``: whether the lines are multicolored or not (``yes`` or ``no``, default is ``yes``)
 - ``width``: the width of the image (default is the width of the browser window)
 - ``height``: the height of the image (default is the height of the browser window)
