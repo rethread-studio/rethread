@@ -67,7 +67,7 @@ Live view: [https://rethread.art/code/repogram/circular](https://rethread.art/co
            width: 50%;"
 />
 
-- [https://rethread.art/code/repogram/circular/?background=black&color=no&width=800&height=800](https://rethread.art/code/repogram/circular/?background=black&color=no&width=800&height=800)
+- [https://rethread.art/code/repogram/circular/?background=white&color=no&width=800&height=800](https://rethread.art/code/repogram/circular/?background=white&color=no&width=800&height=800)
 
 <img 
     src="outputs/repogram_circular_output_2.png" 
