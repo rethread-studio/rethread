@@ -28,7 +28,8 @@ let palette = ["#e516b8","#8f16e5","#165be5","#168be5","#16e5e5","#16e5aa"];
 let colors;
 let colorScale = chroma.bezier(palette);
 
-// io
+// IO
+let IODiv; // div element that contains all the following IO thingies
 let fileInput; // input for file to analyse
 let colModeSelect; // color mode select
 let backgroundCheckbox; // checkbox, whether there is a background or not
@@ -38,6 +39,7 @@ let shakeButton; // button to shake text
 let shuffleLinesButton, shuffleColumnsButton; // buttons to shuffle lines and columns
 let justifyButton; // button to justify text, i.e. spread the letters throughout the whole line
 let centerButton; // button to center text
+let saveButton; // button to save
 
 function preload() {
   myFont = loadFont("MPLUS1Code-Regular.ttf");
@@ -84,9 +86,13 @@ function setup() {
   cnv.position((windowWidth - width) / 2, (windowHeight - height) / 2);
   frameRate(10);
   noStroke();
+
+  IODiv = createDiv();
+  IODiv.style("width", (windowWidth - width) / 2);
   
   fileInput = createFileInput(handleFile, false);
   //fileInput.style("color", random(palette));
+  fileInput.parent(IODiv);
   
   colModeSelect = createSelect(false);
   //colModeSelect.position(width-210, 10);
@@ -95,32 +101,45 @@ function setup() {
   }
   colModeSelect.selected(allModes[0], 0);
   colModeSelect.changed(selectModeEvent);
+  colModeSelect.parent(IODiv);
   
   backgroundCheckbox = createCheckbox("Background", true);
   //backgroundCheckbox.style("color", random(palette));
+  backgroundCheckbox.parent(IODiv);
   
   defaultCheckbox = createCheckbox("Black background, white text as default");
   //defaultCheckbox.style("color", random(palette));
   defaultCheckbox.changed(flipColors);
+  defaultCheckbox.parent(IODiv);
   
   fallCheckbox = createCheckbox("Falling", false);
   //fallCheckbox.style("color", random(palette));
   //fallCheckbox.changed(() => (frameCount = 0));
+  fallCheckbox.parent(IODiv);
   
   shakeButton = createButton("Shake");
   shakeButton.mousePressed(shake);
+  shakeButton.parent(IODiv);
   
   shuffleLinesButton = createButton("Shuffle lines");
   shuffleLinesButton.mousePressed(shuffleLines);
+  shuffleLinesButton.parent(IODiv);
   
   shuffleColumnsButton = createButton("Shuffle columns");
   shuffleColumnsButton.mousePressed(shuffleColumns);
+  shuffleColumnsButton.parent(IODiv);
   
   justifyButton = createButton("Justify");
   justifyButton.mousePressed(justify);
+  justifyButton.parent(IODiv);
   
   centerButton = createButton("Center");
   centerButton.mousePressed(centering);
+  centerButton.parent(IODiv);
+
+  saveButton = createButton("Save image");
+  saveButton.mousePressed(() => (saveCanvas("decode")));
+  saveButton.parent(IODiv);
 }
 
 function draw() {
@@ -325,7 +344,7 @@ function getHeight(i, j) {
 }
 
 
-
+// IO
 
 function handleFile(file) {
   if (file.type != "text") {
@@ -334,12 +353,14 @@ function handleFile(file) {
   }
   let str = file.data.split("\n");
   if (str.length*sy < windowHeight) {
-    for (let i = 0; i < str.length-1; i++) str[i] = str[i].substring(0, str[i].length-1);
-    sourceFile = str;
-    let allIO = [fileInput, colModeSelect, backgroundCheckbox, fallCheckbox, shakeButton, shuffleLinesButton, shuffleColumnsButton, justifyButton, centerButton];
-    for (let el of allIO) {
-      el.remove();
+    for (let i = 0; i < str.length; i++) {
+      if (str[i].indexOf("\r") != -1) {
+        str[i] = str[i].substring(0, str[i].length-1);
+      }
+        
     }
+    sourceFile = str;
+    IODiv.remove();
     setup();
   } else {
     alert("This file is too long.");
