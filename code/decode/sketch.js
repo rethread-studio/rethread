@@ -20,7 +20,7 @@ let maxHeight, maxIndent, minWordLength, maxWordLength, minLineLength, maxLineLe
 let backgroundCol = 250;
 let defaultTextCol = 255-backgroundCol;
 
-const allModes = ["DEFAULT", "RANDOM_CHAR", "WORD_HASH", "RANDOM_LINE", "VERT_GRADIENT", "HEIGHT_GRADIENT", "LINE_GRADIENT", "HORIZ_GRADIENT", "WORD_LENGTH_GRADIENT", "INDENT_GRADIENT", "LINE_LENGTH_GRADIENT", "VERT_SEQ", "HEIGHT_SEQ", "LINE_SEQ", "HORIZ_SEQ", "WORD_LENGTH_SEQ", "INDENT_SEQ", "LINE_LENGTH_SEQ", "ALPHA", "SEPARATE", "BLOCKS"];
+const allModes = ["DEFAULT_COLORS", "RANDOM_CHAR", "WORD_HASH", "RANDOM_LINE", "VERT_GRADIENT", "HEIGHT_GRADIENT", "LINE_GRADIENT", "HORIZ_GRADIENT", "WORD_LENGTH_GRADIENT", "INDENT_GRADIENT", "LINE_LENGTH_GRADIENT", "VERT_SEQ", "HEIGHT_SEQ", "LINE_SEQ", "HORIZ_SEQ", "WORD_LENGTH_SEQ", "INDENT_SEQ", "LINE_LENGTH_SEQ", "ALPHA", "SEPARATE", "BLOCKS"];
 // WORD_SEQ
 
 let colMode = 0;
@@ -29,17 +29,8 @@ let colors;
 let colorScale = chroma.bezier(palette);
 
 // IO
-let IODiv; // div element that contains all the following IO thingies
-let fileInput; // input for file to analyse
-let colModeSelect; // color mode select
-let backgroundCheckbox; // checkbox, whether there is a background or not
-let defaultCheckbox; // checkbox, whether the default color is black (and background is white), or the opposite
-let fallCheckbox; // checkbox to make code fall
-let shakeButton; // button to shake text
-let shuffleLinesButton, shuffleColumnsButton; // buttons to shuffle lines and columns
-let justifyButton; // button to justify text, i.e. spread the letters throughout the whole line
-let centerButton; // button to center text
-let saveButton; // button to save
+let IODiv; // div element that contains all the IO thingies
+let colModeSelect, backgroundCheckbox, fallCheckbox;
 
 function preload() {
   myFont = loadFont("MPLUS1Code-Regular.ttf");
@@ -84,16 +75,27 @@ function setup() {
 
   let cnv = createCanvas(m * sx + margin, n * sy + margin);
   cnv.position((windowWidth - width) / 2, (windowHeight - height) / 2);
+  cnv.style("border", "dashed 2px black");
   frameRate(10);
   noStroke();
 
+  // IO
+
   IODiv = createDiv();
   IODiv.style("width", (windowWidth - width) / 2);
-  
-  fileInput = createFileInput(handleFile, false);
+
+  let subdiv1 = createDiv();
+  subdiv1.parent(IODiv);
+  subdiv1.style("padding", 10);
+
+  let fileInput = createFileInput(handleFile, false);
   //fileInput.style("color", random(palette));
-  fileInput.parent(IODiv);
-  
+  fileInput.parent(subdiv1);
+
+  let subdiv2 = createDiv();
+  subdiv2.parent(IODiv);
+  subdiv2.style("padding", 10);
+
   colModeSelect = createSelect(false);
   //colModeSelect.position(width-210, 10);
   for (let i = 0; i < allModes.length; i++) {
@@ -101,45 +103,65 @@ function setup() {
   }
   colModeSelect.selected(allModes[0], 0);
   colModeSelect.changed(selectModeEvent);
-  colModeSelect.parent(IODiv);
+  colModeSelect.parent(subdiv2);
   
-  backgroundCheckbox = createCheckbox("Background", true);
+  backgroundCheckbox = createCheckbox("Draw background", true);
   //backgroundCheckbox.style("color", random(palette));
-  backgroundCheckbox.parent(IODiv);
+  backgroundCheckbox.parent(subdiv2);
   
-  defaultCheckbox = createCheckbox("Black background, white text as default");
+  let defaultCheckbox = createCheckbox("Black background, white text as default");
   //defaultCheckbox.style("color", random(palette));
   defaultCheckbox.changed(flipColors);
-  defaultCheckbox.parent(IODiv);
-  
-  fallCheckbox = createCheckbox("Falling", false);
+  defaultCheckbox.parent(subdiv2);
+
+  let subdiv3 = createDiv();
+  subdiv3.parent(IODiv);
+  subdiv3.style("padding", 10);
+
+  fallCheckbox = createCheckbox("Fall", false);
   //fallCheckbox.style("color", random(palette));
   //fallCheckbox.changed(() => (frameCount = 0));
-  fallCheckbox.parent(IODiv);
+  fallCheckbox.parent(subdiv3);
   
-  shakeButton = createButton("Shake");
+  let shakeButton = createButton("Shake");
   shakeButton.mousePressed(shake);
-  shakeButton.parent(IODiv);
+  shakeButton.parent(subdiv3);
   
-  shuffleLinesButton = createButton("Shuffle lines");
+  let shuffleLinesButton = createButton("Shuffle lines");
   shuffleLinesButton.mousePressed(shuffleLines);
-  shuffleLinesButton.parent(IODiv);
+  shuffleLinesButton.parent(subdiv3);
   
-  shuffleColumnsButton = createButton("Shuffle columns");
+  let shuffleColumnsButton = createButton("Shuffle columns");
   shuffleColumnsButton.mousePressed(shuffleColumns);
-  shuffleColumnsButton.parent(IODiv);
-  
-  justifyButton = createButton("Justify");
-  justifyButton.mousePressed(justify);
-  justifyButton.parent(IODiv);
-  
-  centerButton = createButton("Center");
-  centerButton.mousePressed(centering);
-  centerButton.parent(IODiv);
+  shuffleColumnsButton.parent(subdiv3);
 
-  saveButton = createButton("Save image");
+  let subdiv4 = createDiv();
+  subdiv4.parent(IODiv);
+  subdiv4.style("padding", 10);
+
+  let alignLeftButton = createButton("Align left");
+  alignLeftButton.mousePressed(alignLeft);
+  alignLeftButton.parent(subdiv4);
+  
+  let centerButton = createButton("Center");
+  centerButton.mousePressed(centering);
+  centerButton.parent(subdiv4);
+
+  let alignRightButton = createButton("Align right");
+  alignRightButton.mousePressed(alignRight);
+  alignRightButton.parent(subdiv4);
+
+  let justifyButton = createButton("Justify");
+  justifyButton.mousePressed(justify);
+  justifyButton.parent(subdiv4);
+
+  let subdiv5 = createDiv();
+  subdiv5.parent(IODiv);
+  subdiv5.style("padding", 10);
+
+  let saveButton = createButton("Save image");
   saveButton.mousePressed(() => (saveCanvas("decode")));
-  saveButton.parent(IODiv);
+  saveButton.parent(subdiv5);
 }
 
 function draw() {
@@ -420,6 +442,68 @@ function shuffleColumns() {
   }
 }
 
+function alignLeft() {
+  for (let i = 0; i < n; i++) {
+    let k1 = 0, k2 = m;
+    while (data[i][k1].char == " " && k1 < m-1) k1++;
+    while (data[i][k2-1].char == " " && k2 > 1) k2--;
+    if (k2 < k1) continue;
+    let newLine = [];
+    for (let j = 0; j < k2-k1; j++) {
+      newLine.push(data[i][j+k1]);
+    }
+    for (let j = 0; j < m-k2+k1; j++) {
+      newLine.push({
+        char: " "
+      });
+    }
+    data[i] = newLine;
+  }
+}
+
+function centering() {
+  for (let i = 0; i < n; i++) {
+    let k1 = 0, k2 = m;
+    while (data[i][k1].char == " " && k1 < m-1) k1++;
+    while (data[i][k2-1].char == " " && k2 > 1) k2--;
+    if (k2 < k1) continue;
+    let newLine = [];
+    for (let j = 0; j < floor((m-k2+k1)/2); j++) {
+      newLine.push({
+        char: " "
+      });
+    }
+    for (let j = 0; j < k2-k1; j++) {
+      newLine.push(data[i][j+k1]);
+    }
+    while (newLine.length != data[i].length) {
+      newLine.push({
+        char: " "
+      });
+    }
+    data[i] = newLine;
+  }
+}
+
+function alignRight() {
+  for (let i = 0; i < n; i++) {
+    let k1 = 0, k2 = m;
+    while (data[i][k1].char == " " && k1 < m-1) k1++;
+    while (data[i][k2-1].char == " " && k2 > 1) k2--;
+    if (k2 < k1) continue;
+    let newLine = [];
+    for (let j = 0; j < m-k2+k1; j++) {
+      newLine.push({
+        char: " "
+      });
+    }
+    for (let j = 0; j < k2-k1; j++) {
+      newLine.push(data[i][j+k1]);
+    }
+    data[i] = newLine;
+  }
+}
+
 function justify() {
   for (let i = 0; i < n; i++) {
     let indices = [];
@@ -450,30 +534,6 @@ function justify() {
       }
     }
     
-    data[i] = newLine;
-  }
-}
-
-function centering() {
-  for (let i = 0; i < n; i++) {
-    let k1 = 0, k2 = m;
-    while (data[i][k1].char == " " && k1 < m-1) k1++;
-    while (data[i][k2-1].char == " " && k2 > 1) k2--;
-    if (k2 < k1) continue
-    let newLine = [];
-    for (let j = 0; j < floor((m-k2+k1)/2); j++) {
-      newLine.push({
-        char: " "
-      });
-    }
-    for (let j = 0; j < k2-k1; j++) {
-      newLine.push(data[i][j+k1]);
-    }
-    while (newLine.length != data[i].length) {
-      newLine.push({
-        char: " "
-      });
-    }
     data[i] = newLine;
   }
 }
