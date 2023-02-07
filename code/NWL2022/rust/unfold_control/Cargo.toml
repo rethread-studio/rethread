@@ -1,5 +1,5 @@
 [package]
-name = "led_matrix_simulator"
+name = "unfold_control"
 version = "0.1.0"
 edition = "2021"
 

@@ -2643,37 +2643,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "830d08ce1d1d941e6b30645f1a0eb5643013d835ce3779a5fc208261dbe10f55"
 
 [[package]]
-name = "led_matrix_simulator"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bevy",
- "bevy-inspector-egui",
- "bevy_egui 0.16.0",
- "clap",
- "crossbeam",
- "ctrlc",
- "env_logger 0.9.1",
- "fastrand",
- "futures-channel",
- "futures-util",
- "hyper",
- "knyst",
- "log",
- "nannou_osc",
- "once_cell",
- "parser",
- "rand",
- "rfd",
- "serde",
- "serde_json",
- "simple_logger",
- "tokio",
- "tokio-tungstenite",
- "url",
-]
-
-[[package]]
 name = "lewton"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4394,6 +4363,37 @@ name = "typenum"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dcf81ac59edc17cc8697ff311e8f5ef2d99fcbd9817b34cec66f90b6c3dfd987"
+
+[[package]]
+name = "unfold_control"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bevy",
+ "bevy-inspector-egui",
+ "bevy_egui 0.16.0",
+ "clap",
+ "crossbeam",
+ "ctrlc",
+ "env_logger 0.9.1",
+ "fastrand",
+ "futures-channel",
+ "futures-util",
+ "hyper",
+ "knyst",
+ "log",
+ "nannou_osc",
+ "once_cell",
+ "parser",
+ "rand",
+ "rfd",
+ "serde",
+ "serde_json",
+ "simple_logger",
+ "tokio",
+ "tokio-tungstenite",
+ "url",
+]
 
 [[package]]
 name = "unicode-bidi"
