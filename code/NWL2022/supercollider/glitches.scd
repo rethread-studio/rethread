@@ -115,7 +115,7 @@ Ndef(\glitch_out, {
 	wet = Greyhole.ar(sig, delayTime, damp, size, diff, feedback);
 
 	sig = (sig * (1-mix)) + (wet*mix);
-	sig = Limiter.ar(sig, 0.95) * 0.20;
+	sig = Limiter.ar(sig, 0.95) * 0.30;
 	sig = LeakDC.ar(sig);
 	sig
 }).play(out: ~mainBus.index, group: ~glitchGroup);
