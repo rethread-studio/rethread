@@ -1,0 +1,147 @@
+#+TITLE: Cyber Todo
+
+* STRT Etherdream turning off and on again
+#+begin_quote
+[notice ] response : I command : d
+
+protocol           : 0
+light_engine_state : ready 0
+playback_state     : idle 0
+source             : 0
+light_engine_flags : 00000
+playback_flags     : 000
+source_flags       : 0
+buffer_fullness    : 224
+point_rate         : 0
+point_count        : 15743447
+
+[notice ] sendPrepare()
+[notice ] sendBegin()
+
+#+end_quote
+
+Sometimes
+
+** Try changing cables and network equipment to see if that's the issue
+
+* DONE Text
+
+Text is quite hard to read, partly because it is flickering unless very imprecise.
+
+It is easier to read text drawn a few letters at a time.
+
+** DONE Implement functions for drawing a text message over time, a few letters at a time
+
+** DONE All the letters
+
+* Optimisations
+
+** Limit the number of user event texts
+*** DONE Check the maximum number of text messages possible
+** TODO Player trail flickering
+** DONE Add off time on laser text for the zoomed out view
+
+* DONE Activity points
+
+** DONE Limit number of activity points to improve speed
+If there are too many points already, maybe some points can merge into one bigger point?
+
+** DONE Draw activity points as points
+Drawing points instead of circles is waaaay faster.
+
+* User views
+** DONE Fix user move coordinate
+** DONE Show all user events separately
+
+* Ftrace visualisations
+
+** DONE Many very short dots, one long dot in the middle
+
+** DONE Colour code error codes
+
+** DONE Something rising from the bottom up
+System calls
+Some analysis (process? type?)
+
+** TODO Walk across the screen
+Similar types of events start close to each other
+small subset of types
+
+** ftrace event types
+
+*** prefixes
+ys, dd, ix, cp, redit, random,
+
+There is probably one letter missing from the parsing in many of these
+- ys: sys
+- cp: tcp
+- dd: add? (mostly random events)
+- ix: irq_matrix
+- redit: credit (random event)
+
+* DONE Transitions between states
+
+# ** TODO Fly into one of the circles of the triangle
+Maybe spin around at the end to reveal like the inside?
+
+Looks good on the laser!! I need to fix the issue with zooming into/out of a specific spot.
+
+** DONE Spin around to switch between states for the same position
+
+** DONE Automatic transitions
+
+* DONE Automatically connect and arm laser on startup
+
+** DONE Find Etherdream automatically
+This is the only part left, try it with the box.
+
+* View ideas
+
+** DONE Let scrolling text from events fly across the screen
+
+** TODO More details about the architecture in the zoomed out view
+More details could be optionally drawn on the same view
+- Different connected users (who have made an action in the last n seconds)
+- Different parts of the server structure
+- Different parts that are in the room (laser, DAC, webcams, server, projector)
+
+** NO Rain of ftrace events
+Different colours for different events
+Tested: doesn't work, the laer doesn't have time to draw them and the colours don't work with low intensity dots.
+
+** HOLD Stack trace like view?
+
+** HOLD Heartbeat monitor for events
+
+** DONE User view for events per user
+
+** DONE One colour per source of data
+- users
+- server
+- room and OS
+
+** DONE More events in the web server view
+
+** DONE Server lines
+- full line turning on per event, or
+- a dot running horizontally
+
+
+* Documentation
+
+** DONE Pause function for creating stills
+- don't run update
+- don't accept new events
+
+* Knowledge Base
+
+** Dot intensity
+It seems like the maximum dot intensity is approximately 1.0 / (number_of_dots * 4)
+
+* From test
+
+** DONE Disable vis being transitioned from because it becomes too bright when it's tiny
+
+** Try to get rid of the flickering
+- many users on red dots
+- web ser er circle?

@@ -1,0 +1,14 @@
+{
+    "Laser": {
+        "Custom": null,
+        "Edit_laser": "1",
+        "Global_brightness": "1",
+        "Global_test_pattern": "0",
+        "Interface": {
+            "Lock_input_zones": "0",
+            "Show_path_previews": "1",
+            "Show_preview": "1"
+        },
+        "numLasers": "2"
+    }
+}

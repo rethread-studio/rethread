@@ -1,0 +1,74 @@
+{
+    "0": {
+        "Brightness": "0.5",
+        "Colour_calibration": {
+            "blue_0": "0",
+            "blue_100": "0.38",
+            "blue_25": "0.25",
+            "blue_50": "0.5",
+            "blue_75": "1",
+            "green_0": "0",
+            "green_100": "1",
+            "green_25": "0.25",
+            "green_50": "0.5",
+            "green_75": "0.75",
+            "red_0": "0",
+            "red_100": "1",
+            "red_25": "0.25",
+            "red_50": "0.5",
+            "red_75": "0.75"
+        },
+        "Laser_settings": {
+            "Advanced": {
+                "Experimental_shape_sorting": "1",
+                "Laser_on_while_moving": "0",
+                "Optimise_shape_draw_order": "1",
+                "Smooth_home_position": "1",
+                "Sync_shift": "0",
+                "Sync_to_Target_framerate": "0",
+                "Target_framerate": "23"
+            },
+            "Colour_shift": "0",
+            "Flip_Horizontal": "1",
+            "Flip_Vertical": "0",
+            "Output_position_offset": "0, 0",
+            "Output_rotation": "0",
+            "Points_per_second": "29200",
+            "Speed": "1.04"
+        },
+        "Scanner_settings": {
+            "Hold_off_after": "1",
+            "Hold_off_before": "1",
+            "Hold_on_after": "0",
+            "Hold_on_before": "0",
+            "Move_Speed": "4.3",
+            "Render_profiles": {
+                "Default": {
+                    "acceleration": "0.5",
+                    "corner_threshold": "30",
+                    "dot_max_points": "10",
+                    "speed": "4"
+                },
+                "Fast": {
+                    "acceleration": "1.2",
+                    "corner_threshold": "80",
+                    "dot_max_points": "5",
+                    "speed": "6"
+                },
+                "High_detail": {
+                    "acceleration": "0.75",
+                    "corner_threshold": "15",
+                    "dot_max_points": "14",
+                    "speed": "1.8"
+                }
+            },
+            "description": "",
+            "label": "laserimage1"
+        },
+        "dacId": "Etherdream 66E6349EFA66"
+    },
+    "laserzones": [
+        0
+    ],
+    "maskmanager": null
+}

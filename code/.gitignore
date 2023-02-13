@@ -11,3 +11,5 @@ OF/apps/*
 !OF/apps/myApps/**/*
 !OF/apps/foreachApps/
 !OF/apps/foreachApps/**/*
+!OF/apps/cyberglow/
+!OF/apps/cyberglow/**/*

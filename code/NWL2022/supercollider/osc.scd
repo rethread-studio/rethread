@@ -29,17 +29,17 @@ OSCdef(\call, {|msg, time, addr, recvPort|
 	// TODO: Vary mix between wavetable and sine based on the section
 	sine_mix = ((~section.diversity-0.5)*0.25).min(1).max(0);
 	// sine_mix.postln;
-	Synth(\osc, [\freq, freq, \atk, atk, \sus, ~call_sus,\rel, ~call_sus*2.0, \amp, amp * 0.2 * sine_mix, \buf, buf, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1)]);
-	Synth(\sine, [\freq, freq, \amp, 0.05 * amp * (1.0-sine_mix), \release_time, ~call_sus*5.0, \out, ~mainBus,]);
+	Synth(\osc, [\freq, freq, \atk, atk, \sus, ~call_sus,\rel, ~call_sus*2.0, \amp, amp * 0.25 * sine_mix, \buf, buf, \out, ~revBus, \pan, rrand(-0.5, 0.5), \detune, rrand(0.0, 0.1), \phrasing_in, ~phrasingBus]);
+	Synth(\sine, [\freq, freq, \amp, 0.075 * amp * (1.0-sine_mix), \release_time, ~call_sus*5.0, \out, ~mainBus, \phrasing_in, ~phrasingBus]);
 
 	if(depth == ~section.min_depth && (~now.() - ~last_min > 1.0), {
 		var freq = ~chord[0] * 2;
-		Synth(\sine, [\freq, freq, \atk, 0.1, \sus, 0, \amp, 0.03, \release_time, 0.5, \out, ~rev3Bus]);
+		Synth(\sine, [\freq, freq, \atk, 0.1, \sus, 0, \amp, 0.03, \release_time, 0.5, \out, ~rev3Bus, \phrasing_in, ~phrasingBus]);
 		~last_min = ~now.();
 	});
 	if(depth == ~section.max_depth && (~now.() - ~last_max > 1.0), {
 		var freq = ~chord[0] * 32.0;
-		Synth(\sine, [\freq, freq, \atk, 0.1, \sus, 0, \amp, 0.03, \release_time, 0.5, \out, ~rev3Bus]);
+		Synth(\sine, [\freq, freq, \atk, 0.1, \sus, 0, \amp, 0.03, \release_time, 0.5, \out, ~rev3Bus, \phrasing_in, ~phrasingBus]);
 		~last_max = ~now.();
 	});
 
@@ -92,8 +92,9 @@ OSCdef(\section, {|msg, time, addr, recvPort|
 
 	~updateChord.();
 
-	Synth(\osc, [\freq, 1000, \atk, 0.01, \sus, 0.00,\rel, 0.05, \amp, 0.2, \buf, ~wt_buf[0], \out, ~rev3Bus, \pan, 0, \detune, 0.3]);
-	Synth(\sine, [\freq, 2000, \amp, 0.1, \atk, 0.07, \sus, 0.02,\rel, 8.5, \out, ~rev3Bus, \pan, 0]);
+	Synth(\osc, [\freq, 1000 + rrand(-10, 10), \atk, 0.01, \sus, 0.00,\rel, 0.05, \amp, 0.15, \buf, ~wt_buf[0], \out, ~rev3Bus, \pan, 0, \detune, 0.3, \phrasing_in, ~phrasingBus]);
+	Synth(\sine, [\freq, 2000 + rrand(-10, 10), \amp, 0.025, \atk, 0.07, \sus, 0.02,\rel, 1.0, \out, ~rev3Bus, \pan, -1, \phrasing_in, ~phrasingBus]);
+	Synth(\sine, [\freq, 2000 + rrand(-10, 10), \amp, 0.025, \atk, 0.07, \sus, 0.02,\rel, 1.0, \out, ~rev3Bus, \pan, 1, \phrasing_in, ~phrasingBus]);
 
 	~rev.set(\wetness, ~section.depth_width.linexp(10, 70, 0.1, 0.9));
 	// msg.postln

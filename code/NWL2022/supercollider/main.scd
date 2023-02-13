@@ -48,6 +48,17 @@ s.waitForBoot({
 		Out.ar(\out.kr(0), sig);
 	}).add;
 
+	SynthDef(\phrasing, {
+		var sig;
+		sig = LFNoise1.kr(0.1).range(0.05, 0.5);
+		2.do {
+			sig = LFNoise1.kr(sig).range(0.05, 1.2);
+		};
+		sig = LFNoise1.kr(sig).range(0.54, 1.0).pow(1.5).max(0.3) + 0.4;
+		// sig.poll;
+		Out.kr(\out.kr(10), sig);
+	}).add;
+
 
 
 	//10 wavetables with increasing complexitymovementRecord
@@ -95,7 +106,7 @@ s.waitForBoot({
 		sig = Splay.ar(sig); //spread 8 signals over stereo field
 		sig = LeakDC.ar(sig); //remove DC bias
 		sig = Balance2.ar(sig[0], sig[1], pan, amp); //L/R balance (pan)
-		sig = sig * env;
+		sig = sig * env * AmpCompA.kr(freq) * In.kr(\phrasing_in.kr(10));
 		Out.ar(out, sig);
 		Out.ar(rout, sig * rsend.dbamp); //"post-fader" send to reverb
 	}).add;
@@ -121,15 +132,15 @@ s.waitForBoot({
 		sig = Splay.ar(sig); //spread 8 signals over stereo field
 		sig = LeakDC.ar(sig); //remove DC bias
 		sig = Balance2.ar(sig[0], sig[1], pan, amp); //L/R balance (pan)
-		sig = sig * env;
+		sig = sig * env* In.kr(\phrasing_in.kr(10));
 		Out.ar(out, sig);
 		Out.ar(rout, sig * rsend.dbamp); //"post-fader" send to reverb
 	}).add;
 
 	SynthDef(\sine, {
-		var sig, env;
+		var sig, env, freq = \freq.kr(220);
 		env = Env.perc(\attack_time.kr(0.01), \release_time.kr(2.0)).kr(2);
-		sig = SinOsc.ar(\freq.kr(220)) * env * \amp.kr(0.5);
+		sig = SinOsc.ar(freq) * env * \amp.kr(0.5) * AmpCompA.kr(freq) * In.kr(\phrasing_in.kr(10));
 		sig = Pan2.ar(sig, \pan.kr(0));
 		Out.ar(\out.kr(0), sig);
 	}).add;
@@ -183,10 +194,12 @@ s.waitForBoot({
 	~mainBus = Bus.audio(s, 2);
 	~revBus = Bus.audio(s, 2);
 	~rev3Bus = Bus.audio(s, 2);
+	~phrasingBus = Bus.control(s, 1);
 	s.sync;
 	~main = Synth(\mainchannel, [\out, 0, \in, ~mainBus], addAction: \addToTail, target: ~postGroup);
 	~rev = Synth(\long_reverb, [\in, ~revBus, \out, ~mainBus, \wetness, 0.1, \lpf_freq, 10000, \predelay, 0.05, \rt, 1.0, \wetness, 0.05]);
 	~rev3 = Synth(\medium_reverb, [\in, ~rev3Bus, \out, ~mainBus, \mix, 0.4, \feedback, 0.95, \size, 0.9, \damp, 0.65, \diff, 0.6]);
+	~phrasing = Synth(\phrasing, [\out, ~phrasingBus]);
 
 	~section = Environment.new(know: true);
 	~section.min_depth = 0;

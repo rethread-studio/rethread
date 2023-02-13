@@ -7,7 +7,7 @@ window=0
 tmux rename-window -t $session:$window 'git'
 tmux send-keys -t $session:$window "cd /home/reth/Documents/rethread/code/NWL2022/artnet_controller && node index.js" C-m
 tmux split-window -t $session:$window -v
-tmux send-keys -t $session:$window "cd /home/reth/Documents/rethread/code/NWL2022/data_exploration/led_matrix_simulator && cargo run --release -- --trace /home/reth/Documents/unfold_traces/data-jedit-with-marker --osc --headless
+tmux send-keys -t $session:$window "cd /home/reth/Documents/rethread/code/NWL2022/rust/unfold_control && cargo run --release -- --trace /home/reth/Documents/unfold_traces/data-varna-startup-shutdown --osc --headless
 " C-m
 tmux split-window -t $session:$window -v
 # tmux send-keys -t $session:$window "export XAUTHORITY=/home/reth/.Xauthority" C-m

@@ -1,0 +1,31 @@
+{
+    "Scanner_settings": {
+        "Hold_off_after": "1",
+        "Hold_off_before": "1",
+        "Hold_on_after": "0",
+        "Hold_on_before": "0",
+        "Move_Speed": "4",
+        "Render_profiles": {
+            "Default": {
+                "acceleration": "0.5",
+                "corner_threshold": "30",
+                "dot_max_points": "10",
+                "speed": "4"
+            },
+            "Fast": {
+                "acceleration": "1.2",
+                "corner_threshold": "80",
+                "dot_max_points": "5",
+                "speed": "6"
+            },
+            "High_detail": {
+                "acceleration": "0.75",
+                "corner_threshold": "15",
+                "dot_max_points": "20",
+                "speed": "2.5"
+            }
+        },
+        "description": "",
+        "label": "Default"
+    }
+}

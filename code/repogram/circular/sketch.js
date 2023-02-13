@@ -4,22 +4,42 @@
 let data;
 let queue = [];
 let mySize;
+let palette, colScale;
 
 // parameters
 let diskOffset = 1; // 0 => perfect disk, 1 => deformed disk
-let backgroundCol = 98;
+// editable via the URL
+let backgroundCol = 2;
+let multicolor = true;
 
 function preload() {
   data = loadJSON("../data/repo_data.json");
+  palette = loadStrings("../palette.txt");
 }
 
 function setup() {
-  //createCanvas(705, 500);
-  createCanvas(windowWidth, windowHeight);
-  mySize = min(width, height)*0.8;
+  let params = getURLParams();
+  if (params.background != undefined && params.background == "white") {
+    backgroundCol = 98;
+  }
+  if (params.color != undefined && params.color == "no") {
+    multicolor = false;
+  }
+  let w = (params.width != undefined) ? params.width : windowWidth;
+  let h = (params.height != undefined) ? params.height : windowHeight;
+  createCanvas(w, h);
+
+  if (params.width != undefined || params.height != undefined) pixelDensity(1);
   colorMode(HSB, 100);
   noFill();
-  background(backgroundCol);
+
+  palette = palette[0].split(",");
+  colScale = chroma.bezier(palette);
+  
+  mySize = min(width, height)*0.8;
+  if (params.background == undefined || params.background != "transparent") {
+    background(backgroundCol);
+  }
   
   //noLoop();
   data.x = width/2;
@@ -44,16 +64,15 @@ function draw() {
   
   if (node.max_depth == 0) return; // leaf
   
-  let thetaStep = (node.end-node.start)/node.leaves_count;
-  let theta = node.start;
+  let thetaStep = (node.end-node.start)/(node.leaves_count+2);
+  let theta = node.start+thetaStep;
   let children = node.children;
   shuffle(children, true);
   let nChildren = children.length;
   let max_diam = mySize - node.diam;
-  let hu1 = 70, hu2 = 116;
-  //hu1 = 115;
-  //hu2 = hu1 - (node.depth+1)/data.max_depth*100;
-  if (node.depth % 2 == 0) [hu1, hu2] = [hu2, hu1];
+
+  //if (node.depth % 2 == 0) palette.reverse();
+
   for (let i = 0; i < nChildren; i++) {
     let c = children[i];
     if (!c.explored) {
@@ -64,9 +83,7 @@ function draw() {
       c.middle = (c.start+c.end)/2;
       c.width = max_diam/(c.max_depth + diskOffset);
       c.diam = node.diam + c.width;
-      c.hu = map(theta, node.start, node.end, hu1, hu2)%100;
-      c.sa = 90;
-      c.br = 90;
+      c.col = colScale(map(theta, node.start, node.end, 0, 1)).hex();
       c.depth = node.depth + 1;
       c.parent = node;
       theta += thetaStep*c.leaves_count;
@@ -85,6 +102,7 @@ function drawNode(node) {
   let x4 = width/2 + (node.parent.diam)/2*cos(node.middle);
   let y4 = height/2 + (node.parent.diam)/2*sin(node.middle);
   
-  stroke(node.hu, node.sa, node.br);
+  if (multicolor) stroke(node.col);
+  else stroke(100-backgroundCol, 90);
   bezier(x1, y1, x2, y2, x3, y3, x4, y4);
 }
