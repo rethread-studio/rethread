@@ -153,6 +153,10 @@ function setup() {
   subdiv5.parent(IODiv);
   subdiv5.style("padding", 10);
 
+  let resetButton = createButton("Reset");
+  resetButton.mousePressed(() => (initArrays()));
+  resetButton.parent(subdiv5);
+
   let saveButton = createButton("Save image");
   saveButton.mousePressed(() => (saveCanvas("decode")));
   saveButton.parent(subdiv5);
