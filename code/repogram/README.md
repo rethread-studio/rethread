@@ -1,6 +1,6 @@
 # Repogram
 
-The repogram is a generative visualization of a directory tree. Here, it's the re|thread repo.
+The repogram is a generative visualization of the re|thread repo.
 
 ## Data
 
@@ -10,7 +10,7 @@ To create or update the JSON file, run ``py tree_extraction.py`` in the ``data``
 
 ## Visualization
 
-There are two visualizations. They represent the same data with the same logic (an animated breadth-first search), but in different shapes. They are web-based, created with [p5.js](https://p5js.org).
+There are two visualizations. They represent the same data, with the same logic (an animated breadth-first search) but in different shapes. They are web-based, created with [p5.js](https://p5js.org).
 
 In both cases, the order of the directories and files is shuffled (recursively), so that the visualization changes each time the page is loaded: it's generative!
 
