@@ -26,7 +26,9 @@ Sometimes, the artnet_controller program fails to shut the LEDs off at exit. The
 
 ### SuperCollider sonification
 
-Lives in `NWL2022/supercollider/`. Running main.scd will load everything and start listening for OSC messages from unfold_control. It is advisable to run JACK before running sclang because starting JACK takes a few seconds. Starting JACK manually also gives more control over starting parameters.
+Lives in `NWL2022/supercollider/`. Running main.scd will load everything and start listening for OSC messages from unfold_control. It is advisable to run JACK before running sclang because starting JACK takes a few seconds. Starting JACK manually also gives more control over starting parameters. The easiest way to start JACK is via the `qjackctl` program which has a graphical user interface. To automatically start JACK in a script, use the `jackd` binary. Suitable parameters depend on the hardware configuration and are beyond the scope of this README. See the startup script for an example.
+
+To start the SuperCollider program:
 
 ```sh
 sclang path/to/rethread_repo/code/NWL2022/main.scd
