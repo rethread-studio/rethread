@@ -21,12 +21,12 @@ In the [rectangular](rectangular) version, each directory or file is drawn as on
 Live view: [https://rethread.art/code/repogram/rectangular](https://rethread.art/code/repogram/rectangular).
 
 #### URL parameters
-- ``lines``: whether we also draw the white tree lines on top (``yes`` or ``no``, default is ``yes``)
+- ``lines``: whether we also draw the white tree lines on top (``yes`` or ``no``, default is ``no``)
 - ``width``: the width of the image (default is the width of the browser window)
 - ``height``: the height of the image (default is the height of the browser window)
 
 #### Examples
-- [https://rethread.art/code/repogram/rectangular/?width=1080&height=720](https://rethread.art/code/repogram/rectangular/?width=1080&height=720)
+- [https://rethread.art/code/repogram/rectangular/?lines=yes&width=1080&height=720](https://rethread.art/code/repogram/rectangular/?lines=yes&width=1080&height=720)
 
 <img 
     src="outputs/repogram_rectangular_output_1.png" 
@@ -36,7 +36,7 @@ Live view: [https://rethread.art/code/repogram/rectangular](https://rethread.art
            width: 100%;"
 />
 
-- [https://rethread.art/code/repogram/rectangular/?lines=no&width=720&height=1080](https://rethread.art/code/repogram/rectangular/?lines=no&width=720&height=1080)
+- [https://rethread.art/code/repogram/rectangular/?width=720&height=1080](https://rethread.art/code/repogram/rectangular/?width=720&height=1080)
 
 <img 
     src="outputs/repogram_rectangular_output_2.png" 
