@@ -22,10 +22,10 @@ let myFont;
 let keywords = ["copy", "paste", "search", "replace", "find", "write"];
 
 function preload() {
-  //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
-  //data = loadJSON("../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
-  data = loadJSON("../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
-  myFont = loadFont("../MPLUS1Code-VariableFont_wght.ttf");
+  //data = loadJSON("../../../LED_web_demo/data-imagej-copy-paste_parsed.json");
+  //data = loadJSON("../../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
+  data = loadJSON("../../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
+  myFont = loadFont("../../MPLUS1Code-VariableFont_wght.ttf");
 }
 
 function setup() {
