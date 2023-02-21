@@ -1,9 +1,3 @@
-// code formatting as an artistic practice
-// code as individual letters
-// what is pretty code?
-
-// falling code inspired by Andreas Gysin's (https://www.instagram.com/p/CUR2We3gc2I/)
-
 let myFont;
 let sourceFile,
   data,
@@ -76,7 +70,7 @@ function setup() {
   cnv.position((windowWidth - width) / 2, (windowHeight - height) / 2);
   cnv.style("border", "dashed 2px black");
   frameRate(10);
-  pixelDensity(4);
+  //pixelDensity(4);
   noStroke();
 
   // IO
@@ -158,6 +152,10 @@ function setup() {
   let subdiv5 = createDiv();
   subdiv5.parent(IODiv);
   subdiv5.style("padding", 10);
+
+  let resetButton = createButton("Reset");
+  resetButton.mousePressed(() => (initArrays()));
+  resetButton.parent(subdiv5);
 
   let saveButton = createButton("Save image");
   saveButton.mousePressed(() => (saveCanvas("decode")));

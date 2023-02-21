@@ -11,8 +11,12 @@ tmux send-keys -t $session:$window "cd /home/reth/Documents/rethread/code/NWL202
 " C-m
 tmux split-window -t $session:$window -v
 # tmux send-keys -t $session:$window "export XAUTHORITY=/home/reth/.Xauthority" C-m
-tmux send-keys -t $session:$window "export DISPLAY=:1" C-m
-tmux send-keys -t $session:$window "cd /home/reth/Documents/rethread/code/NWL2022/supercollider && sclang -D main.scd" C-m
+# jackd -R -d alsa -d hw:US20x20 -n 3 -r 48000 -p 128
+#
+tmux send-keys -t $session:$window "jackd -R -d alsa -d hw:US20x20 -n 3 -r 48000 -p 128 &" C-m
+tmux send-keys -t $session:$window "export DISPLAY=:0" C-m
+tmux send-keys -t $session:$window "sleep 1" C-m
+tmux send-keys -t $session:$window "cd /home/reth/Documents/rethread/code/NWL2022/supercollider && sclang -D main.scd > /home/reth/sc_unfold_log.txt" C-m
 tmux split-window -t $session:$window -v
 tmux send-keys -t $session:$window "cd /home/reth/Documents/rethread/ && python3 -m http.server 8800" C-m
 
