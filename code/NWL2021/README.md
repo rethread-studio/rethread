@@ -17,3 +17,8 @@ cd ../../
 docker-compose up
 ```
 starting from the root folder of this project.
+
+## OSC issues
+
+Your firewall may be blocking the UDP packets with OSC data coming out from the docker container. There's probably a better way, but a quick workaround is to temporarily disable the firewall.
+
