@@ -3309,6 +3309,7 @@ table.alt tbody tr td {
     display: inline;
 }
 
+/*
 #header .content {
     -moz-transition: opacity 0.5s ease, -moz-transform 1s ease;
     -webkit-transition: opacity 0.5s ease, -webkit-transform 1s ease;
@@ -3322,6 +3323,7 @@ table.alt tbody tr td {
     text-align: right;
     margin: -3.5em 4em 0 0;
 }
+*/
 
 #header .content> :last-child {
     margin-bottom: 0;
@@ -3461,6 +3463,7 @@ body.is-mobile #header {
     background-attachment: scroll, scroll;
 }
 
+/*
 body.is-preload #header .content {
     -moz-transform: translateX(2em);
     -webkit-transform: translateX(2em);
@@ -3476,6 +3479,7 @@ body.is-preload #header .image {
     transform: translateY(4em);
     opacity: 0;
 }
+*/
 
 body.is-preload #header .image img {
     opacity: 0;
