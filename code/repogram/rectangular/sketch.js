@@ -43,7 +43,7 @@ function preload() {
     infoButton.style("color", "white");
     infoButton.style("padding-left", "1em");
     infoButton.style("padding-right", "1em");
-    infoButton.mousePressed(() => (window.open("https://github.com/castor-software/rethread/blob/master/code/repogram/README.md")));
+    infoButton.mousePressed(() => {if (mouseButton === LEFT) window.open("https://github.com/castor-software/rethread/blob/master/code/repogram/README.md")});
   } else {
     // the sketch is run from its folder
     data = loadJSON("../data/repo_data.json");
@@ -83,6 +83,7 @@ function setup() {
 }
 
 function draw() {
+  if (infoButton) infoButton.position(width - 50, 13);
   translate(-width/2, -height/2);
 
   if (queue.length == 0) {
@@ -119,8 +120,6 @@ function draw() {
       queue.push(c);
     }
   }
-
-  if (infoButton) infoButton.position(width - 50, height - 50);
 }
 
 function drawNode(node) {
