@@ -11,12 +11,15 @@
 #define LED_PIN     6
 
 // How many NeoPixels are attached to the Arduino?
-#define LED_COUNT  300
+#define LED_COUNT  500
 
 // NeoPixel brightness, 0 (min) to 255 (max)
-#define BRIGHTNESS 255 // Set BRIGHTNESS to about 1/5 (max = 255)
+#define BRIGHTNESS 200 // Set BRIGHTNESS to about 1/5 (max = 255)
 
 uint16_t g_hue = 0;
+
+uint8_t orange[3] = {255, 50, 0};
+uint8_t teal[3] = {0, 255, 255};
 
 // Declare our NeoPixel strip object:
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -56,7 +59,7 @@ void loop() {
   rainbowFade2White(3, 3, 1);*/
 
   //swipes();
-  every_n_pixels(10, 5);
+  every_n_pixels(10, 30);
 }
 
 // Fill strip pixels one after another with a color. Strip is NOT cleared
@@ -220,12 +223,18 @@ void every_n_pixels(int interval, int max_num_pixels) {
 
   for(int i = 0; i < max_num_pixels; i++) {
     int index = i*interval + offset;
-    strip.setPixelColor(index, strip.Color(255, 255, 255, strip.gamma8(255)));
+    strip.setPixelColor(index, strip.Color(orange[0], orange[1], orange[2], strip.gamma8(255)));
+    //strip.setPixelColor(index, strip.gamma32(strip.ColorHSV(0, 255, 255)));
+  
+  }
+  for(int i = 0; i < max_num_pixels; i++) {
+    int index = (i*interval + offset - (interval/2) );
+    strip.setPixelColor(index, strip.Color(teal[0], teal[1], teal[2], strip.gamma8(255)));
     //strip.setPixelColor(index, strip.gamma32(strip.ColorHSV(0, 255, 255)));
   
   }
   strip.show();
-  delay(100);
+  delay(200);
   }
 }
 

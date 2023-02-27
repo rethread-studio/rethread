@@ -1,10 +1,6 @@
 let data;
 let trace_len; // length of trace
-let n_sections; // number of sections
-let hGap; // gap between rectangles vertically
-let wMargin, hMargin; // margins inside each window
-let i0Max;
-let i0; // index of the section in the first window
+let wMargin; // margins inside each window horizontally
 
 let scale;
 const WINDOW_WIDTH = 57;
@@ -21,9 +17,9 @@ let nSups; // number of suppliers
 let cnv, ctx; // canvas and its context
 
 function preload() {
-  //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
-  //data = loadJSON("../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
-  data = loadJSON("../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
+  //data = loadJSON("../../../LED_web_demo/data-imagej-copy-paste_parsed.json");
+  //data = loadJSON("../../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
+  data = loadJSON("../../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
 }
 
 function setup() {
@@ -35,18 +31,9 @@ function setup() {
 
   //console.log(data)
   trace_len = data.draw_trace.length;
-  n_sections = data.depth_envelope.sections.length;
   wMargin = WINDOW_WIDTH*scale/10;
-  hMargin = WINDOW_WIDTH*scale/10;
-
-  max_section_size = 0;
-  for (let s of data.depth_envelope.sections) {
-    let section_size = s.end_index - s.start_index;
-    if (section_size > max_section_size) max_section_size = section_size;
-  }
 
   centerCanvas();
-  initParams();
 
   getAllSuppliersAndDependencies();
   allDeps.sort();
@@ -60,33 +47,36 @@ function setup() {
 function draw() {
   background(0);
 
-  if (frameCount % 200 == 0) i0 = floor(random(i0Max));
-  let w = WINDOW_WIDTH*scale;
+  let t = 3*frameCount/(4-nWindows);
+  let nh = 61;
+  let w = WINDOW_WIDTH*scale, h = height/nh;
+  let eps = 1;
   for (let i = 0; i < mWindows; i++) {
-    let section = data.depth_envelope.sections[i+i0];
-    let section_size = section.end_index - section.start_index;
-    let x = i*w;
+    let x = i*w, j = 0, y = h-eps/2, k = i*nh + floor(t/h);
 
-    let t = (frameCount+100*section.shannon_wiener_diversity_index)/100;
-    let hMax = (height-2*hMargin)/section_size;
-    let hMin = hMax/(nWindows == 1 ? 2 : nWindows);
-    let h = map(sin(t), -1, 1, hMin, hMax);
-    hGap = h/10;
-    for (let j = 0; j < section_size; j++) {
-      let y = height - hMargin - h*(j+1);
-      let d = data.draw_trace[j+section.start_index];
+    while (y < height) {
+      let d = data.draw_trace[k%trace_len];
       let [sup, dep] = getSupAndDep(d.name);
       let hu1 = 360*allDeps.indexOf(dep)/allDeps.length;
       let hu2 = 360*allSups.indexOf(sup)/allSups.length;
       let sa = 90;
       let va = 90;
-      //fill(hu1, sa, va);
+
       let grd = ctx.createLinearGradient(x+wMargin, 0, x+w-wMargin, 0);
       grd.addColorStop(0, color(hu1, sa, va));
       grd.addColorStop(1, color(hu2, sa, va));
       ctx.fillStyle = grd;
-      rect(x+wMargin, y+hGap/2, w-2*wMargin, h-hGap, hGap/2);
-      y -= h;
+
+      let idx = j % (i+1);
+      let tl = (idx > 0 && i > 0) ? 0 : h/2;
+      let tr = (idx > 0 && i > 0) ? 0 : h/2;
+      let br = (idx < i && i > 0) ? 0 : h/2;
+      let bl = (idx < i && i > 0) ? 0 : h/2;
+      rect(x+wMargin, y, w-2*wMargin, h+eps, tl, tr, br, bl);
+
+      y += (idx == i) ? 2*h : h;
+      j++;
+      k++;
     }
   }
 
@@ -96,11 +86,6 @@ function draw() {
 
 function determineScale() {
   scale = windowHeight/(WINDOW_HEIGHT*nWindows);
-}
-
-function initParams() {
-  i0Max = n_sections - mWindows;
-  i0 = floor(random(i0Max));
 }
 
 function centerCanvas() {
@@ -164,5 +149,4 @@ function windowResized() {
   determineScale();
   resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   centerCanvas();
-  initParams();
 }

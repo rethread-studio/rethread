@@ -1,15 +1,17 @@
 let data;
 let trace_len; // length of trace
-let w, h; // width and height of each rectangle
+let n_sections; // number of sections
 let hGap; // gap between rectangles vertically
-let wMargin; // margin on the sides
+let wMargin, hMargin; // margins inside each window
+let i0Max;
+let i0; // index of the section in the first window
 
 let scale;
 const WINDOW_WIDTH = 57;
 const WINDOW_HEIGHT = 112;
-let mWindows = 1; // how many windows in width
+let mWindows = 3; // how many windows in width
 let nWindows = 2; // how many windows in height
-let showWindowFrame = true, orthoMode = false, showText = true;
+let showWindowFrame = true;
 
 let allDeps; // array with all dependencies
 let allSups; // array with all suppliers
@@ -18,27 +20,30 @@ let nSups; // number of suppliers
 
 let cnv, ctx; // canvas and its context
 
-let myFont;
-let keywords = ["copy", "paste", "search", "replace", "find", "write"];
-
 function preload() {
-  //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
-  //data = loadJSON("../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
-  data = loadJSON("../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
-  myFont = loadFont("../MPLUS1Code-VariableFont_wght.ttf");
+  //data = loadJSON("../../../LED_web_demo/data-imagej-copy-paste_parsed.json");
+  //data = loadJSON("../../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
+  data = loadJSON("../../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
 }
 
 function setup() {
   determineScale();
-  cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale, WEBGL);
-  if (orthoMode) ortho();
+  cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   noStroke();
   colorMode(HSB);
-  ctx = canvas.getContext("webgl");
+  ctx = canvas.getContext("2d");
 
   //console.log(data)
   trace_len = data.draw_trace.length;
+  n_sections = data.depth_envelope.sections.length;
   wMargin = WINDOW_WIDTH*scale/10;
+  hMargin = WINDOW_WIDTH*scale/10;
+
+  max_section_size = 0;
+  for (let s of data.depth_envelope.sections) {
+    let section_size = s.end_index - s.start_index;
+    if (section_size > max_section_size) max_section_size = section_size;
+  }
 
   centerCanvas();
   initParams();
@@ -49,67 +54,40 @@ function setup() {
   nDeps = allDeps.length;
   nSups = allSups.length;
 
-  textFont(myFont);
-  textAlign(LEFT, CENTER);
-
-  console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window separations\n- p to change projection mode\n- t to show/hide text keywords");
+  console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window separations");
 }
 
 function draw() {
   background(0);
-  translate(-width/2, -height/2);
 
-  let t = frameCount/2;
-  let x = wMargin, y = -t%h-height/3, i = floor(t/h);
-  while (y < height+height/3) {
-    let d = data.draw_trace[(i++)%trace_len];
-    let [sup, dep] = getSupAndDep(d.name);
-    let hu1 = 360*allDeps.indexOf(dep)/allDeps.length;
-    let hu2 = 360*allSups.indexOf(sup)/allSups.length;
-    let sa = 90;
-    let va = 90;
+  if (frameCount % 200 == 0) i0 = floor(random(i0Max));
+  let w = WINDOW_WIDTH*scale;
+  for (let i = 0; i < mWindows; i++) {
+    let section = data.depth_envelope.sections[i+i0];
+    let section_size = section.end_index - section.start_index;
+    let x = i*w;
 
-    push();
-
-    translate(x+w/2, y+h/2, 0);
-    rotateY(frameCount/50 + y/50);
-
-    fill(94);
-    rotateX(3*PI/2);
-    cylinder(h/5, w-2*wMargin);
-    rotate(PI/2);
-
-    push();
-    fill(hu1, sa, va);
-    translate(-w/2+wMargin, 0);
-    sphere(h/2);
-    fill(hu2, sa, va);
-    translate(w-2*wMargin, 0);
-    sphere(h/2);
-    pop();
-
-    if (showText) {
-      rotateX(-3*PI/2);
-      let funcName = getActualName(d.name);
-      for (let wo of keywords) {
-        let idx = funcName.toLowerCase().indexOf(wo);
-        if (idx >= 0) {
-          fill(94);
-          text(wo, w/2-wMargin/2+h/4, -hGap*2);
-          /*
-          translate(0, -hGap, 10);
-          text(wo, 0, 0);
-          translate(0, 0, -20);
-          text(wo, 0, 0);
-          */
-          break;
-        }
-      }
+    let t = (frameCount+100*section.shannon_wiener_diversity_index)/100;
+    let hMax = (height-2*hMargin)/section_size;
+    let hMin = hMax/(nWindows == 1 ? 2 : nWindows);
+    let h = map(sin(t), -1, 1, hMin, hMax);
+    hGap = h/10;
+    for (let j = 0; j < section_size; j++) {
+      let y = height - hMargin - h*(j+1);
+      let d = data.draw_trace[j+section.start_index];
+      let [sup, dep] = getSupAndDep(d.name);
+      let hu1 = 360*allDeps.indexOf(dep)/allDeps.length;
+      let hu2 = 360*allSups.indexOf(sup)/allSups.length;
+      let sa = 90;
+      let va = 90;
+      //fill(hu1, sa, va);
+      let grd = ctx.createLinearGradient(x+wMargin, 0, x+w-wMargin, 0);
+      grd.addColorStop(0, color(hu1, sa, va));
+      grd.addColorStop(1, color(hu2, sa, va));
+      ctx.fillStyle = grd;
+      rect(x+wMargin, y+hGap/2, w-2*wMargin, h-hGap, hGap/2);
+      y -= h;
     }
-
-    pop();
-
-    y += h;
   }
 
   //console.log(frameRate());
@@ -121,10 +99,8 @@ function determineScale() {
 }
 
 function initParams() {
-  w = width-wMargin*2;
-  h = 20;
-  hGap = h/8;
-  textSize(h);
+  i0Max = n_sections - mWindows;
+  i0 = floor(random(i0Max));
 }
 
 function centerCanvas() {
@@ -138,13 +114,14 @@ function drawWindowsOutline() {
   stroke(255);
   strokeWeight(2);
   for (let x = WINDOW_WIDTH*scale; x < width; x += WINDOW_WIDTH*scale) {
-    line(x, 0, 0, x, height, 0);
+    line(x, 0, x, height);
   }
   for (let y = WINDOW_HEIGHT*scale; y < height; y += WINDOW_HEIGHT*scale) {
-    line(0, y, 0, width, y, 0);
+    line(0, y, width, y);
   }
   noStroke();
 }
+
 
 function getSupAndDep(s) {
   // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
@@ -171,12 +148,6 @@ function getAllSuppliersAndDependencies() {
   }
 }
 
-function getActualName(s) {
-  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
-  // return: the actual name of the function
-  return s.slice(s.lastIndexOf(".")+1, s.length);
-}
-
 function keyPressed() {
   if (key == " ") {
     showWindowFrame = !showWindowFrame;
@@ -186,8 +157,6 @@ function keyPressed() {
   if (keyCode == RIGHT_ARROW && mWindows < 4) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
-  if (key == "p") orthoMode = !orthoMode; // "p" like "projection"
-  if (key == "t") showText = !showText;
   windowResized();
 }
 
@@ -196,5 +165,4 @@ function windowResized() {
   resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   centerCanvas();
   initParams();
-  if (orthoMode) ortho();
 }
