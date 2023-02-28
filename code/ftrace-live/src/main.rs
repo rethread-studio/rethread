@@ -1,14 +1,14 @@
 use clap::{App, Arg};
 
 use std::fs::File;
-use std::io::BufReader;
 use std::io::prelude::*;
+use std::io::BufReader;
 
-use std::str;
 use std::collections::HashMap;
+use std::str;
 
-use std::process::Command;
 use std::process;
+use std::process::Command;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -31,27 +31,27 @@ fn main() -> std::result::Result<(), std::io::Error> {
             Arg::new("port")
                 .short('p')
                 .long("port")
-                .about("Sets the remote port")
+                .help("Sets the remote port")
                 .takes_value(true),
         )
         .arg(
             Arg::new("event")
                 .short('e')
                 .long("event")
-                .about("Sets the event filter")
+                .help("Sets the event filter")
                 .takes_value(true)
-                .multiple(true)
+                .multiple(true),
         )
         .arg(
             Arg::new("pid")
                 .short('i')
                 .long("pid")
-                .about("Sets a single process to trace")
+                .help("Sets a single process to trace")
                 .takes_value(true),
         )
         .arg(
             Arg::new("output")
-                .about("Sets an optional output file")
+                .help("Sets an optional output file")
                 .index(1),
         )
         .get_matches();
@@ -59,9 +59,10 @@ fn main() -> std::result::Result<(), std::io::Error> {
     // You can check the value provided by positional arguments, or option arguments
     let mut port = 57120;
     if let Some(o) = matches.value_of("port") {
-        port = o.parse::<i32>().expect("Port received was not a valid number.");
+        port = o
+            .parse::<i32>()
+            .expect("Port received was not a valid number.");
         println!("Value for port: {}", port);
-        
     }
 
     // let mut event_filter = "*:*";
@@ -84,15 +85,15 @@ fn main() -> std::result::Result<(), std::io::Error> {
 
     ctrlc::set_handler(move || {
         match r.load(Ordering::SeqCst) {
-            true =>  r.store(false, Ordering::SeqCst),
+            true => r.store(false, Ordering::SeqCst),
             false => {
                 // CTRL+C has already been pressed and the application hasn't shut down
                 // exit immediately
                 panic!("Forced exit without cleanup!");
             }
         }
-       
-    }).expect("Error setting Ctrl-C handler");
+    })
+    .expect("Error setting Ctrl-C handler");
 
     println!("My pid is {}", process::id()); // Print OS-assigned PID
 
@@ -114,7 +115,6 @@ fn main() -> std::result::Result<(), std::io::Error> {
 
     Ok(())
 }
-
 
 fn reset_trace() {
     set_ftrace_parameter("tracing_on", "0");
@@ -141,7 +141,6 @@ fn init_trace_options(pid: Option<u32>, events: &Vec<&str>) {
         enable_event(event_name);
     }
 
-
     // Listen to a single pid if one was supplied
     if let Some(process) = pid {
         // Function tracer for only a single process
@@ -150,11 +149,9 @@ fn init_trace_options(pid: Option<u32>, events: &Vec<&str>) {
         // Note, sched_switch and sched_wake_up will also trace events listed in this file.
         set_ftrace_parameter("set_event_pid", &process.to_string());
     }
-    
 
     // Exclude the current pid from tracing
     // set_event_notrace_pid is not available on my system
-
 }
 
 fn enable_event(name: &str) {
@@ -174,12 +171,13 @@ fn disable_event(name: &str) {
 fn set_ftrace_parameter(name: &str, arg: &str) {
     let mut path: String = String::from("/sys/kernel/tracing/");
     path.push_str(name);
-    match File::create(path) {
+    match File::create(path.clone()) {
         Ok(mut f) => {
-            f.write_all(arg.as_bytes()).expect("Unable to write tracing setting");
+            f.write_all(arg.as_bytes())
+                .expect("Unable to write tracing setting");
         }
         Err(e) => {
-            println!("Unable to open file {} because: {}", name, e);
+            println!("Unable to open file {} because: {}", path, e);
         }
     }
 }
@@ -187,7 +185,6 @@ fn set_ftrace_parameter(name: &str, arg: &str) {
 /// Initialise an event for use in this trace
 fn init_event(event_name: &str) {
     // disable tracing the current process
-
 }
 
 fn cleanup_ftrace(events: &Vec<&str>) {
@@ -197,11 +194,11 @@ fn cleanup_ftrace(events: &Vec<&str>) {
     reset_trace();
 }
 
-
-
 fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connected>) {
     // Set up state
-    let mut state = Model{ start_timestamp: 0.0 };
+    let mut state = Model {
+        start_timestamp: 0.0,
+    };
 
     // Set up file reader
     let file = File::open("/sys/kernel/tracing/trace_pipe").unwrap();
@@ -216,7 +213,6 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
 
     // The system call to read the file can be interrupted by CTRL+C in which case we want to break out of the loop.
     while running.load(Ordering::SeqCst) {
-        
         // Read from the file using fill_buf which will read a little bit at a time and then return
         // ca 165000 events per second
         match buf_reader.fill_buf() {
@@ -243,13 +239,13 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
                 }
                 // ensure the bytes we worked with aren't returned again later
                 let length = buffer.len();
-                buf_reader.consume(length);  
+                buf_reader.consume(length);
                 // println!("Finished reading!");
                 if num_events != 0 {
                     // println!("num: {}", num_events);
                 }
                 num_events = 0;
-            },
+            }
             Err(e) => {
                 println!("{}", e);
                 break;
@@ -264,21 +260,36 @@ fn read_trace_pipe(running: Arc<AtomicBool>, osc_sender: osc::Sender<osc::Connec
     }
 }
 
-fn send_osc_message(osc_sender: &osc::Sender<osc::Connected>, timestamp: f64, event_string: String, pid: i32, cpu: i32) {
+fn send_osc_message(
+    osc_sender: &osc::Sender<osc::Connected>,
+    timestamp: f64,
+    event_string: String,
+    pid: i32,
+    cpu: i32,
+) {
     let osc_addr = "/ftrace".to_string();
     // message format: timestamp, event_type
-    let args = vec![osc::Type::Double(timestamp), osc::Type::String(event_string), osc::Type::Int(pid), osc::Type::Int(cpu)];
+    let args = vec![
+        osc::Type::Double(timestamp),
+        osc::Type::String(event_string),
+        osc::Type::Int(pid),
+        osc::Type::Int(cpu),
+    ];
     let packet = (osc_addr, args);
     // println!("{:?}", packet);
 
-    osc_sender.send(packet).expect("Unable to send osc message!");
+    osc_sender
+        .send(packet)
+        .expect("Unable to send osc message!");
 }
 
 fn send_osc_start_transmission(osc_sender: &osc::Sender<osc::Connected>) {
     let osc_addr = "/start_transmission".to_string();
     let args = vec![];
     let packet = (osc_addr, args);
-    osc_sender.send(packet).expect("Unable to send osc message!");
+    osc_sender
+        .send(packet)
+        .expect("Unable to send osc message!");
 }
 
 // TODO: The amount of whitespace seems to be variable between systems. Find a more clever way of parsing this
@@ -286,24 +297,40 @@ fn parse_line(line: &str, state: &mut Model) -> (f64, String, i32, i32) {
     let _process = &line[0..16];
     // pid can be 5 or 6 characters on my system
     let pid_str = &line[17..23];
-    let pid_offset = if line[23..24].eq(" ") {
+    let pid_offset = if line[24..25].eq(" ") {
         6
-    } else if line[23..24].eq("[") {
+    } else if line[24..25].eq("[") {
         5
     } else {
         panic!("Wrong pid index");
     };
-    let cpu_str = &line[20+pid_offset..22+pid_offset];
-    let _irq = &line[25+pid_offset..29+pid_offset];
-    let timestamp = &line[30+pid_offset..41+pid_offset];
+    // ksoftirqd/6-53      [006] ..s1. 15515.189049: tcp_probe: family=AF_INET src=172.24.0.4:48634 dest=172.24.0.3:27017 mark=0x0 data_len=313 snd_nxt=0x2624a1ca snd_una=0x2624a1ca snd_cwnd=10 ssthresh=2147483647 snd_wnd=64768 srtt=5167 rcv_wnd=1249536 sock_cookie=1068
+    let cpu_str = &line[20 + pid_offset..23 + pid_offset];
+    let _irq = &line[25 + pid_offset..29 + pid_offset];
+    let timestamp = &line[30 + pid_offset..43 + pid_offset];
     // shave of last : of timestamp
     // timestamp = &timestamp[..timestamp.len()-1];
     // println!("ts: {}, line: {}", timestamp, line);
-    let timestamp_float = timestamp.parse::<f64>().unwrap();
-    let event = &line[43+pid_offset..line.len()];
+    let timestamp_float = timestamp
+        .split_ascii_whitespace()
+        .last()
+        .unwrap()
+        .parse::<f64>()
+        .unwrap();
+    let event = &line[43 + pid_offset..line.len()];
     // Ignore the whitespace after the number by taking the first element in the string split by whitespace, e.g. Some("4827"), and unwrap
-    let pid = pid_str.split_ascii_whitespace().next().unwrap().parse::<i32>().expect(&format!("Pid string wrong: {}, line: {}, process: {}", pid_str, line, _process));
-    let cpu = cpu_str.parse::<i32>().expect(&format!("cpu string wrong: {}", cpu_str));
+    let pid = pid_str
+        .split_ascii_whitespace()
+        .next()
+        .unwrap()
+        .parse::<i32>()
+        .expect(&format!(
+            "Pid string wrong: {}, line: {}, process: {}",
+            pid_str, line, _process
+        ));
+    let cpu = cpu_str
+        .parse::<i32>()
+        .expect(&format!("cpu string wrong: {}", cpu_str));
     // First event
     if state.start_timestamp == 0.0 {
         state.start_timestamp = timestamp_float;

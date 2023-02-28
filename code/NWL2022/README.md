@@ -10,6 +10,24 @@ The startup script uses tmux to start everything in the background, but give you
 tmux attach-session -t unfold-session
 ```
 
+## Starting automatically on boot
+
+cron is not the ideal tool for this since it will start the script before the graphical environment which causes a race condition. Instead, use whatever method your desktop environment offers to start the script _after_ the graphical interface has started. For i3, this can be achieved by adding the following line to the i3 configuration, normall placed in `$HOME/.config/i3/config`
+
+```sh
+exec_always $HOME/Documents/rethread/code/NWL2022/startup_script.sh
+```
+
+## Starting automatically at a specific time
+
+To schedule the program to start at a specific time, edit the root crontab by running `sudo crontab -e` and add an running the script for the user "reth"
+
+Example running 09:30:
+
+```sh
+30 09 * * * su -l reth -c "sh /home/reth/Documents/rethread/code/NWL2022/startup_script.sh >> /home/reth/Documents/cron_test_log.txt"
+```
+
 ## Manual start and experimentation
 
 ### unfold_control
@@ -39,6 +57,43 @@ sclang path/to/rethread_repo/code/NWL2022/main.scd
 The projection graphics are p5.js programs/sketches to be viewed in a browser. They assume they have access to files in the rethread repo file structure so a local webserver needs to be started in the root of the rethread repository.
 
 The projections we used can then be found at URLs `RETHREAD_REPO/code/NWL2022/window_projections/`
+
+## Autostarting
+
+### Browser windows
+
+For a scriptable window assignment we have chosen to go with the i3 window manager together with xrandr.
+
+A new fullscreen chromium window can be opened using
+
+```sh
+chromium --new-window --start-fullscreen rethread.art
+```
+
+i3 can be scripted using the `i3-msg` binary
+
+```sh
+i3-msg move container to workspace number 6
+```
+
+Another option is to use the i3 config file to start everything.
+
+#### Moving a workspace to a specific screen
+
+The available monitor outputs are shown by running `xrandr --current`
+
+Set up a newly connected screen by e.g.
+
+```sh
+xrandr --output HDMI-0 --mode 1920x1080 --right-of DP-2
+```
+
+This usually moves some of the workspaces to the new screen. You can manually select which screen a workspace should be on in the config file. You can also move a workspace to an output.
+
+```sh
+i3-msg workspace 6
+i3-msg move workspace to output HDMI-0
+```
 
 # Software description
 

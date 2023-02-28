@@ -1,13 +1,15 @@
 let data;
 let trace_len; // length of trace
-let wMargin; // margins inside each window horizontally
+let w, h; // width and height of each rectangle
+let hGap; // gap between rectangles vertically
+let wMargin; // margin on the sides
 
 let scale;
 const WINDOW_WIDTH = 57;
 const WINDOW_HEIGHT = 112;
-let mWindows = 3; // how many windows in width
+let mWindows = 1; // how many windows in width
 let nWindows = 2; // how many windows in height
-let showWindowFrame = true;
+let showWindowFrame = true, orthoMode = false, showText = true;
 
 let allDeps; // array with all dependencies
 let allSups; // array with all suppliers
@@ -16,24 +18,30 @@ let nSups; // number of suppliers
 
 let cnv, ctx; // canvas and its context
 
+let myFont;
+let keywords = ["copy", "paste", "search", "replace", "find", "write"];
+
 function preload() {
-  //data = loadJSON("../../LED_web_demo/data-imagej-copy-paste_parsed.json");
-  //data = loadJSON("../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
-  data = loadJSON("../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
+  //data = loadJSON("../../../LED_web_demo/data-imagej-copy-paste_parsed.json");
+  //data = loadJSON("../../../LED_web_demo/data-varna-startup-shutdown_parsed.json");
+  data = loadJSON("../../../LED_web_demo/data-varna-copy-paste-isolated_parsed.json");
+  myFont = loadFont("../../MPLUS1Code-VariableFont_wght.ttf");
 }
 
 function setup() {
   determineScale();
-  cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
+  cnv = createCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale, WEBGL);
+  if (orthoMode) ortho();
   noStroke();
   colorMode(HSB);
-  ctx = canvas.getContext("2d");
+  ctx = canvas.getContext("webgl");
 
   //console.log(data)
   trace_len = data.draw_trace.length;
   wMargin = WINDOW_WIDTH*scale/10;
 
   centerCanvas();
+  initParams();
 
   getAllSuppliersAndDependencies();
   allDeps.sort();
@@ -41,43 +49,67 @@ function setup() {
   nDeps = allDeps.length;
   nSups = allSups.length;
 
-  console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window separations");
+  textFont(myFont);
+  textAlign(LEFT, CENTER);
+
+  console.log("Instructions:\n- arrow keys to change window dimensions\n- space to show/hide window separations\n- p to change projection mode\n- t to show/hide text keywords");
 }
 
 function draw() {
   background(0);
+  translate(-width/2, -height/2);
 
-  let t = 3*frameCount/(4-nWindows);
-  let nh = 61;
-  let w = WINDOW_WIDTH*scale, h = height/nh;
-  let eps = 1;
-  for (let i = 0; i < mWindows; i++) {
-    let x = i*w, j = 0, y = h-eps/2, k = i*nh + floor(t/h);
+  let t = frameCount/2;
+  let x = wMargin, y = -t%h-height/3, i = floor(t/h);
+  while (y < height+height/3) {
+    let d = data.draw_trace[(i++)%trace_len];
+    let [sup, dep] = getSupAndDep(d.name);
+    let hu1 = 360*allDeps.indexOf(dep)/allDeps.length;
+    let hu2 = 360*allSups.indexOf(sup)/allSups.length;
+    let sa = 90;
+    let va = 90;
 
-    while (y < height) {
-      let d = data.draw_trace[k%trace_len];
-      let [sup, dep] = getSupAndDep(d.name);
-      let hu1 = 360*allDeps.indexOf(dep)/allDeps.length;
-      let hu2 = 360*allSups.indexOf(sup)/allSups.length;
-      let sa = 90;
-      let va = 90;
+    push();
 
-      let grd = ctx.createLinearGradient(x+wMargin, 0, x+w-wMargin, 0);
-      grd.addColorStop(0, color(hu1, sa, va));
-      grd.addColorStop(1, color(hu2, sa, va));
-      ctx.fillStyle = grd;
+    translate(x+w/2, y+h/2, 0);
+    rotateY(frameCount/50 + y/50);
 
-      let idx = j % (i+1);
-      let tl = (idx > 0 && i > 0) ? 0 : h/2;
-      let tr = (idx > 0 && i > 0) ? 0 : h/2;
-      let br = (idx < i && i > 0) ? 0 : h/2;
-      let bl = (idx < i && i > 0) ? 0 : h/2;
-      rect(x+wMargin, y, w-2*wMargin, h+eps, tl, tr, br, bl);
+    fill(94);
+    rotateX(3*PI/2);
+    cylinder(h/5, w-2*wMargin);
+    rotate(PI/2);
 
-      y += (idx == i) ? 2*h : h;
-      j++;
-      k++;
+    push();
+    fill(hu1, sa, va);
+    translate(-w/2+wMargin, 0);
+    sphere(h/2);
+    fill(hu2, sa, va);
+    translate(w-2*wMargin, 0);
+    sphere(h/2);
+    pop();
+
+    if (showText) {
+      rotateX(-3*PI/2);
+      let funcName = getActualName(d.name);
+      for (let wo of keywords) {
+        let idx = funcName.toLowerCase().indexOf(wo);
+        if (idx >= 0) {
+          fill(94);
+          text(wo, w/2-wMargin/2+h/4, -hGap*2);
+          /*
+          translate(0, -hGap, 10);
+          text(wo, 0, 0);
+          translate(0, 0, -20);
+          text(wo, 0, 0);
+          */
+          break;
+        }
+      }
     }
+
+    pop();
+
+    y += h;
   }
 
   //console.log(frameRate());
@@ -86,6 +118,13 @@ function draw() {
 
 function determineScale() {
   scale = windowHeight/(WINDOW_HEIGHT*nWindows);
+}
+
+function initParams() {
+  w = width-wMargin*2;
+  h = 20;
+  hGap = h/8;
+  textSize(h);
 }
 
 function centerCanvas() {
@@ -99,14 +138,13 @@ function drawWindowsOutline() {
   stroke(255);
   strokeWeight(2);
   for (let x = WINDOW_WIDTH*scale; x < width; x += WINDOW_WIDTH*scale) {
-    line(x, 0, x, height);
+    line(x, 0, 0, x, height, 0);
   }
   for (let y = WINDOW_HEIGHT*scale; y < height; y += WINDOW_HEIGHT*scale) {
-    line(0, y, width, y);
+    line(0, y, 0, width, y, 0);
   }
   noStroke();
 }
-
 
 function getSupAndDep(s) {
   // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
@@ -133,6 +171,12 @@ function getAllSuppliersAndDependencies() {
   }
 }
 
+function getActualName(s) {
+  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
+  // return: the actual name of the function
+  return s.slice(s.lastIndexOf(".")+1, s.length);
+}
+
 function keyPressed() {
   if (key == " ") {
     showWindowFrame = !showWindowFrame;
@@ -142,6 +186,8 @@ function keyPressed() {
   if (keyCode == RIGHT_ARROW && mWindows < 4) mWindows++;
   if (keyCode == DOWN_ARROW && nWindows > 1) nWindows--;
   if (keyCode == UP_ARROW && nWindows < 3) nWindows++;
+  if (key == "p") orthoMode = !orthoMode; // "p" like "projection"
+  if (key == "t") showText = !showText;
   windowResized();
 }
 
@@ -149,4 +195,6 @@ function windowResized() {
   determineScale();
   resizeCanvas(WINDOW_WIDTH*mWindows*scale, WINDOW_HEIGHT*nWindows*scale);
   centerCanvas();
+  initParams();
+  if (orthoMode) ortho();
 }

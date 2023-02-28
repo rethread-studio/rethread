@@ -1,6 +1,6 @@
 # Repogram
 
-The repogram is a generative visualization of a directory tree. Here, it's the re|thread repo.
+The repogram is a generative visualization of the re|thread repo.
 
 ## Data
 
@@ -10,7 +10,7 @@ To create or update the JSON file, run ``py tree_extraction.py`` in the ``data``
 
 ## Visualization
 
-There are two visualizations. They represent the same data with the same logic (an animated breadth-first search), but in different shapes. They are web-based, created with [p5.js](https://p5js.org).
+There are two visualizations. They represent the same data, with the same logic (an animated breadth-first search) but in different shapes. They are web-based, created with [p5.js](https://p5js.org).
 
 In both cases, the order of the directories and files is shuffled (recursively), so that the visualization changes each time the page is loaded: it's generative!
 
@@ -21,12 +21,12 @@ In the [rectangular](rectangular) version, each directory or file is drawn as on
 Live view: [https://rethread.art/code/repogram/rectangular](https://rethread.art/code/repogram/rectangular).
 
 #### URL parameters
-- ``lines``: whether we also draw the white tree lines on top (``yes`` or ``no``, default is ``yes``)
+- ``lines``: whether we also draw the white tree lines on top (``yes`` or ``no``, default is ``no``)
 - ``width``: the width of the image (default is the width of the browser window)
 - ``height``: the height of the image (default is the height of the browser window)
 
 #### Examples
-- [https://rethread.art/code/repogram/rectangular/?width=1080&height=720](https://rethread.art/code/repogram/rectangular/?width=1080&height=720)
+- [https://rethread.art/code/repogram/rectangular/?lines=yes&width=1080&height=720](https://rethread.art/code/repogram/rectangular/?lines=yes&width=1080&height=720)
 
 <img 
     src="outputs/repogram_rectangular_output_1.png" 
@@ -36,7 +36,7 @@ Live view: [https://rethread.art/code/repogram/rectangular](https://rethread.art
            width: 100%;"
 />
 
-- [https://rethread.art/code/repogram/rectangular/?lines=no&width=720&height=1080](https://rethread.art/code/repogram/rectangular/?lines=no&width=720&height=1080)
+- [https://rethread.art/code/repogram/rectangular/?width=720&height=1080](https://rethread.art/code/repogram/rectangular/?width=720&height=1080)
 
 <img 
     src="outputs/repogram_rectangular_output_2.png" 
