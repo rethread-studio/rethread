@@ -39,3 +39,17 @@ sclang path/to/rethread_repo/code/NWL2022/main.scd
 The projection graphics are p5.js programs/sketches to be viewed in a browser. They assume they have access to files in the rethread repo file structure so a local webserver needs to be started in the root of the rethread repository.
 
 The projections we used can then be found at URLs `RETHREAD_REPO/code/NWL2022/window_projections/`
+
+# Software description
+
+The software infrastructure of un|fold consists of several pieces of bespoke software running on tried and tested open technology.
+
+At the core of the network of software is a control center ('unfold_control') which reads the trace data, analyses it using our own algorithms and emits signals for what function call(s) to sonify/visualise. This software is a Rust program making use of the Bevy game engine for an animation preview, the nannou_osc library for communicating with SuperCollider and tokio and tokio-tungstenite for an async WebSocket runtime.
+
+The sound part of un|fold is generated in real time by a SuperCollider program. SuperCollider continually receives data from unfold_control and uses that data to start sounds and change parameters for oscillators and effects.
+
+To communicate with the LED controllers via artnet we are using a JavaScript program running on Node.js to take advantage of the well tested Node.js artnet library.
+
+The projected visualisations are created using web technology with p5.js and are run in a browser. The visualisations can sync with the playback via WebSocket.
+
+Other software we depend on include the Linux kernel, the JACK audio server, tmux and cron.
