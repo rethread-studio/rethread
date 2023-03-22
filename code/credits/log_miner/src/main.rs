@@ -1,10 +1,30 @@
+use anyhow::Result;
 use std::{
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     io::{self, Read},
 };
 
-fn main() {
-    let mut authors = HashSet::new();
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+struct Author {
+    name: String,
+    email_addresses: Vec<String>,
+}
+impl Author {
+    pub fn new(name: String) -> Self {
+        Self {
+            name,
+            email_addresses: Vec::new(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+struct Data {
+    authors: Vec<Author>,
+}
+
+fn main() -> Result<()> {
+    let mut authors = HashMap::new();
 
     loop {
         let mut input = String::new();
@@ -13,7 +33,18 @@ fn main() {
                 if len == 0 {
                     break;
                 } else {
-                    authors.insert(input.trim().clone());
+                    let trimmed = input.trim();
+                    let mut it = trimmed.split(";");
+                    let author = it.next().unwrap();
+                    let entry = authors
+                        .entry(author.to_string())
+                        .or_insert(Author::new(author.to_string()));
+                    for email in it {
+                        let s = email.to_string();
+                        if !entry.email_addresses.contains(&s) {
+                            entry.email_addresses.push(s);
+                        }
+                    }
                     // println!("{}", input);
                 }
             }
@@ -23,6 +54,11 @@ fn main() {
             }
         }
     }
-    dbg!(&authors);
-    println!("Num authors: {}", authors.len());
+    // dbg!(&emails);
+    // println!("Num authors: {}", emails.len());
+    let authors = authors.values().cloned().collect();
+    let data = Data { authors };
+    let json = serde_json::to_string_pretty(&data)?;
+    println!("{json}");
+    Ok(())
 }
