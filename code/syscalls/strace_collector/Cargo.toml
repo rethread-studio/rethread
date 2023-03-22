@@ -1,0 +1,13 @@
+[package]
+name = "strace_collector"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+nix = "0.26.2"
+owo-colors = "3.5.0"
+serde_json = "1.0.94"
+syscalls_shared = { path = "../syscalls_shared/" }
+protocol = { version = "3.4", features = ["derive"] }
