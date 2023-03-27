@@ -28,6 +28,9 @@ struct SyscallAnalyser {
     pub packets_per_kind: HashMap<SyscallKind, u64>,
     pub packets_last_second: Vec<(Syscall, Instant)>,
     pub errors_last_second: Vec<(Errno, Instant)>,
+    pub num_packets_last_second: usize,
+    pub num_errors_last_second: usize,
+    last_second: Instant,
 }
 impl SyscallAnalyser {
     pub fn new() -> Self {
@@ -35,33 +38,43 @@ impl SyscallAnalyser {
             packets_per_kind: HashMap::new(),
             packets_last_second: Vec::new(),
             errors_last_second: Vec::new(),
+            num_packets_last_second: 0,
+            num_errors_last_second: 0,
+            last_second: Instant::now(),
         }
     }
     pub fn register_packet(&mut self, syscall: Syscall) {
         *self.packets_per_kind.entry(syscall.kind).or_insert(0) += 1;
+        self.num_packets_last_second += 1;
         let errno = Errno::from_i32(syscall.return_value);
         if !matches!(errno, Errno::UnknownErrno) {
             self.errors_last_second.push((errno, Instant::now()));
+            self.num_errors_last_second += 1;
         }
         self.packets_last_second.push((syscall, Instant::now()));
     }
     pub fn update(&mut self) {
-        let mut i = 0;
-        while i < self.packets_last_second.len() {
-            if self.packets_last_second[i].1.elapsed().as_secs() > 0 {
-                self.packets_last_second.remove(i);
-            } else {
-                i += 1;
-            }
+        if self.last_second.elapsed() >= Duration::from_secs(1) {
+            self.num_packets_last_second = 0;
+            self.num_errors_last_second = 0;
+            self.last_second = Instant::now();
         }
-        let mut i = 0;
-        while i < self.errors_last_second.len() {
-            if self.errors_last_second[i].1.elapsed().as_secs() > 0 {
-                self.errors_last_second.remove(i);
-            } else {
-                i += 1;
-            }
-        }
+        // let mut i = 0;
+        // while i < self.packets_last_second.len() {
+        //     if self.packets_last_second[i].1.elapsed().as_secs() > 0 {
+        //         self.packets_last_second.remove(i);
+        //     } else {
+        //         i += 1;
+        //     }
+        // }
+        // let mut i = 0;
+        // while i < self.errors_last_second.len() {
+        //     if self.errors_last_second[i].1.elapsed().as_secs() > 0 {
+        //         self.errors_last_second.remove(i);
+        //     } else {
+        //         i += 1;
+        //     }
+        // }
     }
     pub fn packets_per_kind_rows<'a, 'b>(&'a self) -> Vec<Row<'b>> {
         let rows = self
@@ -159,8 +172,8 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         let packets_per_kind_rows = sa.packets_per_kind_rows();
         (
             packets_per_kind_rows,
-            sa.packets_last_second.len(),
-            sa.errors_last_second.len(),
+            sa.num_packets_last_second,
+            sa.num_errors_last_second,
         )
     };
     render_packets_per_kind(f, packets_per_kind_rows, rects[1], app);
