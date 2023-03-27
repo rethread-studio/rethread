@@ -38,12 +38,13 @@ impl TryFrom<&str> for SyscallKind {
     }
 }
 
-#[derive(Protocol, Copy, Clone, Debug, PartialEq)]
+#[derive(Protocol, Clone, Debug, PartialEq)]
 pub struct Syscall {
     pub syscall_id: u64,
     pub kind: SyscallKind,
     pub args: [u64; 3],
     pub return_value: i32,
+    pub command: String,
 }
 
 #[derive(Protocol, Clone, Debug, PartialEq)]
