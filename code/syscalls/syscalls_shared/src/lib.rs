@@ -1,7 +1,8 @@
 use nix::errno::Errno;
 use protocol::Protocol;
 
-#[derive(Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq)]
+use serde::{Deserialize, Serialize};
+#[derive(Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq, Serialize, Deserialize)]
 pub enum SyscallKind {
     Memory,
     Io,
@@ -38,7 +39,7 @@ impl TryFrom<&str> for SyscallKind {
     }
 }
 
-#[derive(Protocol, Clone, Debug, PartialEq)]
+#[derive(Protocol, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Syscall {
     pub syscall_id: u64,
     pub kind: SyscallKind,
@@ -47,7 +48,7 @@ pub struct Syscall {
     pub command: String,
 }
 
-#[derive(Protocol, Clone, Debug, PartialEq)]
+#[derive(Protocol, Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Packet {
     Syscall(Syscall),
 }

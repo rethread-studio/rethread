@@ -4,16 +4,19 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use futures_util::{SinkExt, StreamExt};
+use log::*;
 use nix::errno::Errno;
+use std::net::SocketAddr;
 use std::{
     collections::HashMap,
     fmt::Debug,
-    net::{TcpListener, TcpStream},
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
 use std::{error::Error, io};
 use syscalls_shared::{Packet, Syscall, SyscallKind};
+use tokio::net::{TcpListener, TcpStream};
 use tui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Layout},
@@ -24,7 +27,11 @@ use tui::{
 
 use protocol::wire::stream::Connection;
 
+static SHOW_TUI: bool = true;
+
 struct SyscallAnalyser {
+    pub num_packets_total: usize,
+    pub num_errors_total: usize,
     pub packets_per_kind: HashMap<SyscallKind, u64>,
     pub packets_last_second: Vec<(Syscall, Instant)>,
     pub errors_last_second: Vec<(Errno, Instant)>,
@@ -41,6 +48,8 @@ impl SyscallAnalyser {
             num_packets_last_second: 0,
             num_errors_last_second: 0,
             last_second: Instant::now(),
+            num_packets_total: 0,
+            num_errors_total: 0,
         }
     }
     pub fn register_packet(&mut self, syscall: Syscall) {
@@ -92,41 +101,48 @@ impl SyscallAnalyser {
     }
 }
 
-fn main() -> anyhow::Result<()> {
-    // setup terminal
-    enable_raw_mode()?;
-    let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let env = env_logger::Env::default()
+        .filter_or("MY_LOG_LEVEL", "info")
+        .write_style_or("MY_LOG_STYLE", "always");
+
+    env_logger::init_from_env(env);
 
     let syscall_analyser = Arc::new(Mutex::new(SyscallAnalyser::new()));
 
-    {
-        let syscall_analyser = syscall_analyser.clone();
-        std::thread::spawn(move || {
-            start_network_communication(syscall_analyser);
-        });
-    }
+    if SHOW_TUI {
+        {
+            let syscall_analyser = syscall_analyser.clone();
+            tokio::spawn(start_network_communication(syscall_analyser));
+        }
+        // setup terminal
+        enable_raw_mode()?;
+        let mut stdout = io::stdout();
+        execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+        let backend = CrosstermBackend::new(stdout);
+        let mut terminal = Terminal::new(backend)?;
+        // create app and run it
+        let app = App {
+            syscall_analyser: syscall_analyser.clone(),
+            table_state: TableState::default(),
+        };
+        let res = run_app(&mut terminal, app);
 
-    // create app and run it
-    let app = App {
-        syscall_analyser: syscall_analyser.clone(),
-        table_state: TableState::default(),
-    };
-    let res = run_app(&mut terminal, app);
+        // restore terminal
+        disable_raw_mode()?;
+        execute!(
+            terminal.backend_mut(),
+            LeaveAlternateScreen,
+            DisableMouseCapture
+        )?;
+        terminal.show_cursor()?;
 
-    // restore terminal
-    disable_raw_mode()?;
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen,
-        DisableMouseCapture
-    )?;
-    terminal.show_cursor()?;
-
-    if let Err(err) = res {
-        println!("{:?}", err)
+        if let Err(err) = res {
+            println!("{:?}", err)
+        }
+    } else {
+        start_network_communication(syscall_analyser).await?;
     }
 
     Ok(())
@@ -253,12 +269,13 @@ fn render_general<B: Backend>(
         ]);
     f.render_stateful_widget(t, rect, &mut app.table_state);
 }
-fn start_network_communication(syscall_analyser: Arc<Mutex<SyscallAnalyser>>) -> Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:34254").unwrap();
+async fn start_network_communication(syscall_analyser: Arc<Mutex<SyscallAnalyser>>) -> Result<()> {
+    let addr = "127.0.0.1:3012";
+    let listener = TcpListener::bind(&addr).await.expect("Can't listen");
 
     {
         let syscall_analyser = syscall_analyser.clone();
-        std::thread::spawn(move || -> ! {
+        tokio::spawn(async move {
             loop {
                 {
                     let mut syscall_analyser = syscall_analyser.lock().unwrap();
@@ -271,36 +288,76 @@ fn start_network_communication(syscall_analyser: Arc<Mutex<SyscallAnalyser>>) ->
             }
         });
     }
-
-    for stream in listener.incoming() {
-        handle_client(stream?, syscall_analyser.clone())?;
+    loop {
+        let (socket, _) = listener.accept().await?;
+        let syscall_analyser = syscall_analyser.clone();
+        let peer = socket
+            .peer_addr()
+            .expect("connected streams should have a peer address");
+        info!("Peer address: {}", peer);
+        tokio::spawn(async move {
+            handle_client(peer, socket, syscall_analyser).await.unwrap();
+        });
     }
+
     Ok(())
 }
-fn handle_client(
+async fn handle_client(
+    peer: SocketAddr,
     stream: TcpStream,
     syscall_analyser: Arc<Mutex<SyscallAnalyser>>,
 ) -> anyhow::Result<()> {
-    let settings = protocol::Settings {
-        byte_order: protocol::ByteOrder::LittleEndian,
-        ..Default::default()
-    };
-    let mut connection: Connection<Packet, TcpStream> = protocol::wire::stream::Connection::new(
-        stream,
-        protocol::wire::middleware::pipeline::default(),
-        settings,
-    );
+    let mut ws_stream = tokio_tungstenite::accept_async(stream)
+        .await
+        .expect("Failed to accept");
 
-    loop {
-        if let Some(response) = connection.receive_packet().unwrap() {
-            match response {
-                Packet::Syscall(syscall) => {
-                    let mut analyser = syscall_analyser.lock().unwrap();
-                    analyser.register_packet(syscall);
+    info!("New WebSocket connection: {}", peer);
+    while let Some(msg) = ws_stream.next().await {
+        match msg? {
+            tokio_tungstenite::tungstenite::Message::Text(text) => info!("ws message: {text}"),
+            tokio_tungstenite::tungstenite::Message::Binary(data) => {
+                match postcard::from_bytes(&data) {
+                    Ok(packet) => match packet {
+                        Packet::Syscall(syscall) => {
+                            let mut analyser = syscall_analyser.lock().unwrap();
+                            analyser.register_packet(syscall);
+                        }
+                        _ => (),
+                    },
+                    Err(e) => error!("Failed to parse binary packet as postcard: {e}"),
                 }
-                _ => (),
             }
+            tokio_tungstenite::tungstenite::Message::Ping(_) => todo!(),
+            tokio_tungstenite::tungstenite::Message::Pong(_) => todo!(),
+            tokio_tungstenite::tungstenite::Message::Close(_) => todo!(),
+            tokio_tungstenite::tungstenite::Message::Frame(_) => todo!(),
         }
     }
+
     Ok(())
+
+    // old
+
+    // let settings = protocol::Settings {
+    //     byte_order: protocol::ByteOrder::LittleEndian,
+    //     ..Default::default()
+    // };
+    // let mut connection: Connection<Packet, TcpStream> = protocol::wire::stream::Connection::new(
+    //     stream,
+    //     protocol::wire::middleware::pipeline::default(),
+    //     settings,
+    // );
+
+    // loop {
+    //     if let Some(response) = connection.receive_packet().unwrap() {
+    //         match response {
+    //             Packet::Syscall(syscall) => {
+    //                 let mut analyser = syscall_analyser.lock().unwrap();
+    //                 analyser.register_packet(syscall);
+    //             }
+    //             _ => (),
+    //         }
+    //     }
+    // }
+    // Ok(())
 }

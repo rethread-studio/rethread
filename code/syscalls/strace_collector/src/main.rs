@@ -1,6 +1,7 @@
-use std::{collections::HashMap, os::unix::process::CommandExt, process::Command};
+use std::{collections::HashMap, net::TcpStream, os::unix::process::CommandExt, process::Command};
 
 use argh::FromArgs;
+use log::*;
 use nix::{
     errno::Errno,
     sys::{ptrace, wait::waitpid},
@@ -8,6 +9,8 @@ use nix::{
 };
 use owo_colors::OwoColorize;
 use syscalls_shared::{Packet, Syscall, SyscallKind};
+use tungstenite::{connect, stream::MaybeTlsStream, WebSocket};
+use url::Url;
 
 #[derive(FromArgs)]
 /// Strace Collector
@@ -24,6 +27,8 @@ struct Args {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
+
     let args: Args = argh::from_env();
     let json: serde_json::Value = serde_json::from_str(include_str!("syscall.json"))?;
     let syscall_table: HashMap<u64, String> = json["aaData"]
@@ -39,7 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect();
 
     let command_str = args.command.unwrap_or("gedit".to_string());
-    let mut command = Command::new(command_str);
+    let mut command = Command::new(command_str.clone());
     if let Some(command_args) = args.args {
         command.arg(command_args);
     }
@@ -58,18 +63,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut is_sys_exit = false;
     let mut num_syscalls: u64 = 0;
 
-    use std::net::TcpStream;
-
-    let stream = TcpStream::connect("127.0.0.1:34254").unwrap();
-    let settings = protocol::Settings {
-        byte_order: protocol::ByteOrder::LittleEndian,
-        ..Default::default()
-    };
-    let mut connection = protocol::wire::stream::Connection::new(
-        stream,
-        protocol::wire::middleware::pipeline::default(),
-        settings,
-    );
+    let mut socket = reconnect();
 
     loop {
         // Continue execution until the next syscall
@@ -99,9 +93,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 kind,
                 args: [regs.rdi, regs.rsi, regs.rdx],
                 return_value: regs.rax as i64 as i32,
+                command: command_str.clone(),
             };
-            connection.send_packet(&Packet::Syscall(syscall)).unwrap();
+            let postcard = postcard::to_stdvec(&Packet::Syscall(syscall)).unwrap();
+            match socket.write_message(tungstenite::Message::Binary(postcard)) {
+                Ok(_) => (),
+                Err(_) => {
+                    info!("Reconnecting...");
+                    socket = reconnect();
+                }
+            }
+            // socket.write_message(tungstenite::Message::Text("syscall".to_owned()))?;
         }
         is_sys_exit = !is_sys_exit;
     }
+    socket.close(None)?;
+}
+
+fn reconnect() -> WebSocket<MaybeTlsStream<TcpStream>> {
+    let socket = loop {
+        match connect(Url::parse("ws://localhost:3012/strace").unwrap()) {
+            Ok((socket, _response)) => break socket,
+            Err(e) => error!("Failed to connect"),
+        }
+    };
+    socket
 }
