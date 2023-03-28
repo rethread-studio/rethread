@@ -6,17 +6,22 @@ use crossterm::{
 };
 use futures_util::{SinkExt, StreamExt};
 use log::*;
+use menu::MenuItem;
 use nix::errno::Errno;
-use std::net::SocketAddr;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fmt::Debug,
-    sync::{Arc, Mutex},
+    fs::File,
+    io::Write,
     time::{Duration, Instant},
 };
-use std::{error::Error, io};
+use std::{net::SocketAddr, path::PathBuf};
 use syscalls_shared::{Packet, Syscall, SyscallKind};
-use tokio::net::{TcpListener, TcpStream};
+use tokio::{
+    net::{TcpListener, TcpStream},
+    sync::mpsc::UnboundedSender,
+};
 use tui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Layout},
@@ -25,10 +30,94 @@ use tui::{
     Frame, Terminal,
 };
 
-use protocol::wire::stream::Connection;
+mod menu;
 
 static SHOW_TUI: bool = true;
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct RecordedPackets {
+    records: Vec<Record>,
+}
+
+impl RecordedPackets {
+    fn new() -> Self {
+        Self { records: vec![] }
+    }
+    fn record_packet(&mut self, packet: Packet, timestamp: Duration) {
+        self.records.push(Record { packet, timestamp })
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct Record {
+    packet: Packet,
+    timestamp: Duration,
+}
+
+struct PacketHQ {
+    syscall_analyser: SyscallAnalyser,
+    recording: Option<RecordedPackets>,
+    start_recording_time: Instant,
+    gui_update_sender: rtrb::Producer<GuiUpdate>,
+    command_receiver: rtrb::Consumer<PacketHQCommands>,
+}
+impl PacketHQ {
+    fn new(
+        gui_update_sender: rtrb::Producer<GuiUpdate>,
+        command_receiver: rtrb::Consumer<PacketHQCommands>,
+    ) -> Self {
+        Self {
+            syscall_analyser: SyscallAnalyser::new(),
+            recording: None,
+            start_recording_time: Instant::now(),
+            gui_update_sender,
+            command_receiver,
+        }
+    }
+    fn start_recording(&mut self) {
+        self.start_recording_time = Instant::now();
+        self.recording = Some(RecordedPackets::new());
+    }
+    fn stop_and_save_recording(&mut self, path: PathBuf) {
+        let Some(recording) = self.recording.take() else { return };
+        let data = postcard::to_stdvec(&recording).unwrap();
+        let Ok(mut file) = File::create(path) else { error!("Couldn't open file to save data!"); return; };
+        file.write_all(data.as_slice());
+    }
+    fn register_packet(&mut self, packet: Packet) {
+        match &packet {
+            Packet::Syscall(syscall) => self.syscall_analyser.register_packet(syscall),
+        }
+        if let Some(recording) = &mut self.recording {
+            recording.record_packet(packet, self.start_recording_time.elapsed());
+        }
+    }
+    fn update(&mut self) {
+        self.syscall_analyser.update();
+        self.gui_update_sender
+            .push(GuiUpdate {
+                syscall_analyser: self.syscall_analyser.clone(),
+            })
+            .ok();
+        while let Ok(command) = self.command_receiver.pop() {
+            match command {
+                PacketHQCommands::StartRecording => self.start_recording(),
+                PacketHQCommands::SaveRecording { path } => self.stop_and_save_recording(path),
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+struct GuiUpdate {
+    syscall_analyser: SyscallAnalyser,
+}
+enum PacketHQCommands {
+    StartRecording,
+    SaveRecording { path: PathBuf },
+}
+
+#[derive(Clone, Debug)]
 struct SyscallAnalyser {
     pub num_packets_total: usize,
     pub num_errors_total: usize,
@@ -52,7 +141,7 @@ impl SyscallAnalyser {
             num_errors_total: 0,
         }
     }
-    pub fn register_packet(&mut self, syscall: Syscall) {
+    pub fn register_packet(&mut self, syscall: &Syscall) {
         *self.packets_per_kind.entry(syscall.kind).or_insert(0) += 1;
         self.num_packets_last_second += 1;
         let errno = Errno::from_i32(syscall.return_value);
@@ -60,7 +149,6 @@ impl SyscallAnalyser {
             self.errors_last_second.push((errno, Instant::now()));
             self.num_errors_last_second += 1;
         }
-        self.packets_last_second.push((syscall, Instant::now()));
     }
     pub fn update(&mut self) {
         if self.last_second.elapsed() >= Duration::from_secs(1) {
@@ -109,12 +197,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     env_logger::init_from_env(env);
 
-    let syscall_analyser = Arc::new(Mutex::new(SyscallAnalyser::new()));
+    let (gui_update_sender, gui_update_receiver) = rtrb::RingBuffer::new(100);
+    let (packet_hq_sender, packet_hq_receiver) = rtrb::RingBuffer::new(100);
+    let packet_hq = PacketHQ::new(gui_update_sender, packet_hq_receiver);
 
     if SHOW_TUI {
         {
-            let syscall_analyser = syscall_analyser.clone();
-            tokio::spawn(start_network_communication(syscall_analyser));
+            tokio::spawn(start_network_communication(packet_hq));
         }
         // setup terminal
         enable_raw_mode()?;
@@ -124,8 +213,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut terminal = Terminal::new(backend)?;
         // create app and run it
         let app = App {
-            syscall_analyser: syscall_analyser.clone(),
+            gui_update_receiver,
+            packet_hq_sender,
+            syscall_analyser: None,
             table_state: TableState::default(),
+            menu_table_state: TableState::default(),
+            is_recording: false,
         };
         let res = run_app(&mut terminal, app);
 
@@ -142,22 +235,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("{:?}", err)
         }
     } else {
-        start_network_communication(syscall_analyser).await?;
+        start_network_communication(packet_hq).await?;
     }
 
     Ok(())
 }
 
-struct App {
-    syscall_analyser: Arc<Mutex<SyscallAnalyser>>,
+pub struct App {
+    syscall_analyser: Option<SyscallAnalyser>,
+    gui_update_receiver: rtrb::Consumer<GuiUpdate>,
+    packet_hq_sender: rtrb::Producer<PacketHQCommands>,
     table_state: TableState,
+    menu_table_state: TableState,
+    is_recording: bool,
 }
 
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Result<()> {
     let mut last_tick = Instant::now();
     let tick_rate = Duration::from_millis(16);
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
+        while let Ok(gui_update) = app.gui_update_receiver.pop() {
+            app.syscall_analyser = Some(gui_update.syscall_analyser);
+        }
 
         let timeout = tick_rate
             .checked_sub(last_tick.elapsed())
@@ -165,6 +265,45 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
         if crossterm::event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
+                    KeyCode::Down => {
+                        if let Some(selected) = app.menu_table_state.selected() {
+                            app.menu_table_state.select(Some(
+                                (selected + 1) % enum_iterator::cardinality::<MenuItem>(),
+                            ));
+                        } else {
+                            app.menu_table_state.select(Some(0));
+                        }
+                    }
+                    KeyCode::Up => {
+                        if let Some(selected) = app.menu_table_state.selected() {
+                            app.menu_table_state.select(Some(
+                                (selected - 1) % enum_iterator::cardinality::<MenuItem>(),
+                            ));
+                        } else {
+                            app.menu_table_state
+                                .select(Some(enum_iterator::cardinality::<MenuItem>() - 1));
+                        }
+                    }
+                    KeyCode::Enter => {
+                        let selected = app.menu_table_state.selected().unwrap_or(0);
+                        match MenuItem::try_from(selected as u8).unwrap() {
+                            MenuItem::LoadRecordedData => {
+                                todo!()
+                            }
+                            MenuItem::RecordData => {
+                                app.is_recording = true;
+                                app.packet_hq_sender
+                                    .push(PacketHQCommands::StartRecording)?;
+                            }
+                            MenuItem::StopAndSaveRecording => {
+                                if let Some(path) = rfd::FileDialog::new().save_file() {
+                                    app.is_recording = false;
+                                    app.packet_hq_sender
+                                        .push(PacketHQCommands::SaveRecording { path })?;
+                                }
+                            }
+                        }
+                    }
                     KeyCode::Char('q') => return Ok(()),
                     _ => {}
                 }
@@ -179,21 +318,36 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
 
 fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let rects = Layout::default()
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .direction(tui::layout::Direction::Horizontal)
+        .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
         .margin(5)
         .split(f.size());
+    let data_rects = Layout::default()
+        .direction(tui::layout::Direction::Vertical)
+        .constraints([Constraint::Percentage(25), Constraint::Percentage(75)])
+        .margin(5)
+        .split(rects[1]);
+    let menu_rect = rects[0];
 
-    let (packets_per_kind_rows, syscalls_last_second, errors_last_second) = {
-        let sa = app.syscall_analyser.lock().unwrap();
-        let packets_per_kind_rows = sa.packets_per_kind_rows();
-        (
-            packets_per_kind_rows,
-            sa.num_packets_last_second,
-            sa.num_errors_last_second,
-        )
-    };
-    render_packets_per_kind(f, packets_per_kind_rows, rects[1], app);
-    render_general(f, syscalls_last_second, errors_last_second, rects[0], app);
+    if let Some(sa) = &app.syscall_analyser {
+        let (packets_per_kind_rows, syscalls_last_second, errors_last_second) = {
+            let packets_per_kind_rows = sa.packets_per_kind_rows();
+            (
+                packets_per_kind_rows,
+                sa.num_packets_last_second,
+                sa.num_errors_last_second,
+            )
+        };
+        render_packets_per_kind(f, packets_per_kind_rows, data_rects[1], app);
+        render_general(
+            f,
+            syscalls_last_second,
+            errors_last_second,
+            data_rects[0],
+            app,
+        );
+    }
+    menu::menu_ui(f, app, menu_rect);
 }
 fn render_packets_per_kind<B: Backend>(
     f: &mut Frame<B>,
@@ -269,34 +423,30 @@ fn render_general<B: Backend>(
         ]);
     f.render_stateful_widget(t, rect, &mut app.table_state);
 }
-async fn start_network_communication(syscall_analyser: Arc<Mutex<SyscallAnalyser>>) -> Result<()> {
+async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
     let addr = "127.0.0.1:3012";
     let listener = TcpListener::bind(&addr).await.expect("Can't listen");
+    let (packet_sender, mut packet_receiver) = tokio::sync::mpsc::unbounded_channel();
 
     {
-        let syscall_analyser = syscall_analyser.clone();
         tokio::spawn(async move {
             loop {
-                {
-                    let mut syscall_analyser = syscall_analyser.lock().unwrap();
-                    syscall_analyser.update();
-                    // dbg!(&syscall_analyser.packets_per_kind);
-                    // dbg!(syscall_analyser.packets_last_second.len());
-                    // dbg!(syscall_analyser.errors_last_second.len());
+                while let Ok(packet) = packet_receiver.try_recv() {
+                    packet_hq.register_packet(packet);
                 }
-                std::thread::sleep(Duration::from_millis(1000));
+                packet_hq.update();
             }
         });
     }
     loop {
         let (socket, _) = listener.accept().await?;
-        let syscall_analyser = syscall_analyser.clone();
+        let packet_sender = packet_sender.clone();
         let peer = socket
             .peer_addr()
             .expect("connected streams should have a peer address");
         info!("Peer address: {}", peer);
         tokio::spawn(async move {
-            handle_client(peer, socket, syscall_analyser).await.unwrap();
+            handle_client(peer, socket, packet_sender).await.unwrap();
         });
     }
 
@@ -305,7 +455,7 @@ async fn start_network_communication(syscall_analyser: Arc<Mutex<SyscallAnalyser
 async fn handle_client(
     peer: SocketAddr,
     stream: TcpStream,
-    syscall_analyser: Arc<Mutex<SyscallAnalyser>>,
+    packet_sender: UnboundedSender<Packet>,
 ) -> anyhow::Result<()> {
     let mut ws_stream = tokio_tungstenite::accept_async(stream)
         .await
@@ -317,13 +467,7 @@ async fn handle_client(
             tokio_tungstenite::tungstenite::Message::Text(text) => info!("ws message: {text}"),
             tokio_tungstenite::tungstenite::Message::Binary(data) => {
                 match postcard::from_bytes(&data) {
-                    Ok(packet) => match packet {
-                        Packet::Syscall(syscall) => {
-                            let mut analyser = syscall_analyser.lock().unwrap();
-                            analyser.register_packet(syscall);
-                        }
-                        _ => (),
-                    },
+                    Ok(packet) => packet_sender.send(packet)?,
                     Err(e) => error!("Failed to parse binary packet as postcard: {e}"),
                 }
             }
