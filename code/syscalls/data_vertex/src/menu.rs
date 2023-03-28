@@ -14,6 +14,8 @@ use crate::App;
 #[repr(u8)]
 pub enum MenuItem {
     LoadRecordedData,
+    StartPlayback,
+    PausePlayback,
     RecordData,
     StopAndSaveRecording,
 }

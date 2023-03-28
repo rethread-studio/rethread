@@ -412,6 +412,7 @@ dependencies = [
  "enum-iterator",
  "env_logger",
  "futures-util",
+ "humantime",
  "log",
  "nix",
  "num_enum",

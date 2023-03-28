@@ -13,7 +13,7 @@ use std::{
     collections::HashMap,
     fmt::Debug,
     fs::File,
-    io::Write,
+    io::{Read, Write},
     time::{Duration, Instant},
 };
 use std::{net::SocketAddr, path::PathBuf};
@@ -26,7 +26,7 @@ use tui::{
     backend::{Backend, CrosstermBackend},
     layout::{Constraint, Layout},
     style::{Color, Modifier, Style},
-    widgets::{Block, Borders, Cell, Row, Table, TableState},
+    widgets::{Block, Borders, Cell, Gauge, Row, Table, TableState},
     Frame, Terminal,
 };
 
@@ -54,12 +54,73 @@ struct Record {
     timestamp: Duration,
 }
 
+#[derive(Clone, Debug)]
+struct RecordingPlayback {
+    recorded_packets: RecordedPackets,
+    /// Playback is driven by the timestamps as Duration
+    current_duration: Duration,
+    /// Store current packet so we don't add a packet twice
+    current_packet: usize,
+    playing: bool,
+    last_packet_timestamp: Duration,
+}
+
+impl RecordingPlayback {
+    fn new(mut recorded_packets: RecordedPackets) -> Self {
+        // Sort packets because they have to be in time order
+        recorded_packets
+            .records
+            .sort_by_key(|record| record.timestamp);
+        let last_packet_timestamp = if recorded_packets.records.len() > 0 {
+            recorded_packets.records.iter().last().unwrap().timestamp
+        } else {
+            Duration::ZERO
+        };
+        Self {
+            recorded_packets,
+            current_duration: Duration::ZERO,
+            current_packet: 0,
+            playing: false,
+            last_packet_timestamp,
+        }
+    }
+    fn from_file(path: &PathBuf) -> Result<Self> {
+        let mut file = File::open(path)?;
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes)?;
+        let recorded_packets = postcard::from_bytes(&bytes)?;
+        Ok(Self::new(recorded_packets))
+    }
+    fn progress_time(&mut self, dt: Duration) {
+        if self.playing {
+            self.current_duration += dt;
+        }
+    }
+    fn next_packet(&mut self) -> Option<&Packet> {
+        if !self.playing {
+            return None;
+        }
+        if self.current_packet >= self.recorded_packets.records.len() {
+            self.playing = false;
+            return None;
+        }
+        if self.recorded_packets.records[self.current_packet].timestamp <= self.current_duration {
+            let packet = &self.recorded_packets.records[self.current_packet].packet;
+            self.current_packet += 1;
+            return Some(packet);
+        } else {
+            None
+        }
+    }
+}
 struct PacketHQ {
     syscall_analyser: SyscallAnalyser,
     recording: Option<RecordedPackets>,
+    recording_playback: Option<RecordingPlayback>,
     start_recording_time: Instant,
     gui_update_sender: rtrb::Producer<GuiUpdate>,
     command_receiver: rtrb::Consumer<PacketHQCommands>,
+    last_update: Instant,
 }
 impl PacketHQ {
     fn new(
@@ -72,6 +133,8 @@ impl PacketHQ {
             start_recording_time: Instant::now(),
             gui_update_sender,
             command_receiver,
+            recording_playback: None,
+            last_update: Instant::now(),
         }
     }
     fn start_recording(&mut self) {
@@ -82,7 +145,11 @@ impl PacketHQ {
         let Some(recording) = self.recording.take() else { return };
         let data = postcard::to_stdvec(&recording).unwrap();
         let Ok(mut file) = File::create(path) else { error!("Couldn't open file to save data!"); return; };
-        file.write_all(data.as_slice());
+        file.write_all(data.as_slice()).unwrap();
+    }
+    fn load_recording(&mut self, path: PathBuf) {
+        let Ok(recording_playback) = RecordingPlayback::from_file(&path) else { error!("Failed to load data from path: {path:?}"); return; };
+        self.recording_playback = Some(recording_playback);
     }
     fn register_packet(&mut self, packet: Packet) {
         match &packet {
@@ -91,18 +158,53 @@ impl PacketHQ {
         if let Some(recording) = &mut self.recording {
             recording.record_packet(packet, self.start_recording_time.elapsed());
         }
+        // TODO: Send via OSC
     }
     fn update(&mut self) {
+        let dt = self.last_update.elapsed();
+        self.last_update = Instant::now();
         self.syscall_analyser.update();
+        if let Some(rp) = &mut self.recording_playback {
+            rp.progress_time(dt);
+            while let Some(packet) = rp.next_packet() {
+                match packet {
+                    Packet::Syscall(syscall) => self.syscall_analyser.register_packet(syscall),
+                }
+                // TODO Send via OSC
+            }
+        }
+        let playback_data = if let Some(rp) = &self.recording_playback {
+            PlaybackData {
+                current_index: rp.current_packet,
+                max_index: rp.recorded_packets.records.len(),
+                current_timestamp: rp.current_duration,
+                max_timestamp: rp.last_packet_timestamp,
+                playing: rp.playing,
+            }
+        } else {
+            PlaybackData::default()
+        };
         self.gui_update_sender
             .push(GuiUpdate {
                 syscall_analyser: self.syscall_analyser.clone(),
+                playback_data,
             })
             .ok();
         while let Ok(command) = self.command_receiver.pop() {
             match command {
                 PacketHQCommands::StartRecording => self.start_recording(),
                 PacketHQCommands::SaveRecording { path } => self.stop_and_save_recording(path),
+                PacketHQCommands::LoadRecording { path } => self.load_recording(path),
+                PacketHQCommands::PauseRecordingPlayback => {
+                    if let Some(recording) = &mut self.recording_playback {
+                        recording.playing = false;
+                    }
+                }
+                PacketHQCommands::StartRecordingPlayback => {
+                    if let Some(rp) = &mut self.recording_playback {
+                        rp.playing = true;
+                    }
+                }
             }
         }
     }
@@ -111,10 +213,33 @@ impl PacketHQ {
 #[derive(Clone, Debug)]
 struct GuiUpdate {
     syscall_analyser: SyscallAnalyser,
+    playback_data: PlaybackData,
+}
+#[derive(Clone, Debug)]
+struct PlaybackData {
+    current_index: usize,
+    max_index: usize,
+    current_timestamp: Duration,
+    max_timestamp: Duration,
+    playing: bool,
+}
+impl Default for PlaybackData {
+    fn default() -> Self {
+        Self {
+            current_index: 0,
+            max_index: 0,
+            current_timestamp: Duration::ZERO,
+            max_timestamp: Duration::ZERO,
+            playing: false,
+        }
+    }
 }
 enum PacketHQCommands {
     StartRecording,
     SaveRecording { path: PathBuf },
+    LoadRecording { path: PathBuf },
+    PauseRecordingPlayback,
+    StartRecordingPlayback,
 }
 
 #[derive(Clone, Debug)]
@@ -207,7 +332,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         // setup terminal
         enable_raw_mode()?;
-        let mut stdout = io::stdout();
+        let mut stdout = std::io::stdout();
         execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
         let backend = CrosstermBackend::new(stdout);
         let mut terminal = Terminal::new(backend)?;
@@ -219,6 +344,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             table_state: TableState::default(),
             menu_table_state: TableState::default(),
             is_recording: false,
+            playback_data: None,
         };
         let res = run_app(&mut terminal, app);
 
@@ -243,6 +369,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 pub struct App {
     syscall_analyser: Option<SyscallAnalyser>,
+    playback_data: Option<PlaybackData>,
     gui_update_receiver: rtrb::Consumer<GuiUpdate>,
     packet_hq_sender: rtrb::Producer<PacketHQCommands>,
     table_state: TableState,
@@ -257,6 +384,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
         terminal.draw(|f| ui(f, &mut app))?;
         while let Ok(gui_update) = app.gui_update_receiver.pop() {
             app.syscall_analyser = Some(gui_update.syscall_analyser);
+            app.playback_data = Some(gui_update.playback_data);
         }
 
         let timeout = tick_rate
@@ -288,7 +416,11 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                         let selected = app.menu_table_state.selected().unwrap_or(0);
                         match MenuItem::try_from(selected as u8).unwrap() {
                             MenuItem::LoadRecordedData => {
-                                todo!()
+                                if let Some(path) = rfd::FileDialog::new().pick_file() {
+                                    app.is_recording = false;
+                                    app.packet_hq_sender
+                                        .push(PacketHQCommands::LoadRecording { path })?;
+                                }
                             }
                             MenuItem::RecordData => {
                                 app.is_recording = true;
@@ -301,6 +433,14 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                                     app.packet_hq_sender
                                         .push(PacketHQCommands::SaveRecording { path })?;
                                 }
+                            }
+                            MenuItem::StartPlayback => {
+                                app.packet_hq_sender
+                                    .push(PacketHQCommands::StartRecordingPlayback)?;
+                            }
+                            MenuItem::PausePlayback => {
+                                app.packet_hq_sender
+                                    .push(PacketHQCommands::PauseRecordingPlayback)?;
                             }
                         }
                     }
@@ -318,16 +458,25 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
 
 fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let rects = Layout::default()
+        .direction(tui::layout::Direction::Vertical)
+        .constraints([Constraint::Percentage(90), Constraint::Min(5)].as_ref())
+        .split(f.size());
+    let progress_bar = rects[1];
+    let rects = Layout::default()
         .direction(tui::layout::Direction::Horizontal)
         .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
         .margin(5)
-        .split(f.size());
+        .split(rects[0]);
     let data_rects = Layout::default()
         .direction(tui::layout::Direction::Vertical)
         .constraints([Constraint::Percentage(25), Constraint::Percentage(75)])
         .margin(5)
         .split(rects[1]);
     let menu_rect = rects[0];
+
+    if let Some(pd) = &app.playback_data {
+        render_progress_bar(f, progress_bar, pd);
+    }
 
     if let Some(sa) = &app.syscall_analyser {
         let (packets_per_kind_rows, syscalls_last_second, errors_last_second) = {
@@ -348,6 +497,37 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         );
     }
     menu::menu_ui(f, app, menu_rect);
+}
+fn render_progress_bar<B: Backend>(
+    f: &mut Frame<B>,
+    rect: tui::layout::Rect,
+    playback_data: &PlaybackData,
+) {
+    let g = Gauge::default()
+        .block(Block::default().borders(Borders::ALL).title(format!(
+            "Playback progress: {} / {} | {} / {}",
+            playback_data.current_index,
+            playback_data.max_index,
+            humantime::format_duration(playback_data.current_timestamp),
+            humantime::format_duration(playback_data.max_timestamp),
+        )))
+        .gauge_style(
+            Style::default()
+                .fg(if playback_data.playing {
+                    Color::Green
+                } else {
+                    Color::White
+                })
+                .bg(Color::Black)
+                .add_modifier(Modifier::ITALIC),
+        )
+        .percent(
+            ((playback_data.current_timestamp.as_secs_f64()
+                / playback_data.max_timestamp.as_secs_f64())
+                * 100.) as u16,
+        );
+
+    f.render_widget(g, rect);
 }
 fn render_packets_per_kind<B: Backend>(
     f: &mut Frame<B>,
