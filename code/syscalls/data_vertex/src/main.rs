@@ -16,6 +16,7 @@ use std::{
     fmt::Debug,
     fs::File,
     io::{Read, Write},
+    sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
 use std::{net::SocketAddr, path::PathBuf};
@@ -327,11 +328,16 @@ impl SyscallAnalyser {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let env = env_logger::Env::default()
-        .filter_or("MY_LOG_LEVEL", "info")
-        .write_style_or("MY_LOG_STYLE", "always");
+    let log_file = File::create("debug.log")?;
+    tracing_subscriber::fmt()
+        .pretty()
+        .with_thread_names(true)
+        .with_writer(Mutex::new(log_file))
+        // enable everything
+        .with_max_level(tracing::Level::INFO)
+        // sets this to be the default, global subscriber for this application.
+        .init();
 
-    env_logger::init_from_env(env);
     let settings = if let Ok(settings) = Config::load_from_file() {
         settings
     } else {
@@ -668,10 +674,16 @@ async fn handle_client(
                     Err(e) => error!("Failed to parse binary packet as postcard: {e}"),
                 }
             }
-            tokio_tungstenite::tungstenite::Message::Ping(_) => todo!(),
-            tokio_tungstenite::tungstenite::Message::Pong(_) => todo!(),
-            tokio_tungstenite::tungstenite::Message::Close(_) => todo!(),
-            tokio_tungstenite::tungstenite::Message::Frame(_) => todo!(),
+            tokio_tungstenite::tungstenite::Message::Ping(_) => {
+                warn!("Received Ping from websocket")
+            }
+            tokio_tungstenite::tungstenite::Message::Pong(_) => {
+                warn!("Received Pong from websocket")
+            }
+            tokio_tungstenite::tungstenite::Message::Close(_) => {
+                info!("Websocket client closed")
+            }
+            tokio_tungstenite::tungstenite::Message::Frame(_) => unreachable!(),
         }
     }
 
