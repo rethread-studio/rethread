@@ -1,4 +1,13 @@
-use std::{collections::HashMap, net::TcpStream, os::unix::process::CommandExt, process::Command};
+use std::{
+    collections::HashMap,
+    net::TcpStream,
+    os::unix::process::CommandExt,
+    process::Command,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+};
 
 use argh::FromArgs;
 use log::*;
@@ -28,6 +37,14 @@ struct Args {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
+
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    })
+    .expect("Error setting Ctrl-C handler");
 
     let args: Args = argh::from_env();
     let json: serde_json::Value = serde_json::from_str(include_str!("syscall.json"))?;
@@ -67,13 +84,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     loop {
         // Continue execution until the next syscall
-        ptrace::syscall(child_pid, None)?;
-        _ = waitpid(child_pid, None)?;
+        match ptrace::syscall(child_pid, None) {
+            Ok(_) => (),
+            Err(e) => {
+                error!("ptrace error: {e}\nExiting");
+                break;
+            }
+        }
+        _ = match waitpid(child_pid, None) {
+            Ok(_) => (),
+            Err(e) => {
+                error!("ptrace error: {e}\nExiting");
+                break;
+            }
+        };
         if is_sys_exit {
             num_syscalls += 1;
-            let regs = ptrace::getregs(child_pid)?;
-            let name = &syscall_table[&regs.orig_rax];
-            let kind = SyscallKind::try_from(name.as_str()).unwrap_or(SyscallKind::Unknown);
+            let Ok(regs) = ptrace::getregs(child_pid) else { error!("Failed to get ptrace regs. Exiting"); break; };
+            let name = syscall_table.get(&regs.orig_rax).map_or("", |s| s.as_str());
+            let kind = SyscallKind::try_from(name).unwrap_or(SyscallKind::Unknown);
             if args.print_syscalls {
                 let errno = Errno::from_i32((regs.rax as i64) as i32);
                 eprintln!(
@@ -106,15 +135,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // socket.write_message(tungstenite::Message::Text("syscall".to_owned()))?;
         }
         is_sys_exit = !is_sys_exit;
+        if !running.load(Ordering::SeqCst) {
+            break;
+        }
     }
     socket.close(None)?;
+    Ok(())
 }
 
 fn reconnect() -> WebSocket<MaybeTlsStream<TcpStream>> {
     let socket = loop {
         match connect(Url::parse("ws://localhost:3012/strace").unwrap()) {
             Ok((socket, _response)) => break socket,
-            Err(e) => error!("Failed to connect"),
+            Err(e) => error!("Failed to connect: {e}"),
         }
     };
     socket
