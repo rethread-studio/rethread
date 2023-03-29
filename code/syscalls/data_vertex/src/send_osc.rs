@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use log::error;
 use nannou_osc::{Connected, Sender, Type};
 use syscalls_shared::Syscall;

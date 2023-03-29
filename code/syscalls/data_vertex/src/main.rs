@@ -5,7 +5,7 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use futures_util::{SinkExt, StreamExt};
+use futures_util::StreamExt;
 use log::*;
 use menu::MenuItem;
 use nix::errno::Errno;
@@ -16,7 +16,7 @@ use std::{
     fmt::Debug,
     fs::File,
     io::{Read, Write},
-    sync::{Arc, Mutex},
+    sync::Mutex,
     time::{Duration, Instant},
 };
 use std::{net::SocketAddr, path::PathBuf};
@@ -259,8 +259,6 @@ struct SyscallAnalyser {
     pub num_packets_total: usize,
     pub num_errors_total: usize,
     pub packets_per_kind: HashMap<SyscallKind, u64>,
-    pub packets_last_second: Vec<(Syscall, Instant)>,
-    pub errors_last_second: Vec<(Errno, Instant)>,
     pub num_packets_last_second: usize,
     pub num_errors_last_second: usize,
     last_second: Instant,
@@ -269,8 +267,6 @@ impl SyscallAnalyser {
     pub fn new() -> Self {
         Self {
             packets_per_kind: HashMap::new(),
-            packets_last_second: Vec::new(),
-            errors_last_second: Vec::new(),
             num_packets_last_second: 0,
             num_errors_last_second: 0,
             last_second: Instant::now(),
@@ -279,12 +275,13 @@ impl SyscallAnalyser {
         }
     }
     pub fn register_packet(&mut self, syscall: &Syscall) {
+        self.num_packets_total += 1;
         *self.packets_per_kind.entry(syscall.kind).or_insert(0) += 1;
         self.num_packets_last_second += 1;
         let errno = Errno::from_i32(syscall.return_value);
         if !matches!(errno, Errno::UnknownErrno) {
-            self.errors_last_second.push((errno, Instant::now()));
             self.num_errors_last_second += 1;
+            self.num_errors_total += 1;
         }
     }
     pub fn update(&mut self) {
@@ -330,7 +327,6 @@ impl SyscallAnalyser {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let log_file = File::create("debug.log")?;
     tracing_subscriber::fmt()
-        .pretty()
         .with_thread_names(true)
         .with_writer(Mutex::new(log_file))
         // enable everything
@@ -653,7 +649,7 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
         });
     }
 
-    Ok(())
+    //Ok(())
 }
 async fn handle_client(
     peer: SocketAddr,

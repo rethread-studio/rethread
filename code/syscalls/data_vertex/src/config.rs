@@ -28,13 +28,14 @@ impl Config {
             ]),
         }
     }
+    #[allow(unused)]
     pub fn save_to_file(&self) -> anyhow::Result<()> {
         // Check if there is already a config file and rename it if so
         let path = "Settings.toml";
         std::fs::rename(path, "Settings.toml.old").ok();
         // Deserialize self
         let data = toml::to_string_pretty(self)?;
-        std::fs::write(path, data.as_bytes());
+        std::fs::write(path, data.as_bytes())?;
         Ok(())
     }
     pub fn load_from_file() -> anyhow::Result<Self> {
