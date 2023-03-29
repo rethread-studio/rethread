@@ -2,7 +2,8 @@ use nix::errno::Errno;
 use protocol::Protocol;
 
 use serde::{Deserialize, Serialize};
-#[derive(Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq, Serialize, Deserialize)]
+use strum::Display;
+#[derive(Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq, Serialize, Deserialize, Display)]
 pub enum SyscallKind {
     Memory,
     Io,
@@ -46,6 +47,12 @@ pub struct Syscall {
     pub args: [u64; 3],
     pub return_value: i32,
     pub command: String,
+}
+impl Syscall {
+    pub fn returns_error(&self) -> bool {
+        let errno = Errno::from_i32(self.return_value);
+        !matches!(errno, Errno::UnknownErrno)
+    }
 }
 
 #[derive(Protocol, Clone, Debug, PartialEq, Serialize, Deserialize)]

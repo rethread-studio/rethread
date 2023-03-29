@@ -1,4 +1,5 @@
 use anyhow::Result;
+use config::Config;
 use crossterm::{
     event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
@@ -8,6 +9,7 @@ use futures_util::{SinkExt, StreamExt};
 use log::*;
 use menu::MenuItem;
 use nix::errno::Errno;
+use send_osc::OscSender;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -30,7 +32,9 @@ use tui::{
     Frame, Terminal,
 };
 
+mod config;
 mod menu;
+mod send_osc;
 
 static SHOW_TUI: bool = true;
 
@@ -121,9 +125,11 @@ struct PacketHQ {
     gui_update_sender: rtrb::Producer<GuiUpdate>,
     command_receiver: rtrb::Consumer<PacketHQCommands>,
     last_update: Instant,
+    osc_sender: OscSender,
 }
 impl PacketHQ {
     fn new(
+        settings: &Config,
         gui_update_sender: rtrb::Producer<GuiUpdate>,
         command_receiver: rtrb::Consumer<PacketHQCommands>,
     ) -> Self {
@@ -135,6 +141,7 @@ impl PacketHQ {
             command_receiver,
             recording_playback: None,
             last_update: Instant::now(),
+            osc_sender: OscSender::new(settings),
         }
     }
     fn start_recording(&mut self) {
@@ -153,7 +160,11 @@ impl PacketHQ {
     }
     fn register_packet(&mut self, packet: Packet) {
         match &packet {
-            Packet::Syscall(syscall) => self.syscall_analyser.register_packet(syscall),
+            Packet::Syscall(syscall) => {
+                self.syscall_analyser.register_packet(syscall);
+
+                self.osc_sender.send_syscall(syscall);
+            }
         }
         if let Some(recording) = &mut self.recording {
             recording.record_packet(packet, self.start_recording_time.elapsed());
@@ -321,10 +332,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .write_style_or("MY_LOG_STYLE", "always");
 
     env_logger::init_from_env(env);
+    let settings = if let Ok(settings) = Config::load_from_file() {
+        settings
+    } else {
+        error!("Failed to load configuration");
+        Config::empty()
+    };
 
     let (gui_update_sender, gui_update_receiver) = rtrb::RingBuffer::new(100);
     let (packet_hq_sender, packet_hq_receiver) = rtrb::RingBuffer::new(100);
-    let packet_hq = PacketHQ::new(gui_update_sender, packet_hq_receiver);
+    let packet_hq = PacketHQ::new(&settings, gui_update_sender, packet_hq_receiver);
 
     if SHOW_TUI {
         {

@@ -9,3 +9,4 @@ edition = "2021"
 nix = "0.26.2"
 protocol = { version = "3.4", features = ["derive"] }
 serde = { version = "1.0.159", features = ["derive"] }
+strum = { version = "0.24.1", features = ["derive"] }
