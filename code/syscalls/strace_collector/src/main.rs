@@ -28,15 +28,21 @@ struct Args {
     #[argh(option)]
     command: Option<String>,
     /// optional arguments to the command you are running
-    #[argh(option)]
-    args: Option<String>,
+    #[argh(positional, greedy)]
+    args: Vec<String>,
     /// if syscalls are printed to the terminal, set to false for cli apps
     #[argh(switch, short = 'p')]
     print_syscalls: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .pretty()
+        .with_thread_names(true)
+        // enable everything
+        .with_max_level(tracing::Level::INFO)
+        // sets this to be the default, global subscriber for this application.
+        .init();
 
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
@@ -62,8 +68,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let command_str = args.command.unwrap_or("gedit".to_string());
     let mut command = Command::new(command_str.clone());
-    if let Some(command_args) = args.args {
-        command.arg(command_args);
+    for arg in args.args {
+        command.arg(arg);
     }
     unsafe {
         command.pre_exec(|| {
@@ -80,21 +86,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut is_sys_exit = false;
     let mut num_syscalls: u64 = 0;
 
-    let mut socket = reconnect();
+    let Ok( mut socket)  = reconnect(running.clone()) else {return Ok(())};
 
     loop {
         // Continue execution until the next syscall
         match ptrace::syscall(child_pid, None) {
             Ok(_) => (),
             Err(e) => {
-                error!("ptrace error: {e}\nExiting");
+                error!("ptrace error: {e}. Exiting");
                 break;
             }
         }
         _ = match waitpid(child_pid, None) {
             Ok(_) => (),
             Err(e) => {
-                error!("ptrace error: {e}\nExiting");
+                error!("ptrace error: {e}. Exiting");
                 break;
             }
         };
@@ -129,7 +135,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(_) => (),
                 Err(_) => {
                     info!("Reconnecting...");
-                    socket = reconnect();
+                    socket = match reconnect(running.clone()) {
+                        Ok(s) => s,
+                        Err(_) => break,
+                    }
                 }
             }
             // socket.write_message(tungstenite::Message::Text("syscall".to_owned()))?;
@@ -143,12 +152,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn reconnect() -> WebSocket<MaybeTlsStream<TcpStream>> {
+fn reconnect(running: Arc<AtomicBool>) -> Result<WebSocket<MaybeTlsStream<TcpStream>>, ()> {
     let socket = loop {
         match connect(Url::parse("ws://localhost:3012/strace").unwrap()) {
             Ok((socket, _response)) => break socket,
             Err(e) => error!("Failed to connect: {e}"),
         }
+        if !running.load(Ordering::SeqCst) {
+            return Err(());
+        }
     };
-    socket
+    info!("Connected to data_vertex via websocket");
+    Ok(socket)
 }

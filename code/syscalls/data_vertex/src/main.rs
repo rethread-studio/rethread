@@ -101,6 +101,10 @@ impl RecordingPlayback {
             self.current_duration += dt;
         }
     }
+    fn reset(&mut self) {
+        self.current_duration = Duration::ZERO;
+        self.current_packet = 0;
+    }
     fn next_packet(&mut self) -> Option<&Packet> {
         if !self.playing {
             return None;
@@ -163,14 +167,12 @@ impl PacketHQ {
         match &packet {
             Packet::Syscall(syscall) => {
                 self.syscall_analyser.register_packet(syscall);
-
                 self.osc_sender.send_syscall(syscall);
             }
         }
         if let Some(recording) = &mut self.recording {
             recording.record_packet(packet, self.start_recording_time.elapsed());
         }
-        // TODO: Send via OSC
     }
     fn update(&mut self) {
         let dt = self.last_update.elapsed();
@@ -180,9 +182,11 @@ impl PacketHQ {
             rp.progress_time(dt);
             while let Some(packet) = rp.next_packet() {
                 match packet {
-                    Packet::Syscall(syscall) => self.syscall_analyser.register_packet(syscall),
+                    Packet::Syscall(syscall) => {
+                        self.syscall_analyser.register_packet(syscall);
+                        self.osc_sender.send_syscall(syscall);
+                    }
                 }
-                // TODO Send via OSC
             }
         }
         let playback_data = if let Some(rp) = &self.recording_playback {
@@ -215,6 +219,11 @@ impl PacketHQ {
                 PacketHQCommands::StartRecordingPlayback => {
                     if let Some(rp) = &mut self.recording_playback {
                         rp.playing = true;
+                    }
+                }
+                PacketHQCommands::ResetRecordingPlayback => {
+                    if let Some(rp) = &mut self.recording_playback {
+                        rp.reset();
                     }
                 }
             }
@@ -252,6 +261,7 @@ enum PacketHQCommands {
     LoadRecording { path: PathBuf },
     PauseRecordingPlayback,
     StartRecordingPlayback,
+    ResetRecordingPlayback,
 }
 
 #[derive(Clone, Debug)]
@@ -423,9 +433,14 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                     }
                     KeyCode::Up => {
                         if let Some(selected) = app.menu_table_state.selected() {
-                            app.menu_table_state.select(Some(
-                                (selected - 1) % enum_iterator::cardinality::<MenuItem>(),
-                            ));
+                            if selected > 0 {
+                                app.menu_table_state.select(Some(
+                                    (selected - 1) % enum_iterator::cardinality::<MenuItem>(),
+                                ));
+                            } else {
+                                app.menu_table_state
+                                    .select(Some(enum_iterator::cardinality::<MenuItem>() - 1));
+                            }
                         } else {
                             app.menu_table_state
                                 .select(Some(enum_iterator::cardinality::<MenuItem>() - 1));
@@ -460,6 +475,11 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                             MenuItem::PausePlayback => {
                                 app.packet_hq_sender
                                     .push(PacketHQCommands::PauseRecordingPlayback)?;
+                            }
+                            MenuItem::Exit => return Ok(()),
+                            MenuItem::ResetPlayback => {
+                                app.packet_hq_sender
+                                    .push(PacketHQCommands::ResetRecordingPlayback)?;
                             }
                         }
                     }

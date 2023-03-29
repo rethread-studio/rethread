@@ -1627,6 +1627,8 @@ dependencies = [
  "protocol",
  "serde_json",
  "syscalls_shared",
+ "tracing",
+ "tracing-subscriber",
  "tungstenite",
  "url",
 ]

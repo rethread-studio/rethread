@@ -16,8 +16,10 @@ pub enum MenuItem {
     LoadRecordedData,
     StartPlayback,
     PausePlayback,
+    ResetPlayback,
     RecordData,
     StopAndSaveRecording,
+    Exit,
 }
 
 pub fn menu_ui<B: Backend>(f: &mut Frame<B>, state: &mut App, rect: tui::layout::Rect) {

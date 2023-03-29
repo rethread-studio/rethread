@@ -1,6 +1,7 @@
 use log::error;
 use nannou_osc::{Connected, Sender, Type};
 use syscalls_shared::Syscall;
+use tracing::info;
 
 use crate::config::Config;
 
@@ -11,6 +12,7 @@ pub struct OscSender {
 impl OscSender {
     pub fn new(settings: &Config) -> Self {
         // dbg!(&settings.osc_receivers);
+        info!("OSC receivers from settings: {:?}", settings.osc_receivers);
         let mut senders = Vec::new();
         for recv_settings in settings.osc_receivers.values() {
             if let Ok(sender) = nannou_osc::sender() {
