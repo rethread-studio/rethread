@@ -526,14 +526,16 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
                 sa.num_errors_last_second,
             )
         };
-        render_packets_per_kind(f, packets_per_kind_rows, data_rects[1], app);
         render_general(
             f,
             syscalls_last_second,
             errors_last_second,
+            sa.num_packets_total,
+            sa.num_errors_total,
             data_rects[0],
             app,
         );
+        render_packets_per_kind(f, packets_per_kind_rows, data_rects[1], app);
     }
     menu::menu_ui(f, app, menu_rect);
 }
@@ -603,6 +605,8 @@ fn render_general<B: Backend>(
     f: &mut Frame<B>,
     syscalls_last_second: usize,
     errors_last_second: usize,
+    syscalls_total: usize,
+    errors_total: usize,
     rect: tui::layout::Rect,
     app: &mut App,
 ) {
@@ -618,6 +622,14 @@ fn render_general<B: Backend>(
     let kind_style = Style::default().fg(Color::LightCyan);
     let rows = vec![
         Row::new(vec![
+            Cell::from("syscalls since start").style(kind_style),
+            Cell::from(format!("{syscalls_total}")),
+        ]),
+        Row::new(vec![
+            Cell::from("errors since start").style(kind_style),
+            Cell::from(format!("{errors_total}")),
+        ]),
+        Row::new(vec![
             Cell::from("syscalls last second").style(kind_style),
             Cell::from(format!("{syscalls_last_second}")),
         ]),
@@ -628,11 +640,7 @@ fn render_general<B: Backend>(
     ];
     let t = Table::new(rows)
         .header(header)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title("Running average data"),
-        )
+        .block(Block::default().borders(Borders::ALL).title("Global data"))
         .highlight_style(selected_style)
         .highlight_symbol(">> ")
         .widths(&[
