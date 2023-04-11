@@ -26,7 +26,8 @@ klingtnet/rosc
 llvm/llvm-project
 microsoft/TypeScript
 microsoft/vscode
-mozilla/gecko-devmrdoob/three.js
+mozilla/gecko-dev
+mrdoob/three.js
 nannou-org/nannou
 nginx/nginx
 nodejs/node
@@ -35,9 +36,11 @@ openframeworks/openFrameworks
 openjdk/jdk
 openssl/openssl
 processing/p5.js
-processing/p5.js-web-editorprocessing/processing
+processing/p5.js-web-editor
+processing/processing
 python/cpython
-redhat/centos-stream/rpms/bpftracerust-lang/cargo
+redhat/centos-stream/rpms/bpftrace
+rust-lang/cargo
 rust-lang/rust
 scribusproject/scribus
 snapview/tokio-tungstenite
