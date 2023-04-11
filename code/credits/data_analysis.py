@@ -6,13 +6,16 @@ def make_repo_list():
     file_list = ["gh_api_repo_list.txt", "gitlog_repo_list.txt", "others_repo_list.txt"]
     repo_list = []
     for filename in file_list:
-        with open(filename, "r") as f:
+        with open("repo_lists/" + filename, "r") as f:
             repo_list += f.readlines()
+    repo_list.sort()
+    with open("repo_lists/all_repos.txt", "w") as f:
+        f.writelines(repo_list)
     repo_list = [r.replace("/", "_").removesuffix("\n") for r in repo_list]
     return repo_list
 
 def turn_gitlogs_into_raw_datasets():
-    with open("gitlog_repo_list.txt", "r") as f:
+    with open("repo_lists/gitlog_repo_list.txt", "r") as f:
         gitlog_repo_list = f.readlines()
     for repo in gitlog_repo_list:
         repo_name = repo.replace("/", "_").removesuffix("\n")
@@ -181,7 +184,6 @@ def find_all_intersections(min, max):
 turn_gitlogs_into_raw_datasets()
 
 repo_list = make_repo_list()
-repo_list.sort()
 
 process_all_datasets()
 all_contributors = merge_datasets()
