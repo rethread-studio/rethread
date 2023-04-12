@@ -63,6 +63,8 @@ def process_dataset(repo_name):
             if idx == -1:
                 idx = email.find("-at-")
             if idx == -1:
+                idx = email.find("%")
+            if idx == -1:
                 idx = len(email)
             the_id = email[0:idx]
             already_added = False
