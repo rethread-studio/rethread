@@ -48,6 +48,12 @@ def process_dataset(repo_name):
     contributors = []
     n_contributions = 0 # total number of (non-anonymous) contributions
     for d in raw_data:
+        if d["type"] == "Anonymous" and d["email"].find("[bot]") >= 0:
+            d["type"] = "Bot"
+            idx1 = d["email"].find("+")+1
+            idx2 = d["email"].find("@")
+            d["login"] = d["email"][idx1:idx2]
+
         if d["type"] != "Anonymous":
             c = {
                 "id": d["login"],
@@ -59,14 +65,18 @@ def process_dataset(repo_name):
                 contributors.append(c)
         else:
             email = d["email"]
-            idx = email.find("@")
-            if idx == -1:
-                idx = email.find("-at-")
-            if idx == -1:
-                idx = email.find("%")
-            if idx == -1:
-                idx = len(email)
+            f = lambda x: x if x >= 0 else len(email)
+            at_strings = ["@", "-at-", "_at_", " at ", ".at.", "%"]
+            idx = min([f(email.find(at)) for at in at_strings])
             the_id = email[0:idx]
+
+            idx = the_id.find("+")
+            if idx != -1:
+                if the_id[:idx].isnumeric():
+                    the_id = the_id[idx+1:]
+                else:
+                    the_id = the_id[:idx]
+
             already_added = False
             for c in contributors:
                 if c["id"] == the_id and c["type"] == "Anonymous":
