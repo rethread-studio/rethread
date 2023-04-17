@@ -13,7 +13,7 @@ const WINDOW_HEIGHT = 112;
 let max_section_length = 256;
 let h; // height of 1 bloc (DNA helix, ngram unit...)
 
-let N_FRAMES = 200; // how many frames before changing
+let N_FRAMES = 500; // how many frames before changing
 
 let cnv; // global canvas
 
@@ -51,7 +51,7 @@ function setup() {
 function draw() {
   background(0);
 
-  let t = frameCount/2;
+  let t = frameCount;
   
   anim.update(t);
 
@@ -103,7 +103,7 @@ function helix_bars(choice) {
         push();
 
         translate(x+this.w/2, y+h/2, 0);
-        rotateY(y/120);
+        rotateY(y/180);
         fill(get_sup_color(sup));
         beginShape();
         vertex(-this.w/2+this.wMargin, -h/2+this.hGap/2, 0);
@@ -146,7 +146,7 @@ function helix_balls(choice) {
         push();
 
         translate(x+this.w/2, y+h/2, 0);
-        rotateY(y/120-PI/2);
+        rotateY(y/180-PI/2);
 
         fill(240);
         rotateX(3*PI/2);
