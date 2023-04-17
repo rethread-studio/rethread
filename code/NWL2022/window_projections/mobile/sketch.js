@@ -10,18 +10,14 @@ let myFont;
 let my_scale;
 const WINDOW_WIDTH = 57;
 const WINDOW_HEIGHT = 112;
-const SMOL_WINDOW_HEIGHT = 47;
-let mWindows = 1; // how many windows in width
-let nWindows = 1; // how many windows in height
 let max_section_length = 256;
 let h; // height of 1 bloc (DNA helix, ngram unit...)
 
 let N_FRAMES = 200; // how many frames before changing
-let glitch_duration = 0.05; // percentage, for how many of the N_FRAMES frames does the glitch effect last
 
 let cnv; // global canvas
 
-let left_zone;
+let anim;
 let glitch_amount = 0;
 
 let viz = 1;
@@ -35,7 +31,7 @@ function preload() {
 
 function setup() {
   determineScale();
-  cnv = createCanvas(WINDOW_WIDTH*mWindows*my_scale, WINDOW_HEIGHT*nWindows*my_scale, WEBGL);
+  cnv = createCanvas(WINDOW_WIDTH*my_scale, WINDOW_HEIGHT*my_scale, WEBGL);
   //pixelDensity(1);
 
   //console.log(data)
@@ -48,6 +44,8 @@ function setup() {
 
   generate_window_composition();
   noStroke();
+  textAlign(LEFT, TOP);
+  textFont(myFont);
 }
 
 function draw() {
@@ -55,28 +53,11 @@ function draw() {
 
   let t = frameCount/2;
   
-  /*
-  let left_img = cnv.get();
-  console.log(left_img);
-  if (glitch_amount > 0) {
-    left_img = glitch_it(left_img, glitch_amount);
-  }
-  image(left_img, left_zone.x0, left_zone.y0);
-  if (glitch_amount > 0) {
-    left_img.remove();
-  }
-  */
-  
-  left_zone.update(t);
+  anim.update(t);
 
-  let f = (frameCount/N_FRAMES) % 2;
-  if (f == 1) {
+  if (frameCount % N_FRAMES == 0) {
     generate_window_composition();
-  }/* else if (f > 1-glitch_duration && f < 1) {
-    glitch_amount++;
-  } else if (f > 1 && f < 1+glitch_duration) {
-    glitch_amount--;
-  }*/
+  }
 }
 
 function generate_window_composition() {
@@ -86,28 +67,15 @@ function generate_window_composition() {
     let choice = random(["helix_bars", "helix_balls"]);
     if (random() < 1/2) ortho();
     else perspective();
-    left_zone = (choice == "helix_bars") ? helix_bars(choice) : helix_balls(choice);
+    anim = (choice == "helix_bars") ? helix_bars(choice) : helix_balls(choice);
   } else {
     // trace print
     let mode = random(["sup", "dep", "name"]);
     let dna = random() < 1/4;
-    left_zone = trace_print(mode, dna);
+    anim = trace_print(mode, dna);
   }
 
-  left_zone.update(~~random(trace_len));
-}
-
-function glitch_it(img, amount) {
-  let grph = createGraphics(img.width, img.height);
-  let bh = img.height/random([8, 16, 32]);
-  for (let y = 0; y < img.height; y += bh) {
-    let xOffset = random(-amount, amount)*img.width/100;
-    grph.image(img, xOffset, y, img.width, bh, 0, y, img.width, bh);
-    //grph.image(img, xOffset-img.width, y, img.width, bh, 0, y, img.width, bh);
-    //grph.image(img, xOffset+img.width, y, img.width, bh, 0, y, img.width, bh);
-  }
-  if (random() < 1/10) grph.filter(random([GRAY, INVERT]));
-  return grph;
+  anim.update(~~random(trace_len));
 }
 
 function helix_bars(choice) {
@@ -135,7 +103,7 @@ function helix_bars(choice) {
         push();
 
         translate(x+this.w/2, y+h/2, 0);
-        rotateY(y/60);
+        rotateY(y/120);
         fill(get_sup_color(sup));
         beginShape();
         vertex(-this.w/2+this.wMargin, -h/2+this.hGap/2, 0);
@@ -178,7 +146,7 @@ function helix_balls(choice) {
         push();
 
         translate(x+this.w/2, y+h/2, 0);
-        rotateY(y/60-PI/2);
+        rotateY(y/120-PI/2);
 
         fill(240);
         rotateX(3*PI/2);
@@ -211,11 +179,9 @@ function trace_print(mode, dna) {
     update: function(t) {
       push();
       translate(-width/2, -height/2);
-      textAlign(LEFT, TOP);
-      textFont(myFont);
 
       let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
-      textSize(h);
+      textSize(h*0.9);
       let k = floor(t/h);
       let y0 = -height/3;
 
@@ -271,7 +237,7 @@ function turn_into_dna(str) {
 
 
 function determineScale() {
-  my_scale = 0.99*windowHeight/(WINDOW_HEIGHT*nWindows);
+  my_scale = 0.99*windowHeight/WINDOW_HEIGHT;
 }
 
 function centerCanvas() {
@@ -298,31 +264,8 @@ function get_sup_color(sup) {
   return sup_colors.get(all_sups.indexOf(sup), 1);
 }
 
-/*
-function getSupAndDep(s) {
-  // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
-  // return: an array, the first value is the supplier, the second is the dependency
-  let func = (s.indexOf("/") == -1) ? s : s.split("/")[1]; // remove the eventual prefix, find the interesting part
-  let idx1 = func.indexOf(".", func.indexOf(".")+1); // find the second occurence of "."
-  let idx2 = func.indexOf(".", idx1+1); // find the first occurence of "." after idx1
-  let idx3 = func.indexOf("$", idx1+1); // find the first occurence of "$" after idx1
-  if (idx3 == -1) idx3 = idx2; // ignore idx3 if there is no "$" found
-  let supplier = func.slice(0, idx1); // find the supplier
-  let dependency = func.slice(idx1+1, min(idx2, idx3)); // find the dependency
-  return [supplier, dependency];
-}
-*/
-
 function getActualName(s) {
   // s: a string corresponding to a method call, of the form "[eventual prefix]/[supplier].[dependency].[actual function name]"
   // return: the actual name of the function
   return s.slice(s.lastIndexOf(".")+1, s.length);
 }
-
-/*
-function windowResized() {
-  determineScale();
-  resizeCanvas(WINDOW_WIDTH*mWindows*my_scale, WINDOW_HEIGHT*nWindows*my_scale);
-  centerCanvas();
-}
-*/
