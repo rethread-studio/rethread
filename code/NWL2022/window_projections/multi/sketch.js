@@ -30,6 +30,15 @@ let glitch_amount = 0;
 let prev_viz = -1;
 
 function preload() {
+  let params = getURLParams();
+  where = params.where;
+  if (where == "mobile") {
+    mWindows = 1;
+    N_FRAMES = 200;
+    glitch_duration = 0.05;
+    dataset = "data-varna-copy-paste-isolated_parsed";
+  }
+
   data = loadJSON(`../../LED_web_demo/${dataset}.json`);
   myFont = loadFont("../MPLUS1Code-VariableFont_wght.ttf");
   sup_colors = loadTable(`../../color_tables/${dataset}_supplier_colors.csv`, "csv", "header");
@@ -37,15 +46,6 @@ function preload() {
 }
 
 function setup() {
-  let params = getURLParams();
-  where = params.where;
-  if (where == "mobile") {
-    mWindows = 1;
-    N_FRAMES = 100;
-    glitch_duration = 0.1;
-    dataset = "data-varna-copy-paste-isolated_parsed";
-  }
-
   determineScale();
   cnv = createCanvas(WINDOW_WIDTH*mWindows*my_scale, WINDOW_HEIGHT*nWindows*my_scale);
   //pixelDensity(1);
