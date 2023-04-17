@@ -45,4 +45,11 @@ impl OscSender {
             sender.send((addr, args)).ok();
         }
     }
+    pub fn send_syscall_analysis(&mut self, num_packets: usize, num_errors: usize) {
+        for sender in &mut self.senders {
+            let addr = "/syscall_analysis";
+            let args = vec![Type::Int(num_packets as i32), Type::Int(num_errors as i32)];
+            sender.send((addr, args)).ok();
+        }
+    }
 }

@@ -122,15 +122,39 @@ impl RecordingPlayback {
         }
     }
 }
-struct PacketHQ {
+struct Analysers {
     syscall_analyser: SyscallAnalyser,
+    osc_sender: OscSender,
+}
+impl Analysers {
+    pub fn new(settings: &Config) -> Self {
+        Self {
+            syscall_analyser: SyscallAnalyser::new(),
+            osc_sender: OscSender::new(settings),
+        }
+    }
+
+    fn register_packet(&mut self, packet: &Packet) {
+        match packet {
+            Packet::Syscall(syscall) => {
+                self.syscall_analyser.register_packet(syscall);
+                self.osc_sender.send_syscall(syscall);
+            }
+        }
+    }
+
+    fn update(&mut self) {
+        self.syscall_analyser.update(&mut self.osc_sender);
+    }
+}
+struct PacketHQ {
+    analysers: Analysers,
     recording: Option<RecordedPackets>,
     recording_playback: Option<RecordingPlayback>,
     start_recording_time: Instant,
     gui_update_sender: rtrb::Producer<GuiUpdate>,
     command_receiver: rtrb::Consumer<PacketHQCommands>,
     last_update: Instant,
-    osc_sender: OscSender,
 }
 impl PacketHQ {
     fn new(
@@ -139,14 +163,13 @@ impl PacketHQ {
         command_receiver: rtrb::Consumer<PacketHQCommands>,
     ) -> Self {
         Self {
-            syscall_analyser: SyscallAnalyser::new(),
             recording: None,
             start_recording_time: Instant::now(),
             gui_update_sender,
             command_receiver,
             recording_playback: None,
             last_update: Instant::now(),
-            osc_sender: OscSender::new(settings),
+            analysers: Analysers::new(settings),
         }
     }
     fn start_recording(&mut self) {
@@ -164,12 +187,7 @@ impl PacketHQ {
         self.recording_playback = Some(recording_playback);
     }
     fn register_packet(&mut self, packet: Packet) {
-        match &packet {
-            Packet::Syscall(syscall) => {
-                self.syscall_analyser.register_packet(syscall);
-                self.osc_sender.send_syscall(syscall);
-            }
-        }
+        self.analysers.register_packet(&packet);
         if let Some(recording) = &mut self.recording {
             recording.record_packet(packet, self.start_recording_time.elapsed());
         }
@@ -177,16 +195,11 @@ impl PacketHQ {
     fn update(&mut self) {
         let dt = self.last_update.elapsed();
         self.last_update = Instant::now();
-        self.syscall_analyser.update();
+        self.analysers.update();
         if let Some(rp) = &mut self.recording_playback {
             rp.progress_time(dt);
             while let Some(packet) = rp.next_packet() {
-                match packet {
-                    Packet::Syscall(syscall) => {
-                        self.syscall_analyser.register_packet(syscall);
-                        self.osc_sender.send_syscall(syscall);
-                    }
-                }
+                self.analysers.register_packet(packet);
             }
         }
         let playback_data = if let Some(rp) = &self.recording_playback {
@@ -202,7 +215,7 @@ impl PacketHQ {
         };
         self.gui_update_sender
             .push(GuiUpdate {
-                syscall_analyser: self.syscall_analyser.clone(),
+                syscall_analyser: self.analysers.syscall_analyser.clone(),
                 playback_data,
             })
             .ok();
@@ -269,17 +282,17 @@ struct SyscallAnalyser {
     pub num_packets_total: usize,
     pub num_errors_total: usize,
     pub packets_per_kind: HashMap<SyscallKind, u64>,
-    pub num_packets_last_second: usize,
-    pub num_errors_last_second: usize,
-    last_second: Instant,
+    pub num_packets_last_interval: usize,
+    pub num_errors_last_interval: usize,
+    last_interval: Instant,
 }
 impl SyscallAnalyser {
     pub fn new() -> Self {
         Self {
             packets_per_kind: HashMap::new(),
-            num_packets_last_second: 0,
-            num_errors_last_second: 0,
-            last_second: Instant::now(),
+            num_packets_last_interval: 0,
+            num_errors_last_interval: 0,
+            last_interval: Instant::now(),
             num_packets_total: 0,
             num_errors_total: 0,
         }
@@ -287,18 +300,22 @@ impl SyscallAnalyser {
     pub fn register_packet(&mut self, syscall: &Syscall) {
         self.num_packets_total += 1;
         *self.packets_per_kind.entry(syscall.kind).or_insert(0) += 1;
-        self.num_packets_last_second += 1;
+        self.num_packets_last_interval += 1;
         let errno = Errno::from_i32(syscall.return_value);
         if !matches!(errno, Errno::UnknownErrno) {
-            self.num_errors_last_second += 1;
+            self.num_errors_last_interval += 1;
             self.num_errors_total += 1;
         }
     }
-    pub fn update(&mut self) {
-        if self.last_second.elapsed() >= Duration::from_secs(1) {
-            self.num_packets_last_second = 0;
-            self.num_errors_last_second = 0;
-            self.last_second = Instant::now();
+    pub fn update(&mut self, osc_sender: &mut OscSender) {
+        if self.last_interval.elapsed() >= Duration::from_secs_f32(0.5) {
+            osc_sender.send_syscall_analysis(
+                self.num_packets_last_interval,
+                self.num_errors_last_interval,
+            );
+            self.num_packets_last_interval = 0;
+            self.num_errors_last_interval = 0;
+            self.last_interval = Instant::now();
         }
         // let mut i = 0;
         // while i < self.packets_last_second.len() {
@@ -522,8 +539,8 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
             let packets_per_kind_rows = sa.packets_per_kind_rows();
             (
                 packets_per_kind_rows,
-                sa.num_packets_last_second,
-                sa.num_errors_last_second,
+                sa.num_packets_last_interval,
+                sa.num_errors_last_interval,
             )
         };
         render_general(
