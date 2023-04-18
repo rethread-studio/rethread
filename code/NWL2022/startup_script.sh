@@ -12,8 +12,8 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 session="unfold-session"
 tmux new-session -d -s $session
 
-echo "Browsers"
-sh /home/reth/Documents/rethread/code/NWL2022/start_browser_script.sh
+# echo "Browsers"
+# sh /home/reth/Documents/rethread/code/NWL2022/start_browser_script.sh
 
 echo "Artnet and sound"
 window=0
