@@ -11,7 +11,11 @@ let my_scale;
 const WINDOW_WIDTH = 57;
 const WINDOW_HEIGHT = 112;
 let max_section_length = 256;
-let h; // height of 1 bloc (DNA helix, ngram unit...)
+
+let wMargin; // margin on the sides
+let w; // width of each function call rectangle
+let h; // height of 1 bloc (DNA helix bar...)
+let hGap; // gap between rectangles vertically
 
 let N_FRAMES = 500; // how many frames before changing
 
@@ -39,7 +43,12 @@ function setup() {
   max_name_length = get_max_name_length();
   all_deps = dep_colors.getColumn(0);
   all_sups = sup_colors.getColumn(0);
+  
+  wMargin = WINDOW_WIDTH*my_scale/10;
+  w = width-wMargin*2;
   h = 30/931*height;
+  hGap = h/8;
+
   centerCanvas();
 
   generate_window_composition();
@@ -79,22 +88,13 @@ function generate_window_composition() {
 }
 
 function helix_bars(choice) {
-  let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
-  let w = width-wMargin*2; // width of each function call rectangle
-  let hGap = h/8; // gap between rectangles vertically
-
   return {
-    m: 1,
-    n: 1,
     choice: choice,
-    wMargin: wMargin,
-    w: w,
-    hGap: hGap,
     update: function(t) {
       push();
       translate(-width/2, -height/2);
 
-      let x = this.wMargin, y = -t%h-height/10, i = floor(t/h);
+      let x = wMargin, y = -t%h-height/10, i = floor(t/h);
 
       while (y < height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
@@ -102,15 +102,15 @@ function helix_bars(choice) {
 
         push();
 
-        translate(x+this.w/2, y+h/2, 0);
+        translate(x+w/2, y+h/2, 0);
         rotateY(y/180);
         fill(get_sup_color(sup));
         beginShape();
-        vertex(-this.w/2+this.wMargin, -h/2+this.hGap/2, 0);
-        vertex(-this.w/2+this.wMargin, h/2-this.hGap/2, 0);
+        vertex(-w/2+wMargin, -h/2+hGap/2, 0);
+        vertex(-w/2+wMargin, h/2-hGap/2, 0);
         fill(get_dep_color(dep));
-        vertex(this.w/2-this.wMargin, h/2-this.hGap/2, 0);
-        vertex(this.w/2-this.wMargin, -h/2+this.hGap/2, 0);
+        vertex(w/2-wMargin, h/2-hGap/2, 0);
+        vertex(w/2-wMargin, -h/2+hGap/2, 0);
         endShape();
 
         pop();
@@ -124,20 +124,13 @@ function helix_bars(choice) {
 }
 
 function helix_balls(choice) {
-  let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
-  let w = width-wMargin*2; // width of each function call rectangle
-  let hGap = h/8; // gap between rectangles vertically
-
   return {
     choice: choice,
-    wMargin: wMargin,
-    w: w,
-    hGap: hGap,
     update: function(t) {
       push();
       translate(-width/2, -height/2);
 
-      let x = this.wMargin, y = -t%h-height/10, i = floor(t/h);
+      let x = wMargin, y = -t%h-height/10, i = floor(t/h);
 
       while (y < height*1.1) {
         let d = data.draw_trace[(i++)%trace_len];
@@ -145,20 +138,20 @@ function helix_balls(choice) {
 
         push();
 
-        translate(x+this.w/2, y+h/2, 0);
+        translate(x+w/2, y+h/2, 0);
         rotateY(y/180-PI/2);
 
         fill(240);
         rotateX(3*PI/2);
-        cylinder(h/5, this.w-2*this.wMargin, 6, 1);
+        cylinder(h/5, w-2*wMargin, 6, 1);
         rotate(PI/2);
 
         push();
         fill(get_sup_color(sup));
-        translate(-this.w/2+this.wMargin, 0);
+        translate(-w/2+wMargin, 0);
         sphere(h/2, 12, 8);
         fill(get_dep_color(dep));
-        translate(this.w-2*this.wMargin, 0);
+        translate(w-2*wMargin, 0);
         sphere(h/2, 12, 8);
         pop();
 
@@ -180,10 +173,9 @@ function trace_print(mode, dna) {
       push();
       translate(-width/2, -height/2);
 
-      let wMargin = WINDOW_WIDTH*my_scale/10; // margin on the sides
       textSize(h*0.9);
       let k = floor(t/h);
-      let y0 = -height/3;
+      let y0 = h*2.7;
 
       for (let y = y0; y < height; y += h) {
         let d = data.draw_trace[k%trace_len];
@@ -206,8 +198,6 @@ function trace_print(mode, dna) {
         k++;
       }
 
-      fill(0);
-      rect(0, 0, width, h*2.7);
       let str = "> print ";
       if (this.mode == "sup") {
         str += "suppliers"
