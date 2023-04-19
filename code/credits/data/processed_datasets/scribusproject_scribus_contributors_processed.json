@@ -1,0 +1,86 @@
+{
+ "repo": "scribusproject_scribus",
+ "n_contributions": 20643,
+ "contributors": [
+  {
+   "id": "mrb",
+   "type": "Anonymous",
+   "contributions": 6212
+  },
+  {
+   "id": "jghali",
+   "type": "Anonymous",
+   "contributions": 5830
+  },
+  {
+   "id": "franz.schmid",
+   "type": "Anonymous",
+   "contributions": 4586
+  },
+  {
+   "id": "mrdocs",
+   "type": "Anonymous",
+   "contributions": 1420
+  },
+  {
+   "id": "pvanek",
+   "type": "User",
+   "contributions": 845
+  },
+  {
+   "id": "avox",
+   "type": "Anonymous",
+   "contributions": 733
+  },
+  {
+   "id": "riku",
+   "type": "Anonymous",
+   "contributions": 385
+  },
+  {
+   "id": "gregp-scribus",
+   "type": "User",
+   "contributions": 191
+  },
+  {
+   "id": "christoph",
+   "type": "Anonymous",
+   "contributions": 156
+  },
+  {
+   "id": "pierre",
+   "type": "Anonymous",
+   "contributions": 127
+  },
+  {
+   "id": "malex",
+   "type": "Anonymous",
+   "contributions": 56
+  },
+  {
+   "id": "admin",
+   "type": "Anonymous",
+   "contributions": 43
+  },
+  {
+   "id": "herm",
+   "type": "User",
+   "contributions": 34
+  },
+  {
+   "id": "nodoid",
+   "type": "User",
+   "contributions": 18
+  },
+  {
+   "id": "jainbasil",
+   "type": "User",
+   "contributions": 6
+  },
+  {
+   "id": "unknown",
+   "type": "Anonymous",
+   "contributions": 1
+  }
+ ]
+}

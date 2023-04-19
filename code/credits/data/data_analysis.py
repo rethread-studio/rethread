@@ -45,7 +45,7 @@ def turn_other_lists_into_raw_datasets():
     for repo in text_repo_list:
         repo_name = repo.replace("/", "_").removesuffix("\n")
         filename = "./other_lists/" + repo_name + ".txt"
-        with open(filename, "r") as f:
+        with open(filename, "r", encoding="utf-8") as f:
             txt_data = f.readlines()
         raw_data = []
         for d in txt_data:
@@ -56,7 +56,7 @@ def turn_other_lists_into_raw_datasets():
             })
         
         raw_data_filename = "./raw_datasets/" + repo_name + "_contributors_raw.json"
-        with open(raw_data_filename, "w") as f:
+        with open(raw_data_filename, "w", encoding="utf-8") as f:
             json.dump(raw_data, f, indent = 1)
 
 def process_dataset(repo_name):

@@ -1,0 +1,121 @@
+{
+ "repo": "colinbdclark_osc.js",
+ "n_contributions": 328,
+ "contributors": [
+  {
+   "id": "colinbdclark",
+   "type": "User",
+   "contributions": 278
+  },
+  {
+   "id": "okofish",
+   "type": "User",
+   "contributions": 8
+  },
+  {
+   "id": "egasimus",
+   "type": "User",
+   "contributions": 6
+  },
+  {
+   "id": "jean-emmanuel",
+   "type": "User",
+   "contributions": 6
+  },
+  {
+   "id": "heisters",
+   "type": "User",
+   "contributions": 4
+  },
+  {
+   "id": "janslow",
+   "type": "User",
+   "contributions": 4
+  },
+  {
+   "id": "sonnyp",
+   "type": "User",
+   "contributions": 3
+  },
+  {
+   "id": "djipco",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "xseignard",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "hughrawlinson",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "drart",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "chetbox",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "jacoscaz",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "ide",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "nytamin",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "Julusian",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "manuelmitasch",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "Plastix",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "TOGoS",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "tobi",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "git",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "tambien",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "bobbyjenkins34",
+   "type": "User",
+   "contributions": 1
+  }
+ ]
+}

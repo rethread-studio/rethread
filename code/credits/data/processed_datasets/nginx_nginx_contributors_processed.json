@@ -1,0 +1,406 @@
+{
+ "repo": "nginx_nginx",
+ "n_contributions": 7140,
+ "contributors": [
+  {
+   "id": "igorsysoev",
+   "type": "User",
+   "contributions": 3683
+  },
+  {
+   "id": "mdounin",
+   "type": "User",
+   "contributions": 1648
+  },
+  {
+   "id": "ru",
+   "type": "Anonymous",
+   "contributions": 630
+  },
+  {
+   "id": "VBart",
+   "type": "User",
+   "contributions": 414
+  },
+  {
+   "id": "arut",
+   "type": "User",
+   "contributions": 191
+  },
+  {
+   "id": "pluknet",
+   "type": "Anonymous",
+   "contributions": 174
+  },
+  {
+   "id": "vl-homutov",
+   "type": "User",
+   "contributions": 120
+  },
+  {
+   "id": "PiotrSikora",
+   "type": "User",
+   "contributions": 85
+  },
+  {
+   "id": "xeioex",
+   "type": "User",
+   "contributions": 32
+  },
+  {
+   "id": "defanator",
+   "type": "User",
+   "contributions": 22
+  },
+  {
+   "id": "gmm",
+   "type": "Anonymous",
+   "contributions": 16
+  },
+  {
+   "id": "maximkonovalov",
+   "type": "User",
+   "contributions": 13
+  },
+  {
+   "id": "cubicdaiya",
+   "type": "User",
+   "contributions": 8
+  },
+  {
+   "id": "fblr",
+   "type": "User",
+   "contributions": 7
+  },
+  {
+   "id": "iphucc",
+   "type": "User",
+   "contributions": 5
+  },
+  {
+   "id": "kou",
+   "type": "User",
+   "contributions": 4
+  },
+  {
+   "id": "agentzh",
+   "type": "User",
+   "contributions": 4
+  },
+  {
+   "id": "flygoast",
+   "type": "User",
+   "contributions": 4
+  },
+  {
+   "id": "FdaSilvaYY",
+   "type": "User",
+   "contributions": 4
+  },
+  {
+   "id": "glebius",
+   "type": "Anonymous",
+   "contributions": 3
+  },
+  {
+   "id": "p.pautov",
+   "type": "Anonymous",
+   "contributions": 3
+  },
+  {
+   "id": "chobits",
+   "type": "User",
+   "contributions": 3
+  },
+  {
+   "id": "othree",
+   "type": "User",
+   "contributions": 3
+  },
+  {
+   "id": "a.bavshin",
+   "type": "Anonymous",
+   "contributions": 2
+  },
+  {
+   "id": "debayang",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "erankor",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "thresheek",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "orgads",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "yves.crespin",
+   "type": "Anonymous",
+   "contributions": 2
+  },
+  {
+   "id": "ghedo",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "tokers",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "lyokha",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "LinuxJedi",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "x4121",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "mathpal",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "bartw72",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "yefei.dyf",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "keyolk",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "TechCiel",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "damz",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "xonatius",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "dbussink",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "unknown",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "laz2",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "evanmiller",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "fdasilva",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "iippolitov",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "iii-i",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "codeeply",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "radford",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "rainingmaster",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "timeless",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "pushrax",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "klnusbaum",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "zls.sogou",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "lukastribus",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "marcusball",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "maage",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "nextsux",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "Khaless",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "murilobandrade",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "kelunik",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "n.morozov",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "nova",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "ottok",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "lepatryk",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "Lekensteyn",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "quantum5",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "robmueller",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "robn",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "tSed",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "osokin",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "ohtsu",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "leblanc-simon",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "thibaultcha",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "ttaubert",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "toshipp",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "fffilimonov",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "balusch",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "chronolaw",
+   "type": "User",
+   "contributions": 1
+  }
+ ]
+}
