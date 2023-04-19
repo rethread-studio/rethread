@@ -106,16 +106,18 @@ function draw() {
   if (selectedLine != -1) {
     let repo_name = all_repos_list[selectedLine];
     repo_name = repo_name.substring(repo_name.lastIndexOf("/")+1);
+    let info_contributors = data[selectedLine].contributors.length + (other_repos_list.indexOf(repo_name) != -1 ? " people" : " contributors") ;
     let offset = lineHeight*3/4;
     let x = mouseX+offset;
     let y = mouseY+offset;
-    if (y + lineHeight > height) y -= 2*offset;
+    if (y + 2*lineHeight > height) y -= 4*offset;
     fill(dark_pink);
     stroke(neon_green);
-    rect(x, y, charWidth*repo_name.length, lineHeight);
+    rect(x, y, Math.max(repo_name.length, info_contributors.length)*charWidth, 2*lineHeight);
     noStroke();
     fill(neon_green);
     text(repo_name, x, y);
+    text(info_contributors, x, y+lineHeight);
   }
 }
 
