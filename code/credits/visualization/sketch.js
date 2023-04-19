@@ -6,11 +6,14 @@
 
 // random highlight, automatic mouse
 
+p5.disableFriendlyErrors = true; // disables FES
+
 let data = [];
 let all_repos_list;
 let gitlab_repos_list = ["redhat/centos-stream/rpms/bpftrace"], other_repos_list = ["artistic-inspirations", "rethread-and-friends"];
 
 let lineHeight = 20;
+let charWidth;
 let maxLength = []; // max word length for each dataset
 let gap; // gap between each name horintally
 let nCols; // number of columns
@@ -50,7 +53,8 @@ function setup() {
   textAlign(LEFT, TOP);
   
   textFont("monospace", lineHeight/1.25);
-  gap = 3*textWidth("a");
+  charWidth = textWidth("a");
+  gap = 3*charWidth;
   
   minContributors = data[0].contributors.length;
   maxContributors = 0;
@@ -77,6 +81,7 @@ function draw() {
     rect(0, (selectedLine)*lineHeight, width, lineHeight);
   }
   
+  fill(neon_green);
   let y = 0;
   for (let i = 0; i < data.length; i++) {
     let contributors = data[i].contributors;
@@ -84,16 +89,15 @@ function draw() {
     let j = j0[i];
     while (x < width*1.2) {
       let c = contributors[j%contributors.length];
-      fill(neon_green);
       text(c.id, x, y);
-      x += textWidth(c.id) + gap;
+      x += charWidth*c.id.length + gap;
       j++;
     }
     y += lineHeight;
-    let theSpeed = theSpeeds[i]
+    let theSpeed = theSpeeds[i];
     if (i == selectedLine) theSpeed = minSpeed/2;
     x0[i] -= theSpeed;
-    if (x0[i] < -textWidth(contributors[j0[i]].id)-gap) {
+    if (x0[i] < -charWidth*contributors[j0[i]].id.length - gap) {
       x0[i] = 0;
       j0[i] = (j0[i]+1)%contributors.length;
     }
@@ -108,7 +112,7 @@ function draw() {
     if (y + lineHeight > height) y -= 2*offset;
     fill(dark_pink);
     stroke(neon_green);
-    rect(x, y, textWidth(repo_name), lineHeight);
+    rect(x, y, charWidth*repo_name.length, lineHeight);
     noStroke();
     fill(neon_green);
     text(repo_name, x, y);
