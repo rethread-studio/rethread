@@ -39,12 +39,12 @@ def turn_gitlogs_into_raw_datasets():
         with open(raw_data_filename, "w") as f:
             json.dump(raw_data, f, indent = 1)
 
-def turn_text_lists_into_raw_datasets():
+def turn_other_lists_into_raw_datasets():
     with open("repo_lists/other_lists.txt", "r") as f:
         text_repo_list = f.readlines()
     for repo in text_repo_list:
         repo_name = repo.replace("/", "_").removesuffix("\n")
-        filename = "./" + repo_name + ".txt"
+        filename = "./other_lists/" + repo_name + ".txt"
         with open(filename, "r") as f:
             txt_data = f.readlines()
         raw_data = []
@@ -216,7 +216,7 @@ def find_all_intersections(min, max):
 
 
 turn_gitlogs_into_raw_datasets()
-turn_text_lists_into_raw_datasets()
+turn_other_lists_into_raw_datasets()
 
 repo_list = make_repo_list()
 

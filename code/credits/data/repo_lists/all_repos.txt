@@ -5,7 +5,7 @@ Kitware/CMake
 apache/httpd
 apache/maven
 arduino/arduino-ide
-artist_contributors
+artistic-inspirations
 bevyengine/bevy
 brave/brave-browser
 chromium/chromium
