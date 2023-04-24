@@ -17,12 +17,18 @@ Florian Cramer
 Winnie Soon
 Alida Sun
 Alexis André
+Ada Lovelace
+Alan Turing
+Grace Hopper
+Margaret Hamilton
 Nicola Pellow
 Stephanie Forrest
 Hilma af Klint
+Wassily Kandinsky
 Eliane Radigue
 Alva Noto
 John Williams
+Dan Perri
 John Baldessari
 Laurie Spiegel
 Brian Eno
@@ -33,6 +39,8 @@ Golan Levin
 Tega Brain
 Ksawery Kirklewski
 Manolo Gamboa Naon
+Saskia Freeke
+Takawo Shunsuke
 Andreas Gysin
 Nadieh Bremer
 Mike Bostock
@@ -71,3 +79,7 @@ Piet Mondrian
 Elsa von Freytag-Loringhoven
 Marcel Duchamp
 Bob Grant & Bob Totten
+Daft Punk
+Daniel Shiffman
+Raphaël de Courville
+Bridget Riley

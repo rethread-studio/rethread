@@ -1,6 +1,6 @@
 {
  "repo": "artistic-inspirations",
- "n_contributions": 70,
+ "n_contributions": 82,
  "contributors": [
   {
    "id": "Sol LeWitt",
@@ -98,6 +98,26 @@
    "contributions": 1
   },
   {
+   "id": "Ada Lovelace",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Alan Turing",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Grace Hopper",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Margaret Hamilton",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
    "id": "Nicola Pellow",
    "type": "Human",
    "contributions": 1
@@ -113,6 +133,11 @@
    "contributions": 1
   },
   {
+   "id": "Wassily Kandinsky",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
    "id": "Eliane Radigue",
    "type": "Human",
    "contributions": 1
@@ -124,6 +149,11 @@
   },
   {
    "id": "John Williams",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Dan Perri",
    "type": "Human",
    "contributions": 1
   },
@@ -174,6 +204,16 @@
   },
   {
    "id": "Manolo Gamboa Naon",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Saskia Freeke",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Takawo Shunsuke",
    "type": "Human",
    "contributions": 1
   },
@@ -349,6 +389,26 @@
   },
   {
    "id": "Bob Grant & Bob Totten",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Daft Punk",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Daniel Shiffman",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Rapha\u00ebl de Courville",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Bridget Riley",
    "type": "Human",
    "contributions": 1
   }

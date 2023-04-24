@@ -1,11 +1,3 @@
-// randomly flips to other text modes:
-// - other encodings
-// - leet https://en.wikipedia.org/wiki/Leet
-// - hexadecimal
-// - shuffle
-
-// random highlight, automatic mouse
-
 p5.disableFriendlyErrors = true; // disables FES
 
 let data = [];
@@ -29,6 +21,11 @@ let j0 = [];
 let x0 = [];
 let minSpeed = 0.5, maxSpeed = 5, theSpeeds = [];
 let selectedLine = -1;
+
+// glitch modes
+const NO_GLITCH = 0, SHUFFLE = 1, LEET = 2, S_PLUS_7 = 3, HEXADECIMAL = 4;
+const numModes = 5;
+let glitchMode = 0;
 
 function preload() {
   all_repos_list = loadStrings("../data/repo_lists/all_repos.txt", loadRepos);
@@ -89,7 +86,7 @@ function draw() {
     let j = j0[i];
     while (x < width*1.2) {
       let c = contributors[j%contributors.length];
-      text(c.id, x, y);
+      text(glitchText(c.id), x, y);
       x += charWidth*c.id.length + gap;
       j++;
     }
@@ -121,6 +118,67 @@ function draw() {
   }
 }
 
+function glitchText(str) {
+  if (glitchMode == NO_GLITCH) return str;
+  if (glitchMode == SHUFFLE) {
+    randomSeed(frameCount/10);
+    return shuffle(str.split("")).join("");
+  }
+  if (glitchMode == LEET) {
+    let chars = str.split("");
+    for (let i = 0; i < chars.length; i++) {
+      switch (chars[i].toUpperCase()) {
+        case "A":
+          chars[i] = "4";
+          break;
+        case "B":
+          chars[i] = "8";
+          break;
+        case "E":
+          chars[i] = "3";
+          break;
+        case "G":
+          chars[i] = "6";
+          break;
+        case "L":
+          chars[i] = "1";
+          break;
+        case "O":
+          chars[i] = "0";
+          break;
+        case "Q":
+          chars[i] = "9";
+          break;
+        case "S":
+          chars[i] = "5";
+          break;
+        case "T":
+          chars[i] = "7";
+          break;
+        case "Z":
+          chars[i] = "2";
+          break;
+      }
+    }
+    return chars.join("");
+  }
+  if (glitchMode == S_PLUS_7) {
+    let chars = str.split("");
+    for (let i = 0; i < chars.length; i++) {
+      let c = chars[i];
+      chars[i] = String.fromCodePoint(c.codePointAt(0)+7);
+    }
+    return chars.join("");
+  } else if (glitchMode == HEXADECIMAL) {
+    let chars = str.split("");
+    for (let i = 0; i < chars.length; i++) {
+      let c = chars[i];
+      chars[i] = (c.codePointAt(0)%16).toString(16);;
+    }
+    return chars.join("");
+  }
+}
+
 function mouseClicked() {
   let repo_name = all_repos_list[selectedLine];
   if (other_repos_list.indexOf(repo_name) != -1) {
@@ -137,6 +195,12 @@ function mouseMoved() {
     selectedLine = floor(mouseY/lineHeight);
   else 
     selectedLine = -1;
+}
+
+function keyPressed() {
+  if (key == "r") {
+    glitchMode = (glitchMode + 1)%numModes;
+  }
 }
 
 function windowResized() {
