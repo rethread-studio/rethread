@@ -1,6 +1,6 @@
 {
  "repo": "artistic-inspirations",
- "n_contributions": 41,
+ "n_contributions": 70,
  "contributors": [
   {
    "id": "Sol LeWitt",
@@ -183,6 +183,16 @@
    "contributions": 1
   },
   {
+   "id": "Nadieh Bremer",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Mike Bostock",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
    "id": "Sonia & Robert Delaunay",
    "type": "Human",
    "contributions": 1
@@ -198,12 +208,147 @@
    "contributions": 1
   },
   {
+   "id": "Billy Kl\u00fcver",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
    "id": "Jean Tinguely",
    "type": "Human",
    "contributions": 1
   },
   {
-   "id": "Billy Kl\u00fcver",
+   "id": "Steve Reich",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Morton Feldman",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "E.A.T.",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Fujiko Nakaya",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Buckminster Fuller",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Frederik de Wilde",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Simon Pope ",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Colin Green",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Matthew Fuller",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Evan Roth",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "W. Bradford Paley",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Niki de Saint Phalle",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Jean-Michel Basquiat",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Sam Aaron",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Dumb Type",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Gretchen Andrew",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Yeohyun Ahn",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Sasha Stiles",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Gordon Matta-Clark",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Scott McCloud",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Lana & Lilly Wachowski",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Raymond Queneau",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Fran\u00e7ois Le Lionnais",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Piet Mondrian",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Elsa von Freytag-Loringhoven",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Marcel Duchamp",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Bob Grant & Bob Totten",
    "type": "Human",
    "contributions": 1
   }
