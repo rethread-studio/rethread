@@ -28,13 +28,13 @@ const numModes = 7;
 let glitchMode = NO_GLITCH;
 
 function preload() {
-  all_repos_list = loadStrings("../data/repo_lists/all_repos.txt", loadRepos);
+  all_repos_list = loadStrings("https://raw.githubusercontent.com/castor-software/rethread/master/code/credits/data/repo_lists/all_repos.txt", loadRepos);
 }
 
 function loadRepos(all_repos_list) {
   for (let r of all_repos_list) {
     if (r.length > 0) {
-      data.push(loadJSON("../data/processed_datasets/"+r.replaceAll("/", "_")+"_contributors_processed.json"));
+      data.push(loadJSON("https://raw.githubusercontent.com/castor-software/rethread/master/code/credits/data/processed_datasets/"+r.replaceAll("/", "_")+"_contributors_processed.json"));
     }
   }
 }
