@@ -1,4 +1,3 @@
-let dataset = "data-varna-copy-paste-isolated_parsed";
 let data;
 let trace_len; // length of trace
 let max_name_length;
@@ -10,7 +9,6 @@ let myFont;
 let my_scale;
 const WINDOW_WIDTH = 57;
 const WINDOW_HEIGHT = 112;
-let max_section_length = 256;
 
 let wMargin; // margin on the sides
 let w; // width of each function call rectangle
@@ -27,6 +25,7 @@ let glitch_amount = 0;
 let viz = 1;
 
 function preload() {
+  let dataset = "data-varna-copy-paste-isolated_parsed";
   data = loadJSON(`../../LED_web_demo/${dataset}.json`);
   myFont = loadFont("../MPLUS1Code-VariableFont_wght.ttf");
   sup_colors = loadTable(`../../color_tables/${dataset}_supplier_colors.csv`, "csv", "header");
@@ -55,14 +54,14 @@ function setup() {
   noStroke();
   textAlign(LEFT, TOP);
   textFont(myFont);
+  textSize(h*0.9);
 }
 
 function draw() {
   background(0);
 
-  let t = frameCount;
-  
-  anim.update(t);
+  translate(-width/2, -height/2);
+  anim.update(frameCount);
 
   if (frameCount % N_FRAMES == 0) {
     generate_window_composition();
@@ -91,9 +90,6 @@ function helix_bars(choice) {
   return {
     choice: choice,
     update: function(t) {
-      push();
-      translate(-width/2, -height/2);
-
       let x = wMargin, y = -t%h-height/10, i = floor(t/h);
 
       while (y < height*1.1) {
@@ -117,8 +113,6 @@ function helix_bars(choice) {
 
         y += h;
       }
-
-      pop();
     }
   };
 }
@@ -127,9 +121,6 @@ function helix_balls(choice) {
   return {
     choice: choice,
     update: function(t) {
-      push();
-      translate(-width/2, -height/2);
-
       let x = wMargin, y = -t%h-height/10, i = floor(t/h);
 
       while (y < height*1.1) {
@@ -159,8 +150,6 @@ function helix_balls(choice) {
 
         y += h;
       }
-
-      pop();
     }
   };
 }
@@ -170,10 +159,6 @@ function trace_print(mode, dna) {
     mode: mode,
     dna: dna,
     update: function(t) {
-      push();
-      translate(-width/2, -height/2);
-
-      textSize(h*0.9);
       let k = floor(t/h);
       let y0 = h*2.7;
 
@@ -189,7 +174,11 @@ function trace_print(mode, dna) {
           str = dep;
         } else {
           let name = getActualName(d.name);
-          fill([color(get_sup_color(sup)), color(get_dep_color(dep))][~~noise(t)]);
+          if (name.length % 2 == 0) {
+            fill(color(get_sup_color(sup)));
+          } else {
+            fill(color(get_dep_color(dep)));
+          }
           str = name;
         }
         if (this.dna) str = turn_into_dna(str);
@@ -210,8 +199,6 @@ function trace_print(mode, dna) {
       else str += ".txt";
       fill(250);
       text(str, wMargin, h*1.2);
-
-      pop();
     }
   };
 }

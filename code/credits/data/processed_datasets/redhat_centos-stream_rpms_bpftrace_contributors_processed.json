@@ -1,0 +1,36 @@
+{
+ "repo": "redhat_centos-stream_rpms_bpftrace",
+ "n_contributions": 18,
+ "contributors": [
+  {
+   "id": "contyk",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "yortnoswad",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "jeromemarchand",
+   "type": "User",
+   "contributions": 9
+  },
+  {
+   "id": "mohanboddu",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "afedorova",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "vmalikrh",
+   "type": "User",
+   "contributions": 3
+  }
+ ]
+}

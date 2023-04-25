@@ -5,6 +5,7 @@ Kitware/CMake
 apache/httpd
 apache/maven
 arduino/arduino-ide
+artistic-inspirations
 bevyengine/bevy
 brave/brave-browser
 chromium/chromium
@@ -40,6 +41,7 @@ processing/p5.js-web-editor
 processing/processing
 python/cpython
 redhat/centos-stream/rpms/bpftrace
+rethread-and-friends
 rust-lang/cargo
 rust-lang/rust
 scribusproject/scribus

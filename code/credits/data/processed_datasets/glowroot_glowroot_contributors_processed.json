@@ -1,0 +1,141 @@
+{
+ "repo": "glowroot_glowroot",
+ "n_contributions": 4178,
+ "contributors": [
+  {
+   "id": "trask",
+   "type": "User",
+   "contributions": 4057
+  },
+  {
+   "id": "Nowheresly",
+   "type": "User",
+   "contributions": 59
+  },
+  {
+   "id": "ajdevries",
+   "type": "User",
+   "contributions": 14
+  },
+  {
+   "id": "ionutursuleanu",
+   "type": "User",
+   "contributions": 14
+  },
+  {
+   "id": "jaikiran",
+   "type": "User",
+   "contributions": 4
+  },
+  {
+   "id": "albertus82",
+   "type": "User",
+   "contributions": 3
+  },
+  {
+   "id": "robinroos",
+   "type": "User",
+   "contributions": 3
+  },
+  {
+   "id": "tylerOrMe",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "hgomez",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "sldab",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "aaron-ai",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "adrianbader",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "babatsai",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "brunolmfg",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "lfremery",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "teh-username",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "pavanimanthana",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "mdaniel",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "oboukili",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "panoskonstantinides",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "reilly",
+   "type": "Anonymous",
+   "contributions": 2
+  },
+  {
+   "id": "The-Alchemist",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "sakash279",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "charles.jourdain",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "clive.makamara",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "github-actions[bot]",
+   "type": "Bot",
+   "contributions": 1
+  },
+  {
+   "id": "thomsetiabudi",
+   "type": "User",
+   "contributions": 1
+  }
+ ]
+}

@@ -3,7 +3,7 @@ import copy
 import itertools
 
 def make_repo_list():
-    file_list = ["gh_api_repo_list.txt", "gitlog_repo_list.txt", "others_repo_list.txt"]
+    file_list = ["gh_api_repo_list.txt", "gitlog_repo_list.txt", "gitlab_repo_list.txt", "other_lists.txt"]
     repo_list = []
     for filename in file_list:
         with open("repo_lists/" + filename, "r") as f:
@@ -37,6 +37,26 @@ def turn_gitlogs_into_raw_datasets():
         
         raw_data_filename = "./raw_datasets/" + repo_name + "_contributors_raw.json"
         with open(raw_data_filename, "w") as f:
+            json.dump(raw_data, f, indent = 1)
+
+def turn_other_lists_into_raw_datasets():
+    with open("repo_lists/other_lists.txt", "r") as f:
+        text_repo_list = f.readlines()
+    for repo in text_repo_list:
+        repo_name = repo.replace("/", "_").removesuffix("\n")
+        filename = "./other_lists/" + repo_name + ".txt"
+        with open(filename, "r", encoding="utf-8") as f:
+            txt_data = f.readlines()
+        raw_data = []
+        for d in txt_data:
+            raw_data.append({
+                "login": d.removesuffix("\n"),
+                "type": "Human",
+                "contributions": 1
+            })
+        
+        raw_data_filename = "./raw_datasets/" + repo_name + "_contributors_raw.json"
+        with open(raw_data_filename, "w", encoding="utf-8") as f:
             json.dump(raw_data, f, indent = 1)
 
 def process_dataset(repo_name):
@@ -77,6 +97,8 @@ def process_dataset(repo_name):
                 else:
                     the_id = the_id[:idx]
 
+            if len(the_id) == 0:
+                continue
             already_added = False
             for c in contributors:
                 if c["id"] == the_id and c["type"] == "Anonymous":
@@ -194,6 +216,7 @@ def find_all_intersections(min, max):
 
 
 turn_gitlogs_into_raw_datasets()
+turn_other_lists_into_raw_datasets()
 
 repo_list = make_repo_list()
 
