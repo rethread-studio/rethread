@@ -1,7 +1,9 @@
 [workspace]
-
+resolver = "2"
 members = [
     "strace_collector",
     "data_vertex",
     "syscalls_shared",
+    "strace_parser",
+    "grapher",
 ]
