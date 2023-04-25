@@ -23,9 +23,9 @@ let minSpeed = 0.5, maxSpeed = 5, theSpeeds = [];
 let selectedLine = -1;
 
 // glitch modes
-const NO_GLITCH = 0, SHUFFLE = 1, LEET = 2, S_PLUS_7 = 3, HEXADECIMAL = 4;
-const numModes = 5;
-let glitchMode = 0;
+const NO_GLITCH = 0, SHUFFLE = 1, LEET = 2, S_PLUS_7 = 3, HEXADECIMAL = 4, SLIDE = 5, REVERSE = 6;
+const numModes = 7;
+let glitchMode = NO_GLITCH;
 
 function preload() {
   all_repos_list = loadStrings("../data/repo_lists/all_repos.txt", loadRepos);
@@ -121,7 +121,7 @@ function draw() {
 function glitchText(str) {
   if (glitchMode == NO_GLITCH) return str;
   if (glitchMode == SHUFFLE) {
-    randomSeed(frameCount/10);
+    randomSeed(frameCount/21);
     return shuffle(str.split("")).join("");
   }
   if (glitchMode == LEET) {
@@ -173,9 +173,18 @@ function glitchText(str) {
     let chars = str.split("");
     for (let i = 0; i < chars.length; i++) {
       let c = chars[i];
-      chars[i] = (c.codePointAt(0)%16).toString(16);;
+      chars[i] = (c.codePointAt(0)%16).toString(16);
     }
     return chars.join("");
+  } else if (glitchMode == SLIDE) {
+    let chars = str.split("");
+    for (let i = 0; i < chars.length; i++) {
+      let c = chars[i];
+      chars[i] = str[(i+floor(frameCount/10))%str.length];
+    }
+    return chars.join("");
+  } else if (glitchMode == REVERSE) {
+    return str.split("").reverse().join("");
   }
 }
 
