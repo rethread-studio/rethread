@@ -96,7 +96,7 @@ function draw() {
     let theSpeed = theSpeeds[i];
     if (i == selectedLine) theSpeed = minSpeed/2;
     x0[i] -= theSpeed;
-    if (x0[i] < -charWidth*contributors[j0[i]].id.length - gap) {
+    if (x0[i] <= -charWidth*contributors[j0[i]].id.length - gap) {
       x0[i] = 0;
       j0[i] = (j0[i]+1)%contributors.length;
     }
@@ -192,7 +192,7 @@ function glitchText(str) {
   }
 }
 
-function mouseClicked() {
+function doubleClicked() {
   let repo_name = all_repos_list[selectedLine];
   if (other_repos_list.indexOf(repo_name) != -1) {
     return;
