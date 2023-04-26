@@ -109,10 +109,13 @@ function draw() {
     let offset = lineHeight*3/4;
     let x = mouseX+offset;
     let y = mouseY+offset;
-    if (y + 2*lineHeight > height) y -= 4*offset;
+    let w = Math.max(repo_name.length, info_contributors.length)*charWidth;
+    let h = 2*lineHeight;
+    if (x + w > width) x -= w;
+    if (y + h > height) y -= 2*h;
     fill(dark_pink);
     stroke(neon_green);
-    rect(x, y, Math.max(repo_name.length, info_contributors.length)*charWidth, 2*lineHeight);
+    rect(x, y, w, h);
     noStroke();
     fill(neon_green);
     text(repo_name, x, y);
@@ -181,7 +184,6 @@ function glitchText(str) {
   } else if (glitchMode == SLIDE) {
     let chars = str.split("");
     for (let i = 0; i < chars.length; i++) {
-      let c = chars[i];
       chars[i] = str[(i+floor(frameCount/10))%str.length];
     }
     return chars.join("");
@@ -202,7 +204,7 @@ function mouseClicked() {
 }
 
 function mouseMoved() {
-  if (mouseY > 0 && mouseY < height)
+  if (mouseY > 0 && mouseY < height && !(navigator.userAgent.toLowerCase().match(/mobile/i)))
     selectedLine = floor(mouseY/lineHeight);
   else 
     selectedLine = -1;
