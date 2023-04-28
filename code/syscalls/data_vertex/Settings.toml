@@ -1,4 +1,5 @@
 [osc_receivers]
 supercollider = { ip = "127.0.0.1", port = 57120 }
 grapher = { ip = "127.0.0.1", port = 7375}
+knyst_waveguide = { ip = "127.0.0.1", port = 7376}
 touchdesigner = { ip = "192.168.1.255", port = 57130 }
