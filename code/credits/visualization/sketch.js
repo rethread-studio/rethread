@@ -193,13 +193,16 @@ function glitchText(str) {
 }
 
 function doubleClicked() {
-  let repo_name = all_repos_list[selectedLine];
-  if (other_repos_list.indexOf(repo_name) != -1) {
-    return;
-  } else if (gitlab_repos_list.indexOf(repo_name) != -1) {
-    window.open("https://gitlab.com/"+repo_name);
-  } else {
-    window.open("https://github.com/"+repo_name);
+  if (mouseY > 0 && mouseY < height) {
+    let idx = floor(mouseY/lineHeight);
+    let repo_name = all_repos_list[idx];
+    if (other_repos_list.indexOf(repo_name) != -1) {
+      return;
+    } else if (gitlab_repos_list.indexOf(repo_name) != -1) {
+      window.open("https://gitlab.com/"+repo_name);
+    } else {
+      window.open("https://github.com/"+repo_name);
+    }
   }
 }
 
