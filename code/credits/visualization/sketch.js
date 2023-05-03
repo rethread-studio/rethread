@@ -23,8 +23,9 @@ let minSpeed = 0.5, maxSpeed = 5, theSpeeds = [];
 let selectedLine = -1;
 
 // glitch modes
-const NO_GLITCH = 0, SHUFFLE = 1, LEET = 2, S_PLUS_7 = 3, HEXADECIMAL = 4, SLIDE = 5, REVERSE = 6;
+const RANDOM = -1, NO_GLITCH = 0, SHUFFLE = 1, LEET = 2, S_PLUS_7 = 3, HEXADECIMAL = 4, SLIDE = 5, REVERSE = 6;
 const numModes = 7;
+let wasGlitched = false;
 let glitchMode = NO_GLITCH;
 
 function preload() {
@@ -51,7 +52,7 @@ function setup() {
   noStroke();
   textAlign(LEFT, TOP);
   
-  textFont("monospace", lineHeight/1.25);
+  textFont("monospace", lineHeight/1.1);
   charWidth = textWidth("a");
   gap = 3*charWidth;
   
@@ -74,6 +75,22 @@ function setup() {
 
 function draw() {
   background(0);
+
+  if (glitchMode == RANDOM) {
+    if (random() < 1/8) glitchMode = wasGlitched ? 0 : ~~random(numModes);
+  } else if (glitchMode == NO_GLITCH) {
+    if (random() < 1/512) {
+      // glitch it!
+      glitchMode = RANDOM;
+      wasGlitched = false;
+    }
+  } else {
+    if (random() < 1/128) {
+      // back to normal
+      glitchMode = RANDOM;
+      wasGlitched = true;
+    }
+  }
   
   if (selectedLine != -1) {
     fill(dark_green);
@@ -124,13 +141,20 @@ function draw() {
 }
 
 function glitchText(str) {
+  if (glitchMode == RANDOM) {
+    let chars = str.split("");
+    for (let i = 0; i < chars.length; i++) {
+      chars[i] = random("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ".split(""));
+    }
+    return chars.join("");
+  }
   if (glitchMode == NO_GLITCH) return str;
   if (glitchMode == SHUFFLE) {
-    randomSeed(frameCount/21);
+    randomSeed(frameCount/64);
     return shuffle(str.split("")).join("");
   }
   if (glitchMode == LEET) {
-    let chars = str.split("");
+    let chars = str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").split("");
     for (let i = 0; i < chars.length; i++) {
       switch (chars[i].toUpperCase()) {
         case "A":
@@ -196,8 +220,10 @@ function doubleClicked() {
   if (mouseY > 0 && mouseY < height) {
     let idx = floor(mouseY/lineHeight);
     let repo_name = all_repos_list[idx];
-    if (other_repos_list.indexOf(repo_name) != -1) {
-      return;
+    if (repo_name == "artistic-inspirations") {
+      window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    } else if (repo_name == "rethread-and-friends") {
+      window.open("https://rethread.art/");
     } else if (gitlab_repos_list.indexOf(repo_name) != -1) {
       window.open("https://gitlab.com/"+repo_name);
     } else {

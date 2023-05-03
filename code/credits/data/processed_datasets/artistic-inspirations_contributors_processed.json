@@ -1,6 +1,6 @@
 {
  "repo": "artistic-inspirations",
- "n_contributions": 82,
+ "n_contributions": 81,
  "contributors": [
   {
    "id": "Sol LeWitt",
@@ -384,11 +384,6 @@
   },
   {
    "id": "Marcel Duchamp",
-   "type": "Human",
-   "contributions": 1
-  },
-  {
-   "id": "Bob Grant & Bob Totten",
    "type": "Human",
    "contributions": 1
   },
