@@ -2,6 +2,7 @@ Sol LeWitt
 Vera Molnár
 John Cage
 Ryoji Ikeda
+Muriel Cooper
 John Maeda
 Casey Reas
 Ben Fry
@@ -48,6 +49,7 @@ Sonia & Robert Delaunay
 Anni & Josef Albers
 A. Michael Noll
 Billy Klüver
+Nicolas Schöffer
 Jean Tinguely
 Steve Reich
 Morton Feldman
@@ -73,6 +75,7 @@ Sasha Stiles
 Gordon Matta-Clark
 Scott McCloud
 Lana & Lilly Wachowski
+Simon Whiteley
 Raymond Queneau
 François Le Lionnais
 Piet Mondrian
@@ -82,3 +85,17 @@ Daft Punk
 Daniel Shiffman
 Raphaël de Courville
 Bridget Riley
+Claude Debussy
+Igor Stravinsky
+Onyx Ashanti
+James Turrell
+Mika Vainio
+Stanislav Lem
+Ursula K. Le Guin
+György Ligeti
+Tim Hecker
+Annbjørg Lien
+Fischli & Weiss
+Kurt Vonnegut
+Tino Sehgal
+Terry Gilliam

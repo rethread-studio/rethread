@@ -52,7 +52,7 @@ function setup() {
   noStroke();
   textAlign(LEFT, TOP);
   
-  textFont("monospace", lineHeight/1.1);
+  textFont("monospace", lineHeight/1.05);
   charWidth = textWidth("a");
   gap = 3*charWidth;
   
@@ -144,13 +144,13 @@ function glitchText(str) {
   if (glitchMode == RANDOM) {
     let chars = str.split("");
     for (let i = 0; i < chars.length; i++) {
-      chars[i] = random("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ".split(""));
+      chars[i] = random("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-[] ".split(""));
     }
     return chars.join("");
   }
   if (glitchMode == NO_GLITCH) return str;
   if (glitchMode == SHUFFLE) {
-    randomSeed(frameCount/64);
+    randomSeed(str.length*str.codePointAt(0));
     return shuffle(str.split("")).join("");
   }
   if (glitchMode == LEET) {
@@ -195,7 +195,9 @@ function glitchText(str) {
     let chars = str.split("");
     for (let i = 0; i < chars.length; i++) {
       let c = chars[i];
-      chars[i] = String.fromCodePoint(c.codePointAt(0)+7);
+      let cod = c.codePointAt(0)+7;
+      if (cod > "z".codePointAt(0) && cod < "z".codePointAt(0)+8) cod = cod - "z".codePointAt(0) + "A".codePointAt(0) - 1;
+      chars[i] = String.fromCodePoint(cod);
     }
     return chars.join("");
   } else if (glitchMode == HEXADECIMAL) {
@@ -206,9 +208,11 @@ function glitchText(str) {
     }
     return chars.join("");
   } else if (glitchMode == SLIDE) {
+    randomSeed(str.length);
+    let off = ~~random(str.length*str.codePointAt(0));
     let chars = str.split("");
     for (let i = 0; i < chars.length; i++) {
-      chars[i] = str[(i+floor(frameCount/10))%str.length];
+      chars[i] = str[(i+off)%str.length];
     }
     return chars.join("");
   } else if (glitchMode == REVERSE) {
@@ -217,31 +221,32 @@ function glitchText(str) {
 }
 
 function doubleClicked() {
-  if (mouseY > 0 && mouseY < height) {
-    let idx = floor(mouseY/lineHeight);
-    let repo_name = all_repos_list[idx];
-    if (repo_name == "artistic-inspirations") {
-      window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-    } else if (repo_name == "rethread-and-friends") {
-      window.open("https://rethread.art/");
-    } else if (gitlab_repos_list.indexOf(repo_name) != -1) {
-      window.open("https://gitlab.com/"+repo_name);
-    } else {
-      window.open("https://github.com/"+repo_name);
-    }
+  let idx = floor(constrain(mouseY, 0, height)/lineHeight);
+  let repo_name = all_repos_list[idx];
+  let link;
+  if (repo_name == "artistic-inspirations") {
+    link = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  } else if (repo_name == "rethread-and-friends") {
+    link = "https://rethread.art/";
+  } else if (gitlab_repos_list.indexOf(repo_name) != -1) {
+    link = "https://gitlab.com/"+repo_name;
+  } else {
+    link = "https://github.com/"+repo_name;
   }
+  window.open(link);
 }
 
 function mouseMoved() {
-  if (mouseY > 0 && mouseY < height && !(navigator.userAgent.toLowerCase().match(/mobile/i)))
-    selectedLine = floor(mouseY/lineHeight);
+  if (!(navigator.userAgent.toLowerCase().match(/mobile/i)))
+    selectedLine = floor(constrain(mouseY, 0, height)/lineHeight);
   else 
     selectedLine = -1;
 }
 
 function keyPressed() {
   if (key == "r") {
-    glitchMode = (glitchMode + 1)%numModes;
+    glitchMode = NO_GLITCH;
+    wasGlitched = true;
   }
 }
 

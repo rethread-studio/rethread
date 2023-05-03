@@ -1,6 +1,6 @@
 {
  "repo": "artistic-inspirations",
- "n_contributions": 81,
+ "n_contributions": 98,
  "contributors": [
   {
    "id": "Sol LeWitt",
@@ -19,6 +19,11 @@
   },
   {
    "id": "Ryoji Ikeda",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Muriel Cooper",
    "type": "Human",
    "contributions": 1
   },
@@ -253,6 +258,11 @@
    "contributions": 1
   },
   {
+   "id": "Nicolas Sch\u00f6ffer",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
    "id": "Jean Tinguely",
    "type": "Human",
    "contributions": 1
@@ -363,6 +373,11 @@
    "contributions": 1
   },
   {
+   "id": "Simon Whiteley",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
    "id": "Raymond Queneau",
    "type": "Human",
    "contributions": 1
@@ -404,6 +419,76 @@
   },
   {
    "id": "Bridget Riley",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Claude Debussy",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Igor Stravinsky",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Onyx Ashanti",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "James Turrell",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Mika Vainio",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Stanislav Lem",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Ursula K. Le Guin",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Gy\u00f6rgy Ligeti",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Tim Hecker",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Annbj\u00f8rg Lien",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Fischli & Weiss",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Kurt Vonnegut",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Tino Sehgal",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "Terry Gilliam",
    "type": "Human",
    "contributions": 1
   }
