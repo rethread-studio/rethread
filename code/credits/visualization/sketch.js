@@ -221,7 +221,7 @@ function glitchText(str) {
 }
 
 function doubleClicked() {
-  let idx = floor(constrain(mouseY, 0, height)/lineHeight);
+  let idx = floor(constrain(mouseY, 0, height-1)/lineHeight);
   let repo_name = all_repos_list[idx];
   let link;
   if (repo_name == "artistic-inspirations") {
@@ -237,10 +237,12 @@ function doubleClicked() {
 }
 
 function mouseMoved() {
-  if (!(navigator.userAgent.toLowerCase().match(/mobile/i)))
-    selectedLine = floor(constrain(mouseY, 0, height)/lineHeight);
-  else 
+  if (!(navigator.userAgent.toLowerCase().match(/mobile/i))) {
+    selectedLine = floor(constrain(mouseY, 0, height-1)/lineHeight);
+    console.log(selectedLine)
+  } else { 
     selectedLine = -1;
+  }
 }
 
 function keyPressed() {
