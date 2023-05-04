@@ -25,7 +25,7 @@ let selectedLine = -1;
 // glitch modes
 const RANDOM = -1, NO_GLITCH = 0, SHUFFLE = 1, LEET = 2, S_PLUS_7 = 3, HEXADECIMAL = 4, SLIDE = 5, REVERSE = 6;
 const numModes = 7;
-let wasGlitched = false;
+let wasGlitched = false, glitchStart, maxGlitchLength = 256;
 let glitchMode = NO_GLITCH;
 
 function preload() {
@@ -83,9 +83,10 @@ function draw() {
       // glitch it!
       glitchMode = RANDOM;
       wasGlitched = false;
+      glitchStart = frameCount;
     }
   } else {
-    if (random() < 1/128) {
+    if (random() < 1/128 || frameCount > glitchStart + maxGlitchLength) {
       // back to normal
       glitchMode = RANDOM;
       wasGlitched = true;
