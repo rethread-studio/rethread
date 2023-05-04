@@ -1,6 +1,6 @@
 {
  "repo": "rethread-and-friends",
- "n_contributions": 26,
+ "n_contributions": 27,
  "contributors": [
   {
    "id": "Benoit Baudry",
@@ -129,6 +129,11 @@
   },
   {
    "id": "Jonas Johansson",
+   "type": "Human",
+   "contributions": 1
+  },
+  {
+   "id": "ASSERT",
    "type": "Human",
    "contributions": 1
   }
