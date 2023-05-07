@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
+    <script src="libraries/StartAudioContext.js"></script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let canvas;
+        var w = document.documentElement.clientWidth;//width of window that is available for drawing
+        var h = document.documentElement.clientHeight;//width of window that is available for drawing
+
+
+        function setup() {
+            colorMode(HSB, 360, 100, 100, 250)
+            canvas = createCanvas(w, h);
+            background(0, 0, 0);
+
+
+        }
+
+
+        function draw() {
+            if (frameCount==1){
+                noStroke()
+                fill(0,0,100)
+                rect(0,0,w,h)
+            }
+            if (frameCount<180){
+                background(0, 0, 0, 2);
+            }
+            else{
+                if (frameCount<480){
+                    background(0, 0, 0);
+                    bw()
+                }
+                else{
+                    background(0, 0, 0);
+                    fill(0, 0, 100); stroke(0, 0, 100);
+                textSize(42)
+                textAlign("center")
+                text("sys|call by re|thread", w / 2, h / 2-53);
+                text("opening on 2023::06::15", w / 2, h / 2);
+                text("turbine hall @ KTH", w / 2, h / 2+53);
+                }
+            }
+        }
+
+        var hei = 42;
+        var starty = 0;
+        var speed = 4;
+        var startx = w/2-1;
+        var wid = 2;
+        function bw(){
+            noStroke()
+            fill(0,0,100)
+            let y = starty
+            while (y<h){
+                rect(startx,y,wid,hei+random()*hei)
+                y+=2*hei;
+            }
+            if (starty<hei){
+                starty+=speed
+            }
+            if (starty>=hei&&starty<2*hei){
+                rect(startx,0,wid,starty-hei)
+                starty+=speed
+            }
+            if (starty==2*hei){
+                starty=0
+            }
+            if (startx>=0){
+                startx-=3;
+                wid+=6;
+            }
+        }
+
+
+        function windowResized() {
+            w = document.documentElement.clientWidth;//width of window that is available for drawing
+            h = document.documentElement.clientHeight;//width of window that is available for drawing
+            resizeCanvas(w, h);
+        }
+
+    </script>
+</body>
+
+</html>
