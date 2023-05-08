@@ -240,7 +240,6 @@ function doubleClicked() {
 function mouseMoved() {
   if (!(navigator.userAgent.toLowerCase().match(/mobile/i))) {
     selectedLine = floor(constrain(mouseY, 0, height-1)/lineHeight);
-    console.log(selectedLine)
   } else { 
     selectedLine = -1;
   }
