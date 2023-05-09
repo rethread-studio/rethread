@@ -1,99 +1,215 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML>
+<!--
+	Fractal by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
-    <script src="libraries/StartAudioContext.js"></script>
-    <style>
-        body {
-            padding: 0;
-            margin: 0;
-        }
-    </style>
+	<title>sys|calls</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="../assets/css/main.css" />
+	<link rel="icon" type="image/png" sizes="32x32" href="../images/favicon.png">
+	<noscript>
+		<link rel="stylesheet" href="../assets/css/noscript.css" />
+	</noscript>
+
+
+
 </head>
 
-<body>
-    <script>
-        let canvas;
-        var w = document.documentElement.clientWidth;//width of window that is available for drawing
-        var h = document.documentElement.clientHeight;//width of window that is available for drawing
+<body class="is-preload">
+
+	<section class="main">
+		<div class="content" id="header">
+			<!--
+			<img src="../images/syscalls/wip_banner.png"
+				alt="sys|calls" style="width: 100%" />
+			-->
+		</div>
+
+	</section>
+
+	<!-- Two -->
+	<section id="" class="wrapper">
+		<div class="inner alt">
+			<div class="content">
+				<h2 style="margin-bottom:0">sys|calls</h2>
+				<h3 style="margin:0">When: June 15 to 18, 2023</h3>
+				<h3 style="margin:0">Where: Turbine Hall, KTH<br> Drottning Kristinas väg 14, Stockholm</h3>
+				<p></p>
+				<p>sys|calls is an immersive installation and live performance exploring the beauty of system calls.
+				</p>
+			</div>
+
+			<div class="content">
+				<h3> Preview </h3>
+				<p>A preview will take place at Den Fantastiska Platsen (Hornsgatan 124, 117 28 Stockholm) on May 30, 2023.
+				</p>
+			</div>
+
+			<div class="content">
+				<h3> Page under construction... </h3>
+				<p>More info soon!
+				</p>
+			</div>
+
+			<!--
+			<div class="content">
+				<h3> sys|calls in the world </h3>
+				<table>
+					
+				</table>
+				<h4>On social media</h4>
+					<table>
+					</table>
+			</div>
+		-->
+			
+			<div class="content">
+				<h3> Credits </h3>
+				<p>sys|calls was designed and developed by <a href="https://imakethings.work/">Jaime Reyes</a> and the
+					<a href="https://rethread.art/">re|thread</a> collective: <a href="https://eriknatanael.com/">Erik Natanael Gustafsson</a>, <a href="https://www.linkedin.com/in/maria-euler-art-science-design/">Maria Kling</a>, <a href="https://ronikaufman.github.io/">Roni Kaufman</a>, and <a href="https://softwarediversity.eu/">Benoit
+					Baudry</a>.</p>
+					<!--
+				<p>
+					sys|calls was supported by the <a href="https://www.kth.se/">KTH Royal Institute of
+						Technology</a> and the
+					<a href="https://wasp-sweden.org/">Wallenberg Autonomous Systems, Software and AI Program
+						(WASP)</a>. Special thanks to Leif Handberg (KTH) for his support and for giving us access to an amazing space.
+				</p>
+			-->
+				<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img
+						alt="Creative Commons License" style="border-width:0"
+						src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed
+				under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons
+					Attribution 4.0 International License</a>.
+			</div>
+		</div>
+	</section>
+
+	<!-- Three -->
+	<section id="three" class="wrapper style2 special">
+		<ul class="actions special">
+			<li><a href="../index.html" class="button">HOME</a></li>
+			<!-- <li><a href="#" class="button">Learn More</a></li> -->
+		</ul>
+	</section>
 
 
-        function setup() {
-            colorMode(HSB, 360, 100, 100, 250)
-            canvas = createCanvas(w, h);
-            background(0, 0, 0);
+	<!-- Scripts -->
+	<script src="/assets/js/jquery.min.js"></script>
+	<script src="/assets/js/jquery.scrolly.min.js"></script>
+	<script src="/assets/js/browser.min.js"></script>
+	<script src="/assets/js/breakpoints.min.js"></script>
+	<script src="/assets/js/util.js"></script>
+	<script src="/assets/js/main.js"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
+    <script src="libraries/StartAudioContext.js"></script>
+
+	<script>
+		let canvas;
+		let headerDiv = document.getElementById("header");
+		let boundingRect = headerDiv.getBoundingClientRect();
+
+		var w = boundingRect.width;//width of window that is available for drawing
+		var h = boundingRect.height;//width of window that is available for drawing
+
+		let str1 = "sys|calls by re|thread & Jaime Reyes";
+		let str2 = "opening on 2023::06::15";
+		let str3 = "turbine hall @ KTH";
+		let fontSize;
+
+		function setup() {
+			colorMode(HSB, 360, 100, 100, 250)
+			canvas = createCanvas(w, h);
+			canvas.parent("header");
+			background(0, 0, 0);
+
+			fontSize = 42;
+			textSize(fontSize);
+			textFont("monospace");
+			while (textWidth(str1) > width*0.9) {
+				textSize(fontSize);
+				fontSize--;
+			}
+		}
 
 
-        }
+		function draw() {
+			if (frameCount==1){
+				noStroke()
+				fill(0,0,100)
+				rect(0,0,w,h)
+			}
+			if (frameCount<180){
+				background(0, 0, 0, 2);
+			}
+			else{
+				if (frameCount<480){
+					background(0, 0, 0);
+					bw()
+				}
+				else{
+					background(0, 0, 0);
+					fill(0, 0, 100); stroke(0, 0, 100);
+					textAlign(CENTER, CENTER);
+					text(str1, w / 2, h / 2-fontSize*1.2);
+					text(str2, w / 2, h / 2);
+					text(str3, w / 2, h / 2+fontSize*1.2);
+				}
+			}
+		}
 
+		var hei = 42;
+		var starty = 0;
+		var speed = 4;
+		var startx = w/2-1;
+		var wid = 2;
+		function bw(){
+			noStroke()
+			fill(0,0,100)
+			let y = starty
+			while (y<h){
+				rect(startx,y,wid,hei+random()*hei)
+				y+=2*hei;
+			}
+			if (starty<hei){
+				starty+=speed
+			}
+			if (starty>=hei&&starty<2*hei){
+				rect(startx,0,wid,starty-hei)
+				starty+=speed
+			}
+			if (starty==2*hei){
+				starty=0
+			}
+			if (startx>=0){
+				startx-=3;
+				wid+=6;
+			}
+		}
 
-        function draw() {
-            if (frameCount==1){
-                noStroke()
-                fill(0,0,100)
-                rect(0,0,w,h)
-            }
-            if (frameCount<180){
-                background(0, 0, 0, 2);
-            }
-            else{
-                if (frameCount<480){
-                    background(0, 0, 0);
-                    bw()
-                }
-                else{
-                    background(0, 0, 0);
-                    fill(0, 0, 100); stroke(0, 0, 100);
-                textSize(42)
-                textAlign("center")
-                text("sys|calls by re|thread & Jaime Reyes", w / 2, h / 2-53);
-                text("opening on 2023::06::15", w / 2, h / 2);
-                text("turbine hall @ KTH", w / 2, h / 2+53);
-                }
-            }
-        }
+		function windowResized() {
+			boundingRect = headerDiv.getBoundingClientRect();
+			w = boundingRect.width;//width of window that is available for drawing
+			h = boundingRect.height;//width of window that is available for drawing
+			resizeCanvas(w, h);
 
-        var hei = 42;
-        var starty = 0;
-        var speed = 4;
-        var startx = w/2-1;
-        var wid = 2;
-        function bw(){
-            noStroke()
-            fill(0,0,100)
-            let y = starty
-            while (y<h){
-                rect(startx,y,wid,hei+random()*hei)
-                y+=2*hei;
-            }
-            if (starty<hei){
-                starty+=speed
-            }
-            if (starty>=hei&&starty<2*hei){
-                rect(startx,0,wid,starty-hei)
-                starty+=speed
-            }
-            if (starty==2*hei){
-                starty=0
-            }
-            if (startx>=0){
-                startx-=3;
-                wid+=6;
-            }
-        }
+			fontSize = 42;
+			textSize(fontSize);
+			while (textWidth(str1) > width*0.9) {
+				textSize(fontSize);
+				fontSize--;
+			}
+		}
 
+	</script>
 
-        function windowResized() {
-            w = document.documentElement.clientWidth;//width of window that is available for drawing
-            h = document.documentElement.clientHeight;//width of window that is available for drawing
-            resizeCanvas(w, h);
-        }
-
-    </script>
 </body>
 
 </html>
