@@ -2,8 +2,10 @@ use nix::errno::Errno;
 use protocol::Protocol;
 
 use serde::{Deserialize, Serialize};
-use strum::Display;
-#[derive(Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq, Serialize, Deserialize, Display)]
+use strum::{Display, EnumIter};
+#[derive(
+    Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq, Serialize, Deserialize, Display, EnumIter,
+)]
 pub enum SyscallKind {
     Memory,
     /// I/O calls that could apply to any file descriptor
