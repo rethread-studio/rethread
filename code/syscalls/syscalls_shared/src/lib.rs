@@ -1,10 +1,11 @@
+use enum_iterator::Sequence;
 use nix::errno::Errno;
 use protocol::Protocol;
 
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter};
 #[derive(
-    Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq, Serialize, Deserialize, Display, EnumIter,
+    Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq, Serialize, Deserialize, Display, Sequence,
 )]
 pub enum SyscallKind {
     Memory,
