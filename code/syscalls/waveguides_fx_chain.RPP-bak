@@ -1,4 +1,4 @@
-<REAPER_PROJECT 0.1 "6.58/linux-x86_64" 1684416577
+<REAPER_PROJECT 0.1 "6.58/linux-x86_64" 1683896308
   <NOTES 0 2
   >
   RIPPLE 0
@@ -60,8 +60,8 @@
   GLOBAL_AUTO -1
   TEMPO 120 4 4
   PLAYRATE 1 0 0.25 4
-  SELECTION 0 13
-  SELECTION2 0 13
+  SELECTION 10 13
+  SELECTION2 10 13
   MASTERAUTOMODE 0
   MASTERTRACKHEIGHT 0 0
   MASTERPEAKCOL 16576
@@ -72,7 +72,7 @@
   MASTER_VOLUME 0.72459208542817 0 -1 -1 1
   MASTER_PANMODE 3
   MASTER_FX 1
-  MASTER_SEL 0
+  MASTER_SEL 1
   <MASTERPLAYSPEEDENV
     EGUID {83C96734-3D52-2C31-FAA7-6D76374B463A}
     ACT 0 -1
@@ -144,42 +144,21 @@
       <VST "VST: ReaLimit (Cockos)" realimit.vst.so 0 "" 1919708532<565354726C6D747265616C696D697400> ""
         dG1scu5e7f4CAAAAAQAAAAAAAAACAAAAAAAAAAIAAAABAAAAAAAAAAIAAAAAAAAAMAAAAAEAAAAAABAA
         AwAAAAAAAADMzMzMzMwowAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAD+fduMQw8Y/
-        AFByb2dyYW0gMQAQAAAA
+        AAAQAAAA
       >
-      PRESETNAME "Program 1"
       FLOATPOS 0 0 0 0
       FXID {5628C4E3-0117-D88D-22CB-831C45BBF14B}
       WAK 0 0
-      BYPASS 0 0 0
+      BYPASS 1 0 0
       <LV2 "LV2: Calf Reverb (Calf Studio Gear)" http://calf.sourceforge.net/plugins/Reverb ""
         CFG 0 0 0 ""
         MIDI events_in 24 0 
         MIDI events_out 25 0 
-        P decay_time 2.765199899673461914 hf_damp 5000 room_size 2 diffusion 0.81099998950958252 amount 0.224390238523483276
-        P dry 0.907999992370605469 predelay 9.5 bass_cut 300 treble_cut 5000 on 1 level_in 1 level_out 1
+        P decay_time 2.765199899673461914 hf_damp 5000 room_size 2 diffusion 0.81099998950958252 amount 0.25 dry 1
+        P predelay 9.5 bass_cut 300 treble_cut 5000 on 1 level_in 1 level_out 1
       >
       FLOATPOS 0 0 0 0
       FXID {6D3A1513-7783-7315-F6B1-F8B595415B15}
-      <PARMENV 7:_amount 0 2 1
-        EGUID {12283E4C-8488-DA3A-A4D7-F3B29164459B}
-        ACT 1 -1
-        VIS 1 1 1
-        LANEHEIGHT 0 0
-        ARM 1
-        DEFSHAPE 0 -1 -1
-        PT 0 0.22439024 0
-      >
-      <PROGRAMENV 7:_amount 1
-        PARAMBASE 0
-        LFO 1
-        LFOWT 0.057 1
-        AUDIOCTL 0
-        AUDIOCTLWT 1 1
-        LFOSHAPE 3
-        LFOSYNC 0 0 0
-        LFOSPEED 0.499756 0
-        MODWND 1 0 0 431 169
-      >
       WAK 0 0
       BYPASS 1 0 0
       <VST "VST: ToTape6 (airwindows)" ToTape6.so 0 "" 1953461365<565354746F7475746F74617065360000> ""
@@ -190,15 +169,6 @@
       PRESETNAME Default
       FLOATPOS 0 0 0 0
       FXID {28AB8DA4-DA48-2417-2093-BD2A3BCCDFE7}
-      WAK 0 0
-      BYPASS 1 0 0
-      <VST "VST: Galactic (airwindows)" Galactic.so 0 "" 1734437985<56535467616C6167616C616374696300> ""
-        YWxhZ+5e7f4CAAAAAQAAAAAAAAACAAAAAAAAAAIAAAABAAAAAAAAAAIAAAAAAAAAFAAAAAEAAAAAABAA
-        mpmZPrKdTz8AAAAAAACAPwAAgD8=
-        AAAQAAAA
-      >
-      FLOATPOS 0 0 0 0
-      FXID {5FDB38B2-7B7A-845B-CB0F-1B400B5D7103}
       WAK 0 0
     >
   >
