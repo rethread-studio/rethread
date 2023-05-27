@@ -5,4 +5,5 @@ members = [
     "data_vertex",
     "syscalls_shared",
     "grapher",
+    "syscalls_sonifier",
 ]

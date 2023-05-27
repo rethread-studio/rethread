@@ -1,0 +1,234 @@
+use std::collections::HashMap;
+use std::time::{Duration, Instant};
+
+use knyst::controller::KnystCommands;
+use knyst::graph::{NodeAddress, NodeChanges, SimultaneousChanges};
+use knyst::prelude::*;
+use knyst_waveguide::interface::{
+    ContinuousWaveguide, MultiVoiceTriggeredSynth, Note, NoteOpt, PluckedWaveguide,
+    PluckedWaveguideSettings, SustainedSynth, Synth, TriggeredSynth,
+};
+use syscalls_shared::SyscallKind;
+
+use crate::Sonifier;
+
+pub struct DirectCategories {
+    continuous_wgs: HashMap<String, SyscallWaveguide>,
+    post_fx: NodeAddress,
+    sample_duration: Duration,
+    last_sample: Instant,
+    k: KnystCommands,
+}
+
+impl DirectCategories {
+    pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
+        let post_fx = k.push(
+            gen(|ctx, _| {
+                let inp = ctx.inputs.get_channel(0);
+                let out = ctx.outputs.iter_mut().next().unwrap();
+                for (i, o) in inp.iter().zip(out.iter_mut()) {
+                    *o = (i * 0.1).clamp(-1.0, 1.0);
+                }
+                // dbg!(&inp);
+                GenState::Continue
+            })
+            .input("in")
+            .output("sig"),
+            inputs![],
+        );
+        k.connect(post_fx.to_graph_out().channels(2).to_channel(8));
+
+        let mut continuous_wgs = HashMap::new();
+        for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
+            let kind_label = format!("{syscall_kind:?}");
+
+            let (mut sender, mut receiver) =
+                rtrb::RingBuffer::<f32>::new((sample_rate * 0.3) as usize);
+            for _i in 0..(sample_rate * 0.05) as usize {
+                sender.push(0.0).ok();
+            }
+            let mut value = 0.0;
+            let exciter_sig = k.push(
+                gen(move |ctx, _| {
+                    let in_buf = ctx.inputs.get_channel(0);
+                    let out_buf = ctx.outputs.iter_mut().next().unwrap();
+                    for (i, o) in in_buf.iter().zip(out_buf.iter_mut()) {
+                        let new_value =
+                            (receiver.pop().unwrap_or(0.0).clamp(0.0, 500.0) / 500.0).powf(0.125);
+                        if value < 0.001 {
+                            value += new_value;
+                        }
+                        value = value.clamp(-1.0, 1.0);
+                        *o = value + i;
+                        value *= 0.5;
+                    }
+                    GenState::Continue
+                })
+                .output("out")
+                .input("in"),
+                inputs![],
+            );
+            let mut continuous_wg = ContinuousWaveguide::new(k);
+            k.connect(
+                exciter_sig
+                    .to(continuous_wg.exciter_bus_input())
+                    .from_channel(0)
+                    .to_channel(0),
+            );
+            k.connect(Connection::graph_input(&exciter_sig));
+            for out in continuous_wg.outputs() {
+                k.connect(out.to_node(&post_fx));
+            }
+            let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
+            let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
+            let scale = [0, 17, 31, 48, 53, 53 + 26, 53 + 31];
+            let wrap_interval = 53;
+            // let freq = 25. * (i + 1).pow(2) as f32;
+            let freq = to_freq53(
+                scale[i % scale.len()] + wrap_interval * (i / scale.len()) as i32,
+                110.,
+            );
+            continuous_wg.change(
+                NoteOpt {
+                    freq: Some(freq),
+                    amp: Some(1.0),
+                    // damping: freq * 7.0,
+                    damping: Some(1000. + freq * 4.0),
+                    feedback: Some(0.99999 * 1.01),
+                    stiffness: Some(0.),
+                    hpf: Some(10.),
+                    exciter_lpf: Some(2000.),
+                    position: Some(0.25),
+                },
+                &mut changes,
+            );
+            k.schedule_changes(changes);
+            let syscall_waveguide = SyscallWaveguide::new(continuous_wg, exciter_sig, sender);
+            continuous_wgs.insert(kind_label, syscall_waveguide);
+        }
+
+        // let to_freq53 = |degree| 2.0_f32.powf(degree as f32 / 53.) * 220.0;
+
+        let sample_duration = Duration::from_secs_f64(1.0 / sample_rate as f64);
+        Self {
+            continuous_wgs,
+            post_fx,
+            k: k.clone(),
+            last_sample: Instant::now(),
+            sample_duration,
+        }
+    }
+}
+
+impl Sonifier for DirectCategories {
+    fn apply_osc_message(&mut self, m: nannou_osc::Message) {
+        if m.addr == "/syscall" {
+            let mut args = m.args.unwrap().into_iter();
+            let id = args.next().unwrap().int().unwrap();
+            let kind = args.next().unwrap().string().unwrap();
+            let mut func_args = [0_i32; 3];
+            func_args[0] = args.next().unwrap().int().unwrap();
+            func_args[1] = args.next().unwrap().int().unwrap();
+            func_args[2] = args.next().unwrap().int().unwrap();
+            if let Some(swg) = self.continuous_wgs.get_mut(&kind) {
+                swg.register_call(id, func_args);
+            }
+        }
+    }
+
+    fn update(&mut self) {
+        for swg in self.continuous_wgs.values_mut() {
+            swg.update(&mut self.k);
+        }
+    }
+
+    fn free(mut self) {
+        for (_kind, wg) in self.continuous_wgs.drain() {
+            wg.free(&mut self.k);
+        }
+        self.k.free_node(self.post_fx);
+    }
+}
+
+struct SyscallWaveguide {
+    wg: ContinuousWaveguide,
+    exciter: NodeAddress,
+    exciter_sender: rtrb::Producer<f32>,
+    accumulator: f32,
+    coeff: f32,
+    iterations_since_trigger: usize,
+    average_iterations_since_trigger: f32,
+}
+
+impl SyscallWaveguide {
+    pub fn new(
+        wg: ContinuousWaveguide,
+        exciter: NodeAddress,
+        exciter_sender: rtrb::Producer<f32>,
+    ) -> Self {
+        Self {
+            wg,
+            exciter,
+            exciter_sender,
+            accumulator: 0.0,
+            coeff: 1.0,
+            iterations_since_trigger: 1000,
+            average_iterations_since_trigger: 1000.,
+        }
+    }
+    fn register_call(&mut self, id: i32, args: [i32; 3]) {
+        self.accumulator += id as f32 * self.coeff;
+        self.accumulator += self.coeff;
+    }
+    fn update(&mut self, k: &mut KnystCommands) {
+        if !self.exciter_sender.is_full() {
+            // if self.accumulator > 500. {
+            //     self.coeff *= 0.9;
+            // }
+            // if self.accumulator < 10.0 {
+            //     self.coeff *= 1.00001;
+            // }
+            // self.coeff = self.coeff.clamp(0.0001, 2.0);
+            if self.accumulator > 300. {
+                self.exciter_sender.push(self.accumulator).unwrap();
+                self.accumulator = 0.0;
+                self.average_iterations_since_trigger = self.average_iterations_since_trigger * 0.9
+                    + self.iterations_since_trigger as f32 * 0.1;
+                if self.iterations_since_trigger < (48000 / 20) {
+                    self.coeff *= 0.99;
+                }
+                let mut changes = SimultaneousChanges::now();
+                let feedback = 0.999
+                    + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.5);
+                self.wg.change(
+                    NoteOpt {
+                        feedback: Some(feedback),
+                        ..Default::default()
+                    },
+                    &mut changes,
+                );
+                k.schedule_changes(changes);
+                self.iterations_since_trigger = 0;
+            } else {
+                self.exciter_sender.push(0.0).unwrap();
+                self.iterations_since_trigger += 1;
+            }
+            if self.iterations_since_trigger == 2000 {
+                let mut changes = SimultaneousChanges::now();
+                let feedback = 0.999;
+                self.wg.change(
+                    NoteOpt {
+                        feedback: Some(feedback),
+                        ..Default::default()
+                    },
+                    &mut changes,
+                );
+                k.schedule_changes(changes);
+            }
+        }
+    }
+    fn free(self, k: &mut KnystCommands) {
+        k.free_node(self.exciter);
+        self.wg.free(k);
+    }
+}
