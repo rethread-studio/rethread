@@ -182,6 +182,12 @@ impl PacketHQ {
         let Ok(mut file) = File::create(path) else { error!("Couldn't open file to save data!"); return; };
         file.write_all(data.as_slice()).unwrap();
     }
+    fn stop_and_save_recording_json(&mut self, path: PathBuf) {
+        let Some(recording) = self.recording.take() else { return };
+        let data = serde_json::to_string(&recording).unwrap();
+        let Ok(mut file) = File::create(path) else { error!("Couldn't open file to save data!"); return; };
+        write!(file, "{}", data).unwrap();
+    }
     fn load_recording(&mut self, path: PathBuf) {
         let Ok(recording_playback) = RecordingPlayback::from_file(&path) else { error!("Failed to load data from path: {path:?}"); return; };
         self.recording_playback = Some(recording_playback);
@@ -223,6 +229,9 @@ impl PacketHQ {
             match command {
                 PacketHQCommands::StartRecording => self.start_recording(),
                 PacketHQCommands::SaveRecording { path } => self.stop_and_save_recording(path),
+                PacketHQCommands::SaveRecordingJson { path } => {
+                    self.stop_and_save_recording_json(path)
+                }
                 PacketHQCommands::LoadRecording { path } => self.load_recording(path),
                 PacketHQCommands::PauseRecordingPlayback => {
                     if let Some(recording) = &mut self.recording_playback {
@@ -271,6 +280,7 @@ impl Default for PlaybackData {
 enum PacketHQCommands {
     StartRecording,
     SaveRecording { path: PathBuf },
+    SaveRecordingJson { path: PathBuf },
     LoadRecording { path: PathBuf },
     PauseRecordingPlayback,
     StartRecordingPlayback,
@@ -483,6 +493,13 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                                     app.is_recording = false;
                                     app.packet_hq_sender
                                         .push(PacketHQCommands::SaveRecording { path })?;
+                                }
+                            }
+                            MenuItem::StopAndSaveRecordingJson => {
+                                if let Some(path) = rfd::FileDialog::new().save_file() {
+                                    app.is_recording = false;
+                                    app.packet_hq_sender
+                                        .push(PacketHQCommands::SaveRecordingJson { path })?;
                                 }
                             }
                             MenuItem::StartPlayback => {
