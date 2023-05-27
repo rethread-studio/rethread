@@ -1,11 +1,13 @@
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use knyst::prelude::*;
 use knyst::*;
 
 use anyhow::Result;
 use nannou_osc::{receiver, Message as OscMessage};
+use rand::{thread_rng, Rng};
 
 use crate::direct_categories::DirectCategories;
 use crate::direct_functions::DirectFunctions;
@@ -48,11 +50,12 @@ fn main() -> Result<()> {
     };
 
     let osc_receiver = receiver(7376).unwrap();
-    let mut current_sonifier = None;
+    let mut current_sonifier: Option<Box<dyn Sonifier>> = None;
     // current_sonifier = Some(DirectCategories::new(&mut k, sample_rate));
-    // current_sonifier = Some(QuantisedCategories::new(&mut k, sample_rate));
-    current_sonifier = Some(DirectFunctions::new(&mut k, sample_rate));
+    current_sonifier = Some(Box::new(QuantisedCategories::new(&mut k, sample_rate)));
+    // current_sonifier = Some(Box::new(DirectFunctions::new(&mut k, sample_rate)));
     let mut osc_messages = Vec::with_capacity(40);
+    let mut last_switch = Instant::now();
     // main loop
     loop {
         // Receive OSC messages
@@ -66,6 +69,27 @@ fn main() -> Result<()> {
             sonifier.update();
         }
         osc_messages.clear();
+
+        if last_switch.elapsed() > Duration::from_secs_f32(10.) {
+            let mut old_sonifier = current_sonifier.take().unwrap();
+            old_sonifier.free();
+            let mut rng = thread_rng();
+            match rng.gen::<usize>() % 3 {
+                0 => {
+                    current_sonifier =
+                        Some(Box::new(QuantisedCategories::new(&mut k, sample_rate)));
+                }
+                1 => {
+                    current_sonifier = Some(Box::new(DirectCategories::new(&mut k, sample_rate)));
+                }
+                2 => {
+                    current_sonifier = Some(Box::new(DirectFunctions::new(&mut k, sample_rate)));
+                }
+                _ => (),
+            }
+            k.free_disconnected_nodes();
+            last_switch = Instant::now();
+        }
         if stop.load(std::sync::atomic::Ordering::SeqCst) {
             eprintln!("{}", stop_message.lock().unwrap());
             break;
@@ -80,7 +104,7 @@ pub trait Sonifier {
     /// Run an update cycle from the main loop
     fn update(&mut self);
     /// Removes all the nodes making sound so that a new sonifier can be started
-    fn free(self);
+    fn free(&mut self);
 }
 
 pub fn to_freq53(degree: i32, root: f32) -> f32 {

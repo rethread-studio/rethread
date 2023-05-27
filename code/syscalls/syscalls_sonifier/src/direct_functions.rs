@@ -172,11 +172,11 @@ impl Sonifier for DirectFunctions {
         self.k.schedule_changes(changes);
     }
 
-    fn free(mut self) {
+    fn free(&mut self) {
         for (_kind, cat) in self.categories.drain() {
             cat.free(&mut self.k);
         }
-        self.k.free_node(self.post_fx);
+        self.k.free_node(self.post_fx.clone());
     }
 }
 

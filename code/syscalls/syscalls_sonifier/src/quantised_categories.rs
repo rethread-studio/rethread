@@ -112,6 +112,13 @@ impl QuantisedCategories {
             // let trig_interval = 0.25;
             // let delay_time = ((i) % num_syscall_kinds as usize) as f32 * 0.25 / num_syscall_kinds;
 
+            // let mut graph_settings = k.default_graph_settings();
+            // graph_settings.num_outputs = 4;
+            // let graph = Graph::new(graph_settings);
+            // let graph_id = graph.id();
+            // let graph = k.push(graph, inputs![]);
+            // let k = k.to_graph(graph_id);
+
             let impulse = k.push(
                 IntervalTrig::new(),
                 inputs![("interval": trig_interval)],
@@ -236,11 +243,11 @@ impl Sonifier for QuantisedCategories {
         }
     }
 
-    fn free(mut self) {
+    fn free(&mut self) {
         for (_kind, wg) in self.continuous_wgs.drain() {
             wg.free(&mut self.k);
         }
-        self.k.free_node(self.post_fx);
+        self.k.free_node(self.post_fx.clone());
     }
 }
 
@@ -330,6 +337,7 @@ impl SyscallKindQuantisedWaveguide {
     }
     fn free(self, k: &mut KnystCommands) {
         k.free_node(self.exciter);
+        k.free_node(self.sine_amp);
         self.wg.free(k);
     }
 }

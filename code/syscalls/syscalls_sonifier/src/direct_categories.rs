@@ -142,11 +142,11 @@ impl Sonifier for DirectCategories {
         }
     }
 
-    fn free(mut self) {
+    fn free(&mut self) {
         for (_kind, wg) in self.continuous_wgs.drain() {
             wg.free(&mut self.k);
         }
-        self.k.free_node(self.post_fx);
+        self.k.free_node(self.post_fx.clone());
     }
 }
 
