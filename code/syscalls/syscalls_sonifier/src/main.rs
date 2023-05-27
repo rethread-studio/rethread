@@ -8,9 +8,11 @@ use anyhow::Result;
 use nannou_osc::{receiver, Message as OscMessage};
 
 use crate::direct_categories::DirectCategories;
+use crate::direct_functions::DirectFunctions;
 use crate::quantised_categories::QuantisedCategories;
 
 mod direct_categories;
+mod direct_functions;
 mod quantised_categories;
 
 fn main() -> Result<()> {
@@ -48,7 +50,8 @@ fn main() -> Result<()> {
     let osc_receiver = receiver(7376).unwrap();
     let mut current_sonifier = None;
     // current_sonifier = Some(DirectCategories::new(&mut k, sample_rate));
-    current_sonifier = Some(QuantisedCategories::new(&mut k, sample_rate));
+    // current_sonifier = Some(QuantisedCategories::new(&mut k, sample_rate));
+    current_sonifier = Some(DirectFunctions::new(&mut k, sample_rate));
     let mut osc_messages = Vec::with_capacity(40);
     // main loop
     loop {
@@ -78,4 +81,8 @@ pub trait Sonifier {
     fn update(&mut self);
     /// Removes all the nodes making sound so that a new sonifier can be started
     fn free(self);
+}
+
+pub fn to_freq53(degree: i32, root: f32) -> f32 {
+    2.0_f32.powf(degree as f32 / 53.) * root
 }
