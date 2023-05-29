@@ -8,6 +8,7 @@ use crossterm::{
 use futures_util::StreamExt;
 use log::*;
 use menu::MenuItem;
+use movement::Score;
 use nix::errno::Errno;
 use send_osc::OscSender;
 use serde::{Deserialize, Serialize};
@@ -35,6 +36,7 @@ use tui::{
 
 mod config;
 mod menu;
+mod movement;
 mod send_osc;
 
 static SHOW_TUI: bool = true;
@@ -124,31 +126,31 @@ impl RecordingPlayback {
 }
 struct Analysers {
     syscall_analyser: SyscallAnalyser,
-    osc_sender: OscSender,
 }
 impl Analysers {
     pub fn new(settings: &Config) -> Self {
         Self {
             syscall_analyser: SyscallAnalyser::new(),
-            osc_sender: OscSender::new(settings),
         }
     }
 
-    fn register_packet(&mut self, packet: &Packet) {
+    fn register_packet(&mut self, packet: &Packet, osc_sender: &mut OscSender) {
         match packet {
             Packet::Syscall(syscall) => {
                 self.syscall_analyser.register_packet(syscall);
-                self.osc_sender.send_syscall(syscall);
+                osc_sender.send_syscall(syscall);
             }
         }
     }
 
-    fn update(&mut self) {
-        self.syscall_analyser.update(&mut self.osc_sender);
+    fn update(&mut self, osc_sender: &mut OscSender) {
+        self.syscall_analyser.update(osc_sender);
     }
 }
 struct PacketHQ {
+    score: Score,
     analysers: Analysers,
+    osc_sender: OscSender,
     recording: Option<RecordedPackets>,
     recording_playback: Option<RecordingPlayback>,
     start_recording_time: Instant,
@@ -163,7 +165,9 @@ impl PacketHQ {
         command_receiver: rtrb::Consumer<PacketHQCommands>,
     ) -> Self {
         Self {
+            score: Score::new(),
             recording: None,
+            osc_sender: OscSender::new(settings),
             start_recording_time: Instant::now(),
             gui_update_sender,
             command_receiver,
@@ -193,7 +197,8 @@ impl PacketHQ {
         self.recording_playback = Some(recording_playback);
     }
     fn register_packet(&mut self, packet: Packet) {
-        self.analysers.register_packet(&packet);
+        self.analysers
+            .register_packet(&packet, &mut self.osc_sender);
         if let Some(recording) = &mut self.recording {
             recording.record_packet(packet, self.start_recording_time.elapsed());
         }
@@ -201,11 +206,11 @@ impl PacketHQ {
     fn update(&mut self) {
         let dt = self.last_update.elapsed();
         self.last_update = Instant::now();
-        self.analysers.update();
+        self.analysers.update(&mut self.osc_sender);
         if let Some(rp) = &mut self.recording_playback {
             rp.progress_time(dt);
             while let Some(packet) = rp.next_packet() {
-                self.analysers.register_packet(packet);
+                self.analysers.register_packet(packet, &mut self.osc_sender);
             }
         }
         let playback_data = if let Some(rp) = &self.recording_playback {
@@ -248,8 +253,11 @@ impl PacketHQ {
                         rp.reset();
                     }
                 }
+                PacketHQCommands::PlayScore => self.score.play_from(0, &mut self.osc_sender),
+                PacketHQCommands::StopScorePlayback => self.score.stop(&mut self.osc_sender),
             }
         }
+        self.score.update(&mut self.osc_sender);
     }
 }
 
@@ -278,6 +286,8 @@ impl Default for PlaybackData {
     }
 }
 enum PacketHQCommands {
+    PlayScore,
+    StopScorePlayback,
     StartRecording,
     SaveRecording { path: PathBuf },
     SaveRecordingJson { path: PathBuf },
@@ -515,6 +525,12 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                                 app.packet_hq_sender
                                     .push(PacketHQCommands::ResetRecordingPlayback)?;
                             }
+                            MenuItem::PlayScore => {
+                                app.packet_hq_sender.push(PacketHQCommands::PlayScore)?;
+                            }
+                            MenuItem::StopScorePlayback => app
+                                .packet_hq_sender
+                                .push(PacketHQCommands::StopScorePlayback)?,
                         }
                     }
                     KeyCode::Char('q') => return Ok(()),

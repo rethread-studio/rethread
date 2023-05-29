@@ -3,7 +3,7 @@ use nannou_osc::{Connected, Sender, Type};
 use syscalls_shared::Syscall;
 use tracing::info;
 
-use crate::config::Config;
+use crate::{config::Config, movement::Movement};
 
 pub struct OscSender {
     senders: Vec<Sender<Connected>>,
@@ -52,4 +52,23 @@ impl OscSender {
             sender.send((addr, args)).ok();
         }
     }
+    pub fn send_movement(&mut self, m: &Movement) {
+        for sender in &mut self.senders {
+            let addr = "/new_movement";
+            let args = vec![
+                Type::Int(m.id as i32),
+                Type::Bool(m.is_break),
+                Type::String(m.description.clone()),
+            ];
+            sender.send((addr, args)).ok();
+        }
+    }
+    pub fn send_score_stop(&mut self) {
+        for sender in &mut self.senders {
+            let addr = "/score_stopped";
+            let args = vec![];
+            sender.send((addr, args)).ok();
+        }
+    }
+    // TODO: Send continuous analysis of individual categories and individual syscalls
 }

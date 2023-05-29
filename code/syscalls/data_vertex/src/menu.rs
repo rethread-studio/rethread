@@ -13,6 +13,8 @@ use crate::App;
 #[derive(Copy, Clone, Debug, PartialEq, Eq, TryFromPrimitive, Sequence)]
 #[repr(u8)]
 pub enum MenuItem {
+    PlayScore,
+    StopScorePlayback,
     LoadRecordedData,
     StartPlayback,
     PausePlayback,
