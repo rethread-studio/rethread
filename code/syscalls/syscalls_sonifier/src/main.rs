@@ -44,8 +44,9 @@ fn main() -> Result<()> {
         let stop = stop.clone();
         let stop_message = stop_message.clone();
         backend.start_processing(graph, resources, RunGraphSettings::default(), move |e| {
-            *stop_message.lock().unwrap() = format!("{e:?}");
-            stop.store(true, std::sync::atomic::Ordering::SeqCst);
+            eprintln!("!! Error:{e:?}");
+            // *stop_message.lock().unwrap() = format!("{e:?}");
+            // stop.store(true, std::sync::atomic::Ordering::SeqCst);
         })?
     };
 
@@ -70,24 +71,27 @@ fn main() -> Result<()> {
         }
         osc_messages.clear();
 
-        if last_switch.elapsed() > Duration::from_secs_f32(10.) {
+        if last_switch.elapsed() > Duration::from_secs_f32(2.) {
             let mut old_sonifier = current_sonifier.take().unwrap();
             old_sonifier.free();
+            k.free_disconnected_nodes();
             let mut rng = thread_rng();
             match rng.gen::<usize>() % 3 {
                 0 => {
                     current_sonifier =
                         Some(Box::new(QuantisedCategories::new(&mut k, sample_rate)));
+                    println!("QuantisedCat");
                 }
                 1 => {
                     current_sonifier = Some(Box::new(DirectCategories::new(&mut k, sample_rate)));
+                    println!("DirectCat");
                 }
                 2 => {
                     current_sonifier = Some(Box::new(DirectFunctions::new(&mut k, sample_rate)));
+                    println!("DirectFunc");
                 }
                 _ => (),
             }
-            k.free_disconnected_nodes();
             last_switch = Instant::now();
         }
         if stop.load(std::sync::atomic::Ordering::SeqCst) {
