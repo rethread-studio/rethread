@@ -5,6 +5,7 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
+use enum_iterator::cardinality;
 use futures_util::StreamExt;
 use log::*;
 use menu::MenuItem;
@@ -302,12 +303,15 @@ struct SyscallAnalyser {
     pub num_packets_total: usize,
     pub num_errors_total: usize,
     pub packets_per_kind: HashMap<SyscallKind, u64>,
+    pub packets_per_kind_last_interval: Vec<i32>,
+    pub average_packets_per_kind_last_interval: Vec<f32>,
     pub num_packets_last_interval: usize,
     pub num_errors_last_interval: usize,
     last_interval: Instant,
 }
 impl SyscallAnalyser {
     pub fn new() -> Self {
+        let num_kinds = cardinality::<SyscallKind>();
         Self {
             packets_per_kind: HashMap::new(),
             num_packets_last_interval: 0,
@@ -315,11 +319,15 @@ impl SyscallAnalyser {
             last_interval: Instant::now(),
             num_packets_total: 0,
             num_errors_total: 0,
+            packets_per_kind_last_interval: vec![0; num_kinds],
+            average_packets_per_kind_last_interval: vec![0.; num_kinds],
         }
     }
     pub fn register_packet(&mut self, syscall: &Syscall) {
         self.num_packets_total += 1;
         *self.packets_per_kind.entry(syscall.kind).or_insert(0) += 1;
+        self.packets_per_kind_last_interval
+            [<SyscallKind as Into<u8>>::into(syscall.kind) as usize] += 1;
         self.num_packets_last_interval += 1;
         let errno = Errno::from_i32(syscall.return_value);
         if !matches!(errno, Errno::UnknownErrno) {
@@ -328,11 +336,24 @@ impl SyscallAnalyser {
         }
     }
     pub fn update(&mut self, osc_sender: &mut OscSender) {
-        if self.last_interval.elapsed() >= Duration::from_secs_f32(0.5) {
+        if self.last_interval.elapsed() >= Duration::from_secs_f32(0.1) {
             osc_sender.send_syscall_analysis(
                 self.num_packets_last_interval,
                 self.num_errors_last_interval,
+                &self.packets_per_kind_last_interval,
             );
+            for i in 0..cardinality::<SyscallKind>() {
+                let ratio = self.packets_per_kind_last_interval[i] as f32
+                    / self.average_packets_per_kind_last_interval[i];
+                if ratio > 2.0 {
+                    let kind = SyscallKind::try_from(i as u8).unwrap().to_string();
+                    osc_sender.send_category_peak(kind, ratio)
+                }
+                self.average_packets_per_kind_last_interval[i] *= 0.9;
+                self.average_packets_per_kind_last_interval[i] +=
+                    self.packets_per_kind_last_interval[i] as f32 * 0.9;
+                self.packets_per_kind_last_interval[i] = 0;
+            }
             self.num_packets_last_interval = 0;
             self.num_errors_last_interval = 0;
             self.last_interval = Instant::now();
@@ -367,6 +388,12 @@ impl SyscallAnalyser {
             })
             .collect();
         rows
+    }
+}
+
+impl Default for SyscallAnalyser {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

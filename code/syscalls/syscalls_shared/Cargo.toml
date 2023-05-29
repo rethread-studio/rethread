@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 enum-iterator = "1.4.1"
 nix = "0.26.2"
+num_enum = "0.6.1"
 protocol = { version = "3.4", features = ["derive"] }
 serde = { version = "1.0.159", features = ["derive"] }
 strum = { version = "0.24.1", features = ["derive"] }

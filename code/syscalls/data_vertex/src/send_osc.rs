@@ -45,10 +45,28 @@ impl OscSender {
             sender.send((addr, args)).ok();
         }
     }
-    pub fn send_syscall_analysis(&mut self, num_packets: usize, num_errors: usize) {
+    pub fn send_syscall_analysis(
+        &mut self,
+        num_packets: usize,
+        num_errors: usize,
+        packets_per_kind_last_interval: &[i32],
+    ) {
         for sender in &mut self.senders {
             let addr = "/syscall_analysis";
             let args = vec![Type::Int(num_packets as i32), Type::Int(num_errors as i32)];
+            sender.send((addr, args)).ok();
+            let addr = "/syscall_analysis/per_kind_interval";
+            let args = packets_per_kind_last_interval
+                .iter()
+                .map(|v| Type::Int(*v))
+                .collect();
+            sender.send((addr, args)).ok();
+        }
+    }
+    pub fn send_category_peak(&mut self, kind: String, ratio: f32) {
+        for sender in &mut self.senders {
+            let addr = "/syscall_analysis/category_peak";
+            let args = vec![Type::String(kind.clone()), Type::Float(ratio)];
             sender.send((addr, args)).ok();
         }
     }

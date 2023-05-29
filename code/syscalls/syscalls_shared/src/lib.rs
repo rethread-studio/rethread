@@ -1,12 +1,25 @@
 use enum_iterator::Sequence;
 use nix::errno::Errno;
-use protocol::Protocol;
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter};
+use strum::Display;
+
 #[derive(
-    Protocol, Copy, Clone, Debug, PartialEq, Hash, Eq, Serialize, Deserialize, Display, Sequence,
+    Copy,
+    Clone,
+    Debug,
+    PartialEq,
+    Hash,
+    Eq,
+    Serialize,
+    Deserialize,
+    Display,
+    Sequence,
+    IntoPrimitive,
+    TryFromPrimitive,
 )]
+#[repr(u8)]
 pub enum SyscallKind {
     Memory,
     /// I/O calls that could apply to any file descriptor
@@ -81,7 +94,7 @@ impl TryFrom<&str> for SyscallKind {
     }
 }
 
-#[derive(Protocol, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Syscall {
     pub syscall_id: u64,
     pub kind: SyscallKind,
@@ -95,8 +108,13 @@ impl Syscall {
         !matches!(errno, Errno::UnknownErrno)
     }
 }
+impl ToString for Syscall {
+    fn to_string(&self) -> String {
+        format!("{self:?}")
+    }
+}
 
-#[derive(Protocol, Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Packet {
     Syscall(Syscall),
 }
