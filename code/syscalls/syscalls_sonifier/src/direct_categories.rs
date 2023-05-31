@@ -1,13 +1,16 @@
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
+use enum_iterator::cardinality;
 use knyst::controller::KnystCommands;
 use knyst::graph::{NodeAddress, NodeChanges, SimultaneousChanges};
 use knyst::prelude::*;
+use knyst::wavetable::WavetableOscillatorOwned;
 use knyst_waveguide::interface::{
     ContinuousWaveguide, MultiVoiceTriggeredSynth, Note, NoteOpt, PluckedWaveguide,
     PluckedWaveguideSettings, SustainedSynth, Synth, TriggeredSynth,
 };
+use knyst_waveguide::OnePoleLPF;
 use syscalls_shared::SyscallKind;
 
 use crate::Sonifier;
@@ -22,6 +25,7 @@ pub struct DirectCategories {
 
 impl DirectCategories {
     pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
+        println!("Creating DirectCategories");
         let post_fx = k.push(
             gen(|ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
@@ -36,9 +40,10 @@ impl DirectCategories {
             .output("sig"),
             inputs![],
         );
-        k.connect(post_fx.to_graph_out().channels(2).to_channel(8));
+        k.connect(post_fx.to_graph_out().channels(2).to_channel(12));
 
         let mut continuous_wgs = HashMap::new();
+        let phase_per_i = 6.28 / cardinality::<SyscallKind>() as f32;
         for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
             let kind_label = format!("{syscall_kind:?}");
 
@@ -76,8 +81,11 @@ impl DirectCategories {
                     .to_channel(0),
             );
             k.connect(Connection::graph_input(&exciter_sig));
+            // let sine = k.push(WavetableOscillatorOwned::new(Wavetable::sine()), inputs![]);
+            let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
+            k.connect(lpf.to(&post_fx));
             for out in continuous_wg.outputs() {
-                k.connect(out.to_node(&post_fx));
+                k.connect(out.to_node(&lpf));
             }
             let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
             let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
@@ -103,7 +111,13 @@ impl DirectCategories {
                 &mut changes,
             );
             k.schedule_changes(changes);
-            let syscall_waveguide = SyscallWaveguide::new(continuous_wg, exciter_sig, sender);
+            let syscall_waveguide = SyscallWaveguide::new(
+                continuous_wg,
+                exciter_sig,
+                lpf,
+                phase_per_i * i as f32,
+                sender,
+            );
             continuous_wgs.insert(kind_label, syscall_waveguide);
         }
 
@@ -141,6 +155,16 @@ impl Sonifier for DirectCategories {
             swg.update(&mut self.k);
         }
     }
+    fn patch_to_fx_chain(&mut self, fx_chain: usize) {
+        self.k
+            .connect(Connection::clear_to_graph_outputs(&self.post_fx));
+        self.k.connect(
+            self.post_fx
+                .to_graph_out()
+                .channels(2)
+                .to_channel(fx_chain * 4),
+        );
+    }
 
     fn free(&mut self) {
         for (_kind, wg) in self.continuous_wgs.drain() {
@@ -153,27 +177,37 @@ impl Sonifier for DirectCategories {
 struct SyscallWaveguide {
     wg: ContinuousWaveguide,
     exciter: NodeAddress,
+    lpf: NodeAddress,
+    lpf_freq: f32,
+    lpf_phase: f32,
     exciter_sender: rtrb::Producer<f32>,
     accumulator: f32,
     coeff: f32,
     iterations_since_trigger: usize,
     average_iterations_since_trigger: f32,
+    block_counter: usize,
 }
 
 impl SyscallWaveguide {
     pub fn new(
         wg: ContinuousWaveguide,
         exciter: NodeAddress,
+        lpf: NodeAddress,
+        lpf_phase: f32,
         exciter_sender: rtrb::Producer<f32>,
     ) -> Self {
         Self {
             wg,
             exciter,
             exciter_sender,
+            lpf,
+            lpf_phase,
+            lpf_freq: 20000.,
             accumulator: 0.0,
             coeff: 1.0,
             iterations_since_trigger: 1000,
             average_iterations_since_trigger: 1000.,
+            block_counter: 0,
         }
     }
     fn register_call(&mut self, id: i32, args: [i32; 3]) {
@@ -189,6 +223,7 @@ impl SyscallWaveguide {
             //     self.coeff *= 1.00001;
             // }
             // self.coeff = self.coeff.clamp(0.0001, 2.0);
+            let mut changes = SimultaneousChanges::now();
             if self.accumulator > 300. {
                 self.exciter_sender.push(self.accumulator).unwrap();
                 self.accumulator = 0.0;
@@ -197,7 +232,6 @@ impl SyscallWaveguide {
                 if self.iterations_since_trigger < (48000 / 20) {
                     self.coeff *= 0.99;
                 }
-                let mut changes = SimultaneousChanges::now();
                 let feedback = 0.999
                     + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.5);
                 self.wg.change(
@@ -207,14 +241,12 @@ impl SyscallWaveguide {
                     },
                     &mut changes,
                 );
-                k.schedule_changes(changes);
                 self.iterations_since_trigger = 0;
             } else {
                 self.exciter_sender.push(0.0).unwrap();
                 self.iterations_since_trigger += 1;
             }
             if self.iterations_since_trigger == 2000 {
-                let mut changes = SimultaneousChanges::now();
                 let feedback = 0.999;
                 self.wg.change(
                     NoteOpt {
@@ -223,8 +255,15 @@ impl SyscallWaveguide {
                     },
                     &mut changes,
                 );
-                k.schedule_changes(changes);
             }
+            if self.block_counter >= 128 {
+                self.lpf_phase = (self.lpf_phase + 0.001) % 6.28;
+                self.lpf_freq = self.lpf_phase.sin() * 9000. + 9100.;
+                changes.push(self.lpf.change().set("cutoff_freq", self.lpf_freq));
+                self.block_counter = 0;
+            }
+            self.block_counter += 1;
+            k.schedule_changes(changes);
         }
     }
     fn free(self, k: &mut KnystCommands) {

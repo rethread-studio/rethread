@@ -44,6 +44,7 @@ pub struct QuantisedCategories {
 }
 impl QuantisedCategories {
     pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
+        println!("Creating QuantisedCategories");
         let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
 
         let (mut sender, mut receiver) = rtrb::RingBuffer::<f32>::new(16);
@@ -215,6 +216,16 @@ impl Sonifier for QuantisedCategories {
                 swg.register_call(id, func_args);
             }
         }
+    }
+    fn patch_to_fx_chain(&mut self, fx_chain: usize) {
+        self.k
+            .connect(Connection::clear_to_graph_outputs(&self.post_fx));
+        self.k.connect(
+            self.post_fx
+                .to_graph_out()
+                .channels(2)
+                .to_channel(fx_chain * 4),
+        );
     }
 
     fn update(&mut self) {

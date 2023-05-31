@@ -100,6 +100,7 @@ pub struct DirectFunctions {
 
 impl DirectFunctions {
     pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
+        println!("Creating DirectFunctions");
         let post_fx = k.push(
             gen(|ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
@@ -177,6 +178,17 @@ impl Sonifier for DirectFunctions {
             cat.free(&mut self.k);
         }
         self.k.free_node(self.post_fx.clone());
+    }
+
+    fn patch_to_fx_chain(&mut self, fx_chain: usize) {
+        self.k
+            .connect(Connection::clear_to_graph_outputs(&self.post_fx));
+        self.k.connect(
+            self.post_fx
+                .to_graph_out()
+                .channels(2)
+                .to_channel(fx_chain * 4),
+        );
     }
 }
 
