@@ -225,10 +225,12 @@ impl PacketHQ {
         } else {
             PlaybackData::default()
         };
+        let score_playback_data = self.score.score_playback_data();
         self.gui_update_sender
             .push(GuiUpdate {
                 syscall_analyser: self.analysers.syscall_analyser.clone(),
                 playback_data,
+                score_playback_data,
             })
             .ok();
         while let Ok(command) = self.command_receiver.pop() {
@@ -266,6 +268,28 @@ impl PacketHQ {
 struct GuiUpdate {
     syscall_analyser: SyscallAnalyser,
     playback_data: PlaybackData,
+    score_playback_data: ScorePlaybackData,
+}
+#[derive(Clone, Debug)]
+pub struct ScorePlaybackData {
+    current_index: usize,
+    max_index: usize,
+    current_timestamp_for_mvt: Duration,
+    max_timestamp_for_mvt: Duration,
+    playing: bool,
+    tags: String,
+}
+impl Default for ScorePlaybackData {
+    fn default() -> Self {
+        Self {
+            current_index: 0,
+            max_index: 0,
+            current_timestamp_for_mvt: Duration::ZERO,
+            max_timestamp_for_mvt: Duration::ZERO,
+            playing: false,
+            tags: String::new(),
+        }
+    }
 }
 #[derive(Clone, Debug)]
 struct PlaybackData {
@@ -438,6 +462,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             menu_table_state: TableState::default(),
             is_recording: false,
             playback_data: None,
+            score_playback_data: ScorePlaybackData::default(),
         };
         let res = run_app(&mut terminal, app);
 
@@ -463,6 +488,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 pub struct App {
     syscall_analyser: Option<SyscallAnalyser>,
     playback_data: Option<PlaybackData>,
+    score_playback_data: ScorePlaybackData,
     gui_update_receiver: rtrb::Consumer<GuiUpdate>,
     packet_hq_sender: rtrb::Producer<PacketHQCommands>,
     table_state: TableState,
@@ -478,6 +504,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
         while let Ok(gui_update) = app.gui_update_receiver.pop() {
             app.syscall_analyser = Some(gui_update.syscall_analyser);
             app.playback_data = Some(gui_update.playback_data);
+            app.score_playback_data = gui_update.score_playback_data;
         }
 
         let timeout = tick_rate
@@ -575,9 +602,17 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
 fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let rects = Layout::default()
         .direction(tui::layout::Direction::Vertical)
-        .constraints([Constraint::Percentage(90), Constraint::Min(5)].as_ref())
+        .constraints(
+            [
+                Constraint::Percentage(80),
+                Constraint::Min(5),
+                Constraint::Min(5),
+            ]
+            .as_ref(),
+        )
         .split(f.size());
     let progress_bar = rects[1];
+    let score_bar = rects[2];
     let rects = Layout::default()
         .direction(tui::layout::Direction::Horizontal)
         .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
@@ -593,6 +628,8 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     if let Some(pd) = &app.playback_data {
         render_progress_bar(f, progress_bar, pd);
     }
+    let spd = &app.score_playback_data;
+    render_score_bar(f, score_bar, spd);
 
     if let Some(sa) = &app.syscall_analyser {
         let (packets_per_kind_rows, syscalls_last_second, errors_last_second) = {
@@ -615,6 +652,38 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         render_packets_per_kind(f, packets_per_kind_rows, data_rects[1], app);
     }
     menu::menu_ui(f, app, menu_rect);
+}
+fn render_score_bar<B: Backend>(
+    f: &mut Frame<B>,
+    rect: tui::layout::Rect,
+    score_playback_data: &ScorePlaybackData,
+) {
+    let g = Gauge::default()
+        .block(Block::default().borders(Borders::ALL).title(format!(
+            "Score tags: {}, progress: {} / {} | {} / {}",
+            score_playback_data.tags,
+            score_playback_data.current_index,
+            score_playback_data.max_index,
+            humantime::format_duration(score_playback_data.current_timestamp_for_mvt),
+            humantime::format_duration(score_playback_data.max_timestamp_for_mvt),
+        )))
+        .gauge_style(
+            Style::default()
+                .fg(if score_playback_data.playing {
+                    Color::Green
+                } else {
+                    Color::White
+                })
+                .bg(Color::Black)
+                .add_modifier(Modifier::ITALIC),
+        )
+        .percent(
+            ((score_playback_data.current_timestamp_for_mvt.as_secs_f64()
+                / score_playback_data.max_timestamp_for_mvt.as_secs_f64())
+                * 100.) as u16,
+        );
+
+    f.render_widget(g, rect);
 }
 fn render_progress_bar<B: Backend>(
     f: &mut Frame<B>,
