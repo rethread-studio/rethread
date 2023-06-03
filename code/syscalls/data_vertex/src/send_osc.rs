@@ -83,8 +83,15 @@ impl OscSender {
     }
     pub fn send_score_stop(&mut self) {
         for sender in &mut self.senders {
-            let addr = "/score_stopped";
-            let args = vec![];
+            let addr = "/score/play";
+            let args = vec![Type::Int(0)];
+            sender.send((addr, args)).ok();
+        }
+    }
+    pub fn send_score_start(&mut self) {
+        for sender in &mut self.senders {
+            let addr = "/score/play";
+            let args = vec![Type::Int(1)];
             sender.send((addr, args)).ok();
         }
     }

@@ -76,6 +76,9 @@ impl Score {
         }
     }
     pub fn play_from(&mut self, mvt: usize, osc_sender: &mut OscSender) {
+        if !self.is_playing {
+            osc_sender.send_score_start();
+        }
         self.current_movement = mvt;
         self.is_playing = true;
         self.start_of_last_movement = Instant::now();
