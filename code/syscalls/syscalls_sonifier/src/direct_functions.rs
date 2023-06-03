@@ -5,18 +5,12 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use knyst::controller::KnystCommands;
-use knyst::envelope::{Envelope, SustainMode};
-use knyst::graph::{NodeAddress, NodeChanges, SimultaneousChanges};
+use knyst::graph::{NodeAddress, SimultaneousChanges};
 use knyst::prelude::*;
 use knyst::*;
-use knyst_waveguide::interface::{
-    ContinuousWaveguide, MultiVoiceTriggeredSynth, Note, NoteOpt, PluckedWaveguide,
-    PluckedWaveguideSettings, SustainedSynth, Synth, TriggeredSynth,
-};
-use knyst_waveguide::{OnePole, OnePoleHPF, OnePoleLPF, XorNoise};
+use knyst_waveguide::interface::{ContinuousWaveguide, NoteOpt, SustainedSynth, Synth};
 
-use anyhow::Result;
-use nannou_osc::receiver;
+use nannou_osc::{Connected, Type};
 use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use syscalls_shared::SyscallKind;
@@ -24,38 +18,34 @@ use syscalls_shared::SyscallKind;
 use crate::{to_freq53, Sonifier};
 
 const SCALE: [i32; 7] = [0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
-const WRAP_INTERVAL: i32 = 53;
-
-const ACTIVATE_IO: bool = true;
-const ACTIVATE_SOCKET_IO: bool = true;
-const ACTIVATE_MEMORY: bool = true;
-const ACTIVATE_SYNCHRONISATION: bool = true;
 
 struct Category {
     kind: String,
     wgs: HashMap<i32, SyscallWaveguide>,
+    category_bus: NodeAddress,
     enabled: bool,
     octave: i32,
     wrap_interval: i32,
 }
 
 impl Category {
-    pub fn new(k: &mut KnystCommands, octave: i32, wrap_interval: i32, kind: String) -> Self {
+    pub fn new(
+        k: &mut KnystCommands,
+        category_bus: NodeAddress,
+        octave: i32,
+        wrap_interval: i32,
+        kind: String,
+    ) -> Self {
         Self {
             kind,
             wgs: HashMap::new(),
-            enabled: true,
+            category_bus,
+            enabled: false,
             octave,
             wrap_interval,
         }
     }
-    pub fn register_call(
-        &mut self,
-        id: i32,
-        func_args: [i32; 3],
-        output: &NodeAddress,
-        k: &mut KnystCommands,
-    ) {
+    pub fn register_call(&mut self, id: i32, func_args: [i32; 3], k: &mut KnystCommands) {
         if self.enabled {
             match self.wgs.get_mut(&id) {
                 Some(wg) => wg.register_call(id, func_args),
@@ -69,11 +59,22 @@ impl Category {
                         25.,
                     );
                     println!("New wg for {} id {id} freq {freq}, i: {i}", &self.kind);
-                    let mut wg = make_new_waveguide(k, freq, output);
+                    let mut wg = make_new_waveguide(k, freq, &self.category_bus);
                     wg.register_call(id, func_args);
                     self.wgs.insert(id, wg);
                 }
             }
+        }
+    }
+    pub fn change_harmony(&mut self, scale: &[i32], root: f32, changes: &mut SimultaneousChanges) {
+        for (i, swg) in self.wgs.values_mut().enumerate() {
+            let freq = to_freq53(
+                scale[i % scale.len()]
+                    + self.wrap_interval * (i / scale.len()) as i32
+                    + 53 * self.octave,
+                root,
+            );
+            swg.set_freq(freq, changes);
         }
     }
     pub fn update(&mut self, changes: &mut SimultaneousChanges) {
@@ -88,20 +89,44 @@ impl Category {
             wg.free(k);
         }
     }
+    pub fn patch_to(&mut self, out: &NodeAddress, k: &mut KnystCommands) {
+        k.connect(Connection::clear_to_nodes(&self.category_bus));
+        k.connect(self.category_bus.to(&out).channels(2));
+    }
 }
 
 pub struct DirectFunctions {
-    categories: HashMap<String, Category>,
-    post_fx: NodeAddress,
+    categories: Vec<(String, Category)>,
+    post_fx_foreground: NodeAddress,
+    post_fx_background: NodeAddress,
+    vary_focus: bool,
     sample_duration: Duration,
     last_sample: Instant,
+    focused_category: Option<usize>,
+    last_focus_change: Instant,
+    time_to_next_focus_change: Duration,
     k: KnystCommands,
 }
 
 impl DirectFunctions {
-    pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
+    pub fn new(k: &mut KnystCommands, sample_rate: f32, enabled_kinds: &[SyscallKind]) -> Self {
         println!("Creating DirectFunctions");
-        let post_fx = k.push(
+        let post_fx_foreground = k.push(
+            gen(|ctx, _| {
+                let inp = ctx.inputs.get_channel(0);
+                let out = ctx.outputs.iter_mut().next().unwrap();
+                for (i, o) in inp.iter().zip(out.iter_mut()) {
+                    *o = (i * 0.2).clamp(-1.0, 1.0);
+                }
+                // dbg!(&inp);
+                GenState::Continue
+            })
+            .input("in")
+            .output("sig"),
+            inputs![],
+        );
+        k.connect(post_fx_foreground.to_graph_out().channels(2).to_channel(4));
+        let post_fx_background = k.push(
             gen(|ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().unwrap();
@@ -115,13 +140,13 @@ impl DirectFunctions {
             .output("sig"),
             inputs![],
         );
-        k.connect(post_fx.to_graph_out().channels(2).to_channel(4));
+        k.connect(post_fx_background.to_graph_out().channels(2).to_channel(8));
 
         // let to_freq53 = |degree| 2.0_f32.powf(degree as f32 / 53.) * 220.0;
 
         let sample_duration = Duration::from_secs_f64(1.0 / sample_rate as f64);
         let last_sample = Instant::now();
-        let mut categories = HashMap::new();
+        let mut categories = Vec::new();
 
         for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
             let kind_string = format!("{syscall_kind:?}");
@@ -133,16 +158,28 @@ impl DirectFunctions {
             if syscall_kind == SyscallKind::Unknown {
                 wrap_interval = 0;
             }
-            println!("kind: {kind_string}, octave: {octave}");
-            categories.insert(
+            let category_bus = k.push(graph::Bus(4), inputs![]);
+            k.connect(category_bus.to(&post_fx_foreground).channels(2));
+            // println!("kind: {kind_string}, octave: {octave}");
+            categories.push((
                 kind_string.clone(),
-                Category::new(k, octave, wrap_interval, kind_string),
-            );
+                Category::new(k, category_bus, octave, wrap_interval, kind_string),
+            ));
+        }
+        for kind in enabled_kinds {
+            let kind_string = format!("{kind:?}");
+            let i = categories.iter().position(|v| v.0 == kind_string).unwrap();
+            categories[i].1.enabled = true;
         }
         Self {
             categories,
-            post_fx,
+            post_fx_foreground,
+            post_fx_background,
             sample_duration,
+            vary_focus: true,
+            last_focus_change: Instant::now(),
+            time_to_next_focus_change: Duration::from_secs_f32(10.),
+            focused_category: None,
             last_sample,
             k: k.clone(),
         }
@@ -159,36 +196,78 @@ impl Sonifier for DirectFunctions {
             func_args[0] = args.next().unwrap().int().unwrap();
             func_args[1] = args.next().unwrap().int().unwrap();
             func_args[2] = args.next().unwrap().int().unwrap();
-            if let Some(category) = self.categories.get_mut(&kind) {
-                category.register_call(id, func_args, &self.post_fx, &mut self.k);
+            if let Some(category) = self
+                .categories
+                .iter()
+                .position(|(list_kind, _)| list_kind == &kind)
+            {
+                let category = &mut self.categories[category].1;
+                category.register_call(id, func_args, &mut self.k);
             }
         }
     }
 
-    fn update(&mut self) {
+    fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
+        let mut rng = thread_rng();
         let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
-        for cat in self.categories.values_mut() {
+        for (_, cat) in self.categories.iter_mut() {
             cat.update(&mut changes);
         }
         self.k.schedule_changes(changes);
+        if self.vary_focus && self.last_focus_change.elapsed() > self.time_to_next_focus_change {
+            self.time_to_next_focus_change = Duration::from_secs_f32(rng.gen_range(6.0..20.0));
+            self.last_focus_change = Instant::now();
+            if self.focused_category.is_some() {
+                // Every category to the foreground
+                for (_, cat) in &mut self.categories {
+                    cat.patch_to(&self.post_fx_foreground, &mut self.k);
+                }
+                self.focused_category = None;
+                let addr = "/voice/focus/disabled";
+                let args = vec![];
+                osc_sender.send((addr, args)).ok();
+            } else {
+                let focused = rng.gen_range(0..self.categories.len());
+                for (i, (name, cat)) in &mut self.categories.iter_mut().enumerate() {
+                    if i == focused {
+                        cat.patch_to(&self.post_fx_foreground, &mut self.k);
+                        let addr = "/voice/focus/enabled";
+                        let args = vec![Type::String(name.clone())];
+                        osc_sender.send((addr, args)).ok();
+                    } else {
+                        cat.patch_to(&self.post_fx_background, &mut self.k);
+                    }
+                }
+                self.focused_category = Some(focused);
+            }
+        }
     }
 
     fn free(&mut self) {
-        for (_kind, cat) in self.categories.drain() {
+        for (_kind, cat) in self.categories.drain(..) {
             cat.free(&mut self.k);
         }
-        self.k.free_node(self.post_fx.clone());
+        self.k.free_node(self.post_fx_foreground.clone());
+        self.k.free_node(self.post_fx_background.clone());
     }
 
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
         self.k
-            .connect(Connection::clear_to_graph_outputs(&self.post_fx));
+            .connect(Connection::clear_to_graph_outputs(&self.post_fx_foreground));
         self.k.connect(
-            self.post_fx
+            self.post_fx_foreground
                 .to_graph_out()
                 .channels(2)
                 .to_channel(fx_chain * 4),
         );
+    }
+
+    fn change_harmony(&mut self, scale: &[i32], root: f32) {
+        let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
+        for (i, (_, cat)) in self.categories.iter_mut().enumerate() {
+            cat.change_harmony(scale, root, &mut changes);
+        }
+        self.k.schedule_changes(changes);
     }
 }
 
@@ -273,9 +352,18 @@ impl SyscallWaveguide {
             average_iterations_since_trigger: 100.,
         }
     }
-    fn register_call(&mut self, id: i32, args: [i32; 3]) {
+    fn register_call(&mut self, _id: i32, _args: [i32; 3]) {
         // self.accumulator += id as f32 * self.coeff;
         self.accumulator += self.coeff * 300.;
+    }
+    fn set_freq(&mut self, freq: f32, changes: &mut SimultaneousChanges) {
+        self.wg.change(
+            NoteOpt {
+                freq: Some(freq),
+                ..Default::default()
+            },
+            changes,
+        );
     }
     fn update(&mut self, changes: &mut SimultaneousChanges) {
         if !self.exciter_sender.is_full() {

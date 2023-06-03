@@ -3,17 +3,14 @@ use std::time::{Duration, Instant};
 
 use enum_iterator::cardinality;
 use knyst::controller::KnystCommands;
-use knyst::graph::{NodeAddress, NodeChanges, SimultaneousChanges};
+use knyst::graph::{NodeAddress, SimultaneousChanges};
 use knyst::prelude::*;
-use knyst::wavetable::WavetableOscillatorOwned;
-use knyst_waveguide::interface::{
-    ContinuousWaveguide, MultiVoiceTriggeredSynth, Note, NoteOpt, PluckedWaveguide,
-    PluckedWaveguideSettings, SustainedSynth, Synth, TriggeredSynth,
-};
+use knyst_waveguide::interface::{ContinuousWaveguide, NoteOpt, SustainedSynth, Synth};
 use knyst_waveguide::OnePoleLPF;
+use nannou_osc::Connected;
 use syscalls_shared::SyscallKind;
 
-use crate::Sonifier;
+use crate::{to_freq53, Sonifier};
 
 pub struct DirectCategories {
     continuous_wgs: HashMap<String, SyscallWaveguide>,
@@ -88,7 +85,7 @@ impl DirectCategories {
                 k.connect(out.to_node(&lpf));
             }
             let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
-            let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
+            // let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
             let scale = [0, 17, 31, 48, 53, 53 + 26, 53 + 31];
             let wrap_interval = 53;
             // let freq = 25. * (i + 1).pow(2) as f32;
@@ -150,11 +147,12 @@ impl Sonifier for DirectCategories {
         }
     }
 
-    fn update(&mut self) {
+    fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
         for swg in self.continuous_wgs.values_mut() {
             swg.update(&mut self.k);
         }
     }
+
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
         self.k
             .connect(Connection::clear_to_graph_outputs(&self.post_fx));
@@ -171,6 +169,20 @@ impl Sonifier for DirectCategories {
             wg.free(&mut self.k);
         }
         self.k.free_node(self.post_fx.clone());
+    }
+
+    fn change_harmony(&mut self, scale: &[i32], root: f32) {
+        let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
+        for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
+            let freq = to_freq53(
+                scale[i % scale.len()] + 53 * (i / scale.len()) as i32,
+                root * 4.0,
+            );
+            self.continuous_wgs
+                .get_mut(&format!("{:?}", syscall_kind))
+                .unwrap()
+                .set_freq(freq, &mut changes);
+        }
     }
 }
 
@@ -213,6 +225,15 @@ impl SyscallWaveguide {
     fn register_call(&mut self, id: i32, args: [i32; 3]) {
         self.accumulator += id as f32 * self.coeff;
         self.accumulator += self.coeff;
+    }
+    fn set_freq(&mut self, freq: f32, changes: &mut SimultaneousChanges) {
+        self.wg.change(
+            NoteOpt {
+                freq: Some(freq),
+                ..Default::default()
+            },
+            changes,
+        );
     }
     fn update(&mut self, k: &mut KnystCommands) {
         if !self.exciter_sender.is_full() {

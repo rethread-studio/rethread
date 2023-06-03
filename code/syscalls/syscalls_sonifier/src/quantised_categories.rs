@@ -26,14 +26,14 @@ use knyst_waveguide::interface::{
 use knyst_waveguide::{HalfSineImpulse, OnePole, OnePoleHPF, OnePoleLPF, XorNoise};
 
 use anyhow::Result;
-use nannou_osc::receiver;
+use nannou_osc::{receiver, Connected};
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use rtrb::Producer;
 use syscalls_shared::SyscallKind;
 
-use crate::Sonifier;
+use crate::{to_freq53, Sonifier};
 const SCALE: [i32; 7] = [0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
 
 pub struct QuantisedCategories {
@@ -45,7 +45,7 @@ pub struct QuantisedCategories {
 impl QuantisedCategories {
     pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
         println!("Creating QuantisedCategories");
-        let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
+        // let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
 
         let (mut sender, mut receiver) = rtrb::RingBuffer::<f32>::new(16);
         for _ in 0..16 {
@@ -228,7 +228,7 @@ impl Sonifier for QuantisedCategories {
         );
     }
 
-    fn update(&mut self) {
+    fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
         if !self.sender.is_full() {
             let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
             let mut rng = thread_rng();
@@ -259,6 +259,22 @@ impl Sonifier for QuantisedCategories {
             wg.free(&mut self.k);
         }
         self.k.free_node(self.post_fx.clone());
+    }
+
+    fn change_harmony(&mut self, scale: &[i32], root: f32) {
+        let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
+
+        for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
+            let freq = to_freq53(
+                scale[i % scale.len()] + 53 * (i / scale.len()) as i32,
+                root * 4.,
+            );
+
+            self.continuous_wgs
+                .get_mut(&format!("{:?}", syscall_kind))
+                .unwrap()
+                .set_freq(freq, &mut changes);
+        }
     }
 }
 
