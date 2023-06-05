@@ -8,6 +8,7 @@ use knyst::prelude::*;
 use knyst_waveguide::interface::{ContinuousWaveguide, NoteOpt, SustainedSynth, Synth};
 use knyst_waveguide::OnePoleLPF;
 use nannou_osc::Connected;
+use rtrb::Producer;
 use syscalls_shared::SyscallKind;
 
 use crate::{to_freq53, Sonifier};
@@ -17,12 +18,34 @@ pub struct DirectCategories {
     post_fx: NodeAddress,
     sample_duration: Duration,
     last_sample: Instant,
+    decrese_sensitivity: Option<f32>,
+    block_sender: Producer<f32>,
+    block_counter: NodeAddress,
+    coeff_mod: f32,
     k: KnystCommands,
 }
 
 impl DirectCategories {
     pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
         println!("Creating DirectCategories");
+        // This Gen has as only function to communicate when a block has passed on the audio thread
+        let (mut block_sender, mut block_receiver) =
+            rtrb::RingBuffer::<f32>::new((sample_rate * 0.3) as usize);
+        let block_counter = k.push(
+            gen(move |ctx, _| {
+                let out_buf = ctx.outputs.iter_mut().next().unwrap();
+                for o in out_buf.iter_mut() {
+                    block_receiver.pop().unwrap_or(0.0);
+                    *o = 0.0;
+                }
+                GenState::Continue
+            })
+            .output("out"),
+            inputs![],
+        );
+        // Connect to graph out to avoid it being automatically removed
+        k.connect(block_counter.to_graph_out());
+
         let post_fx = k.push(
             gen(|ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
@@ -127,6 +150,10 @@ impl DirectCategories {
             k: k.clone(),
             last_sample: Instant::now(),
             sample_duration,
+            coeff_mod: 1.0,
+            decrese_sensitivity: Some(0.999),
+            block_sender,
+            block_counter,
         }
     }
 }
@@ -142,14 +169,20 @@ impl Sonifier for DirectCategories {
             func_args[1] = args.next().unwrap().int().unwrap();
             func_args[2] = args.next().unwrap().int().unwrap();
             if let Some(swg) = self.continuous_wgs.get_mut(&kind) {
-                swg.register_call(id, func_args);
+                swg.register_call(self.coeff_mod, id, func_args);
             }
         }
     }
 
     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
         for swg in self.continuous_wgs.values_mut() {
-            swg.update(&mut self.k);
+            swg.update(self.coeff_mod, &mut self.k);
+        }
+        if !self.block_sender.is_full() {
+            self.block_sender.push(0.).unwrap();
+            if let Some(coeff_mod_decrease) = self.decrese_sensitivity {
+                self.coeff_mod *= coeff_mod_decrease;
+            }
         }
     }
 
@@ -169,6 +202,7 @@ impl Sonifier for DirectCategories {
             wg.free(&mut self.k);
         }
         self.k.free_node(self.post_fx.clone());
+        self.k.free_node(self.block_counter.clone());
     }
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
@@ -223,8 +257,8 @@ impl SyscallWaveguide {
             block_counter: 0,
         }
     }
-    fn register_call(&mut self, id: i32, args: [i32; 3]) {
-        self.accumulator += id as f32 * self.coeff;
+    fn register_call(&mut self, coeff_mod: f32, id: i32, args: [i32; 3]) {
+        self.accumulator += id as f32 * self.coeff * coeff_mod;
         self.accumulator += self.coeff;
     }
     fn set_freq(&mut self, freq: f32, changes: &mut SimultaneousChanges) {
@@ -236,7 +270,7 @@ impl SyscallWaveguide {
             changes,
         );
     }
-    fn update(&mut self, k: &mut KnystCommands) {
+    fn update(&mut self, coeff_mod: f32, k: &mut KnystCommands) {
         if !self.exciter_sender.is_full() {
             // if self.accumulator > 500. {
             //     self.coeff *= 0.9;

@@ -395,6 +395,10 @@ impl SyscallKindQuantisedWaveguide {
     fn free(self, k: &mut KnystCommands) {
         k.free_node(self.exciter);
         k.free_node(self.sine_amp);
+        k.free_node(self.sine);
+        k.free_node(self.pan);
+        k.free_node(self.impulse);
+        k.free_node(self.trig_delay);
         self.wg.free(k);
     }
 }

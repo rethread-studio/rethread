@@ -9,6 +9,7 @@ use knyst::graph::{NodeAddress, SimultaneousChanges};
 use knyst::prelude::*;
 use knyst::*;
 use knyst_waveguide::interface::{ContinuousWaveguide, NoteOpt, SustainedSynth, Synth};
+use knyst_waveguide::OnePoleLPF;
 
 use nannou_osc::{Connected, Type};
 use rand::seq::SliceRandom;
@@ -23,10 +24,14 @@ struct Category {
     kind: String,
     syscall_kind: SyscallKind,
     wgs: HashMap<i32, SyscallWaveguide>,
+    lpf: NodeAddress,
+    lpf_freq: f32,
+    lpf_phase: f32,
     category_bus: NodeAddress,
     enabled: bool,
     octave: i32,
     wrap_interval: i32,
+    block_counter: usize,
 }
 
 impl Category {
@@ -37,6 +42,8 @@ impl Category {
         wrap_interval: i32,
         kind: String,
         syscall_kind: SyscallKind,
+        lpf: NodeAddress,
+        lpf_phase: f32,
     ) -> Self {
         Self {
             kind,
@@ -46,6 +53,10 @@ impl Category {
             enabled: false,
             octave,
             wrap_interval,
+            lpf,
+            lpf_freq: 20000.,
+            lpf_phase,
+            block_counter: 0,
         }
     }
     pub fn register_call(&mut self, id: i32, func_args: [i32; 3], k: &mut KnystCommands) {
@@ -96,12 +107,22 @@ impl Category {
                     wg.free(k);
                 }
             }
+            // Update LPF
+            if self.block_counter >= 128 {
+                self.lpf_phase = (self.lpf_phase + 0.001) % 6.28;
+                self.lpf_freq = self.lpf_phase.sin() * 9000. + 9100.;
+                changes.push(self.lpf.change().set("cutoff_freq", self.lpf_freq));
+                self.block_counter = 0;
+            }
+            self.block_counter += 1;
         }
     }
     pub fn free(mut self, k: &mut KnystCommands) {
         for (_id, wg) in self.wgs.drain() {
             wg.free(k);
         }
+        k.free_node(self.lpf);
+        k.free_node(self.category_bus);
     }
     pub fn patch_to(&mut self, out: &NodeAddress, k: &mut KnystCommands) {
         k.connect(Connection::clear_to_nodes(&self.category_bus));
@@ -168,6 +189,7 @@ impl DirectFunctions {
         let last_sample = Instant::now();
         let mut categories = Vec::new();
 
+        let phase_per_i = 6.28 / enabled_kinds.len() as f32;
         for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
             let kind_string = format!("{syscall_kind:?}");
             let mut wrap_interval = 53;
@@ -179,7 +201,12 @@ impl DirectFunctions {
                 wrap_interval = 0;
             }
             let category_bus = k.push(graph::Bus(4), inputs![]);
-            k.connect(category_bus.to(&post_fx_foreground).channels(2));
+            let lpf = k.push(
+                OnePoleLPF::new(),
+                inputs![("cutoff_freq" : 20000.), ("signal" ; category_bus.out(0))],
+            );
+            k.connect(lpf.to(&post_fx_foreground));
+            // k.connect(category_bus.to(&post_fx_foreground).channels(2));
             // println!("kind: {kind_string}, octave: {octave}");
             categories.push((
                 kind_string.clone(),
@@ -190,6 +217,8 @@ impl DirectFunctions {
                     wrap_interval,
                     kind_string,
                     syscall_kind,
+                    lpf,
+                    phase_per_i * i as f32,
                 ),
             ));
         }
