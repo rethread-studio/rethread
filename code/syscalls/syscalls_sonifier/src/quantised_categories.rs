@@ -66,8 +66,8 @@ impl QuantisedCategories {
                     .zip(out0.iter_mut())
                     .zip(out1.iter_mut())
                 {
-                    *o0 = (i0 * 0.5).clamp(-1.0, 1.0);
-                    *o1 = (i1 * 0.5).clamp(-1.0, 1.0);
+                    *o0 = (i0 * 1.5).clamp(-1.0, 1.0);
+                    *o1 = (i1 * 1.5).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
@@ -108,10 +108,11 @@ impl QuantisedCategories {
             }
 
             // Switch between these two sets for very different rhythmic timings
-            let trig_interval = 1.5 / ((i + 1) as f32);
-            let delay_time = 0.0;
-            // let trig_interval = 0.25;
-            // let delay_time = ((i) % num_syscall_kinds as usize) as f32 * 0.25 / num_syscall_kinds;
+            // let trig_interval = 1.5 / ((i + 1) as f32);
+            // let delay_time = 0.0;
+            let trig_interval = 1.0;
+            let delay_time =
+                ((i) % num_syscall_kinds as usize) as f32 * trig_interval / num_syscall_kinds;
 
             // let mut graph_settings = k.default_graph_settings();
             // graph_settings.num_outputs = 4;
@@ -136,14 +137,14 @@ impl QuantisedCategories {
 
             let sine = k.push(
                 WavetableOscillatorOwned::new(Wavetable::sine()),
-                inputs![("freq": freq * 4.0)],
+                inputs![("freq": freq * 2.0)],
             );
             let sine_env = Envelope {
                 // Points are given in the format (value, time_to_reach_value)
                 points: vec![
                     // (0.05 * (1.0 / ((i + 1) as f32)).powf(0.5), 0.01),
-                    (0.05, 0.01),
-                    (0.0, 0.3),
+                    (0.05, 0.001),
+                    (0.0, 0.1),
                 ],
                 ..Default::default()
             };
@@ -189,8 +190,17 @@ impl QuantisedCategories {
                 &mut changes,
             );
             k.schedule_changes(changes);
-            let syscall_waveguide =
-                SyscallKindQuantisedWaveguide::new(freq, continuous_wg, sine_amp, exciter, sender);
+            let syscall_waveguide = SyscallKindQuantisedWaveguide::new(
+                freq,
+                continuous_wg,
+                sine,
+                sine_amp,
+                exciter,
+                pan,
+                impulse,
+                trig_delay,
+                sender,
+            );
             continuous_wgs.insert(kind_label, syscall_waveguide);
         }
         Self {
@@ -275,6 +285,7 @@ impl Sonifier for QuantisedCategories {
                 .unwrap()
                 .set_freq(freq, &mut changes);
         }
+        self.k.schedule_changes(changes);
     }
 }
 
@@ -283,6 +294,10 @@ struct SyscallKindQuantisedWaveguide {
     wg: ContinuousWaveguide,
     exciter: NodeAddress,
     sine_amp: NodeAddress,
+    sine: NodeAddress,
+    pan: NodeAddress,
+    impulse: NodeAddress,
+    trig_delay: NodeAddress,
     exciter_sender: rtrb::Producer<f32>,
     accumulator: f32,
     coeff: f32,
@@ -295,21 +310,29 @@ impl SyscallKindQuantisedWaveguide {
     pub fn new(
         freq: f32,
         wg: ContinuousWaveguide,
+        sine: NodeAddress,
         sine_amp: NodeAddress,
         exciter: NodeAddress,
+        pan: NodeAddress,
+        impulse: NodeAddress,
+        trig_delay: NodeAddress,
         exciter_sender: rtrb::Producer<f32>,
     ) -> Self {
         Self {
             freq,
             wg,
             exciter,
+            sine,
             sine_amp,
             exciter_sender,
             accumulator: 0.0,
-            coeff: 0.25,
+            coeff: 0.15,
             amp: 0.0,
             position: 0.25,
             damping: 0.0,
+            pan,
+            impulse,
+            trig_delay,
         }
     }
     fn register_call(&mut self, id: i32, args: [i32; 3]) {
@@ -317,34 +340,40 @@ impl SyscallKindQuantisedWaveguide {
         self.accumulator += self.coeff;
         self.amp += self.coeff;
         self.position += id as f32 * 0.001;
-        self.damping = (self.damping + 0.00001).clamp(0.0, 1.0);
+        self.damping = (self.damping + 0.0001).clamp(0.0, 1.0);
         if self.position > 0.4 {
             self.position = 0.4;
         }
         if self.amp > 0.4 {
             self.amp = 0.4;
-            self.coeff *= 0.98;
+            // self.coeff *= 0.98;
         }
     }
     fn update(&mut self, changes: &mut SimultaneousChanges, rng: &mut ThreadRng) {
-        self.amp *= 0.99 - (self.amp * 0.2);
-        self.damping *= 0.99999999;
+        // let feedback =
+        //     1.01 - (1.0 - (self.amp * 3.2).clamp(0.0, 1.0).powf(1. / 4.)).clamp(0.0, 0.5);
+        let feedback = 1.00 - (1.0 - (self.amp * 2.5).clamp(0.0, 1.0)).clamp(0.0, 0.9);
+        self.amp *= 0.99 - (self.amp * 0.5);
+        // self.damping *= 0.99999999;
+        self.damping *= 0.95;
         // self.amp *= 0.95;
         self.position *= 0.985;
         let mut new_freq = None;
-        if self.amp > 0.35 {
-            new_freq = Some(
-                self.freq
-                    * [1.0_f32, 3.0 / 2.0, 2.0, 3.0, 4.0 / 3.0, 4.0]
-                        .choose(rng)
-                        .unwrap(),
-            );
-        }
+        // dbg!(self.amp, feedback);
+        // if self.amp > 0.35 {
+        //     new_freq = Some(
+        //         self.freq
+        //             * [1.0_f32, 3.0 / 2.0, 2.0, 3.0, 4.0 / 3.0, 4.0]
+        //                 .choose(rng)
+        //                 .unwrap(),
+        //     );
+        // }
         changes.push(self.exciter.change().set("amp", self.amp));
         changes.push(self.sine_amp.change().set(1, self.amp));
         self.wg.change(
             NoteOpt {
                 freq: new_freq,
+                feedback: Some(feedback),
                 position: Some(0.1 + self.position),
                 damping: Some(self.damping.powf(2.) as f32 * 9000. + 100. + self.freq * 4.),
                 ..Default::default()
@@ -354,6 +383,7 @@ impl SyscallKindQuantisedWaveguide {
     }
     fn set_freq(&mut self, freq: f32, changes: &mut SimultaneousChanges) {
         self.freq = freq;
+        changes.push(self.sine.change().set("freq", freq * 2.0));
         self.wg.change(
             NoteOpt {
                 freq: Some(freq),

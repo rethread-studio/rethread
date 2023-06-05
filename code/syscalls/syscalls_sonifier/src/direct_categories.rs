@@ -183,6 +183,7 @@ impl Sonifier for DirectCategories {
                 .unwrap()
                 .set_freq(freq, &mut changes);
         }
+        self.k.schedule_changes(changes);
     }
 }
 
