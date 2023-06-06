@@ -4057,6 +4057,7 @@ dependencies = [
  "dasp",
  "derive_builder",
  "enum-iterator",
+ "fastrand",
  "knyst",
  "knyst_waveguide",
  "nannou_osc",

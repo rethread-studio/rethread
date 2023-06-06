@@ -14,11 +14,13 @@ use syscalls_shared::SyscallKind;
 use crate::direct_categories::DirectCategories;
 use crate::direct_functions::DirectFunctions;
 use crate::harmony::HarmonicChange;
+use crate::program_themes::ProgramThemes;
 use crate::quantised_categories::QuantisedCategories;
 
 mod direct_categories;
 mod direct_functions;
 mod harmony;
+mod program_themes;
 mod quantised_categories;
 
 fn main() -> Result<()> {
@@ -57,7 +59,7 @@ fn main() -> Result<()> {
     let osc_receiver = receiver(7376).unwrap();
     let mut osc_sender = sender().unwrap().connect("127.0.0.1:57120").unwrap();
     let mut current_sonifier: Option<Box<dyn Sonifier>> = None;
-    current_sonifier = Some(Box::new(DirectCategories::new(&mut k, sample_rate)));
+    // current_sonifier = Some(Box::new(DirectCategories::new(&mut k, sample_rate)));
     // current_sonifier = Some(Box::new(QuantisedCategories::new(&mut k, sample_rate)));
     // current_sonifier = Some(Box::new(DirectFunctions::new(
     //     &mut k,
@@ -81,8 +83,9 @@ fn main() -> Result<()> {
     //         SyscallKind::WaitForReady,
     //     ],
     // )));
+    current_sonifier = Some(Box::new(ProgramThemes::new(&mut k)));
     if let Some(sonifier) = &mut current_sonifier {
-        sonifier.patch_to_fx_chain(2);
+        sonifier.patch_to_fx_chain(1);
     }
     let mut osc_messages = Vec::with_capacity(40);
     let mut last_switch = Instant::now();
