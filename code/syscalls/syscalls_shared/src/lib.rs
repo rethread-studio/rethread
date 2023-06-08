@@ -1,4 +1,5 @@
 use enum_iterator::Sequence;
+#[cfg(not(target_arch = "wasm32"))]
 use nix::errno::Errno;
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 
@@ -105,6 +106,7 @@ pub struct Syscall {
     pub command: String,
 }
 impl Syscall {
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn returns_error(&self) -> bool {
         let errno = Errno::from_i32(self.return_value);
         !matches!(errno, Errno::UnknownErrno)

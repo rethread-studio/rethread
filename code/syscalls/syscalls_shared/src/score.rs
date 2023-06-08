@@ -1,8 +1,11 @@
-use std::time::{Duration, Instant};
+use std::time::Duration;
+#[cfg(not(target_arch = "wasm32"))]
+use std::time::Instant;
 
 pub struct Score {
     pub current_movement: usize,
     pub movements: Vec<Movement>,
+    #[cfg(not(target_arch = "wasm32"))]
     pub start_of_last_movement: Instant,
     pub is_playing: bool,
 }
@@ -190,6 +193,7 @@ impl Score {
         Self {
             current_movement: 0,
             movements,
+            #[cfg(not(target_arch = "wasm32"))]
             start_of_last_movement: Instant::now(),
             is_playing: false,
         }
@@ -197,6 +201,7 @@ impl Score {
     pub fn is_playing(&self) -> bool {
         self.is_playing
     }
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn play_from(&mut self, mvt: usize) -> &Movement {
         self.current_movement = mvt;
         self.is_playing = true;
@@ -212,6 +217,7 @@ impl Score {
             .iter()
             .fold(Duration::ZERO, |acc, m| acc + m.duration)
     }
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn update(&mut self) -> ScoreUpdate {
         if self.is_playing {
             if self.start_of_last_movement.elapsed()
@@ -232,6 +238,7 @@ impl Score {
             ScoreUpdate::Nothing
         }
     }
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn score_playback_data(&self) -> ScorePlaybackData {
         ScorePlaybackData {
             current_index: self.current_movement,
