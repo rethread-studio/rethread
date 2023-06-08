@@ -91,14 +91,19 @@ impl Category {
             swg.set_freq(freq, changes);
         }
     }
-    pub fn update(&mut self, changes: &mut SimultaneousChanges, k: &mut KnystCommands) {
+    pub fn update(
+        &mut self,
+        sensitivity_coeff: f32,
+        changes: &mut SimultaneousChanges,
+        k: &mut KnystCommands,
+    ) {
         if self.enabled {
             let mut to_remove = vec![];
             for (id, swg) in self.wgs.iter_mut() {
                 if swg.last_call.elapsed() > Duration::from_secs(5) {
                     to_remove.push(*id);
                 } else {
-                    swg.update(changes);
+                    swg.update(sensitivity_coeff, changes);
                 }
             }
             for id in to_remove {
@@ -136,6 +141,7 @@ pub struct DirectFunctions {
     post_fx_foreground: NodeAddress,
     post_fx_background: NodeAddress,
     vary_focus: bool,
+    pub decrease_sensitivity: bool,
     sample_duration: Duration,
     last_sample: Instant,
     focused_category: Option<SyscallKind>,
@@ -232,13 +238,14 @@ impl DirectFunctions {
             post_fx_foreground,
             post_fx_background,
             sample_duration,
-            vary_focus: true,
+            vary_focus: focus_kinds.len() > 0,
             last_focus_change: Instant::now(),
             time_to_next_focus_change: Duration::from_secs_f32(10.),
             focused_category: None,
             last_sample,
             k: k.clone(),
             focus_kinds,
+            decrease_sensitivity: false,
         }
     }
 }
@@ -267,8 +274,9 @@ impl Sonifier for DirectFunctions {
     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
         let mut rng = thread_rng();
         let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
+        let sensitivity_coeff = if self.decrease_sensitivity { 0.99 } else { 1.0 };
         for (_, cat) in self.categories.iter_mut() {
-            cat.update(&mut changes, &mut self.k);
+            cat.update(sensitivity_coeff, &mut changes, &mut self.k);
         }
         self.k.schedule_changes(changes);
         if self.vary_focus && self.last_focus_change.elapsed() > self.time_to_next_focus_change {
@@ -284,20 +292,22 @@ impl Sonifier for DirectFunctions {
                 let args = vec![];
                 osc_sender.send((addr, args)).ok();
             } else {
-                // let focused = rng.gen_range(0..self.categories.len());
-                let focused = self.focus_kinds.choose(&mut rng).unwrap();
-                let focused_string = format!("{focused:?}");
-                for (i, (name, cat)) in &mut self.categories.iter_mut().enumerate() {
-                    if *name == focused_string {
-                        cat.patch_to(&self.post_fx_foreground, &mut self.k);
-                        let addr = "/voice/focus/enabled";
-                        let args = vec![Type::String(name.clone())];
-                        osc_sender.send((addr, args)).ok();
-                    } else {
-                        cat.patch_to(&self.post_fx_background, &mut self.k);
+                if self.focus_kinds.len() > 0 {
+                    // let focused = rng.gen_range(0..self.categories.len());
+                    let focused = self.focus_kinds.choose(&mut rng).unwrap();
+                    let focused_string = format!("{focused:?}");
+                    for (i, (name, cat)) in &mut self.categories.iter_mut().enumerate() {
+                        if *name == focused_string {
+                            cat.patch_to(&self.post_fx_foreground, &mut self.k);
+                            let addr = "/voice/focus/enabled";
+                            let args = vec![Type::String(name.clone())];
+                            osc_sender.send((addr, args)).ok();
+                        } else {
+                            cat.patch_to(&self.post_fx_background, &mut self.k);
+                        }
                     }
+                    self.focused_category = Some(*focused);
                 }
-                self.focused_category = Some(*focused);
             }
         }
     }
@@ -439,8 +449,9 @@ impl SyscallWaveguide {
             changes,
         );
     }
-    fn update(&mut self, changes: &mut SimultaneousChanges) {
+    fn update(&mut self, sensitivity_coeff: f32, changes: &mut SimultaneousChanges) {
         if !self.exciter_sender.is_full() {
+            self.coeff *= sensitivity_coeff;
             // if self.accumulator > 500. {
             //     self.coeff *= 0.9;
             // }

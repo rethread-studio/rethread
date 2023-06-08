@@ -1,12 +1,12 @@
 use std::{
     sync::{Arc, Mutex},
-    time::Duration,
+    time::{Duration, Instant},
 };
 
 use crate::{to_freq53, Sonifier};
 use atomic_float::AtomicF32;
 use knyst::{
-    controller::{CallbackHandle, KnystCommands},
+    controller::{CallbackHandle, KnystCommands, StartBeat},
     graph::{Bus, NodeAddress, SimultaneousChanges},
     prelude::*,
     time::Superbeats,
@@ -15,21 +15,65 @@ use knyst_waveguide::interface::{Note, NoteOpt, PluckedWaveguide, Synth, Trigger
 use knyst_waveguide::phrase::*;
 
 #[derive(Debug, Clone, Copy)]
+struct Program {
+    counter: u32,
+    max_counter: u32,
+    activity_value: f32,
+}
+impl Program {
+    pub fn new() -> Self {
+        Self {
+            counter: 0,
+            max_counter: 1,
+            activity_value: 0.,
+        }
+    }
+    pub fn register_call(&mut self) {
+        self.counter += 1;
+    }
+    pub fn update_interval(&mut self) {
+        if self.counter > self.max_counter {
+            self.max_counter = self.counter;
+        }
+        let new_activity = self.counter as f32 / self.max_counter as f32;
+        self.activity_value = self.activity_value * 0.9 + new_activity * 0.1;
+        self.counter = 0;
+    }
+    pub fn activity_value(&self) -> f32 {
+        self.activity_value.powf(0.3)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 struct Activity {
-    thunderbird: f32,
-    htop: f32,
-    konqueror: f32,
-    gedit: f32,
-    rhythmbox: f32,
+    htop: Program,
+    konqueror: Program,
+    gedit: Program,
+    thunderbird: Program,
+    rhythmbox: Program,
+    last_update: Instant,
+    interval_duration: Duration,
 }
 impl Activity {
     pub fn new() -> Activity {
         Self {
-            thunderbird: 0.,
-            htop: 0.,
-            konqueror: 0.,
-            gedit: 0.,
-            rhythmbox: 0.,
+            thunderbird: Program::new(),
+            htop: Program::new(),
+            konqueror: Program::new(),
+            gedit: Program::new(),
+            rhythmbox: Program::new(),
+            last_update: Instant::now(),
+            interval_duration: Duration::from_millis(50),
+        }
+    }
+    pub fn update(&mut self) {
+        if self.last_update.elapsed() >= self.interval_duration {
+            self.last_update = Instant::now();
+            self.thunderbird.update_interval();
+            self.htop.update_interval();
+            self.konqueror.update_interval();
+            self.rhythmbox.update_interval();
+            self.gedit.update_interval();
         }
     }
 }
@@ -45,6 +89,7 @@ pub struct ProgramThemes {
 
 impl ProgramThemes {
     pub fn new(k: &mut KnystCommands) -> Self {
+        println!("ProgramThemes");
         k.change_musical_time_map(|mtm| {
             mtm.replace(0, knyst::scheduling::TempoChange::NewTempo { bpm: 80. })
         });
@@ -93,19 +138,22 @@ impl ProgramThemes {
 
         let callback_root = root.clone();
         let callback_activity = activity.clone();
+        let mut i = 0;
         let callback = k.schedule_beat_callback(
             move |mut time, k| {
-                println!("Running callback");
+                println!("Running callback {i}, time: {time:?}");
+                i += 1;
                 let root_freq = callback_root.load(std::sync::atomic::Ordering::Relaxed);
                 let activity = callback_activity.lock().unwrap();
-                dbg!(&activity);
+                // dbg!(&activity);
                 {
                     let mut time = time;
                     let phrase = &phrases[rng.usize(..phrases.len())];
                     for event in phrase.events() {
-                        if rng.f32() < activity.thunderbird {
+                        if rng.f32() < activity.thunderbird.activity_value() {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
+                                    println!("Event at {time:?}");
                                     let mut changes = SimultaneousChanges::beats(time);
                                     let freq = to_freq53(n.0 + 53 * 4, root_freq);
                                     let amp = n.1 * 0.5;
@@ -134,7 +182,7 @@ impl ProgramThemes {
                     let mut time = time;
                     let phrase = &konqueror_phrases()[rng.usize(..konqueror_phrases().len())];
                     for event in phrase.events() {
-                        if rng.f32() < activity.konqueror {
+                        if rng.f32() < activity.konqueror.activity_value() {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
                                     let mut changes = SimultaneousChanges::beats(time);
@@ -165,17 +213,18 @@ impl ProgramThemes {
                     let mut time = time;
                     let phrase = &htop_phrases()[rng.usize(..htop_phrases().len())];
                     for event in phrase.events() {
-                        if rng.f32() < activity.htop {
+                        let a = activity.htop.activity_value();
+                        if rng.f32() < a {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
                                     let mut changes = SimultaneousChanges::beats(time);
                                     let freq = to_freq53(n.0 + 159, root_freq);
-                                    let amp = n.1;
+                                    let amp = n.1 * (0.1 + a.powf(0.5) * 0.9);
                                     let feedback =
                                         if event.duration > Superbeats::from_beats_f32(1. / 32.) {
                                             0.99999
                                         } else {
-                                            0.9
+                                            0.95
                                         };
                                     wg_htop.trig(
                                         Note {
@@ -200,7 +249,8 @@ impl ProgramThemes {
                 }
                 Some(Superbeats::from_beats(2))
             },
-            Superbeats::from_beats(1), // Time for the first time the
+            // TODO: Add support for starting a callback at the next matching beat pattern
+            StartBeat::Multiple(Superbeats::from_beats(1)), // Time for the first time the
         );
         Self {
             callbacks: vec![callback],
@@ -229,22 +279,24 @@ impl Sonifier for ProgramThemes {
             let mut activity = self.activity.lock().unwrap();
             match program.as_str() {
                 "htop" => {
-                    activity.htop += 0.001;
+                    activity.htop.register_call();
                 }
                 "konqueror" => {
-                    activity.konqueror += 0.01;
+                    activity.konqueror.register_call();
                 }
                 "gedit" => {
-                    activity.gedit += 0.0001;
+                    activity.gedit.register_call();
                 }
                 "thunderbird" => {
-                    activity.thunderbird += 0.001;
+                    activity.thunderbird.register_call();
                 }
                 "rhythmbox" => {
-                    activity.rhythmbox += 0.0001;
+                    activity.rhythmbox.register_call();
                 }
                 _ => (),
             }
+        } else if m.addr == "/syscall_analysis/per_kind_interval" {
+            //
         }
     }
 
@@ -267,12 +319,7 @@ impl Sonifier for ProgramThemes {
     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<nannou_osc::Connected>) {
         // todo!()
         let mut activity = self.activity.lock().unwrap();
-        let coeff = 0.99999;
-        activity.gedit *= coeff;
-        activity.thunderbird *= coeff;
-        activity.konqueror *= coeff;
-        activity.rhythmbox *= coeff;
-        activity.htop *= coeff;
+        activity.update();
     }
 
     fn free(&mut self) {
