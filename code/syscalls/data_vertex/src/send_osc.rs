@@ -79,6 +79,9 @@ impl OscSender {
                 Type::String(m.description.clone()),
             ];
             sender.send((addr, args)).ok();
+            let addr = "/break";
+            let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
+            sender.send((addr, args)).ok();
         }
     }
     pub fn send_score_stop(&mut self) {
