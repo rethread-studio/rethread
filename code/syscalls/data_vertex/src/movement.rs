@@ -17,10 +17,22 @@ impl Score {
                 id: 0,
                 is_break: false,
                 description: "direct,categories".to_string(),
-                duration: Duration::from_secs(90),
+                duration: Duration::from_secs(4 * 60),
             },
             Movement {
                 id: 1,
+                is_break: true,
+                description: "break".to_string(),
+                duration: Duration::from_secs(break_dur),
+            },
+            Movement {
+                id: 100,
+                is_break: false,
+                description: "direct,categories,interlude".to_string(),
+                duration: Duration::from_secs(2 * 60),
+            },
+            Movement {
+                id: 201,
                 is_break: true,
                 description: "break".to_string(),
                 duration: Duration::from_secs(break_dur),
@@ -38,10 +50,23 @@ impl Score {
                 duration: Duration::from_secs(break_dur),
             },
             Movement {
+                id: 102,
+                is_break: false,
+                description: "interlude,direct,function calls,lower and lower sensitivity"
+                    .to_string(),
+                duration: Duration::from_secs(2 * 60),
+            },
+            Movement {
+                id: 201,
+                is_break: true,
+                description: "break".to_string(),
+                duration: Duration::from_secs(break_dur),
+            },
+            Movement {
                 id: 6,
                 is_break: false,
-                description: "direct,function calls,chorus".to_string(),
-                duration: Duration::from_secs(60),
+                description: "direct,function calls,focus shifting,chorus".to_string(),
+                duration: Duration::from_secs(7 * 60),
             },
             Movement {
                 id: 7,
@@ -53,7 +78,7 @@ impl Score {
                 id: 4,
                 is_break: false,
                 description: "quantised,categories,clear".to_string(),
-                duration: Duration::from_secs(4 * 60),
+                duration: Duration::from_secs(5 * 60),
             },
             Movement {
                 id: 8,
@@ -62,10 +87,50 @@ impl Score {
                 duration: Duration::from_secs(break_dur),
             },
             Movement {
+                id: 104,
+                is_break: false,
+                description: "interlude,quantised,categories,clear".to_string(),
+                duration: Duration::from_secs(2 * 60),
+            },
+            Movement {
+                id: 108,
+                is_break: true,
+                description: "break".to_string(),
+                duration: Duration::from_secs(break_dur),
+            },
+            Movement {
                 id: 5,
                 is_break: false,
-                description: "quantised,categories,smoothed".to_string(),
-                duration: Duration::from_secs(4 * 60),
+                description:
+                    "quantised,categories,smoothed,occasional snippets of the binaries as sound"
+                        .to_string(),
+                duration: Duration::from_secs(3 * 60),
+            },
+            Movement {
+                id: 9,
+                is_break: true,
+                description: "break".to_string(),
+                duration: Duration::from_secs(break_dur),
+            },
+            Movement {
+                id: 10,
+                is_break: false,
+                description: "themes,many programs open (open and close), quickly rising harmony"
+                    .to_string(),
+                duration: Duration::from_secs(5 * 60),
+            },
+            Movement {
+                id: 110,
+                is_break: false,
+                description: "themes,many programs open (open and close),smoothed direct functions in the background, steady harmony"
+                    .to_string(),
+                duration: Duration::from_secs(1 * 60),
+            },
+            Movement {
+                id: 1000,
+                is_break: true,
+                description: "break".to_string(),
+                duration: Duration::from_secs(break_dur),
             },
         ];
         Self {
