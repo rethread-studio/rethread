@@ -9,8 +9,17 @@ use enum_iterator::cardinality;
 use futures_util::StreamExt;
 use log::*;
 use menu::MenuItem;
-use movement::Score;
+use movement::{Movement, Score};
 use nix::errno::Errno;
+use ratatui as tui;
+use ratatui::{
+    backend::{Backend, CrosstermBackend},
+    layout::{Alignment, Constraint, Layout},
+    style::{Color, Modifier, Style},
+    text::{Line, Span},
+    widgets::{Block, Borders, Cell, Gauge, Paragraph, Row, Table, TableState, Wrap},
+    Frame, Terminal,
+};
 use send_osc::OscSender;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -26,13 +35,6 @@ use syscalls_shared::{Packet, Syscall, SyscallKind};
 use tokio::{
     net::{TcpListener, TcpStream},
     sync::mpsc::UnboundedSender,
-};
-use tui::{
-    backend::{Backend, CrosstermBackend},
-    layout::{Constraint, Layout},
-    style::{Color, Modifier, Style},
-    widgets::{Block, Borders, Cell, Gauge, Row, Table, TableState},
-    Frame, Terminal,
 };
 
 mod config;
@@ -275,9 +277,9 @@ pub struct ScorePlaybackData {
     current_index: usize,
     max_index: usize,
     current_timestamp_for_mvt: Duration,
-    max_timestamp_for_mvt: Duration,
     playing: bool,
-    tags: String,
+    current_mvt: Option<Movement>,
+    next_mvt: Option<Movement>,
 }
 impl Default for ScorePlaybackData {
     fn default() -> Self {
@@ -285,9 +287,9 @@ impl Default for ScorePlaybackData {
             current_index: 0,
             max_index: 0,
             current_timestamp_for_mvt: Duration::ZERO,
-            max_timestamp_for_mvt: Duration::ZERO,
+            current_mvt: None,
+            next_mvt: None,
             playing: false,
-            tags: String::new(),
         }
     }
 }
@@ -604,9 +606,9 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .direction(tui::layout::Direction::Vertical)
         .constraints(
             [
-                Constraint::Percentage(80),
+                Constraint::Percentage(60),
                 Constraint::Min(5),
-                Constraint::Min(5),
+                Constraint::Min(15),
             ]
             .as_ref(),
         )
@@ -616,12 +618,12 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     let rects = Layout::default()
         .direction(tui::layout::Direction::Horizontal)
         .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
-        .margin(5)
+        .margin(1)
         .split(rects[0]);
     let data_rects = Layout::default()
         .direction(tui::layout::Direction::Vertical)
         .constraints([Constraint::Percentage(25), Constraint::Percentage(75)])
-        .margin(5)
+        .margin(1)
         .split(rects[1]);
     let menu_rect = rects[0];
 
@@ -658,14 +660,27 @@ fn render_score_bar<B: Backend>(
     rect: tui::layout::Rect,
     score_playback_data: &ScorePlaybackData,
 ) {
+    let score_rects = Layout::default()
+        .direction(tui::layout::Direction::Vertical)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        .margin(0)
+        .split(rect);
+    let max_timestamp = score_playback_data
+        .current_mvt
+        .as_ref()
+        .map_or(Duration::ZERO, |m| m.duration);
+    let tags = score_playback_data
+        .current_mvt
+        .as_ref()
+        .map_or("", |m| &m.description);
     let g = Gauge::default()
         .block(Block::default().borders(Borders::ALL).title(format!(
             "Score tags: {}, progress: {} / {} | {} / {}",
-            score_playback_data.tags,
+            tags,
             score_playback_data.current_index,
             score_playback_data.max_index,
             humantime::format_duration(score_playback_data.current_timestamp_for_mvt),
-            humantime::format_duration(score_playback_data.max_timestamp_for_mvt),
+            humantime::format_duration(max_timestamp),
         )))
         .gauge_style(
             Style::default()
@@ -679,11 +694,56 @@ fn render_score_bar<B: Backend>(
         )
         .percent(
             ((score_playback_data.current_timestamp_for_mvt.as_secs_f64()
-                / score_playback_data.max_timestamp_for_mvt.as_secs_f64())
+                / max_timestamp.as_secs_f64())
                 * 100.) as u16,
         );
 
-    f.render_widget(g, rect);
+    f.render_widget(g, score_rects[0]);
+    if let Some(next) = &score_playback_data.next_mvt {
+        let break_text = if next.is_break { "BREAK" } else { "" };
+        let interlude_text = if next.is_interlude { "INTERLUDE" } else { "" };
+        let text = vec![
+            Line::from(vec![
+                Span::styled(
+                    break_text,
+                    Style::default()
+                        .add_modifier(Modifier::ITALIC)
+                        .fg(Color::Blue),
+                ),
+                Span::styled(
+                    break_text,
+                    Style::default()
+                        .add_modifier(Modifier::ITALIC)
+                        .fg(Color::LightMagenta),
+                ),
+                Span::raw("."),
+            ]),
+            Line::from(Span::styled(
+                format!("id: {}", next.id),
+                Style::default().fg(Color::Red),
+            )),
+            Line::from(Span::styled(
+                format!("description: {}", next.description),
+                Style::default(),
+            )),
+            Line::from(Span::styled(
+                format!("duration: {} seconds", next.duration.as_secs_f32()),
+                Style::default(),
+            )),
+        ];
+
+        let paragraph = Paragraph::new(text)
+            .block(
+                Block::default()
+                    .title("Next movement")
+                    .borders(Borders::ALL),
+            )
+            .style(Style::default().fg(Color::White).bg(Color::Black))
+            .alignment(Alignment::Center)
+            .wrap(Wrap { trim: true });
+
+        f.render_widget(paragraph, score_rects[1]);
+    }
 }
 fn render_progress_bar<B: Backend>(
     f: &mut Frame<B>,

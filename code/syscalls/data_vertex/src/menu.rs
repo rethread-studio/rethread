@@ -1,6 +1,6 @@
 use enum_iterator::Sequence;
 use num_enum::TryFromPrimitive;
-use tui::{
+use ratatui::{
     backend::Backend,
     layout::Constraint,
     style::{Color, Modifier, Style},
@@ -25,7 +25,7 @@ pub enum MenuItem {
     Exit,
 }
 
-pub fn menu_ui<B: Backend>(f: &mut Frame<B>, state: &mut App, rect: tui::layout::Rect) {
+pub fn menu_ui<B: Backend>(f: &mut Frame<B>, state: &mut App, rect: ratatui::layout::Rect) {
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
     let normal_style = Style::default().bg(Color::Blue);
     let header_cells = ["Actions"]
