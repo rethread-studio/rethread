@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::iter::repeat;
+use std::ops::Range;
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -114,10 +115,10 @@ impl Category {
             }
             // Update LPF
             if self.block_counter >= 128 {
-                self.lpf_phase = (self.lpf_phase + 0.001) % 6.28;
-                self.lpf_freq = self.lpf_phase.sin() * 9000. + 9100.;
-                changes.push(self.lpf.change().set("cutoff_freq", self.lpf_freq));
-                self.block_counter = 0;
+                // self.lpf_phase = (self.lpf_phase + 0.001) % 6.28;
+                // self.lpf_freq = self.lpf_phase.sin() * 9000. + 9100.;
+                // changes.push(self.lpf.change().set("cutoff_freq", self.lpf_freq));
+                // self.block_counter = 0;
             }
             self.block_counter += 1;
         }
@@ -147,6 +148,7 @@ pub struct DirectFunctions {
     focused_category: Option<SyscallKind>,
     last_focus_change: Instant,
     time_to_next_focus_change: Duration,
+    pub next_focus_time_range: Range<f32>,
     k: KnystCommands,
 }
 
@@ -209,7 +211,7 @@ impl DirectFunctions {
             let category_bus = k.push(graph::Bus(4), inputs![]);
             let lpf = k.push(
                 OnePoleLPF::new(),
-                inputs![("cutoff_freq" : 20000.), ("signal" ; category_bus.out(0))],
+                inputs![("cutoff_freq" : 20000.), ("sig" ; category_bus.out(0))],
             );
             k.connect(lpf.to(&post_fx_foreground));
             // k.connect(category_bus.to(&post_fx_foreground).channels(2));
@@ -246,6 +248,7 @@ impl DirectFunctions {
             k: k.clone(),
             focus_kinds,
             decrease_sensitivity: false,
+            next_focus_time_range: 15.0..40.0,
         }
     }
 }
@@ -280,7 +283,8 @@ impl Sonifier for DirectFunctions {
         }
         self.k.schedule_changes(changes);
         if self.vary_focus && self.last_focus_change.elapsed() > self.time_to_next_focus_change {
-            self.time_to_next_focus_change = Duration::from_secs_f32(rng.gen_range(15.0..40.0));
+            self.time_to_next_focus_change =
+                Duration::from_secs_f32(rng.gen_range(self.next_focus_time_range.clone()));
             self.last_focus_change = Instant::now();
             if self.focused_category.is_some() {
                 // Every category to the foreground

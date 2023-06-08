@@ -352,7 +352,7 @@ impl SyscallKindQuantisedWaveguide {
     fn update(&mut self, changes: &mut SimultaneousChanges, rng: &mut ThreadRng) {
         // let feedback =
         //     1.01 - (1.0 - (self.amp * 3.2).clamp(0.0, 1.0).powf(1. / 4.)).clamp(0.0, 0.5);
-        let feedback = 1.00 - (1.0 - (self.amp * 2.5).clamp(0.0, 1.0)).clamp(0.0, 0.9);
+        let feedback = 0.99999 - (1.0 - (self.amp * 2.5).clamp(0.0, 1.0)).clamp(0.0, 0.9);
         self.amp *= 0.99 - (self.amp * 0.5);
         // self.damping *= 0.99999999;
         self.damping *= 0.95;

@@ -1,4 +1,5 @@
 use std::sync::atomic::AtomicBool;
+use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -6,7 +7,8 @@ use knyst::prelude::*;
 use knyst::*;
 
 use anyhow::Result;
-use nannou_osc::{receiver, sender, Connected, Message as OscMessage, Type};
+use nannou_osc::rosc::OscPacket;
+use nannou_osc::{receiver, sender, Connected, Message as OscMessage, Sender, Type};
 use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use syscalls_shared::SyscallKind;
@@ -68,24 +70,24 @@ fn main() -> Result<()> {
     //     sample_rate,
     //     &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
     // )));
-    // current_sonifier = Some(Box::new(DirectFunctions::new(
-    //     &mut k,
-    //     sample_rate,
-    //     &[
-    //         SyscallKind::Io,
-    //         SyscallKind::WaitForReady,
-    //         SyscallKind::Random,
-    //         SyscallKind::Permissions,
-    //         SyscallKind::SystemInfo,
-    //         SyscallKind::Memory,
-    //     ],
-    //     vec![
-    //         SyscallKind::Io,
-    //         SyscallKind::Memory,
-    //         SyscallKind::WaitForReady,
-    //     ],
-    // )));
-    current_sonifiers = vec![Box::new(ProgramThemes::new(&mut k))];
+    current_sonifiers = vec![Box::new(DirectFunctions::new(
+        &mut k,
+        sample_rate,
+        &[
+            SyscallKind::Io,
+            SyscallKind::WaitForReady,
+            SyscallKind::Random,
+            SyscallKind::Permissions,
+            SyscallKind::SystemInfo,
+            SyscallKind::Memory,
+        ],
+        vec![
+            SyscallKind::Io,
+            SyscallKind::Memory,
+            SyscallKind::WaitForReady,
+        ],
+    ))];
+    // current_sonifiers = vec![Box::new(ProgramThemes::new(&mut k))];
     for sonifier in &mut current_sonifiers {
         sonifier.patch_to_fx_chain(1);
     }
@@ -115,6 +117,21 @@ fn main() -> Result<()> {
             .transpose(9),
         HarmonicChange::new().new_chord(chord_maj7sharp11.clone()),
     ];
+    let mut app = App {
+        current_sonifiers,
+        current_chord,
+        chord_change_interval,
+        osc_sender,
+        last_switch,
+        last_chord_change,
+        mvt_id,
+        root_freq,
+        root,
+        harmonic_changes,
+        sample_rate,
+        k,
+        current_harmonic_change,
+    };
     // let mut current_chord = 0;
     let mut rng = thread_rng();
     // main loop
@@ -127,160 +144,13 @@ fn main() -> Result<()> {
             if m.addr == "/new_movement" {
                 if let Some(args) = m.args {
                     let mut args = args.into_iter();
-                    mvt_id = args.next().unwrap().int().unwrap();
+                    let new_mvt_id = args.next().unwrap().int().unwrap();
                     let is_break = args.next().unwrap().bool().unwrap();
                     let description = args.next().unwrap().string().unwrap();
-                    for sonifier in &mut current_sonifiers {
-                        sonifier.free();
-                    }
-                    k.free_disconnected_nodes();
-                    current_sonifiers.clear();
-                    if !is_break {
-                        let tags = description.split(",");
-                        println!("tags: {:?}", tags.clone().collect::<Vec<_>>());
-                        let start_channels = match mvt_id {
-                            0 => {
-                                current_sonifiers =
-                                    vec![Box::new(DirectCategories::new(&mut k, sample_rate))];
-                                1
-                            }
-                            100 => {
-                                // interlude
-                                chord_change_interval = None;
-                                current_sonifiers =
-                                    vec![Box::new(DirectCategories::new(&mut k, sample_rate))];
-                                1
-                            }
-                            2 => {
-                                chord_change_interval = None;
-                                current_sonifiers = vec![Box::new(DirectFunctions::new(
-                                    &mut k,
-                                    sample_rate,
-                                    &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
-                                    vec![],
-                                ))];
-                                1
-                            }
-                            102 => {
-                                // interlude
-                                chord_change_interval = None;
-                                let mut sonifier = DirectFunctions::new(
-                                    &mut k,
-                                    sample_rate,
-                                    &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
-                                    vec![],
-                                );
-                                sonifier.decrease_sensitivity = true;
-                                current_sonifiers = vec![Box::new(sonifier)];
-                                1
-                            }
-                            4 => {
-                                current_sonifiers =
-                                    vec![Box::new(QuantisedCategories::new(&mut k, sample_rate))];
-                                1
-                            }
-                            104 => {
-                                // Interlude
-                                current_sonifiers =
-                                    vec![Box::new(QuantisedCategories::new(&mut k, sample_rate))];
-                                1
-                            }
-                            6 => {
-                                chord_change_interval = Some(Duration::from_secs(8));
-                                current_sonifiers = vec![Box::new(DirectFunctions::new(
-                                    &mut k,
-                                    sample_rate,
-                                    &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
-                                    vec![
-                                        SyscallKind::Io,
-                                        SyscallKind::Memory,
-                                        SyscallKind::WaitForReady,
-                                    ],
-                                ))];
-                                3
-                            }
-                            5 => {
-                                chord_change_interval = None;
-                                current_sonifiers = vec![
-                                    Box::new(QuantisedCategories::new(&mut k, sample_rate)),
-                                    Box::new(PeakBinaries::new(&mut k)),
-                                ];
-                                2
-                            }
-                            10 => {
-                                chord_change_interval = Some(Duration::from_secs(12));
-                                current_sonifiers = vec![Box::new(ProgramThemes::new(&mut k))];
-                                1
-                            }
-                            110 => {
-                                chord_change_interval = None;
-                                current_sonifiers = vec![
-                                    Box::new(ProgramThemes::new(&mut k)),
-                                    Box::new(DirectCategories::new(&mut k, sample_rate)),
-                                ];
-                                // TODO: Different fx chains for the different sonifiers
-                                2
-                            }
-                            _ => {
-                                eprintln!("!! Unhandled movement:");
-                                dbg!(&mvt_id, tags);
-                                0
-                            }
-                        };
-                        if current_sonifiers.len() > 0 {
-                            root = 0; // Reset root every movement
-                        }
-                        for sonifier in &mut current_sonifiers {
-                            sonifier.patch_to_fx_chain(start_channels);
-                            let root = to_freq53(root, root_freq);
-                            sonifier.change_harmony(&mut current_chord, root);
-                            last_chord_change = Instant::now();
-                        }
-                        // if tags.position(|s| s == "direct").is_some() {
-                        //     if tags.position(|s| s == "categories").is_some() {
-                        //         current_sonifier =
-                        //             Some(Box::new(DirectCategories::new(&mut k, sample_rate)));
-                        //     } else if tags.position(|s| s == "function calls").is_some() {
-                        //         current_sonifier =
-                        //             Some(Box::new(DirectFunctions::new(&mut k, sample_rate)));
-                        //     }
-                        // } else if tags.position(|s| s == "quantised").is_some() {
-                        //     current_sonifier =
-                        //         Some(Box::new(QuantisedCategories::new(&mut k, sample_rate)));
-                        // }
-                    } else {
-                        println!("Break");
-
-                        let addr = "/break_voice";
-                        let args =
-                            vec![Type::Int(mvt_id as i32), Type::String(description.clone())];
-                        osc_sender.send((addr, args)).ok();
-                    }
+                    app.change_movement(new_mvt_id, is_break);
                 }
             } else {
-                for sonifier in &mut current_sonifiers {
-                    sonifier.apply_osc_message(m.clone());
-                }
-            }
-        }
-        let change_harmony = if let Some(time_interval) = &chord_change_interval {
-            if last_chord_change.elapsed() > *time_interval {
-                harmonic_changes[current_harmonic_change].apply(&mut current_chord, &mut root);
-                current_harmonic_change = (current_harmonic_change + 1) % harmonic_changes.len();
-                println!("Changed harmony to scale {current_chord:?}, root: {root}");
-                last_chord_change = Instant::now();
-                true
-            } else {
-                false
-            }
-        } else {
-            false
-        };
-        for sonifier in &mut current_sonifiers {
-            sonifier.update(&mut osc_sender);
-            if change_harmony {
-                let root = to_freq53(root, root_freq);
-                sonifier.change_harmony(&current_chord, root);
+                app.apply_osc_message(m);
             }
         }
 
@@ -332,6 +202,227 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+struct App {
+    current_sonifiers: Vec<Box<dyn Sonifier>>,
+    current_chord: Vec<i32>,
+    chord_change_interval: Option<Duration>,
+    // osc_receiver: Receiver<Connected>,
+    osc_sender: Sender<Connected>,
+    last_switch: Instant,
+    last_chord_change: Instant,
+    mvt_id: i32,
+    root_freq: f32,
+    root: i32,
+    harmonic_changes: Vec<HarmonicChange>,
+    current_harmonic_change: usize,
+    sample_rate: f32,
+    k: KnystCommands,
+}
+impl App {
+    pub fn apply_osc_message(&mut self, m: OscMessage) {
+        for sonifier in &mut self.current_sonifiers {
+            sonifier.apply_osc_message(m.clone());
+        }
+    }
+    pub fn update(&mut self) {
+        let App {
+            current_sonifiers,
+            current_chord,
+            chord_change_interval,
+            osc_sender,
+            last_switch,
+            last_chord_change,
+            mvt_id,
+            root_freq,
+            root,
+            harmonic_changes,
+            sample_rate,
+            k,
+            current_harmonic_change,
+        } = self;
+        let change_harmony = if let Some(time_interval) = &chord_change_interval {
+            if last_chord_change.elapsed() > *time_interval {
+                harmonic_changes[*current_harmonic_change].apply(current_chord, root);
+                *current_harmonic_change = (*current_harmonic_change + 1) % harmonic_changes.len();
+                println!("Changed harmony to scale {current_chord:?}, root: {root}");
+                *last_chord_change = Instant::now();
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        };
+        for sonifier in &mut *current_sonifiers {
+            sonifier.update(osc_sender);
+            if change_harmony {
+                let root = to_freq53(*root, *root_freq);
+                sonifier.change_harmony(&current_chord, root);
+            }
+        }
+    }
+    pub fn change_movement(&mut self, new_mvt_id: i32, is_break: bool) {
+        let App {
+            current_sonifiers,
+            // osc_receiver,
+            osc_sender,
+            last_switch,
+            last_chord_change,
+            mvt_id,
+            root_freq,
+            root,
+            harmonic_changes,
+            sample_rate,
+            k,
+            chord_change_interval,
+            current_chord,
+            current_harmonic_change,
+        } = self;
+
+        let sample_rate = *sample_rate;
+
+        for sonifier in &mut *current_sonifiers {
+            sonifier.free();
+        }
+        k.free_disconnected_nodes();
+        current_sonifiers.clear();
+        if !is_break {
+            // let tags = description.split(",");
+            // println!("tags: {:?}", tags.clone().collect::<Vec<_>>());
+            match mvt_id {
+                0 => {
+                    *current_sonifiers = vec![Box::new(DirectCategories::new(k, sample_rate))];
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(1);
+                    }
+                }
+                100 => {
+                    // interlude
+                    *chord_change_interval = None;
+                    *current_sonifiers = vec![Box::new(DirectCategories::new(k, sample_rate))];
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(1);
+                    }
+                }
+                2 => {
+                    *chord_change_interval = None;
+                    *current_sonifiers = vec![Box::new(DirectFunctions::new(
+                        k,
+                        sample_rate,
+                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                        vec![],
+                    ))];
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(1);
+                    }
+                }
+                102 => {
+                    // interlude
+                    *chord_change_interval = None;
+                    let mut sonifier = DirectFunctions::new(
+                        k,
+                        sample_rate,
+                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                        vec![],
+                    );
+                    sonifier.decrease_sensitivity = true;
+                    *current_sonifiers = vec![Box::new(sonifier)];
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(1);
+                    }
+                }
+                4 => {
+                    *current_sonifiers = vec![Box::new(QuantisedCategories::new(k, sample_rate))];
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(1);
+                    }
+                }
+                104 => {
+                    // Interlude
+                    *current_sonifiers = vec![Box::new(QuantisedCategories::new(k, sample_rate))];
+
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(1);
+                    }
+                }
+                6 => {
+                    *chord_change_interval = Some(Duration::from_secs(8));
+                    *current_sonifiers = vec![Box::new(DirectFunctions::new(
+                        k,
+                        sample_rate,
+                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                        vec![
+                            SyscallKind::Io,
+                            SyscallKind::Memory,
+                            SyscallKind::WaitForReady,
+                        ],
+                    ))];
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(3);
+                    }
+                }
+                106 => {
+                    *chord_change_interval = Some(Duration::from_secs(8));
+                    let mut sonifier = DirectFunctions::new(
+                        k,
+                        sample_rate,
+                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                        vec![
+                            SyscallKind::Io,
+                            SyscallKind::Memory,
+                            SyscallKind::WaitForReady,
+                        ],
+                    );
+                    sonifier.patch_to_fx_chain(3);
+                    sonifier.next_focus_time_range = 5.0..15.0;
+                    *current_sonifiers = vec![Box::new(sonifier)];
+                }
+                5 => {
+                    *chord_change_interval = None;
+                    let mut qc = QuantisedCategories::new(k, sample_rate);
+                    qc.patch_to_fx_chain(2);
+                    *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new(k))];
+                }
+                10 => {
+                    *chord_change_interval = Some(Duration::from_secs(12));
+                    *current_sonifiers = vec![Box::new(ProgramThemes::new(k))];
+                    current_sonifiers
+                        .iter_mut()
+                        .for_each(|s| s.patch_to_fx_chain(1));
+                }
+                110 => {
+                    *chord_change_interval = None;
+                    let mut pt = ProgramThemes::new(k);
+                    pt.patch_to_fx_chain(1);
+                    let mut dc = DirectCategories::new(k, sample_rate);
+                    dc.patch_to_fx_chain(2);
+                    *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
+                    // TODO: Different fx chains for the different sonifiers,
+                }
+                _ => {
+                    eprintln!("!! Unhandled movement:");
+                    dbg!(&mvt_id);
+                    0
+                }
+            };
+            if current_sonifiers.len() > 0 {
+                *root = 0; // Reset root every movement
+            }
+            for sonifier in current_sonifiers {
+                let root = to_freq53(*root, *root_freq);
+                sonifier.change_harmony(current_chord, root);
+                *last_chord_change = Instant::now();
+            }
+        } else {
+            println!("Break");
+
+            let addr = "/break_voice";
+            let args = vec![Type::Int(*mvt_id as i32)];
+            osc_sender.send((addr, args)).ok();
+        }
+    }
 }
 
 pub trait Sonifier {

@@ -47,7 +47,7 @@ OSCdef(\voice_break, { arg msg, time, addr, recvPort;
 			/*sig = PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum));
 			sig = PitchShift.ar(sig, 0.2, 1.5);*/
 			pos = Line.kr(0, 1, BufSamples.kr(bufnum)/BufSampleRate.kr(bufnum) * 1.1, doneAction: 2);
-			sig = GrainBuf.ar(1, Impulse.kr(LFNoise1.kr(2).range(30, 60)), LFNoise1.kr(3).range(0.15, 0.4), bufnum, LFNoise1.kr(20).range(0.2, 1.1) * 0.8,
+			sig = GrainBuf.ar(1, Impulse.kr(LFNoise1.kr(2).range(30, 60)), LFNoise1.kr(3).range(0.15, 0.4), bufnum, LFNoise1.kr(20).range(0.95, 1.1) * 0.8,
 				pos, 2, pan, envbuf);
 			//sig = PlayBuf.ar(1, bufnum, BufRateScale.ir(bufnum));
 			sig = LPF.ar(sig, 4000);
