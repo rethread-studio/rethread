@@ -1,9 +1,10 @@
 use log::error;
 use nannou_osc::{Connected, Sender, Type};
+use syscalls_shared::score::Movement;
 use syscalls_shared::Syscall;
 use tracing::info;
 
-use crate::{config::Config, movement::Movement};
+use crate::config::Config;
 
 pub struct OscSender {
     senders: Vec<Sender<Connected>>,

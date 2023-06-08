@@ -1,7 +1,5 @@
 use std::time::{Duration, Instant};
 
-use crate::{send_osc::OscSender, ScorePlaybackData};
-
 pub struct Score {
     pub current_movement: usize,
     pub movements: Vec<Movement>,
@@ -196,38 +194,42 @@ impl Score {
             is_playing: false,
         }
     }
-    pub fn play_from(&mut self, mvt: usize, osc_sender: &mut OscSender) {
-        if !self.is_playing {
-            osc_sender.send_score_start();
-        }
+    pub fn is_playing(&self) -> bool {
+        self.is_playing
+    }
+    pub fn play_from(&mut self, mvt: usize) -> &Movement {
         self.current_movement = mvt;
         self.is_playing = true;
         self.start_of_last_movement = Instant::now();
-        osc_sender.send_movement(&self.movements[self.current_movement]);
+        &self.movements[self.current_movement]
     }
-    pub fn stop(&mut self, osc_sender: &mut OscSender) {
+    pub fn stop(&mut self) {
         self.is_playing = false;
         self.current_movement = 0;
-        osc_sender.send_score_stop();
     }
     pub fn total_duration(&self) -> Duration {
         self.movements
             .iter()
             .fold(Duration::ZERO, |acc, m| acc + m.duration)
     }
-    pub fn update(&mut self, osc_sender: &mut OscSender) {
+    pub fn update(&mut self) -> ScoreUpdate {
         if self.is_playing {
             if self.start_of_last_movement.elapsed()
                 >= self.movements[self.current_movement].duration
             {
                 self.current_movement += 1;
-                if self.current_movement >= self.movements.len() {
-                    self.stop(osc_sender);
-                } else {
-                    osc_sender.send_movement(&self.movements[self.current_movement]);
-                }
                 self.start_of_last_movement = Instant::now();
+                if self.current_movement >= self.movements.len() {
+                    self.stop();
+                    ScoreUpdate::ScoreStop
+                } else {
+                    ScoreUpdate::NewMovement(self.movements[self.current_movement].clone())
+                }
+            } else {
+                ScoreUpdate::Nothing
             }
+        } else {
+            ScoreUpdate::Nothing
         }
     }
     pub fn score_playback_data(&self) -> ScorePlaybackData {
@@ -261,6 +263,12 @@ impl Score {
     }
 }
 
+pub enum ScoreUpdate {
+    Nothing,
+    ScoreStop,
+    NewMovement(Movement),
+}
+
 #[derive(Debug, Clone)]
 pub struct Movement {
     /// Hardcoded id so that we can link other data to the movement and also
@@ -270,4 +278,26 @@ pub struct Movement {
     pub is_interlude: bool,
     pub description: String,
     pub duration: Duration,
+}
+
+#[derive(Clone, Debug)]
+pub struct ScorePlaybackData {
+    pub current_index: usize,
+    pub max_index: usize,
+    pub current_timestamp_for_mvt: Duration,
+    pub playing: bool,
+    pub current_mvt: Option<Movement>,
+    pub next_mvt: Option<Movement>,
+}
+impl Default for ScorePlaybackData {
+    fn default() -> Self {
+        Self {
+            current_index: 0,
+            max_index: 0,
+            current_timestamp_for_mvt: Duration::ZERO,
+            current_mvt: None,
+            next_mvt: None,
+            playing: false,
+        }
+    }
 }

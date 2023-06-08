@@ -5,6 +5,8 @@ use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
 use strum::Display;
 
+pub mod score;
+
 #[derive(
     Copy,
     Clone,

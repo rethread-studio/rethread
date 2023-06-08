@@ -9,7 +9,6 @@ use enum_iterator::cardinality;
 use futures_util::StreamExt;
 use log::*;
 use menu::MenuItem;
-use movement::{Movement, Score};
 use nix::errno::Errno;
 use ratatui as tui;
 use ratatui::{
@@ -31,6 +30,7 @@ use std::{
     time::{Duration, Instant},
 };
 use std::{net::SocketAddr, path::PathBuf};
+use syscalls_shared::score::{Movement, Score, ScorePlaybackData, ScoreUpdate};
 use syscalls_shared::{Packet, Syscall, SyscallKind};
 use tokio::{
     net::{TcpListener, TcpStream},
@@ -39,7 +39,7 @@ use tokio::{
 
 mod config;
 mod menu;
-mod movement;
+// mod movement;
 mod send_osc;
 
 static SHOW_TUI: bool = true;
@@ -258,11 +258,28 @@ impl PacketHQ {
                         rp.reset();
                     }
                 }
-                PacketHQCommands::PlayScore => self.score.play_from(0, &mut self.osc_sender),
-                PacketHQCommands::StopScorePlayback => self.score.stop(&mut self.osc_sender),
+                PacketHQCommands::PlayScore => {
+                    if !self.score.is_playing() {
+                        self.osc_sender.send_score_start();
+                    }
+                    let new_mvt = self.score.play_from(0);
+                    self.osc_sender.send_movement(new_mvt);
+                }
+                PacketHQCommands::StopScorePlayback => {
+                    self.score.stop();
+                    self.osc_sender.send_score_stop();
+                }
             }
         }
-        self.score.update(&mut self.osc_sender);
+        match self.score.update() {
+            ScoreUpdate::ScoreStop => {
+                self.osc_sender.send_score_stop();
+            }
+            ScoreUpdate::NewMovement(m) => {
+                self.osc_sender.send_movement(&m);
+            }
+            ScoreUpdate::Nothing => (),
+        }
     }
 }
 
@@ -271,27 +288,6 @@ struct GuiUpdate {
     syscall_analyser: SyscallAnalyser,
     playback_data: PlaybackData,
     score_playback_data: ScorePlaybackData,
-}
-#[derive(Clone, Debug)]
-pub struct ScorePlaybackData {
-    current_index: usize,
-    max_index: usize,
-    current_timestamp_for_mvt: Duration,
-    playing: bool,
-    current_mvt: Option<Movement>,
-    next_mvt: Option<Movement>,
-}
-impl Default for ScorePlaybackData {
-    fn default() -> Self {
-        Self {
-            current_index: 0,
-            max_index: 0,
-            current_timestamp_for_mvt: Duration::ZERO,
-            current_mvt: None,
-            next_mvt: None,
-            playing: false,
-        }
-    }
 }
 #[derive(Clone, Debug)]
 struct PlaybackData {
