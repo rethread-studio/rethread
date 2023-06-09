@@ -53,7 +53,7 @@ impl eframe::App for TemplateApp {
             // The central panel the region left after adding TopPanel's and SidePanel's
 
             let strace_path =
-                "/home/erik/code/kth/rethread/code/syscalls/target/release/strace_collector";
+                "/home/assert/Documents/rethread/code/syscalls/target/release/strace_collector";
             let programs = ["gedit", "konqueror", "thunderbird", "htop", "rhythmbox"];
             for p in programs {
                 if ui.button(p).clicked() {
@@ -75,7 +75,7 @@ impl eframe::App for TemplateApp {
     }
 }
 
-pub fn start_program(strace_path: impl Into<PathBuf>, program: &'static str) {
+pub fn start_program(strace_path: &'static str, program: &'static str) {
     // let mut c = Command::new(strace_path.into());
     // c.arg("--command");
     // c.arg(program);
@@ -98,19 +98,27 @@ pub fn start_program(strace_path: impl Into<PathBuf>, program: &'static str) {
             c.arg("-e");
             c.arg("sh");
             c.arg("-c");
-            c.arg(format!("{:?} --command {program}", strace_path.into()));
+            c.arg(format!("{} --command {program}", strace_path));
             eprintln!("{:?}", c.spawn());
         }
-        "xterm" | "gnome-terminal" => {
+        "xterm" => {
             let mut c = Command::new(terminal);
             c.arg("-e");
-            c.arg(format!("{:?} --command {program}", strace_path.into()));
+            c.arg(format!("{} --command {program}", strace_path));
+            eprintln!("{:?}", c.spawn());
+        }
+        "gnome-terminal" => {
+            let mut c = Command::new(terminal);
+            c.arg("--");
+            c.arg(strace_path);
+            c.arg("--command");
+            c.arg(program);
             eprintln!("{:?}", c.spawn());
         }
         _ => {
             let mut c = Command::new(terminal);
             c.arg("-e");
-            c.arg(format!("{:?} --command {program}", strace_path.into()));
+            c.arg(format!("{} --command {program}", strace_path));
             eprintln!("{:?}", c.spawn());
         }
     }
