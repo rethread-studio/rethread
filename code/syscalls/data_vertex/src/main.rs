@@ -891,7 +891,7 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
             .expect("connected streams should have a peer address");
         info!("Peer address: {}", peer);
         tokio::spawn(async move {
-            handle_client(peer, socket, packet_sender).await.unwrap();
+            handle_client(peer, socket, packet_sender).await.ok();
         });
     }
 
