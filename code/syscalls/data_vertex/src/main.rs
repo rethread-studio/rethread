@@ -749,12 +749,12 @@ fn render_score_bar<B: Backend>(
                 * 100.) as u16,
         );
 
-    f.render_widget(g, score_rects[0]);
+    f.render_widget(g, score_rects[2]);
     if let Some(current) = &score_playback_data.current_mvt {
-        render_movement_info(f, score_rects[1], "Current movement", current);
+        render_movement_info(f, score_rects[0], "Current movement", current);
     }
     if let Some(next) = &score_playback_data.next_mvt {
-        render_movement_info(f, score_rects[2], "Next movement", next);
+        render_movement_info(f, score_rects[1], "Next movement", next);
     }
 }
 fn render_progress_bar<B: Backend>(
