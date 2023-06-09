@@ -217,6 +217,7 @@ impl Score {
             .iter()
             .fold(Duration::ZERO, |acc, m| acc + m.duration)
     }
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn total_duration_at_playhead(&self) -> Duration {
         if self.is_playing {
             self.movements[..self.current_movement]
