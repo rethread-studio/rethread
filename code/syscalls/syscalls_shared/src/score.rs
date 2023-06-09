@@ -217,6 +217,16 @@ impl Score {
             .iter()
             .fold(Duration::ZERO, |acc, m| acc + m.duration)
     }
+    pub fn total_duration_at_playhead(&self) -> Duration {
+        if self.is_playing {
+            self.movements[..self.current_movement]
+                .iter()
+                .fold(Duration::ZERO, |acc, m| acc + m.duration)
+                + self.start_of_last_movement.elapsed()
+        } else {
+            Duration::ZERO
+        }
+    }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn update(&mut self) -> ScoreUpdate {
         if self.is_playing {
@@ -266,6 +276,8 @@ impl Score {
                 }
             },
             playing: self.is_playing,
+            total_duration: self.total_duration(),
+            total_duration_at_playhead: self.total_duration_at_playhead(),
         }
     }
 }
@@ -295,6 +307,8 @@ pub struct ScorePlaybackData {
     pub playing: bool,
     pub current_mvt: Option<Movement>,
     pub next_mvt: Option<Movement>,
+    pub total_duration: Duration,
+    pub total_duration_at_playhead: Duration,
 }
 impl Default for ScorePlaybackData {
     fn default() -> Self {
@@ -304,6 +318,8 @@ impl Default for ScorePlaybackData {
             current_timestamp_for_mvt: Duration::ZERO,
             current_mvt: None,
             next_mvt: None,
+            total_duration: Duration::ZERO,
+            total_duration_at_playhead: Duration::ZERO,
             playing: false,
         }
     }
