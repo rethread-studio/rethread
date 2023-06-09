@@ -33,6 +33,7 @@ fn App(cx: Scope) -> impl IntoView {
 #[component]
 fn ScorePage(cx: Scope) -> impl IntoView {
     let score = Score::new();
+    let total_duration = score.total_duration();
     let movements: Vec<_> = score
         .movements
         .iter()
@@ -40,7 +41,10 @@ fn ScorePage(cx: Scope) -> impl IntoView {
         .collect();
     view! { cx,
             <div class="font-urbanist bg-slate-900 text-gray-100">
-            <h1 class="text-3xl">"Score for sys|calls"</h1>
+            <div class="flex flex-col">
+                <h1 class="text-3xl">"Score for sys|calls"</h1>
+                <span class="text-xl">"Total duration: " {format_duration(total_duration).to_string()}</span>
+            </div>
             {movements}
             </div>
     }

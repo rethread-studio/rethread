@@ -558,10 +558,6 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
-.m-1 {
-  margin: 0.25rem;
-}
-
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -569,10 +565,6 @@ video {
 
 .flex {
   display: flex;
-}
-
-.h-screen {
-  height: 100vh;
 }
 
 .flex-row {
@@ -587,27 +579,8 @@ video {
   justify-content: space-between;
 }
 
-.overflow-hidden {
-  overflow: hidden;
-}
-
 .border-2 {
   border-width: 2px;
-}
-
-.border-amber-500 {
-  --tw-border-opacity: 1;
-  border-color: rgb(245 158 11 / var(--tw-border-opacity));
-}
-
-.border-green-900 {
-  --tw-border-opacity: 1;
-  border-color: rgb(20 83 45 / var(--tw-border-opacity));
-}
-
-.border-emerald-900 {
-  --tw-border-opacity: 1;
-  border-color: rgb(6 78 59 / var(--tw-border-opacity));
 }
 
 .border-gray-900 {
@@ -615,29 +588,14 @@ video {
   border-color: rgb(17 24 39 / var(--tw-border-opacity));
 }
 
+.bg-slate-900 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(15 23 42 / var(--tw-bg-opacity));
+}
+
 .bg-blue-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(37 99 235 / var(--tw-bg-opacity));
-}
-
-.bg-green-600 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(22 163 74 / var(--tw-bg-opacity));
-}
-
-.bg-slate-600 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(71 85 105 / var(--tw-bg-opacity));
-}
-
-.bg-slate-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(241 245 249 / var(--tw-bg-opacity));
-}
-
-.bg-emerald-800 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(6 95 70 / var(--tw-bg-opacity));
 }
 
 .bg-gray-600 {
@@ -650,11 +608,6 @@ video {
   background-color: rgb(31 41 55 / var(--tw-bg-opacity));
 }
 
-.bg-slate-900 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(15 23 42 / var(--tw-bg-opacity));
-}
-
 .p-1 {
   padding: 0.25rem;
 }
@@ -663,23 +616,14 @@ video {
   font-family: Urbanist, sans-serif;
 }
 
-.text-xl {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-}
-
 .text-3xl {
   font-size: 1.875rem;
   line-height: 2.25rem;
 }
 
-.font-normal {
-  font-weight: 400;
-}
-
-.text-white {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
 }
 
 .text-gray-100 {
@@ -693,10 +637,4 @@ video {
   font-family: "Urbanist";
 
   src: url("assets/fonts/Urbanist/Urbanist-VariableFont_wght.ttf");
-}
-
-@media (min-width: 768px) {
-  .md\:flex-row {
-    flex-direction: row;
-  }
 }
