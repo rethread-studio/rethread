@@ -651,6 +651,52 @@ fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
     }
     menu::menu_ui(f, app, menu_rect);
 }
+fn render_movement_info<B: Backend>(
+    f: &mut Frame<B>,
+    rect: tui::layout::Rect,
+    name: &'static str,
+    mvt: &Movement,
+) {
+    let break_text = if mvt.is_break { "BREAK" } else { "" };
+    let interlude_text = if mvt.is_interlude { "INTERLUDE" } else { "" };
+    let text = vec![
+        Line::from(vec![
+            Span::styled(
+                break_text,
+                Style::default()
+                    .add_modifier(Modifier::ITALIC)
+                    .fg(Color::Blue),
+            ),
+            Span::styled(
+                interlude_text,
+                Style::default()
+                    .add_modifier(Modifier::ITALIC)
+                    .fg(Color::LightMagenta),
+            ),
+            Span::raw("."),
+        ]),
+        Line::from(Span::styled(
+            format!("id: {}", mvt.id),
+            Style::default().fg(Color::Red),
+        )),
+        Line::from(Span::styled(
+            format!("description: {}", mvt.description),
+            Style::default(),
+        )),
+        Line::from(Span::styled(
+            format!("duration: {} seconds", mvt.duration.as_secs_f32()),
+            Style::default(),
+        )),
+    ];
+
+    let paragraph = Paragraph::new(text)
+        .block(Block::default().title(name).borders(Borders::ALL))
+        .style(Style::default().fg(Color::White).bg(Color::Black))
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true });
+
+    f.render_widget(paragraph, rect);
+}
 fn render_score_bar<B: Backend>(
     f: &mut Frame<B>,
     rect: tui::layout::Rect,
@@ -658,7 +704,11 @@ fn render_score_bar<B: Backend>(
 ) {
     let score_rects = Layout::default()
         .direction(tui::layout::Direction::Vertical)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        .constraints([
+            Constraint::Percentage(34),
+            Constraint::Percentage(33),
+            Constraint::Percentage(33),
+        ])
         .margin(0)
         .split(rect);
     let max_timestamp = score_playback_data
@@ -671,12 +721,17 @@ fn render_score_bar<B: Backend>(
         .map_or("", |m| &m.description);
     let g = Gauge::default()
         .block(Block::default().borders(Borders::ALL).title(format!(
-            "Score tags: {}, progress: {} / {} | {} / {}",
-            tags,
+            "Movement progress: {} / {} | {} / {} | total duration: {} / {}",
             score_playback_data.current_index,
             score_playback_data.max_index,
-            humantime::format_duration(score_playback_data.current_timestamp_for_mvt),
+            humantime::format_duration(Duration::from_secs(
+                score_playback_data.current_timestamp_for_mvt.as_secs()
+            )),
             humantime::format_duration(max_timestamp),
+            humantime::format_duration(Duration::from_secs(
+                score_playback_data.total_duration_at_playhead.as_secs()
+            )),
+            humantime::format_duration(score_playback_data.total_duration),
         )))
         .gauge_style(
             Style::default()
@@ -695,50 +750,11 @@ fn render_score_bar<B: Backend>(
         );
 
     f.render_widget(g, score_rects[0]);
+    if let Some(current) = &score_playback_data.current_mvt {
+        render_movement_info(f, score_rects[1], "Current movement", current);
+    }
     if let Some(next) = &score_playback_data.next_mvt {
-        let break_text = if next.is_break { "BREAK" } else { "" };
-        let interlude_text = if next.is_interlude { "INTERLUDE" } else { "" };
-        let text = vec![
-            Line::from(vec![
-                Span::styled(
-                    break_text,
-                    Style::default()
-                        .add_modifier(Modifier::ITALIC)
-                        .fg(Color::Blue),
-                ),
-                Span::styled(
-                    break_text,
-                    Style::default()
-                        .add_modifier(Modifier::ITALIC)
-                        .fg(Color::LightMagenta),
-                ),
-                Span::raw("."),
-            ]),
-            Line::from(Span::styled(
-                format!("id: {}", next.id),
-                Style::default().fg(Color::Red),
-            )),
-            Line::from(Span::styled(
-                format!("description: {}", next.description),
-                Style::default(),
-            )),
-            Line::from(Span::styled(
-                format!("duration: {} seconds", next.duration.as_secs_f32()),
-                Style::default(),
-            )),
-        ];
-
-        let paragraph = Paragraph::new(text)
-            .block(
-                Block::default()
-                    .title("Next movement")
-                    .borders(Borders::ALL),
-            )
-            .style(Style::default().fg(Color::White).bg(Color::Black))
-            .alignment(Alignment::Center)
-            .wrap(Wrap { trim: true });
-
-        f.render_widget(paragraph, score_rects[1]);
+        render_movement_info(f, score_rects[2], "Next movement", next);
     }
 }
 fn render_progress_bar<B: Backend>(
