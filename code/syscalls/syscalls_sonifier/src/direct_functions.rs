@@ -60,10 +60,16 @@ impl Category {
             block_counter: 0,
         }
     }
-    pub fn register_call(&mut self, id: i32, func_args: [i32; 3], k: &mut KnystCommands) {
+    pub fn register_call(
+        &mut self,
+        sensitivity_coeff: f32,
+        id: i32,
+        func_args: [i32; 3],
+        k: &mut KnystCommands,
+    ) {
         if self.enabled {
             match self.wgs.get_mut(&id) {
-                Some(wg) => wg.register_call(id, func_args),
+                Some(wg) => wg.register_call(sensitivity_coeff, id, func_args),
                 None => {
                     let i = self.wgs.len();
                     // let freq = 25. * (i + 1).pow(2) as f32;
@@ -75,7 +81,7 @@ impl Category {
                     );
                     println!("New wg for {} id {id} freq {freq}, i: {i}", &self.kind);
                     let mut wg = make_new_waveguide(k, freq, &self.category_bus, self.syscall_kind);
-                    wg.register_call(id, func_args);
+                    wg.register_call(sensitivity_coeff, id, func_args);
                     self.wgs.insert(id, wg);
                 }
             }
@@ -104,7 +110,7 @@ impl Category {
                 if swg.last_call.elapsed() > Duration::from_secs(5) {
                     to_remove.push(*id);
                 } else {
-                    swg.update(sensitivity_coeff, changes);
+                    swg.update(changes);
                 }
             }
             for id in to_remove {
@@ -132,7 +138,7 @@ impl Category {
     }
     pub fn patch_to(&mut self, out: &NodeAddress, k: &mut KnystCommands) {
         k.connect(Connection::clear_to_nodes(&self.category_bus));
-        k.connect(self.category_bus.to(&out).channels(2));
+        k.connect(self.category_bus.to(&out).channels(4));
     }
 }
 
@@ -143,6 +149,8 @@ pub struct DirectFunctions {
     post_fx_background: NodeAddress,
     vary_focus: bool,
     pub decrease_sensitivity: bool,
+    sensitivity_coeff: f32,
+    tick: Instant,
     sample_duration: Duration,
     last_sample: Instant,
     focused_category: Option<SyscallKind>,
@@ -189,7 +197,7 @@ impl DirectFunctions {
             .output("sig"),
             inputs![],
         );
-        k.connect(post_fx_background.to_graph_out().channels(2).to_channel(8));
+        k.connect(post_fx_background.to_graph_out().channels(4).to_channel(8));
 
         // let to_freq53 = |degree| 2.0_f32.powf(degree as f32 / 53.) * 220.0;
 
@@ -249,6 +257,8 @@ impl DirectFunctions {
             focus_kinds,
             decrease_sensitivity: false,
             next_focus_time_range: 15.0..40.0,
+            sensitivity_coeff: 1.0,
+            tick: Instant::now(),
         }
     }
 }
@@ -269,7 +279,7 @@ impl Sonifier for DirectFunctions {
                 .position(|(list_kind, _)| list_kind == &kind)
             {
                 let category = &mut self.categories[category].1;
-                category.register_call(id, func_args, &mut self.k);
+                category.register_call(self.sensitivity_coeff, id, func_args, &mut self.k);
             }
         }
     }
@@ -277,9 +287,14 @@ impl Sonifier for DirectFunctions {
     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
         let mut rng = thread_rng();
         let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
-        let sensitivity_coeff = if self.decrease_sensitivity { 0.99 } else { 1.0 };
+        if self.tick.elapsed() > Duration::from_millis(10) {
+            if self.decrease_sensitivity {
+                self.sensitivity_coeff *= 0.9995;
+            }
+            self.tick = Instant::now();
+        }
         for (_, cat) in self.categories.iter_mut() {
-            cat.update(sensitivity_coeff, &mut changes, &mut self.k);
+            cat.update(self.sensitivity_coeff, &mut changes, &mut self.k);
         }
         self.k.schedule_changes(changes);
         if self.vary_focus && self.last_focus_change.elapsed() > self.time_to_next_focus_change {
@@ -330,7 +345,7 @@ impl Sonifier for DirectFunctions {
         self.k.connect(
             self.post_fx_foreground
                 .to_graph_out()
-                .channels(2)
+                .channels(4)
                 .to_channel(fx_chain * 4),
         );
     }
@@ -360,7 +375,8 @@ fn make_new_waveguide(
             let in_buf = ctx.inputs.get_channel(0);
             let out_buf = ctx.outputs.iter_mut().next().unwrap();
             for (i, o) in in_buf.iter().zip(out_buf.iter_mut()) {
-                let new_value = (receiver.pop().unwrap().clamp(0.0, 500.0) / 500.0).powf(0.125);
+                let new_value =
+                    (receiver.pop().unwrap_or(0.0).clamp(0.0, 500.0) / 500.0).powf(0.125);
                 if value < 0.001 {
                     value += new_value;
                 }
@@ -439,9 +455,9 @@ impl SyscallWaveguide {
             last_call: Instant::now(),
         }
     }
-    fn register_call(&mut self, _id: i32, _args: [i32; 3]) {
+    fn register_call(&mut self, sensitivity_coeff: f32, _id: i32, _args: [i32; 3]) {
         // self.accumulator += id as f32 * self.coeff;
-        self.accumulator += self.coeff * 300.;
+        self.accumulator += self.coeff * 200. * sensitivity_coeff;
         self.last_call = Instant::now();
     }
     fn set_freq(&mut self, freq: f32, changes: &mut SimultaneousChanges) {
@@ -453,9 +469,8 @@ impl SyscallWaveguide {
             changes,
         );
     }
-    fn update(&mut self, sensitivity_coeff: f32, changes: &mut SimultaneousChanges) {
+    fn update(&mut self, changes: &mut SimultaneousChanges) {
         if !self.exciter_sender.is_full() {
-            self.coeff *= sensitivity_coeff;
             // if self.accumulator > 500. {
             //     self.coeff *= 0.9;
             // }
@@ -463,7 +478,7 @@ impl SyscallWaveguide {
             //     self.coeff *= 1.00001;
             // }
             // self.coeff = self.coeff.clamp(0.0001, 2.0);
-            if self.accumulator > 300. {
+            if self.accumulator > 200. {
                 self.exciter_sender.push(self.accumulator).unwrap();
                 self.accumulator = 0.0;
                 self.average_iterations_since_trigger = self.average_iterations_since_trigger * 0.9

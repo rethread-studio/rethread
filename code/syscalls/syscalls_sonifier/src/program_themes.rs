@@ -13,6 +13,7 @@ use knyst::{
 };
 use knyst_waveguide::interface::{Note, NoteOpt, PluckedWaveguide, Synth, TriggeredSynth};
 use knyst_waveguide::phrase::*;
+use nannou_osc::Type;
 
 #[derive(Debug, Clone, Copy)]
 struct Program {
@@ -89,7 +90,7 @@ pub struct ProgramThemes {
 
 impl ProgramThemes {
     pub fn new(k: &mut KnystCommands) -> Self {
-        println!("ProgramThemes");
+        println!("Creating ProgramThemes");
         k.change_musical_time_map(|mtm| {
             mtm.replace(0, knyst::scheduling::TempoChange::NewTempo { bpm: 80. })
         });
@@ -296,7 +297,6 @@ impl Sonifier for ProgramThemes {
                 _ => (),
             }
         } else if m.addr == "/syscall_analysis/per_kind_interval" {
-            //
         }
     }
 

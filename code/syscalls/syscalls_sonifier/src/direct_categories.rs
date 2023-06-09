@@ -60,7 +60,7 @@ impl DirectCategories {
             .output("sig"),
             inputs![],
         );
-        k.connect(post_fx.to_graph_out().channels(2).to_channel(12));
+        k.connect(post_fx.to_graph_out().channels(4).to_channel(12));
 
         let mut continuous_wgs = HashMap::new();
         let phase_per_i = 6.28 / cardinality::<SyscallKind>() as f32;
@@ -192,7 +192,7 @@ impl Sonifier for DirectCategories {
         self.k.connect(
             self.post_fx
                 .to_graph_out()
-                .channels(2)
+                .channels(4)
                 .to_channel(fx_chain * 4),
         );
     }

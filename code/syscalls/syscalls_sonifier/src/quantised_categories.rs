@@ -78,7 +78,7 @@ impl QuantisedCategories {
             .output("sig_right"),
             inputs![],
         );
-        k.connect(post_fx.to_graph_out().channels(2).to_channel(4));
+        k.connect(post_fx.to_graph_out().channels(4).to_channel(4));
 
         // let scale = [-53, 0, 9, 13, 31, 36, 44];
         // let scale = [0, 9, 14, 31, 36, 45];
@@ -171,7 +171,7 @@ impl QuantisedCategories {
             for out in continuous_wg.outputs() {
                 k.connect(out.to_node(&pan));
             }
-            k.connect(pan.to(&post_fx).channels(2));
+            k.connect(pan.to(&post_fx).channels(4));
             let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
             continuous_wg.change(
                 NoteOpt {
@@ -233,7 +233,7 @@ impl Sonifier for QuantisedCategories {
         self.k.connect(
             self.post_fx
                 .to_graph_out()
-                .channels(2)
+                .channels(4)
                 .to_channel(fx_chain * 4),
         );
     }
@@ -340,7 +340,7 @@ impl SyscallKindQuantisedWaveguide {
         self.accumulator += self.coeff;
         self.amp += self.coeff;
         self.position += id as f32 * 0.001;
-        self.damping = (self.damping + 0.0001).clamp(0.0, 1.0);
+        self.damping = (self.damping + 0.00001).clamp(0.0, 1.0);
         if self.position > 0.4 {
             self.position = 0.4;
         }
@@ -352,12 +352,12 @@ impl SyscallKindQuantisedWaveguide {
     fn update(&mut self, changes: &mut SimultaneousChanges, rng: &mut ThreadRng) {
         // let feedback =
         //     1.01 - (1.0 - (self.amp * 3.2).clamp(0.0, 1.0).powf(1. / 4.)).clamp(0.0, 0.5);
-        let feedback = 0.99999 - (1.0 - (self.amp * 2.5).clamp(0.0, 1.0)).clamp(0.0, 0.9);
+        let feedback = 0.9999 - (1.0 - (self.amp * 2.5).clamp(0.0, 1.0)).clamp(0.0, 0.9);
         self.amp *= 0.99 - (self.amp * 0.5);
         // self.damping *= 0.99999999;
-        self.damping *= 0.95;
+        self.damping *= 0.995;
         // self.amp *= 0.95;
-        self.position *= 0.985;
+        self.position *= 0.9985;
         let mut new_freq = None;
         // dbg!(self.amp, feedback);
         // if self.amp > 0.35 {
@@ -375,7 +375,7 @@ impl SyscallKindQuantisedWaveguide {
                 freq: new_freq,
                 feedback: Some(feedback),
                 position: Some(0.1 + self.position),
-                damping: Some(self.damping.powf(2.) as f32 * 9000. + 100. + self.freq * 4.),
+                damping: Some(self.damping.powf(2.) as f32 * 2000. + 100. + self.freq * 4.),
                 ..Default::default()
             },
             changes,
