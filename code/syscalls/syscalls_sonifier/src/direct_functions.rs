@@ -162,6 +162,7 @@ pub struct DirectFunctions {
 
 impl DirectFunctions {
     pub fn new(
+        amp: f32,
         k: &mut KnystCommands,
         sample_rate: f32,
         enabled_kinds: &[SyscallKind],
@@ -169,11 +170,11 @@ impl DirectFunctions {
     ) -> Self {
         println!("Creating DirectFunctions");
         let post_fx_foreground = k.push(
-            gen(|ctx, _| {
+            gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().unwrap();
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
-                    *o = (i * 0.2).clamp(-1.0, 1.0);
+                    *o = (i * 0.2 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
@@ -182,13 +183,13 @@ impl DirectFunctions {
             .output("sig"),
             inputs![],
         );
-        k.connect(post_fx_foreground.to_graph_out().channels(2).to_channel(4));
+        k.connect(post_fx_foreground.to_graph_out().channels(4).to_channel(4));
         let post_fx_background = k.push(
-            gen(|ctx, _| {
+            gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().unwrap();
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
-                    *o = (i * 0.07).clamp(-1.0, 1.0);
+                    *o = (i * 0.05 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
@@ -491,7 +492,7 @@ impl SyscallWaveguide {
                 }
                 self.coeff = self.coeff.clamp(0.0001, 1.0);
                 let feedback = 0.999
-                    + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.3);
+                    + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.1);
                 self.wg.change(
                     NoteOpt {
                         feedback: Some(feedback),
@@ -504,7 +505,7 @@ impl SyscallWaveguide {
                 self.exciter_sender.push(0.0).unwrap();
                 self.iterations_since_trigger += 1;
             }
-            if self.iterations_since_trigger == 2000 {
+            if self.iterations_since_trigger == 1500 {
                 let feedback = 0.99;
                 self.wg.change(
                     NoteOpt {

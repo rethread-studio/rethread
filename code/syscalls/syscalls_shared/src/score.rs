@@ -172,7 +172,7 @@ impl Score {
                 is_interlude: false,
                 description: "binaries"
                     .to_string(),
-                duration: Duration::from_secs(15),
+                duration: Duration::from_secs(30),
             },
             Movement {
                 id: 42,
@@ -182,13 +182,6 @@ impl Score {
                     .to_string(),
                 duration: Duration::from_secs(30),
             },
-            Movement {
-                id: 1000,
-                is_break: true,
-                is_interlude: false,
-                description: "break".to_string(),
-                duration: Duration::from_secs(break_dur),
-            },
         ];
         Self {
             current_movement: 0,
@@ -196,6 +189,30 @@ impl Score {
             #[cfg(not(target_arch = "wasm32"))]
             start_of_last_movement: Instant::now(),
             is_playing: false,
+        }
+    }
+    pub fn next_movement(&mut self) -> ScoreUpdate {
+        self.current_movement += 1;
+        if self.current_movement >= self.movements.len() {
+            self.current_movement = 0;
+            self.stop();
+            ScoreUpdate::ScoreStop
+        } else {
+            if self.is_playing {
+                ScoreUpdate::NewMovement(self.play_from(self.current_movement).clone())
+            } else {
+                ScoreUpdate::Nothing
+            }
+        }
+    }
+    pub fn previous_movement(&mut self) -> ScoreUpdate {
+        if self.current_movement > 0 {
+            self.current_movement -= 1;
+        }
+        if self.is_playing {
+            ScoreUpdate::NewMovement(self.play_from(self.current_movement).clone())
+        } else {
+            ScoreUpdate::Nothing
         }
     }
     pub fn is_playing(&self) -> bool {

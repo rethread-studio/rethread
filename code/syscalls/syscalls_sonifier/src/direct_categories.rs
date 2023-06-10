@@ -16,6 +16,7 @@ use crate::{to_freq53, Sonifier};
 pub struct DirectCategories {
     continuous_wgs: HashMap<String, SyscallWaveguide>,
     post_fx: NodeAddress,
+    lpf: NodeAddress,
     sample_duration: Duration,
     last_sample: Instant,
     decrese_sensitivity: Option<f32>,
@@ -26,7 +27,7 @@ pub struct DirectCategories {
 }
 
 impl DirectCategories {
-    pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
+    pub fn new(amp: f32, k: &mut KnystCommands, sample_rate: f32) -> Self {
         println!("Creating DirectCategories");
         // This Gen has as only function to communicate when a block has passed on the audio thread
         let (mut block_sender, mut block_receiver) =
@@ -47,11 +48,11 @@ impl DirectCategories {
         k.connect(block_counter.to_graph_out());
 
         let post_fx = k.push(
-            gen(|ctx, _| {
+            gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().unwrap();
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
-                    *o = (i * 0.1).clamp(-1.0, 1.0);
+                    *o = (i * 0.1 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
@@ -60,7 +61,11 @@ impl DirectCategories {
             .output("sig"),
             inputs![],
         );
-        k.connect(post_fx.to_graph_out().channels(4).to_channel(12));
+        let lpf = k.push(
+            OnePoleLPF::new(),
+            inputs![("sig" ; post_fx.out(0)), ("cutoff_freq" : 20000.)],
+        );
+        k.connect(lpf.to_graph_out().channels(4).to_channel(12));
 
         let mut continuous_wgs = HashMap::new();
         let phase_per_i = 6.28 / cardinality::<SyscallKind>() as f32;
@@ -154,7 +159,12 @@ impl DirectCategories {
             decrese_sensitivity: Some(0.999),
             block_sender,
             block_counter,
+            lpf,
         }
+    }
+    pub fn set_lpf(&mut self, freq: f32) {
+        self.k
+            .schedule_change(ParameterChange::now(self.lpf.clone(), freq).label("cutoff_freq"));
     }
 }
 

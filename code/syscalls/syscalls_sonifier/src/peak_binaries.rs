@@ -30,7 +30,7 @@ impl PeakBinaries {
             .collect();
         Self {
             category_peaks,
-            threshold: 1.0,
+            threshold: 3.0,
             sound_kind: SoundKind::Binary,
             root_freq: 25.,
         }
@@ -62,11 +62,16 @@ impl Sonifier for PeakBinaries {
     }
 
     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<nannou_osc::Connected>) {
+        let rng = fastrand::Rng::new();
         for (_kind, peak_value) in &mut self.category_peaks {
             if *peak_value > self.threshold {
                 match self.sound_kind {
                     SoundKind::Binary => {
-                        let length = (*peak_value * 0.02).clamp(0.0, 1.0) * 1.2 + 0.01;
+                        let length = ((*peak_value - self.threshold) * 0.002)
+                            .clamp(0.0, 1.0)
+                            .powf(0.5)
+                            * (rng.f32().powi(2) * 0.8 + 0.4)
+                            + 0.01;
                         let addr = "/peak_binary";
                         let args = vec![Type::Float(length)];
                         osc_sender.send((addr, args)).ok();

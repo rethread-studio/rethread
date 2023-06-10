@@ -11,8 +11,11 @@ use knyst::{
     prelude::*,
     time::Superbeats,
 };
-use knyst_waveguide::interface::{Note, NoteOpt, PluckedWaveguide, Synth, TriggeredSynth};
 use knyst_waveguide::phrase::*;
+use knyst_waveguide::{
+    interface::{Note, NoteOpt, PluckedWaveguide, Synth, TriggeredSynth},
+    OnePoleLPF,
+};
 use nannou_osc::Type;
 
 #[derive(Debug, Clone, Copy)]
@@ -83,13 +86,15 @@ pub struct ProgramThemes {
     callbacks: Vec<CallbackHandle>,
     inner_graph: NodeAddress,
     bus: NodeAddress,
+    lpf: NodeAddress,
+    mul: NodeAddress,
     root: Arc<AtomicF32>,
     activity: Arc<Mutex<Activity>>,
     k: KnystCommands,
 }
 
 impl ProgramThemes {
-    pub fn new(k: &mut KnystCommands) -> Self {
+    pub fn new(amp: f32, k: &mut KnystCommands) -> Self {
         println!("Creating ProgramThemes");
         k.change_musical_time_map(|mtm| {
             mtm.replace(0, knyst::scheduling::TempoChange::NewTempo { bpm: 80. })
@@ -103,36 +108,39 @@ impl ProgramThemes {
         k.connect(inner_graph.to_graph_out().channels(4));
         let mut k = k.to_graph(graph_id);
         let bus = k.push(Bus(4), inputs![]);
+        let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 2000.)]);
+        let mul = k.push(Mult, inputs![(0 ; lpf.out(0)), (1 : amp)]);
+        k.connect(mul.to(&bus).channels(4).to_channel(0));
         k.connect(bus.to_graph_out().channels(4).to_channel(0));
         let mut wg_thunderbird = PluckedWaveguide::new(&mut k, None, false);
         let mut wg_konqueror = PluckedWaveguide::new(&mut k, None, false);
         let mut wg_htop = PluckedWaveguide::new(&mut k, None, false);
 
         for out in wg_thunderbird.outputs() {
-            k.connect(out.to_node(&bus).channels(4));
+            k.connect(out.to_node(&lpf).channels(4));
         }
         for out in wg_konqueror.outputs() {
-            k.connect(out.to_node(&bus).channels(4));
+            k.connect(out.to_node(&lpf).channels(4));
         }
         for out in wg_htop.outputs() {
-            k.connect(out.to_node(&bus).channels(4));
+            k.connect(out.to_node(&lpf).channels(4));
         }
 
         let activity = Arc::new(Mutex::new(Activity::new()));
 
         let rng = fastrand::Rng::new();
-        let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
-        let freq = rng.f32() * 200. + 200.;
-        wg_thunderbird.trig(
-            NoteOpt {
-                freq: Some(freq),
-                damping: Some(freq * 6.0),
-                feedback: Some(0.9999),
-                ..Default::default()
-            },
-            &mut changes,
-        );
-        k.schedule_changes(changes);
+        // let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
+        // let freq = rng.f32() * 200. + 200.;
+        // wg_thunderbird.trig(
+        //     NoteOpt {
+        //         freq: Some(freq),
+        //         damping: Some(freq * 6.0),
+        //         feedback: Some(0.9999),
+        //         ..Default::default()
+        //     },
+        //     &mut changes,
+        // );
+        // k.schedule_changes(changes);
 
         let root = Arc::new(AtomicF32::new(25.));
         let phrases = thunderbird_phrases();
@@ -142,7 +150,7 @@ impl ProgramThemes {
         let mut i = 0;
         let callback = k.schedule_beat_callback(
             move |mut time, k| {
-                println!("Running callback {i}, time: {time:?}");
+                // println!("Running callback {i}, time: {time:?}");
                 i += 1;
                 let root_freq = callback_root.load(std::sync::atomic::Ordering::Relaxed);
                 let activity = callback_activity.lock().unwrap();
@@ -150,14 +158,17 @@ impl ProgramThemes {
                 {
                     let mut time = time;
                     let phrase = &phrases[rng.usize(..phrases.len())];
+                    let a = activity.thunderbird.activity_value();
                     for event in phrase.events() {
-                        if rng.f32() < activity.thunderbird.activity_value() {
+                        if rng.f32() < a {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
                                     println!("Event at {time:?}");
                                     let mut changes = SimultaneousChanges::beats(time);
                                     let freq = to_freq53(n.0 + 53 * 4, root_freq);
-                                    let amp = n.1 * 0.5;
+                                    // let amp = n.1 * 0.5;
+                                    let amp =
+                                        n.1 * (0.1 + (a.powf(1.5) * 0.5 + rng.f32() * 0.5) * 0.9);
                                     wg_thunderbird.trig(
                                         Note {
                                             freq,
@@ -183,12 +194,15 @@ impl ProgramThemes {
                     let mut time = time;
                     let phrase = &konqueror_phrases()[rng.usize(..konqueror_phrases().len())];
                     for event in phrase.events() {
-                        if rng.f32() < activity.konqueror.activity_value() {
+                        let a = activity.konqueror.activity_value();
+                        if rng.f32() < a {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
                                     let mut changes = SimultaneousChanges::beats(time);
                                     let freq = to_freq53(n.0 + 53, root_freq);
-                                    let amp = n.1;
+                                    // let amp = n.1;
+                                    let amp =
+                                        n.1 * (0.1 + (a.powf(1.5) * 0.5 + rng.f32() * 0.5) * 0.9);
                                     wg_konqueror.trig(
                                         Note {
                                             freq,
@@ -225,7 +239,7 @@ impl ProgramThemes {
                                         if event.duration > Superbeats::from_beats_f32(1. / 32.) {
                                             0.99999
                                         } else {
-                                            0.95
+                                            0.98
                                         };
                                     wg_htop.trig(
                                         Note {
@@ -260,6 +274,8 @@ impl ProgramThemes {
             bus,
             root,
             activity,
+            lpf,
+            mul,
         }
     }
 }
@@ -328,6 +344,8 @@ impl Sonifier for ProgramThemes {
         }
         self.k.free_node(self.inner_graph.clone());
         self.k.free_node(self.bus.clone());
+        self.k.free_node(self.lpf.clone());
+        self.k.free_node(self.mul.clone());
     }
 }
 
@@ -399,42 +417,42 @@ fn htop_phrases() -> Vec<Phrase<(i32, f32)>> {
     let mut phrases = vec![];
     {
         let mut p = Phrase::new();
-        p.push((1. / 32., (-53 + 31, 0.25)));
+        p.push((1. / 32., (-53 + 31, 0.55)));
+        p.push((1. / 32., (0, 0.15)));
+        p.push((1. / 32., (31, 0.35)));
+        p.push((7. / 32., (0, 0.45)));
+        p.push((1. / 32., (-53 + 31, 0.15)));
         p.push((1. / 32., (0, 0.25)));
-        p.push((1. / 32., (31, 0.25)));
-        p.push((7. / 32., (0, 0.25)));
-        p.push((1. / 32., (-53 + 31, 0.25)));
-        p.push((1. / 32., (0, 0.25)));
-        p.push((1. / 32., (31, 0.25)));
-        p.push((3. / 32., (0, 0.25)));
+        p.push((1. / 32., (31, 0.55)));
+        p.push((3. / 32., (0, 0.35)));
         phrases.push(p);
     }
     {
         let mut p = Phrase::new();
-        p.push((1. / 32., (-53 + 48, 0.25)));
+        p.push((1. / 32., (-53 + 48, 0.55)));
         p.push((1. / 32., (17, 0.25)));
-        p.push((1. / 32., (26, 0.25)));
-        p.push((3. / 32., (17, 0.25)));
+        p.push((1. / 32., (26, 0.35)));
+        p.push((3. / 32., (17, 0.55)));
         phrases.push(p);
     }
     {
         let mut p = Phrase::new();
-        p.push((1. / 32., (-53 + 31, 0.25)));
+        p.push((1. / 32., (-53 + 31, 0.55)));
+        p.push((1. / 32., (-53 + 48, 0.15)));
+        p.push((1. / 32., (31, 0.35)));
+        p.push((7. / 32., (-53 + 48, 0.45)));
+        p.push((1. / 32., (-53 + 26, 0.15)));
         p.push((1. / 32., (-53 + 48, 0.25)));
-        p.push((1. / 32., (31, 0.25)));
-        p.push((7. / 32., (-53 + 48, 0.25)));
-        p.push((1. / 32., (-53 + 26, 0.25)));
-        p.push((1. / 32., (-53 + 48, 0.25)));
-        p.push((1. / 32., (17, 0.25)));
-        p.push((3. / 32., (-53 + 48, 0.25)));
+        p.push((1. / 32., (17, 0.55)));
+        p.push((3. / 32., (-53 + 48, 0.35)));
         phrases.push(p);
     }
     {
         let mut p = Phrase::new();
-        p.push((1. / 32., (-53, 0.25)));
+        p.push((1. / 32., (-53, 0.55)));
         p.push((1. / 32., (-53 + 31, 0.25)));
-        p.push((1. / 32., (17, 0.25)));
-        p.push((3. / 32., (-53 + 31, 0.25)));
+        p.push((1. / 32., (17, 0.35)));
+        p.push((3. / 32., (-53 + 31, 0.55)));
         phrases.push(p);
     }
     phrases

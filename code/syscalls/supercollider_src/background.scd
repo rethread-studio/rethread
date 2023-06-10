@@ -55,6 +55,7 @@ OSCdef(\background_noise, { arg msg, time, addr, recvPort;
 	}.play;
 
 }, '/background_noise', nil);
+
 )
 
 // Noisy foundation for the whole piece
@@ -65,22 +66,42 @@ var root = 25;
 Ndef(\root, {root});
 Ndef(\root).fadeTime = 0.05;
 Ndef(\rumbling_bass, {
-	var sig, pitch_mix = LFNoise1.kr(0.1).range(0, 1);
+	var sig, pitch_mix = LFNoise1.kr(0.1).range(0, 1).pow(2.0);
 	sig = BrownNoise.ar()!4;
 	// sig = LPF.ar(sig, LFNoise2.kr(0.5).range(100, 2000) * LFNoise1.kr(2).range(0.8, 1.0));
-	sig = Resonz.ar(sig, Ndef(\root).kr*[4, 8, 12, 16], {LFNoise2.kr(0.05).range(0.001, 1.0).clip(0.001, 1.0).pow(3)}!4);
+	sig = Resonz.ar(sig, Ndef(\root).kr*[4, 8, 12, 16], {LFNoise1.kr(0.05).range(0.001, 1.0).clip(0.001, 1.0).pow(3)}!4);
 	sig = Mix(sig);
-	sig = sig * 0.5 + (AnalogVintageDistortion.ar(sig*LFNoise2.kr(0.1).range(0.01, 0.1), LFNoise1.kr(0.03).range(0.0, 2.5), LFNoise1.kr(0.2).range(0.0, 0.5)) * LFNoise1.kr(0.1).range(0.0, 0.5).pow(1.5));
-	sig = LPF.ar(sig, LFNoise2.kr(0.05).range(50, 10000) * LFNoise1.kr(2).range(0.7, 1.0) * LFNoise1.kr(5).range(0.9, 1.0));
-	sig = HPF.ar(sig, (LFNoise2.kr(0.05).range(0, 1).pow(2) *200 + 10) * LFNoise1.kr(2).range(0.8, 1.0));
+	sig = sig * 0.5 + (AnalogVintageDistortion.ar(sig*LFNoise1.kr(0.1).range(0.01, 0.1), LFNoise1.kr(0.03).range(0.0, 2.5), LFNoise1.kr(0.2).range(0.0, 0.5)) * LFNoise1.kr(0.1).range(0.0, 0.5).pow(1.5));
+	sig = LPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(3)* 10000+50) * LFNoise1.kr(2).range(0.7, 1.0) * LFNoise1.kr(5).range(0.9, 1.0));
+	sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) *200 + 10) * LFNoise1.kr(2).range(0.8, 1.0));
 	sig = Limiter.ar(sig, 0.9);
-	sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
-	sig = (sig * (1.0-pitch_mix)) + (Splay.ar(Resonz.ar(sig, Ndef(\root).kr*[4, 6, 8, 12, 16], {LFNoise2.kr(0.05).range(0.001, 1.0).clip(0.001, 1.0).pow(3)}!5)) * pitch_mix * 0.2);
+	// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
+	sig = (sig * (1.0-pitch_mix)) + (Splay.ar(Resonz.ar(sig, Ndef(\root).kr*[4, 6, 8, 12, 16], {LFNoise1.kr(0.05).range(0.001, 1.0).clip(0.001, 1.0).pow(3)}!5)) * pitch_mix * 0.2);
+	sig = Limiter.ar(sig, 0.9);
 
+	sig = sig * 0.1;
 	// sig = Pan2.ar(sig*0.5);
-	sig
+	(sig!2).flatten
 }).play;
 )
 Ndef(\root, {25*1});
+Ndef(\rumbling_bass).release(10.0)
+
+(
+// Triggered background noise
+OSCdef(\change_harmony, { arg msg, time, addr, recvPort;
+	var
+	root = msg[1].asFloat,
+	num_pitches_in_chord = msg[2].asInteger,
+	chord = msg[3..(num_pitches_in_chord+3)];
+	// file = ~binaries["thunderbird_8bit.wav".asSymbol];
+	msg.postln;
+	root.postln;
+	chord.postln;
+
+	Ndef(\root, {25*1});
+
+}, '/change_harmony', nil);
+)
 
 // Soft low mid tones matching the harmony from the sonifier

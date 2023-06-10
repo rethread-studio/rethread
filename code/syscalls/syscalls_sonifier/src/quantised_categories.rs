@@ -40,6 +40,7 @@ pub struct QuantisedCategories {
     continuous_wgs: HashMap<String, SyscallKindQuantisedWaveguide>,
     post_fx: NodeAddress,
     sender: Producer<f32>,
+    lpf: NodeAddress,
     k: KnystCommands,
 }
 impl QuantisedCategories {
@@ -56,29 +57,23 @@ impl QuantisedCategories {
             gen(move |ctx, _| {
                 receiver.pop().unwrap();
                 let in0 = ctx.inputs.get_channel(0);
-                let in1 = ctx.inputs.get_channel(1);
                 let mut outputs = ctx.outputs.iter_mut();
                 let out0 = outputs.next().unwrap();
-                let out1 = outputs.next().unwrap();
-                for (((i0, i1), o0), o1) in in0
-                    .iter()
-                    .zip(in1)
-                    .zip(out0.iter_mut())
-                    .zip(out1.iter_mut())
-                {
-                    *o0 = (i0 * 1.5).clamp(-1.0, 1.0);
-                    *o1 = (i1 * 1.5).clamp(-1.0, 1.0);
+                for (i0, o0) in in0.iter().zip(out0.iter_mut()) {
+                    *o0 = (i0 * 2.5).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
             })
-            .input("in_left")
-            .input("in_right")
-            .output("sig_left")
-            .output("sig_right"),
+            .input("in")
+            .output("sig"),
             inputs![],
         );
-        k.connect(post_fx.to_graph_out().channels(4).to_channel(4));
+        let lpf = k.push(
+            OnePoleLPF::new(),
+            inputs![("sig" ; post_fx.out(0)), ("cutoff_freq" : 7000.)],
+        );
+        k.connect(lpf.to_graph_out().channels(4).to_channel(12));
 
         // let scale = [-53, 0, 9, 13, 31, 36, 44];
         // let scale = [0, 9, 14, 31, 36, 45];
@@ -110,9 +105,9 @@ impl QuantisedCategories {
             // Switch between these two sets for very different rhythmic timings
             // let trig_interval = 1.5 / ((i + 1) as f32);
             // let delay_time = 0.0;
-            let trig_interval = 1.0;
-            let delay_time =
-                ((i) % num_syscall_kinds as usize) as f32 * trig_interval / num_syscall_kinds;
+            let trig_interval = 0.8;
+            let delay_position = ((i) % num_syscall_kinds as usize) as f32 / num_syscall_kinds;
+            let delay_time = trig_interval * delay_position;
 
             // let mut graph_settings = k.default_graph_settings();
             // graph_settings.num_outputs = 4;
@@ -132,7 +127,7 @@ impl QuantisedCategories {
             );
             let exciter = k.push(
                 HalfSineImpulse::new(),
-                inputs![("freq" : 1000.), ("amp" : 0.2), ("restart_trig" ; trig_delay.out(0))],
+                inputs![("freq" : 3000.), ("amp" : 0.2), ("restart_trig" ; trig_delay.out(0))],
             );
 
             let sine = k.push(
@@ -143,8 +138,8 @@ impl QuantisedCategories {
                 // Points are given in the format (value, time_to_reach_value)
                 points: vec![
                     // (0.05 * (1.0 / ((i + 1) as f32)).powf(0.5), 0.01),
-                    (0.05, 0.001),
-                    (0.0, 0.1),
+                    (0.03, 0.01),
+                    (0.0, 0.2),
                 ],
                 ..Default::default()
             };
@@ -166,12 +161,16 @@ impl QuantisedCategories {
 
             let pan = k.push(
             PanMonoToStereo,
-            inputs![("signal" ; sine_amp.out(0)), ("pan": ((i/2) as f32 / (num_syscall_kinds/2.0))* (-1.0_f32).powi(i as i32))],
+            inputs![ ("pan": ((i/2) as f32 / (num_syscall_kinds/2.0))* (-1.0_f32).powi(i as i32))],
         );
-            for out in continuous_wg.outputs() {
-                k.connect(out.to_node(&pan));
+            if i > 7 {
+                k.connect(sine_amp.to(&pan));
+            } else {
+                for out in continuous_wg.outputs() {
+                    k.connect(out.to_node(&pan));
+                }
             }
-            k.connect(pan.to(&post_fx).channels(4));
+            k.connect(pan.to(&post_fx).channels(1));
             let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
             continuous_wg.change(
                 NoteOpt {
@@ -200,6 +199,7 @@ impl QuantisedCategories {
                 impulse,
                 trig_delay,
                 sender,
+                delay_position,
             );
             continuous_wgs.insert(kind_label, syscall_waveguide);
         }
@@ -208,6 +208,7 @@ impl QuantisedCategories {
             post_fx,
             sender,
             k: k.clone(),
+            lpf,
         }
     }
 }
@@ -246,6 +247,7 @@ impl Sonifier for QuantisedCategories {
             for swg in self.continuous_wgs.values_mut() {
                 swg.update(&mut changes, &mut rng);
             }
+            // TODO: Set new interval
             // freq_change_counter += 1;
             // if freq_change_counter > 1000 {
             //     let transposition = scale.choose(&mut rng).unwrap();
@@ -269,6 +271,7 @@ impl Sonifier for QuantisedCategories {
             wg.free(&mut self.k);
         }
         self.k.free_node(self.post_fx.clone());
+        self.k.free_node(self.lpf.clone());
     }
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
@@ -304,6 +307,8 @@ struct SyscallKindQuantisedWaveguide {
     amp: f32,
     position: f32,
     damping: f64,
+    delay_position: f32,
+    last_coeff_change: Instant,
 }
 
 impl SyscallKindQuantisedWaveguide {
@@ -317,6 +322,7 @@ impl SyscallKindQuantisedWaveguide {
         impulse: NodeAddress,
         trig_delay: NodeAddress,
         exciter_sender: rtrb::Producer<f32>,
+        delay_position: f32,
     ) -> Self {
         Self {
             freq,
@@ -326,19 +332,22 @@ impl SyscallKindQuantisedWaveguide {
             sine_amp,
             exciter_sender,
             accumulator: 0.0,
-            coeff: 0.15,
+            coeff: 0.025,
             amp: 0.0,
             position: 0.25,
             damping: 0.0,
             pan,
             impulse,
             trig_delay,
+            last_coeff_change: Instant::now(),
+            delay_position,
         }
     }
     fn register_call(&mut self, id: i32, args: [i32; 3]) {
         // self.accumulator += id as f32 * self.coeff;
         self.accumulator += self.coeff;
-        self.amp += self.coeff;
+        self.amp += 0.0000001 * self.coeff;
+        self.amp *= 1.0 + self.coeff;
         self.position += id as f32 * 0.001;
         self.damping = (self.damping + 0.00001).clamp(0.0, 1.0);
         if self.position > 0.4 {
@@ -346,14 +355,27 @@ impl SyscallKindQuantisedWaveguide {
         }
         if self.amp > 0.4 {
             self.amp = 0.4;
-            // self.coeff *= 0.98;
+            if self.last_coeff_change.elapsed() > Duration::from_secs_f32(0.1) {
+                self.coeff *= 0.98;
+                self.last_coeff_change = Instant::now();
+            }
         }
+    }
+    fn set_new_timing(&mut self, interval: f32, changes: &mut SimultaneousChanges) {
+        let delay_time = interval * self.delay_position;
+        changes.push(self.trig_delay.change().set("delay_time", delay_time));
+        changes.push(self.impulse.change().set("interval", interval));
     }
     fn update(&mut self, changes: &mut SimultaneousChanges, rng: &mut ThreadRng) {
         // let feedback =
         //     1.01 - (1.0 - (self.amp * 3.2).clamp(0.0, 1.0).powf(1. / 4.)).clamp(0.0, 0.5);
-        let feedback = 0.9999 - (1.0 - (self.amp * 2.5).clamp(0.0, 1.0)).clamp(0.0, 0.9);
-        self.amp *= 0.99 - (self.amp * 0.5);
+        // let feedback = 0.9999 - (1.0 - (self.amp * 2.5).clamp(0.0, 1.0)).clamp(0.0, 0.9);
+        let feedback = 0.9999;
+        self.amp *= 0.999 - (self.amp * 0.1);
+        if self.amp < 0.1 && self.last_coeff_change.elapsed() > Duration::from_secs_f32(0.2) {
+            self.coeff *= 1.01;
+            self.last_coeff_change = Instant::now();
+        }
         // self.damping *= 0.99999999;
         self.damping *= 0.995;
         // self.amp *= 0.95;
@@ -368,14 +390,15 @@ impl SyscallKindQuantisedWaveguide {
         //                 .unwrap(),
         //     );
         // }
-        changes.push(self.exciter.change().set("amp", self.amp));
-        changes.push(self.sine_amp.change().set(1, self.amp));
+        let applied_amp = self.amp.powi(2);
+        changes.push(self.exciter.change().set("amp", applied_amp));
+        changes.push(self.sine_amp.change().set(1, applied_amp * 0.5));
         self.wg.change(
             NoteOpt {
                 freq: new_freq,
                 feedback: Some(feedback),
                 position: Some(0.1 + self.position),
-                damping: Some(self.damping.powf(2.) as f32 * 2000. + 100. + self.freq * 4.),
+                damping: Some(self.damping.powf(2.) as f32 * 2000. + 100. + self.freq * 7.),
                 ..Default::default()
             },
             changes,
