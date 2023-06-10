@@ -14,6 +14,8 @@ use crate::App;
 #[repr(u8)]
 pub enum MenuItem {
     PlayScore,
+    NextMovement,
+    PreviousMovement,
     StopScorePlayback,
     LoadRecordedData,
     StartPlayback,

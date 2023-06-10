@@ -269,6 +269,30 @@ impl PacketHQ {
                     self.score.stop();
                     self.osc_sender.send_score_stop();
                 }
+                PacketHQCommands::NextMovement => {
+                    let update = self.score.next_movement();
+                    match update {
+                        ScoreUpdate::ScoreStop => {
+                            self.osc_sender.send_score_stop();
+                        }
+                        ScoreUpdate::NewMovement(m) => {
+                            self.osc_sender.send_movement(&m);
+                        }
+                        ScoreUpdate::Nothing => (),
+                    }
+                }
+                PacketHQCommands::PreviousMovement => {
+                    let update = self.score.previous_movement();
+                    match update {
+                        ScoreUpdate::ScoreStop => {
+                            self.osc_sender.send_score_stop();
+                        }
+                        ScoreUpdate::NewMovement(m) => {
+                            self.osc_sender.send_movement(&m);
+                        }
+                        ScoreUpdate::Nothing => (),
+                    }
+                }
             }
         }
         match self.score.update() {
@@ -310,6 +334,8 @@ impl Default for PlaybackData {
 }
 enum PacketHQCommands {
     PlayScore,
+    NextMovement,
+    PreviousMovement,
     StopScorePlayback,
     StartRecording,
     SaveRecording { path: PathBuf },
@@ -583,6 +609,12 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                             MenuItem::StopScorePlayback => app
                                 .packet_hq_sender
                                 .push(PacketHQCommands::StopScorePlayback)?,
+                            MenuItem::NextMovement => {
+                                app.packet_hq_sender.push(PacketHQCommands::NextMovement)?
+                            }
+                            MenuItem::PreviousMovement => app
+                                .packet_hq_sender
+                                .push(PacketHQCommands::PreviousMovement)?,
                         }
                     }
                     KeyCode::Char('q') => return Ok(()),
