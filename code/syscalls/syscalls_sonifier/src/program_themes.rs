@@ -108,7 +108,7 @@ impl ProgramThemes {
         k.connect(inner_graph.to_graph_out().channels(4));
         let mut k = k.to_graph(graph_id);
         let bus = k.push(Bus(4), inputs![]);
-        let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 2000.)]);
+        let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 10000.)]);
         let mul = k.push(Mult, inputs![(0 ; lpf.out(0)), (1 : amp)]);
         k.connect(mul.to(&bus).channels(4).to_channel(0));
         k.connect(bus.to_graph_out().channels(4).to_channel(0));

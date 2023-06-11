@@ -137,7 +137,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(11, None, false);
+    app.change_movement(6, None, false);
     // main loop
     loop {
         // Receive OSC messages
@@ -345,6 +345,19 @@ impl App {
                         s.patch_to_fx_chain(1);
                     }
                 }
+                40 => {
+                    *chord_change_interval = None;
+
+                    let mut pb = PeakBinaries::new(k);
+                    pb.threshold = 1.0;
+                    let mut pn = PeakBinaries::new(k);
+                    pn.threshold = 5.0;
+                    pn.sound_kind = SoundKind::FilteredNoise(8);
+                    *current_sonifiers = vec![Box::new(pb), Box::new(pn)];
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(1);
+                    }
+                }
                 2 => {
                     *chord_change_interval = None;
                     *current_sonifiers = vec![Box::new(DirectFunctions::new(
@@ -369,7 +382,10 @@ impl App {
                         vec![],
                     );
                     sonifier.decrease_sensitivity = true;
-                    *current_sonifiers = vec![Box::new(sonifier)];
+                    let mut pn = PeakBinaries::new(k);
+                    pn.threshold = 2.0;
+                    pn.sound_kind = SoundKind::FilteredNoise(5);
+                    *current_sonifiers = vec![Box::new(sonifier), Box::new(pn)];
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(1);
                     }
@@ -390,7 +406,7 @@ impl App {
                 }
                 6 => {
                     *chord_change_interval = Some(Duration::from_secs(8));
-                    *current_sonifiers = vec![Box::new(DirectFunctions::new(
+                    let mut df = DirectFunctions::new(
                         1.0,
                         k,
                         sample_rate,
@@ -400,7 +416,9 @@ impl App {
                             SyscallKind::Memory,
                             SyscallKind::WaitForReady,
                         ],
-                    ))];
+                    );
+                    df.decrease_sensitivity = true;
+                    *current_sonifiers = vec![Box::new(df)];
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(3);
                     }
@@ -418,6 +436,7 @@ impl App {
                             SyscallKind::WaitForReady,
                         ],
                     );
+                    sonifier.decrease_sensitivity = true;
                     sonifier.patch_to_fx_chain(3);
                     sonifier.next_focus_time_range = 5.0..15.0;
                     *current_sonifiers = vec![Box::new(sonifier)];
@@ -432,17 +451,17 @@ impl App {
                     *chord_change_interval = Some(Duration::from_secs(12));
                     let mut pb = PeakBinaries::new(k);
                     pb.threshold = 5.0;
-                    pb.sound_kind = SoundKind::FilteredNoise;
-                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.5, k)), Box::new(pb)];
+                    pb.sound_kind = SoundKind::FilteredNoise(3);
+                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.3, k)), Box::new(pb)];
                     current_sonifiers
                         .iter_mut()
                         .for_each(|s| s.patch_to_fx_chain(1));
                 }
                 110 => {
                     *chord_change_interval = None;
-                    let mut pt = ProgramThemes::new(0.5, k);
+                    let mut pt = ProgramThemes::new(0.3, k);
                     pt.patch_to_fx_chain(1);
-                    let mut dc = DirectCategories::new(0.2, k, sample_rate);
+                    let mut dc = DirectCategories::new(0.05, k, sample_rate);
                     dc.patch_to_fx_chain(2);
                     dc.set_lpf(4000.);
                     *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
@@ -452,6 +471,18 @@ impl App {
                     let mut pb = PeakBinaries::new(k);
                     pb.threshold = 1.0;
                     *current_sonifiers = vec![Box::new(pb)];
+                }
+                42 => {
+                    *chord_change_interval = Some(Duration::from_secs_f32(0.5));
+                    *harmonic_changes = vec![HarmonicChange::new().transpose(-1)];
+                    *current_harmonic_change = 0;
+
+                    let addr = "/end_movement";
+                    let args = vec![];
+                    osc_sender.send((addr, args)).ok();
+                    // let mut pb = PeakBinaries::new(k);
+                    // pb.threshold = 1.0;
+                    // *current_sonifiers = vec![Box::new(pb)];
                 }
                 _ => {
                     eprintln!("!! Unhandled movement:");

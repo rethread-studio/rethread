@@ -124,7 +124,7 @@ impl DirectCategories {
             continuous_wg.change(
                 NoteOpt {
                     freq: Some(freq),
-                    amp: Some(1.0),
+                    amp: Some(0.5),
                     // damping: freq * 7.0,
                     damping: Some(1000. + freq * 4.0),
                     feedback: Some(0.99999 * 1.01),
@@ -302,6 +302,7 @@ impl SyscallWaveguide {
                     + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.5);
                 self.wg.change(
                     NoteOpt {
+                        amp: Some(0.1),
                         feedback: Some(feedback),
                         ..Default::default()
                     },
@@ -316,6 +317,7 @@ impl SyscallWaveguide {
                 let feedback = 0.999;
                 self.wg.change(
                     NoteOpt {
+                        amp: Some(0.5),
                         feedback: Some(feedback),
                         ..Default::default()
                     },

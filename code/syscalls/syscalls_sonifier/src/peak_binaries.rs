@@ -3,11 +3,12 @@ use knyst::prelude::{Buffer, KnystCommands};
 use nannou_osc::Type;
 use syscalls_shared::SyscallKind;
 
-use crate::Sonifier;
+use crate::{to_freq53, Sonifier};
 
 pub enum SoundKind {
     Binary,
-    FilteredNoise,
+    /// param is number of different pitches from the chord to choose from
+    FilteredNoise(usize),
 }
 
 pub struct PeakBinaries {
@@ -15,6 +16,7 @@ pub struct PeakBinaries {
     category_peaks: Vec<(String, f32)>,
     pub threshold: f32,
     pub sound_kind: SoundKind,
+    chord: Vec<i32>,
     root_freq: f32,
 }
 
@@ -33,6 +35,7 @@ impl PeakBinaries {
             threshold: 3.0,
             sound_kind: SoundKind::Binary,
             root_freq: 25.,
+            chord: vec![0],
         }
     }
 }
@@ -59,6 +62,7 @@ impl Sonifier for PeakBinaries {
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
         // Does nothing
         self.root_freq = root;
+        self.chord = scale.iter().cloned().collect();
     }
 
     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<nannou_osc::Connected>) {
@@ -76,9 +80,12 @@ impl Sonifier for PeakBinaries {
                         let args = vec![Type::Float(length)];
                         osc_sender.send((addr, args)).ok();
                     }
-                    SoundKind::FilteredNoise => {
+                    SoundKind::FilteredNoise(num_pitches_from_chord) => {
                         let length = (*peak_value * 0.2).clamp(1.0, 3.0);
-                        let freq = self.root_freq;
+                        let degree_index =
+                            rng.usize(0..(num_pitches_from_chord.min(self.chord.len())));
+                        let degree = self.chord[degree_index];
+                        let freq = to_freq53(degree, self.root_freq);
                         let addr = "/background_noise";
                         let args = vec![Type::Float(length), Type::Float(freq)];
                         osc_sender.send((addr, args)).ok();

@@ -107,16 +107,16 @@ impl Category {
         if self.enabled {
             let mut to_remove = vec![];
             for (id, swg) in self.wgs.iter_mut() {
-                if swg.last_call.elapsed() > Duration::from_secs(5) {
+                if swg.last_call.elapsed() > Duration::from_secs(15) && swg.interface.is_some() {
                     to_remove.push(*id);
                 } else {
                     swg.update(changes);
                 }
             }
             for id in to_remove {
-                println!("Removed wg {id}");
-                if let Some(wg) = self.wgs.remove(&id) {
-                    wg.free(k);
+                // println!("Removed wg {id}");
+                if let Some(wg) = self.wgs.get_mut(&id) {
+                    wg.despawn(k);
                 }
             }
             // Update LPF
@@ -130,8 +130,8 @@ impl Category {
         }
     }
     pub fn free(mut self, k: &mut KnystCommands) {
-        for (_id, wg) in self.wgs.drain() {
-            wg.free(k);
+        for (_id, mut wg) in self.wgs.drain() {
+            wg.despawn(k);
         }
         k.free_node(self.lpf);
         k.free_node(self.category_bus);
@@ -211,8 +211,8 @@ impl DirectFunctions {
             let kind_string = format!("{syscall_kind:?}");
             let mut wrap_interval = 53;
             let mut octave = i as i32;
-            if octave > 7 {
-                octave -= 4;
+            if octave > 6 {
+                octave -= 5;
             }
             if syscall_kind == SyscallKind::Unknown {
                 wrap_interval = 0;
@@ -290,7 +290,7 @@ impl Sonifier for DirectFunctions {
         let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
         if self.tick.elapsed() > Duration::from_millis(10) {
             if self.decrease_sensitivity {
-                self.sensitivity_coeff *= 0.9995;
+                self.sensitivity_coeff *= 0.99992;
             }
             self.tick = Instant::now();
         }
@@ -366,73 +366,29 @@ fn make_new_waveguide(
     post_fx: &NodeAddress,
     category: SyscallKind,
 ) -> SyscallWaveguide {
-    let (mut sender, mut receiver) = rtrb::RingBuffer::<f32>::new((48000. * 0.5) as usize);
-    for _i in 0..(48000. * 0.5) as usize {
-        sender.push(0.0).ok();
-    }
-    let mut value = 0.0;
-    let exciter_sig = k.push(
-        gen(move |ctx, _| {
-            let in_buf = ctx.inputs.get_channel(0);
-            let out_buf = ctx.outputs.iter_mut().next().unwrap();
-            for (i, o) in in_buf.iter().zip(out_buf.iter_mut()) {
-                let new_value =
-                    (receiver.pop().unwrap_or(0.0).clamp(0.0, 500.0) / 500.0).powf(0.125);
-                if value < 0.001 {
-                    value += new_value;
-                }
-                value = value.clamp(-1.0, 1.0);
-                *o = value + i;
-                value *= 0.7;
-            }
-            GenState::Continue
-        })
-        .output("out")
-        .input("in"),
-        inputs![],
-    );
-    let mut continuous_wg = ContinuousWaveguide::new(k);
-    k.connect(
-        exciter_sig
-            .to(continuous_wg.exciter_bus_input())
-            .from_channel(0)
-            .to_channel(0),
-    );
-    k.connect(Connection::graph_input(&exciter_sig));
-    for out in continuous_wg.outputs() {
-        k.connect(out.to_node(post_fx));
-    }
-    let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
-    continuous_wg.change(
-        NoteOpt {
-            freq: Some(freq),
-            amp: Some(0.1),
-            // damping: freq * 7.0,
-            damping: Some(1000. + freq * 4.0),
-            feedback: Some(0.99),
-            stiffness: Some(0.),
-            hpf: Some(10.),
-            exciter_lpf: Some(2000.),
-            position: Some(0.25),
-        },
-        &mut changes,
-    );
-    k.schedule_changes(changes);
     let starting_coeff = match category {
         SyscallKind::Io => 0.001,
         SyscallKind::SocketIo => 0.01,
         SyscallKind::WaitForReady => 0.1,
         _ => 0.3,
     };
-    SyscallWaveguide::new(continuous_wg, exciter_sig, sender, starting_coeff)
+    SyscallWaveguide::new(k, freq, post_fx.clone(), category, starting_coeff)
 }
 
-struct SyscallWaveguide {
+struct WgInterface {
     wg: ContinuousWaveguide,
     exciter: NodeAddress,
     exciter_sender: rtrb::Producer<f32>,
+}
+
+struct SyscallWaveguide {
+    interface: Option<WgInterface>,
+    freq: f32,
+    k: KnystCommands,
+    output: NodeAddress,
+    category: SyscallKind,
     accumulator: f32,
-    coeff: f32,
+    coeff: f64,
     iterations_since_trigger: usize,
     average_iterations_since_trigger: f32,
     pub last_call: Instant,
@@ -440,85 +396,166 @@ struct SyscallWaveguide {
 
 impl SyscallWaveguide {
     pub fn new(
-        wg: ContinuousWaveguide,
-        exciter: NodeAddress,
-        exciter_sender: rtrb::Producer<f32>,
+        k: &mut KnystCommands,
+        freq: f32,
+        output: NodeAddress,
+        category: SyscallKind,
         starting_coeff: f32,
     ) -> Self {
-        Self {
-            wg,
-            exciter,
-            exciter_sender,
+        let mut s = Self {
             accumulator: 0.0,
-            coeff: starting_coeff,
+            coeff: starting_coeff as f64,
             iterations_since_trigger: 1000,
             average_iterations_since_trigger: 100.,
             last_call: Instant::now(),
+            interface: None,
+            freq,
+            k: k.clone(),
+            output,
+            category,
+        };
+        s.spawn();
+        s
+    }
+    pub fn spawn(&mut self) {
+        if self.interface.is_none() {
+            let (mut exciter_sender, mut receiver) =
+                rtrb::RingBuffer::<f32>::new((48000. * 0.5) as usize);
+            for _i in 0..(48000. * 0.5) as usize {
+                exciter_sender.push(0.0).ok();
+            }
+            let mut value = 0.0;
+            let exciter = self.k.push(
+                gen(move |ctx, _| {
+                    let in_buf = ctx.inputs.get_channel(0);
+                    let out_buf = ctx.outputs.iter_mut().next().unwrap();
+                    for (i, o) in in_buf.iter().zip(out_buf.iter_mut()) {
+                        let new_value =
+                            (receiver.pop().unwrap_or(0.0).clamp(0.0, 500.0) / 500.0).powf(0.125);
+                        if value < 0.001 {
+                            value += new_value;
+                        }
+                        value = value.clamp(-1.0, 1.0);
+                        *o = value + i;
+                        value *= 0.7;
+                    }
+                    GenState::Continue
+                })
+                .output("out")
+                .input("in"),
+                inputs![],
+            );
+            let mut continuous_wg = ContinuousWaveguide::new(&mut self.k);
+            self.k.connect(
+                exciter
+                    .to(continuous_wg.exciter_bus_input())
+                    .from_channel(0)
+                    .to_channel(0),
+            );
+            self.k.connect(Connection::graph_input(&exciter));
+            for out in continuous_wg.outputs() {
+                self.k.connect(out.to_node(&self.output));
+            }
+            let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
+            continuous_wg.change(
+                NoteOpt {
+                    freq: Some(self.freq),
+                    amp: Some(0.1),
+                    // damping: freq * 7.0,
+                    damping: Some(1000. + self.freq * 4.0),
+                    feedback: Some(0.9999),
+                    stiffness: Some(0.),
+                    hpf: Some(10.),
+                    exciter_lpf: Some(1500.),
+                    position: Some(0.25),
+                },
+                &mut changes,
+            );
+            self.k.schedule_changes(changes);
+            self.interface = Some(WgInterface {
+                wg: continuous_wg,
+                exciter,
+                exciter_sender,
+            })
         }
     }
     fn register_call(&mut self, sensitivity_coeff: f32, _id: i32, _args: [i32; 3]) {
         // self.accumulator += id as f32 * self.coeff;
-        self.accumulator += self.coeff * 200. * sensitivity_coeff;
+        self.accumulator += self.coeff as f32 * 200. * sensitivity_coeff;
         self.last_call = Instant::now();
+        if self.interface.is_none() {
+            self.spawn();
+        }
     }
     fn set_freq(&mut self, freq: f32, changes: &mut SimultaneousChanges) {
-        self.wg.change(
-            NoteOpt {
-                freq: Some(freq),
-                ..Default::default()
-            },
-            changes,
-        );
+        self.freq = freq;
+        if let Some(i) = &mut self.interface {
+            i.wg.change(
+                NoteOpt {
+                    freq: Some(freq),
+                    ..Default::default()
+                },
+                changes,
+            );
+        }
     }
     fn update(&mut self, changes: &mut SimultaneousChanges) {
-        if !self.exciter_sender.is_full() {
-            // if self.accumulator > 500. {
-            //     self.coeff *= 0.9;
-            // }
-            // if self.accumulator < 10.0 {
-            //     self.coeff *= 1.00001;
-            // }
-            // self.coeff = self.coeff.clamp(0.0001, 2.0);
-            if self.accumulator > 200. {
-                self.exciter_sender.push(self.accumulator).unwrap();
-                self.accumulator = 0.0;
-                self.average_iterations_since_trigger = self.average_iterations_since_trigger * 0.9
-                    + self.iterations_since_trigger as f32 * 0.1;
-                if self.iterations_since_trigger < (48000 / 20) {
-                    self.coeff *= 0.99;
+        if let Some(i) = &mut self.interface {
+            if !i.exciter_sender.is_full() {
+                // if self.accumulator > 500. {
+                //     self.coeff *= 0.9;
+                // }
+                // if self.accumulator < 10.0 {
+                //     self.coeff *= 1.00001;
+                // }
+                // self.coeff = self.coeff.clamp(0.0001, 2.0);
+                if self.accumulator > 200. {
+                    i.exciter_sender.push(self.accumulator).unwrap();
+                    self.accumulator = 0.0;
+                    self.average_iterations_since_trigger = self.average_iterations_since_trigger
+                        * 0.9
+                        + self.iterations_since_trigger as f32 * 0.1;
+                    if self.iterations_since_trigger < (48000 / 4) {
+                        self.coeff *= 0.9;
+                    }
+                    if self.iterations_since_trigger > (48000) {
+                        self.coeff *= 1.10;
+                    }
+                    self.coeff = self.coeff.clamp(0.0001, 1.0);
+                    let feedback = 0.999
+                        + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.1);
+                    i.wg.change(
+                        NoteOpt {
+                            feedback: Some(feedback),
+                            amp: Some(0.05),
+                            ..Default::default()
+                        },
+                        changes,
+                    );
+                    self.iterations_since_trigger = 0;
+                } else {
+                    i.exciter_sender.push(0.0).unwrap();
+                    self.iterations_since_trigger += 1;
                 }
-                if self.iterations_since_trigger > (48000) {
-                    self.coeff *= 1.10;
+                if self.iterations_since_trigger == 1500 {
+                    let feedback = 0.99;
+                    i.wg.change(
+                        NoteOpt {
+                            feedback: Some(feedback),
+
+                            amp: Some(0.10),
+                            ..Default::default()
+                        },
+                        changes,
+                    );
                 }
-                self.coeff = self.coeff.clamp(0.0001, 1.0);
-                let feedback = 0.999
-                    + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.1);
-                self.wg.change(
-                    NoteOpt {
-                        feedback: Some(feedback),
-                        ..Default::default()
-                    },
-                    changes,
-                );
-                self.iterations_since_trigger = 0;
-            } else {
-                self.exciter_sender.push(0.0).unwrap();
-                self.iterations_since_trigger += 1;
-            }
-            if self.iterations_since_trigger == 1500 {
-                let feedback = 0.99;
-                self.wg.change(
-                    NoteOpt {
-                        feedback: Some(feedback),
-                        ..Default::default()
-                    },
-                    changes,
-                );
             }
         }
     }
-    fn free(self, k: &mut KnystCommands) {
-        k.free_node(self.exciter);
-        self.wg.free(k);
+    fn despawn(&mut self, k: &mut KnystCommands) {
+        if let Some(i) = self.interface.take() {
+            k.free_node(i.exciter);
+            i.wg.free(k);
+        }
     }
 }
