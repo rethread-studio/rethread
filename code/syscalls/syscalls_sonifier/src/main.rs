@@ -137,7 +137,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(11, false);
+    app.change_movement(11, None, false);
     // main loop
     loop {
         // Receive OSC messages
@@ -151,7 +151,13 @@ fn main() -> Result<()> {
                     let new_mvt_id = args.next().unwrap().int().unwrap();
                     let is_break = args.next().unwrap().bool().unwrap();
                     let description = args.next().unwrap().string().unwrap();
-                    app.change_movement(new_mvt_id, is_break);
+                    let next_mvt_id = args.next().unwrap().int().unwrap();
+                    let next_mvt_id = if next_mvt_id == -1 {
+                        None
+                    } else {
+                        Some(next_mvt_id)
+                    };
+                    app.change_movement(new_mvt_id, next_mvt_id, is_break);
                 }
             } else if m.addr == "/score/play" {
                 if let Some(args) = m.args {
@@ -294,7 +300,7 @@ impl App {
         self.k.free_disconnected_nodes();
         self.current_sonifiers.clear();
     }
-    pub fn change_movement(&mut self, new_mvt_id: i32, is_break: bool) {
+    pub fn change_movement(&mut self, new_mvt_id: i32, next_mvt_id: Option<i32>, is_break: bool) {
         let App {
             current_sonifiers,
             // osc_receiver,
@@ -462,10 +468,13 @@ impl App {
             }
         } else {
             println!("Break");
-
-            let addr = "/break_voice";
-            let args = vec![Type::Int(*mvt_id as i32)];
-            osc_sender.send((addr, args)).ok();
+            if let Some(next_mvt_id) = next_mvt_id {
+                println!("Sending break voice for id {next_mvt_id}");
+                let addr = "/break_voice";
+                // TODO: This should be the id of the next movement instead
+                let args = vec![Type::Int(next_mvt_id as i32)];
+                osc_sender.send((addr, args)).ok();
+            }
         }
     }
 }

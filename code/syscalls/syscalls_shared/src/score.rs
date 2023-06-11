@@ -199,7 +199,8 @@ impl Score {
             ScoreUpdate::ScoreStop
         } else {
             if self.is_playing {
-                ScoreUpdate::NewMovement(self.play_from(self.current_movement).clone())
+                let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
+                ScoreUpdate::NewMovement { new_mvt, next_mvt }
             } else {
                 ScoreUpdate::Nothing
             }
@@ -210,7 +211,8 @@ impl Score {
             self.current_movement -= 1;
         }
         if self.is_playing {
-            ScoreUpdate::NewMovement(self.play_from(self.current_movement).clone())
+            let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
+            ScoreUpdate::NewMovement { new_mvt, next_mvt }
         } else {
             ScoreUpdate::Nothing
         }
@@ -219,11 +221,18 @@ impl Score {
         self.is_playing
     }
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn play_from(&mut self, mvt: usize) -> &Movement {
+    pub fn play_from(&mut self, mvt: usize) -> (Movement, Option<Movement>) {
         self.current_movement = mvt;
         self.is_playing = true;
         self.start_of_last_movement = Instant::now();
-        &self.movements[self.current_movement]
+        (
+            self.movements[self.current_movement].clone(),
+            if self.current_movement + 1 < self.movements.len() {
+                Some(self.movements[self.current_movement + 1].clone())
+            } else {
+                None
+            },
+        )
     }
     pub fn stop(&mut self) {
         self.is_playing = false;
@@ -257,7 +266,14 @@ impl Score {
                     self.stop();
                     ScoreUpdate::ScoreStop
                 } else {
-                    ScoreUpdate::NewMovement(self.movements[self.current_movement].clone())
+                    ScoreUpdate::NewMovement {
+                        new_mvt: self.movements[self.current_movement].clone(),
+                        next_mvt: if self.current_movement + 1 < self.movements.len() {
+                            Some(self.movements[self.current_movement + 1].clone())
+                        } else {
+                            None
+                        },
+                    }
                 }
             } else {
                 ScoreUpdate::Nothing
@@ -303,7 +319,10 @@ impl Score {
 pub enum ScoreUpdate {
     Nothing,
     ScoreStop,
-    NewMovement(Movement),
+    NewMovement {
+        new_mvt: Movement,
+        next_mvt: Option<Movement>,
+    },
 }
 
 #[derive(Debug, Clone)]

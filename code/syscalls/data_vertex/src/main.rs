@@ -262,8 +262,8 @@ impl PacketHQ {
                     if !self.score.is_playing() {
                         self.osc_sender.send_score_start();
                     }
-                    let new_mvt = self.score.play_from(0);
-                    self.osc_sender.send_movement(new_mvt);
+                    let (new_mvt, next_mvt) = self.score.play_from(0);
+                    self.osc_sender.send_movement(&new_mvt, next_mvt);
                 }
                 PacketHQCommands::StopScorePlayback => {
                     self.score.stop();
@@ -275,8 +275,8 @@ impl PacketHQ {
                         ScoreUpdate::ScoreStop => {
                             self.osc_sender.send_score_stop();
                         }
-                        ScoreUpdate::NewMovement(m) => {
-                            self.osc_sender.send_movement(&m);
+                        ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
+                            self.osc_sender.send_movement(&new_mvt, next_mvt);
                         }
                         ScoreUpdate::Nothing => (),
                     }
@@ -287,8 +287,8 @@ impl PacketHQ {
                         ScoreUpdate::ScoreStop => {
                             self.osc_sender.send_score_stop();
                         }
-                        ScoreUpdate::NewMovement(m) => {
-                            self.osc_sender.send_movement(&m);
+                        ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
+                            self.osc_sender.send_movement(&new_mvt, next_mvt);
                         }
                         ScoreUpdate::Nothing => (),
                     }
@@ -299,8 +299,8 @@ impl PacketHQ {
             ScoreUpdate::ScoreStop => {
                 self.osc_sender.send_score_stop();
             }
-            ScoreUpdate::NewMovement(m) => {
-                self.osc_sender.send_movement(&m);
+            ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
+                self.osc_sender.send_movement(&new_mvt, next_mvt);
             }
             ScoreUpdate::Nothing => (),
         }

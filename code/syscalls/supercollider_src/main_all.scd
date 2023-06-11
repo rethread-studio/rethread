@@ -1,6 +1,6 @@
 (
 {
-	~ttsBuffer = Buffer.read(s, "/home/erik/Musik/syscalls_spoken/2.wav", 0, -1);
+	// ~ttsBuffer = Buffer.read(s, "/home/erik/Musik/syscalls_spoken/2.wav", 0, -1);
 
 	{var paths = PathName("/home/erik/Musik/syscalls_spoken");
 		var winenv = Env([0, 1, 0], [0.5, 0.5], [8, -8]);
@@ -61,13 +61,15 @@
 	s.sync;
 
 	OSCdef(\voice_break, { arg msg, time, addr, recvPort;
+		var file = (msg[1].asString ++ ".wav").asSymbol;
+		file = ~voices[file];
 		msg.postln;
 		{
 			var winenv = Env([0, 1, 0], [0.5, 0.5], [8, -8]);
 			z = Buffer.sendCollection(s, winenv.discretize, 1);
 			s.sync;
-			20.wait; // TODO: Time it so that the voice finishes just before the break is over
-			{ var sig, bufnum = ~ttsBuffer, envbuf = z, pan = 0, pos, cutfreq = [350, 1000, 100];
+			(30-(file.duration*1.1 + 0.5)).wait; // TODO: Time it so that the voice finishes just before the break is over
+			{ var sig, bufnum = file, envbuf = z, pan = 0, pos, cutfreq = [350, 1000, 100];
 				/*sig = PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum));
 				sig = PitchShift.ar(sig, 0.2, 1.5);*/
 				pos = Line.kr(0, 1, BufSamples.kr(bufnum)/BufSampleRate.kr(bufnum) * 1.1, doneAction: 2);

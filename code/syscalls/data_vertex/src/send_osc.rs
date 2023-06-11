@@ -71,13 +71,18 @@ impl OscSender {
             sender.send((addr, args)).ok();
         }
     }
-    pub fn send_movement(&mut self, m: &Movement) {
+    pub fn send_movement(&mut self, m: &Movement, next_mvt: Option<Movement>) {
         for sender in &mut self.senders {
             let addr = "/new_movement";
             let args = vec![
                 Type::Int(m.id as i32),
                 Type::Bool(m.is_break),
                 Type::String(m.description.clone()),
+                Type::Int(if let Some(m) = next_mvt.clone() {
+                    m.id as i32
+                } else {
+                    -1
+                }),
             ];
             sender.send((addr, args)).ok();
             let addr = "/break";
