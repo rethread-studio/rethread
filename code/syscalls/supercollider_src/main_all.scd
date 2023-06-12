@@ -104,37 +104,80 @@
 	Ndef(\root, {25});
 	Ndef(\root).fadeTime = 0.05;
 	Ndef(\rumbling_bass).clear;
+	Ndef(\bwr_low, {0.01});
+	Ndef(\bwr_high, {1.5});
+	Ndef(\bwr_high).fadeTime = 2;
+	Ndef(\lpf_low, {50});
+	Ndef(\lpf_high, {10000});
 	~start_rumbling_bass = {
 		Ndef(\rumbling_bass, {
 			var sig, pitch_mix = LFNoise1.kr(0.1).range(0, 1).pow(2.0),
-			bwr1 = {LFNoise1.kr(0.05).range(0.001, 1.0).clip(0.001, 1.0).pow(4)}!4,
+			bwr1 = {LFNoise1.kr(0.05).range(Ndef.kr(\bwr_low, 1), Ndef.kr(\bwr_high, 1)).clip(0.001, 1.0).pow(4)}!4,
 			bwramp1 = (0.00001 / bwr1).clip(0.00001, 1.0).pow(0.33) * 300.0,
-			bwr2 = {LFNoise1.kr(0.05).range(0.001, 0.5).clip(0.001, 1.0).pow(3)}!5,
-			bwramp2 = (0.00001 / bwr2).clip(0.00001, 1.0).pow(0.5) * 300.0;
+			bwr2 = {LFNoise1.kr(0.05).range(Ndef.kr(\bwr_low, 1), Ndef.kr(\bwr_high, 1) * 0.5).clip(0.001, 1.0).pow(3)}!5,
+			bwramp2 = (0.00001 / bwr2).clip(0.00001, 1.0).pow(0.5) * 300.0,
+			lpf_low = Ndef.kr(\lpf_low, 1),
+			lpf_high = Ndef.kr(\lpf_high, 1),
+			lpf_mul = lpf_high - lpf_low
+			;
 			// pitch_mix = 0.0;
 			// bwramp1.poll;
 			sig = BrownNoise.ar()!4;
 			// sig = PinkNoise.ar()!4;
 			// sig = LPF.ar(sig, LFNoise2.kr(0.5).range(100, 2000) * LFNoise1.kr(2).range(0.8, 1.0));
-			sig = Resonz.ar(sig, Ndef(\root).kr*[4, 8, 12, 16],bwr1) * bwramp1;
+			sig = Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 8, 12, 16],bwr1) * bwramp1;
 			sig = Mix(sig);
 			sig = Limiter.ar(sig);
 			sig = sig * 0.5 + (AnalogVintageDistortion.ar(sig*LFNoise1.kr(0.1).range(0.01, 0.1), LFNoise1.kr(0.03).range(0.0, 2.5), LFNoise1.kr(0.2).range(0.0, 0.5)) * LFNoise1.kr(0.1).range(0.0, 0.5).pow(1.5));
-			sig = LPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(3)* 10000+50) * LFNoise1.kr(2).range(0.7, 1.0) * LFNoise1.kr(5).range(0.9, 1.0));
+			sig = LPF.ar(sig, ((
+				LFNoise1.kr(0.05).range(0, 1).pow(3) * lpf_mul + lpf_low)
+			* LFNoise1.kr(2).range(0.7, 1.0)
+			* LFNoise1.kr(5).range(0.9, 1.0)
+			).clip(10, 19000));
 			sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) *200 + 10) * LFNoise1.kr(LFNoise1.kr(2).range(1, 5)).range(0.5, 1.0));
 			sig = Limiter.ar(sig, 0.9);
 			// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
-			sig = (sig * (1.0-pitch_mix)) + (Splay.ar(Resonz.ar(sig, Ndef(\root).kr*[4, 6, 8, 12, 16], bwr2)*bwramp2) * pitch_mix * 0.2);
+			sig = (sig * (1.0-pitch_mix)) + (Splay.ar(Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 6, 8, 12, 16], bwr2)*bwramp2) * pitch_mix * 0.2);
 			sig = BPeakEQ.ar(sig, 300, 0.5, -2);
 			sig = BPeakEQ.ar(sig, 2000, 1.0, -3);
 			sig = Limiter.ar(sig, 0.9);
 
-			sig = sig * 0.1 * Line.kr(0.001, 1.0, 10.0);
+			sig = sig * 0.1 * Line.kr(0.001, 1.0, 5.0);
 			// sig = Pan2.ar(sig*0.5);
 			(sig!2).flatten
 		}).play(16, 4);
 	};
 	~start_rumbling_bass.();
+
+	OSCdef(\background_ramp, { arg msg, time, addr, recvPort;
+		var
+		fade_duration = msg[1].asFloat,
+		bwr_low_start = msg[2].asFloat,
+		bwr_low_end = msg[3].asFloat,
+		bwr_high_start = msg[4].asFloat,
+		bwr_high_end = msg[5].asFloat,
+		lpf_low_start = msg[6].asFloat,
+		lpf_low_end = msg[7].asFloat,
+		lpf_high_start = msg[8].asFloat,
+		lpf_high_end = msg[9].asFloat;
+		msg.postln;
+		Ndef(\bwr_low).fadeTime = 0.01;
+		Ndef(\bwr_high).fadeTime = 0.01;
+		Ndef(\lpf_low).fadeTime = 0.01;
+		Ndef(\lpf_high).fadeTime = 0.01;
+		Ndef(\bwr_low, {bwr_low_start});
+		Ndef(\bwr_high, {bwr_high_start});
+		Ndef(\lpf_low, {lpf_low_start});
+		Ndef(\lpf_high, {lpf_high_start});
+		Ndef(\bwr_low).fadeTime = fade_duration;
+		Ndef(\bwr_high).fadeTime = fade_duration;
+		Ndef(\lpf_low).fadeTime = fade_duration;
+		Ndef(\lpf_high).fadeTime = fade_duration;
+		Ndef(\bwr_low, {bwr_low_end});
+		Ndef(\bwr_high, {bwr_high_end});
+		Ndef(\lpf_low, {lpf_low_end});
+		Ndef(\lpf_high, {lpf_high_end});
+	}, '/background_ramp', nil);
 
 
 	// Ndef(\rumbling_bass).release(0.1)

@@ -83,6 +83,7 @@ impl OscSender {
                 } else {
                     -1
                 }),
+                Type::Float(m.duration.as_secs_f32()),
             ];
             sender.send((addr, args)).ok();
             let addr = "/break";

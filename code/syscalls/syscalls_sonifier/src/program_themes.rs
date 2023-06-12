@@ -1,5 +1,5 @@
 use std::{
-    sync::{Arc, Mutex},
+    sync::{atomic::AtomicU32, Arc, Mutex},
     time::{Duration, Instant},
 };
 
@@ -89,6 +89,7 @@ pub struct ProgramThemes {
     lpf: NodeAddress,
     mul: NodeAddress,
     root: Arc<AtomicF32>,
+    chord: Arc<AtomicU32>,
     activity: Arc<Mutex<Activity>>,
     k: KnystCommands,
 }
@@ -143,27 +144,35 @@ impl ProgramThemes {
         // k.schedule_changes(changes);
 
         let root = Arc::new(AtomicF32::new(25.));
-        let phrases = thunderbird_phrases();
+        let chord = Arc::new(AtomicU32::new(0));
+        let phrases = thunderbird_theme();
 
         let callback_root = root.clone();
+        let callback_chord = chord.clone();
         let callback_activity = activity.clone();
         let mut i = 0;
         let callback = k.schedule_beat_callback(
-            move |mut time, k| {
+            move |time, k| {
                 // println!("Running callback {i}, time: {time:?}");
                 i += 1;
                 let root_freq = callback_root.load(std::sync::atomic::Ordering::Relaxed);
+                let current_chord = callback_chord.load(std::sync::atomic::Ordering::Relaxed);
                 let activity = callback_activity.lock().unwrap();
                 // dbg!(&activity);
                 {
                     let mut time = time;
+                    let theme = thunderbird_theme();
+                    let phrases = match current_chord {
+                        0 => &theme.chord0_phrases,
+                        1 => &theme.chord1_phrases,
+                        _ => &theme.chord0_phrases,
+                    };
                     let phrase = &phrases[rng.usize(..phrases.len())];
                     let a = activity.thunderbird.activity_value();
                     for event in phrase.events() {
                         if rng.f32() < a {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
-                                    println!("Event at {time:?}");
                                     let mut changes = SimultaneousChanges::beats(time);
                                     let freq = to_freq53(n.0 + 53 * 4, root_freq);
                                     // let amp = n.1 * 0.5;
@@ -192,7 +201,13 @@ impl ProgramThemes {
                 }
                 {
                     let mut time = time;
-                    let phrase = &konqueror_phrases()[rng.usize(..konqueror_phrases().len())];
+                    let theme = konqueror_theme();
+                    let phrases = match current_chord {
+                        0 => &theme.chord0_phrases,
+                        1 => &theme.chord1_phrases,
+                        _ => &theme.chord0_phrases,
+                    };
+                    let phrase = &phrases[rng.usize(..phrases.len())];
                     for event in phrase.events() {
                         let a = activity.konqueror.activity_value();
                         if rng.f32() < a {
@@ -226,7 +241,13 @@ impl ProgramThemes {
                 }
                 {
                     let mut time = time;
-                    let phrase = &htop_phrases()[rng.usize(..htop_phrases().len())];
+                    let theme = htop_theme();
+                    let phrases = match current_chord {
+                        0 => &theme.chord0_phrases,
+                        1 => &theme.chord1_phrases,
+                        _ => &theme.chord0_phrases,
+                    };
+                    let phrase = &phrases[rng.usize(..phrases.len())];
                     for event in phrase.events() {
                         let a = activity.htop.activity_value();
                         if rng.f32() < a {
@@ -276,6 +297,7 @@ impl ProgramThemes {
             activity,
             lpf,
             mul,
+            chord,
         }
     }
 }
@@ -329,6 +351,11 @@ impl Sonifier for ProgramThemes {
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
         self.root.store(root, std::sync::atomic::Ordering::Relaxed);
+        if scale[0] == 0 {
+            self.chord.store(0, std::sync::atomic::Ordering::SeqCst);
+        } else if scale[0] == 5 {
+            self.chord.store(1, std::sync::atomic::Ordering::SeqCst);
+        }
         // todo!()
     }
 
@@ -349,8 +376,8 @@ impl Sonifier for ProgramThemes {
     }
 }
 
-fn thunderbird_phrases() -> Vec<Phrase<(i32, f32)>> {
-    let mut phrases = vec![];
+fn thunderbird_theme() -> Theme {
+    let mut chord0_phrases = vec![];
     {
         let mut p = Phrase::new();
         p.push((1. / 16., (31, 0.5)));
@@ -358,7 +385,7 @@ fn thunderbird_phrases() -> Vec<Phrase<(i32, f32)>> {
         p.push((1. / 16., (17, 0.25)));
         p.push((1. / 16., (0, 0.25)));
         p.push((1. / 4., (-5, 0.15)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
     {
         let mut p = Phrase::new();
@@ -370,7 +397,7 @@ fn thunderbird_phrases() -> Vec<Phrase<(i32, f32)>> {
         p.push((1. / 16., (26, 0.25)));
         p.push((1. / 16., (31, 0.25)));
         p.push((1. / 16., (48, 0.25)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
     {
         let mut p = Phrase::new();
@@ -381,26 +408,70 @@ fn thunderbird_phrases() -> Vec<Phrase<(i32, f32)>> {
         p.push((1. / 16., (17, 0.15)));
         p.push((1. / 16., (26, 0.35)));
         p.push((1. / 16., (31, 0.25)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
-    phrases
+    let mut chord1_phrases = vec![];
+    {
+        let mut p = Phrase::new();
+        p.push((1. / 16., (36, 0.5)));
+        p.push((1. / 16., (22, 0.25)));
+        p.push((1. / 16., (14, 0.25)));
+        p.push((1. / 16., (5, 0.25)));
+        p.push((1. / 4., (-53 + 49, 0.15)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 8.);
+        p.push((1. / 16., (-53 + 49, 0.35)));
+        p.push((1. / 16., (5, 0.25)));
+        p.push((1. / 16., (14, 0.5)));
+        p.push((1. / 16., (36, 0.15)));
+        p.push((1. / 8., (14, 0.35)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 16.);
+        p.push((1. / 16., (36, 0.25)));
+        p.push((1. / 16., (14, 0.35)));
+        p.push((1. / 16., (36, 0.5)));
+        p.push((1. / 16., (14, 0.25)));
+        p.push((1. / 16., (36, 0.25)));
+        p.push((1. / 8., (14, 0.25)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 8.);
+        p.push((1. / 16., (5, 0.35)));
+        p.push((1. / 16., (36, 0.25)));
+        p.push((1. / 16., (5, 0.5)));
+        p.push((1. / 16., (36, 0.15)));
+        p.push((1. / 8., (5, 0.35)));
+        chord1_phrases.push(p);
+    }
+    Theme {
+        chord0_phrases,
+        chord1_phrases,
+    }
 }
 
-fn konqueror_phrases() -> Vec<Phrase<(i32, f32)>> {
-    let mut phrases = vec![];
+fn konqueror_theme() -> Theme {
+    let mut chord0_phrases = vec![];
     {
         let mut p = Phrase::new();
         p.push(3. / 8.);
         p.push((1. / 8., (-22, 0.25)));
         p.push((1. / 4., (0, 0.5)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
     {
         let mut p = Phrase::new();
         p.push(3. / 8.);
         p.push((1. / 8., (31, 0.25)));
         p.push((1. / 4., (53, 0.5)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
     {
         let mut p = Phrase::new();
@@ -408,13 +479,40 @@ fn konqueror_phrases() -> Vec<Phrase<(i32, f32)>> {
         p.push((1. / 8., (31, 0.25)));
         p.push((1. / 4., (53 + 17, 0.5)));
         p.push((1. / 4., (48, 0.35)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
-    phrases
+    let mut chord1_phrases = vec![];
+    {
+        let mut p = Phrase::new();
+        p.push(3. / 8.);
+        p.push((1. / 8., (-53 + 22, 0.25)));
+        p.push((1. / 4., (5, 0.5)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(3. / 8.);
+        p.push((1. / 8., (-53 + 49, 0.25)));
+        p.push((1. / 4., (36, 0.5)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(3. / 8.);
+        p.push((1. / 8., (22, 0.25)));
+        p.push((1. / 8., (49, 0.5)));
+        p.push((1. / 4., (36, 0.35)));
+        p.push((1. / 8., (14, 0.25)));
+        chord1_phrases.push(p);
+    }
+    Theme {
+        chord0_phrases,
+        chord1_phrases,
+    }
 }
 
-fn htop_phrases() -> Vec<Phrase<(i32, f32)>> {
-    let mut phrases = vec![];
+fn htop_theme() -> Theme {
+    let mut chord0_phrases = vec![];
     {
         let mut p = Phrase::new();
         p.push((1. / 32., (-53 + 31, 0.55)));
@@ -425,7 +523,7 @@ fn htop_phrases() -> Vec<Phrase<(i32, f32)>> {
         p.push((1. / 32., (0, 0.25)));
         p.push((1. / 32., (31, 0.55)));
         p.push((3. / 32., (0, 0.35)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
     {
         let mut p = Phrase::new();
@@ -433,7 +531,7 @@ fn htop_phrases() -> Vec<Phrase<(i32, f32)>> {
         p.push((1. / 32., (17, 0.25)));
         p.push((1. / 32., (26, 0.35)));
         p.push((3. / 32., (17, 0.55)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
     {
         let mut p = Phrase::new();
@@ -445,7 +543,7 @@ fn htop_phrases() -> Vec<Phrase<(i32, f32)>> {
         p.push((1. / 32., (-53 + 48, 0.25)));
         p.push((1. / 32., (17, 0.55)));
         p.push((3. / 32., (-53 + 48, 0.35)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
     {
         let mut p = Phrase::new();
@@ -453,7 +551,69 @@ fn htop_phrases() -> Vec<Phrase<(i32, f32)>> {
         p.push((1. / 32., (-53 + 31, 0.25)));
         p.push((1. / 32., (17, 0.35)));
         p.push((3. / 32., (-53 + 31, 0.55)));
-        phrases.push(p);
+        chord0_phrases.push(p);
     }
-    phrases
+    let mut chord1_phrases = vec![];
+    {
+        let mut p = Phrase::new();
+        p.push((1. / 32., (-53 + 49, 0.55)));
+        p.push((1. / 32., (14, 0.25)));
+        p.push((1. / 32., (22, 0.35)));
+        p.push((5. / 32., (14, 0.55)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push((1. / 32., (-53 + 36, 0.55)));
+        p.push((1. / 32., (14, 0.15)));
+        p.push((1. / 32., (36, 0.35)));
+        p.push((7. / 32., (14, 0.45)));
+        p.push((1. / 32., (-53 + 36, 0.15)));
+        p.push((1. / 32., (5, 0.25)));
+        p.push((1. / 32., (36, 0.55)));
+        p.push((3. / 32., (5, 0.35)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push((1. / 32., (-53 + 49, 0.55)));
+        p.push((1. / 32., (22, 0.25)));
+        p.push((1. / 32., (36, 0.35)));
+        p.push((5. / 32., (22, 0.55)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push((1. / 32., (-53 + 36, 0.55)));
+        p.push((1. / 32., (5, 0.15)));
+        p.push((1. / 32., (36, 0.35)));
+        p.push((7. / 32., (5, 0.45)));
+        p.push((1. / 32., (-53 + 36, 0.15)));
+        p.push((1. / 32., (14, 0.25)));
+        p.push((1. / 32., (36, 0.55)));
+        p.push((3. / 32., (14, 0.35)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push((1. / 32., (-53 + 49, 0.55)));
+        p.push((1. / 32., (5, 0.15)));
+        p.push((1. / 32., (14, 0.35)));
+        p.push((7. / 32., (22, 0.45)));
+        p.push((1. / 32., (5, 0.35)));
+        p.push((1. / 32., (14, 0.25)));
+        p.push((1. / 32., (22, 0.15)));
+        p.push((3. / 32., (36, 0.55)));
+        chord1_phrases.push(p);
+    }
+
+    Theme {
+        chord0_phrases,
+        chord1_phrases,
+    }
+}
+
+pub struct Theme {
+    chord0_phrases: Vec<Phrase<(i32, f32)>>,
+    chord1_phrases: Vec<Phrase<(i32, f32)>>,
 }

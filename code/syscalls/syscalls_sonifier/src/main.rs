@@ -1,3 +1,4 @@
+use std::ops::Range;
 use std::sync::atomic::AtomicBool;
 use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
@@ -133,11 +134,12 @@ fn main() -> Result<()> {
         sample_rate,
         k,
         current_harmonic_change,
+        is_on_break: false,
     };
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(6, None, false);
+    app.change_movement(10, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
@@ -152,12 +154,13 @@ fn main() -> Result<()> {
                     let is_break = args.next().unwrap().bool().unwrap();
                     let description = args.next().unwrap().string().unwrap();
                     let next_mvt_id = args.next().unwrap().int().unwrap();
+                    let duration = args.next().unwrap().float().unwrap();
                     let next_mvt_id = if next_mvt_id == -1 {
                         None
                     } else {
                         Some(next_mvt_id)
                     };
-                    app.change_movement(new_mvt_id, next_mvt_id, is_break);
+                    app.change_movement(new_mvt_id, next_mvt_id, is_break, duration);
                 }
             } else if m.addr == "/score/play" {
                 if let Some(args) = m.args {
@@ -239,6 +242,7 @@ struct App {
     harmonic_changes: Vec<HarmonicChange>,
     current_harmonic_change: usize,
     sample_rate: f32,
+    is_on_break: bool,
     k: KnystCommands,
 }
 impl App {
@@ -262,12 +266,13 @@ impl App {
             sample_rate,
             k,
             current_harmonic_change,
+            is_on_break,
         } = self;
         let change_harmony = if let Some(time_interval) = &chord_change_interval {
-            if last_chord_change.elapsed() > *time_interval {
+            if last_chord_change.elapsed() > *time_interval && !*is_on_break {
                 harmonic_changes[*current_harmonic_change].apply(current_chord, root);
                 let addr = "/change_harmony";
-                let root = to_freq53(*root, *root_freq);
+                let root = to_freq53(*root + current_chord[0], *root_freq);
                 let mut args = vec![Type::Float(root)];
                 args.push(Type::Int(current_chord.len() as i32));
                 for degree in &*current_chord {
@@ -300,7 +305,13 @@ impl App {
         self.k.free_disconnected_nodes();
         self.current_sonifiers.clear();
     }
-    pub fn change_movement(&mut self, new_mvt_id: i32, next_mvt_id: Option<i32>, is_break: bool) {
+    pub fn change_movement(
+        &mut self,
+        new_mvt_id: i32,
+        next_mvt_id: Option<i32>,
+        is_break: bool,
+        duration: f32,
+    ) {
         let App {
             current_sonifiers,
             // osc_receiver,
@@ -316,6 +327,7 @@ impl App {
             chord_change_interval,
             current_chord,
             current_harmonic_change,
+            is_on_break,
         } = self;
 
         *mvt_id = new_mvt_id;
@@ -327,11 +339,20 @@ impl App {
         }
         k.free_disconnected_nodes();
         current_sonifiers.clear();
+        *is_on_break = is_break;
+        let mut background_ramp = None;
         if !is_break {
             // let tags = description.split(",");
             // println!("tags: {:?}", tags.clone().collect::<Vec<_>>());
             match new_mvt_id {
                 0 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.01..0.1,
+                        bwr_high: 0.5..1.5,
+                        lpf_low: 50.0..200.0,
+                        lpf_high: 2000.0..10000.0,
+                    });
+                    *chord_change_interval = None;
                     *current_sonifiers = vec![Box::new(DirectCategories::new(0.5, k, sample_rate))];
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(1);
@@ -339,6 +360,12 @@ impl App {
                 }
                 100 => {
                     // interlude
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.01..0.04,
+                        bwr_high: 0.5..0.5,
+                        lpf_low: 200.0..200.0,
+                        lpf_high: 10000.0..2000.0,
+                    });
                     *chord_change_interval = None;
                     *current_sonifiers = vec![Box::new(DirectCategories::new(0.5, k, sample_rate))];
                     for s in current_sonifiers.iter_mut() {
@@ -346,6 +373,12 @@ impl App {
                     }
                 }
                 40 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.04..0.04,
+                        bwr_high: 0.8..0.8,
+                        lpf_low: 100.0..100.0,
+                        lpf_high: 20000.0..200.0,
+                    });
                     *chord_change_interval = None;
 
                     let mut pb = PeakBinaries::new(k);
@@ -359,6 +392,12 @@ impl App {
                     }
                 }
                 2 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.004..0.008,
+                        bwr_high: 0.5..0.8,
+                        lpf_low: 200.0..200.0,
+                        lpf_high: 2000.0..1000.0,
+                    });
                     *chord_change_interval = None;
                     *current_sonifiers = vec![Box::new(DirectFunctions::new(
                         1.0,
@@ -373,6 +412,12 @@ impl App {
                 }
                 102 => {
                     // interlude
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.14..0.02,
+                        bwr_high: 0.9..0.7,
+                        lpf_low: 200.0..200.0,
+                        lpf_high: 2000.0..5000.0,
+                    });
                     *chord_change_interval = None;
                     let mut sonifier = DirectFunctions::new(
                         1.0,
@@ -391,6 +436,12 @@ impl App {
                     }
                 }
                 4 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.014..0.012,
+                        bwr_high: 0.9..1.5,
+                        lpf_low: 200.0..2000.0,
+                        lpf_high: 2000.0..12000.0,
+                    });
                     *current_sonifiers = vec![Box::new(QuantisedCategories::new(k, sample_rate))];
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(1);
@@ -398,6 +449,12 @@ impl App {
                 }
                 104 => {
                     // Interlude
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.04..0.001,
+                        bwr_high: 0.9..0.8,
+                        lpf_low: 200.0..20.0,
+                        lpf_high: 12000.0..12000.0,
+                    });
                     *current_sonifiers = vec![Box::new(QuantisedCategories::new(k, sample_rate))];
 
                     for s in current_sonifiers.iter_mut() {
@@ -405,6 +462,12 @@ impl App {
                     }
                 }
                 6 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.14..0.101,
+                        bwr_high: 1.0..1.8,
+                        lpf_low: 200.0..20.0,
+                        lpf_high: 12000.0..5000.0,
+                    });
                     *chord_change_interval = Some(Duration::from_secs(8));
                     let mut df = DirectFunctions::new(
                         1.0,
@@ -424,6 +487,12 @@ impl App {
                     }
                 }
                 106 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.34..0.101,
+                        bwr_high: 1.2..1.0,
+                        lpf_low: 200.0..200.0,
+                        lpf_high: 500.0..5000.0,
+                    });
                     *chord_change_interval = Some(Duration::from_secs(8));
                     let mut sonifier = DirectFunctions::new(
                         1.0,
@@ -442,12 +511,24 @@ impl App {
                     *current_sonifiers = vec![Box::new(sonifier)];
                 }
                 5 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.05..0.101,
+                        bwr_high: 1.2..0.8,
+                        lpf_low: 200.0..100.0,
+                        lpf_high: 500.0..1000.0,
+                    });
                     *chord_change_interval = None;
                     let mut qc = QuantisedCategories::new(k, sample_rate);
                     qc.patch_to_fx_chain(2);
                     *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new(k))];
                 }
                 10 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.05..0.101,
+                        bwr_high: 0.8..0.9,
+                        lpf_low: 20.0..20.0,
+                        lpf_high: 1000.0..7000.0,
+                    });
                     *chord_change_interval = Some(Duration::from_secs(12));
                     let mut pb = PeakBinaries::new(k);
                     pb.threshold = 5.0;
@@ -458,15 +539,27 @@ impl App {
                         .for_each(|s| s.patch_to_fx_chain(1));
                 }
                 110 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.15..0.101,
+                        bwr_high: 0.8..0.9,
+                        lpf_low: 20.0..20.0,
+                        lpf_high: 1000.0..7000.0,
+                    });
                     *chord_change_interval = None;
                     let mut pt = ProgramThemes::new(0.3, k);
                     pt.patch_to_fx_chain(1);
                     let mut dc = DirectCategories::new(0.05, k, sample_rate);
                     dc.patch_to_fx_chain(2);
-                    dc.set_lpf(4000.);
+                    dc.set_lpf(3000.);
                     *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
                 }
                 11 => {
+                    background_ramp = Some(BackgroundRamp {
+                        bwr_low: 0.35..0.701,
+                        bwr_high: 1.8..1.9,
+                        lpf_low: 20.0..20.0,
+                        lpf_high: 1000.0..7000.0,
+                    });
                     *chord_change_interval = None;
                     let mut pb = PeakBinaries::new(k);
                     pb.threshold = 1.0;
@@ -497,12 +590,14 @@ impl App {
                 sonifier.change_harmony(current_chord, root);
                 *last_chord_change = Instant::now();
             }
+            if let Some(background_ramp) = background_ramp {
+                background_ramp.send_osc(duration, osc_sender);
+            }
         } else {
             println!("Break");
             if let Some(next_mvt_id) = next_mvt_id {
                 println!("Sending break voice for id {next_mvt_id}");
                 let addr = "/break_voice";
-                // TODO: This should be the id of the next movement instead
                 let args = vec![Type::Int(next_mvt_id as i32)];
                 osc_sender.send((addr, args)).ok();
             }
@@ -524,4 +619,28 @@ pub trait Sonifier {
 
 pub fn to_freq53(degree: i32, root: f32) -> f32 {
     2.0_f32.powf(degree as f32 / 53.) * root
+}
+
+struct BackgroundRamp {
+    bwr_low: Range<f32>,
+    bwr_high: Range<f32>,
+    lpf_low: Range<f32>,
+    lpf_high: Range<f32>,
+}
+impl BackgroundRamp {
+    pub fn send_osc(&self, fade_duration: f32, osc_sender: &mut Sender<Connected>) {
+        let addr = "/background_ramp";
+        let args = vec![
+            Type::Float(fade_duration),
+            Type::Float(self.bwr_low.start),
+            Type::Float(self.bwr_low.end),
+            Type::Float(self.bwr_high.start),
+            Type::Float(self.bwr_high.end),
+            Type::Float(self.lpf_low.start),
+            Type::Float(self.lpf_low.end),
+            Type::Float(self.lpf_high.start),
+            Type::Float(self.lpf_high.end),
+        ];
+        osc_sender.send((addr, args)).ok();
+    }
 }
