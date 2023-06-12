@@ -19,7 +19,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "direct,categories".to_string(),
-                duration: Duration::from_secs(4 * 60),
+                duration: Duration::from_secs(2 * 60),
             },
             Movement {
                 id: 1,
@@ -33,7 +33,7 @@ impl Score {
                 is_break: false,
                 is_interlude: true,
                 description: "direct,categories,interlude".to_string(),
-                duration: Duration::from_secs(2 * 60),
+                duration: Duration::from_secs(1 * 60),
             },
             Movement {
                 id: 205,
@@ -61,7 +61,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "direct,function calls".to_string(),
-                duration: Duration::from_secs(3 * 60),
+                duration: Duration::from_secs(2 * 60),
             },
             Movement {
                 id: 3,
@@ -76,7 +76,7 @@ impl Score {
                 is_interlude: true,
                 description: "interlude,direct,function calls,lower and lower sensitivity"
                     .to_string(),
-                duration: Duration::from_secs(2 * 60),
+                duration: Duration::from_secs(1 * 60),
             },
             Movement {
                 id: 201,
@@ -90,7 +90,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "direct,function calls,focus shifting,chorus".to_string(),
-                duration: Duration::from_secs(4 * 60),
+                duration: Duration::from_secs(2 * 60),
             },
             Movement {
                 id: 7,
@@ -163,7 +163,31 @@ impl Score {
                 is_interlude: false,
                 description: "themes,many programs open (open and close), quickly rising harmony"
                     .to_string(),
-                duration: Duration::from_secs(5 * 60),
+                duration: Duration::from_secs(1 * 60),
+            },
+            Movement {
+                id: 111,
+                is_break: false,
+                is_interlude: false,
+                description: "themes,many programs open (open and close), quickly rising harmony"
+                    .to_string(),
+                duration: Duration::from_secs(10),
+            },
+            Movement {
+                id: 112,
+                is_break: false,
+                is_interlude: false,
+                description: "themes,many programs open (open and close), quickly rising harmony"
+                    .to_string(),
+                duration: Duration::from_secs(3 * 60),
+            },
+            Movement {
+                id: 113,
+                is_break: false,
+                is_interlude: false,
+                description: "themes,many programs open (open and close), quickly rising harmony"
+                    .to_string(),
+                duration: Duration::from_secs(15),
             },
             Movement {
                 id: 110,
