@@ -457,6 +457,7 @@ impl SyscallWaveguide {
                 self.k.connect(out.to_node(&self.output));
             }
             let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
+            continuous_wg.set_amp_ramp_time(0.001, &mut changes);
             continuous_wg.change(
                 NoteOpt {
                     freq: Some(self.freq),
