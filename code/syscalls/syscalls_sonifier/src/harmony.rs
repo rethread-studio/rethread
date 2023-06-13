@@ -17,10 +17,17 @@ impl HarmonicChange {
         self.new_chord = Some(chord);
         self
     }
-    pub fn apply(&self, current_chord: &mut Vec<i32>, current_root: &mut i32) {
+    pub fn apply(
+        &self,
+        current_chord: &mut Vec<i32>,
+        current_root: &mut i32,
+        transposition_within_octave_guard: bool,
+    ) {
         if let Some(transposition) = self.transposition {
             *current_root += transposition;
-            *current_root = (*current_root + 53) % 53;
+            if transposition_within_octave_guard {
+                *current_root = (*current_root + 53) % 53;
+            }
         }
         if let Some(new_chord) = &self.new_chord {
             *current_chord = new_chord.clone();

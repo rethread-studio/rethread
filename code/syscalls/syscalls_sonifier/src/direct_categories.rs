@@ -98,7 +98,9 @@ impl DirectCategories {
                 .input("in"),
                 inputs![],
             );
+            let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
             let mut continuous_wg = ContinuousWaveguide::new(k);
+            continuous_wg.set_amp_ramp_time(0.1, &mut changes);
             k.connect(
                 exciter_sig
                     .to(continuous_wg.exciter_bus_input())
@@ -112,7 +114,6 @@ impl DirectCategories {
             for out in continuous_wg.outputs() {
                 k.connect(out.to_node(&lpf));
             }
-            let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
             // let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
             let scale = [0, 17, 31, 48, 53, 53 + 26, 53 + 31];
             let wrap_interval = 53;

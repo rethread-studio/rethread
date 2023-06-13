@@ -135,11 +135,12 @@ fn main() -> Result<()> {
         k,
         current_harmonic_change,
         is_on_break: false,
+        transposition_within_octave_guard: true,
     };
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(10, None, false, 30.);
+    app.change_movement(0, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
@@ -243,6 +244,7 @@ struct App {
     current_harmonic_change: usize,
     sample_rate: f32,
     is_on_break: bool,
+    transposition_within_octave_guard: bool,
     k: KnystCommands,
 }
 impl App {
@@ -267,10 +269,15 @@ impl App {
             k,
             current_harmonic_change,
             is_on_break,
+            transposition_within_octave_guard,
         } = self;
         let change_harmony = if let Some(time_interval) = &chord_change_interval {
             if last_chord_change.elapsed() > *time_interval && !*is_on_break {
-                harmonic_changes[*current_harmonic_change].apply(current_chord, root);
+                harmonic_changes[*current_harmonic_change].apply(
+                    current_chord,
+                    root,
+                    *transposition_within_octave_guard,
+                );
                 let addr = "/change_harmony";
                 let root = to_freq53(*root + current_chord[0], *root_freq);
                 let mut args = vec![Type::Float(root)];
@@ -302,6 +309,7 @@ impl App {
         for sonifier in &mut self.current_sonifiers {
             sonifier.free();
         }
+        self.chord_change_interval = None;
         self.k.free_disconnected_nodes();
         self.current_sonifiers.clear();
     }
@@ -328,6 +336,7 @@ impl App {
             current_chord,
             current_harmonic_change,
             is_on_break,
+            transposition_within_octave_guard,
         } = self;
 
         *mvt_id = new_mvt_id;
@@ -340,6 +349,7 @@ impl App {
         k.free_disconnected_nodes();
         current_sonifiers.clear();
         *is_on_break = is_break;
+        *transposition_within_octave_guard = true;
         let mut background_ramp = None;
         if !is_break {
             // let tags = description.split(",");
@@ -382,7 +392,7 @@ impl App {
                     *chord_change_interval = None;
 
                     let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 1.0;
+                    pb.threshold = 2.0;
                     let mut pn = PeakBinaries::new(k);
                     pn.threshold = 5.0;
                     pn.sound_kind = SoundKind::FilteredNoise(8);
@@ -533,7 +543,39 @@ impl App {
                     let mut pb = PeakBinaries::new(k);
                     pb.threshold = 5.0;
                     pb.sound_kind = SoundKind::FilteredNoise(3);
-                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.3, k)), Box::new(pb)];
+                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                    current_sonifiers
+                        .iter_mut()
+                        .for_each(|s| s.patch_to_fx_chain(1));
+                }
+                111 => {
+                    background_ramp = None;
+                    *chord_change_interval = Some(Duration::from_secs(12));
+                    let mut pb = PeakBinaries::new(k);
+                    pb.threshold = 3.0;
+                    // pb.sound_kind = SoundKind::FilteredNoise(3);
+                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                    current_sonifiers
+                        .iter_mut()
+                        .for_each(|s| s.patch_to_fx_chain(1));
+                }
+                112 => {
+                    background_ramp = None;
+                    *chord_change_interval = Some(Duration::from_secs(12));
+                    let mut pb = PeakBinaries::new(k);
+                    pb.threshold = 5.0;
+                    pb.sound_kind = SoundKind::FilteredNoise(3);
+                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                    current_sonifiers
+                        .iter_mut()
+                        .for_each(|s| s.patch_to_fx_chain(1));
+                }
+                113 => {
+                    background_ramp = None;
+                    *chord_change_interval = Some(Duration::from_secs(6));
+                    let mut pb = PeakBinaries::new(k);
+                    pb.threshold = 3.0;
+                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
                     current_sonifiers
                         .iter_mut()
                         .for_each(|s| s.patch_to_fx_chain(1));
@@ -546,7 +588,7 @@ impl App {
                         lpf_high: 1000.0..7000.0,
                     });
                     *chord_change_interval = None;
-                    let mut pt = ProgramThemes::new(0.3, k);
+                    let mut pt = ProgramThemes::new(0.1, k);
                     pt.patch_to_fx_chain(1);
                     let mut dc = DirectCategories::new(0.05, k, sample_rate);
                     dc.patch_to_fx_chain(2);
@@ -562,13 +604,14 @@ impl App {
                     });
                     *chord_change_interval = None;
                     let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 1.0;
+                    pb.threshold = 2.0;
                     *current_sonifiers = vec![Box::new(pb)];
                 }
                 42 => {
                     *chord_change_interval = Some(Duration::from_secs_f32(0.5));
                     *harmonic_changes = vec![HarmonicChange::new().transpose(-1)];
                     *current_harmonic_change = 0;
+                    *transposition_within_octave_guard = false;
 
                     let addr = "/end_movement";
                     let args = vec![];

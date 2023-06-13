@@ -4,15 +4,25 @@
 	Buffer.freeAll;
 	// ~ttsBuffer = Buffer.read(s, "/home/erik/Musik/syscalls_spoken/2.wav", 0, -1);
 
-	{var paths = PathName("/home/erik/Musik/syscalls_spoken");
+	{var paths = PathName("/home/erik/Musik/syscalls_spoken/focus");
 		var winenv = Env([0, 1, 0], [0.5, 0.5], [8, -8]);
-		~voices = Dictionary.new;
+		~voices_focus = Dictionary.new;
 		paths.files.do{|path| path.fileName.postln;
-			~voices.add(path.fileName.asSymbol ->
+			~voices_focus.add(path.fileName.asSymbol ->
 				Buffer.read(s, path.fullPath));
 		};
 		~winBuffer = Buffer.sendCollection(s, winenv.discretize, 1);
 	}.();
+		{var paths = PathName("/home/erik/Musik/syscalls_spoken/movements");
+		var winenv = Env([0, 1, 0], [0.5, 0.5], [8, -8]);
+		~voices_movements = Dictionary.new;
+		paths.files.do{|path| path.fileName.postln;
+			~voices_movements.add(path.fileName.asSymbol ->
+				Buffer.read(s, path.fullPath));
+		};
+		~winBuffer = Buffer.sendCollection(s, winenv.discretize, 1);
+	}.();
+
 
 	{ // Load binaries as sound files
 		var path = PathName("/home/erik/Musik/syscalls_binaries");
@@ -45,10 +55,34 @@
 			sig = (sig * 0.5) + (FreeVerb.ar(sig, 0.2) * 0.5);
 			sig = (sig*0.5) + (sig * (Demand.kr(Dust.kr(LFNoise1.kr(1/2).range(5, 20)) + Impulse.kr(0), 0, Dseq([1, 0], inf))) * 0.5);
 			sig = sig * LFNoise2.kr(1).range(0.1, 1.0) * XLine.kr(0.5, 1.0, 1);
-			sig = Pan2.ar(sig * 4);
+			sig = Pan2.ar(sig * 2);
 
 			SendTrig.kr(pos > 0.99, 1);
 			Out.ar(0, sig);
+		}).add;
+		SynthDef(\grain_voice_mvt,
+			{ | bufnum, envbuf | var sig, pan = 0, pos, cutfreq = [350, 1000, 100];
+				/*sig = PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum));
+				sig = PitchShift.ar(sig, 0.2, 1.5);*/
+				pos = Line.kr(0, 1, BufSamples.kr(bufnum)/BufSampleRate.kr(bufnum) * 1.1, doneAction: 2);
+				sig = GrainBuf.ar(1, Impulse.kr(LFNoise1.kr(2).range(30, 60)), LFNoise1.kr(3).range(0.15, 0.4), bufnum,
+					rate: LFNoise1.kr(20).range(0.8, 1.1) * 0.8,
+					pos: pos,
+					interp: 2, pan: pan, envbufnum: envbuf);
+				//sig = PlayBuf.ar(1, bufnum, BufRateScale.ir(bufnum));
+				sig = LPF.ar(sig, 4000);
+				sig = HPF.ar(sig, 100);
+				sig = BPeakEQ.ar(sig, 1500, 0.2, 10);
+				cutfreq.do{|cut|
+					sig = BPeakEQ.ar(sig, cut, 0.8, -10);
+				};
+				sig = (sig * 0.5) + (FreeVerb.ar(sig, 0.2) * 0.5);
+				sig = (sig*0.5) + (sig * (Demand.kr(Dust.kr(LFNoise1.kr(1/2).range(5, 20)) + Impulse.kr(0), 0, Dseq([1, 0], inf))) * 0.5);
+				// sig = sig * LFNoise2.kr(1).range(0.1, 1.0);
+				sig = Pan2.ar(sig * 1);
+
+				SendTrig.kr(pos > 0.99, 1);
+				Out.ar(0, sig);
 		}).add;
 		SynthDef(\binary_playbuf, {
 			var sig, env, buf = \buf.ir(0), length = \length.ir(0.1), out = \out.kr(0), front_back_mix = Line.ar(0.0, 1.0, length), start_frame = Rand(0, BufFrames.ir(buf) - (length * SampleRate.ir));
@@ -64,7 +98,7 @@
 
 	OSCdef(\voice_break, { arg msg, time, addr, recvPort;
 		var file = (msg[1].asString ++ ".wav").asSymbol;
-		file = ~voices[file];
+		file = ~voices_movements[file];
 		{
 			Ndef(\rumbling_bass).release(25);
 			26.wait;
@@ -72,31 +106,8 @@
 		}.fork;
 		msg.postln;
 		{
-			var winenv = Env([0, 1, 0], [0.5, 0.5], [8, -8]);
-			z = Buffer.sendCollection(s, winenv.discretize, 1);
-			s.sync;
 			(30-(file.duration*1.1 + 0.5)).wait; // TODO: Time it so that the voice finishes just before the break is over
-			{ var sig, bufnum = file, envbuf = z, pan = 0, pos, cutfreq = [350, 1000, 100];
-				/*sig = PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum));
-				sig = PitchShift.ar(sig, 0.2, 1.5);*/
-				pos = Line.kr(0, 1, BufSamples.kr(bufnum)/BufSampleRate.kr(bufnum) * 1.1, doneAction: 2);
-				sig = GrainBuf.ar(1, Impulse.kr(LFNoise1.kr(2).range(30, 60)), LFNoise1.kr(3).range(0.15, 0.4), bufnum, LFNoise1.kr(20).range(0.95, 1.1) * 0.8,
-					pos, 2, pan, envbuf);
-				//sig = PlayBuf.ar(1, bufnum, BufRateScale.ir(bufnum));
-				sig = LPF.ar(sig, 4000);
-				sig = HPF.ar(sig, 100);
-				sig = BPeakEQ.ar(sig, 1500, 0.2, 10);
-				cutfreq.do{|cut|
-					sig = BPeakEQ.ar(sig, cut, 0.8, -10);
-				};
-				sig = (sig * 0.5) + (FreeVerb.ar(sig, 0.2) * 0.5);
-				sig = (sig*0.5) + (sig * (Demand.kr(Dust.kr(LFNoise1.kr(1/2).range(5, 20)) + Impulse.kr(0), 0, Dseq([1, 0], inf))) * 0.5);
-				// sig = sig * LFNoise2.kr(1).range(0.1, 1.0);
-				sig = Pan2.ar(sig * 3);
-
-				SendTrig.kr(pos > 0.99, 1);
-				Out.ar(0, sig);
-			}.play;
+			Synth(\grain_voice_mvt, [\bufnum, file, \envbuf, ~winBuffer]);
 		}.fork;
 	}, '/break_voice', nil);
 
@@ -107,8 +118,12 @@
 	Ndef(\bwr_low, {0.01});
 	Ndef(\bwr_high, {1.5});
 	Ndef(\bwr_high).fadeTime = 2;
+	Ndef(\bwr_low).fadeTime = 2;
 	Ndef(\lpf_low, {50});
 	Ndef(\lpf_high, {10000});
+	Ndef(\rumbling_noise_source, {
+		BrownNoise.ar()!4 * 10
+	});
 	~start_rumbling_bass = {
 		Ndef(\rumbling_bass, {
 			var sig, pitch_mix = LFNoise1.kr(0.1).range(0, 1).pow(2.0),
@@ -122,8 +137,10 @@
 			;
 			// pitch_mix = 0.0;
 			// bwramp1.poll;
-			sig = BrownNoise.ar()!4;
+			// sig = Ndef.ar(\rumbling_noise_source, 4);
 			// sig = PinkNoise.ar()!4;
+			sig = BrownNoise.ar()!4;
+
 			// sig = LPF.ar(sig, LFNoise2.kr(0.5).range(100, 2000) * LFNoise1.kr(2).range(0.8, 1.0));
 			sig = Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 8, 12, 16],bwr1) * bwramp1;
 			sig = Mix(sig);
@@ -184,8 +201,8 @@
 
 
 	OSCdef(\voiceFocusEnabled, { arg msg, time, addr, recvPort;
-		var  focus = ~voices['Focus.wav'], file = (msg[1].asString ++ ".wav").asSymbol;
-		file = ~voices[file];
+		var  focus = ~voices_focus['Focus.wav'], file = (msg[1].asString ++ ".wav").asSymbol;
+		file = ~voices_focus[file];
 		/*	("Found buffer: " ++ file).postln;
 		focus.postln;
 		msg.postln;*/
@@ -283,17 +300,14 @@
 
 	}, '/peak_binary', nil);
 
-}.fork;
-)
 
 
-(
-~end_movement = { var movement_duration = 40;
+~end_movement = { var movement_duration = 40, movement_duration_remaining = movement_duration;
 	{
 		~play_changed_harmony = false;
 		// Replace the rumbling Ndef by something slowly descending
 		Ndef(\root2, {Line.kr(25, 25*0.5, movement_duration*0.5)});
-		Ndef(\rumbling_bass).fadeTime = 20;
+		Ndef(\rumbling_bass).fadeTime = movement_duration*0.5;
 		0.1.wait;
 		Ndef(\rumbling_bass, {
 			var sig, pitch_mix = Line.kr(0.0, 1.0, movement_duration*0.3), bwr = XLine.kr(1.0, 0.001, movement_duration * 0.7);
@@ -302,7 +316,7 @@
 			sig = Resonz.ar(sig, Ndef(\root2).kr*[4, 8, 12, 16], {LFNoise1.kr(0.05).range(0.001, 1.0).clip(0.001, 1.0).pow(3)}!4);
 			sig = Mix(sig);
 			sig = sig * 0.5 + (AnalogVintageDistortion.ar(sig*LFNoise1.kr(0.1).range(0.01, 0.1), LFNoise1.kr(0.03).range(0.0, 2.5), LFNoise1.kr(0.2).range(0.0, 0.5)) * LFNoise1.kr(0.1).range(0.0, 0.5).pow(1.5));
-			sig = LPF.ar(sig, XLine.kr(10000, 100, movement_duration) * LFNoise1.kr(2).range(0.7, 1.0) * LFNoise1.kr(5).range(0.9, 1.0));
+			sig = LPF.ar(sig, XLine.kr(10000, 10, movement_duration) * LFNoise1.kr(2).range(0.7, 1.0) * LFNoise1.kr(5).range(0.9, 1.0));
 			sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) *200 + 10) * LFNoise1.kr(2).range(0.8, 1.0));
 			sig = Limiter.ar(sig, 0.9);
 			// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
@@ -313,7 +327,13 @@
 			// sig = Pan2.ar(sig*0.5);
 			(sig!2).flatten
 		}).play;
-		movement_duration.wait;
+
+		~voices_movements.do{ |mvt| var gap = rrand(0.1, 0.3);
+			Synth(\grain_voice_mvt, [\bufnum, mvt, \envbuf, ~winBuffer]);
+			movement_duration_remaining = movement_duration_remaining - gap;
+			gap.wait;
+		};
+		movement_duration_remaining.wait;
 		Ndef(\rumbling_bass).release(10);
 	}.fork;
 };
@@ -324,6 +344,7 @@ OSCdef(\end_movement, { arg msg, time, addr, recvPort;
 
 }, '/end_movement', nil);
 
+	}.fork;
 )
 
 
