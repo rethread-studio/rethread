@@ -19,7 +19,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "direct,categories".to_string(),
-                duration: Duration::from_secs(2 * 60),
+                duration: Duration::from_secs(3 * 30),
             },
             Movement {
                 id: 1,
@@ -47,7 +47,7 @@ impl Score {
                 is_break: false,
                 is_interlude: true,
                 description: "peak_binaries".to_string(),
-                duration: Duration::from_secs(2 * 60),
+                duration: Duration::from_secs(1 * 60),
             },
             Movement {
                 id: 201,
@@ -118,7 +118,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "quantised,categories,clear".to_string(),
-                duration: Duration::from_secs(3 * 60),
+                duration: Duration::from_secs(2 * 60),
             },
             Movement {
                 id: 8,
@@ -132,7 +132,7 @@ impl Score {
                 is_break: false,
                 is_interlude: true,
                 description: "interlude,quantised,categories,clear".to_string(),
-                duration: Duration::from_secs(2 * 60),
+                duration: Duration::from_secs(3 * 30),
             },
             Movement {
                 id: 108,
