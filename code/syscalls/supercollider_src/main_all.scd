@@ -13,7 +13,7 @@
 		};
 		~winBuffer = Buffer.sendCollection(s, winenv.discretize, 1);
 	}.();
-		{var paths = PathName("/home/erik/Musik/syscalls_spoken/movements");
+	{var paths = PathName("/home/erik/Musik/syscalls_spoken/movements");
 		var winenv = Env([0, 1, 0], [0.5, 0.5], [8, -8]);
 		~voices_movements = Dictionary.new;
 		paths.files.do{|path| path.fileName.postln;
@@ -66,9 +66,10 @@
 				sig = PitchShift.ar(sig, 0.2, 1.5);*/
 				pos = Line.kr(0, 1, BufSamples.kr(bufnum)/BufSampleRate.kr(bufnum) * 1.1, doneAction: 2);
 				sig = GrainBuf.ar(1, Impulse.kr(LFNoise1.kr(2).range(30, 60)), LFNoise1.kr(3).range(0.15, 0.4), bufnum,
-					rate: LFNoise1.kr(20).range(0.8, 1.1) * 0.8,
+					rate: LFNoise1.kr(3).range(0.9, 1.1) * 0.8 * [1.0, 0.875, 0.75],
 					pos: pos,
 					interp: 2, pan: pan, envbufnum: envbuf);
+				sig = Mix(sig * [1.0, 0.5, 0.25]);
 				//sig = PlayBuf.ar(1, bufnum, BufRateScale.ir(bufnum));
 				sig = LPF.ar(sig, 4000);
 				sig = HPF.ar(sig, 100);
@@ -80,6 +81,34 @@
 				sig = (sig*0.5) + (sig * (Demand.kr(Dust.kr(LFNoise1.kr(1/2).range(5, 20)) + Impulse.kr(0), 0, Dseq([1, 0], inf))) * 0.5);
 				// sig = sig * LFNoise2.kr(1).range(0.1, 1.0);
 				sig = Pan2.ar(sig * 1);
+				sig = (sig!2).flatten;
+
+				SendTrig.kr(pos > 0.99, 1);
+				Out.ar(0, sig);
+		}).add;
+		SynthDef(\grain_voice_mvt_end,
+			{ | bufnum, envbuf | var sig, pan = 0, pos, cutfreq = [350, 1000, 100];
+				/*sig = PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum));
+				sig = PitchShift.ar(sig, 0.2, 1.5);*/
+				pos = EnvGen.kr(Env([0, 1], BufDur.ir(bufnum) * 5.0, [-6]), doneAction: 2);
+				// pos = Line.kr(0, 1, BufSamples.kr(bufnum)/BufSampleRate.kr(bufnum) * Line.kr(1.1, 5.0, 30.0), doneAction: 2);
+				sig = GrainBuf.ar(1, Impulse.kr(LFNoise1.kr(2).range(30, 60)), LFNoise1.kr(3).range(0.15, 0.4), bufnum,
+					rate: LFNoise1.kr(3).range(0.9, 1.1) * 0.8 * [1.0, 0.875, 0.75] * XLine.kr(1.0, 0.4, 30.0),
+					pos: pos,
+					interp: 2, pan: pan, envbufnum: envbuf);
+				sig = Mix(sig * [1.0, 0.5, 0.25]);
+				//sig = PlayBuf.ar(1, bufnum, BufRateScale.ir(bufnum));
+				sig = LPF.ar(sig, 4000);
+				sig = HPF.ar(sig, 100);
+				sig = BPeakEQ.ar(sig, 1500, 0.2, 10);
+				cutfreq.do{|cut|
+					sig = BPeakEQ.ar(sig, cut, 0.8, -10);
+				};
+				sig = (sig * 0.5) + (FreeVerb.ar(sig, 0.2) * 0.5);
+				sig = (sig*0.5) + (sig * (Demand.kr(Dust.kr(LFNoise1.kr(1/2).range(5, 20)) + Impulse.kr(0), 0, Dseq([1, 0], inf))) * 0.5);
+				// sig = sig * LFNoise2.kr(1).range(0.1, 1.0);
+				sig = Pan2.ar(sig * 1);
+				sig = (sig!2).flatten;
 
 				SendTrig.kr(pos > 0.99, 1);
 				Out.ar(0, sig);
@@ -166,35 +195,35 @@
 	};
 	~start_rumbling_bass.();
 
-	OSCdef(\background_ramp, { arg msg, time, addr, recvPort;
-		var
-		fade_duration = msg[1].asFloat,
-		bwr_low_start = msg[2].asFloat,
-		bwr_low_end = msg[3].asFloat,
-		bwr_high_start = msg[4].asFloat,
-		bwr_high_end = msg[5].asFloat,
-		lpf_low_start = msg[6].asFloat,
-		lpf_low_end = msg[7].asFloat,
-		lpf_high_start = msg[8].asFloat,
-		lpf_high_end = msg[9].asFloat;
-		msg.postln;
-		Ndef(\bwr_low).fadeTime = 0.01;
-		Ndef(\bwr_high).fadeTime = 0.01;
-		Ndef(\lpf_low).fadeTime = 0.01;
-		Ndef(\lpf_high).fadeTime = 0.01;
-		Ndef(\bwr_low, {bwr_low_start});
-		Ndef(\bwr_high, {bwr_high_start});
-		Ndef(\lpf_low, {lpf_low_start});
-		Ndef(\lpf_high, {lpf_high_start});
-		Ndef(\bwr_low).fadeTime = fade_duration;
-		Ndef(\bwr_high).fadeTime = fade_duration;
-		Ndef(\lpf_low).fadeTime = fade_duration;
-		Ndef(\lpf_high).fadeTime = fade_duration;
-		Ndef(\bwr_low, {bwr_low_end});
-		Ndef(\bwr_high, {bwr_high_end});
-		Ndef(\lpf_low, {lpf_low_end});
-		Ndef(\lpf_high, {lpf_high_end});
-	}, '/background_ramp', nil);
+	// OSCdef(\background_ramp, { arg msg, time, addr, recvPort;
+	// 	var
+	// 	fade_duration = msg[1].asFloat,
+	// 	bwr_low_start = msg[2].asFloat,
+	// 	bwr_low_end = msg[3].asFloat,
+	// 	bwr_high_start = msg[4].asFloat,
+	// 	bwr_high_end = msg[5].asFloat,
+	// 	lpf_low_start = msg[6].asFloat,
+	// 	lpf_low_end = msg[7].asFloat,
+	// 	lpf_high_start = msg[8].asFloat,
+	// 	lpf_high_end = msg[9].asFloat;
+	// 	msg.postln;
+	// 	Ndef(\bwr_low).fadeTime = 0.01;
+	// 	Ndef(\bwr_high).fadeTime = 0.01;
+	// 	Ndef(\lpf_low).fadeTime = 0.01;
+	// 	Ndef(\lpf_high).fadeTime = 0.01;
+	// 	Ndef(\bwr_low, {bwr_low_start});
+	// 	Ndef(\bwr_high, {bwr_high_start});
+	// 	Ndef(\lpf_low, {lpf_low_start});
+	// 	Ndef(\lpf_high, {lpf_high_start});
+	// 	Ndef(\bwr_low).fadeTime = fade_duration;
+	// 	Ndef(\bwr_high).fadeTime = fade_duration;
+	// 	Ndef(\lpf_low).fadeTime = fade_duration;
+	// 	Ndef(\lpf_high).fadeTime = fade_duration;
+	// 	Ndef(\bwr_low, {bwr_low_end});
+	// 	Ndef(\bwr_high, {bwr_high_end});
+	// 	Ndef(\lpf_low, {lpf_low_end});
+	// 	Ndef(\lpf_high, {lpf_high_end});
+	// }, '/background_ramp', nil);
 
 
 	// Ndef(\rumbling_bass).release(0.1)
@@ -215,7 +244,7 @@
 
 
 	OSCdef(\voiceFocusDisabled, { arg msg, time, addr, recvPort;
-		var file = ~voices['FocusDisabled.wav'];
+		var file = ~voices_focus['FocusDisabled.wav'];
 		// msg.postln;
 		Synth(\grain_voice, [\bufnum, file, \envbuf, ~winBuffer]);
 
@@ -259,7 +288,7 @@
 			});
 		});
 
-		Ndef(\root, {root});
+		Ndef(\root, {~s53.degreeToFreq(chord[0], root, 0)});
 
 	}, '/change_harmony', nil);
 
@@ -269,7 +298,7 @@
 		root = msg[2].asFloat, comparisonPitch = root.log2.frac, chosenComparison = 1, chosenFreq;
 		// file = ~binaries["thunderbird_8bit.wav".asSymbol];
 		msg.postln;
-
+		2
 		[1, 3/2, 5/4].do{|interval|
 			var comp = abs((root*interval).log2.frac-1000.log2.frac);
 			if(comp < chosenComparison) {
@@ -284,8 +313,8 @@
 			var sig, env, front_back_mix = Rand(0, 1.0);
 			sig = Resonz.ar(PinkNoise.ar*5, chosenFreq, LFNoise1.kr(0.25).range(0.0001, 0.01));
 			sig = LPF.ar(sig, LFNoise1.kr(0.5).range(900, 10000));
-			env = EnvGen.kr(Env([0, 1, 0.5, 0], [Rand(0.7, 1.9), length*0.34, length *0.66], [\lin, \lin, -6]), doneAction: 2) * Rand(0.1, 1.0);
-			sig = Pan2.ar(sig)*env * 0.1;
+			env = EnvGen.kr(Env([0, 1, 0.5, 0], [Rand(0.7, 1.9), length*0.34, length *0.66], [\lin, \lin, -6]), doneAction: 2) * Rand(0.2, 1.0).pow(2);
+			sig = Pan2.ar(sig * 0.1*env);
 			Out.ar(8, sig * front_back_mix);
 			Out.ar(10, sig * (1.0-front_back_mix));
 		}.play;
@@ -302,49 +331,49 @@
 
 
 
-~end_movement = { var movement_duration = 40, movement_duration_remaining = movement_duration;
-	{
-		~play_changed_harmony = false;
-		// Replace the rumbling Ndef by something slowly descending
-		Ndef(\root2, {Line.kr(25, 25*0.5, movement_duration*0.5)});
-		Ndef(\rumbling_bass).fadeTime = movement_duration*0.5;
-		0.1.wait;
-		Ndef(\rumbling_bass, {
-			var sig, pitch_mix = Line.kr(0.0, 1.0, movement_duration*0.3), bwr = XLine.kr(1.0, 0.001, movement_duration * 0.7);
-			sig = BrownNoise.ar()!4;
-			// sig = LPF.ar(sig, LFNoise2.kr(0.5).range(100, 2000) * LFNoise1.kr(2).range(0.8, 1.0));
-			sig = Resonz.ar(sig, Ndef(\root2).kr*[4, 8, 12, 16], {LFNoise1.kr(0.05).range(0.001, 1.0).clip(0.001, 1.0).pow(3)}!4);
-			sig = Mix(sig);
-			sig = sig * 0.5 + (AnalogVintageDistortion.ar(sig*LFNoise1.kr(0.1).range(0.01, 0.1), LFNoise1.kr(0.03).range(0.0, 2.5), LFNoise1.kr(0.2).range(0.0, 0.5)) * LFNoise1.kr(0.1).range(0.0, 0.5).pow(1.5));
-			sig = LPF.ar(sig, XLine.kr(10000, 10, movement_duration) * LFNoise1.kr(2).range(0.7, 1.0) * LFNoise1.kr(5).range(0.9, 1.0));
-			sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) *200 + 10) * LFNoise1.kr(2).range(0.8, 1.0));
-			sig = Limiter.ar(sig, 0.9);
-			// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
-			sig = (sig * (1.0-pitch_mix)) + (Splay.ar(Resonz.ar(sig, Ndef(\root2).kr*[4, 6, 8, 12, 16], bwr)) * pitch_mix * 0.2);
-			sig = Limiter.ar(sig, 0.9);
+	~end_movement = { var movement_duration = 40, movement_duration_remaining = movement_duration;
+		{
+			~play_changed_harmony = false;
+			// Replace the rumbling Ndef by something slowly descending
+			Ndef(\root2, {Line.kr(25, 25*0.5, movement_duration*0.5)});
+			Ndef(\rumbling_bass).fadeTime = movement_duration*0.5;
+			0.1.wait;
+			Ndef(\rumbling_bass, {
+				var sig, pitch_mix = Line.kr(0.0, 1.0, movement_duration*0.3), bwr = XLine.kr(1.0, 0.001, movement_duration * 0.7);
+				sig = BrownNoise.ar()!4;
+				// sig = LPF.ar(sig, LFNoise2.kr(0.5).range(100, 2000) * LFNoise1.kr(2).range(0.8, 1.0));
+				sig = Resonz.ar(sig, Ndef(\root2).kr*[4, 8, 12, 16], {LFNoise1.kr(0.05).range(0.001, 1.0).clip(0.001, 1.0).pow(3)}!4);
+				sig = Mix(sig);
+				sig = sig * 0.5 + (AnalogVintageDistortion.ar(sig*LFNoise1.kr(0.1).range(0.01, 0.1), LFNoise1.kr(0.03).range(0.0, 2.5), LFNoise1.kr(0.2).range(0.0, 0.5)) * LFNoise1.kr(0.1).range(0.0, 0.5).pow(1.5));
+				sig = LPF.ar(sig, XLine.kr(10000, 10, movement_duration) * LFNoise1.kr(2).range(0.7, 1.0) * LFNoise1.kr(5).range(0.9, 1.0));
+				sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) *200 + 10) * LFNoise1.kr(2).range(0.8, 1.0));
+				sig = Limiter.ar(sig, 0.9);
+				// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
+				sig = (sig * (1.0-pitch_mix)) + (Splay.ar(Resonz.ar(sig, Ndef(\root2).kr*[4, 6, 8, 12, 16], bwr)) * pitch_mix * 0.2);
+				sig = Limiter.ar(sig, 0.9);
 
-			sig = sig * 0.1;
-			// sig = Pan2.ar(sig*0.5);
-			(sig!2).flatten
-		}).play;
+				sig = sig * 0.1;.
+				// sig = Pan2.ar(sig*0.5);
+				(sig!2).flatten
+			}).play;
 
-		~voices_movements.do{ |mvt| var gap = rrand(0.1, 0.3);
-			Synth(\grain_voice_mvt, [\bufnum, mvt, \envbuf, ~winBuffer]);
-			movement_duration_remaining = movement_duration_remaining - gap;
-			gap.wait;
-		};
-		movement_duration_remaining.wait;
-		Ndef(\rumbling_bass).release(10);
-	}.fork;
-};
-OSCdef(\end_movement, { arg msg, time, addr, recvPort;
+			~voices_movements.do{ |mvt| var gap = rrand(0.2, 0.5);
+				Synth(\grain_voice_mvt_end, [\bufnum, mvt, \envbuf, ~winBuffer]);
+				movement_duration_remaining = movement_duration_remaining - gap;
+				gap.wait;
+			};
+			movement_duration_remaining.wait;
+			Ndef(\rumbling_bass).release(10);
+		}.fork;
+	};
+	OSCdef(\end_movement, { arg msg, time, addr, recvPort;
 
-	msg.postln;
-	~end_movement.();
+		msg.postln;
+		~end_movement.();
 
-}, '/end_movement', nil);
+	}, '/end_movement', nil);
 
-	}.fork;
+}.fork;
 )
 
 
@@ -384,3 +413,6 @@ Ndef(\resonantsnare, { |pan=0|
 	Pan2.ar(sig, pan);
 }).play;
 )
+
+b = NetAddr.new("127.0.0.1", 57120);    // create the NetAddr
+b.sendMsg("/break_voice", 4);    // send the application the message "hello" with the parameter "there"

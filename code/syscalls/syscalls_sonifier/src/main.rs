@@ -161,6 +161,7 @@ fn main() -> Result<()> {
                     } else {
                         Some(next_mvt_id)
                     };
+                    println!("New movement, {new_mvt_id}, break: {is_break:?}");
                     app.change_movement(new_mvt_id, next_mvt_id, is_break, duration);
                 }
             } else if m.addr == "/score/play" {
@@ -279,7 +280,7 @@ impl App {
                     *transposition_within_octave_guard,
                 );
                 let addr = "/change_harmony";
-                let root = to_freq53(*root + current_chord[0], *root_freq);
+                let root = to_freq53(*root, *root_freq);
                 let mut args = vec![Type::Float(root)];
                 args.push(Type::Int(current_chord.len() as i32));
                 for degree in &*current_chord {
@@ -590,7 +591,7 @@ impl App {
                     *chord_change_interval = None;
                     let mut pt = ProgramThemes::new(0.1, k);
                     pt.patch_to_fx_chain(1);
-                    let mut dc = DirectCategories::new(0.05, k, sample_rate);
+                    let mut dc = DirectCategories::new(0.08, k, sample_rate);
                     dc.patch_to_fx_chain(2);
                     dc.set_lpf(3000.);
                     *current_sonifiers = vec![Box::new(pt), Box::new(dc)];

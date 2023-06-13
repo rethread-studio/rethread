@@ -346,7 +346,7 @@ impl SyscallKindQuantisedWaveguide {
     fn register_call(&mut self, id: i32, args: [i32; 3]) {
         // self.accumulator += id as f32 * self.coeff;
         self.accumulator += self.coeff;
-        self.amp += 0.0000001 * self.coeff;
+        self.amp += 0.0000002 * self.coeff;
         self.amp *= 1.0 + self.coeff;
         self.position += id as f32 * 0.001;
         self.damping = (self.damping + 0.00001).clamp(0.0, 1.0);
@@ -371,7 +371,7 @@ impl SyscallKindQuantisedWaveguide {
         //     1.01 - (1.0 - (self.amp * 3.2).clamp(0.0, 1.0).powf(1. / 4.)).clamp(0.0, 0.5);
         // let feedback = 0.9999 - (1.0 - (self.amp * 2.5).clamp(0.0, 1.0)).clamp(0.0, 0.9);
         let feedback = 0.9999;
-        self.amp *= 0.999 - (self.amp * 0.1);
+        self.amp *= 0.999 - (self.amp * 0.15);
         if self.amp < 0.1 && self.last_coeff_change.elapsed() > Duration::from_secs_f32(0.2) {
             self.coeff *= 1.01;
             self.last_coeff_change = Instant::now();
