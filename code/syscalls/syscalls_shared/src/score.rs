@@ -45,7 +45,7 @@ impl Score {
             Movement {
                 id: 40,
                 is_break: false,
-                is_interlude: true,
+                is_interlude: false,
                 description: "peak_binaries".to_string(),
                 duration: Duration::from_secs(1 * 60),
             },
@@ -179,7 +179,7 @@ impl Score {
                 is_interlude: false,
                 description: "themes,many programs open (open and close), quickly rising harmony"
                     .to_string(),
-                duration: Duration::from_secs(3 * 60),
+                duration: Duration::from_secs(2 * 60),
             },
             Movement {
                 id: 113,
