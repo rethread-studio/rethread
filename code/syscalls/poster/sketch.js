@@ -1,6 +1,7 @@
 let myFont, qrImg;
 
 let y, h;
+let addInfo = true;
 
 function preload() {
   myFont = loadFont("Epilogue-SemiBold.ttf");
@@ -13,6 +14,9 @@ function setup() {
   let params = getURLParams();
   if (params.pixeldensity != undefined) {
     pixelDensity(parseInt(params.pixeldensity));
+  }
+  if (params.addinfo != undefined && params.addinfo == "no") {
+    addInfo = false;
   }
 
   h = height/42;
@@ -46,25 +50,27 @@ function draw() {
   if (y > height) {
     noLoop();
 
-    fill(255);
-    noStroke();
-    rect(0, 20*h, width, h);
-    fill(0);
-    rect(0, 21*h, width, h);
+    if (addInfo) {
+      fill(255);
+      noStroke();
+      rect(0, 20*h, width, h);
+      fill(0);
+      rect(0, 21*h, width, h);
+      
+      textFont(myFont, h*2/3);
+      textAlign(CENTER, CENTER);
+      fill(0);
+      text("sys|calls, by Jaime Reyes & re|thread", width/2, height/2-h/2-h/20);
+      fill(255);
+      text("June 15, 17 & 18, Turbine Hall, KTH", width/2, height/2+h/2-h/20);
     
-    textFont(myFont, h*2/3);
-    textAlign(CENTER, CENTER);
-    fill(0);
-    text("sys|calls, by Jaime Reyes & re|thread", width/2, height/2-h/2-h/20);
-    fill(255);
-    text("June 15, 17 & 18, Turbine Hall, KTH", width/2, height/2+h/2-h/20);
-  
-    let qrSize = 4*h;
-    fill(0);
-    rect(width-qrSize, height-qrSize-h, qrSize, h);
-    fill(255);
-    textSize(h/2);
-    text("Info & sign up", width-qrSize/2, height-qrSize-h/2-h/20);
-    image(qrImg, width-qrSize, height-qrSize, qrSize, qrSize);
+      let qrSize = 4*h;
+      fill(0);
+      rect(width-qrSize, height-qrSize-h, qrSize, h);
+      fill(255);
+      textSize(h/2);
+      text("Info & sign up", width-qrSize/2, height-qrSize-h/2-h/20);
+      image(qrImg, width-qrSize, height-qrSize, qrSize, qrSize);
+    }
   }
 }
