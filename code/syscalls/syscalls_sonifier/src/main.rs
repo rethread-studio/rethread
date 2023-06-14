@@ -100,7 +100,7 @@ fn main() -> Result<()> {
     let mut osc_messages = Vec::with_capacity(40);
     let mut last_switch = Instant::now();
     let mut last_chord_change = Instant::now();
-    let mut mvt_id = 0;
+    let mut mvt_id = 99998;
     let mut root_freq = 25.;
     let mut root: i32 = 0;
     let chord_maj7sharp11 = vec![0, 17, 31, 48, 53, 53 + 26, 53 + 31];
@@ -143,7 +143,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(2, None, false, 30.);
+    app.change_movement(122, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
@@ -343,358 +343,378 @@ impl App {
             transposition_within_octave_guard,
         } = self;
 
-        *mvt_id = new_mvt_id;
+        if new_mvt_id != *mvt_id {
+            let sample_rate = *sample_rate;
 
-        let sample_rate = *sample_rate;
+            for sonifier in &mut *current_sonifiers {
+                sonifier.free();
+            }
+            k.free_disconnected_nodes();
+            current_sonifiers.clear();
+            *is_on_break = is_break;
+            *transposition_within_octave_guard = true;
+            let mut background_ramp = None;
+            let mut rumble_change = None;
+            if !is_break {
+                // let tags = description.split(",");
+                // println!("tags: {:?}", tags.clone().collect::<Vec<_>>());
+                match new_mvt_id {
+                    0 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.01..0.1,
+                            bwr_high: 0.5..1.5,
+                            lpf_low: 50.0..200.0,
+                            lpf_high: 2000.0..10000.0,
+                        });
+                        *chord_change_interval = None;
+                        *current_sonifiers =
+                            vec![Box::new(DirectCategories::new(0.5, k, sample_rate))];
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(1);
+                        }
+                        rumble_change = Some(RUMBLE_STOP);
+                    }
+                    100 => {
+                        // interlude
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.01..0.04,
+                            bwr_high: 0.5..0.5,
+                            lpf_low: 200.0..200.0,
+                            lpf_high: 10000.0..2000.0,
+                        });
+                        *chord_change_interval = None;
+                        *current_sonifiers =
+                            vec![Box::new(DirectCategories::new(0.5, k, sample_rate))];
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(1);
+                        }
+                        rumble_change = Some(RUMBLE_RESTART);
+                    }
+                    40 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.04..0.04,
+                            bwr_high: 0.8..0.8,
+                            lpf_low: 100.0..100.0,
+                            lpf_high: 20000.0..200.0,
+                        });
+                        *chord_change_interval = None;
 
-        for sonifier in &mut *current_sonifiers {
-            sonifier.free();
-        }
-        k.free_disconnected_nodes();
-        current_sonifiers.clear();
-        *is_on_break = is_break;
-        *transposition_within_octave_guard = true;
-        let mut background_ramp = None;
-        let mut rumble_change = None;
-        if !is_break {
-            // let tags = description.split(",");
-            // println!("tags: {:?}", tags.clone().collect::<Vec<_>>());
-            match new_mvt_id {
-                0 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.01..0.1,
-                        bwr_high: 0.5..1.5,
-                        lpf_low: 50.0..200.0,
-                        lpf_high: 2000.0..10000.0,
-                    });
-                    *chord_change_interval = None;
-                    *current_sonifiers = vec![Box::new(DirectCategories::new(0.5, k, sample_rate))];
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(1);
+                        let mut pb = PeakBinaries::new(k);
+                        pb.threshold = 2.0;
+                        let mut pn = PeakBinaries::new(k);
+                        pn.threshold = 5.0;
+                        pn.sound_kind = SoundKind::FilteredNoise(8);
+                        *current_sonifiers = vec![Box::new(pb), Box::new(pn)];
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(1);
+                        }
                     }
-                    rumble_change = Some(RUMBLE_STOP);
-                }
-                100 => {
-                    // interlude
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.01..0.04,
-                        bwr_high: 0.5..0.5,
-                        lpf_low: 200.0..200.0,
-                        lpf_high: 10000.0..2000.0,
-                    });
-                    *chord_change_interval = None;
-                    *current_sonifiers = vec![Box::new(DirectCategories::new(0.5, k, sample_rate))];
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(1);
+                    2 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.004..0.008,
+                            bwr_high: 0.5..0.8,
+                            lpf_low: 200.0..200.0,
+                            lpf_high: 2000.0..1000.0,
+                        });
+                        *chord_change_interval = None;
+                        *current_sonifiers = vec![Box::new(DirectFunctions::new(
+                            1.0,
+                            k,
+                            sample_rate,
+                            &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                            vec![],
+                        ))];
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(1);
+                        }
+                        rumble_change = Some(RUMBLE_RESTART);
                     }
-                    rumble_change = Some(RUMBLE_RESTART);
-                }
-                40 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.04..0.04,
-                        bwr_high: 0.8..0.8,
-                        lpf_low: 100.0..100.0,
-                        lpf_high: 20000.0..200.0,
-                    });
-                    *chord_change_interval = None;
+                    102 => {
+                        // interlude
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.14..0.02,
+                            bwr_high: 0.9..0.7,
+                            lpf_low: 200.0..200.0,
+                            lpf_high: 2000.0..5000.0,
+                        });
+                        *chord_change_interval = None;
+                        let mut sonifier = DirectFunctions::new(
+                            1.0,
+                            k,
+                            sample_rate,
+                            &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                            vec![],
+                        );
+                        sonifier.decrease_sensitivity = true;
+                        let mut pn = PeakBinaries::new(k);
+                        pn.threshold = 2.0;
+                        pn.sound_kind = SoundKind::FilteredNoise(5);
+                        *current_sonifiers = vec![Box::new(sonifier), Box::new(pn)];
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(1);
+                        }
+                        rumble_change = Some(RUMBLE_STOP);
+                    }
+                    4 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.014..0.012,
+                            bwr_high: 0.9..1.5,
+                            lpf_low: 200.0..2000.0,
+                            lpf_high: 2000.0..12000.0,
+                        });
+                        *current_sonifiers =
+                            vec![Box::new(QuantisedCategories::new(k, sample_rate))];
+                        // TODO: Less loud quantised categories
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(1);
+                        }
+                        rumble_change = Some(RUMBLE_RESTART);
+                    }
+                    104 => {
+                        // Interlude
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.04..0.001,
+                            bwr_high: 0.9..0.8,
+                            lpf_low: 200.0..20.0,
+                            lpf_high: 12000.0..12000.0,
+                        });
+                        *current_sonifiers =
+                            vec![Box::new(QuantisedCategories::new(k, sample_rate))];
 
-                    let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 2.0;
-                    let mut pn = PeakBinaries::new(k);
-                    pn.threshold = 5.0;
-                    pn.sound_kind = SoundKind::FilteredNoise(8);
-                    *current_sonifiers = vec![Box::new(pb), Box::new(pn)];
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(1);
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(1);
+                        }
                     }
-                }
-                2 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.004..0.008,
-                        bwr_high: 0.5..0.8,
-                        lpf_low: 200.0..200.0,
-                        lpf_high: 2000.0..1000.0,
-                    });
-                    *chord_change_interval = None;
-                    *current_sonifiers = vec![Box::new(DirectFunctions::new(
-                        1.0,
-                        k,
-                        sample_rate,
-                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
-                        vec![],
-                    ))];
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(1);
+                    6 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.14..0.101,
+                            bwr_high: 1.0..1.8,
+                            lpf_low: 200.0..20.0,
+                            lpf_high: 12000.0..5000.0,
+                        });
+                        *chord_change_interval = Some(Duration::from_secs(8));
+                        let mut df = DirectFunctions::new(
+                            1.0,
+                            k,
+                            sample_rate,
+                            &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                            vec![
+                                SyscallKind::Io,
+                                SyscallKind::Memory,
+                                SyscallKind::WaitForReady,
+                            ],
+                        );
+                        df.decrease_sensitivity = true;
+                        *current_sonifiers = vec![Box::new(df)];
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(3);
+                        }
                     }
-                    rumble_change = Some(RUMBLE_RESTART);
-                }
-                102 => {
-                    // interlude
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.14..0.02,
-                        bwr_high: 0.9..0.7,
-                        lpf_low: 200.0..200.0,
-                        lpf_high: 2000.0..5000.0,
-                    });
-                    *chord_change_interval = None;
-                    let mut sonifier = DirectFunctions::new(
-                        1.0,
-                        k,
-                        sample_rate,
-                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
-                        vec![],
-                    );
-                    sonifier.decrease_sensitivity = true;
-                    let mut pn = PeakBinaries::new(k);
-                    pn.threshold = 2.0;
-                    pn.sound_kind = SoundKind::FilteredNoise(5);
-                    *current_sonifiers = vec![Box::new(sonifier), Box::new(pn)];
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(1);
+                    106 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.34..0.101,
+                            bwr_high: 1.2..1.0,
+                            lpf_low: 200.0..200.0,
+                            lpf_high: 500.0..5000.0,
+                        });
+                        *chord_change_interval = Some(Duration::from_secs(8));
+                        let mut sonifier = DirectFunctions::new(
+                            1.0,
+                            k,
+                            sample_rate,
+                            &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                            vec![
+                                SyscallKind::Io,
+                                SyscallKind::Memory,
+                                SyscallKind::WaitForReady,
+                            ],
+                        );
+                        sonifier.decrease_sensitivity = true;
+                        sonifier.patch_to_fx_chain(3);
+                        sonifier.next_focus_time_range = 5.0..15.0;
+                        *current_sonifiers = vec![Box::new(sonifier)];
                     }
-                    rumble_change = Some(RUMBLE_STOP);
-                }
-                4 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.014..0.012,
-                        bwr_high: 0.9..1.5,
-                        lpf_low: 200.0..2000.0,
-                        lpf_high: 2000.0..12000.0,
-                    });
-                    *current_sonifiers = vec![Box::new(QuantisedCategories::new(k, sample_rate))];
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(1);
+                    5 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.05..0.101,
+                            bwr_high: 1.2..0.8,
+                            lpf_low: 200.0..100.0,
+                            lpf_high: 500.0..1000.0,
+                        });
+                        *chord_change_interval = None;
+                        let mut qc = QuantisedCategories::new(k, sample_rate);
+                        qc.patch_to_fx_chain(2);
+                        *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new(k))];
+                        rumble_change = Some(RUMBLE_STOP);
                     }
-                    rumble_change = Some(RUMBLE_RESTART);
-                }
-                104 => {
-                    // Interlude
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.04..0.001,
-                        bwr_high: 0.9..0.8,
-                        lpf_low: 200.0..20.0,
-                        lpf_high: 12000.0..12000.0,
-                    });
-                    *current_sonifiers = vec![Box::new(QuantisedCategories::new(k, sample_rate))];
+                    10 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.05..0.101,
+                            bwr_high: 0.8..0.9,
+                            lpf_low: 20.0..20.0,
+                            lpf_high: 1000.0..7000.0,
+                        });
+                        *chord_change_interval = Some(Duration::from_secs(12));
+                        let mut pb = PeakBinaries::new(k);
+                        pb.threshold = 5.0;
+                        pb.sound_kind = SoundKind::FilteredNoise(3);
+                        *current_sonifiers =
+                            vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                        current_sonifiers
+                            .iter_mut()
+                            .for_each(|s| s.patch_to_fx_chain(1));
+                        rumble_change = Some(RUMBLE_RESTART);
+                    }
+                    111 => {
+                        background_ramp = None;
+                        *chord_change_interval = Some(Duration::from_secs(12));
+                        let mut pb = PeakBinaries::new(k);
+                        pb.threshold = 3.0;
+                        // pb.sound_kind = SoundKind::FilteredNoise(3);
+                        *current_sonifiers =
+                            vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                        current_sonifiers
+                            .iter_mut()
+                            .for_each(|s| s.patch_to_fx_chain(1));
+                    }
+                    112 => {
+                        background_ramp = None;
+                        *chord_change_interval = Some(Duration::from_secs(12));
+                        let mut pb = PeakBinaries::new(k);
+                        pb.threshold = 5.0;
+                        pb.sound_kind = SoundKind::FilteredNoise(3);
+                        *current_sonifiers =
+                            vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                        current_sonifiers
+                            .iter_mut()
+                            .for_each(|s| s.patch_to_fx_chain(1));
+                    }
+                    113 => {
+                        background_ramp = None;
+                        *chord_change_interval = Some(Duration::from_secs(6));
+                        let mut pb = PeakBinaries::new(k);
+                        pb.threshold = 3.0;
+                        *current_sonifiers =
+                            vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                        current_sonifiers
+                            .iter_mut()
+                            .for_each(|s| s.patch_to_fx_chain(1));
+                    }
+                    110 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.15..0.101,
+                            bwr_high: 0.8..0.9,
+                            lpf_low: 20.0..20.0,
+                            lpf_high: 1000.0..7000.0,
+                        });
+                        *chord_change_interval = None;
+                        let mut pt = ProgramThemes::new(0.1, k);
+                        pt.patch_to_fx_chain(1);
+                        let mut dc = DirectCategories::new(0.08, k, sample_rate);
+                        dc.patch_to_fx_chain(2);
+                        dc.set_lpf(3000.);
+                        *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
+                    }
+                    122 => {
+                        // interlude
+                        *chord_change_interval = None;
+                        let mut sonifier = DirectFunctions::new(
+                            1.0,
+                            k,
+                            sample_rate,
+                            &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                            vec![],
+                        );
+                        sonifier.decrease_sensitivity = false;
+                        let mut pn = PeakBinaries::new(k);
+                        pn.threshold = 2.0;
+                        pn.sound_kind = SoundKind::FilteredNoise(5);
+                        *current_sonifiers = vec![Box::new(sonifier), Box::new(pn)];
+                        for s in current_sonifiers.iter_mut() {
+                            s.patch_to_fx_chain(1);
+                        }
+                    }
+                    11 => {
+                        background_ramp = Some(BackgroundRamp {
+                            bwr_low: 0.35..0.701,
+                            bwr_high: 1.8..1.9,
+                            lpf_low: 20.0..20.0,
+                            lpf_high: 1000.0..7000.0,
+                        });
+                        *chord_change_interval = None;
+                        let mut sonifier = DirectFunctions::new(
+                            0.3,
+                            k,
+                            sample_rate,
+                            &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                            vec![],
+                        );
+                        sonifier.decrease_sensitivity = false;
+                        sonifier.patch_to_fx_chain(2);
+                        let mut pb = PeakBinaries::new(k);
+                        pb.threshold = 2.0;
+                        *current_sonifiers = vec![Box::new(pb), Box::new(sonifier)];
+                        rumble_change = Some(RUMBLE_STOP);
+                    }
+                    42 => {
+                        *chord_change_interval = Some(Duration::from_secs_f32(0.42));
+                        *harmonic_changes = vec![HarmonicChange::new().transpose(-1)];
+                        *current_harmonic_change = 0;
+                        *transposition_within_octave_guard = false;
 
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(1);
-                    }
-                }
-                6 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.14..0.101,
-                        bwr_high: 1.0..1.8,
-                        lpf_low: 200.0..20.0,
-                        lpf_high: 12000.0..5000.0,
-                    });
-                    *chord_change_interval = Some(Duration::from_secs(8));
-                    let mut df = DirectFunctions::new(
-                        1.0,
-                        k,
-                        sample_rate,
-                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
-                        vec![
-                            SyscallKind::Io,
-                            SyscallKind::Memory,
-                            SyscallKind::WaitForReady,
-                        ],
-                    );
-                    df.decrease_sensitivity = true;
-                    *current_sonifiers = vec![Box::new(df)];
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(3);
-                    }
-                }
-                106 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.34..0.101,
-                        bwr_high: 1.2..1.0,
-                        lpf_low: 200.0..200.0,
-                        lpf_high: 500.0..5000.0,
-                    });
-                    *chord_change_interval = Some(Duration::from_secs(8));
-                    let mut sonifier = DirectFunctions::new(
-                        1.0,
-                        k,
-                        sample_rate,
-                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
-                        vec![
-                            SyscallKind::Io,
-                            SyscallKind::Memory,
-                            SyscallKind::WaitForReady,
-                        ],
-                    );
-                    sonifier.decrease_sensitivity = true;
-                    sonifier.patch_to_fx_chain(3);
-                    sonifier.next_focus_time_range = 5.0..15.0;
-                    *current_sonifiers = vec![Box::new(sonifier)];
-                }
-                5 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.05..0.101,
-                        bwr_high: 1.2..0.8,
-                        lpf_low: 200.0..100.0,
-                        lpf_high: 500.0..1000.0,
-                    });
-                    *chord_change_interval = None;
-                    let mut qc = QuantisedCategories::new(k, sample_rate);
-                    qc.patch_to_fx_chain(2);
-                    *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new(k))];
-                    rumble_change = Some(RUMBLE_STOP);
-                }
-                10 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.05..0.101,
-                        bwr_high: 0.8..0.9,
-                        lpf_low: 20.0..20.0,
-                        lpf_high: 1000.0..7000.0,
-                    });
-                    *chord_change_interval = Some(Duration::from_secs(12));
-                    let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 5.0;
-                    pb.sound_kind = SoundKind::FilteredNoise(3);
-                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
-                    current_sonifiers
-                        .iter_mut()
-                        .for_each(|s| s.patch_to_fx_chain(1));
-                    rumble_change = Some(RUMBLE_RESTART);
-                }
-                111 => {
-                    background_ramp = None;
-                    *chord_change_interval = Some(Duration::from_secs(12));
-                    let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 3.0;
-                    // pb.sound_kind = SoundKind::FilteredNoise(3);
-                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
-                    current_sonifiers
-                        .iter_mut()
-                        .for_each(|s| s.patch_to_fx_chain(1));
-                }
-                112 => {
-                    background_ramp = None;
-                    *chord_change_interval = Some(Duration::from_secs(12));
-                    let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 5.0;
-                    pb.sound_kind = SoundKind::FilteredNoise(3);
-                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
-                    current_sonifiers
-                        .iter_mut()
-                        .for_each(|s| s.patch_to_fx_chain(1));
-                }
-                113 => {
-                    background_ramp = None;
-                    *chord_change_interval = Some(Duration::from_secs(6));
-                    let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 3.0;
-                    *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
-                    current_sonifiers
-                        .iter_mut()
-                        .for_each(|s| s.patch_to_fx_chain(1));
-                }
-                110 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.15..0.101,
-                        bwr_high: 0.8..0.9,
-                        lpf_low: 20.0..20.0,
-                        lpf_high: 1000.0..7000.0,
-                    });
-                    *chord_change_interval = None;
-                    let mut pt = ProgramThemes::new(0.1, k);
-                    pt.patch_to_fx_chain(1);
-                    let mut dc = DirectCategories::new(0.08, k, sample_rate);
-                    dc.patch_to_fx_chain(2);
-                    dc.set_lpf(3000.);
-                    *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
-                }
-                122 => {
-                    // interlude
-                    *chord_change_interval = None;
-                    let mut sonifier = DirectFunctions::new(
-                        1.0,
-                        k,
-                        sample_rate,
-                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
-                        vec![],
-                    );
-                    sonifier.decrease_sensitivity = false;
-                    let mut pn = PeakBinaries::new(k);
-                    pn.threshold = 2.0;
-                    pn.sound_kind = SoundKind::FilteredNoise(5);
-                    *current_sonifiers = vec![Box::new(sonifier), Box::new(pn)];
-                    for s in current_sonifiers.iter_mut() {
-                        s.patch_to_fx_chain(1);
-                    }
-                }
-                11 => {
-                    background_ramp = Some(BackgroundRamp {
-                        bwr_low: 0.35..0.701,
-                        bwr_high: 1.8..1.9,
-                        lpf_low: 20.0..20.0,
-                        lpf_high: 1000.0..7000.0,
-                    });
-                    *chord_change_interval = None;
-                    let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 2.0;
-                    *current_sonifiers = vec![Box::new(pb)];
-                    rumble_change = Some(RUMBLE_STOP);
-                }
-                42 => {
-                    *chord_change_interval = Some(Duration::from_secs_f32(0.3));
-                    *harmonic_changes = vec![HarmonicChange::new().transpose(-1)];
-                    *current_harmonic_change = 0;
-                    *transposition_within_octave_guard = false;
+                        let addr = "/end_movement";
+                        let args = vec![];
+                        osc_sender.send((addr, args)).ok();
+                        // let mut pb = PeakBinaries::new(k);
+                        // pb.threshold = 1.0;
+                        // *current_sonifiers = vec![Box::new(pb)];
+                        //
+                        let mut pb = PeakBinaries::new(k);
+                        pb.threshold = 2.0;
+                        let mut pt = ProgramThemes::new(0.1, k);
+                        pt.patch_to_fx_chain(1);
 
-                    let addr = "/end_movement";
-                    let args = vec![];
+                        let mut pbf = PeakBinaries::new(k);
+                        pbf.threshold = 5.0;
+                        pbf.sound_kind = SoundKind::FilteredNoise(3);
+                        let mut dc = DirectCategories::new(0.08, k, sample_rate);
+                        dc.patch_to_fx_chain(2);
+                        dc.set_lpf(3000.);
+                        *current_sonifiers =
+                            vec![Box::new(pt), Box::new(dc), Box::new(pbf), Box::new(pb)];
+                    }
+                    _ => {
+                        eprintln!("!! Unhandled movement:");
+                        dbg!(&mvt_id);
+                    }
+                };
+                if current_sonifiers.len() > 0 {
+                    *root = 0; // Reset root every movement
+                }
+                for sonifier in current_sonifiers {
+                    let root = to_freq53(*root, *root_freq);
+                    sonifier.change_harmony(current_chord, root);
+                    *last_chord_change = Instant::now();
+                }
+                if let Some(background_ramp) = background_ramp {
+                    background_ramp.send_osc(duration, osc_sender);
+                }
+                if let Some(rumble_change) = rumble_change {
+                    let addr = "/rumble_change";
+                    let args = vec![Type::Int(rumble_change as i32)];
                     osc_sender.send((addr, args)).ok();
-                    // let mut pb = PeakBinaries::new(k);
-                    // pb.threshold = 1.0;
-                    // *current_sonifiers = vec![Box::new(pb)];
-                    //
-                    let mut pb = PeakBinaries::new(k);
-                    pb.threshold = 2.0;
-                    let mut pt = ProgramThemes::new(0.1, k);
-                    pt.patch_to_fx_chain(1);
+                }
+            } else {
+                println!("Break");
+                if let Some(next_mvt_id) = next_mvt_id {
+                    println!("Sending break voice for id {next_mvt_id}");
+                    let addr = "/break_voice";
+                    let args = vec![Type::Int(next_mvt_id as i32)];
+                    osc_sender.send((addr, args)).ok();
+                }
+            }
 
-                    let mut pbf = PeakBinaries::new(k);
-                    pbf.threshold = 5.0;
-                    pbf.sound_kind = SoundKind::FilteredNoise(3);
-                    let mut dc = DirectCategories::new(0.08, k, sample_rate);
-                    dc.patch_to_fx_chain(2);
-                    dc.set_lpf(3000.);
-                    *current_sonifiers =
-                        vec![Box::new(pt), Box::new(dc), Box::new(pbf), Box::new(pb)];
-                }
-                _ => {
-                    eprintln!("!! Unhandled movement:");
-                    dbg!(&mvt_id);
-                }
-            };
-            if current_sonifiers.len() > 0 {
-                *root = 0; // Reset root every movement
-            }
-            for sonifier in current_sonifiers {
-                let root = to_freq53(*root, *root_freq);
-                sonifier.change_harmony(current_chord, root);
-                *last_chord_change = Instant::now();
-            }
-            if let Some(background_ramp) = background_ramp {
-                background_ramp.send_osc(duration, osc_sender);
-            }
-            if let Some(rumble_change) = rumble_change {
-                let addr = "/rumble_change";
-                let args = vec![Type::Int(rumble_change as i32)];
-                osc_sender.send((addr, args)).ok();
-            }
-        } else {
-            println!("Break");
-            if let Some(next_mvt_id) = next_mvt_id {
-                println!("Sending break voice for id {next_mvt_id}");
-                let addr = "/break_voice";
-                let args = vec![Type::Int(next_mvt_id as i32)];
-                osc_sender.send((addr, args)).ok();
-            }
+            *mvt_id = new_mvt_id;
         }
     }
 }

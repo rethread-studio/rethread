@@ -439,10 +439,10 @@
 
 
 
-	~end_movement = { var movement_duration = 30, movement_duration_remaining = movement_duration;
+	~end_movement = { var movement_duration = 18, movement_duration_remaining = movement_duration;
 		{
 			~play_changed_harmony = false;
-			Synth(\prayer_bell, [\amp, 0.04]);
+			Synth(\prayer_bell, [\amp, 0.01, \freq, 5000]);
 			// Replace the rumbling Ndef by something slowly descending
 			Ndef(\root2, {Line.kr(25, 25*0.5, movement_duration*0.5)});
 			Ndef(\rumbling_bass).fadeTime = movement_duration*0.5;
@@ -474,12 +474,32 @@
 				gap.wait;
 			};
 			movement_duration_remaining.wait;
-			Ndef(\rumbling_bass).release(10);
-			10.wait;
-			Synth(\binary_playbuf, [\buf, ~binaries.values[0], \length, 0.2, \amp, 0.40, \out, 0]);
-			0.05.wait;
-			Synth(\binary_playbuf, [\buf, ~binaries.values[1], \length, 0.05, \amp, 0.40, \out, 0]);
+			Ndef(\rumbling_bass, {
+				var sig, pitch_mix = Line.kr(1.0, 0.0, 10.0), bwr = XLine.kr(0.01, 1.8, 9.0);
+				sig = Ndef.ar(\rumbling_noise_source, 4);
+				// sig = BrownNoise.ar()!4;
+				// sig = LPF.ar(sig, LFNoise2.kr(0.5).range(100, 22000) * LFNoise1.kr(2).range(0.8, 1.0));
+				sig = Resonz.ar(sig, Ndef(\root2).kr*[4, 8, 12, 16], bwr);
+				sig = Mix(sig);
+				sig = sig * 0.5 + (AnalogVintageDistortion.ar(sig*LFNoise1.kr(2).range(0.01, 0.1), LFNoise1.kr(0.03).range(0.0, 2.5), LFNoise1.kr(0.2).range(0.0, 0.5)) * LFNoise1.kr(0.1).range(0.0, 0.5).pow(1.5));
+				sig = LPF.ar(sig, XLine.kr(10, 15000, 10.0) * LFNoise1.kr(2).range(0.7, 1.0) * LFNoise1.kr(5).range(0.9, 1.0));
+				sig = HPF.ar(sig, XLine.kr(200, 10, 8.0));
+				sig = Limiter.ar(sig, 0.9);
+				// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
+				sig = (sig * (1.0-pitch_mix))!2 + (Splay.ar(Resonz.ar(sig, Ndef(\root2).kr*[4, 6, 8, 12, 16], bwr)) * pitch_mix * 0.2);
+				sig = Limiter.ar(sig, 0.9);
+
+				sig = sig * XLine.kr(0.1, 0.20, 12.0);
+				// sig = Pan2.ar(sig*0.5);
+				(sig!2).flatten
+			}).play;
+			12.wait;
+			Ndef(\rumbling_bass).release(0.05);
+/*			Synth(\binary_playbuf, [\buf, ~binaries.values[0], \length, 0.3, \amp, 0.20, \out, 0]);
+			0.07.wait;
+			Synth(\binary_playbuf, [\buf, ~binaries.values[1], \length, 0.05, \amp, 0.20, \out, 0]);*/
 			s.freeAll;
+			Synth(\prayer_bell, [\amp, 0.01, \freq, 5700]);
 		}.fork;
 	};
 	OSCdef(\end_movement, { arg msg, time, addr, recvPort;
@@ -556,4 +576,3 @@ Ndef(\rumbling_noise_source, {
 });
 )
 ~binaries.values
-
