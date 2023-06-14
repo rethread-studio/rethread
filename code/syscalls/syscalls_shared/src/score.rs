@@ -226,7 +226,7 @@ impl Score {
                 is_break: false,
                 description: "ending,steadily get lower into the sub frequencies and smoother,image goes to white"
                     .to_string(),
-                duration: Duration::from_secs(40),
+                duration: Duration::from_secs(30),
             },
             Movement {
                 id: 9999,
