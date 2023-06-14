@@ -33,7 +33,7 @@ impl Score {
                 is_break: false,
                 is_interlude: true,
                 description: "direct,categories,interlude".to_string(),
-                duration: Duration::from_secs(1 * 60),
+                duration: Duration::from_secs(40),
             },
             Movement {
                 id: 205,
