@@ -45,7 +45,7 @@ fn main() -> Result<()> {
         // In JACK we can decide ourselves how many outputs and inputs we want
         num_inputs: 1,
         num_outputs: 16,
-        ring_buffer_size: 10000,
+        ring_buffer_size: 40000,
         max_node_inputs: 10,
         num_nodes: 2000,
         ..Default::default()
@@ -143,7 +143,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(10, None, false, 30.);
+    app.change_movement(2, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
@@ -640,7 +640,7 @@ impl App {
                     rumble_change = Some(RUMBLE_STOP);
                 }
                 42 => {
-                    *chord_change_interval = Some(Duration::from_secs_f32(0.5));
+                    *chord_change_interval = Some(Duration::from_secs_f32(0.3));
                     *harmonic_changes = vec![HarmonicChange::new().transpose(-1)];
                     *current_harmonic_change = 0;
                     *transposition_within_octave_guard = false;
@@ -651,6 +651,20 @@ impl App {
                     // let mut pb = PeakBinaries::new(k);
                     // pb.threshold = 1.0;
                     // *current_sonifiers = vec![Box::new(pb)];
+                    //
+                    let mut pb = PeakBinaries::new(k);
+                    pb.threshold = 2.0;
+                    let mut pt = ProgramThemes::new(0.1, k);
+                    pt.patch_to_fx_chain(1);
+
+                    let mut pbf = PeakBinaries::new(k);
+                    pbf.threshold = 5.0;
+                    pbf.sound_kind = SoundKind::FilteredNoise(3);
+                    let mut dc = DirectCategories::new(0.08, k, sample_rate);
+                    dc.patch_to_fx_chain(2);
+                    dc.set_lpf(3000.);
+                    *current_sonifiers =
+                        vec![Box::new(pt), Box::new(dc), Box::new(pbf), Box::new(pb)];
                 }
                 _ => {
                     eprintln!("!! Unhandled movement:");

@@ -392,6 +392,7 @@ struct SyscallWaveguide {
     iterations_since_trigger: usize,
     average_iterations_since_trigger: f32,
     pub last_call: Instant,
+    pub last_ramp_change: Instant,
 }
 
 impl SyscallWaveguide {
@@ -413,6 +414,7 @@ impl SyscallWaveguide {
             k: k.clone(),
             output,
             category,
+            last_ramp_change: Instant::now(),
         };
         s.spawn();
         s
@@ -503,9 +505,12 @@ impl SyscallWaveguide {
     fn update(&mut self, changes: &mut SimultaneousChanges) {
         if let Some(i) = &mut self.interface {
             if !i.exciter_sender.is_full() {
-                // TODO: This shouldn't be necessary, but it is a workaround for a bug
-                let rng = fastrand::Rng::new();
-                i.wg.set_amp_ramp_time(rng.f32() * 0.001 + 0.001, changes);
+                if self.last_ramp_change.elapsed() > Duration::from_secs_f32(0.5) {
+                    // TODO: This shouldn't be necessary, but it is a workaround for a bug
+                    let rng = fastrand::Rng::new();
+                    i.wg.set_amp_ramp_time(rng.f32() * 0.001 + 0.001, changes);
+                    self.last_ramp_change = Instant::now();
+                }
                 // if self.accumulator > 500. {
                 //     self.coeff *= 0.9;
                 // }
