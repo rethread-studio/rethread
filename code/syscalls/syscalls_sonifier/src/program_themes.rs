@@ -116,6 +116,7 @@ impl ProgramThemes {
         let mut wg_thunderbird = PluckedWaveguide::new(&mut k, None, false);
         let mut wg_konqueror = PluckedWaveguide::new(&mut k, None, false);
         let mut wg_htop = PluckedWaveguide::new(&mut k, None, false);
+        let mut wg_gedit = PluckedWaveguide::new(&mut k, None, false);
 
         for out in wg_thunderbird.outputs() {
             k.connect(out.to_node(&lpf).channels(4));
@@ -124,6 +125,9 @@ impl ProgramThemes {
             k.connect(out.to_node(&lpf).channels(4));
         }
         for out in wg_htop.outputs() {
+            k.connect(out.to_node(&lpf).channels(4));
+        }
+        for out in wg_gedit.outputs() {
             k.connect(out.to_node(&lpf).channels(4));
         }
 
@@ -270,6 +274,50 @@ impl ProgramThemes {
                                             position: 0.25,
                                             feedback,
                                             exciter_lpf: 1500.,
+                                            ..Default::default()
+                                        }
+                                        .into(),
+                                        &mut changes,
+                                    );
+                                    k.schedule_changes(changes);
+                                }
+                                NoteEventKind::Rest => (),
+                            }
+                        }
+                        time += event.duration * Superbeats::from_beats(4);
+                    }
+                }
+                {
+                    let mut time = time;
+                    let theme = gedit_theme();
+                    let phrases = match current_chord {
+                        0 => &theme.chord0_phrases,
+                        1 => &theme.chord1_phrases,
+                        _ => &theme.chord0_phrases,
+                    };
+                    let phrase = &phrases[rng.usize(..phrases.len())];
+                    for event in phrase.events() {
+                        let a = activity.gedit.activity_value().powf(0.5);
+                        if rng.f32() < a {
+                            match event.kind {
+                                NoteEventKind::Note(n) => {
+                                    let mut changes = SimultaneousChanges::beats(time);
+                                    let freq = to_freq53(n.0 + 212 + 53, root_freq);
+                                    let amp = n.1 * (0.1 + a.powf(0.5) * 0.8);
+                                    let feedback =
+                                        if event.duration > Superbeats::from_beats_f32(1. / 32.) {
+                                            0.999999
+                                        } else {
+                                            0.98
+                                        };
+                                    wg_gedit.trig(
+                                        Note {
+                                            freq,
+                                            amp: amp * 0.5,
+                                            damping: freq * 10.0,
+                                            position: 0.5,
+                                            feedback,
+                                            exciter_lpf: 2500.,
                                             ..Default::default()
                                         }
                                         .into(),
@@ -604,6 +652,92 @@ fn htop_theme() -> Theme {
         p.push((1. / 32., (14, 0.25)));
         p.push((1. / 32., (22, 0.15)));
         p.push((3. / 32., (36, 0.55)));
+        chord1_phrases.push(p);
+    }
+
+    Theme {
+        chord0_phrases,
+        chord1_phrases,
+    }
+}
+fn gedit_theme() -> Theme {
+    let mut chord0_phrases = vec![];
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 16.);
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 16., (17, 0.25)));
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 16., (9, 0.25)));
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 8., (0, 0.5)));
+        chord0_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 16.);
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 16., (0, 0.45)));
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 16., (-53 + 48, 0.55)));
+        chord0_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 16.);
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 16., (17, 0.35)));
+        p.push((1. / 16., (26, 0.25)));
+        p.push((1. / 16., (0, 0.45)));
+        p.push((1. / 16., (26, 0.25)));
+        p.push((1. / 16., (-53 + 48, 0.5)));
+        p.push((1. / 16., (26, 0.25)));
+        chord0_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 16.);
+        p.push((1. / 16., (0, 0.25)));
+        p.push((1. / 16., (-53 + 48, 0.35)));
+        p.push((1. / 16., (0, 0.25)));
+        p.push((1. / 16., (-53 + 31, 0.45)));
+        p.push((1. / 16., (0, 0.25)));
+        p.push((1. / 16., (-53 + 17, 0.5)));
+        p.push((1. / 16., (0, 0.25)));
+        chord0_phrases.push(p);
+    }
+    let mut chord1_phrases = vec![];
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 16.);
+        p.push((1. / 16., (22, 0.25)));
+        p.push((1. / 16., (14, 0.45)));
+        p.push((1. / 16., (22, 0.25)));
+        p.push((1. / 16., (5, 0.55)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 16.);
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 16., (14, 0.35)));
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 16., (5, 0.45)));
+        p.push((1. / 16., (31, 0.25)));
+        p.push((1. / 16., (-53 + 49, 0.5)));
+        p.push((1. / 16., (31, 0.25)));
+        chord1_phrases.push(p);
+    }
+    {
+        let mut p = Phrase::new();
+        p.push(1. / 16.);
+        p.push((1. / 16., (5, 0.25)));
+        p.push((1. / 16., (-53 + 49, 0.35)));
+        p.push((1. / 16., (5, 0.25)));
+        p.push((1. / 16., (-53 + 36, 0.45)));
+        p.push((1. / 16., (5, 0.25)));
+        p.push((1. / 16., (-53 + 22, 0.5)));
+        p.push((1. / 16., (5, 0.25)));
         chord1_phrases.push(p);
     }
 

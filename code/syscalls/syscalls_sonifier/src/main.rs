@@ -29,6 +29,9 @@ mod peak_binaries;
 mod program_themes;
 mod quantised_categories;
 
+const RUMBLE_RESTART: i32 = 1;
+const RUMBLE_STOP: i32 = 2;
+
 fn main() -> Result<()> {
     let mut backend = audio_backend::JackBackend::new("knyst_waveguide_syscalls")?;
 
@@ -140,7 +143,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(0, None, false, 30.);
+    app.change_movement(10, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
@@ -352,6 +355,7 @@ impl App {
         *is_on_break = is_break;
         *transposition_within_octave_guard = true;
         let mut background_ramp = None;
+        let mut rumble_change = None;
         if !is_break {
             // let tags = description.split(",");
             // println!("tags: {:?}", tags.clone().collect::<Vec<_>>());
@@ -368,6 +372,7 @@ impl App {
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(1);
                     }
+                    rumble_change = Some(RUMBLE_STOP);
                 }
                 100 => {
                     // interlude
@@ -382,6 +387,7 @@ impl App {
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(1);
                     }
+                    rumble_change = Some(RUMBLE_RESTART);
                 }
                 40 => {
                     background_ramp = Some(BackgroundRamp {
@@ -420,6 +426,7 @@ impl App {
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(1);
                     }
+                    rumble_change = Some(RUMBLE_RESTART);
                 }
                 102 => {
                     // interlude
@@ -445,6 +452,7 @@ impl App {
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(1);
                     }
+                    rumble_change = Some(RUMBLE_STOP);
                 }
                 4 => {
                     background_ramp = Some(BackgroundRamp {
@@ -457,6 +465,7 @@ impl App {
                     for s in current_sonifiers.iter_mut() {
                         s.patch_to_fx_chain(1);
                     }
+                    rumble_change = Some(RUMBLE_RESTART);
                 }
                 104 => {
                     // Interlude
@@ -532,6 +541,7 @@ impl App {
                     let mut qc = QuantisedCategories::new(k, sample_rate);
                     qc.patch_to_fx_chain(2);
                     *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new(k))];
+                    rumble_change = Some(RUMBLE_STOP);
                 }
                 10 => {
                     background_ramp = Some(BackgroundRamp {
@@ -548,6 +558,7 @@ impl App {
                     current_sonifiers
                         .iter_mut()
                         .for_each(|s| s.patch_to_fx_chain(1));
+                    rumble_change = Some(RUMBLE_RESTART);
                 }
                 111 => {
                     background_ramp = None;
@@ -596,6 +607,25 @@ impl App {
                     dc.set_lpf(3000.);
                     *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
                 }
+                122 => {
+                    // interlude
+                    *chord_change_interval = None;
+                    let mut sonifier = DirectFunctions::new(
+                        1.0,
+                        k,
+                        sample_rate,
+                        &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
+                        vec![],
+                    );
+                    sonifier.decrease_sensitivity = false;
+                    let mut pn = PeakBinaries::new(k);
+                    pn.threshold = 2.0;
+                    pn.sound_kind = SoundKind::FilteredNoise(5);
+                    *current_sonifiers = vec![Box::new(sonifier), Box::new(pn)];
+                    for s in current_sonifiers.iter_mut() {
+                        s.patch_to_fx_chain(1);
+                    }
+                }
                 11 => {
                     background_ramp = Some(BackgroundRamp {
                         bwr_low: 0.35..0.701,
@@ -607,6 +637,7 @@ impl App {
                     let mut pb = PeakBinaries::new(k);
                     pb.threshold = 2.0;
                     *current_sonifiers = vec![Box::new(pb)];
+                    rumble_change = Some(RUMBLE_STOP);
                 }
                 42 => {
                     *chord_change_interval = Some(Duration::from_secs_f32(0.5));
@@ -636,6 +667,11 @@ impl App {
             }
             if let Some(background_ramp) = background_ramp {
                 background_ramp.send_osc(duration, osc_sender);
+            }
+            if let Some(rumble_change) = rumble_change {
+                let addr = "/rumble_change";
+                let args = vec![Type::Int(rumble_change as i32)];
+                osc_sender.send((addr, args)).ok();
             }
         } else {
             println!("Break");

@@ -1,5 +1,6 @@
 (
 {
+	Ndef.clear;
 	~s53 = Scale.chromatic(\et53);
 	Buffer.freeAll;
 	// ~ttsBuffer = Buffer.read(s, "/home/erik/Musik/syscalls_spoken/2.wav", 0, -1);
@@ -54,19 +55,19 @@
 			};
 			sig = (sig * 0.5) + (FreeVerb.ar(sig, 0.2) * 0.5);
 			sig = (sig*0.5) + (sig * (Demand.kr(Dust.kr(LFNoise1.kr(1/2).range(5, 20)) + Impulse.kr(0), 0, Dseq([1, 0], inf))) * 0.5);
-			sig = sig * LFNoise2.kr(1).range(0.1, 1.0) * XLine.kr(0.5, 1.0, 1);
+			sig = sig * LFNoise2.kr(1).range(0.1, 1.0);
 			sig = Pan2.ar(sig * 2);
 
 			SendTrig.kr(pos > 0.99, 1);
 			Out.ar(0, sig);
 		}).add;
 		SynthDef(\grain_voice_mvt,
-			{ | bufnum, envbuf | var sig, pan = 0, pos, cutfreq = [350, 1000, 100];
+			{ | bufnum, envbuf, rate_min = 0.9 | var sig, pan = 0, pos, cutfreq = [350, 1000, 100];
 				/*sig = PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum));
 				sig = PitchShift.ar(sig, 0.2, 1.5);*/
 				pos = Line.kr(0, 1, BufSamples.kr(bufnum)/BufSampleRate.kr(bufnum) * 1.1, doneAction: 2);
 				sig = GrainBuf.ar(1, Impulse.kr(LFNoise1.kr(2).range(30, 60)), LFNoise1.kr(3).range(0.15, 0.4), bufnum,
-					rate: LFNoise1.kr(3).range(0.9, 1.1) * 0.8 * [1.0, 0.875, 0.75],
+					rate: LFNoise1.kr(3).range(rate_min, 1.1) * 0.8 * [1.0, 0.875, 0.75],
 					pos: pos,
 					interp: 2, pan: pan, envbufnum: envbuf);
 				sig = Mix(sig * [1.0, 0.5, 0.25]);
@@ -107,7 +108,7 @@
 				sig = (sig * 0.5) + (FreeVerb.ar(sig, 0.2) * 0.5);
 				sig = (sig*0.5) + (sig * (Demand.kr(Dust.kr(LFNoise1.kr(1/2).range(5, 20)) + Impulse.kr(0), 0, Dseq([1, 0], inf))) * 0.5);
 				// sig = sig * LFNoise2.kr(1).range(0.1, 1.0);
-				sig = Pan2.ar(sig * 1);
+				sig = Pan2.ar(sig * 1 * Line.kr(1.0, 0.1, BufDur.ir(bufnum)));
 				sig = (sig!2).flatten;
 
 				SendTrig.kr(pos > 0.99, 1);
@@ -128,17 +129,40 @@
 	OSCdef(\voice_break, { arg msg, time, addr, recvPort;
 		var file = (msg[1].asString ++ ".wav").asSymbol;
 		file = ~voices_movements[file];
-		{
-			Ndef(\rumbling_bass).release(25);
-			26.wait;
-			~start_rumbling_bass.();
-		}.fork;
+
+		/*		{
+		Ndef(\rumbling_bass).release(25);
+		26.wait;
+		~start_rumbling_bass.();
+		}.fork;*/
 		msg.postln;
+		~mvt_voice_counter = ~mvt_voice_counter + 1;
 		{
 			(30-(file.duration*1.1 + 0.5)).wait; // TODO: Time it so that the voice finishes just before the break is over
-			Synth(\grain_voice_mvt, [\bufnum, file, \envbuf, ~winBuffer]);
+			Synth(\grain_voice_mvt, [\bufnum, file, \envbuf, ~winBuffer, \rate_min, 0.96 - ((~mvt_voice_counter/20) * 0.4)]);
 		}.fork;
 	}, '/break_voice', nil);
+
+	OSCdef(\rumble_change, {
+		arg msg, time, addr, recvPort;
+		var bass_mode = msg[1].asInteger;
+		msg.postln;
+		switch(bass_mode.asSymbol,
+			\0, {},
+			\1, {
+				Ndef(\rumbling_bass).release(20);
+				{
+					25.wait;
+					~start_rumbling_bass.();
+				}.fork;
+			},
+			\2, {
+				Ndef(\rumbling_bass).release(20);
+			},
+			{}
+		);
+
+	}, '/rumble_change', nil);
 
 
 	Ndef(\root, {25});
@@ -150,9 +174,27 @@
 	Ndef(\bwr_low).fadeTime = 2;
 	Ndef(\lpf_low, {50});
 	Ndef(\lpf_high, {10000});
-	Ndef(\rumbling_noise_source, {
-		BrownNoise.ar()!4 * 10
-	});
+	{
+		var buffers = ~binaries.values,
+		binaryBus = Bus.audio(s, 1);
+		buffers.do { |buf, i|
+			{
+				(i*0.1).wait;
+				loop { var length = rrand(0.2, 2.0);
+					rrand(0.1, 0.5).wait;
+					Synth(\binary_playbuf, [\buf, buf, \length, length, \amp, 0.63, \out, binaryBus]);
+					length.wait;
+				}
+			}.fork;
+
+		};
+		Ndef(\rumbling_noise_source, {
+			var sig;
+			sig = BrownNoise.ar()!4 * 0.5;
+			sig = sig + (In.ar(binaryBus, 1)!4);
+			sig
+		});
+	}.();
 	~start_rumbling_bass = {
 		Ndef(\rumbling_bass, {
 			var sig, pitch_mix = LFNoise1.kr(0.1).range(0, 1).pow(2.0),
@@ -166,9 +208,9 @@
 			;
 			// pitch_mix = 0.0;
 			// bwramp1.poll;
-			// sig = Ndef.ar(\rumbling_noise_source, 4);
+			sig = Ndef.ar(\rumbling_noise_source, 4);
 			// sig = PinkNoise.ar()!4;
-			sig = BrownNoise.ar()!4;
+			// sig = BrownNoise.ar()!4;
 
 			// sig = LPF.ar(sig, LFNoise2.kr(0.5).range(100, 2000) * LFNoise1.kr(2).range(0.8, 1.0));
 			sig = Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 8, 12, 16],bwr1) * bwramp1;
@@ -183,14 +225,14 @@
 			sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) *200 + 10) * LFNoise1.kr(LFNoise1.kr(2).range(1, 5)).range(0.5, 1.0));
 			sig = Limiter.ar(sig, 0.9);
 			// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
-			sig = (sig * (1.0-pitch_mix)) + (Splay.ar(Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 6, 8, 12, 16], bwr2)*bwramp2) * pitch_mix * 0.2);
+			sig = (sig * (1.0-pitch_mix))!2 + ((Splay.ar(Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 6, 8, 12, 16], bwr2)*bwramp2) * pitch_mix * 0.2));
 			sig = BPeakEQ.ar(sig, 300, 0.5, -2);
 			sig = BPeakEQ.ar(sig, 2000, 1.0, -3);
 			sig = Limiter.ar(sig, 0.9);
 
-			sig = sig * 0.1 * Line.kr(0.001, 1.0, 5.0);
+			sig = sig * 0.05 * Line.kr(0.001, 1.0, 5.0);
 			// sig = Pan2.ar(sig*0.5);
-			(sig!2).flatten
+			(sig!2).flatten;
 		}).play(16, 4);
 	};
 	~start_rumbling_bass.();
@@ -298,7 +340,7 @@
 		root = msg[2].asFloat, comparisonPitch = root.log2.frac, chosenComparison = 1, chosenFreq;
 		// file = ~binaries["thunderbird_8bit.wav".asSymbol];
 		msg.postln;
-		2
+
 		[1, 3/2, 5/4].do{|interval|
 			var comp = abs((root*interval).log2.frac-1000.log2.frac);
 			if(comp < chosenComparison) {
@@ -349,10 +391,10 @@
 				sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) *200 + 10) * LFNoise1.kr(2).range(0.8, 1.0));
 				sig = Limiter.ar(sig, 0.9);
 				// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
-				sig = (sig * (1.0-pitch_mix)) + (Splay.ar(Resonz.ar(sig, Ndef(\root2).kr*[4, 6, 8, 12, 16], bwr)) * pitch_mix * 0.2);
+				sig = (sig * (1.0-pitch_mix))!2 + (Splay.ar(Resonz.ar(sig, Ndef(\root2).kr*[4, 6, 8, 12, 16], bwr)) * pitch_mix * 0.2);
 				sig = Limiter.ar(sig, 0.9);
 
-				sig = sig * 0.1;.
+				sig = sig * 0.1;
 				// sig = Pan2.ar(sig*0.5);
 				(sig!2).flatten
 			}).play;
@@ -416,3 +458,27 @@ Ndef(\resonantsnare, { |pan=0|
 
 b = NetAddr.new("127.0.0.1", 57120);    // create the NetAddr
 b.sendMsg("/break_voice", 4);    // send the application the message "hello" with the parameter "there"
+
+(
+var buffers = ~binaries.values,
+binaryBus = Bus.audio(s, 1);
+buffers.do { |buf, i|
+	{
+		(i*0.1).wait;
+		loop { var length = rrand(0.2, 2.0);
+			rrand(0.1, 0.5).wait;
+			Synth(\binary_playbuf, [\buf, buf, \length, length, \amp, 0.43, \out, binaryBus]);
+			length.wait;
+		}
+	}.fork;
+
+};
+Ndef(\rumbling_noise_source, {
+	var sig;
+	sig = BrownNoise.ar()!4 * 0.5;
+	sig = sig + (In.ar(binaryBus, 1)!4);
+
+	sig
+});
+)
+~binaries.values

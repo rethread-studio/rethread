@@ -503,6 +503,9 @@ impl SyscallWaveguide {
     fn update(&mut self, changes: &mut SimultaneousChanges) {
         if let Some(i) = &mut self.interface {
             if !i.exciter_sender.is_full() {
+                // TODO: This shouldn't be necessary, but it is a workaround for a bug
+                let rng = fastrand::Rng::new();
+                i.wg.set_amp_ramp_time(rng.f32() * 0.001 + 0.001, changes);
                 // if self.accumulator > 500. {
                 //     self.coeff *= 0.9;
                 // }
