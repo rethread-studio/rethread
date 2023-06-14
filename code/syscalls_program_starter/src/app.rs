@@ -54,7 +54,7 @@ impl eframe::App for TemplateApp {
 
             let strace_path =
                 "/home/assert/Documents/rethread/code/syscalls/target/release/strace_collector";
-            let programs = ["gedit", "konqueror", "thunderbird", "htop", "rhythmbox"];
+            let programs = ["gedit", "konqueror", "thunderbird", "htop"];
             for p in programs {
                 if ui.button(p).clicked() {
                     start_program(strace_path, p);
