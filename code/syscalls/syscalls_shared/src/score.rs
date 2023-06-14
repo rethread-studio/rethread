@@ -90,7 +90,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "direct,function calls,focus shifting,chorus".to_string(),
-                duration: Duration::from_secs(2 * 60),
+                duration: Duration::from_secs(90),
             },
             // Movement {
             //     id: 7,
@@ -104,7 +104,7 @@ impl Score {
                 is_break: false,
                 is_interlude: true,
                 description: "interlude,direct,function calls,focus shifting (fast, few types),chorus".to_string(),
-                duration: Duration::from_secs(60),
+                duration: Duration::from_secs(40),
             },
             Movement {
                 id: 207,

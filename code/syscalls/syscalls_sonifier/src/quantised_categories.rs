@@ -175,7 +175,7 @@ impl QuantisedCategories {
             continuous_wg.change(
                 NoteOpt {
                     freq: Some(freq),
-                    amp: Some(0.1),
+                    amp: Some(0.0),
                     // damping: freq * 7.0,
                     // damping: Some(1000. + freq * 4.0),
                     // damping: Some(850. + freq * 4.0),

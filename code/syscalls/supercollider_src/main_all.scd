@@ -195,7 +195,7 @@
 		var file = (msg[1].asString ++ ".wav").asSymbol;
 		file = ~voices_movements[file];
 
-		Synth(\prayer_bell, [\amp, 0.04]);
+		Synth(\prayer_bell, [\amp, 0.03]);
 		/*		{
 		Ndef(\rumbling_bass).release(25);
 		26.wait;
@@ -433,7 +433,7 @@
 		file = ~binaries.values.choose;
 		// file = ~binaries["thunderbird_8bit.wav".asSymbol];
 		msg.postln;
-		Synth(\binary_playbuf, [\buf, file, \length, length, \amp, 0.040]);
+		Synth(\binary_playbuf, [\buf, file, \length, length, \amp, 0.035]);
 
 	}, '/peak_binary', nil);
 
@@ -467,12 +467,14 @@
 				(sig!2).flatten
 			}).play;
 
-			3.wait;
-			~voices_movements.do{ |mvt, i| var gap = rrand(0.3, 0.4) * i.linlin(0, ~voices_movements.size, 3.0, 0.5);
-				Synth(\grain_voice_mvt_end, [\bufnum, mvt, \envbuf, ~winBuffer]);
-				movement_duration_remaining = movement_duration_remaining - gap;
-				gap.wait;
-			};
+			{
+				3.wait;
+				~voices_movements.do{ |mvt, i| var gap = rrand(0.3, 0.4) * i.linlin(0, ~voices_movements.size, 3.0, 0.5);
+					Synth(\grain_voice_mvt_end, [\bufnum, mvt, \envbuf, ~winBuffer]);
+					// movement_duration_remaining = movement_duration_remaining - gap;
+					gap.wait;
+				};
+			}.fork;
 			movement_duration_remaining.wait;
 			Ndef(\rumbling_bass, {
 				var sig, pitch_mix = Line.kr(1.0, 0.0, 10.0), bwr = XLine.kr(0.01, 1.8, 9.0);
@@ -493,8 +495,9 @@
 				// sig = Pan2.ar(sig*0.5);
 				(sig!2).flatten
 			}).play;
-			12.wait;
+			(12-0.05..).wait;
 			Ndef(\rumbling_bass).release(0.05);
+			0.05.wait;
 /*			Synth(\binary_playbuf, [\buf, ~binaries.values[0], \length, 0.3, \amp, 0.20, \out, 0]);
 			0.07.wait;
 			Synth(\binary_playbuf, [\buf, ~binaries.values[1], \length, 0.05, \amp, 0.20, \out, 0]);*/

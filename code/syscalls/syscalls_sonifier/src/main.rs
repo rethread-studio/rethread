@@ -143,7 +143,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(122, None, false, 30.);
+    app.change_movement(6, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
