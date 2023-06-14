@@ -19,7 +19,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "direct,categories".to_string(),
-                duration: Duration::from_secs(3 * 30),
+                duration: Duration::from_secs(2 * 30),
             },
             Movement {
                 id: 1,
@@ -47,7 +47,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "peak_binaries".to_string(),
-                duration: Duration::from_secs(1 * 60),
+                duration: Duration::from_secs(40),
             },
             Movement {
                 id: 201,
@@ -61,7 +61,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "direct,function calls".to_string(),
-                duration: Duration::from_secs(2 * 60),
+                duration: Duration::from_secs(90),
             },
             Movement {
                 id: 3,
@@ -76,7 +76,7 @@ impl Score {
                 is_interlude: true,
                 description: "interlude,direct,function calls,lower and lower sensitivity"
                     .to_string(),
-                duration: Duration::from_secs(1 * 60),
+                duration: Duration::from_secs(45),
             },
             Movement {
                 id: 201,
@@ -148,7 +148,7 @@ impl Score {
                 description:
                     "quantised,categories,smoothed,occasional snippets of the binaries as sound,performer makes breaks and variation in the interaction"
                         .to_string(),
-                duration: Duration::from_secs(3 * 60),
+                duration: Duration::from_secs(2 * 30),
             },
             Movement {
                 id: 9,
@@ -163,7 +163,7 @@ impl Score {
                 is_interlude: false,
                 description: "themes,many programs open (open and close), quickly rising harmony"
                     .to_string(),
-                duration: Duration::from_secs(1 * 60),
+                duration: Duration::from_secs(1 * 40),
             },
             Movement {
                 id: 111,
@@ -179,7 +179,7 @@ impl Score {
                 is_interlude: false,
                 description: "themes,many programs open (open and close), quickly rising harmony"
                     .to_string(),
-                duration: Duration::from_secs(2 * 60),
+                duration: Duration::from_secs(1 * 50),
             },
             Movement {
                 id: 113,
@@ -205,6 +205,14 @@ impl Score {
                 duration: Duration::from_secs(break_dur),
             },
             Movement {
+                id: 122,
+                is_break: false,
+                is_interlude: true,
+                description: "interlude,direct,function calls,"
+                    .to_string(),
+                duration: Duration::from_secs(30),
+            },
+            Movement {
                 id: 11,
                 is_break: false,
                 is_interlude: false,
@@ -218,7 +226,7 @@ impl Score {
                 is_break: false,
                 description: "ending,steadily get lower into the sub frequencies and smoother,image goes to white"
                     .to_string(),
-                duration: Duration::from_secs(30),
+                duration: Duration::from_secs(40),
             },
         ];
         Self {
@@ -229,6 +237,7 @@ impl Score {
             is_playing: false,
         }
     }
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn next_movement(&mut self) -> ScoreUpdate {
         self.current_movement += 1;
         if self.current_movement >= self.movements.len() {
@@ -244,6 +253,7 @@ impl Score {
             }
         }
     }
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn previous_movement(&mut self) -> ScoreUpdate {
         if self.current_movement > 0 {
             self.current_movement -= 1;
