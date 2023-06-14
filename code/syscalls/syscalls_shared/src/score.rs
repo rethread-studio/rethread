@@ -19,7 +19,7 @@ impl Score {
                 is_break: false,
                 is_interlude: false,
                 description: "direct,categories".to_string(),
-                duration: Duration::from_secs(2 * 30),
+                duration: Duration::from_secs(3 * 30),
             },
             // Movement {
             //     id: 1,
