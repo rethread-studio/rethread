@@ -218,7 +218,7 @@ impl Score {
                 is_interlude: false,
                 description: "binaries"
                     .to_string(),
-                duration: Duration::from_secs(30),
+                duration: Duration::from_secs(20),
             },
             Movement {
                 id: 42,
