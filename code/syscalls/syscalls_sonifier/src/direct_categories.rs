@@ -73,10 +73,10 @@ impl DirectCategories {
             let kind_label = format!("{syscall_kind:?}");
 
             let (mut sender, mut receiver) =
-                rtrb::RingBuffer::<f32>::new((sample_rate * 0.3) as usize);
-            for _i in 0..(sample_rate * 0.05) as usize {
-                sender.push(0.0).ok();
-            }
+                rtrb::RingBuffer::<f32>::new((sample_rate * 0.05) as usize);
+            // for _i in 0..(sample_rate * 0.05) as usize {
+            //     sender.push(0.0).ok();
+            // }
             let mut value = 0.0;
             let exciter_sig = k.push(
                 gen(move |ctx, _| {

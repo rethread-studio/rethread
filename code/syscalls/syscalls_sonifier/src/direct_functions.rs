@@ -422,10 +422,10 @@ impl SyscallWaveguide {
     pub fn spawn(&mut self) {
         if self.interface.is_none() {
             let (mut exciter_sender, mut receiver) =
-                rtrb::RingBuffer::<f32>::new((48000. * 0.5) as usize);
-            for _i in 0..(48000. * 0.5) as usize {
-                exciter_sender.push(0.0).ok();
-            }
+                rtrb::RingBuffer::<f32>::new((48000. * 0.05) as usize);
+            // for _i in 0..(48000. * 0.5) as usize {
+            //     exciter_sender.push(0.0).ok();
+            // }
             let mut value = 0.0;
             let exciter = self.k.push(
                 gen(move |ctx, _| {
