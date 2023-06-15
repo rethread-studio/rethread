@@ -19,6 +19,7 @@ use ratatui::{
     widgets::{Block, Borders, Cell, Gauge, Paragraph, Row, Table, TableState, Wrap},
     Frame, Terminal,
 };
+use rtrb::{Consumer, Producer, RingBuffer};
 use send_osc::OscSender;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -463,49 +464,59 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Config::empty()
     };
 
-    let (gui_update_sender, gui_update_receiver) = rtrb::RingBuffer::new(100);
-    let (packet_hq_sender, packet_hq_receiver) = rtrb::RingBuffer::new(100);
+    let (gui_update_sender, gui_update_receiver) = rtrb::RingBuffer::new(1000);
+    let (packet_hq_sender, packet_hq_receiver) = rtrb::RingBuffer::new(1000);
     let packet_hq = PacketHQ::new(&settings, gui_update_sender, packet_hq_receiver);
 
     if SHOW_TUI {
         {
             tokio::spawn(start_network_communication(packet_hq));
         }
-        // setup terminal
-        enable_raw_mode()?;
-        let mut stdout = std::io::stdout();
-        execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
-        let backend = CrosstermBackend::new(stdout);
-        let mut terminal = Terminal::new(backend)?;
-        // create app and run it
-        let app = App {
-            gui_update_receiver,
-            packet_hq_sender,
-            syscall_analyser: None,
-            table_state: TableState::default(),
-            menu_table_state: TableState::default(),
-            is_recording: false,
-            playback_data: None,
-            score_playback_data: ScorePlaybackData::default(),
-        };
-        let res = run_app(&mut terminal, app);
-
-        // restore terminal
-        disable_raw_mode()?;
-        execute!(
-            terminal.backend_mut(),
-            LeaveAlternateScreen,
-            DisableMouseCapture
-        )?;
-        terminal.show_cursor()?;
-
-        if let Err(err) = res {
-            println!("{:?}", err)
-        }
+        // tokio::task::spawn_blocking(move || {
+        setup_tui(gui_update_receiver, packet_hq_sender).unwrap()
+        // });
     } else {
         start_network_communication(packet_hq).await?;
     }
 
+    Ok(())
+}
+
+fn setup_tui(
+    gui_update_receiver: Consumer<GuiUpdate>,
+    mut packet_hq_sender: Producer<PacketHQCommands>,
+) -> anyhow::Result<()> {
+    // setup terminal
+    enable_raw_mode()?;
+    let mut stdout = std::io::stdout();
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+    // create app and run it
+    let app = App {
+        gui_update_receiver,
+        packet_hq_sender,
+        syscall_analyser: None,
+        table_state: TableState::default(),
+        menu_table_state: TableState::default(),
+        is_recording: false,
+        playback_data: None,
+        score_playback_data: ScorePlaybackData::default(),
+    };
+    let res = run_app(&mut terminal, app);
+
+    // restore terminal
+    disable_raw_mode()?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    )?;
+    terminal.show_cursor()?;
+
+    if let Err(err) = res {
+        println!("{:?}", err)
+    }
     Ok(())
 }
 
@@ -525,10 +536,17 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
     let tick_rate = Duration::from_millis(16);
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
-        while let Ok(gui_update) = app.gui_update_receiver.pop() {
-            app.syscall_analyser = Some(gui_update.syscall_analyser);
-            app.playback_data = Some(gui_update.playback_data);
-            app.score_playback_data = gui_update.score_playback_data;
+        {
+            let available = app.gui_update_receiver.slots();
+            let chunk = app.gui_update_receiver.read_chunk(available);
+            if let Ok(chunk) = chunk {
+                if let Some(gui_update) = chunk.as_slices().1.last() {
+                    app.syscall_analyser = Some(gui_update.syscall_analyser.clone());
+                    app.playback_data = Some(gui_update.playback_data.clone());
+                    app.score_playback_data = gui_update.score_playback_data.clone();
+                }
+                chunk.commit_all();
+            }
         }
 
         let timeout = tick_rate
@@ -908,10 +926,16 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
     {
         tokio::spawn(async move {
             loop {
+                let mut counter = 0;
                 while let Ok(packet) = packet_receiver.try_recv() {
                     packet_hq.register_packet(packet);
+                    counter += 1;
+                    if counter > 500 {
+                        break;
+                    }
                 }
                 packet_hq.update();
+                // tokio::time::sleep(Duration::from_millis(1)).await;
             }
         });
     }
