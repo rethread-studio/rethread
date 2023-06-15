@@ -4,6 +4,7 @@ use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
+use knyst::graph::Gen;
 use knyst::prelude::*;
 use knyst::*;
 
@@ -143,7 +144,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(6, None, false, 30.);
+    app.change_movement(4, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
@@ -756,5 +757,68 @@ impl BackgroundRamp {
             Type::Float(self.lpf_high.end),
         ];
         osc_sender.send((addr, args)).ok();
+    }
+}
+
+/// Pan to quad as two stereo pairs (0: front left, 1: front right, 2: rear left, 3: rear right)
+/// *inputs*
+/// 0: "signal"
+/// 1: "pan_x"
+/// 2: "pan_y"
+pub struct PanMonoToQuad;
+impl Gen for PanMonoToQuad {
+    fn process(&mut self, ctx: GenContext, _resources: &mut Resources) -> GenState {
+        for i in 0..ctx.block_size() {
+            let signal = ctx.inputs.read(0, i);
+            // The equation needs pan to be in the range [0, 1]
+            let pan_x = ctx.inputs.read(1, i) * 0.5 + 0.5;
+            let pan_y = ctx.inputs.read(2, i).clamp(-1.0, 1.0) * 0.5 + 0.5;
+            let pan_x_radians = pan_x * std::f32::consts::FRAC_PI_2;
+            let pan_y_radians = pan_y * std::f32::consts::FRAC_PI_2;
+            // let left_gain = fastapprox::fast::cos(pan_x_radians);
+            // let right_gain = fastapprox::fast::sin(pan_x_radians);
+            // let front_gain = fastapprox::fast::cos(pan_y_radians);
+            // let rear_gain = fastapprox::fast::sin(pan_y_radians);
+            let left_gain = 1.0 - pan_x;
+            let right_gain = pan_x;
+            let front_gain = 1.0 - pan_y;
+            let rear_gain = pan_y;
+            ctx.outputs.write(signal * left_gain * front_gain, 0, i);
+            ctx.outputs.write(signal * right_gain * front_gain, 1, i);
+            ctx.outputs.write(signal * left_gain * rear_gain, 2, i);
+            ctx.outputs.write(signal * right_gain * rear_gain, 3, i);
+        }
+        GenState::Continue
+    }
+
+    fn num_inputs(&self) -> usize {
+        3
+    }
+
+    fn num_outputs(&self) -> usize {
+        4
+    }
+
+    fn input_desc(&self, input: usize) -> &'static str {
+        match input {
+            0 => "signal",
+            1 => "pan_x",
+            2 => "pan_y",
+            _ => "",
+        }
+    }
+
+    fn output_desc(&self, output: usize) -> &'static str {
+        match output {
+            0 => "left_front",
+            1 => "right_front",
+            2 => "left_rear",
+            3 => "right_rear",
+            _ => "",
+        }
+    }
+
+    fn name(&self) -> &'static str {
+        "PanMonoToStereo"
     }
 }

@@ -33,14 +33,14 @@ use rand::{thread_rng, Rng};
 use rtrb::Producer;
 use syscalls_shared::SyscallKind;
 
-use crate::{to_freq53, Sonifier};
+use crate::{to_freq53, PanMonoToQuad, Sonifier};
 const SCALE: [i32; 7] = [0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
 
 pub struct QuantisedCategories {
     continuous_wgs: HashMap<String, SyscallKindQuantisedWaveguide>,
     post_fx: NodeAddress,
     sender: Producer<f32>,
-    lpf: NodeAddress,
+    lpf: Vec<NodeAddress>,
     k: KnystCommands,
 }
 impl QuantisedCategories {
@@ -57,23 +57,61 @@ impl QuantisedCategories {
             gen(move |ctx, _| {
                 receiver.pop().unwrap();
                 let in0 = ctx.inputs.get_channel(0);
+                let in1 = ctx.inputs.get_channel(1);
+                let in2 = ctx.inputs.get_channel(2);
+                let in3 = ctx.inputs.get_channel(3);
                 let mut outputs = ctx.outputs.iter_mut();
                 let out0 = outputs.next().unwrap();
-                for (i0, o0) in in0.iter().zip(out0.iter_mut()) {
+                let out1 = outputs.next().unwrap();
+                let out2 = outputs.next().unwrap();
+                let out3 = outputs.next().unwrap();
+                for (((((((i0, i1), i2), i3), o0), o1), o2), o3) in in0
+                    .iter()
+                    .zip(in1)
+                    .zip(in2)
+                    .zip(in3)
+                    .zip(out0.iter_mut())
+                    .zip(out1.iter_mut())
+                    .zip(out2.iter_mut())
+                    .zip(out3.iter_mut())
+                {
                     *o0 = (i0 * 2.5).clamp(-1.0, 1.0);
+                    *o1 = (i1 * 2.5).clamp(-1.0, 1.0);
+                    *o2 = (i2 * 2.5).clamp(-1.0, 1.0);
+                    *o3 = (i3 * 2.5).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
             })
-            .input("in")
-            .output("sig"),
+            .input("in0")
+            .input("in1")
+            .input("in2")
+            .input("in3")
+            .output("sig0")
+            .output("sig1")
+            .output("sig2")
+            .output("sig3"),
             inputs![],
         );
-        let lpf = k.push(
-            OnePoleLPF::new(),
-            inputs![("sig" ; post_fx.out(0)), ("cutoff_freq" : 7000.)],
-        );
-        k.connect(lpf.to_graph_out().channels(4).to_channel(12));
+        // k.connect(post_fx.to_graph_out().channels(4).to_channel(12));
+
+        for i in 0..4 {
+            k.connect(
+                post_fx
+                    .to_graph_out()
+                    .channels(1)
+                    .from_channel(i)
+                    .to_channel(3 * 4 + i),
+            );
+        }
+
+        let lpf: Vec<_> = (0..4)
+            .map(|i| {
+                let lpfna = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 7000.)]);
+                k.connect(lpfna.to(&post_fx).channels(1).from_channel(0).to_channel(i));
+                lpfna
+            })
+            .collect();
 
         // let scale = [-53, 0, 9, 13, 31, 36, 44];
         // let scale = [0, 9, 14, 31, 36, 45];
@@ -159,10 +197,19 @@ impl QuantisedCategories {
             );
             let mut value = 0.0;
 
-            let pan = k.push(
-            PanMonoToStereo,
-            inputs![ ("pan": ((i/2) as f32 / (num_syscall_kinds/2.0))* (-1.0_f32).powi(i as i32))],
-        );
+            //     let pan = k.push(
+            //     PanMonoToStereo,
+            //     inputs![ ("pan": ((i/2) as f32 / (num_syscall_kinds/2.0))* (-1.0_f32).powi(i as i32))],
+            // );
+            let (pan_x, pan_y) = match i % 4 {
+                0 => (-1., -1.),
+                1 => (-1., 1.),
+                2 => (1., 1.),
+                3 => (1., -1.),
+                _ => (0., 0.),
+            };
+            // let (pan_x, pan_y) = (0.0, 0.0);
+            let pan = k.push(PanMonoToQuad, inputs![("pan_x": pan_x), ("pan_y": pan_y)]);
             if i > 7 {
                 k.connect(sine_amp.to(&pan));
             } else {
@@ -170,7 +217,10 @@ impl QuantisedCategories {
                     k.connect(out.to_node(&pan));
                 }
             }
-            k.connect(pan.to(&post_fx).channels(1));
+            // k.connect(pan.to(&post_fx).channels(1));
+            for i in 0..4 {
+                k.connect(pan.to(&lpf[i]).channels(1).from_channel(i).to_channel(0));
+            }
             let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
             continuous_wg.change(
                 NoteOpt {
@@ -231,12 +281,21 @@ impl Sonifier for QuantisedCategories {
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
         self.k
             .connect(Connection::clear_to_graph_outputs(&self.post_fx));
-        self.k.connect(
-            self.post_fx
-                .to_graph_out()
-                .channels(4)
-                .to_channel(fx_chain * 4),
-        );
+        for i in 0..4 {
+            self.k.connect(
+                self.post_fx
+                    .to_graph_out()
+                    .channels(1)
+                    .from_channel(i)
+                    .to_channel(fx_chain * 4 + i),
+            );
+        }
+        // self.k.connect(
+        //     self.post_fx
+        //         .to_graph_out()
+        //         .channels(4)
+        //         .to_channel(fx_chain * 4),
+        // );
     }
 
     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
@@ -271,7 +330,9 @@ impl Sonifier for QuantisedCategories {
             wg.free(&mut self.k);
         }
         self.k.free_node(self.post_fx.clone());
-        self.k.free_node(self.lpf.clone());
+        for na in &self.lpf {
+            self.k.free_node(na.clone());
+        }
     }
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
@@ -334,7 +395,7 @@ impl SyscallKindQuantisedWaveguide {
             accumulator: 0.0,
             coeff: 0.025,
             amp: 0.0,
-            position: 0.25,
+            position: 0.1,
             damping: 0.0,
             pan,
             impulse,
@@ -380,6 +441,9 @@ impl SyscallKindQuantisedWaveguide {
         self.damping *= 0.995;
         // self.amp *= 0.95;
         self.position *= 0.9985;
+        if self.position < 0.1 {
+            self.position = 0.1;
+        }
         let mut new_freq = None;
         // dbg!(self.amp, feedback);
         // if self.amp > 0.35 {
