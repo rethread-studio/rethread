@@ -495,7 +495,7 @@
 				// sig = Pan2.ar(sig*0.5);
 				(sig!2).flatten
 			}).play;
-			(12-0.05..).wait;
+			(12-0.05).wait;
 			Ndef(\rumbling_bass).release(0.05);
 			0.05.wait;
 /*			Synth(\binary_playbuf, [\buf, ~binaries.values[0], \length, 0.3, \amp, 0.20, \out, 0]);

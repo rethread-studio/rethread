@@ -44,7 +44,7 @@ pub struct QuantisedCategories {
     k: KnystCommands,
 }
 impl QuantisedCategories {
-    pub fn new(k: &mut KnystCommands, sample_rate: f32) -> Self {
+    pub fn new(amp: f32, k: &mut KnystCommands, sample_rate: f32) -> Self {
         println!("Creating QuantisedCategories");
         // let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
 
@@ -75,10 +75,10 @@ impl QuantisedCategories {
                     .zip(out2.iter_mut())
                     .zip(out3.iter_mut())
                 {
-                    *o0 = (i0 * 2.5).clamp(-1.0, 1.0);
-                    *o1 = (i1 * 2.5).clamp(-1.0, 1.0);
-                    *o2 = (i2 * 2.5).clamp(-1.0, 1.0);
-                    *o3 = (i3 * 2.5).clamp(-1.0, 1.0);
+                    *o0 = (i0 * 2.5 * amp).clamp(-1.0, 1.0);
+                    *o1 = (i1 * 2.5 * amp).clamp(-1.0, 1.0);
+                    *o2 = (i2 * 2.5 * amp).clamp(-1.0, 1.0);
+                    *o3 = (i3 * 2.5 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue

@@ -144,7 +144,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    app.change_movement(4, None, false, 30.);
+    // app.change_movement(0, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
@@ -464,8 +464,7 @@ impl App {
                             lpf_high: 2000.0..12000.0,
                         });
                         *current_sonifiers =
-                            vec![Box::new(QuantisedCategories::new(k, sample_rate))];
-                        // TODO: Less loud quantised categories
+                            vec![Box::new(QuantisedCategories::new(1.3, k, sample_rate))];
                         for s in current_sonifiers.iter_mut() {
                             s.patch_to_fx_chain(1);
                         }
@@ -479,8 +478,9 @@ impl App {
                             lpf_low: 200.0..20.0,
                             lpf_high: 12000.0..12000.0,
                         });
+                        // TODO: Much louder quantised categories
                         *current_sonifiers =
-                            vec![Box::new(QuantisedCategories::new(k, sample_rate))];
+                            vec![Box::new(QuantisedCategories::new(10.0, k, sample_rate))];
 
                         for s in current_sonifiers.iter_mut() {
                             s.patch_to_fx_chain(1);
@@ -543,7 +543,7 @@ impl App {
                             lpf_high: 500.0..1000.0,
                         });
                         *chord_change_interval = None;
-                        let mut qc = QuantisedCategories::new(k, sample_rate);
+                        let mut qc = QuantisedCategories::new(1.0, k, sample_rate);
                         qc.patch_to_fx_chain(2);
                         *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new(k))];
                         rumble_change = Some(RUMBLE_STOP);

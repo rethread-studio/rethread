@@ -189,7 +189,7 @@ impl DirectFunctions {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().unwrap();
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
-                    *o = (i * 0.05 * amp).clamp(-1.0, 1.0);
+                    *o = (i * 0.075 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
