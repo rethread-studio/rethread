@@ -20,7 +20,6 @@ let N_FRAMES = 500; // how many frames before changing
 let cnv; // global canvas
 
 let anim;
-let glitch_amount = 0;
 
 let viz = 1;
 

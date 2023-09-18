@@ -11,4 +11,6 @@ color-eyre = "0.6.2"
 knyst = { path = "/home/erik/code/rust/audio/knyst/", default-features = false, features = ["jack"] }
 # knyst = { git = "https://github.com/ErikNatanael/knyst.git", default-features = false }
 knyst_waveguide = { path = "/home/erik/code/rust/audio/knyst_waveguide/", default-features = false}
+nom = "7.1.3"
+rand = "0.8.5"
 rtrb = "0.2.3"

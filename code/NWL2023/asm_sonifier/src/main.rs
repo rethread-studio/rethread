@@ -1,6 +1,7 @@
 use std::{
     collections::HashMap,
     sync::{atomic::AtomicBool, Arc, Mutex},
+    time::Duration,
 };
 
 use color_eyre::eyre::Result;
@@ -8,16 +9,20 @@ use knyst::{graph::SimultaneousChanges, prelude::*};
 use knyst_waveguide::{
     interface::{
         ContinuousWaveguide, MultiVoiceTriggeredSynth, NoteOpt, PluckedWaveguide, SustainedSynth,
-        Synth,
+        Synth, TriggeredSynth,
     },
     OnePoleLPF,
 };
+use rand::{seq::SliceRandom, thread_rng};
+
+use crate::{asm_data::load_asm, gesture::Gesture};
 
 mod asm_data;
+mod gesture;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
-    let mut backend = knyst::audio_backend::JackBackend::new("knyst_waveguide_syscalls")?;
+    let mut backend = knyst::audio_backend::JackBackend::new("asm_sonifier")?;
 
     let sample_rate = backend.sample_rate() as f32;
     let block_size = backend.block_size().unwrap_or(64);
@@ -28,7 +33,7 @@ fn main() -> Result<()> {
         sample_rate,
         // In JACK we can decide ourselves how many outputs and inputs we want
         num_inputs: 1,
-        num_outputs: 16,
+        num_outputs: 2,
         ring_buffer_size: 40000,
         max_node_inputs: 10,
         num_nodes: 2000,
@@ -48,11 +53,69 @@ fn main() -> Result<()> {
             // stop.store(true, std::sync::atomic::Ordering::SeqCst);
         })?
     };
-    let mut sonifier = Sonifier::new(&mut k);
 
     // Load assembly data
+    println!("Loading asm");
+    let asm = load_asm();
+    println!("{:?}", asm.functions.len());
+
+    for f in &asm.functions {
+        println!("{}", f.name);
+    }
+
+    let gestures: Vec<_> = asm
+        .functions
+        .iter()
+        .map(|f| Gesture::from_asm_function(f))
+        .collect();
+
+    {
+        let mut sonifier = Sonifier::new(&mut k, 0.0);
+        let gestures = gestures.clone();
+        std::thread::spawn(move || play_gestures(&gestures, &mut sonifier));
+    }
+    std::thread::sleep(Duration::from_secs(20));
+    {
+        let mut sonifier = Sonifier::new(&mut k, 1.0);
+        let gestures = gestures.clone();
+        std::thread::spawn(move || play_gestures(&gestures, &mut sonifier));
+    }
+
+    {
+        let mut sonifier = Sonifier::new(&mut k, -1.0);
+        let gestures = gestures.clone();
+        play_gestures(&gestures, &mut sonifier);
+    }
+
+    // dbg!(&asm);
 
     Ok(())
+}
+
+fn play_gestures(gestures: &Vec<Gesture>, sonifier: &mut Sonifier) {
+    let mut next_gesture = &gestures[0];
+    let mut rng = thread_rng();
+    loop {
+        let mut found_gesture = false;
+
+        if let Some(jump) = next_gesture.play(sonifier) {
+            println!(
+                "Current gesture: {}, looking for label: {}",
+                next_gesture.function_name, jump.label
+            );
+            for g in gestures {
+                if g.function_name.as_str() == &jump.label[1..] {
+                    next_gesture = g;
+                    found_gesture = true;
+                }
+            }
+        }
+        if !found_gesture {
+            // break;
+            next_gesture = gestures.choose(&mut rng).unwrap();
+        }
+        println!("Next gesture: {}", next_gesture.function_name);
+    }
 }
 
 struct Sonifier {
@@ -63,10 +126,10 @@ struct Sonifier {
     k: KnystCommands,
 }
 impl Sonifier {
-    pub fn new(k: &mut KnystCommands) -> Self {
+    pub fn new(k: &mut KnystCommands, pan: f32) -> Self {
         let mut k = k.clone();
         let amp = 1.0;
-        let plucked_wg = PluckedWaveguide::voices(&mut k, 5, true);
+        let plucked_wg = PluckedWaveguide::voices(&mut k, 15, true);
         let post_fx = k.push(
             gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
@@ -88,7 +151,8 @@ impl Sonifier {
             OnePoleLPF::new(),
             inputs![("sig" ; post_fx.out(0)), ("cutoff_freq" : 20000.)],
         );
-        k.connect(lpf.to_graph_out().channels(4).to_channel(12));
+        let pan = k.push(PanMonoToStereo, inputs![(0 ; lpf.out(0)), ("pan" : pan)]);
+        k.connect(pan.to_graph_out().channels(2));
         Self {
             plucked_wg,
             continuous_wgs: HashMap::new(),
@@ -96,6 +160,11 @@ impl Sonifier {
             lpf,
             k,
         }
+    }
+    pub fn play_note(&mut self, n: NoteOpt) {
+        let mut changes = SimultaneousChanges::now();
+        self.plucked_wg.trig(n, &mut changes);
+        self.k.schedule_changes(changes);
     }
 }
 
