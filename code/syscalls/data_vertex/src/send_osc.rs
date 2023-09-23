@@ -5,9 +5,14 @@ use syscalls_shared::Syscall;
 use tracing::info;
 
 use crate::config::Config;
+pub struct WebsocketSenders {
+    pub syscall_tx: tokio::sync::broadcast::Sender<Syscall>,
+    pub movement_tx: tokio::sync::broadcast::Sender<Movement>,
+}
 
 pub struct OscSender {
     senders: Vec<Sender<Connected>>,
+    websocket_senders: Option<WebsocketSenders>,
 }
 
 impl OscSender {
@@ -28,7 +33,13 @@ impl OscSender {
                 error!("Failed to create osc sender");
             }
         }
-        Self { senders }
+        Self {
+            senders,
+            websocket_senders: None,
+        }
+    }
+    pub fn register_websocket_senders(&mut self, ws: WebsocketSenders) {
+        self.websocket_senders = Some(ws);
     }
     pub fn send_syscall(&mut self, syscall: &Syscall) {
         for sender in &mut self.senders {
@@ -44,6 +55,9 @@ impl OscSender {
                 Type::String(syscall.command.clone()),
             ];
             sender.send((addr, args)).ok();
+        }
+        if let Some(ws) = &mut self.websocket_senders {
+            ws.syscall_tx.send(syscall.clone()).unwrap();
         }
     }
     pub fn send_syscall_analysis(
@@ -91,6 +105,9 @@ impl OscSender {
                 let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
                 sender.send((addr, args)).ok();
             }
+        }
+        if let Some(ws) = &mut self.websocket_senders {
+            ws.movement_tx.send(m.clone()).unwrap();
         }
     }
     pub fn send_score_stop(&mut self) {

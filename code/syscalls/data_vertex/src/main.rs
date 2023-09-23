@@ -6,7 +6,7 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use enum_iterator::cardinality;
-use futures_util::StreamExt;
+use futures_util::{pin_mut, stream::TryStreamExt, SinkExt, StreamExt};
 use log::*;
 use menu::MenuItem;
 use nix::errno::Errno;
@@ -20,14 +20,14 @@ use ratatui::{
     Frame, Terminal,
 };
 use rtrb::{Consumer, Producer, RingBuffer};
-use send_osc::OscSender;
+use send_osc::{OscSender, WebsocketSenders};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fmt::Debug,
     fs::File,
     io::{Read, Write},
-    sync::Mutex,
+    sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
 use std::{net::SocketAddr, path::PathBuf};
@@ -37,6 +37,7 @@ use tokio::{
     net::{TcpListener, TcpStream},
     sync::mpsc::UnboundedSender,
 };
+use tokio_tungstenite::tungstenite::Message;
 
 mod config;
 mod menu;
@@ -179,6 +180,9 @@ impl PacketHQ {
             last_update: Instant::now(),
             analysers: Analysers::new(settings),
         }
+    }
+    pub fn register_websocket_senders(&mut self, ws: WebsocketSenders) {
+        self.osc_sender.register_websocket_senders(ws);
     }
     fn start_recording(&mut self) {
         self.start_recording_time = Instant::now();
@@ -923,8 +927,18 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
     let listener = TcpListener::bind(&addr).await.expect("Can't listen");
     let (packet_sender, mut packet_receiver) = tokio::sync::mpsc::unbounded_channel();
 
+    let (syscall_tx, mut syscall_rx1) = tokio::sync::broadcast::channel(1000);
+    let (movement_tx, mut movement_rx1) = tokio::sync::broadcast::channel(1000);
+
     {
+        let syscall_tx = syscall_tx.clone();
+        let movement_tx = movement_tx.clone();
         tokio::spawn(async move {
+            let ws = WebsocketSenders {
+                syscall_tx,
+                movement_tx,
+            };
+            packet_hq.register_websocket_senders(ws);
             loop {
                 let mut counter = 0;
                 while let Ok(packet) = packet_receiver.try_recv() {
@@ -939,6 +953,7 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
             }
         });
     }
+    tokio::spawn(async move { start_websocket_endpoints(syscall_tx, movement_tx).await });
     loop {
         let (socket, _) = listener.accept().await?;
         let packet_sender = packet_sender.clone();
@@ -947,13 +962,139 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
             .expect("connected streams should have a peer address");
         info!("Peer address: {}", peer);
         tokio::spawn(async move {
-            handle_client(peer, socket, packet_sender).await.ok();
+            handle_strace_collector_client(peer, socket, packet_sender)
+                .await
+                .ok();
         });
     }
 
     //Ok(())
 }
-async fn handle_client(
+enum EndpointMessage {
+    Syscall(Syscall),
+    Movement(Movement),
+    CategoryPeak { kind: String, ratio: f32 },
+}
+type Tx = UnboundedSender<EndpointMessage>;
+type EndpointClients = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
+
+async fn start_websocket_endpoints(
+    syscall_tx: tokio::sync::broadcast::Sender<Syscall>,
+    movement_tx: tokio::sync::broadcast::Sender<Movement>,
+) -> Result<()> {
+    let addr = "127.0.0.1:1237".to_string();
+    // Create the event loop and TCP listener we'll accept connections on.
+    let try_socket = TcpListener::bind(&addr).await;
+    let listener = try_socket.expect("Failed to bind");
+    println!("Listening on: {}", addr);
+
+    // Let's spawn the handling of each connection in a separate task.
+    while let Ok((stream, addr)) = listener.accept().await {
+        tokio::spawn(register_new_websocket_reception_client(
+            addr,
+            stream,
+            syscall_tx.subscribe(),
+            movement_tx.subscribe(),
+        ));
+    }
+
+    Ok(())
+}
+async fn register_new_websocket_reception_client(
+    addr: SocketAddr,
+    stream: TcpStream,
+    // endpoints: EndpointClients,
+    mut syscall_rx: tokio::sync::broadcast::Receiver<Syscall>,
+    mut movement_rx: tokio::sync::broadcast::Receiver<Movement>,
+) {
+    info!("Incoming TCP connection from: {}", addr);
+
+    let mut ws_stream = tokio_tungstenite::accept_async(stream)
+        .await
+        .expect("Error during the websocket handshake occurred");
+    info!("WebSocket connection established: {}", addr);
+
+    // Insert the write part of this peer to the peer map.
+    // let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+
+    // endpoints.lock().unwrap().insert(addr, tx);
+
+    // let (outgoing, incoming) = ws_stream.split();
+
+    // let broadcast_incoming = incoming.try_for_each(|msg| {
+    //     println!(
+    //         "Received a message from {}: {}",
+    //         addr,
+    //         msg.to_text().unwrap()
+    //     );
+    //     let peers = peer_map.lock().unwrap();
+
+    //     // We want to broadcast the message to everyone except ourselves.
+    //     let broadcast_recipients = peers
+    //         .iter()
+    //         .filter(|(peer_addr, _)| peer_addr != &&addr)
+    //         .map(|(_, ws_sink)| ws_sink);
+
+    //     for recp in broadcast_recipients {
+    //         recp.unbounded_send(msg.clone()).unwrap();
+    //     }
+
+    //     future::ok(())
+    // });
+
+    // let received_syscall_from_others = syscall_rx.recv().map(Ok).forward(outgoing);
+    // let received_syscall = syscall_rx
+    //     .recv()
+    //     .await
+    //     .map(|syscall| Message::Text(syscall.command))
+    //     .forward(outgoing);
+
+    // let received_movement = movement_rx
+    //     .recv()
+    //     .await
+    //     .map(|mvt| Message::Text(mvt.description))
+    //     .forward(outgoing);
+    // // pin_mut!(broadcast_incoming, receive_from_others);
+    // pin_mut!(received_syscall, received_movement);
+    // // futures_util::future::select(broadcast_incoming, receive_from_others).await;
+    // let mut result = Ok;
+    // while !result.is_err() {
+    //     tokio::select! { biased;
+    //                      result = received_movement => {}
+    //                      result = received_syscall => {}
+    //     }
+    // }
+
+    let mut error_in_stream = false;
+    while !error_in_stream {
+        match movement_rx.try_recv() {
+            Ok(mvt) => {
+                let m = Message::Text(mvt.description);
+                match ws_stream.feed(m).await {
+                    Ok(_) => {}
+                    Err(_) => error_in_stream = true,
+                }
+            }
+            Err(e) => {}
+        }
+        match syscall_rx.try_recv() {
+            Ok(syscall) => {
+                let m = Message::Text(syscall.command);
+                match ws_stream.feed(m).await {
+                    Ok(_) => {}
+                    Err(_) => error_in_stream = true,
+                }
+            }
+            Err(_) => {}
+        }
+    }
+    let _ = ws_stream.flush().await;
+    // receive_from_others.await;
+
+    info!("{} disconnected", &addr);
+    // endpoints.lock().unwrap().remove(&addr);
+}
+async fn handle_strace_collector_client(
     peer: SocketAddr,
     stream: TcpStream,
     packet_sender: UnboundedSender<Packet>,
