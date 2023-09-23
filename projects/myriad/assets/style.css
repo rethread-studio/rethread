@@ -1,0 +1,70 @@
+@font-face {
+    font-family: Epilogue-Regular;
+    src: url(fonts/Epilogue-Regular.ttf);
+}
+
+html {
+    position: relative; 
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    font-family: 'Epilogue-Regular', sans-serif;
+    font-weight: normal;
+    line-height: 1.5em;
+    font-size: 16px;
+    min-height: 100%;
+}
+
+div.center-horizontally {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+div.header {
+    text-align: center;
+    padding-top: 2rem;
+}
+
+div.content {
+    max-width: 42rem;
+    padding-right: 2rem;
+    padding-left: 2rem;
+    padding-top: 3%;
+    margin-bottom: 8rem;
+}
+
+div.footer {
+    text-align: center;
+    position: absolute;
+    bottom: 0;
+    overflow: hidden;
+}
+
+h1, h2, h3 {
+    font-weight: normal;
+}
+
+h1 {
+    font-size: 28px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+h3 {
+    font-size: 20px;
+}
+
+a {
+    color: black
+}
+
+br {
+    display: block;
+    margin: 0.4rem 0;
+ }
