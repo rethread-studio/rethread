@@ -47,6 +47,7 @@ div.footer {
     position: absolute;
     bottom: 0;
     overflow: hidden;
+    margin-bottom: 1rem;
 }
 
 h1, h2, h3 {
@@ -72,6 +73,10 @@ a {
 br {
     display: block;
     margin: 0.4rem 0;
+}
+
+p {
+    margin-bottom: 1rem;
 }
 
 table {
