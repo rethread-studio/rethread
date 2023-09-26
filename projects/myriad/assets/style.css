@@ -3,6 +3,11 @@
     src: url(fonts/Epilogue-Regular.ttf);
 }
 
+@font-face {
+    font-family: Epilogue-Medium;
+    src: url(fonts/Epilogue-Medium.ttf);
+}
+
 html {
     position: relative; 
 }
@@ -18,7 +23,7 @@ html, body {
     min-height: 100%;
 }
 
-div.center-horizontally {
+.center-horizontally {
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -42,6 +47,7 @@ div.footer {
     position: absolute;
     bottom: 0;
     overflow: hidden;
+    margin-bottom: 1rem;
 }
 
 h1, h2, h3 {
@@ -67,4 +73,33 @@ a {
 br {
     display: block;
     margin: 0.4rem 0;
- }
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+table {
+   text-align: left;
+   border-collapse: collapse;
+   margin-left: auto;
+   margin-right: auto;
+}
+
+th {
+    font-weight: normal;
+    font-family: 'Epilogue-Medium', sans-serif;
+    padding-bottom: 0.5rem;
+}
+
+.col-left {
+   border-right-style: solid;
+   border-width: thin;
+   padding-right: 2rem;
+   width: 50%;
+}
+
+.col-right {
+   padding-left: 2rem;
+   width: 50%;
+}
