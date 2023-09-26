@@ -71,18 +71,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
         })
         .collect();
+    info!("Data loaded, initial setup complete");
 
     let (syscall_sender, syscall_receiver) = channel();
     // let (child_sender, child_receiver) = channel();
     let mut unknown_kind_syscalls = HashMap::new();
 
     let command_str = args.command.unwrap_or("gedit".to_string());
-    let Ok( mut socket)  = reconnect(running.clone()) else {return Ok(())};
+    let Ok(mut socket) = reconnect(running.clone()) else {
+        return Ok(());
+    };
 
     {
         let syscall_sender = syscall_sender.clone();
         let running = running.clone();
         std::thread::spawn(move || {
+            info!("Syscall tracing thread started");
             let mut command = Command::new(command_str.clone());
             for arg in args.args {
                 command.arg(arg);
@@ -199,6 +203,7 @@ fn trace_pid(
     syscall_sender: Sender<Syscall>,
     running: Arc<AtomicBool>,
 ) -> Result<()> {
+    info!("Tracing child {child_name}");
     let res = waitpid(child_pid, None)?;
     eprintln!("first wait: {:?}", res.yellow());
 
@@ -281,7 +286,10 @@ fn trace_pid(
         };
         if is_sys_exit {
             num_syscalls += 1;
-            let Ok(regs) = ptrace::getregs(child_pid) else { error!("Failed to get ptrace regs for {}. Exiting", child_name); break; };
+            let Ok(regs) = ptrace::getregs(child_pid) else {
+                error!("Failed to get ptrace regs for {}. Exiting", child_name);
+                break;
+            };
 
             let syscall = Syscall {
                 syscall_id: regs.orig_rax,
@@ -303,7 +311,8 @@ fn trace_pid(
 
 fn reconnect(running: Arc<AtomicBool>) -> Result<WebSocket<MaybeTlsStream<TcpStream>>, ()> {
     let socket = loop {
-        match connect(Url::parse("ws://localhost:3012/strace").unwrap()) {
+        info!("Trying to connect");
+        match connect(Url::parse("ws://localhost:3012").unwrap()) {
             Ok((socket, _response)) => break socket,
             Err(e) => error!("Failed to connect: {e}"),
         }

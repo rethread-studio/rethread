@@ -5,14 +5,15 @@ use syscalls_shared::Syscall;
 use tracing::info;
 
 use crate::config::Config;
-pub struct WebsocketSenders {
-    pub syscall_tx: tokio::sync::broadcast::Sender<Syscall>,
-    pub movement_tx: tokio::sync::broadcast::Sender<Movement>,
+pub struct WebsocketSender {
+    pub message_tx: tokio::sync::broadcast::Sender<String>,
 }
+
+impl WebsocketSender {}
 
 pub struct OscSender {
     senders: Vec<Sender<Connected>>,
-    websocket_senders: Option<WebsocketSenders>,
+    websocket_senders: Option<WebsocketSender>,
 }
 
 impl OscSender {
@@ -38,7 +39,7 @@ impl OscSender {
             websocket_senders: None,
         }
     }
-    pub fn register_websocket_senders(&mut self, ws: WebsocketSenders) {
+    pub fn register_websocket_senders(&mut self, ws: WebsocketSender) {
         self.websocket_senders = Some(ws);
     }
     pub fn send_syscall(&mut self, syscall: &Syscall) {
@@ -57,7 +58,13 @@ impl OscSender {
             sender.send((addr, args)).ok();
         }
         if let Some(ws) = &mut self.websocket_senders {
-            ws.syscall_tx.send(syscall.clone()).unwrap();
+            let m = format!(
+                "s:{},{},{},{},{}",
+                syscall.syscall_id, syscall.kind, syscall.args[0], syscall.args[1], syscall.args[2]
+            );
+            if let Ok(ok) = ws.message_tx.send(m) {
+                // info!("Sending syscall to {ok} receivers");
+            }
         }
     }
     pub fn send_syscall_analysis(
@@ -107,7 +114,16 @@ impl OscSender {
             }
         }
         if let Some(ws) = &mut self.websocket_senders {
-            ws.movement_tx.send(m.clone()).unwrap();
+            let m = format!(
+                "m:{},{},{},{}",
+                m.id,
+                m.is_break,
+                next_mvt.map(|mvt| mvt.id as i32).unwrap_or(-1),
+                m.duration.as_millis()
+            );
+            if let Ok(ok) = ws.message_tx.send(m) {
+                // info!("Sending syscall to {ok} receivers");
+            }
         }
     }
     pub fn send_score_stop(&mut self) {

@@ -20,14 +20,14 @@ use ratatui::{
     Frame, Terminal,
 };
 use rtrb::{Consumer, Producer, RingBuffer};
-use send_osc::{OscSender, WebsocketSenders};
+use send_osc::{OscSender, WebsocketSender};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fmt::Debug,
     fs::File,
     io::{Read, Write},
-    sync::{Arc, Mutex},
+    sync::{atomic::AtomicBool, Arc, Mutex},
     time::{Duration, Instant},
 };
 use std::{net::SocketAddr, path::PathBuf};
@@ -37,7 +37,7 @@ use tokio::{
     net::{TcpListener, TcpStream},
     sync::mpsc::UnboundedSender,
 };
-use tokio_tungstenite::tungstenite::Message;
+use tokio_tungstenite::tungstenite::{client, Message};
 
 mod config;
 mod menu;
@@ -181,7 +181,7 @@ impl PacketHQ {
             analysers: Analysers::new(settings),
         }
     }
-    pub fn register_websocket_senders(&mut self, ws: WebsocketSenders) {
+    pub fn register_websocket_senders(&mut self, ws: WebsocketSender) {
         self.osc_sender.register_websocket_senders(ws);
     }
     fn start_recording(&mut self) {
@@ -189,19 +189,32 @@ impl PacketHQ {
         self.recording = Some(RecordedPackets::new());
     }
     fn stop_and_save_recording(&mut self, path: PathBuf) {
-        let Some(recording) = self.recording.take() else { return };
+        let Some(recording) = self.recording.take() else {
+            return;
+        };
         let data = postcard::to_stdvec(&recording).unwrap();
-        let Ok(mut file) = File::create(path) else { error!("Couldn't open file to save data!"); return; };
+        let Ok(mut file) = File::create(path) else {
+            error!("Couldn't open file to save data!");
+            return;
+        };
         file.write_all(data.as_slice()).unwrap();
     }
     fn stop_and_save_recording_json(&mut self, path: PathBuf) {
-        let Some(recording) = self.recording.take() else { return };
+        let Some(recording) = self.recording.take() else {
+            return;
+        };
         let data = serde_json::to_string(&recording).unwrap();
-        let Ok(mut file) = File::create(path) else { error!("Couldn't open file to save data!"); return; };
+        let Ok(mut file) = File::create(path) else {
+            error!("Couldn't open file to save data!");
+            return;
+        };
         write!(file, "{}", data).unwrap();
     }
     fn load_recording(&mut self, path: PathBuf) {
-        let Ok(recording_playback) = RecordingPlayback::from_file(&path) else { error!("Failed to load data from path: {path:?}"); return; };
+        let Ok(recording_playback) = RecordingPlayback::from_file(&path) else {
+            error!("Failed to load data from path: {path:?}");
+            return;
+        };
         self.recording_playback = Some(recording_playback);
     }
     fn register_packet(&mut self, packet: Packet) {
@@ -449,9 +462,10 @@ impl Default for SyscallAnalyser {
         Self::new()
     }
 }
-
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread", worker_threads = 10)]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Debug using tokio-console
+    // console_subscriber::init();
     let log_file = File::create("debug.log")?;
     tracing_subscriber::fmt()
         .with_thread_names(true)
@@ -476,9 +490,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         {
             tokio::spawn(start_network_communication(packet_hq));
         }
-        // tokio::task::spawn_blocking(move || {
-        setup_tui(gui_update_receiver, packet_hq_sender).unwrap()
-        // });
+        tokio::task::spawn_blocking(move || {
+            setup_tui(gui_update_receiver, packet_hq_sender).unwrap()
+        })
+        .await?;
     } else {
         start_network_communication(packet_hq).await?;
     }
@@ -488,7 +503,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn setup_tui(
     gui_update_receiver: Consumer<GuiUpdate>,
-    mut packet_hq_sender: Producer<PacketHQCommands>,
+    packet_hq_sender: Producer<PacketHQCommands>,
 ) -> anyhow::Result<()> {
     // setup terminal
     enable_raw_mode()?;
@@ -540,15 +555,18 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
     let tick_rate = Duration::from_millis(16);
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
-        {
+        if !app.gui_update_receiver.is_empty() {
             let available = app.gui_update_receiver.slots();
             let chunk = app.gui_update_receiver.read_chunk(available);
             if let Ok(chunk) = chunk {
-                if let Some(gui_update) = chunk.as_slices().1.last() {
-                    app.syscall_analyser = Some(gui_update.syscall_analyser.clone());
-                    app.playback_data = Some(gui_update.playback_data.clone());
-                    app.score_playback_data = gui_update.score_playback_data.clone();
-                }
+                let chunk_slices = chunk.as_slices();
+                let gui_update = chunk_slices
+                    .1
+                    .last()
+                    .unwrap_or(chunk_slices.0.last().expect("the first slice to have elements since we checked that there are slots to read"));
+                app.syscall_analyser = Some(gui_update.syscall_analyser.clone());
+                app.playback_data = Some(gui_update.playback_data.clone());
+                app.score_playback_data = gui_update.score_playback_data.clone();
                 chunk.commit_all();
             }
         }
@@ -927,33 +945,33 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
     let listener = TcpListener::bind(&addr).await.expect("Can't listen");
     let (packet_sender, mut packet_receiver) = tokio::sync::mpsc::unbounded_channel();
 
-    let (syscall_tx, mut syscall_rx1) = tokio::sync::broadcast::channel(1000);
-    let (movement_tx, mut movement_rx1) = tokio::sync::broadcast::channel(1000);
-
+    let (message_tx, message_rx1) = tokio::sync::broadcast::channel(100000);
+    drop(message_rx1);
     {
-        let syscall_tx = syscall_tx.clone();
-        let movement_tx = movement_tx.clone();
+        let message_tx = message_tx.clone();
         tokio::spawn(async move {
-            let ws = WebsocketSenders {
-                syscall_tx,
-                movement_tx,
-            };
+            let ws = WebsocketSender { message_tx };
             packet_hq.register_websocket_senders(ws);
+            let mut counter = 0;
             loop {
-                let mut counter = 0;
-                while let Ok(packet) = packet_receiver.try_recv() {
-                    packet_hq.register_packet(packet);
-                    counter += 1;
-                    if counter > 500 {
-                        break;
+                tokio::select! {
+                    Some(packet) = packet_receiver.recv() => {
+                        packet_hq.register_packet(packet);
+                        counter += 1;
+                        if counter >= 500 {
+                            counter = 0;
+                            packet_hq.update();
+                        }
+                    }
+                    _ = tokio::time::sleep(Duration::from_millis(10)) => {
+                        packet_hq.update();
                     }
                 }
-                packet_hq.update();
                 // tokio::time::sleep(Duration::from_millis(1)).await;
             }
         });
     }
-    tokio::spawn(async move { start_websocket_endpoints(syscall_tx, movement_tx).await });
+    tokio::spawn(async move { start_websocket_endpoints(message_tx).await });
     loop {
         let (socket, _) = listener.accept().await?;
         let packet_sender = packet_sender.clone();
@@ -975,123 +993,188 @@ enum EndpointMessage {
     Movement(Movement),
     CategoryPeak { kind: String, ratio: f32 },
 }
-type Tx = UnboundedSender<EndpointMessage>;
+// type Tx = UnboundedSender<EndpointMessage>;
+type Tx = tokio::sync::mpsc::UnboundedSender<bool>;
 type EndpointClients = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 
 async fn start_websocket_endpoints(
-    syscall_tx: tokio::sync::broadcast::Sender<Syscall>,
-    movement_tx: tokio::sync::broadcast::Sender<Movement>,
+    message_tx: tokio::sync::broadcast::Sender<String>,
 ) -> Result<()> {
     let addr = "127.0.0.1:1237".to_string();
     // Create the event loop and TCP listener we'll accept connections on.
     let try_socket = TcpListener::bind(&addr).await;
     let listener = try_socket.expect("Failed to bind");
-    println!("Listening on: {}", addr);
+    info!("Listening for endpoints on: {}", addr);
+    let endpoint_clients: EndpointClients = Arc::new(Mutex::new(HashMap::new()));
 
+    let mut all_handles = Vec::new();
     // Let's spawn the handling of each connection in a separate task.
-    while let Ok((stream, addr)) = listener.accept().await {
-        tokio::spawn(register_new_websocket_reception_client(
-            addr,
-            stream,
-            syscall_tx.subscribe(),
-            movement_tx.subscribe(),
-        ));
+    loop {
+        match listener.accept().await {
+            Ok((stream, addr)) => {
+                let (private_tx, private_rx) = tokio::sync::mpsc::unbounded_channel();
+                tokio::spawn(async move {
+                    let mut num = 0;
+                    loop {
+                        private_tx.send(format!("{num} is the value")).ok();
+                        num += 1;
+                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                    }
+                });
+                let syscall_rx = message_tx.subscribe();
+                all_handles.push(tokio::spawn(async move {
+                    register_new_websocket_endpoint_client(addr, stream, syscall_rx).await
+                }));
+            }
+            Err(e) => {
+                error!("Error accepting listeners: {e:?}");
+            }
+        }
+    }
+    for handle in all_handles {
+        handle.await;
     }
 
     Ok(())
 }
-async fn register_new_websocket_reception_client(
+async fn register_new_websocket_endpoint_client(
     addr: SocketAddr,
     stream: TcpStream,
     // endpoints: EndpointClients,
-    mut syscall_rx: tokio::sync::broadcast::Receiver<Syscall>,
-    mut movement_rx: tokio::sync::broadcast::Receiver<Movement>,
-) {
+    mut message_rx: tokio::sync::broadcast::Receiver<String>,
+) -> Result<()> {
     info!("Incoming TCP connection from: {}", addr);
 
     let mut ws_stream = tokio_tungstenite::accept_async(stream)
         .await
         .expect("Error during the websocket handshake occurred");
-    info!("WebSocket connection established: {}", addr);
+    info!("WebSocket connection established for endpoint: {}", addr);
+    let start_send = ws_stream
+        .send(Message::Text("Start of transfer".to_owned()))
+        .await;
+    info!("{start_send:?}");
+    // info!("{:?}", ws_stream.flush().await);
 
-    // Insert the write part of this peer to the peer map.
-    // let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+    let (mut write, mut read) = ws_stream.split();
 
-    // endpoints.lock().unwrap().insert(addr, tx);
-
-    // let (outgoing, incoming) = ws_stream.split();
-
-    // let broadcast_incoming = incoming.try_for_each(|msg| {
-    //     println!(
-    //         "Received a message from {}: {}",
-    //         addr,
-    //         msg.to_text().unwrap()
-    //     );
-    //     let peers = peer_map.lock().unwrap();
-
-    //     // We want to broadcast the message to everyone except ourselves.
-    //     let broadcast_recipients = peers
-    //         .iter()
-    //         .filter(|(peer_addr, _)| peer_addr != &&addr)
-    //         .map(|(_, ws_sink)| ws_sink);
-
-    //     for recp in broadcast_recipients {
-    //         recp.unbounded_send(msg.clone()).unwrap();
-    //     }
-
-    //     future::ok(())
-    // });
-
-    // let received_syscall_from_others = syscall_rx.recv().map(Ok).forward(outgoing);
-    // let received_syscall = syscall_rx
-    //     .recv()
-    //     .await
-    //     .map(|syscall| Message::Text(syscall.command))
-    //     .forward(outgoing);
-
-    // let received_movement = movement_rx
-    //     .recv()
-    //     .await
-    //     .map(|mvt| Message::Text(mvt.description))
-    //     .forward(outgoing);
-    // // pin_mut!(broadcast_incoming, receive_from_others);
-    // pin_mut!(received_syscall, received_movement);
-    // // futures_util::future::select(broadcast_incoming, receive_from_others).await;
-    // let mut result = Ok;
-    // while !result.is_err() {
-    //     tokio::select! { biased;
-    //                      result = received_movement => {}
-    //                      result = received_syscall => {}
-    //     }
-    // }
-
-    let mut error_in_stream = false;
-    while !error_in_stream {
-        match movement_rx.try_recv() {
-            Ok(mvt) => {
-                let m = Message::Text(mvt.description);
-                match ws_stream.feed(m).await {
-                    Ok(_) => {}
-                    Err(_) => error_in_stream = true,
+    let disconnected = Arc::new(AtomicBool::new(false));
+    let (disconnect_tx, mut disconnect_rx) = tokio::sync::oneshot::channel();
+    {
+        let disconnected = disconnected.clone();
+        tokio::spawn(async move {
+            loop {
+                let message = read.next().await;
+                info!("Received from endpoint {addr}: {message:?}");
+                if matches!(message, None) {
+                    // This means disconnection
+                    // disconnected.store(true, std::sync::atomic::Ordering::SeqCst);
+                    // If this fails the sending stream has already disconnected
+                    disconnect_tx.send(true).ok();
+                    break;
                 }
             }
-            Err(e) => {}
-        }
-        match syscall_rx.try_recv() {
-            Ok(syscall) => {
-                let m = Message::Text(syscall.command);
-                match ws_stream.feed(m).await {
-                    Ok(_) => {}
-                    Err(_) => error_in_stream = true,
-                }
-            }
-            Err(_) => {}
-        }
+        });
     }
-    let _ = ws_stream.flush().await;
-    // receive_from_others.await;
+
+    let mut sent_since_flush: u64 = 0;
+
+    loop {
+        if disconnected.load(std::sync::atomic::Ordering::SeqCst) {
+            break;
+        }
+        tokio::select! {
+            m = message_rx.recv() => {
+                match m {
+                    Ok(m) => {
+                        let m = Message::Text(m);
+                        match write.feed(m).await {
+                            Ok(_) => {}
+                            Err(e) => {
+                                error!("Error in endpoint {addr} ws stream: {e:?}");
+                                break;
+                            }
+                        }
+                        sent_since_flush += 1;
+                        if sent_since_flush > 1000 {
+                            write.flush().await.ok();
+                        }
+                    }
+                    Err(e) => {
+                        error!("Error receiving from broadcast channel: {e}");
+                    }
+                }
+
+            }
+            _ = &mut disconnect_rx => {
+                break;
+            }
+        }
+        // TODO: Avoid busy looping here, maybe by receiving from just one channel and awaiting that channel.
+        // #[rustfmt::skip]
+        // tokio::select! {
+        //     // oneshot_message = rx.recv() => {
+        //     //     error!("Got message to abort: {oneshot_message:?}");
+        //     //     break;
+        //     // }
+        //     s = private_rx.recv() => {
+        //         if let Some(s) = s{
+        //             let m = Message::Text(s);
+        //             match write.send(m).await {
+        //                 Ok(_) => {}
+        //                 Err(e) => {
+        //                     error!("Error in endpoint {addr} ws stream: {e:?}");
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     message = read.next() => {
+        //         info!("Received from endpoint {addr}: {message:?}");
+        //         if matches!(message, None) {
+        //             // This means disconnection
+        //             break;
+        //         }
+        //     }
+        //     mvt = movement_rx.recv()=> {
+        //         if let Ok(mvt) = mvt{
+        //             let m = Message::Text(mvt.description);
+        //             match write.send(m).await {
+        //                 Ok(_) => {}
+        //                 Err(e) => {
+        //                     error!("Error in endpoint {addr} ws stream: {e:?}");
+        //                     break;
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     syscall = syscall_rx.recv() => {
+        //         match syscall {
+        //             Ok(syscall) => {
+        //                 let m = Message::Text(syscall.to_string());
+        //                 match write.feed(m).await {
+        //                     Ok(_) => {}
+        //                     Err(e) => {
+        //                         error!("Error in endpoint {addr} ws stream: {e:?}");
+        //                         break;
+        //                     }
+        //                 }
+        //                 sent_since_flush += 1;
+        //                 if sent_since_flush > 1000 {
+        //                     write.flush().await.ok();
+        //                 }
+        //             }
+        //             Err(e) => {
+        //                 error!("Error from syscall_rx {addr}: {e:?}");
+        //             }
+        //         }
+        //     }
+        // }
+    }
 
     info!("{} disconnected", &addr);
+    // let ws_stream = write.merge
+    // ws_stream.close(None).await.ok();
+    Ok(())
     // endpoints.lock().unwrap().remove(&addr);
 }
 async fn handle_strace_collector_client(
@@ -1103,7 +1186,7 @@ async fn handle_strace_collector_client(
         .await
         .expect("Failed to accept");
 
-    info!("New WebSocket connection: {}", peer);
+    info!("New WebSocket strace client connection: {}", peer);
     while let Some(msg) = ws_stream.next().await {
         match msg? {
             tokio_tungstenite::tungstenite::Message::Text(text) => info!("ws message: {text}"),

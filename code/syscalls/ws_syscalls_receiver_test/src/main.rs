@@ -10,14 +10,15 @@
 //!
 //! You can use this example together with the `server` example.
 
-use std::env;
+use std::{env, sync::atomic::AtomicU64};
 
-use futures_util::{future, pin_mut, StreamExt};
+use color_eyre::Result;
+use futures_util::{future, pin_mut, SinkExt, StreamExt};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     // let connect_addr = env::args()
     //     .nth(1)
     //     .unwrap_or_else(|| panic!("this program requires at least one argument"));
@@ -30,18 +31,58 @@ async fn main() {
     let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
     println!("WebSocket handshake has been successfully completed");
 
-    let (write, read) = ws_stream.split();
+    tokio::io::stdout()
+        .write_all(b"Writing to output")
+        .await
+        .unwrap();
 
-    let stdin_to_ws = stdin_rx.map(Ok).forward(write);
-    let ws_to_stdout = {
-        read.for_each(|message| async {
-            let data = message.unwrap().into_data();
-            tokio::io::stdout().write_all(&data).await.unwrap();
-        })
-    };
+    {
+        let (mut write, read) = ws_stream.split();
+        write
+            .send(Message::Text("Hi from receiver".to_string()))
+            .await
+            .ok();
 
-    pin_mut!(stdin_to_ws, ws_to_stdout);
-    future::select(stdin_to_ws, ws_to_stdout).await;
+        // let stdin_to_ws = stdin_rx.map(Ok).forward(write);
+        // let ws_to_stdout = {
+        //     read.for_each(|message| async {
+        //         // let data = message.unwrap().into_data();
+        //         // tokio::io::stdout().write_all(&data).await.unwrap();
+        //         let text = message.unwrap().into_text().unwrap();
+        //         println!("{text}");
+        //     })
+        // };
+        // loop {
+        //     let message = ws_stream.next().await;
+        //     println!("Received message");
+        //     if let Some(message) = message {
+        //         let text = message.unwrap().into_text().unwrap();
+        //         println!("{text}");
+        //     }
+        //     ws_stream.
+        // }
+
+        let messages_received = AtomicU64::new(0);
+        let read_future = read.for_each(|message| async {
+            // println!("receiving...");
+            // let data = message.unwrap().into_data();
+            // tokio::io::stdout().write(&data).await.unwrap();
+            let text = message.unwrap().into_text().unwrap();
+            if let Some('m') = text.chars().nth(0) {
+                println!("{text}");
+            }
+            // let val = messages_received.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            // println!("{val}");
+            // println!("received...");
+        });
+
+        read_future.await;
+    }
+
+    Ok(())
+
+    // pin_mut!(stdin_to_ws, ws_to_stdout);
+    // future::select(stdin_to_ws, ws_to_stdout).await;
 }
 
 // Our helper method which will read data from stdin and send it along the
