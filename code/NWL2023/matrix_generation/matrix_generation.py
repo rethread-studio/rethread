@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 N = 4
 upperBound = 100
@@ -15,6 +16,7 @@ def randomInvertibleMatrix(integer = False):
         return m
     return randomInvertibleMatrix()
 
+"""
 def generateInvertibleMatrices(k = 100, filename = "matrices.txt"):
     # k: number of matrices to generate
     myFile = open(filename, 'w')
@@ -22,6 +24,13 @@ def generateInvertibleMatrices(k = 100, filename = "matrices.txt"):
         m = randomInvertibleMatrix(True)
         myFile.write(np.array2string(m) + "\n")
     myFile.close()
+"""
+
+def generateInvertibleMatrices(k = 100, filename = "matrices.json"):
+    # k: number of matrices to generate
+    matrices = [randomInvertibleMatrix(True).tolist() for i in range(k)]
+    with open(filename, 'w') as f:
+        json.dump({"matrices":matrices}, f)
 
 #m = randomInvertibleMatrix(integer = True)
 #print(m)
