@@ -1,11 +1,21 @@
 @font-face {
-    font-family: Epilogue-Regular;
-    src: url(fonts/Epilogue-Regular.ttf);
+    font-family: Louise-Regular;
+    src: url(fonts/Louise-Regular.woff);
 }
 
 @font-face {
-    font-family: Epilogue-Medium;
-    src: url(fonts/Epilogue-Medium.ttf);
+    font-family: Inconsolata-Regular;
+    src: url(fonts/Inconsolata-Regular.ttf);
+}
+
+@font-face {
+    font-family: Inconsolata-Medium;
+    src: url(fonts/Inconsolata-Medium.ttf);
+}
+
+@font-face {
+    font-family: Inconsolata-SemiBold;
+    src: url(fonts/Inconsolata-SemiBold.ttf);
 }
 
 html {
@@ -16,7 +26,7 @@ html, body {
     margin: 0;
     padding: 0;
     background-color: white;
-    font-family: 'Epilogue-Regular', sans-serif;
+    font-family: Inconsolata-Regular, sans-serif;
     font-weight: normal;
     line-height: 1.5em;
     font-size: 16px;
@@ -55,7 +65,8 @@ h1, h2, h3 {
 }
 
 h1 {
-    font-size: 28px;
+    font-size: 40px;
+    font-family: Louise-Regular, serif;
 }
 
 h2 {
@@ -64,6 +75,7 @@ h2 {
 
 h3 {
     font-size: 20px;
+    font-family: Inconsolata-Medium, serif;
 }
 
 a {
@@ -76,7 +88,7 @@ br {
 }
 
 p {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 table {
@@ -88,7 +100,7 @@ table {
 
 th {
     font-weight: normal;
-    font-family: 'Epilogue-Medium', sans-serif;
+    font-family: Inconsolata-SemiBold, sans-serif;
     padding-bottom: 0.5rem;
 }
 
