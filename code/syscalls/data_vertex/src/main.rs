@@ -28,7 +28,7 @@ use std::{
     fs::File,
     io::{Read, Write},
     sync::{atomic::AtomicBool, Arc, Mutex},
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime},
 };
 use std::{net::SocketAddr, path::PathBuf};
 use syscalls_shared::score::{Movement, Score, ScorePlaybackData, ScoreUpdate};
@@ -42,21 +42,33 @@ use tokio_tungstenite::tungstenite::{client, Message};
 mod config;
 mod menu;
 // mod movement;
+mod egui_main;
 mod send_osc;
 
 static SHOW_TUI: bool = true;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct RecordedPackets {
+pub struct RecordedPackets {
     records: Vec<Record>,
+    name: String,
 }
 
 impl RecordedPackets {
-    fn new() -> Self {
-        Self { records: vec![] }
+    fn new(name: String) -> Self {
+        Self {
+            records: vec![],
+            name,
+        }
     }
     fn record_packet(&mut self, packet: Packet, timestamp: Duration) {
         self.records.push(Record { packet, timestamp })
+    }
+    fn trim_silence_before(&mut self) {
+        if let Some(first_timestamp) = self.records.first().map(|r| r.timestamp) {
+            for r in &mut self.records {
+                r.timestamp -= first_timestamp;
+            }
+        }
     }
 }
 
@@ -67,7 +79,7 @@ struct Record {
 }
 
 #[derive(Clone, Debug)]
-struct RecordingPlayback {
+pub struct RecordingPlayback {
     recorded_packets: RecordedPackets,
     /// Playback is driven by the timestamps as Duration
     current_duration: Duration,
@@ -112,6 +124,9 @@ impl RecordingPlayback {
         self.current_duration = Duration::ZERO;
         self.current_packet = 0;
     }
+    fn trim_silence_before(&mut self) {
+        self.recorded_packets.trim_silence_before();
+    }
     fn next_packet(&mut self) -> Option<&Packet> {
         if !self.playing {
             return None;
@@ -152,33 +167,58 @@ impl Analysers {
         self.syscall_analyser.update(osc_sender);
     }
 }
+
+#[derive(Clone, Debug)]
+pub enum RecordingCommand {
+    /// Replaces the recording with the same label name
+    ReplaceRecording(RecordingPlayback),
+    ReplaceAllRecordings(Vec<RecordingPlayback>),
+    SendAllRecordings,
+    StartPlayback(String),
+    StopPlayback(String),
+    LoadRecordingFromFile(PathBuf),
+    CloseRecording(String),
+}
+
+#[derive(Clone, Debug)]
+pub enum EguiUpdate {
+    AllRecordings(Vec<RecordingPlayback>),
+    StartingPlaybackOfRecording(String),
+    StoppingPlaybackOfRecording(String),
+}
 struct PacketHQ {
     score: Score,
     analysers: Analysers,
     osc_sender: OscSender,
     recording: Option<RecordedPackets>,
-    recording_playback: Option<RecordingPlayback>,
+    recording_playbacks: Vec<RecordingPlayback>,
     start_recording_time: Instant,
-    gui_update_sender: rtrb::Producer<GuiUpdate>,
+    tui_update_sender: rtrb::Producer<GuiUpdate>,
     command_receiver: rtrb::Consumer<PacketHQCommands>,
+    egui_command_receiver: rtrb::Consumer<RecordingCommand>,
+    egui_update_sender: rtrb::Producer<EguiUpdate>,
     last_update: Instant,
 }
 impl PacketHQ {
     fn new(
         settings: &Config,
-        gui_update_sender: rtrb::Producer<GuiUpdate>,
+        tui_update_sender: rtrb::Producer<GuiUpdate>,
         command_receiver: rtrb::Consumer<PacketHQCommands>,
+        egui_update_sender: rtrb::Producer<EguiUpdate>,
+        egui_command_receiver: rtrb::Consumer<RecordingCommand>,
     ) -> Self {
         Self {
             score: Score::new(),
             recording: None,
             osc_sender: OscSender::new(settings),
             start_recording_time: Instant::now(),
-            gui_update_sender,
+            tui_update_sender,
             command_receiver,
-            recording_playback: None,
+            recording_playbacks: vec![],
             last_update: Instant::now(),
             analysers: Analysers::new(settings),
+            egui_command_receiver,
+            egui_update_sender,
         }
     }
     pub fn register_websocket_senders(&mut self, ws: WebsocketSender) {
@@ -186,13 +226,22 @@ impl PacketHQ {
     }
     fn start_recording(&mut self) {
         self.start_recording_time = Instant::now();
-        self.recording = Some(RecordedPackets::new());
+        self.recording = Some(RecordedPackets::new(
+            humantime::format_rfc3339(SystemTime::now()).to_string(),
+        ));
     }
     fn stop_and_save_recording(&mut self, path: PathBuf) {
         let Some(recording) = self.recording.take() else {
             return;
         };
         let data = postcard::to_stdvec(&recording).unwrap();
+        // Add the recording to the list
+        self.recording_playbacks
+            .push(RecordingPlayback::new(recording));
+        // Send the updated list of recordings to the editor
+        self.egui_update_sender
+            .push(EguiUpdate::AllRecordings(self.recording_playbacks.clone()))
+            .ok();
         let Ok(mut file) = File::create(path) else {
             error!("Couldn't open file to save data!");
             return;
@@ -215,7 +264,10 @@ impl PacketHQ {
             error!("Failed to load data from path: {path:?}");
             return;
         };
-        self.recording_playback = Some(recording_playback);
+        self.recording_playbacks.push(recording_playback);
+        self.egui_update_sender
+            .push(EguiUpdate::AllRecordings(self.recording_playbacks.clone()))
+            .unwrap();
     }
     fn register_packet(&mut self, packet: Packet) {
         self.analysers
@@ -228,13 +280,13 @@ impl PacketHQ {
         let dt = self.last_update.elapsed();
         self.last_update = Instant::now();
         self.analysers.update(&mut self.osc_sender);
-        if let Some(rp) = &mut self.recording_playback {
+        for rp in &mut self.recording_playbacks {
             rp.progress_time(dt);
             while let Some(packet) = rp.next_packet() {
                 self.analysers.register_packet(packet, &mut self.osc_sender);
             }
         }
-        let playback_data = if let Some(rp) = &self.recording_playback {
+        let playback_data = if let Some(rp) = &self.recording_playbacks.first() {
             PlaybackData {
                 current_index: rp.current_packet,
                 max_index: rp.recorded_packets.records.len(),
@@ -246,13 +298,59 @@ impl PacketHQ {
             PlaybackData::default()
         };
         let score_playback_data = self.score.score_playback_data();
-        self.gui_update_sender
+        self.tui_update_sender
             .push(GuiUpdate {
                 syscall_analyser: self.analysers.syscall_analyser.clone(),
                 playback_data,
                 score_playback_data,
             })
             .ok();
+        while let Ok(command) = self.egui_command_receiver.pop() {
+            match command {
+                RecordingCommand::ReplaceRecording(new_recording) => {
+                    for r in &mut self.recording_playbacks {
+                        if r.recorded_packets
+                            .name
+                            .eq(&new_recording.recorded_packets.name)
+                        {
+                            *r = new_recording;
+                            break;
+                        }
+                    }
+                }
+                RecordingCommand::SendAllRecordings => self
+                    .egui_update_sender
+                    .push(EguiUpdate::AllRecordings(self.recording_playbacks.clone()))
+                    .unwrap(),
+                RecordingCommand::StartPlayback(recording_name) => {
+                    for r in &mut self.recording_playbacks {
+                        if r.recorded_packets.name == recording_name {
+                            r.playing = true;
+                        }
+                    }
+                }
+                RecordingCommand::StopPlayback(recording_name) => {
+                    for r in &mut self.recording_playbacks {
+                        if r.recorded_packets.name == recording_name {
+                            r.playing = false;
+                        }
+                    }
+                }
+                RecordingCommand::LoadRecordingFromFile(path) => self.load_recording(path),
+                RecordingCommand::CloseRecording(name) => {
+                    if let Some(i) = self
+                        .recording_playbacks
+                        .iter()
+                        .position(|r| r.recorded_packets.name == name)
+                    {
+                        self.recording_playbacks.remove(i);
+                    }
+                }
+                RecordingCommand::ReplaceAllRecordings(recordings) => {
+                    self.recording_playbacks = recordings
+                }
+            }
+        }
         while let Ok(command) = self.command_receiver.pop() {
             match command {
                 PacketHQCommands::StartRecording => self.start_recording(),
@@ -262,18 +360,28 @@ impl PacketHQ {
                 }
                 PacketHQCommands::LoadRecording { path } => self.load_recording(path),
                 PacketHQCommands::PauseRecordingPlayback => {
-                    if let Some(recording) = &mut self.recording_playback {
+                    for recording in &mut self.recording_playbacks {
                         recording.playing = false;
+                        self.egui_update_sender
+                            .push(EguiUpdate::StoppingPlaybackOfRecording(
+                                recording.recorded_packets.name.clone(),
+                            ))
+                            .ok();
                     }
                 }
                 PacketHQCommands::StartRecordingPlayback => {
-                    if let Some(rp) = &mut self.recording_playback {
-                        rp.playing = true;
+                    for recording in &mut self.recording_playbacks {
+                        recording.playing = true;
+                        self.egui_update_sender
+                            .push(EguiUpdate::StartingPlaybackOfRecording(
+                                recording.recorded_packets.name.clone(),
+                            ))
+                            .ok();
                     }
                 }
                 PacketHQCommands::ResetRecordingPlayback => {
-                    if let Some(rp) = &mut self.recording_playback {
-                        rp.reset();
+                    for recording in &mut self.recording_playbacks {
+                        recording.reset();
                     }
                 }
                 PacketHQCommands::PlayScore => {
@@ -462,7 +570,7 @@ impl Default for SyscallAnalyser {
         Self::new()
     }
 }
-#[tokio::main(flavor = "multi_thread", worker_threads = 10)]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Debug using tokio-console
     // console_subscriber::init();
@@ -484,20 +592,55 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let (gui_update_sender, gui_update_receiver) = rtrb::RingBuffer::new(1000);
     let (packet_hq_sender, packet_hq_receiver) = rtrb::RingBuffer::new(1000);
-    let packet_hq = PacketHQ::new(&settings, gui_update_sender, packet_hq_receiver);
+    let (packet_hq_command_sender, egui_command_receiver) = rtrb::RingBuffer::new(1000);
+    let (egui_update_sender, egui_update_receiver) = rtrb::RingBuffer::new(1000);
+    let packet_hq = PacketHQ::new(
+        &settings,
+        gui_update_sender,
+        packet_hq_receiver,
+        egui_update_sender,
+        egui_command_receiver,
+    );
 
-    if SHOW_TUI {
-        {
-            tokio::spawn(start_network_communication(packet_hq));
-        }
-        tokio::task::spawn_blocking(move || {
-            setup_tui(gui_update_receiver, packet_hq_sender).unwrap()
+    tokio_main(packet_hq, gui_update_receiver, packet_hq_sender);
+
+    egui_main::start_egui(packet_hq_command_sender, egui_update_receiver).unwrap();
+
+    Ok(())
+}
+
+fn tokio_main(
+    packet_hq: PacketHQ,
+    gui_update_receiver: Consumer<GuiUpdate>,
+    packet_hq_sender: Producer<PacketHQCommands>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let rt = tokio::runtime::Runtime::new().expect("Unable to create Runtime");
+
+    // Enter the runtime so that `tokio::spawn` is available immediately.
+    let _enter = rt.enter();
+
+    // Execute the runtime in its own thread.
+    // The future doesn't have to do anything. In this example, it just sleeps forever.
+    std::thread::spawn(move || {
+        rt.block_on(async {
+            if SHOW_TUI {
+                {
+                    tokio::spawn(start_network_communication(packet_hq));
+                }
+                let tui_handle = tokio::task::spawn_blocking(move || {
+                    setup_tui(gui_update_receiver, packet_hq_sender).unwrap()
+                });
+                for h in [tui_handle] {
+                    h.await.unwrap();
+                }
+            } else {
+                start_network_communication(packet_hq).await.unwrap();
+            }
+            // loop {
+            //     tokio::time::sleep(Duration::from_secs(3600)).await;
+            // }
         })
-        .await?;
-    } else {
-        start_network_communication(packet_hq).await?;
-    }
-
+    });
     Ok(())
 }
 
