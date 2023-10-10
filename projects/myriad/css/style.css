@@ -25,13 +25,22 @@ html {
 html, body {
     margin: 0;
     padding: 0;
-    background-color: white;
     font-family: Inconsolata-Regular, sans-serif;
     font-weight: normal;
     line-height: 1.5em;
     font-size: 16px;
     min-height: 100%;
 }
+
+body {
+    background-color: white;
+    color: black;
+}
+
+.dark-mode {
+    background-color: black;
+    color: greenyellow;
+  }
 
 .center-horizontally {
     align-items: center;
@@ -60,6 +69,14 @@ div.footer {
     margin-bottom: 1rem;
 }
 
+div.mode-button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 1rem;
+    margin-right: 1rem;
+}
+
 h1, h2, h3 {
     font-weight: normal;
 }
@@ -79,7 +96,11 @@ h3 {
 }
 
 a {
-    color: black
+    color: black;
+}
+
+.dark-mode a {
+    color: greenyellow;
 }
 
 br {
@@ -114,4 +135,15 @@ th {
 .col-right {
    padding-left: 2rem;
    width: 50%;
+}
+
+button {
+    border: none;
+    color: black;
+    background-color: #00000000;
+    cursor: pointer;
+}
+
+.dark-mode button {
+    color: greenyellow;
 }
