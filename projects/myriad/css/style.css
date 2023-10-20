@@ -142,6 +142,7 @@ button {
     color: black;
     background-color: #00000000;
     cursor: pointer;
+    font-size: 17px;
 }
 
 .dark-mode button {

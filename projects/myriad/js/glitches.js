@@ -20,7 +20,7 @@ window.addEventListener('load', function() {
 });
 
 function glitchElements() {
-    if (Math.random() < 1/500 && progress == 0) glitchOneElement();
+    if (Math.random() < 1/250 && progress == 0) glitchOneElement();
     requestAnimationFrame(glitchElements);
 }
 
