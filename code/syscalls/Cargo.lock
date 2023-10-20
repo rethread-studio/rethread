@@ -1279,6 +1279,7 @@ dependencies = [
  "toml 0.7.8",
  "tracing",
  "tracing-subscriber",
+ "walkdir",
 ]
 
 [[package]]
@@ -2457,7 +2458,6 @@ dependencies = [
  "jack",
  "loom",
  "rtrb",
- "rustversion",
  "slotmap",
  "symphonia",
  "thiserror",

@@ -22,6 +22,7 @@ pub enum MenuItem {
     PausePlayback,
     ResetPlayback,
     RecordData,
+    StopRecording,
     StopAndSaveRecording,
     StopAndSaveRecordingJson,
     Exit,
