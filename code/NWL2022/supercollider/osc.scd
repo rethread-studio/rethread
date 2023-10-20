@@ -100,3 +100,25 @@ OSCdef(\section, {|msg, time, addr, recvPort|
 	// msg.postln
 
 }, '/section', nil);
+
+OSCdef(\fade_out, {|msg, time, addr, recvPort|
+	var fade_out_time = msg[1].asFloat;
+	~main.set(\amp_lag_time, fade_out_time, \amp, 0.0);
+
+	msg.postln
+
+}, '/fade_out', nil); // def style
+
+OSCdef(\start, {|msg, time, addr, recvPort|
+	~main.set(\amp_lag_time, 0.0, \amp, 1.0);
+
+	msg.postln
+
+}, '/start', nil); // def style
+
+OSCdef(\stop, {|msg, time, addr, recvPort|
+	~main.set(\amp_lag_time, 0.1, \amp, 0.0);
+
+	msg.postln
+
+}, '/stop', nil); // def style

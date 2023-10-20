@@ -4379,6 +4379,7 @@ dependencies = [
  "fastrand",
  "futures-channel",
  "futures-util",
+ "humantime",
  "hyper",
  "knyst",
  "log",

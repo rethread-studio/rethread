@@ -12,6 +12,7 @@ use std::{
 
 mod gui;
 mod scheduler;
+mod score;
 mod websocket;
 
 use anyhow::Result;

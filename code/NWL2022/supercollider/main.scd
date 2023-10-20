@@ -1,5 +1,6 @@
 
 s.waitForBoot({
+	~disable_reverb = false;
 	SynthDef(\tick3, {
 		var sig, env, rq = \rq.kr(0.3);
 		env = Env.perc(\atk.kr(0), \rel.kr(0.5), curve: [\c0.kr(-4), \c1.kr(-4)]).ar(2);
@@ -108,7 +109,7 @@ s.waitForBoot({
 		sig = Balance2.ar(sig[0], sig[1], pan, amp); //L/R balance (pan)
 		sig = sig * env * AmpCompA.kr(freq) * In.kr(\phrasing_in.kr(10));
 		Out.ar(out, sig);
-		Out.ar(rout, sig * rsend.dbamp); //"post-fader" send to reverb
+		// Out.ar(rout, sig * rsend.dbamp); //"post-fader" send to reverb
 	}).add;
 
 	SynthDef(\sus_osc, {
@@ -173,14 +174,17 @@ s.waitForBoot({
 		Out.ar(\out.kr(0), sig);
 	}).add;
 	SynthDef(\mainchannel,  { | in |
-		var sig;
+		var sig, amp = \amp.kr(1.0);
 		sig = In.ar(in, 2);
 		sig = BPeakEQ.ar(sig, 290, 0.8, -3.7);
 		sig = BPeakEQ.ar(sig, 760, 0.8, -7.6);
 		sig = BLowShelf.ar(sig, 100, 1.0, -6);
-
+		amp = Lag2.kr(amp, \amp_lag_time.kr(30.0));
+		amp = amp * (amp > 0.001);
+		sig = sig * amp;
+		// (sig*1000).poll;
 		Out.ar(\out.kr(0), sig);
-		Out.ar(2, sig * \secondary_amp.kr(0.06));
+		// Out.ar(2, sig * \secondary_amp.kr(0.06));m
 	}).add;
 
 	~from_53 = { | degrees |
@@ -199,6 +203,11 @@ s.waitForBoot({
 	~main = Synth(\mainchannel, [\out, 0, \in, ~mainBus], addAction: \addToTail, target: ~postGroup);
 	~rev = Synth(\long_reverb, [\in, ~revBus, \out, ~mainBus, \wetness, 0.1, \lpf_freq, 10000, \predelay, 0.05, \rt, 1.0, \wetness, 0.05]);
 	~rev3 = Synth(\medium_reverb, [\in, ~rev3Bus, \out, ~mainBus, \mix, 0.4, \feedback, 0.95, \size, 0.9, \damp, 0.65, \diff, 0.6]);
+
+	if(~disable_reverb == true) {
+		~rev.set(\wetness, 0.0);
+		~rev3.set(\mix, 0.0);
+	};
 	~phrasing = Synth(\phrasing, [\out, ~phrasingBus]);
 
 	~section = Environment.new(know: true);
@@ -239,6 +248,8 @@ s.waitForBoot({
 	"glitches.scd".loadRelative;
 	"osc.scd".loadRelative;
 });
+
+// ~main.set(\amp_lag_time, 10.0, \amp, 0.0);
 
 /*
 
