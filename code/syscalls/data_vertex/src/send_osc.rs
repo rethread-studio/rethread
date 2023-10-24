@@ -84,12 +84,34 @@ impl OscSender {
                 .collect();
             sender.send((addr, args)).ok();
         }
+        if let Some(ws) = &mut self.websocket_senders {
+            let m = format!("/syscall_analysis:{},{}", num_packets, num_errors);
+            if let Ok(ok) = ws.message_tx.send(m) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+            let mut m = format!("/syscall_analysis/per_kind_interval:");
+            m.extend(
+                packets_per_kind_last_interval
+                    .iter()
+                    .map(|v| format!("{v},")),
+            );
+            if let Ok(ok) = ws.message_tx.send(m) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+        }
     }
     pub fn send_category_peak(&mut self, kind: String, ratio: f32) {
         for sender in &mut self.senders {
             let addr = "/syscall_analysis/category_peak";
             let args = vec![Type::String(kind.clone()), Type::Float(ratio)];
             sender.send((addr, args)).ok();
+        }
+
+        if let Some(ws) = &mut self.websocket_senders {
+            let m = format!("/syscall_analysis/category_peak:{},{}", kind.clone(), ratio,);
+            if let Ok(ok) = ws.message_tx.send(m) {
+                // info!("Sending syscall to {ok} receivers");
+            }
         }
     }
     pub fn send_movement(&mut self, m: &Movement, next_mvt: Option<Movement>) {
@@ -114,14 +136,21 @@ impl OscSender {
             }
         }
         if let Some(ws) = &mut self.websocket_senders {
-            let m = format!(
-                "m:{},{},{},{}",
+            let mess = format!(
+                "/new_movement:{},{},{},{}",
                 m.id,
                 m.is_break,
                 next_mvt.map(|mvt| mvt.id as i32).unwrap_or(-1),
                 m.duration.as_millis()
             );
-            if let Ok(ok) = ws.message_tx.send(m) {
+            if let Ok(ok) = ws.message_tx.send(mess) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+            let mess = format!(
+                "/break:{}",
+                if m.is_break { 1 } else { 0},
+            );
+            if let Ok(ok) = ws.message_tx.send(mess) {
                 // info!("Sending syscall to {ok} receivers");
             }
         }
@@ -132,12 +161,24 @@ impl OscSender {
             let args = vec![Type::Int(0)];
             sender.send((addr, args)).ok();
         }
+        if let Some(ws) = &mut self.websocket_senders {
+            let m = format!("/score/play:false",);
+            if let Ok(ok) = ws.message_tx.send(m) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+        }
     }
     pub fn send_score_start(&mut self) {
         for sender in &mut self.senders {
             let addr = "/score/play";
             let args = vec![Type::Int(1)];
             sender.send((addr, args)).ok();
+        }
+        if let Some(ws) = &mut self.websocket_senders {
+            let m = format!("/score/play:true",);
+            if let Ok(ok) = ws.message_tx.send(m) {
+                // info!("Sending syscall to {ok} receivers");
+            }
         }
     }
     // TODO: Send continuous analysis of individual categories and individual syscalls
