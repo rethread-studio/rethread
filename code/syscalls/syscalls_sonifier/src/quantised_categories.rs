@@ -235,6 +235,7 @@ impl QuantisedCategories {
                     hpf: Some(10.),
                     exciter_lpf: Some(200.),
                     position: Some(0.35),
+                    exciter_amp: Some(0.2),
                 },
                 &mut changes,
             );

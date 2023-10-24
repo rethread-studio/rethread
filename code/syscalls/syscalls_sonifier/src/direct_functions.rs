@@ -471,6 +471,7 @@ impl SyscallWaveguide {
                     hpf: Some(10.),
                     exciter_lpf: Some(1500.),
                     position: Some(0.25),
+                    exciter_amp: Some(0.2),
                 },
                 &mut changes,
             );
