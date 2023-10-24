@@ -7,6 +7,7 @@ use crossterm::{
 };
 use enum_iterator::cardinality;
 use futures_util::{SinkExt, StreamExt};
+use fxhash::FxHashMap;
 use log::*;
 use menu::MenuItem;
 use nix::errno::Errno;
@@ -40,9 +41,8 @@ use tokio::{
 use tokio_tungstenite::tungstenite::Message;
 
 mod config;
-mod menu;
-// mod movement;
 mod egui_main;
+mod menu;
 mod send_osc;
 
 static SHOW_TUI: bool = true;
@@ -83,6 +83,43 @@ impl RecordedPackets {
         let mut file = File::create(path)?;
         file.write_all(data.as_slice()).unwrap();
         Ok(())
+    }
+    fn analyse_main_program(&mut self) {
+        let mut program_count = FxHashMap::default();
+        for r in &self.records {
+            match &r.packet {
+                syscalls_shared::Packet::Syscall(s) => {
+                    *program_count.entry(s.command.clone()).or_insert(0) += 1
+                }
+            }
+        }
+        let mut sorted_programs = program_count.into_iter().collect::<Vec<_>>();
+        sorted_programs.sort_by(|a, b| a.1.cmp(&b.1));
+        if let Some((main_program, _)) = sorted_programs.first() {
+            self.main_program = main_program.clone();
+        }
+    }
+    fn mean_activity(&self, timestep: Duration) -> f32 {
+        let mut time = Duration::ZERO;
+        let mut activity_slices = vec![];
+        let mut current_i = 0;
+
+        while current_i < self.records.len() {
+            let mut calls_per_ts = 0;
+            while self.records[current_i].timestamp < time {
+                calls_per_ts += 1;
+                current_i += 1;
+                if current_i >= self.records.len() {
+                    break;
+                }
+            }
+            activity_slices.push(calls_per_ts);
+            time += timestep;
+        }
+
+        let num_slices = activity_slices.len();
+        (activity_slices.into_iter().sum::<usize>() as f64/ num_slices as f64) as f32
+
     }
 }
 
