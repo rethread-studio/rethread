@@ -331,6 +331,15 @@ impl eframe::App for EguiApp {
             if ui.button("Add active program").clicked() {
                 self.add_active_program(self.selected_program_value.clone());
             }
+            ui.separator();
+            if ui.button("Analyse metadata").clicked() {
+                // Set main program for all recordings
+                for rec in &mut self.recordings {
+                    rec.recorded_packets.analyse_main_program();
+                }
+                // Calculate the mean intensity per recording and assign ascending number within each program category
+                analyse_recording_intensities(&mut self.recordings);
+            }
         });
 
         egui::TopBottomPanel::top("my_panel").show(ctx, |ui| {
@@ -485,19 +494,7 @@ fn recording_window(
                 todo!()
             }
             if ui.button("Get main program").clicked() {
-                let mut program_count = FxHashMap::default();
-                for r in &recording.recorded_packets.records {
-                    match &r.packet {
-                        syscalls_shared::Packet::Syscall(s) => {
-                            *program_count.entry(s.command.clone()).or_insert(0) += 1
-                        }
-                    }
-                }
-                let mut sorted_programs = program_count.into_iter().collect::<Vec<_>>();
-                sorted_programs.sort_by(|a, b| a.1.cmp(&b.1));
-                if let Some((main_program, _)) = sorted_programs.first() {
-                    recording.recorded_packets.main_program = main_program.clone();
-                }
+                recording.recorded_packets.analyse_main_program();
                 command = Some(RecordingCommand::ReplaceRecording(recording.clone()));
             }
             if ui.button("Close").clicked() {
@@ -534,4 +531,22 @@ fn recording_window(
             }
         });
     command
+}
+
+fn analyse_recording_intensities(recordings: &mut [RecordingPlayback]) {
+    let timestep = Duration::from_millis(50);
+    let mut recording_activity = FxHashMap::default();
+    for (i, rec) in recordings.iter_mut().enumerate() {
+        let activity = rec.recorded_packets.mean_activity(timestep);
+        let entry = recording_activity
+            .entry(rec.recorded_packets.main_program.clone())
+            .or_insert(Vec::new());
+        entry.push((activity, i));
+    }
+    for list in recording_activity.values_mut() {
+        list.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        for (intensity, (_activity, index)) in list.iter().enumerate() {
+            recordings[*index].recorded_packets.intensity = intensity as u32;
+        }
+    }
 }
