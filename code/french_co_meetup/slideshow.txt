@@ -1,7 +1,7 @@
 # re|thread
 https://rethread.art/code/NWL2022/window_projections/multi/?where=left,re|thread<br>Animation for un|fold
 https://rethread.art/code/NWL2022/window_projections/multi/?where=right,re|thread<br>Animation for un|fold
-https://ronikaufman.github.io/hommage-a-molnar/,Roni Kaufman<br>Hommage à Molnár
+https://rethread.art/code/repogram/rectangular/index.html,re|thread<br>Repogram
 https://player.vimeo.com/video/674432396?autoplay=1&loop=1&muted=1,re|thread<br>Browser Chance Music
 https://player.vimeo.com/video/665661685?autoplay=1&loop=1&muted=1,re|thread<br>cyber|glow
 https://player.vimeo.com/video/483464921?autoplay=1&loop=1&muted=1,re|thread<br>RFC:675:08
@@ -12,6 +12,8 @@ https://player.vimeo.com/video/483464921?autoplay=1&loop=1&muted=1,re|thread<br>
 /images/drift/code.png,re|thread<br>Drift
 /images/drift/driftIntro.jpg,re|thread<br>Drift
 https://rethread.art/code/french_co_meetup/sketches/frenchco-bezier001.html,
+https://ronikaufman.github.io/hommage-a-molnar/,Roni Kaufman<br>Hommage à Molnár
+https://raw.githubusercontent.com/ronikaufman/melodic_guitar_music_album_cover/main/artwork.png,Roni Kaufman<br>Artwork for the album cover of "Melodic Guitar Music" by Adrian Holovary 
 # Vera Molnar
 https://fovarosikeptar.hu/wp-content/uploads/2019/10/fovarosi-keptar-2019-vera-molnar-04.jpg,Vera Molnár
 https://fovarosikeptar.hu/wp-content/uploads/2019/10/fovarosi-keptar-2019-vera-molnar-09.jpg,Vera Molnár
