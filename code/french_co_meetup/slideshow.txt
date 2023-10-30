@@ -11,6 +11,7 @@ https://player.vimeo.com/video/483464921?autoplay=1&loop=1&muted=1,re|thread<br>
 /images/kulturnat/triangle.jpg,re|thread<br>cyber|glow
 /images/drift/code.png,re|thread<br>Drift
 /images/drift/driftIntro.jpg,re|thread<br>Drift
+https://rethread.art/code/french_co_meetup/sketches/frenchco-bezier001.html,
 # Vera Molnar
 https://fovarosikeptar.hu/wp-content/uploads/2019/10/fovarosi-keptar-2019-vera-molnar-04.jpg,Vera Molnár
 https://fovarosikeptar.hu/wp-content/uploads/2019/10/fovarosi-keptar-2019-vera-molnar-09.jpg,Vera Molnár
