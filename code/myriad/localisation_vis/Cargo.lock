@@ -168,6 +168,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc7eb209b1518d6bb87b283c20095f5228ecda460da70b44f0802523dea6da04"
 
 [[package]]
+name = "anyhow"
+version = "1.0.75"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
+
+[[package]]
 name = "arboard"
 version = "3.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1366,6 +1372,8 @@ dependencies = [
  "eframe",
  "egui",
  "egui_plot",
+ "multilateration",
+ "nom",
  "serialport",
 ]
 
@@ -1410,6 +1418,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62bb907fe88d54d8d9ce32a3cceab4218ed2f6b7d35617cafe9adf84e43919cb"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "mathru"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7220b456e6e4b9e4b7a29004cbc140c2e49085839b46400f36354d7155ebd924"
+dependencies = [
+ "rand",
 ]
 
 [[package]]
@@ -1471,6 +1488,16 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "multilateration"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68dc342b2525a42df05b9bb431a9de9bbf17336a5a99cefef918b42b8ee7a663"
+dependencies = [
+ "anyhow",
+ "mathru",
 ]
 
 [[package]]

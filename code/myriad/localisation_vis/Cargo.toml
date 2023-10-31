@@ -10,4 +10,6 @@ color-eyre = "0.6.2"
 eframe = "0.23.0"
 egui = "0.23.0"
 egui_plot = "0.23.0"
+multilateration = "1.0.0"
+nom = "7.1.3"
 serialport = { version = "4.2.2", features = ["usbportinfo-interface"] }
