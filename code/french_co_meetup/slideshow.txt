@@ -12,6 +12,8 @@ https://player.vimeo.com/video/483464921?autoplay=1&loop=1&muted=1,re|thread<br>
 /images/drift/code.png,re|thread<br>Drift
 /images/drift/driftIntro.jpg,re|thread<br>Drift
 https://rethread.art/code/french_co_meetup/sketches/frenchco-bezier001.html,
+https://rethread.art/code/french_co_meetup/sketches/frenchco-bezier002.html,
+https://rethread.art/code/french_co_meetup/sketches/frenchco-bezier004.html,
 https://ronikaufman.github.io/hommage-a-molnar/,Roni Kaufman<br>Hommage à Molnár
 https://raw.githubusercontent.com/ronikaufman/melodic_guitar_music_album_cover/main/artwork.png,Roni Kaufman<br>Artwork for the album cover of "Melodic Guitar Music" by Adrian Holovary 
 # Vera Molnar
