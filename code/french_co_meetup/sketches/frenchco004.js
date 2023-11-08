@@ -1,7 +1,5 @@
 
-//global vars for the whole piece
-var w// = 900 
-var h// = 900 
+var w, h 
 var cnv
 var x, y
 var xoff, yoff

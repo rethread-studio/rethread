@@ -20,7 +20,7 @@
             color: #FFFFFF;
             font-family: monospace;
             margin-left: 12px;
-            font-size: 12px
+            font-size: 14px
         }
     </style>
     <style type="text/css">
@@ -32,7 +32,7 @@
             color: #FFFFFF;
             font-family: monospace;
             margin-left: 12px;
-            font-size: 10px
+            font-size: 8px
         }
     </style>
 
@@ -41,28 +41,28 @@
 <body style="background-color:#000000;">
 
     <div class="sourcecode">
-        <pre id="fileDisplayArea"> </pre>
+        <pre id="fileDisplayArea"></pre>
     </div>
 
-    <div class="credits">   
-        credits:<br>@al.my.re; p5.js; perlin; vera
+    <div class="credits">
+        credits:<br>@al.my.re; p5.js; bezier
     </div>
 
     <script>
 
         window.onload = function () {
             var fileDisplayArea = document.getElementById('fileDisplayArea');
-            fetch("frenchco004.js")
+            fetch("frenchcobezier002.js")
                 .then((res) => res.text())
                 .then((text) => {
                     fileDisplayArea.innerText = text;
                 })
                 .catch((e) => console.error(e));
         }
-    
+
     </script>
 
-    <script src="frenchco004.js"></script>
+    <script src="frenchcobezier002.js"></script>
 </body>
 
 </html>
