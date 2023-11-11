@@ -39,8 +39,17 @@ function draw() {
             iframeElement.style.display = "block";
             imgElement.style.display = "none";
         }
-        if (description) pElement.innerHTML = description;
-        else pElement.innerHTML = "";
+        if (description) {
+            pElement.innerHTML = description;
+            imgElement.style.height = "90%";
+            iframeElement.style.height = "90%";
+            pElement.style.height = "10%";
+        } else {
+            pElement.innerHTML = "";
+            imgElement.style.height = "100%";
+            iframeElement.style.height = "100%";
+            pElement.style.height = "0";
+        }
     }
 }
 
