@@ -1,7 +1,7 @@
 //! Plays the audified machine code as the exciter in a waveguide
 //!
 //! Play through a large reverb
-use rand::{thread_rng, Rng};
+use rand::{random, thread_rng, Rng};
 use std::{
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -16,13 +16,16 @@ use knyst::{
     audio_backend::{CpalBackend, CpalBackendOptions, JackBackend},
     controller::print_error_handler,
     envelope::Envelope,
-    handles::{graph_output, handle, Handle},
+    filter::one_pole::{one_pole_hpf, one_pole_lpf},
+    handles::{graph_output, handle, AnyNodeHandle, Handle},
     modal_interface::commands,
     prelude::*,
+    resources::BufferId,
     sphere::{KnystSphere, SphereSettings},
     trig::interval_trig,
 };
-use knyst_waveguide2::{one_pole_lpf, waveguide};
+use knyst_reverb::{luff_verb, LuffVerb, LuffVerbHandle};
+use knyst_waveguide2::waveguide;
 use trace_sonifier::{
     binary_instructions::{
         self, machine_code, machine_code_instruction_only, machine_code_to_buffer,
@@ -56,16 +59,48 @@ fn main() -> Result<()> {
         "/home/erik/Nextcloud/reinverse_traces/Normalize_random_0.txt",
     ];
 
-    let trace = std::fs::read_to_string(traces[0])?;
+    let verb = luff_verb(1050 * 48, 0.30).lowpass(19000.).damping(15000.);
+    graph_output(
+        0,
+        one_pole_hpf()
+            .sig(verb * 0.10)
+            .cutoff_freq(100.)
+            .repeat_outputs(1),
+    );
+    for path in traces {
+        println!("Playing trace: {path}");
+        let trace = std::fs::read_to_string(path)?;
 
+        let buffer = machine_code_to_buffer(&trace, true)?;
+        println!("Buffer length: {}", buffer.length_seconds());
+        let buffer = commands().insert_buffer(buffer);
+
+        play_waveguide_segments(verb, buffer, random(), random());
+        std::thread::sleep(Duration::from_secs(5));
+    }
+
+    let mut buffer = String::new();
+    let stdin = std::io::stdin(); // We get `Stdin` here.
+    stdin.read_line(&mut buffer)?;
+
+    Ok(())
+}
+
+fn play_waveguide_segments(
+    verb: Handle<LuffVerbHandle>,
+    buffer: BufferId,
+    random_interval: bool,
+    pass_through_trigger: bool,
+) {
     let mut rng = thread_rng();
-    let buffer = machine_code_to_buffer(&trace, true)?;
-    println!("Buffer length: {}", buffer.length_seconds());
-    let buffer = commands().insert_buffer(buffer);
-
     let mut root = 1000.0;
-    loop {
-        commands().init_local_graph(commands().default_graph_settings());
+    // .input(sig * 0.125);
+    // .input(sig * 0.125 + graph_input(0, 1));
+    let mut graphs = vec![];
+    for _ in 0..4 {
+        let mut gs = commands().default_graph_settings();
+        gs.num_outputs = 1;
+        commands().init_local_graph(gs);
 
         let exciter = buffer_reader(buffer, 1.0, true, StopAction::FreeGraph);
         let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(3600.);
@@ -77,36 +112,47 @@ fn main() -> Result<()> {
         for &freq in [1.0, 3. / 2., 6. / 5., 2.0, 3.].iter() {
             let freq = freq * root;
 
-            // Take the interval times from the matrix
-            let interval_time = rng.gen_range(1.0f32..2.0);
-            let interval_time = 0.5;
-            let exciter_to_wg = exciter_to_wg
-                * handle(env.to_gen()).set("restart", interval_trig().interval(interval_time));
-            let exciter_to_wg = one_pole_lpf().sig(exciter_to_wg).cutoff_freq(freq * 3.0);
+            let exciter_to_wg: AnyNodeHandle = if pass_through_trigger {
+                // Take the interval times from the matrix
+                let interval_time = if random_interval {
+                    rng.gen_range(1.0f32..2.0)
+                } else {
+                    64. / 60.
+                };
+                (exciter_to_wg
+                    * handle(env.to_gen()).set("restart", interval_trig().interval(interval_time)))
+                .into()
+            } else {
+                exciter_to_wg.into()
+            };
+            let exciter_to_wg = one_pole_lpf().sig(&exciter_to_wg).cutoff_freq(freq * 3.0);
             let wg = waveguide()
-                .freq(freq as f32)
+                .freq(freq)
                 .exciter(exciter_to_wg)
                 .feedback(0.9999)
                 // .feedback(1.001)
-                .damping(freq as f32 * 7. + 1000.)
+                .damping(freq * 7. + 1000.)
                 .lf_damping(6.)
                 .position(0.4)
                 .stiffness(0.0);
             let sig = wg * 0.1;
-            graph_output(0, sig.repeat_outputs(1));
+            graph_output(0, sig);
         }
         let g = commands().upload_local_graph();
-        graph_output(0, g);
+        graphs.push(g);
+        verb.input(g);
+        graph_output(
+            0,
+            one_pole_lpf().sig(g).cutoff_freq(4000.).repeat_outputs(1),
+        );
 
         root *= 0.5;
         std::thread::sleep(Duration::from_secs(15));
     }
 
-    let mut buffer = String::new();
-    let stdin = std::io::stdin(); // We get `Stdin` here.
-    stdin.read_line(&mut buffer)?;
-
-    Ok(())
+    for g in graphs {
+        g.free();
+    }
 }
 fn sine() -> Handle<OscillatorHandle> {
     oscillator(WavetableId::cos())
