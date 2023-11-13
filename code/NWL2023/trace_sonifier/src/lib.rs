@@ -1,6 +1,7 @@
 use fxhash::FxHashMap;
 
 pub mod binary_instructions;
+mod harmony;
 pub mod instances_of_instruction;
 
 use color_eyre::Result;
