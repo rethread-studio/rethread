@@ -75,7 +75,7 @@ fn main() -> Result<()> {
         println!("Buffer length: {}", buffer.length_seconds());
         let buffer = commands().insert_buffer(buffer);
 
-        play_waveguide_segments(verb, buffer, random(), random());
+        play_waveguide_segments(verb, buffer, true, true);
         std::thread::sleep(Duration::from_secs(5));
     }
 

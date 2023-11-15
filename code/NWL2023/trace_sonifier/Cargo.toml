@@ -11,6 +11,7 @@ color-eyre = "0.6.2"
 knyst = { path = "/home/erik/code/rust/audio/knyst/knyst" }
 knyst_waveguide2 = { path = "/home/erik/code/rust/audio/knyst_waveguide2" }
 knyst_reverb = { path = "/home/erik/code/rust/audio/knyst_reverb" }
+neodrs = { path = "/home/erik/Nextcloud/Neod/code/neod-rs/neodrs" }
 atomic_float = "0.1.0"
 musical_matter = { path = "/home/erik/code/rust/musical_matter" }
 rand = "0.8.5"

@@ -14,6 +14,22 @@ impl Default for InstructionInstance {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct InstructionInstanceAbsolute {
+    pub bytes: [u8; 10],
+    pub num_bytes: usize,
+    pub absolute_position_in_list: u64,
+}
+impl InstructionInstanceAbsolute {
+    pub fn from_instruction_instance(ins: InstructionInstance, position: u64) -> Self {
+        Self {
+            bytes: ins.bytes,
+            num_bytes: ins.num_bytes,
+            absolute_position_in_list: position,
+        }
+    }
+}
+
 use std::mem;
 
 use color_eyre::{eyre::Context, Result};
