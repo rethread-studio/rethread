@@ -18,7 +18,7 @@ use knyst::{
     envelope::Envelope,
     filter::one_pole::{one_pole_hpf, one_pole_lpf},
     graph::GraphId,
-    handles::{handle, AnyNodeHandle},
+    handles::{handle, AnyNodeHandle, GenericHandle},
     prelude::*,
     resources::BufferId,
     trig::interval_trig,
@@ -29,7 +29,6 @@ use knyst_waveguide2::{
     half_sine_wt, waveguide, HalfSineImpulseHandle, HalfSineWtHandle, WaveguideHandle,
 };
 use musical_matter::pitch::EdoChordSemantic;
-use neodrs::SynthesisInterface;
 use rand::{random, rngs::StdRng, seq::SliceRandom, thread_rng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
 use tokio::select;
@@ -39,6 +38,8 @@ use trace_sonifier::{
     instances_of_instruction::{InstructionInstance, InstructionInstanceAbsolute},
     instruction_occurrence_by_name,
 };
+
+        const TRACE_PATH: &'static str = "C:/Users/erikn/Nextcloud/reinverse_traces/";
 
 enum Messages {
     StartMovement(usize),
@@ -84,7 +85,7 @@ impl Vind {
         let movement = &self.score[num];
         println!("trace: {}", movement.trace_name);
         let trace = match std::fs::read_to_string(format!(
-            "/home/erik/Nextcloud/reinverse_traces/{}.txt",
+            "{TRACE_PATH}{}.txt",
             movement.trace_name
         )) {
             Ok(trace) => trace,
@@ -152,18 +153,18 @@ async fn main() -> Result<()> {
     let (stop_application_sender, mut stop_application_receiver) =
         tokio::sync::broadcast::channel(1);
     let traces = [
-        "/home/erik/Nextcloud/reinverse_traces/Inverse_random_0.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Inverse_diagonal_0.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Inverse_lower_triangular_0.txt",
-        "/home/erik/Nextcloud/reinverse_traces/SVD_lower_triangular_7.txt",
-        "/home/erik/Nextcloud/reinverse_traces/SVD_random_7.txt",
-        "/home/erik/Nextcloud/reinverse_traces/SVD_upper_triangular_7.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Multiply_diagonal_42.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Multiply_random_73.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Normalize_random_0.txt",
+        "Inverse_random_0.txt",
+        "Inverse_diagonal_0.txt",
+        "Inverse_lower_triangular_0.txt",
+        "SVD_lower_triangular_7.txt",
+        "SVD_random_7.txt",
+        "SVD_upper_triangular_7.txt",
+        "Multiply_diagonal_42.txt",
+        "Multiply_random_73.txt",
+        "Normalize_random_0.txt",
     ];
 
-    let emergency_trace = std::fs::read_to_string(traces[0])?;
+    let emergency_trace = std::fs::read_to_string(format!("{TRACE_PATH}{}", traces[0]))?;
     let mut vind = Vind {
         processes: vec![],
         chord_matrix: ChordMatrix::new(),
@@ -401,6 +402,15 @@ async fn instructions_to_melody_rewrite(
     });
 
     Ok(process)
+}
+
+fn bus(arg: usize) -> Handle<GenericHandle> {
+    let id = commands().push_without_inputs(Bus(arg));
+    Handle::new(GenericHandle::new(
+         id,
+         arg,
+         arg,
+    ))
 }
 
 async fn sines_n_most_uncommon(
