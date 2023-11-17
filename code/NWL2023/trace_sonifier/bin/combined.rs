@@ -4,8 +4,8 @@
 use std::{
     borrow::BorrowMut,
     sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc, Mutex,
+        atomic::{AtomicBool, AtomicUsize, Ordering},
+        Arc, Mutex, OnceLock,
     },
     time::Duration,
 };
@@ -15,8 +15,9 @@ use color_eyre::Result;
 use knyst::{
     audio_backend::JackBackend,
     commands,
-    envelope::Envelope,
-    filter::one_pole::{one_pole_hpf, one_pole_lpf},
+    envelope::{envelope_gen, Envelope, SustainMode},
+    gen::filter::one_pole::{one_pole_hpf, one_pole_lpf},
+    gen::random::random_lin,
     graph::GraphId,
     handles::{handle, AnyNodeHandle, GenericHandle},
     prelude::*,
@@ -26,12 +27,12 @@ use knyst::{
 use knyst::{handles::Handle, prelude::OscillatorHandle, resources::WavetableId};
 use knyst_reverb::{luff_verb, LuffVerbHandle};
 use knyst_waveguide2::{
-    half_sine_wt, waveguide, HalfSineImpulseHandle, HalfSineWtHandle, WaveguideHandle,
+    half_sine_wt, waveguide, white_noise, HalfSineImpulseHandle, HalfSineWtHandle, WaveguideHandle,
 };
 use musical_matter::pitch::EdoChordSemantic;
 use rand::{random, rngs::StdRng, seq::SliceRandom, thread_rng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
-use tokio::select;
+use tokio::{select, time::interval};
 use trace_sonifier::{
     binary_instructions::machine_code_to_buffer,
     harmony::ChordMatrix,
@@ -39,7 +40,9 @@ use trace_sonifier::{
     instruction_occurrence_by_name,
 };
 
-        const TRACE_PATH: &'static str = "C:/Users/erikn/Nextcloud/reinverse_traces/";
+// const TRACE_PATH: &'static str = "C:/Users/erikn/Nextcloud/reinverse_traces/";
+
+static TRACE_PATH: OnceLock<String> = OnceLock::new();
 
 enum Messages {
     StartMovement(usize),
@@ -73,6 +76,7 @@ struct Vind {
     /// If a trace cannot be loaded, use this instead
     emergency_trace: String,
     chord_matrix: ChordMatrix,
+    latest_trace: String,
     score: Vec<ScoreObject>,
 }
 
@@ -84,23 +88,29 @@ impl Vind {
         // Select sonification method
         let movement = &self.score[num];
         println!("trace: {}", movement.trace_name);
-        let trace = match std::fs::read_to_string(format!(
-            "{TRACE_PATH}{}.txt",
-            movement.trace_name
-        )) {
-            Ok(trace) => trace,
-            Err(e) => {
-                eprintln!("Failed to load trace: {e}");
-                self.emergency_trace.clone()
-            }
-        };
+        let trace_path = TRACE_PATH.get().expect("Trace path should be initialised");
+        let trace =
+            match std::fs::read_to_string(format!("{trace_path}{}.txt", movement.trace_name)) {
+                Ok(trace) => trace,
+                Err(e) => {
+                    eprintln!("Failed to load trace: {e}");
+                    self.emergency_trace.clone()
+                }
+            };
 
         // Start new sonification
-        let process =
-            play_waveguide_segments(&trace, true, true, self.chord_matrix.current()).await;
+        let process = play_waveguide_segments(
+            &trace,
+            false,
+            true,
+            &movement.source[0].matrix[..],
+            true,
+            self.chord_matrix.current(),
+        )
+        .await;
         self.processes.push(process);
         let process =
-            instructions_to_melody_rewrite(&trace, 10, 20, 18, self.chord_matrix.current())
+            instructions_to_melody_rewrite(&trace, 15, 15, 18, self.chord_matrix.current())
                 .await
                 .unwrap();
         self.processes.push(process);
@@ -118,6 +128,7 @@ impl Vind {
         //         .unwrap();
         // self.tokio_stop_channels.push(stop_channel);
         // self.new_chord_senders.push(chord_sender);
+        self.latest_trace = trace;
     }
     pub async fn stop_active_processes(&mut self) {
         for proc in &mut self.processes {
@@ -127,11 +138,16 @@ impl Vind {
         }
         self.processes.clear();
     }
-    pub async fn pulse(&mut self, num: i32) {}
+    pub async fn pulse(&mut self, num: i32) {
+        if num % 3 == 0 {
+            self.next_chord();
+        }
+        play_pulse(num as u32, self.chord_matrix.current()).await;
+    }
     pub async fn perform_break(&mut self) {
         self.stop_active_processes().await;
 
-        let process = break_sines(self.chord_matrix.current()).await;
+        let process = break_sines(self.chord_matrix.current(), &self.latest_trace).await;
         self.processes.push(process);
     }
     pub async fn set_beam_width(&mut self, value: f32) {
@@ -149,6 +165,13 @@ impl Vind {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    dotenv::dotenv().ok(); // This line loads the environment variables from the ".env" file.
+    TRACE_PATH.set(
+        std::env::var("TRACE_PATH").expect(
+            "The TRACE_PATH environment variable should be set, optionally in the .env file",
+        ),
+    );
+
     let score = load_score()?;
     let (stop_application_sender, mut stop_application_receiver) =
         tokio::sync::broadcast::channel(1);
@@ -164,11 +187,14 @@ async fn main() -> Result<()> {
         "Normalize_random_0.txt",
     ];
 
-    let emergency_trace = std::fs::read_to_string(format!("{TRACE_PATH}{}", traces[0]))?;
+    let trace_path = TRACE_PATH.get().unwrap();
+
+    let emergency_trace = std::fs::read_to_string(format!("{trace_path}{}", traces[0]))?;
     let mut vind = Vind {
         processes: vec![],
         chord_matrix: ChordMatrix::new(),
         stop_application_sender,
+        latest_trace: emergency_trace.clone(),
         emergency_trace,
         score,
     };
@@ -176,20 +202,30 @@ async fn main() -> Result<()> {
     let (sender, mut receiver) = tokio::sync::mpsc::unbounded_channel();
 
     receive_osc(sender)?;
-    let mut backend = JackBackend::new("Knyst<3JACK")?;
+    let mut backend = JackBackend::new("reinverse")?;
     let _sphere = KnystSphere::start(
         &mut backend,
         SphereSettings {
             num_inputs: 0,
-            num_outputs: 2,
+            num_outputs: 4,
             ..Default::default()
         },
         knyst::controller::print_error_handler,
     );
-    vind.start_movement(0).await;
-    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
-    vind.perform_break().await;
+    // vind.perform_break().await;
+    // tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
+    vind.start_movement(8).await;
+    // vind.perform_break().await;
     // vind.start_movement(0).await;
+
+    let (chord_change_sender, mut chord_change_receiver) =
+        tokio::sync::mpsc::unbounded_channel::<()>();
+    tokio::task::spawn(async move {
+        loop {
+            tokio::time::sleep(std::time::Duration::from_millis(50000)).await;
+            // chord_change_sender.send(()).ok();
+        }
+    });
 
     loop {
         tokio::select! {
@@ -204,9 +240,7 @@ async fn main() -> Result<()> {
         }
             }
             _ = stop_application_receiver.recv() => break,
-            _ = tokio::time::sleep(std::time::Duration::from_millis(
-                60000
-                    )) => vind.next_chord(),
+            _ = chord_change_receiver.recv() => vind.next_chord(),
         }
     }
 
@@ -282,13 +316,7 @@ async fn instructions_to_melody_rewrite(
     graph_output(0, outer_graph_handle);
     commands().to_graph(outer_graph_id);
     let verb = luff_verb(650 * 48, 0.70).lowpass(19000.).damping(5000.);
-    graph_output(
-        0,
-        one_pole_hpf()
-            .sig(verb * 0.20)
-            .cutoff_freq(100.)
-            .repeat_outputs(1),
-    );
+    graph_output(1, one_pole_hpf().sig(verb * 0.30).cutoff_freq(100.));
 
     let exciter = half_sine_wt()
         .freq(200. * 0.4837) // Nice for plucking low notes
@@ -308,7 +336,8 @@ async fn instructions_to_melody_rewrite(
         .stiffness(0.0);
     let beam_setter = bus(1).set(0, 0.5);
     let sig = wg * (0.2 * beam_setter + 0.02);
-    graph_output(0, sig.repeat_outputs(1));
+    graph_output(3, sig);
+    verb.input(sig * 0.2);
     let mut freqs: Vec<_> = chord
         .to_edo_chord()
         .to_edo_pitches()
@@ -320,10 +349,11 @@ async fn instructions_to_melody_rewrite(
         let mut rng: StdRng = SeedableRng::from_entropy();
         // let indent = name.chars().map(|c| c as u8 as u32).sum::<u32>() % 120;
         // let indent = " ".repeat(indent as usize);
-        let mut time_counter = 0;
-        let mut time_to_next = 0;
+        let skip_nr = rng.gen_range(0..instruction_score.score.len() / 2);
+        let mut time_counter = instruction_score.score[skip_nr].1.absolute_position_in_list;
+        let mut time_to_next;
         exciter.restart_trig();
-        for (i, instance) in instruction_score.score {
+        for (i, instance) in instruction_score.score.into_iter().skip(skip_nr) {
             let i = i.0;
             let octave = 2f32.powi((i / freqs.len()) as i32);
             let freq = freqs[i % freqs.len()] * octave;
@@ -332,7 +362,7 @@ async fn instructions_to_melody_rewrite(
                 (instance.absolute_position_in_list - time_counter) * millis_per_instruction;
             time_counter = instance.absolute_position_in_list;
 
-            println!("{i}: {time_to_next}");
+            // println!("{i}: {time_to_next}");
 
             // println!("{indent}{name}");
 
@@ -341,11 +371,27 @@ async fn instructions_to_melody_rewrite(
                 let ornament_length = rng.gen_range(40..(time_to_next.min(200)));
                 let num_ornaments = time_to_next.min(200) / ornament_length;
                 let pre_delay = time_to_next - (ornament_length * num_ornaments);
-                select! {
-                  _ = tokio::time::sleep(std::time::Duration::from_millis(
-                    pre_delay
-                )) => (),
-                _ = stop_receiver.recv() => {break;}
+                if pre_delay > 3000 {
+                    select! {
+                      _ = tokio::time::sleep(std::time::Duration::from_millis(
+                        pre_delay/2
+                    )) => (),
+                    _ = stop_receiver.recv() => {break;}
+                    }
+                    wg.feedback(0.999);
+                    select! {
+                      _ = tokio::time::sleep(std::time::Duration::from_millis(
+                        pre_delay/2
+                    )) => (),
+                    _ = stop_receiver.recv() => {break;}
+                    }
+                } else {
+                    select! {
+                      _ = tokio::time::sleep(std::time::Duration::from_millis(
+                        pre_delay
+                    )) => (),
+                    _ = stop_receiver.recv() => {break;}
+                    }
                 }
                 for i in 0..num_ornaments {
                     if i % 2 == 0 {
@@ -369,7 +415,7 @@ async fn instructions_to_melody_rewrite(
                                     .to_edo_chord()
                                     .to_edo_pitches()
                                     .into_iter()
-                                    .map(|p| p.to_freq_pitch(200.).frequency())
+                                    .map(|p| p.to_freq_pitch(100.).frequency())
                                     .collect();
 
                         }
@@ -406,11 +452,7 @@ async fn instructions_to_melody_rewrite(
 
 fn bus(arg: usize) -> Handle<GenericHandle> {
     let id = commands().push_without_inputs(Bus(arg));
-    Handle::new(GenericHandle::new(
-         id,
-         arg,
-         arg,
-    ))
+    Handle::new(GenericHandle::new(id, arg, arg))
 }
 
 async fn sines_n_most_uncommon(
@@ -619,13 +661,15 @@ async fn play_waveguide_segments(
     trace: &str,
     random_interval: bool,
     pass_through_trigger: bool,
+    matrix: &[f64],
+    reverb: bool,
     chord: &EdoChordSemantic,
 ) -> ProcessInteractivity {
     println!("Start waveguide segments");
 
     let process = ProcessInteractivity::new();
     let mut stop_receiver = process.stop_sender.subscribe();
-    let mut chord_receiver = process.chord_sender.subscribe();
+    let chord_receiver = process.chord_sender.subscribe();
     let buffer = machine_code_to_buffer(trace, true).unwrap();
     println!("Buffer length: {}", buffer.length_seconds());
     let buffer = commands().insert_buffer(buffer);
@@ -636,7 +680,8 @@ async fn play_waveguide_segments(
         .into_iter()
         .map(|p| p.to_freq_pitch(200.).frequency())
         .collect();
-    dbg!(&freqs);
+
+    let mut interval_index = Arc::new(AtomicUsize::new(0));
 
     // .input(sig * 0.125);
     // .input(sig * 0.125 + graph_input(0, 1));
@@ -644,6 +689,7 @@ async fn play_waveguide_segments(
         let stop_sender = process.stop_sender.clone();
         let chord_sender = process.chord_sender.clone();
         let beam_width_sender = process.beam_width_sender.clone();
+        let matrix = matrix.to_vec();
         tokio::task::spawn(async move {
             let mut root = 4.0;
             let mut rng: StdRng = SeedableRng::from_entropy();
@@ -653,15 +699,24 @@ async fn play_waveguide_segments(
             graph_output(0, outer_graph_handle);
             commands().to_graph(outer_graph_id);
 
+            let main_env = envelope_gen(
+                0.0,
+                vec![(1.0, 2.0), (0.0, 5.0)],
+                SustainMode::SustainAtPoint(0),
+                StopAction::Continue,
+            );
+
             let verb = luff_verb(1650 * 48, 0.60).lowpass(19000.).damping(5000.);
             graph_output(
-                0,
+                2,
                 one_pole_hpf()
-                    .sig(verb * sine().freq(0.1).range(0.02, 0.25))
+                    .sig(verb * sine().freq(0.1).range(0.02, 0.35))
                     .cutoff_freq(100.)
-                    .repeat_outputs(1),
+                    * main_env,
             );
             let beam_setter = bus(1).set(0, 0.5);
+            let exciter = buffer_reader(buffer, 1.0, true, StopAction::FreeGraph);
+            let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(3600.);
 
             for _ in 0..4 {
                 {
@@ -670,15 +725,16 @@ async fn play_waveguide_segments(
                     let mut stop_receiver = stop_sender.subscribe();
                     let mut chord_receiver = chord_sender.subscribe();
                     let mut beam_receiver = beam_width_sender.subscribe();
+                    let matrix = matrix.clone();
+                    let interval_index = interval_index.clone();
                     tokio::task::spawn(async move {
                         let mut rng: StdRng = SeedableRng::from_entropy();
                         let mut gs = commands().default_graph_settings();
                         gs.num_outputs = 1;
+                        gs.num_inputs = 1;
                         commands().to_graph(outer_graph_id);
                         commands().init_local_graph(gs);
 
-                        let exciter = buffer_reader(buffer, 1.0, true, StopAction::FreeGraph);
-                        let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(3600.);
                         let env = Envelope {
                             start_value: 0.0,
                             points: vec![(1.0, 0.01), (0.25, 0.1), (0.0, 0.5)],
@@ -687,13 +743,20 @@ async fn play_waveguide_segments(
                         let mut wgs = vec![];
                         for &freq in &freqs {
                             let freq = freq * root;
+                            let exciter_to_wg = graph_input(0, 1);
 
                             let exciter_to_wg: AnyNodeHandle = if pass_through_trigger {
                                 // Take the interval times from the matrix
                                 let interval_time = if random_interval {
                                     rng.gen_range(1.0f32..2.0)
                                 } else {
-                                    64. / 60.
+                                    let i = interval_index.fetch_add(4, Ordering::SeqCst);
+                                    let interval = matrix[i]
+                                        + matrix[i + 32]
+                                        + matrix[i + 64]
+                                        + matrix[i + 96];
+                                    interval as f32 + 0.1
+                                    // 64. / 60.
                                 };
                                 (exciter_to_wg
                                     * handle(env.to_gen())
@@ -714,17 +777,17 @@ async fn play_waveguide_segments(
                                 .position(0.4)
                                 .stiffness(0.0);
                             wgs.push(wg);
-                            let sig = wg * 0.2;
+                            let sig = wg * 0.4;
                             graph_output(0, sig);
                         }
                         let inner_graph = commands().upload_local_graph();
+                        inner_graph.set(0, exciter_to_wg);
                         let g = inner_graph * (beam_setter + 0.01);
-                        verb.input(g);
+                        if reverb {
+                            verb.input(g);
+                        }
                         commands().to_graph(outer_graph_id);
-                        graph_output(
-                            0,
-                            one_pole_lpf().sig(g).cutoff_freq(4000.).repeat_outputs(1),
-                        );
+                        graph_output(1, one_pole_lpf().sig(g).cutoff_freq(4000.));
                         loop {
                             tokio::select! {
                             new_chord = chord_receiver.recv() => {
@@ -758,10 +821,13 @@ async fn play_waveguide_segments(
             }
 
             commands().to_top_level_graph();
-            stop_sender.send(()).ok();
+            stop_receiver.recv().await.ok();
+            // stop_sender.send(()).ok();
+            main_env.release_trig();
             tokio::time::sleep(Duration::from_secs(30)).await;
             verb.free();
             outer_graph_handle.free();
+            commands().remove_buffer(buffer);
         });
     }
 
@@ -838,24 +904,37 @@ fn receive_osc(sender: tokio::sync::mpsc::UnboundedSender<Messages>) -> Result<(
     Ok(())
 }
 
-async fn break_sines(chord: &EdoChordSemantic) -> ProcessInteractivity {
+async fn break_sines(chord: &EdoChordSemantic, last_trace: &str) -> ProcessInteractivity {
     let process = ProcessInteractivity::new();
     let mut stop_receiver = process.stop_sender.subscribe();
     let mut chord_receiver = process.chord_sender.subscribe();
     let mut beam_receiver = process.beam_width_sender.subscribe();
+
+    let buffer = machine_code_to_buffer(last_trace, false).unwrap();
+    let buffer = commands().insert_buffer(buffer);
 
     commands().to_top_level_graph();
     let outer_graph_id = commands().init_local_graph(commands().default_graph_settings());
     let outer_graph_handle = commands().upload_local_graph();
     graph_output(0, outer_graph_handle);
     commands().to_graph(outer_graph_id);
+
+    // let main_env = Envelope {
+    //     points: vec![(1.0, 2.0), (0.0, 5.0)],
+    //     sustain: knyst::envelope::SustainMode::SustainAtPoint(0),
+    //     ..Default::default()
+    // };
+    // let main_env = handle(main_env.to_gen());
+    let main_env = envelope_gen(
+        0.0,
+        vec![(1.0, 2.0), (0.0, 5.0)],
+        SustainMode::SustainAtPoint(0),
+        StopAction::Continue,
+    );
     let verb = luff_verb(650 * 48, 0.70).lowpass(19000.).damping(5000.);
     graph_output(
         0,
-        one_pole_hpf()
-            .sig(verb * 0.20)
-            .cutoff_freq(100.)
-            .repeat_outputs(1),
+        one_pole_hpf().sig(verb * 0.20).cutoff_freq(100.) * main_env,
     );
     let freqs: Vec<_> = chord
         .to_edo_chord()
@@ -867,23 +946,51 @@ async fn break_sines(chord: &EdoChordSemantic) -> ProcessInteractivity {
     let beam_setter = bus(1).set(0, 0.5);
 
     let beam = lag().value(beam_setter).time(1.0);
+    let mut sines = vec![];
 
-    let s0 = sine().freq(freqs[0] * 2.0);
-    let sig = s0 * (sine().freq(sine().freq(0.1).range(2.0, 10.0)) * beam + 1.0) * 0.1;
-    graph_output(0, sig.repeat_outputs(1));
-    let s1 = sine().freq(freqs[2] * 2.0);
-    let sig =
-        s1 * sine().freq(sine().freq((sine().freq(0.15) + 2.0) * 20. * beam) * beam + 1.0) * 0.1;
-    graph_output(0, sig.repeat_outputs(1));
-    let s2 = sine().freq(freqs[1] * 8.0);
-    let sig = s2 * (sine().freq((sine().freq(0.15) + 2.0) * 12. * beam) * beam + 1.0) * 0.1 * beam;
-    graph_output(0, sig.repeat_outputs(1));
-    let s3 = sine().freq(freqs[1] * 4.0);
-    // let sig = s3
-    //     * (sine().freq((sine().freq(0.15) + 2.0) * 12. * beam) * beam + 1.0)
-    //     * 0.1
-    //     * (1.0 - beam);
-    // graph_output(0, sig.repeat_outputs(1));
+    let trace_sound = buffer_reader(buffer, 0.5, true, StopAction::Continue);
+    let trace_sound = one_pole_lpf().sig(trace_sound * 0.1).cutoff_freq(3600.);
+
+    for i in 0..2 {
+        let freq_mult = 2.0 * (1.0 + i as f32 * 0.005);
+        let s0 = sine().freq(freqs[0] * freq_mult * (random_lin().freq(3.0) * 0.01 + 1.0));
+        sines.push((s0, freq_mult, 0));
+        let sig = s0
+            * (sine().freq(random_lin().freq(0.1) * 8. + 2.) * beam + 1.0)
+            * 0.1
+            * random_lin().freq(0.2).powf(3.0);
+        graph_output(1, sig * main_env);
+        let freq_mult = 2.0 + i as f32 * 0.005;
+        let s1 = sine().freq(freqs[2] * freq_mult);
+        sines.push((s1, freq_mult, 2));
+        let sig = s1
+            * sine().freq(sine().freq((random_lin().freq(0.15) + 2.0) * 10. * beam) * beam + 1.0)
+            * 0.1
+            * random_lin().freq(0.5).powf(3.0);
+        graph_output(2, sig * main_env);
+        // let s2 = sine().freq(freqs[1] * 8.0);
+        let s2 = waveguide()
+            .freq(freqs[1] * (8.0 + i as f32 * 0.005))
+            .damping(12000.)
+            .exciter(white_noise() * 0.01 + trace_sound)
+            .feedback(random_lin().freq(0.5).powf(2.0) * 0.1 + 1.0)
+            // .feedback(1.001)
+            .lf_damping(6.)
+            .position(0.5)
+            .stiffness(0.0);
+        let sig = s2
+            * (sine().freq((sine().freq(0.15) + 2.0) * 7. * beam) * beam + 1.0)
+            * 0.1
+            * beam
+            * random_lin().freq(0.7).powf(2.0);
+        graph_output(2, sig * main_env);
+        // let s3 = sine().freq(freqs[1] * 4.0);
+        // let sig = s3
+        //     * (sine().freq((sine().freq(0.15) + 2.0) * 12. * beam) * beam + 1.0)
+        //     * 0.1
+        //     * (1.0 - beam);
+        // graph_output(0, sig.repeat_outputs(1));
+    }
 
     tokio::task::spawn(async move {
         loop {
@@ -896,9 +1003,9 @@ async fn break_sines(chord: &EdoChordSemantic) -> ProcessInteractivity {
                     .into_iter()
                     .map(|p| p.to_freq_pitch(200.).frequency())
                     .collect();
-                s0.freq(freqs[0]*2.0);
-                s1.freq(freqs[2]*2.0);
-                s2.freq(freqs[1]*8.0);
+                for (sine, freq_mult, chord_note) in &mut sines {
+                    sine.freq(freqs[*chord_note]* *freq_mult);
+                }
 
                 }
             },
@@ -909,8 +1016,89 @@ async fn break_sines(chord: &EdoChordSemantic) -> ProcessInteractivity {
             _ = stop_receiver.recv() => break,
             }
         }
+        main_env.release_trig();
+        println!("Releasing break sines");
+        tokio::time::sleep(Duration::from_secs(20)).await;
         outer_graph_handle.free();
         println!("Break sines freed");
+        commands().remove_buffer(buffer);
+    });
+
+    process
+}
+
+async fn play_pulse(num: u32, chord: &EdoChordSemantic) -> ProcessInteractivity {
+    let process = ProcessInteractivity::new();
+    let mut stop_receiver = process.stop_sender.subscribe();
+    let mut chord_receiver = process.chord_sender.subscribe();
+    let mut beam_receiver = process.beam_width_sender.subscribe();
+
+    commands().to_top_level_graph();
+    let outer_graph_id = commands().init_local_graph(commands().default_graph_settings());
+    let outer_graph_handle = commands().upload_local_graph();
+    graph_output(0, outer_graph_handle);
+    commands().to_graph(outer_graph_id);
+
+    // let main_env = Envelope {
+    //     points: vec![(1.0, 2.0), (0.0, 5.0)],
+    //     sustain: knyst::envelope::SustainMode::SustainAtPoint(0),
+    //     ..Default::default()
+    // };
+    // let main_env = handle(main_env.to_gen());
+    let amp = 1.0 / ((num % 3) as f32 + 1.0);
+    let main_env = envelope_gen(
+        0.0,
+        vec![(amp.powi(2) * 0.5, 0.02), (0.0, 1.0)],
+        SustainMode::NoSustain,
+        StopAction::FreeGraph,
+    );
+    let freqs: Vec<_> = chord
+        .to_edo_chord()
+        .to_edo_pitches()
+        .into_iter()
+        .map(|p| p.to_freq_pitch(200.).frequency())
+        .collect();
+
+    let beam_setter = bus(1).set(0, 0.5);
+
+    let beam = lag().value(beam_setter).time(1.0);
+    let mut sines = vec![];
+
+    for i in 0..2 {
+        let freq_mult = 2.0 * (1.0 + i as f32 * 0.005);
+        let s0 = sine().freq(freqs[0] * freq_mult * (random_lin().freq(3.0) * 0.01 + 1.0));
+        sines.push((s0, freq_mult, 0));
+        let sig = s0 * 0.1;
+        graph_output(1, sig * main_env);
+        let freq_mult = 2.0 + i as f32 * 0.005;
+        let s1 = sine().freq(freqs[2] * freq_mult);
+        sines.push((s1, freq_mult, 2));
+        let sig = s1 * 0.1;
+        graph_output(1, sig * main_env);
+        // let s2 = sine().freq(freqs[1] * 8.0);
+        let s2 = waveguide()
+            .freq(freqs[1] * (8.0 + i as f32 * 0.005))
+            .damping(12000.)
+            .exciter(white_noise() * 0.01)
+            .feedback(random_lin().freq(0.5).powf(2.0) * 0.1 + 1.0)
+            // .feedback(1.001)
+            .lf_damping(6.)
+            .position(0.5)
+            .stiffness(0.0);
+        let sig =
+            s2 * (sine().freq((sine().freq(0.15) + 2.0) * 7. * beam) * beam + 1.0) * 0.1 * beam;
+        graph_output(1, sig * main_env);
+        // let s3 = sine().freq(freqs[1] * 4.0);
+        // let sig = s3
+        //     * (sine().freq((sine().freq(0.15) + 2.0) * 12. * beam) * beam + 1.0)
+        //     * 0.1
+        //     * (1.0 - beam);
+        // graph_output(0, sig.repeat_outputs(1));
+    }
+
+    tokio::task::spawn(async move {
+        tokio::time::sleep(Duration::from_secs(3)).await;
+        println!("Pulse freed");
     });
 
     process

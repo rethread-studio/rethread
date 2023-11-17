@@ -52,10 +52,11 @@ fn main() -> Result<()> {
         let machine_code = machine_code(&trace)?;
         // let machine_code = machine_code_instruction_only(&trace)?;
         // Convert from 8bit unsigned to f32 samples
-        // let buffer: Vec<_> = machine_code
-        //     .into_iter()
-        //     .map(|byte| (byte as i16 - (u8::MAX / 2) as i16) as f32 / (u8::MAX / 2) as f32)
-        //     .collect();
+        let buffer: Vec<_> = machine_code
+            .into_iter()
+            .map(|byte| (byte as i16 - (u8::MAX / 2) as i16) as f32 / (u8::MAX / 2) as f32)
+            .collect();
+        let buffer = Buffer::from_vec(buffer, 48000.);
         // treat them as 16bit values
         // buffer.save_to_disk("/home/erik/buf_dc_removed.wav")?;
 
@@ -72,7 +73,7 @@ fn main() -> Result<()> {
         // let sig = play_buf.repeat_outputs(1);
         // let sig = buffer_reader_multi(buffer_id, 4.0, StopAction::FreeSelf) * 0.1;
         // let sig = buffer_reader_multi(buffer_id, 1.0, StopAction::FreeSelf) * 0.1;
-        let sig = buffer_reader_multi(buffer_id, 0.1, StopAction::FreeSelf) * 0.1;
+        let sig = buffer_reader_multi(buffer_id, 0.1, false, StopAction::FreeSelf) * 0.1;
         // let sig = sig + buffer_reader_multi(buffer_id, 2.0, StopAction::FreeSelf) * 0.2;
         // let sig = sig + buffer_reader_multi(buffer_id, 3.0, StopAction::FreeSelf) * 0.2;
         // let sig = sig + buffer_reader_multi(buffer_id, 8.0, StopAction::FreeSelf) * 0.2;

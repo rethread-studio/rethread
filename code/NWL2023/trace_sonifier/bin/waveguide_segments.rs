@@ -16,7 +16,7 @@ use knyst::{
     audio_backend::{CpalBackend, CpalBackendOptions, JackBackend},
     controller::print_error_handler,
     envelope::Envelope,
-    filter::one_pole::{one_pole_hpf, one_pole_lpf},
+    gen::filter::one_pole::{one_pole_hpf, one_pole_lpf},
     handles::{graph_output, handle, AnyNodeHandle, Handle},
     modal_interface::commands,
     prelude::*,
