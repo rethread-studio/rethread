@@ -1,6 +1,5 @@
 // TODOs:
-// - Place each sound producing process in a graph and free that graph at the end. This means we need to spawn a graph and then set that graph as the default graph before every time we spawn a new inner graph.
-
+//
 use std::{
     borrow::BorrowMut,
     sync::{
@@ -77,6 +76,7 @@ struct Vind {
     emergency_trace: String,
     chord_matrix: ChordMatrix,
     latest_trace: String,
+    latest_movement: usize,
     score: Vec<ScoreObject>,
 }
 
@@ -156,7 +156,9 @@ impl Vind {
         }
     }
     pub fn next_chord(&mut self) {
-        self.chord_matrix.next_chord();
+        // self.chord_matrix.next_chord();
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        self.chord_matrix.next_from_matrix_probability(&self.score[self.latest_movement].result[0][..], &mut rng);
         for proc in &mut self.processes {
             proc.chord_sender.send(self.chord_matrix.current().clone());
         }
@@ -195,6 +197,7 @@ async fn main() -> Result<()> {
         chord_matrix: ChordMatrix::new(),
         stop_application_sender,
         latest_trace: emergency_trace.clone(),
+        latest_movement: 0,
         emergency_trace,
         score,
     };
@@ -785,6 +788,9 @@ async fn play_waveguide_segments(
                         let g = inner_graph * (beam_setter + 0.01);
                         if reverb {
                             verb.input(g);
+                        } else {
+                        graph_output(2, one_pole_lpf().sig(g).cutoff_freq(12000.));
+
                         }
                         commands().to_graph(outer_graph_id);
                         graph_output(1, one_pole_lpf().sig(g).cutoff_freq(4000.));
