@@ -20,7 +20,7 @@ use knyst::{
     envelope::Envelope,
     gen::filter::one_pole::one_pole_hpf,
     handles::{graph_output, handle, Handle},
-    modal_interface::commands,
+    modal_interface::knyst,
     prelude::*,
     sphere::{KnystSphere, SphereSettings},
 };
@@ -166,7 +166,7 @@ fn short_sines(
     std::thread::spawn(move || {
         for instance in instances {
             // new graph
-            commands().init_local_graph(commands().default_graph_settings());
+            knyst().init_local_graph(knyst().default_graph_settings());
             let sig = sine().freq(freq * root.load(Ordering::Acquire)) * 0.015;
             let env = Envelope {
                 points: vec![(1.0, 0.02), (0.0, 0.4)],
@@ -177,7 +177,7 @@ fn short_sines(
 
             graph_output(0, sig.repeat_outputs(1));
             // push graph to sphere
-            let graph = commands().upload_local_graph();
+            let graph = knyst().upload_local_graph();
 
             output.input(graph * 0.1);
             graph_output(0, graph);

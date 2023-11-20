@@ -5,14 +5,14 @@ use std::{path::PathBuf, time::Duration};
 
 use color_eyre::Result;
 use knyst::{
-    audio_backend::{CpalBackend, CpalBackendOptions, JackBackend},
+    audio_backend::JackBackend,
     controller::print_error_handler,
     handles::graph_output,
-    modal_interface::commands,
+    modal_interface::knyst,
     prelude::*,
     sphere::{KnystSphere, SphereSettings},
 };
-use trace_sonifier::binary_instructions::{self, machine_code, machine_code_instruction_only};
+use trace_sonifier::binary_instructions::machine_code;
 
 fn main() -> Result<()> {
     // Start knyst
@@ -62,7 +62,7 @@ fn main() -> Result<()> {
 
         println!("buffer length: {}", buffer.length_seconds());
 
-        let buffer_id = commands().insert_buffer(buffer);
+        let buffer_id = knyst().insert_buffer(buffer);
         Ok(buffer_id)
     })
     .collect();

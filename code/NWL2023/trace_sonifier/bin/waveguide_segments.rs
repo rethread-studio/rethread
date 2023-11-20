@@ -1,37 +1,25 @@
 //! Plays the audified machine code as the exciter in a waveguide
 //!
 //! Play through a large reverb
-use rand::{random, thread_rng, Rng};
-use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
-    time::Duration,
-};
+use rand::{thread_rng, Rng};
+use std::time::Duration;
 
-use atomic_float::AtomicF32;
 use color_eyre::Result;
 use knyst::{
-    audio_backend::{CpalBackend, CpalBackendOptions, JackBackend},
+    audio_backend::JackBackend,
     controller::print_error_handler,
     envelope::Envelope,
     gen::filter::one_pole::{one_pole_hpf, one_pole_lpf},
     handles::{graph_output, handle, AnyNodeHandle, Handle},
-    modal_interface::commands,
+    modal_interface::knyst,
     prelude::*,
     resources::BufferId,
     sphere::{KnystSphere, SphereSettings},
     trig::interval_trig,
 };
-use knyst_reverb::{luff_verb, LuffVerb, LuffVerbHandle};
+use knyst_reverb::{luff_verb, LuffVerbHandle};
 use knyst_waveguide2::waveguide;
-use trace_sonifier::{
-    binary_instructions::{
-        self, machine_code, machine_code_instruction_only, machine_code_to_buffer,
-    },
-    instances_of_instruction::InstructionInstance,
-};
+use trace_sonifier::binary_instructions::machine_code_to_buffer;
 
 fn main() -> Result<()> {
     // Start knyst
@@ -73,7 +61,7 @@ fn main() -> Result<()> {
 
         let buffer = machine_code_to_buffer(&trace, true)?;
         println!("Buffer length: {}", buffer.length_seconds());
-        let buffer = commands().insert_buffer(buffer);
+        let buffer = knyst().insert_buffer(buffer);
 
         play_waveguide_segments(verb, buffer, true, true);
         std::thread::sleep(Duration::from_secs(5));
@@ -98,9 +86,9 @@ fn play_waveguide_segments(
     // .input(sig * 0.125 + graph_input(0, 1));
     let mut graphs = vec![];
     for _ in 0..4 {
-        let mut gs = commands().default_graph_settings();
+        let mut gs = knyst().default_graph_settings();
         gs.num_outputs = 1;
-        commands().init_local_graph(gs);
+        knyst().init_local_graph(gs);
 
         let exciter = buffer_reader(buffer, 1.0, true, StopAction::FreeGraph);
         let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(3600.);
@@ -138,7 +126,7 @@ fn play_waveguide_segments(
             let sig = wg * 0.1;
             graph_output(0, sig);
         }
-        let g = commands().upload_local_graph();
+        let g = knyst().upload_local_graph();
         graphs.push(g);
         verb.input(g);
         graph_output(
