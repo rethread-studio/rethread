@@ -1,5 +1,11 @@
 // TODOs:
 // - Place each sound producing process in a graph and free that graph at the end. This means we need to spawn a graph and then set that graph as the default graph before every time we spawn a new inner graph.
+// - Fix processes not being freed correctly
+// - Vary if both chords and melody play or just one of them
+// - Vary waveguide melody internal BPF
+// - Vary break chords based on result matrix
+// - Break sines tremolo based on a saw movement, i.e. accel -> a tempo subito
+// - Interpolate beam value for waveguide chords
 
 use std::{
     borrow::BorrowMut,
@@ -14,12 +20,12 @@ use atomic_float::AtomicF32;
 use color_eyre::Result;
 use knyst::{
     audio_backend::JackBackend,
-    commands,
     envelope::{envelope_gen, Envelope, SustainMode},
     gen::filter::one_pole::{one_pole_hpf, one_pole_lpf},
     gen::random::random_lin,
     graph::GraphId,
     handles::{handle, AnyNodeHandle, GenericHandle},
+    knyst,
     prelude::*,
     resources::BufferId,
     trig::interval_trig,
@@ -32,7 +38,7 @@ use knyst_waveguide2::{
 use musical_matter::pitch::EdoChordSemantic;
 use rand::{random, rngs::StdRng, seq::SliceRandom, thread_rng, Rng, SeedableRng};
 use serde::{Deserialize, Serialize};
-use tokio::{select, time::interval};
+use tokio::{select, sync::mpsc::UnboundedSender, time::interval};
 use trace_sonifier::{
     binary_instructions::machine_code_to_buffer,
     harmony::ChordMatrix,
@@ -78,6 +84,7 @@ struct Vind {
     chord_matrix: ChordMatrix,
     latest_trace: String,
     score: Vec<ScoreObject>,
+    chord_change_sender: UnboundedSender<()>,
 }
 
 impl Vind {
@@ -149,16 +156,25 @@ impl Vind {
 
         let process = break_sines(self.chord_matrix.current(), &self.latest_trace).await;
         self.processes.push(process);
+        let process = chord_change_process(
+            vec![Duration::from_secs_f32(5.0)],
+            self.chord_change_sender.clone(),
+        );
+        self.processes.push(process);
     }
     pub async fn set_beam_width(&mut self, value: f32) {
         for proc in &mut self.processes {
-            proc.beam_width_sender.send(value);
+            if let Err(e) = proc.beam_width_sender.send(value) {
+                eprintln!("Error sending beam value: {e}");
+            }
         }
     }
     pub fn next_chord(&mut self) {
         self.chord_matrix.next_chord();
         for proc in &mut self.processes {
-            proc.chord_sender.send(self.chord_matrix.current().clone());
+            if let Err(e) = proc.chord_sender.send(self.chord_matrix.current().clone()) {
+                eprintln!("Error sending next chord: {e}");
+            }
         }
     }
 }
@@ -166,11 +182,11 @@ impl Vind {
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv::dotenv().ok(); // This line loads the environment variables from the ".env" file.
-    TRACE_PATH.set(
-        std::env::var("TRACE_PATH").expect(
+    TRACE_PATH
+        .set(std::env::var("TRACE_PATH").expect(
             "The TRACE_PATH environment variable should be set, optionally in the .env file",
-        ),
-    );
+        ))
+        .expect("TRACE_PATH global static should not have been set before.");
 
     let score = load_score()?;
     let (stop_application_sender, mut stop_application_receiver) =
@@ -189,6 +205,14 @@ async fn main() -> Result<()> {
 
     let trace_path = TRACE_PATH.get().unwrap();
 
+    let (chord_change_sender, mut chord_change_receiver) =
+        tokio::sync::mpsc::unbounded_channel::<()>();
+    tokio::task::spawn(async move {
+        loop {
+            tokio::time::sleep(std::time::Duration::from_millis(50000)).await;
+            // chord_change_sender.send(()).ok();
+        }
+    });
     let emergency_trace = std::fs::read_to_string(format!("{trace_path}{}", traces[0]))?;
     let mut vind = Vind {
         processes: vec![],
@@ -197,6 +221,7 @@ async fn main() -> Result<()> {
         latest_trace: emergency_trace.clone(),
         emergency_trace,
         score,
+        chord_change_sender,
     };
 
     let (sender, mut receiver) = tokio::sync::mpsc::unbounded_channel();
@@ -218,15 +243,6 @@ async fn main() -> Result<()> {
     // vind.perform_break().await;
     // vind.start_movement(0).await;
 
-    let (chord_change_sender, mut chord_change_receiver) =
-        tokio::sync::mpsc::unbounded_channel::<()>();
-    tokio::task::spawn(async move {
-        loop {
-            tokio::time::sleep(std::time::Duration::from_millis(50000)).await;
-            // chord_change_sender.send(()).ok();
-        }
-    });
-
     loop {
         tokio::select! {
             message = receiver.recv() => {
@@ -245,6 +261,26 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn chord_change_process(
+    intervals: Vec<Duration>,
+    chord_change_sender: UnboundedSender<()>,
+) -> ProcessInteractivity {
+    let process = ProcessInteractivity::new();
+    {
+        let mut stop_receiver = process.stop_sender.subscribe();
+        tokio::task::spawn(async move {
+            for interval in intervals.into_iter().cycle() {
+                tokio::select! {
+                    _ = tokio::time::sleep(interval) => (),
+                    _ = stop_receiver.recv() => break,
+                }
+                chord_change_sender.send(()).ok();
+            }
+        });
+    }
+    process
 }
 
 struct InstructionId(usize);
@@ -310,11 +346,11 @@ async fn instructions_to_melody_rewrite(
     let mut chord_receiver = process.chord_sender.subscribe();
     let mut beam_receiver = process.beam_width_sender.subscribe();
 
-    commands().to_top_level_graph();
-    let outer_graph_id = commands().init_local_graph(commands().default_graph_settings());
-    let outer_graph_handle = commands().upload_local_graph();
+    knyst().to_top_level_graph();
+    let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
+    let outer_graph_handle = knyst().upload_local_graph();
     graph_output(0, outer_graph_handle);
-    commands().to_graph(outer_graph_id);
+    knyst().to_graph(outer_graph_id);
     let verb = luff_verb(650 * 48, 0.70).lowpass(19000.).damping(5000.);
     graph_output(1, one_pole_hpf().sig(verb * 0.30).cutoff_freq(100.));
 
@@ -451,7 +487,7 @@ async fn instructions_to_melody_rewrite(
 }
 
 fn bus(arg: usize) -> Handle<GenericHandle> {
-    let id = commands().push_without_inputs(Bus(arg));
+    let id = knyst().push_without_inputs(Bus(arg));
     Handle::new(GenericHandle::new(id, arg, arg))
 }
 
@@ -466,10 +502,10 @@ async fn sines_n_most_uncommon(
     let mut map = map.into_iter().collect::<Vec<_>>();
     map.sort_by_key(|(_, num)| *num);
 
-    let outer_graph_id = commands().init_local_graph(commands().default_graph_settings());
-    let outer_graph_handle = commands().upload_local_graph();
+    let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
+    let outer_graph_handle = knyst().upload_local_graph();
     graph_output(0, outer_graph_handle);
-    commands().to_graph(outer_graph_id);
+    knyst().to_graph(outer_graph_id);
     let root = Arc::new(AtomicF32::new(1.0));
 
     let process = ProcessInteractivity::new();
@@ -590,12 +626,12 @@ fn short_sines(
     exciter: Handle<HalfSineWtHandle>,
     mut stop: tokio::sync::broadcast::Receiver<()>,
 ) -> tokio::task::JoinHandle<()> {
-    // commands().to_graph(outer_graph);
-    // commands().init_local_graph(commands().default_graph_settings());
+    // knyst().to_graph(outer_graph);
+    // knyst().init_local_graph(knyst().default_graph_settings());
 
     // // push graph to sphere
-    // let graph = commands().upload_local_graph();
-    // commands().to_graph(outer_graph);
+    // let graph = knyst().upload_local_graph();
+    // knyst().to_graph(outer_graph);
     // output.input(graph * 0.1);
     // graph_output(0, graph);
     tokio::spawn(async move {
@@ -672,7 +708,7 @@ async fn play_waveguide_segments(
     let chord_receiver = process.chord_sender.subscribe();
     let buffer = machine_code_to_buffer(trace, true).unwrap();
     println!("Buffer length: {}", buffer.length_seconds());
-    let buffer = commands().insert_buffer(buffer);
+    let buffer = knyst().insert_buffer(buffer);
 
     let mut freqs: Vec<_> = chord
         .to_edo_chord()
@@ -693,11 +729,11 @@ async fn play_waveguide_segments(
         tokio::task::spawn(async move {
             let mut root = 4.0;
             let mut rng: StdRng = SeedableRng::from_entropy();
-            commands().to_top_level_graph();
-            let outer_graph_id = commands().init_local_graph(commands().default_graph_settings());
-            let outer_graph_handle = commands().upload_local_graph();
+            knyst().to_top_level_graph();
+            let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
+            let outer_graph_handle = knyst().upload_local_graph();
             graph_output(0, outer_graph_handle);
-            commands().to_graph(outer_graph_id);
+            knyst().to_graph(outer_graph_id);
 
             let main_env = envelope_gen(
                 0.0,
@@ -715,7 +751,12 @@ async fn play_waveguide_segments(
                     * main_env,
             );
             let beam_setter = bus(1).set(0, 0.5);
-            let exciter = buffer_reader(buffer, 1.0, true, StopAction::FreeGraph);
+            let exciter = buffer_reader(
+                buffer,
+                rng.gen_range(0.25..4.0),
+                true,
+                StopAction::FreeGraph,
+            );
             let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(3600.);
 
             for _ in 0..4 {
@@ -729,11 +770,11 @@ async fn play_waveguide_segments(
                     let interval_index = interval_index.clone();
                     tokio::task::spawn(async move {
                         let mut rng: StdRng = SeedableRng::from_entropy();
-                        let mut gs = commands().default_graph_settings();
+                        let mut gs = knyst().default_graph_settings();
                         gs.num_outputs = 1;
                         gs.num_inputs = 1;
-                        commands().to_graph(outer_graph_id);
-                        commands().init_local_graph(gs);
+                        knyst().to_graph(outer_graph_id);
+                        knyst().init_local_graph(gs);
 
                         let env = Envelope {
                             start_value: 0.0,
@@ -780,13 +821,13 @@ async fn play_waveguide_segments(
                             let sig = wg * 0.4;
                             graph_output(0, sig);
                         }
-                        let inner_graph = commands().upload_local_graph();
+                        let inner_graph = knyst().upload_local_graph();
                         inner_graph.set(0, exciter_to_wg);
                         let g = inner_graph * (beam_setter + 0.01);
                         if reverb {
                             verb.input(g);
                         }
-                        commands().to_graph(outer_graph_id);
+                        knyst().to_graph(outer_graph_id);
                         graph_output(1, one_pole_lpf().sig(g).cutoff_freq(4000.));
                         loop {
                             tokio::select! {
@@ -809,7 +850,7 @@ async fn play_waveguide_segments(
                             _ = stop_receiver.recv() => break,
                             }
                         }
-                        g.free();
+                        inner_graph.free();
                     });
                 }
 
@@ -820,14 +861,14 @@ async fn play_waveguide_segments(
                 }
             }
 
-            commands().to_top_level_graph();
+            knyst().to_top_level_graph();
             stop_receiver.recv().await.ok();
             // stop_sender.send(()).ok();
             main_env.release_trig();
             tokio::time::sleep(Duration::from_secs(30)).await;
             verb.free();
             outer_graph_handle.free();
-            commands().remove_buffer(buffer);
+            knyst().remove_buffer(buffer);
         });
     }
 
@@ -874,26 +915,34 @@ fn receive_osc(sender: tokio::sync::mpsc::UnboundedSender<Messages>) -> Result<(
                         //
                         let mvt = args.next().unwrap().int().unwrap();
                         eprintln!("Start mvt: {mvt:?}");
-                        sender.send(Messages::StartMovement(mvt as usize));
+                        if let Err(e) = sender.send(Messages::StartMovement(mvt as usize)) {
+                            eprintln!("Error sending from OSC: {e}")
+                        }
                     }
                     "/pulse" => {
                         let mut args = mess.args.unwrap().into_iter();
                         //
                         let pulse = args.next().unwrap().int().unwrap();
                         eprintln!("Pulse: {pulse:?}");
-                        sender.send(Messages::Pulse(pulse));
+                        if let Err(e) = sender.send(Messages::Pulse(pulse)) {
+                            eprintln!("Error sending from OSC: {e}")
+                        }
                     }
                     "/beam_width" => {
                         let mut args = mess.args.unwrap().into_iter();
                         //
                         let val = args.next().unwrap().float().unwrap();
                         eprintln!("Beam value: {val}");
-                        sender.send(Messages::BeamWidth(val));
+                        if let Err(e) = sender.send(Messages::BeamWidth(val)) {
+                            eprintln!("Error sending from OSC: {e}")
+                        }
                     }
                     "/break" => {
                         //
                         eprintln!("break");
-                        sender.send(Messages::Break);
+                        if let Err(e) = sender.send(Messages::Break) {
+                            eprintln!("Error sending from OSC: {e}")
+                        }
                     }
                     _ => (),
                 }
@@ -911,13 +960,13 @@ async fn break_sines(chord: &EdoChordSemantic, last_trace: &str) -> ProcessInter
     let mut beam_receiver = process.beam_width_sender.subscribe();
 
     let buffer = machine_code_to_buffer(last_trace, false).unwrap();
-    let buffer = commands().insert_buffer(buffer);
+    let buffer = knyst().insert_buffer(buffer);
 
-    commands().to_top_level_graph();
-    let outer_graph_id = commands().init_local_graph(commands().default_graph_settings());
-    let outer_graph_handle = commands().upload_local_graph();
+    knyst().to_top_level_graph();
+    let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
+    let outer_graph_handle = knyst().upload_local_graph();
     graph_output(0, outer_graph_handle);
-    commands().to_graph(outer_graph_id);
+    knyst().to_graph(outer_graph_id);
 
     // let main_env = Envelope {
     //     points: vec![(1.0, 2.0), (0.0, 5.0)],
@@ -1021,7 +1070,7 @@ async fn break_sines(chord: &EdoChordSemantic, last_trace: &str) -> ProcessInter
         tokio::time::sleep(Duration::from_secs(20)).await;
         outer_graph_handle.free();
         println!("Break sines freed");
-        commands().remove_buffer(buffer);
+        knyst().remove_buffer(buffer);
     });
 
     process
@@ -1033,11 +1082,11 @@ async fn play_pulse(num: u32, chord: &EdoChordSemantic) -> ProcessInteractivity 
     let mut chord_receiver = process.chord_sender.subscribe();
     let mut beam_receiver = process.beam_width_sender.subscribe();
 
-    commands().to_top_level_graph();
-    let outer_graph_id = commands().init_local_graph(commands().default_graph_settings());
-    let outer_graph_handle = commands().upload_local_graph();
+    knyst().to_top_level_graph();
+    let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
+    let outer_graph_handle = knyst().upload_local_graph();
     graph_output(0, outer_graph_handle);
-    commands().to_graph(outer_graph_id);
+    knyst().to_graph(outer_graph_id);
 
     // let main_env = Envelope {
     //     points: vec![(1.0, 2.0), (0.0, 5.0)],
@@ -1098,6 +1147,7 @@ async fn play_pulse(num: u32, chord: &EdoChordSemantic) -> ProcessInteractivity 
 
     tokio::task::spawn(async move {
         tokio::time::sleep(Duration::from_secs(3)).await;
+        outer_graph_handle.free();
         println!("Pulse freed");
     });
 

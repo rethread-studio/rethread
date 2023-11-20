@@ -8,12 +8,6 @@ edition = "2021"
 [dependencies]
 hex = "0.4.3"
 color-eyre = "0.6.2"
-knyst = { path = "/home/erik/code/rust/audio/knyst/knyst" }
-# knyst = { path = "../../../../knyst/knyst" }
-knyst_waveguide2 = { path = "/home/erik/code/rust/audio/knyst_waveguide2" }
-# knyst_waveguide2 = { path = "../../../../knyst_waveguide2" }
-knyst_reverb = { path = "/home/erik/code/rust/audio/knyst_reverb" }
-# knyst_reverb = { path = "../../../../knyst_reverb" }
 atomic_float = "0.1.0"
 musical_matter = { git = "https://gitlab.com/ErikNatanael/music_matters.git" }
 rand = "0.8.5"
@@ -24,6 +18,15 @@ serde = { version = "1.0.192", features = ["derive"] }
 serde_json = "1.0.108"
 dotenv = "0.15.0"
 
+# [target.'cfg(unix)'.dependencies]
+knyst = { path = "/home/erik/code/rust/audio/knyst/knyst" }
+knyst_waveguide2 = { path = "/home/erik/code/rust/audio/knyst_waveguide2" }
+knyst_reverb = { path = "/home/erik/code/rust/audio/knyst_reverb" }
+
+# [target.'cfg(windows)'.dependencies]
+# knyst_reverb = { path = "../../../../knyst_reverb" }
+# knyst_waveguide2 = { path = "../../../../knyst_waveguide2" }
+# knyst = { path = "../../../../knyst/knyst" }
 
 [[bin]]
 name = "audify"
