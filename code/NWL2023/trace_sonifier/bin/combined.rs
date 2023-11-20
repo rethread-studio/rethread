@@ -105,7 +105,7 @@ impl Vind {
                 }
             };
 
-        // Start new sonification
+        // // Start new sonification
         let process = play_waveguide_segments(
             &trace,
             false,
