@@ -1,8 +1,11 @@
+use nannou_osc::receiver;
 use std::{
     path::PathBuf,
     process::{Child, Command},
     time::{Duration, Instant},
 };
+
+const RECEIVER_PORT: u16 = 57103;
 
 enum Message {
     CompleteRestart,
@@ -26,18 +29,21 @@ fn main() {
         Process::new(
             "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/target/release/conductor.exe",
             "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/",
-    ),
+    ).recompilation_command("cargo build --release".to_string()),
 
         Process::new(
             "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/target/release/combined.exe",
             "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/",
-        ),
+    ).recompilation_command("cargo build --release --bin combined".to_string()),
         ];
     let mut processes = vec;
     for p in &mut processes {
         p.restart();
     }
     let mut complete_restart = false;
+    let mut recompile = false;
+    let mut osc_receiver = { receiver(RECEIVER_PORT).ok() };
+    // let mut rng: StdRng = SeedableRng::from_entropy();
     loop {
         std::thread::sleep(Duration::from_secs(1));
         for p in &mut processes {
@@ -49,12 +55,39 @@ fn main() {
                 Message::Continue => (),
             }
         }
-        if complete_restart {
-            complete_restart = false;
-
+        if let Some(osc) = &mut osc_receiver {
+            if let Ok(Some((packet, _socket))) = osc.try_recv() {
+                for mess in packet.into_msgs() {
+                    match mess.addr.as_str() {
+                        "/restart" => {
+                            complete_restart = true;
+                        }
+                        "/recompile" => {
+                            recompile = true;
+                        }
+                        _ => {
+                            eprintln!(
+                                "Received unknown message to supervisor at address {}",
+                                mess.addr.as_str()
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        if complete_restart || recompile {
             for p in &mut processes {
                 p.stop();
             }
+        }
+        if recompile {
+            for p in &mut processes {
+                p.recompile();
+            }
+        }
+        if complete_restart || recompile {
+            complete_restart = false;
+            recompile = false;
             for p in &mut processes {
                 p.restart();
             }
@@ -72,6 +105,7 @@ struct Process {
     last_start: Instant,
     path: PathBuf,
     working_dir: PathBuf,
+    recompilation_command: Option<String>,
     max_time_alive_before_restart: Duration,
     current_child_process: Option<Child>,
     trigger_complete_restart_on_fail: bool,
@@ -87,6 +121,7 @@ impl Process {
             current_child_process: None,
             trigger_complete_restart_on_fail: false,
             wait_after_restart: Duration::from_secs(0),
+            recompilation_command: None,
         }
     }
     pub fn complete_restart(mut self, complete_restart: bool) -> Self {
@@ -96,6 +131,21 @@ impl Process {
     pub fn wait_after_restart(mut self, wait_time: Duration) -> Self {
         self.wait_after_restart = wait_time;
         self
+    }
+    pub fn recompilation_command(mut self, recompilation_command: String) -> Self {
+        self.recompilation_command = Some(recompilation_command);
+        self
+    }
+    pub fn recompile(&mut self) {
+        if let Some(recompilation_command) = &self.recompilation_command {
+            let parts: Vec<_> = recompilation_command.split_ascii_whitespace().collect();
+            let mut command = Command::new(parts[0]);
+            command.current_dir(&self.working_dir).args(&parts[1..]);
+            match command.output() {
+                Ok(output) => eprintln!("Successful recompile!\n{output:?}"),
+                Err(e) => eprintln!("Error recompiling: {e}"),
+            }
+        }
     }
     pub fn restart(&mut self) {
         if let Some(mut child) = self.current_child_process.take() {
