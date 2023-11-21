@@ -24,11 +24,11 @@ async fn main() {
     SimpleLogger::new().init().unwrap();
     let num_movements = 8;
     let mut rng = thread_rng();
-    // let break_time = Duration::from_secs(30);
-    let break_time = Duration::from_secs(4);
+    let break_time = Duration::from_secs(30);
+    // let break_time = Duration::from_secs(4);
     let num_pulses_per_movement = 32;
-    // let movement_time = Duration::from_secs(60);
-    let movement_time = Duration::from_secs(6);
+    let movement_time = Duration::from_secs(60);
+    // let movement_time = Duration::from_secs(6);
     let mut movement_start = Instant::now();
     let mut pulse_counter = 0;
     let settings = if let Ok(settings) = Config::load_from_file() {

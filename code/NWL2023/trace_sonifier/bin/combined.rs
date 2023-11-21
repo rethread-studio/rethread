@@ -145,6 +145,7 @@ impl Vind {
             }
         }
         self.processes.clear();
+        knyst().free_disconnected_nodes();
     }
     pub async fn pulse(&mut self, num: i32) {
         if num % 3 == 0 {
@@ -353,34 +354,46 @@ async fn instructions_to_melody_rewrite(
     let mut chord_receiver = process.chord_sender.subscribe();
     let mut beam_receiver = process.beam_width_sender.subscribe();
 
+    let mut o_exciter = None;
+    let mut o_beam_setter = None;
+    let mut o_verb = None;
+    let mut o_wg = None;
     knyst().to_top_level_graph();
-    let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
-    let outer_graph_handle = knyst().upload_local_graph();
-    graph_output(0, outer_graph_handle);
-    knyst().to_graph(outer_graph_id);
-    let verb = luff_verb(650 * 48, 0.70).lowpass(19000.).damping(5000.);
-    graph_output(1, one_pole_hpf().sig(verb * 0.30).cutoff_freq(100.));
+    let outer_graph = upload_graph(knyst().default_graph_settings(), || {
+        let verb = luff_verb(650 * 48, 0.70).lowpass(19000.).damping(5000.);
+        graph_output(1, one_pole_hpf().sig(verb * 0.30).cutoff_freq(100.));
 
-    let exciter = half_sine_wt()
-        .freq(200. * 0.4837) // Nice for plucking low notes
-        // .freq(control.out("freq") * 2.2837) /// Nice for high notes and especially sustained
-        .amp(0.2);
-    let exciter_to_wg = one_pole_lpf().sig(exciter).cutoff_freq(2600.);
-    // let exciter_input = one_pole_hpf()
-    // .sig(one_pole_lpf().sig(white_noise() * 0.1).cutoff_freq(100.))
-    // .cutoff_freq(40.);
-    let wg = waveguide()
-        .freq(100.)
-        .exciter(exciter_to_wg)
-        .feedback(0.99999)
-        .damping(5000.)
-        .lf_damping(6.)
-        .position(0.5)
-        .stiffness(0.0);
-    let beam_setter = bus(1).set(0, 0.5);
-    let sig = wg * (0.2 * beam_setter + 0.02);
-    graph_output(3, sig);
-    verb.input(sig * 0.2);
+        let exciter = half_sine_wt()
+            .freq(200. * 0.4837) // Nice for plucking low notes
+            // .freq(control.out("freq") * 2.2837) /// Nice for high notes and especially sustained
+            .amp(0.2);
+        let exciter_to_wg = one_pole_lpf().sig(exciter).cutoff_freq(2600.);
+        // let exciter_input = one_pole_hpf()
+        // .sig(one_pole_lpf().sig(white_noise() * 0.1).cutoff_freq(100.))
+        // .cutoff_freq(40.);
+        let wg = waveguide()
+            .freq(100.)
+            .exciter(exciter_to_wg)
+            .feedback(0.99999)
+            .damping(5000.)
+            .lf_damping(6.)
+            .position(0.5)
+            .stiffness(0.0);
+        let beam_setter = bus(1).set(0, 0.5);
+        let sig = wg * (0.2 * beam_setter + 0.02);
+        graph_output(3, sig);
+        verb.input(sig * 0.2);
+        o_exciter = Some(exciter);
+        o_verb = Some(exciter);
+        o_wg = Some(wg);
+        o_beam_setter = Some(beam_setter);
+    });
+    let exciter = o_exciter.unwrap();
+    let verb = o_verb.unwrap();
+    let beam_setter = o_beam_setter.unwrap();
+    let wg = o_wg.unwrap();
+    graph_output(0, outer_graph);
+    knyst().to_graph(outer_graph.graph_id());
     let mut freqs: Vec<_> = chord
         .to_edo_chord()
         .to_edo_pitches()
@@ -486,8 +499,10 @@ async fn instructions_to_melody_rewrite(
         println!("Stopping melody");
         wg.feedback(0.99);
         tokio::time::sleep(Duration::from_secs(5)).await;
+        exciter.free();
+        beam_setter.free();
         verb.free();
-        outer_graph_handle.free();
+        outer_graph.free();
     });
 
     Ok(process)
@@ -737,10 +752,9 @@ async fn play_waveguide_segments(
             let mut root = 4.0;
             let mut rng: StdRng = SeedableRng::from_entropy();
             knyst().to_top_level_graph();
-            let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
-            let outer_graph_handle = knyst().upload_local_graph();
-            graph_output(0, outer_graph_handle);
-            knyst().to_graph(outer_graph_id);
+            let outer_graph = upload_graph(knyst().default_graph_settings(), || {});
+            graph_output(0, outer_graph);
+            knyst().to_graph(outer_graph.graph_id());
 
             let main_env = envelope_gen(
                 0.0,
@@ -766,6 +780,7 @@ async fn play_waveguide_segments(
             );
             let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(3600.);
 
+            let mut stop_received = false;
             for _ in 0..4 {
                 {
                     let root = root;
@@ -780,55 +795,57 @@ async fn play_waveguide_segments(
                         let mut gs = knyst().default_graph_settings();
                         gs.num_outputs = 1;
                         gs.num_inputs = 1;
-                        knyst().to_graph(outer_graph_id);
-                        knyst().init_local_graph(gs);
-
-                        let env = Envelope {
-                            start_value: 0.0,
-                            points: vec![(1.0, 0.01), (0.25, 0.1), (0.0, 0.5)],
-                            ..Default::default()
-                        };
+                        knyst().to_graph(outer_graph.graph_id());
                         let mut wgs = vec![];
-                        for &freq in &freqs {
-                            let freq = freq * root;
-                            let exciter_to_wg = graph_input(0, 1);
-
-                            let exciter_to_wg: AnyNodeHandle = if pass_through_trigger {
-                                // Take the interval times from the matrix
-                                let interval_time = if random_interval {
-                                    rng.gen_range(1.0f32..2.0)
-                                } else {
-                                    let i = interval_index.fetch_add(4, Ordering::SeqCst);
-                                    let interval = matrix[i]
-                                        + matrix[i + 32]
-                                        + matrix[i + 64]
-                                        + matrix[i + 96];
-                                    interval as f32 + 0.1
-                                    // 64. / 60.
-                                };
-                                (exciter_to_wg
-                                    * handle(env.to_gen())
-                                        .set("restart", interval_trig().interval(interval_time)))
-                                .into()
-                            } else {
-                                exciter_to_wg.into()
+                        let inner_graph = upload_graph(gs, || {
+                            let env = Envelope {
+                                start_value: 0.0,
+                                points: vec![(1.0, 0.01), (0.25, 0.1), (0.0, 0.5)],
+                                ..Default::default()
                             };
-                            let exciter_to_wg =
-                                one_pole_lpf().sig(&exciter_to_wg).cutoff_freq(freq * 3.0);
-                            let wg = waveguide()
-                                .freq(freq)
-                                .exciter(exciter_to_wg)
-                                .feedback(0.9999)
-                                // .feedback(1.001)
-                                .damping(freq * 7. + 1000.)
-                                .lf_damping(6.)
-                                .position(0.4)
-                                .stiffness(0.0);
-                            wgs.push(wg);
-                            let sig = wg * 0.4;
-                            graph_output(0, sig);
-                        }
-                        let inner_graph = knyst().upload_local_graph();
+                            for &freq in &freqs {
+                                let freq = freq * root;
+                                let exciter_to_wg = graph_input(0, 1);
+
+                                let exciter_to_wg: AnyNodeHandle = if pass_through_trigger {
+                                    // Take the interval times from the matrix
+                                    let interval_time = if random_interval {
+                                        rng.gen_range(1.0f32..2.0)
+                                    } else {
+                                        let i = interval_index.fetch_add(4, Ordering::SeqCst);
+                                        let interval = matrix[i]
+                                            + matrix[i + 32]
+                                            + matrix[i + 64]
+                                            + matrix[i + 96];
+                                        interval as f32 + 0.1
+                                        // 64. / 60.
+                                    };
+                                    (exciter_to_wg
+                                        * handle(env.to_gen()).set(
+                                            "restart",
+                                            interval_trig().interval(interval_time),
+                                        ))
+                                    .into()
+                                } else {
+                                    exciter_to_wg.into()
+                                };
+                                let exciter_to_wg =
+                                    one_pole_lpf().sig(&exciter_to_wg).cutoff_freq(freq * 3.0);
+                                let wg = waveguide()
+                                    .freq(freq)
+                                    .exciter(exciter_to_wg)
+                                    .feedback(0.9999)
+                                    // .feedback(1.001)
+                                    .damping(freq * 7. + 1000.)
+                                    .lf_damping(6.)
+                                    .position(0.4)
+                                    .stiffness(0.0);
+                                wgs.push(wg);
+                                let sig = wg * 0.4;
+                                graph_output(0, sig);
+                            }
+                        });
+                        knyst().to_graph(outer_graph.graph_id());
                         inner_graph.set(0, exciter_to_wg);
                         let g = inner_graph * (beam_setter + 0.01);
                         if reverb {
@@ -836,27 +853,28 @@ async fn play_waveguide_segments(
                         } else {
                             graph_output(2, one_pole_lpf().sig(g).cutoff_freq(12000.));
                         }
-                        knyst().to_graph(outer_graph_id);
                         graph_output(1, one_pole_lpf().sig(g).cutoff_freq(4000.));
                         loop {
                             tokio::select! {
-                            new_chord = chord_receiver.recv() => {
-                                let freqs: Vec<_> = new_chord.unwrap()
-                                    .to_edo_chord()
-                                    .to_edo_pitches()
-                                    .into_iter()
-                                    .map(|p| p.to_freq_pitch(200.).frequency())
-                                    .collect();
-                                for (freq, wg) in freqs.into_iter().zip(wgs.iter_mut()) {
-                                    wg.freq(freq * root);
+                                new_chord = chord_receiver.recv() => {
+                                    let freqs: Vec<_> = new_chord.unwrap()
+                                        .to_edo_chord()
+                                        .to_edo_pitches()
+                                        .into_iter()
+                                        .map(|p| p.to_freq_pitch(200.).frequency())
+                                        .collect();
+                                    for (freq, wg) in freqs.into_iter().zip(wgs.iter_mut()) {
+                                        wg.freq(freq * root);
+                                    }
+                                },
+                                beam = beam_receiver.recv() => {
+                                    if let Ok(val) = beam{
+                                        beam_setter.set(0, val.powi(2));
+                                    }
                                 }
-                            },
-                            beam = beam_receiver.recv() => {
-                                if let Ok(val) = beam{
-                                    beam_setter.set(0, val.powi(2));
-                                }
-                            }
-                            _ = stop_receiver.recv() => break,
+                                _ = stop_receiver.recv() => {
+                                    break
+                                },
                             }
                         }
                         inner_graph.free();
@@ -866,17 +884,21 @@ async fn play_waveguide_segments(
                 root *= 0.5;
                 tokio::select! {
                     _ = tokio::time::sleep(Duration::from_secs(15)) => (),
-                    _ = stop_receiver.recv() => break,
+                    _ = stop_receiver.recv() => {
+                        stop_received = true;
+                        break},
                 }
             }
 
             knyst().to_top_level_graph();
-            stop_receiver.recv().await.ok();
+            if !stop_received {
+                stop_receiver.recv().await.ok();
+            }
             // stop_sender.send(()).ok();
             main_env.release_trig();
-            tokio::time::sleep(Duration::from_secs(30)).await;
+            tokio::time::sleep(Duration::from_secs(2)).await;
             verb.free();
-            outer_graph_handle.free();
+            outer_graph.free();
             knyst().remove_buffer(buffer);
         });
     }
@@ -932,7 +954,7 @@ fn receive_osc(sender: tokio::sync::mpsc::UnboundedSender<Messages>) -> Result<(
                         let mut args = mess.args.unwrap().into_iter();
                         //
                         let pulse = args.next().unwrap().int().unwrap();
-                        eprintln!("Pulse: {pulse:?}");
+                        // eprintln!("Pulse: {pulse:?}");
                         if let Err(e) = sender.send(Messages::Pulse(pulse)) {
                             eprintln!("Error sending from OSC: {e}")
                         }
@@ -1076,7 +1098,7 @@ async fn break_sines(chord: &EdoChordSemantic, last_trace: &str) -> ProcessInter
         }
         main_env.release_trig();
         println!("Releasing break sines");
-        tokio::time::sleep(Duration::from_secs(20)).await;
+        tokio::time::sleep(Duration::from_secs(10)).await;
         outer_graph_handle.free();
         println!("Break sines freed");
         knyst().remove_buffer(buffer);
@@ -1156,8 +1178,8 @@ async fn play_pulse(num: u32, chord: &EdoChordSemantic) -> ProcessInteractivity 
 
     tokio::task::spawn(async move {
         tokio::time::sleep(Duration::from_secs(3)).await;
-        outer_graph_handle.free();
-        println!("Pulse freed");
+        // outer_graph_handle.free();
+        // println!("Pulse freed");
     });
 
     process
