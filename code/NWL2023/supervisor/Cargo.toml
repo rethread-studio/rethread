@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 ctrlc = "3.4.1"
+nannou_osc = "0.18.0"

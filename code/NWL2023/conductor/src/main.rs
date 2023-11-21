@@ -2,6 +2,7 @@ use std::time::{Duration, Instant};
 
 use config::Config;
 use log::{error, info};
+use nannou_osc::receiver;
 use nannou_osc::{Connected, Sender, Type};
 mod config;
 use rand::rngs::StdRng;
@@ -9,6 +10,8 @@ use rand::thread_rng;
 use rand::Rng;
 use rand::SeedableRng;
 use simple_logger::SimpleLogger;
+
+const RECEIVER_PORT: u16 = 57380;
 
 enum Messages {
     StartMovement(usize),
@@ -50,11 +53,29 @@ async fn main() {
 
     {
         let mtx = mtx.clone();
-        tokio::task::spawn(async move {
-            let mut rng: StdRng = SeedableRng::from_entropy();
+        tokio::task::spawn_blocking(move || {
+            let osc_receiver = receiver(RECEIVER_PORT).unwrap();
+            // let mut rng: StdRng = SeedableRng::from_entropy();
             loop {
-                mtx.send(Messages::BeamWidth(rng.gen_range(0.1..1.0)));
-                tokio::time::sleep(Duration::from_millis(2000)).await;
+                if let Ok((packet, _socket)) = osc_receiver.recv() {
+                    for mess in packet.into_msgs() {
+                        match mess.addr.as_str() {
+                            "/beam_width" => {
+                                let mut args = mess.args.unwrap().into_iter();
+                                let beam = args.next().unwrap().float().unwrap();
+                                if let Err(e) = mtx.send(Messages::BeamWidth(beam)) {
+                                    eprintln!("Failed to pass on beam value: {e}");
+                                }
+                            }
+                            _ => {
+                                eprintln!(
+                                    "Received unknown message to conductor at address {}",
+                                    mess.addr.as_str()
+                                );
+                            }
+                        }
+                    }
+                }
             }
         });
     }
