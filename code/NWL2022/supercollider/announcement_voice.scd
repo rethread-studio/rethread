@@ -1,10 +1,13 @@
 (
+b = NetAddr.new("127.0.0.1", 57123);    // create the NetAddr
+
 ~fft_buf = Buffer.alloc(s,2048,1);
 Ndef(\grain_voice_mvt,
-	{var sig, pan = 0, pos, cutfreq = [350, 1000, 100], fft, freq, hasFreq;
+	{var sig, pan = 0, pos, cutfreq = [350, 1000, 100], fft, freq, hasFreq, amp_ctrl;
 		sig = SoundIn.ar(0);
 		# freq, hasFreq = Tartini.kr(sig);
-		SendReply.kr(Impulse.kr(30), '/amp', Amplitude.kr(sig), freq*hasFreq);
+		amp_ctrl = Amplitude.kr(BBandPass.ar(sig, [60, 150, 400, 600, 2000], 0.5)).lag(0.2);
+		SendReply.kr(Impulse.kr(30), '/amp', amp_ctrl);
 		fft = FFT(~fft_buf, sig);
 		// IFFT(~fft_buf);
 		sig = PitchShift.ar(sig, 0.2, [1.0, 0.875, 0.75], 0.01, 0.01);
@@ -27,25 +30,19 @@ Ndef(\grain_voice_mvt,
 OSCdef(\amp, {
 	arg msg;
 	msg.postln;
+	~amp = msg[3..7];
+	~send_led_data.();
+
 }, '/amp');
 
-~magnitudes = [];
-Routine({
-    loop{
-        ~fft_buf.getToFloatArray(action: { arg array;
-            var z, x;
-            z = array.clump(2).flop;
-            // Initially data is in complex form
-            z = [Signal.newFrom(z[0]), Signal.newFrom(z[1])];
-            x = Complex(z[0], z[1]);
-			~magnitudes = x.magnitude;
-			// x.magnitude.postln;
+// TODO: The magnitudes don't work very well, sending them is slow.
+~send_led_data = {
+	b.sendMsg("/unfold_voice_leds", ~amp[0], ~amp[1], ~amp[2], ~amp[3], ~amp[4]);
+};
 
-        });
-        0.01.wait;
-}}).play
+
 )
-
+~amp
 (
 var w, much = 0.02, string, synth;
 
@@ -58,10 +55,10 @@ w.drawFunc = Routine {
 		var num_bins, x_pos = 0;
 		/*Pen.fillColor = Color.black;
 		Pen.fillRect(w.bounds);*/
-		num_bins = ~magnitudes.size;
-		~magnitudes.do {| mag, i | var y_pos;
+		num_bins = ~amp.size;
+		~amp.do {| mag, i | var y_pos;
 			Pen.strokeColor = Color.new255(255, 0, 0);
-			y_pos = ((1.0-mag.pow(1))*1)*height;
+			y_pos = ((1.0-mag.pow(0.25))*1)*height;
 			Pen.lineTo(Point(x_pos, y_pos));
 
 			x_pos = x_pos + (width/num_bins);

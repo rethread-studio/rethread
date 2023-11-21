@@ -83,6 +83,7 @@ struct Vind {
     emergency_trace: String,
     chord_matrix: ChordMatrix,
     latest_trace: String,
+    latest_movement: usize,
     score: Vec<ScoreObject>,
     chord_change_sender: UnboundedSender<()>,
 }
@@ -170,7 +171,12 @@ impl Vind {
         }
     }
     pub fn next_chord(&mut self) {
-        self.chord_matrix.next_chord();
+        // self.chord_matrix.next_chord();
+        let mut rng: StdRng = SeedableRng::from_entropy();
+        self.chord_matrix.next_from_matrix_probability(
+            &self.score[self.latest_movement].result[0][..],
+            &mut rng,
+        );
         for proc in &mut self.processes {
             if let Err(e) = proc.chord_sender.send(self.chord_matrix.current().clone()) {
                 eprintln!("Error sending next chord: {e}");
@@ -219,6 +225,7 @@ async fn main() -> Result<()> {
         chord_matrix: ChordMatrix::new(),
         stop_application_sender,
         latest_trace: emergency_trace.clone(),
+        latest_movement: 0,
         emergency_trace,
         score,
         chord_change_sender,
@@ -826,6 +833,8 @@ async fn play_waveguide_segments(
                         let g = inner_graph * (beam_setter + 0.01);
                         if reverb {
                             verb.input(g);
+                        } else {
+                            graph_output(2, one_pole_lpf().sig(g).cutoff_freq(12000.));
                         }
                         knyst().to_graph(outer_graph_id);
                         graph_output(1, one_pole_lpf().sig(g).cutoff_freq(4000.));

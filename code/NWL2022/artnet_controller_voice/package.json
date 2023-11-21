@@ -1,0 +1,17 @@
+{
+  "name": "artnet_controller",
+  "version": "1.0.0",
+  "description": "Control lights via artnet for unfold",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erik Natanael Gustafsson",
+  "license": "MIT",
+  "dependencies": {
+    "artnet": "^1.4.0",
+    "ctrl-c": "^2.3.2",
+    "node-cleanup": "^2.1.2",
+    "osc": "^2.4.3"
+  }
+}
