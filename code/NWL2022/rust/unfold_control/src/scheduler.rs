@@ -18,14 +18,20 @@ use parser::deepika2::{CallDrawData, DepthEnvelopePoint};
 
 #[derive(Copy, Clone, Debug)]
 pub enum SchedulerMessage {
+    Start,
+    Stop,
+    FadeOut,
     JumpToStart,
     JumpToDeepestSection(usize),
     JumpToShallowestSection(usize),
     JumpToMostDiverseSection(usize),
     JumpToLeastDiverseSection(usize),
+    JumpToSection(usize),
     JumpNextMarker,
     JumpPreviousMarker,
+    JumpNextSection,
     JumpCloseToEnd,
+    StopAtNextSection,
 }
 
 #[derive(Clone)]
@@ -62,6 +68,7 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
     let mut current_section = trace.trace.depth_envelope.sections[0];
     let mut seconds_between_calls = 0.025;
     let mut play = false;
+    let mut stop_at_next_section = false;
     // let mut audio_engine = AudioEngine::new();
 
     let (index_increase_tx, index_increase_rx) = unbounded();
@@ -82,6 +89,9 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
         }
         while let Ok(new_message) = message_rx.try_recv() {
             match new_message {
+                SchedulerMessage::StopAtNextSection => {
+                    stop_at_next_section = true;
+                }
                 SchedulerMessage::JumpNextMarker => {
                     let old_index = trace.current_index;
                     let current_marker = trace.trace.draw_trace[trace.current_index].marker.clone();
@@ -110,6 +120,10 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
                             break;
                         }
                     }
+                    index_increase_tx.send(trace.current_index).unwrap();
+                }
+                SchedulerMessage::JumpNextSection => {
+                    trace.current_index = current_section.end_index + 1;
                     index_increase_tx.send(trace.current_index).unwrap();
                 }
                 SchedulerMessage::JumpCloseToEnd => {
@@ -175,6 +189,32 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
                     }
                     index_increase_tx.send(trace.current_index).unwrap();
                 }
+                SchedulerMessage::Start => {
+                    play = true;
+                }
+                SchedulerMessage::Stop => {
+                    play = false;
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_stop();
+                    }
+                }
+                SchedulerMessage::FadeOut => {
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_fade_out(10.0);
+                    }
+                }
+                SchedulerMessage::JumpToSection(new_section) => {
+                    if new_section < trace.trace.depth_envelope.sections.len() {
+                        trace.current_depth_envelope_index = new_section;
+                        current_section =
+                            trace.trace.depth_envelope.sections[trace.current_depth_envelope_index];
+                        trace.current_index = current_section.start_index;
+                        if let Some(osc_communicator) = &mut osc_communicator {
+                            osc_communicator.send_section(current_section);
+                        }
+                        index_increase_tx.send(trace.current_index).unwrap();
+                    }
+                }
             }
         }
         if play {
@@ -184,8 +224,8 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
                 trace.current_depth_envelope_index = 0;
                 // play = false;
             }
-        }
-        if play {
+            // }
+            // if play {
             index_increase_tx.send(trace.current_index).unwrap();
 
             let num_depth_points = trace.trace.depth_envelope.sections.len();
@@ -194,6 +234,7 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
             while trace.current_index > current_section.end_index
                 || trace.current_index < current_section.start_index
             {
+                // Move to the next section
                 trace.current_depth_envelope_index += 1;
                 trace.current_depth_envelope_index %= num_depth_points;
                 current_section =
@@ -206,6 +247,13 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
                     serde_json::to_string(&Event::Section(&current_section)).unwrap();
                 if let Err(e) = ws_communicator.sender.send(section_json) {
                     error!("Unable to send section over websocket: {e:?}");
+                }
+                if stop_at_next_section {
+                    play = false;
+                    stop_at_next_section = false;
+                    if let Some(osc_communicator) = &mut osc_communicator {
+                        osc_communicator.send_stop();
+                    }
                 }
             }
             let state = current_section.state;
@@ -297,6 +345,21 @@ impl OscCommunicator {
         use nannou_osc::Type;
         let addr = "/speed";
         let args = vec![Type::Float(time_between_events)];
+        if let Err(e) = self.supercollider_sender.send((addr, args)) {
+            warn!("OSC error: failed to send: {e:?}");
+        }
+    }
+    pub fn send_fade_out(&mut self, time_to_fade: f32) {
+        use nannou_osc::Type;
+        let addr = "/fade_out";
+        let args = vec![Type::Float(time_to_fade)];
+        if let Err(e) = self.supercollider_sender.send((addr, args)) {
+            warn!("OSC error: failed to send: {e:?}");
+        }
+    }
+    pub fn send_stop(&mut self) {
+        let addr = "/stop";
+        let args = vec![];
         if let Err(e) = self.supercollider_sender.send((addr, args)) {
             warn!("OSC error: failed to send: {e:?}");
         }

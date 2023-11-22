@@ -1,3 +1,9 @@
+use anyhow::Result;
+use nix::libc::TCP_THIN_LINEAR_TIMEOUTS;
+use nix::sys::ptrace::{getevent, Options};
+use std::mem::transmute;
+use std::sync::mpsc::{channel, Sender};
+use std::time::Duration;
 use std::{
     collections::HashMap,
     net::TcpStream,
@@ -65,71 +71,107 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
         })
         .collect();
+    info!("Data loaded, initial setup complete");
+
+    let (syscall_sender, syscall_receiver) = channel();
+    // let (child_sender, child_receiver) = channel();
+    let mut unknown_kind_syscalls = HashMap::new();
 
     let command_str = args.command.unwrap_or("gedit".to_string());
-    let mut command = Command::new(command_str.clone());
-    for arg in args.args {
-        command.arg(arg);
-    }
-    unsafe {
-        command.pre_exec(|| {
-            use nix::sys::ptrace::traceme;
-            traceme().map_err(|e| e.into())
+    let Ok(mut socket) = reconnect(running.clone()) else {
+        return Ok(());
+    };
+
+    {
+        let syscall_sender = syscall_sender.clone();
+        let running = running.clone();
+        std::thread::spawn(move || {
+            info!("Syscall tracing thread started");
+            let mut command = Command::new(command_str.clone());
+            for arg in args.args {
+                command.arg(arg);
+            }
+            unsafe {
+                command.pre_exec(|| {
+                    use nix::sys::ptrace::traceme;
+                    traceme().map_err(|e| e.into())
+                });
+            }
+            let child = command.spawn()?;
+            let child_pid = Pid::from_raw(child.id() as _);
+            // ptrace::setoptions(
+            //     child_pid,
+            //     Options::PTRACE_O_TRACECLONE
+            //         | Options::PTRACE_O_TRACEFORK
+            //         | Options::PTRACE_O_TRACEVFORK,
+            // );
+            trace_pid(child_pid, command_str.clone(), syscall_sender, running)
         });
     }
-
-    let child = command.spawn()?;
-    let child_pid = Pid::from_raw(child.id() as _);
-    let res = waitpid(child_pid, None)?;
-    eprintln!("first wait: {:?}", res.yellow());
-
-    let mut is_sys_exit = false;
-    let mut num_syscalls: u64 = 0;
-
-    let Ok( mut socket)  = reconnect(running.clone()) else {return Ok(())};
-
+    // ...
     loop {
-        // Continue execution until the next syscall
-        match ptrace::syscall(child_pid, None) {
-            Ok(_) => (),
-            Err(e) => {
-                error!("ptrace error: {e}. Exiting");
-                break;
-            }
-        }
-        _ = match waitpid(child_pid, None) {
-            Ok(_) => (),
-            Err(e) => {
-                error!("ptrace error: {e}. Exiting");
-                break;
-            }
-        };
-        if is_sys_exit {
-            num_syscalls += 1;
-            let Ok(regs) = ptrace::getregs(child_pid) else { error!("Failed to get ptrace regs. Exiting"); break; };
-            let name = syscall_table.get(&regs.orig_rax).map_or("", |s| s.as_str());
-            let kind = SyscallKind::try_from(name).unwrap_or(SyscallKind::Unknown);
+        if let Ok(mut syscall) = syscall_receiver.try_recv() {
+            let name = syscall_table
+                .get(&syscall.syscall_id)
+                .map_or("", |s| s.as_str());
+
+            let kind = if let Ok(kind) = SyscallKind::try_from(name) {
+                kind
+            } else {
+                *unknown_kind_syscalls.entry(name.clone()).or_insert(0) += 1;
+                SyscallKind::Unknown
+            };
+            syscall.kind = kind;
+
+            // info!("{}", syscall.command);
             if args.print_syscalls {
-                let errno = Errno::from_i32((regs.rax as i64) as i32);
+                let errno = Errno::from_i32(syscall.return_value);
                 eprintln!(
-                    "{}: {:?} {}({:x}, {:x}, {:x}, ...) = {:x} {}",
-                    num_syscalls,
+                    "{:?} {}({:x}, {:x}, {:x}, ...) = {:x} {}",
                     kind,
                     name.green(),
-                    regs.rdi.blue(),
-                    regs.rsi.blue(),
-                    regs.rdx.blue(),
-                    regs.rax.yellow(),
+                    syscall.args[0].blue(),
+                    syscall.args[1].blue(),
+                    syscall.args[2].blue(),
+                    syscall.return_value.yellow(),
                     errno.desc().red(),
                 );
             }
-            let syscall = Syscall {
-                syscall_id: regs.orig_rax,
-                kind,
-                args: [regs.rdi, regs.rsi, regs.rdx],
-                return_value: regs.rax as i64 as i32,
-                command: command_str.clone(),
-            };
+            if name == "fork" || name == "clone3" || name == "vfork" || name == "clone" {
+                info!("Forked process! {:?}", syscall);
+                let errno = Errno::from_i32(syscall.return_value);
+                // eprintln!(
+                //     "{:?} {}({:x}, {:x}, {:x}, ...) = {:} {}",
+                //     syscall.kind,
+                //     name.green(),
+                //     syscall.args[0].blue(),
+                //     syscall.args[1].blue(),
+                //     syscall.args[2].blue(),
+                //     syscall.return_value.yellow(),
+                //     errno.desc().red(),
+                // );
+                // if syscall.return_value > 0 {
+                //     {
+                //         let syscall_sender = syscall_sender.clone();
+                //         let running = running.clone();
+                //         std::thread::spawn(move || {
+                //             let child_pid = Pid::from_raw(syscall.return_value as _);
+                //             if let Err(e) = nix::sys::ptrace::attach(child_pid) {
+                //                 error!(
+                //                     "Failed to attach to child process {}: {e}",
+                //                     syscall.return_value
+                //                 );
+                //             }
+                //             trace_pid(
+                //                 child_pid,
+                //                 format!("Child {}", syscall.return_value),
+                //                 syscall_sender,
+                //                 running,
+                //             )
+                //         });
+                //     }
+                // }
+            }
             let postcard = postcard::to_stdvec(&Packet::Syscall(syscall)).unwrap();
             match socket.write_message(tungstenite::Message::Binary(postcard)) {
                 Ok(_) => (),
@@ -141,6 +183,122 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                 }
             }
+        }
+
+        if !running.load(Ordering::SeqCst) {
+            break;
+        }
+    }
+
+    socket.close(None)?;
+    let mut uks: Vec<_> = unknown_kind_syscalls.into_iter().collect();
+    uks.sort_by(|(_, a), (_, b)| a.cmp(b));
+    dbg!(uks);
+    Ok(())
+}
+
+fn trace_pid(
+    child_pid: Pid,
+    child_name: String,
+    syscall_sender: Sender<Syscall>,
+    running: Arc<AtomicBool>,
+) -> Result<()> {
+    info!("Tracing child {child_name}");
+    let res = waitpid(child_pid, None)?;
+    eprintln!("first wait: {:?}", res.yellow());
+
+    let mut is_sys_exit = false;
+    let mut num_syscalls: u64 = 0;
+
+    loop {
+        // Continue execution until the next syscall
+        match ptrace::syscall(child_pid, None) {
+            Ok(_) => (),
+            Err(e) => {
+                error!("ptrace error: {e}. Exiting");
+                break;
+            }
+        }
+        _ = match waitpid(child_pid, None) {
+            Ok(wait_status) => {
+                // Check for forking
+                if let nix::sys::wait::WaitStatus::PtraceEvent(_pid, _signal, event) = wait_status {
+                    use nix::sys::ptrace::Event;
+                    let event = unsafe { transmute(event) };
+                    match event {
+                        Event::PTRACE_EVENT_CLONE
+                        | Event::PTRACE_EVENT_FORK
+                        | Event::PTRACE_EVENT_VFORK => {
+                            // There was a forking, start a new trace
+                            info!("There was a forking");
+                            // Get new pid
+                            //             ptrace(PTRACE_GETEVENTMSG, child, NULL, (long) &newpid);
+                            let res = getevent(child_pid);
+                            if let Ok(new_pid) = res {
+                                info!("Got new pid: {new_pid}");
+                                {
+                                    let new_pid = Pid::from_raw(new_pid as _);
+                                    // if let Err(e) = nix::sys::ptrace::attach(new_pid) {
+                                    //     error!(
+                                    //         "Failed to attach to child process {}: {e}",
+                                    //         new_pid
+                                    //     );
+                                    // }
+                                    match ptrace::syscall(new_pid, None) {
+                                        Ok(_) => (),
+                                        Err(e) => {
+                                            error!("ptrace error: {e}. Exiting");
+                                            break;
+                                        }
+                                    }
+                                    std::thread::sleep(Duration::from_millis(100));
+                                }
+                                // {
+                                //     let syscall_sender = syscall_sender.clone();
+                                //     let running = running.clone();
+                                //     std::thread::spawn(move || {
+                                //         let child_pid = Pid::from_raw(new_pid as _);
+                                //         // if let Err(e) = nix::sys::ptrace::attach(child_pid) {
+                                //         //     error!(
+                                //         //         "Failed to attach to child process {}: {e}",
+                                //         //         new_pid
+                                //         //     );
+                                //         // }
+                                //         std::thread::sleep(Duration::from_millis(100));
+                                //         trace_pid(
+                                //             child_pid,
+                                //             format!("Child {}", new_pid),
+                                //             syscall_sender,
+                                //             running,
+                                //         )
+                                //     });
+                                // }
+                            }
+                        }
+                        _ => (),
+                    }
+                }
+            }
+            Err(e) => {
+                error!("ptrace error: {e}. Exiting");
+                break;
+            }
+        };
+        if is_sys_exit {
+            num_syscalls += 1;
+            let Ok(regs) = ptrace::getregs(child_pid) else {
+                error!("Failed to get ptrace regs for {}. Exiting", child_name);
+                break;
+            };
+
+            let syscall = Syscall {
+                syscall_id: regs.orig_rax,
+                kind: SyscallKind::Unknown,
+                args: [regs.rdi, regs.rsi, regs.rdx],
+                return_value: to_i32(regs.rax),
+                command: child_name.clone(),
+            };
+            syscall_sender.send(syscall).unwrap();
             // socket.write_message(tungstenite::Message::Text("syscall".to_owned()))?;
         }
         is_sys_exit = !is_sys_exit;
@@ -148,13 +306,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             break;
         }
     }
-    socket.close(None)?;
     Ok(())
 }
 
 fn reconnect(running: Arc<AtomicBool>) -> Result<WebSocket<MaybeTlsStream<TcpStream>>, ()> {
     let socket = loop {
-        match connect(Url::parse("ws://localhost:3012/strace").unwrap()) {
+        info!("Trying to connect");
+        match connect(Url::parse("ws://localhost:3012").unwrap()) {
             Ok((socket, _response)) => break socket,
             Err(e) => error!("Failed to connect: {e}"),
         }
@@ -164,4 +322,9 @@ fn reconnect(running: Arc<AtomicBool>) -> Result<WebSocket<MaybeTlsStream<TcpStr
     };
     info!("Connected to data_vertex via websocket");
     Ok(socket)
+}
+
+fn to_i32(n: u64) -> i32 {
+    let bytes = n.to_le_bytes();
+    i32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
 }

@@ -11,7 +11,7 @@ use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_inspector_egui::{Inspectable, InspectorPlugin};
 use rfd::FileDialog;
 
-use crate::{get_args, scheduler::SchedulerMessage};
+use crate::{get_args, scheduler::SchedulerMessage, score::Score};
 
 use super::Trace;
 use super::{AnimationCallData, NUM_LEDS_X, NUM_LEDS_Y};
@@ -22,6 +22,7 @@ pub fn run_gui() {
         .insert_resource(ClearColor(Color::rgb(0.01, 0.01, 0.03)))
         .insert_resource(AnimationTimer(Timer::from_seconds(0.025, true)))
         .insert_resource(Trace::new(&args.trace))
+        .insert_resource(Score::feet_under_80())
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         .add_plugin(InspectorPlugin::<GlobalSettings>::new())
@@ -600,10 +601,14 @@ fn bevy_ui(
     mut settings: ResMut<GlobalSettings>,
     mut timer: ResMut<AnimationTimer>,
     mut trace: ResMut<Trace>,
+    mut score: ResMut<Score>,
     mut turbine_hall_visibility: Query<&mut Visibility, With<TurbineHall>>,
     _query: Query<Entity, With<LedMatrix>>,
     mut egui_context: ResMut<EguiContext>,
 ) {
+    if let Some(scheduler_com) = &mut trace.scheduler_com {
+        score.update(scheduler_com);
+    }
     egui::Window::new("Settings")
         .id(egui::Id::new(777333))
         .default_pos(egui::pos2(200., 300.))
@@ -617,6 +622,11 @@ fn bevy_ui(
                     scheduler_com.play_tx.send(settings.play).unwrap();
                 }
             }
+            if ui.button("Start score").clicked() {
+                if let Some(scheduler_com) = &mut trace.scheduler_com {
+                    score.start(scheduler_com);
+                }
+            }
             if ui.button("Toggle hall visibility").clicked() {
                 let mut v = turbine_hall_visibility.single_mut();
                 v.is_visible = !v.is_visible;
@@ -627,6 +637,9 @@ fn bevy_ui(
                 }
                 if ui.button("next marker ->").clicked() {
                     trace.send_scheduler_message(SchedulerMessage::JumpNextMarker);
+                }
+                if ui.button("next section ->").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::JumpNextSection);
                 }
                 if ui.button("Start").clicked() {
                     trace.send_scheduler_message(SchedulerMessage::JumpToStart);
@@ -655,6 +668,9 @@ fn bevy_ui(
                     trace.send_scheduler_message(SchedulerMessage::JumpToLeastDiverseSection(
                         min_length,
                     ));
+                }
+                if ui.button("Stop at next section").clicked() {
+                    trace.send_scheduler_message(SchedulerMessage::StopAtNextSection);
                 }
             });
             ui.collapsing("Open trace", |ui| {
@@ -708,6 +724,9 @@ fn bevy_ui(
                         let call = &trace.draw_trace[*current_index];
                         ui.label("Num:");
                         ui.label(&format!("{}", *current_index));
+                        ui.end_row();
+                        ui.label("Section num:");
+                        ui.label(&format!("{}", current_depth_envelope_index));
                         ui.end_row();
                         ui.label("Section:");
                         // egui::ScrollArea::horizontal().show(ui, |ui| {

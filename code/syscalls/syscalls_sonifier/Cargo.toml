@@ -1,0 +1,27 @@
+[package]
+name = "syscalls_sonifier"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.71"
+atomic_float = "0.1.0"
+crossterm = "0.26.1"
+dasp = { version = "0.11.0", features = ["signal"] }
+derive_builder = "0.12.0"
+enum-iterator = "1.4.1"
+# knyst = {version = "0.4.2", features = ["jack"] }
+# knyst = { git = "https://github.com/ErikNatanael/knyst.git", features = ["jack"] }
+knyst = { path = "/home/erik/code/rust/audio/knyst", features = ["jack"] }
+# knyst_waveguide = { path = "../../../../knyst_waveguide" }
+knyst_waveguide = { path = "/home/erik/code/rust/audio/knyst_waveguide" }
+syscalls_shared = { path = "../syscalls_shared" }
+num = "0.4.0"
+num_enum = "0.5.11"
+rand = "0.8.5"
+termion = "2.0.1"
+nannou_osc = "0.18.0"
+rtrb = "0.2.3"
+fastrand = "1.9.0"

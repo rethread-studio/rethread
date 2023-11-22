@@ -1,0 +1,13 @@
+[package]
+name = "score_page"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+syscalls_shared = { path = "../syscalls/syscalls_shared/" }
+leptos = "0.2.5"
+leptos_router = { version = "0.2.5", features = ["csr"] }
+console_error_panic_hook = "0.1.7"
+humantime = "2.1.0"

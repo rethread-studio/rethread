@@ -1,0 +1,2633 @@
+.section .text.matrix_inversion::my_inverse,"ax",@progbits
+	.globl	matrix_inversion::my_inverse
+	.p2align	4, 0x90
+	.type	matrix_inversion::my_inverse,@function
+matrix_inversion::my_inverse:
+
+	.cfi_startproc
+	.cfi_personality 155, DW.ref.rust_eh_personality
+	.cfi_lsda 27, .Lexception0
+	push rbp
+	.cfi_def_cfa_offset 16
+	push r15
+	.cfi_def_cfa_offset 24
+	push r14
+	.cfi_def_cfa_offset 32
+	push r13
+	.cfi_def_cfa_offset 40
+	push r12
+	.cfi_def_cfa_offset 48
+	push rbx
+	.cfi_def_cfa_offset 56
+	sub rsp, 408
+	.cfi_def_cfa_offset 464
+	.cfi_offset rbx, -56
+	.cfi_offset r12, -48
+	.cfi_offset r13, -40
+	.cfi_offset r14, -32
+	.cfi_offset r15, -24
+	.cfi_offset rbp, -16
+	mov rax, qword ptr [rdi + 32]
+	mov qword ptr [rsp + 208], rax
+	movups xmm0, xmmword ptr [rdi]
+	movups xmm1, xmmword ptr [rdi + 16]
+	movaps xmmword ptr [rsp + 192], xmm1
+	movaps xmmword ptr [rsp + 176], xmm0
+
+	mov r15, qword ptr [rsp + 200]
+
+	cmp r15, rax
+
+	jne .LBB9_158
+
+	cmp r15, 4
+	ja .LBB9_14
+
+	lea rax, [rip + .LJTI9_0]
+	movsxd rcx, dword ptr [rax + 4*r15]
+	add rcx, rax
+	jmp rcx
+
+	mov rax, qword ptr [rsp + 184]
+
+	movss xmm0, dword ptr [rax]
+
+	xorps xmm1, xmm1
+
+	ucomiss xmm0, xmm1
+
+	jne .LBB9_4
+	jnp .LBB9_143
+
+.LBB9_4:
+	movss xmm1, dword ptr [rip + .LCPI9_1]
+
+	divss xmm1, xmm0
+
+	movss dword ptr [rax], xmm1
+	jmp .LBB9_27
+
+	mov r15, qword ptr [rsp + 184]
+
+	mov rbx, qword ptr [rsp + 192]
+
+	test rbx, rbx
+	je .LBB9_20
+
+	xor r14d, r14d
+	mov rax, rbx
+	shr rax, 61
+	sete al
+
+	jne .LBB9_161
+
+	lea r12, [4*rbx]
+	mov r14b, al
+	shl r14, 2
+
+	test r12, r12
+	je .LBB9_9
+
+	mov rdi, r12
+
+	mov rsi, r14
+	call qword ptr [rip + __rust_alloc@GOTPCREL]
+	mov r14, rax
+
+.LBB9_9:
+	test r14, r14
+	jne .LBB9_21
+	jmp .LBB9_19
+
+	mov rax, qword ptr [rsp + 184]
+
+	movss xmm1, dword ptr [rax]
+
+	movsd xmm3, qword ptr [rax + 4]
+	movaps xmm4, xmm3
+	shufps xmm4, xmm3, 85
+
+	movss xmm0, dword ptr [rax + 12]
+
+	movaps xmm2, xmm1
+	mulss xmm2, xmm0
+
+	mulss xmm4, xmm3
+
+	subss xmm2, xmm4
+
+	xorps xmm4, xmm4
+
+	ucomiss xmm2, xmm4
+
+	jne .LBB9_11
+	jnp .LBB9_143
+
+.LBB9_11:
+	xorps xmm3, xmmword ptr [rip + .LCPI9_0]
+	movlhps xmm0, xmm3
+
+	shufps xmm1, xmm3, 212
+
+	shufps xmm0, xmm1, 40
+	shufps xmm2, xmm2, 0
+
+	divps xmm0, xmm2
+
+	movups xmmword ptr [rax], xmm0
+	jmp .LBB9_27
+
+	mov rax, qword ptr [rsp + 184]
+
+	movsd xmm3, qword ptr [rax + 20]
+	movaps xmm2, xmm3
+	shufps xmm2, xmm3, 85
+
+	movss xmm1, dword ptr [rax + 16]
+
+	movsd xmm0, qword ptr [rax]
+
+	movsd xmm4, qword ptr [rax + 8]
+
+	movsd xmm7, qword ptr [rax + 28]
+
+	movaps xmm6, xmm1
+	movlhps xmm6, xmm3
+	shufps xmm6, xmm3, 226
+
+	mulps xmm6, xmm7
+
+	movaps xmm5, xmm6
+	shufps xmm5, xmm6, 85
+	subps xmm5, xmm6
+
+	movaps xmm8, xmm0
+	shufps xmm8, xmm4, 1
+	shufps xmm8, xmm4, 226
+
+	mulps xmm8, xmm7
+
+	movaps xmm6, xmm8
+	shufps xmm6, xmm8, 85
+	subps xmm6, xmm8
+
+	movaps xmm8, xmm3
+	unpcklps xmm8, xmm5
+	movaps xmm9, xmm0
+	shufps xmm9, xmm0, 225
+	mulps xmm9, xmm8
+
+	movaps xmm8, xmm1
+	unpcklps xmm8, xmm6
+
+	mulps xmm8, xmm4
+
+	subps xmm9, xmm8
+	movaps xmm10, xmm9
+	shufps xmm10, xmm9, 85
+
+	movaps xmm8, xmm2
+	mulss xmm8, xmm9
+
+	addss xmm8, xmm10
+
+	xorps xmm10, xmm10
+
+	ucomiss xmm8, xmm10
+
+	jne .LBB9_13
+	jnp .LBB9_143
+
+.LBB9_13:
+	movaps xmm10, xmm0
+	shufps xmm10, xmm0, 85
+
+	mulss xmm2, xmm3
+
+	movaps xmm11, xmm4
+	shufps xmm11, xmm4, 85
+
+	movaps xmm12, xmm4
+	mulps xmm12, xmm7
+	shufps xmm12, xmm12, 85
+
+	subss xmm2, xmm12
+
+	movaps xmm13, xmm4
+	shufps xmm13, xmm0, 1
+	movaps xmm12, xmm3
+
+	shufps xmm12, xmm7, 197
+	shufps xmm13, xmm12, 34
+	movaps xmm12, xmm7
+	shufps xmm12, xmm4, 197
+	movaps xmm14, xmm0
+	shufps xmm14, xmm4, 85
+	shufps xmm12, xmm14, 40
+
+	mulps xmm12, xmm13
+
+	movaps xmm13, xmm0
+	shufps xmm13, xmm3, 16
+	shufps xmm3, xmm13, 33
+	unpcklps xmm4, xmm0
+	movlhps xmm7, xmm1
+	shufps xmm4, xmm7, 36
+
+	mulps xmm4, xmm3
+
+	subps xmm12, xmm4
+
+	xorps xmm6, xmmword ptr [rip + .LCPI9_0]
+
+	movlhps xmm6, xmm5
+	movlhps xmm2, xmm9
+
+	shufps xmm6, xmm2, 34
+	movaps xmm2, xmm8
+	shufps xmm2, xmm8, 0
+
+	divps xmm6, xmm2
+
+	movups xmmword ptr [rax], xmm6
+
+	divps xmm12, xmm2
+
+	movups xmmword ptr [rax + 16], xmm12
+
+	mulss xmm0, xmm1
+
+	mulss xmm11, xmm10
+
+	subss xmm0, xmm11
+
+	divss xmm0, xmm8
+
+	movss dword ptr [rax + 32], xmm0
+	jmp .LBB9_27
+
+.LBB9_14:
+	mov rax, qword ptr [rsp + 184]
+	mov qword ptr [rsp + 8], rax
+	mov rbx, qword ptr [rsp + 192]
+
+	test rbx, rbx
+	je .LBB9_30
+
+	xor esi, esi
+	mov rax, rbx
+	shr rax, 61
+	sete al
+
+	jne .LBB9_161
+
+	lea r12, [4*rbx]
+	mov sil, al
+	shl rsi, 2
+
+	test r12, r12
+	je .LBB9_18
+
+	mov rdi, r12
+
+	call qword ptr [rip + __rust_alloc@GOTPCREL]
+
+	mov rsi, rax
+
+.LBB9_18:
+	test rsi, rsi
+	jne .LBB9_31
+
+.LBB9_19:
+	mov esi, 4
+	mov rdi, r12
+	call qword ptr [rip + alloc::alloc::handle_alloc_error@GOTPCREL]
+
+	jmp .LBB9_162
+
+.LBB9_20:
+	mov r14d, 4
+	xor r12d, r12d
+
+.LBB9_21:
+	mov rdi, r14
+	mov rsi, r15
+	mov rdx, r12
+	call qword ptr [rip + memcpy@GOTPCREL]
+
+	mov qword ptr [rsp + 368], rbx
+	mov qword ptr [rsp + 376], r14
+	mov qword ptr [rsp + 384], rbx
+	mov qword ptr [rsp + 392], 4
+	mov qword ptr [rsp + 400], 4
+
+	cmp rbx, 6
+	jb .LBB9_148
+
+	cmp rbx, 11
+	jb .LBB9_149
+
+	cmp rbx, 16
+	jb .LBB9_150
+
+	movss xmm3, dword ptr [r14 + 20]
+
+	movsd xmm2, qword ptr [r14 + 24]
+	movsd xmm1, qword ptr [r14 + 40]
+	shufps xmm1, xmm1, 225
+	movsd xmm4, qword ptr [r14 + 56]
+
+	shufps xmm3, xmm3, 0
+
+	mulps xmm3, xmm1
+
+	mulps xmm3, xmm4
+
+	movaps xmm0, xmm3
+	shufps xmm0, xmm3, 85
+	subps xmm0, xmm3
+
+	movss xmm3, dword ptr [r14 + 36]
+	shufps xmm3, xmm3, 0
+
+	movss xmm5, dword ptr [r14 + 52]
+	shufps xmm5, xmm5, 0
+
+	mulps xmm5, xmm2
+
+	shufps xmm2, xmm2, 225
+	mulps xmm2, xmm3
+
+	mulps xmm2, xmm4
+
+	movaps xmm3, xmm2
+	shufps xmm3, xmm2, 85
+	subps xmm0, xmm3
+
+	addps xmm0, xmm2
+
+	mulps xmm5, xmm1
+
+	addps xmm0, xmm5
+
+	shufps xmm5, xmm5, 85
+	subps xmm0, xmm5
+	movaps xmmword ptr [rsp + 16], xmm0
+
+	movss dword ptr [r15], xmm0
+	movss xmm4, dword ptr [r14 + 40]
+
+	movss xmm3, dword ptr [r14 + 4]
+
+	movss xmm2, dword ptr [r14 + 8]
+
+	movss xmm1, dword ptr [r14 + 36]
+
+	movaps xmm5, xmm1
+
+	movss xmm0, dword ptr [r14 + 12]
+
+	mulss xmm1, xmm0
+
+	movss xmm6, dword ptr [r14 + 52]
+
+	mulss xmm0, xmm6
+
+	mulss xmm0, xmm4
+
+	mulss xmm4, xmm3
+
+	movss xmm7, dword ptr [r14 + 60]
+
+	mulss xmm4, xmm7
+
+	movss xmm8, dword ptr [r14 + 44]
+
+	mulss xmm3, xmm8
+
+	movss xmm9, dword ptr [r14 + 56]
+
+	mulss xmm3, xmm9
+
+	subss xmm3, xmm4
+
+	mulss xmm5, xmm2
+
+	mulss xmm5, xmm7
+
+	addss xmm5, xmm3
+
+	mulss xmm1, xmm9
+
+	subss xmm5, xmm1
+
+	mulss xmm2, xmm6
+
+	mulss xmm2, xmm8
+
+	subss xmm5, xmm2
+
+	addss xmm0, xmm5
+
+	movaps xmmword ptr [rsp + 160], xmm0
+
+	movss dword ptr [r15 + 4], xmm0
+	movss xmm1, dword ptr [r14 + 24]
+
+	movss xmm3, dword ptr [r14 + 4]
+
+	movss xmm0, dword ptr [r14 + 8]
+
+	movaps xmm4, xmm3
+	mulss xmm4, xmm1
+
+	movss xmm5, dword ptr [r14 + 60]
+
+	mulss xmm4, xmm5
+
+	movss xmm6, dword ptr [r14 + 28]
+
+	mulss xmm3, xmm6
+
+	movss xmm7, dword ptr [r14 + 56]
+
+	mulss xmm3, xmm7
+
+	subss xmm4, xmm3
+
+	movss xmm3, dword ptr [r14 + 20]
+
+	movaps xmm8, xmm3
+
+	mulss xmm8, xmm0
+
+	mulss xmm8, xmm5
+
+	subss xmm4, xmm8
+
+	movss xmm5, dword ptr [r14 + 12]
+
+	mulss xmm3, xmm5
+
+	mulss xmm3, xmm7
+
+	addss xmm3, xmm4
+
+	movss xmm4, dword ptr [r14 + 52]
+
+	mulss xmm0, xmm4
+
+	mulss xmm0, xmm6
+
+	addss xmm0, xmm3
+
+	mulss xmm5, xmm4
+
+	mulss xmm5, xmm1
+
+	subss xmm0, xmm5
+
+	movaps xmmword ptr [rsp + 112], xmm0
+
+	movss dword ptr [r15 + 8], xmm0
+	movss xmm6, dword ptr [r14 + 24]
+
+	movss xmm5, dword ptr [r14 + 4]
+
+	movss xmm4, dword ptr [r14 + 8]
+
+	movss xmm1, dword ptr [r14 + 20]
+
+	movaps xmm3, xmm1
+
+	movss xmm0, dword ptr [r14 + 12]
+
+	mulss xmm1, xmm0
+
+	movss xmm7, dword ptr [r14 + 36]
+
+	mulss xmm0, xmm7
+
+	mulss xmm0, xmm6
+
+	mulss xmm6, xmm5
+
+	movss xmm8, dword ptr [r14 + 44]
+
+	mulss xmm6, xmm8
+
+	movss xmm9, dword ptr [r14 + 28]
+
+	mulss xmm5, xmm9
+
+	movss xmm10, dword ptr [r14 + 40]
+
+	mulss xmm5, xmm10
+
+	subss xmm5, xmm6
+
+	mulss xmm3, xmm4
+
+	mulss xmm3, xmm8
+
+	addss xmm3, xmm5
+
+	mulss xmm1, xmm10
+
+	subss xmm3, xmm1
+
+	mulss xmm4, xmm7
+
+	mulss xmm4, xmm9
+
+	subss xmm3, xmm4
+
+	addss xmm0, xmm3
+
+	movaps xmmword ptr [rsp + 48], xmm0
+
+	movss dword ptr [r15 + 12], xmm0
+
+	movss xmm3, dword ptr [r14 + 16]
+
+	movaps xmm10, xmmword ptr [rip + .LCPI9_0]
+
+	movaps xmm5, xmm3
+
+	xorps xmm5, xmm10
+
+	movsd xmm6, qword ptr [r14 + 40]
+	movsd xmm1, qword ptr [r14 + 24]
+
+	movsd xmm7, qword ptr [r14 + 56]
+
+	shufps xmm7, xmm7, 225
+
+	unpcklps xmm5, xmm3
+
+	mulps xmm5, xmm6
+
+	mulps xmm5, xmm7
+
+	movaps xmm4, xmm5
+
+	shufps xmm4, xmm5, 85
+	addps xmm4, xmm5
+
+	movss xmm3, dword ptr [r14 + 32]
+	shufps xmm3, xmm3, 0
+
+	mulps xmm3, xmm1
+
+	mulps xmm3, xmm7
+
+	addps xmm4, xmm3
+
+	shufps xmm3, xmm3, 85
+	subps xmm4, xmm3
+
+	movss xmm3, dword ptr [r14 + 48]
+	shufps xmm3, xmm3, 0
+
+	shufps xmm1, xmm1, 225
+	mulps xmm1, xmm3
+
+	mulps xmm1, xmm6
+
+	movaps xmm3, xmm1
+	shufps xmm3, xmm1, 85
+	subps xmm4, xmm3
+
+	addps xmm4, xmm1
+
+	movss dword ptr [r15 + 16], xmm4
+	movss xmm6, dword ptr [r14 + 40]
+
+	movss xmm1, dword ptr [r14]
+
+	movss xmm0, dword ptr [r14 + 8]
+
+	movaps xmm3, xmm1
+	mulss xmm3, xmm6
+
+	movss xmm7, dword ptr [r14 + 60]
+
+	mulss xmm3, xmm7
+
+	movss xmm8, dword ptr [r14 + 44]
+
+	mulss xmm1, xmm8
+
+	movss xmm9, dword ptr [r14 + 56]
+
+	mulss xmm1, xmm9
+
+	subss xmm3, xmm1
+
+	movss xmm1, dword ptr [r14 + 32]
+
+	movaps xmm11, xmm1
+	mulss xmm11, xmm0
+
+	mulss xmm11, xmm7
+
+	subss xmm3, xmm11
+
+	movss xmm7, dword ptr [r14 + 12]
+
+	mulss xmm1, xmm7
+
+	mulss xmm1, xmm9
+
+	addss xmm1, xmm3
+
+	movss xmm3, dword ptr [r14 + 48]
+
+	mulss xmm0, xmm3
+
+	mulss xmm0, xmm8
+
+	addss xmm0, xmm1
+
+	mulss xmm7, xmm3
+
+	mulss xmm7, xmm6
+
+	subss xmm0, xmm7
+
+	movaps xmmword ptr [rsp + 32], xmm0
+
+	movss dword ptr [r15 + 20], xmm0
+
+	movss xmm8, dword ptr [r14 + 24]
+
+	movss xmm7, dword ptr [r14]
+
+	movss xmm1, dword ptr [r14 + 16]
+
+	movaps xmm3, xmm1
+
+	movss xmm0, dword ptr [r14 + 12]
+
+	mulss xmm1, xmm0
+
+	movss xmm9, dword ptr [r14 + 48]
+
+	mulss xmm0, xmm9
+
+	mulss xmm0, xmm8
+
+	mulss xmm8, xmm7
+
+	movss xmm11, dword ptr [r14 + 60]
+
+	mulss xmm8, xmm11
+
+	movss xmm12, dword ptr [r14 + 28]
+
+	mulss xmm7, xmm12
+
+	movss xmm13, dword ptr [r14 + 56]
+
+	mulss xmm7, xmm13
+
+	subss xmm7, xmm8
+
+	movss xmm8, dword ptr [r14 + 8]
+
+	mulss xmm3, xmm8
+
+	mulss xmm3, xmm11
+
+	addss xmm3, xmm7
+
+	mulss xmm1, xmm13
+
+	subss xmm3, xmm1
+
+	mulss xmm8, xmm9
+
+	mulss xmm8, xmm12
+
+	subss xmm3, xmm8
+
+	addss xmm0, xmm3
+
+	movaps xmmword ptr [rsp + 64], xmm0
+
+	movss dword ptr [r15 + 24], xmm0
+	movss xmm1, dword ptr [r14 + 24]
+
+	movss xmm3, dword ptr [r14]
+
+	movss xmm0, dword ptr [r14 + 8]
+
+	movaps xmm8, xmm3
+
+	mulss xmm8, xmm1
+
+	movss xmm9, dword ptr [r14 + 44]
+
+	mulss xmm8, xmm9
+
+	movss xmm11, dword ptr [r14 + 28]
+
+	mulss xmm3, xmm11
+
+	movss xmm12, dword ptr [r14 + 40]
+
+	mulss xmm3, xmm12
+
+	subss xmm8, xmm3
+
+	movss xmm3, dword ptr [r14 + 16]
+
+	movaps xmm13, xmm3
+
+	mulss xmm13, xmm0
+
+	mulss xmm13, xmm9
+
+	subss xmm8, xmm13
+
+	movss xmm9, dword ptr [r14 + 12]
+
+	mulss xmm3, xmm9
+
+	mulss xmm3, xmm12
+
+	addss xmm3, xmm8
+
+	movss xmm8, dword ptr [r14 + 32]
+
+	mulss xmm0, xmm8
+
+	mulss xmm0, xmm11
+
+	addss xmm0, xmm3
+
+	mulss xmm9, xmm8
+
+	mulss xmm9, xmm1
+
+	subss xmm0, xmm9
+
+	movaps xmmword ptr [rsp + 256], xmm0
+
+	movss dword ptr [r15 + 28], xmm0
+	movsd xmm8, qword ptr [r14 + 16]
+
+	movsd xmm9, qword ptr [r14 + 32]
+
+	movaps xmm3, xmm9
+
+	shufps xmm3, xmm9, 225
+
+	mulps xmm3, xmm8
+
+	movss xmm1, dword ptr [r14 + 60]
+
+	shufps xmm1, xmm1, 0
+
+	mulps xmm1, xmm3
+
+	movaps xmm11, xmm1
+
+	shufps xmm11, xmm1, 85
+
+	movss xmm12, dword ptr [r14 + 44]
+
+	movss xmm3, dword ptr [r14 + 52]
+
+	movaps xmm13, xmm8
+
+	mulss xmm13, xmm12
+
+	mulss xmm13, xmm3
+
+	subss xmm1, xmm13
+
+	subss xmm1, xmm11
+
+	movss xmm11, dword ptr [r14 + 28]
+
+	movss xmm13, dword ptr [r14 + 48]
+
+	shufps xmm8, xmm9, 1
+	shufps xmm8, xmm9, 226
+	movaps xmm14, xmm11
+	unpcklps xmm14, xmm13
+
+	mulps xmm14, xmm8
+
+	unpcklps xmm3, xmm12
+
+	mulps xmm3, xmm14
+
+	addss xmm1, xmm3
+
+	shufps xmm3, xmm3, 85
+	addss xmm3, xmm1
+
+	mulss xmm11, xmm13
+
+	shufps xmm9, xmm9, 85
+	mulss xmm9, xmm11
+
+	subss xmm3, xmm9
+
+	movss dword ptr [r15 + 32], xmm3
+
+	movss xmm12, dword ptr [r14 + 36]
+
+	movss xmm11, dword ptr [r14]
+
+	movss xmm1, dword ptr [r14 + 32]
+
+	movaps xmm8, xmm1
+
+	movss xmm9, dword ptr [r14 + 12]
+
+	mulss xmm1, xmm9
+
+	movss xmm13, dword ptr [r14 + 48]
+
+	mulss xmm9, xmm13
+
+	mulss xmm9, xmm12
+
+	mulss xmm12, xmm11
+
+	movss xmm14, dword ptr [r14 + 60]
+
+	mulss xmm12, xmm14
+
+	movss xmm15, dword ptr [r14 + 44]
+
+	mulss xmm11, xmm15
+
+	movss xmm2, dword ptr [r14 + 52]
+
+	mulss xmm11, xmm2
+
+	subss xmm11, xmm12
+
+	movss xmm12, dword ptr [r14 + 4]
+
+	mulss xmm8, xmm12
+
+	mulss xmm8, xmm14
+
+	addss xmm8, xmm11
+
+	mulss xmm1, xmm2
+
+	subss xmm8, xmm1
+
+	mulss xmm12, xmm13
+
+	mulss xmm12, xmm15
+
+	subss xmm8, xmm12
+
+	addss xmm9, xmm8
+
+	movss dword ptr [r15 + 36], xmm9
+	movss xmm1, dword ptr [r14 + 20]
+
+	movss xmm2, dword ptr [r14]
+
+	movaps xmm8, xmm2
+
+	mulss xmm8, xmm1
+
+	movss xmm12, dword ptr [r14 + 60]
+
+	mulss xmm8, xmm12
+
+	movss xmm13, dword ptr [r14 + 28]
+
+	mulss xmm2, xmm13
+
+	movss xmm14, dword ptr [r14 + 52]
+
+	mulss xmm2, xmm14
+
+	subss xmm8, xmm2
+
+	movss xmm11, dword ptr [r14 + 4]
+
+	movss xmm2, dword ptr [r14 + 16]
+
+	movaps xmm15, xmm2
+
+	mulss xmm15, xmm11
+
+	mulss xmm15, xmm12
+
+	subss xmm8, xmm15
+
+	movss xmm12, dword ptr [r14 + 12]
+
+	mulss xmm2, xmm12
+
+	mulss xmm2, xmm14
+
+	addss xmm2, xmm8
+
+	movss xmm8, dword ptr [r14 + 48]
+
+	mulss xmm11, xmm8
+
+	mulss xmm11, xmm13
+
+	addss xmm11, xmm2
+
+	mulss xmm12, xmm8
+
+	mulss xmm12, xmm1
+
+	subss xmm11, xmm12
+
+	movss dword ptr [r15 + 40], xmm11
+
+	movss xmm2, dword ptr [r14 + 16]
+
+	xorps xmm10, xmm2
+
+	movsd xmm1, qword ptr [r14 + 36]
+
+	movsd xmm13, qword ptr [r14 + 20]
+
+	movsd xmm8, qword ptr [r14 + 52]
+
+	shufps xmm8, xmm8, 225
+
+	unpcklps xmm10, xmm2
+
+	mulps xmm10, xmm1
+
+	mulps xmm10, xmm8
+
+	movaps xmm12, xmm10
+
+	shufps xmm12, xmm10, 85
+	addps xmm12, xmm10
+
+	movss xmm2, dword ptr [r14 + 32]
+	shufps xmm2, xmm2, 0
+
+	mulps xmm2, xmm13
+
+	mulps xmm2, xmm8
+
+	addps xmm12, xmm2
+
+	shufps xmm2, xmm2, 85
+	subps xmm12, xmm2
+
+	movss xmm2, dword ptr [r14 + 48]
+	shufps xmm2, xmm2, 0
+
+	shufps xmm13, xmm13, 225
+	mulps xmm13, xmm2
+
+	mulps xmm13, xmm1
+
+	movaps xmm1, xmm13
+	shufps xmm1, xmm13, 85
+	subps xmm12, xmm1
+
+	addps xmm12, xmm13
+
+	movss dword ptr [r15 + 48], xmm12
+
+	movss xmm2, dword ptr [r14 + 16]
+
+	movaps xmm1, xmm2
+
+	movss xmm10, dword ptr [r14 + 12]
+
+	mulss xmm2, xmm10
+
+	movss xmm8, dword ptr [r14 + 32]
+
+	mulss xmm10, xmm8
+
+	movss xmm13, dword ptr [r14 + 20]
+
+	mulss xmm10, xmm13
+
+	movss xmm14, dword ptr [r14]
+
+	mulss xmm13, xmm14
+
+	movss xmm15, dword ptr [r14 + 44]
+
+	mulss xmm13, xmm15
+
+	movss xmm5, dword ptr [r14 + 28]
+
+	mulss xmm14, xmm5
+
+	movss xmm6, dword ptr [r14 + 36]
+
+	mulss xmm14, xmm6
+
+	subss xmm14, xmm13
+
+	movss xmm13, dword ptr [r14 + 4]
+
+	mulss xmm1, xmm13
+
+	mulss xmm1, xmm15
+
+	addss xmm1, xmm14
+
+	mulss xmm2, xmm6
+
+	subss xmm1, xmm2
+
+	mulss xmm13, xmm8
+
+	mulss xmm13, xmm5
+
+	subss xmm1, xmm13
+
+	addss xmm10, xmm1
+
+	movss dword ptr [r15 + 44], xmm10
+	movss xmm1, dword ptr [r14 + 36]
+
+	movss xmm2, dword ptr [r14]
+
+	movaps xmm5, xmm2
+
+	mulss xmm5, xmm1
+
+	movss xmm6, dword ptr [r14 + 56]
+
+	mulss xmm5, xmm6
+
+	movss xmm8, dword ptr [r14 + 40]
+
+	mulss xmm2, xmm8
+
+	movss xmm14, dword ptr [r14 + 52]
+
+	mulss xmm2, xmm14
+
+	subss xmm5, xmm2
+
+	movss xmm13, dword ptr [r14 + 4]
+
+	movss xmm2, dword ptr [r14 + 32]
+
+	movaps xmm15, xmm2
+
+	mulss xmm15, xmm13
+
+	mulss xmm15, xmm6
+
+	subss xmm5, xmm15
+
+	movss xmm6, dword ptr [r14 + 8]
+
+	mulss xmm2, xmm6
+
+	mulss xmm2, xmm14
+
+	addss xmm2, xmm5
+
+	movss xmm5, dword ptr [r14 + 48]
+
+	mulss xmm13, xmm5
+
+	mulss xmm13, xmm8
+
+	addss xmm13, xmm2
+
+	mulss xmm6, xmm5
+
+	mulss xmm6, xmm1
+
+	subss xmm13, xmm6
+
+	movss dword ptr [r15 + 52], xmm13
+
+	movss xmm2, dword ptr [r14 + 16]
+
+	movaps xmm1, xmm2
+
+	movss xmm14, dword ptr [r14 + 8]
+
+	mulss xmm2, xmm14
+
+	movss xmm5, dword ptr [r14 + 48]
+
+	mulss xmm14, xmm5
+
+	movss xmm6, dword ptr [r14 + 20]
+
+	mulss xmm14, xmm6
+
+	movss xmm8, dword ptr [r14]
+
+	mulss xmm6, xmm8
+
+	movss xmm15, dword ptr [r14 + 56]
+
+	mulss xmm6, xmm15
+
+	movss xmm7, dword ptr [r14 + 24]
+
+	mulss xmm8, xmm7
+
+	movss xmm0, dword ptr [r14 + 52]
+
+	mulss xmm8, xmm0
+
+	subss xmm8, xmm6
+
+	movss xmm6, dword ptr [r14 + 4]
+
+	mulss xmm1, xmm6
+
+	mulss xmm1, xmm15
+
+	addss xmm1, xmm8
+
+	mulss xmm2, xmm0
+
+	subss xmm1, xmm2
+
+	mulss xmm6, xmm5
+
+	mulss xmm6, xmm7
+
+	subss xmm1, xmm6
+
+	addss xmm14, xmm1
+
+	movss dword ptr [r15 + 56], xmm14
+	movss xmm0, dword ptr [r14 + 20]
+
+	movss xmm1, dword ptr [r14]
+
+	movaps xmm2, xmm1
+
+	mulss xmm2, xmm0
+
+	movss xmm5, dword ptr [r14 + 40]
+
+	mulss xmm2, xmm5
+
+	movss xmm6, dword ptr [r14 + 24]
+
+	mulss xmm1, xmm6
+
+	movss xmm7, dword ptr [r14 + 36]
+
+	mulss xmm1, xmm7
+
+	subss xmm2, xmm1
+
+	movss xmm15, dword ptr [r14 + 4]
+
+	movss xmm1, dword ptr [r14 + 16]
+
+	movaps xmm8, xmm1
+
+	mulss xmm8, xmm15
+
+	mulss xmm8, xmm5
+
+	subss xmm2, xmm8
+
+	movss xmm5, dword ptr [r14 + 8]
+
+	mulss xmm1, xmm5
+
+	mulss xmm1, xmm7
+
+	addss xmm1, xmm2
+
+	movss xmm2, dword ptr [r14 + 32]
+
+	mulss xmm15, xmm2
+
+	mulss xmm15, xmm6
+
+	addss xmm15, xmm1
+
+	mulss xmm5, xmm2
+
+	movaps xmm2, xmmword ptr [rsp + 16]
+
+	mulss xmm5, xmm0
+
+	subss xmm15, xmm5
+
+	movss dword ptr [r15 + 60], xmm15
+
+	movaps xmm0, xmm2
+
+	unpcklps xmm0, xmm4
+
+	movsd xmm1, qword ptr [r14]
+
+	mulps xmm1, xmm0
+
+	movaps xmm8, xmm3
+
+	unpcklps xmm8, xmm12
+
+	movsd xmm0, qword ptr [r14 + 8]
+
+	mulps xmm8, xmm0
+
+	movaps xmm0, xmm1
+	shufps xmm0, xmm1, 85
+	addss xmm0, xmm1
+	addss xmm0, xmm8
+	shufps xmm8, xmm8, 85
+	addss xmm8, xmm0
+
+	xorps xmm0, xmm0
+
+	ucomiss xmm8, xmm0
+
+	jne .LBB9_25
+	jnp .LBB9_138
+
+.LBB9_25:
+	movss xmm1, dword ptr [rip + .LCPI9_1]
+
+	divss xmm1, xmm8
+
+	movaps xmm0, xmmword ptr [rsp + 112]
+
+	unpcklps xmm0, xmmword ptr [rsp + 48]
+	unpcklps xmm2, xmmword ptr [rsp + 160]
+	movlhps xmm2, xmm0
+	shufps xmm1, xmm1, 0
+
+	mulps xmm2, xmm1
+	movups xmmword ptr [r15], xmm2
+
+	movaps xmm0, xmmword ptr [rsp + 64]
+	unpcklps xmm0, xmmword ptr [rsp + 256]
+	unpcklps xmm4, xmmword ptr [rsp + 32]
+	movlhps xmm4, xmm0
+	mulps xmm4, xmm1
+	movups xmmword ptr [r15 + 16], xmm4
+
+	unpcklps xmm11, xmm10
+	unpcklps xmm3, xmm9
+	movlhps xmm3, xmm11
+	mulps xmm3, xmm1
+	movups xmmword ptr [r15 + 32], xmm3
+
+	unpcklps xmm14, xmm15
+	unpcklps xmm12, xmm13
+	movlhps xmm12, xmm14
+	mulps xmm12, xmm1
+	movups xmmword ptr [r15 + 48], xmm12
+
+	shl rbx, 2
+
+	mov edx, 4
+	mov rdi, r14
+
+.LBB9_26:
+	mov rsi, rbx
+	call qword ptr [rip + __rust_dealloc@GOTPCREL]
+
+.LBB9_27:
+	mov rdi, qword ptr [rsp + 184]
+
+	test rdi, rdi
+	je .LBB9_145
+
+	mov rsi, qword ptr [rsp + 176]
+
+	test rsi, rsi
+	je .LBB9_145
+
+	shl rsi, 2
+
+	mov edx, 4
+	add rsp, 408
+	.cfi_def_cfa_offset 56
+	pop rbx
+	.cfi_def_cfa_offset 48
+	pop r12
+	.cfi_def_cfa_offset 40
+	pop r13
+	.cfi_def_cfa_offset 32
+	pop r14
+	.cfi_def_cfa_offset 24
+	pop r15
+	.cfi_def_cfa_offset 16
+	pop rbp
+	.cfi_def_cfa_offset 8
+	jmp qword ptr [rip + __rust_dealloc@GOTPCREL]
+
+.LBB9_30:
+	.cfi_def_cfa_offset 464
+	mov esi, 4
+	xor r12d, r12d
+
+.LBB9_31:
+	mov rdi, rsi
+	mov r14, rsi
+
+	mov rsi, qword ptr [rsp + 8]
+	mov rdx, r12
+	call qword ptr [rip + memcpy@GOTPCREL]
+
+	mov qword ptr [rsp + 328], rbx
+	mov qword ptr [rsp + 32], r14
+
+	mov qword ptr [rsp + 336], r14
+	mov qword ptr [rsp + 344], rbx
+	mov qword ptr [rsp + 352], r15
+	mov qword ptr [rsp + 360], r15
+
+	mov rax, r15
+	imul rax, r15
+
+	test rax, rax
+
+	je .LBB9_36
+
+	mov rsi, qword ptr [rsp + 8]
+
+	lea rcx, [rsi + 4*r15]
+	mov rdx, rsi
+
+	.p2align	4, 0x90
+.LBB9_33:
+	cmp rsi, rcx
+	lea r8, [rdx + 4*r15]
+	mov rdi, rsi
+	cmove rdi, r8
+
+	test rdi, rdi
+	je .LBB9_35
+
+	xor r9d, r9d
+	cmp rax, 1
+	setne r9b
+
+	cmp rsi, rcx
+	lea rsi, [rsi + 4*r15]
+	cmove rcx, rsi
+
+	cmove rdx, r8
+
+	lea rsi, [rdi + 4*r9]
+
+	mov dword ptr [rdi], 0
+
+	dec rax
+
+	jne .LBB9_33
+
+.LBB9_35:
+	test r15, r15
+
+	je .LBB9_146
+
+.LBB9_36:
+	lea rcx, [r15 - 1]
+	mov eax, r15d
+	and eax, 3
+	mov qword ptr [rsp + 240], rcx
+	cmp rcx, 3
+	jae .LBB9_38
+
+	xor ecx, ecx
+	jmp .LBB9_40
+
+.LBB9_38:
+	mov rdx, r15
+	and rdx, -4
+	lea rcx, [4*r15]
+	lea rsi, [rcx + 2*rcx]
+	mov rdi, r15
+	shl rdi, 4
+	add rdi, 16
+	xor ecx, ecx
+	mov r8, qword ptr [rsp + 8]
+
+	.p2align	4, 0x90
+.LBB9_39:
+	mov dword ptr [r8], 1065353216
+
+	mov dword ptr [r8 + 4*r15 + 4], 1065353216
+
+	mov dword ptr [r8 + 8*r15 + 8], 1065353216
+
+	add rcx, 4
+
+	mov dword ptr [r8 + rsi + 12], 1065353216
+
+	add r8, rdi
+	cmp rdx, rcx
+	jne .LBB9_39
+
+.LBB9_40:
+	mov qword ptr [rsp + 104], rbx
+	lea rdx, [r15 + 1]
+	mov qword ptr [rsp + 136], rdx
+	test rax, rax
+	je .LBB9_43
+
+	imul rcx, qword ptr [rsp + 136]
+	mov rdx, qword ptr [rsp + 8]
+	lea rcx, [rdx + 4*rcx]
+	lea rdx, [4*r15 + 4]
+
+	.p2align	4, 0x90
+.LBB9_42:
+	mov dword ptr [rcx], 1065353216
+
+	add rcx, rdx
+
+	dec rax
+	jne .LBB9_42
+
+.LBB9_43:
+	lea rax, [r15 - 1]
+	mov qword ptr [rsp + 296], rax
+	mov rax, r15
+	and rax, -2
+	mov qword ptr [rsp + 288], rax
+	lea r11, [4*r15]
+	lea rax, [4*r15 + 4]
+	mov qword ptr [rsp + 112], rax
+	lea rbp, [8*r15]
+	mov rax, r15
+	shl rax, 5
+	mov qword ptr [rsp + 280], rax
+	mov r8, qword ptr [rsp + 32]
+	lea rax, [r8 + 4*r15]
+	add rax, 20
+	mov qword ptr [rsp + 152], rax
+	lea rax, [r8 + 4*r15]
+	add rax, 4
+	mov qword ptr [rsp + 144], rax
+	mov r9d, 16
+	xor eax, eax
+	mov qword ptr [rsp + 248], rax
+	lea rax, [rip + .L__unnamed_3]
+	mov qword ptr [rsp + 96], rax
+	lea rax, [rip + .L__unnamed_4]
+	mov qword ptr [rsp + 88], rax
+	xorps xmm0, xmm0
+	movss xmm1, dword ptr [rip + .LCPI9_1]
+	lea rax, [rip + .L__unnamed_5]
+	mov qword ptr [rsp + 232], rax
+	movaps xmm2, xmmword ptr [rip + .LCPI9_2]
+	lea rax, [rip + .L__unnamed_6]
+	mov qword ptr [rsp + 224], rax
+	mov rdi, qword ptr [rsp + 240]
+	mov r12, r15
+	mov r13, qword ptr [rsp + 8]
+	mov r10, r15
+	mov r14, r8
+	xor ebx, ebx
+	mov qword ptr [rsp + 160], r11
+	mov qword ptr [rsp + 16], r15
+
+	jmp .LBB9_45
+
+	.p2align	4, 0x90
+.LBB9_44:
+	mov rbx, qword ptr [rsp + 48]
+	inc rbx
+
+	mov rax, qword ptr [rsp + 112]
+
+	add r14, rax
+	mov r10, qword ptr [rsp + 64]
+	dec r10
+	mov r13, qword ptr [rsp + 312]
+	add r13, 4
+	mov r12, qword ptr [rsp + 320]
+	inc r12
+	mov r9, qword ptr [rsp + 256]
+	add r9, 4
+	add qword ptr [rsp + 248], 4
+	dec rdi
+	add qword ptr [rsp + 152], rax
+	add qword ptr [rsp + 144], rax
+	mov r15, qword ptr [rsp + 16]
+
+	cmp rbx, r15
+	mov r8, qword ptr [rsp + 32]
+
+	je .LBB9_112
+
+.LBB9_45:
+	mov rsi, r15
+	sub rsi, rbx
+
+	mov rax, rbx
+	imul rax, r15
+
+	cmp rsi, 1
+
+	je .LBB9_49
+
+	test rsi, rsi
+	je .LBB9_157
+
+	lea rcx, [rax + rbx]
+
+	movss xmm3, dword ptr [r8 + 4*rcx]
+	andps xmm3, xmm2
+	mov ecx, 1
+	xor r15d, r15d
+
+	.p2align	4, 0x90
+.LBB9_48:
+	movss xmm4, dword ptr [r14 + 4*rcx]
+	andps xmm4, xmm2
+
+	ucomiss xmm4, xmm3
+
+	cmova r15, rcx
+
+	lea rdx, [rcx + 1]
+
+	maxss xmm4, xmm3
+	movaps xmm3, xmm4
+	mov rcx, rdx
+
+	cmp r10, rdx
+
+	jne .LBB9_48
+	jmp .LBB9_50
+
+	.p2align	4, 0x90
+.LBB9_49:
+	xor r15d, r15d
+
+.LBB9_50:
+	lea rcx, [r15 + rbx]
+
+	cmp qword ptr [rsp + 16], rcx
+	jbe .LBB9_154
+
+	add rax, rcx
+
+	movss xmm3, dword ptr [r8 + 4*rax]
+
+	ucomiss xmm3, xmm0
+
+	jne .LBB9_52
+	jnp .LBB9_110
+
+.LBB9_52:
+	mov qword ptr [rsp + 64], r10
+	mov qword ptr [rsp + 256], r9
+	mov r9, rdi
+	and r9, -8
+	mov r10, qword ptr [rsp + 296]
+	sub r10, rbx
+
+	test r15, r15
+	mov qword ptr [rsp + 48], rbx
+
+	mov qword ptr [rsp + 320], r12
+	mov qword ptr [rsp + 312], r13
+	je .LBB9_65
+
+	cmp qword ptr [rsp + 16], rbx
+	mov r8, qword ptr [rsp + 288]
+	jbe .LBB9_156
+
+	cmp qword ptr [rsp + 240], 0
+	mov qword ptr [rsp + 304], rsi
+
+	je .LBB9_68
+
+	mov rdx, qword ptr [rsp + 8]
+	lea rbx, [rdx + 4*rcx]
+	lea rax, [r15 + r12]
+	lea r12, [rdx + 4*rax]
+	xor eax, eax
+
+	.p2align	4, 0x90
+.LBB9_56:
+	movss xmm4, dword ptr [r13]
+
+	mov edx, dword ptr [rbx]
+	mov dword ptr [r13], edx
+
+	movss dword ptr [rbx], xmm4
+
+	add rax, 2
+
+	movss xmm4, dword ptr [r13 + r11]
+
+	mov edx, dword ptr [r12]
+	mov dword ptr [r13 + r11], edx
+
+	movss dword ptr [r12], xmm4
+
+	add rbx, rbp
+	add r13, rbp
+	add r12, rbp
+	cmp r8, rax
+	jne .LBB9_56
+
+	test byte ptr [rsp + 16], 1
+	mov rsi, qword ptr [rsp + 48]
+	je .LBB9_59
+
+.LBB9_58:
+	imul rax, qword ptr [rsp + 16]
+
+	lea rdx, [rax + rsi]
+
+	add rax, rcx
+
+	mov r11, qword ptr [rsp + 8]
+
+	movss xmm4, dword ptr [r11 + 4*rdx]
+
+	mov r8d, dword ptr [r11 + 4*rax]
+	mov dword ptr [r11 + 4*rdx], r8d
+
+	movss dword ptr [r11 + 4*rax], xmm4
+
+	mov r11, qword ptr [rsp + 160]
+
+.LBB9_59:
+	test rsi, rsi
+
+	je .LBB9_91
+
+	cmp rsi, 8
+	jb .LBB9_82
+
+	mov eax, 0
+	cmp qword ptr [rsp + 16], 1
+	mov rsi, qword ptr [rsp + 48]
+	jne .LBB9_86
+
+	mov rbx, qword ptr [rsp + 32]
+	lea rax, [rbx + 4*rsi]
+	lea rdx, [rax + 4*rcx]
+	cmp rax, rdx
+	jae .LBB9_83
+
+	lea rax, [rbx + 8*rsi]
+	lea rdx, [rbx + 4*rcx]
+	cmp rdx, rax
+	jae .LBB9_83
+
+	xor eax, eax
+	jmp .LBB9_86
+
+	.p2align	4, 0x90
+.LBB9_65:
+	mov rcx, rbx
+
+	not rcx
+
+	add rcx, qword ptr [rsp + 16]
+
+	je .LBB9_44
+
+	mov rax, qword ptr [rsp + 48]
+	imul rax, qword ptr [rsp + 136]
+	movaps xmm4, xmm1
+	divss xmm4, xmm3
+
+	cmp r10, 8
+	jae .LBB9_69
+
+	xor edx, edx
+	mov rbx, qword ptr [rsp + 32]
+	mov r8, qword ptr [rsp + 64]
+	jmp .LBB9_72
+
+	.p2align	4, 0x90
+.LBB9_68:
+	xor eax, eax
+	test byte ptr [rsp + 16], 1
+	mov rsi, qword ptr [rsp + 48]
+
+	jne .LBB9_58
+	jmp .LBB9_59
+
+.LBB9_69:
+	mov rdx, r10
+	and rdx, -8
+	movaps xmm3, xmm4
+
+	shufps xmm3, xmm4, 0
+	xor r8d, r8d
+	mov rbx, qword ptr [rsp + 32]
+
+	.p2align	4, 0x90
+.LBB9_70:
+	movups xmm5, xmmword ptr [r14 + 4*r8 + 4]
+	movups xmm6, xmmword ptr [r14 + 4*r8 + 20]
+	mulps xmm5, xmm3
+	mulps xmm6, xmm3
+	movups xmmword ptr [r14 + 4*r8 + 4], xmm5
+	movups xmmword ptr [r14 + 4*r8 + 20], xmm6
+
+	add r8, 8
+	cmp r9, r8
+	jne .LBB9_70
+
+	cmp r10, rdx
+	mov r8, qword ptr [rsp + 64]
+	je .LBB9_74
+
+.LBB9_72:
+	inc rdx
+
+	.p2align	4, 0x90
+.LBB9_73:
+	movss xmm3, dword ptr [r14 + 4*rdx]
+
+	mulss xmm3, xmm4
+	movss dword ptr [r14 + 4*rdx], xmm3
+
+	inc rdx
+
+	cmp r8, rdx
+
+	jne .LBB9_73
+
+.LBB9_74:
+	lea rax, [rbx + 4*rax]
+
+	mov rdx, qword ptr [rsp + 16]
+	lea rax, [rax + 4*rdx]
+
+	mov rdx, r10
+	and rdx, -8
+	mov rbx, qword ptr [rsp + 144]
+	mov r15, qword ptr [rsp + 152]
+	xor r12d, r12d
+	jmp .LBB9_76
+
+	.p2align	4, 0x90
+.LBB9_75:
+	inc r12
+
+	add r15, r11
+	add rbx, r11
+
+	cmp r12, rcx
+
+	je .LBB9_44
+
+.LBB9_76:
+	mov r8, r12
+	imul r8, qword ptr [rsp + 16]
+
+	movss xmm3, dword ptr [rax + 4*r8]
+
+	cmp r10, 8
+
+	jae .LBB9_78
+
+	xor r8d, r8d
+
+	jmp .LBB9_81
+
+	.p2align	4, 0x90
+.LBB9_78:
+	movaps xmm4, xmm3
+	shufps xmm4, xmm3, 0
+	xor r13d, r13d
+
+	.p2align	4, 0x90
+.LBB9_79:
+	movups xmm5, xmmword ptr [r14 + 4*r13 + 4]
+	movups xmm6, xmmword ptr [r14 + 4*r13 + 20]
+	movups xmm7, xmmword ptr [r15 + 4*r13 - 16]
+	movups xmm8, xmmword ptr [r15 + 4*r13]
+
+	mulps xmm5, xmm4
+	subps xmm7, xmm5
+	mulps xmm6, xmm4
+	subps xmm8, xmm6
+
+	movups xmmword ptr [r15 + 4*r13 - 16], xmm7
+	movups xmmword ptr [r15 + 4*r13], xmm8
+
+	add r13, 8
+	cmp r9, r13
+	jne .LBB9_79
+
+	mov r8, rdx
+
+	cmp r10, rdx
+	je .LBB9_75
+
+	.p2align	4, 0x90
+.LBB9_81:
+	movss xmm4, dword ptr [rbx + 4*r8]
+
+	movss xmm5, dword ptr [r14 + 4*r8 + 4]
+
+	mulss xmm5, xmm3
+	subss xmm4, xmm5
+
+	movss dword ptr [rbx + 4*r8], xmm4
+
+	lea r13, [r8 + 1]
+
+	mov r8, r13
+
+	cmp rdi, r13
+
+	jne .LBB9_81
+	jmp .LBB9_75
+
+.LBB9_82:
+	xor eax, eax
+	mov rsi, qword ptr [rsp + 48]
+	jmp .LBB9_86
+
+.LBB9_83:
+	mov rdx, rsi
+	and rdx, -8
+
+	mov rax, rsi
+	and rax, -8
+	mov r13, qword ptr [rsp + 256]
+	lea r8, [4*r15]
+	add r8, r13
+	mov r12, qword ptr [rsp + 280]
+
+	.p2align	4, 0x90
+.LBB9_84:
+	movups xmm4, xmmword ptr [rbx + r13 - 16]
+	movups xmm5, xmmword ptr [rbx + r13]
+
+	movups xmm6, xmmword ptr [rbx + r8 - 16]
+	movups xmm7, xmmword ptr [rbx + r8]
+	movups xmmword ptr [rbx + r13 - 16], xmm6
+	movups xmmword ptr [rbx + r13], xmm7
+
+	movups xmmword ptr [rbx + r8 - 16], xmm4
+	movups xmmword ptr [rbx + r8], xmm5
+
+	add rbx, r12
+	add rdx, -8
+	jne .LBB9_84
+
+	mov rsi, qword ptr [rsp + 48]
+	cmp rsi, rax
+	je .LBB9_91
+
+	.p2align	4, 0x90
+.LBB9_86:
+	mov rdx, rax
+	or rdx, 1
+	test sil, 1
+	je .LBB9_88
+
+	imul rax, qword ptr [rsp + 16]
+	lea r8, [rax + rsi]
+
+	add rax, rcx
+
+	mov r12, qword ptr [rsp + 32]
+
+	movss xmm4, dword ptr [r12 + 4*r8]
+
+	mov ebx, dword ptr [r12 + 4*rax]
+	mov dword ptr [r12 + 4*r8], ebx
+
+	mov rsi, qword ptr [rsp + 48]
+
+	movss dword ptr [r12 + 4*rax], xmm4
+	mov rax, rdx
+
+.LBB9_88:
+	cmp rsi, rdx
+	je .LBB9_91
+
+	mov rdx, qword ptr [rsp + 16]
+	mov rbx, rdx
+	imul rbx, rax
+	lea r12, [rcx + rbx]
+	add rbx, rsi
+	lea r13, [rax + 1]
+	imul rdx, r13
+	add rdx, rcx
+	imul r13, r11
+	add r13, qword ptr [rsp + 248]
+	mov rcx, qword ptr [rsp + 32]
+
+	.p2align	4, 0x90
+.LBB9_90:
+	movss xmm4, dword ptr [rcx + 4*rbx]
+
+	mov r8d, dword ptr [rcx + 4*r12]
+	mov dword ptr [rcx + 4*rbx], r8d
+
+	movss dword ptr [rcx + 4*r12], xmm4
+
+	add rax, 2
+
+	movss xmm4, dword ptr [rcx + r13]
+
+	mov r8d, dword ptr [rcx + 4*rdx]
+	mov dword ptr [rcx + r13], r8d
+
+	movss dword ptr [rcx + 4*rdx], xmm4
+
+	add rcx, rbp
+	cmp rsi, rax
+
+	jne .LBB9_90
+
+.LBB9_91:
+	mov rsi, qword ptr [rsp + 304]
+
+	cmp rsi, r15
+
+	jbe .LBB9_155
+
+	mov rdx, qword ptr [rsp + 48]
+	mov rax, rdx
+	imul rax, qword ptr [rsp + 136]
+	mov rcx, qword ptr [rsp + 32]
+	lea rax, [rcx + 4*rax]
+
+	mov rcx, rdx
+	not rcx
+	add rcx, qword ptr [rsp + 16]
+
+	movss xmm4, dword ptr [rax]
+
+	mov edx, dword ptr [rax + 4*r15]
+	mov dword ptr [rax], edx
+
+	movss dword ptr [rax + 4*r15], xmm4
+
+	dec rsi
+
+	je .LBB9_100
+
+	movaps xmm4, xmm1
+	divss xmm4, xmm3
+
+	cmp r10, 8
+	jae .LBB9_95
+
+	xor ebx, ebx
+	mov rdx, qword ptr [rsp + 64]
+	jmp .LBB9_98
+
+.LBB9_95:
+	mov rbx, r10
+	and rbx, -8
+	movaps xmm3, xmm4
+
+	shufps xmm3, xmm4, 0
+	xor edx, edx
+
+	.p2align	4, 0x90
+.LBB9_96:
+	movups xmm5, xmmword ptr [r14 + 4*rdx + 4]
+	movups xmm6, xmmword ptr [r14 + 4*rdx + 20]
+	mulps xmm5, xmm3
+	mulps xmm6, xmm3
+	movups xmmword ptr [r14 + 4*rdx + 4], xmm5
+	movups xmmword ptr [r14 + 4*rdx + 20], xmm6
+
+	add rdx, 8
+	cmp r9, rdx
+	jne .LBB9_96
+
+	cmp r10, rbx
+	mov rdx, qword ptr [rsp + 64]
+	je .LBB9_100
+
+.LBB9_98:
+	inc rbx
+
+	.p2align	4, 0x90
+.LBB9_99:
+	movss xmm3, dword ptr [r14 + 4*rbx]
+
+	mulss xmm3, xmm4
+	movss dword ptr [r14 + 4*rbx], xmm3
+
+	inc rbx
+
+	cmp rdx, rbx
+
+	jne .LBB9_99
+
+.LBB9_100:
+	test rcx, rcx
+
+	je .LBB9_44
+
+	dec r15
+
+	cmp rsi, r15
+
+	jbe .LBB9_159
+
+	mov rdx, qword ptr [rsp + 16]
+	lea rax, [rax + 4*rdx]
+
+	mov rdx, r10
+	and rdx, -8
+	mov r13, qword ptr [rsp + 144]
+	mov rbx, qword ptr [rsp + 152]
+	xor r12d, r12d
+	jmp .LBB9_104
+
+	.p2align	4, 0x90
+.LBB9_103:
+	inc r12
+
+	mov r11, qword ptr [rsp + 160]
+
+	add rbx, r11
+	add r13, r11
+
+	cmp r12, rcx
+
+	je .LBB9_44
+
+.LBB9_104:
+	mov r8, r12
+	imul r8, qword ptr [rsp + 16]
+
+	lea r11, [r8 + r15]
+
+	movss xmm3, dword ptr [rax + 4*r8]
+
+	movss xmm4, dword ptr [rax + 4*r11 + 4]
+
+	movss dword ptr [rax + 4*r8], xmm4
+
+	movss dword ptr [rax + 4*r11 + 4], xmm3
+
+	movss xmm3, dword ptr [rax + 4*r8]
+
+	cmp r10, 8
+
+	jae .LBB9_106
+
+	xor r8d, r8d
+
+	jmp .LBB9_109
+
+	.p2align	4, 0x90
+.LBB9_106:
+	movaps xmm4, xmm3
+	shufps xmm4, xmm3, 0
+	xor r8d, r8d
+
+	.p2align	4, 0x90
+.LBB9_107:
+	movups xmm5, xmmword ptr [r14 + 4*r8 + 4]
+	movups xmm6, xmmword ptr [r14 + 4*r8 + 20]
+	movups xmm7, xmmword ptr [rbx + 4*r8 - 16]
+	movups xmm8, xmmword ptr [rbx + 4*r8]
+
+	mulps xmm5, xmm4
+	subps xmm7, xmm5
+	mulps xmm6, xmm4
+	subps xmm8, xmm6
+
+	movups xmmword ptr [rbx + 4*r8 - 16], xmm7
+	movups xmmword ptr [rbx + 4*r8], xmm8
+
+	add r8, 8
+	cmp r9, r8
+	jne .LBB9_107
+
+	mov r8, rdx
+	cmp r10, rdx
+	je .LBB9_103
+
+	.p2align	4, 0x90
+.LBB9_109:
+	movss xmm4, dword ptr [r13 + 4*r8]
+
+	movss xmm5, dword ptr [r14 + 4*r8 + 4]
+
+	mulss xmm5, xmm3
+	subss xmm4, xmm5
+
+	movss dword ptr [r13 + 4*r8], xmm4
+
+	lea r11, [r8 + 1]
+
+	mov r8, r11
+
+	cmp rdi, r11
+
+	jne .LBB9_109
+	jmp .LBB9_103
+
+.LBB9_110:
+	mov rsi, qword ptr [rsp + 104]
+
+	test rsi, rsi
+
+	je .LBB9_143
+
+	shl rsi, 2
+	mov edx, 4
+	mov rdi, qword ptr [rsp + 32]
+	call qword ptr [rip + __rust_dealloc@GOTPCREL]
+	jmp .LBB9_143
+
+.LBB9_112:
+	mov r9, r15
+	dec r9
+
+	mov rbp, r15
+	mov r8, qword ptr [rsp + 112]
+
+	je .LBB9_125
+
+	mov rcx, qword ptr [rsp + 32]
+	lea rax, [rcx + 20]
+	mov qword ptr [rsp + 64], rax
+	mov rax, qword ptr [rsp + 8]
+	lea r13, [rax + 20]
+	add rcx, 4
+	mov qword ptr [rsp + 48], rcx
+	lea r10, [rax + 4]
+	xor esi, esi
+	lea rax, [rip + .L__unnamed_7]
+	mov qword ptr [rsp + 96], rax
+	lea rax, [rip + .L__unnamed_8]
+	mov qword ptr [rsp + 88], rax
+	jmp .LBB9_115
+
+	.p2align	4, 0x90
+.LBB9_114:
+	mov r11, qword ptr [rsp + 160]
+
+	add r13, r11
+	add r10, r11
+
+	cmp rsi, rbp
+
+	je .LBB9_125
+
+.LBB9_115:
+	mov rax, rsi
+
+	inc rsi
+
+	imul rax, rbp
+
+	mov rcx, qword ptr [rsp + 8]
+
+	lea r11, [rcx + 4*rax]
+
+	mov rbx, r10
+	mov r14, qword ptr [rsp + 48]
+	mov r15, r13
+	mov r12, qword ptr [rsp + 64]
+	mov rdx, r9
+	xor ecx, ecx
+	jmp .LBB9_117
+
+	.p2align	4, 0x90
+.LBB9_116:
+	dec rdx
+	add r12, r8
+	add r15, 4
+	add r14, r8
+	add rbx, 4
+
+	cmp rcx, r9
+
+	je .LBB9_114
+
+.LBB9_117:
+	cmp rcx, rbp
+
+	je .LBB9_152
+
+	mov rax, rcx
+	inc rcx
+
+	cmp rbp, rcx
+
+	je .LBB9_116
+
+	mov rdi, r9
+	sub rdi, rax
+	movss xmm0, dword ptr [r11 + 4*rax]
+
+	cmp rdi, 8
+	jae .LBB9_121
+
+	xor eax, eax
+
+	jmp .LBB9_124
+
+	.p2align	4, 0x90
+.LBB9_121:
+	mov rbp, rdx
+	and rbp, -8
+	mov rax, rdi
+
+	and rax, -8
+	movaps xmm1, xmm0
+	shufps xmm1, xmm0, 0
+	xor r8d, r8d
+
+	.p2align	4, 0x90
+.LBB9_122:
+	movups xmm2, xmmword ptr [r12 + 4*r8 - 16]
+	movups xmm3, xmmword ptr [r12 + 4*r8]
+	movups xmm4, xmmword ptr [r15 + 4*r8 - 16]
+	movups xmm5, xmmword ptr [r15 + 4*r8]
+
+	mulps xmm2, xmm1
+	subps xmm4, xmm2
+	mulps xmm3, xmm1
+	subps xmm5, xmm3
+
+	movups xmmword ptr [r15 + 4*r8 - 16], xmm4
+	movups xmmword ptr [r15 + 4*r8], xmm5
+
+	add r8, 8
+	cmp rbp, r8
+	jne .LBB9_122
+
+	cmp rdi, rax
+	mov rbp, qword ptr [rsp + 16]
+	mov r8, qword ptr [rsp + 112]
+	je .LBB9_116
+
+	.p2align	4, 0x90
+.LBB9_124:
+	movss xmm1, dword ptr [rbx + 4*rax]
+
+	movss xmm2, dword ptr [r14 + 4*rax]
+
+	mulss xmm2, xmm0
+	subss xmm1, xmm2
+
+	movss dword ptr [rbx + 4*rax], xmm1
+
+	lea rdi, [rax + 1]
+
+	mov rax, rdi
+
+	cmp rdx, rdi
+
+	jne .LBB9_124
+	jmp .LBB9_116
+
+.LBB9_125:
+	mov rax, r9
+	imul rax, rbp
+	lea rdx, [rax + r9]
+	mov rcx, qword ptr [rsp + 32]
+
+	lea r12, [rcx + 4*rax]
+	add r12, 16
+	mov rdi, r11
+	neg rdi
+	mov r10, qword ptr [rsp + 8]
+	lea r8, [r10 + 16]
+	lea r15, [rcx + 4*rax]
+	xor ebx, ebx
+	xorps xmm0, xmm0
+	lea rax, [rip + .L__unnamed_7]
+	mov qword ptr [rsp + 96], rax
+	lea rax, [rip + .L__unnamed_8]
+	mov qword ptr [rsp + 88], rax
+	xor eax, eax
+	mov r11, qword ptr [rsp + 104]
+	mov qword ptr [rsp + 112], rdx
+	mov qword ptr [rsp + 48], r15
+
+.LBB9_126:
+	mov rcx, qword ptr [rsp + 32]
+
+	movss xmm2, dword ptr [rcx + 4*rdx]
+
+	ucomiss xmm2, xmm0
+
+	jne .LBB9_127
+	jnp .LBB9_140
+
+.LBB9_127:
+	lea r11, [rax + 1]
+
+	imul rax, rbp
+
+	mov rcx, qword ptr [rsp + 8]
+	lea r14, [rcx + 4*rax]
+	mov rsi, r12
+	mov r13, r9
+	mov rax, rbp
+	mov rdx, qword ptr [rsp + 32]
+	jmp .LBB9_129
+
+	.p2align	4, 0x90
+.LBB9_128:
+	mov rcx, r13
+	mov rbp, qword ptr [rsp + 16]
+	imul rcx, rbp
+	add rcx, r13
+
+	movss xmm2, dword ptr [rdx + 4*rcx]
+
+	add r12, rdi
+	add r15, rdi
+
+	ucomiss xmm2, xmm0
+
+	jne .LBB9_129
+	jnp .LBB9_139
+
+.LBB9_129:
+	mov rcx, rax
+
+	movss xmm1, dword ptr [r14 + 4*r13]
+
+	divss xmm1, xmm2
+
+	movss dword ptr [r14 + 4*r13], xmm1
+
+	cmp rax, rbp
+
+	ja .LBB9_152
+
+	mov rax, r13
+
+	sub r13, 1
+
+	jb .LBB9_137
+
+	cmp rax, 8
+	jae .LBB9_133
+
+	xor ebp, ebp
+	jmp .LBB9_136
+
+	.p2align	4, 0x90
+.LBB9_133:
+	mov rbp, rax
+	and rbp, -8
+	movaps xmm2, xmm1
+	shufps xmm2, xmm1, 0
+	xor ecx, ecx
+
+	.p2align	4, 0x90
+.LBB9_134:
+	movups xmm3, xmmword ptr [r12 + 4*rcx - 16]
+	movups xmm4, xmmword ptr [r12 + 4*rcx]
+	movups xmm5, xmmword ptr [r8 + 4*rcx - 16]
+	movups xmm6, xmmword ptr [r8 + 4*rcx]
+
+	mulps xmm3, xmm2
+	subps xmm5, xmm3
+	mulps xmm4, xmm2
+	subps xmm6, xmm4
+
+	movups xmmword ptr [r8 + 4*rcx - 16], xmm5
+	movups xmmword ptr [r8 + 4*rcx], xmm6
+
+	add rcx, 8
+	cmp rbp, rcx
+	jne .LBB9_134
+
+	cmp rax, rbp
+	je .LBB9_128
+
+	.p2align	4, 0x90
+.LBB9_136:
+	movss xmm2, dword ptr [r10 + 4*rbp]
+
+	movss xmm3, dword ptr [r15 + 4*rbp]
+
+	mulss xmm3, xmm1
+	subss xmm2, xmm3
+
+	movss dword ptr [r10 + 4*rbp], xmm2
+
+	lea rcx, [rbp + 1]
+
+	mov rbp, rcx
+
+	cmp rax, rcx
+
+	jne .LBB9_136
+	jmp .LBB9_128
+
+.LBB9_137:
+	mov rax, qword ptr [rsp + 160]
+
+	add r8, rax
+	add r10, rax
+	mov rax, r11
+
+	cmp r11, rbp
+	setae bl
+	mov r11, qword ptr [rsp + 104]
+
+	mov r12, rsi
+	mov rdx, qword ptr [rsp + 112]
+	mov r15, qword ptr [rsp + 48]
+
+	jne .LBB9_126
+	jmp .LBB9_140
+
+.LBB9_138:
+	shl rbx, 2
+
+	mov edx, 4
+	mov rdi, r14
+	mov rsi, rbx
+	call qword ptr [rip + __rust_dealloc@GOTPCREL]
+	jmp .LBB9_143
+
+.LBB9_139:
+	mov r11, qword ptr [rsp + 104]
+
+.LBB9_140:
+	test r11, r11
+
+	je .LBB9_142
+
+	shl r11, 2
+	mov edx, 4
+	mov rdi, qword ptr [rsp + 32]
+	mov rsi, r11
+	call qword ptr [rip + __rust_dealloc@GOTPCREL]
+
+.LBB9_142:
+	test bl, 1
+	jne .LBB9_27
+
+.LBB9_143:
+	mov rsi, qword ptr [rsp + 176]
+
+	test rsi, rsi
+	je .LBB9_145
+
+	mov rdi, qword ptr [rsp + 184]
+
+	shl rsi, 2
+
+	mov edx, 4
+	call qword ptr [rip + __rust_dealloc@GOTPCREL]
+
+.LBB9_145:
+	add rsp, 408
+	.cfi_def_cfa_offset 56
+	pop rbx
+	.cfi_def_cfa_offset 48
+	pop r12
+	.cfi_def_cfa_offset 40
+	pop r13
+	.cfi_def_cfa_offset 32
+	pop r14
+	.cfi_def_cfa_offset 24
+	pop r15
+	.cfi_def_cfa_offset 16
+	pop rbp
+	.cfi_def_cfa_offset 8
+	ret
+
+.LBB9_146:
+	.cfi_def_cfa_offset 464
+	test rbx, rbx
+
+	je .LBB9_27
+
+	shl rbx, 2
+	mov edx, 4
+	mov rdi, qword ptr [rsp + 32]
+	jmp .LBB9_26
+
+.LBB9_148:
+	lea rdx, [rip + .L__unnamed_9]
+	mov edi, 5
+	jmp .LBB9_151
+
+.LBB9_149:
+	lea rdx, [rip + .L__unnamed_10]
+	mov edi, 10
+	jmp .LBB9_151
+
+.LBB9_150:
+	lea rdx, [rip + .L__unnamed_11]
+	mov edi, 15
+
+.LBB9_151:
+	mov rsi, rbx
+	call qword ptr [rip + core::panicking::panic_bounds_check@GOTPCREL]
+
+	jmp .LBB9_162
+
+.LBB9_152:
+	mov esi, 29
+
+.LBB9_153:
+	mov rdi, qword ptr [rsp + 88]
+	mov rdx, qword ptr [rsp + 96]
+
+	call std::panicking::begin_panic
+
+	jmp .LBB9_162
+
+.LBB9_154:
+	mov esi, 27
+	lea rax, [rip + .L__unnamed_12]
+	mov qword ptr [rsp + 88], rax
+	lea rax, [rip + .L__unnamed_13]
+	mov qword ptr [rsp + 96], rax
+	jmp .LBB9_153
+
+.LBB9_155:
+	mov esi, 41
+	jmp .LBB9_160
+
+.LBB9_156:
+	lea rdi, [rip + .L__unnamed_14]
+	lea rdx, [rip + .L__unnamed_15]
+	mov esi, 62
+	call qword ptr [rip + core::panicking::panic@GOTPCREL]
+
+	jmp .LBB9_162
+
+.LBB9_157:
+	mov esi, 35
+	jmp .LBB9_153
+
+.LBB9_158:
+	lea rdi, [rip + .L__unnamed_16]
+
+	lea rdx, [rip + .L__unnamed_17]
+	mov esi, 37
+	call std::panicking::begin_panic
+
+	jmp .LBB9_162
+
+.LBB9_159:
+	mov esi, 27
+	lea rax, [rip + .L__unnamed_12]
+	mov qword ptr [rsp + 224], rax
+	lea rax, [rip + .L__unnamed_18]
+	mov qword ptr [rsp + 232], rax
+
+.LBB9_160:
+	mov rdi, qword ptr [rsp + 224]
+	mov rdx, qword ptr [rsp + 232]
+
+	call std::panicking::begin_panic
+
+	jmp .LBB9_162
+
+.LBB9_161:
+	call qword ptr [rip + alloc::raw_vec::capacity_overflow@GOTPCREL]
+
+.LBB9_162:
+	ud2
+
+	mov rbx, rax
+	jmp .LBB9_169
+
+	jmp .LBB9_166
+
+.LBB9_166:
+	mov rbx, rax
+	lea rdi, [rsp + 328]
+	jmp .LBB9_168
+
+	mov rbx, rax
+	lea rdi, [rsp + 368]
+
+.LBB9_168:
+	call core::ptr::drop_in_place<nalgebra::base::matrix::Matrix<f32,nalgebra::base::dimension::Dyn,nalgebra::base::dimension::Dyn,nalgebra::base::vec_storage::VecStorage<f32,nalgebra::base::dimension::Dyn,nalgebra::base::dimension::Dyn>>>
+
+.LBB9_169:
+	lea rdi, [rsp + 176]
+	call core::ptr::drop_in_place<nalgebra::base::matrix::Matrix<f32,nalgebra::base::dimension::Dyn,nalgebra::base::dimension::Dyn,nalgebra::base::vec_storage::VecStorage<f32,nalgebra::base::dimension::Dyn,nalgebra::base::dimension::Dyn>>>
+	mov rdi, rbx
+	call _Unwind_Resume@PLT
+	ud2
+

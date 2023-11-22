@@ -1,6 +1,6 @@
 use enum_iterator::Sequence;
 use num_enum::TryFromPrimitive;
-use tui::{
+use ratatui::{
     backend::Backend,
     layout::Constraint,
     style::{Color, Modifier, Style},
@@ -13,16 +13,22 @@ use crate::App;
 #[derive(Copy, Clone, Debug, PartialEq, Eq, TryFromPrimitive, Sequence)]
 #[repr(u8)]
 pub enum MenuItem {
+    PlayScore,
+    NextMovement,
+    PreviousMovement,
+    StopScorePlayback,
     LoadRecordedData,
     StartPlayback,
     PausePlayback,
     ResetPlayback,
     RecordData,
+    StopRecording,
     StopAndSaveRecording,
+    StopAndSaveRecordingJson,
     Exit,
 }
 
-pub fn menu_ui<B: Backend>(f: &mut Frame<B>, state: &mut App, rect: tui::layout::Rect) {
+pub fn menu_ui<B: Backend>(f: &mut Frame<B>, state: &mut App, rect: ratatui::layout::Rect) {
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
     let normal_style = Style::default().bg(Color::Blue);
     let header_cells = ["Actions"]

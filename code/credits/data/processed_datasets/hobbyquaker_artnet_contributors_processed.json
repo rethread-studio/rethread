@@ -1,0 +1,51 @@
+{
+ "repo": "hobbyquaker_artnet",
+ "n_contributions": 79,
+ "contributors": [
+  {
+   "id": "hobbyquaker",
+   "type": "User",
+   "contributions": 60
+  },
+  {
+   "id": "maxjoehnk",
+   "type": "User",
+   "contributions": 6
+  },
+  {
+   "id": "martinzuern",
+   "type": "User",
+   "contributions": 4
+  },
+  {
+   "id": "jnovack",
+   "type": "User",
+   "contributions": 3
+  },
+  {
+   "id": "margau",
+   "type": "User",
+   "contributions": 2
+  },
+  {
+   "id": "solexious",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "hibas123",
+   "type": "User",
+   "contributions": 1
+  },
+  {
+   "id": "sebastian.raff",
+   "type": "Anonymous",
+   "contributions": 1
+  },
+  {
+   "id": "sparks-alec",
+   "type": "User",
+   "contributions": 1
+  }
+ ]
+}

@@ -1,0 +1,1530 @@
+.section .text.matrix_inversion::my_inverse,"ax",@progbits
+	.globl	matrix_inversion::my_inverse
+	.p2align	4, 0x90
+	.type	matrix_inversion::my_inverse,@function
+matrix_inversion::my_inverse:
+
+		// /home/erik/code/rust/matrix_inversion/src/lib.rs : 3
+		pub fn my_inverse() {
+	.cfi_startproc
+	.cfi_personality 155, DW.ref.rust_eh_personality
+	.cfi_lsda 27, .Lexception0
+	push rbp
+	.cfi_def_cfa_offset 16
+	push r15
+	.cfi_def_cfa_offset 24
+	push r14
+	.cfi_def_cfa_offset 32
+	push r13
+	.cfi_def_cfa_offset 40
+	push r12
+	.cfi_def_cfa_offset 48
+	push rbx
+	.cfi_def_cfa_offset 56
+	sub rsp, 168
+	.cfi_def_cfa_offset 224
+	.cfi_offset rbx, -56
+	.cfi_offset r12, -48
+	.cfi_offset r13, -40
+	.cfi_offset r14, -32
+	.cfi_offset r15, -24
+	.cfi_offset rbp, -16
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/alloc/src/alloc.rs : 93
+		unsafe { __rust_alloc(layout.size(), layout.align()) }
+	mov edi, 4096
+	mov esi, 4
+	call qword ptr [rip + __rust_alloc@GOTPCREL]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/alloc/src/raw_vec.rs : 187
+		let ptr = match result {
+	test rax, rax
+	je .LBB8_100
+
+	mov rbx, rax
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/mod.rs : 1386
+		copy_nonoverlapping(&src as *const T, dst, 1);
+	lea rdi, [rax + 4]
+	mov edx, 4088
+	xor esi, esi
+	call qword ptr [rip + memset@GOTPCREL]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/construction.rs : 179
+		unsafe { *res.get_unchecked_mut((i, i)) = elt.clone() }
+	mov dword ptr [rbx], 1065353216
+
+	mov dword ptr [rbx + 132], 1065353216
+
+	mov dword ptr [rbx + 264], 1065353216
+
+	mov dword ptr [rbx + 396], 1065353216
+
+	mov dword ptr [rbx + 528], 1065353216
+
+	mov dword ptr [rbx + 660], 1065353216
+
+	mov dword ptr [rbx + 792], 1065353216
+
+	mov dword ptr [rbx + 924], 1065353216
+
+	mov dword ptr [rbx + 1056], 1065353216
+
+	mov dword ptr [rbx + 1188], 1065353216
+
+	mov dword ptr [rbx + 1320], 1065353216
+
+	mov dword ptr [rbx + 1452], 1065353216
+
+	mov dword ptr [rbx + 1584], 1065353216
+
+	mov dword ptr [rbx + 1716], 1065353216
+
+	mov dword ptr [rbx + 1848], 1065353216
+
+	mov dword ptr [rbx + 1980], 1065353216
+
+	mov dword ptr [rbx + 2112], 1065353216
+
+	mov dword ptr [rbx + 2244], 1065353216
+
+	mov dword ptr [rbx + 2376], 1065353216
+
+	mov dword ptr [rbx + 2508], 1065353216
+
+	mov dword ptr [rbx + 2640], 1065353216
+
+	mov dword ptr [rbx + 2772], 1065353216
+
+	mov dword ptr [rbx + 2904], 1065353216
+
+	mov dword ptr [rbx + 3036], 1065353216
+
+	mov dword ptr [rbx + 3168], 1065353216
+
+	mov dword ptr [rbx + 3300], 1065353216
+
+	mov dword ptr [rbx + 3432], 1065353216
+
+	mov dword ptr [rbx + 3564], 1065353216
+
+	mov dword ptr [rbx + 3696], 1065353216
+
+	mov dword ptr [rbx + 3828], 1065353216
+
+	mov dword ptr [rbx + 3960], 1065353216
+
+	mov dword ptr [rbx + 4092], 1065353216
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/matrix.rs : 570
+		Matrix::from_data(self.data.into_owned())
+	mov qword ptr [rsp + 88], 1024
+	mov qword ptr [rsp + 96], rbx
+	mov qword ptr [rsp + 104], 1024
+	mov qword ptr [rsp + 112], 32
+	mov qword ptr [rsp + 120], 32
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/alloc/src/alloc.rs : 93
+		unsafe { __rust_alloc(layout.size(), layout.align()) }
+	mov edi, 4096
+	mov esi, 4
+	call qword ptr [rip + __rust_alloc@GOTPCREL]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/alloc/src/raw_vec.rs : 187
+		let ptr = match result {
+	test rax, rax
+	je .LBB8_93
+
+	mov r13, rax
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	mov edx, 4096
+	mov rdi, rax
+	mov rsi, rbx
+	call qword ptr [rip + memcpy@GOTPCREL]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/matrix.rs : 318
+		Matrix {
+	mov qword ptr [rsp + 128], 1024
+	mov qword ptr [rsp + 136], r13
+	mov qword ptr [rsp + 144], 1024
+	mov qword ptr [rsp + 152], 32
+	mov qword ptr [rsp + 160], 32
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 48
+		let inner_end = if size == 0 {
+	lea rsi, [rbx + 128]
+	mov eax, 1024
+	mov rcx, rbx
+	mov rdi, rbx
+
+	.p2align	4, 0x90
+.LBB8_3:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 81
+		if self.ptr == self.inner_end {
+	lea r9, [rcx + 128]
+	cmp rdi, rsi
+	mov rdx, rdi
+	cmove rdx, r9
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/edition.rs : 180
+		for e in self.iter_mut() {
+	test rdx, rdx
+	je .LBB8_6
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 81
+		if self.ptr == self.inner_end {
+	lea r8, [rdi + 128]
+	cmp rdi, rsi
+	cmovne r8, rsi
+
+	cmove rcx, r9
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 100
+		if self.size != 0 {
+	lea r9, [rdx + 4]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/edition.rs : 181
+		*e = val.clone()
+	mov dword ptr [rdx], 0
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 81
+		if self.ptr == self.inner_end {
+	lea rdi, [rcx + 128]
+
+	cmp r9, r8
+	mov rsi, r9
+	cmove rsi, rdi
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/edition.rs : 180
+		for e in self.iter_mut() {
+	test rsi, rsi
+	je .LBB8_6
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 100
+		if self.size != 0 {
+	xor r10d, r10d
+	cmp rax, 2
+	setne r10b
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 81
+		if self.ptr == self.inner_end {
+	add rdx, 132
+	cmp r9, r8
+	cmovne rdx, r8
+
+	cmove rcx, rdi
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 100
+		if self.size != 0 {
+	lea rdi, [rsi + 4*r10]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/edition.rs : 181
+		*e = val.clone()
+	mov dword ptr [rsi], 0
+	mov rsi, rdx
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/iter.rs : 75
+		if self.size == 0 {
+	add rax, -2
+
+	jne .LBB8_3
+
+.LBB8_6:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/edition.rs : 205
+		unsafe { *self.get_unchecked_mut((i, i)) = val.clone() }
+	mov dword ptr [rbx], 1065353216
+
+	mov dword ptr [rbx + 132], 1065353216
+
+	mov dword ptr [rbx + 264], 1065353216
+
+	mov dword ptr [rbx + 396], 1065353216
+
+	mov dword ptr [rbx + 528], 1065353216
+
+	mov dword ptr [rbx + 660], 1065353216
+
+	mov dword ptr [rbx + 792], 1065353216
+
+	mov dword ptr [rbx + 924], 1065353216
+
+	mov dword ptr [rbx + 1056], 1065353216
+
+	mov dword ptr [rbx + 1188], 1065353216
+
+	mov dword ptr [rbx + 1320], 1065353216
+
+	mov dword ptr [rbx + 1452], 1065353216
+
+	mov dword ptr [rbx + 1584], 1065353216
+
+	mov dword ptr [rbx + 1716], 1065353216
+
+	mov dword ptr [rbx + 1848], 1065353216
+
+	mov dword ptr [rbx + 1980], 1065353216
+
+	mov dword ptr [rbx + 2112], 1065353216
+
+	mov dword ptr [rbx + 2244], 1065353216
+
+	mov dword ptr [rbx + 2376], 1065353216
+
+	mov dword ptr [rbx + 2508], 1065353216
+
+	mov dword ptr [rbx + 2640], 1065353216
+
+	mov dword ptr [rbx + 2772], 1065353216
+
+	mov dword ptr [rbx + 2904], 1065353216
+
+	mov dword ptr [rbx + 3036], 1065353216
+
+	mov dword ptr [rbx + 3168], 1065353216
+
+	mov dword ptr [rbx + 3300], 1065353216
+
+	mov dword ptr [rbx + 3432], 1065353216
+
+	mov dword ptr [rbx + 3564], 1065353216
+
+	mov dword ptr [rbx + 3696], 1065353216
+
+	mov dword ptr [rbx + 3828], 1065353216
+
+	mov dword ptr [rbx + 3960], 1065353216
+
+	mov dword ptr [rbx + 4092], 1065353216
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/min_max.rs : 225
+		assert!(!self.is_empty(), "The input vector must not be empty.");
+	lea rsi, [rbx + 128]
+	lea r8, [r13 + 128]
+	lea rax, [r13 + 132]
+	mov qword ptr [rsp + 16], rax
+	lea rax, [r13 + 148]
+	mov qword ptr [rsp + 48], rax
+	mov r11d, 31
+	xor r15d, r15d
+	xorps xmm0, xmm0
+	movss xmm1, dword ptr [rip + .LCPI8_1]
+	lea rax, [rip + .L__unnamed_3]
+	mov qword ptr [rsp + 32], rax
+	lea rax, [rip + .L__unnamed_4]
+	mov qword ptr [rsp + 24], rax
+	movaps xmm2, xmmword ptr [rip + .LCPI8_0]
+	mov qword ptr [rsp + 40], r13
+	mov qword ptr [rsp + 64], rbx
+
+	mov qword ptr [rsp + 56], rbx
+	mov r14, r13
+	mov qword ptr [rsp + 8], r13
+	jmp .LBB8_7
+
+	.p2align	4, 0x90
+.LBB8_64:
+	inc r15
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	add r14, 132
+	add rsi, 4
+	add qword ptr [rsp + 56], 4
+	add qword ptr [rsp + 40], 4
+	add r8, 4
+	dec r11
+	add qword ptr [rsp + 16], 132
+	add qword ptr [rsp + 48], 132
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r15, 32
+	mov r13, qword ptr [rsp + 8]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_65
+
+.LBB8_7:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/const_ptr.rs : 545
+		unsafe { intrinsics::arith_offset(self, count) }
+	mov rax, r15
+	shl rax, 7
+	lea rax, [rax + 4*r15]
+	add rax, r13
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/min_max.rs : 225
+		assert!(!self.is_empty(), "The input vector must not be empty.");
+	lea rcx, [r15 - 31]
+	mov r10, r15
+	sub r10, 31
+	jne .LBB8_9
+
+	xor r12d, r12d
+	jmp .LBB8_11
+
+	.p2align	4, 0x90
+.LBB8_9:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/std/src/f32.rs : 188
+		unsafe { intrinsics::fabsf32(self) }
+	movss xmm3, dword ptr [rax]
+	andps xmm3, xmm2
+	mov edx, 1
+	xor r12d, r12d
+
+	.p2align	4, 0x90
+.LBB8_10:
+	movss xmm4, dword ptr [r14 + 4*rdx]
+	andps xmm4, xmm2
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1367
+		fn gt(&self, other: &$t) -> bool { (*self) > (*other) }
+	ucomiss xmm4, xmm3
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/min_max.rs : 233
+		if val > the_max {
+	cmova r12, rdx
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	lea rdi, [r15 + rdx + 1]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	inc rdx
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/min_max.rs : 233
+		if val > the_max {
+	maxss xmm4, xmm3
+	movaps xmm3, xmm4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp rdi, 32
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_10
+
+.LBB8_11:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/lu.rs : 67
+		let piv = matrix.view_range(i.., i).icamax() + i;
+	lea rdx, [r12 + r15]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/ops.rs : 45
+		ij.0 < shape.0 && ij.1 < shape.1,
+	cmp rdx, 32
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/ops.rs : 44
+		assert!(
+	jae .LBB8_12
+
+	mov rdi, r15
+	shl rdi, 5
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/storage.rs : 74
+		irow * rstride.value() + icol * cstride.value()
+	add rdi, rdx
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/lu.rs : 68
+		let diag = matrix[(piv, i)].clone();
+	movss xmm4, dword ptr [r13 + 4*rdi]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-traits-0.2.16/src/identities.rs : 40
+		*self == $v
+	ucomiss xmm4, xmm0
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/lu.rs : 70
+		if diag.is_zero() {
+	jne .LBB8_17
+	jnp .LBB8_96
+
+.LBB8_17:
+	mov rbx, r11
+	and rbx, -8
+
+	neg rcx
+	movaps xmm3, xmm1
+	divss xmm3, xmm4
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/lu.rs : 74
+		if piv != i {
+	test r12, r12
+	je .LBB8_23
+
+	mov qword ptr [rsp + 72], rdx
+
+	mov r10, r11
+	and r10, -4
+	mov r13, r15
+	and r13, -2
+
+	mov edx, 32
+	sub rdx, r15
+	mov qword ptr [rsp + 80], rdx
+	mov rdx, qword ptr [rsp + 56]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	lea rdi, [rdx + 4*r12]
+	xor r9d, r9d
+
+	.p2align	4, 0x90
+.LBB8_19:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss xmm4, dword ptr [rsi + r9 - 128]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2724
+		copy(src, dst, count)
+	mov ebp, dword ptr [rdi + r9]
+	mov dword ptr [rsi + r9 - 128], ebp
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss dword ptr [rdi + r9], xmm4
+
+	movss xmm4, dword ptr [rsi + r9]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2724
+		copy(src, dst, count)
+	mov ebp, dword ptr [rdi + r9 + 128]
+	mov dword ptr [rsi + r9], ebp
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss dword ptr [rdi + r9 + 128], xmm4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	add r9, 256
+	cmp r9, 4096
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_19
+
+	test r15, r15
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/edition.rs : 314
+		if irow1 != irow2 {
+	je .LBB8_42
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	cmp r15, 1
+	jne .LBB8_38
+
+	xor ebp, ebp
+	jmp .LBB8_40
+
+	.p2align	4, 0x90
+.LBB8_23:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/min_max.rs : 225
+		assert!(!self.is_empty(), "The input vector must not be empty.");
+	cmp r15, 31
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_65
+
+	cmp rcx, 8
+	jae .LBB8_26
+
+	xor edx, edx
+
+	jmp .LBB8_29
+
+.LBB8_38:
+	mov rdx, qword ptr [rsp + 40]
+
+	lea r9, [rdx + 4*r12]
+	xor edi, edi
+	xor ebp, ebp
+
+	.p2align	4, 0x90
+.LBB8_39:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss xmm4, dword ptr [r8 + rdi - 128]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2724
+		copy(src, dst, count)
+	mov edx, dword ptr [r9 + rdi]
+	mov dword ptr [r8 + rdi - 128], edx
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss dword ptr [r9 + rdi], xmm4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	add rbp, 2
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss xmm4, dword ptr [r8 + rdi]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2724
+		copy(src, dst, count)
+	mov edx, dword ptr [r9 + rdi + 128]
+	mov dword ptr [r8 + rdi], edx
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss dword ptr [r9 + rdi + 128], xmm4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	add rdi, 256
+	cmp r13, rbp
+	jne .LBB8_39
+
+.LBB8_40:
+	test r15b, 1
+	je .LBB8_42
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/storage.rs : 74
+		irow * rstride.value() + icol * cstride.value()
+	shl rbp, 5
+
+	lea rdx, [r15 + rbp]
+
+	add rbp, qword ptr [rsp + 72]
+
+	mov r9, qword ptr [rsp + 8]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss xmm4, dword ptr [r9 + 4*rdx]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2724
+		copy(src, dst, count)
+	mov edi, dword ptr [r9 + 4*rbp]
+	mov dword ptr [r9 + 4*rdx], edi
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss dword ptr [r9 + 4*rbp], xmm4
+
+.LBB8_42:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/matrix.rs : 1213
+		row_cols2.0 < nrows && row_cols2.1 < ncols,
+	cmp qword ptr [rsp + 80], r12
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/matrix.rs : 1212
+		assert!(
+	jbe .LBB8_43
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss xmm4, dword ptr [rax]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2724
+		copy(src, dst, count)
+	mov edx, dword ptr [rax + 4*r12]
+	mov dword ptr [rax], edx
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/intrinsics.rs : 2637
+		copy_nonoverlapping(src, dst, count)
+	movss dword ptr [rax + 4*r12], xmm4
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/min_max.rs : 225
+		assert!(!self.is_empty(), "The input vector must not be empty.");
+	cmp r15, 31
+	mov r13, qword ptr [rsp + 8]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_65
+
+	cmp rcx, 8
+	jae .LBB8_47
+
+	xor edx, edx
+	jmp .LBB8_50
+
+	.p2align	4, 0x90
+.LBB8_47:
+	mov rdx, rcx
+	and rdx, -8
+	movaps xmm4, xmm3
+	shufps xmm4, xmm3, 0
+	xor edi, edi
+
+	.p2align	4, 0x90
+.LBB8_48:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 896
+		fn mul_assign(&mut self, other: $t) { *self *= other }
+	movups xmm5, xmmword ptr [r14 + 4*rdi + 4]
+	movups xmm6, xmmword ptr [r14 + 4*rdi + 20]
+	mulps xmm5, xmm4
+	mulps xmm6, xmm4
+	movups xmmword ptr [r14 + 4*rdi + 4], xmm5
+	movups xmmword ptr [r14 + 4*rdi + 20], xmm6
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	add rdi, 8
+	cmp rbx, rdi
+	jne .LBB8_48
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	cmp rcx, rdx
+	je .LBB8_51
+
+	.p2align	4, 0x90
+.LBB8_50:
+	movss xmm4, dword ptr [r14 + 4*rdx + 4]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 896
+		fn mul_assign(&mut self, other: $t) { *self *= other }
+	mulss xmm4, xmm3
+	movss dword ptr [r14 + 4*rdx + 4], xmm4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	lea rdi, [rdx + 1]
+
+	mov rdx, rdi
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r11, rdi
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_50
+
+.LBB8_51:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/min_max.rs : 225
+		assert!(!self.is_empty(), "The input vector must not be empty.");
+	cmp r15, 31
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_65
+
+	mov edx, 31
+	sub rdx, r15
+
+	dec r12
+
+	cmp rdx, r12
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/ops.rs : 66
+		assert!(
+	jbe .LBB8_53
+
+	sub rax, -128
+
+	mov rbx, rcx
+	and rbx, -4
+	mov rdi, qword ptr [rsp + 16]
+	xor r13d, r13d
+	jmp .LBB8_57
+
+	.p2align	4, 0x90
+.LBB8_63:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	inc r13
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	sub rdi, -128
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r13, rdx
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_64
+
+.LBB8_57:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/storage.rs : 74
+		irow * rstride.value() + icol * cstride.value()
+	mov r9, r13
+	shl r9, 5
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/mut_ptr.rs : 558
+		unsafe { intrinsics::arith_offset(self, count) as *mut T }
+	mov rbp, r13
+	shl rbp, 7
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/storage.rs : 74
+		irow * rstride.value() + icol * cstride.value()
+	add r9, r12
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/mod.rs : 1188
+		crate::intrinsics::read_via_copy(src)
+	movss xmm3, dword ptr [rax + rbp]
+
+	movss xmm4, dword ptr [rax + 4*r9 + 4]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/mod.rs : 1386
+		copy_nonoverlapping(&src as *const T, dst, 1);
+	movss dword ptr [rax + rbp], xmm4
+
+	movss dword ptr [rax + 4*r9 + 4], xmm3
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/lu.rs : 386
+		.axpy(-pivot_row[k].clone(), &coeffs, T::one());
+	movss xmm3, dword ptr [rax + rbp]
+
+	cmp rcx, 4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jae .LBB8_59
+
+	xor r9d, r9d
+	jmp .LBB8_62
+
+	.p2align	4, 0x90
+.LBB8_59:
+	movaps xmm4, xmm3
+	shufps xmm4, xmm3, 0
+	xor r9d, r9d
+
+	.p2align	4, 0x90
+.LBB8_60:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movups xmm5, xmmword ptr [r14 + 4*r9 + 4]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	mulps xmm5, xmm4
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movups xmm6, xmmword ptr [rdi + 4*r9]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	subps xmm6, xmm5
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 47
+		*y =
+	movups xmmword ptr [rdi + 4*r9], xmm6
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	add r9, 4
+	cmp r10, r9
+	jne .LBB8_60
+
+	mov r9, rbx
+	cmp rcx, rbx
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_63
+
+	.p2align	4, 0x90
+.LBB8_62:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movss xmm4, dword ptr [rdi + 4*r9]
+
+	movss xmm5, dword ptr [r14 + 4*r9 + 4]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	mulss xmm5, xmm3
+	subss xmm4, xmm5
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 47
+		*y =
+	movss dword ptr [rdi + 4*r9], xmm4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	lea rbp, [r9 + 1]
+
+	mov r9, rbp
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r11, rbp
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_62
+	jmp .LBB8_63
+
+.LBB8_26:
+	mov rdx, rcx
+
+	and rdx, -8
+	movaps xmm4, xmm3
+
+	shufps xmm4, xmm3, 0
+	xor edi, edi
+
+	.p2align	4, 0x90
+.LBB8_27:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 896
+		fn mul_assign(&mut self, other: $t) { *self *= other }
+	movups xmm5, xmmword ptr [r14 + 4*rdi + 4]
+	movups xmm6, xmmword ptr [r14 + 4*rdi + 20]
+	mulps xmm5, xmm4
+	mulps xmm6, xmm4
+	movups xmmword ptr [r14 + 4*rdi + 4], xmm5
+	movups xmmword ptr [r14 + 4*rdi + 20], xmm6
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	add rdi, 8
+	cmp rbx, rdi
+	jne .LBB8_27
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	cmp rcx, rdx
+	je .LBB8_30
+
+	.p2align	4, 0x90
+.LBB8_29:
+	movss xmm4, dword ptr [r14 + 4*rdx + 4]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 896
+		fn mul_assign(&mut self, other: $t) { *self *= other }
+	mulss xmm4, xmm3
+	movss dword ptr [r14 + 4*rdx + 4], xmm4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	lea rdi, [rdx + 1]
+
+	mov rdx, rdi
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r11, rdi
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_29
+
+.LBB8_30:
+	neg r10
+
+	mov rdx, rcx
+	and rdx, -8
+	mov r12, qword ptr [rsp + 16]
+	mov rdi, qword ptr [rsp + 48]
+	xor r13d, r13d
+	jmp .LBB8_31
+
+	.p2align	4, 0x90
+.LBB8_37:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	inc r13
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	sub rdi, -128
+	sub r12, -128
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r13, r10
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_64
+
+.LBB8_31:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/lu.rs : 354
+		.axpy(-pivot_row[k].clone(), &coeffs, T::one());
+	mov r9, r13
+	shl r9, 7
+	movss xmm3, dword ptr [rax + r9 + 128]
+
+	cmp rcx, 8
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jae .LBB8_33
+
+	xor r9d, r9d
+	jmp .LBB8_36
+
+	.p2align	4, 0x90
+.LBB8_33:
+	movaps xmm4, xmm3
+	shufps xmm4, xmm3, 0
+	xor r9d, r9d
+
+	.p2align	4, 0x90
+.LBB8_34:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movups xmm5, xmmword ptr [r14 + 4*r9 + 4]
+	movups xmm6, xmmword ptr [r14 + 4*r9 + 20]
+	movups xmm7, xmmword ptr [rdi + 4*r9 - 16]
+	movups xmm8, xmmword ptr [rdi + 4*r9]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	mulps xmm5, xmm4
+	subps xmm7, xmm5
+	mulps xmm6, xmm4
+	subps xmm8, xmm6
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 47
+		*y =
+	movups xmmword ptr [rdi + 4*r9 - 16], xmm7
+	movups xmmword ptr [rdi + 4*r9], xmm8
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	add r9, 8
+	cmp rbx, r9
+	jne .LBB8_34
+
+	mov r9, rdx
+	cmp rcx, rdx
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_37
+
+	.p2align	4, 0x90
+.LBB8_36:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movss xmm4, dword ptr [r12 + 4*r9]
+
+	movss xmm5, dword ptr [r14 + 4*r9 + 4]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	mulss xmm5, xmm3
+	subss xmm4, xmm5
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 47
+		*y =
+	movss dword ptr [r12 + 4*r9], xmm4
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	lea rbp, [r9 + 1]
+
+	mov r9, rbp
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r11, rbp
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_36
+	jmp .LBB8_37
+
+.LBB8_65:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/matrix_view.rs : 282
+		assert!(
+	lea rax, [r13 + 4]
+	xor ecx, ecx
+	lea rdx, [rip + .L__unnamed_5]
+	lea rdi, [rip + .L__unnamed_6]
+	mov r15, qword ptr [rsp + 64]
+	mov r14, r15
+	mov esi, 29
+	jmp .LBB8_66
+
+	.p2align	4, 0x90
+.LBB8_76:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	sub r14, -128
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp rcx, 32
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_77
+
+.LBB8_66:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	inc rcx
+
+	mov r10d, 1
+	mov r12d, 31
+
+	mov r8, r14
+	mov r9, rax
+
+	.p2align	4, 0x90
+.LBB8_67:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	cmp r10, 32
+	je .LBB8_13
+
+	movss xmm0, dword ptr [r8]
+	cmp r12, 4
+	jae .LBB8_70
+
+	xor r11d, r11d
+	jmp .LBB8_73
+
+	.p2align	4, 0x90
+.LBB8_70:
+	mov r11, r12
+	and r11, -4
+	movaps xmm1, xmm0
+	shufps xmm1, xmm0, 0
+	xor ebx, ebx
+
+	.p2align	4, 0x90
+.LBB8_71:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movups xmm2, xmmword ptr [r9 + 4*rbx]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	mulps xmm2, xmm1
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movups xmm3, xmmword ptr [r8 + 4*rbx + 4]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	subps xmm3, xmm2
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 47
+		*y =
+	movups xmmword ptr [r8 + 4*rbx + 4], xmm3
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	add rbx, 4
+	cmp r11, rbx
+	jne .LBB8_71
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	cmp r12, r11
+	je .LBB8_74
+
+	.p2align	4, 0x90
+.LBB8_73:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movss xmm1, dword ptr [r8 + 4*r11 + 4]
+
+	movss xmm2, dword ptr [r9 + 4*r11]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	mulss xmm2, xmm0
+	subss xmm1, xmm2
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 47
+		*y =
+	movss dword ptr [r8 + 4*r11 + 4], xmm1
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	lea rbx, [r11 + 1]
+
+	mov r11, rbx
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r12, rbx
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_73
+
+.LBB8_74:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r10, 31
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	je .LBB8_76
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	lea r11, [r10 + 1]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/matrix_view.rs : 282
+		assert!(
+	add r8, 4
+
+	dec r12
+
+	add r9, 132
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	cmp r10, 32
+	mov r10, r11
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/matrix_view.rs : 282
+		assert!(
+	jne .LBB8_67
+
+.LBB8_13:
+	call std::panicking::begin_panic
+
+	jmp .LBB8_55
+
+.LBB8_77:
+	movss xmm0, dword ptr [r13 + 4092]
+	xorps xmm1, xmm1
+	ucomiss xmm0, xmm1
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/solve.rs : 169
+		if diag.is_zero() {
+	jne .LBB8_78
+	jnp .LBB8_96
+
+.LBB8_78:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/matrix_view.rs : 282
+		assert!(
+	mov rax, r13
+	add rax, 3968
+	xor ebx, ebx
+	mov rcx, r15
+	xor esi, esi
+
+.LBB8_79:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	lea rdx, [rsi + 1]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/mut_ptr.rs : 558
+		unsafe { intrinsics::arith_offset(self, count) as *mut T }
+	mov rdi, rsi
+	shl rdi, 7
+	add rdi, r15
+	mov r10d, 31
+
+	mov r8, rax
+	movaps xmm3, xmm0
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	mov r9d, 31
+	jmp .LBB8_80
+
+	.p2align	4, 0x90
+.LBB8_87:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/const_ptr.rs : 545
+		unsafe { intrinsics::arith_offset(self, count) }
+	mov r10, r9
+	shl r10, 7
+	lea r10, [r10 + 4*r9]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/solve.rs : 167
+		let diag = self.get_unchecked((i, i)).clone();
+	movss xmm3, dword ptr [r13 + r10]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/solve.rs : 169
+		if diag.is_zero() {
+	add r8, -128
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/num-traits-0.2.16/src/identities.rs : 40
+		*self == $v
+	ucomiss xmm3, xmm1
+	mov r10, r9
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/solve.rs : 169
+		if diag.is_zero() {
+	jne .LBB8_80
+	jnp .LBB8_89
+
+.LBB8_80:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/solve.rs : 173
+		coeff = b.vget_unchecked(i).clone() / diag;
+	movss xmm2, dword ptr [rdi + 4*r10]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 505
+		fn div(self, other: $t) -> $t { self / other }
+	divss xmm2, xmm3
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/solve.rs : 174
+		*b.vget_unchecked_mut(i) = coeff.clone();
+	movss dword ptr [rdi + 4*r10], xmm2
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	sub r9, 1
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jb .LBB8_88
+
+	cmp r10, 4
+	jae .LBB8_83
+
+	xor r11d, r11d
+	jmp .LBB8_86
+
+	.p2align	4, 0x90
+.LBB8_83:
+	mov r11, r10
+	and r11, -4
+	movaps xmm3, xmm2
+	shufps xmm3, xmm2, 0
+	xor r14d, r14d
+
+	.p2align	4, 0x90
+.LBB8_84:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movups xmm4, xmmword ptr [r8 + 4*r14]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	mulps xmm4, xmm3
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movups xmm5, xmmword ptr [rcx + 4*r14]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	subps xmm5, xmm4
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 47
+		*y =
+	movups xmmword ptr [rcx + 4*r14], xmm5
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	add r14, 4
+	cmp r11, r14
+	jne .LBB8_84
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	cmp r10, r11
+	je .LBB8_87
+
+	.p2align	4, 0x90
+.LBB8_86:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 48
+		a.clone() * x.get_unchecked(i * stride2).clone() * c.clone() + beta.clone() * y.clone();
+	movss xmm3, dword ptr [rcx + 4*r11]
+
+	movss xmm4, dword ptr [r8 + 4*r11]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ops/arith.rs : 104
+		fn add(self, other: $t) -> $t { self + other }
+	mulss xmm4, xmm2
+	subss xmm3, xmm4
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/base/blas_uninit.rs : 47
+		*y =
+	movss dword ptr [rcx + 4*r11], xmm3
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 488
+		unsafe { intrinsics::unchecked_add(self, rhs) }
+	lea r14, [r11 + 1]
+
+	mov r11, r14
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp r10, r14
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_86
+	jmp .LBB8_87
+
+	.p2align	4, 0x90
+.LBB8_88:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp rsi, 31
+	setae bl
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	sub rcx, -128
+	mov rsi, rdx
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/cmp.rs : 1402
+		fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+	cmp rdx, 32
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/iter/range.rs : 621
+		if self.start < self.end {
+	jne .LBB8_79
+
+.LBB8_89:
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/lu.rs : 85
+		}
+	mov esi, 4096
+	mov edx, 4
+	mov rdi, r13
+	call qword ptr [rip + __rust_dealloc@GOTPCREL]
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/inverse.rs : 23
+		if me.try_inverse_mut() {
+	test bl, 1
+	je .LBB8_97
+
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/inverse.rs : 24
+		Some(me)
+	mov rdi, qword ptr [rsp + 96]
+
+		// /home/erik/code/rust/matrix_inversion/src/lib.rs : 8
+		match m1.try_inverse() {
+	test rdi, rdi
+	je .LBB8_99
+
+	mov rsi, qword ptr [rsp + 88]
+	test rsi, rsi
+	je .LBB8_99
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 604
+		unsafe { intrinsics::unchecked_mul(self, rhs) }
+	shl rsi, 2
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/alloc/src/alloc.rs : 111
+		unsafe { __rust_dealloc(ptr, layout.size(), layout.align()) }
+	mov edx, 4
+	add rsp, 168
+	.cfi_def_cfa_offset 56
+	pop rbx
+	.cfi_def_cfa_offset 48
+	pop r12
+	.cfi_def_cfa_offset 40
+	pop r13
+	.cfi_def_cfa_offset 32
+	pop r14
+	.cfi_def_cfa_offset 24
+	pop r15
+	.cfi_def_cfa_offset 16
+	pop rbp
+	.cfi_def_cfa_offset 8
+	jmp qword ptr [rip + __rust_dealloc@GOTPCREL]
+
+.LBB8_96:
+	.cfi_def_cfa_offset 224
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/lu.rs : 85
+		}
+	mov esi, 4096
+	mov edx, 4
+	mov rdi, r13
+	call qword ptr [rip + __rust_dealloc@GOTPCREL]
+
+.LBB8_97:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/mod.rs : 490
+		pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
+	mov rsi, qword ptr [rsp + 88]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/alloc/src/raw_vec.rs : 240
+		if T::IS_ZST || self.cap == 0 {
+	test rsi, rsi
+	je .LBB8_99
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/ptr/mod.rs : 490
+		pub unsafe fn drop_in_place<T: ?Sized>(to_drop: *mut T) {
+	mov rdi, qword ptr [rsp + 96]
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/core/src/num/uint_macros.rs : 604
+		unsafe { intrinsics::unchecked_mul(self, rhs) }
+	shl rsi, 2
+
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/alloc/src/alloc.rs : 111
+		unsafe { __rust_dealloc(ptr, layout.size(), layout.align()) }
+	mov edx, 4
+	call qword ptr [rip + __rust_dealloc@GOTPCREL]
+
+.LBB8_99:
+		// /home/erik/code/rust/matrix_inversion/src/lib.rs : 16
+		}
+	add rsp, 168
+	.cfi_def_cfa_offset 56
+	pop rbx
+	.cfi_def_cfa_offset 48
+	pop r12
+	.cfi_def_cfa_offset 40
+	pop r13
+	.cfi_def_cfa_offset 32
+	pop r14
+	.cfi_def_cfa_offset 24
+	pop r15
+	.cfi_def_cfa_offset 16
+	pop rbp
+	.cfi_def_cfa_offset 8
+	ret
+.LBB8_12:
+	.cfi_def_cfa_offset 224
+	mov esi, 27
+	lea rdx, [rip + .L__unnamed_7]
+	lea rdi, [rip + .L__unnamed_8]
+	jmp .LBB8_13
+.LBB8_43:
+	mov esi, 41
+	jmp .LBB8_54
+.LBB8_53:
+	mov esi, 27
+	lea rax, [rip + .L__unnamed_8]
+	mov qword ptr [rsp + 24], rax
+	lea rax, [rip + .L__unnamed_9]
+	mov qword ptr [rsp + 32], rax
+.LBB8_54:
+
+	mov rdi, qword ptr [rsp + 24]
+	mov rdx, qword ptr [rsp + 32]
+
+	call std::panicking::begin_panic
+
+	jmp .LBB8_55
+
+.LBB8_100:
+		// /rustc/90c541806f23a127002de5b4038be731ba1458ca/library/alloc/src/raw_vec.rs : 189
+		Err(_) => handle_alloc_error(layout),
+	mov edi, 4096
+	mov esi, 4
+	call qword ptr [rip + alloc::alloc::handle_alloc_error@GOTPCREL]
+
+	ud2
+
+.LBB8_93:
+	mov edi, 4096
+	mov esi, 4
+	call qword ptr [rip + alloc::alloc::handle_alloc_error@GOTPCREL]
+
+.LBB8_55:
+	ud2
+
+	mov rbx, rax
+
+	jmp .LBB8_95
+
+	jmp .LBB8_15
+
+.LBB8_15:
+	mov rbx, rax
+	lea rdi, [rsp + 128]
+	call core::ptr::drop_in_place<nalgebra::base::matrix::Matrix<f32,nalgebra::base::dimension::Dyn,nalgebra::base::dimension::Dyn,nalgebra::base::vec_storage::VecStorage<f32,nalgebra::base::dimension::Dyn,nalgebra::base::dimension::Dyn>>>
+
+.LBB8_95:
+	lea rdi, [rsp + 88]
+		// /home/erik/.cargo/registry/src/index.crates.io-6f17d22bba15001f/nalgebra-0.32.3/src/linalg/inverse.rs : 28
+		}
+	call core::ptr::drop_in_place<nalgebra::base::matrix::Matrix<f32,nalgebra::base::dimension::Dyn,nalgebra::base::dimension::Dyn,nalgebra::base::vec_storage::VecStorage<f32,nalgebra::base::dimension::Dyn,nalgebra::base::dimension::Dyn>>>
+	mov rdi, rbx
+	call _Unwind_Resume@PLT
+	ud2
+

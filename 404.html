@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.min.js"></script>
+    <script src="libraries/StartAudioContext.js"></script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let canvas;
+        var w = document.documentElement.clientWidth;//width of window that is available for drawing
+        var h = document.documentElement.clientHeight;//width of window that is available for drawing
+        var bowie;
+        var fSize;
+        var ptsg, ptsp, ptsl;
+        var initialPixelDensity;
+        var letters=[];
+        var alpha;
+
+        function preload() {
+            bowie = loadFont("https://rethread.art/assets/webfonts/ChunkFive-Regular.otf");
+        }
+
+        function setup() {
+            colorMode(HSB, 360, 100, 100, 250)
+            canvas = createCanvas(w, h);
+            background(0, 0, 0);
+            fSize = 0.5*w;
+            alpha=10;
+            initialPixelDensity = 0.42
+            ptsg = bowie.textToPoints('4', 0.01*w, 0.85 * h, fSize, {
+                sampleFactor: initialPixelDensity,
+                simplifyThreshold: 0
+            })
+            letters.push(ptsg)
+            ptsp = bowie.textToPoints('0',0.36*w, 0.85 * h,fSize, {
+                sampleFactor: initialPixelDensity,
+                simplifyThreshold: 0
+            })
+            letters.push(ptsp)
+            ptsl = bowie.textToPoints('4',0.69*w, 0.85 * h, fSize, {
+                sampleFactor: initialPixelDensity,
+                simplifyThreshold: 0
+            })
+            letters.push(ptsl)
+        }
+
+        function draw() {
+            if (frameCount%42==0 && alpha>0.1){alpha-=0.5;}
+            background(0,0,0,alpha)
+            let p = pickpoint()
+            drawlettersinblack(p)
+            }
+
+        function pickpoint(){
+            let j = Math.floor(random()*letters.length);
+            let pts=letters[j]
+            let i = Math.floor(random()*pts.length);
+            let p = pts[i];
+            return p
+        }
+
+        function drawlettersinblack(p){
+            let pix_diam = random()*5+1;
+            noStroke();
+            fill(0, 0, 100); 
+            let rad = Math.exp(random()*4)
+            let angle = radians(p.alpha + 90-(random()*180))
+            let x1=p.x+rad*cos(angle)
+            let y1=p.y+rad*sin(angle)
+            ellipse(x1, y1, pix_diam, pix_diam);
+        }
+
+
+        function windowResized() {
+            w = document.documentElement.clientWidth;//width of window that is available for drawing
+            h = document.documentElement.clientHeight;//width of window that is available for drawing
+            resizeCanvas(w, h);
+        }
+
+    </script>
+</body>
+
+</html>
