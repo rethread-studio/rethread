@@ -175,6 +175,7 @@ s.waitForBoot({
 	SynthDef(\mainchannel,  { | in |
 		var sig;
 		sig = In.ar(in, 2);
+		sig = BPeakEQ.ar(sig, 80, 0.8, -2.7);
 		sig = BPeakEQ.ar(sig, 290, 0.8, -3.7);
 		sig = BPeakEQ.ar(sig, 760, 0.8, -7.6);
 		sig = BLowShelf.ar(sig, 100, 1.0, -6);
