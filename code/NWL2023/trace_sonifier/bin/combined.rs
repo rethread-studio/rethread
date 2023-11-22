@@ -1,14 +1,12 @@
 // TODOs:
-// - Place each sound producing process in a graph and free that graph at the end. This means we need to spawn a graph and then set that graph as the default graph before every time we spawn a new inner graph.
-// - Fix processes not being freed correctly
 // - Vary if both chords and melody play or just one of them
 // - Vary waveguide melody internal BPF
-// - Vary break chords based on result matrix
 // - Break sines tremolo based on a saw movement, i.e. accel -> a tempo subito
 // - Interpolate beam value for waveguide chords
 
 use std::{
     borrow::BorrowMut,
+    os::unix::thread,
     sync::{
         atomic::{AtomicBool, AtomicUsize, Ordering},
         Arc, Mutex, OnceLock,
@@ -86,10 +84,13 @@ struct Vind {
     latest_movement: usize,
     score: Vec<ScoreObject>,
     chord_change_sender: UnboundedSender<()>,
+    is_on_break: bool,
+    huge_reverb: Handle<LuffVerbHandle>,
 }
 
 impl Vind {
     pub async fn start_movement(&mut self, num: usize) {
+        self.is_on_break = false;
         // Stop previous movement
         self.stop_active_processes().await;
 
@@ -107,21 +108,59 @@ impl Vind {
             };
 
         // // Start new sonification
-        let process = play_waveguide_segments(
-            &trace,
-            false,
-            true,
-            &movement.source[0].matrix[..],
-            true,
-            self.chord_matrix.current(),
-        )
-        .await;
-        self.processes.push(process);
-        let process =
-            instructions_to_melody_rewrite(&trace, 15, 15, 18, self.chord_matrix.current())
+        let mut rng = thread_rng();
+        let variation = rng.gen_range(0..=2);
+        let variation = 0;
+        match variation {
+            0 => {
+                let process = play_waveguide_segments(
+                    &trace,
+                    false,
+                    random(),
+                    &movement.source[0].matrix[..],
+                    true,
+                    self.chord_matrix.current(),
+                )
+                .await;
+                self.processes.push(process);
+            }
+            1 => {
+                let process = instructions_to_melody_rewrite(
+                    &trace,
+                    15,
+                    15,
+                    18,
+                    self.chord_matrix.current(),
+                    self.huge_reverb,
+                )
                 .await
                 .unwrap();
-        self.processes.push(process);
+                self.processes.push(process);
+            }
+            _ => {
+                let process = play_waveguide_segments(
+                    &trace,
+                    false,
+                    true,
+                    &movement.source[0].matrix[..],
+                    true,
+                    self.chord_matrix.current(),
+                )
+                .await;
+                self.processes.push(process);
+                let process = instructions_to_melody_rewrite(
+                    &trace,
+                    15,
+                    15,
+                    18,
+                    self.chord_matrix.current(),
+                    self.huge_reverb,
+                )
+                .await
+                .unwrap();
+                self.processes.push(process);
+            }
+        }
         // let stop_channel = sines_n_most_uncommon(
         //     &trace,
         //     rng.gen_range(5..20),
@@ -154,9 +193,15 @@ impl Vind {
         play_pulse(num as u32, self.chord_matrix.current()).await;
     }
     pub async fn perform_break(&mut self) {
+        self.is_on_break = true;
         self.stop_active_processes().await;
 
-        let process = break_sines(self.chord_matrix.current(), &self.latest_trace).await;
+        let process = break_sines(
+            self.chord_matrix.current(),
+            &self.latest_trace,
+            self.huge_reverb,
+        )
+        .await;
         self.processes.push(process);
         let process = chord_change_process(
             vec![Duration::from_secs_f32(5.0)],
@@ -174,10 +219,17 @@ impl Vind {
     pub fn next_chord(&mut self) {
         // self.chord_matrix.next_chord();
         let mut rng: StdRng = SeedableRng::from_entropy();
-        self.chord_matrix.next_from_matrix_probability(
-            &self.score[self.latest_movement].result[0][..],
-            &mut rng,
-        );
+        if self.is_on_break {
+            self.chord_matrix.next_from_matrix_probability(
+                &self.score[self.latest_movement].result[0][..],
+                &mut rng,
+            );
+        } else {
+            self.chord_matrix.next_from_matrix_probability(
+                &self.score[self.latest_movement].source[0].matrix[..],
+                &mut rng,
+            );
+        }
         for proc in &mut self.processes {
             if let Err(e) = proc.chord_sender.send(self.chord_matrix.current().clone()) {
                 eprintln!("Error sending next chord: {e}");
@@ -220,17 +272,6 @@ async fn main() -> Result<()> {
             // chord_change_sender.send(()).ok();
         }
     });
-    let emergency_trace = std::fs::read_to_string(format!("{trace_path}{}", traces[0]))?;
-    let mut vind = Vind {
-        processes: vec![],
-        chord_matrix: ChordMatrix::new(),
-        stop_application_sender,
-        latest_trace: emergency_trace.clone(),
-        latest_movement: 0,
-        emergency_trace,
-        score,
-        chord_change_sender,
-    };
 
     let (sender, mut receiver) = tokio::sync::mpsc::unbounded_channel();
 
@@ -240,14 +281,31 @@ async fn main() -> Result<()> {
         &mut backend,
         SphereSettings {
             num_inputs: 0,
-            num_outputs: 4,
+            num_outputs: 5,
             ..Default::default()
         },
         knyst::controller::print_error_handler,
     );
+
+    let emergency_trace = std::fs::read_to_string(format!("{trace_path}{}", traces[0]))?;
+    let huge_reverb = luff_verb(48 * 2530, 0.90).damping(8000.).lowpass(19000.);
+    graph_output(0, huge_reverb.repeat_outputs(1));
+    let mut vind = Vind {
+        processes: vec![],
+        chord_matrix: ChordMatrix::new(),
+        stop_application_sender,
+        latest_trace: emergency_trace.clone(),
+        latest_movement: 0,
+        emergency_trace,
+        score,
+        chord_change_sender,
+        is_on_break: false,
+        huge_reverb,
+    };
+    let mut rng = thread_rng();
     // vind.perform_break().await;
     // tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
-    vind.start_movement(8).await;
+    vind.start_movement(rng.gen_range(0..9)).await;
     // vind.perform_break().await;
     // vind.start_movement(0).await;
 
@@ -330,6 +388,7 @@ async fn instructions_to_melody_rewrite(
     skip_most_uncommon: usize,
     millis_per_instruction: u64,
     chord: &EdoChordSemantic,
+    huge_reverb: Handle<LuffVerbHandle>,
 ) -> Result<ProcessInteractivity> {
     println!("Starting instruction melody");
 
@@ -393,6 +452,8 @@ async fn instructions_to_melody_rewrite(
     let beam_setter = o_beam_setter.unwrap();
     let wg = o_wg.unwrap();
     graph_output(0, outer_graph);
+    huge_reverb.input(outer_graph.out(0) * random_lin().freq(2.).powf(3.0) * 1.5);
+    // huge_reverb.input(outer_graph.out(0));
     knyst().to_graph(outer_graph.graph_id());
     let mut freqs: Vec<_> = chord
         .to_edo_chord()
@@ -727,7 +788,7 @@ async fn play_waveguide_segments(
 
     let process = ProcessInteractivity::new();
     let mut stop_receiver = process.stop_sender.subscribe();
-    let chord_receiver = process.chord_sender.subscribe();
+    let mut chord_receiver = process.chord_sender.subscribe();
     let buffer = machine_code_to_buffer(trace, true).unwrap();
     println!("Buffer length: {}", buffer.length_seconds());
     let buffer = knyst().insert_buffer(buffer);
@@ -736,7 +797,7 @@ async fn play_waveguide_segments(
         .to_edo_chord()
         .to_edo_pitches()
         .into_iter()
-        .map(|p| p.to_freq_pitch(200.).frequency())
+        .map(|p| p.to_freq_pitch(100.).frequency())
         .collect();
 
     let mut interval_index = Arc::new(AtomicUsize::new(0));
@@ -745,6 +806,7 @@ async fn play_waveguide_segments(
     // .input(sig * 0.125 + graph_input(0, 1));
     {
         let stop_sender = process.stop_sender.clone();
+
         let chord_sender = process.chord_sender.clone();
         let beam_width_sender = process.beam_width_sender.clone();
         let matrix = matrix.to_vec();
@@ -763,22 +825,24 @@ async fn play_waveguide_segments(
                 StopAction::Continue,
             );
 
-            let verb = luff_verb(1650 * 48, 0.60).lowpass(19000.).damping(5000.);
+            let verb = luff_verb(1065 * 48, 0.29).lowpass(19000.).damping(10000.);
+            let wave_movement_amp = sine().freq(0.1).range(0.02, 1.0).powf(2.0);
             graph_output(
-                2,
+                4,
                 one_pole_hpf()
-                    .sig(verb * sine().freq(0.1).range(0.02, 0.35))
+                    .sig(verb * wave_movement_amp)
                     .cutoff_freq(100.)
                     * main_env,
             );
             let beam_setter = bus(1).set(0, 0.5);
             let exciter = buffer_reader(
                 buffer,
-                rng.gen_range(0.25..4.0),
+                // rng.gen_range(0.25..1.0),
+                1.2,
                 true,
                 StopAction::FreeGraph,
             );
-            let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(3600.);
+            let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(1000.);
 
             let mut stop_received = false;
             for _ in 0..4 {
@@ -803,7 +867,14 @@ async fn play_waveguide_segments(
                                 points: vec![(1.0, 0.01), (0.25, 0.1), (0.0, 0.5)],
                                 ..Default::default()
                             };
-                            for &freq in &freqs {
+                            // let feedback = random_lin().freq(0.1).powf(0.2)*0.1 + 0.901;
+                            let feedback = 1.0001;
+                            let freqs = if pass_through_trigger {
+                                &freqs[..]
+                            } else {
+                                &freqs[0..1]
+                            };
+                            for &freq in freqs {
                                 let freq = freq * root;
                                 let exciter_to_wg = graph_input(0, 1);
 
@@ -829,41 +900,43 @@ async fn play_waveguide_segments(
                                 } else {
                                     exciter_to_wg.into()
                                 };
-                                let exciter_to_wg =
-                                    one_pole_lpf().sig(&exciter_to_wg).cutoff_freq(freq * 3.0);
+                                let exciter_to_wg = one_pole_hpf().cutoff_freq(freq * 0.25).sig(
+                                    one_pole_lpf().sig(&exciter_to_wg).cutoff_freq(freq * 2.0),
+                                );
                                 let wg = waveguide()
                                     .freq(freq)
                                     .exciter(exciter_to_wg)
-                                    .feedback(0.9999)
+                                    .feedback(feedback)
                                     // .feedback(1.001)
-                                    .damping(freq * 7. + 1000.)
+                                    .damping(freq * 9. + 2000.)
                                     .lf_damping(6.)
-                                    .position(0.4)
+                                    .position(0.5)
                                     .stiffness(0.0);
                                 wgs.push(wg);
-                                let sig = wg * 0.4;
+                                let sig = wg * 0.3;
                                 graph_output(0, sig);
                             }
                         });
                         knyst().to_graph(outer_graph.graph_id());
                         inner_graph.set(0, exciter_to_wg);
-                        let g = inner_graph * (beam_setter + 0.01);
+                        let g = inner_graph * (beam_setter + 0.01) * main_env;
                         if reverb {
                             verb.input(g);
+                            graph_output(4, g * wave_movement_amp);
                         } else {
-                            graph_output(2, one_pole_lpf().sig(g).cutoff_freq(12000.));
+                            graph_output(4, one_pole_lpf().sig(g).cutoff_freq(6000.));
                         }
-                        graph_output(1, one_pole_lpf().sig(g).cutoff_freq(4000.));
+                        graph_output(4, g * (wave_movement_amp + 0.1));
                         loop {
                             tokio::select! {
                                 new_chord = chord_receiver.recv() => {
-                                    let freqs: Vec<_> = new_chord.unwrap()
+                                    let new_freqs: Vec<_> = new_chord.unwrap()
                                         .to_edo_chord()
                                         .to_edo_pitches()
                                         .into_iter()
-                                        .map(|p| p.to_freq_pitch(200.).frequency())
+                                        .map(|p| p.to_freq_pitch(100.).frequency())
                                         .collect();
-                                    for (freq, wg) in freqs.into_iter().zip(wgs.iter_mut()) {
+                                    for (freq, wg) in new_freqs.into_iter().zip(wgs.iter_mut()) {
                                         wg.freq(freq * root);
                                     }
                                 },
@@ -877,7 +950,6 @@ async fn play_waveguide_segments(
                                 },
                             }
                         }
-                        inner_graph.free();
                     });
                 }
 
@@ -888,6 +960,16 @@ async fn play_waveguide_segments(
                         stop_received = true;
                         break},
                 }
+                // Check for new chords since last time
+                while let Ok(new_chord) = chord_receiver.try_recv() {
+                    let new_freqs: Vec<_> = new_chord
+                        .to_edo_chord()
+                        .to_edo_pitches()
+                        .into_iter()
+                        .map(|p| p.to_freq_pitch(100.).frequency())
+                        .collect();
+                    freqs = new_freqs;
+                }
             }
 
             knyst().to_top_level_graph();
@@ -896,7 +978,7 @@ async fn play_waveguide_segments(
             }
             // stop_sender.send(()).ok();
             main_env.release_trig();
-            tokio::time::sleep(Duration::from_secs(2)).await;
+            tokio::time::sleep(Duration::from_secs(20)).await;
             verb.free();
             outer_graph.free();
             knyst().remove_buffer(buffer);
@@ -984,7 +1066,11 @@ fn receive_osc(sender: tokio::sync::mpsc::UnboundedSender<Messages>) -> Result<(
     Ok(())
 }
 
-async fn break_sines(chord: &EdoChordSemantic, last_trace: &str) -> ProcessInteractivity {
+async fn break_sines(
+    chord: &EdoChordSemantic,
+    last_trace: &str,
+    huge_reverb: Handle<LuffVerbHandle>,
+) -> ProcessInteractivity {
     let process = ProcessInteractivity::new();
     let mut stop_receiver = process.stop_sender.subscribe();
     let mut chord_receiver = process.chord_sender.subscribe();
@@ -1010,11 +1096,6 @@ async fn break_sines(chord: &EdoChordSemantic, last_trace: &str) -> ProcessInter
         vec![(1.0, 2.0), (0.0, 5.0)],
         SustainMode::SustainAtPoint(0),
         StopAction::Continue,
-    );
-    let verb = luff_verb(650 * 48, 0.70).lowpass(19000.).damping(5000.);
-    graph_output(
-        0,
-        one_pole_hpf().sig(verb * 0.20).cutoff_freq(100.) * main_env,
     );
     let freqs: Vec<_> = chord
         .to_edo_chord()
