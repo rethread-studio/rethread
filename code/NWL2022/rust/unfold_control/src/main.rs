@@ -331,10 +331,18 @@ impl Trace {
         //     + 1;
         // num leds from section depth
         let depth_point = self.trace.depth_envelope.sections[self.current_depth_envelope_index];
-        let num_leds =
-            (((call.depth - depth_point.min_depth) as f32 / depth_point.max_depth as f32).powf(0.3)
-                * (NUM_LEDS_X as i32 - 1) as f32) as usize
-                + 1;
+        // absolute depth, original
+        // let num_leds =
+        //     (((call.depth - depth_point.min_depth) as f32 / depth_point.max_depth as f32).powf(0.3)
+        //         * (NUM_LEDS_X as i32 - 1) as f32) as usize
+        //         + 1;
+        // which line is empty
+        let num_leds = ((*call).depth / 5) % 10;
+        let num_leds = if num_leds > 5 {
+            10 - num_leds
+        } else {
+            num_leds
+        };
         let left_color = if let Some(supplier) = &call.supplier {
             self.supplier_colors.get(supplier).unwrap().clone()
         } else {

@@ -27,10 +27,15 @@ for (let i = 0; i < num_channels_total; i += 3) {
   leds[i + 2] = 255;
 }
 var row_leds = new Array();
+// var default_color = {
+//   r: 0,
+//   g: 0,
+//   b: 0,
+// };
 var default_color = {
-  r: 0,
-  g: 0,
-  b: 0,
+  r: 255,
+  g: 255,
+  b: 255,
 };
 
 
@@ -95,10 +100,12 @@ function rows_to_led_values() {
     leds_right[i + 2] = default_color.b;
   }
   for (let i = 0; i < row_leds.length; i++) {
-    for (let x = 0; x < row_leds[i].num_leds; x++) {
+    // for (let x = 0; x < row_leds[i].num_leds; x++) {
+    for (let x = 0; x < num_leds_x; x++) {
       // if (x >= num_leds_x) {
       //   break;
       // }
+      if   (x !=   row_leds[i].num_leds   ){
       let left_index = xy_to_index(num_leds_x -x -1, i, 1);
       let right_index = xy_to_index(num_leds_x - x-1, i, 1);
       // console.log("x: " + x + " y: " + i + " index: " + index);
@@ -108,8 +115,7 @@ function rows_to_led_values() {
       leds_right[right_index] = row_leds[i].right_color.r;
       leds_right[right_index + 1] = row_leds[i].right_color.g;
       leds_right[right_index + 2] = row_leds[i].right_color.b;
-    }
-    for (let x = row_leds[i].num_leds; x < num_leds_x; x++) {
+} else  {
       let left_index = xy_to_index(num_leds_x -x -1, i, 1);
       let right_index = xy_to_index(num_leds_x - x-1, i, 1);
       // console.log("x: " + x + " y: " + i + " index: " + index);
@@ -119,7 +125,20 @@ function rows_to_led_values() {
       leds_right[right_index] = default_color.r;
       leds_right[right_index + 1] = default_color.g;
       leds_right[right_index + 2] = default_color.b;
+
+}
     }
+    // for (let x = row_leds[i].num_leds; x < num_leds_x; x++) {
+    //   let left_index = xy_to_index(num_leds_x -x -1, i, 1);
+    //   let right_index = xy_to_index(num_leds_x - x-1, i, 1);
+    //   // console.log("x: " + x + " y: " + i + " index: " + index);
+    //   leds[left_index] = default_color.r;
+    //   leds[left_index + 1] = default_color.g;
+    //   leds[left_index + 2] = default_color.b;
+    //   leds_right[right_index] = default_color.r;
+    //   leds_right[right_index + 1] = default_color.g;
+    //   leds_right[right_index + 2] = default_color.b;
+    // }
   }
 }
 
