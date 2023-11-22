@@ -182,7 +182,7 @@ pub fn start_scheduler(mut trace: Trace) -> SchedulerCom {
             if trace.current_index >= trace.trace.draw_trace.len() {
                 trace.current_index = 0;
                 trace.current_depth_envelope_index = 0;
-                play = false;
+                // play = false;
             }
         }
         if play {
@@ -251,6 +251,7 @@ impl OscCommunicator {
     pub fn new() -> Self {
         let sender = nannou_osc::sender()
             .unwrap()
+            // .connect("192.168.50.90:57120")
             .connect("localhost:57120")
             .unwrap();
         let artnet_sender = nannou_osc::sender()
