@@ -174,7 +174,11 @@ s.waitForBoot({
 		Out.ar(\out.kr(0), sig);
 	}).add;
 	SynthDef(\mainchannel,  { | in |
-		var sig, amp = \amp.kr(1.0);
+		var sig, amp = \amp.kr(1.0), reverbmix = Ramp.kr(\reverbmix.kr(0.0), 15);
+		reverbmix = reverbmix + LFNoise1.kr(LFNoise1.kr(0.3).range(0.05, 0.4)).range(-0.5, 0.6).clip(0.0, 1.0).pow(2);
+		reverbmix = reverbmix + LFNoise1.kr(LFNoise1.kr(0.8).range(0.1, 0.5)).range(0.0, Line.kr(0.7, 1.1, 60*10)).pow(3);
+		reverbmix = reverbmix.clip(0.0, 1.0);
+		// reverbmix = reverbmix.pow(2.0);
 		sig = In.ar(in, 2);
 		sig = BPeakEQ.ar(sig, 80, 0.8, -2.7);
 		sig = BPeakEQ.ar(sig, 290, 0.8, -3.7);
@@ -184,8 +188,8 @@ s.waitForBoot({
 		amp = amp * (amp > 0.001);
 		sig = sig * amp;
 		// (sig*1000).poll;
-		Out.ar(\out.kr(0), sig);
-		// Out.ar(2, sig * \secondary_amp.kr(0.06));m
+		Out.ar(\out.kr(0), sig * (1.0-reverbmix));
+		Out.ar(2, sig * reverbmix);
 	}).add;
 
 	~from_53 = { | degrees |
