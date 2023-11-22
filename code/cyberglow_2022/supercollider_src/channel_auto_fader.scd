@@ -49,6 +49,7 @@
 	~fade_channels.do{ | chan | chan.enable_lpf(true); chan.set_lag_time(~fade_lag_time); };
 
 	focus_channels = {~fade_channels.choose}!~num_focused;
+	// focus_channels = ~fade_channels;
 	// Make sure we don't have the same channel twice in a row
 	while({ ~contains.(~last_focus_channels_auto_fade, focus_channels) || ~contains_duplicate.(focus_channels) },
 		{ focus_channels =  {~fade_channels.choose}!~num_focused; });
@@ -63,8 +64,8 @@
 			});
 		};
 	}, {
-		~last_focus_channels_auto_fade.do{|chan| chan.set_amp(min_amp)};
-		~last_focus_channels_auto_fade.do{|chan| chan.set_lpf_freq(min_lpf_freq)};
+		// ~last_focus_channels_auto_fade.do{|chan| chan.set_amp(min_amp)};
+		// ~last_focus_channels_auto_fade.do{|chan| chan.set_lpf_freq(min_lpf_freq)};
 	});
 
 	focus_channels.do{|chan| chan.set_amp(focus_amp)};

@@ -18,11 +18,16 @@ services:
     links:
       - mongodb
       - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   screen:
     build: .
     restart: always
     command: pm2-runtime ecosystem.config.js --only screen
     privileged: true
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
     env_file:
       - ./.env
     volumes:
@@ -33,6 +38,9 @@ services:
       - server
     links:
       - server
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 
   mongodb:
     image: mongo:latest

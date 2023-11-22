@@ -230,17 +230,27 @@ angular
         bot.socket.on("disconnect", leave);
 
         function leave() {
-          clearInterval(botinterval);
+          clearTimeout(botinterval);
           $scope.$apply(() => {
             bot.status = "inactive";
             $scope.bots.slice(0, $scope.bots.indexOf(bot));
           });
         }
 
-        const botinterval = setInterval(() => {
-          bot.socket.emit(directions[Math.floor(Math.random() * 4)]);
-          bot.socket.emit("click", { x: 0, y: 0 });
-        }, 500);
+        function take_action() {
+
+          let botinterval = setTimeout(() => {
+            if (Math.random() > 0.3) {
+              bot.socket.emit(directions[Math.floor(Math.random() * 4)]);
+            } else {
+              bot.socket.emit("click", { x: 0, y: 0 });
+            }
+            take_action();
+          }, Math.random() *600 + 200);
+        }
+
+        take_action();
+
         $scope.bots.push(bot);
       };
       $scope.$on("$destroy", function () {

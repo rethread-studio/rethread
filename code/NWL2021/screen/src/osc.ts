@@ -1,5 +1,15 @@
 import * as osc from "osc";
 import config from "../../config";
+// Accessing dns module
+const dns = require('dns');
+
+// Set the rrtype for dns.resolve() method
+const rrtype="A";
+
+var host_gateway_ip = "172.17.0.1";
+// dns.resolve('host.docker.internal', rrtype, (err, records)
+//   => {host_gateway_ip = records[0];
+//      console.log("HOST GATEWAY IP IS " + host_gateway_ip);});
 
 let udpPort;
 
@@ -62,20 +72,24 @@ export function send(
   }
 
   try {
+    let ip =
     udpPort.send(
       {
         address: opt?.address ? opt?.address : config.OSC_ADDRESS,
         args,
       },
       opt?.ip ? opt?.ip : config.OSC_IP,
+      // host_gateway_ip,
       opt?.port ? opt?.port : config.OSC_PORT
     );
+
     // console.log(
     //   {
     //     address: opt?.address ? opt?.address : config.OSC_ADDRESS,
     //     args,
     //   },
-    //   opt?.ip ? opt?.ip : config.OSC_IP,
+    //   // opt?.ip ? opt?.ip : config.OSC_IP,
+    //   host_gateway_ip,
     //   opt?.port ? opt?.port : config.OSC_PORT
     // );
 

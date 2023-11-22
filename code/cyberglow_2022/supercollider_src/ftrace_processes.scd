@@ -126,8 +126,9 @@
 	// Vary pitch dispersion over time
 	{
 		loop{
-			~tick_softener.set(\pitch_dispersion, exprand(0.002, 0.1));
-			~tick_softener.set(\time_dispersion, exprand(0.0002, 0.01));
+			var p_disp= exprand(0.002, 0.1), t_disp = exprand(0.0002, 0.01);
+			~tickSoftenerSynths.do{|syn| syn.set(\pitch_dispersion, p_disp);};
+			~tickSoftenerSynths.do{|syn| syn.set(\time_dispersion, t_disp);};
 			rrand(1, 2).wait;
 		};
 	}.fork;

@@ -44,7 +44,7 @@ s.waitForBoot({
 					~channels.user_gestures,
 					~channels.server_gestures
 				];
-				~channels.tick.set_amp(0);
+				~channels.tick.set_amp(1);
 				~channels.noise.set_amp(0);
 				~ftrace_beep_dur = 0.15;
 				~rev.set(\mix, 0.3);

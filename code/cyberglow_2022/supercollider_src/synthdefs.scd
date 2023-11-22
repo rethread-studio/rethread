@@ -161,6 +161,10 @@ SynthDef(\medium_reverb, { | out = 0, amp = 1, mix = 0.3  |
 		\stereo, {
 			in = In.ar(\in.kr(10), 2);
 			sig = in;
+		},
+		{
+			in = In.ar(\in.kr(10), 2);
+			sig = in;
 		}
 	);
 	mix = mix.lag(\mixLag.kr(10));
@@ -409,6 +413,9 @@ SynthDef(\main_out_glitch, {
 			sig = In.ar(\in.kr(10), 4);
 		},
 		\stereo, {
+			sig = In.ar(\in.kr(10), 2);
+		},
+		{
 			sig = In.ar(\in.kr(10), 2);
 		}
 	);

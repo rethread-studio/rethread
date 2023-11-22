@@ -11,7 +11,7 @@ OSCdef(\transition_from_vis_OSC, { arg msg, time, addr, recvPort;
 
 OSCdef(\transitionOSC, { arg msg, time, addr, recvPort;
 	var time_to_next_transition = msg[1].asFloat;
-	// [msg, time, addr, recvPort].postln;
+	[msg, time, addr, recvPort].postln;
 	// if there was a visualisation transition, change synthesis mode
 	if(~next_transition_vis_transition_from != nil, {
 		switch(~next_transition_vis_transition_from,

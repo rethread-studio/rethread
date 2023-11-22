@@ -82,19 +82,19 @@ export default class FTrace {
     const process = line.substring(0, 16).trim();
     const pid = parseInt(line.substring(17, 23).trim());
     let pid_offset = 0;
-    if (line.substring(23, 24) == " ") {
+    if (line.substring(24, 25) == " ") {
       pid_offset = 6;
-    } else if (line.substring(23, 24) == "[") {
+    } else if (line.substring(24, 25) == "[") {
       pid_offset = 5;
     } else {
       // throw new Error("Wrong pid index");
       return;
     }
     const cpu = parseInt(
-      line.substring(20 + pid_offset, 22 + pid_offset).trim()
+      line.substring(20 + pid_offset, 23 + pid_offset).trim()
     );
     const timestamp = parseFloat(
-      line.substring(30 + pid_offset, 41 + pid_offset).trim()
+      line.substring(30 + pid_offset, 43 + pid_offset).trim()
     );
 
     const event = line.substring(45 + pid_offset, line.length).trim();

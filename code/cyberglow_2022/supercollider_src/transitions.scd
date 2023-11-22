@@ -73,20 +73,20 @@
 
 ~transitionMainGlitch1 = { | time = 5, main_pitch_ratio = 0.5, noise_freq_ratio = 1.0, freq_ratio = 1.0 |
 	var cresc_time = time * 0.3;
-	~main_glitch.set(\lag_time, time);
-	~main_glitch.set(\enable_pitch_shift, 1);
-	~main_glitch.set(\pitch_shift_ratio, main_pitch_ratio);
-	~main_glitch.set(\enable_bit_crush, 1);
-	~main_glitch.set(\sample_rate, 1000);
+~mainGlitchSynths.do{|syn| syn.set(\lag_time, time);};
+~mainGlitchSynths.do{|syn| syn.set(\enable_pitch_shift, 1);};
+~mainGlitchSynths.do{|syn| syn.set(\pitch_shift_ratio, main_pitch_ratio);};
+~mainGlitchSynths.do{|syn| syn.set(\enable_bit_crush, 1);};
+~mainGlitchSynths.do{|syn| syn.set(\sample_rate, 1000);};
 	(time - cresc_time).wait;
 	~cresc = Synth(\windy, [\freq, 100, \out, ~revBus, \amp, 0.2, \atk, cresc_time, \curve_atk, 7, \rel, 0]);
 	cresc_time.wait;
 	~cresc.release;
-	~main_glitch.set(\lag_time, 0.2);
-	~main_glitch.set(\enable_pitch_shift, 0);
-	~main_glitch.set(\pitch_shift_ratio, 1.0);
-	~main_glitch.set(\enable_bit_crush, 0);
-	~main_glitch.set(\sample_rate, 441000);
+~mainGlitchSynths.do{|syn| syn.set(\lag_time, 0.2);};
+~mainGlitchSynths.do{|syn| syn.set(\enable_pitch_shift, 0);};
+~mainGlitchSynths.do{|syn| syn.set(\pitch_shift_ratio, 1.0);};
+~mainGlitchSynths.do{|syn| syn.set(\enable_bit_crush, 0);};
+~mainGlitchSynths.do{|syn| syn.set(\sample_rate, 44100);};
 	{
 		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2/20, mul: 0.125*0.35);
 		sig = sig * Env([0.5, 0], [5]).ar(2);
@@ -99,18 +99,18 @@
 
 ~transitionMainGlitch2 = { | time = 5, noise_freq_ratio = 1.0, freq_ratio = 1.0 |
 	var cresc_time = time * 0.5;
-	~main_glitch.set(\lag_time, time);
-	~main_glitch.set(\enable_pitch_shift, 1);
-	~main_glitch.set(\pitch_shift_ratio, 3);
-	~main_glitch.set(\pitch_dispersion, 1);
+~mainGlitchSynths.do{|syn| syn.set(\lag_time, time);};
+~mainGlitchSynths.do{|syn| syn.set(\enable_pitch_shift, 1);};
+~mainGlitchSynths.do{|syn| syn.set(\pitch_shift_ratio, 3);};
+~mainGlitchSynths.do{|syn| syn.set(\pitch_dispersion, 1);};
 	(time - cresc_time).wait;
 	~cresc = Synth(\windy, [\freq, 200, \out, ~revBus, \amp, 0.2, \atk, cresc_time, \curve_atk, 7, \rel, 0]);
 	cresc_time.wait;
 	~cresc.release;
-	~main_glitch.set(\lag_time, 0.2);
-	~main_glitch.set(\enable_pitch_shift, 0);
-	~main_glitch.set(\pitch_shift_ratio, 1.0);
-	~main_glitch.set(\pitch_dispersion, 0);
+~mainGlitchSynths.do{|syn| syn.set(\lag_time, 0.2);};
+~mainGlitchSynths.do{|syn| syn.set(\enable_pitch_shift, 0);};
+~mainGlitchSynths.do{|syn| syn.set(\pitch_shift_ratio, 1.0);};
+~mainGlitchSynths.do{|syn| syn.set(\pitch_dispersion, 0);};
 	{
 		var sig = SinOsc.ar({LFNoise2.kr(8).range(3500, 3540)}!2/20, mul: 0.125*0.35);
 		sig = sig * Env([0.5, 0], [5]).ar(2);
