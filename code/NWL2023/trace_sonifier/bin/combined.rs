@@ -3,6 +3,9 @@
 // - Vary waveguide melody internal BPF
 // - Break sines tremolo based on a saw movement, i.e. accel -> a tempo subito
 // - Interpolate beam value for waveguide chords
+// - Improve waves of waveguides mix
+// - Voice saying the name of the operation at the start of a movement
+// - Pulses in 4/4 sometimes? Check other audifications for structure, maybe it's always in 3.
 
 use std::{
     borrow::BorrowMut,
