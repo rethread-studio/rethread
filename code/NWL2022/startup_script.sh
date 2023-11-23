@@ -15,6 +15,9 @@ tmux new-session -d -s $session
 # echo "Browsers"
 # sh /home/reth/Documents/rethread/code/NWL2022/start_browser_script.sh
 
+echo "Shut down voice controller"
+pkill -9 node
+
 echo "Artnet and sound"
 window=0
 tmux rename-window -t $session:$window 'artnet_controller'

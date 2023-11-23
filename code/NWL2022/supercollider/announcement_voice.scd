@@ -19,17 +19,19 @@ Ndef(\grain_voice_mvt,
 		cutfreq.do{|cut|
 			sig = BPeakEQ.ar(sig, cut, 0.8, -10);
 		};
+		sig = Decimator.ar(sig, rate: 44100, bits: 10.5);
 		sig = (sig * 0.5) + (FreeVerb.ar(sig, 0.2) * 0.5);
 		// sig = (sig*0.5) + (sig * (Demand.kr(Dust.kr(LFNoise1.kr(1/2).range(5, 20)) + Impulse.kr(0), 0, Dseq([1, 0], inf))) * 0.5);
 		// sig = sig * LFNoise2.kr(1).range(0.1, 1.0);
 		sig = Pan2.ar(sig * 1);
-		sig = (sig!2).flatten;
+		// sig = (sig!2).flatten;
 		Out.ar(0, sig);
+		Out.ar(2, sig*0.1);
 }).play;
 
 OSCdef(\amp, {
 	arg msg;
-	msg.postln;
+	// msg.postln;
 	~amp = msg[3..7];
 	~send_led_data.();
 
@@ -42,6 +44,8 @@ OSCdef(\amp, {
 
 
 )
+
+Ndef(\grain_voice_mvt).release(5);
 ~amp
 (
 var w, much = 0.02, string, synth;

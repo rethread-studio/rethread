@@ -134,7 +134,7 @@ var udpPort = new osc.UDPPort({
 // Listen for incoming OSC messages.
 udpPort.on("message", function (oscMsg, timeTag, info) {
   // console.log("An OSC message just arrived!", oscMsg);
-  console.log(oscMsg.args);
+  // console.log(oscMsg.args);
   let amp = oscMsg.args[0].value;
   let mags = [oscMsg.args[0].value,
   oscMsg.args[1].value,
@@ -143,7 +143,7 @@ udpPort.on("message", function (oscMsg, timeTag, info) {
   oscMsg.args[4].value,
   ];
 
-  let left_num_rows = mags.map((mag) => Math.pow(mag, 0.25) * 15);
+  let left_num_rows = mags.map((mag) => Math.pow(mag, 0.25) * 50 - 5);
 
   for (let i = 0; i < num_channels_total; i += 3) {
     leds_left[i] = default_color.r;
@@ -168,12 +168,18 @@ udpPort.on("message", function (oscMsg, timeTag, info) {
         g: 0,
         b: mags[0]*255, 
       };
+      let color_glitch_left = 0;
+      let color_glitch_right = 0;
+      if(Math.random() > 0.9) {
+        color_glitch_left = Math.random() * 150;
+        color_glitch_right = Math.random() * 150;
+      }
       if (y < left_num_rows[x]) {
         leds_left[left_index] = active_color.r;
-        leds_left[left_index + 1] = active_color.g;
-        leds_left[left_index + 2] = active_color.b;
+        leds_left[left_index + 1] = active_color.g + color_glitch_left;
+        leds_left[left_index + 2] = active_color.b + color_glitch_left;
         leds_right[right_index] = active_color.r;
-        leds_right[right_index + 1] = active_color.g;
+        leds_right[right_index + 1] = active_color.g + color_glitch_right;
         leds_right[right_index + 2] = active_color.b;
       } else {
         leds_left[left_index] = default_color.r;
