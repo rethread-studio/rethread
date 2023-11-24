@@ -180,6 +180,7 @@ s.waitForBoot({
 		reverbmix = reverbmix.clip(0.0, 1.0);
 		// reverbmix = reverbmix.pow(2.0);
 		sig = In.ar(in, 2);
+
 		sig = BPeakEQ.ar(sig, 80, 0.8, -2.7);
 		sig = BPeakEQ.ar(sig, 290, 0.8, -3.7);
 		sig = BPeakEQ.ar(sig, 760, 0.8, -7.6);

@@ -27,16 +27,16 @@ for (let i = 0; i < num_channels_total; i += 3) {
   leds[i + 2] = 255;
 }
 var row_leds = new Array();
-// var default_color = {
-//   r: 0,
-//   g: 0,
-//   b: 0,
-// };
 var default_color = {
-  r: 255,
-  g: 255,
-  b: 255,
+  r: 0,
+  g: 0,
+  b: 0,
 };
+// var default_color = {
+//   r: 255,
+//   g: 255,
+//   b: 255,
+// };
 
 
 rows_to_led_values();
