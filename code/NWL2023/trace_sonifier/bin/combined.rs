@@ -1,11 +1,10 @@
 // TODOs:
-// - Vary if both chords and melody play or just one of them
 // - Vary waveguide melody internal BPF
-// - Break sines tremolo based on a saw movement, i.e. accel -> a tempo subito
 // - Interpolate beam value for waveguide chords
 // - Improve waves of waveguides mix
 // - Voice saying the name of the operation at the start of a movement
 // - Change sonification processes within one movement?
+// - Shorter pulse envelope, especially for the sines?
 
 use std::{
     borrow::BorrowMut,
@@ -35,6 +34,7 @@ use knyst::{handles::Handle, prelude::OscillatorHandle, resources::WavetableId};
 use knyst_reverb::{luff_verb, LuffVerbHandle};
 use knyst_waveguide2::{
     half_sine_wt, waveguide, white_noise, HalfSineImpulseHandle, HalfSineWtHandle, WaveguideHandle,
+    parallel_bpf_waveguide::parallel_bpf_waveguide
 };
 use musical_matter::pitch::EdoChordSemantic;
 use rand::{random, rngs::StdRng, seq::SliceRandom, thread_rng, Rng, SeedableRng};
@@ -221,10 +221,16 @@ impl Vend {
         self.is_on_break = true;
         self.stop_active_processes().await;
 
+        let invert_accel = match self.score[self.latest_movement].operation {
+            Operation::Hessenberg => true,
+            _ => false,
+        };
+
         let process = break_sines(
             self.chord_matrix.current(),
             &self.latest_trace,
             self.huge_reverb,
+            invert_accel,
         )
         .await;
         self.processes.push(process);
@@ -456,13 +462,27 @@ async fn instructions_to_melody_rewrite(
         // let exciter_input = one_pole_hpf()
         // .sig(one_pole_lpf().sig(white_noise() * 0.1).cutoff_freq(100.))
         // .cutoff_freq(40.);
+    let bpf_freq = phasor().freq(1.0/60.).powf(2.0) * 4000. + 300.;
+    let position = random_lin().freq(3.) * 0.4 + 0.1;
+    let position = 0.5;
+        // let wg = parallel_bpf_waveguide()
+        //     .freq(100.)
+        //     .exciter(exciter_to_wg)
+        //     // .feedback(0.99999)
+        //     .feedback(1.01)
+        //     .damping(5000.)
+        //     .lf_damping(6.)
+        //     .position(position)
+        //     .bpf_mix(0.10)
+        //     .bpf_freq(bpf_freq)
+        //     .stiffness(0.0);
         let wg = waveguide()
             .freq(100.)
             .exciter(exciter_to_wg)
             .feedback(0.99999)
             .damping(5000.)
             .lf_damping(6.)
-            .position(0.5)
+            .position(position)
             .stiffness(0.0);
         let beam_setter = bus(1).set(0, 0.5);
         let sig = wg * (0.2 * beam_setter + 0.02);
@@ -1097,6 +1117,7 @@ async fn break_sines(
     chord: &EdoChordSemantic,
     last_trace: &str,
     huge_reverb: Handle<LuffVerbHandle>,
+    invert_accel: bool,
 ) -> ProcessInteractivity {
     let process = ProcessInteractivity::new();
     let mut stop_receiver = process.stop_sender.subscribe();
@@ -1151,10 +1172,12 @@ async fn break_sines(
         let freq_mult = 2.0 + i as f32 * 0.005;
         let s1 = sine().freq(freqs[2] * freq_mult);
         sines.push((s1, freq_mult, 2));
-        let sig = s1
-            * sine().freq(phasor().freq((random_lin().freq(0.05) + 2.0) * 10. * beam) * beam + 1.0)
-            * 0.1
-            * random_lin().freq(0.5).powf(3.0);
+        let mod_speed = if invert_accel {
+            1.0 - phasor().freq((random_lin().freq(0.05) + 2.0) * 10. * beam) * beam + 1.0
+        } else {
+            phasor().freq((random_lin().freq(0.05) + 2.0) * 10. * beam) * beam + 1.0
+        };
+        let sig = s1 * sine().freq(mod_speed) * 0.1 * random_lin().freq(0.5).powf(3.0);
         graph_output(2, sig * main_env);
         // let s2 = sine().freq(freqs[1] * 8.0);
         let s2 = waveguide()
@@ -1166,8 +1189,13 @@ async fn break_sines(
             .lf_damping(6.)
             .position(0.5)
             .stiffness(0.0);
+        let mod_speed = if invert_accel {
+            ((1.0 - phasor().freq(0.15)) + 2.0) * 7. * beam
+        } else {
+            (phasor().freq(0.15) + 2.0) * 7. * beam
+        };
         let sig = s2
-            * (sine().freq((phasor().freq(0.15) + 2.0) * 7. * beam) * beam + 1.0)
+            * (sine().freq(mod_speed) * beam + 1.0)
             * 0.2
             * beam
             * random_lin().freq(0.7).powf(2.0);

@@ -33,20 +33,23 @@ fn main() -> Result<()> {
     // let trace =
     //     std::fs::read_to_string("/home/erik/Nextcloud/reinverse_traces/Inverse_diagonal_0.txt")?;
     let buffers: Result<Vec<_>> = [
-        "/home/erik/Nextcloud/reinverse_traces/Inverse_random_0.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Inverse_diagonal_0.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Inverse_lower_triangular_0.txt",
-        "/home/erik/Nextcloud/reinverse_traces/SVD_lower_triangular_7.txt",
-        "/home/erik/Nextcloud/reinverse_traces/SVD_random_7.txt",
-        "/home/erik/Nextcloud/reinverse_traces/SVD_upper_triangular_7.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Multiply_diagonal_42.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Multiply_random_73.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Normalize_random_0.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Inverse_random_0.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Inverse_diagonal_0.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Inverse_lower_triangular_0.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/SVD_lower_triangular_7.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/SVD_random_7.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/SVD_upper_triangular_7.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Multiply_diagonal_42.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Multiply_random_73.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Normalize_random_0.txt",
+        "/home/erik/Nextcloud/reinverse_traces/Hessenberg_diagonal_3.txt",
+        "/home/erik/Nextcloud/reinverse_traces/Hessenberg_random_3.txt",
+        "/home/erik/Nextcloud/reinverse_traces/Hessenberg_lower_triangular_3.txt",
     ]
     .into_iter()
     .map(|path| {
         let trace = std::fs::read_to_string(path)?;
-        let path = PathBuf::from(path);
+        let mut path = PathBuf::from(path);
         let file_name = path.file_name().unwrap().to_string_lossy();
 
         let machine_code = machine_code(&trace)?;
@@ -58,7 +61,8 @@ fn main() -> Result<()> {
             .collect();
         let buffer = Buffer::from_vec(buffer, 48000.);
         // treat them as 16bit values
-        // buffer.save_to_disk("/home/erik/buf_dc_removed.wav")?;
+        path.set_extension(".wav");
+        buffer.save_to_disk(path)?;
 
         println!("buffer length: {}", buffer.length_seconds());
 
