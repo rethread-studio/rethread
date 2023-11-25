@@ -5,7 +5,7 @@
 // - Interpolate beam value for waveguide chords
 // - Improve waves of waveguides mix
 // - Voice saying the name of the operation at the start of a movement
-// - Pulses in 4/4 sometimes? Check other audifications for structure, maybe it's always in 3.
+// - Change sonification processes within one movement?
 
 use std::{
     borrow::BorrowMut,
@@ -77,7 +77,7 @@ impl ProcessInteractivity {
 }
 
 /// Global state
-struct Vind {
+struct Vend {
     processes: Vec<ProcessInteractivity>,
     stop_application_sender: tokio::sync::broadcast::Sender<()>,
     /// If a trace cannot be loaded, use this instead
@@ -89,9 +89,10 @@ struct Vind {
     chord_change_sender: UnboundedSender<()>,
     is_on_break: bool,
     huge_reverb: Handle<LuffVerbHandle>,
+    chord_change_pattern: Vec<bool>,
 }
 
-impl Vind {
+impl Vend {
     pub async fn start_movement(&mut self, num: usize) {
         self.is_on_break = false;
         // Stop previous movement
@@ -110,10 +111,23 @@ impl Vind {
                 }
             };
 
+        // Set chord change pattern
+        self.chord_change_pattern = match movement.operation {
+            Operation::Inverse => vec![true, false, false],
+            Operation::Normalize => vec![false],
+            Operation::Multiply => vec![true, false, false, true],
+            Operation::SVD => vec![true, false, false, true],
+            Operation::Hessenberg => vec![
+                true, false, false, false, //
+                true, false, false, false, //
+                true, false, false, false, false, false, false,
+            ],
+        };
+
         // // Start new sonification
         let mut rng = thread_rng();
         let variation = rng.gen_range(0..=2);
-        let variation = 0;
+        // let variation = 0;
         match variation {
             0 => {
                 let process = play_waveguide_segments(
@@ -190,10 +204,18 @@ impl Vind {
         knyst().free_disconnected_nodes();
     }
     pub async fn pulse(&mut self, num: i32) {
-        if num % 3 == 0 {
+        // if num % 3 == 0 {
+        //     self.next_chord();
+        // }
+        if self.chord_change_pattern[num as usize % self.chord_change_pattern.len()] {
             self.next_chord();
         }
-        play_pulse(num as u32, self.chord_matrix.current()).await;
+        play_pulse(
+            num as u32,
+            self.chord_matrix.current(),
+            &self.chord_change_pattern,
+        )
+        .await;
     }
     pub async fn perform_break(&mut self) {
         self.is_on_break = true;
@@ -293,7 +315,7 @@ async fn main() -> Result<()> {
     let emergency_trace = std::fs::read_to_string(format!("{trace_path}{}", traces[0]))?;
     let huge_reverb = luff_verb(48 * 2530, 0.90).damping(8000.).lowpass(19000.);
     graph_output(0, huge_reverb.repeat_outputs(1));
-    let mut vind = Vind {
+    let mut vind = Vend {
         processes: vec![],
         chord_matrix: ChordMatrix::new(),
         stop_application_sender,
@@ -304,6 +326,7 @@ async fn main() -> Result<()> {
         chord_change_sender,
         is_on_break: false,
         huge_reverb,
+        chord_change_pattern: vec![true, false, false],
     };
     let mut rng = thread_rng();
     // vind.perform_break().await;
@@ -997,6 +1020,7 @@ enum Operation {
     Normalize,
     Multiply,
     SVD,
+    Hessenberg,
 }
 type FlatMatrix = Vec<f64>;
 #[derive(Serialize, Deserialize)]
@@ -1128,7 +1152,7 @@ async fn break_sines(
         let s1 = sine().freq(freqs[2] * freq_mult);
         sines.push((s1, freq_mult, 2));
         let sig = s1
-            * sine().freq(sine().freq((random_lin().freq(0.15) + 2.0) * 10. * beam) * beam + 1.0)
+            * sine().freq(phasor().freq((random_lin().freq(0.05) + 2.0) * 10. * beam) * beam + 1.0)
             * 0.1
             * random_lin().freq(0.5).powf(3.0);
         graph_output(2, sig * main_env);
@@ -1143,8 +1167,8 @@ async fn break_sines(
             .position(0.5)
             .stiffness(0.0);
         let sig = s2
-            * (sine().freq((sine().freq(0.15) + 2.0) * 7. * beam) * beam + 1.0)
-            * 0.1
+            * (sine().freq((phasor().freq(0.15) + 2.0) * 7. * beam) * beam + 1.0)
+            * 0.2
             * beam
             * random_lin().freq(0.7).powf(2.0);
         graph_output(2, sig * main_env);
@@ -1191,7 +1215,11 @@ async fn break_sines(
     process
 }
 
-async fn play_pulse(num: u32, chord: &EdoChordSemantic) -> ProcessInteractivity {
+async fn play_pulse(
+    num: u32,
+    chord: &EdoChordSemantic,
+    chord_change_pattern: &[bool],
+) -> ProcessInteractivity {
     let process = ProcessInteractivity::new();
     let mut stop_receiver = process.stop_sender.subscribe();
     let mut chord_receiver = process.chord_sender.subscribe();
@@ -1209,7 +1237,17 @@ async fn play_pulse(num: u32, chord: &EdoChordSemantic) -> ProcessInteractivity 
     //     ..Default::default()
     // };
     // let main_env = handle(main_env.to_gen());
-    let amp = 1.0 / ((num % 3) as f32 + 1.0);
+    let one = 0.8;
+    let minor_accentuated = 0.5;
+    let unaccentuated = 0.30;
+    let index = num as usize % chord_change_pattern.len();
+    let amp: f32 = if index == 0 {
+        one
+    } else if chord_change_pattern[index] {
+        minor_accentuated
+    } else {
+        unaccentuated // * ((index as f32 / chord_change_pattern.len() as f32) * 0.5 + 0.5)
+    };
     let main_env = envelope_gen(
         0.0,
         vec![(amp.powi(2) * 0.5, 0.02), (0.0, 1.0)],
