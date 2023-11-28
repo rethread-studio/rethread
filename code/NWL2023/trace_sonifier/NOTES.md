@@ -58,3 +58,15 @@ Instead of an accelerando, a ritardando over the entire trace. 1 long section on
 
 ### Random 3
 4+4+7
+
+# Harmony
+
+Like the 32 rows and columns of the matrices we have been experimenting on, the harmony of the piece consists of 32 chords. The tuning system used is 53-EDO and the chords, in ups and downs notation, are Cv7, C^m7, CvM9 and Csus24, transposed a fifth up eight times. To determine the next chord, a matrix in the current operation is used as an adjacency matrix, interpreted as the probability of moving to any of the other chords from the current chord. To illustrate passing from source matrix to the result of the operation performed, the source matrix is used as the adjacency matrix in the first two thirds of a movement and the resulting matrix in the last third.
+
+# Melody
+
+Some of the least used machine instructions in the trace are turned into a melody. Depending on its rarity, the instructions is assigned a pitch and, working our way through a small portion of the trace, we allow each instruction to take some times, whether it is played or not. The machine instructions are treated as a score, of which we play only one part out of many. As any human interpreter, our machine musician freely adds its own inflection and ornamentation to ameliorate the music.
+
+# Audification
+
+Anything that is data can be turned into sound by simply reinterpreting the numbers as digital audio; a process called audification. The audification of the actual traces machine code instructions can be heard as the wave like spacey chords in the background and the high noisy flute like drone in the break section.
