@@ -680,6 +680,9 @@ async fn instructions_to_melody_rewrite(
             }
         }
         println!("Stopping melody");
+        tokio::time::sleep(Duration::from_secs(1)).await;
+        wg.feedback(1.001);
+        tokio::time::sleep(Duration::from_secs_f32(0.5)).await;
         wg.feedback(0.99);
         tokio::time::sleep(Duration::from_secs(5)).await;
         exciter.free();
@@ -1101,6 +1104,7 @@ async fn play_waveguide_segments(
             if !stop_received {
                 stop_receiver.recv().await.ok();
             }
+            eprintln!("Releasing waveguide chords");
             // stop_sender.send(()).ok();
             main_env.release_trig();
             tokio::time::sleep(Duration::from_secs(10)).await;
