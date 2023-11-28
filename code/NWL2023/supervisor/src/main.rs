@@ -19,32 +19,41 @@ fn main() {
     ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on channel."))
         .expect("Error setting Ctrl-C handler");
     let vec = vec![
-                Process::new(
-        "C:\\Program Files\\JACK2\\qjackctl\\qjackctl.exe",
-        "C:\\Program Files\\JACK2"
-            ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
-                Process::new(
-                    "C:\\Program Files\\REAPER (x64)\\reaper.exe",
-        "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\REAPER (x64)"
-            ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
-                Process::new(
-                    "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/target/release/conductor.exe",
-                    "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/",
-            ).recompilation_command("cargo build --release".to_string()),
-            Process::new(
-                "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/target/release/combined.exe",
-                "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/",
-        ).recompilation_command("cargo build --release --bin combined".to_string()),
-        // Process::new(
-        //     "/home/erik/code/kth/rethread/code/NWL2023/conductor/target/release/conductor",
-        //     "/home/erik/code/kth/rethread/code/NWL2023/conductor/",
-        // )
-        // .recompilation_command("cargo build --release".to_string()),
-        // Process::new(
-        //     "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/target/release/combined",
-        //     "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/",
-        // )
-        // .recompilation_command("cargo build --release --bin combined".to_string()),
+        // Windows
+        //         Process::new(
+        // "C:\\Program Files\\JACK2\\qjackctl\\qjackctl.exe",
+        // "C:\\Program Files\\JACK2"
+        //     ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
+        //         Process::new(
+        //             "C:\\Program Files\\REAPER (x64)\\reaper.exe",
+        // "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\REAPER (x64)"
+        //     ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
+        //         Process::new(
+        //             "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/target/release/conductor.exe",
+        //             "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/",
+        //     ).recompilation_command("cargo build --release".to_string()),
+        //     Process::new(
+        //         "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/target/release/combined.exe",
+        //         "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/",
+        // ).recompilation_command("cargo build --release --bin combined".to_string()),
+
+        // Linux
+        Process::new(
+            "/home/erik/Program/reaper_linux_x86_64/REAPER/reaper",
+            "/home/erik/Program/reaper_linux_x86_64/REAPER/",
+        )
+        .wait_after_restart(Duration::from_secs(10))
+        .complete_restart(true),
+        Process::new(
+            "/home/erik/code/kth/rethread/code/NWL2023/conductor/target/release/conductor",
+            "/home/erik/code/kth/rethread/code/NWL2023/conductor/",
+        )
+        .recompilation_command("cargo build --release".to_string()),
+        Process::new(
+            "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/target/release/combined",
+            "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/",
+        )
+        .recompilation_command("cargo build --release --bin combined".to_string()),
     ];
     let mut processes = vec;
     // Time in UTC+0
@@ -169,7 +178,7 @@ impl Process {
             last_start: Instant::now(),
             path: path.into(),
             working_dir: working_dir.into(),
-            max_time_alive_before_restart: Duration::from_secs(60 * 60),
+            max_time_alive_before_restart: Duration::from_secs(90 * 60),
             current_child_process: None,
             trigger_complete_restart_on_fail: false,
             wait_after_restart: Duration::from_secs(0),
@@ -215,6 +224,7 @@ impl Process {
             }
             Err(e) => eprintln!("Failed to start process at {:?}, {e}", &self.path),
         }
+        self.last_start = Instant::now();
         std::thread::sleep(self.wait_after_restart.clone());
     }
     pub fn stop(&mut self) {
@@ -249,6 +259,11 @@ impl Process {
                     "Process {:?} has reached its max time limit, restarting.",
                     self.path
                 );
+                if self.trigger_complete_restart_on_fail {
+                    return Message::CompleteRestart;
+                } else {
+                    self.restart();
+                }
             }
         }
         Message::Continue
