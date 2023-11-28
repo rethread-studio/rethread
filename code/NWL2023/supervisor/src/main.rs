@@ -1,8 +1,9 @@
+use chrono::{Timelike, Utc};
 use nannou_osc::receiver;
 use std::{
     path::PathBuf,
     process::{Child, Command},
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime},
 };
 
 const RECEIVER_PORT: u16 = 57103;
@@ -18,41 +19,85 @@ fn main() {
     ctrlc::set_handler(move || tx.send(()).expect("Could not send signal on channel."))
         .expect("Error setting Ctrl-C handler");
     let vec = vec![
-        Process::new(
-"C:\\Program Files\\JACK2\\qjackctl\\qjackctl.exe",
-"C:\\Program Files\\JACK2"
-    ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
-        Process::new(
-            "C:\\Program Files\\REAPER (x64)\\reaper.exe",
-"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\REAPER (x64)"
-    ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
-        Process::new(
-            "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/target/release/conductor.exe",
-            "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/",
-    ).recompilation_command("cargo build --release".to_string()),
-
-        Process::new(
-            "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/target/release/combined.exe",
-            "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/",
-    ).recompilation_command("cargo build --release --bin combined".to_string()),
-        ];
+                Process::new(
+        "C:\\Program Files\\JACK2\\qjackctl\\qjackctl.exe",
+        "C:\\Program Files\\JACK2"
+            ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
+                Process::new(
+                    "C:\\Program Files\\REAPER (x64)\\reaper.exe",
+        "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\REAPER (x64)"
+            ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
+                Process::new(
+                    "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/target/release/conductor.exe",
+                    "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/",
+            ).recompilation_command("cargo build --release".to_string()),
+            Process::new(
+                "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/target/release/combined.exe",
+                "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/",
+        ).recompilation_command("cargo build --release --bin combined".to_string()),
+        // Process::new(
+        //     "/home/erik/code/kth/rethread/code/NWL2023/conductor/target/release/conductor",
+        //     "/home/erik/code/kth/rethread/code/NWL2023/conductor/",
+        // )
+        // .recompilation_command("cargo build --release".to_string()),
+        // Process::new(
+        //     "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/target/release/combined",
+        //     "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/",
+        // )
+        // .recompilation_command("cargo build --release --bin combined".to_string()),
+    ];
     let mut processes = vec;
-    for p in &mut processes {
-        p.restart();
-    }
+    // Time in UTC+0
+    let start_hour = 15;
+    let start_minute = 00;
+    let stop_hour = 21;
+    let stop_minute = 00;
     let mut complete_restart = false;
     let mut recompile = false;
+    let mut resting = true; // We are resting 22-16 which means, don't try to restart
+    let mut always_on = false; // Overrides the resting option, trying to keep the programs going no matter what
     let mut osc_receiver = { receiver(RECEIVER_PORT).ok() };
+    // let start_time = todo!();
     // let mut rng: StdRng = SeedableRng::from_entropy();
     loop {
         std::thread::sleep(Duration::from_secs(1));
-        for p in &mut processes {
-            match p.update() {
-                Message::CompleteRestart => {
+        let now = Utc::now();
+        // println!(
+        //         "The current UTC time is {:02}:{:02}:{:02} ",
+        //         now.hour(),
+        //         now.minute(),
+        //         now.second(),
+        //     );
+        if !always_on {
+            if resting {
+                if now.hour() >= start_hour
+                    && now.minute() >= start_minute
+                    && !(now.hour() >= stop_hour && now.minute() >= stop_minute)
+                {
+                    resting = false;
                     complete_restart = true;
-                    break;
                 }
-                Message::Continue => (),
+            } else {
+                if (now.hour() >= stop_hour && now.minute() >= stop_minute)
+                    || !(now.hour() >= start_hour && now.minute() >= start_minute)
+                {
+                    resting = true;
+                    for p in &mut processes {
+                        p.stop();
+                    }
+                }
+            }
+        }
+
+        if !resting || always_on {
+            for p in &mut processes {
+                match p.update() {
+                    Message::CompleteRestart => {
+                        complete_restart = true;
+                        break;
+                    }
+                    Message::Continue => (),
+                }
             }
         }
         if let Some(osc) = &mut osc_receiver {
@@ -64,6 +109,13 @@ fn main() {
                         }
                         "/recompile" => {
                             recompile = true;
+                        }
+                        "/always_on" => {
+                            always_on = true;
+                            complete_restart = true;
+                        }
+                        "/follow_start_end" => {
+                            always_on = false;
                         }
                         _ => {
                             eprintln!(

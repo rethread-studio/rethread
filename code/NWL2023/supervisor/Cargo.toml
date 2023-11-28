@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chrono = "0.4.31"
 ctrlc = "3.4.1"
 nannou_osc = "0.18.0"
