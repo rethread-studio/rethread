@@ -2,9 +2,7 @@
 // - Vary waveguide melody internal BPF (haven't got a nice result yet)
 // - Interpolate beam value for waveguide chords
 // - Improve waves of waveguides mix
-// - Voice saying the name of the operation at the start of a movement
 // - Change sonification processes within one movement?
-// - Shorter pulse envelope, especially for the sines?
 
 use std::{
     borrow::BorrowMut,
@@ -561,7 +559,7 @@ async fn instructions_to_melody_rewrite(
             wg.position(0.5);
         }
         let beam_setter = bus(1).set(0, 0.5);
-        let sig = wg * (0.2 * beam_setter + 0.02);
+        let sig = wg * (0.2 * ramp().value(beam_setter).time(0.5) + 0.02);
         graph_output(3, sig);
         verb.input(sig * 0.2);
         o_exciter = Some(exciter);
