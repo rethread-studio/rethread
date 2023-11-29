@@ -338,6 +338,7 @@ async fn main() -> Result<()> {
         .expect("TRACE_PATH global static should not have been set before.");
 
     let score = load_score()?;
+    println!("Loaded {} movements", score.len());
     let (stop_application_sender, mut stop_application_receiver) =
         tokio::sync::broadcast::channel(1);
     let traces = [

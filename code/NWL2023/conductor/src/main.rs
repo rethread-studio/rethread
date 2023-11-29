@@ -22,7 +22,7 @@ enum Messages {
 #[tokio::main]
 async fn main() {
     SimpleLogger::new().init().unwrap();
-    let num_movements = 8;
+    let num_movements = 12;
     let mut rng = thread_rng();
     let break_time = Duration::from_secs(30);
     // let break_time = Duration::from_secs(4);
