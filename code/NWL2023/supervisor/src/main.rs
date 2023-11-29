@@ -20,40 +20,40 @@ fn main() {
         .expect("Error setting Ctrl-C handler");
     let vec = vec![
         // Windows
-        //         Process::new(
-        // "C:\\Program Files\\JACK2\\qjackctl\\qjackctl.exe",
-        // "C:\\Program Files\\JACK2"
-        //     ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
-        //         Process::new(
-        //             "C:\\Program Files\\REAPER (x64)\\reaper.exe",
-        // "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\REAPER (x64)"
-        //     ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
-        //         Process::new(
-        //             "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/target/release/conductor.exe",
-        //             "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/",
-        //     ).recompilation_command("cargo build --release".to_string()),
-        //     Process::new(
-        //         "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/target/release/combined.exe",
-        //         "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/",
-        // ).recompilation_command("cargo build --release --bin combined".to_string()),
+                Process::new(
+        "C:\\Program Files\\JACK2\\qjackctl\\qjackctl.exe",
+        "C:\\Program Files\\JACK2"
+            ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
+                Process::new(
+                    "C:\\Program Files\\REAPER (x64)\\reaper.exe",
+        "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\REAPER (x64)"
+            ).wait_after_restart(Duration::from_secs(10)).complete_restart(true),
+                Process::new(
+                    "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/target/release/conductor.exe",
+                    "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/",
+            ).recompilation_command("cargo build --release".to_string()),
+            Process::new(
+                "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/target/release/combined.exe",
+                "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/",
+        ).recompilation_command("cargo build --release --bin combined".to_string()),
 
         // Linux
-        Process::new(
-            "/home/erik/Program/reaper_linux_x86_64/REAPER/reaper",
-            "/home/erik/Program/reaper_linux_x86_64/REAPER/",
-        )
-        .wait_after_restart(Duration::from_secs(10))
-        .complete_restart(true),
-        Process::new(
-            "/home/erik/code/kth/rethread/code/NWL2023/conductor/target/release/conductor",
-            "/home/erik/code/kth/rethread/code/NWL2023/conductor/",
-        )
-        .recompilation_command("cargo build --release".to_string()),
-        Process::new(
-            "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/target/release/combined",
-            "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/",
-        )
-        .recompilation_command("cargo build --release --bin combined".to_string()),
+        // Process::new(
+        //     "/home/erik/Program/reaper_linux_x86_64/REAPER/reaper",
+        //     "/home/erik/Program/reaper_linux_x86_64/REAPER/",
+        // )
+        // .wait_after_restart(Duration::from_secs(10))
+        // .complete_restart(true),
+        // Process::new(
+        //     "/home/erik/code/kth/rethread/code/NWL2023/conductor/target/release/conductor",
+        //     "/home/erik/code/kth/rethread/code/NWL2023/conductor/",
+        // )
+        // .recompilation_command("cargo build --release".to_string()),
+        // Process::new(
+        //     "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/target/release/combined",
+        //     "/home/erik/code/kth/rethread/code/NWL2023/trace_sonifier/",
+        // )
+        // .recompilation_command("cargo build --release --bin combined".to_string()),
     ];
     let mut processes = vec;
     // Time in UTC+0
