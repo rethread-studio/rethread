@@ -71,18 +71,166 @@
 
 			<div class="content">
 				<h3> The installation </h3>
-				<p>[re|in]verse is a light, sound and water work placed in the underpass under Centralbron. It animates matrices by projecting light beams onto the closest 16 pillars (4 rows of 4 pillars), thus representing the data as a new 4-by-4 matrix.</p>
+					<p>
+						[re|in]verse is a light, sound and water work placed in the underpass under Centralbron. It animates matrices by projecting light beams onto the closest pillars, thus representing the data as a new matrix.
+					</p>
+				<h3> Matrices all the way down </h3>
+					<p>
+						Matrices are found on different levels of the installation. The data, that is visualized and sonified, is the software execution trace of different matrix operations (multiplication, singular value decomposition, normaliziation, inversion, Hessenberg decomposition). The matrices used to make these operations were randomly generated, and can be either completely random, diagonal, upper/lower triangular, Vandermonde. They are all invertible and their dimensions are 32 x 32 (in reference to 1932, the year in which Heisenberg was awarded the Nobel Prize).
+					</p>
 			</div>
 
-			<!--
+			<div class="content">
+				<h3> Music </h3>
+					<h4> Time and time signatures </h4>
+						<p>
+							The overall form of the piece is a 2 + 1 (60s movement +  30s "break")
+							form, which mirrors the most common form in the software. Some
+							operations are further subdivided in three and some in 4 with a
+							recurring 1 + 2 + 1 pattern. The music reflects this by the amplitude of
+							pulses and how often chords are changed.
+						</p>
+						<p>
+							Each block of activity in the software execution generally contains 32
+							"beats", or iterations, coinciding with the dimensionality of the
+							matrix. Similarly, every movement in the music has 32 pulses.
+						</p>
+						<p>
+							A very common feature in the software execution is an accellerando, as
+							iterations work on smaller and smaller subsections of the matrix. The
+							music reflects this through the modulation of sine waves in the "break"
+							part.
+						</p>
+						<table style="text-align: left">
+							<tr>
+								<th><a href="../images/reinverse/spectograms/Multiply_diagonal_42.png">Mult</a><a href="../images/reinverse/spectograms/Multiply_random_73.png">iply</a></th>
+								<td>
+									Storform approx 2 + 1.<br>
+									First part has a repeating pattern in 4/4 1 + 2 + 1 with accelerando to the
+									second part.<br>
+									Second part has no such clear structure, but it is steadily doing a
+									ritardando.
+								</td>
+							</tr>
+							<tr>
+								<th><a href="../images/reinverse/spectograms/SVD_lower_triangular_7.png">Singular</a> <a href="../images/reinverse/spectograms/SVD_random_7.png">value</a> <a href="../images/reinverse/spectograms/SVD_upper_triangular_7.png">decomposition</a> (SVD)</th>
+								<td>
+									Same pattern as Multiply.
+								</td>
+							</tr>
+							<tr>
+								<th><a href="../images/reinverse/spectograms/Normalize_random_0.png">Normalize</a></th>
+								<td>
+									Very short, just init burst and then a slightly longer burst of noise.
+								</td>
+							</tr>
+							<tr>
+								<th><a href="../images/reinverse/spectograms/Inverse_diagonal_0.png">In</a><a href="../images/reinverse/spectograms/Inverse_diagonal_0.png">ver</a><a href="../images/reinverse/spectograms/Inverse_random_0.png">se</a></th>
+								<td>
+									Init burst.<br>
+									3 longer sections, the first slightly shorter.
+								</td>
+							</tr>
+							<tr>
+								<th><a href="../images/reinverse/spectograms/Hessenberg_diagonal_3.png">Hessenberg</a> <a href="../images/reinverse/spectograms/Hessenberg_lower_triangular_3.png">decomposition</a></th>
+								<td>
+									Varies based on the source matrix.<br>
+									Diagonal: Instead of an accelerando, a ritardando over the entire trace. 1 long
+									section only, apart from the init burst.<br>
+									Random: 4 + 4 + 7 form.
+								</td>
+							</tr>
+						</table> 
+						<p style="text-align: center;">
+							<img src="../images/reinverse/spectograms/Hessenberg_random_3.png" alt="render" style="width: 100%;">
+							<i>Spectrogram of the Hessenberg decomposition of a random matrix. <br>Click on the operation names above to see more.</i>
+						</p>
+						<!--
+						<ul>
+							<li>
+								<h5 style="font-size: 1.5rem; margin: 0">Multiply</h5>
+								<p>
+									Storform approx 2 + 1.<br>
+									First part has a repeating pattern in 4/4 1 + 2 + 1 with accelerando to the
+									second part.<br>
+									Second part has no such clear structure, but it is steadily doing a
+									ritardando.
+								</p>
+							</li>
+							<li>
+								<h5 style="font-size: 1.5rem; margin: 0">Singular value decomposition (SVD)</h5>
+								<p>
+									Same pattern as Multiply.
+								</p>
+							</li>
+							<li>
+								<h5 style="font-size: 1.5rem; margin: 0">Normalize</h5>
+								<p>
+									Very short, just init burst and then a slightly longer burst of noise.
+								</p>
+							</li>
+							<li>
+								<h5 style="font-size: 1.5rem; margin: 0">Inverse</h5>
+								<p>
+									Init burst.<br>
+									3 longer sections, the first slightly shorter.
+								</p>
+							</li>
+							<li>
+								<h5 style="font-size: 1.5rem; margin: 0">Hessenberg decomposition </h5>
+								<p>
+									Varies based on the source matrix.<br>
+									Diagonal 3: Instead of an accelerando, a ritardando over the entire trace. 1 long
+									section only, apart from the init burst.<br>
+									Random 3: 4 + 4 + 7 form.
+								</p>
+							</li>
+						</ul>
+						-->
+					<h4> Harmony </h4>
+						<p>
+							Like the 32 rows and columns of the matrices we have been experimenting
+							on, the harmony of the piece consists of 32 chords. The tuning system
+							used is 53-EDO and the chords, in ups and downs notation, are Cv7, C^m7,
+							CvM9 and Csus24, transposed a fifth up eight times. To determine the
+							next chord, a matrix in the current operation is used as an adjacency
+							matrix, interpreted as the probability of moving to any of the other
+							chords from the current chord. To illustrate passing from source matrix
+							to the result of the operation performed, the source matrix is used as
+							the adjacency matrix in the first two thirds of a movement and the
+							resulting matrix in the last third.
+						</p>
+					<h4> Melody </h4>
+						<p>
+							Some of the least used machine instructions in the trace are turned into
+							a melody. Depending on its rarity, the instructions is assigned a pitch
+							and, working our way through a small portion of the trace, we allow each
+							instruction to take some times, whether it is played or not. The machine
+							instructions are treated as a score, of which we play only one part out
+							of many. As any human interpreter, our machine musician freely adds its
+							own inflection and ornamentation to ameliorate the music.
+						</p>
+					<h4> Audification </h4>
+						<p>
+							Anything that is data can be turned into sound by simply reinterpreting
+							the numbers as digital audio; a process called audification. The
+							audification of the actual traces machine code instructions can be heard
+							as the wave like spacey chords in the background and the high noisy
+							flute like drone in the break section.
+						</p>
+			</div>
+
 			<div class="content">
 				<h3> [re|in]verse in the world </h3>
 				<table>
 					<tr>
-						<td></td>
-						<td></td>
+						<td>2023-12-02</td>
+						<td><a
+								href="https://nobelweeklights.se/installation/reinverse/?lang=en">On the Nobel Week Lights website</a>
+						</td>
 					</tr>
 				</table>
+				<!--
 				<h4>On social media</h4>
 				<table>
 					<tr>
@@ -90,8 +238,8 @@
 						<td></td>
 					</tr>
 				</table>
+				-->
 			</div>
-			-->
 
 			<div class="content">
 				<h3> Credits </h3>
