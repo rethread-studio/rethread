@@ -1048,9 +1048,11 @@ async fn play_waveguide_segments(
                             inner_graph * (ramp().value(beam_setter).time(1.0) + 0.01) * main_env;
                         if reverb {
                             verb.input(g);
-                            graph_output(4, g * wave_movement_amp);
+                            graph_output(2, g * wave_movement_amp);
+                            // graph_output(4, g * wave_movement_amp);
                         } else {
                             graph_output(4, one_pole_lpf().sig(g).cutoff_freq(6000.));
+                            graph_output(2, g * wave_movement_amp);
                         }
                         graph_output(4, g * ((wave_movement_amp * (1.0 - dry_mix)) + dry_mix));
                         loop {
