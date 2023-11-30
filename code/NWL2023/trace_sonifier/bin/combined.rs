@@ -19,11 +19,11 @@ use atomic_float::AtomicF32;
 use color_eyre::Result;
 use knyst::{
     audio_backend::JackBackend,
-    envelope::{envelope_gen, Envelope, SustainMode},
+    envelope::{envelope_gen, Envelope, EnvelopeGenHandle, SustainMode},
     gen::filter::one_pole::{one_pole_hpf, one_pole_lpf},
     gen::random::random_lin,
     graph::GraphId,
-    handles::{handle, AnyNodeHandle, GenericHandle},
+    handles::{handle, AnyNodeHandle, GenericHandle, GraphHandle},
     knyst,
     prelude::*,
     resources::BufferId,
@@ -123,10 +123,10 @@ impl Vend {
         let movement = &self.score[num];
         if let Some(ob) = &self.operation_buffers {
             knyst().to_top_level_graph();
-           let buf = ob.from_op(movement.operation);
-           let voice = buffer_reader(buf, 0.9, false, StopAction::FreeSelf);
-           graph_output(0, voice * 0.6);
-           graph_output(2, voice * 0.1);
+            let buf = ob.from_op(movement.operation);
+            let voice = buffer_reader(buf, 0.9, false, StopAction::FreeSelf);
+            graph_output(0, voice * 0.6);
+            graph_output(2, voice * 0.1);
         }
         println!("trace: {}", movement.trace_name);
         let trace_path = TRACE_PATH.get().expect("Trace path should be initialised");
@@ -161,16 +161,17 @@ impl Vend {
                 let process = play_waveguide_segments(
                     &trace,
                     false,
-                    random(),
+                    true,
                     &movement.source[0].matrix[..],
                     true,
                     self.chord_matrix.current(),
+                    &self.chord_change_pattern,
                 )
                 .await;
                 self.processes.push(process);
             }
             1 => {
-                let instructions_to_skip = rng.gen_range(12..30);
+                let instructions_to_skip = rng.gen_range(12..25);
                 let process = instructions_to_melody_rewrite(
                     &trace,
                     15,
@@ -187,14 +188,15 @@ impl Vend {
                 let process = play_waveguide_segments(
                     &trace,
                     false,
-                    true,
+                    random(),
                     &movement.source[0].matrix[..],
                     true,
                     self.chord_matrix.current(),
+                    &self.chord_change_pattern,
                 )
                 .await;
                 self.processes.push(process);
-                let instructions_to_skip = rng.gen_range(12..30);
+                let instructions_to_skip = rng.gen_range(12..25);
                 let process = instructions_to_melody_rewrite(
                     &trace,
                     15,
@@ -266,10 +268,18 @@ impl Vend {
         )
         .await;
         self.processes.push(process);
-        let process = chord_change_process(
-            vec![Duration::from_secs_f32(5.0)],
-            self.chord_change_sender.clone(),
-        );
+        let chord_change_intervals = match self.score[self.latest_movement].operation {
+            Operation::Inverse => vec![4., 3., 2., 1., 10., 10.],
+            Operation::Normalize => vec![10.],
+            Operation::Multiply | Operation::SVD => vec![6., 4., 3., 2., 2., 3., 4., 6.],
+            Operation::Hessenberg => vec![6., 5., 4., 3., 2., 1., 10.],
+        };
+        let chord_change_intervals = chord_change_intervals
+            .into_iter()
+            .map(|secs| Duration::from_secs_f32(secs))
+            .collect();
+        let process =
+            chord_change_process(chord_change_intervals, self.chord_change_sender.clone());
         self.processes.push(process);
     }
     pub async fn set_beam_width(&mut self, value: f32) {
@@ -907,6 +917,7 @@ async fn play_waveguide_segments(
     matrix: &[f64],
     reverb: bool,
     chord: &EdoChordSemantic,
+    chord_change_pattern: &[bool],
 ) -> ProcessInteractivity {
     println!("Start waveguide segments");
 
@@ -934,6 +945,8 @@ async fn play_waveguide_segments(
         let chord_sender = process.chord_sender.clone();
         let beam_width_sender = process.beam_width_sender.clone();
         let matrix = matrix.to_vec();
+        let chord_change_pattern_len = chord_change_pattern.len().max(1) as f32;
+        dbg!(chord_change_pattern_len);
         tokio::task::spawn(async move {
             let mut root = 4.0;
             let mut rng: StdRng = SeedableRng::from_entropy();
@@ -949,15 +962,12 @@ async fn play_waveguide_segments(
                 StopAction::Continue,
             );
 
-            let verb = luff_verb(1065 * 48, 0.29).lowpass(19000.).damping(10000.);
-            let wave_movement_amp = sine().freq(0.1).range(0.02, 1.0).powf(2.0);
-            graph_output(
-                4,
-                one_pole_hpf()
-                    .sig(verb * wave_movement_amp)
-                    .cutoff_freq(100.)
-                    * main_env,
-            );
+            let verb = luff_verb(1265 * 48, 0.49).lowpass(19000.).damping(10000.);
+            let wave_movement_amp = sine()
+                .freq((32. / 60.) / chord_change_pattern_len)
+                .range(0.02, 1.0)
+                .powf(2.0);
+            graph_output(4, one_pole_hpf().sig(verb).cutoff_freq(100.) * main_env);
             let beam_setter = bus(1).set(0, 0.5);
             let exciter = buffer_reader(
                 buffer,
@@ -1047,7 +1057,7 @@ async fn play_waveguide_segments(
                         let g =
                             inner_graph * (ramp().value(beam_setter).time(1.0) + 0.01) * main_env;
                         if reverb {
-                            verb.input(g);
+                            verb.input(g * wave_movement_amp);
                             graph_output(2, g * wave_movement_amp);
                             // graph_output(4, g * wave_movement_amp);
                         } else {
@@ -1197,6 +1207,60 @@ fn receive_osc(sender: tokio::sync::mpsc::UnboundedSender<Messages>) -> Result<(
     Ok(())
 }
 
+fn sine_synth(
+    freqs: &[f32],
+    beam: AnyNodeHandle,
+    s0_active: bool,
+    s1_active: bool,
+    invert_accel: bool,
+) -> (Handle<GraphHandle>, Handle<EnvelopeGenHandle>) {
+    let mut gs = knyst().default_graph_settings();
+    gs.num_inputs = 1;
+    let mut o_sine_env = None;
+    let sine_graph = upload_graph(gs, || {
+        let beam = graph_input(0, 1);
+        let sine_env = envelope_gen(
+            0.0,
+            vec![(1.0, 1.0), (0.0, 5.0)],
+            SustainMode::SustainAtPoint(0),
+            StopAction::FreeGraph,
+        );
+        for i in 0..3 {
+            if s0_active {
+                let freq_mult = 2.0 * (1.0 + i as f32 * 0.005);
+                let s0 = sine().freq(freqs[0] * freq_mult * (random_lin().freq(3.0) * 0.01 + 1.0));
+                // sines.push((s0, freq_mult, 0));
+                let sig = s0
+                    * (sine().freq(random_lin().freq(0.1) * 8. + 2.) * beam + 1.0)
+                    * 0.1
+                    * random_lin().freq(0.2).powf(3.0)
+                    * (random_lin().freq(2.27).powf(2.) * 0.5 + 0.5);
+                graph_output(1, sig * sine_env);
+            }
+            if s1_active {
+                let freq_mult = 2.0 + i as f32 * 0.005;
+                let s1 = sine().freq(freqs[2] * freq_mult);
+                // sines.push((s1, freq_mult, 2));
+                let mod_speed = if invert_accel {
+                    1.0 - phasor().freq((random_lin().freq(0.05) + 2.0) * 10. * beam) * beam + 1.0
+                } else {
+                    phasor().freq((random_lin().freq(0.05) + 2.0) * 10. * beam) * beam + 1.0
+                };
+                let sig = s1
+                    * sine().freq(mod_speed)
+                    * 0.1
+                    * random_lin().freq(0.5).powf(3.0)
+                    * (random_lin().freq(3.27).powf(2.) * 0.5 + 0.5);
+                graph_output(2, sig * sine_env);
+            }
+        }
+        o_sine_env = Some(sine_env);
+    });
+    sine_graph.set(0, &beam);
+    graph_output(0, sine_graph);
+    (sine_graph, o_sine_env.unwrap())
+}
+
 async fn break_sines(
     chord: &EdoChordSemantic,
     last_trace: &str,
@@ -1239,38 +1303,25 @@ async fn break_sines(
     let beam_setter = bus(1).set(0, 0.5);
 
     let beam = lag().value(beam_setter).time(1.0);
-    let mut sines = vec![];
+    // let mut sines = vec![];
 
     let trace_sound = buffer_reader(buffer, 0.5, true, StopAction::Continue);
     let trace_sound = one_pole_lpf().sig(trace_sound * 0.1).cutoff_freq(3600.);
 
     let mut rng: StdRng = SeedableRng::from_entropy();
-    let s0_active = rng.gen();
-    let s1_active = rng.gen();
+    // let s0_active = rng.gen();
+    // let s1_active = rng.gen();
+    let s0_active = true;
+    let s1_active = true;
+
+    let mut o_sine_env = None;
+
+    knyst().to_graph(outer_graph_id);
+    let (sine_graph, sine_env) =
+        sine_synth(&freqs, beam.into(), s0_active, s1_active, invert_accel);
+    o_sine_env = Some(sine_env);
 
     for i in 0..3 {
-        if s0_active {
-            let freq_mult = 2.0 * (1.0 + i as f32 * 0.005);
-            let s0 = sine().freq(freqs[0] * freq_mult * (random_lin().freq(3.0) * 0.01 + 1.0));
-            sines.push((s0, freq_mult, 0));
-            let sig = s0
-                * (sine().freq(random_lin().freq(0.1) * 8. + 2.) * beam + 1.0)
-                * 0.1
-                * random_lin().freq(0.2).powf(3.0);
-            graph_output(1, sig * main_env);
-        }
-        if s1_active {
-            let freq_mult = 2.0 + i as f32 * 0.005;
-            let s1 = sine().freq(freqs[2] * freq_mult);
-            sines.push((s1, freq_mult, 2));
-            let mod_speed = if invert_accel {
-                1.0 - phasor().freq((random_lin().freq(0.05) + 2.0) * 10. * beam) * beam + 1.0
-            } else {
-                phasor().freq((random_lin().freq(0.05) + 2.0) * 10. * beam) * beam + 1.0
-            };
-            let sig = s1 * sine().freq(mod_speed) * 0.1 * random_lin().freq(0.5).powf(3.0);
-            graph_output(2, sig * main_env);
-        }
         // let s2 = sine().freq(freqs[1] * 8.0);
         let s2 = waveguide()
             .freq(freqs[1] * (8.0 + i as f32 * 0.01))
@@ -1292,39 +1343,50 @@ async fn break_sines(
             * beam
             * random_lin().freq(0.7).powf(2.0);
         graph_output(2, sig * main_env);
-        // let s3 = sine().freq(freqs[1] * 4.0);
-        // let sig = s3
-        //     * (sine().freq((sine().freq(0.15) + 2.0) * 12. * beam) * beam + 1.0)
-        //     * 0.1
-        //     * (1.0 - beam);
-        // graph_output(0, sig.repeat_outputs(1));
     }
+    // let s3 = sine().freq(freqs[1] * 4.0);
+    // let sig = s3
+    //     * (sine().freq((sine().freq(0.15) + 2.0) * 12. * beam) * beam + 1.0)
+    //     * 0.1
+    //     * (1.0 - beam);
+    // graph_output(0, sig.repeat_outputs(1));
 
     tokio::task::spawn(async move {
         loop {
             tokio::select! {
-            new_chord = chord_receiver.recv() => {
-                if let Ok(new_chord) = new_chord {
-                let freqs: Vec<_> = new_chord
-                    .to_edo_chord()
-                    .to_edo_pitches()
-                    .into_iter()
-                    .map(|p| p.to_freq_pitch(200.).frequency())
-                    .collect();
-                for (sine, freq_mult, chord_note) in &mut sines {
-                    sine.freq(freqs[*chord_note]* *freq_mult);
-                }
+                                            new_chord = chord_receiver.recv() => {
+                                                if let Ok(new_chord) = new_chord {
+                                                let freqs: Vec<_> = new_chord
+                                                    .to_edo_chord()
+                                                    .to_edo_pitches()
+                                                    .into_iter()
+                                                    .map(|p| p.to_freq_pitch(200.).frequency())
+                                                    .collect();
+                                                // for (sine, freq_mult, chord_note) in &mut sines {
+                                                //     sine.freq(freqs[*chord_note]* *freq_mult);
+                                                // }
+                                                if let Some(env) =
+                                                o_sine_env.take() {
+                                                    env.release_trig();
+                                                }
 
-                }
-            },
-            new_beam_value = beam_receiver.recv() => {
-                if let Ok(v) = new_beam_value {
-                    beam_setter.set(0, v);}
-                }
-            _ = stop_receiver.recv() => break,
-            }
+            knyst().to_graph(outer_graph_id);
+            let (sine_graph, sine_env) =
+                sine_synth(&freqs, beam.into(), s0_active, s1_active, invert_accel);
+            o_sine_env = Some(sine_env);
+                                                }
+                                            },
+                                            new_beam_value = beam_receiver.recv() => {
+                                                if let Ok(v) = new_beam_value {
+                                                    beam_setter.set(0, v);}
+                                                }
+                                            _ = stop_receiver.recv() => break,
+                                            }
         }
         main_env.release_trig();
+        if let Some(env) = o_sine_env.take() {
+            env.release_trig();
+        }
         println!("Releasing break sines");
         tokio::time::sleep(Duration::from_secs(10)).await;
         outer_graph_handle.free();
