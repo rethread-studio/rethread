@@ -15,6 +15,10 @@
 	<noscript>
 		<link rel="stylesheet" href="../assets/css/noscript.css" />
 	</noscript>
+	<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+	<script id="MathJax-script" async
+			src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+	</script>
 
 
 
@@ -75,6 +79,19 @@
 					of different sizes, shapes and content. The quest for efficiency has motivated recent advances in machine
 					learning for matrix computation.
 				</p>
+				<p style="text-align: center;">
+					\[ A = \begin{bmatrix}
+					1 & 1 & 1\\
+					1 & 2 & 3\\
+					1 & 3 & 6
+					\end{bmatrix} \quad
+					A^{-1} = \begin{bmatrix}
+					3 & -3 & 1\\
+					-3 & 5 & -2\\
+					1 & -2 & 1
+					\end{bmatrix}\]
+					<i>Example of a matrix with 3 lines and 3 columns (3 x 3), and its inverse.</i>
+				</p>
 			</div>
 
 			<div class="content">
@@ -131,7 +148,7 @@
 					music reflects this through the modulation of sine waves in the "break"
 					part.
 				</p>
-				<table style="text-align: left">
+				<table style="text-align: left;">
 					<tr>
 						<th><a href="../images/reinverse/spectograms/Multiply_diagonal_42.png">Mult</a><a
 								href="../images/reinverse/spectograms/Multiply_random_73.png">iply</a></th>
