@@ -36,35 +36,24 @@ const RUMBLE_STOP: i32 = 2;
 fn main() -> Result<()> {
     let mut backend = audio_backend::JackBackend::new("knyst_waveguide_syscalls")?;
 
+    let stop = Arc::new(AtomicBool::new(false));
+    let stop_message = Arc::new(Mutex::new(String::from("Bye!")));
     let sample_rate = backend.sample_rate() as f32;
     let block_size = backend.block_size().unwrap_or(64);
     println!("sr: {sample_rate}, block: {block_size}");
-    let resources = Resources::new(ResourcesSettings::default());
-    let graph: Graph = Graph::new(GraphSettings {
-        block_size,
-        sample_rate,
-        // In JACK we can decide ourselves how many outputs and inputs we want
-        num_inputs: 1,
-        num_outputs: 16,
-        ring_buffer_size: 40000,
-        max_node_inputs: 10,
-        num_nodes: 2000,
-        ..Default::default()
-    });
-    let stop = Arc::new(AtomicBool::new(false));
-    let stop_message = Arc::new(Mutex::new(String::from("Bye!")));
-    // `start_processing` is starting a Controller on a separate thread by
-    // default. If you want to handle when the Controller updates manually you
-    // can use `start_processing_retyrn_controller` instead
-    let mut k = {
-        let stop = stop.clone();
-        let stop_message = stop_message.clone();
-        backend.start_processing(graph, resources, RunGraphSettings::default(), move |e| {
+    let _sphere = KnystSphere::start(
+        &mut backend,
+        SphereSettings {
+            num_inputs: 1,
+            num_outputs: 2,
+            ..Default::default()
+        },
+        |e| {
             eprintln!("!! Error:{e:?}");
             // *stop_message.lock().unwrap() = format!("{e:?}");
             // stop.store(true, std::sync::atomic::Ordering::SeqCst);
-        })?
-    };
+        },
+    );
 
     let osc_receiver = receiver(7376).unwrap();
     let mut osc_sender = sender().unwrap().connect("127.0.0.1:57120").unwrap();
@@ -136,7 +125,6 @@ fn main() -> Result<()> {
         root,
         harmonic_changes,
         sample_rate,
-        k,
         current_harmonic_change,
         is_on_break: false,
         transposition_within_octave_guard: true,
@@ -250,7 +238,6 @@ struct App {
     sample_rate: f32,
     is_on_break: bool,
     transposition_within_octave_guard: bool,
-    k: KnystCommands,
 }
 impl App {
     pub fn apply_osc_message(&mut self, m: OscMessage) {
@@ -336,7 +323,6 @@ impl App {
             root,
             harmonic_changes,
             sample_rate,
-            k,
             chord_change_interval,
             current_chord,
             current_harmonic_change,
@@ -350,6 +336,7 @@ impl App {
             for sonifier in &mut *current_sonifiers {
                 sonifier.free();
             }
+            let mut k = knyst();
             k.free_disconnected_nodes();
             current_sonifiers.clear();
             *is_on_break = is_break;
@@ -369,7 +356,7 @@ impl App {
                         });
                         *chord_change_interval = None;
                         *current_sonifiers =
-                            vec![Box::new(DirectCategories::new(0.5, k, sample_rate))];
+                            vec![Box::new(DirectCategories::new(0.5, sample_rate))];
                         for s in current_sonifiers.iter_mut() {
                             s.patch_to_fx_chain(1);
                         }
@@ -385,7 +372,7 @@ impl App {
                         });
                         *chord_change_interval = None;
                         *current_sonifiers =
-                            vec![Box::new(DirectCategories::new(0.5, k, sample_rate))];
+                            vec![Box::new(DirectCategories::new(0.5, sample_rate))];
                         for s in current_sonifiers.iter_mut() {
                             s.patch_to_fx_chain(1);
                         }
@@ -400,9 +387,9 @@ impl App {
                         });
                         *chord_change_interval = None;
 
-                        let mut pb = PeakBinaries::new(k);
+                        let mut pb = PeakBinaries::new();
                         pb.threshold = 2.0;
-                        let mut pn = PeakBinaries::new(k);
+                        let mut pn = PeakBinaries::new();
                         pn.threshold = 5.0;
                         pn.sound_kind = SoundKind::FilteredNoise(8);
                         *current_sonifiers = vec![Box::new(pb), Box::new(pn)];
@@ -420,7 +407,6 @@ impl App {
                         *chord_change_interval = None;
                         *current_sonifiers = vec![Box::new(DirectFunctions::new(
                             1.0,
-                            k,
                             sample_rate,
                             &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
                             vec![],
@@ -441,13 +427,12 @@ impl App {
                         *chord_change_interval = None;
                         let mut sonifier = DirectFunctions::new(
                             1.0,
-                            k,
                             sample_rate,
                             &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
                             vec![],
                         );
                         sonifier.decrease_sensitivity = true;
-                        let mut pn = PeakBinaries::new(k);
+                        let mut pn = PeakBinaries::new();
                         pn.threshold = 2.0;
                         pn.sound_kind = SoundKind::FilteredNoise(5);
                         *current_sonifiers = vec![Box::new(sonifier), Box::new(pn)];
@@ -464,7 +449,7 @@ impl App {
                             lpf_high: 2000.0..12000.0,
                         });
                         *current_sonifiers =
-                            vec![Box::new(QuantisedCategories::new(1.3, k, sample_rate))];
+                            vec![Box::new(QuantisedCategories::new(1.3, sample_rate))];
                         for s in current_sonifiers.iter_mut() {
                             s.patch_to_fx_chain(1);
                         }
@@ -480,7 +465,7 @@ impl App {
                         });
                         // TODO: Much louder quantised categories
                         *current_sonifiers =
-                            vec![Box::new(QuantisedCategories::new(10.0, k, sample_rate))];
+                            vec![Box::new(QuantisedCategories::new(10.0, sample_rate))];
 
                         for s in current_sonifiers.iter_mut() {
                             s.patch_to_fx_chain(1);
@@ -496,7 +481,6 @@ impl App {
                         *chord_change_interval = Some(Duration::from_secs(8));
                         let mut df = DirectFunctions::new(
                             1.0,
-                            k,
                             sample_rate,
                             &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
                             vec![
@@ -521,7 +505,6 @@ impl App {
                         *chord_change_interval = Some(Duration::from_secs(8));
                         let mut sonifier = DirectFunctions::new(
                             1.0,
-                            k,
                             sample_rate,
                             &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
                             vec![
@@ -556,11 +539,10 @@ impl App {
                             lpf_high: 1000.0..7000.0,
                         });
                         *chord_change_interval = Some(Duration::from_secs(12));
-                        let mut pb = PeakBinaries::new(k);
+                        let mut pb = PeakBinaries::new();
                         pb.threshold = 5.0;
                         pb.sound_kind = SoundKind::FilteredNoise(3);
-                        *current_sonifiers =
-                            vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                        *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1)), Box::new(pb)];
                         current_sonifiers
                             .iter_mut()
                             .for_each(|s| s.patch_to_fx_chain(1));
@@ -569,7 +551,7 @@ impl App {
                     111 => {
                         background_ramp = None;
                         *chord_change_interval = Some(Duration::from_secs(12));
-                        let mut pb = PeakBinaries::new(k);
+                        let mut pb = PeakBinaries::new();
                         pb.threshold = 3.0;
                         // pb.sound_kind = SoundKind::FilteredNoise(3);
                         *current_sonifiers =
@@ -581,7 +563,7 @@ impl App {
                     112 => {
                         background_ramp = None;
                         *chord_change_interval = Some(Duration::from_secs(12));
-                        let mut pb = PeakBinaries::new(k);
+                        let mut pb = PeakBinaries::new();
                         pb.threshold = 5.0;
                         pb.sound_kind = SoundKind::FilteredNoise(3);
                         *current_sonifiers =
@@ -593,7 +575,7 @@ impl App {
                     113 => {
                         background_ramp = None;
                         *chord_change_interval = Some(Duration::from_secs(6));
-                        let mut pb = PeakBinaries::new(k);
+                        let mut pb = PeakBinaries::new();
                         pb.threshold = 3.0;
                         *current_sonifiers =
                             vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
@@ -609,9 +591,9 @@ impl App {
                             lpf_high: 1000.0..7000.0,
                         });
                         *chord_change_interval = None;
-                        let mut pt = ProgramThemes::new(0.1, k);
+                        let mut pt = ProgramThemes::new(0.1);
                         pt.patch_to_fx_chain(1);
-                        let mut dc = DirectCategories::new(0.08, k, sample_rate);
+                        let mut dc = DirectCategories::new(0.08, sample_rate);
                         dc.patch_to_fx_chain(2);
                         dc.set_lpf(3000.);
                         *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
