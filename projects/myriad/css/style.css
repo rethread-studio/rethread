@@ -125,6 +125,10 @@ th {
     padding-bottom: 0.5rem;
 }
 
+td {
+    vertical-align: top;
+}
+
 .col-left {
    border-right-style: solid;
    border-width: thin;

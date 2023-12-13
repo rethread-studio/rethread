@@ -61,10 +61,10 @@ fn main() {
     let start_minute = 00;
     let stop_hour = 21;
     let stop_minute = 00;
-    let mut complete_restart = false;
+    let mut complete_restart = true;
     let mut recompile = false;
     let mut resting = true; // We are resting 22-16 which means, don't try to restart
-    let mut always_on = false; // Overrides the resting option, trying to keep the programs going no matter what
+    let mut always_on = true; // Overrides the resting option, trying to keep the programs going no matter what
     let mut osc_receiver = { receiver(RECEIVER_PORT).ok() };
     // let start_time = todo!();
     // let mut rng: StdRng = SeedableRng::from_entropy();
@@ -78,6 +78,7 @@ fn main() {
         //         now.second(),
         //     );
         if !always_on {
+            complete_restart = false;
             if resting {
                 if now.hour() >= start_hour
                     && now.minute() >= start_minute
