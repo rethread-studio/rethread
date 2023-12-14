@@ -3,20 +3,19 @@ use std::{
     time::{Duration, Instant},
 };
 
-use crate::{to_freq53, Sonifier};
+use super::phrase::*;
+use crate::{note::Note, to_freq53, Sonifier};
 use atomic_float::AtomicF32;
 use knyst::{
     controller::{CallbackHandle, KnystCommands, StartBeat},
-    graph::{Bus, NodeAddress, SimultaneousChanges},
+    gen::filter::one_pole::{one_pole_lpf, OnePoleLpfHandle},
+    handles::{GenericHandle, GraphHandle},
+    knyst,
     prelude::*,
     time::Superbeats,
 };
-use knyst_waveguide::phrase::*;
-use knyst_waveguide::{
-    interface::{Note, NoteOpt, PluckedWaveguide, Synth, TriggeredSynth},
-    OnePoleLPF,
-};
-use nannou_osc::Type;
+use knyst_waveguide2::half_sine_wt;
+use knyst_waveguide2::waveguide;
 
 #[derive(Debug, Clone, Copy)]
 struct Program {
@@ -84,52 +83,76 @@ impl Activity {
 
 pub struct ProgramThemes {
     callbacks: Vec<CallbackHandle>,
-    inner_graph: NodeAddress,
-    bus: NodeAddress,
-    lpf: NodeAddress,
-    mul: NodeAddress,
+    inner_graph: Handle<GraphHandle>,
+    bus: Handle<GenericHandle>,
+    lpf: Handle<OnePoleLpfHandle>,
+    mul: Handle<GenericHandle>,
     root: Arc<AtomicF32>,
     chord: Arc<AtomicU32>,
     activity: Arc<Mutex<Activity>>,
-    k: KnystCommands,
+}
+
+fn plucked_waveguide() -> Handle<GraphHandle> {
+    upload_graph(
+        knyst()
+            .default_graph_settings()
+            .num_inputs(4)
+            .num_outputs(1),
+        || {
+            let freq = graph_input(0, 1);
+            let exciter_trig = graph_input(1, 1);
+            let position = graph_input(2, 1);
+            let feedback = graph_input(3, 1);
+            let exciter = half_sine_wt()
+                .freq(freq * 0.4837) // Nice for plucking low notes
+                // .freq(control.out("freq") * 2.2837) /// Nice for high notes and especially sustained
+                .amp(0.1)
+                .restart(exciter_trig);
+            let exciter_to_wg = one_pole_lpf().sig(exciter).cutoff_freq(2600.);
+            let wg = waveguide()
+                .exciter(exciter_to_wg)
+                .freq(freq)
+                .position(position)
+                .feedback(feedback)
+                .damping(1000. + freq * 4.0)
+                .lf_damping(10.);
+        },
+    )
 }
 
 impl ProgramThemes {
-    pub fn new(amp: f32, k: &mut KnystCommands) -> Self {
+    pub fn new(amp: f32) -> Self {
         println!("Creating ProgramThemes");
-        k.change_musical_time_map(|mtm| {
+        knyst().change_musical_time_map(|mtm| {
             mtm.replace(0, knyst::scheduling::TempoChange::NewTempo { bpm: 80. })
         });
-        let mut graph_settings = k.default_graph_settings();
+        let mut graph_settings = knyst().default_graph_settings();
         graph_settings.num_outputs = 4;
         graph_settings.num_inputs = 0;
-        let inner_graph = Graph::new(graph_settings);
-        let graph_id = inner_graph.id();
-        let inner_graph = k.push(inner_graph, inputs![]);
-        k.connect(inner_graph.to_graph_out().channels(4));
-        let mut k = k.to_graph(graph_id);
-        let bus = k.push(Bus(4), inputs![]);
-        let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 10000.)]);
-        let mul = k.push(Mult, inputs![(0 ; lpf.out(0)), (1 : amp)]);
-        k.connect(mul.to(&bus).channels(4).to_channel(0));
-        k.connect(bus.to_graph_out().channels(4).to_channel(0));
-        let mut wg_thunderbird = PluckedWaveguide::new(&mut k, None, false);
-        let mut wg_konqueror = PluckedWaveguide::new(&mut k, None, false);
-        let mut wg_htop = PluckedWaveguide::new(&mut k, None, false);
-        let mut wg_gedit = PluckedWaveguide::new(&mut k, None, false);
+        let inner_graph = upload_graph(graph_settings, || {});
+        // let inner_graph = Graph::new(graph_settings);
+        // let graph_id = inner_graph.id();
+        // let inner_graph = k.push(inner_graph, inputs![]);
+        // k.connect(inner_graph.to_graph_out().channels(4));
+        graph_output(0, inner_graph);
 
-        for out in wg_thunderbird.outputs() {
-            k.connect(out.to_node(&lpf).channels(4));
-        }
-        for out in wg_konqueror.outputs() {
-            k.connect(out.to_node(&lpf).channels(4));
-        }
-        for out in wg_htop.outputs() {
-            k.connect(out.to_node(&lpf).channels(4));
-        }
-        for out in wg_gedit.outputs() {
-            k.connect(out.to_node(&lpf).channels(4));
-        }
+        inner_graph.activate();
+        let bus = bus(4);
+        graph_output(0, bus);
+        let lpf = one_pole_lpf().cutoff_freq(10000.);
+        let amp_bus = bus(1).set(amp);
+        let mul = lpf * amp_bus;
+        bus.set(0, mul.channels(4));
+        // k.connect(mul.to(&bus).channels(4).to_channel(0));
+        // k.connect(bus.to_graph_out().channels(4).to_channel(0));
+        let mut wg_thunderbird = plucked_waveguide();
+        let mut wg_konqueror = plucked_waveguide();
+        let mut wg_htop = plucked_waveguide();
+        let mut wg_gedit = plucked_waveguide();
+        lpf.sig(wg_gedit);
+        lpf.sig(wg_konqueror);
+        lpf.sig(wg_thunderbird);
+        lpf.sig(wg_htop);
 
         let activity = Arc::new(Mutex::new(Activity::new()));
 
@@ -155,7 +178,7 @@ impl ProgramThemes {
         let callback_chord = chord.clone();
         let callback_activity = activity.clone();
         let mut i = 0;
-        let callback = k.schedule_beat_callback(
+        let callback = knyst().schedule_beat_callback(
             move |time, k| {
                 // println!("Running callback {i}, time: {time:?}");
                 i += 1;

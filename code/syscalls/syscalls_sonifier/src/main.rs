@@ -26,7 +26,9 @@ use crate::quantised_categories::QuantisedCategories;
 mod direct_categories;
 mod direct_functions;
 mod harmony;
+mod note;
 mod peak_binaries;
+mod phrase;
 mod program_themes;
 mod quantised_categories;
 
