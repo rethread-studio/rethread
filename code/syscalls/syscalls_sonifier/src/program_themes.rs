@@ -7,9 +7,10 @@ use super::phrase::*;
 use crate::{note::Note, to_freq53, Sonifier};
 use atomic_float::AtomicF32;
 use knyst::{
-    controller::{CallbackHandle, KnystCommands, StartBeat},
+    controller::{schedule_bundle, CallbackHandle, KnystCommands, StartBeat},
     gen::filter::one_pole::{one_pole_lpf, OnePoleLpfHandle},
-    handles::{GenericHandle, GraphHandle},
+    graph::Time,
+    handles::{GenericHandle, GraphHandle, HandleData, MulHandle},
     knyst,
     prelude::*,
     time::Superbeats,
@@ -86,7 +87,7 @@ pub struct ProgramThemes {
     inner_graph: Handle<GraphHandle>,
     bus: Handle<GenericHandle>,
     lpf: Handle<OnePoleLpfHandle>,
-    mul: Handle<GenericHandle>,
+    mul: Handle<MulHandle>,
     root: Arc<AtomicF32>,
     chord: Arc<AtomicU32>,
     activity: Arc<Mutex<Activity>>,
@@ -96,26 +97,30 @@ fn plucked_waveguide() -> Handle<GraphHandle> {
     upload_graph(
         knyst()
             .default_graph_settings()
-            .num_inputs(4)
+            .num_inputs(7)
             .num_outputs(1),
         || {
             let freq = graph_input(0, 1);
             let exciter_trig = graph_input(1, 1);
             let position = graph_input(2, 1);
             let feedback = graph_input(3, 1);
+            let amp = graph_input(4, 1);
+            let exciter_lpf = graph_input(5, 1);
+            let damping = graph_input(6, 1);
             let exciter = half_sine_wt()
                 .freq(freq * 0.4837) // Nice for plucking low notes
                 // .freq(control.out("freq") * 2.2837) /// Nice for high notes and especially sustained
                 .amp(0.1)
                 .restart(exciter_trig);
-            let exciter_to_wg = one_pole_lpf().sig(exciter).cutoff_freq(2600.);
+            let exciter_to_wg = one_pole_lpf().sig(exciter).cutoff_freq(exciter_lpf);
             let wg = waveguide()
                 .exciter(exciter_to_wg)
                 .freq(freq)
                 .position(position)
                 .feedback(feedback)
-                .damping(1000. + freq * 4.0)
+                .damping(damping)
                 .lf_damping(10.);
+            graph_output(0, wg * amp);
         },
     )
 }
@@ -137,12 +142,12 @@ impl ProgramThemes {
         graph_output(0, inner_graph);
 
         inner_graph.activate();
-        let bus = bus(4);
-        graph_output(0, bus);
+        let main_bus = bus(4);
+        graph_output(0, main_bus);
         let lpf = one_pole_lpf().cutoff_freq(10000.);
-        let amp_bus = bus(1).set(amp);
+        let amp_bus = bus(1).set(0, amp);
         let mul = lpf * amp_bus;
-        bus.set(0, mul.channels(4));
+        main_bus.set(0, mul.channels(4));
         // k.connect(mul.to(&bus).channels(4).to_channel(0));
         // k.connect(bus.to_graph_out().channels(4).to_channel(0));
         let mut wg_thunderbird = plucked_waveguide();
@@ -200,25 +205,33 @@ impl ProgramThemes {
                         if rng.f32() < a {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
-                                    let mut changes = SimultaneousChanges::beats(time);
-                                    let freq = to_freq53(n.0 + 53 * 4, root_freq);
-                                    // let amp = n.1 * 0.5;
-                                    let amp =
-                                        n.1 * (0.1 + (a.powf(1.5) * 0.5 + rng.f32() * 0.5) * 0.9);
-                                    wg_thunderbird.trig(
-                                        Note {
-                                            freq,
-                                            amp,
-                                            damping: freq * (4.0 + amp * 16.0),
-                                            position: 0.5,
-                                            feedback: 0.999,
-                                            exciter_lpf: 2600.,
-                                            ..Default::default()
-                                        }
-                                        .into(),
-                                        &mut changes,
-                                    );
-                                    k.schedule_changes(changes);
+                                    schedule_bundle(Time::Beats(time), || {
+                                        let freq = to_freq53(n.0 + 53 * 4, root_freq);
+                                        // let amp = n.1 * 0.5;
+                                        let amp = n.1
+                                            * (0.1 + (a.powf(1.5) * 0.5 + rng.f32() * 0.5) * 0.9);
+                                        wg_thunderbird
+                                            .set(0, freq) // freq
+                                            .trig(1) // exciter trigger
+                                            .set(2, 0.5) // position
+                                            .set(3, 0.999) // feedback
+                                            .set(4, amp) // amp
+                                            .set(5, 2600.) // exciter_lpf
+                                            .set(6, freq * (4.0 + amp * 16.)); // damping
+
+                                        // wg_thunderbird.trig(
+                                        //     Note {
+                                        //         freq,
+                                        //         amp,
+                                        //         damping: freq * (4.0 + amp * 16.0),
+                                        //         position: 0.5,
+                                        //         feedback: 0.999,
+                                        //         exciter_lpf: 2600.,
+                                        //         ..Default::default()
+                                        //     }
+                                        //     .into(),
+                                        // );
+                                    });
                                 }
                                 NoteEventKind::Rest => (),
                             }
@@ -240,25 +253,33 @@ impl ProgramThemes {
                         if rng.f32() < a {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
-                                    let mut changes = SimultaneousChanges::beats(time);
-                                    let freq = to_freq53(n.0 + 53, root_freq);
-                                    // let amp = n.1;
-                                    let amp =
-                                        n.1 * (0.1 + (a.powf(1.5) * 0.5 + rng.f32() * 0.5) * 0.9);
-                                    wg_konqueror.trig(
-                                        Note {
-                                            freq,
-                                            amp: amp * 0.5,
-                                            damping: freq * 8.0,
-                                            position: 0.15,
-                                            feedback: 0.999,
-                                            exciter_lpf: 1000.,
-                                            ..Default::default()
-                                        }
-                                        .into(),
-                                        &mut changes,
-                                    );
-                                    k.schedule_changes(changes);
+                                    schedule_bundle(Time::Beats(time), || {
+                                        let freq = to_freq53(n.0 + 53, root_freq);
+                                        // let amp = n.1;
+                                        let amp = n.1
+                                            * (0.1 + (a.powf(1.5) * 0.5 + rng.f32() * 0.5) * 0.9);
+
+                                        wg_konqueror
+                                            .set(0, freq) // freq
+                                            .trig(1) // exciter trigger
+                                            .set(2, 0.5) // position
+                                            .set(3, 0.999) //feedback
+                                            .set(4, amp * 0.5) // amp
+                                            .set(5, 1000.) // exciter lpf
+                                            .set(6, freq * 8.); // damping
+                                                                // wg_konqueror.trig(
+                                                                //     Note {
+                                                                //         freq,
+                                                                //         amp: amp * 0.5,
+                                                                //         damping: freq * 8.0,
+                                                                //         position: 0.15,
+                                                                //         feedback: 0.999,
+                                                                //         exciter_lpf: 1000.,
+                                                                //         ..Default::default()
+                                                                //     }
+                                                                //     .into(),
+                                                                // );
+                                    })
                                 }
                                 NoteEventKind::Rest => (),
                             }
@@ -280,29 +301,38 @@ impl ProgramThemes {
                         if rng.f32() < a {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
-                                    let mut changes = SimultaneousChanges::beats(time);
-                                    let freq = to_freq53(n.0 + 159, root_freq);
-                                    let amp = n.1 * (0.1 + a.powf(0.5) * 0.9);
-                                    let feedback =
-                                        if event.duration > Superbeats::from_beats_f32(1. / 32.) {
+                                    schedule_bundle(Time::Beats(time), || {
+                                        let freq = to_freq53(n.0 + 159, root_freq);
+                                        let amp = n.1 * (0.1 + a.powf(0.5) * 0.9);
+                                        let feedback = if event.duration
+                                            > Superbeats::from_beats_f32(1. / 32.)
+                                        {
                                             0.99999
                                         } else {
                                             0.98
                                         };
-                                    wg_htop.trig(
-                                        Note {
-                                            freq,
-                                            amp: amp * 0.5,
-                                            damping: freq * 10.0,
-                                            position: 0.25,
-                                            feedback,
-                                            exciter_lpf: 1500.,
-                                            ..Default::default()
-                                        }
-                                        .into(),
-                                        &mut changes,
-                                    );
-                                    k.schedule_changes(changes);
+
+                                        wg_htop
+                                            .set(0, freq) // freq
+                                            .trig(1) // exciter trigger
+                                            .set(2, 0.25) // position
+                                            .set(3, feedback) //feedback
+                                            .set(4, amp * 0.5) // amp
+                                            .set(5, 1500.) // exciter lpf
+                                            .set(6, freq * 10.); // damping
+                                                                 // wg_htop.trig(
+                                                                 //     Note {
+                                                                 //         freq,
+                                                                 //         amp: amp * 0.5,
+                                                                 //         damping: freq * 10.0,
+                                                                 //         position: 0.25,
+                                                                 //         feedback,
+                                                                 //         exciter_lpf: 1500.,
+                                                                 //         ..Default::default()
+                                                                 //     }
+                                                                 //     .into(),
+                                                                 // );
+                                    });
                                 }
                                 NoteEventKind::Rest => (),
                             }
@@ -324,29 +354,37 @@ impl ProgramThemes {
                         if rng.f32() < a {
                             match event.kind {
                                 NoteEventKind::Note(n) => {
-                                    let mut changes = SimultaneousChanges::beats(time);
-                                    let freq = to_freq53(n.0 + 212 + 53, root_freq);
-                                    let amp = n.1 * (0.1 + a.powf(0.5) * 0.8);
-                                    let feedback =
-                                        if event.duration > Superbeats::from_beats_f32(1. / 32.) {
+                                    schedule_bundle(Time::Beats(time), || {
+                                        let freq = to_freq53(n.0 + 212 + 53, root_freq);
+                                        let amp = n.1 * (0.1 + a.powf(0.5) * 0.8);
+                                        let feedback = if event.duration
+                                            > Superbeats::from_beats_f32(1. / 32.)
+                                        {
                                             0.999999
                                         } else {
                                             0.98
                                         };
-                                    wg_gedit.trig(
-                                        Note {
-                                            freq,
-                                            amp: amp * 0.5,
-                                            damping: freq * 10.0,
-                                            position: 0.5,
-                                            feedback,
-                                            exciter_lpf: 2500.,
-                                            ..Default::default()
-                                        }
-                                        .into(),
-                                        &mut changes,
-                                    );
-                                    k.schedule_changes(changes);
+                                        wg_gedit
+                                            .set(0, freq) // freq
+                                            .trig(1) // exciter trigger
+                                            .set(2, 0.5) // position
+                                            .set(3, feedback) //feedback
+                                            .set(4, amp * 0.5) // amp
+                                            .set(5, 2500.) // exciter lpf
+                                            .set(6, freq * 10.); // damping
+                                                                 // wg_gedit.trig(
+                                                                 //     Note {
+                                                                 //         freq,
+                                                                 //         amp: amp * 0.5,
+                                                                 //         damping: freq * 10.0,
+                                                                 //         position: 0.5,
+                                                                 //         feedback,
+                                                                 //         exciter_lpf: 2500.,
+                                                                 //         ..Default::default()
+                                                                 //     }
+                                                                 //     .into(),
+                                                                 // );
+                                    });
                                 }
                                 NoteEventKind::Rest => (),
                             }
@@ -362,8 +400,7 @@ impl ProgramThemes {
         Self {
             callbacks: vec![callback],
             inner_graph,
-            k,
-            bus,
+            bus: main_bus,
             root,
             activity,
             lpf,
@@ -410,14 +447,8 @@ impl Sonifier for ProgramThemes {
     }
 
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
-        self.k
-            .connect(Connection::clear_to_graph_outputs(&self.inner_graph));
-        self.k.connect(
-            self.inner_graph
-                .to_graph_out()
-                .channels(4)
-                .to_channel(fx_chain * 4),
-        );
+        self.inner_graph.clear_graph_output_connections();
+        graph_output(fx_chain * 4, self.inner_graph.channels(4));
     }
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
@@ -440,10 +471,10 @@ impl Sonifier for ProgramThemes {
         for callback in self.callbacks.drain(..) {
             callback.free();
         }
-        self.k.free_node(self.inner_graph.clone());
-        self.k.free_node(self.bus.clone());
-        self.k.free_node(self.lpf.clone());
-        self.k.free_node(self.mul.clone());
+        self.inner_graph.free();
+        self.bus.free();
+        self.lpf.free();
+        self.mul.free();
     }
 }
 

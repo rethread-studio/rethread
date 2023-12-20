@@ -1,10 +1,8 @@
 use std::ops::Range;
 use std::sync::atomic::AtomicBool;
-use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use knyst::graph::Gen;
 use knyst::prelude::*;
 use knyst::*;
 
@@ -12,8 +10,7 @@ use anyhow::Result;
 use nannou_osc::rosc::OscPacket;
 use nannou_osc::{receiver, sender, Connected, Message as OscMessage, Sender, Type};
 use peak_binaries::SoundKind;
-use rand::seq::SliceRandom;
-use rand::{thread_rng, Rng};
+use rand::thread_rng;
 use syscalls_shared::SyscallKind;
 
 use crate::direct_categories::DirectCategories;
@@ -26,11 +23,11 @@ use crate::quantised_categories::QuantisedCategories;
 mod direct_categories;
 mod direct_functions;
 mod harmony;
-mod note;
 mod peak_binaries;
-mod phrase;
 mod program_themes;
 mod quantised_categories;
+pub mod phrase;
+pub mod note;
 
 const RUMBLE_RESTART: i32 = 1;
 const RUMBLE_STOP: i32 = 2;
@@ -60,7 +57,7 @@ fn main() -> Result<()> {
     let osc_receiver = receiver(7376).unwrap();
     let mut osc_sender = sender().unwrap().connect("127.0.0.1:57120").unwrap();
     let mut current_sonifiers: Vec<Box<dyn Sonifier>> = vec![];
-    current_sonifiers = vec![Box::new(DirectCategories::new(1.0, &mut k, sample_rate))];
+    current_sonifiers = vec![Box::new(DirectCategories::new(1.0, sample_rate))];
     // current_sonifiers = vec![Box::new(QuantisedCategories::new(&mut k, sample_rate))];
     // current_sonifier = Some(Box::new(DirectFunctions::new(
     //     &mut k,
@@ -260,7 +257,6 @@ impl App {
             root,
             harmonic_changes,
             sample_rate,
-            k,
             current_harmonic_change,
             is_on_break,
             transposition_within_octave_guard,
@@ -304,7 +300,7 @@ impl App {
             sonifier.free();
         }
         self.chord_change_interval = None;
-        self.k.free_disconnected_nodes();
+        knyst().free_disconnected_nodes();
         self.current_sonifiers.clear();
     }
     pub fn change_movement(
@@ -528,9 +524,9 @@ impl App {
                             lpf_high: 500.0..1000.0,
                         });
                         *chord_change_interval = None;
-                        let mut qc = QuantisedCategories::new(1.0, k, sample_rate);
+                        let mut qc = QuantisedCategories::new(1.0,  sample_rate);
                         qc.patch_to_fx_chain(2);
-                        *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new(k))];
+                        *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new())];
                         rumble_change = Some(RUMBLE_STOP);
                     }
                     10 => {
@@ -557,7 +553,7 @@ impl App {
                         pb.threshold = 3.0;
                         // pb.sound_kind = SoundKind::FilteredNoise(3);
                         *current_sonifiers =
-                            vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                            vec![Box::new(ProgramThemes::new(0.1)), Box::new(pb)];
                         current_sonifiers
                             .iter_mut()
                             .for_each(|s| s.patch_to_fx_chain(1));
@@ -568,8 +564,7 @@ impl App {
                         let mut pb = PeakBinaries::new();
                         pb.threshold = 5.0;
                         pb.sound_kind = SoundKind::FilteredNoise(3);
-                        *current_sonifiers =
-                            vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                        *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1)), Box::new(pb)];
                         current_sonifiers
                             .iter_mut()
                             .for_each(|s| s.patch_to_fx_chain(1));
@@ -579,8 +574,7 @@ impl App {
                         *chord_change_interval = Some(Duration::from_secs(6));
                         let mut pb = PeakBinaries::new();
                         pb.threshold = 3.0;
-                        *current_sonifiers =
-                            vec![Box::new(ProgramThemes::new(0.1, k)), Box::new(pb)];
+                        *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1)), Box::new(pb)];
                         current_sonifiers
                             .iter_mut()
                             .for_each(|s| s.patch_to_fx_chain(1));
@@ -605,13 +599,12 @@ impl App {
                         *chord_change_interval = None;
                         let mut sonifier = DirectFunctions::new(
                             1.0,
-                            k,
                             sample_rate,
                             &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
                             vec![],
                         );
                         sonifier.decrease_sensitivity = false;
-                        let mut pn = PeakBinaries::new(k);
+                        let mut pn = PeakBinaries::new();
                         pn.threshold = 2.0;
                         pn.sound_kind = SoundKind::FilteredNoise(5);
                         *current_sonifiers = vec![Box::new(sonifier), Box::new(pn)];
@@ -629,14 +622,13 @@ impl App {
                         *chord_change_interval = None;
                         let mut sonifier = DirectFunctions::new(
                             0.3,
-                            k,
                             sample_rate,
                             &enum_iterator::all::<SyscallKind>().collect::<Vec<_>>(),
                             vec![],
                         );
                         sonifier.decrease_sensitivity = false;
                         sonifier.patch_to_fx_chain(2);
-                        let mut pb = PeakBinaries::new(k);
+                        let mut pb = PeakBinaries::new();
                         pb.threshold = 2.0;
                         *current_sonifiers = vec![Box::new(pb), Box::new(sonifier)];
                         rumble_change = Some(RUMBLE_STOP);
@@ -654,15 +646,15 @@ impl App {
                         // pb.threshold = 1.0;
                         // *current_sonifiers = vec![Box::new(pb)];
                         //
-                        let mut pb = PeakBinaries::new(k);
+                        let mut pb = PeakBinaries::new();
                         pb.threshold = 2.0;
-                        let mut pt = ProgramThemes::new(0.1, k);
+                        let mut pt = ProgramThemes::new(0.1);
                         pt.patch_to_fx_chain(1);
 
-                        let mut pbf = PeakBinaries::new(k);
+                        let mut pbf = PeakBinaries::new();
                         pbf.threshold = 5.0;
                         pbf.sound_kind = SoundKind::FilteredNoise(3);
-                        let mut dc = DirectCategories::new(0.08, k, sample_rate);
+                        let mut dc = DirectCategories::new(0.08, sample_rate);
                         dc.patch_to_fx_chain(2);
                         dc.set_lpf(3000.);
                         *current_sonifiers =
@@ -750,13 +742,27 @@ impl BackgroundRamp {
 /// 1: "pan_x"
 /// 2: "pan_y"
 pub struct PanMonoToQuad;
-impl Gen for PanMonoToQuad {
-    fn process(&mut self, ctx: GenContext, _resources: &mut Resources) -> GenState {
-        for i in 0..ctx.block_size() {
-            let signal = ctx.inputs.read(0, i);
+#[impl_gen]
+impl PanMonoToQuad {
+    pub fn new() -> Self {
+        PanMonoToQuad
+    }
+    pub fn process(
+        &mut self,
+        input: &[Sample],
+        pan_x: &[Sample],
+        pan_y: &[Sample],
+        front_left: &mut [Sample],
+        front_right: &mut [Sample],
+        rear_left: &mut [Sample],
+        rear_right: &mut [Sample],
+        block_size: BlockSize,
+    ) -> GenState {
+        for i in 0..*block_size {
+            let signal = input[i];
             // The equation needs pan to be in the range [0, 1]
-            let pan_x = ctx.inputs.read(1, i) * 0.5 + 0.5;
-            let pan_y = ctx.inputs.read(2, i).clamp(-1.0, 1.0) * 0.5 + 0.5;
+            let pan_x = pan_x[i].clamp(-1., 1.0) * 0.5 + 0.5;
+            let pan_y =pan_y[i].clamp(-1.0, 1.0) * 0.5 + 0.5;
             let pan_x_radians = pan_x * std::f32::consts::FRAC_PI_2;
             let pan_y_radians = pan_y * std::f32::consts::FRAC_PI_2;
             // let left_gain = fastapprox::fast::cos(pan_x_radians);
@@ -767,10 +773,11 @@ impl Gen for PanMonoToQuad {
             let right_gain = pan_x;
             let front_gain = 1.0 - pan_y;
             let rear_gain = pan_y;
-            ctx.outputs.write(signal * left_gain * front_gain, 0, i);
-            ctx.outputs.write(signal * right_gain * front_gain, 1, i);
-            ctx.outputs.write(signal * left_gain * rear_gain, 2, i);
-            ctx.outputs.write(signal * right_gain * rear_gain, 3, i);
+
+            front_left[i] = (signal * left_gain * front_gain);
+            front_right[i] = (signal * right_gain * front_gain);
+            rear_left[i] = (signal * left_gain * rear_gain);
+            rear_right[i] = (signal * right_gain * rear_gain);
         }
         GenState::Continue
     }

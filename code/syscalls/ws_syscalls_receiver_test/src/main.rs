@@ -19,11 +19,12 @@ use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // let connect_addr = env::args()
-    //     .nth(1)
-    //     .unwrap_or_else(|| panic!("this program requires at least one argument"));
-    let connect_addr = "ws://127.0.0.1:1237";
-    let url = url::Url::parse(connect_addr).unwrap();
+    let connect_addr = "ws://127.0.0.1:8080";
+    let connect_addr = env::args()
+        .nth(1)
+        .unwrap_or(connect_addr.to_string());
+    println!("Connecting to {connect_addr}");
+    let url = url::Url::parse(&connect_addr).unwrap();
 
     let (stdin_tx, stdin_rx) = futures_channel::mpsc::unbounded();
     tokio::spawn(read_stdin(stdin_tx));
@@ -66,10 +67,10 @@ async fn main() -> Result<()> {
         let read_future = read.for_each(|message| async {
             // println!("receiving...");
             // let data = message.unwrap().into_data();
-            // tokio::io::stdout().write(&data).await.unwrap();
             let text = message.unwrap().into_text().unwrap();
-            if let Some('m') = text.chars().nth(0) {
-                println!("{text}");
+            if text.chars().nth(0).unwrap() != 's' {
+                tokio::io::stdout().write(&text.as_bytes()).await.unwrap();
+                tokio::io::stdout().write(&['\n' as u8]).await.unwrap();
             }
             // let val = messages_received.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
             // println!("{val}");

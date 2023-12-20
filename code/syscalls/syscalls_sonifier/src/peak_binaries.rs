@@ -21,7 +21,7 @@ pub struct PeakBinaries {
 }
 
 impl PeakBinaries {
-    pub fn new(k: &mut KnystCommands) -> Self {
+    pub fn new() -> Self {
         println!("Creating PeakBinaries");
         // Load sound files
         // let thunderbird =

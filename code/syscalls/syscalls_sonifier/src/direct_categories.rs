@@ -2,10 +2,10 @@ use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
 use enum_iterator::cardinality;
-use knyst::controller::KnystCommands;
+use knyst::controller::{schedule_bundle, KnystCommands};
 use knyst::gen::filter::one_pole::{one_pole_lpf, OnePoleLpfHandle};
-use knyst::graph::{NodeId, SimultaneousChanges};
-use knyst::handles::GenericHandle;
+use knyst::graph::{NodeId, Time};
+use knyst::handles::{GenericHandle, HandleData};
 use knyst::prelude::*;
 use knyst_waveguide2::waveguide;
 use knyst_waveguide2::WaveguideHandle;
@@ -163,8 +163,7 @@ impl DirectCategories {
         }
     }
     pub fn set_lpf(&mut self, freq: f32) {
-        self.k
-            .schedule_change(ParameterChange::now(self.lpf.clone(), freq).label("cutoff_freq"));
+        self.lpf.cutoff_freq(freq);
     }
 }
 
@@ -197,37 +196,31 @@ impl Sonifier for DirectCategories {
     }
 
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
-        self.k
-            .connect(Connection::clear_to_graph_outputs(&self.post_fx));
-        self.k.connect(
-            self.post_fx
-                .to_graph_out()
-                .channels(4)
-                .to_channel(fx_chain * 4),
-        );
+        self.post_fx.clear_graph_output_connections();
+        graph_output(fx_chain * 4, self.post_fx.channels(4));
     }
 
     fn free(&mut self) {
         for (_kind, wg) in self.continuous_wgs.drain() {
             wg.free();
         }
-        self.k.free_node(self.post_fx.clone());
-        self.k.free_node(self.block_counter.clone());
+        self.post_fx.free();
+        self.block_counter.free();
     }
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
-        let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
-        for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
-            let freq = to_freq53(
-                scale[i % scale.len()] + 53 * (i / scale.len()) as i32,
-                root * 4.0,
-            );
-            self.continuous_wgs
-                .get_mut(&format!("{:?}", syscall_kind))
-                .unwrap()
-                .set_freq(freq, &mut changes);
-        }
-        self.k.schedule_changes(changes);
+        schedule_bundle(Time::Immediately, || {
+            for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
+                let freq = to_freq53(
+                    scale[i % scale.len()] + 53 * (i / scale.len()) as i32,
+                    root * 4.0,
+                );
+                self.continuous_wgs
+                    .get_mut(&format!("{:?}", syscall_kind))
+                    .unwrap()
+                    .set_freq(freq);
+            }
+        });
     }
 }
 
@@ -274,7 +267,7 @@ impl SyscallWaveguide {
         self.accumulator += id as f32 * self.coeff * coeff_mod;
         self.accumulator += self.coeff;
     }
-    fn set_freq(&mut self, freq: f32, changes: &mut SimultaneousChanges) {
+    fn set_freq(&mut self, freq: f32) {
         self.wg.freq(freq);
     }
     fn update(&mut self, coeff_mod: f32) {
