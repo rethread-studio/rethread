@@ -517,7 +517,7 @@ impl SyscallWaveguide {
                     let feedback = 0.999
                         + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.1);
                     i.wg.feedback(feedback);
-                    i.wg_amp.set(1, 0.05);
+                    i.wg_amp.set(0, 0.05);
                     self.iterations_since_trigger = 0;
                 } else {
                     i.exciter_sender.push(0.0).unwrap();
@@ -526,7 +526,7 @@ impl SyscallWaveguide {
                 if self.iterations_since_trigger == 1500 {
                     let feedback = 0.99;
                     i.wg.feedback(feedback);
-                    i.wg_amp.set(1, 0.10);
+                    i.wg_amp.set(0, 0.10);
                 }
             }
         }

@@ -12,7 +12,7 @@ use knyst::controller::{schedule_bundle, KnystCommands};
 use knyst::envelope::{Envelope, SustainMode};
 use knyst::gen::delay::{sample_delay, SampleDelayHandle};
 use knyst::gen::filter::one_pole::{one_pole_lpf, OnePoleLpfHandle};
-use knyst::graph::{SimultaneousChanges, Time};
+use knyst::graph::Time;
 use knyst::handles::{GenericHandle, HandleData};
 use knyst::prelude::*;
 use knyst::time::Superseconds;
@@ -27,7 +27,7 @@ use rand::{thread_rng, Rng};
 use rtrb::Producer;
 use syscalls_shared::SyscallKind;
 
-use crate::{to_freq53, PanMonoToQuad, Sonifier, pan_mono_to_quad, PanMonoToQuadHandle};
+use crate::{pan_mono_to_quad, to_freq53, PanMonoToQuad, PanMonoToQuadHandle, Sonifier};
 const SCALE: [i32; 7] = [0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
 
 pub struct QuantisedCategories {
@@ -378,7 +378,7 @@ impl SyscallKindQuantisedWaveguide {
             }
         }
     }
-    fn set_new_timing(&mut self, interval: f32, changes: &mut SimultaneousChanges) {
+    fn set_new_timing(&mut self, interval: f32) {
         let delay_time = interval * self.delay_position;
         self.trig_delay.delay_time(delay_time);
         self.impulse.interval(interval);

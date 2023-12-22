@@ -23,11 +23,11 @@ use crate::quantised_categories::QuantisedCategories;
 mod direct_categories;
 mod direct_functions;
 mod harmony;
+pub mod note;
 mod peak_binaries;
+pub mod phrase;
 mod program_themes;
 mod quantised_categories;
-pub mod phrase;
-pub mod note;
 
 const RUMBLE_RESTART: i32 = 1;
 const RUMBLE_STOP: i32 = 2;
@@ -44,7 +44,7 @@ fn main() -> Result<()> {
         &mut backend,
         SphereSettings {
             num_inputs: 1,
-            num_outputs: 2,
+            num_outputs: 24,
             ..Default::default()
         },
         |e| {
@@ -131,7 +131,7 @@ fn main() -> Result<()> {
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
-    // app.change_movement(0, None, false, 30.);
+    app.change_movement(113, None, false, 30.);
     // main loop
     loop {
         // Receive OSC messages
@@ -524,7 +524,7 @@ impl App {
                             lpf_high: 500.0..1000.0,
                         });
                         *chord_change_interval = None;
-                        let mut qc = QuantisedCategories::new(1.0,  sample_rate);
+                        let mut qc = QuantisedCategories::new(1.0, sample_rate);
                         qc.patch_to_fx_chain(2);
                         *current_sonifiers = vec![Box::new(qc), Box::new(PeakBinaries::new())];
                         rumble_change = Some(RUMBLE_STOP);
@@ -552,8 +552,7 @@ impl App {
                         let mut pb = PeakBinaries::new();
                         pb.threshold = 3.0;
                         // pb.sound_kind = SoundKind::FilteredNoise(3);
-                        *current_sonifiers =
-                            vec![Box::new(ProgramThemes::new(0.1)), Box::new(pb)];
+                        *current_sonifiers = vec![Box::new(ProgramThemes::new(0.1)), Box::new(pb)];
                         current_sonifiers
                             .iter_mut()
                             .for_each(|s| s.patch_to_fx_chain(1));
@@ -762,9 +761,9 @@ impl PanMonoToQuad {
             let signal = input[i];
             // The equation needs pan to be in the range [0, 1]
             let pan_x = pan_x[i].clamp(-1., 1.0) * 0.5 + 0.5;
-            let pan_y =pan_y[i].clamp(-1.0, 1.0) * 0.5 + 0.5;
-            let pan_x_radians = pan_x * std::f32::consts::FRAC_PI_2;
-            let pan_y_radians = pan_y * std::f32::consts::FRAC_PI_2;
+            let pan_y = pan_y[i].clamp(-1.0, 1.0) * 0.5 + 0.5;
+            // let pan_x_radians = pan_x * std::f32::consts::FRAC_PI_2;
+            // let pan_y_radians = pan_y * std::f32::consts::FRAC_PI_2;
             // let left_gain = fastapprox::fast::cos(pan_x_radians);
             // let right_gain = fastapprox::fast::sin(pan_x_radians);
             // let front_gain = fastapprox::fast::cos(pan_y_radians);
@@ -780,36 +779,5 @@ impl PanMonoToQuad {
             rear_right[i] = (signal * right_gain * rear_gain);
         }
         GenState::Continue
-    }
-
-    fn num_inputs(&self) -> usize {
-        3
-    }
-
-    fn num_outputs(&self) -> usize {
-        4
-    }
-
-    fn input_desc(&self, input: usize) -> &'static str {
-        match input {
-            0 => "signal",
-            1 => "pan_x",
-            2 => "pan_y",
-            _ => "",
-        }
-    }
-
-    fn output_desc(&self, output: usize) -> &'static str {
-        match output {
-            0 => "left_front",
-            1 => "right_front",
-            2 => "left_rear",
-            3 => "right_rear",
-            _ => "",
-        }
-    }
-
-    fn name(&self) -> &'static str {
-        "PanMonoToStereo"
     }
 }

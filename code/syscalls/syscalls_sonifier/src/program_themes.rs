@@ -150,10 +150,14 @@ impl ProgramThemes {
         main_bus.set(0, mul.channels(4));
         // k.connect(mul.to(&bus).channels(4).to_channel(0));
         // k.connect(bus.to_graph_out().channels(4).to_channel(0));
-        let mut wg_thunderbird = plucked_waveguide();
-        let mut wg_konqueror = plucked_waveguide();
-        let mut wg_htop = plucked_waveguide();
-        let mut wg_gedit = plucked_waveguide();
+        inner_graph.activate();
+        let wg_thunderbird = plucked_waveguide();
+        inner_graph.activate();
+        let wg_konqueror = plucked_waveguide();
+        inner_graph.activate();
+        let wg_htop = plucked_waveguide();
+        inner_graph.activate();
+        let wg_gedit = plucked_waveguide();
         lpf.sig(wg_gedit);
         lpf.sig(wg_konqueror);
         lpf.sig(wg_thunderbird);
@@ -177,7 +181,6 @@ impl ProgramThemes {
 
         let root = Arc::new(AtomicF32::new(25.));
         let chord = Arc::new(AtomicU32::new(0));
-        let phrases = thunderbird_theme();
 
         let callback_root = root.clone();
         let callback_chord = chord.clone();
