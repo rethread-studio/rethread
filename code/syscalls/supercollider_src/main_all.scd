@@ -26,7 +26,7 @@
 
 
 	{ // Load binaries as sound files
-		var path = PathName("/home/erik/Musik/syscalls_binaries");
+		var path = PathName("/home/erik/Musik/syscalls/binaries");
 		~binaries = Dictionary.new;
 		path.files.do{|path| path.fileName.postln;
 			path.extension.postln;
@@ -242,13 +242,13 @@
 	Ndef(\lpf_high, {10000});
 	{
 		var buffers = ~binaries.values,
-		binaryBus = Bus.audio(s, 1);
+		binaryBus = Bus.audio(s, 4);
 		buffers.do { |buf, i|
 			{
 				(i*0.1).wait;
 				loop { var length = rrand(0.2, 2.0);
 					rrand(0.1, 0.5).wait;
-					Synth(\binary_playbuf, [\buf, buf, \length, length, \amp, 0.63, \out, binaryBus]);
+					Synth(\binary_playbuf, [\buf, buf, \length, length, \amp, 0.63, \out, binaryBus.index + [0, 1, 2, 3].choose]);
 					length.wait;
 				}
 			}.fork;
@@ -257,7 +257,7 @@
 		Ndef(\rumbling_noise_source, {
 			var sig;
 			sig = BrownNoise.ar()!4 * 0.5;
-			sig = sig + (In.ar(binaryBus, 1)!4);
+			sig = sig + In.ar(binaryBus, 4);
 			sig
 		});
 	}.();
@@ -279,24 +279,25 @@
 			// sig = BrownNoise.ar()!4;
 
 			// sig = LPF.ar(sig, LFNoise2.kr(0.5).range(100, 2000) * LFNoise1.kr(2).range(0.8, 1.0));
-			sig = Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 8, 12, 16],bwr1) * bwramp1;
+			/*sig = Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 8, 12, 16],bwr1) * bwramp1;
 			sig = Mix(sig);
-			sig = Limiter.ar(sig);
+			sig = Limiter.ar(sig);*/
 			sig = sig * 0.5 + (AnalogVintageDistortion.ar(sig*LFNoise1.kr(0.1).range(0.01, 0.1), LFNoise1.kr(0.03).range(0.0, 2.5), LFNoise1.kr(0.2).range(0.0, 0.5)) * LFNoise1.kr(0.1).range(0.0, 0.5).pow(1.5));
 			sig = LPF.ar(sig, ((
 				LFNoise1.kr(0.05).range(0, 1).pow(3) * lpf_mul + lpf_low)
 			* LFNoise1.kr(2).range(0.7, 1.0)
 			* LFNoise1.kr(5).range(0.9, 1.0)
 			).clip(10, 19000));
-			sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) *200 + 10) * LFNoise1.kr(LFNoise1.kr(2).range(1, 5)).range(0.5, 1.0));
+			sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) * 200 + 10) * LFNoise1.kr(LFNoise1.kr(2).range(1, 5)).range(0.5, 1.0));
 			sig = Limiter.ar(sig, 0.9);
 			// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
-			sig = (sig * (1.0-pitch_mix))!2 + ((Splay.ar(Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 6, 8, 12, 16], bwr2)*bwramp2) * pitch_mix * 0.2));
+			/*sig = (sig * (1.0-pitch_mix))!2 + ((Splay.ar(Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 6, 8, 12, 16], bwr2)*bwramp2) * pitch_mix * 0.2));*/
 			sig = BPeakEQ.ar(sig, 300, 0.5, -2);
 			sig = BPeakEQ.ar(sig, 2000, 1.0, -3);
 			sig = Limiter.ar(sig, 0.9);
 
-			sig = sig * 0.05 * Line.kr(0.001, 1.0, 5.0);
+			// sig = sig * 0.05 * Line.kr(0.001, 1.0, 5.0);
+			sig = sig * 0.2;
 			// sig = Pan2.ar(sig*0.5);
 			(sig!2).flatten;
 		}).play(16, 4);

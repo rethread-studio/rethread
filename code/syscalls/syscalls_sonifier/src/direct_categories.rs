@@ -6,13 +6,14 @@ use knyst::controller::{schedule_bundle, KnystCommands};
 use knyst::gen::filter::one_pole::{one_pole_lpf, OnePoleLpfHandle};
 use knyst::graph::{NodeId, Time};
 use knyst::handles::{GenericHandle, HandleData};
-use knyst::prelude::*;
+use knyst::{knyst_commands, prelude::*};
 use knyst_waveguide2::waveguide;
 use knyst_waveguide2::WaveguideHandle;
 use nannou_osc::Connected;
 use rtrb::Producer;
 use syscalls_shared::SyscallKind;
 
+use crate::sound_effects::SoundEffects;
 use crate::{to_freq53, Sonifier};
 
 pub struct DirectCategories {
@@ -25,13 +26,15 @@ pub struct DirectCategories {
     block_sender: Producer<f32>,
     block_counter: Handle<GenericHandle>,
     coeff_mod: f32,
+    out_bus: Handle<GenericHandle>,
 }
 
 impl DirectCategories {
-    pub fn new(amp: f32, sample_rate: f32) -> Self {
+    pub fn new(amp: f32, sample_rate: f32, out_bus: Handle<GenericHandle>) -> Self {
         println!("Creating DirectCategories");
+        knyst_commands().to_top_level_graph();
         // This Gen has as only function to communicate when a block has passed on the audio thread
-        let (mut block_sender, mut block_receiver) =
+        let (block_sender, mut block_receiver) =
             rtrb::RingBuffer::<f32>::new((sample_rate * 0.3) as usize);
         let block_counter = handle(
             gen(move |ctx, _| {
@@ -58,10 +61,11 @@ impl DirectCategories {
                 GenState::Continue
             })
             .input("in")
-            .output("sig"),
+            .output("sig")
+            .name("DC_postfx"),
         );
-        let lpf = one_pole_lpf().sig(post_fx).cutoff_freq(20000.);
-        graph_output(12, lpf.repeat_outputs(3));
+        let lpf = one_pole_lpf().sig(post_fx).cutoff_freq(19000.);
+        out_bus.set(12, lpf.repeat_outputs(3));
         // k.connect(lpf.to_graph_out().channels(4).to_channel(12));
 
         let mut continuous_wgs = HashMap::new();
@@ -69,7 +73,7 @@ impl DirectCategories {
         for (i, syscall_kind) in enum_iterator::all::<SyscallKind>().enumerate() {
             let kind_label = format!("{syscall_kind:?}");
 
-            let (mut sender, mut receiver) =
+            let (sender, mut receiver) =
                 rtrb::RingBuffer::<f32>::new((sample_rate * 0.05) as usize);
             // for _i in 0..(sample_rate * 0.05) as usize {
             //     sender.push(0.0).ok();
@@ -103,7 +107,9 @@ impl DirectCategories {
             );
             // let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
             let exciter_input = bus(1);
-            exciter_input.set(0, graph_input(0, 1));
+            // exciter_input.set(0, graph_input(0, 1));
+            // exciter_input.set(0, pink_noise() * 0.1); // Snyggt, men behöver moduleras
+            exciter_input.set(0, exciter_sig);
             let exciter_filter = one_pole_lpf().sig(exciter_input).cutoff_freq(2000.);
             let wg = waveguide()
                 .exciter(exciter_filter)
@@ -115,10 +121,10 @@ impl DirectCategories {
             // let sine = k.push(WavetableOscillatorOwned::new(Wavetable::sine()), inputs![]);
             // let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
             let wg_amp = bus(1).set(0, 0.5);
-            let lpf = one_pole_lpf()
+            let wg_lpf = one_pole_lpf()
                 .cutoff_freq(20000.)
                 .sig(wg * ramp().value(wg_amp).time(0.1));
-            post_fx.set(0, lpf);
+            post_fx.set(0, wg_lpf);
             // let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
             // continuous_wg.change(
             //     NoteOpt {
@@ -139,7 +145,7 @@ impl DirectCategories {
             let syscall_waveguide = SyscallWaveguide::new(
                 wg,
                 exciter_input,
-                lpf,
+                wg_lpf,
                 wg_amp,
                 phase_per_i * i as f32,
                 sender,
@@ -160,6 +166,7 @@ impl DirectCategories {
             block_sender,
             block_counter,
             lpf,
+            out_bus,
         }
     }
     pub fn set_lpf(&mut self, freq: f32) {
@@ -183,7 +190,11 @@ impl Sonifier for DirectCategories {
         }
     }
 
-    fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
+    fn update(
+        &mut self,
+        osc_sender: &mut nannou_osc::Sender<Connected>,
+        _sound_effects: &SoundEffects,
+    ) {
         for swg in self.continuous_wgs.values_mut() {
             swg.update(self.coeff_mod);
         }
@@ -196,8 +207,9 @@ impl Sonifier for DirectCategories {
     }
 
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
-        self.post_fx.clear_graph_output_connections();
-        graph_output(fx_chain * 4, self.post_fx.channels(4));
+        self.lpf.clear_graph_output_connections();
+        self.lpf.clear_output_connections();
+        self.out_bus.set(fx_chain * 4, self.lpf.channels(4));
     }
 
     fn free(&mut self) {

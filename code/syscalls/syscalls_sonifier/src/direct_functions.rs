@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 use knyst::controller::schedule_bundle;
 use knyst::gen::filter::one_pole::{one_pole_lpf, OnePoleLpfHandle};
 use knyst::graph::Time;
-use knyst::handles::{AnyNodeHandle, GenericHandle, HandleData};
+use knyst::handles::{AnyNodeHandle, GenericHandle, GraphHandle, HandleData};
 use knyst::prelude::*;
 use knyst::*;
 
@@ -18,6 +18,7 @@ use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use syscalls_shared::SyscallKind;
 
+use crate::sound_effects::SoundEffects;
 use crate::{to_freq53, Sonifier};
 
 const SCALE: [i32; 7] = [0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
@@ -94,31 +95,30 @@ impl Category {
     }
     pub fn update(&mut self, sensitivity_coeff: f32) {
         if self.enabled {
-            schedule_bundle(Time::Immediately, || {
-                let mut to_remove = vec![];
-                for (id, swg) in self.wgs.iter_mut() {
-                    if swg.last_call.elapsed() > Duration::from_secs(15) && swg.interface.is_some()
-                    {
-                        to_remove.push(*id);
-                    } else {
-                        swg.update();
-                    }
+            // schedule_bundle(Time::Immediately, || {
+            let mut to_remove = vec![];
+            for (id, swg) in self.wgs.iter_mut() {
+                if swg.last_call.elapsed() > Duration::from_secs(15) && swg.interface.is_some() {
+                    to_remove.push(*id);
+                } else {
+                    swg.update();
                 }
-                for id in to_remove {
-                    // println!("Removed wg {id}");
-                    if let Some(wg) = self.wgs.get_mut(&id) {
-                        wg.despawn();
-                    }
+            }
+            for id in to_remove {
+                // println!("Removed wg {id}");
+                if let Some(wg) = self.wgs.get_mut(&id) {
+                    wg.despawn();
                 }
-                // Update LPF
-                if self.block_counter >= 128 {
-                    // self.lpf_phase = (self.lpf_phase + 0.001) % 6.28;
-                    // self.lpf_freq = self.lpf_phase.sin() * 9000. + 9100.;
-                    // changes.push(self.lpf.change().set("cutoff_freq", self.lpf_freq));
-                    // self.block_counter = 0;
-                }
-                self.block_counter += 1;
-            });
+            }
+            // Update LPF
+            if self.block_counter >= 128 {
+                // self.lpf_phase = (self.lpf_phase + 0.001) % 6.28;
+                // self.lpf_freq = self.lpf_phase.sin() * 9000. + 9100.;
+                // changes.push(self.lpf.change().set("cutoff_freq", self.lpf_freq));
+                // self.block_counter = 0;
+            }
+            self.block_counter += 1;
+            // });
         }
     }
     pub fn free(mut self) {
@@ -129,7 +129,7 @@ impl Category {
         self.category_bus.free();
     }
     pub fn patch_to(&mut self, out: &AnyNodeHandle) {
-        self.category_bus.clear_input_connections();
+        self.category_bus.clear_output_connections();
         out.set(0, self.category_bus.channels(4));
         // k.connect(self.category_bus.to(&out).channels(4));
     }
@@ -150,6 +150,7 @@ pub struct DirectFunctions {
     last_focus_change: Instant,
     time_to_next_focus_change: Duration,
     pub next_focus_time_range: Range<f32>,
+    out_bus: Handle<GenericHandle>,
 }
 
 impl DirectFunctions {
@@ -158,8 +159,10 @@ impl DirectFunctions {
         sample_rate: f32,
         enabled_kinds: &[SyscallKind],
         focus_kinds: Vec<SyscallKind>,
+        out_bus: Handle<GenericHandle>,
     ) -> Self {
         println!("Creating DirectFunctions");
+        knyst_commands().to_top_level_graph();
         let post_fx_foreground = handle(
             gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
@@ -170,10 +173,12 @@ impl DirectFunctions {
                 // dbg!(&inp);
                 GenState::Continue
             })
+            .name("DF post_fx back")
             .input("in")
             .output("sig"),
         );
-        graph_output(4, post_fx_foreground.channels(4));
+        // graph_output(4, post_fx_foreground.channels(4));
+        out_bus.set(4, post_fx_foreground.channels(4));
         let post_fx_background = handle(
             gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
@@ -184,10 +189,12 @@ impl DirectFunctions {
                 // dbg!(&inp);
                 GenState::Continue
             })
+            .name("DF post_fx fore")
             .input("in")
             .output("sig"),
         );
-        graph_output(8, post_fx_background.channels(4));
+        // graph_output(8, post_fx_background.channels(4));
+        out_bus.set(8, post_fx_background.channels(4));
 
         // let to_freq53 = |degree| 2.0_f32.powf(degree as f32 / 53.) * 220.0;
 
@@ -244,6 +251,7 @@ impl DirectFunctions {
             next_focus_time_range: 15.0..40.0,
             sensitivity_coeff: 1.0,
             tick: Instant::now(),
+            out_bus,
         }
     }
 }
@@ -269,19 +277,23 @@ impl Sonifier for DirectFunctions {
         }
     }
 
-    fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
+    fn update(
+        &mut self,
+        osc_sender: &mut nannou_osc::Sender<Connected>,
+        sound_effects: &SoundEffects,
+    ) {
         let mut rng = thread_rng();
-        schedule_bundle(Time::Immediately, || {
-            if self.tick.elapsed() > Duration::from_millis(10) {
-                if self.decrease_sensitivity {
-                    self.sensitivity_coeff *= 0.99992;
-                }
-                self.tick = Instant::now();
+        // schedule_bundle(Time::Immediately, || {
+        if self.tick.elapsed() > Duration::from_millis(10) {
+            if self.decrease_sensitivity {
+                self.sensitivity_coeff *= 0.99992;
             }
-            for (_, cat) in self.categories.iter_mut() {
-                cat.update(self.sensitivity_coeff);
-            }
-        });
+            self.tick = Instant::now();
+        }
+        for (_, cat) in self.categories.iter_mut() {
+            cat.update(self.sensitivity_coeff);
+        }
+        // });
         if self.vary_focus && self.last_focus_change.elapsed() > self.time_to_next_focus_change {
             self.time_to_next_focus_change =
                 Duration::from_secs_f32(rng.gen_range(self.next_focus_time_range.clone()));
@@ -295,6 +307,7 @@ impl Sonifier for DirectFunctions {
                 let addr = "/voice/focus/disabled";
                 let args = vec![];
                 osc_sender.send((addr, args)).ok();
+                sound_effects.play_focus_disabled();
             } else {
                 if self.focus_kinds.len() > 0 {
                     // let focused = rng.gen_range(0..self.categories.len());
@@ -306,6 +319,7 @@ impl Sonifier for DirectFunctions {
                             let addr = "/voice/focus/enabled";
                             let args = vec![Type::String(name.clone())];
                             osc_sender.send((addr, args)).ok();
+                            sound_effects.play_focus_enabled(name.clone());
                         } else {
                             cat.patch_to(&self.post_fx_background.into());
                         }
@@ -326,7 +340,10 @@ impl Sonifier for DirectFunctions {
 
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
         self.post_fx_foreground.clear_graph_output_connections();
-        graph_output(fx_chain * 4, self.post_fx_foreground.channels(4));
+        self.post_fx_foreground.clear_output_connections();
+        self.out_bus
+            .set(fx_chain * 4, self.post_fx_foreground.channels(4));
+        // graph_output(fx_chain * 4, self.post_fx_foreground.channels(4));
     }
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
@@ -349,15 +366,14 @@ fn make_new_waveguide(
         SyscallKind::WaitForReady => 0.1,
         _ => 0.3,
     };
-    SyscallWaveguide::new(freq, post_fx.clone(), category, starting_coeff)
+    SyscallWaveguide::new(freq, post_fx, category, starting_coeff)
 }
 
 struct WgInterface {
     wg: Handle<WaveguideHandle>,
     wg_amp: Handle<GenericHandle>,
     wg_amp_ramp: Handle<RampHandle>,
-    lpf: Handle<OnePoleLpfHandle>,
-    exciter: Handle<GenericHandle>,
+    inner_graph: Handle<GraphHandle>,
     exciter_sender: rtrb::Producer<f32>,
 }
 
@@ -398,11 +414,21 @@ impl SyscallWaveguide {
     }
     pub fn spawn(&mut self) {
         if self.interface.is_none() {
-            let (mut exciter_sender, mut receiver) =
+            let (exciter_sender, mut receiver) =
                 rtrb::RingBuffer::<f32>::new((48000. * 0.05) as usize);
             // for _i in 0..(48000. * 0.5) as usize {
             //     exciter_sender.push(0.0).ok();
             // }
+            let wg;
+            let wg_amp;
+            let wg_amp_ramp;
+            let mut gs = knyst_commands()
+                .default_graph_settings()
+                .num_inputs(0)
+                .num_outputs(1);
+            gs.name = format!("DF wg {:?}", self.category);
+            knyst_commands().to_top_level_graph();
+            knyst_commands().init_local_graph(gs);
             let mut value = 0.0;
             let exciter = handle(
                 gen(move |ctx, _| {
@@ -425,10 +451,10 @@ impl SyscallWaveguide {
             );
 
             let exciter_input = bus(1);
-            exciter_input.set(0, graph_input(0, 1));
+            // exciter_input.set(0, graph_input(0, 1));
             exciter_input.set(0, exciter);
             let exciter_filter = one_pole_lpf().sig(exciter_input).cutoff_freq(1500.);
-            let wg = waveguide()
+            wg = waveguide()
                 .exciter(exciter_filter * 0.5)
                 .freq(self.freq)
                 .position(0.25)
@@ -437,10 +463,12 @@ impl SyscallWaveguide {
                 .lf_damping(10.);
             // let sine = k.push(WavetableOscillatorOwned::new(Wavetable::sine()), inputs![]);
             // let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
-            let wg_amp = bus(1).set(0, 0.1);
-            let wg_amp_ramp = ramp().value(wg_amp).time(0.1);
+            wg_amp = bus(1).set(0, 0.1);
+            wg_amp_ramp = ramp().value(wg_amp).time(0.1);
             let lpf = one_pole_lpf().cutoff_freq(20000.).sig(wg * wg_amp_ramp);
-            self.output.set(0, lpf);
+            graph_output(0, lpf);
+            let inner_graph = knyst_commands().upload_local_graph();
+            self.output.set(0, inner_graph);
 
             // old
             // let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
@@ -465,8 +493,7 @@ impl SyscallWaveguide {
                 wg,
                 wg_amp,
                 wg_amp_ramp,
-                lpf,
-                exciter,
+                inner_graph,
                 exciter_sender,
             })
         }
@@ -490,7 +517,7 @@ impl SyscallWaveguide {
             if !i.exciter_sender.is_full() {
                 if self.last_ramp_change.elapsed() > Duration::from_secs_f32(0.5) {
                     // TODO: This shouldn't be necessary, but it is a workaround for a bug
-                    let rng = fastrand::Rng::new();
+                    let mut rng = fastrand::Rng::new();
                     i.wg_amp_ramp.time(rng.f32() * 0.001 + 0.001);
                     self.last_ramp_change = Instant::now();
                 }
@@ -533,10 +560,8 @@ impl SyscallWaveguide {
     }
     fn despawn(&mut self) {
         if let Some(i) = self.interface.take() {
-            i.exciter.free();
-            i.wg.free();
-            i.wg_amp.free();
-            i.wg_amp_ramp.free();
+            i.inner_graph.free();
+            // knyst_commands().free_disconnected_nodes(); // This causes removal of too many nodes
         }
     }
 }
