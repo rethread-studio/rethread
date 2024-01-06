@@ -304,9 +304,9 @@ impl Sonifier for DirectFunctions {
                     cat.patch_to(&self.post_fx_foreground.into());
                 }
                 self.focused_category = None;
-                let addr = "/voice/focus/disabled";
-                let args = vec![];
-                osc_sender.send((addr, args)).ok();
+                // let addr = "/voice/focus/disabled";
+                // let args = vec![];
+                // osc_sender.send((addr, args)).ok();
                 sound_effects.play_focus_disabled();
             } else {
                 if self.focus_kinds.len() > 0 {
@@ -316,9 +316,9 @@ impl Sonifier for DirectFunctions {
                     for (i, (name, cat)) in &mut self.categories.iter_mut().enumerate() {
                         if *name == focused_string {
                             cat.patch_to(&self.post_fx_foreground.into());
-                            let addr = "/voice/focus/enabled";
-                            let args = vec![Type::String(name.clone())];
-                            osc_sender.send((addr, args)).ok();
+                            // let addr = "/voice/focus/enabled";
+                            // let args = vec![Type::String(name.clone())];
+                            // osc_sender.send((addr, args)).ok();
                             sound_effects.play_focus_enabled(name.clone());
                         } else {
                             cat.patch_to(&self.post_fx_background.into());
@@ -464,7 +464,7 @@ impl SyscallWaveguide {
             // let sine = k.push(WavetableOscillatorOwned::new(Wavetable::sine()), inputs![]);
             // let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
             wg_amp = bus(1).set(0, 0.1);
-            wg_amp_ramp = ramp().value(wg_amp).time(0.1);
+            wg_amp_ramp = ramp(0.1).value(wg_amp).time(0.1);
             let lpf = one_pole_lpf().cutoff_freq(20000.).sig(wg * wg_amp_ramp);
             graph_output(0, lpf);
             let inner_graph = knyst_commands().upload_local_graph();
@@ -544,7 +544,7 @@ impl SyscallWaveguide {
                     let feedback = 0.999
                         + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.1);
                     i.wg.feedback(feedback);
-                    i.wg_amp.set(0, 0.05);
+                    i.wg_amp.set(0, 0.10);
                     self.iterations_since_trigger = 0;
                 } else {
                     i.exciter_sender.push(0.0).unwrap();
@@ -553,7 +553,7 @@ impl SyscallWaveguide {
                 if self.iterations_since_trigger == 1500 {
                     let feedback = 0.99;
                     i.wg.feedback(feedback);
-                    i.wg_amp.set(0, 0.10);
+                    i.wg_amp.set(0, 0.20);
                 }
             }
         }

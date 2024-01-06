@@ -179,7 +179,7 @@ impl QuantisedCategories {
             // let sine = k.push(WavetableOscillatorOwned::new(Wavetable::sine()), inputs![]);
             // let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
             let wg_amp = bus(1).set(0, 0.1);
-            let wg_amp_ramp = ramp().value(wg_amp).time(0.1);
+            let wg_amp_ramp = ramp(0.0).value(wg_amp).time(0.1);
 
             let mut value = 0.0;
 

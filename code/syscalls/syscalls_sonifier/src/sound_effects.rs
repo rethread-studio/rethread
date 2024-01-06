@@ -2,10 +2,11 @@ use std::{ffi::OsStr, time::Duration};
 
 use anyhow::Result;
 use knyst::{handles::GenericHandle, knyst_commands, prelude::*, resources::BufferId};
-use rand::{seq::SliceRandom, thread_rng};
+use rand::{seq::SliceRandom, thread_rng, Rng};
 
 use crate::sound_path;
 
+#[derive(Clone)]
 pub struct SoundEffects {
     voice_focus: Vec<(String, BufferId)>,
     voice_movement: Vec<(i32, BufferId)>,
@@ -113,6 +114,24 @@ impl SoundEffects {
         } else {
             eprintln!("Warning: Couldn't find FocusDisabled");
         }
+    }
+    pub fn play_end_movement_effects(&self, duration_secs: f32) {
+        let s = self.clone();
+        std::thread::spawn(move || {
+            let mut rng = thread_rng();
+            std::thread::sleep(Duration::from_secs_f32(3.));
+            let num_bufs = s.voice_movement.len() as f32;
+            for (i, (_, buf)) in s.voice_movement.iter().enumerate() {
+                let gap = rng.gen_range(0.3..0.4) * (3.0 - (i as f32 / num_bufs) * 2.5);
+                play_mono_sound_buffer(*buf, s.out_bus, 0.05);
+                std::thread::sleep(Duration::from_secs_f32(gap));
+            }
+        });
+        let s = self.clone();
+        std::thread::spawn(move || {
+            std::thread::sleep(Duration::from_secs_f32(duration_secs));
+            s.play_bell_b();
+        });
     }
 }
 

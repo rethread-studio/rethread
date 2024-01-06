@@ -5,6 +5,8 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
 use background_noise::BackgroundNoise;
+use knyst::envelope::envelope_gen;
+use knyst::gen::filter::svf::{svf_dynamic, SvfFilterType};
 use knyst::handles::GenericHandle;
 use knyst::prelude::*;
 use knyst::*;
@@ -14,7 +16,7 @@ use knyst_visualiser::probe;
 use nannou_osc::rosc::OscPacket;
 use nannou_osc::{receiver, sender, Connected, Message as OscMessage, Sender, Type};
 use peak_binaries::SoundKind;
-use rand::thread_rng;
+use rand::{thread_rng, Rng};
 use sound_effects::SoundEffects;
 use syscalls_shared::SyscallKind;
 
@@ -141,7 +143,7 @@ fn main() -> Result<()> {
         HarmonicChange::new().new_chord(chord_maj7sharp11.clone()),
     ];
 
-    let background_noise = BackgroundNoise::new(16, output_bus, sound_path());
+    let background_noise = BackgroundNoise::new(16, output_bus, sound_path(), root_freq);
     let mut app = App {
         current_sonifiers,
         current_chord,
@@ -166,7 +168,7 @@ fn main() -> Result<()> {
     let mut rng = thread_rng();
 
     // app.peak_binaries.add_trig(3.0, SoundKind::Binary);
-    app.change_movement(106, None, false, 30.);
+    // app.change_movement(106, None, false, 30.);
     // main loop
     std::thread::spawn(move || {
         loop {
@@ -323,14 +325,20 @@ impl App {
                     root,
                     *transposition_within_octave_guard,
                 );
-                let addr = "/change_harmony";
+                // let addr = "/change_harmony";
                 let root = to_freq53(*root, *root_freq);
-                let mut args = vec![Type::Float(root)];
-                args.push(Type::Int(current_chord.len() as i32));
-                for degree in &*current_chord {
-                    args.push(Type::Int(*degree));
-                }
-                osc_sender.send((addr, args)).ok();
+                // let mut args = vec![Type::Float(root)];
+                // args.push(Type::Int(current_chord.len() as i32));
+                // for degree in &*current_chord {
+                //     args.push(Type::Int(*degree));
+                // }
+                // osc_sender.send((addr, args)).ok();
+                let chord_freqs: Vec<_> = current_chord
+                    .iter()
+                    .map(|degree| to_freq53(*degree, root) * 8.)
+                    .collect();
+                changed_harmony_chord(&chord_freqs);
+                background_noise.change_harmony(root);
 
                 *current_harmonic_change = (*current_harmonic_change + 1) % harmonic_changes.len();
                 println!("Changed harmony to scale {current_chord:?}, root: {root}");
@@ -839,5 +847,45 @@ impl PanMonoToQuad {
             rear_right[i] = (signal * right_gain * rear_gain);
         }
         GenState::Continue
+    }
+}
+fn changed_harmony_chord(new_chord: &[f32]) {
+    let mut rng = thread_rng();
+    if rng.gen::<f32>() > 0.4 {
+        println!("Playing harmony change chord");
+        for f in new_chord {
+            let length = rng.gen_range(6.0..14.0);
+            let speaker = rng.gen_range(0..4);
+            let filtered_noise = upload_graph(knyst_commands().default_graph_settings(), || {
+                let env = envelope_gen(
+                    0.0,
+                    vec![(1.0, 3.), (1.0, length - 5.), (0.0, 2.)],
+                    knyst::envelope::SustainMode::NoSustain,
+                    StopAction::FreeGraph,
+                );
+                let source = white_noise();
+                let mut sigs = vec![];
+                for i in 0..5 {
+                    let freq_detune = [1.0, 1.001, 0.999, 1.002, 0.998][i];
+                    let q_env = envelope_gen(
+                        1.0 / rng.gen_range(0.001..0.008),
+                        vec![(1. / 0.0003, length)],
+                        knyst::envelope::SustainMode::NoSustain,
+                        StopAction::Continue,
+                    );
+
+                    let sig = svf_dynamic(SvfFilterType::Band)
+                        .cutoff_freq(f * freq_detune)
+                        .q(q_env)
+                        .gain(0.0)
+                        .input(source);
+                    sigs.push(sig);
+                }
+                let sig = sigs[0] + sigs[1] + sigs[2] + sigs[3] + sigs[4];
+                let sig = sig * env * 0.001;
+                graph_output(speaker, sig);
+            });
+            graph_output(0, filtered_noise);
+        }
     }
 }

@@ -1,10 +1,17 @@
-use std::ffi::OsStr;
+use std::{
+    ffi::OsStr,
+    time::{Duration, Instant},
+};
 
 use enum_iterator::{all, cardinality};
 use knyst::{
     controller::upload_graph,
     envelope::envelope_gen,
-    gen::{buffer_reader, pan_mono_to_stereo},
+    gen::{
+        buffer_reader,
+        filter::svf::{svf_filter, SvfFilterType},
+        pan_mono_to_stereo,
+    },
     handles::{GenericHandle, Handle},
     knyst_commands,
     prelude::*,
@@ -46,6 +53,7 @@ pub struct PeakBinaries {
     root_freq: f32,
     out_bus: Handle<GenericHandle>,
     output_start_index: usize,
+    last_filtered_noise: Instant,
 }
 
 impl PeakBinaries {
@@ -78,6 +86,7 @@ impl PeakBinaries {
             chord: vec![0],
             out_bus,
             output_start_index,
+            last_filtered_noise: Instant::now(),
         })
     }
     pub fn clear_triggers(&mut self) {
@@ -130,9 +139,9 @@ impl Sonifier for PeakBinaries {
                                 .powf(0.5)
                                 * (rng.f32().powi(2) * 0.8 + 0.4)
                                 + 0.01;
-                            let addr = "/peak_binary";
-                            let args = vec![Type::Float(length)];
-                            osc_sender.send((addr, args)).ok();
+                            // let addr = "/peak_binary";
+                            // let args = vec![Type::Float(length)];
+                            // osc_sender.send((addr, args)).ok();
                             // Play random binary file
                             let buffer = self.sound_files[rng.usize(..self.sound_files.len())];
                             play_binary_sound(
@@ -143,14 +152,20 @@ impl Sonifier for PeakBinaries {
                             );
                         }
                         SoundKind::FilteredNoise(num_pitches_from_chord) => {
-                            let length = (*peak_value * 0.2).clamp(1.0, 3.0);
-                            let degree_index =
-                                rng.usize(0..(num_pitches_from_chord.min(self.chord.len())));
-                            let degree = self.chord[degree_index];
-                            let freq = to_freq53(degree, self.root_freq);
-                            let addr = "/background_noise";
-                            let args = vec![Type::Float(length), Type::Float(freq)];
-                            osc_sender.send((addr, args)).ok();
+                            if self.last_filtered_noise.elapsed() > Duration::from_secs_f32(0.5) {
+                                let length = (*peak_value * 0.2).clamp(1.0, 3.0);
+                                let degree_index =
+                                    rng.usize(0..(num_pitches_from_chord.min(self.chord.len())));
+                                let degree = self.chord[degree_index];
+                                let freq = to_freq53(degree, self.root_freq);
+                                // let addr = "/background_noise";
+                                // let args = vec![Type::Float(length), Type::Float(freq)];
+                                // osc_sender.send((addr, args)).ok();
+                                // Find the variation of the root closest to 1000Hz
+                                let freq = find_variation_closest_to_1000(freq);
+                                spawn_filtered_noise(freq, length, self.out_bus);
+                                self.last_filtered_noise = Instant::now();
+                            }
                         }
                     }
                 }
@@ -207,4 +222,63 @@ fn play_binary_sound(
         },
     );
     out_bus.set(start_index, bin_graph);
+}
+
+fn spawn_filtered_noise(freq: f32, length: f32, out_bus: Handle<GenericHandle>) {
+    let mut rng = thread_rng();
+    knyst_commands().to_top_level_graph();
+    let front_back_mix = rng.gen_range(-1.0..1.0);
+    let filtered_noise = upload_graph(
+        knyst_commands()
+            .default_graph_settings()
+            .num_inputs(0)
+            .num_outputs(4),
+        || {
+            let env = envelope_gen(
+                0.0,
+                vec![
+                    (1.0, rng.gen_range(0.7..1.9)),
+                    (0.5, length * 0.34),
+                    (0.0, length * 0.66),
+                ],
+                knyst::envelope::SustainMode::NoSustain,
+                StopAction::FreeGraph,
+            );
+            let source = pink_noise();
+            let sig = svf_filter(
+                SvfFilterType::Band,
+                freq,
+                rng.gen_range(2000.0..10000.),
+                0.0,
+            )
+            .input(source);
+            let sig = sig * env * 0.001;
+            graph_output(
+                0,
+                pan_mono_to_quad()
+                    .pan_x(0.0)
+                    .pan_y(front_back_mix)
+                    .input(sig),
+            );
+        },
+    );
+    out_bus.set(8, filtered_noise);
+}
+
+fn find_variation_closest_to_1000(root: f32) -> f32 {
+    let linear_1000 = 1000.0f32.log2().fract();
+    let mut best_match = 1.0;
+    let mut chosen_freq = root;
+    for interval in [1., 5. / 4., 3. / 2.] {
+        let linear_interval = (root * interval).log2().fract();
+        let comp = (linear_interval - linear_1000).abs();
+        if comp < best_match {
+            chosen_freq = root * interval;
+            best_match = comp;
+        }
+    }
+    while chosen_freq * 2. < 1500. {
+        chosen_freq *= 2.;
+    }
+    chosen_freq
 }

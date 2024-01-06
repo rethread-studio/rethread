@@ -123,7 +123,7 @@ impl DirectCategories {
             let wg_amp = bus(1).set(0, 0.5);
             let wg_lpf = one_pole_lpf()
                 .cutoff_freq(20000.)
-                .sig(wg * ramp().value(wg_amp).time(0.1));
+                .sig(wg * ramp(0.).value(wg_amp).time(0.1));
             post_fx.set(0, wg_lpf);
             // let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
             // continuous_wg.change(
