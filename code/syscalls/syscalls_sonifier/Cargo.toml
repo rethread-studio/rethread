@@ -16,12 +16,14 @@ enum-iterator = "1.4.1"
 # knyst = { git = "https://github.com/ErikNatanael/knyst.git", features = ["jack"] }
 knyst = { path = "/home/erik/code/rust/audio/knyst/knyst", features = ["jack"] }
 # knyst_waveguide = { path = "../../../../knyst_waveguide" }
-knyst_waveguide2 = { path = "/home/erik/code/rust/audio/knyst_waveguide2" }
+knyst_waveguide2 = { path = "/home/erik/code/rust/audio/knyst_extras/knyst_waveguide2" }
+knyst_visualiser = { path = "/home/erik/code/rust/audio/knyst_extras/knyst_visualiser" }
+knyst_airwindows = { path = "/home/erik/code/rust/audio/knyst_extras/knyst_airwindows" }
 syscalls_shared = { path = "../syscalls_shared" }
 num = "0.4.0"
 num_enum = "0.5.11"
 rand = "0.8.5"
 termion = "2.0.1"
 nannou_osc = "0.18.0"
-rtrb = "0.2.3"
-fastrand = "1.9.0"
+rtrb = "0.3.0"
+fastrand = "2.0.1"

@@ -27,6 +27,7 @@ use rand::{thread_rng, Rng};
 use rtrb::Producer;
 use syscalls_shared::SyscallKind;
 
+use crate::sound_effects::SoundEffects;
 use crate::{pan_mono_to_quad, to_freq53, PanMonoToQuad, PanMonoToQuadHandle, Sonifier};
 const SCALE: [i32; 7] = [0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
 
@@ -35,10 +36,12 @@ pub struct QuantisedCategories {
     post_fx: Handle<GenericHandle>,
     sender: Producer<f32>,
     lpf: Vec<Handle<OnePoleLpfHandle>>,
+    out_bus: Handle<GenericHandle>,
 }
 impl QuantisedCategories {
-    pub fn new(amp: f32, sample_rate: f32) -> Self {
+    pub fn new(amp: f32, sample_rate: f32, out_bus: Handle<GenericHandle>) -> Self {
         println!("Creating QuantisedCategories");
+        knyst_commands().to_top_level_graph();
         // let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
 
         let (mut sender, mut receiver) = rtrb::RingBuffer::<f32>::new(16);
@@ -88,7 +91,8 @@ impl QuantisedCategories {
         // k.connect(post_fx.to_graph_out().channels(4).to_channel(12));
 
         for i in 0..4 {
-            graph_output(3 * 4 + i, post_fx.out(i));
+            // graph_output(3 * 4 + i, post_fx.out(i));
+            out_bus.set(3 * 4 + i, post_fx.out(i));
         }
 
         let lpf: Vec<_> = (0..4)
@@ -175,7 +179,7 @@ impl QuantisedCategories {
             // let sine = k.push(WavetableOscillatorOwned::new(Wavetable::sine()), inputs![]);
             // let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
             let wg_amp = bus(1).set(0, 0.1);
-            let wg_amp_ramp = ramp().value(wg_amp).time(0.1);
+            let wg_amp_ramp = ramp(0.0).value(wg_amp).time(0.1);
 
             let mut value = 0.0;
 
@@ -221,6 +225,7 @@ impl QuantisedCategories {
             post_fx,
             sender,
             lpf,
+            out_bus,
         }
     }
 }
@@ -245,7 +250,8 @@ impl Sonifier for QuantisedCategories {
         // self.k
         //     .connect(Connection::clear_to_graph_outputs(&self.post_fx));
         for i in 0..4 {
-            graph_output(fx_chain * 4 + i, self.post_fx.out(i));
+            // graph_output(fx_chain * 4 + i, self.post_fx.out(i));
+            self.out_bus.set(fx_chain * 4 + i, self.post_fx.out(i));
         }
         // self.k.connect(
         //     self.post_fx
@@ -255,7 +261,11 @@ impl Sonifier for QuantisedCategories {
         // );
     }
 
-    fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
+    fn update(
+        &mut self,
+        osc_sender: &mut nannou_osc::Sender<Connected>,
+        _sound_effecs: &SoundEffects,
+    ) {
         if !self.sender.is_full() {
             schedule_bundle(Time::Immediately, || {
                 let mut rng = thread_rng();

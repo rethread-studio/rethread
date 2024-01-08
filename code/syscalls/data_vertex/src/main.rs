@@ -118,8 +118,7 @@ impl RecordedPackets {
         }
 
         let num_slices = activity_slices.len();
-        (activity_slices.into_iter().sum::<usize>() as f64/ num_slices as f64) as f32
-
+        (activity_slices.into_iter().sum::<usize>() as f64 / num_slices as f64) as f32
     }
 }
 
@@ -1105,9 +1104,10 @@ fn render_progress_bar<B: Backend>(
                 .add_modifier(Modifier::ITALIC),
         )
         .percent(
-            ((playback_data.current_timestamp.as_secs_f64()
+            (((playback_data.current_timestamp.as_secs_f64()
                 / playback_data.max_timestamp.as_secs_f64())
-                * 100.) as u16,
+                * 100.) as u16)
+                .clamp(0, 100),
         );
 
     f.render_widget(g, rect);
@@ -1197,7 +1197,7 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
     let listener = TcpListener::bind(&addr).await.expect("Can't listen");
     let (packet_sender, mut packet_receiver) = tokio::sync::mpsc::unbounded_channel();
 
-    let (message_tx, message_rx1) = tokio::sync::broadcast::channel(100000);
+    let (message_tx, message_rx1) = tokio::sync::broadcast::channel(1000000);
     drop(message_rx1);
     {
         let message_tx = message_tx.clone();
@@ -1252,7 +1252,7 @@ type EndpointClients = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 async fn start_websocket_endpoints(
     message_tx: tokio::sync::broadcast::Sender<String>,
 ) -> Result<()> {
-    let addr = "127.0.0.1:1237".to_string();
+    let addr = "0.0.0.0:1237".to_string();
     // Create the event loop and TCP listener we'll accept connections on.
     let try_socket = TcpListener::bind(&addr).await;
     let listener = try_socket.expect("Failed to bind");

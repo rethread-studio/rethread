@@ -1,0 +1,743 @@
+warning: unused import: `knyst::*`
+ --> /home/erik/code/rust/audio/knyst_extras/knyst_waveguide2/src/double_buffer_waveguide.rs:4:5
+  |
+4 | use knyst::*;
+  |     ^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused variable: `inactive_delay_sig`
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_waveguide2/src/double_buffer_waveguide.rs:104:13
+    |
+104 |         let inactive_delay_sig = sig;
+    |             ^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inactive_delay_sig`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `sample_rate`
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_waveguide2/src/double_buffer_waveguide.rs:151:24
+    |
+151 |     fn init(&mut self, sample_rate: SampleRate) {
+    |                        ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_sample_rate`
+
+warning: method `set_delay_in_frames_and_clear` is never used
+  --> /home/erik/code/rust/audio/knyst_extras/knyst_waveguide2/src/delay.rs:71:12
+   |
+43 | impl AllpassDelay {
+   | ----------------- method in this implementation
+...
+71 |     pub fn set_delay_in_frames_and_clear(&mut self, num_frames: f64) {
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: unused variable: `movement_dur`
+  --> syscalls_shared/src/score.rs:14:13
+   |
+14 |         let movement_dur = 1 * 60;
+   |             ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_movement_dur`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: `knyst_waveguide2` (lib) generated 4 warnings (run `cargo fix --lib -p knyst_waveguide2` to apply 3 suggestions)
+warning: `syscalls_shared` (lib) generated 1 warning (run `cargo fix --lib -p syscalls_shared` to apply 1 suggestion)
+warning: unused import: `process::id`
+ --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/probe.rs:1:41
+  |
+1 | use std::{sync::{Arc, Mutex, OnceLock}, process::id};
+  |                                         ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused imports: `Click`, `selection::Select`
+ --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:4:14
+  |
+4 |     events::{Click, Down, Pointer},
+  |              ^^^^^
+5 |     prelude::{ListenerInput, On},
+6 |     selection::Select,
+  |     ^^^^^^^^^^^^^^^^^
+
+warning: private item shadows public glob re-export
+  --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:23:5
+   |
+23 | use probe::get_new_probes;
+   |     ^^^^^^^^^^^^^^^^^^^^^
+   |
+note: the name `get_new_probes` in the value namespace is supposed to be publicly re-exported here
+  --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:9:9
+   |
+9  | pub use probe::*;
+   |         ^^^^^^^^
+note: but the private item here shadows it
+  --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:23:5
+   |
+23 | use probe::get_new_probes;
+   |     ^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[warn(hidden_glob_reexports)]` on by default
+
+warning: unnecessary parentheses around type
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:115:28
+    |
+115 |     mut graph_query: Query<(&mut Graph)>,
+    |                            ^          ^
+    |
+    = note: `#[warn(unused_parens)]` on by default
+help: remove these parentheses
+    |
+115 -     mut graph_query: Query<(&mut Graph)>,
+115 +     mut graph_query: Query<&mut Graph>,
+    |
+
+warning: unnecessary parentheses around type
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:345:23
+    |
+345 |     edge_query: Query<(&NodeEdge)>,
+    |                       ^         ^
+    |
+help: remove these parentheses
+    |
+345 -     edge_query: Query<(&NodeEdge)>,
+345 +     edge_query: Query<&NodeEdge>,
+    |
+
+warning: unused variable: `text_style`
+  --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:52:9
+   |
+52 |     let text_style = TextStyle {
+   |         ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_text_style`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `text_alignment`
+  --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:57:9
+   |
+57 |     let text_alignment = TextAlignment::Center;
+   |         ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_text_alignment`
+
+warning: unused variable: `size`
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:194:21
+    |
+194 |                 let size = node.input_channels.len().max(node.output_channels.len()) + 1;
+    |                     ^^^^ help: if this is intentional, prefix it with an underscore: `_size`
+
+warning: unused variable: `g`
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:331:13
+    |
+331 |         for g in &mut graph_query {}
+    |             ^ help: if this is intentional, prefix it with an underscore: `_g`
+
+warning: variable does not need to be mutable
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:116:5
+    |
+116 |     mut node_query: Query<(&mut Node, Entity)>,
+    |     ----^^^^^^^^^^
+    |     |
+    |     help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:117:5
+    |
+117 |     mut q_graph_output: Query<(&mut GraphOutputs, Entity)>,
+    |     ----^^^^^^^^^^^^^^
+    |     |
+    |     help: remove this `mut`
+
+warning: unused variable: `q_graph_outputs`
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:378:9
+    |
+378 |     mut q_graph_outputs: Query<(&mut GraphOutputs, &Transform)>,
+    |         ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_q_graph_outputs`
+
+warning: variable does not need to be mutable
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:378:5
+    |
+378 |     mut q_graph_outputs: Query<(&mut GraphOutputs, &Transform)>,
+    |     ----^^^^^^^^^^^^^^^
+    |     |
+    |     help: remove this `mut`
+
+warning: unused variable: `start_y`
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:463:9
+    |
+463 |     let start_y = go_transform.translation.y;
+    |         ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_start_y`
+
+warning: unused variable: `transform`
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:478:34
+    |
+478 |             if let Ok((node, mut transform)) = node_query.get_mut(*node_entity) {
+    |                                  ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_transform`
+
+warning: variable does not need to be mutable
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:478:30
+    |
+478 |             if let Ok((node, mut transform)) = node_query.get_mut(*node_entity) {
+    |                              ----^^^^^^^^^
+    |                              |
+    |                              help: remove this `mut`
+
+warning: field `edge_acceleration` is never read
+  --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:70:5
+   |
+66 | struct Node {
+   |        ---- field in this struct
+...
+70 |     edge_acceleration: f32,
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: field `graph_id` is never read
+  --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:79:5
+   |
+77 | struct GraphOutputs {
+   |        ------------ field in this struct
+78 |     num_outputs: usize,
+79 |     graph_id: u64,
+   |     ^^^^^^^^
+
+warning: function `update_velocities` is never used
+   --> /home/erik/code/rust/audio/knyst_extras/knyst_visualiser/src/lib.rs:376:4
+    |
+376 | fn update_velocities(
+    |    ^^^^^^^^^^^^^^^^^
+
+warning: `knyst_visualiser` (lib) generated 19 warnings (run `cargo fix --lib -p knyst_visualiser` to apply 15 suggestions)
+   Compiling syscalls_sonifier v0.1.0 (/home/erik/code/kth/rethread/code/syscalls/syscalls_sonifier)
+warning: unused import: `nannou_osc::rosc::OscPacket`
+  --> syscalls_sonifier/src/main.rs:12:5
+   |
+12 | use nannou_osc::rosc::OscPacket;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `NodeId`
+ --> syscalls_sonifier/src/direct_categories.rs:7:20
+  |
+7 | use knyst::graph::{NodeId, Time};
+  |                    ^^^^^^
+
+warning: unused import: `std::iter::repeat`
+ --> syscalls_sonifier/src/direct_functions.rs:2:5
+  |
+2 | use std::iter::repeat;
+  |     ^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::sync::atomic::AtomicBool`
+ --> syscalls_sonifier/src/direct_functions.rs:4:5
+  |
+4 | use std::sync::atomic::AtomicBool;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `Arc`, `Mutex`
+ --> syscalls_sonifier/src/direct_functions.rs:5:17
+  |
+5 | use std::sync::{Arc, Mutex};
+  |                 ^^^  ^^^^^
+
+warning: unused import: `knyst::*`
+  --> syscalls_sonifier/src/direct_functions.rs:13:5
+   |
+13 | use knyst::*;
+   |     ^^^^^^^^
+
+warning: unused import: `cardinality`
+ --> syscalls_sonifier/src/peak_binaries.rs:3:26
+  |
+3 | use enum_iterator::{all, cardinality};
+  |                          ^^^^^^^^^^^
+
+warning: unused import: `note::Note`
+ --> syscalls_sonifier/src/program_themes.rs:7:13
+  |
+7 | use crate::{note::Note, to_freq53, Sonifier};
+  |             ^^^^^^^^^^
+
+warning: unused imports: `Arc`, `Mutex`
+ --> syscalls_sonifier/src/quantised_categories.rs:8:17
+  |
+8 | use std::sync::{Arc, Mutex};
+  |                 ^^^  ^^^^^
+
+warning: unused import: `SustainMode`
+  --> syscalls_sonifier/src/quantised_categories.rs:12:33
+   |
+12 | use knyst::envelope::{Envelope, SustainMode};
+   |                                 ^^^^^^^^^^^
+
+warning: unused import: `IntervalTrig`
+  --> syscalls_sonifier/src/quantised_categories.rs:19:34
+   |
+19 | use knyst::trig::{interval_trig, IntervalTrig, IntervalTrigHandle};
+   |                                  ^^^^^^^^^^^^
+
+warning: unused import: `knyst::*`
+  --> syscalls_sonifier/src/quantised_categories.rs:20:5
+   |
+20 | use knyst::*;
+   |     ^^^^^^^^
+
+warning: unused import: `anyhow::Result`
+  --> syscalls_sonifier/src/quantised_categories.rs:22:5
+   |
+22 | use anyhow::Result;
+   |     ^^^^^^^^^^^^^^
+
+warning: unused import: `Waveguide`
+  --> syscalls_sonifier/src/quantised_categories.rs:23:67
+   |
+23 | use knyst_waveguide2::{half_sine_wt, waveguide, HalfSineWtHandle, Waveguide, WaveguideHandle};
+   |                                                                   ^^^^^^^^^
+
+warning: unused import: `receiver`
+  --> syscalls_sonifier/src/quantised_categories.rs:24:18
+   |
+24 | use nannou_osc::{receiver, Connected};
+   |                  ^^^^^^^^
+
+warning: unused import: `Rng`
+  --> syscalls_sonifier/src/quantised_categories.rs:26:24
+   |
+26 | use rand::{thread_rng, Rng};
+   |                        ^^^
+
+warning: unused import: `PanMonoToQuad`
+  --> syscalls_sonifier/src/quantised_categories.rs:30:42
+   |
+30 | use crate::{pan_mono_to_quad, to_freq53, PanMonoToQuad, PanMonoToQuadHandle, Sonifier};
+   |                                          ^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around assigned value
+   --> syscalls_sonifier/src/main.rs:803:29
+    |
+803 |             front_left[i] = (signal * left_gain * front_gain);
+    |                             ^                               ^
+    |
+    = note: `#[warn(unused_parens)]` on by default
+help: remove these parentheses
+    |
+803 -             front_left[i] = (signal * left_gain * front_gain);
+803 +             front_left[i] = signal * left_gain * front_gain;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> syscalls_sonifier/src/main.rs:804:30
+    |
+804 |             front_right[i] = (signal * right_gain * front_gain);
+    |                              ^                                ^
+    |
+help: remove these parentheses
+    |
+804 -             front_right[i] = (signal * right_gain * front_gain);
+804 +             front_right[i] = signal * right_gain * front_gain;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> syscalls_sonifier/src/main.rs:805:28
+    |
+805 |             rear_left[i] = (signal * left_gain * rear_gain);
+    |                            ^                              ^
+    |
+help: remove these parentheses
+    |
+805 -             rear_left[i] = (signal * left_gain * rear_gain);
+805 +             rear_left[i] = signal * left_gain * rear_gain;
+    |
+
+warning: unnecessary parentheses around assigned value
+   --> syscalls_sonifier/src/main.rs:806:29
+    |
+806 |             rear_right[i] = (signal * right_gain * rear_gain);
+    |                             ^                               ^
+    |
+help: remove these parentheses
+    |
+806 -             rear_right[i] = (signal * right_gain * rear_gain);
+806 +             rear_right[i] = signal * right_gain * rear_gain;
+    |
+
+warning: unused import: `KnystCommands`
+ --> syscalls_sonifier/src/direct_categories.rs:5:42
+  |
+5 | use knyst::controller::{schedule_bundle, KnystCommands};
+  |                                          ^^^^^^^^^^^^^
+
+warning: unused import: `KnystCommands`
+  --> syscalls_sonifier/src/quantised_categories.rs:11:42
+   |
+11 | use knyst::controller::{schedule_bundle, KnystCommands};
+   |                                          ^^^^^^^^^^^^^
+
+warning: unused variable: `exciter_sig`
+  --> syscalls_sonifier/src/direct_categories.rs:78:17
+   |
+78 |             let exciter_sig = handle(
+   |                 ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_exciter_sig`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: variable does not need to be mutable
+  --> syscalls_sonifier/src/direct_categories.rs:34:14
+   |
+34 |         let (mut block_sender, mut block_receiver) =
+   |              ----^^^^^^^^^^^^
+   |              |
+   |              help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+  --> syscalls_sonifier/src/direct_categories.rs:72:18
+   |
+72 |             let (mut sender, mut receiver) =
+   |                  ----^^^^^^
+   |                  |
+   |                  help: remove this `mut`
+
+warning: unused variable: `osc_sender`
+   --> syscalls_sonifier/src/direct_categories.rs:186:26
+    |
+186 |     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
+    |                          ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_osc_sender`
+
+warning: unused variable: `args`
+   --> syscalls_sonifier/src/direct_categories.rs:266:58
+    |
+266 |     fn register_call(&mut self, coeff_mod: f32, id: i32, args: [i32; 3]) {
+    |                                                          ^^^^ help: if this is intentional, prefix it with an underscore: `_args`
+
+warning: unused variable: `coeff_mod`
+   --> syscalls_sonifier/src/direct_categories.rs:273:26
+    |
+273 |     fn update(&mut self, coeff_mod: f32) {
+    |                          ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_coeff_mod`
+
+warning: unused variable: `sensitivity_coeff`
+  --> syscalls_sonifier/src/direct_functions.rs:95:30
+   |
+95 |     pub fn update(&mut self, sensitivity_coeff: f32) {
+   |                              ^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_sensitivity_coeff`
+
+warning: unused variable: `i`
+   --> syscalls_sonifier/src/direct_functions.rs:303:26
+    |
+303 |                     for (i, (name, cat)) in &mut self.categories.iter_mut().enumerate() {
+    |                          ^ help: if this is intentional, prefix it with an underscore: `_i`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/direct_functions.rs:401:18
+    |
+401 |             let (mut exciter_sender, mut receiver) =
+    |                  ----^^^^^^^^^^^^^^
+    |                  |
+    |                  help: remove this `mut`
+
+warning: unused variable: `fx_chain`
+  --> syscalls_sonifier/src/peak_binaries.rs:79:37
+   |
+79 |     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
+   |                                     ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_fx_chain`
+
+warning: unused variable: `i`
+   --> syscalls_sonifier/src/program_themes.rs:189:17
+    |
+189 |                 i += 1;
+    |                 ^
+    |
+    = help: did you mean to capture by reference instead?
+
+warning: unused variable: `k`
+   --> syscalls_sonifier/src/program_themes.rs:187:25
+    |
+187 |             move |time, k| {
+    |                         ^ help: if this is intentional, prefix it with an underscore: `_k`
+
+warning: unused variable: `osc_sender`
+   --> syscalls_sonifier/src/program_themes.rs:464:26
+    |
+464 |     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<nannou_osc::Connected>) {
+    |                          ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_osc_sender`
+
+warning: unused variable: `receiver`
+   --> syscalls_sonifier/src/quantised_categories.rs:123:34
+    |
+123 |             let (mut sender, mut receiver) =
+    |                                  ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_receiver`
+
+warning: unused variable: `value`
+   --> syscalls_sonifier/src/quantised_categories.rs:180:21
+    |
+180 |             let mut value = 0.0;
+    |                     ^^^^^ help: if this is intentional, prefix it with an underscore: `_value`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/quantised_categories.rs:123:30
+    |
+123 |             let (mut sender, mut receiver) =
+    |                              ----^^^^^^^^
+    |                              |
+    |                              help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/quantised_categories.rs:180:17
+    |
+180 |             let mut value = 0.0;
+    |                 ----^^^^^
+    |                 |
+    |                 help: remove this `mut`
+
+warning: unused variable: `osc_sender`
+   --> syscalls_sonifier/src/quantised_categories.rs:258:26
+    |
+258 |     fn update(&mut self, osc_sender: &mut nannou_osc::Sender<Connected>) {
+    |                          ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_osc_sender`
+
+warning: unused variable: `args`
+   --> syscalls_sonifier/src/quantised_categories.rs:363:42
+    |
+363 |     fn register_call(&mut self, id: i32, args: [i32; 3]) {
+    |                                          ^^^^ help: if this is intentional, prefix it with an underscore: `_args`
+
+warning: unused variable: `rng`
+   --> syscalls_sonifier/src/quantised_categories.rs:386:26
+    |
+386 |     fn update(&mut self, rng: &mut ThreadRng) {
+    |                          ^^^ help: if this is intentional, prefix it with an underscore: `_rng`
+
+warning: value assigned to `current_sonifiers` is never read
+  --> syscalls_sonifier/src/main.rs:73:13
+   |
+73 |     let mut current_sonifiers: Vec<Box<dyn Sonifier + Send>> = vec![];
+   |             ^^^^^^^^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+   = note: `#[warn(unused_assignments)]` on by default
+
+warning: value assigned to `current_sonifiers` is never read
+  --> syscalls_sonifier/src/main.rs:74:5
+   |
+74 |     current_sonifiers = vec![Box::new(DirectCategories::new(1.0, sample_rate))];
+   |     ^^^^^^^^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+
+warning: unused variable: `rng`
+   --> syscalls_sonifier/src/main.rs:150:13
+    |
+150 |     let mut rng = thread_rng();
+    |             ^^^ help: if this is intentional, prefix it with an underscore: `_rng`
+
+warning: unused variable: `description`
+   --> syscalls_sonifier/src/main.rs:166:29
+    |
+166 |                         let description = args.next().unwrap().string().unwrap();
+    |                             ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_description`
+
+warning: variable does not need to be mutable
+  --> syscalls_sonifier/src/main.rs:72:9
+   |
+72 |     let mut osc_sender = sender().unwrap().connect("127.0.0.1:57120").unwrap();
+   |         ----^^^^^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/main.rs:105:9
+    |
+105 |     let mut last_chord_change = Instant::now();
+    |         ----^^^^^^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/main.rs:106:9
+    |
+106 |     let mut mvt_id = 99998;
+    |         ----^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/main.rs:107:9
+    |
+107 |     let mut root_freq = 25.;
+    |         ----^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/main.rs:108:9
+    |
+108 |     let mut root: i32 = 0;
+    |         ----^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/main.rs:111:9
+    |
+111 |     let mut current_chord = chord_maj7sharp11.clone();
+    |         ----^^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/main.rs:112:9
+    |
+112 |     let mut chord_change_interval = Some(Duration::from_secs(8));
+    |         ----^^^^^^^^^^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/main.rs:114:9
+    |
+114 |     let mut current_harmonic_change = 0;
+    |         ----^^^^^^^^^^^^^^^^^^^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> syscalls_sonifier/src/main.rs:150:9
+    |
+150 |     let mut rng = thread_rng();
+    |         ----^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `last_switch`
+   --> syscalls_sonifier/src/main.rs:277:13
+    |
+277 |             last_switch,
+    |             ^^^^^^^^^^^ help: try ignoring the field: `last_switch: _`
+
+warning: unused variable: `mvt_id`
+   --> syscalls_sonifier/src/main.rs:279:13
+    |
+279 |             mvt_id,
+    |             ^^^^^^ help: try ignoring the field: `mvt_id: _`
+
+warning: unused variable: `sample_rate`
+   --> syscalls_sonifier/src/main.rs:283:13
+    |
+283 |             sample_rate,
+    |             ^^^^^^^^^^^ help: try ignoring the field: `sample_rate: _`
+
+warning: unused variable: `background_noise`
+   --> syscalls_sonifier/src/main.rs:287:13
+    |
+287 |             background_noise,
+    |             ^^^^^^^^^^^^^^^^ help: try ignoring the field: `background_noise: _`
+
+warning: unused variable: `last_switch`
+   --> syscalls_sonifier/src/main.rs:342:13
+    |
+342 |             last_switch,
+    |             ^^^^^^^^^^^ help: try ignoring the field: `last_switch: _`
+
+warning: unused variable: `background_noise`
+   --> syscalls_sonifier/src/main.rs:354:13
+    |
+354 |             background_noise,
+    |             ^^^^^^^^^^^^^^^^ help: try ignoring the field: `background_noise: _`
+
+warning: fields `noise_buffers`, `amp`, `resonant_filters_mix`, and `buf_reader` are never read
+ --> syscalls_sonifier/src/background_noise.rs:6:5
+  |
+5 | pub struct BackgroundNoise {
+  |            --------------- fields in this struct
+6 |     noise_buffers: Vec<BufferId>,
+  |     ^^^^^^^^^^^^^
+7 |     amp: Handle<GenericHandle>,
+  |     ^^^
+8 |     resonant_filters_mix: Handle<GenericHandle>,
+  |     ^^^^^^^^^^^^^^^^^^^^
+9 |     buf_reader: Handle<BufferReaderMultiHandle>,
+  |     ^^^^^^^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+
+warning: fields `sample_duration` and `last_sample` are never read
+  --> syscalls_sonifier/src/direct_categories.rs:22:5
+   |
+18 | pub struct DirectCategories {
+   |            ---------------- fields in this struct
+...
+22 |     sample_duration: Duration,
+   |     ^^^^^^^^^^^^^^^
+23 |     last_sample: Instant,
+   |     ^^^^^^^^^^^
+
+warning: fields `lpf_freq` and `lpf_phase` are never read
+  --> syscalls_sonifier/src/direct_functions.rs:30:5
+   |
+25 | struct Category {
+   |        -------- fields in this struct
+...
+30 |     lpf_freq: f32,
+   |     ^^^^^^^^
+31 |     lpf_phase: f32,
+   |     ^^^^^^^^^
+
+warning: fields `sample_duration` and `last_sample` are never read
+   --> syscalls_sonifier/src/direct_functions.rs:147:5
+    |
+138 | pub struct DirectFunctions {
+    |            --------------- fields in this struct
+...
+147 |     sample_duration: Duration,
+    |     ^^^^^^^^^^^^^^^
+148 |     last_sample: Instant,
+    |     ^^^^^^^^^^^
+
+warning: field `lpf` is never read
+   --> syscalls_sonifier/src/direct_functions.rs:359:5
+    |
+355 | struct WgInterface {
+    |        ----------- field in this struct
+...
+359 |     lpf: Handle<OnePoleLpfHandle>,
+    |     ^^^
+
+warning: field `category` is never read
+   --> syscalls_sonifier/src/direct_functions.rs:368:5
+    |
+364 | struct SyscallWaveguide {
+    |        ---------------- field in this struct
+...
+368 |     category: SyscallKind,
+    |     ^^^^^^^^
+
+warning: field `sound_files` is never read
+  --> syscalls_sonifier/src/peak_binaries.rs:23:5
+   |
+22 | pub struct PeakBinaries {
+   |            ------------ field in this struct
+23 |     sound_files: Vec<BufferId>,
+   |     ^^^^^^^^^^^
+
+warning: fields `exciter_sender` and `delay_position` are never read
+   --> syscalls_sonifier/src/quantised_categories.rs:321:5
+    |
+312 | struct SyscallKindQuantisedWaveguide {
+    |        ----------------------------- fields in this struct
+...
+321 |     exciter_sender: rtrb::Producer<f32>,
+    |     ^^^^^^^^^^^^^^
+...
+327 |     delay_position: f32,
+    |     ^^^^^^^^^^^^^^
+
+warning: method `set_new_timing` is never used
+   --> syscalls_sonifier/src/quantised_categories.rs:381:8
+    |
+331 | impl SyscallKindQuantisedWaveguide {
+    | ---------------------------------- method in this implementation
+...
+381 |     fn set_new_timing(&mut self, interval: f32) {
+    |        ^^^^^^^^^^^^^^
+

@@ -4,14 +4,14 @@ use std::{
 };
 
 use super::phrase::*;
-use crate::{note::Note, to_freq53, Sonifier};
+use crate::{note::Note, sound_effects::SoundEffects, to_freq53, Sonifier};
 use atomic_float::AtomicF32;
 use knyst::{
     controller::{schedule_bundle, CallbackHandle, KnystCommands, StartBeat},
     gen::filter::one_pole::{one_pole_lpf, OnePoleLpfHandle},
     graph::Time,
     handles::{GenericHandle, GraphHandle, HandleData, MulHandle},
-    knyst,
+    knyst_commands,
     prelude::*,
     time::Superbeats,
 };
@@ -91,11 +91,12 @@ pub struct ProgramThemes {
     root: Arc<AtomicF32>,
     chord: Arc<AtomicU32>,
     activity: Arc<Mutex<Activity>>,
+    out_bus: Handle<GenericHandle>,
 }
 
 fn plucked_waveguide() -> Handle<GraphHandle> {
     upload_graph(
-        knyst()
+        knyst_commands()
             .default_graph_settings()
             .num_inputs(7)
             .num_outputs(1),
@@ -126,12 +127,13 @@ fn plucked_waveguide() -> Handle<GraphHandle> {
 }
 
 impl ProgramThemes {
-    pub fn new(amp: f32) -> Self {
+    pub fn new(amp: f32, out_bus: Handle<GenericHandle>) -> Self {
         println!("Creating ProgramThemes");
-        knyst().change_musical_time_map(|mtm| {
+        knyst_commands().to_top_level_graph();
+        knyst_commands().change_musical_time_map(|mtm| {
             mtm.replace(0, knyst::scheduling::TempoChange::NewTempo { bpm: 80. })
         });
-        let mut graph_settings = knyst().default_graph_settings();
+        let mut graph_settings = knyst_commands().default_graph_settings();
         graph_settings.num_outputs = 4;
         graph_settings.num_inputs = 0;
         let inner_graph = upload_graph(graph_settings, || {});
@@ -139,7 +141,8 @@ impl ProgramThemes {
         // let graph_id = inner_graph.id();
         // let inner_graph = k.push(inner_graph, inputs![]);
         // k.connect(inner_graph.to_graph_out().channels(4));
-        graph_output(0, inner_graph);
+        out_bus.set(0, inner_graph);
+        // graph_output(0, inner_graph);
 
         inner_graph.activate();
         let main_bus = bus(4);
@@ -152,11 +155,8 @@ impl ProgramThemes {
         // k.connect(bus.to_graph_out().channels(4).to_channel(0));
         inner_graph.activate();
         let wg_thunderbird = plucked_waveguide();
-        inner_graph.activate();
         let wg_konqueror = plucked_waveguide();
-        inner_graph.activate();
         let wg_htop = plucked_waveguide();
-        inner_graph.activate();
         let wg_gedit = plucked_waveguide();
         lpf.sig(wg_gedit);
         lpf.sig(wg_konqueror);
@@ -165,7 +165,7 @@ impl ProgramThemes {
 
         let activity = Arc::new(Mutex::new(Activity::new()));
 
-        let rng = fastrand::Rng::new();
+        let mut rng = fastrand::Rng::new();
         // let mut changes = SimultaneousChanges::duration_from_now(Duration::ZERO);
         // let freq = rng.f32() * 200. + 200.;
         // wg_thunderbird.trig(
@@ -186,7 +186,7 @@ impl ProgramThemes {
         let callback_chord = chord.clone();
         let callback_activity = activity.clone();
         let mut i = 0;
-        let callback = knyst().schedule_beat_callback(
+        let callback = knyst_commands().schedule_beat_callback(
             move |time, k| {
                 // println!("Running callback {i}, time: {time:?}");
                 i += 1;
@@ -409,6 +409,7 @@ impl ProgramThemes {
             lpf,
             mul,
             chord,
+            out_bus,
         }
     }
 }
@@ -451,7 +452,9 @@ impl Sonifier for ProgramThemes {
 
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
         self.inner_graph.clear_graph_output_connections();
-        graph_output(fx_chain * 4, self.inner_graph.channels(4));
+        self.inner_graph.clear_output_connections();
+        // graph_output(fx_chain * 4, self.inner_graph.channels(4));
+        self.out_bus.set(fx_chain * 4, self.inner_graph.channels(4));
     }
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
@@ -464,7 +467,11 @@ impl Sonifier for ProgramThemes {
         // todo!()
     }
 
-    fn update(&mut self, osc_sender: &mut nannou_osc::Sender<nannou_osc::Connected>) {
+    fn update(
+        &mut self,
+        osc_sender: &mut nannou_osc::Sender<nannou_osc::Connected>,
+        _sound_effects: &SoundEffects,
+    ) {
         // todo!()
         let mut activity = self.activity.lock().unwrap();
         activity.update();
