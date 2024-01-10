@@ -13,7 +13,10 @@ use nix::libc::remove;
 use std::io::{BufRead, BufReader, Error, Write};
 use walkdir::WalkDir;
 
-use crate::{EguiUpdate, RecordingCommand, RecordingPlayback};
+use crate::{
+    audience_interaction_communication::{AudienceUi, AudienceUiMessage},
+    EguiUpdate, RecordingCommand, RecordingPlayback,
+};
 
 pub fn start_egui(
     packet_hq_command_sender: rtrb::Producer<RecordingCommand>,
@@ -73,6 +76,7 @@ struct EguiApp {
     all_program_values: Vec<String>,
     selected_program_value: String,
     persistent_settings: PersistentSettings,
+    audience_ui_com: Option<AudienceUi>,
 }
 impl EguiApp {
     pub fn new(
@@ -90,6 +94,23 @@ impl EguiApp {
                 PersistentSettings::default()
             }
         };
+        // let (tx1, rx1) = std::sync::mpsc::sync_channel(100);
+        // let (tx2, rx2) = std::sync::mpsc::sync_channel(100);
+        let mut num_tries = 0;
+        let audience_ui_com = loop {
+            let audience_ui_com = AudienceUi::new();
+            match audience_ui_com {
+                Ok(a) => break Some(a),
+                Err(e) => {
+                    if num_tries > 10 {
+                        error!("Failed to create audience ui communicator: {}", e);
+                        break None;
+                    }
+                }
+            }
+            num_tries += 1;
+        };
+
         let mut s = Self {
             packet_hq_command_sender,
             egui_update_receiver,
@@ -100,6 +121,7 @@ impl EguiApp {
             all_program_values: vec![],
             selected_program_value: String::new(),
             persistent_settings,
+            audience_ui_com,
         };
         s.apply_persistent_settings();
         s
@@ -116,9 +138,9 @@ impl EguiApp {
             return;
         };
         let Ok(mut output) = std::fs::File::create("./settings.json") else {
-        error!("Failed to open settings file");
-        return;
-    };
+            error!("Failed to open settings file");
+            return;
+        };
         write!(output, "{json}").ok();
     }
     pub fn load_folder(&mut self, folder: PathBuf) {
@@ -215,6 +237,9 @@ impl EguiApp {
     }
     pub fn add_active_program(&mut self, new_active_program: String) {
         if !self.active_programs.contains(&new_active_program) {
+            if let Some(a) = &mut self.audience_ui_com {
+                a.send_activated_program(new_active_program.clone());
+            }
             // // Start any recordings that match the new active program
             // for r in &mut self.recordings {
             //     if !r.playing && r.recorded_packets.main_program == new_active_program {
@@ -237,6 +262,9 @@ impl EguiApp {
     }
     /// After removing an "active program" from the list, stop any recordings matching it
     pub fn stop_active_program(&mut self, removed_active_program: String) {
+        if let Some(a) = &mut self.audience_ui_com {
+            a.send_deactivated_program(removed_active_program.clone());
+        }
         for r in &mut self.recordings {
             if r.playing && r.recorded_packets.main_program == removed_active_program {
                 if let Err(e) = self
@@ -254,6 +282,19 @@ impl EguiApp {
 
 impl eframe::App for EguiApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if let Some(a) = &mut self.audience_ui_com {
+            let m = a.receive_osc();
+            for mess in m {
+                match mess {
+                    AudienceUiMessage::ActivateProgram(program) => self.add_active_program(program),
+                    AudienceUiMessage::DeactivateProgram(program) => {
+                        self.stop_active_program(program)
+                    }
+                    AudienceUiMessage::ProgramWasActivated(_) => unreachable!(),
+                    AudienceUiMessage::ProgramWasDeactivated(_) => unreachable!(),
+                }
+            }
+        }
         // Receive messages
         while let Ok(update) = self.egui_update_receiver.pop() {
             match update {

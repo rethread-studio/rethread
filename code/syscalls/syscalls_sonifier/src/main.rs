@@ -68,6 +68,7 @@ fn main() -> Result<()> {
                 max_buffers: 1000,
                 ..Default::default()
             },
+            scheduling_ring_buffer_capacity: 10000,
             ..Default::default()
         },
         |e| {
@@ -144,6 +145,12 @@ fn main() -> Result<()> {
     ];
 
     let background_noise = BackgroundNoise::new(16, output_bus, sound_path(), root_freq);
+    knyst_commands().to_top_level_graph();
+    let chord_amp_setter = bus(1).set(0, 1.0).set_mortality(false);
+    let chord_amp = ramp(1.0)
+        .value(chord_amp_setter)
+        .time(0.01)
+        .set_mortality(false);
     let mut app = App {
         current_sonifiers,
         current_chord,
@@ -163,12 +170,17 @@ fn main() -> Result<()> {
         sound_effects: SoundEffects::new(output_bus).unwrap(),
         peak_binaries: PeakBinaries::new(output_bus, 0)?,
         main_bus: output_bus,
+        chord_amp_setter,
+        chord_amp,
+        current_movement_start: Instant::now(),
+        current_movement_duration: Duration::ZERO,
     };
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
     // app.peak_binaries.add_trig(3.0, SoundKind::Binary);
-    // app.change_movement(106, None, false, 30.);
+    // app.change_movement(104, None, false, 30.);
+    // app.change_movement(42, None, false, 30.);
     // main loop
     std::thread::spawn(move || {
         loop {
@@ -289,6 +301,10 @@ struct App {
     peak_binaries: PeakBinaries,
     sound_effects: SoundEffects,
     main_bus: Handle<GenericHandle>,
+    chord_amp_setter: Handle<GenericHandle>,
+    chord_amp: Handle<RampHandle>,
+    current_movement_start: Instant,
+    current_movement_duration: Duration,
 }
 impl App {
     pub fn apply_osc_message(&mut self, m: OscMessage) {
@@ -317,33 +333,44 @@ impl App {
             peak_binaries,
             main_bus,
             sound_effects,
+            chord_amp,
+            current_movement_start,
+            current_movement_duration,
+            chord_amp_setter,
         } = self;
-        let change_harmony = if let Some(time_interval) = &chord_change_interval {
-            if last_chord_change.elapsed() > *time_interval && !*is_on_break {
-                harmonic_changes[*current_harmonic_change].apply(
-                    current_chord,
-                    root,
-                    *transposition_within_octave_guard,
-                );
-                // let addr = "/change_harmony";
-                let root = to_freq53(*root, *root_freq);
-                // let mut args = vec![Type::Float(root)];
-                // args.push(Type::Int(current_chord.len() as i32));
-                // for degree in &*current_chord {
-                //     args.push(Type::Int(*degree));
-                // }
-                // osc_sender.send((addr, args)).ok();
-                let chord_freqs: Vec<_> = current_chord
-                    .iter()
-                    .map(|degree| to_freq53(*degree, root) * 8.)
-                    .collect();
-                changed_harmony_chord(&chord_freqs);
-                background_noise.change_harmony(root);
+        let change_harmony = if current_movement_start.elapsed() < *current_movement_duration {
+            if let Some(time_interval) = &chord_change_interval {
+                if last_chord_change.elapsed() > *time_interval && !*is_on_break {
+                    harmonic_changes[*current_harmonic_change].apply(
+                        current_chord,
+                        root,
+                        *transposition_within_octave_guard,
+                    );
+                    // let addr = "/change_harmony";
+                    let root = to_freq53(*root, *root_freq);
+                    // let mut args = vec![Type::Float(root)];
+                    // args.push(Type::Int(current_chord.len() as i32));
+                    // for degree in &*current_chord {
+                    //     args.push(Type::Int(*degree));
+                    // }
+                    // osc_sender.send((addr, args)).ok();
+                    let chord_freqs: Vec<_> = current_chord
+                        .iter()
+                        .map(|degree| to_freq53(*degree, root) * 8.)
+                        .collect();
+                    let length_max = 14.0f32.min(time_interval.as_secs_f32() * 3.0);
+                    let length_min = 6.0f32.min(length_max * 0.5);
+                    changed_harmony_chord(&chord_freqs, *chord_amp, length_min, length_max);
+                    background_noise.change_harmony(root);
 
-                *current_harmonic_change = (*current_harmonic_change + 1) % harmonic_changes.len();
-                println!("Changed harmony to scale {current_chord:?}, root: {root}");
-                *last_chord_change = Instant::now();
-                true
+                    *current_harmonic_change =
+                        (*current_harmonic_change + 1) % harmonic_changes.len();
+                    println!("Changed harmony to scale {current_chord:?}, root: {root}");
+                    *last_chord_change = Instant::now();
+                    true
+                } else {
+                    false
+                }
             } else {
                 false
             }
@@ -394,9 +421,15 @@ impl App {
             peak_binaries,
             main_bus,
             sound_effects,
+            chord_amp,
+            current_movement_start,
+            current_movement_duration,
+            chord_amp_setter,
         } = self;
 
         if new_mvt_id != *mvt_id {
+            *current_movement_start = Instant::now();
+            *current_movement_duration = Duration::from_secs_f32(duration);
             peak_binaries.clear_triggers();
             let sample_rate = *sample_rate;
 
@@ -408,6 +441,9 @@ impl App {
             current_sonifiers.clear();
             *is_on_break = is_break;
             *transposition_within_octave_guard = true;
+            if new_mvt_id != 99 {
+                chord_amp_setter.set(0, 1.0);
+            }
             let mut background_ramp = None;
             let mut rumble_change = None;
             if !is_break {
@@ -532,7 +568,7 @@ impl App {
                         });
                         // TODO: Much louder quantised categories
                         *current_sonifiers = vec![Box::new(QuantisedCategories::new(
-                            10.0,
+                            2.0, // prev: 10
                             sample_rate,
                             *main_bus,
                         ))];
@@ -706,13 +742,16 @@ impl App {
                         *current_harmonic_change = 0;
                         *transposition_within_octave_guard = false;
 
-                        let addr = "/end_movement";
-                        let args = vec![];
-                        osc_sender.send((addr, args)).ok();
+                        // let addr = "/end_movement";
+                        // let args = vec![];
+                        // osc_sender.send((addr, args)).ok();
+
                         // let mut pb = PeakBinaries::new(k);
                         // pb.threshold = 1.0;
                         // *current_sonifiers = vec![Box::new(pb)];
                         //
+                        sound_effects.play_end_movement_effects(duration);
+                        background_noise.fade_out(10.);
                         peak_binaries.add_trig(2.0, SoundKind::Binary);
                         let mut pt = ProgramThemes::new(0.1, *main_bus);
                         pt.patch_to_fx_chain(1);
@@ -722,6 +761,13 @@ impl App {
                         dc.patch_to_fx_chain(2);
                         dc.set_lpf(3000.);
                         *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
+                        {
+                            let chord_amp = *chord_amp_setter;
+                            std::thread::spawn(move || {
+                                std::thread::sleep(Duration::from_secs_f32(duration));
+                                chord_amp.set(0, 0.0);
+                            });
+                        }
                     }
                     _ => {
                         eprintln!("!! Unhandled movement:");
@@ -740,9 +786,17 @@ impl App {
                     background_ramp.send_osc(duration, osc_sender);
                 }
                 if let Some(rumble_change) = rumble_change {
-                    let addr = "/rumble_change";
-                    let args = vec![Type::Int(rumble_change as i32)];
-                    osc_sender.send((addr, args)).ok();
+                    // let addr = "/rumble_change";
+                    // let args = vec![Type::Int(rumble_change as i32)];
+                    // osc_sender.send((addr, args)).ok();
+                    match rumble_change {
+                        0 => (),
+                        // Fade out over 20s, wait 5s then fade in over 10s
+                        RUMBLE_RESTART => background_noise.fade_out_then_in(20., 5., 10.),
+                        // Fade out over 20s
+                        RUMBLE_STOP => background_noise.fade_out(20.),
+                        _ => (),
+                    }
                 }
             } else {
                 println!("Break");
@@ -849,12 +903,18 @@ impl PanMonoToQuad {
         GenState::Continue
     }
 }
-fn changed_harmony_chord(new_chord: &[f32]) {
+fn changed_harmony_chord(
+    new_chord: &[f32],
+    amp: Handle<RampHandle>,
+    length_min: f32,
+    length_max: f32,
+) {
+    knyst_commands().to_top_level_graph();
     let mut rng = thread_rng();
     if rng.gen::<f32>() > 0.4 {
         println!("Playing harmony change chord");
         for f in new_chord {
-            let length = rng.gen_range(6.0..14.0);
+            let length = rng.gen_range(length_min..length_max);
             let speaker = rng.gen_range(0..4);
             let filtered_noise = upload_graph(knyst_commands().default_graph_settings(), || {
                 let env = envelope_gen(
@@ -882,10 +942,10 @@ fn changed_harmony_chord(new_chord: &[f32]) {
                     sigs.push(sig);
                 }
                 let sig = sigs[0] + sigs[1] + sigs[2] + sigs[3] + sigs[4];
-                let sig = sig * env * 0.001;
+                let sig = sig * env * 0.0005;
                 graph_output(speaker, sig);
             });
-            graph_output(0, filtered_noise);
+            graph_output(0, filtered_noise * amp);
         }
     }
 }

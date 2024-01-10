@@ -40,6 +40,7 @@ use tokio::{
 };
 use tokio_tungstenite::tungstenite::Message;
 
+mod audience_interaction_communication;
 mod config;
 mod egui_main;
 mod menu;

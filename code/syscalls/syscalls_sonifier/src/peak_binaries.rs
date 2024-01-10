@@ -209,8 +209,11 @@ fn play_binary_sound(
                 knyst::envelope::SustainMode::NoSustain,
                 knyst::gen::StopAction::FreeGraph,
             );
+            let start_time = buffer.duration() * rng.gen_range(0.0f64..0.5);
             // TODO: Start in the middle
-            let buf = buffer_reader(buffer, 1.0, false, knyst::gen::StopAction::Continue);
+            let buf = BufferReader::new(buffer, 1.0, false, knyst::gen::StopAction::Continue)
+                .start_at(start_time)
+                .upload();
             let sig = buf * env;
             graph_output(
                 0,

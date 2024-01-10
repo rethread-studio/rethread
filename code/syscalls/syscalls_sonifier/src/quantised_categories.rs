@@ -37,6 +37,7 @@ pub struct QuantisedCategories {
     sender: Producer<f32>,
     lpf: Vec<Handle<OnePoleLpfHandle>>,
     out_bus: Handle<GenericHandle>,
+    graph: Handle<GraphHandle>,
 }
 impl QuantisedCategories {
     pub fn new(amp: f32, sample_rate: f32, out_bus: Handle<GenericHandle>) -> Self {
@@ -44,10 +45,18 @@ impl QuantisedCategories {
         knyst_commands().to_top_level_graph();
         // let to_freq53 = |degree, root| 2.0_f32.powf(degree as f32 / 53.) * root;
 
+        // This allows us to know that a block has passed on the audio thread so that we don't update more often than necessary
         let (mut sender, mut receiver) = rtrb::RingBuffer::<f32>::new(16);
         for _ in 0..16 {
             sender.push(0.0).unwrap();
         }
+
+        knyst_commands().init_local_graph(
+            knyst_commands()
+                .default_graph_settings()
+                .num_inputs(0)
+                .num_outputs(4),
+        );
 
         let post_fx = handle(
             gen(move |ctx, _| {
@@ -91,8 +100,8 @@ impl QuantisedCategories {
         // k.connect(post_fx.to_graph_out().channels(4).to_channel(12));
 
         for i in 0..4 {
-            // graph_output(3 * 4 + i, post_fx.out(i));
-            out_bus.set(3 * 4 + i, post_fx.out(i));
+            graph_output(i, post_fx.out(i));
+            // out_bus.set(3 * 4 + i, post_fx.out(i));
         }
 
         let lpf: Vec<_> = (0..4)
@@ -124,11 +133,11 @@ impl QuantisedCategories {
                 SCALE[i % SCALE.len()] + wrap_interval * (i / SCALE.len()) as i32,
                 110.,
             );
-            let (mut sender, mut receiver) =
-                rtrb::RingBuffer::<f32>::new((sample_rate * 0.3) as usize);
-            for _i in 0..(sample_rate * 0.05) as usize {
-                sender.push(0.0).ok();
-            }
+            // let (mut sender, mut receiver) =
+            //     rtrb::RingBuffer::<f32>::new((sample_rate * 0.3) as usize);
+            // for _i in 0..(sample_rate * 0.05) as usize {
+            //     sender.push(0.0).ok();
+            // }
 
             // Switch between these two sets for very different rhythmic timings
             // let trig_interval = 1.5 / ((i + 1) as f32);
@@ -148,39 +157,6 @@ impl QuantisedCategories {
             let trig_delay = sample_delay(Superseconds::from_seconds_f64(2.))
                 .signal(impulse)
                 .delay_time(delay_time);
-            let exciter = half_sine_wt().freq(3000.).amp(0.2).restart(trig_delay);
-
-            let sine = oscillator(WavetableId::cos()).freq(freq * 2.0);
-            let sine_env = Envelope {
-                // Points are given in the format (value, time_to_reach_value)
-                points: vec![
-                    // (0.05 * (1.0 / ((i + 1) as f32)).powf(0.5), 0.01),
-                    (0.03, 0.01),
-                    (0.0, 0.2),
-                ],
-                ..Default::default()
-            }
-            .to_gen()
-            .upload();
-            sine_env.restart(trig_delay);
-            let sine_mult0 = sine * sine_env;
-            let sine_amp = bus(1).set(0, 0.25);
-
-            let exciter_input = bus(1);
-            exciter_input.set(0, exciter);
-            let exciter_filter = one_pole_lpf().sig(exciter_input).cutoff_freq(200.);
-            let wg = waveguide()
-                .exciter(exciter_filter * 0.2)
-                .freq(freq)
-                .position(0.35)
-                .feedback(0.999 * 1.005)
-                .damping(9000. + freq * 4.0)
-                .lf_damping(10.);
-            // let sine = k.push(WavetableOscillatorOwned::new(Wavetable::sine()), inputs![]);
-            // let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
-            let wg_amp = bus(1).set(0, 0.1);
-            let wg_amp_ramp = ramp(0.0).value(wg_amp).time(0.1);
-
             let mut value = 0.0;
 
             //     let pan = k.push(
@@ -196,11 +172,44 @@ impl QuantisedCategories {
             };
             // let (pan_x, pan_y) = (0.0, 0.0);
             let pan = pan_mono_to_quad().pan_x(pan_x).pan_y(pan_y);
-            if i > 7 {
+            let (sine, sine_amp, wg, exciter) = if i > 7 {
+                let sine = oscillator(WavetableId::cos()).freq(freq * 2.0);
+                let sine_env = Envelope {
+                    // Points are given in the format (value, time_to_reach_value)
+                    points: vec![
+                        // (0.05 * (1.0 / ((i + 1) as f32)).powf(0.5), 0.01),
+                        (0.03, 0.01),
+                        (0.0, 0.2),
+                    ],
+                    ..Default::default()
+                }
+                .to_gen()
+                .upload();
+                sine_env.restart(trig_delay);
+                let sine_mult0 = sine * sine_env;
+                let sine_amp = bus(1).set(0, 0.0);
                 pan.input(sine_mult0 * sine_amp);
+                (Some(sine), Some(sine_amp), None, None)
             } else {
+                let exciter = half_sine_wt().freq(3000.).amp(0.0).restart(trig_delay);
+                let exciter_input = bus(1);
+                exciter_input.set(0, exciter);
+                let exciter_filter = one_pole_lpf().sig(exciter_input).cutoff_freq(200.);
+                let wg = waveguide()
+                    .exciter(exciter_filter * 0.2)
+                    .freq(freq)
+                    .position(0.35)
+                    .feedback(0.999 * 1.005)
+                    .damping(9000. + freq * 4.0)
+                    .lf_damping(10.);
+                // let sine = k.push(WavetableOscillatorOwned::new(Wavetable::sine()), inputs![]);
+                // let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
+                let wg_amp = bus(1).set(0, 0.3);
+                let wg_amp_ramp = ramp(0.0).value(wg_amp).time(0.1);
+
                 pan.input(wg * wg_amp_ramp);
-            }
+                (None, None, Some(wg), Some(exciter))
+            };
             // k.connect(pan.to(&post_fx).channels(1));
             for i in 0..4 {
                 lpf[i].sig(pan.out(i));
@@ -210,22 +219,30 @@ impl QuantisedCategories {
                 freq,
                 wg,
                 sine,
-                sine_amp,
                 exciter,
+                sine_amp,
                 pan,
                 impulse,
                 trig_delay,
-                sender,
                 delay_position,
             );
             continuous_wgs.insert(kind_label, syscall_waveguide);
         }
+        let graph = knyst_commands().upload_local_graph().unwrap();
+        println!(
+            "QC inner graph: {}, active_graph: {}",
+            graph.graph_id(),
+            knyst_commands().current_graph()
+        );
+
+        out_bus.set(3 * 4, graph);
         Self {
             continuous_wgs,
             post_fx,
             sender,
             lpf,
             out_bus,
+            graph,
         }
     }
 }
@@ -246,13 +263,16 @@ impl Sonifier for QuantisedCategories {
         }
     }
     fn patch_to_fx_chain(&mut self, fx_chain: usize) {
-        self.post_fx.clear_graph_output_connections();
+        // self.post_fx.clear_graph_output_connections();
+        self.graph.clear_graph_output_connections();
+        self.graph.clear_output_connections();
         // self.k
         //     .connect(Connection::clear_to_graph_outputs(&self.post_fx));
-        for i in 0..4 {
-            // graph_output(fx_chain * 4 + i, self.post_fx.out(i));
-            self.out_bus.set(fx_chain * 4 + i, self.post_fx.out(i));
-        }
+        // for i in 0..4 {
+        //     // graph_output(fx_chain * 4 + i, self.post_fx.out(i));
+        //     self.out_bus.set(fx_chain * 4 + i, self.post_fx.out(i));
+        // }
+        self.out_bus.set(fx_chain * 4, self.graph);
         // self.k.connect(
         //     self.post_fx
         //         .to_graph_out()
@@ -293,13 +313,14 @@ impl Sonifier for QuantisedCategories {
     }
 
     fn free(&mut self) {
-        for (_kind, wg) in self.continuous_wgs.drain() {
-            wg.free();
-        }
-        self.post_fx.free();
-        for na in self.lpf.drain(..) {
-            na.free()
-        }
+        // for (_kind, wg) in self.continuous_wgs.drain() {
+        //     wg.free();
+        // }
+        // self.post_fx.free();
+        // for na in self.lpf.drain(..) {
+        //     na.free()
+        // }
+        self.graph.free();
     }
 
     fn change_harmony(&mut self, scale: &[i32], root: f32) {
@@ -321,14 +342,13 @@ impl Sonifier for QuantisedCategories {
 
 struct SyscallKindQuantisedWaveguide {
     freq: f32,
-    wg: Handle<WaveguideHandle>,
-    exciter: Handle<HalfSineWtHandle>,
-    sine_amp: Handle<GenericHandle>,
-    sine: Handle<OscillatorHandle>,
+    wg: Option<Handle<WaveguideHandle>>,
+    exciter: Option<Handle<HalfSineWtHandle>>,
+    sine_amp: Option<Handle<GenericHandle>>,
+    sine: Option<Handle<OscillatorHandle>>,
     pan: Handle<PanMonoToQuadHandle>,
     impulse: Handle<IntervalTrigHandle>,
     trig_delay: Handle<SampleDelayHandle>,
-    exciter_sender: rtrb::Producer<f32>,
     accumulator: f32,
     coeff: f32,
     amp: f32,
@@ -341,14 +361,13 @@ struct SyscallKindQuantisedWaveguide {
 impl SyscallKindQuantisedWaveguide {
     pub fn new(
         freq: f32,
-        wg: Handle<WaveguideHandle>,
-        sine: Handle<OscillatorHandle>,
-        sine_amp: Handle<GenericHandle>,
-        exciter: Handle<HalfSineWtHandle>,
+        wg: Option<Handle<WaveguideHandle>>,
+        sine: Option<Handle<OscillatorHandle>>,
+        exciter: Option<Handle<HalfSineWtHandle>>,
+        sine_amp: Option<Handle<GenericHandle>>,
         pan: Handle<PanMonoToQuadHandle>,
         impulse: Handle<IntervalTrigHandle>,
         trig_delay: Handle<SampleDelayHandle>,
-        exciter_sender: rtrb::Producer<f32>,
         delay_position: f32,
     ) -> Self {
         Self {
@@ -357,7 +376,6 @@ impl SyscallKindQuantisedWaveguide {
             exciter,
             sine,
             sine_amp,
-            exciter_sender,
             accumulator: 0.0,
             coeff: 0.025,
             amp: 0.0,
@@ -375,7 +393,7 @@ impl SyscallKindQuantisedWaveguide {
         self.accumulator += self.coeff;
         self.amp += 0.0000002 * self.coeff;
         self.amp *= 1.0 + self.coeff;
-        self.position += id as f32 * 0.001;
+        self.position += id as f32 * 0.01;
         self.damping = (self.damping + 0.00001).clamp(0.0, 1.0);
         if self.position > 0.4 {
             self.position = 0.4;
@@ -404,30 +422,31 @@ impl SyscallKindQuantisedWaveguide {
             self.last_coeff_change = Instant::now();
         }
         self.damping *= 0.995;
-        self.position *= 0.9985;
+        self.position *= 0.99985;
         if self.position < 0.1 {
             self.position = 0.1;
         }
         let applied_amp = self.amp.powi(2);
-        self.exciter.amp(applied_amp);
-        self.sine_amp.set(0, applied_amp * 0.5);
-        self.wg
-            .feedback(feedback)
-            .position(0.1 + self.position)
-            .damping(self.damping.powf(2.) as f32 * 2000. + 100. + self.freq * 7.);
+        if let Some(exciter) = &mut self.exciter {
+            exciter.amp(applied_amp * 2.0);
+        }
+        if let Some(sine_amp) = &mut self.sine_amp {
+            sine_amp.set(0, applied_amp * 0.5);
+        }
+        if let Some(wg) = &mut self.wg {
+            wg.feedback(feedback)
+                .position(0.1 + self.position)
+                .damping(self.damping.powf(2.) as f32 * 2000. + 100. + self.freq * 7.);
+        }
     }
     fn set_freq(&mut self, freq: f32) {
         self.freq = freq;
-        self.sine.freq(freq * 2.0);
-        self.wg.freq(freq);
+        if let Some(sine) = &mut self.sine {
+            sine.freq(freq * 2.0);
+        }
+        if let Some(wg) = &mut self.wg {
+            wg.freq(freq);
+        }
     }
-    fn free(self) {
-        self.exciter.free();
-        self.sine.free();
-        self.sine_amp.free();
-        self.pan.free();
-        self.impulse.free();
-        self.trig_delay.free();
-        self.wg.free();
-    }
+    fn free(self) {}
 }

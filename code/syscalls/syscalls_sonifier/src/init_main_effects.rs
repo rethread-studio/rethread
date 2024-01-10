@@ -98,13 +98,17 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
 
     // Channel 3: 8-11
     // TODO: Multiband compressor
+    // To compensate for the multiband compressor, lower gain
+    let gain_compensation = db_to_amplitude(-20.);
     // Limiter
-    let l0 = limiter(-16.8)
-        .input_left(out_bus.out(8))
-        .input_right(out_bus.out(9));
-    let l1 = limiter(-16.8)
-        .input_left(out_bus.out(10))
-        .input_right(out_bus.out(11));
+    let threshold = -16.8;
+    // let threshold = -6.8;
+    let l0 = limiter(threshold)
+        .input_left(out_bus.out(8) * gain_compensation)
+        .input_right(out_bus.out(9) * gain_compensation);
+    let l1 = limiter(threshold)
+        .input_left(out_bus.out(10) * gain_compensation)
+        .input_right(out_bus.out(11) * gain_compensation);
     // Eq -4.8db at 321hz
     let mut eqs = vec![];
     for i in 0..4 {
@@ -162,14 +166,18 @@ fn compressor() -> Handle<RandjaCompressorHandle> {
 
 fn limiter(threshold_db: f32) -> Handle<RandjaCompressorHandle> {
     let sample_rate = 48000.;
-    let attack = 0.001;
-    let release = 0.05;
+    let attack = 0.01;
+    let release = 0.25;
     let mut com = RandjaCompressor::new();
     let threshold = db_to_amplitude(threshold_db);
+    println!(
+        "Limiter threshold db: {threshold_db}, output: {}",
+        1.0 / threshold
+    );
     com.set_threshold(threshold);
     com.set_attack(attack * sample_rate);
     com.set_release(release * sample_rate);
-    com.set_ratio(1.0 / 200.);
+    com.set_ratio(1.0 / 100.);
     com.set_output(1.0 / threshold);
     com.upload()
 }
@@ -224,8 +232,9 @@ fn smooth_rev_chain(input: &[Handle<OutputChannelHandle>], output: &[Handle<Inpu
         .replace(0.77)
         .left(eq[2])
         .right(eq[3]);
-    output[0].set(0, rev0.out(0));
-    output[1].set(0, rev0.out(1));
-    output[2].set(0, rev1.out(0));
-    output[3].set(0, rev1.out(1));
+    let out_amp = db_to_amplitude(-5.89);
+    output[0].set(0, rev0.out(0) * out_amp);
+    output[1].set(0, rev0.out(1) * out_amp);
+    output[2].set(0, rev1.out(0) * out_amp);
+    output[3].set(0, rev1.out(1) * out_amp);
 }

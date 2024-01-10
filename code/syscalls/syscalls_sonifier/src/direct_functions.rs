@@ -467,7 +467,7 @@ impl SyscallWaveguide {
             wg_amp_ramp = ramp(0.1).value(wg_amp).time(0.1);
             let lpf = one_pole_lpf().cutoff_freq(20000.).sig(wg * wg_amp_ramp);
             graph_output(0, lpf);
-            let inner_graph = knyst_commands().upload_local_graph();
+            let inner_graph = knyst_commands().upload_local_graph().unwrap();
             self.output.set(0, inner_graph);
 
             // old

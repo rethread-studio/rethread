@@ -115,26 +115,26 @@ impl OscSender {
         }
     }
     pub fn send_movement(&mut self, m: &Movement, next_mvt: Option<Movement>) {
-        for _ in 0..5 {
-            for sender in &mut self.senders {
-                let addr = "/new_movement";
-                let args = vec![
-                    Type::Int(m.id as i32),
-                    Type::Bool(m.is_break),
-                    Type::String(m.description.clone()),
-                    Type::Int(if let Some(m) = next_mvt.clone() {
-                        m.id as i32
-                    } else {
-                        -1
-                    }),
-                    Type::Float(m.duration.as_secs_f32()),
-                ];
-                sender.send((addr, args)).ok();
-                let addr = "/break";
-                let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
-                sender.send((addr, args)).ok();
-            }
+        // for _ in 0..5 {
+        for sender in &mut self.senders {
+            let addr = "/new_movement";
+            let args = vec![
+                Type::Int(m.id as i32),
+                Type::Bool(m.is_break),
+                Type::String(m.description.clone()),
+                Type::Int(if let Some(m) = next_mvt.clone() {
+                    m.id as i32
+                } else {
+                    -1
+                }),
+                Type::Float(m.duration.as_secs_f32()),
+            ];
+            sender.send((addr, args)).ok();
+            let addr = "/break";
+            let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
+            sender.send((addr, args)).ok();
         }
+        // }
         if let Some(ws) = &mut self.websocket_senders {
             let mess = format!(
                 "/new_movement:{},{},{},{}",
@@ -146,10 +146,7 @@ impl OscSender {
             if let Ok(ok) = ws.message_tx.send(mess) {
                 // info!("Sending syscall to {ok} receivers");
             }
-            let mess = format!(
-                "/break:{}",
-                if m.is_break { 1 } else { 0},
-            );
+            let mess = format!("/break:{}", if m.is_break { 1 } else { 0 },);
             if let Ok(ok) = ws.message_tx.send(mess) {
                 // info!("Sending syscall to {ok} receivers");
             }

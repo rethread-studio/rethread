@@ -10,6 +10,7 @@ use crate::sound_path;
 pub struct SoundEffects {
     voice_focus: Vec<(String, BufferId)>,
     voice_movement: Vec<(i32, BufferId)>,
+    end_movement_voices: BufferId,
     bells_a: Vec<BufferId>,
     bells_b: Vec<BufferId>,
     out_bus: Handle<GenericHandle>,
@@ -69,24 +70,30 @@ impl SoundEffects {
                 bells_b.push(buf);
             }
         }
+        let mut root_path = sound_path();
+        root_path.push("end_movement_voices.wav");
+        let sound_file = Buffer::from_sound_file(root_path)?;
+        let end_movement_voices = knyst_commands().insert_buffer(sound_file);
+
         Ok(Self {
             voice_focus,
             voice_movement,
             bells_a,
             bells_b,
             out_bus,
+            end_movement_voices,
         })
     }
     pub fn play_bell_a(&self) {
         let mut rng = thread_rng();
         if let Some(buf) = self.bells_a.choose(&mut rng) {
-            play_mono_sound_buffer(*buf, self.out_bus, 0.1);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.05);
         }
     }
     pub fn play_bell_b(&self) {
         let mut rng = thread_rng();
         if let Some(buf) = self.bells_b.choose(&mut rng) {
-            play_mono_sound_buffer(*buf, self.out_bus, 0.1);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.05);
         }
     }
     pub fn play_movement_voice(&self, movement: i32) {
@@ -116,20 +123,22 @@ impl SoundEffects {
         }
     }
     pub fn play_end_movement_effects(&self, duration_secs: f32) {
-        let s = self.clone();
-        std::thread::spawn(move || {
-            let mut rng = thread_rng();
-            std::thread::sleep(Duration::from_secs_f32(3.));
-            let num_bufs = s.voice_movement.len() as f32;
-            for (i, (_, buf)) in s.voice_movement.iter().enumerate() {
-                let gap = rng.gen_range(0.3..0.4) * (3.0 - (i as f32 / num_bufs) * 2.5);
-                play_mono_sound_buffer(*buf, s.out_bus, 0.05);
-                std::thread::sleep(Duration::from_secs_f32(gap));
-            }
-        });
+        play_mono_sound_buffer(self.end_movement_voices, self.out_bus, 0.5);
+        // let s = self.clone();
+        // std::thread::spawn(move || {
+        //     let mut rng = thread_rng();
+        //     std::thread::sleep(Duration::from_secs_f32(3.));
+        //     let num_bufs = s.voice_movement.len() as f32;
+        //     for (i, (_, buf)) in s.voice_movement.iter().enumerate() {
+        //         let gap = rng.gen_range(0.3..0.4) * (3.0 - (i as f32 / num_bufs) * 2.5);
+        //         play_mono_sound_buffer(*buf, s.out_bus, 0.05);
+        //         std::thread::sleep(Duration::from_secs_f32(gap));
+        //     }
+        // });
         let s = self.clone();
         std::thread::spawn(move || {
             std::thread::sleep(Duration::from_secs_f32(duration_secs));
+            println!("Playing end bell now");
             s.play_bell_b();
         });
     }
