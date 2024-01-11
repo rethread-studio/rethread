@@ -179,7 +179,7 @@ fn main() -> Result<()> {
     let mut rng = thread_rng();
 
     // app.peak_binaries.add_trig(3.0, SoundKind::Binary);
-    // app.change_movement(104, None, false, 30.);
+    app.change_movement(2, None, false, 300.);
     // app.change_movement(42, None, false, 30.);
     // main loop
     std::thread::spawn(move || {
@@ -312,6 +312,15 @@ impl App {
             sonifier.apply_osc_message(m.clone());
         }
         self.peak_binaries.apply_osc_message(m.clone());
+        match m.addr.as_ref() {
+            "/syscall"
+            | "/syscall_analysis/per_kind_interval"
+            | "/syscall_analysis"
+            | "/syscall_analysis/category_peak" => (),
+            _ => {
+                dbg!(m);
+            }
+        }
     }
     pub fn update(&mut self) {
         let App {

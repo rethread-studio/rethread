@@ -1,16 +1,11 @@
-use std::{
-    ffi::OsStr,
-    path::{Path, PathBuf},
-    time::Duration,
-};
+use std::{ffi::OsStr, path::PathBuf, time::Duration};
 
 use eframe::egui;
-use egui::{menu, Color32, ProgressBar, Widget};
-use egui_plot::{CoordinatesFormatter, Corner, Legend, Line, Plot, PlotPoint, PlotPoints};
+use egui::{menu, Color32, DragValue, ProgressBar, Widget};
+use egui_plot::{CoordinatesFormatter, Corner, Legend, Line, Plot, PlotPoints};
 use fxhash::FxHashMap;
 use log::{error, info};
-use nix::libc::remove;
-use std::io::{BufRead, BufReader, Error, Write};
+use std::io::{BufRead, BufReader, Write};
 use walkdir::WalkDir;
 
 use crate::{
@@ -77,6 +72,7 @@ struct EguiApp {
     selected_program_value: String,
     persistent_settings: PersistentSettings,
     audience_ui_com: Option<AudienceUi>,
+    cut_from_start_length: f32,
 }
 impl EguiApp {
     pub fn new(
@@ -122,6 +118,7 @@ impl EguiApp {
             selected_program_value: String::new(),
             persistent_settings,
             audience_ui_com,
+            cut_from_start_length: 0.0,
         };
         s.apply_persistent_settings();
         s
@@ -381,6 +378,15 @@ impl eframe::App for EguiApp {
                 // Calculate the mean intensity per recording and assign ascending number within each program category
                 analyse_recording_intensities(&mut self.recordings);
             }
+            egui::Grid::new("settigns")
+                .num_columns(2)
+                .spacing([40.0, 4.0])
+                .striped(true)
+                .show(ui, |ui| {
+                    ui.label("Cut from start length:");
+                    ui.add(egui::DragValue::new(&mut self.cut_from_start_length).speed(0.1));
+                    ui.end_row();
+                });
         });
 
         egui::TopBottomPanel::top("my_panel").show(ctx, |ui| {
@@ -417,7 +423,9 @@ impl eframe::App for EguiApp {
             let mut recordings_to_remove = vec![];
             for (i, recording) in self.recordings.iter_mut().enumerate() {
                 let plot = self.plots.get(&recording.recorded_packets.name);
-                if let Some(command) = recording_window(ctx, recording, plot) {
+                if let Some(command) =
+                    recording_window(ctx, recording, self.cut_from_start_length, plot)
+                {
                     if matches!(command, RecordingCommand::CloseRecording(_)) {
                         recordings_to_remove.push(i)
                     }
@@ -480,6 +488,7 @@ fn generate_plot_data(recordings: &[RecordingPlayback], plots: &mut FxHashMap<St
 fn recording_window(
     ctx: &egui::Context,
     recording: &mut RecordingPlayback,
+    cut_length: f32,
     plot: Option<&PlotData>,
 ) -> Option<RecordingCommand> {
     let mut command = None;
@@ -514,7 +523,12 @@ fn recording_window(
                     ui.end_row();
                     ui.label("Main_program:");
                     ui.text_edit_singleline(&mut recording.recorded_packets.main_program);
+                    ui.end_row();
                 });
+            if ui.button("Trim specified length from start").clicked() {
+                recording.trim_from_start(cut_length);
+                command = Some(RecordingCommand::ReplaceRecording(recording.clone()));
+            }
             if ui.button("Trim start silence").clicked() {
                 recording.trim_silence_before();
                 command = Some(RecordingCommand::ReplaceRecording(recording.clone()));
@@ -537,6 +551,9 @@ fn recording_window(
             if ui.button("Get main program").clicked() {
                 recording.recorded_packets.analyse_main_program();
                 command = Some(RecordingCommand::ReplaceRecording(recording.clone()));
+            }
+            if ui.button("Log debug info").clicked() {
+                recording.log_debug_info();
             }
             if ui.button("Close").clicked() {
                 command = Some(RecordingCommand::CloseRecording(

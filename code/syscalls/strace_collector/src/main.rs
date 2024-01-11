@@ -1,5 +1,6 @@
 use anyhow::Result;
 use nix::libc::TCP_THIN_LINEAR_TIMEOUTS;
+use nix::sys;
 use nix::sys::ptrace::{getevent, Options};
 use std::mem::transmute;
 use std::sync::mpsc::{channel, Sender};
@@ -30,15 +31,15 @@ use url::Url;
 #[derive(FromArgs)]
 /// Strace Collector
 struct Args {
+    /// if syscalls are printed to the terminal, set to false for cli apps
+    #[argh(switch, short = 'p')]
+    print_syscalls: bool,
     /// optional command to run, default: gedit
     #[argh(option)]
     command: Option<String>,
     /// optional arguments to the command you are running
     #[argh(positional, greedy)]
     args: Vec<String>,
-    /// if syscalls are printed to the terminal, set to false for cli apps
-    #[argh(switch, short = 'p')]
-    print_syscalls: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -89,6 +90,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             info!("Syscall tracing thread started");
             let mut command = Command::new(command_str.clone());
             for arg in args.args {
+                println!("Adding arg: {arg}");
                 command.arg(arg);
             }
             unsafe {
@@ -291,13 +293,16 @@ fn trace_pid(
                 break;
             };
 
-            let syscall = Syscall {
+            let mut syscall = Syscall {
                 syscall_id: regs.orig_rax,
                 kind: SyscallKind::Unknown,
                 args: [regs.rdi, regs.rsi, regs.rdx],
                 return_value: to_i32(regs.rax),
                 command: child_name.clone(),
+                returns_error: false,
             };
+            let returns_error = syscall.returns_error();
+            syscall.returns_error = returns_error;
             syscall_sender.send(syscall).unwrap();
             // socket.write_message(tungstenite::Message::Text("syscall".to_owned()))?;
         }

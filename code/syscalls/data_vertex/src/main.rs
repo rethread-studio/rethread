@@ -10,7 +10,6 @@ use futures_util::{SinkExt, StreamExt};
 use fxhash::FxHashMap;
 use log::*;
 use menu::MenuItem;
-use nix::errno::Errno;
 use ratatui as tui;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
@@ -67,6 +66,21 @@ impl RecordedPackets {
     }
     fn record_packet(&mut self, packet: Packet, timestamp: Duration) {
         self.records.push(Record { packet, timestamp })
+    }
+    fn trim_from_start(&mut self, seconds: f32) {
+        let final_start_dur = Duration::from_secs_f32(seconds);
+        let mut i = 0;
+        while i < self.records.len() {
+            if self.records[i].timestamp < final_start_dur {
+                i += 1;
+            } else {
+                break;
+            }
+        }
+        self.records.drain(0..i);
+        for r in &mut self.records {
+            r.timestamp -= final_start_dur;
+        }
     }
     fn trim_silence_before(&mut self) {
         if let Some(first_timestamp) = self.records.first().map(|r| r.timestamp) {
@@ -161,6 +175,16 @@ impl RecordingPlayback {
             looping: true,
         }
     }
+    fn start_playback(&mut self, osc_sender: &mut OscSender) {
+        self.current_duration = Duration::ZERO;
+        self.current_packet = 0;
+        self.playing = true;
+        osc_sender.send_start_recording_playback(self.recorded_packets.name.clone());
+    }
+    fn stop_playback(&mut self, osc_sender: &mut OscSender) {
+        self.playing = false;
+        osc_sender.send_stop_recording_playback(self.recorded_packets.name.clone());
+    }
     fn from_file(path: &PathBuf) -> Result<Self> {
         let mut file = File::open(path)?;
         let mut bytes = Vec::new();
@@ -177,8 +201,40 @@ impl RecordingPlayback {
         self.current_duration = Duration::ZERO;
         self.current_packet = 0;
     }
+    fn log_debug_info(&self) {
+        info!("Debug for {}", self.recorded_packets.name);
+        info!(
+            "dur/index {}/{}",
+            self.current_duration.as_secs_f32(),
+            self.current_packet
+        );
+        info!("first packet {:?}", self.recorded_packets.records[0]);
+    }
+    fn trim_from_start(&mut self, seconds: f32) {
+        self.recorded_packets.trim_from_start(seconds);
+        self.last_packet_timestamp = if self.recorded_packets.records.len() > 0 {
+            self.recorded_packets
+                .records
+                .iter()
+                .last()
+                .unwrap()
+                .timestamp
+        } else {
+            Duration::ZERO
+        };
+    }
     fn trim_silence_before(&mut self) {
         self.recorded_packets.trim_silence_before();
+        self.last_packet_timestamp = if self.recorded_packets.records.len() > 0 {
+            self.recorded_packets
+                .records
+                .iter()
+                .last()
+                .unwrap()
+                .timestamp
+        } else {
+            Duration::ZERO
+        };
     }
     fn next_packet(&mut self) -> Option<&Packet> {
         if !self.playing {
@@ -412,7 +468,7 @@ impl PacketHQ {
                     let mut recording_found = false;
                     for r in &mut self.recording_playbacks {
                         if r.recorded_packets.name == recording_name {
-                            r.playing = true;
+                            r.start_playback(&mut self.osc_sender);
                             info!("Started playback on packethq");
                             recording_found = true;
                         }
@@ -424,7 +480,7 @@ impl PacketHQ {
                 RecordingCommand::StopPlayback(recording_name) => {
                     for r in &mut self.recording_playbacks {
                         if r.recorded_packets.name == recording_name {
-                            r.playing = false;
+                            r.stop_playback(&mut self.osc_sender);
                         }
                     }
                 }
@@ -475,7 +531,8 @@ impl PacketHQ {
                 }
                 PacketHQCommands::StartRecordingPlayback => {
                     for recording in &mut self.recording_playbacks {
-                        recording.playing = true;
+                        recording.start_playback(&mut self.osc_sender);
+
                         self.egui_update_sender
                             .push(EguiUpdate::StartingPlaybackOfRecording(
                                 recording.recorded_packets.name.clone(),
@@ -608,8 +665,7 @@ impl SyscallAnalyser {
         self.packets_per_kind_last_interval
             [<SyscallKind as Into<u8>>::into(syscall.kind) as usize] += 1;
         self.num_packets_last_interval += 1;
-        let errno = Errno::from_i32(syscall.return_value);
-        if !matches!(errno, Errno::UnknownErrno) {
+        if syscall.returns_error {
             self.num_errors_last_interval += 1;
             self.num_errors_total += 1;
         }

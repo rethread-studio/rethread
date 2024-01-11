@@ -52,7 +52,7 @@ impl OscSender {
                 Type::Int(syscall.args[1] as i32),
                 Type::Int(syscall.args[2] as i32),
                 Type::Int(syscall.return_value as i32),
-                Type::Bool(syscall.returns_error()),
+                Type::Bool(syscall.returns_error),
                 Type::String(syscall.command.clone()),
             ];
             sender.send((addr, args)).ok();
@@ -147,6 +147,32 @@ impl OscSender {
                 // info!("Sending syscall to {ok} receivers");
             }
             let mess = format!("/break:{}", if m.is_break { 1 } else { 0 },);
+            if let Ok(ok) = ws.message_tx.send(mess) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+        }
+    }
+    pub fn send_start_recording_playback(&mut self, name: String) {
+        for sender in &mut self.senders {
+            let addr = "/start_recording_playback";
+            let args = vec![Type::String(name.clone())];
+            sender.send((addr, args)).ok();
+        }
+        if let Some(ws) = &mut self.websocket_senders {
+            let mess = format!("/start_recording_playback:{}", name.clone());
+            if let Ok(ok) = ws.message_tx.send(mess) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+        }
+    }
+    pub fn send_stop_recording_playback(&mut self, name: String) {
+        for sender in &mut self.senders {
+            let addr = "/stop_recording_playback";
+            let args = vec![Type::String(name.clone())];
+            sender.send((addr, args)).ok();
+        }
+        if let Some(ws) = &mut self.websocket_senders {
+            let mess = format!("/stop_recording_playback:{}", name.clone());
             if let Ok(ok) = ws.message_tx.send(mess) {
                 // info!("Sending syscall to {ok} receivers");
             }
