@@ -13,3 +13,5 @@ OF/apps/*
 !OF/apps/foreachApps/**/*
 !OF/apps/cyberglow/
 !OF/apps/cyberglow/**/*
+!OF/apps/syscalls/
+!OF/apps/syscalls/**/*
