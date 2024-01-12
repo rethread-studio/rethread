@@ -5,6 +5,7 @@ use egui::{menu, Color32, DragValue, ProgressBar, Widget};
 use egui_plot::{CoordinatesFormatter, Corner, Legend, Line, Plot, PlotPoints};
 use fxhash::FxHashMap;
 use log::{error, info};
+use rand::{seq::SliceRandom, thread_rng};
 use std::io::{BufRead, BufReader, Write};
 use walkdir::WalkDir;
 
@@ -60,6 +61,15 @@ impl Default for PersistentSettings {
         }
     }
 }
+#[derive(Copy, Clone, Debug)]
+enum RecordingPlaybackMode {
+    /// Activated programs stay activated, and a new recording is selected at random when the old ends.
+    StickyProgramRandom,
+    /// Activated programs stay activated, and a new recording is selected based on intensity when the old ends (essentially looping).
+    StickyProgramIntensity,
+    /// Activated programs trigger one playback at random and are then deactivated.
+    RandomOnce,
+}
 
 struct EguiApp {
     packet_hq_command_sender: rtrb::Producer<RecordingCommand>,
@@ -73,6 +83,7 @@ struct EguiApp {
     persistent_settings: PersistentSettings,
     audience_ui_com: Option<AudienceUi>,
     cut_from_start_length: f32,
+    recording_playback_mode: RecordingPlaybackMode,
 }
 impl EguiApp {
     pub fn new(
@@ -119,6 +130,7 @@ impl EguiApp {
             persistent_settings,
             audience_ui_com,
             cut_from_start_length: 0.0,
+            recording_playback_mode: RecordingPlaybackMode::RandomOnce,
         };
         s.apply_persistent_settings();
         s
@@ -165,6 +177,43 @@ impl EguiApp {
         }
     }
     pub fn update_playing_recordings(&mut self) {
+        match self.recording_playback_mode {
+            RecordingPlaybackMode::StickyProgramRandom => todo!(),
+            RecordingPlaybackMode::StickyProgramIntensity => self.update_sticky_program_intensity(),
+            RecordingPlaybackMode::RandomOnce => self.update_random_once(),
+        }
+    }
+    pub fn update_random_once(&mut self) {
+        for active_program in &self.active_programs {
+            // If there's no recording running for an active program, try to start one.
+            // The "program" will be deactivated when the playback ends.
+
+            let mut available_variants = vec![];
+            for (i, r) in self.recordings.iter().enumerate() {
+                if r.recorded_packets.main_program == *active_program {
+                    available_variants.push(i);
+                }
+            }
+            if available_variants
+                .iter()
+                .find(|i| self.recordings[**i].playing)
+                .is_none()
+            {
+                let mut rng = thread_rng();
+                if let Some(chosen) = available_variants.choose(&mut rng) {
+                    let chosen = &mut self.recordings[*chosen];
+                    chosen.playing = true;
+                    if let Err(e) = self
+                        .packet_hq_command_sender
+                        .push(RecordingCommand::StartPlayback(chosen.uuid.clone()))
+                    {
+                        error!("Failed to send command to PacketHq: {e}");
+                    }
+                }
+            }
+        }
+    }
+    pub fn update_sticky_program_intensity(&mut self) {
         // For all main_programs, collect the available intensities and choose the one that is closest
         for active_program in &self.active_programs {
             let mut available_intensities = vec![];
@@ -183,27 +232,24 @@ impl EguiApp {
                         best_distance = distance;
                     }
                 }
-                // Activate the selected recording and stop any playing recordings that aren't playing
+                // Activate the selected recording and stop any playing recordings that aren't the selected recording
                 for r in &mut self.recordings {
                     if r.recorded_packets.main_program == *active_program {
                         if r.recorded_packets.intensity == closest_intensity {
                             if !r.playing {
                                 r.playing = true;
-                                if let Err(e) = self.packet_hq_command_sender.push(
-                                    RecordingCommand::StartPlayback(
-                                        r.recorded_packets.name.clone(),
-                                    ),
-                                ) {
+                                if let Err(e) = self
+                                    .packet_hq_command_sender
+                                    .push(RecordingCommand::StartPlayback(r.uuid.clone()))
+                                {
                                     error!("Failed to send command to PacketHq: {e}");
                                 }
                             }
                         } else if r.playing {
                             r.playing = false;
-                            if let Err(e) =
-                                self.packet_hq_command_sender
-                                    .push(RecordingCommand::StopPlayback(
-                                        r.recorded_packets.name.clone(),
-                                    ))
+                            if let Err(e) = self
+                                .packet_hq_command_sender
+                                .push(RecordingCommand::StopPlayback(r.uuid.clone()))
                             {
                                 error!("Failed to send command to PacketHq: {e}");
                             }
@@ -220,11 +266,9 @@ impl EguiApp {
                     .contains(&r.recorded_packets.main_program)
                 {
                     r.playing = false;
-                    if let Err(e) =
-                        self.packet_hq_command_sender
-                            .push(RecordingCommand::StopPlayback(
-                                r.recorded_packets.name.clone(),
-                            ))
+                    if let Err(e) = self
+                        .packet_hq_command_sender
+                        .push(RecordingCommand::StopPlayback(r.uuid.clone()))
                     {
                         error!("Failed to send command to PacketHq: {e}");
                     }
@@ -266,9 +310,7 @@ impl EguiApp {
             if r.playing && r.recorded_packets.main_program == removed_active_program {
                 if let Err(e) = self
                     .packet_hq_command_sender
-                    .push(RecordingCommand::StopPlayback(
-                        r.recorded_packets.name.clone(),
-                    ))
+                    .push(RecordingCommand::StopPlayback(r.uuid.clone()))
                 {
                     error!("Failed to send command to PacketHq: {e}");
                 }
@@ -297,29 +339,30 @@ impl eframe::App for EguiApp {
             match update {
                 EguiUpdate::AllRecordings(recordings) => self.recordings = recordings,
                 EguiUpdate::StartingPlaybackOfRecording(name) => {
-                    if let Some(r) = self
-                        .recordings
-                        .iter_mut()
-                        .find(|r| r.recorded_packets.name == name)
-                    {
+                    if let Some(r) = self.recordings.iter_mut().find(|r| r.uuid == name) {
                         r.playing = true;
                     }
                 }
                 EguiUpdate::StoppingPlaybackOfRecording(name) => {
-                    if let Some(r) = self
-                        .recordings
-                        .iter_mut()
-                        .find(|r| r.recorded_packets.name == name)
-                    {
+                    if let Some(r) = self.recordings.iter_mut().find(|r| r.uuid == name) {
                         r.playing = false;
+                        match self.recording_playback_mode {
+                            RecordingPlaybackMode::StickyProgramRandom => (),
+                            RecordingPlaybackMode::StickyProgramIntensity => (),
+                            RecordingPlaybackMode::RandomOnce => {
+                                if let Some(i) = self
+                                    .active_programs
+                                    .iter()
+                                    .position(|ap| *ap == r.recorded_packets.main_program)
+                                {
+                                    self.active_programs.remove(i);
+                                }
+                            }
+                        }
                     }
                 }
                 EguiUpdate::PlaybackUpdate(name, playback_data) => {
-                    if let Some(r) = self
-                        .recordings
-                        .iter_mut()
-                        .find(|r| r.recorded_packets.name == name)
-                    {
+                    if let Some(r) = self.recordings.iter_mut().find(|r| r.uuid == name) {
                         r.playing = playback_data.playing;
                         r.current_duration = playback_data.current_timestamp;
                         r.current_packet = playback_data.current_index;
@@ -493,6 +536,7 @@ fn recording_window(
 ) -> Option<RecordingCommand> {
     let mut command = None;
     egui::Window::new(&recording.recorded_packets.name)
+        .id(format!("{}", recording.uuid).into())
         // .open(true)
         .resizable(true)
         .default_width(280.0)
@@ -503,7 +547,12 @@ fn recording_window(
                 .striped(true)
                 .show(ui, |ui| {
                     ui.label("Name:");
+                    let prev_name = recording.recorded_packets.name.clone();
                     ui.text_edit_singleline(&mut recording.recorded_packets.name);
+                    if recording.recorded_packets.name != prev_name {
+                        info!("New name: {}", recording.recorded_packets.name);
+                        command = Some(RecordingCommand::ReplaceRecording(recording.clone()));
+                    }
                     ui.end_row();
                     ui.label("Playing:");
                     ui.label(if recording.playing { "yes" } else { "no" });
@@ -535,15 +584,11 @@ fn recording_window(
             }
             if ui.button("Play").clicked() {
                 recording.playing = true;
-                command = Some(RecordingCommand::StartPlayback(
-                    recording.recorded_packets.name.clone(),
-                ));
+                command = Some(RecordingCommand::StartPlayback(recording.uuid.clone()));
             }
             if ui.button("Stop").clicked() {
                 recording.playing = false;
-                command = Some(RecordingCommand::StopPlayback(
-                    recording.recorded_packets.name.clone(),
-                ));
+                command = Some(RecordingCommand::StopPlayback(recording.uuid.clone()));
             }
             if ui.button("Split into programs").clicked() {
                 todo!()
@@ -556,9 +601,7 @@ fn recording_window(
                 recording.log_debug_info();
             }
             if ui.button("Close").clicked() {
-                command = Some(RecordingCommand::CloseRecording(
-                    recording.recorded_packets.name.clone(),
-                ));
+                command = Some(RecordingCommand::CloseRecording(recording.uuid.clone()));
             }
             let progress = recording.current_duration.as_secs_f32()
                 / recording.last_packet_timestamp.as_secs_f32();

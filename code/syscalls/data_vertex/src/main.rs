@@ -38,6 +38,7 @@ use tokio::{
     sync::mpsc::UnboundedSender,
 };
 use tokio_tungstenite::tungstenite::Message;
+use uuid::Uuid;
 
 mod audience_interaction_communication;
 mod config;
@@ -153,6 +154,7 @@ pub struct RecordingPlayback {
     playing: bool,
     looping: bool,
     last_packet_timestamp: Duration,
+    uuid: Uuid,
 }
 
 impl RecordingPlayback {
@@ -172,7 +174,8 @@ impl RecordingPlayback {
             current_packet: 0,
             playing: false,
             last_packet_timestamp,
-            looping: true,
+            looping: false,
+            uuid: Uuid::new_v4(),
         }
     }
     fn start_playback(&mut self, osc_sender: &mut OscSender) {
@@ -236,9 +239,9 @@ impl RecordingPlayback {
             Duration::ZERO
         };
     }
-    fn next_packet(&mut self) -> Option<&Packet> {
+    fn next_packet(&mut self) -> RecordingUpdate {
         if !self.playing {
-            return None;
+            return RecordingUpdate::None;
         }
         if self.current_packet >= self.recorded_packets.records.len() {
             if self.looping {
@@ -246,17 +249,22 @@ impl RecordingPlayback {
                 self.current_packet = 0;
             } else {
                 self.playing = false;
-                return None;
+                return RecordingUpdate::Stopped;
             }
         }
         if self.recorded_packets.records[self.current_packet].timestamp <= self.current_duration {
             let packet = &self.recorded_packets.records[self.current_packet].packet;
             self.current_packet += 1;
-            return Some(packet);
+            return RecordingUpdate::Packet(packet);
         } else {
-            None
+            RecordingUpdate::None
         }
     }
+}
+enum RecordingUpdate<'a> {
+    Packet(&'a Packet),
+    Stopped,
+    None,
 }
 struct Analysers {
     syscall_analyser: SyscallAnalyser,
@@ -288,19 +296,19 @@ pub enum RecordingCommand {
     ReplaceRecording(RecordingPlayback),
     ReplaceAllRecordings(Vec<RecordingPlayback>),
     SendAllRecordings,
-    StartPlayback(String),
-    StopPlayback(String),
+    StartPlayback(Uuid),
+    StopPlayback(Uuid),
     LoadRecordingFromFile(PathBuf),
-    SaveRecordingToFile(String, PathBuf),
-    CloseRecording(String),
+    SaveRecordingToFile(Uuid, PathBuf),
+    CloseRecording(Uuid),
 }
 
 #[derive(Clone, Debug)]
 pub enum EguiUpdate {
     AllRecordings(Vec<RecordingPlayback>),
-    StartingPlaybackOfRecording(String),
-    StoppingPlaybackOfRecording(String),
-    PlaybackUpdate(String, PlaybackData),
+    StartingPlaybackOfRecording(Uuid),
+    StoppingPlaybackOfRecording(Uuid),
+    PlaybackUpdate(Uuid, PlaybackData),
 }
 struct PacketHQ {
     score: Score,
@@ -389,9 +397,12 @@ impl PacketHQ {
             return;
         };
         self.recording_playbacks.push(recording_playback);
-        self.egui_update_sender
+        if let Err(e) = self
+            .egui_update_sender
             .push(EguiUpdate::AllRecordings(self.recording_playbacks.clone()))
-            .unwrap();
+        {
+            error!("Failed to send update (AllRecordings) to egui: {e}");
+        }
     }
     fn register_packet(&mut self, packet: Packet) {
         self.analysers
@@ -406,8 +417,20 @@ impl PacketHQ {
         self.analysers.update(&mut self.osc_sender);
         for rp in &mut self.recording_playbacks {
             rp.progress_time(dt);
-            while let Some(packet) = rp.next_packet() {
-                self.analysers.register_packet(packet, &mut self.osc_sender);
+            loop {
+                match rp.next_packet() {
+                    RecordingUpdate::Packet(packet) => {
+                        self.analysers.register_packet(packet, &mut self.osc_sender);
+                    }
+                    RecordingUpdate::Stopped => {
+                        // The recording just stopped, send that on
+                        rp.stop_playback(&mut self.osc_sender);
+                        self.egui_update_sender
+                            .push(EguiUpdate::StoppingPlaybackOfRecording(rp.uuid))
+                            .ok();
+                    }
+                    RecordingUpdate::None => break,
+                }
             }
         }
         if self.last_gui_update_sent.elapsed() > Duration::from_millis(200) {
@@ -421,10 +444,7 @@ impl PacketHQ {
                     playing: rp.playing,
                 };
                 self.egui_update_sender
-                    .push(EguiUpdate::PlaybackUpdate(
-                        rp.recorded_packets.name.clone(),
-                        pd,
-                    ))
+                    .push(EguiUpdate::PlaybackUpdate(rp.uuid, pd))
                     .ok();
             }
             let playback_data = if let Some(rp) = &self.recording_playbacks.first() {
@@ -451,10 +471,7 @@ impl PacketHQ {
             match command {
                 RecordingCommand::ReplaceRecording(new_recording) => {
                     for r in &mut self.recording_playbacks {
-                        if r.recorded_packets
-                            .name
-                            .eq(&new_recording.recorded_packets.name)
-                        {
+                        if r.uuid.eq(&new_recording.uuid) {
                             *r = new_recording;
                             break;
                         }
@@ -464,45 +481,37 @@ impl PacketHQ {
                     .egui_update_sender
                     .push(EguiUpdate::AllRecordings(self.recording_playbacks.clone()))
                     .unwrap(),
-                RecordingCommand::StartPlayback(recording_name) => {
+                RecordingCommand::StartPlayback(uuid) => {
                     let mut recording_found = false;
                     for r in &mut self.recording_playbacks {
-                        if r.recorded_packets.name == recording_name {
+                        if r.uuid == uuid {
                             r.start_playback(&mut self.osc_sender);
                             info!("Started playback on packethq");
                             recording_found = true;
                         }
                     }
                     if !recording_found {
-                        warn!("Unable to find and start recording {}", &recording_name);
+                        warn!("Unable to find and start recording {}", &uuid);
                     }
                 }
-                RecordingCommand::StopPlayback(recording_name) => {
+                RecordingCommand::StopPlayback(uuid) => {
                     for r in &mut self.recording_playbacks {
-                        if r.recorded_packets.name == recording_name {
+                        if r.uuid == uuid {
                             r.stop_playback(&mut self.osc_sender);
                         }
                     }
                 }
                 RecordingCommand::LoadRecordingFromFile(path) => self.load_recording(path),
-                RecordingCommand::CloseRecording(name) => {
-                    if let Some(i) = self
-                        .recording_playbacks
-                        .iter()
-                        .position(|r| r.recorded_packets.name == name)
-                    {
+                RecordingCommand::CloseRecording(uuid) => {
+                    if let Some(i) = self.recording_playbacks.iter().position(|r| r.uuid == uuid) {
                         self.recording_playbacks.remove(i);
                     }
                 }
                 RecordingCommand::ReplaceAllRecordings(recordings) => {
                     self.recording_playbacks = recordings
                 }
-                RecordingCommand::SaveRecordingToFile(recording_name, path) => {
-                    if let Some(r) = self
-                        .recording_playbacks
-                        .iter()
-                        .find(|r| r.recorded_packets.name == recording_name)
-                    {
+                RecordingCommand::SaveRecordingToFile(uuid, path) => {
+                    if let Some(r) = self.recording_playbacks.iter().find(|r| r.uuid == uuid) {
                         if let Err(e) = r.recorded_packets.save_postcard(&path) {
                             error!("Failed to save recording: {e}");
                         }
@@ -523,9 +532,7 @@ impl PacketHQ {
                     for recording in &mut self.recording_playbacks {
                         recording.playing = false;
                         self.egui_update_sender
-                            .push(EguiUpdate::StoppingPlaybackOfRecording(
-                                recording.recorded_packets.name.clone(),
-                            ))
+                            .push(EguiUpdate::StoppingPlaybackOfRecording(recording.uuid))
                             .ok();
                     }
                 }
@@ -534,9 +541,7 @@ impl PacketHQ {
                         recording.start_playback(&mut self.osc_sender);
 
                         self.egui_update_sender
-                            .push(EguiUpdate::StartingPlaybackOfRecording(
-                                recording.recorded_packets.name.clone(),
-                            ))
+                            .push(EguiUpdate::StartingPlaybackOfRecording(recording.uuid))
                             .ok();
                     }
                 }
