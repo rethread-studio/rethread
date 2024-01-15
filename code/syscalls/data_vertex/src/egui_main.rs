@@ -116,7 +116,10 @@ impl EguiApp {
         let audience_ui_com = loop {
             let audience_ui_com = AudienceUi::new();
             match audience_ui_com {
-                Ok(a) => break Some(a),
+                Ok(mut a) => {
+                    a.send_data_vertex_restart();
+                    break Some(a);
+                }
                 Err(e) => {
                     if num_tries > 10 {
                         error!("Failed to create audience ui communicator: {}", e);
@@ -327,6 +330,13 @@ impl EguiApp {
         if let Some(a) = &mut self.audience_ui_com {
             a.send_deactivated_program(removed_active_program.clone());
         }
+        while let Some(i) = self
+            .active_programs
+            .iter()
+            .position(|p| *p == removed_active_program)
+        {
+            self.active_programs.remove(i);
+        }
         for r in &mut self.recordings {
             if r.playing && r.recorded_packets.main_program == removed_active_program {
                 if let Err(e) = self
@@ -337,11 +347,13 @@ impl EguiApp {
                 }
             }
         }
+        self.update_playing_recordings();
     }
 }
 
 impl eframe::App for EguiApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        let mut send_all_active_programs = false;
         if let Some(a) = &mut self.audience_ui_com {
             let m = a.receive_osc();
             for mess in m {
@@ -352,9 +364,21 @@ impl eframe::App for EguiApp {
                     }
                     AudienceUiMessage::ProgramWasActivated(_) => unreachable!(),
                     AudienceUiMessage::ProgramWasDeactivated(_) => unreachable!(),
+                    AudienceUiMessage::RequestActivePrograms => {
+                        send_all_active_programs = true;
+                    }
+                    AudienceUiMessage::PlayScore => todo!(),
+                    AudienceUiMessage::PlayFreely => todo!(),
                 }
                 self.self_activating_mode = false;
                 self.last_audience_interaction = Instant::now();
+            }
+        }
+        if let Some(a) = &mut self.audience_ui_com {
+            if send_all_active_programs {
+                for program in &self.active_programs {
+                    a.send_activated_program(program.clone());
+                }
             }
         }
         if self.last_audience_interaction.elapsed() > Duration::from_secs(60 * 3) {

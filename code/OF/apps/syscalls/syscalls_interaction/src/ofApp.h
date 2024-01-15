@@ -13,11 +13,13 @@
 class Button {
 public:
   string m_text;
+  string m_on_text;
   string m_osc_name;
   glm::vec2 m_center_pos;
   bool hovered = false;
   bool active = false;
-  Button(string t, string o) : m_text(t), m_osc_name(o) {}
+  Button(string t, string t2, string o)
+      : m_text(t), m_on_text(t2), m_osc_name(o) {}
 };
 
 class Trail {

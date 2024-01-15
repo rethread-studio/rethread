@@ -11,24 +11,38 @@ void ofApp::setup() {
   m_font.setLineHeight(18.0f);
   m_font.setLetterSpacing(1.037);
 
-  m_buttons.push_back(Button("Work on your poetry collection", "gedit"));
-  m_buttons.push_back(Button("Answer emails", "thunderbird"));
-  m_buttons.push_back(Button("Check the news", "konqueror"));
-  m_buttons.push_back(Button("Monitor computer resources", "htop"));
+  m_buttons.push_back(
+      Button("Work on your poetry collection", "Stop writing poetry", "gedit"));
+  m_buttons.push_back(
+      Button("Answer emails", "Stop answering poetry", "thunderbird"));
+  m_buttons.push_back(
+      Button("Check the news", "Stop checking the news", "konqueror"));
+  m_buttons.push_back(
+      Button("Monitor computer resources", "Stop monitoring", "htop"));
+  m_buttons.push_back(
+      Button("Play full piece through", "Play freely", "play_score"));
 
-  float total_height = m_buttons.size() * m_button_height +
-                       ((m_buttons.size() - 1) * m_button_gap);
+  float total_height =
+      m_buttons.size() * m_button_height + ((m_buttons.size()) * m_button_gap);
   float y = total_height * -0.5;
   for (uint i = 0; i < m_buttons.size(); i++) {
     y += m_button_height * 0.5;
-    m_buttons[i].m_center_pos =
-        glm::vec2(ofGetWidth() * 0.5, y + ofGetHeight() * 0.5);
+    m_buttons[i].m_center_pos = glm::vec2(0., y);
     y += m_button_height * 0.5 + m_button_gap;
+    if (i == 3) {
+      y += m_button_gap;
+    }
   }
 
   // OSC
   // open an outgoing connection to HOST:PORT
   sender.setup(HOST, SEND_PORT);
+
+  // Request the active actions to be sent at the start of the program
+  ofxOscMessage m;
+  m.setAddress("/display_request_active_actions");
+  sender.sendMessage(m, false);
+
   // listen on the given port
   ofLog() << "listening for osc messages on port " << RECEIVE_PORT;
   receiver.setup(RECEIVE_PORT);
@@ -43,7 +57,7 @@ void ofApp::update() {
   int hovered_button = 0;
   for (uint i = 0; i < m_buttons.size(); i++) {
     m_buttons[i].hovered = false;
-    float y = m_buttons[i].m_center_pos.y;
+    float y = m_buttons[i].m_center_pos.y + ofGetHeight() * 0.5;
     if (ofGetMouseY() > (y - (m_button_height * 0.5)) &&
         ofGetMouseY() < (y + (m_button_height * 0.5))) {
       cursor_is_inside_h = true;
@@ -106,6 +120,7 @@ void ofApp::draw() {
   ofNoFill();
   ofSetLineWidth(4);
   // ofTranslate(ofGetWidth() / 2, ofGetHeight() / 2);
+  glm::vec2 middle_screen = glm::vec2(ofGetWidth() * 0.5, ofGetHeight() * 0.5);
   for (uint i = 0; i < m_buttons.size(); i++) {
     if (m_buttons[i].active) {
       ofSetColor(255, 0, 0, 255);
@@ -116,11 +131,13 @@ void ofApp::draw() {
         ofSetColor(0, 255, 0, 255);
       }
     }
-    ofDrawRectangle(m_buttons[i].m_center_pos, m_button_width, m_button_height);
+    ofDrawRectangle(m_buttons[i].m_center_pos + middle_screen, m_button_width,
+                    m_button_height);
     ofRectangle rect = m_font.getStringBoundingBox(m_buttons[i].m_text, 0, 0);
-    m_font.drawString(m_buttons[i].m_text,
-                      m_buttons[i].m_center_pos.x - (rect.width * 0.5),
-                      m_buttons[i].m_center_pos.y + (rect.height * 0.5));
+    m_font.drawString(
+        m_buttons[i].m_text,
+        m_buttons[i].m_center_pos.x + middle_screen.x - (rect.width * 0.5),
+        m_buttons[i].m_center_pos.y + middle_screen.y + (rect.height * 0.5));
   }
 
   // Mouse cursor
@@ -180,7 +197,7 @@ void ofApp::mousePressed(int mouse_x, int mouse_y, int button) {
 
   int hovered_button = 0;
   for (uint i = 0; i < m_buttons.size(); i++) {
-    float y = m_buttons[i].m_center_pos.y;
+    float y = m_buttons[i].m_center_pos.y + ofGetHeight() * 0.5;
     if (mouse_y > (y - (m_button_height * 0.5)) &&
         mouse_y < (y + (m_button_height * 0.5))) {
       cursor_is_inside_h = true;
@@ -190,9 +207,13 @@ void ofApp::mousePressed(int mouse_x, int mouse_y, int button) {
   if (cursor_is_inside_h &&
       (mouse_x > ofGetWidth() / 2 - (m_button_width * 0.5)) &&
       (mouse_x < ofGetWidth() / 2 + (m_button_width * 0.5))) {
-    m_buttons[hovered_button].active = true;
+    m_buttons[hovered_button].active = !m_buttons[hovered_button].active;
     ofxOscMessage m;
-    m.setAddress("/display_send_activate_action");
+    if (m_buttons[hovered_button].active) {
+      m.setAddress("/display_send_activate_action");
+    } else {
+      m.setAddress("/display_send_deactivate_action");
+    }
     m.addStringArg(m_buttons[hovered_button].m_osc_name);
     sender.sendMessage(m, false);
   }

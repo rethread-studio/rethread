@@ -8,6 +8,9 @@ pub enum AudienceUiMessage {
     // From Ui program to data_vertex
     ActivateProgram(String),
     DeactivateProgram(String),
+    RequestActivePrograms,
+    PlayScore,
+    PlayFreely,
     // From data_vertex to Ui program
     ProgramWasActivated(String),
     ProgramWasDeactivated(String),
@@ -33,6 +36,11 @@ impl AudienceUi {
             // egui_message_receiver,
         })
     }
+    pub fn send_data_vertex_restart(&mut self) {
+        for program in ["thunderbird", "konqueror", "gedit", "htop", "play_score"] {
+            self.send_deactivated_program(program.to_string());
+        }
+    }
     pub fn send_activated_program(&mut self, program: String) {
         let addr = "/display_activate_program";
         let args = vec![Type::String(program)];
@@ -52,9 +60,25 @@ impl AudienceUi {
                 if m.addr == "/display_send_activate_action" {
                     if let Some(args) = m.args {
                         if let Some(Some(program)) = args.into_iter().next().map(|p| p.string()) {
-                            messages.push(AudienceUiMessage::ActivateProgram(program));
+                            if program == "play_score" {
+                                messages.push(AudienceUiMessage::PlayScore);
+                            } else {
+                                messages.push(AudienceUiMessage::ActivateProgram(program));
+                            }
                         }
                     }
+                } else if m.addr == "/display_send_deactivate_action" {
+                    if let Some(args) = m.args {
+                        if let Some(Some(program)) = args.into_iter().next().map(|p| p.string()) {
+                            if program == "play_score" {
+                                messages.push(AudienceUiMessage::PlayFreely);
+                            } else {
+                                messages.push(AudienceUiMessage::DeactivateProgram(program));
+                            }
+                        }
+                    }
+                } else if m.addr == "/display_request_active_actions" {
+                    messages.push(AudienceUiMessage::RequestActivePrograms);
                 }
             }
         }
