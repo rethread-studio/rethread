@@ -10,6 +10,7 @@ use futures_util::{SinkExt, StreamExt};
 use fxhash::FxHashMap;
 use log::*;
 use menu::MenuItem;
+use rand::{thread_rng, Rng};
 use ratatui as tui;
 use ratatui::{
     backend::{Backend, CrosstermBackend},
@@ -554,6 +555,7 @@ impl PacketHQ {
                     if !self.score.is_playing() {
                         self.osc_sender.send_score_start();
                     }
+                    self.score.random_order = false;
                     let (new_mvt, next_mvt) = self.score.play_from(0);
                     self.osc_sender.send_movement(&new_mvt, next_mvt);
                 }
@@ -584,6 +586,17 @@ impl PacketHQ {
                         }
                         ScoreUpdate::Nothing => (),
                     }
+                }
+                PacketHQCommands::PlayRandomMovements => {
+                    if !self.score.is_playing() {
+                        self.osc_sender.send_score_start();
+                    }
+                    self.score.random_order = true;
+                    let num_movements = self.score.movements.len();
+                    let mut rng = thread_rng();
+                    let start_movement = rng.gen_range(0..num_movements - 1);
+                    let (new_mvt, next_mvt) = self.score.play_from(start_movement);
+                    self.osc_sender.send_movement(&new_mvt, next_mvt);
                 }
             }
         }
@@ -626,6 +639,7 @@ impl Default for PlaybackData {
 }
 enum PacketHQCommands {
     PlayScore,
+    PlayRandomMovements,
     NextMovement,
     PreviousMovement,
     StopScorePlayback,
@@ -768,7 +782,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         egui_command_receiver,
     );
 
-    tokio_main(packet_hq, gui_update_receiver, packet_hq_sender);
+    tokio_main(packet_hq, gui_update_receiver, packet_hq_sender).unwrap();
 
     egui_main::start_egui(packet_hq_command_sender, egui_update_receiver).unwrap();
 
@@ -793,11 +807,15 @@ fn tokio_main(
                 {
                     tokio::spawn(start_network_communication(packet_hq));
                 }
+                let mut restart = false;
                 let tui_handle = tokio::task::spawn_blocking(move || {
                     setup_tui(gui_update_receiver, packet_hq_sender).unwrap()
                 });
                 for h in [tui_handle] {
-                    h.await.unwrap();
+                    if let Err(e) = h.await {
+                        error!("Error in TUI: {e}");
+                        panic!("{e}");
+                    }
                 }
             } else {
                 start_network_communication(packet_hq).await.unwrap();
@@ -968,6 +986,10 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                                 app.is_recording = false;
                                 app.packet_hq_sender.push(PacketHQCommands::StopRecording)?
                             }
+                            MenuItem::PlayRandomMovements => {
+                                app.packet_hq_sender
+                                    .push(PacketHQCommands::PlayRandomMovements)?;
+                            }
                         }
                     }
                     KeyCode::Char('q') => return Ok(()),
@@ -1131,7 +1153,8 @@ fn render_score_bar<B: Backend>(
         .percent(
             ((score_playback_data.current_timestamp_for_mvt.as_secs_f64()
                 / max_timestamp.as_secs_f64())
-                * 100.) as u16,
+                * 100.)
+                .clamp(0., 100.) as u16,
         );
 
     f.render_widget(g, score_rects[2]);

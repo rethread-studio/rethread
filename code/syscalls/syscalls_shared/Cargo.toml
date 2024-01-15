@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 enum-iterator = "1.4.1"
+fastrand = "2.0.1"
 nix = "0.26.2"
 num_enum = "0.6.1"
 protocol = { version = "3.4", features = ["derive"] }

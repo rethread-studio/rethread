@@ -1,11 +1,15 @@
-use std::{ffi::OsStr, path::PathBuf, time::Duration};
+use std::{
+    ffi::OsStr,
+    path::PathBuf,
+    time::{Duration, Instant},
+};
 
 use eframe::egui;
 use egui::{menu, Color32, DragValue, ProgressBar, Widget};
 use egui_plot::{CoordinatesFormatter, Corner, Legend, Line, Plot, PlotPoints};
 use fxhash::FxHashMap;
 use log::{error, info};
-use rand::{seq::SliceRandom, thread_rng};
+use rand::{seq::SliceRandom, thread_rng, Rng};
 use std::io::{BufRead, BufReader, Write};
 use walkdir::WalkDir;
 
@@ -84,6 +88,11 @@ struct EguiApp {
     audience_ui_com: Option<AudienceUi>,
     cut_from_start_length: f32,
     recording_playback_mode: RecordingPlaybackMode,
+    last_audience_interaction: Instant,
+    // If we should activate programs without audience interaction
+    self_activating_mode: bool,
+    next_self_activation: Duration,
+    last_self_activation: Instant,
 }
 impl EguiApp {
     pub fn new(
@@ -130,7 +139,11 @@ impl EguiApp {
             persistent_settings,
             audience_ui_com,
             cut_from_start_length: 0.0,
-            recording_playback_mode: RecordingPlaybackMode::RandomOnce,
+            recording_playback_mode: RecordingPlaybackMode::StickyProgramRandom,
+            last_audience_interaction: Instant::now(),
+            self_activating_mode: false,
+            next_self_activation: Duration::from_secs(10),
+            last_self_activation: Instant::now(),
         };
         s.apply_persistent_settings();
         s
@@ -178,36 +191,44 @@ impl EguiApp {
     }
     pub fn update_playing_recordings(&mut self) {
         match self.recording_playback_mode {
-            RecordingPlaybackMode::StickyProgramRandom => todo!(),
+            RecordingPlaybackMode::StickyProgramRandom => self.update_random_recording(),
             RecordingPlaybackMode::StickyProgramIntensity => self.update_sticky_program_intensity(),
-            RecordingPlaybackMode::RandomOnce => self.update_random_once(),
+            RecordingPlaybackMode::RandomOnce => self.update_random_recording(),
         }
     }
-    pub fn update_random_once(&mut self) {
+    pub fn update_random_recording(&mut self) {
         for active_program in &self.active_programs {
             // If there's no recording running for an active program, try to start one.
-            // The "program" will be deactivated when the playback ends.
+            // The "program" will be deactivated when the playback ends if we should only do one.
 
-            let mut available_variants = vec![];
-            for (i, r) in self.recordings.iter().enumerate() {
-                if r.recorded_packets.main_program == *active_program {
-                    available_variants.push(i);
-                }
-            }
-            if available_variants
+            let already_playing = self
+                .recordings
                 .iter()
-                .find(|i| self.recordings[**i].playing)
-                .is_none()
-            {
-                let mut rng = thread_rng();
-                if let Some(chosen) = available_variants.choose(&mut rng) {
-                    let chosen = &mut self.recordings[*chosen];
-                    chosen.playing = true;
-                    if let Err(e) = self
-                        .packet_hq_command_sender
-                        .push(RecordingCommand::StartPlayback(chosen.uuid.clone()))
-                    {
-                        error!("Failed to send command to PacketHq: {e}");
+                .find(|r| r.playing && r.recorded_packets.name == *active_program)
+                .is_some();
+
+            if !already_playing {
+                let mut available_variants = vec![];
+                for (i, r) in self.recordings.iter().enumerate() {
+                    if r.recorded_packets.main_program == *active_program {
+                        available_variants.push(i);
+                    }
+                }
+                if available_variants
+                    .iter()
+                    .find(|i| self.recordings[**i].playing)
+                    .is_none()
+                {
+                    let mut rng = thread_rng();
+                    if let Some(chosen) = available_variants.choose(&mut rng) {
+                        let chosen = &mut self.recordings[*chosen];
+                        chosen.playing = true;
+                        if let Err(e) = self
+                            .packet_hq_command_sender
+                            .push(RecordingCommand::StartPlayback(chosen.uuid.clone()))
+                        {
+                            error!("Failed to send command to PacketHq: {e}");
+                        }
                     }
                 }
             }
@@ -332,6 +353,32 @@ impl eframe::App for EguiApp {
                     AudienceUiMessage::ProgramWasActivated(_) => unreachable!(),
                     AudienceUiMessage::ProgramWasDeactivated(_) => unreachable!(),
                 }
+                self.self_activating_mode = false;
+                self.last_audience_interaction = Instant::now();
+            }
+        }
+        if self.last_audience_interaction.elapsed() > Duration::from_secs(60 * 3) {
+            self.self_activating_mode = true;
+        }
+        if self.self_activating_mode {
+            if self.last_self_activation.elapsed() > self.next_self_activation {
+                let mut rng = thread_rng();
+                let new_program = self.all_program_values.choose(&mut rng);
+                if let Some(program) = new_program {
+                    self.add_active_program(program.clone());
+                }
+                if self.active_programs.len() > 1 {
+                    // Possibly remove active programs
+                    if rng.gen::<f32>() > 0.7 {
+                        for _ in 0..rng.gen_range(1..=self.active_programs.len()) {
+                            let i = rng.gen_range(0..self.active_programs.len());
+                            self.active_programs.remove(i);
+                        }
+                    }
+                }
+                let seconds_until_next = rng.gen_range(15..90);
+                self.next_self_activation = Duration::from_secs(seconds_until_next);
+                self.last_self_activation = Instant::now();
             }
         }
         // Receive messages
@@ -359,6 +406,7 @@ impl eframe::App for EguiApp {
                                 }
                             }
                         }
+                        self.update_playing_recordings();
                     }
                 }
                 EguiUpdate::PlaybackUpdate(name, playback_data) => {

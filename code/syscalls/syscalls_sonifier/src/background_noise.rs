@@ -174,14 +174,14 @@ impl BackgroundNoise {
             self.lpf_freq.set(0, 0.);
             self.lpf_freq.set(
                 0,
-                exp_line_segment(10., 15000., Superseconds::from_seconds_f64(10.)),
+                exp_line_segment(10., 15000., Seconds::from_seconds_f64(10.)),
             );
             // HPF on everything from 200 to 10hz in 8s
             self.hpf_freq.clear_input_connections();
             self.hpf_freq.set(0, 0.);
             self.hpf_freq.set(
                 0,
-                exp_line_segment(200., 10., Superseconds::from_seconds_f64(8.)),
+                exp_line_segment(200., 10., Seconds::from_seconds_f64(8.)),
             );
             // amp of everything is XLine.kr(0.1, 0.20, 12.0);
             let amp_env = EnvelopeGen::new(
@@ -195,7 +195,7 @@ impl BackgroundNoise {
             self.amp.clear_input_connections();
             self.amp.set(0, 0.);
             self.amp.set(
-                0, amp_env, // exp_line_segment(0.1, 0.2, Superseconds::from_seconds_f64(12.)),
+                0, amp_env, // exp_line_segment(0.1, 0.2, Seconds::from_seconds_f64(12.)),
             );
         });
     }

@@ -15,7 +15,7 @@ use knyst::gen::filter::one_pole::{one_pole_lpf, OnePoleLpfHandle};
 use knyst::graph::Time;
 use knyst::handles::{GenericHandle, HandleData};
 use knyst::prelude::*;
-use knyst::time::Superseconds;
+use knyst::time::Seconds;
 use knyst::trig::{interval_trig, IntervalTrig, IntervalTrigHandle};
 use knyst::*;
 
@@ -154,7 +154,7 @@ impl QuantisedCategories {
             // let k = k.to_graph(graph_id);
 
             let impulse = interval_trig().interval(trig_interval);
-            let trig_delay = sample_delay(Superseconds::from_seconds_f64(2.))
+            let trig_delay = sample_delay(Seconds::from_seconds_f64(2.))
                 .signal(impulse)
                 .delay_time(delay_time);
             let mut value = 0.0;

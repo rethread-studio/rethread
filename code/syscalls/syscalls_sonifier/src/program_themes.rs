@@ -13,7 +13,7 @@ use knyst::{
     handles::{GenericHandle, GraphHandle, HandleData, MulHandle},
     knyst_commands,
     prelude::*,
-    time::Superbeats,
+    time::Beats,
 };
 use knyst_waveguide2::half_sine_wt;
 use knyst_waveguide2::waveguide;
@@ -239,7 +239,7 @@ impl ProgramThemes {
                                 NoteEventKind::Rest => (),
                             }
                         }
-                        time += event.duration * Superbeats::from_beats(4);
+                        time += event.duration * Beats::from_beats(4);
                     }
                 }
                 {
@@ -287,7 +287,7 @@ impl ProgramThemes {
                                 NoteEventKind::Rest => (),
                             }
                         }
-                        time += event.duration * Superbeats::from_beats(4);
+                        time += event.duration * Beats::from_beats(4);
                     }
                 }
                 {
@@ -307,13 +307,12 @@ impl ProgramThemes {
                                     schedule_bundle(Time::Beats(time), || {
                                         let freq = to_freq53(n.0 + 159, root_freq);
                                         let amp = n.1 * (0.1 + a.powf(0.5) * 0.9);
-                                        let feedback = if event.duration
-                                            > Superbeats::from_beats_f32(1. / 32.)
-                                        {
-                                            0.99999
-                                        } else {
-                                            0.98
-                                        };
+                                        let feedback =
+                                            if event.duration > Beats::from_beats_f32(1. / 32.) {
+                                                0.99999
+                                            } else {
+                                                0.98
+                                            };
 
                                         wg_htop
                                             .set(0, freq) // freq
@@ -340,7 +339,7 @@ impl ProgramThemes {
                                 NoteEventKind::Rest => (),
                             }
                         }
-                        time += event.duration * Superbeats::from_beats(4);
+                        time += event.duration * Beats::from_beats(4);
                     }
                 }
                 {
@@ -360,13 +359,12 @@ impl ProgramThemes {
                                     schedule_bundle(Time::Beats(time), || {
                                         let freq = to_freq53(n.0 + 212 + 53, root_freq);
                                         let amp = n.1 * (0.1 + a.powf(0.5) * 0.8);
-                                        let feedback = if event.duration
-                                            > Superbeats::from_beats_f32(1. / 32.)
-                                        {
-                                            0.999999
-                                        } else {
-                                            0.98
-                                        };
+                                        let feedback =
+                                            if event.duration > Beats::from_beats_f32(1. / 32.) {
+                                                0.999999
+                                            } else {
+                                                0.98
+                                            };
                                         wg_gedit
                                             .set(0, freq) // freq
                                             .trig(1) // exciter trigger
@@ -392,13 +390,13 @@ impl ProgramThemes {
                                 NoteEventKind::Rest => (),
                             }
                         }
-                        time += event.duration * Superbeats::from_beats(4);
+                        time += event.duration * Beats::from_beats(4);
                     }
                 }
-                Some(Superbeats::from_beats(2))
+                Some(Beats::from_beats(2))
             },
             // TODO: Add support for starting a callback at the next matching beat pattern
-            StartBeat::Multiple(Superbeats::from_beats(1)), // Time for the first time the
+            StartBeat::Multiple(Beats::from_beats(1)), // Time for the first time the
         );
         Self {
             callbacks: vec![callback],

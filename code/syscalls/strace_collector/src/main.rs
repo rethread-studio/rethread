@@ -1,5 +1,4 @@
 use anyhow::Result;
-use nix::libc::TCP_THIN_LINEAR_TIMEOUTS;
 use nix::sys;
 use nix::sys::ptrace::{getevent, Options};
 use std::mem::transmute;

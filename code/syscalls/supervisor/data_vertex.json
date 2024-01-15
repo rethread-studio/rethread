@@ -1,0 +1,10 @@
+[
+  {
+    "path": "/home/erik/code/kth/rethread/code/syscalls/target/release/data_vertex",
+    "working_dir": "/home/erik/code/kth/rethread/code/syscalls/data_vertex",
+    "recompilation_command": null,
+    "max_time_alive_before_restart_secs": 43200,
+    "wait_after_restart_secs": 1,
+    "trigger_complete_restart_on_fail": false
+  }
+]

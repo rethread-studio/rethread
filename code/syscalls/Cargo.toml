@@ -6,4 +6,5 @@ members = [
     "syscalls_shared",
     "syscalls_sonifier",
     "ws_syscalls_receiver_test",
+    "supervisor",
 ]

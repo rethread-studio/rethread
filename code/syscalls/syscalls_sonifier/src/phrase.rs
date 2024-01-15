@@ -1,5 +1,4 @@
-use knyst::time::Superbeats;
-
+use knyst::time::Beats;
 
 pub struct Phrase<T> {
     events: Vec<NoteEvent<T>>,
@@ -8,7 +7,7 @@ impl<T> Phrase<T> {
     pub fn new() -> Self {
         Self { events: vec![] }
     }
-    pub fn total_duration(&self) -> Superbeats {
+    pub fn total_duration(&self) -> Beats {
         self.events.iter().map(|e| e.duration).sum()
     }
     pub fn events(&self) -> &Vec<NoteEvent<T>> {
@@ -23,13 +22,13 @@ impl<T> Phrase<T> {
 }
 
 pub struct NoteEvent<T> {
-    pub duration: Superbeats,
+    pub duration: Beats,
     pub kind: NoteEventKind<T>,
 }
 impl<T> Into<NoteEvent<T>> for (f32, T) {
     fn into(self) -> NoteEvent<T> {
         NoteEvent {
-            duration: Superbeats::from_beats_f32(self.0),
+            duration: Beats::from_beats_f32(self.0),
             kind: NoteEventKind::Note(self.1),
         }
     }
@@ -37,12 +36,12 @@ impl<T> Into<NoteEvent<T>> for (f32, T) {
 impl<T> Into<NoteEvent<T>> for (u32, T) {
     fn into(self) -> NoteEvent<T> {
         NoteEvent {
-            duration: Superbeats::from_beats(self.0),
+            duration: Beats::from_beats(self.0),
             kind: NoteEventKind::Note(self.1),
         }
     }
 }
-impl<T> Into<NoteEvent<T>> for (Superbeats, T) {
+impl<T> Into<NoteEvent<T>> for (Beats, T) {
     fn into(self) -> NoteEvent<T> {
         NoteEvent {
             duration: self.0,
@@ -50,7 +49,7 @@ impl<T> Into<NoteEvent<T>> for (Superbeats, T) {
         }
     }
 }
-impl<T> Into<NoteEvent<T>> for Superbeats {
+impl<T> Into<NoteEvent<T>> for Beats {
     fn into(self) -> NoteEvent<T> {
         NoteEvent {
             duration: self,
@@ -61,7 +60,7 @@ impl<T> Into<NoteEvent<T>> for Superbeats {
 impl<T> Into<NoteEvent<T>> for f32 {
     fn into(self) -> NoteEvent<T> {
         NoteEvent {
-            duration: Superbeats::from_beats_f32(self),
+            duration: Beats::from_beats_f32(self),
             kind: NoteEventKind::Rest,
         }
     }

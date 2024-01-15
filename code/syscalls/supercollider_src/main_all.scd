@@ -291,7 +291,7 @@
 			sig = HPF.ar(sig, (LFNoise1.kr(0.05).range(0, 1).pow(2.5) * 200 + 10) * LFNoise1.kr(LFNoise1.kr(2).range(1, 5)).range(0.5, 1.0));
 			sig = Limiter.ar(sig, 0.9);
 			// sig = sig!2 + (JPverb.ar(sig, 2.0) * LFNoise1.ar(0.1).range(0.0, 0.5).pow(2));
-			/*sig = (sig * (1.0-pitch_mix))!2 + ((Splay.ar(Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 6, 8, 12, 16], bwr2)*bwramp2) * pitch_mix * 0.2));*/
+			sig = (sig * (1.0-pitch_mix))!2 + ((Splay.ar(Resonz.ar(sig, Ndef.kr(\root, 1)*[4, 6, 8, 12, 16], bwr2)*bwramp2) * pitch_mix * 0.2));
 			sig = BPeakEQ.ar(sig, 300, 0.5, -2);
 			sig = BPeakEQ.ar(sig, 2000, 1.0, -3);
 			sig = Limiter.ar(sig, 0.9);

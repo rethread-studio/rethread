@@ -7,6 +7,7 @@ pub struct Score {
     pub movements: Vec<Movement>,
     #[cfg(not(target_arch = "wasm32"))]
     pub start_of_last_movement: Instant,
+    pub random_order: bool,
     pub is_playing: bool,
 }
 impl Score {
@@ -243,16 +244,28 @@ impl Score {
             #[cfg(not(target_arch = "wasm32"))]
             start_of_last_movement: Instant::now(),
             is_playing: false,
+            random_order: false,
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn next_movement(&mut self) -> ScoreUpdate {
-        self.current_movement += 1;
-        if self.current_movement >= self.movements.len() {
-            self.current_movement = 0;
-            self.stop();
-            ScoreUpdate::ScoreStop
+        if !self.random_order {
+            self.current_movement += 1;
+            if self.current_movement >= self.movements.len() {
+                self.current_movement = 0;
+                self.stop();
+                ScoreUpdate::ScoreStop
+            } else {
+                if self.is_playing {
+                    let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
+                    ScoreUpdate::NewMovement { new_mvt, next_mvt }
+                } else {
+                    ScoreUpdate::Nothing
+                }
+            }
         } else {
+            // Random order
+            self.current_movement = fastrand::usize(..self.movements.len() - 1);
             if self.is_playing {
                 let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
                 ScoreUpdate::NewMovement { new_mvt, next_mvt }
@@ -263,14 +276,25 @@ impl Score {
     }
     #[cfg(not(target_arch = "wasm32"))]
     pub fn previous_movement(&mut self) -> ScoreUpdate {
-        if self.current_movement > 0 {
-            self.current_movement -= 1;
-        }
-        if self.is_playing {
-            let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
-            ScoreUpdate::NewMovement { new_mvt, next_mvt }
+        if !self.random_order {
+            if self.current_movement > 0 {
+                self.current_movement -= 1;
+            }
+            if self.is_playing {
+                let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
+                ScoreUpdate::NewMovement { new_mvt, next_mvt }
+            } else {
+                ScoreUpdate::Nothing
+            }
         } else {
-            ScoreUpdate::Nothing
+            // Random order
+            self.current_movement = fastrand::usize(..self.movements.len() - 1);
+            if self.is_playing {
+                let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
+                ScoreUpdate::NewMovement { new_mvt, next_mvt }
+            } else {
+                ScoreUpdate::Nothing
+            }
         }
     }
     pub fn is_playing(&self) -> bool {
@@ -316,7 +340,11 @@ impl Score {
             if self.start_of_last_movement.elapsed()
                 >= self.movements[self.current_movement].duration
             {
-                self.current_movement += 1;
+                if self.random_order {
+                    self.current_movement = fastrand::usize(..self.movements.len() - 1);
+                } else {
+                    self.current_movement += 1;
+                }
                 self.start_of_last_movement = Instant::now();
                 if self.current_movement >= self.movements.len() {
                     self.stop();

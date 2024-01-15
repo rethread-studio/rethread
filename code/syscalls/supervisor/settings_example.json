@@ -1,0 +1,34 @@
+[
+  {
+    "path": "C:\\Program Files\\JACK2\\qjackctl\\qjackctl.exe",
+    "working_dir": "C:\\Program Files\\JACK2",
+    "recompilation_command": null,
+    "max_time_alive_before_restart_secs": 43200,
+    "wait_after_restart_secs": 10,
+    "trigger_complete_restart_on_fail": true
+  },
+  {
+    "path": "C:\\Program Files\\REAPER (x64)\\reaper.exe",
+    "working_dir": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\REAPER (x64)",
+    "recompilation_command": null,
+    "max_time_alive_before_restart_secs": 43200,
+    "wait_after_restart_secs": 10,
+    "trigger_complete_restart_on_fail": true
+  },
+  {
+    "path": "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/target/release/conductor.exe",
+    "working_dir": "C:/Users/reth/Documents/git/rethread/code/NWL2023/conductor/",
+    "recompilation_command": "cargo build --release",
+    "max_time_alive_before_restart_secs": 43200,
+    "wait_after_restart_secs": 1,
+    "trigger_complete_restart_on_fail": false
+  },
+  {
+    "path": "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/target/release/combined.exe",
+    "working_dir": "C:/Users/reth/Documents/git/rethread/code/NWL2023/trace_sonifier/",
+    "recompilation_command": "cargo build --release --bin combined",
+    "max_time_alive_before_restart_secs": 43200,
+    "wait_after_restart_secs": 1,
+    "trigger_complete_restart_on_fail": false
+  }
+]
