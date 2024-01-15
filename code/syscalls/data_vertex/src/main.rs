@@ -302,6 +302,9 @@ pub enum RecordingCommand {
     LoadRecordingFromFile(PathBuf),
     SaveRecordingToFile(Uuid, PathBuf),
     CloseRecording(Uuid),
+    PlayScore,
+    PlayRandomMovements,
+    StopScorePlayback,
 }
 
 #[derive(Clone, Debug)]
@@ -518,6 +521,12 @@ impl PacketHQ {
                         }
                     }
                 }
+                RecordingCommand::PlayScore => self.play_score(),
+                RecordingCommand::PlayRandomMovements => self.play_random_movements(),
+                RecordingCommand::StopScorePlayback => {
+                    self.score.stop();
+                    self.osc_sender.send_score_stop();
+                }
             }
         }
         while let Ok(command) = self.command_receiver.pop() {
@@ -552,12 +561,7 @@ impl PacketHQ {
                     }
                 }
                 PacketHQCommands::PlayScore => {
-                    if !self.score.is_playing() {
-                        self.osc_sender.send_score_start();
-                    }
-                    self.score.random_order = false;
-                    let (new_mvt, next_mvt) = self.score.play_from(0);
-                    self.osc_sender.send_movement(&new_mvt, next_mvt);
+                    self.play_score();
                 }
                 PacketHQCommands::StopScorePlayback => {
                     self.score.stop();
@@ -588,15 +592,7 @@ impl PacketHQ {
                     }
                 }
                 PacketHQCommands::PlayRandomMovements => {
-                    if !self.score.is_playing() {
-                        self.osc_sender.send_score_start();
-                    }
-                    self.score.random_order = true;
-                    let num_movements = self.score.movements.len();
-                    let mut rng = thread_rng();
-                    let start_movement = rng.gen_range(0..num_movements - 1);
-                    let (new_mvt, next_mvt) = self.score.play_from(start_movement);
-                    self.osc_sender.send_movement(&new_mvt, next_mvt);
+                    self.play_random_movements();
                 }
             }
         }
@@ -609,6 +605,25 @@ impl PacketHQ {
             }
             ScoreUpdate::Nothing => (),
         }
+    }
+    pub fn play_score(&mut self) {
+        if !self.score.is_playing() {
+            self.osc_sender.send_score_start();
+        }
+        self.score.random_order = false;
+        let (new_mvt, next_mvt) = self.score.play_from(0);
+        self.osc_sender.send_movement(&new_mvt, next_mvt);
+    }
+    pub fn play_random_movements(&mut self) {
+        if !self.score.is_playing() {
+            self.osc_sender.send_score_start();
+        }
+        self.score.random_order = true;
+        let num_movements = self.score.movements.len();
+        let mut rng = thread_rng();
+        let start_movement = rng.gen_range(0..num_movements - 1);
+        let (new_mvt, next_mvt) = self.score.play_from(start_movement);
+        self.osc_sender.send_movement(&new_mvt, next_mvt);
     }
 }
 

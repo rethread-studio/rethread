@@ -367,8 +367,16 @@ impl eframe::App for EguiApp {
                     AudienceUiMessage::RequestActivePrograms => {
                         send_all_active_programs = true;
                     }
-                    AudienceUiMessage::PlayScore => todo!(),
-                    AudienceUiMessage::PlayFreely => todo!(),
+                    AudienceUiMessage::PlayScore => {
+                        self.packet_hq_command_sender
+                            .push(RecordingCommand::PlayScore)
+                            .ok();
+                    }
+                    AudienceUiMessage::PlayFreely => {
+                        self.packet_hq_command_sender
+                            .push(RecordingCommand::PlayRandomMovements)
+                            .ok();
+                    }
                 }
                 self.self_activating_mode = false;
                 self.last_audience_interaction = Instant::now();
@@ -396,7 +404,7 @@ impl eframe::App for EguiApp {
                     if rng.gen::<f32>() > 0.7 {
                         for _ in 0..rng.gen_range(1..=self.active_programs.len()) {
                             let i = rng.gen_range(0..self.active_programs.len());
-                            self.active_programs.remove(i);
+                            self.stop_active_program(self.active_programs[i].clone());
                         }
                     }
                 }
