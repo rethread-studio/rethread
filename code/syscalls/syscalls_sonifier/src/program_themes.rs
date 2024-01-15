@@ -1,10 +1,11 @@
 use std::{
-    sync::{atomic::AtomicU32, Arc, Mutex},
+    sync::{atomic::AtomicU32, Arc, Mutex, PoisonError},
     time::{Duration, Instant},
 };
 
 use super::phrase::*;
 use crate::{note::Note, sound_effects::SoundEffects, to_freq53, Sonifier};
+use anyhow::{anyhow, Result};
 use atomic_float::AtomicF32;
 use knyst::{
     controller::{schedule_bundle, CallbackHandle, KnystCommands, StartBeat},
@@ -412,37 +413,85 @@ impl ProgramThemes {
     }
 }
 
+fn parse_syscall_osc_message(m: nannou_osc::Message) -> Result<(i32, String, [i32; 3], String)> {
+    if let Some(args) = m.args {
+        let mut args = args.into_iter();
+        let id = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        let kind = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .string()
+            .ok_or(anyhow!("Wrong type"))?;
+        let mut func_args = [0_i32; 3];
+        func_args[0] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        func_args[1] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        func_args[2] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+
+        let _return_value = args.next().ok_or(anyhow!("Not enough args"))?;
+        let _returns_error = args.next().ok_or(anyhow!("Not enough args"))?;
+        let program = args
+            .next()
+            .ok_or(anyhow!("Not enough args"))?
+            .string()
+            .ok_or(anyhow!("Wrong type"))?;
+        return Ok((id, kind, func_args, program));
+    } else {
+        return Err(anyhow!("No args in syscall message"));
+    }
+}
+
 impl Sonifier for ProgramThemes {
     fn apply_osc_message(&mut self, m: nannou_osc::Message) {
         if m.addr == "/syscall" {
-            let mut args = m.args.unwrap().into_iter();
-            let _id = args.next().unwrap().int().unwrap();
-            let _kind = args.next().unwrap().string().unwrap();
-            let mut func_args = [0_i32; 3];
-            func_args[0] = args.next().unwrap().int().unwrap();
-            func_args[1] = args.next().unwrap().int().unwrap();
-            func_args[2] = args.next().unwrap().int().unwrap();
-            let _return_value = args.next().unwrap();
-            let _returns_error = args.next().unwrap();
-            let program = args.next().unwrap().string().unwrap();
-            let mut activity = self.activity.lock().unwrap();
-            match program.as_str() {
-                "htop" => {
-                    activity.htop.register_call();
+            // let mut args = m.args.unwrap().into_iter();
+            // let _id = args.next().unwrap().int().unwrap();
+            // let _kind = args.next().unwrap().string().unwrap();
+            // let mut func_args = [0_i32; 3];
+            // func_args[0] = args.next().unwrap().int().unwrap();
+            // func_args[1] = args.next().unwrap().int().unwrap();
+            // func_args[2] = args.next().unwrap().int().unwrap();
+            // let _return_value = args.next().unwrap();
+            // let _returns_error = args.next().unwrap();
+            // let program = args.next().unwrap().string().unwrap();
+            if let Ok((_id, _kind, _func_args, program)) = parse_syscall_osc_message(m) {
+                let mut activity = match self.activity.lock() {
+                    Ok(activity) => activity,
+                    Err(e) => e.into_inner(),
+                };
+                match program.as_str() {
+                    "htop" => {
+                        activity.htop.register_call();
+                    }
+                    "konqueror" => {
+                        activity.konqueror.register_call();
+                    }
+                    "gedit" => {
+                        activity.gedit.register_call();
+                    }
+                    "thunderbird" => {
+                        activity.thunderbird.register_call();
+                    }
+                    "rhythmbox" => {
+                        activity.rhythmbox.register_call();
+                    }
+                    _ => (),
                 }
-                "konqueror" => {
-                    activity.konqueror.register_call();
-                }
-                "gedit" => {
-                    activity.gedit.register_call();
-                }
-                "thunderbird" => {
-                    activity.thunderbird.register_call();
-                }
-                "rhythmbox" => {
-                    activity.rhythmbox.register_call();
-                }
-                _ => (),
             }
         } else if m.addr == "/syscall_analysis/per_kind_interval" {
         }
@@ -471,7 +520,10 @@ impl Sonifier for ProgramThemes {
         _sound_effects: &SoundEffects,
     ) {
         // todo!()
-        let mut activity = self.activity.lock().unwrap();
+        let mut activity = match self.activity.lock() {
+            Ok(a) => a,
+            Err(e) => e.into_inner(),
+        };
         activity.update();
     }
 

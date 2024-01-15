@@ -46,16 +46,20 @@ impl BackgroundNoise {
         let noise_sound_files = ["noise_4ch_0.wav", "noise_4ch_1.wav", "noise_4ch_2.wav"];
         let noise_buffers: Vec<_> = noise_sound_files
             .into_iter()
-            .map(|filename| {
+            .filter_map(|filename| {
                 let mut path = sounds_path.clone();
                 path.push(filename);
-                let sound_buffer = Buffer::from_sound_file(path).unwrap();
-                let channels = sound_buffer.num_channels();
-                if channels != 4 {
-                    eprintln!("Noise buffer was not 4 channels, but {channels}");
+                if let Ok(sound_buffer) = Buffer::from_sound_file(path.clone()) {
+                    let channels = sound_buffer.num_channels();
+                    if channels != 4 {
+                        eprintln!("Noise buffer was not 4 channels, but {channels}");
+                    }
+                    let buffer = knyst_commands().insert_buffer(sound_buffer);
+                    Some(buffer)
+                } else {
+                    eprintln!("Noise buffer at path {:?} could not be loaded", path);
+                    None
                 }
-                let buffer = knyst_commands().insert_buffer(sound_buffer);
-                buffer
             })
             .collect();
         knyst_commands().init_local_graph(

@@ -11,7 +11,7 @@ use knyst::handles::GenericHandle;
 use knyst::prelude::*;
 use knyst::*;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use knyst_visualiser::probe;
 use nannou_osc::rosc::OscPacket;
 use nannou_osc::{receiver, sender, Connected, Message as OscMessage, Sender, Type};
@@ -81,8 +81,9 @@ fn main() -> Result<()> {
     let output_bus = bus(24);
     init_main_effects(output_bus);
 
-    let osc_receiver = receiver(7376).unwrap();
-    let mut osc_sender = sender().unwrap().connect("127.0.0.1:57120").unwrap();
+    // We panic on these early errors to allow the program to restart and try again
+    let osc_receiver = receiver(7376)?;
+    let osc_sender = sender()?.connect("127.0.0.1:57120")?;
     let mut current_sonifiers: Vec<Box<dyn Sonifier + Send>> = vec![];
     // current_sonifiers = vec![Box::new(DirectCategories::new(
     //     1.0,
@@ -167,7 +168,7 @@ fn main() -> Result<()> {
         is_on_break: false,
         transposition_within_octave_guard: true,
         background_noise,
-        sound_effects: SoundEffects::new(output_bus).unwrap(),
+        sound_effects: SoundEffects::new(output_bus)?,
         peak_binaries: PeakBinaries::new(output_bus, 0)?,
         main_bus: output_bus,
         chord_amp_setter,
@@ -190,26 +191,23 @@ fn main() -> Result<()> {
             }
             for m in osc_messages.drain(..) {
                 if m.addr == "/new_movement" {
-                    if let Some(args) = m.args {
-                        let mut args = args.into_iter();
-                        let new_mvt_id = args.next().unwrap().int().unwrap();
-                        let is_break = args.next().unwrap().bool().unwrap();
-                        let description = args.next().unwrap().string().unwrap();
-                        let next_mvt_id = args.next().unwrap().int().unwrap();
-                        let duration = args.next().unwrap().float().unwrap();
-                        let next_mvt_id = if next_mvt_id == -1 {
-                            None
-                        } else {
-                            Some(next_mvt_id)
-                        };
-                        println!("New movement, {new_mvt_id}, break: {is_break:?}");
-                        if is_break {
+                    if let Ok(mvt_data) = parse_new_movement_osc(m) {
+                        println!(
+                            "New movement, {}, break: {:?}",
+                            mvt_data.mvt_id, mvt_data.is_break
+                        );
+                        if mvt_data.is_break {
                             app.sound_effects.play_bell_a();
                         } else {
                             app.sound_effects.play_bell_b();
                         }
-                        app.sound_effects.play_movement_voice(new_mvt_id);
-                        app.change_movement(new_mvt_id, next_mvt_id, is_break, duration);
+                        app.sound_effects.play_movement_voice(mvt_data.mvt_id);
+                        app.change_movement(
+                            mvt_data.mvt_id,
+                            mvt_data.next_mvt_id,
+                            mvt_data.is_break,
+                            mvt_data.duration,
+                        );
                     }
                 } else if m.addr == "/score/play" {
                     if let Some(args) = m.args {
@@ -279,6 +277,59 @@ fn main() -> Result<()> {
     knyst_visualiser::init_knyst_visualiser();
 
     Ok(())
+}
+
+struct MovementData {
+    mvt_id: i32,
+    is_break: bool,
+    description: String,
+    duration: f32,
+    next_mvt_id: Option<i32>,
+}
+
+fn parse_new_movement_osc(m: nannou_osc::Message) -> Result<MovementData> {
+    if let Some(args) = m.args {
+        let mut args = args.into_iter();
+        let new_mvt_id = args
+            .next()
+            .ok_or(anyhow!("Not enough osc args"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        let is_break = args
+            .next()
+            .ok_or(anyhow!("Not enough osc args"))?
+            .bool()
+            .ok_or(anyhow!("Wrong type"))?;
+        let description = args
+            .next()
+            .ok_or(anyhow!("Not enough osc args"))?
+            .string()
+            .ok_or(anyhow!("Wrong type"))?;
+        let next_mvt_id = args
+            .next()
+            .ok_or(anyhow!("Not enough osc args"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        let duration = args
+            .next()
+            .ok_or(anyhow!("Not enough osc args"))?
+            .float()
+            .ok_or(anyhow!("Wrong type"))?;
+        let next_mvt_id = if next_mvt_id == -1 {
+            None
+        } else {
+            Some(next_mvt_id)
+        };
+        Ok(MovementData {
+            mvt_id: new_mvt_id,
+            is_break,
+            description,
+            duration,
+            next_mvt_id,
+        })
+    } else {
+        Err(anyhow!("No args in osc message"))
+    }
 }
 
 struct App {

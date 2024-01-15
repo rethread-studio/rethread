@@ -1,3 +1,4 @@
+use anyhow::{anyhow, Result};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
@@ -11,7 +12,7 @@ use knyst_waveguide2::waveguide;
 use knyst_waveguide2::WaveguideHandle;
 use nannou_osc::Connected;
 use rtrb::Producer;
-use syscalls_shared::SyscallKind;
+use syscalls_shared::{Syscall, SyscallKind};
 
 use crate::sound_effects::SoundEffects;
 use crate::{to_freq53, Sonifier};
@@ -38,7 +39,7 @@ impl DirectCategories {
             rtrb::RingBuffer::<f32>::new((sample_rate * 0.3) as usize);
         let block_counter = handle(
             gen(move |ctx, _| {
-                let out_buf = ctx.outputs.iter_mut().next().unwrap();
+                let out_buf = ctx.outputs.iter_mut().next().expect("channel to exist");
                 for o in out_buf.iter_mut() {
                     block_receiver.pop().unwrap_or(0.0);
                     *o = 0.0;
@@ -53,7 +54,7 @@ impl DirectCategories {
         let post_fx = handle(
             gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
-                let out = ctx.outputs.iter_mut().next().unwrap();
+                let out = ctx.outputs.iter_mut().next().expect("channel to exist");
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
                     *o = (i * 0.1 * amp).clamp(-1.0, 1.0);
                 }
@@ -82,7 +83,7 @@ impl DirectCategories {
             let exciter_sig = handle(
                 gen(move |ctx, _| {
                     let in_buf = ctx.inputs.get_channel(0);
-                    let out_buf = ctx.outputs.iter_mut().next().unwrap();
+                    let out_buf = ctx.outputs.iter_mut().next().expect("channel to exist");
                     for (i, o) in in_buf.iter().zip(out_buf.iter_mut()) {
                         let new_value =
                             (receiver.pop().unwrap_or(0.0).clamp(0.0, 500.0) / 500.0).powf(0.125);
@@ -174,18 +175,48 @@ impl DirectCategories {
     }
 }
 
+fn parse_syscall_osc_message(m: nannou_osc::Message) -> Result<(i32, String, [i32; 3])> {
+    if let Some(args) = m.args {
+        let mut args = args.into_iter();
+        let id = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        let kind = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .string()
+            .ok_or(anyhow!("Wrong type"))?;
+        let mut func_args = [0_i32; 3];
+        func_args[0] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        func_args[1] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        func_args[2] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        return Ok((id, kind, func_args));
+    } else {
+        return Err(anyhow!("No args in syscall message"));
+    }
+}
+
 impl Sonifier for DirectCategories {
     fn apply_osc_message(&mut self, m: nannou_osc::Message) {
         if m.addr == "/syscall" {
-            let mut args = m.args.unwrap().into_iter();
-            let id = args.next().unwrap().int().unwrap();
-            let kind = args.next().unwrap().string().unwrap();
-            let mut func_args = [0_i32; 3];
-            func_args[0] = args.next().unwrap().int().unwrap();
-            func_args[1] = args.next().unwrap().int().unwrap();
-            func_args[2] = args.next().unwrap().int().unwrap();
-            if let Some(swg) = self.continuous_wgs.get_mut(&kind) {
-                swg.register_call(self.coeff_mod, id, func_args);
+            if let Ok((id, kind, func_args)) = parse_syscall_osc_message(m) {
+                if let Some(swg) = self.continuous_wgs.get_mut(&kind) {
+                    swg.register_call(self.coeff_mod, id, func_args);
+                }
             }
         }
     }
@@ -199,7 +230,7 @@ impl Sonifier for DirectCategories {
             swg.update(self.coeff_mod);
         }
         if !self.block_sender.is_full() {
-            self.block_sender.push(0.).unwrap();
+            self.block_sender.push(0.).ok();
             if let Some(coeff_mod_decrease) = self.decrese_sensitivity {
                 self.coeff_mod *= coeff_mod_decrease;
             }
@@ -227,10 +258,9 @@ impl Sonifier for DirectCategories {
                     scale[i % scale.len()] + 53 * (i / scale.len()) as i32,
                     root * 4.0,
                 );
-                self.continuous_wgs
-                    .get_mut(&format!("{:?}", syscall_kind))
-                    .unwrap()
-                    .set_freq(freq);
+                if let Some(wg) = self.continuous_wgs.get_mut(&format!("{:?}", syscall_kind)) {
+                    wg.set_freq(freq);
+                }
             }
         });
     }
@@ -292,7 +322,7 @@ impl SyscallWaveguide {
             // }
             // self.coeff = self.coeff.clamp(0.0001, 2.0);
             if self.accumulator > 300. {
-                self.exciter_sender.push(self.accumulator).unwrap();
+                self.exciter_sender.push(self.accumulator).ok();
                 self.accumulator = 0.0;
                 self.average_iterations_since_trigger = self.average_iterations_since_trigger * 0.9
                     + self.iterations_since_trigger as f32 * 0.1;
@@ -305,7 +335,7 @@ impl SyscallWaveguide {
                 self.amp.set(0, 0.1);
                 self.iterations_since_trigger = 0;
             } else {
-                self.exciter_sender.push(0.0).unwrap();
+                self.exciter_sender.push(0.0).ok();
                 self.iterations_since_trigger += 1;
             }
             if self.iterations_since_trigger == 2000 {

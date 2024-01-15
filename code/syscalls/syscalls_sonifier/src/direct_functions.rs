@@ -12,6 +12,7 @@ use knyst::handles::{AnyNodeHandle, GenericHandle, GraphHandle, HandleData};
 use knyst::prelude::*;
 use knyst::*;
 
+use anyhow::{anyhow, Result};
 use knyst_waveguide2::{waveguide, WaveguideHandle};
 use nannou_osc::{Connected, Type};
 use rand::seq::SliceRandom;
@@ -166,7 +167,7 @@ impl DirectFunctions {
         let post_fx_foreground = handle(
             gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
-                let out = ctx.outputs.iter_mut().next().unwrap();
+                let out = ctx.outputs.iter_mut().next().expect("channel must exist");
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
                     *o = (i * 0.2 * amp).clamp(-1.0, 1.0);
                 }
@@ -182,7 +183,7 @@ impl DirectFunctions {
         let post_fx_background = handle(
             gen(move |ctx, _| {
                 let inp = ctx.inputs.get_channel(0);
-                let out = ctx.outputs.iter_mut().next().unwrap();
+                let out = ctx.outputs.iter_mut().next().expect("channel must exist");
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
                     *o = (i * 0.075 * amp).clamp(-1.0, 1.0);
                 }
@@ -233,8 +234,9 @@ impl DirectFunctions {
         }
         for kind in enabled_kinds {
             let kind_string = format!("{kind:?}");
-            let i = categories.iter().position(|v| v.0 == kind_string).unwrap();
-            categories[i].1.enabled = true;
+            if let Some(i) = categories.iter().position(|v| v.0 == kind_string) {
+                categories[i].1.enabled = true;
+            }
         }
         Self {
             categories,
@@ -256,23 +258,53 @@ impl DirectFunctions {
     }
 }
 
+fn parse_syscall_osc_message(m: nannou_osc::Message) -> Result<(i32, String, [i32; 3])> {
+    if let Some(args) = m.args {
+        let mut args = args.into_iter();
+        let id = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        let kind = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .string()
+            .ok_or(anyhow!("Wrong type"))?;
+        let mut func_args = [0_i32; 3];
+        func_args[0] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        func_args[1] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        func_args[2] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        return Ok((id, kind, func_args));
+    } else {
+        return Err(anyhow!("No args in syscall message"));
+    }
+}
+
 impl Sonifier for DirectFunctions {
     fn apply_osc_message(&mut self, m: nannou_osc::Message) {
         if m.addr == "/syscall" {
-            let mut args = m.args.unwrap().into_iter();
-            let id = args.next().unwrap().int().unwrap();
-            let kind = args.next().unwrap().string().unwrap();
-            let mut func_args = [0_i32; 3];
-            func_args[0] = args.next().unwrap().int().unwrap();
-            func_args[1] = args.next().unwrap().int().unwrap();
-            func_args[2] = args.next().unwrap().int().unwrap();
-            if let Some(category) = self
-                .categories
-                .iter()
-                .position(|(list_kind, _)| list_kind == &kind)
-            {
-                let category = &mut self.categories[category].1;
-                category.register_call(self.sensitivity_coeff, id, func_args);
+            if let Ok((id, kind, func_args)) = parse_syscall_osc_message(m) {
+                if let Some(category) = self
+                    .categories
+                    .iter()
+                    .position(|(list_kind, _)| list_kind == &kind)
+                {
+                    let category = &mut self.categories[category].1;
+                    category.register_call(self.sensitivity_coeff, id, func_args);
+                }
             }
         }
     }
@@ -311,7 +343,10 @@ impl Sonifier for DirectFunctions {
             } else {
                 if self.focus_kinds.len() > 0 {
                     // let focused = rng.gen_range(0..self.categories.len());
-                    let focused = self.focus_kinds.choose(&mut rng).unwrap();
+                    let focused = self
+                        .focus_kinds
+                        .choose(&mut rng)
+                        .expect("We already checked that there are focus_kinds");
                     let focused_string = format!("{focused:?}");
                     for (i, (name, cat)) in &mut self.categories.iter_mut().enumerate() {
                         if *name == focused_string {
@@ -433,7 +468,7 @@ impl SyscallWaveguide {
             let exciter = handle(
                 gen(move |ctx, _| {
                     let in_buf = ctx.inputs.get_channel(0);
-                    let out_buf = ctx.outputs.iter_mut().next().unwrap();
+                    let out_buf = ctx.outputs.iter_mut().next().expect("channel must exist");
                     for (i, o) in in_buf.iter().zip(out_buf.iter_mut()) {
                         let new_value =
                             (receiver.pop().unwrap_or(0.0).clamp(0.0, 500.0) / 500.0).powf(0.125);
@@ -467,7 +502,9 @@ impl SyscallWaveguide {
             wg_amp_ramp = ramp(0.1).value(wg_amp).time(0.1);
             let lpf = one_pole_lpf().cutoff_freq(20000.).sig(wg * wg_amp_ramp);
             graph_output(0, lpf);
-            let inner_graph = knyst_commands().upload_local_graph().unwrap();
+            let inner_graph = knyst_commands()
+                .upload_local_graph()
+                .expect("Nothing could have come between the init and upload of local graph");
             self.output.set(0, inner_graph);
 
             // old
@@ -529,7 +566,7 @@ impl SyscallWaveguide {
                 // }
                 // self.coeff = self.coeff.clamp(0.0001, 2.0);
                 if self.accumulator > 200. {
-                    i.exciter_sender.push(self.accumulator).unwrap();
+                    i.exciter_sender.push(self.accumulator).ok();
                     self.accumulator = 0.0;
                     self.average_iterations_since_trigger = self.average_iterations_since_trigger
                         * 0.9
@@ -547,7 +584,7 @@ impl SyscallWaveguide {
                     i.wg_amp.set(0, 0.10);
                     self.iterations_since_trigger = 0;
                 } else {
-                    i.exciter_sender.push(0.0).unwrap();
+                    i.exciter_sender.push(0.0).ok();
                     self.iterations_since_trigger += 1;
                 }
                 if self.iterations_since_trigger == 1500 {

@@ -1,6 +1,6 @@
-use std::{ffi::OsStr, time::Duration};
+use std::{ffi::OsStr, path::PathBuf, time::Duration};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use knyst::{handles::GenericHandle, knyst_commands, prelude::*, resources::BufferId};
 use rand::{seq::SliceRandom, thread_rng, Rng};
 
@@ -10,10 +10,33 @@ use crate::sound_path;
 pub struct SoundEffects {
     voice_focus: Vec<(String, BufferId)>,
     voice_movement: Vec<(i32, BufferId)>,
-    end_movement_voices: BufferId,
+    end_movement_voices: Option<BufferId>,
     bells_a: Vec<BufferId>,
     bells_b: Vec<BufferId>,
     out_bus: Handle<GenericHandle>,
+}
+
+fn load_movement_wav(path: &PathBuf) -> Result<(i32, BufferId)> {
+    let name = path
+        .file_stem()
+        .ok_or(anyhow!("No file stem in movement wav path"))?
+        .to_string_lossy()
+        .to_string();
+    let number = name.parse::<i32>()?;
+    let sound_file = Buffer::from_sound_file(path)?;
+    let buf = knyst_commands().insert_buffer(sound_file);
+    Ok((number, buf))
+}
+fn load_focus_wav(path: &PathBuf) -> Result<(String, BufferId)> {
+    let name = path
+        .file_stem()
+        .ok_or(anyhow!("No file stem in focus wav path"))?
+        .to_string_lossy()
+        .to_string();
+
+    let sound_file = Buffer::from_sound_file(path)?;
+    let buf = knyst_commands().insert_buffer(sound_file);
+    Ok((name, buf))
 }
 
 impl SoundEffects {
@@ -26,10 +49,9 @@ impl SoundEffects {
             let entry = entry?;
             let path = entry.path();
             if let Some("wav") = path.extension().and_then(OsStr::to_str) {
-                let name = path.file_stem().unwrap().to_string_lossy().to_string();
-                let sound_file = Buffer::from_sound_file(path)?;
-                let buf = knyst_commands().insert_buffer(sound_file);
-                voice_focus.push((name, buf));
+                if let Ok((name, buf)) = load_focus_wav(&path) {
+                    voice_focus.push((name, buf));
+                }
             }
         }
         let mut root_path = sound_path();
@@ -39,11 +61,9 @@ impl SoundEffects {
             let entry = entry?;
             let path = entry.path();
             if let Some("wav") = path.extension().and_then(OsStr::to_str) {
-                let name = path.file_stem().unwrap().to_string_lossy().to_string();
-                let number = name.parse::<i32>().unwrap();
-                let sound_file = Buffer::from_sound_file(path)?;
-                let buf = knyst_commands().insert_buffer(sound_file);
-                voice_movement.push((number, buf));
+                if let Ok((number, buf)) = load_movement_wav(&path) {
+                    voice_movement.push((number, buf));
+                }
             }
         }
         let mut root_path = sound_path();
@@ -72,8 +92,16 @@ impl SoundEffects {
         }
         let mut root_path = sound_path();
         root_path.push("end_movement_voices.wav");
-        let sound_file = Buffer::from_sound_file(root_path)?;
-        let end_movement_voices = knyst_commands().insert_buffer(sound_file);
+        let end_movement_voices = if let Ok(sound_file) = Buffer::from_sound_file(root_path.clone())
+        {
+            Some(knyst_commands().insert_buffer(sound_file))
+        } else {
+            eprintln!(
+                "Failed to load end_movement_voices.wav at path {:?}",
+                root_path
+            );
+            None
+        };
 
         Ok(Self {
             voice_focus,
@@ -123,7 +151,12 @@ impl SoundEffects {
         }
     }
     pub fn play_end_movement_effects(&self, duration_secs: f32) {
-        play_mono_sound_buffer(self.end_movement_voices, self.out_bus, 0.5);
+        if let Some(buf) = self.end_movement_voices {
+            play_mono_sound_buffer(buf, self.out_bus, 0.5);
+        } else {
+            eprintln!("end_movement_voices was never loaded");
+        }
+
         // let s = self.clone();
         // std::thread::spawn(move || {
         //     let mut rng = thread_rng();

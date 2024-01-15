@@ -19,7 +19,7 @@ use knyst::time::Seconds;
 use knyst::trig::{interval_trig, IntervalTrig, IntervalTrigHandle};
 use knyst::*;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use knyst_waveguide2::{half_sine_wt, waveguide, HalfSineWtHandle, Waveguide, WaveguideHandle};
 use nannou_osc::{receiver, Connected};
 use rand::rngs::ThreadRng;
@@ -48,7 +48,7 @@ impl QuantisedCategories {
         // This allows us to know that a block has passed on the audio thread so that we don't update more often than necessary
         let (mut sender, mut receiver) = rtrb::RingBuffer::<f32>::new(16);
         for _ in 0..16 {
-            sender.push(0.0).unwrap();
+            sender.push(0.0).ok();
         }
 
         knyst_commands().init_local_graph(
@@ -60,16 +60,16 @@ impl QuantisedCategories {
 
         let post_fx = handle(
             gen(move |ctx, _| {
-                receiver.pop().unwrap();
+                receiver.pop().ok();
                 let in0 = ctx.inputs.get_channel(0);
                 let in1 = ctx.inputs.get_channel(1);
                 let in2 = ctx.inputs.get_channel(2);
                 let in3 = ctx.inputs.get_channel(3);
                 let mut outputs = ctx.outputs.iter_mut();
-                let out0 = outputs.next().unwrap();
-                let out1 = outputs.next().unwrap();
-                let out2 = outputs.next().unwrap();
-                let out3 = outputs.next().unwrap();
+                let out0 = outputs.next().expect("channel must exist");
+                let out1 = outputs.next().expect("channel must exist");
+                let out2 = outputs.next().expect("channel must exist");
+                let out3 = outputs.next().expect("channel must exist");
                 for (((((((i0, i1), i2), i3), o0), o1), o2), o3) in in0
                     .iter()
                     .zip(in1)
@@ -228,7 +228,9 @@ impl QuantisedCategories {
             );
             continuous_wgs.insert(kind_label, syscall_waveguide);
         }
-        let graph = knyst_commands().upload_local_graph().unwrap();
+        let graph = knyst_commands()
+            .upload_local_graph()
+            .expect("Retreiving local graph should be infallible");
         println!(
             "QC inner graph: {}, active_graph: {}",
             graph.graph_id(),
@@ -246,19 +248,47 @@ impl QuantisedCategories {
         }
     }
 }
-
+fn parse_syscall_osc_message(m: nannou_osc::Message) -> Result<(i32, String, [i32; 3])> {
+    if let Some(args) = m.args {
+        let mut args = args.into_iter();
+        let id = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        let kind = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .string()
+            .ok_or(anyhow!("Wrong type"))?;
+        let mut func_args = [0_i32; 3];
+        func_args[0] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        func_args[1] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        func_args[2] = args
+            .next()
+            .ok_or(anyhow!("Too few arguments"))?
+            .int()
+            .ok_or(anyhow!("Wrong type"))?;
+        return Ok((id, kind, func_args));
+    } else {
+        return Err(anyhow!("No args in syscall message"));
+    }
+}
 impl Sonifier for QuantisedCategories {
     fn apply_osc_message(&mut self, m: nannou_osc::Message) {
         if m.addr == "/syscall" {
-            let mut args = m.args.unwrap().into_iter();
-            let id = args.next().unwrap().int().unwrap();
-            let kind = args.next().unwrap().string().unwrap();
-            let mut func_args = [0_i32; 3];
-            func_args[0] = args.next().unwrap().int().unwrap();
-            func_args[1] = args.next().unwrap().int().unwrap();
-            func_args[2] = args.next().unwrap().int().unwrap();
-            if let Some(swg) = self.continuous_wgs.get_mut(&kind) {
-                swg.register_call(id, func_args);
+            if let Ok((id, kind, func_args)) = parse_syscall_osc_message(m) {
+                if let Some(swg) = self.continuous_wgs.get_mut(&kind) {
+                    swg.register_call(id, func_args);
+                }
             }
         }
     }
@@ -289,7 +319,7 @@ impl Sonifier for QuantisedCategories {
         if !self.sender.is_full() {
             schedule_bundle(Time::Immediately, || {
                 let mut rng = thread_rng();
-                self.sender.push(0.0).unwrap();
+                self.sender.push(0.0).ok();
                 for swg in self.continuous_wgs.values_mut() {
                     swg.update(&mut rng);
                 }
@@ -331,10 +361,9 @@ impl Sonifier for QuantisedCategories {
                     root * 4.,
                 );
 
-                self.continuous_wgs
-                    .get_mut(&format!("{:?}", syscall_kind))
-                    .unwrap()
-                    .set_freq(freq);
+                if let Some(wg) = self.continuous_wgs.get_mut(&format!("{:?}", syscall_kind)) {
+                    wg.set_freq(freq);
+                }
             }
         });
     }
