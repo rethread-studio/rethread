@@ -450,7 +450,7 @@ impl App {
             current_sonifiers.clear();
             *is_on_break = is_break;
             *transposition_within_octave_guard = true;
-            if new_mvt_id != 99 {
+            if new_mvt_id != 9999 {
                 chord_amp_setter.set(0, 1.0);
             }
             let mut background_ramp = None;
@@ -778,6 +778,9 @@ impl App {
                             });
                         }
                     }
+                    99 => {
+                        sound_effects.play_bell_b();
+                    }
                     _ => {
                         eprintln!("!! Unhandled movement:");
                         dbg!(&mvt_id);
@@ -904,10 +907,10 @@ impl PanMonoToQuad {
             let front_gain = 1.0 - pan_y;
             let rear_gain = pan_y;
 
-            front_left[i] = (signal * left_gain * front_gain);
-            front_right[i] = (signal * right_gain * front_gain);
-            rear_left[i] = (signal * left_gain * rear_gain);
-            rear_right[i] = (signal * right_gain * rear_gain);
+            front_left[i] = signal * left_gain * front_gain;
+            front_right[i] = signal * right_gain * front_gain;
+            rear_left[i] = signal * left_gain * rear_gain;
+            rear_right[i] = signal * right_gain * rear_gain;
         }
         GenState::Continue
     }
@@ -925,36 +928,44 @@ fn changed_harmony_chord(
         for f in new_chord {
             let length = rng.gen_range(length_min..length_max);
             let speaker = rng.gen_range(0..4);
-            let filtered_noise = upload_graph(knyst_commands().default_graph_settings(), || {
-                let env = envelope_gen(
-                    0.0,
-                    vec![(1.0, 3.), (1.0, length - 5.), (0.0, 2.)],
-                    knyst::envelope::SustainMode::NoSustain,
-                    StopAction::FreeGraph,
-                );
-                let source = white_noise();
-                let mut sigs = vec![];
-                for i in 0..5 {
-                    let freq_detune = [1.0, 1.001, 0.999, 1.002, 0.998][i];
-                    let q_env = envelope_gen(
-                        1.0 / rng.gen_range(0.001..0.008),
-                        vec![(1. / 0.0003, length)],
+            let filtered_noise = upload_graph(
+                knyst_commands()
+                    .default_graph_settings()
+                    .num_outputs(1)
+                    .num_inputs(1),
+                || {
+                    let input_amp = graph_input(0, 1);
+                    let env = envelope_gen(
+                        0.0,
+                        vec![(1.0, 3.), (1.0, length - 5.), (0.0, 2.)],
                         knyst::envelope::SustainMode::NoSustain,
-                        StopAction::Continue,
+                        StopAction::FreeGraph,
                     );
+                    let source = white_noise();
+                    let mut sigs = vec![];
+                    for i in 0..5 {
+                        let freq_detune = [1.0, 1.001, 0.999, 1.002, 0.998][i];
+                        let q_env = envelope_gen(
+                            1.0 / rng.gen_range(0.001..0.008),
+                            vec![(1. / 0.0003, length)],
+                            knyst::envelope::SustainMode::NoSustain,
+                            StopAction::Continue,
+                        );
 
-                    let sig = svf_dynamic(SvfFilterType::Band)
-                        .cutoff_freq(f * freq_detune)
-                        .q(q_env)
-                        .gain(0.0)
-                        .input(source);
-                    sigs.push(sig);
-                }
-                let sig = sigs[0] + sigs[1] + sigs[2] + sigs[3] + sigs[4];
-                let sig = sig * env * 0.0005;
-                graph_output(speaker, sig);
-            });
-            graph_output(0, filtered_noise * amp);
+                        let sig = svf_dynamic(SvfFilterType::Band)
+                            .cutoff_freq(f * freq_detune)
+                            .q(q_env)
+                            .gain(0.0)
+                            .input(source);
+                        sigs.push(sig);
+                    }
+                    let sig = sigs[0] + sigs[1] + sigs[2] + sigs[3] + sigs[4];
+                    let sig = sig * env * 0.0005 * input_amp;
+                    graph_output(0, sig);
+                },
+            );
+            filtered_noise.set(0, amp);
+            graph_output(speaker, filtered_noise);
         }
     }
 }

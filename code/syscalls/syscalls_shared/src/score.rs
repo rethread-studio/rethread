@@ -235,7 +235,7 @@ impl Score {
                 is_break: false,
                 description: "end"
                     .to_string(),
-                duration: Duration::from_secs(1),
+                duration: Duration::from_secs(60),
             },
         ];
         Self {
@@ -265,7 +265,7 @@ impl Score {
             }
         } else {
             // Random order
-            self.current_movement = fastrand::usize(..self.movements.len() - 1);
+            self.current_movement = fastrand::usize(..self.movements.len() - 2);
             if self.is_playing {
                 let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
                 ScoreUpdate::NewMovement { new_mvt, next_mvt }
@@ -288,7 +288,7 @@ impl Score {
             }
         } else {
             // Random order
-            self.current_movement = fastrand::usize(..self.movements.len() - 1);
+            self.current_movement = fastrand::usize(..self.movements.len() - 2);
             if self.is_playing {
                 let (new_mvt, next_mvt) = self.play_from(self.current_movement).clone();
                 ScoreUpdate::NewMovement { new_mvt, next_mvt }
@@ -341,7 +341,10 @@ impl Score {
                 >= self.movements[self.current_movement].duration
             {
                 if self.random_order {
-                    self.current_movement = fastrand::usize(..self.movements.len() - 1);
+                    let old_mvt = self.current_movement;
+                    while self.current_movement == old_mvt {
+                        self.current_movement = fastrand::usize(..self.movements.len() - 2);
+                    }
                 } else {
                     self.current_movement += 1;
                 }
