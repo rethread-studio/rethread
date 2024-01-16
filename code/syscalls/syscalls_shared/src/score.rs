@@ -1,6 +1,6 @@
-use std::time::Duration;
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::Instant;
+use std::{ops::Range, time::Duration};
 
 pub struct Score {
     pub current_movement: usize,
@@ -21,6 +21,8 @@ impl Score {
                 is_interlude: false,
                 description: "direct,categories".to_string(),
                 duration: Duration::from_secs(3 * 30),
+                programs: vec!["konqueror", "gedit"],
+                restart_programs: None,
             },
             // Movement {
             //     id: 1,
@@ -35,6 +37,8 @@ impl Score {
                 is_interlude: true,
                 description: "direct,categories,interlude".to_string(),
                 duration: Duration::from_secs(40),
+                programs: vec!["htop"],
+                restart_programs: None,
             },
             Movement {
                 id: 205,
@@ -42,6 +46,8 @@ impl Score {
                 is_interlude: false,
                 description: "break".to_string(),
                 duration: Duration::from_secs(break_dur),
+                programs: vec![],
+                restart_programs: None,
             },
             Movement {
                 id: 40,
@@ -49,6 +55,8 @@ impl Score {
                 is_interlude: false,
                 description: "peak_binaries".to_string(),
                 duration: Duration::from_secs(40),
+                programs: vec!["konqueror", "htop"],
+                restart_programs: None,
             },
             // Movement {
             //     id: 201,
@@ -63,6 +71,8 @@ impl Score {
                 is_interlude: false,
                 description: "direct,function calls".to_string(),
                 duration: Duration::from_secs(90),
+                programs: vec!["thunderbird", "konqueror"],
+                restart_programs: None,
             },
             Movement {
                 id: 3,
@@ -70,6 +80,8 @@ impl Score {
                 is_interlude: false,
                 description: "break".to_string(),
                 duration: Duration::from_secs(break_dur),
+                programs: vec![],
+                restart_programs: None,
             },
             Movement {
                 id: 102,
@@ -78,6 +90,8 @@ impl Score {
                 description: "interlude,direct,function calls,lower and lower sensitivity"
                     .to_string(),
                 duration: Duration::from_secs(45),
+                programs: vec!["thunderbird", "konqueror", "gedit"],
+                restart_programs: None,
             },
             // Movement {
             //     id: 201,
@@ -92,6 +106,8 @@ impl Score {
                 is_interlude: false,
                 description: "direct,function calls,focus shifting,chorus".to_string(),
                 duration: Duration::from_secs(90),
+                programs: vec!["konqueror"],
+                restart_programs: None,
             },
             // Movement {
             //     id: 7,
@@ -106,6 +122,8 @@ impl Score {
                 is_interlude: true,
                 description: "interlude,direct,function calls,focus shifting (fast, few types),chorus".to_string(),
                 duration: Duration::from_secs(40),
+                programs: vec!["htop"],
+                restart_programs: None,
             },
             Movement {
                 id: 207,
@@ -113,6 +131,8 @@ impl Score {
                 is_interlude: false,
                 description: "break".to_string(),
                 duration: Duration::from_secs(break_dur),
+                programs: vec![],
+                restart_programs: None,
             },
             Movement {
                 id: 4,
@@ -120,6 +140,8 @@ impl Score {
                 is_interlude: false,
                 description: "quantised,categories,clear".to_string(),
                 duration: Duration::from_secs(2 * 60),
+                programs: vec!["konqueror", "thunderbird"],
+                restart_programs: None,
             },
             // Movement {
             //     id: 8,
@@ -134,6 +156,8 @@ impl Score {
                 is_interlude: true,
                 description: "interlude,quantised,categories,clear".to_string(),
                 duration: Duration::from_secs(3 * 30),
+                programs: vec!["htop"],
+                restart_programs: None,
             },
             Movement {
                 id: 108,
@@ -141,6 +165,8 @@ impl Score {
                 is_interlude: false,
                 description: "break".to_string(),
                 duration: Duration::from_secs(break_dur),
+                programs: vec![],
+                restart_programs: None,
             },
             Movement {
                 id: 5,
@@ -150,6 +176,8 @@ impl Score {
                     "quantised,categories,smoothed,occasional snippets of the binaries as sound,performer makes breaks and variation in the interaction"
                         .to_string(),
                 duration: Duration::from_secs(2 * 30),
+                programs: vec!["htop", "gedit", "konqueror"],
+                restart_programs: Some(20.0..60.),
             },
             // Movement {
             //     id: 9,
@@ -165,6 +193,8 @@ impl Score {
                 description: "themes,many programs open (open and close), quickly rising harmony"
                     .to_string(),
                 duration: Duration::from_secs(1 * 40),
+                programs: vec!["thunderbird", "gedit", "konqueror"],
+                restart_programs: Some(8.0..15.0),
             },
             Movement {
                 id: 111,
@@ -173,6 +203,8 @@ impl Score {
                 description: "themes,many programs open (open and close), quickly rising harmony"
                     .to_string(),
                 duration: Duration::from_secs(10),
+                programs: vec!["thunderbird", "gedit", "konqueror", "htop"],
+                restart_programs: Some(2.0..15.0),
             },
             Movement {
                 id: 112,
@@ -181,6 +213,8 @@ impl Score {
                 description: "themes,many programs open (open and close), quickly rising harmony"
                     .to_string(),
                 duration: Duration::from_secs(1 * 50),
+                programs: vec!["thunderbird", "gedit", "konqueror", "htop"],
+                restart_programs: Some(5.0..15.0),
             },
             Movement {
                 id: 113,
@@ -189,6 +223,8 @@ impl Score {
                 description: "themes,many programs open (open and close), quickly rising harmony"
                     .to_string(),
                 duration: Duration::from_secs(15),
+                programs: vec!["thunderbird", "gedit", "konqueror", "htop"],
+                restart_programs: Some(4.0..10.0),
             },
             Movement {
                 id: 110,
@@ -197,6 +233,8 @@ impl Score {
                 description: "themes,many programs open (open and close),smoothed direct functions in the background, steady harmony"
                     .to_string(),
                 duration: Duration::from_secs(1 * 60),
+                programs: vec!["thunderbird", "gedit", "konqueror", "htop"],
+                restart_programs: Some(2.0..10.0),
             },
             Movement {
                 id: 203,
@@ -204,6 +242,8 @@ impl Score {
                 is_interlude: false,
                 description: "break".to_string(),
                 duration: Duration::from_secs(break_dur),
+                programs: vec![],
+                restart_programs: None,
             },
             Movement {
                 id: 122,
@@ -212,6 +252,8 @@ impl Score {
                 description: "interlude,direct,function calls,"
                     .to_string(),
                 duration: Duration::from_secs(20),
+                programs: vec!["htop"],
+                restart_programs: None,
             },
             Movement {
                 id: 11,
@@ -220,6 +262,8 @@ impl Score {
                 description: "binaries"
                     .to_string(),
                 duration: Duration::from_secs(20),
+                programs: vec!["thunderbird", "gedit", "konqueror", "htop"],
+                restart_programs: None,
             },
             Movement {
                 id: 42,
@@ -228,6 +272,8 @@ impl Score {
                 description: "ending,steadily get lower into the sub frequencies and smoother,image goes to white"
                     .to_string(),
                 duration: Duration::from_secs(30),
+                programs: vec!["thunderbird", "gedit", "konqueror", "htop"],
+                restart_programs: None,
             },
             Movement {
                 id: 9999,
@@ -236,6 +282,8 @@ impl Score {
                 description: "end"
                     .to_string(),
                 duration: Duration::from_secs(60),
+                programs: vec![],
+                restart_programs: None,
             },
         ];
         Self {
@@ -421,6 +469,9 @@ pub struct Movement {
     pub is_interlude: bool,
     pub description: String,
     pub duration: Duration,
+    pub programs: Vec<&'static str>,
+    /// If Some, a range of seconds until a program should be restarted
+    pub restart_programs: Option<Range<f32>>,
 }
 
 #[derive(Clone, Debug)]
