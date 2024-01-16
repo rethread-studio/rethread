@@ -29,6 +29,7 @@ use crate::program_themes::ProgramThemes;
 use crate::quantised_categories::QuantisedCategories;
 
 mod background_noise;
+mod crossover;
 mod direct_categories;
 mod direct_functions;
 mod harmony;
