@@ -16,6 +16,8 @@ use knyst::{
 };
 use knyst_airwindows::galactic;
 
+use crate::gen::soft_clipper;
+
 pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
     // Channel 1: 0-3
     // Every other channel is also eventually passed here
@@ -59,9 +61,19 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
         let sig = svf_filter(SvfFilterType::HighShelf, 6139., 1.2, -1.5).input(eq[i]);
         eq[i] = sig;
     }
-    for i in 0..4 {
-        graph_output(i, eq[i]);
-    }
+    // for i in 0..4 {
+    //     graph_output(i, eq[i]);
+    // }
+
+    // Add a soft clipper to the output and boost the output level
+    let soft_clip = soft_clipper()
+        .in0(eq[0])
+        .in1(eq[1])
+        .in2(eq[2])
+        .in3(eq[3])
+        .boost_db(9.)
+        .limit_db(-1.);
+    graph_output(0, soft_clip);
     // for i in 0..4 {
     //     graph_output(i, main_out_bus.out(i));
     // }

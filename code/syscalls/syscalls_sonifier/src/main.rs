@@ -32,6 +32,7 @@ mod background_noise;
 mod crossover;
 mod direct_categories;
 mod direct_functions;
+mod gen;
 mod harmony;
 mod init_main_effects;
 pub mod note;
