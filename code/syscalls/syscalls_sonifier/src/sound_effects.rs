@@ -115,13 +115,13 @@ impl SoundEffects {
     pub fn play_bell_a(&self) {
         let mut rng = thread_rng();
         if let Some(buf) = self.bells_a.choose(&mut rng) {
-            play_mono_sound_buffer(*buf, self.out_bus, 1.0);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.5);
         }
     }
     pub fn play_bell_b(&self) {
         let mut rng = thread_rng();
         if let Some(buf) = self.bells_b.choose(&mut rng) {
-            play_mono_sound_buffer(*buf, self.out_bus, 1.0);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.5);
         }
     }
     pub fn play_movement_voice(&self, movement: i32) {

@@ -80,10 +80,10 @@ impl QuantisedCategories {
                     .zip(out2.iter_mut())
                     .zip(out3.iter_mut())
                 {
-                    *o0 = (i0 * 2.5 * amp).clamp(-1.0, 1.0);
-                    *o1 = (i1 * 2.5 * amp).clamp(-1.0, 1.0);
-                    *o2 = (i2 * 2.5 * amp).clamp(-1.0, 1.0);
-                    *o3 = (i3 * 2.5 * amp).clamp(-1.0, 1.0);
+                    *o0 = (i0 * 3.0 * amp).clamp(-1.0, 1.0);
+                    *o1 = (i1 * 3.0 * amp).clamp(-1.0, 1.0);
+                    *o2 = (i2 * 3.0 * amp).clamp(-1.0, 1.0);
+                    *o3 = (i3 * 3.0 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue

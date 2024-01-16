@@ -157,12 +157,15 @@ impl Sonifier for PeakBinaries {
                                 let degree_index =
                                     rng.usize(0..(num_pitches_from_chord.min(self.chord.len())));
                                 let degree = self.chord[degree_index];
-                                let freq = to_freq53(degree, self.root_freq);
+                                let mut freq = to_freq53(degree, self.root_freq);
+                                while freq < 750. {
+                                    freq *= 2.;
+                                }
                                 // let addr = "/background_noise";
                                 // let args = vec![Type::Float(length), Type::Float(freq)];
                                 // osc_sender.send((addr, args)).ok();
                                 // Find the variation of the root closest to 1000Hz
-                                let freq = find_variation_closest_to_1000(freq);
+                                // let freq = find_variation_closest_to_1000(freq);
                                 spawn_filtered_noise(freq, length, self.out_bus);
                                 self.last_filtered_noise = Instant::now();
                             }

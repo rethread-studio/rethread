@@ -23,7 +23,7 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
     for i in 0..4 {
         main_out_bus.set(i, out_bus.out(i));
     }
-    // Multiband compressor
+    // TODO: Multiband compressor
     // Limiter
     let l0 = limiter(-4.8)
         .input_left(main_out_bus.out(0))
@@ -51,7 +51,7 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
     }
     // Bell 1947 -2db
     for i in 0..4 {
-        let sig = svf_filter(SvfFilterType::Bell, 1947., 1.2, -2.0).input(eq[i]);
+        let sig = svf_filter(SvfFilterType::Bell, 1947., 1.2, -2.5).input(eq[i]);
         eq[i] = sig;
     }
     // HighShelf 6139 -1.5db
@@ -93,8 +93,10 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
         .right(c1.out(1));
     // .left(out_bus.out(6))
     // .right(out_bus.out(7));
-    graph_output(4, (rev0 * 0.4 + c0 * 0.6) * 1.5);
-    graph_output(6, (rev1 * 0.4 + c1 * 0.6) * 1.5);
+    main_out_bus.set(0, (rev0 * 0.4 + c0 * 0.6) * 1.5);
+    main_out_bus.set(2, (rev1 * 0.4 + c1 * 0.6) * 1.5);
+    // graph_output(4, (rev0 * 0.4 + c0 * 0.6) * 1.5);
+    // graph_output(6, (rev1 * 0.4 + c1 * 0.6) * 1.5);
 
     // Channel 3: 8-11
     // TODO: Multiband compressor
@@ -135,18 +137,22 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
     // }
 
     // Channel 4: 12-15
-    // Goes into channel 2
-    c0.input_left(out_bus.out(12));
-    c0.input_right(out_bus.out(13));
-    c1.input_left(out_bus.out(14));
-    c1.input_right(out_bus.out(15));
+    let ch4_amp = db_to_amplitude(2.66);
+    // Goes into channel 2 through the compressor, its first effect
+    c0.input_left(out_bus.out(12) * ch4_amp);
+    c0.input_right(out_bus.out(13) * ch4_amp);
+    c1.input_left(out_bus.out(14) * ch4_amp);
+    c1.input_right(out_bus.out(15) * ch4_amp);
     // for i in 12..=15 {
     //     graph_output(i, out_bus.out(i));
     // }
 
-    // Channel 5: 16-19
-    for i in 16..=19 {
-        graph_output(i, out_bus.out(i));
+    // Channel 5: 16-19, background rumble
+    // for i in 16..=19 {
+    //     graph_output(i, out_bus.out(i));
+    // }
+    for i in 0..4 {
+        graph_output(i, out_bus.out(i + 16));
     }
 }
 

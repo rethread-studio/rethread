@@ -22,7 +22,7 @@ use syscalls_shared::SyscallKind;
 
 use crate::direct_categories::DirectCategories;
 use crate::direct_functions::DirectFunctions;
-use crate::harmony::HarmonicChange;
+use crate::harmony::{default_harmonic_changes, HarmonicChange};
 use crate::init_main_effects::init_main_effects;
 use crate::peak_binaries::PeakBinaries;
 use crate::program_themes::ProgramThemes;
@@ -120,30 +120,17 @@ fn main() -> Result<()> {
     }
     let mut osc_messages = Vec::with_capacity(40);
     let mut last_switch = Instant::now();
-    let mut last_chord_change = Instant::now();
-    let mut mvt_id = 99998;
-    let mut root_freq = 25.;
-    let mut root: i32 = 0;
+    let last_chord_change = Instant::now();
+    let mvt_id = 99998;
+    let root_freq = 25.;
+    let root: i32 = 0;
     let chord_maj7sharp11 = vec![0, 17, 31, 48, 53, 53 + 26, 53 + 31];
-    let chord_9 = vec![0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
-    let mut current_chord = chord_maj7sharp11.clone();
-    let mut chord_change_interval = Some(Duration::from_secs(8));
+    // let chord_9 = vec![0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
+    let current_chord = chord_maj7sharp11.clone();
+    let chord_change_interval = Some(Duration::from_secs(8));
     // let chords = [chord_maj7sharp11, chord_9];
-    let mut current_harmonic_change = 0;
-    let harmonic_changes = vec![
-        HarmonicChange::new().transpose(5),
-        HarmonicChange::new()
-            .new_chord(chord_9.clone())
-            .transpose(-5),
-        HarmonicChange::new()
-            .new_chord(chord_maj7sharp11.clone())
-            .transpose(5),
-        HarmonicChange::new().transpose(5),
-        HarmonicChange::new()
-            .new_chord(chord_9.clone())
-            .transpose(9),
-        HarmonicChange::new().new_chord(chord_maj7sharp11.clone()),
-    ];
+    let current_harmonic_change = 0;
+    let harmonic_changes = default_harmonic_changes();
 
     let background_noise = BackgroundNoise::new(16, output_bus, sound_path(), root_freq);
     knyst_commands().to_top_level_graph();
@@ -829,7 +816,7 @@ impl App {
                             });
                         }
                     }
-                    99 => {
+                    9999 => {
                         sound_effects.play_bell_b();
                     }
                     _ => {

@@ -34,3 +34,22 @@ impl HarmonicChange {
         }
     }
 }
+
+pub fn default_harmonic_changes() -> Vec<HarmonicChange> {
+    let chord_maj7sharp11 = vec![0, 17, 31, 48, 53, 53 + 26, 53 + 31];
+    let chord_9 = vec![0 + 5, 17 + 5, 31 + 5, 44 + 5, 53 + 5, 62 + 5, 53 + 17 + 5];
+    vec![
+        HarmonicChange::new().transpose(5),
+        HarmonicChange::new()
+            .new_chord(chord_9.clone())
+            .transpose(-5),
+        HarmonicChange::new()
+            .new_chord(chord_maj7sharp11.clone())
+            .transpose(5),
+        HarmonicChange::new().transpose(5),
+        HarmonicChange::new()
+            .new_chord(chord_9.clone())
+            .transpose(9),
+        HarmonicChange::new().new_chord(chord_maj7sharp11.clone()),
+    ]
+}

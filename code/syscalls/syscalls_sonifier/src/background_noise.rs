@@ -114,7 +114,8 @@ impl BackgroundNoise {
             graph_output(i, sigs[i]);
         }
         let g = knyst_commands().upload_local_graph().unwrap();
-        graph_output(start_channel, g);
+        // graph_output(start_channel, g);
+        output_bus.set(start_channel, g);
         // let output_channels = sig.out_channels().count();
         // println!("Output channels from sig: {output_channels}");
         // for i in 0..4 {
