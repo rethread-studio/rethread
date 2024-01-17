@@ -191,10 +191,10 @@ impl OscSender {
             }
         }
     }
-    pub fn send_score_start(&mut self) {
+    pub fn send_score_start(&mut self, random_order: bool) {
         for sender in &mut self.senders {
             let addr = "/score/play";
-            let args = vec![Type::Int(1)];
+            let args = vec![Type::Int(if random_order { 2 } else { 1 })];
             sender.send((addr, args)).ok();
         }
         if let Some(ws) = &mut self.websocket_senders {

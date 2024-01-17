@@ -89,8 +89,12 @@ struct EguiApp {
     cut_from_start_length: f32,
     recording_playback_mode: RecordingPlaybackMode,
     last_audience_interaction: Instant,
-    // If we should activate programs without audience interaction
+    // If we should enable the possibility of activating programs without audience interaction
+    enable_self_activation: bool,
+    /// If programs are turned on/off automatically
     self_activating_mode: bool,
+    /// If the piece should be run interactively/by itself (true), or with live performance (false)
+    standalone_mode: bool,
     next_self_activation: Duration,
     last_self_activation: Instant,
 }
@@ -147,8 +151,23 @@ impl EguiApp {
             self_activating_mode: false,
             next_self_activation: Duration::from_secs(10),
             last_self_activation: Instant::now(),
+            enable_self_activation: false,
+            standalone_mode: true,
         };
         s.apply_persistent_settings();
+        if s.standalone_mode {
+            if let Err(e) = s
+                .packet_hq_command_sender
+                .push(RecordingCommand::PlayRandomMovements)
+            {
+                error!("Failed to send command to PacketHq: {e}");
+            }
+            s.enable_self_activation = true;
+            s.self_activating_mode = true;
+        } else {
+            s.enable_self_activation = false;
+            s.self_activating_mode = false;
+        }
         s
     }
     fn apply_persistent_settings(&mut self) {
@@ -389,28 +408,30 @@ impl eframe::App for EguiApp {
                 }
             }
         }
-        if self.last_audience_interaction.elapsed() > Duration::from_secs(60 * 3) {
-            self.self_activating_mode = true;
-        }
-        if self.self_activating_mode {
-            if self.last_self_activation.elapsed() > self.next_self_activation {
-                let mut rng = thread_rng();
-                let new_program = self.all_program_values.choose(&mut rng);
-                if let Some(program) = new_program {
-                    self.add_active_program(program.clone());
-                }
-                if self.active_programs.len() > 1 {
-                    // Possibly remove active programs
-                    if rng.gen::<f32>() > 0.7 {
-                        for _ in 0..rng.gen_range(1..=self.active_programs.len()) {
-                            let i = rng.gen_range(0..self.active_programs.len());
-                            self.stop_active_program(self.active_programs[i].clone());
+        if self.enable_self_activation {
+            if self.last_audience_interaction.elapsed() > Duration::from_secs(60 * 3) {
+                self.self_activating_mode = true;
+            }
+            if self.self_activating_mode {
+                if self.last_self_activation.elapsed() > self.next_self_activation {
+                    let mut rng = thread_rng();
+                    let new_program = self.all_program_values.choose(&mut rng);
+                    if let Some(program) = new_program {
+                        self.add_active_program(program.clone());
+                    }
+                    if self.active_programs.len() > 1 {
+                        // Possibly remove active programs
+                        if rng.gen::<f32>() > 0.7 {
+                            for _ in 0..rng.gen_range(1..self.active_programs.len()) {
+                                let i = rng.gen_range(0..self.active_programs.len());
+                                self.stop_active_program(self.active_programs[i].clone());
+                            }
                         }
                     }
+                    let seconds_until_next = rng.gen_range(15..90);
+                    self.next_self_activation = Duration::from_secs(seconds_until_next);
+                    self.last_self_activation = Instant::now();
                 }
-                let seconds_until_next = rng.gen_range(15..90);
-                self.next_self_activation = Duration::from_secs(seconds_until_next);
-                self.last_self_activation = Instant::now();
             }
         }
         // Receive messages
@@ -446,6 +467,35 @@ impl eframe::App for EguiApp {
                         r.playing = playback_data.playing;
                         r.current_duration = playback_data.current_timestamp;
                         r.current_packet = playback_data.current_index;
+                    }
+                }
+                EguiUpdate::SetActivePrograms(programs) => {
+                    let mut programs_to_stop = vec![];
+                    for ap in &self.active_programs {
+                        if programs.iter().find(|p| ap == *p).is_none() {
+                            programs_to_stop.push(ap.to_string());
+                        }
+                    }
+                    for p in programs_to_stop {
+                        self.stop_active_program(p);
+                    }
+                    for p in programs {
+                        self.add_active_program(p.to_string());
+                    }
+                }
+                EguiUpdate::ScorePlay => {
+                    self.enable_self_activation = false;
+                }
+                EguiUpdate::ScorePlayRandom => {
+                    self.enable_self_activation = true;
+                }
+                EguiUpdate::ScoreStop => {
+                    if self.standalone_mode {
+                        // Start playing freely/randomly
+                        self.packet_hq_command_sender
+                            .push(RecordingCommand::PlayRandomMovements)
+                            .ok();
+                        self.enable_self_activation = true;
                     }
                 }
             }
@@ -508,6 +558,11 @@ impl eframe::App for EguiApp {
                 .show(ui, |ui| {
                     ui.label("Cut from start length:");
                     ui.add(egui::DragValue::new(&mut self.cut_from_start_length).speed(0.1));
+                    ui.end_row();
+
+                    ui.checkbox(&mut self.enable_self_activation, "Enable self activation");
+                    ui.end_row();
+                    ui.checkbox(&mut self.standalone_mode, "Enable standalone mode");
                     ui.end_row();
                 });
         });
@@ -670,9 +725,9 @@ fn recording_window(
                 recording.playing = false;
                 command = Some(RecordingCommand::StopPlayback(recording.uuid.clone()));
             }
-            if ui.button("Split into programs").clicked() {
-                todo!()
-            }
+            // if ui.button("Split into programs").clicked() {
+            //     todo!()
+            // }
             if ui.button("Get main program").clicked() {
                 recording.recorded_packets.analyse_main_program();
                 command = Some(RecordingCommand::ReplaceRecording(recording.clone()));

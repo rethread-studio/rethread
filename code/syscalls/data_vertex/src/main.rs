@@ -313,6 +313,10 @@ pub enum EguiUpdate {
     StartingPlaybackOfRecording(Uuid),
     StoppingPlaybackOfRecording(Uuid),
     PlaybackUpdate(Uuid, PlaybackData),
+    SetActivePrograms(Vec<&'static str>),
+    ScorePlay,
+    ScorePlayRandom,
+    ScoreStop,
 }
 struct PacketHQ {
     score: Score,
@@ -572,9 +576,15 @@ impl PacketHQ {
                     match update {
                         ScoreUpdate::ScoreStop => {
                             self.osc_sender.send_score_stop();
+                            self.egui_update_sender.push(EguiUpdate::ScoreStop).ok();
                         }
                         ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                             self.osc_sender.send_movement(&new_mvt, next_mvt);
+                            if !self.score.random_order {
+                                self.egui_update_sender
+                                    .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                                    .ok();
+                            }
                         }
                         ScoreUpdate::Nothing => (),
                     }
@@ -584,9 +594,15 @@ impl PacketHQ {
                     match update {
                         ScoreUpdate::ScoreStop => {
                             self.osc_sender.send_score_stop();
+                            self.egui_update_sender.push(EguiUpdate::ScoreStop).ok();
                         }
                         ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                             self.osc_sender.send_movement(&new_mvt, next_mvt);
+                            if !self.score.random_order {
+                                self.egui_update_sender
+                                    .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                                    .ok();
+                            }
                         }
                         ScoreUpdate::Nothing => (),
                     }
@@ -599,25 +615,41 @@ impl PacketHQ {
         match self.score.update() {
             ScoreUpdate::ScoreStop => {
                 self.osc_sender.send_score_stop();
+                self.egui_update_sender.push(EguiUpdate::ScoreStop).ok();
             }
             ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                 self.osc_sender.send_movement(&new_mvt, next_mvt);
+                if !self.score.random_order {
+                    self.egui_update_sender
+                        .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                        .ok();
+                }
             }
             ScoreUpdate::Nothing => (),
         }
     }
     pub fn play_score(&mut self) {
         if !self.score.is_playing() {
-            self.osc_sender.send_score_start();
+            self.osc_sender.send_score_start(false);
         }
         self.score.random_order = false;
+        self.egui_update_sender.push(EguiUpdate::ScorePlay).ok();
         let (new_mvt, next_mvt) = self.score.play_from(0);
         self.osc_sender.send_movement(&new_mvt, next_mvt);
+        if !self.score.random_order {
+            self.egui_update_sender.push(EguiUpdate::ScorePlay).ok();
+            self.egui_update_sender
+                .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                .ok();
+        }
     }
     pub fn play_random_movements(&mut self) {
         if !self.score.is_playing() {
-            self.osc_sender.send_score_start();
+            self.osc_sender.send_score_start(true);
         }
+        self.egui_update_sender
+            .push(EguiUpdate::ScorePlayRandom)
+            .ok();
         self.score.random_order = true;
         let num_movements = self.score.movements.len();
         let mut rng = thread_rng();
