@@ -317,8 +317,10 @@ impl Process {
                 eprintln!("Failed to kill child process: {e}");
             }
         }
-        match Command::new(&self.path)
+        match Command::new("konsole")
             .current_dir(&self.working_dir)
+            .arg("-e")
+            .arg(&self.path)
             .spawn()
         {
             Ok(child) => {

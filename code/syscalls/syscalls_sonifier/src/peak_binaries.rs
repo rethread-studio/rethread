@@ -22,7 +22,7 @@ use nannou_osc::Type;
 use rand::{seq::SliceRandom, thread_rng, Rng};
 use syscalls_shared::SyscallKind;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
 use crate::{pan_mono_to_quad, sound_effects::SoundEffects, sound_path, to_freq53, Sonifier};
 
@@ -62,7 +62,10 @@ impl PeakBinaries {
         let mut sound_path = sound_path();
         sound_path.push("binaries/");
         let mut sound_files = Vec::new();
-        for entry in std::fs::read_dir(sound_path)? {
+        let Ok(read_dir) = std::fs::read_dir(sound_path.clone()) else {
+            return Err(anyhow!("Failed to open {:?}", sound_path));
+        };
+        for entry in read_dir {
             let entry = entry?;
             let path = entry.path();
             if let Some("wav") = path.extension().and_then(OsStr::to_str) {
@@ -190,6 +193,7 @@ fn play_binary_sound(
     out_bus: Handle<GenericHandle>,
     start_index: usize,
 ) {
+    knyst_commands().to_top_level_graph();
     // Start time [0, 0.5] * buffer length
     // front_back_mix 0 -> 1.0
     let amp = 0.035;

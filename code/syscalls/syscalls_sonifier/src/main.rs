@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
 use background_noise::BackgroundNoise;
+use harmony::{ii_v_i_harmonic_changes, spicier_harmonies};
 use knyst::envelope::envelope_gen;
 use knyst::gen::filter::svf::{svf_dynamic, SvfFilterType};
 use knyst::handles::GenericHandle;
@@ -16,6 +17,7 @@ use knyst_visualiser::probe;
 use nannou_osc::rosc::OscPacket;
 use nannou_osc::{receiver, sender, Connected, Message as OscMessage, Sender, Type};
 use peak_binaries::SoundKind;
+use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use sound_effects::SoundEffects;
 use syscalls_shared::SyscallKind;
@@ -47,9 +49,16 @@ const RUMBLE_STOP: i32 = 2;
 
 static SOUND_PATH: OnceLock<PathBuf> = OnceLock::new();
 
+#[cfg(target_family = "unix")]
 fn sound_path() -> PathBuf {
     SOUND_PATH
         .get_or_init(|| PathBuf::from("/home/erik/Musik/syscalls/"))
+        .clone()
+}
+#[cfg(target_family = "windows")]
+fn sound_path() -> PathBuf {
+    SOUND_PATH
+        .get_or_init(|| PathBuf::from("C:\\Users\\reth\\Music\\syscalls\\"))
         .clone()
 }
 
@@ -81,6 +90,7 @@ fn main() -> Result<()> {
     );
 
     let output_bus = bus(24);
+    dbg!(output_bus);
     init_main_effects(output_bus);
 
     // We panic on these early errors to allow the program to restart and try again
@@ -164,106 +174,121 @@ fn main() -> Result<()> {
         chord_amp,
         current_movement_start: Instant::now(),
         current_movement_duration: Duration::ZERO,
+        randomised_mode: false,
     };
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
     // app.peak_binaries.add_trig(3.0, SoundKind::Binary);
-    app.change_movement(2, None, false, 300.);
+    app.change_movement(111, None, false, 300.);
     // app.change_movement(42, None, false, 30.);
     // main loop
-    std::thread::spawn(move || {
-        loop {
-            // Receive OSC messages
-            if let Ok(Some(mess)) = osc_receiver.try_recv() {
-                mess.0.unfold(&mut osc_messages);
-            }
-            for m in osc_messages.drain(..) {
-                if m.addr == "/new_movement" {
-                    if let Ok(mvt_data) = parse_new_movement_osc(m) {
-                        println!(
-                            "New movement, {}, break: {:?}",
-                            mvt_data.mvt_id, mvt_data.is_break
-                        );
-                        if mvt_data.is_break {
-                            app.sound_effects.play_bell_a();
-                        } else {
-                            app.sound_effects.play_bell_b();
-                        }
-                        app.sound_effects.play_movement_voice(mvt_data.mvt_id);
-                        app.change_movement(
-                            mvt_data.mvt_id,
-                            mvt_data.next_mvt_id,
-                            mvt_data.is_break,
-                            mvt_data.duration,
-                        );
+    // std::thread::spawn(move || {
+    loop {
+        // Receive OSC messages
+        if let Ok(Some(mess)) = osc_receiver.try_recv() {
+            mess.0.unfold(&mut osc_messages);
+        }
+        for m in osc_messages.drain(..) {
+            if m.addr == "/new_movement" {
+                if let Ok(mvt_data) = parse_new_movement_osc(m) {
+                    println!(
+                        "New movement, {}, break: {:?}",
+                        mvt_data.mvt_id, mvt_data.is_break
+                    );
+                    if mvt_data.is_break {
+                        app.sound_effects.play_bell_a();
+                    } else {
+                        app.sound_effects.play_bell_b();
                     }
-                } else if m.addr == "/score/play" {
-                    if let Some(args) = m.args {
-                        let mut args = args.into_iter();
-                        let val = args.next().unwrap().int().unwrap();
-                        if val == 0 {
+                    app.sound_effects.play_movement_voice(mvt_data.mvt_id);
+                    app.change_movement(
+                        mvt_data.mvt_id,
+                        mvt_data.next_mvt_id,
+                        mvt_data.is_break,
+                        mvt_data.duration,
+                    );
+                }
+            } else if m.addr == "/score/play" {
+                if let Some(args) = m.args {
+                    let mut args = args.into_iter();
+                    let val = args.next().unwrap().int().unwrap();
+                    match val {
+                        0 => {
                             // Score stopped
                             app.stop_playing();
                         }
+                        1 => {
+                            // Score started in linear (normal) mode
+                            app.randomised_mode = false;
+                        }
+                        2 => {
+                            // Score started in random/infinite mode
+                            app.randomised_mode = true;
+                        }
+                        _ => (),
                     }
-                } else {
-                    app.apply_osc_message(m);
+                    if val == 0 {
+                        // Score stopped
+                    }
                 }
-            }
-
-            osc_messages.clear();
-
-            app.update();
-
-            if last_switch.elapsed() > Duration::from_secs_f32(10.) {
-                // if let Some(sonifier) = &mut current_sonifier {
-                //     if mvt_id == 5 {
-                //         if rng.gen::<f32>() > 0.8 {
-                //             sonifier.patch_to_fx_chain(1);
-                //         } else {
-                //             sonifier.patch_to_fx_chain(2);
-                //         }
-                //     } else if mvt_id == 0 {
-                //         if rng.gen::<f32>() > 0.8 {
-                //             sonifier.patch_to_fx_chain(2);
-                //         } else {
-                //             sonifier.patch_to_fx_chain(1);
-                //         }
-                //     }
-                //     // sonifier.patch_to_fx_chain(rng.gen::<usize>() % 3 + 1);
-                // }
-                //     let mut old_sonifier = current_sonifier.take().unwrap();
-                //     old_sonifier.free();
-                //     k.free_disconnected_nodes();
-                //     let mut rng = thread_rng();
-                //     match rng.gen::<usize>() % 3 {
-                //         0 => {
-                //             current_sonifier =
-                //                 Some(Box::new(QuantisedCategories::new(&mut k, sample_rate)));
-                //             println!("QuantisedCat");
-                //         }
-                //         1 => {
-                //             current_sonifier = Some(Box::new(DirectCategories::new(&mut k, sample_rate)));
-                //             println!("DirectCat");
-                //         }
-                //         2 => {
-                //             current_sonifier = Some(Box::new(DirectFunctions::new(&mut k, sample_rate)));
-                //             println!("DirectFunc");
-                //         }
-                //         _ => (),
-                //     }
-                last_switch = Instant::now();
-            }
-            if stop.load(std::sync::atomic::Ordering::SeqCst) {
-                eprintln!("{}", stop_message.lock().unwrap());
-                break;
+            } else {
+                app.apply_osc_message(m);
             }
         }
-    });
+
+        osc_messages.clear();
+
+        app.update();
+
+        if last_switch.elapsed() > Duration::from_secs_f32(10.) {
+            // if let Some(sonifier) = &mut current_sonifier {
+            //     if mvt_id == 5 {
+            //         if rng.gen::<f32>() > 0.8 {
+            //             sonifier.patch_to_fx_chain(1);
+            //         } else {
+            //             sonifier.patch_to_fx_chain(2);
+            //         }
+            //     } else if mvt_id == 0 {
+            //         if rng.gen::<f32>() > 0.8 {
+            //             sonifier.patch_to_fx_chain(2);
+            //         } else {
+            //             sonifier.patch_to_fx_chain(1);
+            //         }
+            //     }
+            //     // sonifier.patch_to_fx_chain(rng.gen::<usize>() % 3 + 1);
+            // }
+            //     let mut old_sonifier = current_sonifier.take().unwrap();
+            //     old_sonifier.free();
+            //     k.free_disconnected_nodes();
+            //     let mut rng = thread_rng();
+            //     match rng.gen::<usize>() % 3 {
+            //         0 => {
+            //             current_sonifier =
+            //                 Some(Box::new(QuantisedCategories::new(&mut k, sample_rate)));
+            //             println!("QuantisedCat");
+            //         }
+            //         1 => {
+            //             current_sonifier = Some(Box::new(DirectCategories::new(&mut k, sample_rate)));
+            //             println!("DirectCat");
+            //         }
+            //         2 => {
+            //             current_sonifier = Some(Box::new(DirectFunctions::new(&mut k, sample_rate)));
+            //             println!("DirectFunc");
+            //         }
+            //         _ => (),
+            //     }
+            last_switch = Instant::now();
+        }
+        if stop.load(std::sync::atomic::Ordering::SeqCst) {
+            eprintln!("{}", stop_message.lock().unwrap());
+            break;
+        }
+    }
+    // });
 
     // Init visualiser
-    knyst_visualiser::init_knyst_visualiser();
+    // knyst_visualiser::init_knyst_visualiser();
 
     Ok(())
 }
@@ -345,6 +370,8 @@ struct App {
     chord_amp: Handle<RampHandle>,
     current_movement_start: Instant,
     current_movement_duration: Duration,
+    /// Whether we are in random score playing mode. This triggers random harmony changes.
+    randomised_mode: bool,
 }
 impl App {
     pub fn apply_osc_message(&mut self, m: OscMessage) {
@@ -386,10 +413,12 @@ impl App {
             current_movement_start,
             current_movement_duration,
             chord_amp_setter,
+            randomised_mode,
         } = self;
         let change_harmony = if current_movement_start.elapsed() < *current_movement_duration {
             if let Some(time_interval) = &chord_change_interval {
                 if last_chord_change.elapsed() > *time_interval && !*is_on_break {
+                    *current_harmonic_change %= harmonic_changes.len();
                     harmonic_changes[*current_harmonic_change].apply(
                         current_chord,
                         root,
@@ -412,8 +441,7 @@ impl App {
                     changed_harmony_chord(&chord_freqs, *chord_amp, length_min, length_max);
                     background_noise.change_harmony(root);
 
-                    *current_harmonic_change =
-                        (*current_harmonic_change + 1) % harmonic_changes.len();
+                    *current_harmonic_change = *current_harmonic_change + 1;
                     println!("Changed harmony to scale {current_chord:?}, root: {root}");
                     *last_chord_change = Instant::now();
                     true
@@ -474,6 +502,7 @@ impl App {
             current_movement_start,
             current_movement_duration,
             chord_amp_setter,
+            randomised_mode,
         } = self;
 
         if new_mvt_id != *mvt_id {
@@ -492,6 +521,29 @@ impl App {
             *transposition_within_octave_guard = true;
             if new_mvt_id != 9999 {
                 chord_amp_setter.set(0, 1.0);
+            }
+            let mut rng = thread_rng();
+            // If we are in random mode and the movement doesn't have its own harmony settings, change them randomly maybe
+            if *randomised_mode {
+                if rng.gen::<f32>() > 0.5 {
+                    *chord_change_interval = *[
+                        None,
+                        Some(Duration::from_secs(
+                            *[4, 8, 12, 24].choose(&mut rng).unwrap(),
+                        )),
+                        Some(Duration::from_secs_f32(rng.gen_range(3.0..10.))),
+                    ]
+                    .choose(&mut rng)
+                    .expect("choose on a non-empty collection should always return something");
+                    *harmonic_changes = match rng.gen_range(0..3) {
+                        0 => spicier_harmonies(),
+                        1 => ii_v_i_harmonic_changes(),
+                        _ => default_harmonic_changes(),
+                    };
+                }
+            } else {
+                // Every movement except 42 uses this harmony so we make sure it's selected here
+                *harmonic_changes = default_harmonic_changes();
             }
             let mut background_ramp = None;
             let mut rumble_change = None;
@@ -820,6 +872,8 @@ impl App {
                     }
                     9999 => {
                         sound_effects.play_bell_b();
+
+                        *harmonic_changes = default_harmonic_changes();
                     }
                     _ => {
                         eprintln!("!! Unhandled movement:");

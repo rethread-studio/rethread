@@ -45,7 +45,11 @@ impl SoundEffects {
         let mut root_path = sound_path();
         root_path.push("voice/focus/");
         let mut voice_focus = Vec::new();
-        for entry in std::fs::read_dir(root_path).unwrap() {
+
+        let Ok(read_dir) = std::fs::read_dir(root_path.clone()) else {
+            return Err(anyhow!("Failed to open {:?}", root_path));
+        };
+        for entry in read_dir {
             let entry = entry?;
             let path = entry.path();
             if let Some("wav") = path.extension().and_then(OsStr::to_str) {
@@ -57,7 +61,10 @@ impl SoundEffects {
         let mut root_path = sound_path();
         root_path.push("voice/movements/");
         let mut voice_movement = Vec::new();
-        for entry in std::fs::read_dir(root_path).unwrap() {
+        let Ok(read_dir) = std::fs::read_dir(root_path.clone()) else {
+            return Err(anyhow!("Failed to open {:?}", root_path));
+        };
+        for entry in read_dir {
             let entry = entry?;
             let path = entry.path();
             if let Some("wav") = path.extension().and_then(OsStr::to_str) {
@@ -69,7 +76,10 @@ impl SoundEffects {
         let mut root_path = sound_path();
         root_path.push("bells/a/");
         let mut bells_a = Vec::new();
-        for entry in std::fs::read_dir(root_path).unwrap() {
+        let Ok(read_dir) = std::fs::read_dir(root_path.clone()) else {
+            return Err(anyhow!("Failed to open {:?}", root_path));
+        };
+        for entry in read_dir {
             let entry = entry?;
             let path = entry.path();
             if let Some("wav") = path.extension().and_then(OsStr::to_str) {
@@ -81,7 +91,10 @@ impl SoundEffects {
         let mut root_path = sound_path();
         root_path.push("bells/b/");
         let mut bells_b = Vec::new();
-        for entry in std::fs::read_dir(root_path).unwrap() {
+        let Ok(read_dir) = std::fs::read_dir(root_path.clone()) else {
+            return Err(anyhow!("Failed to open {:?}", root_path));
+        };
+        for entry in read_dir {
             let entry = entry?;
             let path = entry.path();
             if let Some("wav") = path.extension().and_then(OsStr::to_str) {
