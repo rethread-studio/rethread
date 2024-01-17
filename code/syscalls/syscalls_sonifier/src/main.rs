@@ -13,7 +13,7 @@ use knyst::prelude::*;
 use knyst::*;
 
 use anyhow::{anyhow, Result};
-use knyst_visualiser::probe;
+// use knyst_visualiser::probe;
 use nannou_osc::rosc::OscPacket;
 use nannou_osc::{receiver, sender, Connected, Message as OscMessage, Sender, Type};
 use peak_binaries::SoundKind;

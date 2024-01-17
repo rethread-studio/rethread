@@ -16,7 +16,7 @@ use knyst::{
     prelude::*,
     resources::BufferId,
 };
-use knyst_visualiser::probe;
+// use knyst_visualiser::probe;
 use rand::{thread_rng, Rng};
 
 use crate::Sonifier;

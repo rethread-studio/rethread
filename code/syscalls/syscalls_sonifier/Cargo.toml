@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.71"
 atomic_float = "0.1.0"
-crossterm = "0.26.1"
 dasp = { version = "0.11.0", features = ["signal"] }
 derive_builder = "0.12.0"
 enum-iterator = "1.4.1"
@@ -19,13 +18,12 @@ knyst = { git = "https://github.com/ErikNatanael/knyst.git", features = [
 # knyst = { path = "/home/erik/code/rust/audio/knyst/knyst", features = ["jack"] }
 # knyst_waveguide = { path = "../../../../knyst_waveguide" }
 knyst_waveguide2 = { git = "https://github.com/ErikNatanael/knyst_extras.git" }
-knyst_visualiser = { git = "https://github.com/ErikNatanael/knyst_extras.git" }
+# knyst_visualiser = { git = "https://github.com/ErikNatanael/knyst_extras.git" }
 knyst_airwindows = { git = "https://github.com/ErikNatanael/knyst_extras.git" }
 syscalls_shared = { path = "../syscalls_shared" }
 num = "0.4.0"
 num_enum = "0.5.11"
 rand = "0.8.5"
-termion = "2.0.1"
 nannou_osc = "0.18.0"
 rtrb = "0.3.0"
 fastrand = "2.0.1"
