@@ -133,9 +133,14 @@ void ofApp::draw() {
     }
     ofDrawRectangle(m_buttons[i].m_center_pos + middle_screen, m_button_width,
                     m_button_height);
-    ofRectangle rect = m_font.getStringBoundingBox(m_buttons[i].m_text, 0, 0);
+
+    auto &text = m_buttons[i].m_text;
+    if (m_buttons[i].active) {
+      text = m_buttons[i].m_on_text;
+    }
+    ofRectangle rect = m_font.getStringBoundingBox(text, 0, 0);
     m_font.drawString(
-        m_buttons[i].m_text,
+        text,
         m_buttons[i].m_center_pos.x + middle_screen.x - (rect.width * 0.5),
         m_buttons[i].m_center_pos.y + middle_screen.y + (rect.height * 0.5));
   }
