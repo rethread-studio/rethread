@@ -134,7 +134,7 @@ void ofApp::draw() {
     ofDrawRectangle(m_buttons[i].m_center_pos + middle_screen, m_button_width,
                     m_button_height);
 
-    auto &text = m_buttons[i].m_text;
+    auto text = m_buttons[i].m_text;
     if (m_buttons[i].active) {
       text = m_buttons[i].m_on_text;
     }
@@ -162,16 +162,7 @@ void ofApp::draw() {
     m_trail.push_back(Trail(mouse_pos));
   }
 
-  // Random rectangle
-  for (int i = 0; i < 1; i++) {
-    // float x = ofRandom(ofGetWidth() / m_button_gap) * m_button_gap;
-    float x =
-        (ofGetFrameNum() + i) % int(ofGetWidth() / m_button_gap) * m_button_gap;
-    float y = (ofGetFrameNum() / int(ofGetWidth() / m_button_gap) + i) %
-              int(ofGetHeight() / m_button_gap) * m_button_gap;
-    ofSetColor(0, 255, 0, 255);
-    ofDrawRectangle(x, y, m_button_gap, m_button_gap);
-  }
+  // Trail
   for (int i = 0; i < m_trail.size(); i++) {
     ofSetColor(0, 255, 0, m_trail[i].m_alpha);
     ofDrawRectangle(m_trail[i].m_center_pos, m_button_gap, m_button_gap);
