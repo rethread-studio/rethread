@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     fs::File,
     io::Write,
+    os::windows::process::CommandExt,
     path::PathBuf,
     process::{Child, Command},
     time::{Duration, Instant, SystemTime},
@@ -16,7 +17,7 @@ enum Message {
     Continue,
 }
 fn main() {
-    println!("Starting reinverse supervisor!");
+    println!("Starting syscalls supervisor!");
     let (tx, rx) = std::sync::mpsc::channel();
 
     let args: Vec<String> = std::env::args().collect();
@@ -317,17 +318,34 @@ impl Process {
                 eprintln!("Failed to kill child process: {e}");
             }
         }
-        match Command::new("konsole")
-            .current_dir(&self.working_dir)
-            .arg("-e")
-            .arg(&self.path)
-            .spawn()
+        #[cfg(target_family = "unix")]
         {
-            Ok(child) => {
-                self.current_child_process = Some(child);
-                self.last_start = Instant::now();
+            match Command::new("konsole")
+                .current_dir(&self.working_dir)
+                .arg("-e")
+                .arg(&self.path)
+                .spawn()
+            {
+                Ok(child) => {
+                    self.current_child_process = Some(child);
+                    self.last_start = Instant::now();
+                }
+                Err(e) => eprintln!("Failed to start process at {:?}, {e}", &self.path),
             }
-            Err(e) => eprintln!("Failed to start process at {:?}, {e}", &self.path),
+        }
+        #[cfg(target_family = "windows")]
+        {
+            match Command::new(&self.path)
+                .current_dir(&self.working_dir)
+                .creation_flags(0x00000010)
+                .spawn()
+            {
+                Ok(child) => {
+                    self.current_child_process = Some(child);
+                    self.last_start = Instant::now();
+                }
+                Err(e) => eprintln!("Failed to start process at {:?}, {e}", &self.path),
+            }
         }
         self.last_start = Instant::now();
         std::thread::sleep(self.wait_after_restart.clone());
