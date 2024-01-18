@@ -64,7 +64,7 @@ fn main() {
     let mut complete_restart = true;
     let mut recompile = false;
     let mut resting = true; // We are resting 22-16 which means, don't try to restart
-    let mut always_on = true; // Overrides the resting option, trying to keep the programs going no matter what
+    let mut always_on = false; // Overrides the resting option, trying to keep the programs going no matter what
     let mut osc_receiver = { receiver(RECEIVER_PORT).ok() };
     // let start_time = todo!();
     // let mut rng: StdRng = SeedableRng::from_entropy();
