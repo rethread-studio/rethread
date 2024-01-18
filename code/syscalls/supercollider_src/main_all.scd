@@ -580,3 +580,5 @@ Ndef(\rumbling_noise_source, {
 });
 )
 ~binaries.values
+Synth(\prayer_bell, [\amp, 0.03]);
+Synth(\prayer_bell, [\amp, 0.01, \freq, rrand(4900, 5700)]);
