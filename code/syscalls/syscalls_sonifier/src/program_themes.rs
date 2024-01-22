@@ -122,7 +122,7 @@ fn plucked_waveguide() -> Handle<GraphHandle> {
                 .feedback(feedback)
                 .damping(damping)
                 .lf_damping(10.);
-            graph_output(0, wg * amp);
+            graph_output(0, wg * amp * 2.);
         },
     )
 }

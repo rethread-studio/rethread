@@ -1325,7 +1325,7 @@ fn render_general<B: Backend>(
     f.render_stateful_widget(t, rect, &mut app.table_state);
 }
 async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
-    let addr = "127.0.0.1:3012";
+    let addr = "0.0.0.0:3012";
     let listener = TcpListener::bind(&addr).await.expect("Can't listen");
     let (packet_sender, mut packet_receiver) = tokio::sync::mpsc::unbounded_channel();
 

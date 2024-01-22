@@ -10,7 +10,7 @@ use knyst::{
         },
         random::random_lin,
     },
-    graph::Time,
+    graph::{Time, FreeError},
     handles::GenericHandle,
     knyst_commands,
     prelude::*,
@@ -77,12 +77,12 @@ impl BackgroundNoise {
             .value(root_freq_bus);
         // probe().input(ramped_root_freq);
         let resonant_filters_mix = bus(1).set(0, 0.0);
-        resonant_filters_mix.set(0, random_lin().freq(0.25));
+        resonant_filters_mix.set(0, random_lin().freq(0.25).powf(1.5) * 0.8);
         let buf_reader = BufferReaderMulti::new(noise_buffers[1], 1.0, StopAction::FreeSelf)
             .channels(4)
             .looping(true)
             .upload();
-        let sig = buf_reader * ramp(0.2).value(amp).time(amp_ramp_time);
+        let sig = buf_reader * ramp(0.2).value(amp).time(amp_ramp_time) * 0.5;
         let mut freq_sigs = vec![];
         // let q = 600.;
         for mul in [4, 8, 12, 16] {
@@ -97,6 +97,7 @@ impl BackgroundNoise {
             freq_sigs.push(f_sig);
         }
         let freq_sigs = freq_sigs[0] + freq_sigs[1] + freq_sigs[2] + freq_sigs[3];
+        let freq_sigs = freq_sigs * (random_lin().freq(3.).powf(2.) * 0.75 + 0.25);
         let sig =
             sig * (1.0 - resonant_filters_mix) + (freq_sigs.channels(4) * resonant_filters_mix);
         // let sig = sig + freq_sigs.channels(4);

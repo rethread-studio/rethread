@@ -385,6 +385,8 @@ pub fn send_movement(
     m: &Movement,
     next_mvt: Option<Movement>,
 ) {
+    for _ in 0..4 {
+
     let addr = "/new_movement";
     let args = vec![
         Type::Int(m.id as i32),
@@ -401,6 +403,7 @@ pub fn send_movement(
     let addr = "/break";
     let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
     sender.send((addr, args)).ok();
+    }
 }
 pub fn send_start_recording_playback(sender: &mut nannou_osc::Sender<Connected>, name: String) {
     let addr = "/start_recording_playback";

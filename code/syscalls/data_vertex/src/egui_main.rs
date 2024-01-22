@@ -23,7 +23,6 @@ pub fn start_egui(
     egui_update_receiver: rtrb::Consumer<EguiUpdate>,
 ) -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(620.0, 440.0)),
         ..Default::default()
     };
     eframe::run_native(

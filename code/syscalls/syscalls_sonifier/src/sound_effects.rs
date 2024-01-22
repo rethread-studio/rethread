@@ -128,18 +128,18 @@ impl SoundEffects {
     pub fn play_bell_a(&self) {
         let mut rng = thread_rng();
         if let Some(buf) = self.bells_a.choose(&mut rng) {
-            play_mono_sound_buffer(*buf, self.out_bus, 0.5);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.2);
         }
     }
     pub fn play_bell_b(&self) {
         let mut rng = thread_rng();
         if let Some(buf) = self.bells_b.choose(&mut rng) {
-            play_mono_sound_buffer(*buf, self.out_bus, 0.5);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.1);
         }
     }
     pub fn play_movement_voice(&self, movement: i32) {
         if let Some((_mvt, buf)) = self.voice_movement.iter().find(|(mvt, _)| *mvt == movement) {
-            play_mono_sound_buffer(*buf, self.out_bus, 0.05);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.02);
         }
     }
     pub fn play_focus_enabled(&self, category: impl Into<String>) {
@@ -152,7 +152,7 @@ impl SoundEffects {
             std::thread::spawn(move || {
                 play_mono_sound_buffer(focus, out_bus, 0.05);
                 std::thread::sleep(Duration::from_millis(1000));
-                play_mono_sound_buffer(buf, out_bus, 0.05);
+                play_mono_sound_buffer(buf, out_bus, 0.08);
             });
         }
     }
