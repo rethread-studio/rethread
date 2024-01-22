@@ -201,22 +201,22 @@ impl OscSender {
         //     sender.send((addr, args)).ok();
         // }
         // // }
-        // if let Some(ws) = &mut self.websocket_senders {
-        //     let mess = format!(
-        //         "/new_movement:{},{},{},{}",
-        //         m.id,
-        //         m.is_break,
-        //         next_mvt.map(|mvt| mvt.id as i32).unwrap_or(-1),
-        //         m.duration.as_millis()
-        //     );
-        //     if let Ok(ok) = ws.message_tx.send(mess) {
-        //         // info!("Sending syscall to {ok} receivers");
-        //     }
-        //     let mess = format!("/break:{}", if m.is_break { 1 } else { 0 },);
-        //     if let Ok(ok) = ws.message_tx.send(mess) {
-        //         // info!("Sending syscall to {ok} receivers");
-        //     }
-        // }
+        if let Some(ws) = &mut self.websocket_senders {
+            let mess = format!(
+                "/new_movement:{},{},{},{}",
+                m.id,
+                m.is_break,
+                next_mvt.map(|mvt| mvt.id as i32).unwrap_or(-1),
+                m.duration.as_millis()
+            );
+            if let Ok(ok) = ws.message_tx.send(mess) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+            let mess = format!("/break:{}", if m.is_break { 1 } else { 0 },);
+            if let Ok(ok) = ws.message_tx.send(mess) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+        }
     }
     pub fn send_start_recording_playback(&mut self, name: String) {
         for sender in &mut self.senders {
@@ -386,23 +386,22 @@ pub fn send_movement(
     next_mvt: Option<Movement>,
 ) {
     for _ in 0..4 {
-
-    let addr = "/new_movement";
-    let args = vec![
-        Type::Int(m.id as i32),
-        Type::Bool(m.is_break),
-        Type::String(m.description.clone()),
-        Type::Int(if let Some(m) = next_mvt.clone() {
-            m.id as i32
-        } else {
-            -1
-        }),
-        Type::Float(m.duration.as_secs_f32()),
-    ];
-    sender.send((addr, args)).ok();
-    let addr = "/break";
-    let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
-    sender.send((addr, args)).ok();
+        let addr = "/new_movement";
+        let args = vec![
+            Type::Int(m.id as i32),
+            Type::Bool(m.is_break),
+            Type::String(m.description.clone()),
+            Type::Int(if let Some(m) = next_mvt.clone() {
+                m.id as i32
+            } else {
+                -1
+            }),
+            Type::Float(m.duration.as_secs_f32()),
+        ];
+        sender.send((addr, args)).ok();
+        let addr = "/break";
+        let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
+        sender.send((addr, args)).ok();
     }
 }
 pub fn send_start_recording_playback(sender: &mut nannou_osc::Sender<Connected>, name: String) {

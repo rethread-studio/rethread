@@ -1329,13 +1329,13 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
     let listener = TcpListener::bind(&addr).await.expect("Can't listen");
     let (packet_sender, mut packet_receiver) = tokio::sync::mpsc::unbounded_channel();
 
-    // let (message_tx, message_rx1) = tokio::sync::broadcast::channel(1000000);
-    // drop(message_rx1);
+    let (message_tx, message_rx1) = tokio::sync::broadcast::channel(1000000);
+    drop(message_rx1);
     {
-        // let message_tx = message_tx.clone();
+        let message_tx = message_tx.clone();
         tokio::spawn(async move {
-            // let ws = WebsocketSender { message_tx };
-            // packet_hq.register_websocket_senders(ws);
+            let ws = WebsocketSender { message_tx };
+            packet_hq.register_websocket_senders(ws);
             let mut counter = 0;
             loop {
                 tokio::select! {
@@ -1355,7 +1355,7 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
             }
         });
     }
-    // tokio::spawn(async move { start_websocket_endpoints(message_tx).await });
+    tokio::spawn(async move { start_websocket_endpoints(message_tx).await });
     loop {
         let (socket, _) = listener.accept().await?;
         let packet_sender = packet_sender.clone();
