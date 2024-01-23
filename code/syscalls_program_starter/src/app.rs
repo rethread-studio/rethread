@@ -53,7 +53,7 @@ impl eframe::App for TemplateApp {
             // The central panel the region left after adding TopPanel's and SidePanel's
 
             let strace_path =
-                "/home/assert/Documents/rethread/code/syscalls/target/release/strace_collector";
+                "/home/reth/Documents/rethread/code/syscalls/target/release/strace_collector";
             let programs = ["gedit", "konqueror", "thunderbird", "htop"];
             for p in programs {
                 if ui.button(p).clicked() {
@@ -81,7 +81,7 @@ pub fn start_program(strace_path: &'static str, program: &'static str) {
     // c.arg(program);
     let terminal = match std::env::var("TERMINAL") {
         Ok(term) => term,
-        Err(e) => "gnome-terminal".to_string(),
+        Err(e) => "konsole".to_string(),
     };
     dbg!(&terminal);
     // Kill previous instances
