@@ -212,7 +212,7 @@ fn play_binary_sound(
             );
             let env = envelope_gen(
                 0.0,
-                vec![(amp, 0.02), (amp, length), (0.0, 0.001)],
+                vec![(amp, 0.005), (amp, length), (0.0, 0.001)],
                 knyst::envelope::SustainMode::NoSustain,
                 knyst::gen::StopAction::FreeGraph,
             );

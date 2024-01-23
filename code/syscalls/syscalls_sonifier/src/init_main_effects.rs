@@ -6,7 +6,7 @@ use knyst::{
         },
         filter::{
             self,
-            svf::{svf_filter, SvfFilterType},
+            svf::{svf_filter, SvfFilterType}, one_pole::{one_pole_lpf, one_pole_hpf},
         },
     },
     handles::{
@@ -48,12 +48,12 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
     }
     // Bell 309 -1.7db
     for i in 0..4 {
-        let sig = svf_filter(SvfFilterType::Bell, 309., 1.2, -1.7).input(eq[i]);
+        let sig = svf_filter(SvfFilterType::Bell, 309., 1.2, -5.7).input(eq[i]);
         eq[i] = sig;
     }
     // Bell 1947 -2db
     for i in 0..4 {
-        let sig = svf_filter(SvfFilterType::Bell, 1947., 1.2, -2.5).input(eq[i]);
+        let sig = svf_filter(SvfFilterType::Bell, 1947., 1.2, -3.0).input(eq[i]);
         eq[i] = sig;
     }
     // HighShelf 6139 -1.5db
@@ -61,9 +61,10 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
         let sig = svf_filter(SvfFilterType::HighShelf, 6139., 1.2, -1.5).input(eq[i]);
         eq[i] = sig;
     }
-    // for i in 0..4 {
-    //     graph_output(i, eq[i]);
-    // }
+    for i in 0..4 {
+        let sig = svf_filter(SvfFilterType::HighShelf, 10139., 1.2, -2.5).input(eq[i]);
+        eq[i] = sig;
+    }
 
     // Add a soft clipper to the output and boost the output level
     let soft_clip = soft_clipper()
@@ -73,7 +74,24 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
         .in3(eq[3])
         .boost_db(9.)
         .limit_db(-1.);
-    graph_output(0, soft_clip);
+        // graph_output(0, soft_clip * 0.1);
+
+        let mut eq = vec![];
+    for i in 0..4 {
+        // let sig = one_pole_hpf().sig(one_pole_hpf().cutoff_freq(2000.).sig(soft_clip.out(i))).cutoff_freq(2000.);
+        let sig = svf_filter(SvfFilterType::High, 100., 1.2, -120.).input(soft_clip.out(i));
+        eq.push(sig);
+    }
+    for i in 0..4 {
+        graph_output(i, eq[i]*0.1);
+    }
+
+    // Subwoofer
+    let sub  = soft_clip.out(0) + soft_clip.out(1) + soft_clip.out(2) + soft_clip.out(3);
+    let sub = one_pole_lpf().sig(sub * 0.25).cutoff_freq(150.);
+    let sub = one_pole_lpf().sig(sub).cutoff_freq(150.);
+    let sub =compressor().input_left(sub);
+    graph_output(4, sub.out(0)*db_to_amplitude(-25.));
     // for i in 0..4 {
     //     graph_output(i, main_out_bus.out(i));
     // }

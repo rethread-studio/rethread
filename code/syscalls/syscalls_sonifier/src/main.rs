@@ -5,6 +5,7 @@ use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
 use background_noise::BackgroundNoise;
+use chords::ChordPlayer;
 use harmony::{ii_v_i_harmonic_changes, spicier_harmonies};
 use knyst::envelope::envelope_gen;
 use knyst::gen::filter::svf::{svf_dynamic, SvfFilterType};
@@ -21,6 +22,7 @@ use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use sound_effects::SoundEffects;
 use syscalls_shared::SyscallKind;
+use websocket::WebsocketMess;
 
 use crate::direct_categories::DirectCategories;
 use crate::direct_functions::DirectFunctions;
@@ -29,8 +31,10 @@ use crate::init_main_effects::init_main_effects;
 use crate::peak_binaries::PeakBinaries;
 use crate::program_themes::ProgramThemes;
 use crate::quantised_categories::QuantisedCategories;
+use crate::websocket::start_websocket_thread;
 
 mod background_noise;
+mod chords;
 mod crossover;
 mod direct_categories;
 mod direct_functions;
@@ -43,6 +47,7 @@ pub mod phrase;
 mod program_themes;
 mod quantised_categories;
 mod sound_effects;
+mod websocket;
 
 const RUMBLE_RESTART: i32 = 1;
 const RUMBLE_STOP: i32 = 2;
@@ -52,7 +57,7 @@ static SOUND_PATH: OnceLock<PathBuf> = OnceLock::new();
 #[cfg(target_family = "unix")]
 fn sound_path() -> PathBuf {
     SOUND_PATH
-        .get_or_init(|| PathBuf::from("/home/erik/Musik/syscalls/"))
+        .get_or_init(|| PathBuf::from("/home/assert/Music/syscalls/"))
         .clone()
 }
 #[cfg(target_family = "windows")]
@@ -144,13 +149,10 @@ fn main() -> Result<()> {
     let current_harmonic_change = 0;
     let harmonic_changes = default_harmonic_changes();
 
+    let websocket_receiver = start_websocket_thread();
+
     let background_noise = BackgroundNoise::new(16, output_bus, sound_path(), root_freq);
     knyst_commands().to_top_level_graph();
-    let chord_amp_setter = bus(1).set(0, 1.0).set_mortality(false);
-    let chord_amp = ramp(1.0)
-        .value(chord_amp_setter)
-        .time(0.01)
-        .set_mortality(false);
     let mut app = App {
         current_sonifiers,
         current_chord,
@@ -170,17 +172,16 @@ fn main() -> Result<()> {
         sound_effects: SoundEffects::new(output_bus)?,
         peak_binaries: PeakBinaries::new(output_bus, 0)?,
         main_bus: output_bus,
-        chord_amp_setter,
-        chord_amp,
         current_movement_start: Instant::now(),
         current_movement_duration: Duration::ZERO,
         randomised_mode: false,
+        chord_player: ChordPlayer::new(output_bus),
     };
     // let mut current_chord = 0;
     let mut rng = thread_rng();
 
     // app.peak_binaries.add_trig(3.0, SoundKind::Binary);
-    app.change_movement(111, None, false, 300.);
+    app.change_movement(0, None, false, 300.);
     // app.change_movement(42, None, false, 30.);
     // main loop
     // std::thread::spawn(move || {
@@ -199,7 +200,7 @@ fn main() -> Result<()> {
                     if mvt_data.is_break {
                         app.sound_effects.play_bell_a();
                     } else {
-                        app.sound_effects.play_bell_b();
+                        //app.sound_effects.play_bell_b();
                     }
                     app.sound_effects.play_movement_voice(mvt_data.mvt_id);
                     app.change_movement(
@@ -234,6 +235,26 @@ fn main() -> Result<()> {
                 }
             } else {
                 app.apply_osc_message(m);
+            }
+            // Receive websocket
+            while let Ok(websocket_mess) = websocket_receiver.try_recv() {
+                match websocket_mess {
+                    WebsocketMess::Movement {
+                        id,
+                        is_break,
+                        next_mvt,
+                        duration,
+                    } => {
+                        println!("ws New movement, {}, break: {:?}", id, is_break);
+                        if is_break {
+                            app.sound_effects.play_bell_a();
+                        } else {
+                            //app.sound_effects.play_bell_b();
+                        }
+                        app.sound_effects.play_movement_voice(id);
+                        app.change_movement(mvt_id, next_mvt, is_break, duration);
+                    }
+                }
             }
         }
 
@@ -366,12 +387,11 @@ struct App {
     peak_binaries: PeakBinaries,
     sound_effects: SoundEffects,
     main_bus: Handle<GenericHandle>,
-    chord_amp_setter: Handle<GenericHandle>,
-    chord_amp: Handle<RampHandle>,
     current_movement_start: Instant,
     current_movement_duration: Duration,
     /// Whether we are in random score playing mode. This triggers random harmony changes.
     randomised_mode: bool,
+    chord_player: ChordPlayer,
 }
 impl App {
     pub fn apply_osc_message(&mut self, m: OscMessage) {
@@ -409,11 +429,10 @@ impl App {
             peak_binaries,
             main_bus,
             sound_effects,
-            chord_amp,
             current_movement_start,
             current_movement_duration,
-            chord_amp_setter,
             randomised_mode,
+            chord_player,
         } = self;
         let change_harmony = if current_movement_start.elapsed() < *current_movement_duration {
             if let Some(time_interval) = &chord_change_interval {
@@ -438,7 +457,8 @@ impl App {
                         .collect();
                     let length_max = 14.0f32.min(time_interval.as_secs_f32() * 3.0);
                     let length_min = 6.0f32.min(length_max * 0.5);
-                    changed_harmony_chord(&chord_freqs, *chord_amp, length_min, length_max);
+                    chord_player.chord(&chord_freqs, length_min, length_max);
+                    // changed_harmony_chord(&chord_freqs, *chord_amp, length_min, length_max);
                     background_noise.change_harmony(root);
 
                     *current_harmonic_change = *current_harmonic_change + 1;
@@ -498,11 +518,10 @@ impl App {
             peak_binaries,
             main_bus,
             sound_effects,
-            chord_amp,
             current_movement_start,
             current_movement_duration,
-            chord_amp_setter,
             randomised_mode,
+            chord_player,
         } = self;
 
         if new_mvt_id != *mvt_id {
@@ -520,7 +539,8 @@ impl App {
             *is_on_break = is_break;
             *transposition_within_octave_guard = true;
             if new_mvt_id != 9999 {
-                chord_amp_setter.set(0, 1.0);
+                chord_player.set_amp(1.0);
+                // chord_amp_setter.set(0, 1.0);
             }
             let mut rng = thread_rng();
             // If we are in random mode and the movement doesn't have its own harmony settings, change them randomly maybe
@@ -536,10 +556,22 @@ impl App {
                     .choose(&mut rng)
                     .expect("choose on a non-empty collection should always return something");
                     *harmonic_changes = match rng.gen_range(0..3) {
-                        0 => spicier_harmonies(),
-                        1 => ii_v_i_harmonic_changes(),
+                        //                         0 => spicier_harmonies(),
+                        0 => ii_v_i_harmonic_changes(),
                         _ => default_harmonic_changes(),
                     };
+                }
+                match rng.gen_range(0..3) {
+                    0 => {
+                        background_noise.fade_out(10.);
+                    }
+                    1 => {
+                        background_noise.fade_out_then_in(20., 5., 20.);
+                    }
+                    2 => {
+                        background_noise.fade_out_then_in(10., 1., 1.);
+                    }
+                    _ => (),
                 }
             } else {
                 // Every movement except 42 uses this harmony so we make sure it's selected here
@@ -862,13 +894,7 @@ impl App {
                         dc.patch_to_fx_chain(2);
                         dc.set_lpf(3000.);
                         *current_sonifiers = vec![Box::new(pt), Box::new(dc)];
-                        {
-                            let chord_amp = *chord_amp_setter;
-                            std::thread::spawn(move || {
-                                std::thread::sleep(Duration::from_secs_f32(duration));
-                                chord_amp.set(0, 0.0);
-                            });
-                        }
+                        chord_player.set_amp_after_duration(0., Duration::from_secs_f32(duration));
                     }
                     9999 => {
                         sound_effects.play_bell_b();
@@ -1007,59 +1033,5 @@ impl PanMonoToQuad {
             rear_right[i] = signal * right_gain * rear_gain;
         }
         GenState::Continue
-    }
-}
-fn changed_harmony_chord(
-    new_chord: &[f32],
-    amp: Handle<RampHandle>,
-    length_min: f32,
-    length_max: f32,
-) {
-    knyst_commands().to_top_level_graph();
-    let mut rng = thread_rng();
-    if rng.gen::<f32>() > 0.4 {
-        println!("Playing harmony change chord");
-        for f in new_chord {
-            let length = rng.gen_range(length_min..length_max);
-            let speaker = rng.gen_range(0..4);
-            let filtered_noise = upload_graph(
-                knyst_commands()
-                    .default_graph_settings()
-                    .num_outputs(1)
-                    .num_inputs(1),
-                || {
-                    let input_amp = graph_input(0, 1);
-                    let env = envelope_gen(
-                        0.0,
-                        vec![(1.0, 3.), (1.0, length - 5.), (0.0, 2.)],
-                        knyst::envelope::SustainMode::NoSustain,
-                        StopAction::FreeGraph,
-                    );
-                    let source = white_noise();
-                    let mut sigs = vec![];
-                    for i in 0..5 {
-                        let freq_detune = [1.0, 1.001, 0.999, 1.002, 0.998][i];
-                        let q_env = envelope_gen(
-                            1.0 / rng.gen_range(0.001..0.008),
-                            vec![(1. / 0.0003, length)],
-                            knyst::envelope::SustainMode::NoSustain,
-                            StopAction::Continue,
-                        );
-
-                        let sig = svf_dynamic(SvfFilterType::Band)
-                            .cutoff_freq(f * freq_detune)
-                            .q(q_env)
-                            .gain(0.0)
-                            .input(source);
-                        sigs.push(sig);
-                    }
-                    let sig = sigs[0] + sigs[1] + sigs[2] + sigs[3] + sigs[4];
-                    let sig = sig * env * 0.0005 * input_amp;
-                    graph_output(0, sig);
-                },
-            );
-            filtered_noise.set(0, amp);
-            graph_output(speaker, filtered_noise);
-        }
     }
 }
