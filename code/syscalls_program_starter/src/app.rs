@@ -5,7 +5,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use egui::Color32;
+use egui::{epaint, Color32, ProgressBar};
 use syscalls_shared::score::Score;
 
 use crate::websocket::{start_websocket_thread, WebsocketMess};
@@ -90,16 +90,27 @@ impl eframe::App for TemplateApp {
             .show(ctx, |ui| {
                 // The central panel the region left after adding TopPanel's and SidePanel's
 
+                let visuals = ui.visuals_mut();
+                visuals.override_text_color = Some(Color32::WHITE);
+                visuals.extreme_bg_color = Color32::DARK_GREEN;
+
+                ui.style_mut().text_styles.insert(
+                    egui::TextStyle::Button,
+                    egui::FontId::new(20.0, eframe::epaint::FontFamily::Proportional),
+                );
+
                 let strace_path =
                     "/home/assert/Documents/rethread/code/syscalls/target/release/strace_collector";
                 let programs = ["gedit", "konqueror", "thunderbird", "htop"];
 
                 egui::Grid::new("program grid").show(ui, |ui| {
-                    for p in programs {
+                    for (i, p) in programs.into_iter().enumerate() {
                         if ui.button(p).clicked() {
                             start_program(strace_path, p);
                         }
-                        ui.end_row();
+                        if i % 2 == 1 {
+                            ui.end_row();
+                        }
                     }
                 });
                 if let Some(WebsocketMess::Movement {
@@ -109,18 +120,61 @@ impl eframe::App for TemplateApp {
                     duration,
                 }) = movement_data
                 {
-                    egui::Grid::new("some_unique_id").show(ui, |ui| {
-                        ui.label("Id:");
-                        ui.label(format!("{id}"));
+                    if *is_break {
+                        ui.heading("BREAK");
+                        ui.label("Seconds remaining:");
+                        ui.label(format!(
+                            "{}",
+                            (*duration - last_movement.elapsed().as_secs_f32()).ceil()
+                        ));
+                    } else {
+                        egui::Grid::new("some_unique_id").show(ui, |ui| {
+                            ui.label("Id:");
+                            ui.label(format!("{id}"));
+                            ui.end_row();
+
+                            ui.label("Duration:");
+                            ui.label(format!("{duration}s"));
+                            ui.end_row();
+
+                            ui.label("Programs:");
+                            if let Some(mvt) = score.movements.iter().find(|m| m.id == *id as usize)
+                            {
+                                ui.label(format!("{:?}", mvt.programs));
+                            }
+                            ui.end_row();
+
+                            ui.label("Seconds remaining:");
+                            ui.label(format!(
+                                "{}",
+                                (*duration - last_movement.elapsed().as_secs_f32()).ceil()
+                            ));
+                            ui.end_row();
+                        });
+                    }
+                    let progress = last_movement.elapsed().as_secs_f32() / *duration;
+                    ui.add(
+                        ProgressBar::new(progress)
+                            .fill(Color32::GREEN)
+                            .show_percentage()
+                            .animate(true),
+                    );
+                    ui.add_space(20.);
+
+                    egui::Grid::new("some_unique_id2").show(ui, |ui| {
+                        ui.heading("Next");
                         ui.end_row();
 
-                        ui.label("Duration:");
-                        ui.label(format!("{duration}s"));
-                        ui.end_row();
-
-                        ui.label("Programs:");
-                        if let Some(mvt) = score.movements.iter().find(|m| m.id == *id as usize) {
-                            ui.label(format!("{:?}", mvt.programs));
+                        if let Some(next) = next_mvt {
+                            ui.label("Id:");
+                            ui.label(format!("{next}"));
+                            ui.end_row();
+                            if let Some(mvt) =
+                                score.movements.iter().find(|m| m.id == *next as usize)
+                            {
+                                ui.label("Programs:");
+                                ui.label(format!("{:?}", mvt.programs));
+                            }
                         }
                         ui.end_row();
                     });
