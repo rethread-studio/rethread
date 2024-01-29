@@ -397,6 +397,12 @@ impl eframe::App for EguiApp {
                     }
                 }
                 self.self_activating_mode = false;
+                if let Err(e) = self
+                    .packet_hq_command_sender
+                    .push(RecordingCommand::SetAutostartMovementPrograms(false))
+                {
+                    error!("Failed to send command to PacketHq: {e}");
+                }
                 self.last_audience_interaction = Instant::now();
             }
         }
@@ -410,28 +416,34 @@ impl eframe::App for EguiApp {
         if self.enable_self_activation {
             if self.last_audience_interaction.elapsed() > Duration::from_secs(60 * 3) {
                 self.self_activating_mode = true;
-            }
-            if self.self_activating_mode {
-                if self.last_self_activation.elapsed() > self.next_self_activation {
-                    let mut rng = thread_rng();
-                    let new_program = self.all_program_values.choose(&mut rng);
-                    if let Some(program) = new_program {
-                        self.add_active_program(program.clone());
-                    }
-                    if self.active_programs.len() > 1 {
-                        // Possibly remove active programs
-                        if rng.gen::<f32>() > 0.7 {
-                            for _ in 0..rng.gen_range(1..self.active_programs.len()) {
-                                let i = rng.gen_range(0..self.active_programs.len());
-                                self.stop_active_program(self.active_programs[i].clone());
-                            }
-                        }
-                    }
-                    let seconds_until_next = rng.gen_range(15..90);
-                    self.next_self_activation = Duration::from_secs(seconds_until_next);
-                    self.last_self_activation = Instant::now();
+                if let Err(e) = self
+                    .packet_hq_command_sender
+                    .push(RecordingCommand::SetAutostartMovementPrograms(true))
+                {
+                    error!("Failed to send command to PacketHq: {e}");
                 }
             }
+            // if self.self_activating_mode {
+            //     if self.last_self_activation.elapsed() > self.next_self_activation {
+            //         let mut rng = thread_rng();
+            //         let new_program = self.all_program_values.choose(&mut rng);
+            //         if let Some(program) = new_program {
+            //             self.add_active_program(program.clone());
+            //         }
+            //         if self.active_programs.len() > 1 {
+            //             // Possibly remove active programs
+            //             if rng.gen::<f32>() > 0.7 {
+            //                 for _ in 0..rng.gen_range(1..self.active_programs.len()) {
+            //                     let i = rng.gen_range(0..self.active_programs.len());
+            //                     self.stop_active_program(self.active_programs[i].clone());
+            //                 }
+            //             }
+            //         }
+            //         let seconds_until_next = rng.gen_range(15..90);
+            //         self.next_self_activation = Duration::from_secs(seconds_until_next);
+            //         self.last_self_activation = Instant::now();
+            //     }
+            // }
         }
         // Receive messages
         while let Ok(update) = self.egui_update_receiver.pop() {

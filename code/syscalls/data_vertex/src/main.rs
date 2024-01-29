@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use config::Config;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyEventState},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -305,6 +305,7 @@ pub enum RecordingCommand {
     PlayScore,
     PlayRandomMovements,
     StopScorePlayback,
+    SetAutostartMovementPrograms(bool),
 }
 
 #[derive(Clone, Debug)]
@@ -317,6 +318,7 @@ pub enum EguiUpdate {
     ScorePlay,
     ScorePlayRandom,
     ScoreStop,
+    
 }
 struct PacketHQ {
     score: Score,
@@ -331,6 +333,7 @@ struct PacketHQ {
     egui_update_sender: rtrb::Producer<EguiUpdate>,
     last_update: Instant,
     last_gui_update_sent: Instant,
+    autostart_movement_programs: bool,
 }
 impl PacketHQ {
     fn new(
@@ -353,6 +356,7 @@ impl PacketHQ {
             egui_command_receiver,
             egui_update_sender,
             last_gui_update_sent: Instant::now(),
+            autostart_movement_programs: true,
         }
     }
     pub fn register_websocket_senders(&mut self, ws: WebsocketSender) {
@@ -531,6 +535,7 @@ impl PacketHQ {
                     self.score.stop();
                     self.osc_sender.send_score_stop();
                 }
+                RecordingCommand::SetAutostartMovementPrograms(b) => self.autostart_movement_programs=b,
             }
         }
         while let Ok(command) = self.command_receiver.pop() {
@@ -580,10 +585,10 @@ impl PacketHQ {
                         }
                         ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                             self.osc_sender.send_movement(&new_mvt, next_mvt);
-                            if !self.score.random_order {
-                                // self.egui_update_sender
-                                //     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
-                                //     .ok();
+                            if self.autostart_movement_programs {
+                                self.egui_update_sender
+                                    .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                                    .ok();
                             }
                         }
                         ScoreUpdate::Nothing => (),
@@ -598,10 +603,10 @@ impl PacketHQ {
                         }
                         ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                             self.osc_sender.send_movement(&new_mvt, next_mvt);
-                            if !self.score.random_order {
-                                // self.egui_update_sender
-                                //     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
-                                //     .ok();
+                            if self.autostart_movement_programs {
+                                self.egui_update_sender
+                                    .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                                    .ok();
                             }
                         }
                         ScoreUpdate::Nothing => (),
@@ -619,10 +624,10 @@ impl PacketHQ {
             }
             ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                 self.osc_sender.send_movement(&new_mvt, next_mvt);
-                if !self.score.random_order {
-                    // self.egui_update_sender
-                    //     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
-                    //     .ok();
+                if self.autostart_movement_programs {
+                    self.egui_update_sender
+                        .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                        .ok();
                 }
             }
             ScoreUpdate::Nothing => (),
@@ -638,9 +643,9 @@ impl PacketHQ {
         self.osc_sender.send_movement(&new_mvt, next_mvt);
         if !self.score.random_order {
             self.egui_update_sender.push(EguiUpdate::ScorePlay).ok();
-            // self.egui_update_sender
-            //     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
-            //     .ok();
+            self.egui_update_sender
+                .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                .ok();
         }
     }
     pub fn play_random_movements(&mut self) {
@@ -950,6 +955,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
             .unwrap_or_else(|| Duration::from_secs(0));
         if crossterm::event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
+               if matches!(key.kind, KeyEventKind::Press
+               ) {
                 match key.code {
                     KeyCode::Down => {
                         if let Some(selected) = app.menu_table_state.selected() {
@@ -1042,6 +1049,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                     KeyCode::Char('q') => return Ok(()),
                     _ => {}
                 }
+            }
             }
         }
         if last_tick.elapsed() >= tick_rate {
