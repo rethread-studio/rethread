@@ -10,6 +10,7 @@ use tracing::info;
 use crate::config::Config;
 pub struct WebsocketSender {
     pub message_tx: tokio::sync::broadcast::Sender<String>,
+    pub message_tx_recordings: tokio::sync::broadcast::Sender<String>,
 }
 
 enum OscMessage {
@@ -212,10 +213,10 @@ impl OscSender {
             if let Ok(ok) = ws.message_tx.send(mess) {
                 // info!("Sending syscall to {ok} receivers");
             }
-            let mess = format!("/break:{}", if m.is_break { 1 } else { 0 },);
-            if let Ok(ok) = ws.message_tx.send(mess) {
-                // info!("Sending syscall to {ok} receivers");
-            }
+            // let mess = format!("/break:{}", if m.is_break { 1 } else { 0 },);
+            // if let Ok(ok) = ws.message_tx.send(mess) {
+            //     // info!("Sending syscall to {ok} receivers");
+            // }
         }
     }
     pub fn send_start_recording_playback(&mut self, name: String) {
@@ -230,12 +231,12 @@ impl OscSender {
         //     let args = vec![Type::String(name.clone())];
         //     sender.send((addr, args)).ok();
         // }
-        // if let Some(ws) = &mut self.websocket_senders {
-        //     let mess = format!("/start_recording_playback:{}", name.clone());
-        //     if let Ok(ok) = ws.message_tx.send(mess) {
-        //         // info!("Sending syscall to {ok} receivers");
-        //     }
-        // }
+        if let Some(ws) = &mut self.websocket_senders {
+            let mess = format!("/start_recording_playback:{}", name.clone());
+            if let Ok(ok) = ws.message_tx_recordings.send(mess) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+        }
     }
     pub fn send_stop_recording_playback(&mut self, name: String) {
         for sender in &mut self.senders {
@@ -249,12 +250,12 @@ impl OscSender {
         //     let args = vec![Type::String(name.clone())];
         //     sender.send((addr, args)).ok();
         // }
-        // if let Some(ws) = &mut self.websocket_senders {
-        //     let mess = format!("/stop_recording_playback:{}", name.clone());
-        //     if let Ok(ok) = ws.message_tx.send(mess) {
-        //         // info!("Sending syscall to {ok} receivers");
-        //     }
-        // }
+        if let Some(ws) = &mut self.websocket_senders {
+            let mess = format!("/stop_recording_playback:{}", name.clone());
+            if let Ok(ok) = ws.message_tx_recordings.send(mess) {
+                // info!("Sending syscall to {ok} receivers");
+            }
+        }
     }
     pub fn send_score_stop(&mut self) {
         for sender in &mut self.senders {
@@ -386,22 +387,22 @@ pub fn send_movement(
     next_mvt: Option<Movement>,
 ) {
     // for _ in 0..4 {
-        let addr = "/new_movement";
-        let args = vec![
-            Type::Int(m.id as i32),
-            Type::Bool(m.is_break),
-            Type::String(m.description.clone()),
-            Type::Int(if let Some(m) = next_mvt.clone() {
-                m.id as i32
-            } else {
-                -1
-            }),
-            Type::Float(m.duration.as_secs_f32()),
-        ];
-        sender.send((addr, args)).ok();
-        let addr = "/break";
-        let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
-        sender.send((addr, args)).ok();
+    let addr = "/new_movement";
+    let args = vec![
+        Type::Int(m.id as i32),
+        Type::Bool(m.is_break),
+        Type::String(m.description.clone()),
+        Type::Int(if let Some(m) = next_mvt.clone() {
+            m.id as i32
+        } else {
+            -1
+        }),
+        Type::Float(m.duration.as_secs_f32()),
+    ];
+    sender.send((addr, args)).ok();
+    let addr = "/break";
+    let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
+    sender.send((addr, args)).ok();
     // }
 }
 pub fn send_start_recording_playback(sender: &mut nannou_osc::Sender<Connected>, name: String) {
