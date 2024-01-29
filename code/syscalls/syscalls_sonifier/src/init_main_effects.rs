@@ -6,8 +6,10 @@ use knyst::{
         },
         filter::{
             self,
-            svf::{svf_filter, SvfFilterType}, one_pole::{one_pole_lpf, one_pole_hpf},
+            one_pole::{one_pole_hpf, one_pole_lpf},
+            svf::{svf_dynamic, svf_filter, SvfFilterType},
         },
+        random::random_lin,
     },
     handles::{
         bus, graph_output, GenericHandle, Handle, HandleData, InputChannelHandle,
@@ -16,7 +18,7 @@ use knyst::{
 };
 use knyst_airwindows::galactic;
 
-use crate::gen::soft_clipper;
+use crate::{gen::soft_clipper, background_noise::stderr_dump};
 
 pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
     // Channel 1: 0-3
@@ -58,40 +60,54 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
     }
     // HighShelf 6139 -1.5db
     for i in 0..4 {
-        let sig = svf_filter(SvfFilterType::HighShelf, 6139., 1.2, -1.5).input(eq[i]);
+        let sig = svf_filter(SvfFilterType::HighShelf, 6139., 1.2, -3.5).input(eq[i]);
         eq[i] = sig;
     }
     for i in 0..4 {
-        let sig = svf_filter(SvfFilterType::HighShelf, 10139., 1.2, -2.5).input(eq[i]);
+        let sig = svf_filter(SvfFilterType::HighShelf, 10139., 1.2, -4.5).input(eq[i]);
         eq[i] = sig;
+    }
+
+    let mut eq2 = vec![];
+    // Moving eq
+    let f = random_lin().freq(2.5).powf(2.0) * 8000. + 200.;
+    let g = random_lin().freq(0.1) * 13. - 6.;
+    // stderr_dump().input(g).set_mortality(false);
+    for i in 0..4 {
+        let sig = svf_dynamic(SvfFilterType::Bell)
+            .input(eq[i])
+            .cutoff_freq(f)
+            .q(0.8)
+            .gain(g);
+        eq2.push(sig);
     }
 
     // Add a soft clipper to the output and boost the output level
     let soft_clip = soft_clipper()
-        .in0(eq[0])
-        .in1(eq[1])
-        .in2(eq[2])
-        .in3(eq[3])
+        .in0(eq2[0])
+        .in1(eq2[1])
+        .in2(eq2[2])
+        .in3(eq2[3])
         .boost_db(9.)
         .limit_db(-1.);
-        // graph_output(0, soft_clip * 0.1);
+    // graph_output(0, soft_clip * 0.1);
 
-        let mut eq = vec![];
+    let mut eq = vec![];
     for i in 0..4 {
         // let sig = one_pole_hpf().sig(one_pole_hpf().cutoff_freq(2000.).sig(soft_clip.out(i))).cutoff_freq(2000.);
         let sig = svf_filter(SvfFilterType::High, 100., 1.2, -120.).input(soft_clip.out(i));
         eq.push(sig);
     }
     for i in 0..4 {
-        graph_output(i, eq[i]*0.1);
+        graph_output(i, eq[i] * 0.1);
     }
 
     // Subwoofer
-    let sub  = soft_clip.out(0) + soft_clip.out(1) + soft_clip.out(2) + soft_clip.out(3);
+    let sub = soft_clip.out(0) + soft_clip.out(1) + soft_clip.out(2) + soft_clip.out(3);
     let sub = one_pole_lpf().sig(sub * 0.25).cutoff_freq(150.);
     let sub = one_pole_lpf().sig(sub).cutoff_freq(150.);
-    let sub =compressor().input_left(sub);
-    graph_output(4, sub.out(0)*db_to_amplitude(-25.));
+    // let sub = compressor().input_left(sub);
+    graph_output(4, sub.out(0) * db_to_amplitude(-20.));
     // for i in 0..4 {
     //     graph_output(i, main_out_bus.out(i));
     // }
@@ -109,8 +125,8 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
         .detune(0.0)
         .mix(1.0)
         .replace(0.3)
-        .left(c0.out(0))
-        .right(c0.out(1));
+        .left(one_pole_lpf().sig(c0.out(0)).cutoff_freq(4000.))
+        .right(one_pole_lpf().sig(c0.out(1)).cutoff_freq(4000.));
     // .left(out_bus.out(4))
     // .right(out_bus.out(5));
     let rev1 = galactic()
@@ -119,12 +135,14 @@ pub fn init_main_effects(out_bus: Handle<GenericHandle>) {
         .detune(0.0)
         .mix(1.0)
         .replace(0.3)
-        .left(c1.out(0))
-        .right(c1.out(1));
+        // .left(c1.out(0))
+        // .right(c1.out(1));
+        .left(one_pole_lpf().sig(c1.out(0)).cutoff_freq(4000.))
+        .right(one_pole_lpf().sig(c1.out(1)).cutoff_freq(4000.));
     // .left(out_bus.out(6))
     // .right(out_bus.out(7));
-    main_out_bus.set(0, (rev0 * 0.4 + c0 * 0.6) * 1.5);
-    main_out_bus.set(2, (rev1 * 0.4 + c1 * 0.6) * 1.5);
+    main_out_bus.set(0, (rev0 * 0.6 + c0 * 0.4) * 1.5);
+    main_out_bus.set(2, (rev1 * 0.6 + c1 * 0.4) * 1.5);
     // graph_output(4, (rev0 * 0.4 + c0 * 0.6) * 1.5);
     // graph_output(6, (rev1 * 0.4 + c1 * 0.6) * 1.5);
 

@@ -181,7 +181,7 @@ fn main() -> Result<()> {
     let mut rng = thread_rng();
 
     // app.peak_binaries.add_trig(3.0, SoundKind::Binary);
-    app.change_movement(0, None, false, 300.);
+    // app.change_movement(0, None, false, 300.);
     // app.change_movement(42, None, false, 30.);
     // main loop
     // std::thread::spawn(move || {
@@ -199,10 +199,13 @@ fn main() -> Result<()> {
                     );
                     if mvt_data.is_break {
                         app.sound_effects.play_bell_a();
+                        if let Some(next_id) = mvt_data.next_mvt_id {
+                            app.sound_effects
+                                .play_movement_voice(next_id, mvt_data.duration);
+                        }
                     } else {
                         //app.sound_effects.play_bell_b();
                     }
-                    app.sound_effects.play_movement_voice(mvt_data.mvt_id);
                     app.change_movement(
                         mvt_data.mvt_id,
                         mvt_data.next_mvt_id,
@@ -237,7 +240,7 @@ fn main() -> Result<()> {
                 app.apply_osc_message(m);
             }
             // Receive websocket
-            while let Ok(websocket_mess) = websocket_receiver.try_recv() {
+            if let Ok(websocket_mess) = websocket_receiver.try_recv() {
                 match websocket_mess {
                     WebsocketMess::Movement {
                         id,
@@ -248,11 +251,13 @@ fn main() -> Result<()> {
                         println!("ws New movement, {}, break: {:?}", id, is_break);
                         if is_break {
                             app.sound_effects.play_bell_a();
+                            if let Some(next_id) = next_mvt {
+                                app.sound_effects.play_movement_voice(next_id, duration);
+                            }
                         } else {
                             //app.sound_effects.play_bell_b();
                         }
-                        app.sound_effects.play_movement_voice(id);
-                        app.change_movement(mvt_id, next_mvt, is_break, duration);
+                        app.change_movement(id, next_mvt, is_break, duration);
                     }
                 }
             }
@@ -481,6 +486,7 @@ impl App {
                 sonifier.change_harmony(&current_chord, root);
             }
         }
+        peak_binaries.change_harmony(&current_chord, *root_freq);
         peak_binaries.update(osc_sender, &self.sound_effects);
     }
     pub fn stop_playing(&mut self) {
@@ -824,6 +830,7 @@ impl App {
                             lpf_high: 1000.0..7000.0,
                         });
                         *chord_change_interval = None;
+                        *chord_change_interval = Some(Duration::from_secs(15));
                         let mut pt = ProgramThemes::new(0.1, *main_bus);
                         pt.patch_to_fx_chain(1);
                         let mut dc = DirectCategories::new(0.08, sample_rate, *main_bus);
@@ -842,7 +849,7 @@ impl App {
                             *main_bus,
                         );
                         sonifier.decrease_sensitivity = false;
-                        peak_binaries.add_trig(2.0, SoundKind::FilteredNoise(3));
+                        peak_binaries.add_trig(2.0, SoundKind::FilteredNoise(5));
                         *current_sonifiers = vec![Box::new(sonifier)];
                         for s in current_sonifiers.iter_mut() {
                             s.patch_to_fx_chain(1);

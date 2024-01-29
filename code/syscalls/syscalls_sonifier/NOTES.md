@@ -23,3 +23,10 @@ Bass and top
 
 - Voice announcements too loud
 - DirectFunctions h;ga diskanten f;r stark
+
+# Run 2
+
+- Bell too loud
+- mvt voice before mvt
+- background noise too loud
+- background noise would do well with a faster modulating lpf

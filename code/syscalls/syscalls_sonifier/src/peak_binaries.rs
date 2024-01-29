@@ -164,6 +164,8 @@ impl Sonifier for PeakBinaries {
                                 while freq < 750. {
                                     freq *= 2.;
                                 }
+                                dbg!(&self.chord, degree);
+                                println!("Filtered noise freq: {freq}");
                                 // let addr = "/background_noise";
                                 // let args = vec![Type::Float(length), Type::Float(freq)];
                                 // osc_sender.send((addr, args)).ok();
@@ -196,7 +198,7 @@ fn play_binary_sound(
     knyst_commands().to_top_level_graph();
     // Start time [0, 0.5] * buffer length
     // front_back_mix 0 -> 1.0
-    let amp = 0.035;
+    let amp = 0.010;
     let mut rng = thread_rng();
     let bin_graph = upload_graph(
         knyst_commands()
