@@ -1338,11 +1338,17 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
     let (packet_sender, mut packet_receiver) = tokio::sync::mpsc::unbounded_channel();
 
     let (message_tx, message_rx1) = tokio::sync::broadcast::channel(1000000);
+    let (message_tx_recordings, message_rx2) = tokio::sync::broadcast::channel(1000000);
     drop(message_rx1);
+    drop(message_rx2);
     {
         let message_tx = message_tx.clone();
+        let message_tx_recordings = message_tx.clone();
         tokio::spawn(async move {
-            let ws = WebsocketSender { message_tx };
+            let ws = WebsocketSender {
+                message_tx,
+                message_tx_recordings,
+            };
             packet_hq.register_websocket_senders(ws);
             let mut counter = 0;
             loop {
@@ -1363,7 +1369,8 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
             }
         });
     }
-    tokio::spawn(async move { start_websocket_endpoints(message_tx).await });
+    tokio::spawn(async move { start_websocket_endpoints(message_tx, 1237).await });
+    tokio::spawn(async move { start_websocket_endpoints(message_tx_recordings, 1238).await });
     loop {
         let (socket, _) = listener.accept().await?;
         let packet_sender = packet_sender.clone();
@@ -1391,8 +1398,9 @@ type EndpointClients = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 
 async fn start_websocket_endpoints(
     message_tx: tokio::sync::broadcast::Sender<String>,
+    port: u16,
 ) -> Result<()> {
-    let addr = "0.0.0.0:1237".to_string();
+    let addr = format!("0.0.0.0:{port}");
     // Create the event loop and TCP listener we'll accept connections on.
     let try_socket = TcpListener::bind(&addr).await;
     let listener = try_socket.expect("Failed to bind");
@@ -1404,15 +1412,15 @@ async fn start_websocket_endpoints(
     loop {
         match listener.accept().await {
             Ok((stream, addr)) => {
-                let (private_tx, private_rx) = tokio::sync::mpsc::unbounded_channel();
-                tokio::spawn(async move {
-                    let mut num = 0;
-                    loop {
-                        private_tx.send(format!("{num} is the value")).ok();
-                        num += 1;
-                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-                    }
-                });
+                // let (private_tx, private_rx) = tokio::sync::mpsc::unbounded_channel();
+                // tokio::spawn(async move {
+                //     let mut num = 0;
+                //     loop {
+                //         // private_tx.send(format!("{num} is the value")).ok();
+                //         num += 1;
+                //         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                //     }
+                // });
                 let syscall_rx = message_tx.subscribe();
                 all_handles.push(tokio::spawn(async move {
                     register_new_websocket_endpoint_client(addr, stream, syscall_rx).await
