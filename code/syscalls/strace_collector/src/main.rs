@@ -316,7 +316,7 @@ fn trace_pid(
 fn reconnect(running: Arc<AtomicBool>) -> Result<WebSocket<MaybeTlsStream<TcpStream>>, ()> {
     let socket = loop {
         info!("Trying to connect");
-        match connect(Url::parse("ws://192.168.53.3:3012").unwrap()) {
+        match connect(Url::parse("ws://192.168.53.4:3012").unwrap()) {
             Ok((socket, _response)) => break socket,
             Err(e) => error!("Failed to connect: {e}"),
         }
