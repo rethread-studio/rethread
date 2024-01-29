@@ -63,7 +63,7 @@ fn sound_path() -> PathBuf {
 #[cfg(target_family = "windows")]
 fn sound_path() -> PathBuf {
     SOUND_PATH
-        .get_or_init(|| PathBuf::from("C:\\Users\\reth\\Music\\syscalls\\"))
+        .get_or_init(|| PathBuf::from(r"C:\Users\sysCalls\Documents\syscalls_sounds"))
         .clone()
 }
 
