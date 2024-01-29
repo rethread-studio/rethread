@@ -90,7 +90,7 @@ impl Score {
                 description: "interlude,direct,function calls,lower and lower sensitivity"
                     .to_string(),
                 duration: Duration::from_secs(45),
-                programs: vec!["thunderbird", "konqueror", "gedit"],
+                programs: vec!["htop"],
                 restart_programs: None,
             },
             // Movement {

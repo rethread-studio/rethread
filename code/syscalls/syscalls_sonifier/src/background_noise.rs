@@ -82,7 +82,22 @@ impl BackgroundNoise {
             .channels(4)
             .looping(true)
             .upload();
-        let sig = buf_reader * ramp(0.2).value(amp).time(amp_ramp_time) * 0.5;
+        let sig = buf_reader * ramp(0.2).value(amp).time(amp_ramp_time) * 1.;
+
+    // Moving eq
+    let f = random_lin().freq(2.5).powf(2.0) * 8000. + 200.;
+    let g = random_lin().freq(0.1) * 8. - 4.;
+
+        let mut sigs = vec![];
+        for i in 0..4 {
+
+        let sig2 = svf_dynamic(SvfFilterType::Bell)
+            .input(sig.out(i))
+            .cutoff_freq(f)
+            .q(0.7)
+            .gain(g);
+        sigs.push(sig2);
+        }
         let mut freq_sigs = vec![];
         // let q = 600.;
         for mul in [4, 8, 12, 16] {
@@ -92,23 +107,28 @@ impl BackgroundNoise {
                 .cutoff_freq(ramped_root_freq * mul as f32 * detune)
                 .q(q)
                 .gain(0.0)
-                .input(sig.out(0) * 0.01);
+                .input(sigs[0] * 0.008);
             nan_fuse().input(f_sig);
             freq_sigs.push(f_sig);
         }
         let freq_sigs = freq_sigs[0] + freq_sigs[1] + freq_sigs[2] + freq_sigs[3];
         let freq_sigs = freq_sigs * (random_lin().freq(3.).powf(2.) * 0.75 + 0.25);
+        let mut sigs2 = vec![];
+        for i in 0..4 {
         let sig =
-            sig * (1.0 - resonant_filters_mix) + (freq_sigs.channels(4) * resonant_filters_mix);
+            sigs[i] * (1.0 - resonant_filters_mix) + (freq_sigs.channels(4) * resonant_filters_mix);
+            let sig = sig * 1.;
+            sigs2.push(sig);
+        }
         // let sig = sig + freq_sigs.channels(4);
-        let sig = sig * 0.1;
         let lpf_freq_bus = bus(1).set(0, 20000.);
+        let lpf_freq = random_lin().freq(0.4) * 6000. + 13000.;
         let hpf_freq_bus = bus(1).set(0, 20.);
         let mut sigs = vec![];
         for i in 0..4 {
             let s = one_pole_hpf()
-                .cutoff_freq(hpf_freq_bus)
-                .sig(one_pole_lpf().cutoff_freq(lpf_freq_bus).sig(sig.out(i)));
+                .cutoff_freq(lpf_freq)
+                .sig(one_pole_lpf().cutoff_freq(lpf_freq).sig(sigs2[i]));
             sigs.push(s);
         }
         for i in 0..4 {

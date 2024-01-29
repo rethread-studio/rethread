@@ -56,7 +56,7 @@ impl DirectCategories {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().expect("channel to exist");
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
-                    *o = (i * 0.2 * amp).clamp(-1.0, 1.0);
+                    *o = (i * 0.25 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue

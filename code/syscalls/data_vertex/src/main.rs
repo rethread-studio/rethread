@@ -581,9 +581,9 @@ impl PacketHQ {
                         ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                             self.osc_sender.send_movement(&new_mvt, next_mvt);
                             if !self.score.random_order {
-                                self.egui_update_sender
-                                    .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
-                                    .ok();
+                                // self.egui_update_sender
+                                //     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                                //     .ok();
                             }
                         }
                         ScoreUpdate::Nothing => (),
@@ -599,9 +599,9 @@ impl PacketHQ {
                         ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                             self.osc_sender.send_movement(&new_mvt, next_mvt);
                             if !self.score.random_order {
-                                self.egui_update_sender
-                                    .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
-                                    .ok();
+                                // self.egui_update_sender
+                                //     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                                //     .ok();
                             }
                         }
                         ScoreUpdate::Nothing => (),
@@ -620,9 +620,9 @@ impl PacketHQ {
             ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                 self.osc_sender.send_movement(&new_mvt, next_mvt);
                 if !self.score.random_order {
-                    self.egui_update_sender
-                        .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
-                        .ok();
+                    // self.egui_update_sender
+                    //     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+                    //     .ok();
                 }
             }
             ScoreUpdate::Nothing => (),
@@ -638,9 +638,9 @@ impl PacketHQ {
         self.osc_sender.send_movement(&new_mvt, next_mvt);
         if !self.score.random_order {
             self.egui_update_sender.push(EguiUpdate::ScorePlay).ok();
-            self.egui_update_sender
-                .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
-                .ok();
+            // self.egui_update_sender
+            //     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
+            //     .ok();
         }
     }
     pub fn play_random_movements(&mut self) {

@@ -75,7 +75,7 @@ impl Category {
                             + 53 * self.octave,
                         25.,
                     );
-                    println!("New wg for {} id {id} freq {freq}, i: {i}", &self.kind);
+                    // println!("New wg for {} id {id} freq {freq}, i: {i}", &self.kind);
                     let mut wg = make_new_waveguide(freq, self.category_bus, self.syscall_kind);
                     wg.register_call(sensitivity_coeff, id, func_args);
                     self.wgs.insert(id, wg);

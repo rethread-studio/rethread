@@ -172,15 +172,15 @@ impl OscSender {
         // }
     }
     pub fn send_movement(&mut self, m: &Movement, next_mvt: Option<Movement>) {
-        for sender in &mut self.senders {
-            match sender.send(OscMessage::Movement {
-                m: m.clone(),
-                next_mvt: next_mvt.clone(),
-            }) {
-                Ok(_) => (),
-                Err(e) => error!("Failed to send to osc instance: {e}"),
-            }
-        }
+        // for sender in &mut self.senders {
+        //     match sender.send(OscMessage::Movement {
+        //         m: m.clone(),
+        //         next_mvt: next_mvt.clone(),
+        //     }) {
+        //         Ok(_) => (),
+        //         Err(e) => error!("Failed to send to osc instance: {e}"),
+        //     }
+        // }
         // for _ in 0..5 {
         // for sender in &mut self.senders {
         //     let addr = "/new_movement";
@@ -385,7 +385,7 @@ pub fn send_movement(
     m: &Movement,
     next_mvt: Option<Movement>,
 ) {
-    for _ in 0..4 {
+    // for _ in 0..4 {
         let addr = "/new_movement";
         let args = vec![
             Type::Int(m.id as i32),
@@ -402,7 +402,7 @@ pub fn send_movement(
         let addr = "/break";
         let args = vec![Type::Int(if m.is_break { 1 } else { 0 })];
         sender.send((addr, args)).ok();
-    }
+    // }
 }
 pub fn send_start_recording_playback(sender: &mut nannou_osc::Sender<Connected>, name: String) {
     let addr = "/start_recording_playback";
