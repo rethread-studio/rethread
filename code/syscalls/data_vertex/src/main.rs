@@ -498,7 +498,7 @@ impl PacketHQ {
                     for r in &mut self.recording_playbacks {
                         if r.uuid == uuid {
                             r.start_playback(&mut self.osc_sender);
-                            info!("Started playback on packethq");
+                            // info!("Started playback on packethq");
                             recording_found = true;
                         }
                     }
@@ -1343,7 +1343,7 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
     drop(message_rx2);
     {
         let message_tx = message_tx.clone();
-        let message_tx_recordings = message_tx.clone();
+        let message_tx_recordings = message_tx_recordings.clone();
         tokio::spawn(async move {
             let ws = WebsocketSender {
                 message_tx,
@@ -1423,7 +1423,7 @@ async fn start_websocket_endpoints(
                 // });
                 let syscall_rx = message_tx.subscribe();
                 all_handles.push(tokio::spawn(async move {
-                    register_new_websocket_endpoint_client(addr, stream, syscall_rx).await
+                    register_new_websocket_endpoint_client(addr, stream, syscall_rx, port).await
                 }));
             }
             Err(e) => {
@@ -1442,8 +1442,9 @@ async fn register_new_websocket_endpoint_client(
     stream: TcpStream,
     // endpoints: EndpointClients,
     mut message_rx: tokio::sync::broadcast::Receiver<String>,
+    port: u16
 ) -> Result<()> {
-    info!("Incoming TCP connection from: {}", addr);
+    info!("Incoming TCP connection for {port} from: {}", addr);
 
     let mut ws_stream = tokio_tungstenite::accept_async(stream)
         .await
@@ -1486,6 +1487,7 @@ async fn register_new_websocket_endpoint_client(
             m = message_rx.recv() => {
                 match m {
                     Ok(m) => {
+                        info!("Sending on {port}: {m}");
                         let m = Message::Text(m);
                         match write.feed(m).await {
                             Ok(_) => {}
@@ -1494,10 +1496,10 @@ async fn register_new_websocket_endpoint_client(
                                 break;
                             }
                         }
-                        sent_since_flush += 1;
-                        if sent_since_flush > 1000 {
+                        // sent_since_flush += 1;
+                        // if sent_since_flush > 1000 {
+                        // }
                             write.flush().await.ok();
-                        }
                     }
                     Err(e) => {
                         error!("Error receiving from broadcast channel: {e}");

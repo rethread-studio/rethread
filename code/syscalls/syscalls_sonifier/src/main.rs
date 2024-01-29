@@ -948,6 +948,8 @@ impl App {
             }
 
             *mvt_id = new_mvt_id;
+        } else {
+            println!("Same movement as before");
         }
     }
 }
