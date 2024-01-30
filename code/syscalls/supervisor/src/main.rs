@@ -1,10 +1,11 @@
 use chrono::{Timelike, Utc};
 use nannou_osc::receiver;
 use serde::{Deserialize, Serialize};
+#[cfg(target_family = "windows")]
+use std::os::windows::process::CommandExt;
 use std::{
     fs::File,
     io::Write,
-    os::windows::process::CommandExt,
     path::PathBuf,
     process::{Child, Command},
     time::{Duration, Instant, SystemTime},
@@ -377,17 +378,19 @@ impl Process {
                     self.path
                 ),
             }
-            if self.last_start.elapsed() > self.max_time_alive_before_restart {
-                eprintln!(
-                    "Process {:?} has reached its max time limit, restarting.",
-                    self.path
-                );
-                if self.trigger_complete_restart_on_fail {
-                    return Message::CompleteRestart;
-                } else {
-                    self.restart();
-                }
-            }
+            // if self.max_time_alive_before_restart != Duration::ZERO
+            //     && self.last_start.elapsed() > self.max_time_alive_before_restart
+            // {
+            //     eprintln!(
+            //         "Process {:?} has reached its max time limit, restarting.",
+            //         self.path
+            //     );
+            //     if self.trigger_complete_restart_on_fail {
+            //         return Message::CompleteRestart;
+            //     } else {
+            //         self.restart();
+            //     }
+            // }
         }
         Message::Continue
     }
