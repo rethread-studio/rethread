@@ -1,2 +1,3 @@
 https://rafpinter.github.io/,
-https://margelle.github.io/algorithmic-art-tasks/task3/margelletask3.html
+https://margelle.github.io/algorithmic-art-tasks/task3/margelletask3.html,
+https://rethread.art/code/algorithmicart2024-vernissage/figures-historiques/
