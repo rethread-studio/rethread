@@ -23,7 +23,7 @@
         //96dpi is for plotting on the UUNA TEK iDraw
         //w=96*8.5=816
         //h=96*11=1056
-        var echelle = 0.5
+        var echelle = 1
         var w = 816 * echelle
         var h = 1056 * echelle
         var rightmargin = 0.9 * w
@@ -94,28 +94,44 @@
             var arrowlen=0.58*actualheight
             var cx=w*0.5
             //arrow body
-            line(cx-arrowwid*0.5,topmargin,cx+arrowwid*0.5,topmargin)
-            line(cx-arrowwid*0.5,topmargin,cx-arrowwid*0.5,topmargin+arrowlen)
-            line(cx+arrowwid*0.5,topmargin,cx+arrowwid*0.5,topmargin+arrowlen)
-            addlines(cx-arrowwid*0.5,cx+arrowwid*0.5,topmargin,topmargin+arrowlen)  
+//            line(cx-arrowwid*0.5,topmargin,cx+arrowwid*0.5,topmargin)
+//            line(cx-arrowwid*0.5,topmargin,cx-arrowwid*0.5,topmargin+arrowlen)
+//            line(cx+arrowwid*0.5,topmargin,cx+arrowwid*0.5,topmargin+arrowlen)
+            addstraightlines(cx-arrowwid*0.5,cx+arrowwid*0.5,topmargin,topmargin+arrowlen)  
             //arrow head
-            line(cx-arrowwid*0.5,topmargin+arrowlen,leftmargin,topmargin+arrowlen)
-            line(cx+arrowwid*0.5,topmargin+arrowlen,rightmargin,topmargin+arrowlen)
-            line(leftmargin,topmargin+arrowlen,cx,bottommargin)
-            line(rightmargin,topmargin+arrowlen,cx,bottommargin)
+//            line(cx-arrowwid*0.5,topmargin+arrowlen,leftmargin,topmargin+arrowlen)
+//            line(cx+arrowwid*0.5,topmargin+arrowlen,rightmargin,topmargin+arrowlen)
+//            line(leftmargin,topmargin+arrowlen,cx,bottommargin)
+//            line(rightmargin,topmargin+arrowlen,cx,bottommargin)
+            addlinesintriangle(leftmargin,rightmargin,cx,topmargin+arrowlen,bottommargin)
         }
 
-        function addlines(x1,x2,yorigin,ydest){
+        //draw 
+        function addstraightlines(x1,x2,yorigin,ydest){
             var yoff=0.0
             var yinc=0.1
             var y=yorigin+5*noise(yoff);yoff+=yinc;
             while(y<ydest){
-                console.log("hash at "+y)
                 line(x1,y,x2,y);
-                y+=5*noise(yoff);yoff+=yinc;
+                y+=15*noise(yoff);yoff+=yinc;
             }
         }
 
+        function addlinesintriangle(x1,x2,x3,yorigin,ydest){
+            var yoff=0.0
+            var yinc=0.1
+            var t=0.01*noise(yoff);yoff+=yinc;
+            var y=yorigin+5*noise(yoff);yoff+=yinc;
+            var px1,py1,px2
+            while(t<1){
+                console.log(t)
+                px1 = (1 - t) * x1 + (t * x3);
+                py1 = (1 - t) * yorigin + (t * ydest);
+                px2 = (1 - t) * x2 + (t * x3);
+                line(px1,py1,px2,py1);
+                t+=0.05*noise(yoff);yoff+=yinc;
+            }
+        }
     </script>
 </body>
 
