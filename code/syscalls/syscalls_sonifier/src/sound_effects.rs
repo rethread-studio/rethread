@@ -128,18 +128,23 @@ impl SoundEffects {
     pub fn play_bell_a(&self) {
         let mut rng = thread_rng();
         if let Some(buf) = self.bells_a.choose(&mut rng) {
-            play_mono_sound_buffer(*buf, self.out_bus, 0.5);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.25);
         }
     }
     pub fn play_bell_b(&self) {
         let mut rng = thread_rng();
         if let Some(buf) = self.bells_b.choose(&mut rng) {
-            play_mono_sound_buffer(*buf, self.out_bus, 0.5);
+            play_mono_sound_buffer(*buf, self.out_bus, 0.1);
         }
     }
-    pub fn play_movement_voice(&self, movement: i32) {
+    pub fn play_movement_voice(&self, movement: i32, mvt_before_duration: f32) {
         if let Some((_mvt, buf)) = self.voice_movement.iter().find(|(mvt, _)| *mvt == movement) {
-            play_mono_sound_buffer(*buf, self.out_bus, 0.05);
+            let out_bus = self.out_bus;
+            let buf = *buf;
+            std::thread::spawn(move || {
+                std::thread::sleep(Duration::from_secs_f32(mvt_before_duration-buf.duration().to_seconds_f64() as f32));
+            play_mono_sound_buffer(buf, out_bus, 0.05);
+            });
         }
     }
     pub fn play_focus_enabled(&self, category: impl Into<String>) {
@@ -152,7 +157,7 @@ impl SoundEffects {
             std::thread::spawn(move || {
                 play_mono_sound_buffer(focus, out_bus, 0.05);
                 std::thread::sleep(Duration::from_millis(1000));
-                play_mono_sound_buffer(buf, out_bus, 0.05);
+                play_mono_sound_buffer(buf, out_bus, 0.08);
             });
         }
     }
@@ -165,7 +170,7 @@ impl SoundEffects {
     }
     pub fn play_end_movement_effects(&self, duration_secs: f32) {
         if let Some(buf) = self.end_movement_voices {
-            play_mono_sound_buffer(buf, self.out_bus, 0.5);
+            play_mono_sound_buffer_end_ramp(buf, self.out_bus, 0.3, buf.duration());
         } else {
             eprintln!("end_movement_voices was never loaded");
         }
@@ -185,7 +190,7 @@ impl SoundEffects {
         std::thread::spawn(move || {
             std::thread::sleep(Duration::from_secs_f32(duration_secs));
             println!("Playing end bell now");
-            s.play_bell_b();
+            s.play_bell_a();
         });
     }
 }
@@ -200,6 +205,22 @@ fn play_mono_sound_buffer(buf: BufferId, out_bus: Handle<GenericHandle>, amp: f3
         || {
             let buf = buffer_reader(buf, 1.0, false, knyst::gen::StopAction::FreeGraph);
             let sig = buf * amp;
+            graph_output(0, sig);
+        },
+    );
+    out_bus.set(0, g.channels(4));
+}
+
+fn play_mono_sound_buffer_end_ramp(buf: BufferId, out_bus: Handle<GenericHandle>, amp: f32, duration: Seconds) {
+    knyst_commands().to_top_level_graph();
+    let g = upload_graph(
+        knyst_commands()
+            .default_graph_settings()
+            .num_inputs(0)
+            .num_outputs(1),
+        || {
+            let buf = buffer_reader(buf, 1.0, false, knyst::gen::StopAction::FreeGraph);
+            let sig = buf * exp_line_segment(amp, amp*1.5, duration );
             graph_output(0, sig);
         },
     );

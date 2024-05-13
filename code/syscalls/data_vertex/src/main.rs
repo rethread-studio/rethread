@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use config::Config;
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyEventKind, KeyEventState},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -305,6 +305,7 @@ pub enum RecordingCommand {
     PlayScore,
     PlayRandomMovements,
     StopScorePlayback,
+    SetAutostartMovementPrograms(bool),
 }
 
 #[derive(Clone, Debug)]
@@ -317,6 +318,7 @@ pub enum EguiUpdate {
     ScorePlay,
     ScorePlayRandom,
     ScoreStop,
+    
 }
 struct PacketHQ {
     score: Score,
@@ -331,6 +333,7 @@ struct PacketHQ {
     egui_update_sender: rtrb::Producer<EguiUpdate>,
     last_update: Instant,
     last_gui_update_sent: Instant,
+    autostart_movement_programs: bool,
 }
 impl PacketHQ {
     fn new(
@@ -353,6 +356,7 @@ impl PacketHQ {
             egui_command_receiver,
             egui_update_sender,
             last_gui_update_sent: Instant::now(),
+            autostart_movement_programs: true,
         }
     }
     pub fn register_websocket_senders(&mut self, ws: WebsocketSender) {
@@ -494,7 +498,7 @@ impl PacketHQ {
                     for r in &mut self.recording_playbacks {
                         if r.uuid == uuid {
                             r.start_playback(&mut self.osc_sender);
-                            info!("Started playback on packethq");
+                            // info!("Started playback on packethq");
                             recording_found = true;
                         }
                     }
@@ -531,6 +535,7 @@ impl PacketHQ {
                     self.score.stop();
                     self.osc_sender.send_score_stop();
                 }
+                RecordingCommand::SetAutostartMovementPrograms(b) => self.autostart_movement_programs=b,
             }
         }
         while let Ok(command) = self.command_receiver.pop() {
@@ -580,7 +585,7 @@ impl PacketHQ {
                         }
                         ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                             self.osc_sender.send_movement(&new_mvt, next_mvt);
-                            if !self.score.random_order {
+                            if self.autostart_movement_programs {
                                 self.egui_update_sender
                                     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
                                     .ok();
@@ -598,7 +603,7 @@ impl PacketHQ {
                         }
                         ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                             self.osc_sender.send_movement(&new_mvt, next_mvt);
-                            if !self.score.random_order {
+                            if self.autostart_movement_programs {
                                 self.egui_update_sender
                                     .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
                                     .ok();
@@ -619,7 +624,7 @@ impl PacketHQ {
             }
             ScoreUpdate::NewMovement { new_mvt, next_mvt } => {
                 self.osc_sender.send_movement(&new_mvt, next_mvt);
-                if !self.score.random_order {
+                if self.autostart_movement_programs {
                     self.egui_update_sender
                         .push(EguiUpdate::SetActivePrograms(new_mvt.programs.clone()))
                         .ok();
@@ -950,6 +955,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
             .unwrap_or_else(|| Duration::from_secs(0));
         if crossterm::event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
+               if matches!(key.kind, KeyEventKind::Press
+               ) {
                 match key.code {
                     KeyCode::Down => {
                         if let Some(selected) = app.menu_table_state.selected() {
@@ -1042,6 +1049,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> anyhow::Resu
                     KeyCode::Char('q') => return Ok(()),
                     _ => {}
                 }
+            }
             }
         }
         if last_tick.elapsed() >= tick_rate {
@@ -1325,16 +1333,22 @@ fn render_general<B: Backend>(
     f.render_stateful_widget(t, rect, &mut app.table_state);
 }
 async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
-    let addr = "127.0.0.1:3012";
+    let addr = "0.0.0.0:3012";
     let listener = TcpListener::bind(&addr).await.expect("Can't listen");
     let (packet_sender, mut packet_receiver) = tokio::sync::mpsc::unbounded_channel();
 
     let (message_tx, message_rx1) = tokio::sync::broadcast::channel(1000000);
+    let (message_tx_recordings, message_rx2) = tokio::sync::broadcast::channel(1000000);
     drop(message_rx1);
+    drop(message_rx2);
     {
         let message_tx = message_tx.clone();
+        let message_tx_recordings = message_tx_recordings.clone();
         tokio::spawn(async move {
-            let ws = WebsocketSender { message_tx };
+            let ws = WebsocketSender {
+                message_tx,
+                message_tx_recordings,
+            };
             packet_hq.register_websocket_senders(ws);
             let mut counter = 0;
             loop {
@@ -1355,7 +1369,8 @@ async fn start_network_communication(mut packet_hq: PacketHQ) -> Result<()> {
             }
         });
     }
-    tokio::spawn(async move { start_websocket_endpoints(message_tx).await });
+    tokio::spawn(async move { start_websocket_endpoints(message_tx, 1237).await });
+    tokio::spawn(async move { start_websocket_endpoints(message_tx_recordings, 1238).await });
     loop {
         let (socket, _) = listener.accept().await?;
         let packet_sender = packet_sender.clone();
@@ -1383,8 +1398,9 @@ type EndpointClients = Arc<Mutex<HashMap<SocketAddr, Tx>>>;
 
 async fn start_websocket_endpoints(
     message_tx: tokio::sync::broadcast::Sender<String>,
+    port: u16,
 ) -> Result<()> {
-    let addr = "0.0.0.0:1237".to_string();
+    let addr = format!("0.0.0.0:{port}");
     // Create the event loop and TCP listener we'll accept connections on.
     let try_socket = TcpListener::bind(&addr).await;
     let listener = try_socket.expect("Failed to bind");
@@ -1396,18 +1412,18 @@ async fn start_websocket_endpoints(
     loop {
         match listener.accept().await {
             Ok((stream, addr)) => {
-                let (private_tx, private_rx) = tokio::sync::mpsc::unbounded_channel();
-                tokio::spawn(async move {
-                    let mut num = 0;
-                    loop {
-                        private_tx.send(format!("{num} is the value")).ok();
-                        num += 1;
-                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-                    }
-                });
+                // let (private_tx, private_rx) = tokio::sync::mpsc::unbounded_channel();
+                // tokio::spawn(async move {
+                //     let mut num = 0;
+                //     loop {
+                //         // private_tx.send(format!("{num} is the value")).ok();
+                //         num += 1;
+                //         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                //     }
+                // });
                 let syscall_rx = message_tx.subscribe();
                 all_handles.push(tokio::spawn(async move {
-                    register_new_websocket_endpoint_client(addr, stream, syscall_rx).await
+                    register_new_websocket_endpoint_client(addr, stream, syscall_rx, port).await
                 }));
             }
             Err(e) => {
@@ -1426,8 +1442,9 @@ async fn register_new_websocket_endpoint_client(
     stream: TcpStream,
     // endpoints: EndpointClients,
     mut message_rx: tokio::sync::broadcast::Receiver<String>,
+    port: u16
 ) -> Result<()> {
-    info!("Incoming TCP connection from: {}", addr);
+    info!("Incoming TCP connection for {port} from: {}", addr);
 
     let mut ws_stream = tokio_tungstenite::accept_async(stream)
         .await
@@ -1470,6 +1487,7 @@ async fn register_new_websocket_endpoint_client(
             m = message_rx.recv() => {
                 match m {
                     Ok(m) => {
+                        info!("Sending on {port}: {m}");
                         let m = Message::Text(m);
                         match write.feed(m).await {
                             Ok(_) => {}
@@ -1478,10 +1496,10 @@ async fn register_new_websocket_endpoint_client(
                                 break;
                             }
                         }
-                        sent_since_flush += 1;
-                        if sent_since_flush > 1000 {
+                        // sent_since_flush += 1;
+                        // if sent_since_flush > 1000 {
+                        // }
                             write.flush().await.ok();
-                        }
                     }
                     Err(e) => {
                         error!("Error receiving from broadcast channel: {e}");

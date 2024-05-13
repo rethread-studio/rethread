@@ -75,7 +75,7 @@ impl Category {
                             + 53 * self.octave,
                         25.,
                     );
-                    println!("New wg for {} id {id} freq {freq}, i: {i}", &self.kind);
+                    // println!("New wg for {} id {id} freq {freq}, i: {i}", &self.kind);
                     let mut wg = make_new_waveguide(freq, self.category_bus, self.syscall_kind);
                     wg.register_call(sensitivity_coeff, id, func_args);
                     self.wgs.insert(id, wg);
@@ -169,12 +169,12 @@ impl DirectFunctions {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().expect("channel must exist");
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
-                    *o = (i * 0.2 * amp).clamp(-1.0, 1.0);
+                    *o = (i * 0.45 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
             })
-            .name("DF post_fx back")
+            .name("DF post_fx fore")
             .input("in")
             .output("sig"),
         );
@@ -185,12 +185,12 @@ impl DirectFunctions {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().expect("channel must exist");
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
-                    *o = (i * 0.075 * amp).clamp(-1.0, 1.0);
+                    *o = (i * 0.095 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
             })
-            .name("DF post_fx fore")
+            .name("DF post_fx back")
             .input("in")
             .output("sig"),
         );
@@ -500,7 +500,7 @@ impl SyscallWaveguide {
             // let lpf = k.push(OnePoleLPF::new(), inputs![("cutoff_freq" : 20000.)]);
             wg_amp = bus(1).set(0, 0.1);
             wg_amp_ramp = ramp(0.1).value(wg_amp).time(0.1);
-            let lpf = one_pole_lpf().cutoff_freq(20000.).sig(wg * wg_amp_ramp);
+            let lpf = one_pole_lpf().cutoff_freq(10000.).sig(wg * wg_amp_ramp);
             graph_output(0, lpf);
             let inner_graph = knyst_commands()
                 .upload_local_graph()
@@ -579,7 +579,7 @@ impl SyscallWaveguide {
                     }
                     self.coeff = self.coeff.clamp(0.0001, 1.0);
                     let feedback = 0.999
-                        + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.1);
+                        + (self.average_iterations_since_trigger as f32 * 0.000001).clamp(0.0, 0.01);
                     i.wg.feedback(feedback);
                     i.wg_amp.set(0, 0.10);
                     self.iterations_since_trigger = 0;
@@ -587,7 +587,7 @@ impl SyscallWaveguide {
                     i.exciter_sender.push(0.0).ok();
                     self.iterations_since_trigger += 1;
                 }
-                if self.iterations_since_trigger == 1500 {
+                if self.iterations_since_trigger == 1000 {
                     let feedback = 0.99;
                     i.wg.feedback(feedback);
                     i.wg_amp.set(0, 0.20);

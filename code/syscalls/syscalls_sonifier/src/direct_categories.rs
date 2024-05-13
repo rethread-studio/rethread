@@ -56,7 +56,7 @@ impl DirectCategories {
                 let inp = ctx.inputs.get_channel(0);
                 let out = ctx.outputs.iter_mut().next().expect("channel to exist");
                 for (i, o) in inp.iter().zip(out.iter_mut()) {
-                    *o = (i * 0.1 * amp).clamp(-1.0, 1.0);
+                    *o = (i * 0.25 * amp).clamp(-1.0, 1.0);
                 }
                 // dbg!(&inp);
                 GenState::Continue
@@ -330,7 +330,7 @@ impl SyscallWaveguide {
                     self.coeff *= 0.99;
                 }
                 let feedback = 0.999
-                    + (self.average_iterations_since_trigger as f32 * 0.00001).clamp(0.0, 0.5);
+                    + (self.average_iterations_since_trigger as f32 * 0.000001).clamp(0.0, 0.1);
                 self.wg.feedback(feedback);
                 self.amp.set(0, 0.1);
                 self.iterations_since_trigger = 0;

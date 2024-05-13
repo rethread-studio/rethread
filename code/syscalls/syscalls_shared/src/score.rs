@@ -90,7 +90,7 @@ impl Score {
                 description: "interlude,direct,function calls,lower and lower sensitivity"
                     .to_string(),
                 duration: Duration::from_secs(45),
-                programs: vec!["thunderbird", "konqueror", "gedit"],
+                programs: vec!["htop"],
                 restart_programs: None,
             },
             // Movement {
@@ -390,7 +390,10 @@ impl Score {
             {
                 if self.random_order {
                     let old_mvt = self.current_movement;
-                    while self.current_movement == old_mvt {
+                    let old_is_break = self.movements[old_mvt].is_break;
+                    while self.current_movement == old_mvt
+                        || (old_is_break && self.movements[self.current_movement].is_break)
+                    {
                         self.current_movement = fastrand::usize(..self.movements.len() - 2);
                     }
                 } else {

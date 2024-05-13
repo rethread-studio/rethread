@@ -1,0 +1,26 @@
+[
+  {
+    "path": "C:\\Program Files\\JACK2\\qjackctl\\qjackctl.exe",
+    "working_dir": "C:\\Program Files\\JACK2",
+    "recompilation_command": null,
+    "max_time_alive_before_restart_secs": 43200,
+    "wait_after_restart_secs": 6,
+    "trigger_complete_restart_on_fail": true
+  },
+  {
+    "path": "C:\\Users\\sysCalls\\Documents\\rethread\\code\\syscalls\\target\\release\\data_vertex.exe",
+    "working_dir": "C:\\Users\\sysCalls\\Documents\\rethread\\code\\syscalls\\data_vertex",
+    "recompilation_command": null,
+    "max_time_alive_before_restart_secs": 43200,
+    "wait_after_restart_secs": 3,
+    "trigger_complete_restart_on_fail": false
+  },
+  {
+    "path": "C:\\Users\\sysCalls\\Documents\\rethread\\code\\syscalls\\target\\release\\syscalls_sonifier.exe",
+    "working_dir": "C:\\Users\\sysCalls\\Documents\\rethread\\code\\syscalls\\syscalls_sonifier",
+    "recompilation_command": null,
+    "max_time_alive_before_restart_secs": 43200,
+    "wait_after_restart_secs": 0,
+    "trigger_complete_restart_on_fail": false
+  }
+]

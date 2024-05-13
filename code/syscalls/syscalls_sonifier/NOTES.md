@@ -10,3 +10,23 @@ Bara en kanal från buffer reader kopplas till multiplikationen
 # Förbättringar
 
 Pink noise in i direct categories wgs låter väldigt fint, kunde vara som en vind kanske.
+
+## Filtered noise
+
+ca 1khz +6db
+
+## Multiband compressor
+
+Bass and top
+
+# Run through 1
+
+- Voice announcements too loud
+- DirectFunctions h;ga diskanten f;r stark
+
+# Run 2
+
+- Bell too loud
+- mvt voice before mvt
+- background noise too loud
+- background noise would do well with a faster modulating lpf

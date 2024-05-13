@@ -27,8 +27,8 @@ impl AudienceUi {
     pub fn new(// egui_message_sender: SyncSender<AudienceUiMessage>,
         // egui_message_receiver: std::sync::mpsc::Receiver<AudienceUiMessage>,
     ) -> Result<Self> {
-        let sender = nannou_osc::sender()?.connect(format!("{}:{}", "localhost", 12346))?;
-        let receiver = nannou_osc::receiver(12345)?;
+        let sender = nannou_osc::sender()?.connect(format!("{}:{}", "192.168.53.5", 57346))?;
+        let receiver = nannou_osc::receiver(57345)?;
         Ok(Self {
             sender,
             receiver,
