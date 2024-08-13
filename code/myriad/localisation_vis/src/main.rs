@@ -106,11 +106,11 @@ impl World {
                     id: AnchorId(0),
                 },
                 Anchor {
-                    position: vec2(5.0, 0.0),
+                    position: vec2(1.54, 9.7),
                     id: AnchorId(1),
                 },
                 Anchor {
-                    position: vec2(5.0, 7.0),
+                    position: vec2(3.57, 3.72),
                     id: AnchorId(2),
                 },
             ],
