@@ -1,0 +1,27 @@
+Pins for connecting an ESP32 to  a Daisy Seed via SPI
+
+# ESP32
+
+Predefined pins:
+
+MOSI Pin: 23
+MISO Pin: 19
+SCK Pin: 18
+SS Pin: 5
+
+Datasheet for WROVER says
+https://github.com/Makerfabs/Makerfabs-ESP32-UWB-DW3000/blob/main/hardware/ESP32%20UWB%20v1.0.pdf
+#define HSPI_MISO   12
+#define HSPI_MOSI   13
+#define HSPI_SCLK   14
+#define HSPI_SS     15
+
+3.3V
+GND
+
+# Daisy
+
+SPI1 MOSI: 11
+SPI1 MISO: 10
+SPI1 SCK: 9
+SPI1 CS: 8
