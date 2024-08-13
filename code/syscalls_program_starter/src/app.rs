@@ -153,12 +153,15 @@ impl eframe::App for TemplateApp {
                         });
                     }
                     let progress = last_movement.elapsed().as_secs_f32() / *duration;
-                    ui.add(
-                        ProgressBar::new(progress)
-                            .fill(Color32::GREEN)
-                            .show_percentage()
-                            .animate(true),
-                    );
+                    ui.horizontal(|ui| {
+                        let visuals = ui.visuals_mut();
+                        visuals.override_text_color = Some(Color32::BLACK);
+                        ui.add(
+                            ProgressBar::new(progress)
+                                .fill(Color32::GREEN)
+                                .animate(false),
+                        );
+                    });
                     ui.add_space(20.);
 
                     egui::Grid::new("some_unique_id2").show(ui, |ui| {
@@ -191,7 +194,7 @@ impl eframe::App for TemplateApp {
                 ui.label("You would normally choose either panels OR windows.");
             });
         }
-        ctx.request_repaint_after(Duration::from_millis(250));
+        ctx.request_repaint_after(Duration::from_millis(32));
     }
 }
 
