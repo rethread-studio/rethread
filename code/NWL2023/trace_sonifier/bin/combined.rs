@@ -1342,7 +1342,7 @@ async fn break_sines(
             * 0.2
             * beam
             * random_lin().freq(0.7).powf(2.0);
-        graph_output(2, sig * main_env);
+        graph_output(2, one_pole_hpf().sig(sig * main_env).cutoff_freq(1000.));
     }
     // let s3 = sine().freq(freqs[1] * 4.0);
     // let sig = s3
