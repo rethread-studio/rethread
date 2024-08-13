@@ -20,7 +20,7 @@ use knyst::{
     envelope::Envelope,
     gen::filter::one_pole::one_pole_hpf,
     handles::{graph_output, handle, Handle},
-    modal_interface::knyst,
+    knyst_commands,
     prelude::*,
     sphere::{KnystSphere, SphereSettings},
 };
@@ -78,7 +78,9 @@ fn main() -> Result<()> {
     // short_sines(vmovsd_instances, 4000., root.clone(), pause.clone());
     // short_sines(add_instances, 300., root.clone(), pause.clone());
 
-    let verb = luff_verb(650 * 48, 0.60).lowpass(19000.).damping(5000.);
+    let verb = luff_verb(650 * 48, 0.60, 0.3)
+        .lowpass(19000.)
+        .damping(5000.);
     graph_output(
         0,
         one_pole_hpf()
@@ -166,7 +168,7 @@ fn short_sines(
     std::thread::spawn(move || {
         for instance in instances {
             // new graph
-            knyst().init_local_graph(knyst().default_graph_settings());
+            knyst_commands().init_local_graph(knyst_commands().default_graph_settings());
             let sig = sine().freq(freq * root.load(Ordering::Acquire)) * 0.015;
             let env = Envelope {
                 points: vec![(1.0, 0.02), (0.0, 0.4)],
@@ -177,7 +179,7 @@ fn short_sines(
 
             graph_output(0, sig.repeat_outputs(1));
             // push graph to sphere
-            let graph = knyst().upload_local_graph();
+            let graph = knyst_commands().upload_local_graph().unwrap();
 
             output.input(graph * 0.1);
             graph_output(0, graph);

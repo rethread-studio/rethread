@@ -170,12 +170,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
 
 [[package]]
-name = "cache-padded"
-version = "1.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "981520c98f422fcc584dc1a95c334e6953900b9106bc47a9839b81790009eb21"
-
-[[package]]
 name = "cc"
 version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -456,6 +450,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
+name = "either"
+version = "1.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a26ae43d7bcc3b814de94796a5e736d4029efb0ee900c12e2d54c993ad1a1e07"
+
+[[package]]
 name = "encoding_rs"
 version = "0.8.33"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -605,6 +605,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "itertools"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "25db6b064527c5d482d0423354fcd07a89a2dfe07b67892e62411946db7f07b0"
+dependencies = [
+ "either",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -692,6 +701,7 @@ dependencies = [
 [[package]]
 name = "knyst"
 version = "0.5.0"
+source = "git+https://github.com/ErikNatanael/knyst.git#5457342eb0d4746025eadd2b9d99ef170d08d373"
 dependencies = [
  "assert_no_alloc",
  "cpal",
@@ -700,6 +710,7 @@ dependencies = [
  "fastapprox",
  "fastrand",
  "hound",
+ "itertools",
  "jack",
  "knyst_macro",
  "loom",
@@ -713,6 +724,8 @@ dependencies = [
 [[package]]
 name = "knyst_macro"
 version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "43d8bb5e35fd8baa21880ff6f2797be4377bc3e0318bfa4ab7d92f5163170e7a"
 dependencies = [
  "ident_case",
  "proc-macro2",
@@ -725,6 +738,7 @@ name = "knyst_reverb"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "fastrand",
  "knyst",
  "rand 0.8.5",
  "rand_distr",
@@ -1457,11 +1471,11 @@ dependencies = [
 
 [[package]]
 name = "rtrb"
-version = "0.2.3"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99e704dd104faf2326a320140f70f0b736d607c1caa1b1748a6c568a79819109"
+checksum = "636b228b5adb32add7f0e41e5084d38aa66fb0f942e8a91751c1e90023288fbe"
 dependencies = [
- "cache-padded",
+ "crossbeam-utils",
 ]
 
 [[package]]

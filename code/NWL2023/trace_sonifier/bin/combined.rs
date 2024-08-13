@@ -122,7 +122,7 @@ impl Vend {
         // Select sonification method
         let movement = &self.score[num];
         if let Some(ob) = &self.operation_buffers {
-            knyst().to_top_level_graph();
+            knyst_commands().to_top_level_graph();
             let buf = ob.from_op(movement.operation);
             let voice = buffer_reader(buf, 0.9, false, StopAction::FreeSelf);
             graph_output(0, voice * 0.6);
@@ -233,7 +233,7 @@ impl Vend {
             }
         }
         self.processes.clear();
-        knyst().free_disconnected_nodes();
+        knyst_commands().free_disconnected_nodes();
     }
     pub async fn pulse(&mut self, num: i32) {
         // if num % 3 == 0 {
@@ -323,11 +323,11 @@ fn load_voices() -> Result<OperationBuffers> {
     let normalize = Buffer::from_sound_file(voices_root.join("normalize.wav"))?;
     let multiply = Buffer::from_sound_file(voices_root.join("multiply.wav"))?;
 
-    let inverse = knyst().insert_buffer(inverse);
-    let svd = knyst().insert_buffer(svd);
-    let hessenberg = knyst().insert_buffer(hessenberg);
-    let normalize = knyst().insert_buffer(normalize);
-    let multiply = knyst().insert_buffer(multiply);
+    let inverse = knyst_commands().insert_buffer(inverse);
+    let svd = knyst_commands().insert_buffer(svd);
+    let hessenberg = knyst_commands().insert_buffer(hessenberg);
+    let normalize = knyst_commands().insert_buffer(normalize);
+    let multiply = knyst_commands().insert_buffer(multiply);
 
     Ok(OperationBuffers {
         svd,
@@ -530,8 +530,8 @@ async fn instructions_to_melody_rewrite(
     let mut o_beam_setter = None;
     let mut o_verb = None;
     let mut o_wg = None;
-    knyst().to_top_level_graph();
-    let outer_graph = upload_graph(knyst().default_graph_settings(), || {
+    knyst_commands().to_top_level_graph();
+    let outer_graph = upload_graph(knyst_commands().default_graph_settings(), || {
         let mut rng: StdRng = SeedableRng::from_entropy();
         let verb = luff_verb(650 * 48, 0.70).lowpass(19000.).damping(5000.);
         graph_output(1, one_pole_hpf().sig(verb * 0.30).cutoff_freq(100.));
@@ -585,7 +585,7 @@ async fn instructions_to_melody_rewrite(
     graph_output(0, outer_graph);
     huge_reverb.input(outer_graph.out(0) * random_lin().freq(2.).powf(3.0) * 1.5);
     // huge_reverb.input(outer_graph.out(0));
-    knyst().to_graph(outer_graph.graph_id());
+    knyst_commands().to_graph(outer_graph.graph_id());
     let mut freqs: Vec<_> = chord
         .to_edo_chord()
         .to_edo_pitches()
@@ -704,7 +704,7 @@ async fn instructions_to_melody_rewrite(
 }
 
 fn bus(arg: usize) -> Handle<GenericHandle> {
-    let id = knyst().push_without_inputs(Bus(arg));
+    let id = knyst_commands().push_without_inputs(Bus(arg));
     Handle::new(GenericHandle::new(id, arg, arg))
 }
 
@@ -719,10 +719,10 @@ async fn sines_n_most_uncommon(
     let mut map = map.into_iter().collect::<Vec<_>>();
     map.sort_by_key(|(_, num)| *num);
 
-    let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
-    let outer_graph_handle = knyst().upload_local_graph();
+    let outer_graph_id = knyst_commands().init_local_graph(knyst_commands().default_graph_settings());
+    let outer_graph_handle = knyst_commands().upload_local_graph();
     graph_output(0, outer_graph_handle);
-    knyst().to_graph(outer_graph_id);
+    knyst_commands().to_graph(outer_graph_id);
     let root = Arc::new(AtomicF32::new(1.0));
 
     let process = ProcessInteractivity::new();
@@ -843,12 +843,12 @@ fn short_sines(
     exciter: Handle<HalfSineWtHandle>,
     mut stop: tokio::sync::broadcast::Receiver<()>,
 ) -> tokio::task::JoinHandle<()> {
-    // knyst().to_graph(outer_graph);
-    // knyst().init_local_graph(knyst().default_graph_settings());
+    // knyst_commands().to_graph(outer_graph);
+    // knyst_commands().init_local_graph(knyst_commands().default_graph_settings());
 
     // // push graph to sphere
-    // let graph = knyst().upload_local_graph();
-    // knyst().to_graph(outer_graph);
+    // let graph = knyst_commands().upload_local_graph();
+    // knyst_commands().to_graph(outer_graph);
     // output.input(graph * 0.1);
     // graph_output(0, graph);
     tokio::spawn(async move {
@@ -926,7 +926,7 @@ async fn play_waveguide_segments(
     let mut chord_receiver = process.chord_sender.subscribe();
     let buffer = machine_code_to_buffer(trace, true).unwrap();
     println!("Buffer length: {}", buffer.length_seconds());
-    let buffer = knyst().insert_buffer(buffer);
+    let buffer = knyst_commands().insert_buffer(buffer);
 
     let mut freqs: Vec<_> = chord
         .to_edo_chord()
@@ -950,10 +950,10 @@ async fn play_waveguide_segments(
         tokio::task::spawn(async move {
             let mut root = 4.0;
             let mut rng: StdRng = SeedableRng::from_entropy();
-            knyst().to_top_level_graph();
-            let outer_graph = upload_graph(knyst().default_graph_settings(), || {});
+            knyst_commands().to_top_level_graph();
+            let outer_graph = upload_graph(knyst_commands().default_graph_settings(), || {});
             graph_output(0, outer_graph);
-            knyst().to_graph(outer_graph.graph_id());
+            knyst_commands().to_graph(outer_graph.graph_id());
 
             let main_env = envelope_gen(
                 0.0,
@@ -990,10 +990,10 @@ async fn play_waveguide_segments(
                     let interval_index = interval_index.clone();
                     tokio::task::spawn(async move {
                         let mut rng: StdRng = SeedableRng::from_entropy();
-                        let mut gs = knyst().default_graph_settings();
+                        let mut gs = knyst_commands().default_graph_settings();
                         gs.num_outputs = 1;
                         gs.num_inputs = 1;
-                        knyst().to_graph(outer_graph.graph_id());
+                        knyst_commands().to_graph(outer_graph.graph_id());
                         let mut wgs = vec![];
                         let inner_graph = upload_graph(gs, || {
                             let env = Envelope {
@@ -1051,7 +1051,7 @@ async fn play_waveguide_segments(
                                 graph_output(0, sig);
                             }
                         });
-                        knyst().to_graph(outer_graph.graph_id());
+                        knyst_commands().to_graph(outer_graph.graph_id());
                         inner_graph.set(0, exciter_to_wg);
                         let dry_mix = rng.gen_range(0.1..1.0);
                         let g =
@@ -1111,7 +1111,7 @@ async fn play_waveguide_segments(
                 }
             }
 
-            knyst().to_top_level_graph();
+            knyst_commands().to_top_level_graph();
             if !stop_received {
                 stop_receiver.recv().await.ok();
             }
@@ -1121,7 +1121,7 @@ async fn play_waveguide_segments(
             tokio::time::sleep(Duration::from_secs(10)).await;
             verb.free();
             outer_graph.free();
-            knyst().remove_buffer(buffer);
+            knyst_commands().remove_buffer(buffer);
         });
     }
 
@@ -1214,7 +1214,7 @@ fn sine_synth(
     s1_active: bool,
     invert_accel: bool,
 ) -> (Handle<GraphHandle>, Handle<EnvelopeGenHandle>) {
-    let mut gs = knyst().default_graph_settings();
+    let mut gs = knyst_commands().default_graph_settings();
     gs.num_inputs = 1;
     let mut o_sine_env = None;
     let sine_graph = upload_graph(gs, || {
@@ -1273,13 +1273,13 @@ async fn break_sines(
     let mut beam_receiver = process.beam_width_sender.subscribe();
 
     let buffer = machine_code_to_buffer(last_trace, false).unwrap();
-    let buffer = knyst().insert_buffer(buffer);
+    let buffer = knyst_commands().insert_buffer(buffer);
 
-    knyst().to_top_level_graph();
-    let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
-    let outer_graph_handle = knyst().upload_local_graph();
+    knyst_commands().to_top_level_graph();
+    let outer_graph_id = knyst_commands().init_local_graph(knyst_commands().default_graph_settings());
+    let outer_graph_handle = knyst_commands().upload_local_graph();
     graph_output(0, outer_graph_handle);
-    knyst().to_graph(outer_graph_id);
+    knyst_commands().to_graph(outer_graph_id);
 
     // let main_env = Envelope {
     //     points: vec![(1.0, 2.0), (0.0, 5.0)],
@@ -1316,7 +1316,7 @@ async fn break_sines(
 
     let mut o_sine_env = None;
 
-    knyst().to_graph(outer_graph_id);
+    knyst_commands().to_graph(outer_graph_id);
     let (sine_graph, sine_env) =
         sine_synth(&freqs, beam.into(), s0_active, s1_active, invert_accel);
     o_sine_env = Some(sine_env);
@@ -1370,7 +1370,7 @@ async fn break_sines(
                                                     env.release_trig();
                                                 }
 
-            knyst().to_graph(outer_graph_id);
+            knyst_commands().to_graph(outer_graph_id);
             let (sine_graph, sine_env) =
                 sine_synth(&freqs, beam.into(), s0_active, s1_active, invert_accel);
             o_sine_env = Some(sine_env);
@@ -1391,7 +1391,7 @@ async fn break_sines(
         tokio::time::sleep(Duration::from_secs(10)).await;
         outer_graph_handle.free();
         println!("Break sines freed");
-        knyst().remove_buffer(buffer);
+        knyst_commands().remove_buffer(buffer);
     });
 
     process
@@ -1407,11 +1407,11 @@ async fn play_pulse(
     let mut chord_receiver = process.chord_sender.subscribe();
     let mut beam_receiver = process.beam_width_sender.subscribe();
 
-    knyst().to_top_level_graph();
-    let outer_graph_id = knyst().init_local_graph(knyst().default_graph_settings());
-    let outer_graph_handle = knyst().upload_local_graph();
+    knyst_commands().to_top_level_graph();
+    let outer_graph_id = knyst_commands().init_local_graph(knyst_commands().default_graph_settings());
+    let outer_graph_handle = knyst_commands().upload_local_graph();
     graph_output(0, outer_graph_handle);
-    knyst().to_graph(outer_graph_id);
+    knyst_commands().to_graph(outer_graph_id);
 
     // let main_env = Envelope {
     //     points: vec![(1.0, 2.0), (0.0, 5.0)],
