@@ -16,6 +16,7 @@ enum Operation {
     Normalize,
     Multiply,
     SVD,
+    Hessenberg,
 }
 
 impl Operation {
@@ -41,6 +42,10 @@ impl Operation {
                 let svd = m0.svd(true, true);
                 Some(vec![svd.u.unwrap().into(), svd.v_t.unwrap().into()])
             }
+            Operation::Hessenberg => {
+                let hessenberg = m0.hessenberg();
+                Some(vec![hessenberg.h(), hessenberg.q()])
+            }
         }
     }
 }
@@ -60,7 +65,7 @@ struct ScoreObject {
 }
 
 pub fn test_main() -> Result<()> {
-    let operation = Operation::Multiply;
+    let operation = Operation::Hessenberg;
     // let matrix_values = (0..(32 * 32))
     //     .map(|_| rng.gen_range(0.0..1.0))
     //     .collect::<Vec<f64>>();
@@ -69,13 +74,13 @@ pub fn test_main() -> Result<()> {
     //     .flat_map(|row| row.iter())
     //     .cloned()
     //     .collect();
-    let matrix_values0 = RANDOM[73];
+    let matrix_values0 = LOWER_TRIANGULAR[3];
     let source_matrix0 = DMatrix::<f64>::from_column_slice(32, 32, &matrix_values0[..]);
     let matrix_values1 = LOWER_TRIANGULAR[53];
     let source_matrix1 = DMatrix::<f64>::from_column_slice(32, 32, &matrix_values1[..]);
     let result = operation.apply(source_matrix0, Some(source_matrix1));
     if let Some(res) = result {
-        let source_matrix_name = format!("random_73");
+        let source_matrix_name = format!("lower_triangular_3");
         let result = res
             .into_iter()
             .map(|mat| mat.data.as_vec().clone())
@@ -87,10 +92,10 @@ pub fn test_main() -> Result<()> {
                     matrix: matrix_values0.to_vec(),
                     name: source_matrix_name.clone(),
                 },
-                SourceMatrix {
-                    matrix: matrix_values1.to_vec(),
-                    name: "lower_triangular_53".to_string(),
-                },
+                // SourceMatrix {
+                //     matrix: matrix_values1.to_vec(),
+                //     name: "lower_triangular_53".to_string(),
+                // },
             ],
             result,
             trace_name: format!("{:?}_{source_matrix_name}", operation),
