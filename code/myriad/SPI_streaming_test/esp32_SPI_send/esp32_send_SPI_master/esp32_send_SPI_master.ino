@@ -10,6 +10,8 @@ static const int spiClk = 1000000; // 1 MHz
 SPIClass * hspi = NULL;
 
 byte number = 0;
+int ostinato_index =  0;
+uint8_t ostinato[16] = {0, 1, 2, 4, 3, 5, 4, 3, 2, 3, 1, 6, 4, 3, 2, 1};
 
 void setup() {
   // put your setup code here, to run once:
@@ -33,7 +35,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   hspiCommand();
-  delay(1000);
+  delay(100);
 }
 
 void hspiCommand() {
@@ -41,9 +43,11 @@ void hspiCommand() {
   
   hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
   digitalWrite(HSPI_SS, LOW);
-  hspi->transfer(number);
+  hspi->transfer(ostinato[ostinato_index]);
   digitalWrite(HSPI_SS, HIGH);
   hspi->endTransaction();
 
-  number = (number+1)%16;
+  ostinato_index = (ostinato_index+1)%16;
+  size_t rand_index = esp_random() % 16;
+  ostinato[rand_index] = esp_random() % 16;
 }
