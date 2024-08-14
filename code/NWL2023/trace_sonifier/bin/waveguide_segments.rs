@@ -11,7 +11,7 @@ use knyst::{
     envelope::Envelope,
     gen::filter::one_pole::{one_pole_hpf, one_pole_lpf},
     handles::{graph_output, handle, AnyNodeHandle, Handle},
-    modal_interface::knyst,
+    modal_interface::knyst_commands,
     prelude::*,
     resources::BufferId,
     sphere::{KnystSphere, SphereSettings},
@@ -47,7 +47,9 @@ fn main() -> Result<()> {
         "/home/erik/Nextcloud/reinverse_traces/Normalize_random_0.txt",
     ];
 
-    let verb = luff_verb(1050 * 48, 0.30).lowpass(19000.).damping(15000.);
+    let verb = luff_verb(1050 * 48, 0.30, 0.3)
+        .lowpass(19000.)
+        .damping(15000.);
     graph_output(
         0,
         one_pole_hpf()
@@ -61,7 +63,7 @@ fn main() -> Result<()> {
 
         let buffer = machine_code_to_buffer(&trace, true)?;
         println!("Buffer length: {}", buffer.length_seconds());
-        let buffer = knyst().insert_buffer(buffer);
+        let buffer = knyst_commands().insert_buffer(buffer);
 
         play_waveguide_segments(verb, buffer, true, true);
         std::thread::sleep(Duration::from_secs(5));
@@ -86,9 +88,9 @@ fn play_waveguide_segments(
     // .input(sig * 0.125 + graph_input(0, 1));
     let mut graphs = vec![];
     for _ in 0..4 {
-        let mut gs = knyst().default_graph_settings();
+        let mut gs = knyst_commands().default_graph_settings();
         gs.num_outputs = 1;
-        knyst().init_local_graph(gs);
+        knyst_commands().init_local_graph(gs);
 
         let exciter = buffer_reader(buffer, 1.0, true, StopAction::FreeGraph);
         let exciter_to_wg = one_pole_lpf().sig(exciter * 0.15).cutoff_freq(3600.);
@@ -126,7 +128,7 @@ fn play_waveguide_segments(
             let sig = wg * 0.1;
             graph_output(0, sig);
         }
-        let g = knyst().upload_local_graph();
+        let g = knyst_commands().upload_local_graph().unwrap();
         graphs.push(g);
         verb.input(g);
         graph_output(

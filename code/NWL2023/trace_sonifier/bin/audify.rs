@@ -8,7 +8,7 @@ use knyst::{
     audio_backend::JackBackend,
     controller::print_error_handler,
     handles::graph_output,
-    modal_interface::knyst,
+    modal_interface::knyst_commands,
     prelude::*,
     sphere::{KnystSphere, SphereSettings},
 };
@@ -42,9 +42,10 @@ fn main() -> Result<()> {
         // "/home/erik/Nextcloud/reinverse_traces/Multiply_diagonal_42.txt",
         // "/home/erik/Nextcloud/reinverse_traces/Multiply_random_73.txt",
         // "/home/erik/Nextcloud/reinverse_traces/Normalize_random_0.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Hessenberg_diagonal_3.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Hessenberg_random_3.txt",
-        "/home/erik/Nextcloud/reinverse_traces/Hessenberg_lower_triangular_3.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Hessenberg_diagonal_3.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Hessenberg_random_3.txt",
+        // "/home/erik/Nextcloud/reinverse_traces/Hessenberg_lower_triangular_3.txt",
+        "/home/erik/Nextcloud/rerere_data/one_second_white_noise.txt",
     ]
     .into_iter()
     .map(|path| {
@@ -66,7 +67,7 @@ fn main() -> Result<()> {
 
         println!("buffer length: {}", buffer.length_seconds());
 
-        let buffer_id = knyst().insert_buffer(buffer);
+        let buffer_id = knyst_commands().insert_buffer(buffer);
         Ok(buffer_id)
     })
     .collect();
