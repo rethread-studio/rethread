@@ -1,0 +1,6 @@
+HandBrake/HandBrake
+popcornmix/omxplayer
+videolan/vlc
+audacity/audacity
+brave/brave-browser
+brave/brave-core
