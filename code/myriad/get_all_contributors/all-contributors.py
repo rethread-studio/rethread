@@ -31,13 +31,13 @@ def get_gh_contributors(repo_name):
 		c = contributors[i]
 		contributor_info = {
 			"type": c.type,
-			"contributions": c.contributions,
-			"email": c.email
+			"contributions": c.contributions
 		}
-		if c.type == "User":
-			contributor_info["id"] = c.login
+		if c.type == "Anonymous":
+			hexhash = hex(hash(c.email))
+			contributor_info["id"] = hexhash[2:] if hexhash[0] == "0" else hexhash[3:]
 		else:
-			contributor_info["id"] = c.name
+			contributor_info["id"] = c.login
 
 		total_contributions += c.contributions
 		contributors_list.append(contributor_info)
@@ -45,7 +45,7 @@ def get_gh_contributors(repo_name):
 
 	# fuse users with same email?
 	print("")
-	filename = "contributors/" + repo_name.replace(".", "_").replace("/", "-") + ".json"
+	filename = "contributors/" + repo_name.replace("/", "#") + ".json"
 	repo_data = {
 		"repo": repo_name,
 		"total_contributions": total_contributions,
@@ -67,6 +67,7 @@ with open("gh_repo_lists/all_gh_repos.txt") as f:
 for repo in repos:
 	if repo[0] != "*":
 		get_gh_contributors(repo.rstrip("\n"))
+print("All done ✨")
 
 #print(repo.get_stats_contributors())
 

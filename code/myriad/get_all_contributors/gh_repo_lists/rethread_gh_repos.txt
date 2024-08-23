@@ -47,3 +47,4 @@ scribusproject/scribus
 arduino/arduino-ide
 gfx-rs/wgpu
 ritwickdey/vscode-live-server
+rtyley/bfg-repo-cleaner

@@ -73,8 +73,9 @@ processing/p5.js-web-editor
 processing/processing
 pure-data/pure-data
 python/cpython
-raspberrypi/linux
+*raspberrypi/linux
 ritwickdey/vscode-live-server
+rtyley/bfg-repo-cleaner
 rust-lang/cargo
 rust-lang/rust
 sass/sass
