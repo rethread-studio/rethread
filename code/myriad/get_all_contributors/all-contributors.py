@@ -78,7 +78,7 @@ def get_and_save_gh_info(repo_name):
 	#commits_over_time = get_gh_commit_history(repo)
 	total_contributions, contributors_list = get_gh_contributors(repo)
 
-	filename = "contributors/" + repo_name.replace("/", "#") + ".json"
+	filename = "contributors/" + repo_name.replace("/", "&") + ".json"
 	repo_data = {
 		"repo": repo_name,
 		#"commits_over_time": commits_over_time,
