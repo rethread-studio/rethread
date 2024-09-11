@@ -34,8 +34,8 @@ def get_gh_contributors(repo):
 			"contributions": c.contributions
 		}
 		if c.type == "Anonymous":
-			hexhash = hex(hash(c.email))
-			contributor_info["id"] = hexhash[2:] if hexhash[0] == "0" else hexhash[3:]
+			hexhash = hex(abs(hash(c.email)))
+			contributor_info["id"] = hexhash[2:].rjust(16, "0")
 		else:
 			contributor_info["id"] = c.login
 
