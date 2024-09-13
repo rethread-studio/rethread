@@ -5,7 +5,6 @@ let reposData = [];
 let inconsolataMedium, inconsolataSemiBold;
 
 let textSize;
-let wMargin;
 let lineHeight;
 let topMargin;
 let nLines;
@@ -32,19 +31,18 @@ function loadRepos(reposList) {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    frameRate(5);
+    frameRate(3);
     textAlign(CENTER, TOP);
     //noLoop();
 
-    textSize = 16;
-    wMargin = 10*textSize;
-    console.log(wMargin)
+    textSize = 18;
     lineHeight = textSize*1.5;
     topMargin = textSize*5;
     nLines = ~~((height-topMargin)/lineHeight);
 
     textFont(inconsolataMedium, textSize);
 
+    let marginToGap = 4;
     for (let repo of reposData) {
         let columnWidth = 0;
         for (let contributor of repo.contributors) {
@@ -52,9 +50,19 @@ function setup() {
             if (w > columnWidth) columnWidth = w;
         }
         repo.columnWidth = columnWidth;
-        repo.nColumns = ~~((width-2*wMargin)/columnWidth);
-        repo.wGap = (width-2*wMargin-repo.nColumns*columnWidth)/(repo.nColumns-1);
+        repo.nColumns = ~~(width*0.8/columnWidth);
+        if (repo.contributors.length < nLines) repo.nColumns = 1;
+        //repo.nColumns = floor(min(width*0.8/columnWidth, repo.contributors.length/(nLines+1)+1));
+        repo.wGap = (width-repo.nColumns*columnWidth)/(2*marginToGap+repo.nColumns-1);
+        repo.wMargin = marginToGap*repo.wGap;
+
+        for (let i = 0; i < (nLines-1)*repo.nColumns; i++) {
+            repo.contributors.unshift({id: ""});
+        }
     }
+
+    console.log(nLines);
+    console.log(reposData);
 }
 
 function draw() {
@@ -64,34 +72,31 @@ function draw() {
     if (frameRate() > 30) fill(0, 255, 0);
     else fill(255, 0, 0);
     text(~~frameRate(), 20, 10);
+    //circle(width/2, height/2, 10);
 
     let repo = reposData[repoIdx];
-    let h1 = createP(repo.repo);
+    let h1 = createElement("h1", repo.repo);
     h1.style("color", "white");
-    h1.style("text-align", "center");
-    h1.style("font-family", "monospace");
-    h1.style("font-size", textSize*1.5);
+    h1.style("font-size", textSize*2);
     h1.style("width", width);
     //h1.style("height", topMargin);
-    //h1.style("margin", 0);
+    h1.style("top-margin", textSize*1.5);
+    h1.style("bottom-margin", textSize*1.5);
     h1.position(0, 0);
 
-    let x = wMargin, y = topMargin;
+    let x = repo.wMargin, y = topMargin;
     let iMax = min(i0+nLines*repo.nColumns, repo.contributors.length);
     for (let i = i0; i < iMax; i++) {
         let contributor = repo.contributors[i];
         let p = createP(contributor.id);
         p.style("color", "white");
-        p.style("text-align", "center");
-        p.style("font-family", "monospace");
         p.style("font-size", textSize);
         p.style("width", repo.columnWidth);
-        p.style("margin", 0);
         p.position(x, y);
 
         x += repo.wGap + repo.columnWidth;
-        if (x > width-wMargin) {
-            x = wMargin;
+        if (x > width-repo.wMargin*1.5) {
+            x = repo.wMargin;
             y += lineHeight;
         }
     }
@@ -99,7 +104,7 @@ function draw() {
     i0 += repo.nColumns;
     if (i0 > repo.contributors.length) {
         repoIdx++;
-        if (repoIdx > reposData.length) repoIdx = 0;
+        if (repoIdx >= reposData.length) repoIdx = 0;
         i0 = 0;
     }
 }
