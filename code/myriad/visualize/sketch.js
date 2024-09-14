@@ -15,6 +15,7 @@ let scrollSpeed = 1, y0 = 0;
 function preload() {
     let params = getURLParams();
     let work = params.work;
+    if (work == undefined) work = "all";
     loadStrings("../get_all_contributors/gh_repo_lists/"+work+"_gh_repos.txt", loadRepos);
 
     inconsolataMedium = loadFont("./fonts/Inconsolata-Medium.ttf");
@@ -23,7 +24,7 @@ function preload() {
 function loadRepos(reposList) {
     //console.log(reposList)
     for (let r of reposList) {
-        if (r.length > 0) {
+        if (r.length > 0 && r[0] != "*") {
             reposData.push(loadJSON("../get_all_contributors/contributors/"+r.replaceAll("/", "&")+".json"));
         }
     }
@@ -50,9 +51,9 @@ function setup() {
             if (w > columnWidth) columnWidth = w;
         }
         repo.columnWidth = columnWidth;
-        repo.nColumns = ~~(width*0.8/columnWidth);
-        if (repo.contributors.length < nLines) repo.nColumns = 1;
-        //repo.nColumns = floor(min(width*0.8/columnWidth, repo.contributors.length/(nLines+1)+1));
+        //repo.nColumns = ~~(width*0.8/columnWidth);
+        //if (repo.contributors.length < nLines) repo.nColumns = 1;
+        repo.nColumns = floor(min(width*0.8/columnWidth, 1.5*repo.contributors.length/nLines+1));
         repo.wGap = (width-repo.nColumns*columnWidth)/(2*marginToGap+repo.nColumns-1);
         repo.wMargin = marginToGap*repo.wGap;
 
@@ -61,8 +62,7 @@ function setup() {
         }
     }
 
-    console.log(nLines);
-    console.log(reposData);
+    shuffle(reposData, true);
 }
 
 function draw() {
@@ -95,7 +95,7 @@ function draw() {
         p.position(x, y);
 
         x += repo.wGap + repo.columnWidth;
-        if (x > width-repo.wMargin*1.5) {
+        if (x > width-repo.wMargin*1.1) {
             x = repo.wMargin;
             y += lineHeight;
         }
