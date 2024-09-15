@@ -84,21 +84,22 @@ function draw() {
     h1.style("bottom-margin", textSize*1.5);
     h1.position(0, 0);
 
-    let x = repo.wMargin, y = topMargin;
-    let iMax = min(i0+nLines*repo.nColumns, repo.contributors.length);
-    for (let i = i0; i < iMax; i++) {
-        let contributor = repo.contributors[i];
-        let p = createP(contributor.id);
-        p.style("color", "white");
-        p.style("font-size", textSize);
-        p.style("width", repo.columnWidth);
-        p.position(x, y);
+    let y = topMargin;
+    for (let i = 0; i < nLines; i++) {
+        let x = repo.wMargin;
+        for (let j = 0; j < repo.nColumns; j++) {
+            let idx = i0 + i*repo.nColumns + j;
+            if (idx >= repo.contributors.length) break;
+            let contributor = repo.contributors[idx];
+            let p = createP(contributor.id);
+            p.style("color", "white");
+            p.style("font-size", textSize);
+            p.style("width", repo.columnWidth);
+            p.position(x, y);
 
-        x += repo.wGap + repo.columnWidth;
-        if (x > width-repo.wMargin*1.1) {
-            x = repo.wMargin;
-            y += lineHeight;
+            x += repo.wGap + repo.columnWidth;
         }
+        y += lineHeight;
     }
 
     i0 += repo.nColumns;
