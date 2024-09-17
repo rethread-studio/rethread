@@ -39,7 +39,7 @@ body {
 
 .dark-mode {
     background-color: black;
-    color: greenyellow;
+    color: white;
   }
 
 .center-horizontally {
@@ -97,10 +97,11 @@ h3 {
 
 a {
     color: black;
+    text-decoration-color: DarkOrange;;
 }
 
 .dark-mode a {
-    color: greenyellow;
+    color: white;
 }
 
 br {
@@ -151,4 +152,14 @@ button {
 
 .dark-mode button {
     color: greenyellow;
+}
+
+img {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+pre {
+    font-family: Inconsolata-Regular, sans-serif;
+    margin-bottom: 1.5rem;
 }

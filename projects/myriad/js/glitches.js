@@ -15,7 +15,7 @@ window.addEventListener('load', function() {
     let headers2 = document.getElementsByTagName("h2");
     let headers3 = document.getElementsByTagName("h3");
     let listItems = document.getElementsByTagName("li");
-    glitchableElements = [...paragraphs, ...links, ...links, ...italics, ...headers2, ...headers3, ...listItems];
+    glitchableElements = [...links, ...italics, ...headers2, ...headers3];
     glitchElements();
 });
 
