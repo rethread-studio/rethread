@@ -1,0 +1,4 @@
+[submodule "libdaisy-rust"]
+	path = libdaisy-rust
+	url = https://github.com/ErikNatanael/libdaisy-rust.git
+	branch = unsafe-pointers
