@@ -1,0 +1,8 @@
+[package]
+name = "image_to_bits"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bitvec = "1.0.1"
+image = "0.25.2"

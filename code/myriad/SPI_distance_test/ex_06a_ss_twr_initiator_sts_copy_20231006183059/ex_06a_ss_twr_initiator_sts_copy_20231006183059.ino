@@ -3,14 +3,15 @@
 
 // SPI to Daisy
 static const int spiClk = 1000000; // 1 MHz
-#define HSPI_MISO   12
-#define HSPI_MOSI   13
-#define HSPI_CLK    14
-#define HSPI_SS     15
+#define HSPI_MISO 12
+#define HSPI_MOSI 13
+#define HSPI_CLK 14
+#define HSPI_SS 15
 
-SPIClass * hspi = NULL
+SPIClass *hspi = NULL;
 
-#define NUM_ANCHORS
+#define NUM_ANCHORS 3
+
 static double distances_to_anchors[NUM_ANCHORS];
 
 #define APP_NAME "SS TWR INIT STS v1.0"
@@ -18,7 +19,7 @@ static double distances_to_anchors[NUM_ANCHORS];
 // connection pins to DW3000
 const uint8_t PIN_RST = 27; // reset pin
 const uint8_t PIN_IRQ = 34; // irq pin
-const uint8_t PIN_SS = 4; // spi select pin
+const uint8_t PIN_SS = 4;   // spi select pin
 
 /* Inter-ranging delay period, in milliseconds. */
 #define RNG_DELAY_MS 10
@@ -30,9 +31,9 @@ const uint8_t PIN_SS = 4; // spi select pin
 #define TAG_ID 0
 
 #if TAG_ID == 0
-static uint8_t tag_addr[] = { 'V', 'E' };
+static uint8_t tag_addr[] = {'V', 'E'};
 #elif TAG_ID == 1
-static uint8_t tag_addr[] = { 'Q', '3' };
+static uint8_t tag_addr[] = {'Q', '3'};
 #endif
 #define POLL_MSG_TAG_ADDR0 7
 #define POLL_MSG_TAG_ADDR1 8
@@ -43,9 +44,9 @@ static uint8_t tag_addr[] = { 'Q', '3' };
 #define RESP_MSG_ANCHOR_ADDR0 7
 #define RESP_MSG_ANCHOR_ADDR1 8
 
-static uint8_t anchor_addr0[] = { 'W', 'A' };
-static uint8_t anchor_addr1[] = { 'W', 'B' };
-static uint8_t anchor_addr2[] = { 'W', 'C' };
+static uint8_t anchor_addr0[] = {'W', 'A'};
+static uint8_t anchor_addr1[] = {'W', 'B'};
+static uint8_t anchor_addr2[] = {'W', 'C'};
 
 /* Frames used in the ranging process. See NOTE 3 below. */
 static uint8_t tx_poll_msg[] = {0x41, 0x88, 0, 0xCA, 0xDE, 'W', 'A', 0, 0, 0xE0, 0, 0};
@@ -102,9 +103,8 @@ extern dwt_txconfig_t txconfig_options_ch9;
  * Here we use a default KEY as specified in the IEEE 802.15.4z annex
  */
 static dwt_sts_cp_key_t cp_key =
-{
-        0x14EB220F,0xF86050A8,0xD1D336AA,0x14148674
-};
+    {
+        0x14EB220F, 0xF86050A8, 0xD1D336AA, 0x14148674};
 
 /*
  * 128-bit initial value for the nonce to be programmed into the CP_IV register.
@@ -117,9 +117,8 @@ static dwt_sts_cp_key_t cp_key =
  * Here we use a default IV as specified in the IEEE 802.15.4z annex
  */
 static dwt_sts_cp_iv_t cp_iv =
-{
-        0x1F9A3DE4,0xD37EC3CA,0xC44FA8FB,0x362EEB34
-};
+    {
+        0x1F9A3DE4, 0xD37EC3CA, 0xC44FA8FB, 0x362EEB34};
 
 /*
  * The 'poll' message initiating the ranging exchange includes a 32-bit counter which is part
@@ -127,44 +126,49 @@ static dwt_sts_cp_iv_t cp_iv =
  */
 static void send_tx_poll_msg(void)
 {
-    /* Write frame data to DW IC and prepare transmission. See NOTE 7 below. */
-    tx_poll_msg[ALL_MSG_SN_IDX] = frame_seq_nb;
-    dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
-    dwt_writetxdata(sizeof(tx_poll_msg), tx_poll_msg, 0); /* Zero offset in TX buffer. */
-    dwt_writetxfctrl(sizeof(tx_poll_msg), 0, 1); /* Zero offset in TX buffer, ranging. */
+  /* Write frame data to DW IC and prepare transmission. See NOTE 7 below. */
+  tx_poll_msg[ALL_MSG_SN_IDX] = frame_seq_nb;
+  dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
+  dwt_writetxdata(sizeof(tx_poll_msg), tx_poll_msg, 0); /* Zero offset in TX buffer. */
+  dwt_writetxfctrl(sizeof(tx_poll_msg), 0, 1);          /* Zero offset in TX buffer, ranging. */
 
-    /* Start transmission. */
-    dwt_starttx(DWT_START_TX_IMMEDIATE);
+  /* Start transmission. */
+  dwt_starttx(DWT_START_TX_IMMEDIATE);
 
-    /* Poll DW IC until TX frame sent event set. See NOTE 8 below. */
-    while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK))
-    { };
+  /* Poll DW IC until TX frame sent event set. See NOTE 8 below. */
+  while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK))
+  {
+  };
 
-    /* Clear TXFRS event. */
-    dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
+  /* Clear TXFRS event. */
+  dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
 }
 
-static void set_tag_addr(void) {
+static void set_tag_addr(void)
+{
   tx_poll_msg[POLL_MSG_TAG_ADDR0] = tag_addr[0];
   tx_poll_msg[POLL_MSG_TAG_ADDR1] = tag_addr[1];
   rx_resp_msg[RESP_MSG_TAG_ADDR0] = tag_addr[0];
   rx_resp_msg[RESP_MSG_TAG_ADDR1] = tag_addr[1];
 }
 
-static void set_anchor_addr(uint8_t *anchor_addr) {
+static void set_anchor_addr(uint8_t *anchor_addr)
+{
   tx_poll_msg[POLL_MSG_ANCHOR_ADDR0] = anchor_addr[0];
   tx_poll_msg[POLL_MSG_ANCHOR_ADDR1] = anchor_addr[1];
   rx_resp_msg[RESP_MSG_ANCHOR_ADDR0] = anchor_addr[0];
   rx_resp_msg[RESP_MSG_ANCHOR_ADDR1] = anchor_addr[1];
 }
 
-
-int16_t stsQual; /* This will contain STS quality index and status */
-int goodSts = 0; /* Used for checking STS quality in received signal */
+int16_t stsQual;           /* This will contain STS quality index and status */
+int goodSts = 0;           /* Used for checking STS quality in received signal */
 uint8_t firstLoopFlag = 0; /* Used to track if the program has gone through the first loop or not. */
 
-
-void setup() {
+void setup()
+{
+  for(unsigned i = 0; i < NUM_ANCHORS; i++) {
+    distances_to_anchors[i] = 10000;
+  }
   set_tag_addr(); // Init the message buffers to use this tag address
   UART_init();
   test_run_info((unsigned char *)APP_NAME);
@@ -176,237 +180,250 @@ void setup() {
 
   delay(2); // Time needed for DW3000 to start up (transition from INIT_RC to IDLE_RC, or could wait for SPIRDY event)
 
-  while (!dwt_checkidlerc()) // Need to make sure DW IC is in IDLE_RC before proceeding 
+  while (!dwt_checkidlerc()) // Need to make sure DW IC is in IDLE_RC before proceeding
   {
     UART_puts("IDLE FAILED\r\n");
-    while (1) ;
+    while (1)
+      ;
   }
 
   if (dwt_initialise(DWT_DW_INIT) == DWT_ERROR)
   {
     UART_puts("INIT FAILED\r\n");
-    while (1) ;
+    while (1)
+      ;
   }
 
   // Enabling LEDs here for debug so that for each TX the D1 LED will flash on DW3000 red eval-shield boards.
   dwt_setleds(DWT_LEDS_ENABLE | DWT_LEDS_INIT_BLINK);
 
   /* Configure DW IC. See NOTE 15 below. */
-    if(dwt_configure(&config_options)) /* if the dwt_configure returns DWT_ERROR either the PLL or RX calibration has failed the host should reset the device */
+  if (dwt_configure(&config_options)) /* if the dwt_configure returns DWT_ERROR either the PLL or RX calibration has failed the host should reset the device */
+  {
+    test_run_info((unsigned char *)"CONFIG FAILED     ");
+    while (1)
     {
-        test_run_info((unsigned char *)"CONFIG FAILED     ");
-        while (1)
-        { };
-    }
+    };
+  }
 
-    /* Configure the TX spectrum parameters (power, PG delay and PG count) */
-    if(config_options.chan == 5)
+  /* Configure the TX spectrum parameters (power, PG delay and PG count) */
+  if (config_options.chan == 5)
+  {
+    dwt_configuretxrf(&txconfig_options);
+  }
+  else
+  {
+    dwt_configuretxrf(&txconfig_options_ch9);
+  }
+
+  /* Apply default antenna delay value. See NOTE 2 below. */
+  dwt_setrxantennadelay(RX_ANT_DLY);
+  dwt_settxantennadelay(TX_ANT_DLY);
+
+  /* Set expected response's timeout. See NOTE 1 and 5 below.
+   * As this example only handles one incoming frame with always the same delay, this value can be set here once for all. */
+  set_resp_rx_timeout(RESP_RX_TIMEOUT_UUS, &config_options);
+
+  /* Next can enable TX/RX states output on GPIOs 5 and 6 to help diagnostics, and also TX/RX LEDs */
+  dwt_setlnapamode(DWT_LNA_ENABLE | DWT_PA_ENABLE);
+
+  // Daisy SPI init
+  pinMode(HSPI_SS, OUTPUT);
+
+  hspi = new SPIClass(HSPI);
+  hspi->setDataMode(SPI_MODE0);
+
+  hspi->begin(HSPI_CLK, HSPI_MISO, HSPI_MOSI, HSPI_SS);
+}
+
+void loop()
+{
+  /*
+   * Set STS encryption key and IV (nonce).
+   * See NOTE 16 below.
+   */
+  if (!firstLoopFlag)
+  {
+    /*
+     * On first loop, configure the STS key & IV, then load them.
+     */
+    dwt_configurestskey(&cp_key);
+    dwt_configurestsiv(&cp_iv);
+    dwt_configurestsloadiv();
+    firstLoopFlag = 1;
+  }
+  else
+  {
+    /*
+     * On subsequent loops, we only need to reload the lower 32 bits of STS IV.
+     */
+    dwt_writetodevice(STS_IV0_ID, 0, 4, (uint8_t *)&cp_iv);
+    dwt_configurestsloadiv();
+  }
+  /*
+   * Send the poll message to the responder.
+   */
+  send_tx_poll_msg();
+
+  /*
+   * Set a reference time for the RX to start after TX timestamp.
+   * See NOTE 14 below.
+   */
+  set_delayed_rx_time(POLL_TX_TO_RESP_RX_DLY_UUS, &config_options);
+
+  /* Activate reception a set time period after the TX timestamp for the POLL message. */
+  dwt_rxenable(DWT_START_RX_DLY_TS);
+
+  /* We assume that the transmission is achieved correctly, poll for reception of a frame or error/timeout. See NOTE 8 below. */
+  while (!((status_reg = dwt_read32bitreg(SYS_STATUS_ID)) & (SYS_STATUS_RXFCG_BIT_MASK | SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR)))
+  {
+  };
+
+  /*
+   * Need to check the STS has been received and is good.
+   */
+  goodSts = dwt_readstsquality(&stsQual);
+
+  /* Increment frame sequence number after transmission of the poll message (modulo 256). */
+  frame_seq_nb++;
+
+  /*
+   * Here we are checking for a good frame and good STS quality.
+   */
+  if ((status_reg & SYS_STATUS_RXFCG_BIT_MASK) && (goodSts >= 0))
+  {
+    uint32_t frame_len;
+
+    /* Clear the RX events. */
+    dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_GOOD);
+
+    /* A frame has been received, read it into the local buffer. */
+    frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
+    if (frame_len <= sizeof(rx_buffer))
     {
-        dwt_configuretxrf(&txconfig_options);
+      dwt_readrxdata(rx_buffer, frame_len, 0);
+
+      /* Check that the frame is the expected response from the companion "SS TWR responder" example.
+       * As the sequence number field of the frame is not relevant, it is cleared to simplify the validation of the frame. */
+      rx_buffer[ALL_MSG_SN_IDX] = 0;
+      if (memcmp(rx_buffer, rx_resp_msg, ALL_MSG_COMMON_LEN) == 0)
+      {
+        uint32_t poll_tx_ts, resp_rx_ts, poll_rx_ts, resp_tx_ts;
+        int32_t rtd_init, rtd_resp;
+        float clockOffsetRatio;
+
+        /* Retrieve poll transmission and response reception timestamps. See NOTE 9 below. */
+        poll_tx_ts = dwt_readtxtimestamplo32();
+        resp_rx_ts = dwt_readrxtimestamplo32();
+
+        /* Read carrier integrator value and calculate clock offset ratio. See NOTE 11 below. */
+        clockOffsetRatio = ((float)dwt_readclockoffset()) / (uint32_t)(1 << 26);
+
+        /* Get timestamps embedded in response message. */
+        resp_msg_get_ts(&rx_buffer[RESP_MSG_POLL_RX_TS_IDX], &poll_rx_ts);
+        resp_msg_get_ts(&rx_buffer[RESP_MSG_RESP_TX_TS_IDX], &resp_tx_ts);
+
+        /* Compute time of flight and distance, using clock offset ratio to correct for differing local and remote clock rates */
+        rtd_init = resp_rx_ts - poll_tx_ts;
+        rtd_resp = resp_tx_ts - poll_rx_ts;
+
+        tof = ((rtd_init - rtd_resp * (1 - clockOffsetRatio)) / 2.0) * DWT_TIME_UNITS;
+        distance = tof * SPEED_OF_LIGHT;
+        distances_to_anchors[anchor_selection] = distance;
+
+        /* Display computed distance on LCD. */
+        // snprintf(dist_str, sizeof(dist_str), "%u:%3.2f", anchor_selection, distance);
+        // test_run_info((unsigned char *)dist_str);
+        Serial.print(dist_str);
+        if (anchor_selection == 2)
+        {
+          distances_to_daisy();
+          // Serial.print("\n");
+        }
+        else
+        {
+          // Serial.print(",");
+        }
+      }
+      else
+      {
+        errors[BAD_FRAME_ERR_IDX] += 1;
+        Serial.println("Wrong response ");
+      }
     }
     else
     {
-        dwt_configuretxrf(&txconfig_options_ch9);
+      errors[RTO_ERR_IDX] += 1;
+      Serial.println("Bad length ");
     }
+  }
+  else
+  {
+    // Serial.println("Other error");
+    check_for_status_errors(status_reg, errors);
 
-    /* Apply default antenna delay value. See NOTE 2 below. */
-    dwt_setrxantennadelay(RX_ANT_DLY);
-    dwt_settxantennadelay(TX_ANT_DLY);
+    if (!(status_reg & SYS_STATUS_RXFCG_BIT_MASK))
+    {
+      errors[BAD_FRAME_ERR_IDX] += 1;
+    }
+    if (goodSts < 0)
+    {
+      errors[PREAMBLE_COUNT_ERR_IDX] += 1;
+    }
+    if (stsQual <= 0)
+    {
+      errors[CP_QUAL_ERR_IDX] += 1;
+    }
+  }
 
-    /* Set expected response's timeout. See NOTE 1 and 5 below.
-     * As this example only handles one incoming frame with always the same delay, this value can be set here once for all. */
-    set_resp_rx_timeout(RESP_RX_TIMEOUT_UUS, &config_options);
+  /* Clear RX error/timeout events in the DW IC status register. */
+  dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_GOOD | SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR);
 
-    /* Next can enable TX/RX states output on GPIOs 5 and 6 to help diagnostics, and also TX/RX LEDs */
-    dwt_setlnapamode(DWT_LNA_ENABLE | DWT_PA_ENABLE);
-    
+  /* Execute a delay between ranging exchanges. */
+  Sleep(RNG_DELAY_MS);
 
-    // Daisy SPI init
-    pinMode(HSPI_SS, OUTPUT);
+  // Transfer data via SPI
 
-    hspi = new SPIClass(HSPI);
-
-    hspi->begin(HSPI_CLK, HSPI_MISO, HSPI_MOSI, HSPI_SS);
+  anchor_selection = (anchor_selection + 1) % 3;
+  switch (anchor_selection)
+  {
+  case 0:
+    set_anchor_addr(anchor_addr0);
+    break;
+  case 1:
+    set_anchor_addr(anchor_addr1);
+    break;
+  case 2:
+    set_anchor_addr(anchor_addr2);
+    break;
+  }
 }
 
-void loop() {
-         /*
-         * Set STS encryption key and IV (nonce).
-         * See NOTE 16 below.
-         */
-        if (!firstLoopFlag)
-        {
-            /*
-             * On first loop, configure the STS key & IV, then load them.
-             */
-            dwt_configurestskey(&cp_key);
-            dwt_configurestsiv(&cp_iv);
-            dwt_configurestsloadiv();
-            firstLoopFlag = 1;
-        }
-        else
-        {
-            /*
-             * On subsequent loops, we only need to reload the lower 32 bits of STS IV.
-             */
-            dwt_writetodevice(STS_IV0_ID, 0, 4, (uint8_t *)&cp_iv);
-            dwt_configurestsloadiv();
-        }
-        /*
-         * Send the poll message to the responder.
-         */
-        send_tx_poll_msg();
-
-        /*
-         * Set a reference time for the RX to start after TX timestamp.
-         * See NOTE 14 below.
-         */
-        set_delayed_rx_time(POLL_TX_TO_RESP_RX_DLY_UUS, &config_options);
-
-        /* Activate reception a set time period after the TX timestamp for the POLL message. */
-        dwt_rxenable(DWT_START_RX_DLY_TS);
-
-        /* We assume that the transmission is achieved correctly, poll for reception of a frame or error/timeout. See NOTE 8 below. */
-        while (!((status_reg = dwt_read32bitreg(SYS_STATUS_ID)) & (SYS_STATUS_RXFCG_BIT_MASK | SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR)))
-        { };
-
-        /*
-         * Need to check the STS has been received and is good.
-         */
-        goodSts = dwt_readstsquality(&stsQual);
-
-        /* Increment frame sequence number after transmission of the poll message (modulo 256). */
-        frame_seq_nb++;
-
-        /*
-         * Here we are checking for a good frame and good STS quality.
-         */
-        if ((status_reg & SYS_STATUS_RXFCG_BIT_MASK) && (goodSts >= 0))
-        {
-            uint32_t frame_len;
-
-            /* Clear the RX events. */
-            dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_GOOD);
-
-            /* A frame has been received, read it into the local buffer. */
-            frame_len = dwt_read32bitreg(RX_FINFO_ID) & RXFLEN_MASK;
-            if (frame_len <= sizeof(rx_buffer))
-            {
-                dwt_readrxdata(rx_buffer, frame_len, 0);
-
-                /* Check that the frame is the expected response from the companion "SS TWR responder" example.
-                 * As the sequence number field of the frame is not relevant, it is cleared to simplify the validation of the frame. */
-                rx_buffer[ALL_MSG_SN_IDX] = 0;
-                if (memcmp(rx_buffer, rx_resp_msg, ALL_MSG_COMMON_LEN) == 0)
-                {
-                    uint32_t poll_tx_ts, resp_rx_ts, poll_rx_ts, resp_tx_ts;
-                    int32_t rtd_init, rtd_resp;
-                    float clockOffsetRatio ;
-
-                    /* Retrieve poll transmission and response reception timestamps. See NOTE 9 below. */
-                    poll_tx_ts = dwt_readtxtimestamplo32();
-                    resp_rx_ts = dwt_readrxtimestamplo32();
-
-                    /* Read carrier integrator value and calculate clock offset ratio. See NOTE 11 below. */
-                    clockOffsetRatio = ((float)dwt_readclockoffset()) / (uint32_t)(1<<26);
-
-                    /* Get timestamps embedded in response message. */
-                    resp_msg_get_ts(&rx_buffer[RESP_MSG_POLL_RX_TS_IDX], &poll_rx_ts);
-                    resp_msg_get_ts(&rx_buffer[RESP_MSG_RESP_TX_TS_IDX], &resp_tx_ts);
-
-                    /* Compute time of flight and distance, using clock offset ratio to correct for differing local and remote clock rates */
-                    rtd_init = resp_rx_ts - poll_tx_ts;
-                    rtd_resp = resp_tx_ts - poll_rx_ts;
-
-                    tof = ((rtd_init - rtd_resp * (1 - clockOffsetRatio)) / 2.0) * DWT_TIME_UNITS;
-                    distance = tof * SPEED_OF_LIGHT;
-                    distances_to_anchors[anchor_selection] = distance;
-
-                    /* Display computed distance on LCD. */
-                    // snprintf(dist_str, sizeof(dist_str), "%u:%3.2f", anchor_selection, distance);
-                    // test_run_info((unsigned char *)dist_str);
-                    Serial.print(dist_str);
-                    if(anchor_selection == 2) {
-                      distances_to_daisy();
-                      // Serial.print("\n");
-                    } else {
-                      // Serial.print(",");
-                    }
-                }
-                else
-                {
-                    errors[BAD_FRAME_ERR_IDX] += 1;
-                    Serial.println("Wrong response ");
-                }
-            }
-            else
-            {
-                errors[RTO_ERR_IDX] += 1;
-                Serial.println("Bad length ");
-            }
-        }
-        else
-        {
-          // Serial.println("Other error");
-            check_for_status_errors(status_reg, errors);
-
-            if (!(status_reg & SYS_STATUS_RXFCG_BIT_MASK))
-            {
-                errors[BAD_FRAME_ERR_IDX] += 1;
-            }
-            if (goodSts < 0)
-            {
-                errors[PREAMBLE_COUNT_ERR_IDX] += 1;
-            }
-            if (stsQual <= 0)
-            {
-                errors[CP_QUAL_ERR_IDX] += 1;
-            }
-        }
-
-        /* Clear RX error/timeout events in the DW IC status register. */
-        dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_GOOD | SYS_STATUS_ALL_RX_TO | SYS_STATUS_ALL_RX_ERR);
-        
-
-        /* Execute a delay between ranging exchanges. */
-        Sleep(RNG_DELAY_MS);
-        
-        // Transfer data via SPI
-        
-
-        anchor_selection = (anchor_selection + 1) % 3;
-        switch (anchor_selection) {
-          case 0:
-            set_anchor_addr(anchor_addr0);
-          break;
-          case 1:
-            set_anchor_addr(anchor_addr1);
-          break;
-          case 2:
-            set_anchor_addr(anchor_addr2);
-          break;
-        }
-}
-
-void distances_to_daisy() {
+void distances_to_daisy()
+{
   uint8_t closest_index = 0;
   double closest_distance = 100000.;
-  for(uint8_t i = 0; i < NUM_ANCHORS; i++) {
-    if (distances_to_anchors[i] < closest_distance) {
+  for (uint8_t i = 0; i < NUM_ANCHORS; i++)
+  {
+    if (distances_to_anchors[i] < closest_distance)
+    {
       closest_distance = distances_to_anchors[i];
       closest_index = i;
     }
   }
-  
+
   float dist_float = (float)closest_distance;
   uint8_t message[6];
   message[0] = closest_index;
-  memcpy(message[1], &dist_float, sizeof(dist_float));
-  message[5] = 0;
-  
+  memcpy(&message[1], &dist_float, sizeof(dist_float));
+  message[5] = 254; // Control value for successful transfer
+
+  Serial.printf("i: %i, dist: %d\n", closest_index, dist_float);
+
   hspi->beginTransaction(SPISettings(spiClk, MSBFIRST, SPI_MODE0));
   digitalWrite(HSPI_SS, LOW);
-  for (unsigned i = 0; i < 6; i++) {
+  for (unsigned i = 0; i < 6; i++)
+  {
     hspi->transfer(message[i]);
   }
   digitalWrite(HSPI_SS, HIGH);
