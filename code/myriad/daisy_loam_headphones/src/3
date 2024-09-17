@@ -1,0 +1,194 @@
+use core::mem;
+
+use alloc::vec::Vec;
+use embedded_sdmmc::File;
+use heapless::spsc::{Consumer, Producer, Queue};
+use log::warn;
+
+use crate::{sd_card::SdCardLocal, Sample, NUM_ANCHORS};
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub struct AnchorId(pub u8);
+const BUFFER_SIZE: usize = 16384;
+/// Lives in the audio task and plays back
+pub struct VoicePlayer {
+    buffers: [Vec<i16>; 3],
+    refill_tx: [Producer<'static, (Vec<i16>, AnchorId), 2>; 3],
+    filled_rx: [Consumer<'static, (Vec<i16>, AnchorId), 2>; 3],
+    anchors_in_buffers: [AnchorId; 3],
+    anchor_mix: [f32; 3],
+    furthest_anchor_buffer: AnchorId,
+    buffer_read_ptr: usize,
+}
+impl VoicePlayer {
+    pub fn new(
+        sd_card: &mut SdCardLocal,
+        queues: &'static mut [Queue<(Vec<i16>, AnchorId), 2>; 6],
+    ) -> (Self, VoiceLoader) {
+        let buffers = [
+            vec![0_i16; BUFFER_SIZE],
+            vec![0; BUFFER_SIZE],
+            vec![0; BUFFER_SIZE],
+        ];
+        let buffers_to_send = [
+            vec![0_i16; BUFFER_SIZE],
+            vec![0; BUFFER_SIZE],
+            vec![0; BUFFER_SIZE],
+        ];
+        let anchors_in_buffers = [AnchorId(0), AnchorId(1), AnchorId(2)];
+        let mut queues = queues.iter_mut();
+        let (mut refill_tx, refill_rx) = {
+            let (tx0, rx0) = queues.next().unwrap().split();
+            let (tx1, rx1) = queues.next().unwrap().split();
+            let (tx2, rx2) = queues.next().unwrap().split();
+            ([tx0, tx1, tx2], [rx0, rx1, rx2])
+        };
+        // Send the buffers for immediate filling
+        for ((buf, tx), &anchor) in buffers_to_send
+            .into_iter()
+            .zip(refill_tx.iter_mut())
+            .zip(anchors_in_buffers.iter())
+        {
+            tx.enqueue((buf, anchor)).unwrap();
+        }
+        let (filled_tx, filled_rx) = {
+            let (tx0, rx0) = queues.next().unwrap().split();
+            let (tx1, rx1) = queues.next().unwrap().split();
+            let (tx2, rx2) = queues.next().unwrap().split();
+            ([tx0, tx1, tx2], [rx0, rx1, rx2])
+        };
+        let mut loader = VoiceLoader::new(sd_card, filled_tx, refill_rx);
+        // Fill up the first buffers
+        loader.update(sd_card);
+        (
+            Self {
+                buffers,
+                anchors_in_buffers,
+                refill_tx,
+                filled_rx,
+                furthest_anchor_buffer: AnchorId(2),
+                // Start at max buffer size in order to immediately fetch the filled buffers
+                buffer_read_ptr: BUFFER_SIZE,
+                anchor_mix: [0.5, 0.35, 0.15],
+            },
+            loader,
+        )
+    }
+    pub fn next_frame(&mut self) -> (Sample, Sample) {
+        if self.buffer_read_ptr >= BUFFER_SIZE {
+            self.swap_buffers();
+        }
+        let mut l = 0.;
+        let mut r = 0.;
+        for (buf, &mix) in self.buffers.iter().zip(&self.anchor_mix) {
+            l += sample_i16_to_f32(buf[self.buffer_read_ptr]) * mix;
+            r += sample_i16_to_f32(buf[self.buffer_read_ptr + 1]) * mix;
+        }
+
+        self.buffer_read_ptr += 2;
+        (l, r)
+    }
+    pub fn swap_buffers(&mut self) {
+        for ((local_buf, filled_rx), refill_tx) in self
+            .buffers
+            .iter_mut()
+            .zip(self.filled_rx.iter_mut())
+            .zip(self.refill_tx.iter_mut())
+        {
+            if let Some((mut buf, anchor)) = filled_rx.dequeue() {
+                mem::swap(local_buf, &mut buf);
+                refill_tx.enqueue((buf, anchor)).unwrap();
+            } else {
+                warn!("No buffer ready to be swapped");
+            }
+        }
+        self.buffer_read_ptr = 0;
+    }
+}
+
+pub struct VoiceLoader {
+    voice_file_handles: [File; NUM_ANCHORS],
+    filled_tx: [Producer<'static, (Vec<i16>, AnchorId), 2>; 3],
+    refill_rx: [Consumer<'static, (Vec<i16>, AnchorId), 2>; 3],
+}
+impl VoiceLoader {
+    pub fn new(
+        sd_card: &mut SdCardLocal,
+        filled_tx: [Producer<'static, (Vec<i16>, AnchorId), 2>; 3],
+        refill_rx: [Consumer<'static, (Vec<i16>, AnchorId), 2>; 3],
+    ) -> Self {
+        let anchor_voice_files = [
+            "VOICE_0.BIN",
+            "VOICE_1.BIN",
+            "VOICE_2.BIN",
+            "VOICE_3.BIN",
+            "VOICE_4.BIN",
+            "VOICE_5.BIN",
+            "VOICE_6.BIN",
+        ];
+        let voice_file_handles =
+            core::array::from_fn(|i| sd_card.open_file(anchor_voice_files[i]).unwrap());
+        Self {
+            voice_file_handles,
+            filled_tx,
+            refill_rx,
+        }
+    }
+    pub fn update(&mut self, sd_card: &mut SdCardLocal) {
+        for (refill_rx, filled_tx) in self.refill_rx.iter_mut().zip(self.filled_tx.iter_mut()) {
+            if let Some((mut fill_me, anchor)) = refill_rx.dequeue() {
+                sd_card.read_i16_from_file_cycling(
+                    &mut self.voice_file_handles[anchor.0 as usize],
+                    &mut fill_me,
+                );
+                while let Err(e) = filled_tx.enqueue((fill_me, anchor)) {
+                    fill_me = e.0;
+                    warn!("Error queuing");
+                }
+            }
+        }
+    }
+}
+
+fn sample_i16_to_f32(s: i16) -> f32 {
+    const I16_MAX_RECIP: f32 = 1.0 / i16::MAX as f32;
+    s as f32 * I16_MAX_RECIP
+}
+
+pub struct Anchors {
+    pub distances: [f32; NUM_ANCHORS],
+    pub buffer_anchors: [(AnchorId, f32); NUM_ANCHORS],
+    pub anchor_in_top_three: [bool; NUM_ANCHORS],
+}
+impl Anchors {
+    pub fn new() -> Self {
+        Self {
+            distances: [0.; NUM_ANCHORS],
+            buffer_anchors: core::array::from_fn(|i| (AnchorId(i as u8), 0.0)),
+            anchor_in_top_three: core::array::from_fn(|i| i < 3),
+        }
+    }
+    /// Call after setting all the distances
+    pub fn recalculate(&mut self) -> [f32; 3] {
+        let mut mix = [0.0; 3];
+        let mut anchors = [(0.0, 0); NUM_ANCHORS];
+        for i in 0..NUM_ANCHORS {
+            anchors[i] = (self.distances, i);
+        }
+        anchors.sort_unstable_by(|(a, b)| a.0.partial_cmp(b.0));
+        let mut lowest_dist = f32::MAX;
+        let mut lowest_dist_index = 0;
+        for (i, (anchor, dist)) in &mut self.buffer_anchors.iter_mut().enumerate() {
+            *dist = self.distances[anchor.0 as usize];
+            if *dist < lowest_dist {
+                lowest_dist = *dist;
+                lowest_dist_index = i;
+            }
+        }
+        for i in NUM_ANCHORS {
+            if !self.anchor_in_top_three[i] {
+                if self.distances[i] < lowest_dist
+            }
+        }
+        mix
+    }
+}

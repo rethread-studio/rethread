@@ -1,0 +1,21 @@
+[target.thumbv7em-none-eabihf]
+runner = "gdb-multiarch -q"
+rustflags = [
+    "-C", "link-arg=-Tlink.x", 
+]
+
+[build]
+target = "thumbv7em-none-eabihf" # Cortex-M4F and Cortex-M7F (with FPU)
+
+[profile.dev]
+opt-level = 'z'  
+lto = true   
+codegen-units = 16 
+panic = 'unwind'  
+
+[profile.release]
+opt-level = 'z'     # Optimize for size.
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations.
+panic = 'abort'     # Abort on panic
+# strip = true        # Strip symbols from binary*
