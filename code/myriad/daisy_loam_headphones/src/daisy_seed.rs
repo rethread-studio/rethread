@@ -56,7 +56,7 @@ impl DaisySeed {
 
         // setting up SDRAM
         let sdram = system.sdram;
-        sdram.fill(0.0);
+        // sdram.fill(0.0); // This takes a long time and creates a beep at startup
 
         // setting up SD card connection
         let sdmmc_d = unsafe { pac::Peripherals::steal().SDMMC1 };
