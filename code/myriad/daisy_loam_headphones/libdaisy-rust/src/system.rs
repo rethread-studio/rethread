@@ -2,6 +2,7 @@
 #![allow(dead_code)]
 // #![allow(unused_variables)]
 
+use audio::MAX_TRANSFER_SIZE;
 use log::info;
 
 use stm32h7xx_hal::{
@@ -199,7 +200,7 @@ impl System {
         .into();
 
         info!("Setup up Audio...");
-        let audio = Audio::new(
+        let mut audio = Audio::new(
             device.DMA1,
             ccdr.peripheral.DMA1,
             device.SAI1,
@@ -213,6 +214,10 @@ impl System {
             &mut core.MPU,
             &mut core.SCB,
         );
+        // Init audio DMA to zeroes avoids loud beep at startup
+        for _ in 0..MAX_TRANSFER_SIZE {
+            audio.push_stereo((0.0, 0.0)).ok();
+        }
 
         // Setup GPIOs
         let gpio = crate::gpio::GPIO::init(
