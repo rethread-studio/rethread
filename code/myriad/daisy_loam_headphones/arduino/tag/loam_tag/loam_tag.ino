@@ -51,9 +51,9 @@ static uint8_t tag_addr[] = { 'Q', '3' };
 #define RESP_MSG_ANCHOR_ADDR0 7
 #define RESP_MSG_ANCHOR_ADDR1 8
 
-static uint8_t anchor_addr0[] = { 'W', 'A' };
-static uint8_t anchor_addr1[] = { 'W', 'B' };
-static uint8_t anchor_addr2[] = { 'W', 'C' };
+// static uint8_t anchor_addr0[] = { 'W', 'A' };
+// static uint8_t anchor_addr1[] = { 'W', 'B' };
+// static uint8_t anchor_addr2[] = { 'W', 'C' };
 
 /* Frames used in the ranging process. See NOTE 3 below. */
 static uint8_t tx_poll_msg[] = { 0x41, 0x88, 0, 0xCA, 0xDE, 'W', 'A', 0, 0, 0xE0, 0, 0 };
@@ -149,17 +149,23 @@ static void send_tx_poll_msg(void) {
 }
 
 static void set_tag_addr(void) {
-  tx_poll_msg[POLL_MSG_TAG_ADDR0] = tag_addr[0];
-  tx_poll_msg[POLL_MSG_TAG_ADDR1] = tag_addr[1];
-  rx_resp_msg[RESP_MSG_TAG_ADDR0] = tag_addr[0];
-  rx_resp_msg[RESP_MSG_TAG_ADDR1] = tag_addr[1];
+  tx_poll_msg[POLL_MSG_TAG_ADDR0] = 'T';
+  tx_poll_msg[POLL_MSG_TAG_ADDR1] = TAG_ID;
+  rx_resp_msg[RESP_MSG_TAG_ADDR0] = 'T';
+  rx_resp_msg[RESP_MSG_TAG_ADDR1] = TAG_ID;
 }
 
-static void set_anchor_addr(uint8_t *anchor_addr) {
-  tx_poll_msg[POLL_MSG_ANCHOR_ADDR0] = anchor_addr[0];
-  tx_poll_msg[POLL_MSG_ANCHOR_ADDR1] = anchor_addr[1];
-  rx_resp_msg[RESP_MSG_ANCHOR_ADDR0] = anchor_addr[0];
-  rx_resp_msg[RESP_MSG_ANCHOR_ADDR1] = anchor_addr[1];
+// static void set_anchor_addr(uint8_t *anchor_addr) {
+//   tx_poll_msg[POLL_MSG_ANCHOR_ADDR0] = anchor_addr[0];
+//   tx_poll_msg[POLL_MSG_ANCHOR_ADDR1] = anchor_addr[1];
+//   rx_resp_msg[RESP_MSG_ANCHOR_ADDR0] = anchor_addr[0];
+//   rx_resp_msg[RESP_MSG_ANCHOR_ADDR1] = anchor_addr[1];
+// }
+static void set_anchor_addr(uint8_t anchor_id) {
+  tx_poll_msg[POLL_MSG_ANCHOR_ADDR0] = 'W';
+  tx_poll_msg[POLL_MSG_ANCHOR_ADDR1] = 'A' + anchor_id;
+  rx_resp_msg[RESP_MSG_ANCHOR_ADDR0] = 'W';
+  rx_resp_msg[RESP_MSG_ANCHOR_ADDR1] = 'A' + anchor_id;
 }
 
 
@@ -169,6 +175,12 @@ uint8_t firstLoopFlag = 0; /* Used to track if the program has gone through the 
 
 
 void setup() {
+  // Set unknown distances to the max value
+  constexpr float max_value {std::numeric_limits<float>::max()};
+  for(unsigned int i = 0; i < NUM_ANCHORS; i++) {
+    distances_to_anchors[i] = max_value;
+  }
+  
   set_tag_addr();  // Init the message buffers to use this tag address
   UART_init();
   test_run_info((unsigned char *)APP_NAME);
@@ -365,18 +377,8 @@ void loop() {
     // Serial.print(",");
   }
 
-  anchor_selection = (anchor_selection + 1) % 3;
-  switch (anchor_selection) {
-    case 0:
-      set_anchor_addr(anchor_addr0);
-      break;
-    case 1:
-      set_anchor_addr(anchor_addr1);
-      break;
-    case 2:
-      set_anchor_addr(anchor_addr2);
-      break;
-  }
+  anchor_selection = (anchor_selection + 1) % NUM_ANCHORS;
+  set_anchor_addr(anchor_selection);
 }
 
 void distances_to_daisy() {
@@ -420,7 +422,7 @@ void all_distances_to_daisy() {
   const size_t BUFFER_SIZE = 8;
   uint8_t message[BUFFER_SIZE];
   uint8_t rx_buf[BUFFER_SIZE];
-  Serial.println("Start transfer");
+  //Serial.println("Start transfer");
   digitalWrite(DATA_READY, HIGH);
   uint8_t closest_index = 0;
   double closest_distance = 100000.;
@@ -436,7 +438,7 @@ void all_distances_to_daisy() {
   }
 
   digitalWrite(DATA_READY, LOW);
-  Serial.printf("End transfer: %#04x %#04x %#04x %#04x %#04x %#04x \n", rx_buf[0], rx_buf[1], rx_buf[2], rx_buf[3], rx_buf[4], rx_buf[5]);
+  //Serial.printf("End transfer: %#04x %#04x %#04x %#04x %#04x %#04x \n", rx_buf[0], rx_buf[1], rx_buf[2], rx_buf[3], rx_buf[4], rx_buf[5]);
 }
 
 /*****************************************************************************************************************************************************
