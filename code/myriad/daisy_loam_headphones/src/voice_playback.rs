@@ -3,7 +3,8 @@ use core::mem;
 use alloc::vec::Vec;
 use embedded_sdmmc::File;
 use heapless::spsc::{Consumer, Producer, Queue};
-use log::warn;
+use log::{info, warn};
+#[allow(unused)]
 use num_traits::Float;
 
 use crate::{sd_card::SdCardLocal, Sample, NUM_ANCHORS};
@@ -159,14 +160,14 @@ fn sample_i16_to_f32(s: i16) -> f32 {
 
 pub struct Anchors {
     pub distances: [f32; NUM_ANCHORS],
-    pub buffer_anchors: [(AnchorId, f32); NUM_ANCHORS],
+    pub buffer_anchors: [(AnchorId, f32); 3],
     pub anchor_in_top_three: [bool; NUM_ANCHORS],
 }
 impl Anchors {
     pub fn new() -> Self {
         Self {
-            distances: [0.; NUM_ANCHORS],
-            buffer_anchors: core::array::from_fn(|i| (AnchorId(i as u8), 0.0)),
+            distances: [f32::MAX; NUM_ANCHORS],
+            buffer_anchors: core::array::from_fn(|i| (AnchorId(i as u8), f32::MAX)),
             anchor_in_top_three: core::array::from_fn(|i| i < 3),
         }
     }
@@ -177,7 +178,7 @@ impl Anchors {
         for (anchor_id, dist) in &mut self.buffer_anchors {
             *dist = self.distances[anchor_id.0 as usize];
         }
-        let mut anchors = [(0.0, 0); NUM_ANCHORS];
+        let mut anchors = [(f32::MAX, 0); NUM_ANCHORS];
         for i in 0..NUM_ANCHORS {
             anchors[i] = (self.distances[i], i);
         }
@@ -212,9 +213,10 @@ impl Anchors {
         let distance_sum: f32 = distances
             .iter()
             // .map(|(_, dist)| dist.powi(2))
-            .sum();
+            .sum::<f32>()
+            + 0.01; // Add a small distance to avoid division by zero
         for i in 0..3 {
-            mix[i] = (distances[i] / distance_sum);
+            mix[i] = distances[i] / distance_sum;
         }
         mix
     }

@@ -195,15 +195,19 @@ mod app {
             match spi.transfer(&mut buf) {
                 Ok(rx) => {
                     // info!("{rx:?}");
-                    anchors.distances[rx[0] as usize] = f32::from_le_bytes(
-                        rx[1..5].try_into().expect("slice with incorrect length"),
-                    );
-                    if rx[0] == NUM_ANCHORS as u8 - 1 {
-                        let new_mix = anchors.recalculate();
-                        info!("new_mix: {new_mix:?}");
-                        info!("buffer_anchors: {:?}", anchors.buffer_anchors);
-                        mix.lock(|mix| *mix = new_mix);
-                        closets_anchors.lock(|c| *c = anchors.closest_anchors());
+                    // Validate the data as well as possible
+                    if &rx[5..8] == &[254, 0, 255] && ((rx[0] as usize) < NUM_ANCHORS) {
+                        anchors.distances[rx[0] as usize] = f32::from_le_bytes(
+                            rx[1..5].try_into().expect("slice with incorrect length"),
+                        );
+                        if rx[0] == NUM_ANCHORS as u8 - 1 {
+                            let new_mix = anchors.recalculate();
+                            info!("new_mix: {new_mix:?}");
+                            info!("buffer_anchors: {:?}", anchors.buffer_anchors);
+                            info!("closest_anchors: {:?}", anchors.closest_anchors());
+                            mix.lock(|mix| *mix = new_mix);
+                            closets_anchors.lock(|c| *c = anchors.closest_anchors());
+                        }
                     }
                 }
                 Err(e) => warn!("Transfer failed: {e:?}"),
