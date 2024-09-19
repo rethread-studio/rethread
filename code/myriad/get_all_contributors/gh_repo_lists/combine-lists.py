@@ -1,6 +1,6 @@
 all_repos = []
 
-lists = ["rethread", "apocryph", "megatouch-megatouch", "dear-ai", "glommen", "infinite-sand-sorter", "why-am-i-seeing-this", "relaxrelaxrelax", "pain-creatures", "a-not-so-distant-past"]
+lists = ["rethread", "apocryph", "mmegatouch", "dear-ai", "glommen", "infinite-sand-sorter", "why-am-i-seeing-this", "relaxrelaxrelax", "pain-creatures", "a-not-so-distant-past"]
 for l in lists:
     with open(l + "_gh_repos.txt") as f:
         repos = f.readlines()
