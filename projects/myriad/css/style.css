@@ -109,6 +109,10 @@ br {
     margin: 0.4rem 0;
 }
 
+br.list {
+    margin: 1px;
+}
+
 p {
     margin-bottom: 1.5rem;
 }
@@ -120,7 +124,7 @@ table {
    margin-right: auto;
 }
 
-th {
+th, b {
     font-weight: normal;
     font-family: Inconsolata-SemiBold, sans-serif;
     padding-bottom: 0.5rem;
