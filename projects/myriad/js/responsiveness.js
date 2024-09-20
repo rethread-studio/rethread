@@ -3,7 +3,7 @@
         let divElem = document.getElementById("table-or-list");
         if (isMobileDevice() || window.innerWidth < 750) {
             divElem.innerHTML = `
-                <br>
+                <hr>
                 <b>an <a href="exhibition.html">exhibition</a>:</b> <br>
                 - <i><a href="artworks/a-not-so-distant-past.html">A not so distant past</a></i>, Steve Ashby<br class="list">
                 - <i><a href="artworks/apocryph.html">Apocryph</a></i>, Nicolas Boillot<br class="list">
@@ -16,9 +16,11 @@
                 - <i><a href="artworks/relaxrelaxrelax.html">RELAXRELAXRELAX</a></i>, Yuvia Maini<br class="list">
                 - <i><a href="artworks/why-am-i-seeing-this.html">Why Am I Seeing This?</a></i>, Ivana Tkalčić
 
-                <br>
+                <hr>
                 <b>a <a href="symposium.html">symposium</a>:</b> <br>
                 - 4 panels, to be announced soon
+
+                <hr>
             `;
         } else {
             divElem.innerHTML = `

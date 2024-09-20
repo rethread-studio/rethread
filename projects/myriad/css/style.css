@@ -146,6 +146,15 @@ td {
    width: 50%;
 }
 
+hr {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    border: none;
+    height: 1px;
+    color: black;
+    background-color: black;
+}
+
 button {
     border: none;
     color: black;
