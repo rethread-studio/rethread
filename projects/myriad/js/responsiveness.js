@@ -12,7 +12,7 @@
                 - <i><a href="artworks/infinite-sand-sorter.html">Infinite Sand Sorter</a></i>, Agoston Nagy<br class="list">
                 - <i><a href="artworks/loam.html">loam</a></i>, re|thread<br class="list">
                 - <i><a href="artworks/megatouch.html">Megatouch</a></i>, Håkan Lidbo & Per-Olov Jernberg<br class="list">
-                - <i><a href="artworks/pain-creatures.html">Pain Creatures</a></i>, nar.interactive<br class="list">
+                - <i><a href="artworks/pain-creature.html">Pain Creature</a></i>, nar.interactive<br class="list">
                 - <i><a href="artworks/relaxrelaxrelax.html">RELAXRELAXRELAX</a></i>, Yuvia Maini<br class="list">
                 - <i><a href="artworks/why-am-i-seeing-this.html">Why Am I Seeing This?</a></i>, Ivana Tkalčić
 
@@ -56,7 +56,7 @@
                         <td class="col-left">- <i><a href="artworks/megatouch.html">Megatouch</a></i>, Håkan Lidbo & Per-Olov Jernberg</td>
                     </tr>
                     <tr>
-                        <td class="col-left">- <i><a href="artworks/pain-creatures.html">Pain Creatures</a></i>, nar.interactive</td>
+                        <td class="col-left">- <i><a href="artworks/pain-creature.html">Pain Creature</a></i>, nar.interactive</td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/relaxrelaxrelax.html">RELAXRELAXRELAX</a></i>, Yuvia Maini</td>
