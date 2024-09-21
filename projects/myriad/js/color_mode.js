@@ -1,6 +1,6 @@
 let button;
 
-window.addEventListener('load', function() {
+window.addEventListener("load", function() {
     //localStorage.clear();
     let color_mode = localStorage.getItem("color_mode");
     button = document.getElementById("color-mode-button");

@@ -97,7 +97,7 @@ h3 {
 
 a {
     color: black;
-    text-decoration-color: DarkOrange;;
+    text-decoration-color: orange;
 }
 
 .dark-mode a {
@@ -107,6 +107,10 @@ a {
 br {
     display: block;
     margin: 0.4rem 0;
+}
+
+br.list {
+    margin: 1px;
 }
 
 p {
@@ -120,7 +124,7 @@ table {
    margin-right: auto;
 }
 
-th {
+th, b {
     font-weight: normal;
     font-family: Inconsolata-SemiBold, sans-serif;
     padding-bottom: 0.5rem;
@@ -140,6 +144,15 @@ td {
 .col-right {
    padding-left: 2rem;
    width: 50%;
+}
+
+hr {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    border: none;
+    height: 1px;
+    color: black;
+    background-color: black;
 }
 
 button {

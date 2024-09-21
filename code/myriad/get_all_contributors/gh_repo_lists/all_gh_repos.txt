@@ -20,12 +20,12 @@ btel/svg_utils
 caprover/caprover
 carstenlebek/svelte-email
 *chromium/chromium
-coz-m/MPLUS_FONTS
 curl/curl
 electro-smith/libDaisy
 emacs-mirror/emacs
 festvox/festival
 git/git
+googlefonts/Inconsolata
 joshnuss/svelte-persisted-store
 keenethics/svelte-notifications
 kirovj/pocketbase-pyclient

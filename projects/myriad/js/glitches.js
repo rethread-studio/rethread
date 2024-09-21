@@ -8,7 +8,7 @@ let originalText, originalHTML; // the original text and HTML content of glitche
 let elementChars; // all the characters present in originalText (without " ")
 let progress = 0;
 
-window.addEventListener('load', function() {
+window.addEventListener("load", function() {
     let paragraphs = document.getElementsByTagName("p");
     let links = document.getElementsByTagName("a");
     let italics = document.getElementsByTagName("i");

@@ -1,4 +1,4 @@
-coz-m/MPLUS_FONTS
+googlefonts/Inconsolata
 emacs-mirror/emacs
 microsoft/vscode
 processing/p5.js

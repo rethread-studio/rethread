@@ -78,15 +78,17 @@ def get_and_save_gh_info(repo_name):
 	#commits_over_time = get_gh_commit_history(repo)
 	total_contributions, contributors_list = get_gh_contributors(repo)
 
-	filename = "contributors/" + repo_name.replace("/", "&") + ".json"
+	filename = "contributors/" + repo_name.replace("/", "&")
 	repo_data = {
-		"repo": repo_name,
+		"repo_name": repo_name,
 		#"commits_over_time": commits_over_time,
 		"total_contributions": total_contributions,
 		"contributors": contributors_list,
 	}
-	with open(filename, "w") as fp:
+	with open(filename + ".json", "w") as fp:
 		json.dump(repo_data, fp, indent = 1)
+	with open(filename + ".txt", "w") as fp:
+		fp.write("\n".join(c["id"] for c in contributors_list))
 
 
 def print_progress_bar(iteration, total, length=50):
