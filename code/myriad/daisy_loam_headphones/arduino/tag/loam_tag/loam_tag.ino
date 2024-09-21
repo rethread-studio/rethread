@@ -18,7 +18,7 @@ ESP32SPISlave spi_slave;
 static constexpr size_t QUEUE_SIZE = 1;
 // SPIClass * hspi = NULL
 
-#define NUM_ANCHORS 7
+#define NUM_ANCHORS 10
 static double distances_to_anchors[NUM_ANCHORS];
 
 #define APP_NAME "SS TWR INIT STS v1.0"
@@ -37,11 +37,6 @@ const uint8_t PIN_SS = 4;    // spi select pin
 
 #define TAG_ID 0
 
-#if TAG_ID == 0
-static uint8_t tag_addr[] = { 'V', 'E' };
-#elif TAG_ID == 1
-static uint8_t tag_addr[] = { 'Q', '3' };
-#endif
 #define POLL_MSG_TAG_ADDR0 7
 #define POLL_MSG_TAG_ADDR1 8
 #define POLL_MSG_ANCHOR_ADDR0 5
@@ -87,7 +82,7 @@ static uint32_t status_reg = 0;
 /* Delay between frames, in UWB microseconds. See NOTE 1 below. */
 #define POLL_TX_TO_RESP_RX_DLY_UUS (300 + CPU_COMP)
 /* Receive response timeout. See NOTE 5 below. */
-#define RESP_RX_TIMEOUT_UUS 700
+#define RESP_RX_TIMEOUT_UUS 700 // 700
 
 /* Hold copies of computed time of flight and distance here for reference so that it can be examined at a debug breakpoint. */
 static double tof;
@@ -246,6 +241,8 @@ void setup() {
 
   pinMode(DATA_READY, OUTPUT);
   digitalWrite(DATA_READY, LOW);
+
+  Serial.begin(115200);
 }
 
 void loop() {
@@ -335,9 +332,9 @@ void loop() {
         distances_to_anchors[anchor_selection] = distance;
 
         /* Display computed distance on LCD. */
-        // snprintf(dist_str, sizeof(dist_str), "%u:%3.2f", anchor_selection, distance);
+        //snprintf(dist_str, sizeof(dist_str), "%u:%3.2f", anchor_selection, distance);
         // test_run_info((unsigned char *)dist_str);
-        Serial.print(dist_str);
+        //Serial.print(dist_str);
 
       } else {
         errors[BAD_FRAME_ERR_IDX] += 1;
@@ -369,7 +366,7 @@ void loop() {
   /* Execute a delay between ranging exchanges. */
   Sleep(RNG_DELAY_MS);
 
-  if (anchor_selection == 2) {
+  if (anchor_selection == NUM_ANCHORS-1) {
     // distances_to_daisy();
     all_distances_to_daisy();
     // Serial.print("\n");

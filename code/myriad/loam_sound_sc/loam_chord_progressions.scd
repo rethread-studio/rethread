@@ -12,7 +12,7 @@
 SynthDef(\synth, {
 	var sig, env, freq = \freq.kr(440);
 	// sig = DPW3Tri.ar(freq) * Env.perc(0.01, 2.0).kr(2);
-	sig = DPW4Saw.ar(freq) * Env.perc(0.5, 2.0).					("all changed " + (all_changed && change)).postln;kr(2);
+	sig = DPW4Saw.ar(freq) * Env.perc(0.5, 2.0).kr;
 	sig = LPF.ar(sig, (freq * 10 + 300).clip(10, 20000));
 	DetectSilence.ar(sig, 0.00001, 0.1, 2);
 	sig = sig * \amp.kr(0.5)*AmpCompA.kr(freq, 0.midicps);
@@ -32,7 +32,7 @@ SynthDef(\synth_sus, {
 	degrees.do{ |deg, i| var freq = ~s53.degreeToFreq(deg, 48.midicps, 1), pan = 0;
 			// pan = (i.asFloat / degrees.size) * 2.0 - 1.0;
 			Synth(\synth, [\freq, freq, \pan, pan, \amp, 1 / degrees.size * 0.5]);
-		0.01.wait;
+		0.1.wait;
 	};
 	}.fork;
 };
