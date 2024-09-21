@@ -1,7 +1,8 @@
-use core::mem;
+use core::{mem, sync::atomic::AtomicU32};
 
 use alloc::vec::Vec;
 use embedded_sdmmc::File;
+use heapless::pool::arc::Arc;
 use heapless::spsc::{Consumer, Producer, Queue};
 use log::{info, warn};
 #[allow(unused)]
@@ -11,6 +12,8 @@ use crate::{sd_card::SdCardLocal, Sample, NUM_ANCHORS};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct AnchorId(pub u8);
 const BUFFER_SIZE: usize = 16384;
+const SOUND_FILE_SIZE: u32 = 57600000;
+
 /// Lives in the audio task and plays back
 pub struct VoicePlayer {
     buffers: [Vec<i16>; 3],
@@ -20,11 +23,15 @@ pub struct VoicePlayer {
     pub anchor_mix: [f32; 3],
     furthest_anchor_buffer: AnchorId,
     buffer_read_ptr: usize,
+    /// The buffer loading position
+    position: u32,
+    position_tx: Producer<'static, u32, 2>,
 }
 impl VoicePlayer {
     pub fn new(
         sd_card: &mut SdCardLocal,
         queues: &'static mut [Queue<(Vec<i16>, AnchorId), 2>; 6],
+        position_queue: &'static mut Queue<u32, 2>,
     ) -> (Self, VoiceLoader) {
         let buffers = [
             vec![0_i16; BUFFER_SIZE],
@@ -58,7 +65,8 @@ impl VoicePlayer {
             let (tx2, rx2) = queues.next().unwrap().split();
             ([tx0, tx1, tx2], [rx0, rx1, rx2])
         };
-        let mut loader = VoiceLoader::new(sd_card, filled_tx, refill_rx);
+        let (position_tx, position_rx) = position_queue.split();
+        let mut loader = VoiceLoader::new(sd_card, filled_tx, refill_rx, position_rx);
         // Fill up the first buffers
         loader.update(sd_card);
         (
@@ -71,6 +79,8 @@ impl VoicePlayer {
                 // Start at max buffer size in order to immediately fetch the filled buffers
                 buffer_read_ptr: BUFFER_SIZE,
                 anchor_mix: [0.5, 0.35, 0.15],
+                position_tx,
+                position: 0,
             },
             loader,
         )
@@ -90,6 +100,11 @@ impl VoicePlayer {
         (l, r)
     }
     pub fn swap_buffers(&mut self) {
+        self.position += BUFFER_SIZE as u32;
+        if self.position >= SOUND_FILE_SIZE {
+            self.position -= SOUND_FILE_SIZE;
+        }
+        self.position_tx.enqueue(self.position);
         for (i, ((local_buf, filled_rx), refill_tx)) in self
             .buffers
             .iter_mut()
@@ -113,12 +128,17 @@ pub struct VoiceLoader {
     voice_file_handles: [File; NUM_ANCHORS],
     filled_tx: [Producer<'static, (Vec<i16>, AnchorId), 2>; 3],
     refill_rx: [Consumer<'static, (Vec<i16>, AnchorId), 2>; 3],
+    /// Receiving the sound position in i16s
+    position_rx: Consumer<'static, u32, 2>,
+    /// The file position, in bytes
+    position: u32,
 }
 impl VoiceLoader {
     pub fn new(
         sd_card: &mut SdCardLocal,
         filled_tx: [Producer<'static, (Vec<i16>, AnchorId), 2>; 3],
         refill_rx: [Consumer<'static, (Vec<i16>, AnchorId), 2>; 3],
+        position_rx: Consumer<'static, u32, 2>,
     ) -> Self {
         let anchor_voice_files = [
             "VOICE_0.BIN",
@@ -128,6 +148,9 @@ impl VoiceLoader {
             "VOICE_4.BIN",
             "VOICE_5.BIN",
             "VOICE_6.BIN",
+            "VOICE_7.BIN",
+            "VOICE_8.BIN",
+            "VOICE_9.BIN",
         ];
         let voice_file_handles =
             core::array::from_fn(|i| sd_card.open_file(anchor_voice_files[i]).unwrap());
@@ -135,11 +158,20 @@ impl VoiceLoader {
             voice_file_handles,
             filled_tx,
             refill_rx,
+            position_rx,
+            position: 0,
         }
     }
     pub fn update(&mut self, sd_card: &mut SdCardLocal) {
+        if let Some(new_pos) = self.position_rx.dequeue() {
+            // Convert from i16s to u8s
+            self.position = new_pos * 2;
+        }
         for (refill_rx, filled_tx) in self.refill_rx.iter_mut().zip(self.filled_tx.iter_mut()) {
             if let Some((mut fill_me, anchor)) = refill_rx.dequeue() {
+                self.voice_file_handles[anchor.0 as usize]
+                    .seek_from_start(self.position)
+                    .unwrap();
                 sd_card.read_i16_from_file_cycling(
                     &mut self.voice_file_handles[anchor.0 as usize],
                     &mut fill_me,
@@ -171,7 +203,7 @@ impl Anchors {
             anchor_in_top_three: core::array::from_fn(|i| i < 3),
         }
     }
-    /// Call after setting all the distances
+    /// Call after setting all the distances. Returns new mix values
     pub fn recalculate(&mut self) -> [f32; 3] {
         let mut mix = [0.0; 3];
         // Update the distances to the closest anchors
@@ -209,7 +241,8 @@ impl Anchors {
             self.buffer_anchors[largest_index] =
                 (AnchorId(new_anchors[i].1 as u8), new_anchors[i].0);
         }
-        let distances: [f32; 3] = core::array::from_fn(|i| self.buffer_anchors[i].1.recip());
+        let distances: [f32; 3] =
+            core::array::from_fn(|i| self.buffer_anchors[i].1.recip().powi(2));
         let distance_sum: f32 = distances
             .iter()
             // .map(|(_, dist)| dist.powi(2))

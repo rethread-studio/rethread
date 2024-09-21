@@ -12,7 +12,7 @@ mod voice_playback;
 // mod wav_reader;
 
 pub const CONTROL_RATE_IN_MS: u32 = 10;
-pub const NUM_ANCHORS: usize = 7;
+pub const NUM_ANCHORS: usize = 10;
 
 pub type Sample = f32;
 
@@ -80,12 +80,13 @@ mod app {
 
     #[init(local = [
         queues: [Queue<(Vec<i16>, AnchorId), 2>; 6] = [Queue::new(),Queue::new(),Queue::new(),Queue::new(),Queue::new(),Queue::new()],
+        position_queue: Queue<u32, 2> = Queue::new(),
     ])]
     fn init(ctx: init::Context) -> (Shared, Local, init::Monotonics) {
         libdaisy::logger::init();
         info!("Test");
         // initiate system
-        let mut daisy = DaisySeed::init(ctx.core, ctx.device);
+        let daisy = DaisySeed::init(ctx.core, ctx.device);
         info!("Init done");
 
         #[cfg(feature = "log")]
@@ -113,7 +114,8 @@ mod app {
         // info!("File read");
         // let wav_file = vec![0.0; 1];
         let queues = ctx.local.queues;
-        let (voice_player, voice_loader) = VoicePlayer::new(&mut sd_card, queues);
+        let position_queue = ctx.local.position_queue;
+        let (voice_player, voice_loader) = VoicePlayer::new(&mut sd_card, queues, position_queue);
 
         (
             Shared {
@@ -123,7 +125,7 @@ mod app {
                 // encoder_button: false,
                 // button1: false,
                 // button2: false,
-                mix: [0.0; 3],
+                mix: [0.33; 3],
                 closest_anchors: [AnchorId(0), AnchorId(1), AnchorId(2)],
             },
             Local {
@@ -235,19 +237,6 @@ mod app {
         // switch2.update();
         // encoder.update();
 
-        // if encoder.current_value > 10 {
-        //     encoder.current_value = -9
-        // };
-        // if encoder.current_value < -10 {
-        //     encoder.current_value = 9
-        // };
-        // ctx.shared.encoder.lock(|enc| *enc = encoder.current_value);
-
-        // // do something
-        // let (r, g, b) = hsv_to_rgb((encoder.current_value as f64 * 35.).abs(), 1.0, 0.7);
-        // led1.set_color(r as f32 / 255., g as f32 / 255., b as f32 / 255.);
-        // led1.set_color(0., 0., 0.);
-        // led2.set_color(0., 0., 0.);
         let voice_loader = ctx.local.voice_loader;
         let sd_card = ctx.local.sd_card;
         voice_loader.update(sd_card);
