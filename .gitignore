@@ -10,3 +10,5 @@ test/bower_components
 package
 extension/scripts
 .DS_Store
+code/myriad/get_all_contributors/contributors
+code/myriad/get_all_contributors/github_access_token.txt
