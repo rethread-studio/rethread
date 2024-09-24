@@ -4,6 +4,8 @@
 #include <ESP32SPISlave.h>
 // #include <SPI.h>
 
+#define TAG_ID 1
+
 // SPI to Daisy
 static const int spiClk = 1000000;  // 1 MHz
 #define HSPI_MISO 12
@@ -35,7 +37,6 @@ const uint8_t PIN_SS = 4;    // spi select pin
 #define TX_ANT_DLY 16385
 #define RX_ANT_DLY 16385
 
-#define TAG_ID 0
 
 #define POLL_MSG_TAG_ADDR0 7
 #define POLL_MSG_TAG_ADDR1 8
@@ -137,7 +138,8 @@ static void send_tx_poll_msg(void) {
   dwt_starttx(DWT_START_TX_IMMEDIATE);
 
   /* Poll DW IC until TX frame sent event set. See NOTE 8 below. */
-  while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK)) {};
+  unsigned int c = 0;
+  while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK) && c < 2000) {c++;};
 
   /* Clear TXFRS event. */
   dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
@@ -242,7 +244,7 @@ void setup() {
   pinMode(DATA_READY, OUTPUT);
   digitalWrite(DATA_READY, LOW);
 
-  Serial.begin(115200);
+  Serial.println("Setup done!");
 }
 
 void loop() {
@@ -332,7 +334,7 @@ void loop() {
         distances_to_anchors[anchor_selection] = distance;
 
         /* Display computed distance on LCD. */
-        //snprintf(dist_str, sizeof(dist_str), "%u:%3.2f", anchor_selection, distance);
+        //snprintf(dist_str, sizeof(dist_str), "%u:%3.2f\n", anchor_selection, distance);
         // test_run_info((unsigned char *)dist_str);
         //Serial.print(dist_str);
 

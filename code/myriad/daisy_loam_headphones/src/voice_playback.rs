@@ -232,7 +232,7 @@ impl Anchors {
             // There were new anchors, replace the largest distance in buffer_anchors
             let mut largest_dist = 0.0;
             let mut largest_index = 0;
-            for (i, (id, dist)) in self.buffer_anchors.iter().enumerate() {
+            for (i, (_id, dist)) in self.buffer_anchors.iter().enumerate() {
                 if *dist > largest_dist {
                     largest_index = i;
                     largest_dist = *dist;
