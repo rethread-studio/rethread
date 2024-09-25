@@ -4,7 +4,7 @@
         if (isMobileDevice() || window.innerWidth < 750) {
             divElem.innerHTML = `
                 <hr>
-                <b>an <a href="exhibition.html">exhibition</a>:</b> <br>
+                <b>an <a href="exhibition.html">exhibition</a></b> <br>
                 - <i><a href="artworks/a-not-so-distant-past.html">A not so distant past</a></i>, Steve Ashby<br class="list">
                 - <i><a href="artworks/apocryph.html">Apocryph</a></i>, Nicolas Boillot<br class="list">
                 - <i><a href="artworks/dear-ai.html">Dear Ai</a></i>, Fred Wordie<br class="list">
@@ -17,7 +17,7 @@
                 - <i><a href="artworks/why-am-i-seeing-this.html">Why Am I Seeing This?</a></i>, Ivana Tkalčić
 
                 <hr>
-                <b>a <a href="symposium.html">symposium</a>:</b> <br>
+                <b>a <a href="symposium.html">symposium</a></b> <br>
                 - 4 panels, to be announced soon
 
                 <hr>
@@ -30,8 +30,8 @@
                         <col class="col-right">
                     </colgroup>
                     <tr>
-                        <th class="col-left">an <a href="exhibition.html">exhibition</a>:</th>
-                        <th class="col-right">a <a href="symposium.html">symposium</a>:</th>
+                        <th class="col-left">an <a href="exhibition.html">exhibition</a></th>
+                        <th class="col-right">a <a href="symposium.html">symposium</a></th>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/a-not-so-distant-past.html">A not so distant past</a></i>, Steve Ashby</td>
