@@ -25,3 +25,5 @@ otuva/handwriting-synthesis
 mossblaser/plottie
 caprover/caprover
 tensorflow/tensorflow
+mozsearch/mozsearch
+python/cpython

@@ -78,7 +78,7 @@ def get_and_save_gh_info(repo_name):
 	#commits_over_time = get_gh_commit_history(repo)
 	total_contributions, contributors_list = get_gh_contributors(repo)
 
-	filename = "contributors/" + repo_name.replace("/", "&")
+	filename = "gh_contributors/" + repo_name.replace("/", "&")
 	repo_data = {
 		"repo_name": repo_name,
 		#"commits_over_time": commits_over_time,
@@ -97,7 +97,7 @@ def print_progress_bar(iteration, total, length=50):
     sys.stdout.write(f'\r|{bar}| {iteration}/{total}')
     sys.stdout.flush()
 
-with open("gh_repo_lists/all_gh_repos.txt") as f:
+with open("gh_repos_lists/all_gh_repos.txt") as f:
     repos = f.readlines()
 #print(repos)
 for repo in repos:
