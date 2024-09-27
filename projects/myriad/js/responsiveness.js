@@ -18,6 +18,7 @@
 
                 <hr>
                 <b>a <a href="symposium.html">symposium</a></b> <br>
+                4 panels:<br class="list">
                 - <a href="symposium.html#panel1">layers of contributions</a><br class="list">
                 - <a href="symposium.html#panel2">what's in an artist</a><br class="list">
                 - <a href="symposium.html#panel3">maestros, machines, money, etc.</a><br class="list">
@@ -38,22 +39,23 @@
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/a-not-so-distant-past.html">A not so distant past</a></i>, Steve Ashby</td>
-                        <td class="col-right">- <a href="symposium.html#panel1">layers of contributions</a></td>
+                        <td class="col-right">4 panels:</td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/apocryph.html">Apocryph</a></i>, Nicolas Boillot</td>
-                        <td class="col-right">- <a href="symposium.html#panel2">what's in an artist</a></td>
+                        <td class="col-right">- <a href="symposium.html#panel1">layers of contributions</a></td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/dear-ai.html">Dear Ai</a></i>, Fred Wordie</td>
-                        <td class="col-right">- <a href="symposium.html#panel3">maestros, machines, money, etc.</a></td>
+                        <td class="col-right">- <a href="symposium.html#panel2">what's in an artist</a></td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/glommen.html">Glommen</a></i>, Jonas Johansson</td>
-                        <td class="col-right">- <a href="symposium.html#panel4">collaboration & creativity</a></td>
+                        <td class="col-right">- <a href="symposium.html#panel3">maestros, machines, money, etc.</a></td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/infinite-sand-sorter.html">Infinite Sand Sorter</a></i>, Agoston Nagy</td>
+                        <td class="col-right">- <a href="symposium.html#panel4">collaboration & creativity</a></td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/loam.html">loam</a></i>, re|thread</td>
