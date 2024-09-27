@@ -1,33 +1,36 @@
 p5.disableFriendlyErrors = true; // disables FES
 
-let reposData = [];
+let projectsData = [];
 
 let inconsolataMedium, inconsolataSemiBold;
 
-let textSize;
+let textSize, titleTextSize;
 let lineHeight;
 let topMargin;
 let nLines;
 
-let repoIdx = 0, i0 = 0;
+let projectIdx = 0, i0 = 0;
 let scrollSpeed = 1, y0 = 0;
 
 function preload() {
     let params = getURLParams();
     let work = params.work;
     if (work == undefined) work = "all";
-    loadStrings("../get_all_contributors/gh_repo_lists/"+work+"_gh_repos.txt", loadRepos);
+    loadStrings("../get_all_contributors/gh_repos_lists/"+work+"_gh_repos.txt", (l => loadRepos(l, "gh")));
+    loadStrings("../get_all_contributors/other_projects_lists/"+work+"_other_projects.txt", (l => loadRepos(l, "other")));
 
     inconsolataMedium = loadFont("./fonts/Inconsolata-Medium.ttf");
 }
 
-function loadRepos(reposList) {
-    //console.log(reposList)
-    for (let r of reposList) {
-        if (r.length > 0 && r[0] != "*") {
-            reposData.push({
-                repoName: r,
-                contributors: loadStrings("../get_all_contributors/contributors/"+r.replaceAll("/", "&")+".txt")
+function loadRepos(myList, kind) {
+    //console.log(projectsList)
+    for (let el of myList) {
+        if (el.length > 0 && el[0] != "*") {
+            let path = kind == "gh" ? "../get_all_contributors/gh_contributors/"+el.replaceAll("/", "&")+".txt" : "../get_all_contributors/other_contributors/"+el+".txt";
+            projectsData.push({
+                leftText: kind == "gh" ? el.split("/")[0] : el,
+                rightText: kind == "gh" ? el.split("/")[1] : el,
+                contributors: loadStrings(path)
             });
         }
     }
@@ -35,37 +38,44 @@ function loadRepos(reposList) {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    frameRate(~~random(1, 6));
+    frameRate(~~random(1, 8));
     textAlign(CENTER, TOP);
     //noLoop();
 
     textSize = width/45;
+    titleTextSize = textSize*1.25;
     lineHeight = textSize*1.3;
-    topMargin = textSize*5;
+    topMargin = 0*textSize*5;
     nLines = ~~((height-topMargin)/lineHeight);
 
     textFont(inconsolataMedium, textSize);
 
+    let contributorCount = 0;
+
     let marginToGap = 4;
-    for (let repo of reposData) {
+    for (let project of projectsData) {
         let columnWidth = 0;
-        for (let contributor of repo.contributors) {
+        for (let contributor of project.contributors) {
             let w = textWidth(contributor);
             if (w > columnWidth) columnWidth = w;
         }
-        repo.columnWidth = columnWidth;
-        //repo.nColumns = ~~(width*0.8/columnWidth);
-        //if (repo.contributors.length < nLines) repo.nColumns = 1;
-        repo.nColumns = floor(min(width*0.8/columnWidth, 1.5*repo.contributors.length/nLines+1));
-        repo.wGap = (width-repo.nColumns*columnWidth)/(2*marginToGap+repo.nColumns-1);
-        repo.wMargin = marginToGap*repo.wGap;
+        project.columnWidth = columnWidth;
+        //project.nColumns = ~~(width*0.8/columnWidth);
+        //if (project.contributors.length < nLines) project.nColumns = 1;
+        project.nColumns = floor(min(width*0.8/columnWidth, 1.5*project.contributors.length/nLines+1));
+        project.wGap = (width-project.nColumns*columnWidth)/(2*marginToGap+project.nColumns-1);
+        project.wMargin = marginToGap*project.wGap;
 
-        for (let i = 0; i < (nLines-1)*repo.nColumns; i++) {
-            repo.contributors.unshift("");
+        shuffle(project.contributors, true);
+        for (let i = 0; i < (nLines-1)*project.nColumns; i++) {
+            project.contributors.unshift("");
         }
+
+        contributorCount += project.contributors.length;
     }
 
-    shuffle(reposData, true);
+    shuffle(projectsData, true);
+    console.log(contributorCount);
 }
 
 function draw() {
@@ -77,38 +87,44 @@ function draw() {
     text(~~frameRate(), 20, 10);
     //circle(width/2, height/2, 10);
 
-    let repo = reposData[repoIdx];
-    let h1 = createElement("h1", repo.repoName);
-    h1.style("color", "white");
-    h1.style("font-size", textSize*2);
-    h1.style("width", width);
-    //h1.style("height", topMargin);
-    h1.style("top-margin", textSize*1.5);
-    h1.style("bottom-margin", textSize*1.5);
-    h1.position(0, 0);
+    let project = projectsData[projectIdx];
 
+    let leftTitle = createElement("h1", project.leftText);
+    leftTitle.style("color", "orange");
+    leftTitle.style("font-size", titleTextSize);
+    leftTitle.style("width", width);
+    leftTitle.style("transform", "rotate(-90deg)");
+    leftTitle.position(-width/2+titleTextSize, height/2-titleTextSize);
+
+    let rightTitle = createElement("h1", project.rightText);
+    rightTitle.style("color", "orange");
+    rightTitle.style("font-size", textSize*1.25);
+    rightTitle.style("width", width);
+    rightTitle.style("transform", "rotate(90deg)");
+    rightTitle.position(width/2-titleTextSize, height/2-titleTextSize);
+    
     let y = topMargin;
     for (let i = 0; i < nLines; i++) {
-        let x = repo.wMargin;
-        for (let j = 0; j < repo.nColumns; j++) {
-            let idx = i0 + i*repo.nColumns + j;
-            if (idx >= repo.contributors.length) break;
-            let contributor = repo.contributors[idx];
+        let x = project.wMargin;
+        for (let j = 0; j < project.nColumns; j++) {
+            let idx = i0 + i*project.nColumns + j;
+            if (idx >= project.contributors.length) break;
+            let contributor = project.contributors[idx];
             let p = createP(contributor);
             p.style("color", "white");
             p.style("font-size", textSize);
-            p.style("width", repo.columnWidth);
+            p.style("width", project.columnWidth);
             p.position(x, y);
 
-            x += repo.wGap + repo.columnWidth;
+            x += project.wGap + project.columnWidth;
         }
         y += lineHeight;
     }
 
-    i0 += repo.nColumns;
-    if (i0 > repo.contributors.length) {
-        repoIdx++;
-        if (repoIdx >= reposData.length) repoIdx = 0;
+    i0 += project.nColumns;
+    if (i0 > project.contributors.length) {
+        projectIdx++;
+        if (projectIdx >= projectsData.length) projectIdx = 0;
         i0 = 0;
     }
 }
