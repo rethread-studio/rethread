@@ -12,7 +12,7 @@ use crate::{sd_card::SdCardLocal, Sample, NUM_ANCHORS};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct AnchorId(pub u8);
 const BUFFER_SIZE: usize = 16384;
-const SOUND_FILE_SIZE: u32 = 57600000;
+const SOUND_FILE_SIZE: u32 = 57696000;
 
 /// Lives in the audio task and plays back
 pub struct VoicePlayer {
@@ -104,7 +104,9 @@ impl VoicePlayer {
         if self.position >= SOUND_FILE_SIZE {
             self.position -= SOUND_FILE_SIZE;
         }
-        self.position_tx.enqueue(self.position);
+        if let Err(e) = self.position_tx.enqueue(self.position) {
+            warn!("Unable to send position: {e}");
+        }
         for (i, ((local_buf, filled_rx), refill_tx)) in self
             .buffers
             .iter_mut()

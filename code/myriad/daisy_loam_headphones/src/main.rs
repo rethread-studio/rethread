@@ -173,8 +173,8 @@ mod app {
             // };
             // let sig = s.next();
             let (l, r) = voice_player.next_frame();
-            let l = (l * 3.0).clamp(-1.0, 1.0);
-            let r = (r * 3.0).clamp(-1.0, 1.0);
+            // let l = (l * 3.0).clamp(-1.0, 1.0);
+            // let r = (r * 3.0).clamp(-1.0, 1.0);
             audio.push_stereo((l, r)).unwrap();
         }
     }

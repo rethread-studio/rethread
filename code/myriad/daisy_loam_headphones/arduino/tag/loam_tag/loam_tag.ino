@@ -4,7 +4,7 @@
 #include <ESP32SPISlave.h>
 // #include <SPI.h>
 
-#define TAG_ID 1
+#define TAG_ID 4
 
 // SPI to Daisy
 static const int spiClk = 1000000;  // 1 MHz
@@ -359,6 +359,12 @@ void loop() {
     if (stsQual <= 0) {
       errors[CP_QUAL_ERR_IDX] += 1;
     }
+
+    // The anchor wasn't detected, increase the distance to it artificially
+    if (distances_to_anchors[anchor_selection] < 1000) {
+      distances_to_anchors[anchor_selection] *= 1.1;
+    }
+    
   }
 
   /* Clear RX error/timeout events in the DW IC status register. */
