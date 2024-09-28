@@ -46,7 +46,7 @@ function setup() {
     titleTextSize = textSize*1.5;
     lineHeight = textSize*1.3;
     sideMargin = titleTextSize*1.12;
-    nLines = ~~(height/lineHeight);
+    nLines = 1+~~(height/lineHeight);
 
     let contributorCount = 0;
 
