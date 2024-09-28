@@ -2,28 +2,8 @@
 
 // Regenerate sound files for
 // - sjvasquez#handwriting-synthesis
-(
-~viskningar = "/home/erik/code/kth/loam/repo_data_manip/wav_files/mimic3/*.wav".resolveRelative.pathMatch.collect( { |file|
-	Buffer.readChannel(s, file, channels: [0]);});
-)
-(
-~viskningar = "/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/git/glitchy/*.wav".resolveRelative.pathMatch.collect( { |file|
-	Buffer.readChannel(s, file, channels: [0]);});
-)
 
-(
-var repos = "/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/*".resolveRelative.pathMatch.collect{|dir| var parts = dir.split($/); parts[parts.size-2] },
-repoMap = Dictionary[];
-repos.do{|repo|
-	repoMap.put(repo.asSymbol, 0);
-	repo.postln;
-};
-
-
-)
-~loadProprietaryGlitchBuffers.()
-~proprietary_buffers = ("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/PROPRIETARY/*.wav").resolveRelative.pathMatch.collect( { |file|Buffer.readChannel(s, file, channels: [0]);});
-"a"+"b"
+// Construct ~anchors and set file paths
 (
 var proprietary_buffers = ("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/PROPRIETARY/*.wav").resolveRelative.pathMatch.collect( { |file|
 	Buffer.readChannel(s, file, channels: [0]);}),
@@ -56,8 +36,9 @@ repo = { | name, is_redacted = false, num_contributors = nil |
 		},
 	)
 },
-anchor = { | repos |
+anchor = { | repos, name = "" |
 	(
+		name: name,
 		repos: repos,
 		current_repo: 0,
 		next_repo: { |self| self.current_repo = (self.current_repo + 1) % self.repos.size; },
@@ -73,7 +54,7 @@ repos.do{|repo| repoMap.put(repo, 0)};
 		// buf.normalize;
 		buf});
 };
-~anchors = [
+/*~anchors = [
 	// OS, code editors
 	anchor.([repo.("linux", true, 100000), repo.("llvm#llvm-project"), repo.("Windows", true, 40000), repo.("apache#maven"), repo.("microsoft#vscode"), repo.("curl#curl"), repo.("macOS", true, 30000), repo.("VSCodium#vscodium"), repo.("emacs-mirror#emacs"), repo.("textmate#textmate")]),
 	// Developer tools
@@ -93,17 +74,77 @@ repos.do{|repo| repoMap.put(repo, 0)};
 	anchor.([ repo.("ritwickdey#vscode-live-server"), repo.("kirovj#pocketbase-pyclient"), repo.("tensorflow#tensorflow"), repo.("apache#httpd"), repo.("moment#moment"), repo.("mozman#svgwrite"), repo.("glowroot#glowroot"), repo.("openjdk#jdk"), repo.("docker#compose"), repo.("sass#sass"), repo.("npm#cli"), repo.("nginx#nginx"), repo.("sveltejs#svelte"), repo.("fastmail", true, 100)]),
 	anchor.([ repo.("YouTube", true, 10000), repo.("openai#openai-node"), repo.("NVlabs#stylegan2"), repo.("Instagram", true, 10000), repo.("cilium#ebpf"), repo.("autonomousvision#projected-gan"), repo.("scipy#scipy"), repo.("numpy#numpy"), repo.("otuva#handwriting-synthesis"), repo.("Facebook", true, 40000),  repo.("TikTok", true, 10000)])
 
-];
-
+];*/
+{
+	var dir = "/home/erik/code/kth/rethread/code/myriad/get_all_contributors/gh_repo_lists/", files = [
+		"a-not-so-distant-past_gh_repos.txt",
+		"apocryph_gh_repos.txt",
+		"dear-ai_gh_repos.txt",
+		"glommen_gh_repos.txt",
+		"infinite-sand-sorter_gh_repos.txt",
+		"megatouch_gh_repos.txt",
+		"pain-creature_gh_repos.txt",
+		"relaxrelaxrelax_gh_repos.txt",
+		"why-am-i-seeing-this_gh_repos.txt",
+		"rethread_gh_repos.txt"],
+	fileContent = files.collect{|fileName| File.readAllString(dir ++ fileName)},
+	repos = fileContent.collect{|str| str.stripWhiteSpace.split($\n).collect{|re| re.replace("/", "#")}},
+	anchors = repos.collect{|repos, i| anchor.(repos.collect{|re| repo.(re)}, files[i]) };
+	~anchors = anchors;
+}.();
+{
+	var addRepos = [
+		[], // "a-not-so-distant-past_gh_repos.txt",
+		[], // "apocryph_gh_repos.txt",
+		[], // "dear-ai_gh_repos.txt",
+		[], // "glommen_gh_repos.txt",
+		[], // "infinite-sand-sorter_gh_repos.txt",
+		[], // "megatouch_gh_repos.txt",
+		[], // "pain-creature_gh_repos.txt",
+		[], // "relaxrelaxrelax_gh_repos.txt",
+		[], // "why-am-i-seeing-this_gh_repos.txt",
+		["arduino#arduino-ide", "npm#cli", "processing#p5.js-web-editor", "hobbyquaker#artnet", "GNOME#gimp"], // "rethread_gh_repos.txt"
+	];
+	~anchors.do{|anchor, i| addRepos[i].do{|re| anchor.repos = anchor.repos.add(repo.(re))}};
+}.();
+{
+	var addPropRepos = [
+		[repo.("macOS", true, 30000), repo.("MAX/MSP", true, 500), repo.("Ableton", true, 900), repo.("Kontakt Una Corda", true, 20), repo.("Valhalla DSP", true, 10), repo.("Valhalla DSP", true, 30000),repo.("Izotope Ozone and Neutron", true, 100),repo.("Reaper", true, 50), repo.("IEM ambisonic plugins", true, 40)], // "a-not-so-distant-past_gh_repos.txt",
+		[repo.("Google colab", true, 1000), repo.("macOS", true, 30000), repo.("Adobe", true, 3000), repo.("Xnconvert", true, 100)], // "apocryph_gh_repos.txt",
+		[repo.("macOS", true, 30000), repo.("Adobe", true, 3000), repo.("fastmail", true, 800), repo.("netlify", true, 500)], // "dear-ai_gh_repos.txt",
+		[], // "glommen_gh_repos.txt",
+		[repo.("macOS", true, 30000), repo.("Affinity", true, 300),], // "infinite-sand-sorter_gh_repos.txt",
+		[repo.("macOS", true, 30000), repo.("Adobe", true, 3000), repo.("Windows", true, 40000)], // "megatouch_gh_repos.txt",
+		[repo.("macOS", true, 30000),repo.("Google Docs", true, 10000),repo.("Procreate", true, 300),], // "pain-creature_gh_repos.txt",
+		[repo.("macOS", true, 30000),repo.("TouchDesigner", true, 3000),repo.("Adobe", true, 3000),repo.("macOS", true, 30000),repo.("Resolume", true, 400),repo.("Quicktime", true, 400),repo.("Pages", true, 1000),repo.("iMessage", true, 2000),repo.("MindApp", true, 200),repo.("MuseEEG", true, 200),], // "relaxrelaxrelax_gh_repos.txt",
+		[repo.("Windows", true, 40000), repo.("Adobe", true, 3000), repo.("Ubisoft", true, 4000), repo.("Bryze", true, 600), repo.("Snapchat", true, 6000)], // "why-am-i-seeing-this_gh_repos.txt",
+		[repo.("YouTube", true, 10000), repo.("Reaper", true, 20), repo.("Adobe", true, 3000)], // "rethread_gh_repos.txt"
+	];
+	~anchors.do{|anchor, i| addPropRepos[i].do{|re| anchor.repos = anchor.repos.add(re)}};
+}.();
+~anchors.do{|anchor, i| anchor.repos = anchor.repos.scramble};
 ~anchors.do { |an|
 	an.repos.do {|repo|
 		if(repoMap.at(repo.name) != nil, {
 			repoMap[repo.name] = repoMap[repo.name] + 1;
 		}, {
-			("Invalid repo name: " ++ repo.name).postln;
+			if(repo.is_redacted == false, {
+				("Invalid repo name: " ++ repo.name).postln;
+			});
 		});
 	}
 };
+// Filter out non-existent repos
+~anchors.do { |an| var i = 0;
+	an.repos = an.repos.select({|repo|
+		if(repoMap.at(repo.name) != nil, {
+			true
+		}, {
+			repo.is_redacted
+		});
+	});
+};
+
 // Print unused repos
 {
 	var keys = repoMap.keys;
@@ -122,6 +163,23 @@ repos.do{|repo| repoMap.put(repo, 0)};
 }.();
 
 )
+
+(
+var dir = "/home/erik/code/kth/rethread/code/myriad/get_all_contributors/gh_repo_lists/", files = [
+"a-not-so-distant-past_gh_repos.txt",
+	"apocryph_gh_repos.txt",
+	"dear-ai_gh_repos.txt",
+	"glommen_gh_repos.txt",
+	"infinite-sand-sorter_gh_repos.txt",
+	"megatouch_gh_repos.txt",
+	"pain-creature_gh_repos.txt",
+	"relaxrelaxrelax_gh_repos.txt",
+	"why-am-i-seeing-this_gh_repos.txt",
+	"rethread_gh_repos.txt"],
+fileContent = files.collect{|fileName| File.readAllString(dir ++ fileName)},
+repos = fileContent.collect{|str| str.stripWhiteSpace.split($\n).collect{|re| re.replace("/", "#")}};
+repos
+)
 (
 a = ~anchors[0];
 a.repos.do{|repo| repo.load()};
@@ -129,6 +187,7 @@ a.repos.do{|repo| repo.load()};
 ~anchors[0].repos[1].load.();
 ~anchors[0].repos[1].english;
 "/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/git#git/english/*.wav".resolveRelative.pathMatch.collect( { |file| file.postln; Buffer.readChannel(s, file, channels: [0]);});
+// SynthDefs
 (
 var winenv;
 
@@ -413,7 +472,7 @@ start_fx = { var fxGroup;
 ~anchors[7].repos[0].main_voice
 ~anchors[7].repos[0].is_redacted
 ~anchors[7].repos[0].english[0].sampleRate*/
-{ var anchor = 9;
+{ var anchor = 0;
 	start_fx.();
 	block { |break| loop {
 		var main_r, aux_r, recording_dur = 60*10, aux_synths_to_free = Set[], swich_fx_dur, an;
@@ -427,14 +486,17 @@ start_fx = { var fxGroup;
 		// s.sync;
 		"Loading done".postln;
 
-		s.prepareForRecord("/home/erik/code/kth/loam/anchors/2024-09-21/"++anchor++".aif", 2);
-		s.record("/home/erik/code/kth/loam/anchors/2024-09-21/"++anchor++".aif", duration: recording_dur);
+		s.prepareForRecord("/home/erik/code/kth/loam/anchors/2024-09-26/"++anchor++".aif", 2);
+		s.sync;
+		s.record("/home/erik/code/kth/loam/anchors/2024-09-26/"++anchor++".aif", duration: recording_dur);
 
 		("Start anchor " ++ anchor).postln;
 		main_r = { var voice_lang = \english;
+
 			1.wait;
 			loop {
-				var buf, start_offset = rrand(0.0, 0.9), num_voices = 1;
+				var buf, start_offset = rrand(0.0, 0.9), num_voices = 1, repo_length = 30, repo_play_length, grain_mix = 0.0, pan_variation = 0.0;
+				("next_repo: " ++ an.repos[an.current_repo].name).postln;
 				~auxilliary_voices = [];
 				buf = an.repos[an.current_repo].main_voice;
 				if(an.repos[an.current_repo].is_redacted,
@@ -443,7 +505,10 @@ start_fx = { var fxGroup;
 						if(an.repos[an.current_repo].num_contributors == nil, {
 							("No num_contributors in repo " ++an.repos[an.current_repo].name).postln;
 						});
-						num_voices = an.repos[an.current_repo].num_contributors.explin(100, 100000, 1, 5).round.asInteger;
+						num_voices = an.repos[an.current_repo].num_contributors.explin(10, 100000, 1, 5).round.asInteger;
+						repo_length = an.repos[an.current_repo].num_contributors.explin(10, 100000, 10, 60);
+						grain_mix = rrand(0.2, 0.3);
+						pan_variation = rrand(0.0, 0.2);
 					},
 					{ var length, frames, sampleRate = 22050;
 						frames = an.repos[an.current_repo].english[0].numFrames;
@@ -456,6 +521,7 @@ start_fx = { var fxGroup;
 						});
 						length = frames/sampleRate;
 						num_voices = length.explin(10, 1000, 1, 5).round.asInteger;
+						repo_length = length.explin(10, 1000, 10, 60);
 						/*switch(voice_lang,
 						\english, { voice_lang = \non_english; buf = a.repos[a.current_repo].english.choose;},
 						\non_english, {
@@ -469,13 +535,15 @@ start_fx = { var fxGroup;
 					}
 				);
 
-				~main_voice = Synth(\grain_phaser, [\sndbuf, buf, \amp, 0.2, \pan_variation, 0, \start_offset, start_offset, \grain_mix, 0.0, \out, ~masterBus]);
+				~main_voice = Synth(\grain_phaser, [\sndbuf, buf, \amp, 0.2, \pan_variation, pan_variation, \start_offset, start_offset, \grain_mix, grain_mix, \out, ~masterBus]);
 				if(num_voices > 1, {
 					~auxilliary_voices = (num_voices-1).collect {|i|
 						Synth(\grain_phaser, [\sndbuf, buf, \amp, 0.015, \amp_range, 0.0, \pan_variation, rrand(0.1, 0.8), \rate, rrand(0.85, 1.1), \start_offset, (start_offset * (i+2)).mod(1.0), \grain_mix, 0.0, \out, ~chorusBus]);
 					};
 				});
-				((1.0-rrand(0.0, 1.0).pow(2)) * 30 + 5).min(buf.duration).wait;
+				repo_play_length = ((1.0-rrand(0.0, 1.0).pow(2)) * repo_length + repo_length * 0.2).min(buf.duration);
+				("playing repo for " ++ repo_play_length ++ " s").postln;
+				repo_play_length.wait;
 				~main_voice.set(\playback_speed, exprand(0.3, 0.7), \grain_mix, 1.0);
 				~auxilliary_voices.do {|syn| syn.set(\playback_speed, exprand(0.05, 2.3), \grain_mix, 1.0); };
 				rrand(0.8, 1.5).wait;
