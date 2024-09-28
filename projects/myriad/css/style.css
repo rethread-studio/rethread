@@ -104,6 +104,10 @@ a {
     color: white;
 }
 
+a:hover {
+    color: orange;
+}
+
 br {
     display: block;
     margin: 0.4rem 0;
@@ -164,7 +168,11 @@ button {
 }
 
 .dark-mode button {
-    color: greenyellow;
+    color: white;
+}
+
+button:hover {
+    color: orange;
 }
 
 img {

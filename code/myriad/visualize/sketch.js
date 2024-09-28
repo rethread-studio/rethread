@@ -1,12 +1,12 @@
-p5.disableFriendlyErrors = true; // disables FES
+p5.disableFriendlyErrors = true;
 
 let projectsData = [];
 
-let inconsolataMedium, inconsolataSemiBold;
+let inconsolataRegular;
 
 let textSize, titleTextSize;
 let lineHeight;
-let topMargin;
+let sideMargin;
 let nLines;
 
 let projectIdx = 0, i0 = 0;
@@ -19,7 +19,7 @@ function preload() {
     loadStrings("../get_all_contributors/gh_repos_lists/"+work+"_gh_repos.txt", (l => loadRepos(l, "gh")));
     loadStrings("../get_all_contributors/other_projects_lists/"+work+"_other_projects.txt", (l => loadRepos(l, "other")));
 
-    inconsolataMedium = loadFont("./fonts/Inconsolata-Medium.ttf");
+    inconsolataRegular = loadFont("./fonts/Inconsolata-Regular.ttf");
 }
 
 function loadRepos(myList, kind) {
@@ -42,16 +42,15 @@ function setup() {
     textAlign(CENTER, TOP);
     //noLoop();
 
-    textSize = width/45;
-    titleTextSize = textSize*1.25;
+    textSize = max(width, height)/45;
+    titleTextSize = textSize*1.5;
     lineHeight = textSize*1.3;
-    topMargin = 0*textSize*5;
-    nLines = ~~((height-topMargin)/lineHeight);
-
-    textFont(inconsolataMedium, textSize);
+    sideMargin = titleTextSize*1.12;
+    nLines = ~~(height/lineHeight);
 
     let contributorCount = 0;
 
+    textFont(inconsolataRegular, textSize);
     let marginToGap = 4;
     for (let project of projectsData) {
         let columnWidth = 0;
@@ -62,8 +61,8 @@ function setup() {
         project.columnWidth = columnWidth;
         //project.nColumns = ~~(width*0.8/columnWidth);
         //if (project.contributors.length < nLines) project.nColumns = 1;
-        project.nColumns = floor(min(width*0.8/columnWidth, 1.5*project.contributors.length/nLines+1));
-        project.wGap = (width-project.nColumns*columnWidth)/(2*marginToGap+project.nColumns-1);
+        project.nColumns = floor(min((width-2*sideMargin)*0.8/columnWidth, 1.5*project.contributors.length/nLines+1));
+        project.wGap = (width-2*sideMargin-project.nColumns*columnWidth)/(2*marginToGap+project.nColumns-1);
         project.wMargin = marginToGap*project.wGap;
 
         shuffle(project.contributors, true);
@@ -82,28 +81,31 @@ function draw() {
     removeElements();
     background(0);
 
-    if (frameRate() > 30) fill(0, 255, 0);
-    else fill(255, 0, 0);
-    text(~~frameRate(), 20, 10);
-    //circle(width/2, height/2, 10);
+    //if (frameRate() > 30) fill(0, 255, 0);
+    //else fill(255, 0, 0);
+    //text(~~frameRate(), 20, 10);
 
     let project = projectsData[projectIdx];
 
+    fill("orange");
+    rect(0, 0, sideMargin, height);
     let leftTitle = createElement("h1", project.leftText);
-    leftTitle.style("color", "orange");
+    leftTitle.style("color", "black");
     leftTitle.style("font-size", titleTextSize);
     leftTitle.style("width", width);
     leftTitle.style("transform", "rotate(-90deg)");
-    leftTitle.position(-width/2+titleTextSize, height/2-titleTextSize);
+    //leftTitle.style("background-color", "orange");
+    leftTitle.position(-width/2+titleTextSize/2, height/2-titleTextSize);
 
+    rect(width-sideMargin, 0, sideMargin, height);
     let rightTitle = createElement("h1", project.rightText);
-    rightTitle.style("color", "orange");
-    rightTitle.style("font-size", textSize*1.25);
+    rightTitle.style("color", "black");
+    rightTitle.style("font-size", titleTextSize);
     rightTitle.style("width", width);
     rightTitle.style("transform", "rotate(90deg)");
-    rightTitle.position(width/2-titleTextSize, height/2-titleTextSize);
+    rightTitle.position(width/2-titleTextSize/2, height/2-titleTextSize);
     
-    let y = topMargin;
+    let y = 0;
     for (let i = 0; i < nLines; i++) {
         let x = project.wMargin;
         for (let j = 0; j < project.nColumns; j++) {

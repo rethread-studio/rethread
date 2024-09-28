@@ -1,6 +1,6 @@
 @font-face {
-    font-family: Inconsolata-Medium;
-    src: url(fonts/Inconsolata-Medium.ttf);
+    font-family: Inconsolata-Regular;
+    src: url(fonts/Inconsolata-Regular.ttf);
 }
 
 @font-face {
@@ -15,16 +15,17 @@ body {
     margin: 0;
     justify-content: center;
     align-items: center;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 h1 {
     font-family: Inconsolata-SemiBold;
     text-align: center;
+    white-space: nowrap;
 }
 
 p {
-    font-family: Inconsolata-Medium;
+    font-family: Inconsolata-Regular;
     text-align: center;
     margin: 0;
 }
