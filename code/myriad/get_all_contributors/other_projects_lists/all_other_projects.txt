@@ -1,0 +1,12 @@
+Arial
+Firefox
+IEM Plug-in Suite
+Inkscape
+IrfanView
+LinuxCommand
+Mind Monitor
+Tor
+XnConvert
+iTerm2
+loopMIDI
+vRenamer

@@ -4,7 +4,7 @@
         if (isMobileDevice() || window.innerWidth < 750) {
             divElem.innerHTML = `
                 <hr>
-                <b>an <a href="exhibition.html">exhibition</a>:</b> <br>
+                <b>an <a href="exhibition.html">exhibition</a></b> <br>
                 - <i><a href="artworks/a-not-so-distant-past.html">A not so distant past</a></i>, Steve Ashby<br class="list">
                 - <i><a href="artworks/apocryph.html">Apocryph</a></i>, Nicolas Boillot<br class="list">
                 - <i><a href="artworks/dear-ai.html">Dear Ai</a></i>, Fred Wordie<br class="list">
@@ -17,8 +17,12 @@
                 - <i><a href="artworks/why-am-i-seeing-this.html">Why Am I Seeing This?</a></i>, Ivana Tkalčić
 
                 <hr>
-                <b>a <a href="symposium.html">symposium</a>:</b> <br>
-                - 4 panels, to be announced soon
+                <b>a <a href="symposium.html">symposium</a></b> <br>
+                4 panels:<br class="list">
+                - <a href="symposium.html#panel1">layers of contributions</a><br class="list">
+                - <a href="symposium.html#panel2">what's in an artist</a><br class="list">
+                - <a href="symposium.html#panel3">maestros, machines, money, etc.</a><br class="list">
+                - <a href="symposium.html#panel4">collaboration & creativity</a>
 
                 <hr>
             `;
@@ -30,24 +34,28 @@
                         <col class="col-right">
                     </colgroup>
                     <tr>
-                        <th class="col-left">an <a href="exhibition.html">exhibition</a>:</th>
-                        <th class="col-right">a <a href="symposium.html">symposium</a>:</th>
+                        <th class="col-left">an <a href="exhibition.html">exhibition</a></th>
+                        <th class="col-right">a <a href="symposium.html">symposium</a></th>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/a-not-so-distant-past.html">A not so distant past</a></i>, Steve Ashby</td>
-                        <td class="col-right">- 4 panels, to be announced soon</td>
+                        <td class="col-right">4 panels:</td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/apocryph.html">Apocryph</a></i>, Nicolas Boillot</td>
+                        <td class="col-right">- <a href="symposium.html#panel1">layers of contributions</a></td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/dear-ai.html">Dear Ai</a></i>, Fred Wordie</td>
+                        <td class="col-right">- <a href="symposium.html#panel2">what's in an artist</a></td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/glommen.html">Glommen</a></i>, Jonas Johansson</td>
+                        <td class="col-right">- <a href="symposium.html#panel3">maestros, machines, money, etc.</a></td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/infinite-sand-sorter.html">Infinite Sand Sorter</a></i>, Agoston Nagy</td>
+                        <td class="col-right">- <a href="symposium.html#panel4">collaboration & creativity</a></td>
                     </tr>
                     <tr>
                         <td class="col-left">- <i><a href="artworks/loam.html">loam</a></i>, re|thread</td>
