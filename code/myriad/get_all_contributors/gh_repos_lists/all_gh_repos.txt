@@ -25,7 +25,7 @@ brave/brave-core
 btel/svg_utils
 caprover/caprover
 carstenlebek/svelte-email
-*chromium/chromium
+chromium/chromium
 coqui-ai/TTS
 electro-smith/libDaisy
 emacs-mirror/emacs
@@ -46,7 +46,7 @@ microsoft/TypeScript
 microsoft/vscode
 moment/moment
 mossblaser/plottie
-*mozilla/gecko-dev
+mozilla/gecko-dev
 mozman/svgwrite
 mozsearch/mozsearch
 mrdoob/three.js
@@ -69,7 +69,6 @@ processing/p5.js
 processing/processing
 pure-data/pure-data
 python/cpython
-*raspberrypi/linux
 ritwickdey/vscode-live-server
 rtyley/bfg-repo-cleaner
 rust-lang/cargo
@@ -87,7 +86,7 @@ supercollider/supercollider
 sveltejs/svelte
 tensorflow/tensorflow
 textmate/textmate
-*torvalds/linux
+torvalds/linux
 v8/v8
 videolan/vlc
 vitejs/vite

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 #assumes that GH token is in a file "github_access_token.txt" that's in the same folder as this file
 tok = open("github_access_token.txt", "r")
 tok.seek(0)
-tok_str=tok.readline().rstrip('\n')
+tok_str=tok.readline().rstrip("\n")
 #print(tok_str)
 # using an access token
 auth = Auth.Token(tok_str)
@@ -20,8 +20,6 @@ g = Github(auth=auth)
 #subprocess.check_call(["git", "clone", "git@github.com:processing/p5.js.git"])
 
 def get_gh_contributors(repo):
-	print("Getting contributors")
-
 	contributors = repo.get_contributors(anon=True)
 	total_contributors = contributors.totalCount
 	total_contributions = 0
@@ -72,13 +70,12 @@ def get_gh_commit_history(repo, end_date):
 	return commits_over_time
 
 def get_and_save_gh_info(repo_name):
-	print(repo_name)
 	repo = g.get_repo(repo_name)
 
 	#commits_over_time = get_gh_commit_history(repo)
 	total_contributions, contributors_list = get_gh_contributors(repo)
 
-	filename = "gh_contributors/" + repo_name.replace("/", "&")
+	filename = "./gh_contributors/" + repo_name.replace("/", "&")
 	repo_data = {
 		"repo_name": repo_name,
 		#"commits_over_time": commits_over_time,
@@ -93,38 +90,57 @@ def get_and_save_gh_info(repo_name):
 
 def print_progress_bar(iteration, total, length=50):
     filled_length = int(length * iteration // total)
-    bar = '█' * filled_length + '-' * (length - filled_length)
-    sys.stdout.write(f'\r|{bar}| {iteration}/{total}')
+    bar = "█" * filled_length + "-" * (length - filled_length)
+    sys.stdout.write(f"\r|{bar}| {iteration}/{total}")
     sys.stdout.flush()
 
-with open("gh_repos_lists/all_gh_repos.txt") as f:
+def turn_txt_into_json(name, path):
+	with open(path + "/" + name + ".txt", "r", encoding="utf8") as f:
+		contributors = f.readlines()
+
+	json_data = {
+		"repo_name": name,
+		"total_contributions": len(contributors),
+		"contributors": [{"type": "Other", "contributions": 1, "id": c.rstrip("\n")} for c in contributors]
+	}
+	
+	with open(path + "/" + name + ".json", "w") as fp:
+		json.dump(json_data, fp, indent = 1)
+
+def turn_json_into_txt(name, path):
+	with open(path + "/" + name + ".json", "r") as f:
+		json_data = json.load(f)
+
+	contributors = [c["id"] for c in json_data["contributors"]]
+	with open(path + "/" + name + ".txt", "w") as f:
+		f.write("\n".join(c for c in contributors))
+
+with open("./gh_repos_lists/all_gh_repos.txt", "r") as f:
     repos = f.readlines()
-#print(repos)
+
 for repo in repos:
-	if repo[0] != "*":
-		get_and_save_gh_info(repo.rstrip("\n"))
-print("All done ✨")
+	name = repo.rstrip("\n")
+	print(name)
+	try:
+		get_and_save_gh_info(name)
+	except:
+		print("Can't use GitHub API, looking for .json or .txt files")
+		try:
+			turn_json_into_txt(name.replace("/", "&"), "./gh_contributors")
+			print(".json found and .txt created")
+		except:
+			try:
+				turn_txt_into_json(name.replace("/", "&"), "./gh_contributors")
+				print(".txt found and .json created")
+			except:
+				print("No file found")
 
-#print(repo.get_stats_contributors())
+with open("./other_projects_lists/all_other_projects.txt", "r") as f:
+    other_projects = f.readlines()
 
-#dependency_name="ms"
-
-#url = "https://api.npms.io/v2/package/"+dependency_name
-#resp = requests.get(url)
-#dependency_data = json.loads(resp.content)
-#print(json.dumps(package_data, indent=4))
-
-#get the url to the github repo for the dependency
-#repo_link=dependency_data["collected"]["metadata"]["links"]["repository"]
-#print(repo_link)
-
-#get the name of the repo used in the GH API query
-#repo_name=re.split("github.com/", repo_link, 1)[1]
-#print(repo_name)
-#repo = g.get_repo(repo_name)
-
-#get contributors to the GH repo for the dependency
-#contributors = repo.get_contributors()
-#for c in contributors:
-#	print(c.name)
- 
+for project in other_projects:
+	name = project.rstrip("\n")
+	print(name)
+	print_progress_bar(1, 1)
+	print("")
+	turn_txt_into_json(project.rstrip("\n"), "./other_contributors")

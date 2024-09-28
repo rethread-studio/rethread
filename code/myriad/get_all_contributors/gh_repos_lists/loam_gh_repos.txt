@@ -25,7 +25,6 @@ LibreOffice/core
 inkscape/inkscape
 espressif/arduino-esp32
 arduino/ArduinoCore-API
-raspberrypi/linux
 meta-llama/llama-models
 github/docs
 github/rest-api-description

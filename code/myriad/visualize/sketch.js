@@ -25,7 +25,7 @@ function preload() {
 function loadRepos(myList, kind) {
     //console.log(projectsList)
     for (let el of myList) {
-        if (el.length > 0 && el[0] != "*") {
+        if (el.length > 0) {
             let path = kind == "gh" ? "../get_all_contributors/gh_contributors/"+el.replaceAll("/", "&")+".txt" : "../get_all_contributors/other_contributors/"+el+".txt";
             projectsData.push({
                 leftText: kind == "gh" ? el.split("/")[0] : el,
