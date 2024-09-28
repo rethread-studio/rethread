@@ -109,33 +109,36 @@ impl SdCardLocal {
         let mut chunk_buffer = [0u8; CHUNK_SIZE];
 
         loop {
-            while let Ok(bytes_read) = self.sd_card.read(&self.fat_volume, file, &mut chunk_buffer)
-            {
-                if bytes_read == 0 {
+            match self.sd_card.read(&self.fat_volume, file, &mut chunk_buffer) {
+                Ok(bytes_read) => {
+                    if bytes_read == 0 {
+                        if file.eof() {
+                            file.seek_from_start(0).ok();
+                        } else {
+                            warn!("0 bytes read from file");
+                            return;
+                        }
+                    }
+                    // info!("Chunk read, bytes: {}", bytes_read);
+                    for k in chunk_buffer[..bytes_read].chunks(2) {
+                        // converting every word consisting of four u8 into f32 in buffer
+                        let i16_buffer = [k[0], k[1]];
+                        buffer[write_pos] = i16::from_le_bytes(i16_buffer);
+                        write_pos += 1;
+                        if write_pos >= buffer.len() {
+                            return;
+                        }
+                    }
+                }
+                Err(e) => {
+                    warn!(
+                        "Error reading from file at pos {}: {e:?}",
+                        file.length() - file.left()
+                    );
                     if file.eof() {
-                        file.seek_from_start(0);
-                    } else {
-                        warn!("0 bytes read from file");
-                        return;
+                        file.seek_from_start(0).ok();
                     }
                 }
-                // info!("Chunk read, bytes: {}", bytes_read);
-                for k in chunk_buffer[..bytes_read].chunks(2) {
-                    // converting every word consisting of four u8 into f32 in buffer
-                    let i16_buffer = [k[0], k[1]];
-                    buffer[write_pos] = i16::from_le_bytes(i16_buffer);
-                    write_pos += 1;
-                    if write_pos >= buffer.len() {
-                        return;
-                    }
-                }
-            }
-            // If we have reached end of file, start over
-            if file.eof() {
-                file.seek_from_start(0);
-            } else {
-                warn!("Unknown error reading from file");
-                break;
             }
         }
     }
