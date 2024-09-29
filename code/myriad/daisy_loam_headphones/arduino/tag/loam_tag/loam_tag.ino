@@ -4,7 +4,7 @@
 #include <ESP32SPISlave.h>
 // #include <SPI.h>
 
-#define TAG_ID 4
+#define TAG_ID 5
 
 // SPI to Daisy
 static const int spiClk = 1000000;  // 1 MHz
@@ -20,7 +20,7 @@ ESP32SPISlave spi_slave;
 static constexpr size_t QUEUE_SIZE = 1;
 // SPIClass * hspi = NULL
 
-#define NUM_ANCHORS 10
+#define NUM_ANCHORS 12
 static double distances_to_anchors[NUM_ANCHORS];
 
 #define APP_NAME "SS TWR INIT STS v1.0"

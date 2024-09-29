@@ -12,7 +12,7 @@ use crate::{sd_card::SdCardLocal, Sample, NUM_ANCHORS};
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 pub struct AnchorId(pub u8);
 const BUFFER_SIZE: usize = 16384;
-const SOUND_FILE_SIZE: u32 = 57696000;
+const SOUND_FILE_SIZE: u32 = 57600000;
 
 /// Lives in the audio task and plays back
 pub struct VoicePlayer {
@@ -153,9 +153,14 @@ impl VoiceLoader {
             "VOICE_7.BIN",
             "VOICE_8.BIN",
             "VOICE_9.BIN",
+            "VOICE_10.BIN",
+            "VOICE_11.BIN",
         ];
         let voice_file_handles =
-            core::array::from_fn(|i| sd_card.open_file(anchor_voice_files[i]).unwrap());
+            core::array::from_fn(|i| match sd_card.open_file(anchor_voice_files[i]) {
+                Ok(file) => file,
+                Err(e) => panic!("Failed to load {}", anchor_voice_files[i]),
+            });
         Self {
             voice_file_handles,
             filled_tx,
