@@ -12,7 +12,7 @@ mod voice_playback;
 // mod wav_reader;
 
 pub const CONTROL_RATE_IN_MS: u32 = 10;
-pub const NUM_ANCHORS: usize = 10;
+pub const NUM_ANCHORS: usize = 12;
 
 pub type Sample = f32;
 
