@@ -244,7 +244,7 @@ impl Anchors {
                 (AnchorId(new_anchors[i].1 as u8), new_anchors[i].0);
         }
         let distances: [f32; 3] =
-            core::array::from_fn(|i| self.buffer_anchors[i].1.recip().powi(2));
+            core::array::from_fn(|i| self.buffer_anchors[i].1.recip().powi(3));
         let distance_sum: f32 = distances
             .iter()
             // .map(|(_, dist)| dist.powi(2))
@@ -252,6 +252,12 @@ impl Anchors {
             + 0.01; // Add a small distance to avoid division by zero
         for i in 0..3 {
             mix[i] = distances[i] / distance_sum;
+        }
+        // fade out at great distances
+        for i in 0..3 {
+            // let fade = distances[i].min(1.0);
+            let fade = self.buffer_anchors[i].1.recip().min(1.0);
+            mix[i] *= fade;
         }
         mix
     }
