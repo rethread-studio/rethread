@@ -3,9 +3,19 @@
 // Regenerate sound files for
 // - sjvasquez#handwriting-synthesis
 
+// - [x] En icket-engelsk röst per ankare + en engelsk röst
+// - [x] Ta bort mest aggressiva glitchet
+// - [x] Lägg till toner
+// - [ ] Generera nya röster för loam
+// - [x] Splitta loam i 3
+// - [x] Testa att inte normalisera glitch för bättre balans
+
+("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/apache#maven/non_english/*.wav").resolveRelative.pathMatch.collect{|file|file.split($/).last.asString}
 // Construct ~anchors and set file paths
 (
-var proprietary_buffers = ("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/PROPRIETARY/*.wav").resolveRelative.pathMatch.collect( { |file|
+var english_voices = ["en_UK@apope_low.wav", "en_US@hifi-tts_low.wav", "en_US@vctk_low.wav", "tts_models@en@ljspeech@tacotron2-DDC_ph.wav"],
+non_english_voices = ("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/apache#maven/non_english/*.wav").resolveRelative.pathMatch.collect{|file|file.split($/).last.asString},
+proprietary_buffers = ("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/PROPRIETARY/*.wav").resolveRelative.pathMatch.collect( { |file|
 	Buffer.readChannel(s, file, channels: [0]);}),
 repo = { | name, is_redacted = false, num_contributors = nil |
 	(
@@ -16,10 +26,13 @@ repo = { | name, is_redacted = false, num_contributors = nil |
 		non_english: nil,
 		glitchy: nil,
 		main_voice: nil,
-		load: {|self|
+		english_voice: nil,
+		load: {|self, voice_index|
 			if(self.is_redacted == false, {
 				self.glitchy = ("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/" ++ self.name ++ "/glitchy/*.wav").resolveRelative.pathMatch.collect( { |file|
-					var buf = Buffer.readChannel(s, file, channels: [0]); buf.normalize; buf
+					var buf = Buffer.readChannel(s, file, channels: [0]);
+					// buf.normalize;
+					buf
 				});
 				self.english = ("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/" ++ self.name ++ "/english/*.wav").resolveRelative.pathMatch.collect( { |file|
 					var buf = Buffer.readChannel(s, file, channels: [0]); buf.normalize; buf
@@ -27,10 +40,26 @@ repo = { | name, is_redacted = false, num_contributors = nil |
 				self.non_english = ("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/" ++ self.name ++ "/non_english/*.wav").resolveRelative.pathMatch.collect( { |file|
 					var buf = Buffer.readChannel(s, file, channels: [0]); buf.normalize; buf
 				});
-				self.main_voice = [self.english, self.non_english].wchoose([1, 3].normalizeSum).choose;
+				("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/" ++ self.name ++ "/non_english/*.wav").resolveRelative.pathMatch.do( { |file|
+					var filename =file.split($/).last.asString;
+					if(filename == (non_english_voices[voice_index.min(non_english_voices.size-1)]), {
+						var buf = Buffer.readChannel(s, file, channels: [0]); buf.normalize;
+						self.main_voice = buf;
+					});
+				});
+				("/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/" ++ self.name ++ "/english/*.wav").resolveRelative.pathMatch.do( { |file|
+					var filename =file.split($/).last.asString;
+					if(filename == (english_voices[voice_index%english_voices.size]), {
+						var buf = Buffer.readChannel(s, file, channels: [0]); buf.normalize;
+						self.main_english_voice = buf;
+					});
+				});
+				if (self.main_voice == nil, {self.main_voice = self.non_english.choose});
+				if (self.main_english_voice == nil, {self.main_english_voice = self.english.choose});
 			}, {
 				self.glitchy = ~proprietary_buffers;
 				self.main_voice = self.glitchy.choose;
+				self.main_english_voice = self.main_voice;
 			}
 			);
 		},
@@ -42,6 +71,10 @@ anchor = { | repos, name = "" |
 		repos: repos,
 		current_repo: 0,
 		next_repo: { |self| self.current_repo = (self.current_repo + 1) % self.repos.size; },
+		number: 0,
+		load_buffers: {|self|
+			self.repos.do{|repo| repo.load(self.number); s.sync;};
+		},
 	)
 },
 repos = "/home/erik/code/kth/loam/repo_data_manip/wav_files/repos/*".resolveRelative.pathMatch.collect{|dir| var parts = dir.split($/); parts[parts.size-2] },
@@ -76,7 +109,7 @@ repos.do{|repo| repoMap.put(repo, 0)};
 
 ];*/
 {
-	var dir = "/home/erik/code/kth/rethread/code/myriad/get_all_contributors/gh_repo_lists/", files = [
+	var dir = "/home/erik/code/kth/rethread/code/myriad/get_all_contributors/gh_repos_lists/", files = [
 		"a-not-so-distant-past_gh_repos.txt",
 		"apocryph_gh_repos.txt",
 		"dear-ai_gh_repos.txt",
@@ -86,8 +119,11 @@ repos.do{|repo| repoMap.put(repo, 0)};
 		"pain-creature_gh_repos.txt",
 		"relaxrelaxrelax_gh_repos.txt",
 		"why-am-i-seeing-this_gh_repos.txt",
-		"rethread_gh_repos.txt"],
-	fileContent = files.collect{|fileName| File.readAllString(dir ++ fileName)},
+		"loam_gh_repos.txt"],
+	fileContent = files.collect{|fileName| try { File.readAllString(dir ++ fileName) } {|error|
+		("Error: failed to read repo list: " ++ error ++ " for " ++ dir ++ fileName).postln;
+		[]
+	}},
 	repos = fileContent.collect{|str| str.stripWhiteSpace.split($\n).collect{|re| re.replace("/", "#")}},
 	anchors = repos.collect{|repos, i| anchor.(repos.collect{|re| repo.(re)}, files[i]) };
 	~anchors = anchors;
@@ -118,7 +154,7 @@ repos.do{|repo| repoMap.put(repo, 0)};
 		[repo.("macOS", true, 30000),repo.("Google Docs", true, 10000),repo.("Procreate", true, 300),], // "pain-creature_gh_repos.txt",
 		[repo.("macOS", true, 30000),repo.("TouchDesigner", true, 3000),repo.("Adobe", true, 3000),repo.("macOS", true, 30000),repo.("Resolume", true, 400),repo.("Quicktime", true, 400),repo.("Pages", true, 1000),repo.("iMessage", true, 2000),repo.("MindApp", true, 200),repo.("MuseEEG", true, 200),], // "relaxrelaxrelax_gh_repos.txt",
 		[repo.("Windows", true, 40000), repo.("Adobe", true, 3000), repo.("Ubisoft", true, 4000), repo.("Bryze", true, 600), repo.("Snapchat", true, 6000)], // "why-am-i-seeing-this_gh_repos.txt",
-		[repo.("YouTube", true, 10000), repo.("Reaper", true, 20), repo.("Adobe", true, 3000)], // "rethread_gh_repos.txt"
+		[repo.("YouTube", true, 10000), repo.("Reaper", true, 20), repo.("Adobe", true, 3000), repo.("Gmail", true, 1000), repo.("Messenger", true, 700), repo.("Figma", true, 300), repo.("Phomemo Print Master", true, 30)], // "rethread_gh_repos.txt"
 	];
 	~anchors.do{|anchor, i| addPropRepos[i].do{|re| anchor.repos = anchor.repos.add(re)}};
 }.();
@@ -162,7 +198,70 @@ repos.do{|repo| repoMap.put(repo, 0)};
 	};
 }.();
 
+// Split loam repo into 3
+{
+	var repos = [List[], List[], List[]], an = ~anchors[9];
+	an.repos = an.repos.scramble;
+	an.repos.do{|repo, i| repos[i%3].add(repo);};
+	~anchors[9].repos = repos[0];
+	~anchors = ~anchors.add(anchor.(repos[1], "loam1"));
+	~anchors = ~anchors.add(anchor.(repos[2], "loam2"));
+}.();
+
+// Set number
+~anchors.do { |an, i|
+	an.number = i;
+};
+
+~s53 = Scale.chromatic('et53');
+/*~chords = [
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31+5,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31-3,
+[ -53, 0, 9, 22, 31, 62, 40+53, 48+53 ] - 31+14,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31+14,
+[ -53, 0, 9, 31, 40+9, 53+9, 62+9, 137+9 ] - 31+14,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31-3,
+[ -53, 0, 9, 14, 31, 40, 53, 62, 137-5 ] - 31-3,
+[ -53, 0, 9, 22, 31, 53, 22+53, 43+53 ] - 31+31,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31+5,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31,
+];*/
+~chords = [
+	[ -84, 62, 22, 31, -22, 0, -31, 106 ],
+	[ -26, -17, 111, 27, 36, -79, 5, 67 ],
+	[ -34, 103, 28, -87, -25, 19, 59, -3 ],
+	[ -17, -8, 5, 14, 45, 84, -70, 76 ],
+	[ 76, 120, 45, 14, -70, 36, -17, -8 ],
+	[ 14, 32, -70, 129, 45, 54, -17, -8 ],
+	[ -25, 103, -34, 59, 19, 28, -87, -3 ],
+	[ -34, -87, -3, -20, 6, -25, 19, 28, 98 ],
+	[ 22, 31, 75, 9, 96, -53, 0, 53 ],
+	[ -26, -17, 36, 27, 111, 67, 5, -79 ],
+	[ 106, 62, -22, -84, -31, 22, 31, 0 ]
+];
+
 )
+
+// utility to scramble chords
+(
+var chords = [
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31+5,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31-3,
+[ -53, 0, 9, 22, 31, 62, 40+53, 48+53 ] - 31+14,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31+14,
+[ -53, 0, 9, 31, 40+9, 53+9, 62+9, 137+9 ] - 31+14,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31-3,
+[ -53, 0, 9, 14, 31, 40, 53, 62, 137-5 ] - 31-3,
+[ -53, 0, 9, 22, 31, 53, 22+53, 43+53 ] - 31+31,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31+5,
+[ -53, 0, 9, 31, 53, 62, 40+53, 137 ] - 31,
+];
+chords = chords.collect{|chord| chord.scramble};
+chords.postln;
+)
+
 
 (
 var dir = "/home/erik/code/kth/rethread/code/myriad/get_all_contributors/gh_repo_lists/", files = [
@@ -412,6 +511,38 @@ SynthDef(\fft_extract, {
 	sig = IFFT(chain); // inverse FF
 	Out.ar(\out.kr(0), sig);
 }).add;
+SynthDef(\synth, {
+	var sig, env, freq, density = LFNoise1.kr(0.3).range(0.1, 2), trig = Dust.kr(density), decaytime = TRand.kr(density.reciprocal * 0.6, density.reciprocal * 2.0, trig), coef = TRand.kr(0.2, 0.6, trig), bwr;
+		freq = Lag.kr(Latch.kr(\freq.kr(440), trig).max(20), 0.02);
+		// coef = MouseX.kr(-0.999, 0.999);
+	// sig = DPW3Tri.ar(freq) * EnvGen.ar(Env.perc(0.02, decaytime*0.2), trig) * LFNoise1.kr(0.2).exprange(0.00001, 0.3);
+	sig = LPF.ar(DPW4Saw.ar(freq), Lag.kr(LFNoise1.kr(0.3).range(freq * 2, freq * 7).clip(20.0, 12000.0))) * EnvGen.ar(Env.perc(0.3, decaytime), trig) * LFNoise1.kr(LFNoise1.kr(0.7).range(0.1, 5)).exprange(0.00001, 0.3) * 0.15;
+		bwr = LFNoise1.kr(LFNoise1.kr(0.7).range(0.5, 10)).exprange(0.0001, 0.01);
+	sig = sig + (Resonz.ar(PinkNoise.ar, freq, bwr) * EnvGen.ar(Env.perc(0.2, decaytime), trig) * (0.01/bwr));
+		// sig = SinOsc.ar(freq) * EnvGen.ar(Env.perc(0.01, decaytime*0.2), trig) * LFNoise1.kr(LFNoise1.kr(2).range(0.5, 3)).range(0.5, 1.0).pow(2);
+		sig = (sig * 20).tanh;
+		// sig = Pluck.ar(PinkNoise.ar * SinOsc.ar(freq * 0.9) * 0.1, trig, 0.2, freq.reciprocal, decaytime, coef) * 10;
+	sig = sig * \amp.kr(0.5, 1.0)*AmpCompA.kr(freq, 0.midicps);
+	Out.ar(\out.kr(0), Pan2.ar(sig, \pan.kr(0.0)));
+}).add;
+
+SynthDef(\verb646, {
+	var snd, wet, wetness = \wetness.kr(0.1);
+	snd = In.ar(\in.kr(0), 2);
+	wet = snd + (PitchShift.ar(snd, 0.2, 2)*0.1);
+	wet = DelayN.ar(wet, 0.25, 0.25);
+	// wet = GVerb.ar(wet * \wetness.kr(0.1), 200, 2);
+	wet = JPverb.ar(wet * wetness, 4.0, 0.5, 1.0, 0.707, 0.1, 2.5, 1.0);
+	wet = HPF.ar(wet, 100) * -3.dbamp;
+	wet = LPF.ar(wet, 7000);
+		snd = (snd * (1.0-wetness)) + wet;
+	// Add a little bit of tape flutter
+	snd = DelayC.ar(snd, 0.2, LFNoise2.kr(1).range(0, 0.005));
+
+	//snd = (snd * Demand.kr(Dust.kr(5), 1, Dseq([1, 0], inf))) + (snd*0.5);
+
+	Out.ar(\out.kr(0), snd);
+}).add;
 
 )
 
@@ -427,6 +558,7 @@ var start_fx;
 
 ~distBus = Bus.audio(s, 2);
 ~verbBus = Bus.audio(s, 2);
+~pitchVerbBus = Bus.audio(s, 2);
 ~granBus = Bus.audio(s, 2);
 ~chorusBus = Bus.audio(s, 2);
 ~masterBus = Bus.audio(s, 2);
@@ -444,6 +576,7 @@ start_fx = { var fxGroup;
 	s.sync;
 	~master = Synth(\lastLayer, [\in, ~masterBus], target: fxGroup);
 	~verb = Synth(\verb, [\in, ~verbBus, \wetness, 0.5, \out, ~masterBus], target: ~master, addAction: \addBefore);
+	~pitchVerb = Synth(\verb646, [\in, ~pitchVerbBus, \wetness, 0.5, \out, ~masterBus], target: ~master, addAction: \addBefore);
 	~dist = Synth(\distortion, [\in, ~distBus, \out, ~verbBus], target: ~verb, addAction: \addBefore);
 	~granulizer = Synth(\granulizer, [\in, ~granBus, \out, ~verbBus], target: ~verb, addAction: \addBefore);
 	~chorus = Synth(\chorus, [\out, ~masterBus, \revBus, ~verbBus, \inBus, ~chorusBus, \revAmp, 0.3, \amp, 1], target: ~verb, addAction: \addBefore);
@@ -472,33 +605,41 @@ start_fx = { var fxGroup;
 ~anchors[7].repos[0].main_voice
 ~anchors[7].repos[0].is_redacted
 ~anchors[7].repos[0].english[0].sampleRate*/
-{ var anchor = 0;
+// ~anchors[5].repos[10].main_english_voice.duration
+{ var anchor = 3;
 	start_fx.();
 	block { |break| loop {
-		var main_r, aux_r, recording_dur = 60*10, aux_synths_to_free = Set[], swich_fx_dur, an;
+		var main_r, aux_r, recording_dur = 60*10, aux_synths_to_free = Set[], swich_fx_dur, an, pitch_r, pitch_synth;
 		"Freeing buffers".postln;
 		Buffer.freeAll;
 		an = ~anchors[anchor];
 		"Loading buffers...".postln;
 		~loadProprietaryGlitchBuffers.();
-		an.repos.do{|repo| repo.load(); s.sync;};
+		an.load_buffers();
 		an.current_repo = 0;
 		// s.sync;
 		"Loading done".postln;
 
-		s.prepareForRecord("/home/erik/code/kth/loam/anchors/2024-09-26/"++anchor++".aif", 2);
+		s.prepareForRecord("/home/erik/code/kth/loam/anchors/2024-09-29/"++anchor++".aif", 2);
 		s.sync;
-		s.record("/home/erik/code/kth/loam/anchors/2024-09-26/"++anchor++".aif", duration: recording_dur);
+		s.record("/home/erik/code/kth/loam/anchors/2024-09-29/"++anchor++".aif", duration: recording_dur);
 
 		("Start anchor " ++ anchor).postln;
-		main_r = { var voice_lang = \english;
+		pitch_r = { var pitch_synth =Synth(\synth, [\freq, 20, \amp, 0.0, \out, ~pitchVerbBus]), chord_index = 0;
+			loop {
+				var freq = ~s53.degreeToFreq(~chords[chord_index][anchor % ~chords[chord_index].size], 48.midicps, 1), pan = 0;
+				pitch_synth.set(\freq, freq, \amp, 0.1);
+				chord_index = (chord_index+1) % ~chords.size;
+				5.wait;
+			};
+		}.fork;
+		main_r = {
 
 			1.wait;
 			loop {
 				var buf, start_offset = rrand(0.0, 0.9), num_voices = 1, repo_length = 30, repo_play_length, grain_mix = 0.0, pan_variation = 0.0;
 				("next_repo: " ++ an.repos[an.current_repo].name).postln;
 				~auxilliary_voices = [];
-				buf = an.repos[an.current_repo].main_voice;
 				if(an.repos[an.current_repo].is_redacted,
 					{
 						// buf = a.repos[a.current_repo].glitchy.choose;
@@ -509,8 +650,11 @@ start_fx = { var fxGroup;
 						repo_length = an.repos[an.current_repo].num_contributors.explin(10, 100000, 10, 60);
 						grain_mix = rrand(0.2, 0.3);
 						pan_variation = rrand(0.0, 0.2);
+						buf = an.repos[an.current_repo].main_voice;
 					},
-					{ var length, frames, sampleRate = 22050;
+					{ var length;
+						/* frames,
+						sampleRate = 22050;
 						frames = an.repos[an.current_repo].english[0].numFrames;
 						if(frames == nil, {frames = 1000; ("Invalid buffer in main routine for " ++ an.repos[an.current_repo].name + ", current: " ++ an.current_repo ++ ", anchor: " ++ an).postln;});
 						sampleRate = if(an.repos[an.current_repo].english[0].sampleRate != nil, {
@@ -518,8 +662,12 @@ start_fx = { var fxGroup;
 						}, {
 							("Invalid buffer sampleRate in main routine for " ++ an.repos[an.current_repo].name).postln;
 							22050
-						});
-						length = frames/sampleRate;
+						});*/
+						buf = [an.repos[an.current_repo].main_voice, an.repos[an.current_repo].main_english_voice].wchoose([3, 1].normalizeSum);
+
+						length = try { buf.duration; } {|error| ("Failed to get duration for buf " ++ buf ++ ": " ++ error).postln;
+							try { buf.numFrames/buf.sampleRate } {|error| ("Failed to get fallback duration : " ++ error).postln; 120.0}
+						};
 						num_voices = length.explin(10, 1000, 1, 5).round.asInteger;
 						repo_length = length.explin(10, 1000, 10, 60);
 						/*switch(voice_lang,
@@ -535,10 +683,10 @@ start_fx = { var fxGroup;
 					}
 				);
 
-				~main_voice = Synth(\grain_phaser, [\sndbuf, buf, \amp, 0.2, \pan_variation, pan_variation, \start_offset, start_offset, \grain_mix, grain_mix, \out, ~masterBus]);
+				~main_voice = Synth(\grain_phaser, [\sndbuf, buf, \amp, 0.25, \pan_variation, pan_variation, \start_offset, start_offset, \grain_mix, grain_mix, \out, ~masterBus]);
 				if(num_voices > 1, {
 					~auxilliary_voices = (num_voices-1).collect {|i|
-						Synth(\grain_phaser, [\sndbuf, buf, \amp, 0.015, \amp_range, 0.0, \pan_variation, rrand(0.1, 0.8), \rate, rrand(0.85, 1.1), \start_offset, (start_offset * (i+2)).mod(1.0), \grain_mix, 0.0, \out, ~chorusBus]);
+						Synth(\grain_phaser, [\sndbuf, buf, \amp, 0.010, \amp_range, 0.0, \pan_variation, rrand(0.1, 0.8), \rate, rrand(0.85, 1.1), \start_offset, (start_offset * (i+2)).mod(1.0), \grain_mix, 0.0, \out, ~chorusBus]);
 					};
 				});
 				repo_play_length = ((1.0-rrand(0.0, 1.0).pow(2)) * repo_length + repo_length * 0.2).min(buf.duration);
@@ -592,7 +740,7 @@ start_fx = { var fxGroup;
 				switch(~events.choose,
 					\pan_away, {
 						rrand(2, 5).do {
-							var fade_time = rrand(2, 6), amp = exprand(0.01, 0.05), buf0, buf1;
+							var fade_time = rrand(2, 6), amp = exprand(0.01, 0.035), buf0, buf1;
 							if(an.repos[an.current_repo].is_redacted,
 								{buf0 = an.repos[an.current_repo].glitchy.choose; buf1 = an.repos[an.current_repo].glitchy.choose;},
 								{buf0 = an.repos[an.current_repo].non_english.choose; buf1 = an.repos[an.current_repo].non_english.choose;}
@@ -610,7 +758,7 @@ start_fx = { var fxGroup;
 									{buf = an.repos[an.current_repo].glitchy.choose;},
 									{buf = an.repos[an.current_repo].non_english.choose;}
 								);
-								s = Synth(\grain_phaser, [\sndbuf, buf, \amp, exprand(0.02, 0.04), \pan_variation, rrand(0.5, 3.0), \start_offset, rrand(0.0, 0.99), \release_time, 2.0, \preamp, 0.5, \noiseAmp, 0.0, \bwr, 0.5, \out, ~chorusBus]);
+								s = Synth(\grain_phaser, [\sndbuf, buf, \amp, exprand(0.02, 0.03), \pan_variation, rrand(0.5, 3.0), \start_offset, rrand(0.0, 0.99), \release_time, 2.0, \preamp, 0.5, \noiseAmp, 0.0, \bwr, 0.5, \out, ~chorusBus]);
 								aux_synths_to_free.add(s);
 								2.wait;
 								s.release;
@@ -631,6 +779,8 @@ start_fx = { var fxGroup;
 		~auxilliary_voices.do{ |syn| syn.release; };
 		aux_synths_to_free.do{ |syn| syn.release; };
 		aux_r.stop;
+		pitch_r.stop;
+		pitch_synth.release;
 		3.wait;
 		s.stopRecording();
 		s.sync;
