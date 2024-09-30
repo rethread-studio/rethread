@@ -1,5 +1,6 @@
 Arial
 Firefox
+Helvetica
 IEM Plug-in Suite
 Inkscape
 IrfanView
