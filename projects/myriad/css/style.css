@@ -121,6 +121,10 @@ p {
     margin-bottom: 1.5rem;
 }
 
+p.italics {
+    font-style: italic;
+}
+
 table {
    text-align: left;
    border-collapse: collapse;
