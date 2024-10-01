@@ -25,7 +25,7 @@ function preload() {
 function loadRepos(myList, kind) {
     //console.log(projectsList)
     for (let el of myList) {
-        if (el.length > 0) {
+        if (el.length > 0 && el != "torvalds/linux") {
             let path = kind == "gh" ? "../get_all_contributors/gh_contributors/"+el.replaceAll("/", "&")+".txt" : "../get_all_contributors/other_contributors/"+el+".txt";
             projectsData.push({
                 leftText: kind == "gh" ? el.split("/")[0] : el,
@@ -38,9 +38,10 @@ function loadRepos(myList, kind) {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    frameRate(~~random(1, 8));
-    textAlign(CENTER, TOP);
+    frameRate(round(randomTriangle(1, 8)));
+    //textAlign(CENTER, TOP);
     //noLoop();
+    noStroke();
 
     textSize = max(width, height)/45;
     titleTextSize = textSize*1.5;
@@ -94,7 +95,6 @@ function draw() {
     leftTitle.style("font-size", titleTextSize);
     leftTitle.style("width", width);
     leftTitle.style("transform", "rotate(-90deg)");
-    //leftTitle.style("background-color", "orange");
     leftTitle.position(-width/2+titleTextSize/2, height/2-titleTextSize);
 
     rect(width-sideMargin, 0, sideMargin, height);
@@ -107,7 +107,7 @@ function draw() {
     
     let y = 0;
     for (let i = 0; i < nLines; i++) {
-        let x = project.wMargin;
+        let x = sideMargin+project.wMargin;
         for (let j = 0; j < project.nColumns; j++) {
             let idx = i0 + i*project.nColumns + j;
             if (idx >= project.contributors.length) break;
@@ -129,4 +129,8 @@ function draw() {
         if (projectIdx >= projectsData.length) projectIdx = 0;
         i0 = 0;
     }
+}
+
+function randomTriangle(a, b) {
+    return a + (b - a) * (random()-random()+1) / 2;
 }
