@@ -6,7 +6,7 @@ const COMPUTER = 0, KINDLE = 1, TABLET = 2;
 let type = COMPUTER;
 
 let w = 1024;
-let ratio = type == COMPUTER ? 3/4 : (type == KINDLE ? 297/210 : 1.6);
+let ratio = type == COMPUTER ? 3/4 : (type == KINDLE ? Math.sqrt(2) : 1.6);
 
 let project;
 
