@@ -37,7 +37,7 @@ function setup() {
     project = random(possibilities);
     //project = possibilities[0];
 
-    textSize = max(width, height)/45;
+    textSize = max(width, height)/(type == KINDLE ? 22 : 45);
     titleTextSize = textSize*1.5;
     lineHeight = textSize*1.3;
     sideMargin = titleTextSize*1.12;
@@ -46,7 +46,7 @@ function setup() {
     let marginToGap = 4;
     textFont(inconsolataRegular, textSize);
     columnWidth = textWidth("a".repeat(15));
-    nColumns = type == COMPUTER ? 5 : 3;
+    nColumns = type == COMPUTER ? 5 : (type == KINDLE ? 1 : 3);
     wGap = (width-2*sideMargin-nColumns*columnWidth)/(2*marginToGap+nColumns-1);
     wMargin = marginToGap*wGap;
 }
@@ -54,7 +54,7 @@ function setup() {
 function draw() {
     background("black");
 
-    fill("orange");
+    fill("white");
     rect(0, 0, sideMargin, height);
     rect(width-sideMargin, 0, sideMargin, height);
 
