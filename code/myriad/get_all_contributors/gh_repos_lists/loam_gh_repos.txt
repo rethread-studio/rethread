@@ -67,3 +67,4 @@ rust-lang/libm
 rust-lang/log
 rust-num/num-traits
 probe-rs/rtt-target
+notepad-plus-plus/notepad-plus-plus

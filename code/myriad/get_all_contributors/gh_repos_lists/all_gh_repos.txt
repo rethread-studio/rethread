@@ -70,6 +70,7 @@ nextcloud/text
 nodejs/node
 nodemailer/nodemailer
 nolimits4web/swiper
+notepad-plus-plus/notepad-plus-plus
 npm/npm
 numpy/numpy
 openai/openai-node

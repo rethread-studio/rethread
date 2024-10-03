@@ -27,12 +27,21 @@ function loadRepos(myList, kind) {
     for (let el of myList) {
         if (el.length > 0 && el != "torvalds/linux") {
             let path = kind == "gh" ? "../get_all_contributors/gh_contributors/"+el.replaceAll("/", "&")+".txt" : "../get_all_contributors/other_contributors/"+el+".txt";
-            projectsData.push({
-                leftText: kind == "gh" ? el.split("/")[0] : el,
-                rightText: kind == "gh" ? el.split("/")[1] : el,
-                contributors: loadStrings(path)
-            });
+            let leftText = kind == "gh" ? el.split("/")[0] : el;
+            let rightText = kind == "gh" ? el.split("/")[1] : el;
+            loadStrings(path, strings => createProject(leftText, rightText, strings));
         }
+    }
+}
+
+function createProject(leftText, rightText, strings) {
+    let size = 500;
+    while (strings.length > 0) {
+        projectsData.push({
+            leftText: leftText,
+            rightText: rightText,
+            contributors: strings.splice(0, size)
+        });
     }
 }
 
@@ -52,8 +61,9 @@ function setup() {
     let contributorCount = 0;
 
     textFont(inconsolataRegular, textSize);
-    let marginToGap = 4;
+    let marginToGap = 3;
     for (let project of projectsData) {
+        if (project.contributors.length > MAX_CONTRIBUTORS) project.contributors.splice(MAX_CONTRIBUTORS);
         let columnWidth = 0;
         for (let contributor of project.contributors) {
             let w = textWidth(contributor);
