@@ -2,11 +2,11 @@ p5.disableFriendlyErrors = true;
 
 let inconsolataRegular, inconsolataSemiBold;
 
-const COMPUTER = 0, KINDLE = 1, TABLET = 2;
-let type = COMPUTER;
+const COMPUTER = 0, KINDLE = 1, TABLET = 2, SURFACE = 3, LAPTOP = 4;
+let type = LAPTOP;
 
 let w = 1024;
-let ratio = type == COMPUTER ? 3/4 : (type == KINDLE ? Math.sqrt(2) : 1.6);
+let ratio = type == COMPUTER ? 3/4 : (type == KINDLE ? Math.sqrt(2) : (type == TABLET ? 1.6 : (type == TABLET ? 9/16 : 0.625)));
 
 let project;
 
@@ -31,9 +31,9 @@ function setup() {
     noLoop();
     noStroke();
 
-    let possibilities = ["macOS", "Windows", "Google Docs", "Adobe Photoshop", "Adobe Illustrator", "Safari", "Facebook"];
-    if (type == 1) possibilities = ["Amazon.se"];
-    if (type == 2) possibilities = ["Instagram", "ChatGPT", "YouTube", "Gmail", "WhatsApp", "iOS"];
+    let possibilities = ["macOS", "Windows", "Google Docs", "Adobe Photoshop", "Adobe Illustrator", "Safari", "Facebook", "ChatGPT", "YouTube", "Gmail"];
+    if (type == KINDLE) possibilities = ["Amazon.se"];
+    if (type == TABLET) possibilities = ["Instagram", "WhatsApp", "iOS"];
     project = random(possibilities);
     //project = possibilities[0];
 
@@ -46,7 +46,7 @@ function setup() {
     let marginToGap = 4;
     textFont(inconsolataRegular, textSize);
     columnWidth = textWidth("a".repeat(15));
-    nColumns = type == COMPUTER ? 5 : (type == KINDLE ? 1 : 3);
+    nColumns = (type == COMPUTER || type == SURFACE || type == LAPTOP) ? 5 : (type == KINDLE ? 1 : 3);
     wGap = (width-2*sideMargin-nColumns*columnWidth)/(2*marginToGap+nColumns-1);
     wMargin = marginToGap*wGap;
 }
@@ -54,7 +54,7 @@ function setup() {
 function draw() {
     background("black");
 
-    fill("white");
+    fill(type == KINDLE ? "white" : "orange");
     rect(0, 0, sideMargin, height);
     rect(width-sideMargin, 0, sideMargin, height);
 
