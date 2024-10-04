@@ -36,6 +36,7 @@ function loadRepos(myList, kind) {
 
 function createProject(leftText, rightText, strings) {
     let size = 500;
+    shuffle(strings, true);
     while (strings.length > 0) {
         projectsData.push({
             leftText: leftText,
@@ -63,7 +64,6 @@ function setup() {
     textFont(inconsolataRegular, textSize);
     let marginToGap = 3;
     for (let project of projectsData) {
-        if (project.contributors.length > MAX_CONTRIBUTORS) project.contributors.splice(MAX_CONTRIBUTORS);
         let columnWidth = 0;
         for (let contributor of project.contributors) {
             let w = textWidth(contributor);
