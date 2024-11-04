@@ -1,0 +1,55 @@
+{
+ "repo_name": "korken89/fugit",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "korken89",
+   "contributions": 67
+  },
+  {
+   "type": "Bot",
+   "id": "bors[bot]",
+   "contributions": 12
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "burrbull",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "adamgreig",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "TDHolmes",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "andresv",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "haata",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "jannic",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "qiuchengxuan",
+   "contributions": 1
+  }
+ ]
+}

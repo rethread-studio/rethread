@@ -1,0 +1,125 @@
+{
+ "repo_name": "openai/openai-node",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "stainless-bot",
+   "contributions": 369
+  },
+  {
+   "type": "Bot",
+   "id": "stainless-app[bot]",
+   "contributions": 114
+  },
+  {
+   "type": "User",
+   "id": "schnerd",
+   "contributions": 65
+  },
+  {
+   "type": "User",
+   "id": "RobertCraigie",
+   "contributions": 31
+  },
+  {
+   "type": "User",
+   "id": "athyuttamre",
+   "contributions": 31
+  },
+  {
+   "type": "User",
+   "id": "jeevnayak",
+   "contributions": 14
+  },
+  {
+   "type": "User",
+   "id": "nknj",
+   "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "logankilpatrick",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "Just-Moh-it",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "deyaaeldeen",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "simonpfish",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "alexlevy0",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rattrayalex",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "AngelosP",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "arnif",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "darrenmce",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ceifa",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "guspan-tanadi",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "jacobzim-stl",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "granmoe",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "scottaddie",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "buster95",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "yjp20",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "meorphis",
+   "contributions": 1
+  }
+ ]
+}

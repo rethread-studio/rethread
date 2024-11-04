@@ -1,0 +1,350 @@
+{
+ "repo_name": "nextcloud/text",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "juliusknorr",
+   "contributions": 2153
+  },
+  {
+   "type": "User",
+   "id": "nextcloud-command",
+   "contributions": 1280
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 841
+  },
+  {
+   "type": "User",
+   "id": "nextcloud-bot",
+   "contributions": 804
+  },
+  {
+   "type": "User",
+   "id": "max-nextcloud",
+   "contributions": 745
+  },
+  {
+   "type": "User",
+   "id": "mejo-",
+   "contributions": 729
+  },
+  {
+   "type": "Bot",
+   "id": "renovate[bot]",
+   "contributions": 567
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot-preview[bot]",
+   "contributions": 376
+  },
+  {
+   "type": "Bot",
+   "id": "github-actions[bot]",
+   "contributions": 152
+  },
+  {
+   "type": "User",
+   "id": "susnux",
+   "contributions": 78
+  },
+  {
+   "type": "User",
+   "id": "luka-nextcloud",
+   "contributions": 78
+  },
+  {
+   "type": "User",
+   "id": "azul",
+   "contributions": 55
+  },
+  {
+   "type": "User",
+   "id": "nickvergessen",
+   "contributions": 35
+  },
+  {
+   "type": "User",
+   "id": "jancborchardt",
+   "contributions": 32
+  },
+  {
+   "type": "User",
+   "id": "skjnldsv",
+   "contributions": 30
+  },
+  {
+   "type": "User",
+   "id": "rullzer",
+   "contributions": 27
+  },
+  {
+   "type": "User",
+   "id": "julien-nc",
+   "contributions": 22
+  },
+  {
+   "type": "User",
+   "id": "ShGKme",
+   "contributions": 17
+  },
+  {
+   "type": "User",
+   "id": "elzody",
+   "contributions": 14
+  },
+  {
+   "type": "User",
+   "id": "szaimen",
+   "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "Valdnet",
+   "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "blizzz",
+   "contributions": 10
+  },
+  {
+   "type": "User",
+   "id": "Pytal",
+   "contributions": 10
+  },
+  {
+   "type": "User",
+   "id": "Raudius",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "AndyScherzinger",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "marcelklehr",
+   "contributions": 7
+  },
+  {
+   "type": "Bot",
+   "id": "npmbuildbot[bot]",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "ChristophWurst",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "MorrisJobke",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "PVince81",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "danxuliu",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "icewind1991",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "come-nc",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "grnd-alt",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "artonge",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "gary-kim",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "CarlSchwan",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "ashuio",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "rakekniven",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "georgehrke",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "ksoeren",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "zzkt",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "provokateurin",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "jeremy238",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "DerpgonCz",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "joshtrichards",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "kesselb",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "alexanderschau",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "bjornfor",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "snehar97",
+   "contributions": 1
+  },
+  {
+   "type": "Bot",
+   "id": "npmbuildbot-nextcloud[bot]",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nicofrand",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "goligo",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "dassio",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "vio",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "CommanderRoot",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "szmurlor",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "pierreozoux",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mijorus",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "LoneRifle",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "leifurhauks",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Jerome-Herbinet",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "violoncelloCH",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Hephi2",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "CodeAdminDe",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "enjeck",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "iw0nderhow",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ahstro",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "meonkeys",
+   "contributions": 1
+  }
+ ]
+}

@@ -1,0 +1,400 @@
+{
+ "repo_name": "textmate/textmate",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "sorbits",
+   "contributions": 5171
+  },
+  {
+   "type": "User",
+   "id": "rdwampler",
+   "contributions": 187
+  },
+  {
+   "type": "User",
+   "id": "jtbandes",
+   "contributions": 77
+  },
+  {
+   "type": "User",
+   "id": "dusek",
+   "contributions": 49
+  },
+  {
+   "type": "User",
+   "id": "nanoant",
+   "contributions": 35
+  },
+  {
+   "type": "User",
+   "id": "infininight",
+   "contributions": 31
+  },
+  {
+   "type": "User",
+   "id": "joachimm",
+   "contributions": 23
+  },
+  {
+   "type": "User",
+   "id": "sclukey",
+   "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "dennisvennink",
+   "contributions": 10
+  },
+  {
+   "type": "User",
+   "id": "mathbunnyru",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "bradchoate",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "dhowden",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "elia",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "mkhl",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "percontation",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "mads-hartmann",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "whitlockjc",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "jacob-carlborg",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "imxiaobo",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "ThatsJustCheesy",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "koenpunt",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "Nyx0uf",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "jakecast",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "ZevEisenberg",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "luikore",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "rhencke",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "vmpjdc",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "jbhannah",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "jgavris",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "neverpanic",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "schmidhauser",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "snoldak924",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ryandesign",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "remohammadi",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sanssecours",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ram-nadella",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "pravdomil",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "orta",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nathanieltagg",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mortonfox",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "meyer",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "AJ-Acevedo",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sergeche",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "veganstraightedge",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sudara",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sdefresne",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "tiktuk",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "waynn",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "yuuq",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "burgua",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "duanemoody",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "shadowbq",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "youngrok",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "aaronbrethorst",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "adammw",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "fish2000",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "estum",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "chuthan20",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "aredridel",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "bobrocke",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "briantkelley",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "charliepark",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "codykrieger",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "studioego",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "dmcdougall",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "caldwell",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "dlinz",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Dirklectisch",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "tiennou",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "etienne",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "fcrespo82",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "gabrfarina",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "garysweaver",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "granth",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mackuba",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "jasminlapalme",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "belkadan",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "joshgoebel",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "czekaj",
+   "contributions": 1
+  }
+ ]
+}

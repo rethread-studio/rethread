@@ -1,0 +1,65 @@
+{
+ "repo_name": "rust-embedded/critical-section",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "Dirbaio",
+   "contributions": 74
+  },
+  {
+   "type": "Bot",
+   "id": "bors[bot]",
+   "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "adamgreig",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "eldruin",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "jannic",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "reitermarkus",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "lulf",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "chrysn",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "Catamantaloedis",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "MabezDev",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "torrancew",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "vi",
+   "contributions": 1
+  }
+ ]
+}

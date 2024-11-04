@@ -1,0 +1,185 @@
+{
+ "repo_name": "mozsearch/mozsearch",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "asutherland",
+   "contributions": 524
+  },
+  {
+   "type": "User",
+   "id": "bill-mccloskey",
+   "contributions": 395
+  },
+  {
+   "type": "User",
+   "id": "staktrace",
+   "contributions": 385
+  },
+  {
+   "type": "User",
+   "id": "arai-a",
+   "contributions": 268
+  },
+  {
+   "type": "User",
+   "id": "emilio",
+   "contributions": 171
+  },
+  {
+   "type": "User",
+   "id": "nicolas-guichard",
+   "contributions": 35
+  },
+  {
+   "type": "User",
+   "id": "jsoref",
+   "contributions": 34
+  },
+  {
+   "type": "User",
+   "id": "theres-waldo",
+   "contributions": 26
+  },
+  {
+   "type": "User",
+   "id": "amccreight",
+   "contributions": 23
+  },
+  {
+   "type": "User",
+   "id": "mrbkap",
+   "contributions": 14
+  },
+  {
+   "type": "User",
+   "id": "Rob--W",
+   "contributions": 7
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "bgrins",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "makotokato",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "marco-c",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "mikeconley",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "glandium",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "mozfreddyb",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "sylvestre",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "anna-yeddi",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "kashav",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "mystor",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "ajvincent",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "calixteman",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "dpino",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "gijsk",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mstange",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "monperrus",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mnoorenberghe",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Mozilla-GitHub-Standards",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Ms2ger",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nchevobbe",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nhnt11",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "padenot",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "tomprince",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "buttercookie42",
+   "contributions": 1
+  }
+ ]
+}

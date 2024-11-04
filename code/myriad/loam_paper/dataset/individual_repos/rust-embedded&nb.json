@@ -1,0 +1,65 @@
+{
+ "repo_name": "rust-embedded/nb",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "eldruin",
+   "contributions": 18
+  },
+  {
+   "type": "User",
+   "id": "japaric",
+   "contributions": 16
+  },
+  {
+   "type": "Bot",
+   "id": "bors[bot]",
+   "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "elpiel",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "therealprof",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "Dirbaio",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "vitiral",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "Nemo157",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "homunkulus",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "Beanow",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "hannobraun",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "reitermarkus",
+   "contributions": 1
+  }
+ ]
+}

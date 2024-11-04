@@ -1,0 +1,200 @@
+{
+ "repo_name": "KhronosGroup/GLSL",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "gnl21",
+   "contributions": 108
+  },
+  {
+   "type": "User",
+   "id": "johnkslang",
+   "contributions": 80
+  },
+  {
+   "type": "User",
+   "id": "dgkoch",
+   "contributions": 75
+  },
+  {
+   "type": "User",
+   "id": "mbechard",
+   "contributions": 29
+  },
+  {
+   "type": "User",
+   "id": "jeffbolznv",
+   "contributions": 25
+  },
+  {
+   "type": "User",
+   "id": "Tobski",
+   "contributions": 21
+  },
+  {
+   "type": "User",
+   "id": "alan-baker",
+   "contributions": 18
+  },
+  {
+   "type": "User",
+   "id": "oddhack",
+   "contributions": 17
+  },
+  {
+   "type": "User",
+   "id": "wooyoungqcom",
+   "contributions": 17
+  },
+  {
+   "type": "User",
+   "id": "dj2",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "WyvernWang",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "alelenv",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "nvpbrown",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "jackohound",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "ewerness-nv",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "kpet",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "stu-s",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "pdaniell-nv",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "janharaldfredriksen-arm",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "AaronHaganAMD",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "mchock-nv",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "pow2clk",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "cmarcelo",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "abhilash1910",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "wycwang",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "wycwang0823",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "vkushwaha-nv",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "tsuoranta",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "svenvh",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sparmarNV",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rg3igalia",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "pknowlesnv",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "silverclaw",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "m-kim",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "JoshuaBarczak-Intel",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "gfxstrand",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "DadSchoorse",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "C3pa",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "alegal-arm",
+   "contributions": 1
+  }
+ ]
+}

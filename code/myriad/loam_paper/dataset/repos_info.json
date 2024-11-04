@@ -1,0 +1,734 @@
+[
+ {
+  "repo_name": "BelaPlatform/Bela",
+  "total_contributions": 3375,
+  "anonymous_contributors": 9,
+  "nonanonymous_contributors": 32
+ },
+ {
+  "repo_name": "EnvelopSound/EnvelopForLive",
+  "total_contributions": 613,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 8
+ },
+ {
+  "repo_name": "FFmpeg/FFmpeg",
+  "total_contributions": 117235,
+  "anonymous_contributors": 2097,
+  "nonanonymous_contributors": 311
+ },
+ {
+  "repo_name": "GNOME/gimp",
+  "total_contributions": 46125,
+  "anonymous_contributors": 936,
+  "nonanonymous_contributors": 166
+ },
+ {
+  "repo_name": "HandBrake/HandBrake",
+  "total_contributions": 12717,
+  "anonymous_contributors": 27,
+  "nonanonymous_contributors": 116
+ },
+ {
+  "repo_name": "KDE/plasma-desktop",
+  "total_contributions": 12492,
+  "anonymous_contributors": 55,
+  "nonanonymous_contributors": 303
+ },
+ {
+  "repo_name": "KhronosGroup/GLSL",
+  "total_contributions": 477,
+  "anonymous_contributors": 8,
+  "nonanonymous_contributors": 39
+ },
+ {
+  "repo_name": "KhronosGroup/WebGL",
+  "total_contributions": 6728,
+  "anonymous_contributors": 67,
+  "nonanonymous_contributors": 156
+ },
+ {
+  "repo_name": "KhronosGroup/glslang",
+  "total_contributions": 5153,
+  "anonymous_contributors": 29,
+  "nonanonymous_contributors": 297
+ },
+ {
+  "repo_name": "LibreOffice/core",
+  "total_contributions": 499953,
+  "anonymous_contributors": 2453,
+  "nonanonymous_contributors": 167
+ },
+ {
+  "repo_name": "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
+  "total_contributions": 7,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 2
+ },
+ {
+  "repo_name": "NVlabs/stylegan2",
+  "total_contributions": 19,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 3
+ },
+ {
+  "repo_name": "PipeWire/pipewire",
+  "total_contributions": 12972,
+  "anonymous_contributors": 49,
+  "nonanonymous_contributors": 289
+ },
+ {
+  "repo_name": "ProtonMail/WebClients",
+  "total_contributions": 38871,
+  "anonymous_contributors": 111,
+  "nonanonymous_contributors": 65
+ },
+ {
+  "repo_name": "TU-Studio/IEMPluginSuite",
+  "total_contributions": 1489,
+  "anonymous_contributors": 12,
+  "nonanonymous_contributors": 8
+ },
+ {
+  "repo_name": "VSCodium/vscodium",
+  "total_contributions": 1320,
+  "anonymous_contributors": 13,
+  "nonanonymous_contributors": 103
+ },
+ {
+  "repo_name": "WebAudio/web-audio-api",
+  "total_contributions": 3314,
+  "anonymous_contributors": 15,
+  "nonanonymous_contributors": 63
+ },
+ {
+  "repo_name": "WebAudio/web-midi-api",
+  "total_contributions": 307,
+  "anonymous_contributors": 5,
+  "nonanonymous_contributors": 25
+ },
+ {
+  "repo_name": "arduino/Arduino",
+  "total_contributions": 7376,
+  "anonymous_contributors": 54,
+  "nonanonymous_contributors": 250
+ },
+ {
+  "repo_name": "arduino/ArduinoCore-API",
+  "total_contributions": 348,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 37
+ },
+ {
+  "repo_name": "arduino/arduino-ide",
+  "total_contributions": 1422,
+  "anonymous_contributors": 7,
+  "nonanonymous_contributors": 37
+ },
+ {
+  "repo_name": "audacity/audacity",
+  "total_contributions": 20468,
+  "anonymous_contributors": 65,
+  "nonanonymous_contributors": 217
+ },
+ {
+  "repo_name": "autonomousvision/projected-gan",
+  "total_contributions": 23,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 4
+ },
+ {
+  "repo_name": "brandongmwong/elizabot-js",
+  "total_contributions": 4,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 1
+ },
+ {
+  "repo_name": "brave/brave-browser",
+  "total_contributions": 8889,
+  "anonymous_contributors": 10,
+  "nonanonymous_contributors": 94
+ },
+ {
+  "repo_name": "brave/brave-core",
+  "total_contributions": 65397,
+  "anonymous_contributors": 158,
+  "nonanonymous_contributors": 290
+ },
+ {
+  "repo_name": "btel/svg_utils",
+  "total_contributions": 198,
+  "anonymous_contributors": 4,
+  "nonanonymous_contributors": 22
+ },
+ {
+  "repo_name": "caprover/caprover",
+  "total_contributions": 1682,
+  "anonymous_contributors": 5,
+  "nonanonymous_contributors": 56
+ },
+ {
+  "repo_name": "carstenlebek/svelte-email",
+  "total_contributions": 50,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 4
+ },
+ {
+  "repo_name": "coqui-ai/TTS",
+  "total_contributions": 4668,
+  "anonymous_contributors": 20,
+  "nonanonymous_contributors": 146
+ },
+ {
+  "repo_name": "cuviper/autocfg",
+  "total_contributions": 112,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 10
+ },
+ {
+  "repo_name": "djc/rustc-version-rs",
+  "total_contributions": 116,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 15
+ },
+ {
+  "repo_name": "dtolnay/proc-macro2",
+  "total_contributions": 1147,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 28
+ },
+ {
+  "repo_name": "dtolnay/quote",
+  "total_contributions": 644,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 24
+ },
+ {
+  "repo_name": "dtolnay/semver",
+  "total_contributions": 641,
+  "anonymous_contributors": 3,
+  "nonanonymous_contributors": 62
+ },
+ {
+  "repo_name": "dtolnay/syn",
+  "total_contributions": 4823,
+  "anonymous_contributors": 4,
+  "nonanonymous_contributors": 95
+ },
+ {
+  "repo_name": "dtolnay/unicode-ident",
+  "total_contributions": 146,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 1
+ },
+ {
+  "repo_name": "electro-smith/libDaisy",
+  "total_contributions": 1287,
+  "anonymous_contributors": 5,
+  "nonanonymous_contributors": 39
+ },
+ {
+  "repo_name": "emacs-mirror/emacs",
+  "total_contributions": 175382,
+  "anonymous_contributors": 1373,
+  "nonanonymous_contributors": 331
+ },
+ {
+  "repo_name": "espressif/arduino-esp32",
+  "total_contributions": 2796,
+  "anonymous_contributors": 278,
+  "nonanonymous_contributors": 459
+ },
+ {
+  "repo_name": "festvox/festival",
+  "total_contributions": 81,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 7
+ },
+ {
+  "repo_name": "git/git",
+  "total_contributions": 75191,
+  "anonymous_contributors": 1834,
+  "nonanonymous_contributors": 416
+ },
+ {
+  "repo_name": "github/docs",
+  "total_contributions": 50926,
+  "anonymous_contributors": 2104,
+  "nonanonymous_contributors": 431
+ },
+ {
+  "repo_name": "github/rest-api-description",
+  "total_contributions": 2610,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 23
+ },
+ {
+  "repo_name": "googlefonts/Inconsolata",
+  "total_contributions": 171,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 8
+ },
+ {
+  "repo_name": "hideakitai/ESP32SPISlave",
+  "total_contributions": 59,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 3
+ },
+ {
+  "repo_name": "huggingface/chat-ui",
+  "total_contributions": 1098,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 108
+ },
+ {
+  "repo_name": "i3/i3.github.io",
+  "total_contributions": 573,
+  "anonymous_contributors": 9,
+  "nonanonymous_contributors": 44
+ },
+ {
+  "repo_name": "image-rs/image",
+  "total_contributions": 3357,
+  "anonymous_contributors": 28,
+  "nonanonymous_contributors": 306
+ },
+ {
+  "repo_name": "indexmap-rs/indexmap",
+  "total_contributions": 847,
+  "anonymous_contributors": 4,
+  "nonanonymous_contributors": 40
+ },
+ {
+  "repo_name": "inkscape/inkscape",
+  "total_contributions": 89,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 10
+ },
+ {
+  "repo_name": "jackaudio/jack2",
+  "total_contributions": 4072,
+  "anonymous_contributors": 28,
+  "nonanonymous_contributors": 92
+ },
+ {
+  "repo_name": "joshnuss/svelte-persisted-store",
+  "total_contributions": 338,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 15
+ },
+ {
+  "repo_name": "keenethics/svelte-notifications",
+  "total_contributions": 141,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 19
+ },
+ {
+  "repo_name": "kirovj/pocketbase-pyclient",
+  "total_contributions": 45,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 1
+ },
+ {
+  "repo_name": "korken89/fugit",
+  "total_contributions": 101,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 10
+ },
+ {
+  "repo_name": "matplotlib/matplotlib",
+  "total_contributions": 51279,
+  "anonymous_contributors": 1323,
+  "nonanonymous_contributors": 419
+ },
+ {
+  "repo_name": "meta-llama/llama-models",
+  "total_contributions": 138,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 27
+ },
+ {
+  "repo_name": "microsoft/TypeScript",
+  "total_contributions": 36279,
+  "anonymous_contributors": 542,
+  "nonanonymous_contributors": 345
+ },
+ {
+  "repo_name": "microsoft/vscode",
+  "total_contributions": 126597,
+  "anonymous_contributors": 2263,
+  "nonanonymous_contributors": 334
+ },
+ {
+  "repo_name": "moment/moment",
+  "total_contributions": 4064,
+  "anonymous_contributors": 290,
+  "nonanonymous_contributors": 400
+ },
+ {
+  "repo_name": "mossblaser/plottie",
+  "total_contributions": 29,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 1
+ },
+ {
+  "repo_name": "mozilla/gecko-dev",
+  "total_contributions": 935396,
+  "anonymous_contributors": 11409,
+  "nonanonymous_contributors": 278
+ },
+ {
+  "repo_name": "mozman/svgwrite",
+  "total_contributions": 394,
+  "anonymous_contributors": 5,
+  "nonanonymous_contributors": 19
+ },
+ {
+  "repo_name": "mozsearch/mozsearch",
+  "total_contributions": 1942,
+  "anonymous_contributors": 5,
+  "nonanonymous_contributors": 36
+ },
+ {
+  "repo_name": "mrdoob/three.js",
+  "total_contributions": 44345,
+  "anonymous_contributors": 1961,
+  "nonanonymous_contributors": 364
+ },
+ {
+  "repo_name": "nextcloud/collectives",
+  "total_contributions": 3708,
+  "anonymous_contributors": 13,
+  "nonanonymous_contributors": 58
+ },
+ {
+  "repo_name": "nextcloud/server",
+  "total_contributions": 77815,
+  "anonymous_contributors": 905,
+  "nonanonymous_contributors": 352
+ },
+ {
+  "repo_name": "nextcloud/spreed",
+  "total_contributions": 21169,
+  "anonymous_contributors": 16,
+  "nonanonymous_contributors": 101
+ },
+ {
+  "repo_name": "nextcloud/talk-android",
+  "total_contributions": 9690,
+  "anonymous_contributors": 11,
+  "nonanonymous_contributors": 42
+ },
+ {
+  "repo_name": "nextcloud/text",
+  "total_contributions": 8606,
+  "anonymous_contributors": 4,
+  "nonanonymous_contributors": 69
+ },
+ {
+  "repo_name": "nodejs/node",
+  "total_contributions": 42752,
+  "anonymous_contributors": 3602,
+  "nonanonymous_contributors": 436
+ },
+ {
+  "repo_name": "nodemailer/nodemailer",
+  "total_contributions": 1069,
+  "anonymous_contributors": 33,
+  "nonanonymous_contributors": 124
+ },
+ {
+  "repo_name": "nolimits4web/swiper",
+  "total_contributions": 3693,
+  "anonymous_contributors": 48,
+  "nonanonymous_contributors": 288
+ },
+ {
+  "repo_name": "notepad-plus-plus/notepad-plus-plus",
+  "total_contributions": 6026,
+  "anonymous_contributors": 49,
+  "nonanonymous_contributors": 369
+ },
+ {
+  "repo_name": "npm/npm",
+  "total_contributions": 8338,
+  "anonymous_contributors": 146,
+  "nonanonymous_contributors": 423
+ },
+ {
+  "repo_name": "numpy/numpy",
+  "total_contributions": 37358,
+  "anonymous_contributors": 1403,
+  "nonanonymous_contributors": 433
+ },
+ {
+  "repo_name": "openai/openai-node",
+  "total_contributions": 682,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 24
+ },
+ {
+  "repo_name": "openframeworks/openFrameworks",
+  "total_contributions": 17448,
+  "anonymous_contributors": 150,
+  "nonanonymous_contributors": 289
+ },
+ {
+  "repo_name": "otuva/handwriting-synthesis",
+  "total_contributions": 86,
+  "anonymous_contributors": 3,
+  "nonanonymous_contributors": 3
+ },
+ {
+  "repo_name": "pocketbase/pocketbase",
+  "total_contributions": 1437,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 39
+ },
+ {
+  "repo_name": "popcornmix/omxplayer",
+  "total_contributions": 531,
+  "anonymous_contributors": 14,
+  "nonanonymous_contributors": 53
+ },
+ {
+  "repo_name": "probe-rs/rtt-target",
+  "total_contributions": 102,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 19
+ },
+ {
+  "repo_name": "processing/p5.js",
+  "total_contributions": 11670,
+  "anonymous_contributors": 419,
+  "nonanonymous_contributors": 357
+ },
+ {
+  "repo_name": "processing/processing",
+  "total_contributions": 13211,
+  "anonymous_contributors": 29,
+  "nonanonymous_contributors": 109
+ },
+ {
+  "repo_name": "pure-data/pure-data",
+  "total_contributions": 7002,
+  "anonymous_contributors": 30,
+  "nonanonymous_contributors": 83
+ },
+ {
+  "repo_name": "python/cpython",
+  "total_contributions": 124202,
+  "anonymous_contributors": 2753,
+  "nonanonymous_contributors": 350
+ },
+ {
+  "repo_name": "ritwickdey/vscode-live-server",
+  "total_contributions": 328,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 34
+ },
+ {
+  "repo_name": "rtic-rs/rtic",
+  "total_contributions": 1745,
+  "anonymous_contributors": 8,
+  "nonanonymous_contributors": 86
+ },
+ {
+  "repo_name": "rtyley/bfg-repo-cleaner",
+  "total_contributions": 488,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 5
+ },
+ {
+  "repo_name": "rust-embedded/bare-metal",
+  "total_contributions": 87,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 17
+ },
+ {
+  "repo_name": "rust-embedded/cortex-m",
+  "total_contributions": 1524,
+  "anonymous_contributors": 6,
+  "nonanonymous_contributors": 98
+ },
+ {
+  "repo_name": "rust-embedded/critical-section",
+  "total_contributions": 131,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 12
+ },
+ {
+  "repo_name": "rust-embedded/embedded-alloc",
+  "total_contributions": 171,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 28
+ },
+ {
+  "repo_name": "rust-embedded/embedded-hal",
+  "total_contributions": 885,
+  "anonymous_contributors": 3,
+  "nonanonymous_contributors": 64
+ },
+ {
+  "repo_name": "rust-embedded/nb",
+  "total_contributions": 65,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 12
+ },
+ {
+  "repo_name": "rust-embedded/volatile-register",
+  "total_contributions": 28,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 7
+ },
+ {
+  "repo_name": "rust-lang/cargo",
+  "total_contributions": 18857,
+  "anonymous_contributors": 743,
+  "nonanonymous_contributors": 420
+ },
+ {
+  "repo_name": "rust-lang/hashbrown",
+  "total_contributions": 1066,
+  "anonymous_contributors": 9,
+  "nonanonymous_contributors": 103
+ },
+ {
+  "repo_name": "rust-lang/libm",
+  "total_contributions": 521,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 53
+ },
+ {
+  "repo_name": "rust-lang/log",
+  "total_contributions": 834,
+  "anonymous_contributors": 12,
+  "nonanonymous_contributors": 109
+ },
+ {
+  "repo_name": "rust-lang/rust",
+  "total_contributions": 269636,
+  "anonymous_contributors": 6580,
+  "nonanonymous_contributors": 445
+ },
+ {
+  "repo_name": "rust-num/num-traits",
+  "total_contributions": 1163,
+  "anonymous_contributors": 13,
+  "nonanonymous_contributors": 115
+ },
+ {
+  "repo_name": "sass/sass",
+  "total_contributions": 886,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 26
+ },
+ {
+  "repo_name": "sc00/svelte-textarea-auto-height",
+  "total_contributions": 7,
+  "anonymous_contributors": 0,
+  "nonanonymous_contributors": 1
+ },
+ {
+  "repo_name": "scikit-learn/scikit-learn",
+  "total_contributions": 31848,
+  "anonymous_contributors": 2804,
+  "nonanonymous_contributors": 409
+ },
+ {
+  "repo_name": "scipy/scipy",
+  "total_contributions": 33669,
+  "anonymous_contributors": 1290,
+  "nonanonymous_contributors": 413
+ },
+ {
+  "repo_name": "signalapp/Signal-Android",
+  "total_contributions": 15614,
+  "anonymous_contributors": 47,
+  "nonanonymous_contributors": 303
+ },
+ {
+  "repo_name": "signalapp/Signal-Desktop",
+  "total_contributions": 11172,
+  "anonymous_contributors": 38,
+  "nonanonymous_contributors": 219
+ },
+ {
+  "repo_name": "signalapp/Signal-iOS",
+  "total_contributions": 35091,
+  "anonymous_contributors": 27,
+  "nonanonymous_contributors": 148
+ },
+ {
+  "repo_name": "sjvasquez/handwriting-synthesis",
+  "total_contributions": 22,
+  "anonymous_contributors": 3,
+  "nonanonymous_contributors": 0
+ },
+ {
+  "repo_name": "steveklabnik/semver-parser",
+  "total_contributions": 125,
+  "anonymous_contributors": 2,
+  "nonanonymous_contributors": 16
+ },
+ {
+  "repo_name": "stm32-rs/stm32h7xx-hal",
+  "total_contributions": 1328,
+  "anonymous_contributors": 4,
+  "nonanonymous_contributors": 49
+ },
+ {
+  "repo_name": "supercollider/sc3-plugins",
+  "total_contributions": 1385,
+  "anonymous_contributors": 20,
+  "nonanonymous_contributors": 52
+ },
+ {
+  "repo_name": "supercollider/supercollider",
+  "total_contributions": 26302,
+  "anonymous_contributors": 122,
+  "nonanonymous_contributors": 216
+ },
+ {
+  "repo_name": "sveltejs/svelte",
+  "total_contributions": 9573,
+  "anonymous_contributors": 369,
+  "nonanonymous_contributors": 414
+ },
+ {
+  "repo_name": "tarcieri/micromath",
+  "total_contributions": 163,
+  "anonymous_contributors": 1,
+  "nonanonymous_contributors": 8
+ },
+ {
+  "repo_name": "tensorflow/tensorflow",
+  "total_contributions": 171536,
+  "anonymous_contributors": 4300,
+  "nonanonymous_contributors": 406
+ },
+ {
+  "repo_name": "textmate/textmate",
+  "total_contributions": 5756,
+  "anonymous_contributors": 18,
+  "nonanonymous_contributors": 79
+ },
+ {
+  "repo_name": "v8/v8",
+  "total_contributions": 91435,
+  "anonymous_contributors": 910,
+  "nonanonymous_contributors": 205
+ },
+ {
+  "repo_name": "videolan/vlc",
+  "total_contributions": 104754,
+  "anonymous_contributors": 750,
+  "nonanonymous_contributors": 292
+ },
+ {
+  "repo_name": "vitejs/vite",
+  "total_contributions": 7194,
+  "anonymous_contributors": 611,
+  "nonanonymous_contributors": 440
+ }
+]

@@ -1,0 +1,145 @@
+{
+ "repo_name": "rust-embedded/embedded-alloc",
+ "contributors": [
+  {
+   "type": "Bot",
+   "id": "bors[bot]",
+   "contributions": 32
+  },
+  {
+   "type": "User",
+   "id": "japaric",
+   "contributions": 26
+  },
+  {
+   "type": "User",
+   "id": "newAM",
+   "contributions": 22
+  },
+  {
+   "type": "User",
+   "id": "Dirbaio",
+   "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "jannic",
+   "contributions": 10
+  },
+  {
+   "type": "User",
+   "id": "rmja",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "adamgreig",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "trueb2",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "phil-opp",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "thalesfragoso",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "f-bro",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "jonas-schievink",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "thejpster",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "oli-obk",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "eldruin",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "avlec",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sno2",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "xkr47",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "LeSeulArtichaut",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "reitermarkus",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Nicoretti",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nviennot",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rursprung",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rukai",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Spadi0",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sbechet",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "VictorKoenders",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "wcampbell0x2a",
+   "contributions": 1
+  }
+ ]
+}

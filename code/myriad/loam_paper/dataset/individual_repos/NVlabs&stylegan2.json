@@ -1,0 +1,20 @@
+{
+ "repo_name": "NVlabs/stylegan2",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "tkarras",
+   "contributions": 17
+  },
+  {
+   "type": "User",
+   "id": "jannehellsten",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nurpax",
+   "contributions": 1
+  }
+ ]
+}

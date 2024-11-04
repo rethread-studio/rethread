@@ -47,11 +47,10 @@ def get_gh_contributors(repo):
 	
 	return total_contributions, contributors_list, identified_contributors
 
-def get_gh_commit_history(repo, end_date):
+def get_gh_commit_history(repo, end_date = datetime.now().astimezone()):
 	print("Getting commits")
 
 	start_date = repo.created_at.astimezone()
-	end_date = datetime.now().astimezone()
 	total_days = (end_date - start_date).days
 	n_periods = 32
 	period_days = total_days // n_periods
