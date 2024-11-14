@@ -49,7 +49,7 @@
   {
    "type": "User",
    "id": "nicolasfella",
-   "contributions": 287
+   "contributions": 292
   },
   {
    "type": "User",
@@ -83,6 +83,11 @@
   },
   {
    "type": "User",
+   "id": "veggero",
+   "contributions": 111
+  },
+  {
+   "type": "User",
    "id": "ivan-cukic",
    "contributions": 110
   },
@@ -90,11 +95,6 @@
    "type": "User",
    "id": "caybro",
    "contributions": 110
-  },
-  {
-   "type": "User",
-   "id": "veggero",
-   "contributions": 109
   },
   {
    "type": "User",
@@ -113,6 +113,11 @@
   },
   {
    "type": "User",
+   "id": "redstrate",
+   "contributions": 77
+  },
+  {
+   "type": "User",
    "id": "nowrep",
    "contributions": 70
   },
@@ -125,11 +130,6 @@
    "type": "User",
    "id": "wkai",
    "contributions": 65
-  },
-  {
-   "type": "User",
-   "id": "redstrate",
-   "contributions": 62
   },
   {
    "type": "User",
@@ -233,6 +233,11 @@
   },
   {
    "type": "User",
+   "id": "Akselmo",
+   "contributions": 29
+  },
+  {
+   "type": "User",
    "id": "meven",
    "contributions": 28
   },
@@ -240,11 +245,6 @@
    "type": "User",
    "id": "romangg",
    "contributions": 27
-  },
-  {
-   "type": "User",
-   "id": "Akselmo",
-   "contributions": 26
   },
   {
    "type": "User",
@@ -688,11 +688,6 @@
   },
   {
    "type": "User",
-   "id": "kensington",
-   "contributions": 3
-  },
-  {
-   "type": "User",
    "id": "mufeedali",
    "contributions": 3
   },
@@ -833,42 +828,7 @@
   },
   {
    "type": "User",
-   "id": "elkrejzi",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "wolfpld",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "Be-ing",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "berolinux",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "chrys87",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "claell",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "DaanDeMeyer",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "dominichayesferen",
+   "id": "Filip-Kendes",
    "contributions": 2
   },
   {
@@ -878,8 +838,48 @@
   },
   {
    "type": "User",
-   "id": "Filip-Kendes",
+   "id": "dominichayesferen",
    "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "DaanDeMeyer",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "claell",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "chrys87",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "berolinux",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "Be-ing",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "wolfpld",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "elkrejzi",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "oxalica",
+   "contributions": 1
   },
   {
    "type": "User",
@@ -913,12 +913,12 @@
   },
   {
    "type": "User",
-   "id": "oxalica",
+   "id": "Silver-Saucepan",
    "contributions": 1
   },
   {
    "type": "User",
-   "id": "Silver-Saucepan",
+   "id": "Mel34",
    "contributions": 1
   },
   {
@@ -969,6 +969,11 @@
   {
    "type": "User",
    "id": "mthw0",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "matteo-dinoia",
    "contributions": 1
   },
   {
@@ -1173,11 +1178,6 @@
   },
   {
    "type": "User",
-   "id": "bacteriostat",
-   "contributions": 1
-  },
-  {
-   "type": "User",
    "id": "bastianbeischer",
    "contributions": 1
   },
@@ -1268,6 +1268,11 @@
   },
   {
    "type": "User",
+   "id": "Fealer",
+   "contributions": 1
+  },
+  {
+   "type": "User",
    "id": "AkiSakurai",
    "contributions": 1
   },
@@ -1348,6 +1353,11 @@
   },
   {
    "type": "User",
+   "id": "bacteriostat",
+   "contributions": 1
+  },
+  {
+   "type": "User",
    "id": "cmacq2",
    "contributions": 1
   },
@@ -1369,6 +1379,11 @@
   {
    "type": "User",
    "id": "juliuszint",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "JLP",
    "contributions": 1
   },
   {
@@ -1419,11 +1434,6 @@
   {
    "type": "User",
    "id": "kasars",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "Fealer",
    "contributions": 1
   },
   {

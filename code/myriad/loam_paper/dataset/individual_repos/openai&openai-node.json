@@ -9,7 +9,7 @@
   {
    "type": "Bot",
    "id": "stainless-app[bot]",
-   "contributions": 114
+   "contributions": 124
   },
   {
    "type": "User",
@@ -19,7 +19,7 @@
   {
    "type": "User",
    "id": "RobertCraigie",
-   "contributions": 31
+   "contributions": 32
   },
   {
    "type": "User",
@@ -44,6 +44,11 @@
   {
    "type": "User",
    "id": "Just-Moh-it",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "yjp20",
    "contributions": 5
   },
   {
@@ -109,11 +114,6 @@
   {
    "type": "User",
    "id": "buster95",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "yjp20",
    "contributions": 1
   },
   {

@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "KodrAus",
-   "contributions": 261
+   "contributions": 263
   },
   {
    "type": "User",
@@ -278,7 +278,7 @@
   },
   {
    "type": "User",
-   "id": "suhr",
+   "id": "Kintaro",
    "contributions": 1
   },
   {
@@ -343,7 +343,12 @@
   },
   {
    "type": "User",
-   "id": "lionel-faber",
+   "id": "chrivers",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "suhr",
    "contributions": 1
   },
   {
@@ -413,12 +418,7 @@
   },
   {
    "type": "User",
-   "id": "Kintaro",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "chrivers",
+   "id": "stevenroose",
    "contributions": 1
   },
   {
@@ -434,6 +434,11 @@
   {
    "type": "User",
    "id": "bcko",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "SpriteOvO",
    "contributions": 1
   },
   {
@@ -474,6 +479,11 @@
   {
    "type": "User",
    "id": "zensh",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "lionel-faber",
    "contributions": 1
   },
   {

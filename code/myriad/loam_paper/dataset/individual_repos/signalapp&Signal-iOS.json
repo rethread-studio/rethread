@@ -29,7 +29,7 @@
   {
    "type": "User",
    "id": "max-signal",
-   "contributions": 1632
+   "contributions": 1656
   },
   {
    "type": "User",
@@ -39,7 +39,7 @@
   {
    "type": "User",
    "id": "harry-signal",
-   "contributions": 1340
+   "contributions": 1381
   },
   {
    "type": "User",
@@ -49,12 +49,12 @@
   {
    "type": "User",
    "id": "sashaweiss-signal",
-   "contributions": 675
+   "contributions": 681
   },
   {
    "type": "User",
    "id": "jrose-signal",
-   "contributions": 549
+   "contributions": 551
   },
   {
    "type": "User",
@@ -64,7 +64,7 @@
   {
    "type": "User",
    "id": "ehrenkret-signal",
-   "contributions": 391
+   "contributions": 400
   },
   {
    "type": "User",
@@ -74,7 +74,7 @@
   {
    "type": "User",
    "id": "pete-signal",
-   "contributions": 351
+   "contributions": 359
   },
   {
    "type": "User",
@@ -84,7 +84,7 @@
   {
    "type": "User",
    "id": "marissa-signal",
-   "contributions": 230
+   "contributions": 234
   },
   {
    "type": "User",
@@ -94,7 +94,7 @@
   {
    "type": "User",
    "id": "elaine-signal",
-   "contributions": 202
+   "contributions": 214
   },
   {
    "type": "User",
@@ -103,13 +103,13 @@
   },
   {
    "type": "User",
-   "id": "jim-signal",
-   "contributions": 123
+   "id": "sharplet-signal",
+   "contributions": 126
   },
   {
    "type": "User",
-   "id": "sharplet-signal",
-   "contributions": 119
+   "id": "jim-signal",
+   "contributions": 123
   },
   {
    "type": "User",
@@ -178,12 +178,7 @@
   },
   {
    "type": "User",
-   "id": "mdouglass",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "roostr",
+   "id": "ftlno",
    "contributions": 6
   },
   {
@@ -193,8 +188,18 @@
   },
   {
    "type": "User",
-   "id": "ftlno",
+   "id": "roostr",
    "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "mdouglass",
+   "contributions": 6
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 5
   },
   {
    "type": "User",
@@ -203,32 +208,7 @@
   },
   {
    "type": "User",
-   "id": "skjiisa",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "awaitlink",
-   "contributions": 4
-  },
-  {
-   "type": "Bot",
-   "id": "dependabot[bot]",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "orta",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "jlund-signal",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "jschneier",
+   "id": "akonradi-signal",
    "contributions": 4
   },
   {
@@ -238,7 +218,27 @@
   },
   {
    "type": "User",
-   "id": "akonradi-signal",
+   "id": "jschneier",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "jlund-signal",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "orta",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "awaitlink",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "skjiisa",
    "contributions": 4
   },
   {

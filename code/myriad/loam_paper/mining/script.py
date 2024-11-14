@@ -1,5 +1,6 @@
 from github import Github
 from github import Auth
+import csv
 import json
 import sys
 
@@ -53,19 +54,21 @@ def save_repo_data(repo_name, contributors_list):
 	with open(filename + ".json", "w") as fp:
 		json.dump(repo_data, fp, indent = 1)
 
-with open("./repo_list.txt", "r") as f:
-    repo_list = [line.rstrip() for line in f]
+with open("./repo_list.csv", mode = "r") as f:
+	csvFile = csv.reader(f)
+	repos = [line for line in csvFile]
 
 repos_info = []
 all_contributors = []
-for repo_name in repo_list:
+for [repo_name, category] in repos:
 	print(repo_name)
 	try:
 		contributors_list, total_contributions, count_anonymous_contributors = get_contributors(repo_name)
 		save_repo_data(repo_name, contributors_list)
 
 		repo_info = {
-			"repo_name": repo_name,
+			"name": repo_name,
+			"category": category,
 			"total_contributions": total_contributions,
 			"anonymous_contributors": count_anonymous_contributors,
 			"nonanonymous_contributors": len(contributors_list)

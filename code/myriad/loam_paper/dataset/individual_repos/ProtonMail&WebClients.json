@@ -4,22 +4,22 @@
   {
    "type": "User",
    "id": "mmso",
-   "contributions": 4233
+   "contributions": 4276
   },
   {
    "type": "User",
    "id": "EpokK",
-   "contributions": 3002
+   "contributions": 3015
   },
   {
    "type": "User",
    "id": "edvincandon",
-   "contributions": 2403
+   "contributions": 2504
   },
   {
    "type": "User",
    "id": "nico3333fr",
-   "contributions": 2167
+   "contributions": 2168
   },
   {
    "type": "User",
@@ -34,7 +34,7 @@
   {
    "type": "User",
    "id": "StraightOuttaCrompton",
-   "contributions": 1102
+   "contributions": 1103
   },
   {
    "type": "User",
@@ -44,7 +44,12 @@
   {
    "type": "User",
    "id": "Guillaumez",
-   "contributions": 887
+   "contributions": 894
+  },
+  {
+   "type": "User",
+   "id": "flavienbonvin",
+   "contributions": 744
   },
   {
    "type": "User",
@@ -53,18 +58,18 @@
   },
   {
    "type": "User",
-   "id": "flavienbonvin",
-   "contributions": 716
+   "id": "lkpch",
+   "contributions": 535
   },
   {
    "type": "User",
-   "id": "lkpch",
-   "contributions": 526
+   "id": "D-Bao",
+   "contributions": 458
   },
   {
    "type": "User",
    "id": "HeadFox",
-   "contributions": 456
+   "contributions": 458
   },
   {
    "type": "User",
@@ -74,12 +79,7 @@
   {
    "type": "User",
    "id": "horejsek",
-   "contributions": 436
-  },
-  {
-   "type": "User",
-   "id": "D-Bao",
-   "contributions": 425
+   "contributions": 443
   },
   {
    "type": "User",
@@ -98,6 +98,11 @@
   },
   {
    "type": "User",
+   "id": "p2kmgcl",
+   "contributions": 222
+  },
+  {
+   "type": "User",
    "id": "WebAtProton",
    "contributions": 221
   },
@@ -105,11 +110,6 @@
    "type": "User",
    "id": "sergonius",
    "contributions": 217
-  },
-  {
-   "type": "User",
-   "id": "p2kmgcl",
-   "contributions": 215
   },
   {
    "type": "User",
@@ -133,8 +133,13 @@
   },
   {
    "type": "User",
+   "id": "djankovic",
+   "contributions": 190
+  },
+  {
+   "type": "User",
    "id": "larabr",
-   "contributions": 172
+   "contributions": 174
   },
   {
    "type": "User",
@@ -143,13 +148,8 @@
   },
   {
    "type": "User",
-   "id": "djankovic",
-   "contributions": 167
-  },
-  {
-   "type": "User",
    "id": "AleTid5",
-   "contributions": 139
+   "contributions": 150
   },
   {
    "type": "User",
@@ -184,16 +184,16 @@
   {
    "type": "User",
    "id": "moughxyz",
-   "contributions": 41
-  },
-  {
-   "type": "User",
-   "id": "irena-zaz",
-   "contributions": 32
+   "contributions": 44
   },
   {
    "type": "User",
    "id": "pedroamaroproton",
+   "contributions": 33
+  },
+  {
+   "type": "User",
+   "id": "irena-zaz",
    "contributions": 32
   },
   {

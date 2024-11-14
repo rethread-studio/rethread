@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "juliusknorr",
-   "contributions": 2153
+   "contributions": 2158
   },
   {
    "type": "User",
    "id": "nextcloud-command",
-   "contributions": 1280
+   "contributions": 1296
   },
   {
    "type": "Bot",
@@ -19,22 +19,22 @@
   {
    "type": "User",
    "id": "nextcloud-bot",
-   "contributions": 804
+   "contributions": 812
   },
   {
    "type": "User",
    "id": "max-nextcloud",
-   "contributions": 745
+   "contributions": 746
   },
   {
    "type": "User",
    "id": "mejo-",
-   "contributions": 729
+   "contributions": 738
   },
   {
    "type": "Bot",
    "id": "renovate[bot]",
-   "contributions": 567
+   "contributions": 581
   },
   {
    "type": "Bot",
@@ -44,16 +44,16 @@
   {
    "type": "Bot",
    "id": "github-actions[bot]",
-   "contributions": 152
-  },
-  {
-   "type": "User",
-   "id": "susnux",
-   "contributions": 78
+   "contributions": 165
   },
   {
    "type": "User",
    "id": "luka-nextcloud",
+   "contributions": 79
+  },
+  {
+   "type": "User",
+   "id": "susnux",
    "contributions": 78
   },
   {
@@ -159,6 +159,11 @@
   {
    "type": "User",
    "id": "icewind1991",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "JuliaKirschenheuter",
    "contributions": 4
   },
   {

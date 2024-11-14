@@ -4,17 +4,17 @@
   {
    "type": "User",
    "id": "AndyScherzinger",
-   "contributions": 2360
+   "contributions": 2365
   },
   {
    "type": "User",
    "id": "nextcloud-bot",
-   "contributions": 1832
+   "contributions": 1844
   },
   {
    "type": "User",
    "id": "mahibi",
-   "contributions": 1527
+   "contributions": 1550
   },
   {
    "type": "User",
@@ -34,17 +34,17 @@
   {
    "type": "Bot",
    "id": "renovate[bot]",
-   "contributions": 280
+   "contributions": 291
   },
   {
    "type": "User",
    "id": "nextcloud-android-bot",
-   "contributions": 270
+   "contributions": 271
   },
   {
    "type": "User",
    "id": "sowjanyakch",
-   "contributions": 170
+   "contributions": 205
   },
   {
    "type": "User",
@@ -54,12 +54,12 @@
   {
    "type": "Bot",
    "id": "github-actions[bot]",
-   "contributions": 138
+   "contributions": 147
   },
   {
    "type": "User",
    "id": "rapterjet2004",
-   "contributions": 138
+   "contributions": 141
   },
   {
    "type": "User",
@@ -113,22 +113,22 @@
   },
   {
    "type": "User",
-   "id": "Ruggero1912",
-   "contributions": 6
-  },
-  {
-   "type": "User",
    "id": "ASerbinski",
    "contributions": 6
   },
   {
    "type": "User",
-   "id": "ezhil56x",
-   "contributions": 5
+   "id": "Ruggero1912",
+   "contributions": 6
   },
   {
    "type": "User",
    "id": "comradekingu",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "ezhil56x",
    "contributions": 5
   },
   {
@@ -164,6 +164,11 @@
   {
    "type": "User",
    "id": "dschuermann",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "arkascha",
    "contributions": 2
   },
   {

@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "mejo-",
-   "contributions": 1973
+   "contributions": 1980
   },
   {
    "type": "User",
@@ -14,17 +14,17 @@
   {
    "type": "User",
    "id": "nextcloud-bot",
-   "contributions": 340
+   "contributions": 348
   },
   {
    "type": "Bot",
    "id": "renovate[bot]",
-   "contributions": 222
+   "contributions": 227
   },
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 164
+   "contributions": 167
   },
   {
    "type": "User",
@@ -34,12 +34,12 @@
   {
    "type": "User",
    "id": "juliusknorr",
-   "contributions": 84
+   "contributions": 85
   },
   {
    "type": "Bot",
    "id": "github-actions[bot]",
-   "contributions": 33
+   "contributions": 34
   },
   {
    "type": "User",
@@ -73,12 +73,12 @@
   },
   {
    "type": "User",
-   "id": "Rozenandrey",
+   "id": "blizzz",
    "contributions": 10
   },
   {
    "type": "User",
-   "id": "blizzz",
+   "id": "Rozenandrey",
    "contributions": 10
   },
   {
@@ -133,6 +133,11 @@
   },
   {
    "type": "User",
+   "id": "Koc",
+   "contributions": 4
+  },
+  {
+   "type": "User",
    "id": "rajasekaran86",
    "contributions": 4
   },
@@ -148,22 +153,7 @@
   },
   {
    "type": "User",
-   "id": "larusalka",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "LeoColman",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "Koc",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "julien-nc",
+   "id": "KovalevArtem",
    "contributions": 3
   },
   {
@@ -173,7 +163,17 @@
   },
   {
    "type": "User",
-   "id": "KovalevArtem",
+   "id": "julien-nc",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "LeoColman",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "larusalka",
    "contributions": 3
   },
   {

@@ -9,7 +9,7 @@
   {
    "type": "User",
    "id": "ofTheo",
-   "contributions": 1505
+   "contributions": 1506
   },
   {
    "type": "User",
@@ -29,7 +29,7 @@
   {
    "type": "User",
    "id": "danoli3",
-   "contributions": 421
+   "contributions": 425
   },
   {
    "type": "User",
@@ -39,7 +39,7 @@
   {
    "type": "User",
    "id": "dimitre",
-   "contributions": 312
+   "contributions": 314
   },
   {
    "type": "User",
@@ -83,13 +83,13 @@
   },
   {
    "type": "User",
-   "id": "HalfdanJ",
-   "contributions": 107
+   "id": "roymacdonald",
+   "contributions": 109
   },
   {
    "type": "User",
-   "id": "roymacdonald",
-   "contributions": 104
+   "id": "HalfdanJ",
+   "contributions": 107
   },
   {
    "type": "User",
@@ -103,6 +103,11 @@
   },
   {
    "type": "User",
+   "id": "artificiel",
+   "contributions": 85
+  },
+  {
+   "type": "User",
    "id": "prisonerjohn",
    "contributions": 84
   },
@@ -110,11 +115,6 @@
    "type": "User",
    "id": "2bbb",
    "contributions": 84
-  },
-  {
-   "type": "User",
-   "id": "artificiel",
-   "contributions": 83
   },
   {
    "type": "User",

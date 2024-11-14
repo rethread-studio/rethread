@@ -1,734 +1,856 @@
 [
  {
-  "repo_name": "BelaPlatform/Bela",
+  "name": "BelaPlatform/Bela",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
   "total_contributions": 3375,
   "anonymous_contributors": 9,
   "nonanonymous_contributors": 32
  },
  {
-  "repo_name": "EnvelopSound/EnvelopForLive",
+  "name": "EnvelopSound/EnvelopForLive",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
   "total_contributions": 613,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 8
  },
  {
-  "repo_name": "FFmpeg/FFmpeg",
-  "total_contributions": 117235,
-  "anonymous_contributors": 2097,
+  "name": "FFmpeg/FFmpeg",
+  "category": "command-line tool",
+  "total_contributions": 117316,
+  "anonymous_contributors": 2098,
   "nonanonymous_contributors": 311
  },
  {
-  "repo_name": "GNOME/gimp",
-  "total_contributions": 46125,
+  "name": "GNOME/gimp",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 46211,
   "anonymous_contributors": 936,
   "nonanonymous_contributors": 166
  },
  {
-  "repo_name": "HandBrake/HandBrake",
-  "total_contributions": 12717,
+  "name": "HandBrake/HandBrake",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 12751,
   "anonymous_contributors": 27,
   "nonanonymous_contributors": 116
  },
  {
-  "repo_name": "KDE/plasma-desktop",
-  "total_contributions": 12492,
+  "name": "KDE/plasma-desktop",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 12533,
   "anonymous_contributors": 55,
-  "nonanonymous_contributors": 303
+  "nonanonymous_contributors": 305
  },
  {
-  "repo_name": "KhronosGroup/GLSL",
-  "total_contributions": 477,
+  "name": "KhronosGroup/GLSL",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "total_contributions": 478,
   "anonymous_contributors": 8,
   "nonanonymous_contributors": 39
  },
  {
-  "repo_name": "KhronosGroup/WebGL",
+  "name": "KhronosGroup/WebGL",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 6728,
   "anonymous_contributors": 67,
   "nonanonymous_contributors": 156
  },
  {
-  "repo_name": "KhronosGroup/glslang",
-  "total_contributions": 5153,
+  "name": "KhronosGroup/glslang",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "total_contributions": 5161,
   "anonymous_contributors": 29,
   "nonanonymous_contributors": 297
  },
  {
-  "repo_name": "LibreOffice/core",
-  "total_contributions": 499953,
-  "anonymous_contributors": 2453,
+  "name": "LibreOffice/core",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 500435,
+  "anonymous_contributors": 2460,
   "nonanonymous_contributors": 167
  },
  {
-  "repo_name": "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
+  "name": "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
+  "category": "related to electronics",
   "total_contributions": 7,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 2
  },
  {
-  "repo_name": "NVlabs/stylegan2",
+  "name": "NVlabs/stylegan2",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 19,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 3
  },
  {
-  "repo_name": "PipeWire/pipewire",
-  "total_contributions": 12972,
-  "anonymous_contributors": 49,
+  "name": "PipeWire/pipewire",
+  "category": "command-line tool",
+  "total_contributions": 13022,
+  "anonymous_contributors": 50,
   "nonanonymous_contributors": 289
  },
  {
-  "repo_name": "ProtonMail/WebClients",
-  "total_contributions": 38871,
-  "anonymous_contributors": 111,
+  "name": "ProtonMail/WebClients",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 39533,
+  "anonymous_contributors": 112,
   "nonanonymous_contributors": 65
  },
  {
-  "repo_name": "TU-Studio/IEMPluginSuite",
+  "name": "TU-Studio/IEMPluginSuite",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
   "total_contributions": 1489,
   "anonymous_contributors": 12,
   "nonanonymous_contributors": 8
  },
  {
-  "repo_name": "VSCodium/vscodium",
-  "total_contributions": 1320,
+  "name": "VSCodium/vscodium",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 1337,
   "anonymous_contributors": 13,
-  "nonanonymous_contributors": 103
+  "nonanonymous_contributors": 108
  },
  {
-  "repo_name": "WebAudio/web-audio-api",
-  "total_contributions": 3314,
+  "name": "WebAudio/web-audio-api",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "total_contributions": 3316,
   "anonymous_contributors": 15,
   "nonanonymous_contributors": 63
  },
  {
-  "repo_name": "WebAudio/web-midi-api",
+  "name": "WebAudio/web-midi-api",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
   "total_contributions": 307,
   "anonymous_contributors": 5,
   "nonanonymous_contributors": 25
  },
  {
-  "repo_name": "arduino/Arduino",
+  "name": "arduino/Arduino",
+  "category": "related to electronics",
   "total_contributions": 7376,
   "anonymous_contributors": 54,
   "nonanonymous_contributors": 250
  },
  {
-  "repo_name": "arduino/ArduinoCore-API",
+  "name": "arduino/ArduinoCore-API",
+  "category": "related to electronics",
   "total_contributions": 348,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 37
  },
  {
-  "repo_name": "arduino/arduino-ide",
-  "total_contributions": 1422,
+  "name": "arduino/arduino-ide",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 1423,
   "anonymous_contributors": 7,
   "nonanonymous_contributors": 37
  },
  {
-  "repo_name": "audacity/audacity",
-  "total_contributions": 20468,
+  "name": "audacity/audacity",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 20523,
   "anonymous_contributors": 65,
   "nonanonymous_contributors": 217
  },
  {
-  "repo_name": "autonomousvision/projected-gan",
+  "name": "autonomousvision/projected-gan",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 23,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 4
  },
  {
-  "repo_name": "brandongmwong/elizabot-js",
+  "name": "brandongmwong/elizabot-js",
+  "category": "text and speech",
   "total_contributions": 4,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 1
  },
  {
-  "repo_name": "brave/brave-browser",
-  "total_contributions": 8889,
+  "name": "brave/brave-browser",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 8928,
   "anonymous_contributors": 10,
   "nonanonymous_contributors": 94
  },
  {
-  "repo_name": "brave/brave-core",
-  "total_contributions": 65397,
-  "anonymous_contributors": 158,
+  "name": "brave/brave-core",
+  "category": "engine",
+  "total_contributions": 65743,
+  "anonymous_contributors": 159,
   "nonanonymous_contributors": 290
  },
  {
-  "repo_name": "btel/svg_utils",
+  "name": "btel/svg_utils",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 198,
   "anonymous_contributors": 4,
   "nonanonymous_contributors": 22
  },
  {
-  "repo_name": "caprover/caprover",
-  "total_contributions": 1682,
+  "name": "caprover/caprover",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 1691,
   "anonymous_contributors": 5,
-  "nonanonymous_contributors": 56
+  "nonanonymous_contributors": 57
  },
  {
-  "repo_name": "carstenlebek/svelte-email",
+  "name": "carstenlebek/svelte-email",
+  "category": "other programming language/library/plugin",
   "total_contributions": 50,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 4
  },
  {
-  "repo_name": "coqui-ai/TTS",
+  "name": "coqui-ai/TTS",
+  "category": "text and speech",
   "total_contributions": 4668,
   "anonymous_contributors": 20,
   "nonanonymous_contributors": 146
  },
  {
-  "repo_name": "cuviper/autocfg",
+  "name": "cuviper/autocfg",
+  "category": "other programming language/library/plugin",
   "total_contributions": 112,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 10
  },
  {
-  "repo_name": "djc/rustc-version-rs",
+  "name": "djc/rustc-version-rs",
+  "category": "other programming language/library/plugin",
   "total_contributions": 116,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 15
  },
  {
-  "repo_name": "dtolnay/proc-macro2",
-  "total_contributions": 1147,
+  "name": "dtolnay/proc-macro2",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 1148,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 28
  },
  {
-  "repo_name": "dtolnay/quote",
-  "total_contributions": 644,
+  "name": "dtolnay/quote",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 645,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 24
  },
  {
-  "repo_name": "dtolnay/semver",
-  "total_contributions": 641,
+  "name": "dtolnay/semver",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 642,
   "anonymous_contributors": 3,
   "nonanonymous_contributors": 62
  },
  {
-  "repo_name": "dtolnay/syn",
-  "total_contributions": 4823,
+  "name": "dtolnay/syn",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 4839,
   "anonymous_contributors": 4,
   "nonanonymous_contributors": 95
  },
  {
-  "repo_name": "dtolnay/unicode-ident",
-  "total_contributions": 146,
+  "name": "dtolnay/unicode-ident",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 147,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 1
  },
  {
-  "repo_name": "electro-smith/libDaisy",
+  "name": "electro-smith/libDaisy",
+  "category": "related to electronics",
   "total_contributions": 1287,
   "anonymous_contributors": 5,
   "nonanonymous_contributors": 39
  },
  {
-  "repo_name": "emacs-mirror/emacs",
-  "total_contributions": 175382,
-  "anonymous_contributors": 1373,
-  "nonanonymous_contributors": 331
+  "name": "emacs-mirror/emacs",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 175494,
+  "anonymous_contributors": 1378,
+  "nonanonymous_contributors": 332
  },
  {
-  "repo_name": "espressif/arduino-esp32",
-  "total_contributions": 2796,
-  "anonymous_contributors": 278,
+  "name": "espressif/arduino-esp32",
+  "category": "related to electronics",
+  "total_contributions": 2808,
+  "anonymous_contributors": 280,
   "nonanonymous_contributors": 459
  },
  {
-  "repo_name": "festvox/festival",
+  "name": "festvox/festival",
+  "category": "text and speech",
   "total_contributions": 81,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 7
  },
  {
-  "repo_name": "git/git",
-  "total_contributions": 75191,
-  "anonymous_contributors": 1834,
+  "name": "git/git",
+  "category": "command-line tool",
+  "total_contributions": 75308,
+  "anonymous_contributors": 1836,
   "nonanonymous_contributors": 416
  },
  {
-  "repo_name": "github/docs",
-  "total_contributions": 50926,
-  "anonymous_contributors": 2104,
+  "name": "github/docs",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 51123,
+  "anonymous_contributors": 2119,
   "nonanonymous_contributors": 431
  },
  {
-  "repo_name": "github/rest-api-description",
-  "total_contributions": 2610,
+  "name": "github/rest-api-description",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 2634,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 23
  },
  {
-  "repo_name": "googlefonts/Inconsolata",
+  "name": "googlefonts/Inconsolata",
+  "category": "text and speech",
   "total_contributions": 171,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 8
  },
  {
-  "repo_name": "hideakitai/ESP32SPISlave",
+  "name": "hideakitai/ESP32SPISlave",
+  "category": "related to electronics",
   "total_contributions": 59,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 3
  },
  {
-  "repo_name": "huggingface/chat-ui",
-  "total_contributions": 1098,
+  "name": "huggingface/chat-ui",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 1133,
   "anonymous_contributors": 2,
-  "nonanonymous_contributors": 108
+  "nonanonymous_contributors": 109
  },
  {
-  "repo_name": "i3/i3.github.io",
-  "total_contributions": 573,
+  "name": "i3/i3.github.io",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 578,
   "anonymous_contributors": 9,
   "nonanonymous_contributors": 44
  },
  {
-  "repo_name": "image-rs/image",
-  "total_contributions": 3357,
+  "name": "image-rs/image",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "total_contributions": 3384,
   "anonymous_contributors": 28,
-  "nonanonymous_contributors": 306
+  "nonanonymous_contributors": 307
  },
  {
-  "repo_name": "indexmap-rs/indexmap",
-  "total_contributions": 847,
+  "name": "indexmap-rs/indexmap",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 850,
   "anonymous_contributors": 4,
   "nonanonymous_contributors": 40
  },
  {
-  "repo_name": "inkscape/inkscape",
+  "name": "inkscape/inkscape",
+  "category": "app/website/program with a GUI",
   "total_contributions": 89,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 10
  },
  {
-  "repo_name": "jackaudio/jack2",
+  "name": "jackaudio/jack2",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
   "total_contributions": 4072,
   "anonymous_contributors": 28,
   "nonanonymous_contributors": 92
  },
  {
-  "repo_name": "joshnuss/svelte-persisted-store",
+  "name": "joshnuss/svelte-persisted-store",
+  "category": "other programming language/library/plugin",
   "total_contributions": 338,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 15
  },
  {
-  "repo_name": "keenethics/svelte-notifications",
-  "total_contributions": 141,
+  "name": "keenethics/svelte-notifications",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 142,
   "anonymous_contributors": 1,
-  "nonanonymous_contributors": 19
+  "nonanonymous_contributors": 20
  },
  {
-  "repo_name": "kirovj/pocketbase-pyclient",
+  "name": "kirovj/pocketbase-pyclient",
+  "category": "other programming language/library/plugin",
   "total_contributions": 45,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 1
  },
  {
-  "repo_name": "korken89/fugit",
+  "name": "korken89/fugit",
+  "category": "related to electronics",
   "total_contributions": 101,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 10
  },
  {
-  "repo_name": "matplotlib/matplotlib",
-  "total_contributions": 51279,
-  "anonymous_contributors": 1323,
+  "name": "matplotlib/matplotlib",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "total_contributions": 51322,
+  "anonymous_contributors": 1326,
   "nonanonymous_contributors": 419
  },
  {
-  "repo_name": "meta-llama/llama-models",
-  "total_contributions": 138,
+  "name": "meta-llama/llama-models",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 141,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 27
  },
  {
-  "repo_name": "microsoft/TypeScript",
-  "total_contributions": 36279,
-  "anonymous_contributors": 542,
-  "nonanonymous_contributors": 345
+  "name": "microsoft/TypeScript",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 36296,
+  "anonymous_contributors": 544,
+  "nonanonymous_contributors": 346
  },
  {
-  "repo_name": "microsoft/vscode",
-  "total_contributions": 126597,
-  "anonymous_contributors": 2263,
+  "name": "microsoft/vscode",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 126942,
+  "anonymous_contributors": 2267,
   "nonanonymous_contributors": 334
  },
  {
-  "repo_name": "moment/moment",
+  "name": "moment/moment",
+  "category": "other programming language/library/plugin",
   "total_contributions": 4064,
   "anonymous_contributors": 290,
   "nonanonymous_contributors": 400
  },
  {
-  "repo_name": "mossblaser/plottie",
+  "name": "mossblaser/plottie",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 29,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 1
  },
  {
-  "repo_name": "mozilla/gecko-dev",
-  "total_contributions": 935396,
-  "anonymous_contributors": 11409,
-  "nonanonymous_contributors": 278
+  "name": "mozilla/gecko-dev",
+  "category": "engine",
+  "total_contributions": 937031,
+  "anonymous_contributors": 11425,
+  "nonanonymous_contributors": 279
  },
  {
-  "repo_name": "mozman/svgwrite",
+  "name": "mozman/svgwrite",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 394,
   "anonymous_contributors": 5,
   "nonanonymous_contributors": 19
  },
  {
-  "repo_name": "mozsearch/mozsearch",
-  "total_contributions": 1942,
+  "name": "mozsearch/mozsearch",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 1948,
   "anonymous_contributors": 5,
   "nonanonymous_contributors": 36
  },
  {
-  "repo_name": "mrdoob/three.js",
-  "total_contributions": 44345,
+  "name": "mrdoob/three.js",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "total_contributions": 44407,
   "anonymous_contributors": 1961,
   "nonanonymous_contributors": 364
  },
  {
-  "repo_name": "nextcloud/collectives",
-  "total_contributions": 3708,
+  "name": "nextcloud/collectives",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 3734,
   "anonymous_contributors": 13,
   "nonanonymous_contributors": 58
  },
  {
-  "repo_name": "nextcloud/server",
-  "total_contributions": 77815,
-  "anonymous_contributors": 905,
+  "name": "nextcloud/server",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 78017,
+  "anonymous_contributors": 908,
   "nonanonymous_contributors": 352
  },
  {
-  "repo_name": "nextcloud/spreed",
-  "total_contributions": 21169,
+  "name": "nextcloud/spreed",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 21275,
   "anonymous_contributors": 16,
   "nonanonymous_contributors": 101
  },
  {
-  "repo_name": "nextcloud/talk-android",
-  "total_contributions": 9690,
+  "name": "nextcloud/talk-android",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 9791,
   "anonymous_contributors": 11,
-  "nonanonymous_contributors": 42
+  "nonanonymous_contributors": 43
  },
  {
-  "repo_name": "nextcloud/text",
-  "total_contributions": 8606,
+  "name": "nextcloud/text",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 8677,
   "anonymous_contributors": 4,
-  "nonanonymous_contributors": 69
+  "nonanonymous_contributors": 70
  },
  {
-  "repo_name": "nodejs/node",
-  "total_contributions": 42752,
-  "anonymous_contributors": 3602,
-  "nonanonymous_contributors": 436
+  "name": "nodejs/node",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 42845,
+  "anonymous_contributors": 3610,
+  "nonanonymous_contributors": 434
  },
  {
-  "repo_name": "nodemailer/nodemailer",
+  "name": "nodemailer/nodemailer",
+  "category": "other programming language/library/plugin",
   "total_contributions": 1069,
   "anonymous_contributors": 33,
   "nonanonymous_contributors": 124
  },
  {
-  "repo_name": "nolimits4web/swiper",
-  "total_contributions": 3693,
+  "name": "nolimits4web/swiper",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 3694,
   "anonymous_contributors": 48,
   "nonanonymous_contributors": 288
  },
  {
-  "repo_name": "notepad-plus-plus/notepad-plus-plus",
-  "total_contributions": 6026,
+  "name": "notepad-plus-plus/notepad-plus-plus",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 6035,
   "anonymous_contributors": 49,
   "nonanonymous_contributors": 369
  },
  {
-  "repo_name": "npm/npm",
-  "total_contributions": 8338,
-  "anonymous_contributors": 146,
-  "nonanonymous_contributors": 423
+  "name": "npm/cli",
+  "category": "command-line tool",
+  "total_contributions": 12591,
+  "anonymous_contributors": 501,
+  "nonanonymous_contributors": 430
  },
  {
-  "repo_name": "numpy/numpy",
-  "total_contributions": 37358,
-  "anonymous_contributors": 1403,
+  "name": "numpy/numpy",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 37423,
+  "anonymous_contributors": 1408,
   "nonanonymous_contributors": 433
  },
  {
-  "repo_name": "openai/openai-node",
-  "total_contributions": 682,
+  "name": "openai/openai-node",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 700,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 24
  },
  {
-  "repo_name": "openframeworks/openFrameworks",
-  "total_contributions": 17448,
+  "name": "openframeworks/openFrameworks",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "total_contributions": 17462,
   "anonymous_contributors": 150,
   "nonanonymous_contributors": 289
  },
  {
-  "repo_name": "otuva/handwriting-synthesis",
+  "name": "otuva/handwriting-synthesis",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 86,
   "anonymous_contributors": 3,
   "nonanonymous_contributors": 3
  },
  {
-  "repo_name": "pocketbase/pocketbase",
-  "total_contributions": 1437,
+  "name": "pocketbase/pocketbase",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 1447,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 39
  },
  {
-  "repo_name": "popcornmix/omxplayer",
+  "name": "popcornmix/omxplayer",
+  "category": "command-line tool",
   "total_contributions": 531,
   "anonymous_contributors": 14,
   "nonanonymous_contributors": 53
  },
  {
-  "repo_name": "probe-rs/rtt-target",
+  "name": "probe-rs/rtt-target",
+  "category": "related to electronics",
   "total_contributions": 102,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 19
  },
  {
-  "repo_name": "processing/p5.js",
-  "total_contributions": 11670,
-  "anonymous_contributors": 419,
-  "nonanonymous_contributors": 357
+  "name": "processing/p5.js",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "total_contributions": 11690,
+  "anonymous_contributors": 423,
+  "nonanonymous_contributors": 358
  },
  {
-  "repo_name": "processing/processing",
+  "name": "processing/processing",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 13211,
   "anonymous_contributors": 29,
   "nonanonymous_contributors": 109
  },
  {
-  "repo_name": "pure-data/pure-data",
-  "total_contributions": 7002,
+  "name": "pure-data/pure-data",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "total_contributions": 7010,
   "anonymous_contributors": 30,
   "nonanonymous_contributors": 83
  },
  {
-  "repo_name": "python/cpython",
-  "total_contributions": 124202,
-  "anonymous_contributors": 2753,
-  "nonanonymous_contributors": 350
+  "name": "python/cpython",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 124368,
+  "anonymous_contributors": 2777,
+  "nonanonymous_contributors": 349
  },
  {
-  "repo_name": "ritwickdey/vscode-live-server",
+  "name": "ritwickdey/vscode-live-server",
+  "category": "app/website/program with a GUI",
   "total_contributions": 328,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 34
  },
  {
-  "repo_name": "rtic-rs/rtic",
+  "name": "rtic-rs/rtic",
+  "category": "related to electronics",
   "total_contributions": 1745,
   "anonymous_contributors": 8,
   "nonanonymous_contributors": 86
  },
  {
-  "repo_name": "rtyley/bfg-repo-cleaner",
+  "name": "rtyley/bfg-repo-cleaner",
+  "category": "command-line tool",
   "total_contributions": 488,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 5
  },
  {
-  "repo_name": "rust-embedded/bare-metal",
+  "name": "rust-embedded/bare-metal",
+  "category": "related to electronics",
   "total_contributions": 87,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 17
  },
  {
-  "repo_name": "rust-embedded/cortex-m",
-  "total_contributions": 1524,
-  "anonymous_contributors": 6,
-  "nonanonymous_contributors": 98
+  "name": "rust-embedded/cortex-m",
+  "category": "related to electronics",
+  "total_contributions": 1532,
+  "anonymous_contributors": 7,
+  "nonanonymous_contributors": 99
  },
  {
-  "repo_name": "rust-embedded/critical-section",
+  "name": "rust-embedded/critical-section",
+  "category": "related to electronics",
   "total_contributions": 131,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 12
  },
  {
-  "repo_name": "rust-embedded/embedded-alloc",
+  "name": "rust-embedded/embedded-alloc",
+  "category": "related to electronics",
   "total_contributions": 171,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 28
  },
  {
-  "repo_name": "rust-embedded/embedded-hal",
-  "total_contributions": 885,
+  "name": "rust-embedded/embedded-hal",
+  "category": "related to electronics",
+  "total_contributions": 887,
   "anonymous_contributors": 3,
-  "nonanonymous_contributors": 64
+  "nonanonymous_contributors": 65
  },
  {
-  "repo_name": "rust-embedded/nb",
+  "name": "rust-embedded/nb",
+  "category": "related to electronics",
   "total_contributions": 65,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 12
  },
  {
-  "repo_name": "rust-embedded/volatile-register",
+  "name": "rust-embedded/volatile-register",
+  "category": "related to electronics",
   "total_contributions": 28,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 7
  },
  {
-  "repo_name": "rust-lang/cargo",
-  "total_contributions": 18857,
-  "anonymous_contributors": 743,
-  "nonanonymous_contributors": 420
+  "name": "rust-lang/cargo",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 18954,
+  "anonymous_contributors": 750,
+  "nonanonymous_contributors": 419
  },
  {
-  "repo_name": "rust-lang/hashbrown",
-  "total_contributions": 1066,
+  "name": "rust-lang/hashbrown",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 1081,
   "anonymous_contributors": 9,
   "nonanonymous_contributors": 103
  },
  {
-  "repo_name": "rust-lang/libm",
-  "total_contributions": 521,
+  "name": "rust-lang/libm",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 534,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 53
  },
  {
-  "repo_name": "rust-lang/log",
-  "total_contributions": 834,
+  "name": "rust-lang/log",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 838,
   "anonymous_contributors": 12,
-  "nonanonymous_contributors": 109
+  "nonanonymous_contributors": 111
  },
  {
-  "repo_name": "rust-lang/rust",
-  "total_contributions": 269636,
-  "anonymous_contributors": 6580,
-  "nonanonymous_contributors": 445
+  "name": "rust-lang/rust",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 270698,
+  "anonymous_contributors": 6610,
+  "nonanonymous_contributors": 446
  },
  {
-  "repo_name": "rust-num/num-traits",
+  "name": "rust-num/num-traits",
+  "category": "other programming language/library/plugin",
   "total_contributions": 1163,
   "anonymous_contributors": 13,
   "nonanonymous_contributors": 115
  },
  {
-  "repo_name": "sass/sass",
-  "total_contributions": 886,
+  "name": "sass/sass",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "total_contributions": 889,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 26
  },
  {
-  "repo_name": "sc00/svelte-textarea-auto-height",
+  "name": "sc00/svelte-textarea-auto-height",
+  "category": "other programming language/library/plugin",
   "total_contributions": 7,
   "anonymous_contributors": 0,
   "nonanonymous_contributors": 1
  },
  {
-  "repo_name": "scikit-learn/scikit-learn",
-  "total_contributions": 31848,
-  "anonymous_contributors": 2804,
-  "nonanonymous_contributors": 409
+  "name": "scikit-learn/scikit-learn",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 31886,
+  "anonymous_contributors": 2811,
+  "nonanonymous_contributors": 408
  },
  {
-  "repo_name": "scipy/scipy",
-  "total_contributions": 33669,
-  "anonymous_contributors": 1290,
+  "name": "scipy/scipy",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 33808,
+  "anonymous_contributors": 1298,
   "nonanonymous_contributors": 413
  },
  {
-  "repo_name": "signalapp/Signal-Android",
-  "total_contributions": 15614,
+  "name": "signalapp/Signal-Android",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 15709,
   "anonymous_contributors": 47,
-  "nonanonymous_contributors": 303
+  "nonanonymous_contributors": 306
  },
  {
-  "repo_name": "signalapp/Signal-Desktop",
-  "total_contributions": 11172,
-  "anonymous_contributors": 38,
-  "nonanonymous_contributors": 219
+  "name": "signalapp/Signal-Desktop",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 11226,
+  "anonymous_contributors": 37,
+  "nonanonymous_contributors": 220
  },
  {
-  "repo_name": "signalapp/Signal-iOS",
-  "total_contributions": 35091,
+  "name": "signalapp/Signal-iOS",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 35205,
   "anonymous_contributors": 27,
   "nonanonymous_contributors": 148
  },
  {
-  "repo_name": "sjvasquez/handwriting-synthesis",
+  "name": "sjvasquez/handwriting-synthesis",
+  "category": "programming language/library/plugin specifically to create/process something visual",
   "total_contributions": 22,
   "anonymous_contributors": 3,
   "nonanonymous_contributors": 0
  },
  {
-  "repo_name": "steveklabnik/semver-parser",
+  "name": "steveklabnik/semver-parser",
+  "category": "other programming language/library/plugin",
   "total_contributions": 125,
   "anonymous_contributors": 2,
   "nonanonymous_contributors": 16
  },
  {
-  "repo_name": "stm32-rs/stm32h7xx-hal",
+  "name": "stm32-rs/stm32h7xx-hal",
+  "category": "related to electronics",
   "total_contributions": 1328,
   "anonymous_contributors": 4,
   "nonanonymous_contributors": 49
  },
  {
-  "repo_name": "supercollider/sc3-plugins",
+  "name": "supercollider/sc3-plugins",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
   "total_contributions": 1385,
   "anonymous_contributors": 20,
   "nonanonymous_contributors": 52
  },
  {
-  "repo_name": "supercollider/supercollider",
-  "total_contributions": 26302,
+  "name": "supercollider/supercollider",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "total_contributions": 26311,
   "anonymous_contributors": 122,
-  "nonanonymous_contributors": 216
+  "nonanonymous_contributors": 218
  },
  {
-  "repo_name": "sveltejs/svelte",
-  "total_contributions": 9573,
-  "anonymous_contributors": 369,
-  "nonanonymous_contributors": 414
+  "name": "sveltejs/svelte",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 9633,
+  "anonymous_contributors": 374,
+  "nonanonymous_contributors": 415
  },
  {
-  "repo_name": "tarcieri/micromath",
+  "name": "tarcieri/micromath",
+  "category": "related to electronics",
   "total_contributions": 163,
   "anonymous_contributors": 1,
   "nonanonymous_contributors": 8
  },
  {
-  "repo_name": "tensorflow/tensorflow",
-  "total_contributions": 171536,
-  "anonymous_contributors": 4300,
+  "name": "tensorflow/tensorflow",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 171983,
+  "anonymous_contributors": 4310,
   "nonanonymous_contributors": 406
  },
  {
-  "repo_name": "textmate/textmate",
+  "name": "textmate/textmate",
+  "category": "app/website/program with a GUI",
   "total_contributions": 5756,
   "anonymous_contributors": 18,
   "nonanonymous_contributors": 79
  },
  {
-  "repo_name": "v8/v8",
-  "total_contributions": 91435,
-  "anonymous_contributors": 910,
+  "name": "v8/v8",
+  "category": "engine",
+  "total_contributions": 91676,
+  "anonymous_contributors": 913,
   "nonanonymous_contributors": 205
  },
  {
-  "repo_name": "videolan/vlc",
-  "total_contributions": 104754,
+  "name": "videolan/vlc",
+  "category": "app/website/program with a GUI",
+  "total_contributions": 104989,
   "anonymous_contributors": 750,
   "nonanonymous_contributors": 292
  },
  {
-  "repo_name": "vitejs/vite",
-  "total_contributions": 7194,
-  "anonymous_contributors": 611,
+  "name": "vitejs/vite",
+  "category": "other programming language/library/plugin",
+  "total_contributions": 7246,
+  "anonymous_contributors": 619,
   "nonanonymous_contributors": 440
  }
 ]

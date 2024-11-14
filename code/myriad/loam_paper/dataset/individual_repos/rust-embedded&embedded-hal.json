@@ -14,7 +14,7 @@
   {
    "type": "User",
    "id": "eldruin",
-   "contributions": 176
+   "contributions": 177
   },
   {
    "type": "User",
@@ -244,6 +244,11 @@
   {
    "type": "User",
    "id": "ryan-summers",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "tdittr",
    "contributions": 1
   },
   {

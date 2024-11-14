@@ -4,17 +4,17 @@
   {
    "type": "User",
    "id": "charris",
-   "contributions": 6559
+   "contributions": 6573
   },
   {
    "type": "User",
    "id": "seberg",
-   "contributions": 2819
+   "contributions": 2820
   },
   {
    "type": "User",
    "id": "mattip",
-   "contributions": 2707
+   "contributions": 2709
   },
   {
    "type": "User",
@@ -29,7 +29,7 @@
   {
    "type": "User",
    "id": "rgommers",
-   "contributions": 1363
+   "contributions": 1367
   },
   {
    "type": "User",
@@ -59,7 +59,7 @@
   {
    "type": "User",
    "id": "ngoldbaum",
-   "contributions": 606
+   "contributions": 612
   },
   {
    "type": "User",
@@ -74,12 +74,12 @@
   {
    "type": "User",
    "id": "mhvk",
-   "contributions": 327
+   "contributions": 329
   },
   {
    "type": "User",
    "id": "HaoZeke",
-   "contributions": 299
+   "contributions": 301
   },
   {
    "type": "User",
@@ -124,17 +124,17 @@
   {
    "type": "User",
    "id": "rkern",
-   "contributions": 241
+   "contributions": 242
   },
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 211
+   "contributions": 216
   },
   {
    "type": "User",
    "id": "mtsokol",
-   "contributions": 206
+   "contributions": 213
   },
   {
    "type": "User",
@@ -148,13 +148,13 @@
   },
   {
    "type": "User",
-   "id": "rossbar",
+   "id": "tylerjereddy",
    "contributions": 181
   },
   {
    "type": "User",
-   "id": "tylerjereddy",
-   "contributions": 180
+   "id": "rossbar",
+   "contributions": 181
   },
   {
    "type": "User",
@@ -178,13 +178,13 @@
   },
   {
    "type": "User",
-   "id": "jayvius",
-   "contributions": 127
+   "id": "jorenham",
+   "contributions": 133
   },
   {
    "type": "User",
-   "id": "jorenham",
-   "contributions": 122
+   "id": "jayvius",
+   "contributions": 127
   },
   {
    "type": "User",
@@ -248,8 +248,8 @@
   },
   {
    "type": "User",
-   "id": "Developer-Ecosystem-Engineering",
-   "contributions": 65
+   "id": "linus-md",
+   "contributions": 66
   },
   {
    "type": "User",
@@ -258,12 +258,12 @@
   },
   {
    "type": "User",
-   "id": "larsmans",
-   "contributions": 64
+   "id": "Developer-Ecosystem-Engineering",
+   "contributions": 65
   },
   {
    "type": "User",
-   "id": "linus-md",
+   "id": "larsmans",
    "contributions": 64
   },
   {

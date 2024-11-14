@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "nickvergessen",
-   "contributions": 8113
+   "contributions": 8132
   },
   {
    "type": "User",
    "id": "nextcloud-bot",
-   "contributions": 2170
+   "contributions": 2180
   },
   {
    "type": "User",
@@ -24,12 +24,12 @@
   {
    "type": "User",
    "id": "Antreesy",
-   "contributions": 1495
+   "contributions": 1531
   },
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 1392
+   "contributions": 1418
   },
   {
    "type": "Bot",
@@ -54,12 +54,12 @@
   {
    "type": "User",
    "id": "DorraJaouad",
-   "contributions": 386
+   "contributions": 397
   },
   {
    "type": "User",
    "id": "ShGKme",
-   "contributions": 219
+   "contributions": 220
   },
   {
    "type": "User",
@@ -74,7 +74,7 @@
   {
    "type": "User",
    "id": "nextcloud-command",
-   "contributions": 103
+   "contributions": 104
   },
   {
    "type": "User",
@@ -114,7 +114,7 @@
   {
    "type": "Bot",
    "id": "github-actions[bot]",
-   "contributions": 41
+   "contributions": 42
   },
   {
    "type": "User",
@@ -268,6 +268,11 @@
   },
   {
    "type": "User",
+   "id": "miaulalala",
+   "contributions": 3
+  },
+  {
+   "type": "User",
    "id": "simonspa",
    "contributions": 3
   },
@@ -344,11 +349,6 @@
   {
    "type": "User",
    "id": "GretaD",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "miaulalala",
    "contributions": 2
   },
   {
