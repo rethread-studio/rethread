@@ -73,11 +73,9 @@
    "mozman/svgwrite",
    "mrdoob/three.js",
    "openframeworks/openFrameworks",
-   "otuva/handwriting-synthesis",
    "processing/p5.js",
    "processing/processing",
-   "sass/sass",
-   "sjvasquez/handwriting-synthesis"
+   "sass/sass"
   ]
  },
  {
@@ -109,7 +107,9 @@
    "brandongmwong/elizabot-js",
    "coqui-ai/TTS",
    "festvox/festival",
-   "googlefonts/Inconsolata"
+   "googlefonts/Inconsolata",
+   "otuva/handwriting-synthesis",
+   "sjvasquez/handwriting-synthesis"
   ]
  },
  {

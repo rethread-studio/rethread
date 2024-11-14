@@ -78,7 +78,7 @@ npm/cli,command-line tool
 numpy/numpy,other programming language/library/plugin
 openai/openai-node,other programming language/library/plugin
 openframeworks/openFrameworks,programming language/library/plugin specifically to create/process something visual
-otuva/handwriting-synthesis,programming language/library/plugin specifically to create/process something visual
+otuva/handwriting-synthesis,text and speech
 pocketbase/pocketbase,app/website/program with a GUI
 popcornmix/omxplayer,command-line tool
 probe-rs/rtt-target,related to electronics
@@ -109,7 +109,7 @@ scipy/scipy,other programming language/library/plugin
 signalapp/Signal-Android,app/website/program with a GUI
 signalapp/Signal-Desktop,app/website/program with a GUI
 signalapp/Signal-iOS,app/website/program with a GUI
-sjvasquez/handwriting-synthesis,programming language/library/plugin specifically to create/process something visual
+sjvasquez/handwriting-synthesis,text and speech
 steveklabnik/semver-parser,other programming language/library/plugin
 stm32-rs/stm32h7xx-hal,related to electronics
 supercollider/sc3-plugins,programming language/library/plugin specifically to create/process sound or music
