@@ -23,7 +23,7 @@
  {
   "name": "GNOME/gimp",
   "category": "app/website/program with a GUI",
-  "total_contributions": 46211,
+  "total_contributions": 46213,
   "anonymous_contributors": 936,
   "nonanonymous_contributors": 166
  },
@@ -37,7 +37,7 @@
  {
   "name": "KDE/plasma-desktop",
   "category": "app/website/program with a GUI",
-  "total_contributions": 12533,
+  "total_contributions": 12534,
   "anonymous_contributors": 55,
   "nonanonymous_contributors": 305
  },
@@ -65,7 +65,7 @@
  {
   "name": "LibreOffice/core",
   "category": "app/website/program with a GUI",
-  "total_contributions": 500435,
+  "total_contributions": 500457,
   "anonymous_contributors": 2460,
   "nonanonymous_contributors": 167
  },
@@ -86,16 +86,16 @@
  {
   "name": "PipeWire/pipewire",
   "category": "command-line tool",
-  "total_contributions": 13022,
+  "total_contributions": 13026,
   "anonymous_contributors": 50,
   "nonanonymous_contributors": 289
  },
  {
   "name": "ProtonMail/WebClients",
   "category": "app/website/program with a GUI",
-  "total_contributions": 39533,
+  "total_contributions": 39549,
   "anonymous_contributors": 112,
-  "nonanonymous_contributors": 65
+  "nonanonymous_contributors": 66
  },
  {
   "name": "TU-Studio/IEMPluginSuite",
@@ -149,7 +149,7 @@
  {
   "name": "audacity/audacity",
   "category": "app/website/program with a GUI",
-  "total_contributions": 20523,
+  "total_contributions": 20525,
   "anonymous_contributors": 65,
   "nonanonymous_contributors": 217
  },
@@ -170,14 +170,14 @@
  {
   "name": "brave/brave-browser",
   "category": "app/website/program with a GUI",
-  "total_contributions": 8928,
+  "total_contributions": 8929,
   "anonymous_contributors": 10,
   "nonanonymous_contributors": 94
  },
  {
   "name": "brave/brave-core",
   "category": "engine",
-  "total_contributions": 65743,
+  "total_contributions": 65749,
   "anonymous_contributors": 159,
   "nonanonymous_contributors": 290
  },
@@ -268,7 +268,7 @@
  {
   "name": "emacs-mirror/emacs",
   "category": "app/website/program with a GUI",
-  "total_contributions": 175494,
+  "total_contributions": 175513,
   "anonymous_contributors": 1378,
   "nonanonymous_contributors": 332
  },
@@ -296,8 +296,8 @@
  {
   "name": "github/docs",
   "category": "app/website/program with a GUI",
-  "total_contributions": 51123,
-  "anonymous_contributors": 2119,
+  "total_contributions": 51128,
+  "anonymous_contributors": 2120,
   "nonanonymous_contributors": 431
  },
  {
@@ -394,8 +394,8 @@
  {
   "name": "matplotlib/matplotlib",
   "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 51322,
-  "anonymous_contributors": 1326,
+  "total_contributions": 51325,
+  "anonymous_contributors": 1327,
   "nonanonymous_contributors": 419
  },
  {
@@ -415,7 +415,7 @@
  {
   "name": "microsoft/vscode",
   "category": "app/website/program with a GUI",
-  "total_contributions": 126942,
+  "total_contributions": 126951,
   "anonymous_contributors": 2267,
   "nonanonymous_contributors": 334
  },
@@ -457,7 +457,7 @@
  {
   "name": "mrdoob/three.js",
   "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 44407,
+  "total_contributions": 44410,
   "anonymous_contributors": 1961,
   "nonanonymous_contributors": 364
  },
@@ -471,21 +471,21 @@
  {
   "name": "nextcloud/server",
   "category": "app/website/program with a GUI",
-  "total_contributions": 78017,
+  "total_contributions": 78023,
   "anonymous_contributors": 908,
   "nonanonymous_contributors": 352
  },
  {
   "name": "nextcloud/spreed",
   "category": "app/website/program with a GUI",
-  "total_contributions": 21275,
+  "total_contributions": 21280,
   "anonymous_contributors": 16,
   "nonanonymous_contributors": 101
  },
  {
   "name": "nextcloud/talk-android",
   "category": "app/website/program with a GUI",
-  "total_contributions": 9791,
+  "total_contributions": 9828,
   "anonymous_contributors": 11,
   "nonanonymous_contributors": 43
  },
@@ -520,21 +520,21 @@
  {
   "name": "notepad-plus-plus/notepad-plus-plus",
   "category": "app/website/program with a GUI",
-  "total_contributions": 6035,
+  "total_contributions": 6037,
   "anonymous_contributors": 49,
-  "nonanonymous_contributors": 369
+  "nonanonymous_contributors": 370
  },
  {
   "name": "npm/cli",
   "category": "command-line tool",
-  "total_contributions": 12591,
+  "total_contributions": 12592,
   "anonymous_contributors": 501,
   "nonanonymous_contributors": 430
  },
  {
   "name": "numpy/numpy",
   "category": "other programming language/library/plugin",
-  "total_contributions": 37423,
+  "total_contributions": 37434,
   "anonymous_contributors": 1408,
   "nonanonymous_contributors": 433
  },
@@ -604,8 +604,8 @@
  {
   "name": "python/cpython",
   "category": "other programming language/library/plugin",
-  "total_contributions": 124368,
-  "anonymous_contributors": 2777,
+  "total_contributions": 124370,
+  "anonymous_contributors": 2778,
   "nonanonymous_contributors": 349
  },
  {
@@ -681,7 +681,7 @@
  {
   "name": "rust-lang/cargo",
   "category": "other programming language/library/plugin",
-  "total_contributions": 18954,
+  "total_contributions": 18961,
   "anonymous_contributors": 750,
   "nonanonymous_contributors": 419
  },
@@ -695,9 +695,9 @@
  {
   "name": "rust-lang/libm",
   "category": "other programming language/library/plugin",
-  "total_contributions": 534,
+  "total_contributions": 536,
   "anonymous_contributors": 2,
-  "nonanonymous_contributors": 53
+  "nonanonymous_contributors": 54
  },
  {
   "name": "rust-lang/log",
@@ -709,8 +709,8 @@
  {
   "name": "rust-lang/rust",
   "category": "other programming language/library/plugin",
-  "total_contributions": 270698,
-  "anonymous_contributors": 6610,
+  "total_contributions": 270712,
+  "anonymous_contributors": 6611,
   "nonanonymous_contributors": 446
  },
  {
@@ -744,8 +744,8 @@
  {
   "name": "scipy/scipy",
   "category": "other programming language/library/plugin",
-  "total_contributions": 33808,
-  "anonymous_contributors": 1298,
+  "total_contributions": 33809,
+  "anonymous_contributors": 1299,
   "nonanonymous_contributors": 413
  },
  {
@@ -807,7 +807,7 @@
  {
   "name": "sveltejs/svelte",
   "category": "other programming language/library/plugin",
-  "total_contributions": 9633,
+  "total_contributions": 9636,
   "anonymous_contributors": 374,
   "nonanonymous_contributors": 415
  },
@@ -821,7 +821,7 @@
  {
   "name": "tensorflow/tensorflow",
   "category": "other programming language/library/plugin",
-  "total_contributions": 171983,
+  "total_contributions": 171993,
   "anonymous_contributors": 4310,
   "nonanonymous_contributors": 406
  },
@@ -835,7 +835,7 @@
  {
   "name": "v8/v8",
   "category": "engine",
-  "total_contributions": 91676,
+  "total_contributions": 91685,
   "anonymous_contributors": 913,
   "nonanonymous_contributors": 205
  },
@@ -849,7 +849,7 @@
  {
   "name": "vitejs/vite",
   "category": "other programming language/library/plugin",
-  "total_contributions": 7246,
+  "total_contributions": 7247,
   "anonymous_contributors": 619,
   "nonanonymous_contributors": 440
  }

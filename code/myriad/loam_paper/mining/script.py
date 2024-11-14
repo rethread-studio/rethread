@@ -54,14 +54,33 @@ def save_repo_data(repo_name, contributors_list):
 	with open(filename + ".json", "w") as fp:
 		json.dump(repo_data, fp, indent = 1)
 
+def find(arr, attr, val):
+	return [el for el in arr if el[attr] == val][0]
+
 with open("./repo_list.csv", mode = "r") as f:
 	csvFile = csv.reader(f)
 	repos = [line for line in csvFile]
 
 repos_info = []
+categories_info = []
 all_contributors = []
+gh_api_failures = []
 for [repo_name, category] in repos:
-	print(repo_name)
+	print(repo_name + " (" + category + ")")
+	all_categories = [c["category"] for c in categories_info]
+	if category in all_categories: 
+		# it's a known category
+		#found_category_info = [cat_info for cat_info in categories_info if cat_info["category"] == category][0]
+		found_category_info = find(categories_info, "category", category)
+		found_category_info["repos"].append(repo_name)
+	else:
+		# it's a new category
+		new_category_info = {
+			"category": category,
+			"repos": [repo_name]
+		}
+		categories_info.append(new_category_info)
+
 	try:
 		contributors_list, total_contributions, count_anonymous_contributors = get_contributors(repo_name)
 		save_repo_data(repo_name, contributors_list)
@@ -78,17 +97,30 @@ for [repo_name, category] in repos:
 		all_ids = [c["id"] for c in all_contributors]
 		for c in contributors_list:
 			if c["id"] in all_ids:
-				idx = all_ids.index(c["id"])
-				all_contributors[idx]["contributions"].append({"repo_name": repo_name, "contributions": c["contributions"]})
+				# it's a known contributor
+				#found_contributor = [contrib for contrib in all_contributors if c["id"] == contrib["id"]][0]
+				found_contributor = find(all_contributors, "id", c["id"])
+				found_contributor["contributions"].append({"repo_name": repo_name, "contributions": c["contributions"]})
 			else:
+				# it's a new contributor
 				all_contributors.append({
 					"type": c["type"],
 					"id": c["id"],
 					"contributions": [{"repo_name": repo_name, "contributions": c["contributions"]}]
 				})
-	except Exception as e: print(e)
+	except Exception as e: 
+		repo_info = {
+			"name": repo_name,
+			"category": category
+		}
+		gh_api_failures.append(repo_info)
+		print(e)
 
 with open("../dataset/repos_info.json", "w") as fp:
-		json.dump(repos_info, fp, indent = 1)
+	json.dump(repos_info, fp, indent = 1)
+with open("../dataset/categories_info.json", "w") as fp:
+	json.dump(categories_info, fp, indent = 1)
 with open("../dataset/all_contributors.json", "w") as fp:
-		json.dump(all_contributors, fp, indent = 1)
+	json.dump(all_contributors, fp, indent = 1)
+with open("../dataset/gh_api_failures.json", "w") as fp:
+	json.dump(gh_api_failures, fp, indent = 1)

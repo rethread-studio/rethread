@@ -14,17 +14,17 @@
   {
    "type": "User",
    "id": "ehuss",
-   "contributions": 1501
+   "contributions": 1502
   },
   {
    "type": "User",
    "id": "epage",
-   "contributions": 1308
+   "contributions": 1312
   },
   {
    "type": "User",
    "id": "weihanglo",
-   "contributions": 962
+   "contributions": 963
   },
   {
    "type": "User",
@@ -658,6 +658,11 @@
   },
   {
    "type": "User",
+   "id": "sdroege",
+   "contributions": 10
+  },
+  {
+   "type": "User",
    "id": "osiewicz",
    "contributions": 10
   },
@@ -709,11 +714,6 @@
   {
    "type": "User",
    "id": "mcarton",
-   "contributions": 9
-  },
-  {
-   "type": "User",
-   "id": "sdroege",
    "contributions": 9
   },
   {

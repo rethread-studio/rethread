@@ -1,0 +1,171 @@
+[
+ {
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "repos": [
+   "BelaPlatform/Bela",
+   "EnvelopSound/EnvelopForLive",
+   "TU-Studio/IEMPluginSuite",
+   "WebAudio/web-audio-api",
+   "WebAudio/web-midi-api",
+   "jackaudio/jack2",
+   "pure-data/pure-data",
+   "supercollider/sc3-plugins",
+   "supercollider/supercollider"
+  ]
+ },
+ {
+  "category": "command-line tool",
+  "repos": [
+   "FFmpeg/FFmpeg",
+   "PipeWire/pipewire",
+   "git/git",
+   "npm/cli",
+   "popcornmix/omxplayer",
+   "rtyley/bfg-repo-cleaner"
+  ]
+ },
+ {
+  "category": "app/website/program with a GUI",
+  "repos": [
+   "GNOME/gimp",
+   "HandBrake/HandBrake",
+   "KDE/plasma-desktop",
+   "LibreOffice/core",
+   "ProtonMail/WebClients",
+   "VSCodium/vscodium",
+   "arduino/arduino-ide",
+   "audacity/audacity",
+   "brave/brave-browser",
+   "chromium/chromium",
+   "emacs-mirror/emacs",
+   "github/docs",
+   "huggingface/chat-ui",
+   "i3/i3.github.io",
+   "inkscape/inkscape",
+   "microsoft/vscode",
+   "nextcloud/collectives",
+   "nextcloud/server",
+   "nextcloud/spreed",
+   "nextcloud/talk-android",
+   "nextcloud/text",
+   "notepad-plus-plus/notepad-plus-plus",
+   "pocketbase/pocketbase",
+   "ritwickdey/vscode-live-server",
+   "signalapp/Signal-Android",
+   "signalapp/Signal-Desktop",
+   "signalapp/Signal-iOS",
+   "textmate/textmate",
+   "videolan/vlc"
+  ]
+ },
+ {
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "repos": [
+   "KhronosGroup/GLSL",
+   "KhronosGroup/WebGL",
+   "KhronosGroup/glslang",
+   "NVlabs/stylegan2",
+   "autonomousvision/projected-gan",
+   "btel/svg_utils",
+   "image-rs/image",
+   "matplotlib/matplotlib",
+   "mossblaser/plottie",
+   "mozman/svgwrite",
+   "mrdoob/three.js",
+   "openframeworks/openFrameworks",
+   "otuva/handwriting-synthesis",
+   "processing/p5.js",
+   "processing/processing",
+   "sass/sass",
+   "sjvasquez/handwriting-synthesis"
+  ]
+ },
+ {
+  "category": "related to electronics",
+  "repos": [
+   "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
+   "arduino/Arduino",
+   "arduino/ArduinoCore-API",
+   "electro-smith/libDaisy",
+   "espressif/arduino-esp32",
+   "hideakitai/ESP32SPISlave",
+   "korken89/fugit",
+   "probe-rs/rtt-target",
+   "rtic-rs/rtic",
+   "rust-embedded/bare-metal",
+   "rust-embedded/cortex-m",
+   "rust-embedded/critical-section",
+   "rust-embedded/embedded-alloc",
+   "rust-embedded/embedded-hal",
+   "rust-embedded/nb",
+   "rust-embedded/volatile-register",
+   "stm32-rs/stm32h7xx-hal",
+   "tarcieri/micromath"
+  ]
+ },
+ {
+  "category": "text and speech",
+  "repos": [
+   "brandongmwong/elizabot-js",
+   "coqui-ai/TTS",
+   "festvox/festival",
+   "googlefonts/Inconsolata"
+  ]
+ },
+ {
+  "category": "engine",
+  "repos": [
+   "brave/brave-core",
+   "mozilla/gecko-dev",
+   "v8/v8"
+  ]
+ },
+ {
+  "category": "other programming language/library/plugin",
+  "repos": [
+   "caprover/caprover",
+   "carstenlebek/svelte-email",
+   "cuviper/autocfg",
+   "djc/rustc-version-rs",
+   "dtolnay/proc-macro2",
+   "dtolnay/quote",
+   "dtolnay/semver",
+   "dtolnay/syn",
+   "dtolnay/unicode-ident",
+   "github/rest-api-description",
+   "indexmap-rs/indexmap",
+   "joshnuss/svelte-persisted-store",
+   "keenethics/svelte-notifications",
+   "kirovj/pocketbase-pyclient",
+   "meta-llama/llama-models",
+   "microsoft/TypeScript",
+   "moment/moment",
+   "mozsearch/mozsearch",
+   "nodejs/node",
+   "nodemailer/nodemailer",
+   "nolimits4web/swiper",
+   "numpy/numpy",
+   "openai/openai-node",
+   "python/cpython",
+   "rust-lang/cargo",
+   "rust-lang/hashbrown",
+   "rust-lang/libm",
+   "rust-lang/log",
+   "rust-lang/rust",
+   "rust-num/num-traits",
+   "sc00/svelte-textarea-auto-height",
+   "scikit-learn/scikit-learn",
+   "scipy/scipy",
+   "steveklabnik/semver-parser",
+   "sveltejs/svelte",
+   "tensorflow/tensorflow",
+   "vitejs/vite"
+  ]
+ },
+ {
+  "category": "kernel",
+  "repos": [
+   "torvalds/linux"
+  ]
+ }
+]
