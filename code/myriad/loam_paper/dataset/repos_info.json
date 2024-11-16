@@ -1,856 +1,978 @@
 [
  {
-  "name": "BelaPlatform/Bela",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 3375,
-  "anonymous_contributors": 9,
-  "nonanonymous_contributors": 32
- },
- {
-  "name": "EnvelopSound/EnvelopForLive",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 613,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 8
- },
- {
-  "name": "FFmpeg/FFmpeg",
-  "category": "command-line tool",
-  "total_contributions": 117316,
-  "anonymous_contributors": 2098,
-  "nonanonymous_contributors": 311
- },
- {
-  "name": "GNOME/gimp",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 46213,
-  "anonymous_contributors": 936,
-  "nonanonymous_contributors": 166
- },
- {
-  "name": "HandBrake/HandBrake",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 12751,
-  "anonymous_contributors": 27,
-  "nonanonymous_contributors": 116
- },
- {
-  "name": "KDE/plasma-desktop",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 12534,
-  "anonymous_contributors": 55,
-  "nonanonymous_contributors": 305
- },
- {
-  "name": "KhronosGroup/GLSL",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 478,
-  "anonymous_contributors": 8,
-  "nonanonymous_contributors": 39
- },
- {
-  "name": "KhronosGroup/WebGL",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 6728,
-  "anonymous_contributors": 67,
-  "nonanonymous_contributors": 156
- },
- {
-  "name": "KhronosGroup/glslang",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 5161,
-  "anonymous_contributors": 29,
-  "nonanonymous_contributors": 297
- },
- {
-  "name": "LibreOffice/core",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 500457,
-  "anonymous_contributors": 2460,
-  "nonanonymous_contributors": 167
- },
- {
-  "name": "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
-  "category": "related to electronics",
-  "total_contributions": 7,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 2
- },
- {
-  "name": "NVlabs/stylegan2",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 19,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 3
- },
- {
-  "name": "PipeWire/pipewire",
-  "category": "command-line tool",
-  "total_contributions": 13026,
-  "anonymous_contributors": 50,
-  "nonanonymous_contributors": 289
- },
- {
-  "name": "ProtonMail/WebClients",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 39549,
-  "anonymous_contributors": 112,
-  "nonanonymous_contributors": 66
- },
- {
-  "name": "TU-Studio/IEMPluginSuite",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 1489,
-  "anonymous_contributors": 12,
-  "nonanonymous_contributors": 8
- },
- {
-  "name": "VSCodium/vscodium",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 1337,
-  "anonymous_contributors": 13,
-  "nonanonymous_contributors": 108
- },
- {
-  "name": "WebAudio/web-audio-api",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 3316,
-  "anonymous_contributors": 15,
-  "nonanonymous_contributors": 63
- },
- {
-  "name": "WebAudio/web-midi-api",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 307,
-  "anonymous_contributors": 5,
-  "nonanonymous_contributors": 25
- },
- {
-  "name": "arduino/Arduino",
-  "category": "related to electronics",
-  "total_contributions": 7376,
-  "anonymous_contributors": 54,
-  "nonanonymous_contributors": 250
- },
- {
-  "name": "arduino/ArduinoCore-API",
-  "category": "related to electronics",
-  "total_contributions": 348,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 37
- },
- {
-  "name": "arduino/arduino-ide",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 1423,
-  "anonymous_contributors": 7,
-  "nonanonymous_contributors": 37
- },
- {
-  "name": "audacity/audacity",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 20525,
-  "anonymous_contributors": 65,
-  "nonanonymous_contributors": 217
- },
- {
-  "name": "autonomousvision/projected-gan",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 23,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 4
- },
- {
-  "name": "brandongmwong/elizabot-js",
-  "category": "text and speech",
-  "total_contributions": 4,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 1
- },
- {
-  "name": "brave/brave-browser",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 8929,
-  "anonymous_contributors": 10,
-  "nonanonymous_contributors": 94
- },
- {
-  "name": "brave/brave-core",
-  "category": "engine",
-  "total_contributions": 65749,
-  "anonymous_contributors": 159,
-  "nonanonymous_contributors": 290
- },
- {
-  "name": "btel/svg_utils",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 198,
-  "anonymous_contributors": 4,
-  "nonanonymous_contributors": 22
- },
- {
-  "name": "caprover/caprover",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 1691,
-  "anonymous_contributors": 5,
-  "nonanonymous_contributors": 57
- },
- {
-  "name": "carstenlebek/svelte-email",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 50,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 4
- },
- {
-  "name": "coqui-ai/TTS",
-  "category": "text and speech",
-  "total_contributions": 4668,
-  "anonymous_contributors": 20,
-  "nonanonymous_contributors": 146
- },
- {
-  "name": "cuviper/autocfg",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 112,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 10
- },
- {
-  "name": "djc/rustc-version-rs",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 116,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 15
- },
- {
-  "name": "dtolnay/proc-macro2",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 1148,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 28
- },
- {
-  "name": "dtolnay/quote",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 645,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 24
- },
- {
-  "name": "dtolnay/semver",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 642,
-  "anonymous_contributors": 3,
-  "nonanonymous_contributors": 62
- },
- {
-  "name": "dtolnay/syn",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 4839,
-  "anonymous_contributors": 4,
-  "nonanonymous_contributors": 95
- },
- {
-  "name": "dtolnay/unicode-ident",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 147,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 1
- },
- {
-  "name": "electro-smith/libDaisy",
-  "category": "related to electronics",
-  "total_contributions": 1287,
-  "anonymous_contributors": 5,
-  "nonanonymous_contributors": 39
- },
- {
-  "name": "emacs-mirror/emacs",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 175513,
-  "anonymous_contributors": 1378,
-  "nonanonymous_contributors": 332
- },
- {
-  "name": "espressif/arduino-esp32",
-  "category": "related to electronics",
-  "total_contributions": 2808,
-  "anonymous_contributors": 280,
-  "nonanonymous_contributors": 459
- },
- {
-  "name": "festvox/festival",
-  "category": "text and speech",
-  "total_contributions": 81,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 7
- },
- {
   "name": "git/git",
   "category": "command-line tool",
-  "total_contributions": 75308,
+  "created_at": "2008-07-23 14:21:26+00:00",
+  "total_contributions": 75309,
   "anonymous_contributors": 1836,
-  "nonanonymous_contributors": 416
- },
- {
-  "name": "github/docs",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 51128,
-  "anonymous_contributors": 2120,
-  "nonanonymous_contributors": 431
- },
- {
-  "name": "github/rest-api-description",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 2634,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 23
- },
- {
-  "name": "googlefonts/Inconsolata",
-  "category": "text and speech",
-  "total_contributions": 171,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 8
- },
- {
-  "name": "hideakitai/ESP32SPISlave",
-  "category": "related to electronics",
-  "total_contributions": 59,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 3
- },
- {
-  "name": "huggingface/chat-ui",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 1133,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 109
- },
- {
-  "name": "i3/i3.github.io",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 578,
-  "anonymous_contributors": 9,
-  "nonanonymous_contributors": 44
- },
- {
-  "name": "image-rs/image",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 3384,
-  "anonymous_contributors": 28,
-  "nonanonymous_contributors": 307
- },
- {
-  "name": "indexmap-rs/indexmap",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 850,
-  "anonymous_contributors": 4,
-  "nonanonymous_contributors": 40
- },
- {
-  "name": "inkscape/inkscape",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 89,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 10
- },
- {
-  "name": "jackaudio/jack2",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 4072,
-  "anonymous_contributors": 28,
-  "nonanonymous_contributors": 92
- },
- {
-  "name": "joshnuss/svelte-persisted-store",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 338,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 15
- },
- {
-  "name": "keenethics/svelte-notifications",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 142,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 20
- },
- {
-  "name": "kirovj/pocketbase-pyclient",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 45,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 1
- },
- {
-  "name": "korken89/fugit",
-  "category": "related to electronics",
-  "total_contributions": 101,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 10
- },
- {
-  "name": "matplotlib/matplotlib",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 51325,
-  "anonymous_contributors": 1327,
-  "nonanonymous_contributors": 419
- },
- {
-  "name": "meta-llama/llama-models",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 141,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 27
- },
- {
-  "name": "microsoft/TypeScript",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 36296,
-  "anonymous_contributors": 544,
-  "nonanonymous_contributors": 346
- },
- {
-  "name": "microsoft/vscode",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 126951,
-  "anonymous_contributors": 2267,
-  "nonanonymous_contributors": 334
- },
- {
-  "name": "moment/moment",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 4064,
-  "anonymous_contributors": 290,
-  "nonanonymous_contributors": 400
- },
- {
-  "name": "mossblaser/plottie",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 29,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 1
- },
- {
-  "name": "mozilla/gecko-dev",
-  "category": "engine",
-  "total_contributions": 937031,
-  "anonymous_contributors": 11425,
-  "nonanonymous_contributors": 279
- },
- {
-  "name": "mozman/svgwrite",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 394,
-  "anonymous_contributors": 5,
-  "nonanonymous_contributors": 19
- },
- {
-  "name": "mozsearch/mozsearch",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 1948,
-  "anonymous_contributors": 5,
-  "nonanonymous_contributors": 36
- },
- {
-  "name": "mrdoob/three.js",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 44410,
-  "anonymous_contributors": 1961,
-  "nonanonymous_contributors": 364
- },
- {
-  "name": "nextcloud/collectives",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 3734,
-  "anonymous_contributors": 13,
-  "nonanonymous_contributors": 58
- },
- {
-  "name": "nextcloud/server",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 78023,
-  "anonymous_contributors": 908,
-  "nonanonymous_contributors": 352
- },
- {
-  "name": "nextcloud/spreed",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 21280,
-  "anonymous_contributors": 16,
-  "nonanonymous_contributors": 101
- },
- {
-  "name": "nextcloud/talk-android",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 9828,
-  "anonymous_contributors": 11,
-  "nonanonymous_contributors": 43
- },
- {
-  "name": "nextcloud/text",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 8677,
-  "anonymous_contributors": 4,
-  "nonanonymous_contributors": 70
- },
- {
-  "name": "nodejs/node",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 42845,
-  "anonymous_contributors": 3610,
-  "nonanonymous_contributors": 434
- },
- {
-  "name": "nodemailer/nodemailer",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 1069,
-  "anonymous_contributors": 33,
-  "nonanonymous_contributors": 124
- },
- {
-  "name": "nolimits4web/swiper",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 3694,
-  "anonymous_contributors": 48,
-  "nonanonymous_contributors": 288
- },
- {
-  "name": "notepad-plus-plus/notepad-plus-plus",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 6037,
-  "anonymous_contributors": 49,
-  "nonanonymous_contributors": 370
- },
- {
-  "name": "npm/cli",
-  "category": "command-line tool",
-  "total_contributions": 12592,
-  "anonymous_contributors": 501,
-  "nonanonymous_contributors": 430
- },
- {
-  "name": "numpy/numpy",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 37434,
-  "anonymous_contributors": 1408,
-  "nonanonymous_contributors": 433
- },
- {
-  "name": "openai/openai-node",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 700,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 24
+  "loggedin_contributors": 416
  },
  {
   "name": "openframeworks/openFrameworks",
   "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 17462,
-  "anonymous_contributors": 150,
-  "nonanonymous_contributors": 289
+  "created_at": "2009-10-21 21:55:54+00:00",
+  "total_contributions": 17464,
+  "anonymous_contributors": 151,
+  "loggedin_contributors": 289
  },
  {
-  "name": "otuva/handwriting-synthesis",
+  "name": "mrdoob/three.js",
   "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 86,
-  "anonymous_contributors": 3,
-  "nonanonymous_contributors": 3
- },
- {
-  "name": "pocketbase/pocketbase",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 1447,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 39
- },
- {
-  "name": "popcornmix/omxplayer",
-  "category": "command-line tool",
-  "total_contributions": 531,
-  "anonymous_contributors": 14,
-  "nonanonymous_contributors": 53
- },
- {
-  "name": "probe-rs/rtt-target",
-  "category": "related to electronics",
-  "total_contributions": 102,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 19
- },
- {
-  "name": "processing/p5.js",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 11690,
-  "anonymous_contributors": 423,
-  "nonanonymous_contributors": 358
- },
- {
-  "name": "processing/processing",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 13211,
-  "anonymous_contributors": 29,
-  "nonanonymous_contributors": 109
- },
- {
-  "name": "pure-data/pure-data",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 7010,
-  "anonymous_contributors": 30,
-  "nonanonymous_contributors": 83
- },
- {
-  "name": "python/cpython",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 124370,
-  "anonymous_contributors": 2778,
-  "nonanonymous_contributors": 349
- },
- {
-  "name": "ritwickdey/vscode-live-server",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 328,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 34
- },
- {
-  "name": "rtic-rs/rtic",
-  "category": "related to electronics",
-  "total_contributions": 1745,
-  "anonymous_contributors": 8,
-  "nonanonymous_contributors": 86
- },
- {
-  "name": "rtyley/bfg-repo-cleaner",
-  "category": "command-line tool",
-  "total_contributions": 488,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 5
- },
- {
-  "name": "rust-embedded/bare-metal",
-  "category": "related to electronics",
-  "total_contributions": 87,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 17
- },
- {
-  "name": "rust-embedded/cortex-m",
-  "category": "related to electronics",
-  "total_contributions": 1532,
-  "anonymous_contributors": 7,
-  "nonanonymous_contributors": 99
- },
- {
-  "name": "rust-embedded/critical-section",
-  "category": "related to electronics",
-  "total_contributions": 131,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 12
- },
- {
-  "name": "rust-embedded/embedded-alloc",
-  "category": "related to electronics",
-  "total_contributions": 171,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 28
- },
- {
-  "name": "rust-embedded/embedded-hal",
-  "category": "related to electronics",
-  "total_contributions": 887,
-  "anonymous_contributors": 3,
-  "nonanonymous_contributors": 65
- },
- {
-  "name": "rust-embedded/nb",
-  "category": "related to electronics",
-  "total_contributions": 65,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 12
- },
- {
-  "name": "rust-embedded/volatile-register",
-  "category": "related to electronics",
-  "total_contributions": 28,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 7
- },
- {
-  "name": "rust-lang/cargo",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 18961,
-  "anonymous_contributors": 750,
-  "nonanonymous_contributors": 419
- },
- {
-  "name": "rust-lang/hashbrown",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 1081,
-  "anonymous_contributors": 9,
-  "nonanonymous_contributors": 103
- },
- {
-  "name": "rust-lang/libm",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 536,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 54
- },
- {
-  "name": "rust-lang/log",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 838,
-  "anonymous_contributors": 12,
-  "nonanonymous_contributors": 111
+  "created_at": "2010-03-23 18:58:01+00:00",
+  "total_contributions": 44414,
+  "anonymous_contributors": 1961,
+  "loggedin_contributors": 364
  },
  {
   "name": "rust-lang/rust",
   "category": "other programming language/library/plugin",
-  "total_contributions": 270712,
-  "anonymous_contributors": 6611,
-  "nonanonymous_contributors": 446
- },
- {
-  "name": "rust-num/num-traits",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 1163,
-  "anonymous_contributors": 13,
-  "nonanonymous_contributors": 115
- },
- {
-  "name": "sass/sass",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 889,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 26
- },
- {
-  "name": "sc00/svelte-textarea-auto-height",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 7,
-  "anonymous_contributors": 0,
-  "nonanonymous_contributors": 1
+  "created_at": "2010-06-16 20:39:03+00:00",
+  "total_contributions": 270821,
+  "anonymous_contributors": 6614,
+  "loggedin_contributors": 446
  },
  {
   "name": "scikit-learn/scikit-learn",
   "category": "other programming language/library/plugin",
-  "total_contributions": 31886,
-  "anonymous_contributors": 2811,
-  "nonanonymous_contributors": 408
+  "created_at": "2010-08-17 09:43:38+00:00",
+  "total_contributions": 31892,
+  "anonymous_contributors": 2813,
+  "loggedin_contributors": 408
+ },
+ {
+  "name": "numpy/numpy",
+  "category": "other programming language/library/plugin",
+  "created_at": "2010-09-13 23:02:39+00:00",
+  "total_contributions": 37457,
+  "anonymous_contributors": 1409,
+  "loggedin_contributors": 433
+ },
+ {
+  "name": "arduino/Arduino",
+  "category": "related to electronics",
+  "created_at": "2010-09-17 19:10:36+00:00",
+  "total_contributions": 7376,
+  "anonymous_contributors": 54,
+  "loggedin_contributors": 250
+ },
+ {
+  "name": "sass/sass",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2010-09-22 06:16:55+00:00",
+  "total_contributions": 890,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 26
+ },
+ {
+  "name": "nodemailer/nodemailer",
+  "category": "other programming language/library/plugin",
+  "created_at": "2011-01-19 21:17:36+00:00",
+  "total_contributions": 1069,
+  "anonymous_contributors": 33,
+  "loggedin_contributors": 124
+ },
+ {
+  "name": "matplotlib/matplotlib",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2011-02-19 03:17:12+00:00",
+  "total_contributions": 51330,
+  "anonymous_contributors": 1327,
+  "loggedin_contributors": 419
+ },
+ {
+  "name": "moment/moment",
+  "category": "other programming language/library/plugin",
+  "created_at": "2011-03-01 02:46:06+00:00",
+  "total_contributions": 4064,
+  "anonymous_contributors": 290,
+  "loggedin_contributors": 400
  },
  {
   "name": "scipy/scipy",
   "category": "other programming language/library/plugin",
-  "total_contributions": 33809,
+  "created_at": "2011-03-09 18:52:03+00:00",
+  "total_contributions": 33855,
   "anonymous_contributors": 1299,
-  "nonanonymous_contributors": 413
+  "loggedin_contributors": 413
+ },
+ {
+  "name": "btel/svg_utils",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2011-04-12 15:41:55+00:00",
+  "total_contributions": 198,
+  "anonymous_contributors": 4,
+  "loggedin_contributors": 22
+ },
+ {
+  "name": "FFmpeg/FFmpeg",
+  "category": "command-line tool",
+  "created_at": "2011-04-14 14:12:38+00:00",
+  "total_contributions": 117327,
+  "anonymous_contributors": 2099,
+  "loggedin_contributors": 311
  },
  {
   "name": "signalapp/Signal-Android",
   "category": "app/website/program with a GUI",
+  "created_at": "2011-12-15 20:01:12+00:00",
   "total_contributions": 15709,
   "anonymous_contributors": 47,
-  "nonanonymous_contributors": 306
- },
- {
-  "name": "signalapp/Signal-Desktop",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 11226,
-  "anonymous_contributors": 37,
-  "nonanonymous_contributors": 220
- },
- {
-  "name": "signalapp/Signal-iOS",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 35205,
-  "anonymous_contributors": 27,
-  "nonanonymous_contributors": 148
- },
- {
-  "name": "sjvasquez/handwriting-synthesis",
-  "category": "programming language/library/plugin specifically to create/process something visual",
-  "total_contributions": 22,
-  "anonymous_contributors": 3,
-  "nonanonymous_contributors": 0
- },
- {
-  "name": "steveklabnik/semver-parser",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 125,
-  "anonymous_contributors": 2,
-  "nonanonymous_contributors": 16
- },
- {
-  "name": "stm32-rs/stm32h7xx-hal",
-  "category": "related to electronics",
-  "total_contributions": 1328,
-  "anonymous_contributors": 4,
-  "nonanonymous_contributors": 49
- },
- {
-  "name": "supercollider/sc3-plugins",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 1385,
-  "anonymous_contributors": 20,
-  "nonanonymous_contributors": 52
- },
- {
-  "name": "supercollider/supercollider",
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "total_contributions": 26311,
-  "anonymous_contributors": 122,
-  "nonanonymous_contributors": 218
- },
- {
-  "name": "sveltejs/svelte",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 9636,
-  "anonymous_contributors": 374,
-  "nonanonymous_contributors": 415
- },
- {
-  "name": "tarcieri/micromath",
-  "category": "related to electronics",
-  "total_contributions": 163,
-  "anonymous_contributors": 1,
-  "nonanonymous_contributors": 8
- },
- {
-  "name": "tensorflow/tensorflow",
-  "category": "other programming language/library/plugin",
-  "total_contributions": 171993,
-  "anonymous_contributors": 4310,
-  "nonanonymous_contributors": 406
- },
- {
-  "name": "textmate/textmate",
-  "category": "app/website/program with a GUI",
-  "total_contributions": 5756,
-  "anonymous_contributors": 18,
-  "nonanonymous_contributors": 79
- },
- {
-  "name": "v8/v8",
-  "category": "engine",
-  "total_contributions": 91685,
-  "anonymous_contributors": 913,
-  "nonanonymous_contributors": 205
+  "loggedin_contributors": 306
  },
  {
   "name": "videolan/vlc",
   "category": "app/website/program with a GUI",
-  "total_contributions": 104989,
+  "created_at": "2012-01-29 19:30:36+00:00",
+  "total_contributions": 105027,
   "anonymous_contributors": 750,
-  "nonanonymous_contributors": 292
+  "loggedin_contributors": 292
+ },
+ {
+  "name": "jackaudio/jack2",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2012-02-02 17:37:08+00:00",
+  "total_contributions": 4072,
+  "anonymous_contributors": 28,
+  "loggedin_contributors": 92
+ },
+ {
+  "name": "nolimits4web/swiper",
+  "category": "other programming language/library/plugin",
+  "created_at": "2012-03-14 19:11:45+00:00",
+  "total_contributions": 3694,
+  "anonymous_contributors": 48,
+  "loggedin_contributors": 288
+ },
+ {
+  "name": "supercollider/supercollider",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2012-05-04 19:24:51+00:00",
+  "total_contributions": 26314,
+  "anonymous_contributors": 122,
+  "loggedin_contributors": 219
+ },
+ {
+  "name": "GNOME/gimp",
+  "category": "app/website/program with a GUI",
+  "created_at": "2012-06-03 13:37:45+00:00",
+  "total_contributions": 46221,
+  "anonymous_contributors": 936,
+  "loggedin_contributors": 166
+ },
+ {
+  "name": "brandongmwong/elizabot-js",
+  "category": "text and speech",
+  "created_at": "2012-07-18 23:36:11+00:00",
+  "total_contributions": 4,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 1
+ },
+ {
+  "name": "KhronosGroup/WebGL",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2012-07-27 17:21:51+00:00",
+  "total_contributions": 6728,
+  "anonymous_contributors": 67,
+  "loggedin_contributors": 156
+ },
+ {
+  "name": "textmate/textmate",
+  "category": "app/website/program with a GUI",
+  "created_at": "2012-08-08 16:25:52+00:00",
+  "total_contributions": 5756,
+  "anonymous_contributors": 18,
+  "loggedin_contributors": 79
+ },
+ {
+  "name": "popcornmix/omxplayer",
+  "category": "command-line tool",
+  "created_at": "2012-08-27 18:54:21+00:00",
+  "total_contributions": 531,
+  "anonymous_contributors": 14,
+  "loggedin_contributors": 53
+ },
+ {
+  "name": "supercollider/sc3-plugins",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2012-12-01 18:53:11+00:00",
+  "total_contributions": 1385,
+  "anonymous_contributors": 20,
+  "loggedin_contributors": 52
+ },
+ {
+  "name": "rtyley/bfg-repo-cleaner",
+  "category": "command-line tool",
+  "created_at": "2012-12-21 00:14:20+00:00",
+  "total_contributions": 488,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 5
+ },
+ {
+  "name": "WebAudio/web-midi-api",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2013-01-10 18:45:33+00:00",
+  "total_contributions": 312,
+  "anonymous_contributors": 5,
+  "loggedin_contributors": 25
+ },
+ {
+  "name": "processing/processing",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2013-01-24 21:17:22+00:00",
+  "total_contributions": 13211,
+  "anonymous_contributors": 29,
+  "loggedin_contributors": 109
+ },
+ {
+  "name": "processing/p5.js",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2013-02-26 03:14:47+00:00",
+  "total_contributions": 11690,
+  "anonymous_contributors": 423,
+  "loggedin_contributors": 358
+ },
+ {
+  "name": "WebAudio/web-audio-api",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2013-08-30 11:29:49+00:00",
+  "total_contributions": 3316,
+  "anonymous_contributors": 15,
+  "loggedin_contributors": 63
+ },
+ {
+  "name": "mozilla/gecko-dev",
+  "category": "engine",
+  "created_at": "2013-10-11 20:35:42+00:00",
+  "total_contributions": 937334,
+  "anonymous_contributors": 11429,
+  "loggedin_contributors": 279
+ },
+ {
+  "name": "LibreOffice/core",
+  "category": "app/website/program with a GUI",
+  "created_at": "2013-10-31 15:46:52+00:00",
+  "total_contributions": 500483,
+  "anonymous_contributors": 2461,
+  "loggedin_contributors": 167
+ },
+ {
+  "name": "signalapp/Signal-Desktop",
+  "category": "app/website/program with a GUI",
+  "created_at": "2014-02-24 19:53:36+00:00",
+  "total_contributions": 11226,
+  "anonymous_contributors": 37,
+  "loggedin_contributors": 220
+ },
+ {
+  "name": "rust-lang/cargo",
+  "category": "other programming language/library/plugin",
+  "created_at": "2014-03-04 23:20:42+00:00",
+  "total_contributions": 18988,
+  "anonymous_contributors": 751,
+  "loggedin_contributors": 419
+ },
+ {
+  "name": "signalapp/Signal-iOS",
+  "category": "app/website/program with a GUI",
+  "created_at": "2014-05-04 15:42:40+00:00",
+  "total_contributions": 35205,
+  "anonymous_contributors": 27,
+  "loggedin_contributors": 148
+ },
+ {
+  "name": "image-rs/image",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2014-05-25 11:39:07+00:00",
+  "total_contributions": 3384,
+  "anonymous_contributors": 28,
+  "loggedin_contributors": 307
+ },
+ {
+  "name": "i3/i3.github.io",
+  "category": "app/website/program with a GUI",
+  "created_at": "2014-06-16 20:25:47+00:00",
+  "total_contributions": 578,
+  "anonymous_contributors": 9,
+  "loggedin_contributors": 44
+ },
+ {
+  "name": "microsoft/TypeScript",
+  "category": "other programming language/library/plugin",
+  "created_at": "2014-06-17 15:28:39+00:00",
+  "total_contributions": 36297,
+  "anonymous_contributors": 543,
+  "loggedin_contributors": 347
+ },
+ {
+  "name": "dtolnay/semver",
+  "category": "other programming language/library/plugin",
+  "created_at": "2014-07-30 15:01:22+00:00",
+  "total_contributions": 642,
+  "anonymous_contributors": 3,
+  "loggedin_contributors": 62
+ },
+ {
+  "name": "emacs-mirror/emacs",
+  "category": "app/website/program with a GUI",
+  "created_at": "2014-08-07 06:58:17+00:00",
+  "total_contributions": 175522,
+  "anonymous_contributors": 1379,
+  "loggedin_contributors": 332
+ },
+ {
+  "name": "pure-data/pure-data",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2014-08-18 09:36:46+00:00",
+  "total_contributions": 7010,
+  "anonymous_contributors": 30,
+  "loggedin_contributors": 83
+ },
+ {
+  "name": "inkscape/inkscape",
+  "category": "app/website/program with a GUI",
+  "created_at": "2014-08-20 20:27:16+00:00",
+  "total_contributions": 89,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 10
+ },
+ {
+  "name": "v8/v8",
+  "category": "engine",
+  "created_at": "2014-09-24 15:24:30+00:00",
+  "total_contributions": 91705,
+  "anonymous_contributors": 914,
+  "loggedin_contributors": 205
+ },
+ {
+  "name": "nodejs/node",
+  "category": "other programming language/library/plugin",
+  "created_at": "2014-11-26 19:57:11+00:00",
+  "total_contributions": 42853,
+  "anonymous_contributors": 3610,
+  "loggedin_contributors": 434
+ },
+ {
+  "name": "rust-lang/log",
+  "category": "other programming language/library/plugin",
+  "created_at": "2014-12-13 21:45:04+00:00",
+  "total_contributions": 838,
+  "anonymous_contributors": 12,
+  "loggedin_contributors": 111
+ },
+ {
+  "name": "EnvelopSound/EnvelopForLive",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2015-01-27 05:46:58+00:00",
+  "total_contributions": 613,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 8
+ },
+ {
+  "name": "mozsearch/mozsearch",
+  "category": "other programming language/library/plugin",
+  "created_at": "2015-03-16 05:03:18+00:00",
+  "total_contributions": 1948,
+  "anonymous_contributors": 5,
+  "loggedin_contributors": 36
+ },
+ {
+  "name": "audacity/audacity",
+  "category": "app/website/program with a GUI",
+  "created_at": "2015-03-26 10:46:17+00:00",
+  "total_contributions": 20525,
+  "anonymous_contributors": 65,
+  "loggedin_contributors": 217
+ },
+ {
+  "name": "notepad-plus-plus/notepad-plus-plus",
+  "category": "app/website/program with a GUI",
+  "created_at": "2015-03-28 00:05:08+00:00",
+  "total_contributions": 6037,
+  "anonymous_contributors": 49,
+  "loggedin_contributors": 370
+ },
+ {
+  "name": "KhronosGroup/glslang",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2015-06-25 17:54:39+00:00",
+  "total_contributions": 5162,
+  "anonymous_contributors": 29,
+  "loggedin_contributors": 297
+ },
+ {
+  "name": "HandBrake/HandBrake",
+  "category": "app/website/program with a GUI",
+  "created_at": "2015-08-22 16:32:28+00:00",
+  "total_contributions": 12753,
+  "anonymous_contributors": 27,
+  "loggedin_contributors": 116
+ },
+ {
+  "name": "djc/rustc-version-rs",
+  "category": "other programming language/library/plugin",
+  "created_at": "2015-08-24 00:09:32+00:00",
+  "total_contributions": 116,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 15
+ },
+ {
+  "name": "microsoft/vscode",
+  "category": "app/website/program with a GUI",
+  "created_at": "2015-09-03 20:23:38+00:00",
+  "total_contributions": 127027,
+  "anonymous_contributors": 2271,
+  "loggedin_contributors": 334
+ },
+ {
+  "name": "KDE/plasma-desktop",
+  "category": "app/website/program with a GUI",
+  "created_at": "2015-09-18 15:34:58+00:00",
+  "total_contributions": 12539,
+  "anonymous_contributors": 55,
+  "loggedin_contributors": 305
+ },
+ {
+  "name": "tensorflow/tensorflow",
+  "category": "other programming language/library/plugin",
+  "created_at": "2015-11-07 01:19:20+00:00",
+  "total_contributions": 172075,
+  "anonymous_contributors": 4310,
+  "loggedin_contributors": 407
+ },
+ {
+  "name": "arduino/ArduinoCore-API",
+  "category": "related to electronics",
+  "created_at": "2016-03-18 15:52:10+00:00",
+  "total_contributions": 348,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 37
+ },
+ {
+  "name": "steveklabnik/semver-parser",
+  "category": "other programming language/library/plugin",
+  "created_at": "2016-05-12 00:45:23+00:00",
+  "total_contributions": 125,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 16
+ },
+ {
+  "name": "googlefonts/Inconsolata",
+  "category": "text and speech",
+  "created_at": "2016-05-23 16:40:37+00:00",
+  "total_contributions": 171,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 8
+ },
+ {
+  "name": "nextcloud/server",
+  "category": "app/website/program with a GUI",
+  "created_at": "2016-06-02 07:44:14+00:00",
+  "total_contributions": 78058,
+  "anonymous_contributors": 908,
+  "loggedin_contributors": 352
+ },
+ {
+  "name": "ProtonMail/WebClients",
+  "category": "app/website/program with a GUI",
+  "created_at": "2016-06-08 11:16:51+00:00",
+  "total_contributions": 39593,
+  "anonymous_contributors": 112,
+  "loggedin_contributors": 66
+ },
+ {
+  "name": "BelaPlatform/Bela",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2016-06-22 14:43:22+00:00",
+  "total_contributions": 3375,
+  "anonymous_contributors": 9,
+  "loggedin_contributors": 32
+ },
+ {
+  "name": "nextcloud/spreed",
+  "category": "app/website/program with a GUI",
+  "created_at": "2016-09-01 08:08:37+00:00",
+  "total_contributions": 21307,
+  "anonymous_contributors": 16,
+  "loggedin_contributors": 101
+ },
+ {
+  "name": "dtolnay/quote",
+  "category": "other programming language/library/plugin",
+  "created_at": "2016-09-03 05:34:45+00:00",
+  "total_contributions": 645,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 24
+ },
+ {
+  "name": "dtolnay/syn",
+  "category": "other programming language/library/plugin",
+  "created_at": "2016-09-03 18:35:01+00:00",
+  "total_contributions": 4841,
+  "anonymous_contributors": 4,
+  "loggedin_contributors": 95
+ },
+ {
+  "name": "indexmap-rs/indexmap",
+  "category": "other programming language/library/plugin",
+  "created_at": "2016-09-15 13:06:08+00:00",
+  "total_contributions": 850,
+  "anonymous_contributors": 4,
+  "loggedin_contributors": 40
+ },
+ {
+  "name": "rust-embedded/volatile-register",
+  "category": "related to electronics",
+  "created_at": "2016-09-27 19:33:09+00:00",
+  "total_contributions": 28,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 7
+ },
+ {
+  "name": "rust-embedded/cortex-m",
+  "category": "related to electronics",
+  "created_at": "2016-09-27 23:35:04+00:00",
+  "total_contributions": 1532,
+  "anonymous_contributors": 7,
+  "loggedin_contributors": 99
+ },
+ {
+  "name": "espressif/arduino-esp32",
+  "category": "related to electronics",
+  "created_at": "2016-10-06 06:04:20+00:00",
+  "total_contributions": 2808,
+  "anonymous_contributors": 280,
+  "loggedin_contributors": 459
+ },
+ {
+  "name": "rust-embedded/embedded-alloc",
+  "category": "related to electronics",
+  "created_at": "2016-11-19 15:34:18+00:00",
+  "total_contributions": 171,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 28
+ },
+ {
+  "name": "sveltejs/svelte",
+  "category": "other programming language/library/plugin",
+  "created_at": "2016-11-20 18:13:05+00:00",
+  "total_contributions": 9643,
+  "anonymous_contributors": 374,
+  "loggedin_contributors": 415
+ },
+ {
+  "name": "mozman/svgwrite",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2017-01-22 08:29:23+00:00",
+  "total_contributions": 394,
+  "anonymous_contributors": 5,
+  "loggedin_contributors": 19
+ },
+ {
+  "name": "python/cpython",
+  "category": "other programming language/library/plugin",
+  "created_at": "2017-02-10 19:23:51+00:00",
+  "total_contributions": 124388,
+  "anonymous_contributors": 2779,
+  "loggedin_contributors": 349
+ },
+ {
+  "name": "KhronosGroup/GLSL",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2017-03-05 00:37:33+00:00",
+  "total_contributions": 478,
+  "anonymous_contributors": 8,
+  "loggedin_contributors": 39
+ },
+ {
+  "name": "rtic-rs/rtic",
+  "category": "related to electronics",
+  "created_at": "2017-03-05 05:28:17+00:00",
+  "total_contributions": 1745,
+  "anonymous_contributors": 8,
+  "loggedin_contributors": 86
+ },
+ {
+  "name": "dtolnay/proc-macro2",
+  "category": "other programming language/library/plugin",
+  "created_at": "2017-05-20 02:35:07+00:00",
+  "total_contributions": 1148,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 28
+ },
+ {
+  "name": "PipeWire/pipewire",
+  "category": "command-line tool",
+  "created_at": "2017-05-29 11:30:05+00:00",
+  "total_contributions": 13031,
+  "anonymous_contributors": 50,
+  "loggedin_contributors": 289
+ },
+ {
+  "name": "rust-embedded/nb",
+  "category": "related to electronics",
+  "created_at": "2017-06-08 03:49:59+00:00",
+  "total_contributions": 65,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 12
+ },
+ {
+  "name": "rust-embedded/embedded-hal",
+  "category": "related to electronics",
+  "created_at": "2017-06-09 20:57:29+00:00",
+  "total_contributions": 887,
+  "anonymous_contributors": 3,
+  "loggedin_contributors": 65
+ },
+ {
+  "name": "rust-embedded/bare-metal",
+  "category": "related to electronics",
+  "created_at": "2017-06-22 00:32:17+00:00",
+  "total_contributions": 87,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 17
+ },
+ {
+  "name": "ritwickdey/vscode-live-server",
+  "category": "app/website/program with a GUI",
+  "created_at": "2017-06-27 20:35:26+00:00",
+  "total_contributions": 328,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 34
+ },
+ {
+  "name": "festvox/festival",
+  "category": "text and speech",
+  "created_at": "2017-09-04 15:49:51+00:00",
+  "total_contributions": 81,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 7
+ },
+ {
+  "name": "nextcloud/talk-android",
+  "category": "app/website/program with a GUI",
+  "created_at": "2017-09-11 06:53:14+00:00",
+  "total_contributions": 9834,
+  "anonymous_contributors": 11,
+  "loggedin_contributors": 43
+ },
+ {
+  "name": "caprover/caprover",
+  "category": "other programming language/library/plugin",
+  "created_at": "2017-10-25 05:00:43+00:00",
+  "total_contributions": 1691,
+  "anonymous_contributors": 5,
+  "loggedin_contributors": 57
+ },
+ {
+  "name": "brave/brave-browser",
+  "category": "app/website/program with a GUI",
+  "created_at": "2017-11-09 23:44:38+00:00",
+  "total_contributions": 8937,
+  "anonymous_contributors": 10,
+  "loggedin_contributors": 94
+ },
+ {
+  "name": "brave/brave-core",
+  "category": "engine",
+  "created_at": "2017-11-10 03:33:30+00:00",
+  "total_contributions": 65796,
+  "anonymous_contributors": 159,
+  "loggedin_contributors": 290
+ },
+ {
+  "name": "rust-num/num-traits",
+  "category": "other programming language/library/plugin",
+  "created_at": "2017-12-19 01:37:18+00:00",
+  "total_contributions": 1163,
+  "anonymous_contributors": 13,
+  "loggedin_contributors": 115
+ },
+ {
+  "name": "sjvasquez/handwriting-synthesis",
+  "category": "text and speech",
+  "created_at": "2018-02-25 21:59:38+00:00",
+  "total_contributions": 22,
+  "anonymous_contributors": 3,
+  "loggedin_contributors": 0
+ },
+ {
+  "name": "cuviper/autocfg",
+  "category": "other programming language/library/plugin",
+  "created_at": "2018-05-30 18:18:52+00:00",
+  "total_contributions": 112,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 10
+ },
+ {
+  "name": "npm/cli",
+  "category": "command-line tool",
+  "created_at": "2018-07-05 23:26:52+00:00",
+  "total_contributions": 12592,
+  "anonymous_contributors": 501,
+  "loggedin_contributors": 430
+ },
+ {
+  "name": "rust-lang/libm",
+  "category": "other programming language/library/plugin",
+  "created_at": "2018-07-12 05:47:15+00:00",
+  "total_contributions": 536,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 54
+ },
+ {
+  "name": "VSCodium/vscodium",
+  "category": "app/website/program with a GUI",
+  "created_at": "2018-08-13 14:26:58+00:00",
+  "total_contributions": 1344,
+  "anonymous_contributors": 13,
+  "loggedin_contributors": 108
+ },
+ {
+  "name": "rust-lang/hashbrown",
+  "category": "other programming language/library/plugin",
+  "created_at": "2018-10-28 21:58:58+00:00",
+  "total_contributions": 1081,
+  "anonymous_contributors": 9,
+  "loggedin_contributors": 103
+ },
+ {
+  "name": "nextcloud/text",
+  "category": "app/website/program with a GUI",
+  "created_at": "2019-03-17 08:13:20+00:00",
+  "total_contributions": 8688,
+  "anonymous_contributors": 4,
+  "loggedin_contributors": 70
+ },
+ {
+  "name": "tarcieri/micromath",
+  "category": "related to electronics",
+  "created_at": "2019-04-28 08:53:58+00:00",
+  "total_contributions": 163,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 8
+ },
+ {
+  "name": "keenethics/svelte-notifications",
+  "category": "other programming language/library/plugin",
+  "created_at": "2019-05-21 20:18:44+00:00",
+  "total_contributions": 142,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 20
+ },
+ {
+  "name": "stm32-rs/stm32h7xx-hal",
+  "category": "related to electronics",
+  "created_at": "2019-05-25 04:35:48+00:00",
+  "total_contributions": 1328,
+  "anonymous_contributors": 4,
+  "loggedin_contributors": 49
+ },
+ {
+  "name": "github/docs",
+  "category": "app/website/program with a GUI",
+  "created_at": "2019-05-31 15:57:39+00:00",
+  "total_contributions": 51147,
+  "anonymous_contributors": 2122,
+  "loggedin_contributors": 431
+ },
+ {
+  "name": "electro-smith/libDaisy",
+  "category": "related to electronics",
+  "created_at": "2019-08-06 15:31:04+00:00",
+  "total_contributions": 1287,
+  "anonymous_contributors": 5,
+  "loggedin_contributors": 39
+ },
+ {
+  "name": "mossblaser/plottie",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2019-11-08 10:45:41+00:00",
+  "total_contributions": 29,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 1
+ },
+ {
+  "name": "NVlabs/stylegan2",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2019-11-26 20:52:23+00:00",
+  "total_contributions": 19,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 3
+ },
+ {
+  "name": "probe-rs/rtt-target",
+  "category": "related to electronics",
+  "created_at": "2020-04-04 21:33:48+00:00",
+  "total_contributions": 102,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 19
  },
  {
   "name": "vitejs/vite",
   "category": "other programming language/library/plugin",
-  "total_contributions": 7247,
+  "created_at": "2020-04-21 05:03:57+00:00",
+  "total_contributions": 7250,
   "anonymous_contributors": 619,
-  "nonanonymous_contributors": 440
+  "loggedin_contributors": 440
+ },
+ {
+  "name": "coqui-ai/TTS",
+  "category": "text and speech",
+  "created_at": "2020-05-20 15:45:28+00:00",
+  "total_contributions": 4668,
+  "anonymous_contributors": 20,
+  "loggedin_contributors": 146
+ },
+ {
+  "name": "github/rest-api-description",
+  "category": "other programming language/library/plugin",
+  "created_at": "2020-06-22 16:33:37+00:00",
+  "total_contributions": 2634,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 23
+ },
+ {
+  "name": "joshnuss/svelte-persisted-store",
+  "category": "other programming language/library/plugin",
+  "created_at": "2020-07-03 05:10:23+00:00",
+  "total_contributions": 338,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 15
+ },
+ {
+  "name": "arduino/arduino-ide",
+  "category": "app/website/program with a GUI",
+  "created_at": "2021-02-08 10:43:01+00:00",
+  "total_contributions": 1423,
+  "anonymous_contributors": 7,
+  "loggedin_contributors": 37
+ },
+ {
+  "name": "rust-embedded/critical-section",
+  "category": "related to electronics",
+  "created_at": "2021-05-09 21:47:16+00:00",
+  "total_contributions": 131,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 12
+ },
+ {
+  "name": "hideakitai/ESP32SPISlave",
+  "category": "related to electronics",
+  "created_at": "2021-07-26 09:59:46+00:00",
+  "total_contributions": 59,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 3
+ },
+ {
+  "name": "korken89/fugit",
+  "category": "related to electronics",
+  "created_at": "2021-10-11 07:35:08+00:00",
+  "total_contributions": 101,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 10
+ },
+ {
+  "name": "autonomousvision/projected-gan",
+  "category": "programming language/library/plugin specifically to create/process something visual",
+  "created_at": "2021-11-01 15:13:19+00:00",
+  "total_contributions": 23,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 4
+ },
+ {
+  "name": "openai/openai-node",
+  "category": "other programming language/library/plugin",
+  "created_at": "2021-12-14 22:32:58+00:00",
+  "total_contributions": 700,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 24
+ },
+ {
+  "name": "dtolnay/unicode-ident",
+  "category": "other programming language/library/plugin",
+  "created_at": "2022-05-16 00:44:49+00:00",
+  "total_contributions": 148,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 1
+ },
+ {
+  "name": "sc00/svelte-textarea-auto-height",
+  "category": "other programming language/library/plugin",
+  "created_at": "2022-07-04 19:29:54+00:00",
+  "total_contributions": 7,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 1
+ },
+ {
+  "name": "pocketbase/pocketbase",
+  "category": "app/website/program with a GUI",
+  "created_at": "2022-07-05 06:06:21+00:00",
+  "total_contributions": 1447,
+  "anonymous_contributors": 1,
+  "loggedin_contributors": 39
+ },
+ {
+  "name": "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
+  "category": "related to electronics",
+  "created_at": "2022-08-01 06:15:28+00:00",
+  "total_contributions": 7,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 2
+ },
+ {
+  "name": "kirovj/pocketbase-pyclient",
+  "category": "other programming language/library/plugin",
+  "created_at": "2022-09-02 18:43:09+00:00",
+  "total_contributions": 45,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 1
+ },
+ {
+  "name": "nextcloud/collectives",
+  "category": "app/website/program with a GUI",
+  "created_at": "2022-12-13 10:57:21+00:00",
+  "total_contributions": 3734,
+  "anonymous_contributors": 13,
+  "loggedin_contributors": 58
+ },
+ {
+  "name": "carstenlebek/svelte-email",
+  "category": "other programming language/library/plugin",
+  "created_at": "2023-02-02 10:10:24+00:00",
+  "total_contributions": 50,
+  "anonymous_contributors": 0,
+  "loggedin_contributors": 4
+ },
+ {
+  "name": "huggingface/chat-ui",
+  "category": "app/website/program with a GUI",
+  "created_at": "2023-02-17 15:31:50+00:00",
+  "total_contributions": 1134,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 109
+ },
+ {
+  "name": "otuva/handwriting-synthesis",
+  "category": "text and speech",
+  "created_at": "2023-05-28 11:59:04+00:00",
+  "total_contributions": 86,
+  "anonymous_contributors": 3,
+  "loggedin_contributors": 3
+ },
+ {
+  "name": "TU-Studio/IEMPluginSuite",
+  "category": "programming language/library/plugin specifically to create/process sound or music",
+  "created_at": "2024-01-10 14:47:14+00:00",
+  "total_contributions": 1489,
+  "anonymous_contributors": 12,
+  "loggedin_contributors": 8
+ },
+ {
+  "name": "meta-llama/llama-models",
+  "category": "other programming language/library/plugin",
+  "created_at": "2024-06-27 22:14:09+00:00",
+  "total_contributions": 141,
+  "anonymous_contributors": 2,
+  "loggedin_contributors": 27
  }
 ]

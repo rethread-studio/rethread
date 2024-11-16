@@ -4,22 +4,22 @@
   {
    "type": "User",
    "id": "bors",
-   "contributions": 44799
+   "contributions": 44810
   },
   {
    "type": "User",
    "id": "matthiaskrgr",
-   "contributions": 9919
+   "contributions": 9928
   },
   {
    "type": "User",
    "id": "RalfJung",
-   "contributions": 8001
+   "contributions": 8003
   },
   {
    "type": "User",
    "id": "GuillaumeGomez",
-   "contributions": 6564
+   "contributions": 6577
   },
   {
    "type": "User",
@@ -59,12 +59,12 @@
   {
    "type": "User",
    "id": "Manishearth",
-   "contributions": 3704
+   "contributions": 3705
   },
   {
    "type": "User",
    "id": "compiler-errors",
-   "contributions": 3647
+   "contributions": 3648
   },
   {
    "type": "User",
@@ -89,12 +89,12 @@
   {
    "type": "User",
    "id": "nnethercote",
-   "contributions": 2805
+   "contributions": 2809
   },
   {
    "type": "User",
    "id": "estebank",
-   "contributions": 2521
+   "contributions": 2522
   },
   {
    "type": "User",
@@ -144,7 +144,7 @@
   {
    "type": "User",
    "id": "flip1995",
-   "contributions": 1606
+   "contributions": 1612
   },
   {
    "type": "User",
@@ -179,17 +179,17 @@
   {
    "type": "User",
    "id": "notriddle",
-   "contributions": 1142
+   "contributions": 1146
+  },
+  {
+   "type": "User",
+   "id": "workingjubilee",
+   "contributions": 1135
   },
   {
    "type": "User",
    "id": "frewsxcv",
    "contributions": 1135
-  },
-  {
-   "type": "User",
-   "id": "workingjubilee",
-   "contributions": 1127
   },
   {
    "type": "User",
@@ -204,7 +204,7 @@
   {
    "type": "User",
    "id": "pietroalbini",
-   "contributions": 1063
+   "contributions": 1065
   },
   {
    "type": "User",
@@ -224,7 +224,7 @@
   {
    "type": "User",
    "id": "WaffleLapkin",
-   "contributions": 818
+   "contributions": 821
   },
   {
    "type": "User",
@@ -259,7 +259,7 @@
   {
    "type": "User",
    "id": "ehuss",
-   "contributions": 753
+   "contributions": 755
   },
   {
    "type": "User",
@@ -359,7 +359,7 @@
   {
    "type": "User",
    "id": "Jarcho",
-   "contributions": 541
+   "contributions": 542
   },
   {
    "type": "User",
@@ -414,7 +414,7 @@
   {
    "type": "User",
    "id": "onur-ozkan",
-   "contributions": 438
+   "contributions": 440
   },
   {
    "type": "User",
@@ -489,7 +489,7 @@
   {
    "type": "User",
    "id": "tgross35",
-   "contributions": 373
+   "contributions": 375
   },
   {
    "type": "User",
@@ -534,7 +534,7 @@
   {
    "type": "User",
    "id": "Alexendoo",
-   "contributions": 323
+   "contributions": 324
   },
   {
    "type": "User",
@@ -549,7 +549,7 @@
   {
    "type": "User",
    "id": "BoxyUwU",
-   "contributions": 315
+   "contributions": 316
   },
   {
    "type": "User",
@@ -564,7 +564,7 @@
   {
    "type": "User",
    "id": "y21",
-   "contributions": 309
+   "contributions": 310
   },
   {
    "type": "User",
@@ -609,7 +609,7 @@
   {
    "type": "User",
    "id": "klensy",
-   "contributions": 259
+   "contributions": 262
   },
   {
    "type": "User",
@@ -704,7 +704,7 @@
   {
    "type": "User",
    "id": "mati865",
-   "contributions": 197
+   "contributions": 198
   },
   {
    "type": "User",
@@ -764,7 +764,7 @@
   {
    "type": "User",
    "id": "aDotInTheVoid",
-   "contributions": 175
+   "contributions": 176
   },
   {
    "type": "User",
@@ -1258,6 +1258,11 @@
   },
   {
    "type": "User",
+   "id": "GnomedDev",
+   "contributions": 88
+  },
+  {
+   "type": "User",
    "id": "kornelski",
    "contributions": 87
   },
@@ -1265,11 +1270,6 @@
    "type": "User",
    "id": "Xiretza",
    "contributions": 87
-  },
-  {
-   "type": "User",
-   "id": "GnomedDev",
-   "contributions": 86
   },
   {
    "type": "User",
@@ -1368,17 +1368,7 @@
   },
   {
    "type": "User",
-   "id": "folkertdev",
-   "contributions": 78
-  },
-  {
-   "type": "User",
-   "id": "barosl",
-   "contributions": 78
-  },
-  {
-   "type": "User",
-   "id": "Ezrashaw",
+   "id": "dswij",
    "contributions": 78
   },
   {
@@ -1388,7 +1378,17 @@
   },
   {
    "type": "User",
-   "id": "dswij",
+   "id": "barosl",
+   "contributions": 78
+  },
+  {
+   "type": "User",
+   "id": "folkertdev",
+   "contributions": 78
+  },
+  {
+   "type": "User",
+   "id": "Ezrashaw",
    "contributions": 78
   },
   {
@@ -1398,17 +1398,17 @@
   },
   {
    "type": "User",
+   "id": "tetsuharuohzeki",
+   "contributions": 77
+  },
+  {
+   "type": "User",
    "id": "jachris",
    "contributions": 77
   },
   {
    "type": "User",
-   "id": "semarie",
-   "contributions": 77
-  },
-  {
-   "type": "User",
-   "id": "tetsuharuohzeki",
+   "id": "rail-rain",
    "contributions": 77
   },
   {
@@ -1418,7 +1418,7 @@
   },
   {
    "type": "User",
-   "id": "rail-rain",
+   "id": "semarie",
    "contributions": 77
   },
   {
@@ -1743,6 +1743,11 @@
   },
   {
    "type": "User",
+   "id": "surechen",
+   "contributions": 58
+  },
+  {
+   "type": "User",
    "id": "omasanori",
    "contributions": 57
   },
@@ -1794,11 +1799,6 @@
   {
    "type": "User",
    "id": "kraktus",
-   "contributions": 56
-  },
-  {
-   "type": "User",
-   "id": "surechen",
    "contributions": 56
   },
   {

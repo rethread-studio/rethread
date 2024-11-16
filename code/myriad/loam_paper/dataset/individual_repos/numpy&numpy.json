@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "charris",
-   "contributions": 6576
+   "contributions": 6585
   },
   {
    "type": "User",
@@ -129,7 +129,7 @@
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 216
+   "contributions": 217
   },
   {
    "type": "User",
@@ -168,6 +168,11 @@
   },
   {
    "type": "User",
+   "id": "jorenham",
+   "contributions": 149
+  },
+  {
+   "type": "User",
    "id": "jarrodmillman",
    "contributions": 147
   },
@@ -175,11 +180,6 @@
    "type": "User",
    "id": "ganesh-k13",
    "contributions": 144
-  },
-  {
-   "type": "User",
-   "id": "jorenham",
-   "contributions": 138
   },
   {
    "type": "User",

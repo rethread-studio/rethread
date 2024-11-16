@@ -74,7 +74,7 @@
   {
    "type": "User",
    "id": "andrewbranch",
-   "contributions": 630
+   "contributions": 631
   },
   {
    "type": "User",
@@ -1219,6 +1219,11 @@
   {
    "type": "User",
    "id": "orouz",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "nicolas377",
    "contributions": 2
   },
   {
