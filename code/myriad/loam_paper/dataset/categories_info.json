@@ -1,6 +1,17 @@
 [
  {
-  "category": "app/website/program with a GUI",
+  "category": "CLI",
+  "repos": [
+   "FFmpeg/FFmpeg",
+   "PipeWire/pipewire",
+   "git/git",
+   "npm/cli",
+   "popcornmix/omxplayer",
+   "rtyley/bfg-repo-cleaner"
+  ]
+ },
+ {
+  "category": "GUI",
   "repos": [
    "GNOME/gimp",
    "HandBrake/HandBrake",
@@ -34,14 +45,26 @@
   ]
  },
  {
-  "category": "command-line tool",
+  "category": "electronics",
   "repos": [
-   "FFmpeg/FFmpeg",
-   "PipeWire/pipewire",
-   "git/git",
-   "npm/cli",
-   "popcornmix/omxplayer",
-   "rtyley/bfg-repo-cleaner"
+   "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
+   "arduino/Arduino",
+   "arduino/ArduinoCore-API",
+   "electro-smith/libDaisy",
+   "espressif/arduino-esp32",
+   "hideakitai/ESP32SPISlave",
+   "korken89/fugit",
+   "probe-rs/rtt-target",
+   "rtic-rs/rtic",
+   "rust-embedded/bare-metal",
+   "rust-embedded/cortex-m",
+   "rust-embedded/critical-section",
+   "rust-embedded/embedded-alloc",
+   "rust-embedded/embedded-hal",
+   "rust-embedded/nb",
+   "rust-embedded/volatile-register",
+   "stm32-rs/stm32h7xx-hal",
+   "tarcieri/micromath"
   ]
  },
  {
@@ -59,7 +82,7 @@
   ]
  },
  {
-  "category": "other programming language/library/plugin",
+  "category": "other",
   "repos": [
    "caprover/caprover",
    "carstenlebek/svelte-email",
@@ -101,7 +124,32 @@
   ]
  },
  {
-  "category": "programming language/library/plugin specifically to create/process something visual",
+  "category": "sound/music",
+  "repos": [
+   "BelaPlatform/Bela",
+   "EnvelopSound/EnvelopForLive",
+   "TU-Studio/IEMPluginSuite",
+   "WebAudio/web-audio-api",
+   "WebAudio/web-midi-api",
+   "jackaudio/jack2",
+   "pure-data/pure-data",
+   "supercollider/sc3-plugins",
+   "supercollider/supercollider"
+  ]
+ },
+ {
+  "category": "text/speech",
+  "repos": [
+   "brandongmwong/elizabot-js",
+   "coqui-ai/TTS",
+   "festvox/festival",
+   "googlefonts/Inconsolata",
+   "otuva/handwriting-synthesis",
+   "sjvasquez/handwriting-synthesis"
+  ]
+ },
+ {
+  "category": "visual",
   "repos": [
    "KhronosGroup/GLSL",
    "KhronosGroup/WebGL",
@@ -118,54 +166,6 @@
    "processing/p5.js",
    "processing/processing",
    "sass/sass"
-  ]
- },
- {
-  "category": "programming language/library/plugin specifically to create/process sound or music",
-  "repos": [
-   "BelaPlatform/Bela",
-   "EnvelopSound/EnvelopForLive",
-   "TU-Studio/IEMPluginSuite",
-   "WebAudio/web-audio-api",
-   "WebAudio/web-midi-api",
-   "jackaudio/jack2",
-   "pure-data/pure-data",
-   "supercollider/sc3-plugins",
-   "supercollider/supercollider"
-  ]
- },
- {
-  "category": "related to electronics",
-  "repos": [
-   "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
-   "arduino/Arduino",
-   "arduino/ArduinoCore-API",
-   "electro-smith/libDaisy",
-   "espressif/arduino-esp32",
-   "hideakitai/ESP32SPISlave",
-   "korken89/fugit",
-   "probe-rs/rtt-target",
-   "rtic-rs/rtic",
-   "rust-embedded/bare-metal",
-   "rust-embedded/cortex-m",
-   "rust-embedded/critical-section",
-   "rust-embedded/embedded-alloc",
-   "rust-embedded/embedded-hal",
-   "rust-embedded/nb",
-   "rust-embedded/volatile-register",
-   "stm32-rs/stm32h7xx-hal",
-   "tarcieri/micromath"
-  ]
- },
- {
-  "category": "text and speech",
-  "repos": [
-   "brandongmwong/elizabot-js",
-   "coqui-ai/TTS",
-   "festvox/festival",
-   "googlefonts/Inconsolata",
-   "otuva/handwriting-synthesis",
-   "sjvasquez/handwriting-synthesis"
   ]
  }
 ]

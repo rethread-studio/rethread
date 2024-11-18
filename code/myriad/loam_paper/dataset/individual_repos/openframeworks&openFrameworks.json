@@ -34,7 +34,7 @@
   {
    "type": "User",
    "id": "tgfrerer",
-   "contributions": 404
+   "contributions": 394
   },
   {
    "type": "User",
@@ -238,12 +238,12 @@
   },
   {
    "type": "User",
-   "id": "trentbrooks",
+   "id": "kpasko",
    "contributions": 19
   },
   {
    "type": "User",
-   "id": "kpasko",
+   "id": "trentbrooks",
    "contributions": 19
   },
   {
@@ -818,17 +818,12 @@
   },
   {
    "type": "User",
-   "id": "zealtv",
-   "contributions": 2
-  },
-  {
-   "type": "User",
    "id": "donarturo11",
    "contributions": 2
   },
   {
    "type": "User",
-   "id": "gumilastik",
+   "id": "zealtv",
    "contributions": 2
   },
   {
@@ -839,6 +834,11 @@
   {
    "type": "User",
    "id": "nongio",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "gumilastik",
    "contributions": 2
   },
   {
@@ -888,17 +888,7 @@
   },
   {
    "type": "User",
-   "id": "jnakanojp",
-   "contributions": 2
-  },
-  {
-   "type": "User",
    "id": "xuv",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "martinell",
    "contributions": 2
   },
   {
@@ -908,7 +898,17 @@
   },
   {
    "type": "User",
-   "id": "nondescriptpointer",
+   "id": "martinell",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "jnakanojp",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "kashimAstro",
    "contributions": 1
   },
   {
@@ -983,11 +983,6 @@
   },
   {
    "type": "User",
-   "id": "revilo196",
-   "contributions": 1
-  },
-  {
-   "type": "User",
    "id": "drlight-code",
    "contributions": 1
   },
@@ -1053,6 +1048,11 @@
   },
   {
    "type": "User",
+   "id": "nondescriptpointer",
+   "contributions": 1
+  },
+  {
+   "type": "User",
    "id": "braitsch",
    "contributions": 1
   },
@@ -1109,16 +1109,6 @@
   {
    "type": "User",
    "id": "javl",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "aefreedman",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "kashimAstro",
    "contributions": 1
   },
   {
@@ -1189,6 +1179,16 @@
   {
    "type": "User",
    "id": "I33N",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "lewisou",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "aefreedman",
    "contributions": 1
   },
   {
@@ -1283,11 +1283,6 @@
   },
   {
    "type": "User",
-   "id": "lewisou",
-   "contributions": 1
-  },
-  {
-   "type": "User",
    "id": "lewislepton",
    "contributions": 1
   },
@@ -1364,6 +1359,11 @@
   {
    "type": "User",
    "id": "nunoh",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "revilo196",
    "contributions": 1
   },
   {

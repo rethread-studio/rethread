@@ -4,17 +4,17 @@
   {
    "type": "User",
    "id": "AndyScherzinger",
-   "contributions": 2365
+   "contributions": 2366
   },
   {
    "type": "User",
    "id": "nextcloud-bot",
-   "contributions": 1846
+   "contributions": 1848
   },
   {
    "type": "User",
    "id": "mahibi",
-   "contributions": 1558
+   "contributions": 1560
   },
   {
    "type": "User",
@@ -34,12 +34,12 @@
   {
    "type": "Bot",
    "id": "renovate[bot]",
-   "contributions": 294
+   "contributions": 295
   },
   {
    "type": "User",
    "id": "nextcloud-android-bot",
-   "contributions": 271
+   "contributions": 272
   },
   {
    "type": "User",
@@ -47,13 +47,13 @@
    "contributions": 232
   },
   {
-   "type": "User",
-   "id": "danxuliu",
-   "contributions": 150
-  },
-  {
    "type": "Bot",
    "id": "github-actions[bot]",
+   "contributions": 151
+  },
+  {
+   "type": "User",
+   "id": "danxuliu",
    "contributions": 150
   },
   {
@@ -88,13 +88,13 @@
   },
   {
    "type": "User",
-   "id": "parneet-guraya",
+   "id": "Valdnet",
    "contributions": 24
   },
   {
    "type": "User",
-   "id": "Valdnet",
-   "contributions": 23
+   "id": "parneet-guraya",
+   "contributions": 24
   },
   {
    "type": "User",

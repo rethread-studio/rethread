@@ -1,9 +1,9 @@
-BelaPlatform/Bela,programming language/library/plugin specifically to create/process sound or music
-FFmpeg/FFmpeg,command-line tool
-GNOME/gimp,app/website/program with a GUI
-KhronosGroup/GLSL,programming language/library/plugin specifically to create/process something visual
-Makerfabs/Makerfabs-ESP32-UWB-DW3000,related to electronics
-brandongmwong/elizabot-js,text and speech
+BelaPlatform/Bela,sound/music
+FFmpeg/FFmpeg,CLI
+GNOME/gimp,GUI
+KhronosGroup/GLSL,visual
+Makerfabs/Makerfabs-ESP32-UWB-DW3000,electronics
+brandongmwong/elizabot-js,text/speech
 brave/brave-core,engine
-caprover/caprover,other programming language/library/plugin
+caprover/caprover,other
 torvalds/linux,kernel

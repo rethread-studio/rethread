@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "nsarrazin",
-   "contributions": 525
+   "contributions": 535
   },
   {
    "type": "User",
@@ -29,7 +29,7 @@
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 23
+   "contributions": 24
   },
   {
    "type": "User",
@@ -168,7 +168,7 @@
   },
   {
    "type": "User",
-   "id": "Vaibhavs10",
+   "id": "zhang-yi-chi",
    "contributions": 1
   },
   {
@@ -199,6 +199,11 @@
   {
    "type": "User",
    "id": "symsmith",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "StuartMesham",
    "contributions": 1
   },
   {
@@ -259,11 +264,6 @@
   {
    "type": "User",
    "id": "muhammadbaqirjafari",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "zhang-yi-chi",
    "contributions": 1
   },
   {
@@ -354,6 +354,11 @@
   {
    "type": "User",
    "id": "wgcv",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Vaibhavs10",
    "contributions": 1
   },
   {

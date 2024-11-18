@@ -19,7 +19,7 @@
   {
    "type": "User",
    "id": "nickvergessen",
-   "contributions": 4976
+   "contributions": 4978
   },
   {
    "type": "User",
@@ -29,7 +29,7 @@
   {
    "type": "User",
    "id": "skjnldsv",
-   "contributions": 3331
+   "contributions": 3332
   },
   {
    "type": "User",
@@ -38,13 +38,13 @@
   },
   {
    "type": "User",
-   "id": "blizzz",
+   "id": "nextcloud-bot",
    "contributions": 2825
   },
   {
    "type": "User",
-   "id": "nextcloud-bot",
-   "contributions": 2823
+   "id": "blizzz",
+   "contributions": 2825
   },
   {
    "type": "User",
@@ -74,7 +74,7 @@
   {
    "type": "User",
    "id": "susnux",
-   "contributions": 1368
+   "contributions": 1378
   },
   {
    "type": "User",
@@ -89,7 +89,7 @@
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 1049
+   "contributions": 1054
   },
   {
    "type": "User",
@@ -149,12 +149,12 @@
   {
    "type": "User",
    "id": "nextcloud-command",
-   "contributions": 436
+   "contributions": 438
   },
   {
    "type": "User",
    "id": "provokateurin",
-   "contributions": 423
+   "contributions": 425
   },
   {
    "type": "User",

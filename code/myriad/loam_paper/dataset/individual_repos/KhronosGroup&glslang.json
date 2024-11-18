@@ -728,7 +728,7 @@
   },
   {
    "type": "User",
-   "id": "aaronfranke",
+   "id": "yavn",
    "contributions": 1
   },
   {
@@ -1103,6 +1103,11 @@
   },
   {
    "type": "User",
+   "id": "aaronfranke",
+   "contributions": 1
+  },
+  {
+   "type": "User",
    "id": "archimedus",
    "contributions": 1
   },
@@ -1353,6 +1358,11 @@
   },
   {
    "type": "User",
+   "id": "jpr42",
+   "contributions": 1
+  },
+  {
+   "type": "User",
    "id": "kasper93",
    "contributions": 1
   },
@@ -1384,11 +1394,6 @@
   {
    "type": "User",
    "id": "theblackunknown",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "yavn",
    "contributions": 1
   },
   {

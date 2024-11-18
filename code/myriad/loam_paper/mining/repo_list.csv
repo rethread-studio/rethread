@@ -1,124 +1,124 @@
-BelaPlatform/Bela,programming language/library/plugin specifically to create/process sound or music
-EnvelopSound/EnvelopForLive,programming language/library/plugin specifically to create/process sound or music
-FFmpeg/FFmpeg,command-line tool
-GNOME/gimp,app/website/program with a GUI
-HandBrake/HandBrake,app/website/program with a GUI
-KDE/plasma-desktop,app/website/program with a GUI
-KhronosGroup/GLSL,programming language/library/plugin specifically to create/process something visual
-KhronosGroup/WebGL,programming language/library/plugin specifically to create/process something visual
-KhronosGroup/glslang,programming language/library/plugin specifically to create/process something visual
-LibreOffice/core,app/website/program with a GUI
-Makerfabs/Makerfabs-ESP32-UWB-DW3000,related to electronics
-NVlabs/stylegan2,programming language/library/plugin specifically to create/process something visual
-PipeWire/pipewire,command-line tool
-ProtonMail/WebClients,app/website/program with a GUI
-TU-Studio/IEMPluginSuite,programming language/library/plugin specifically to create/process sound or music
-VSCodium/vscodium,app/website/program with a GUI
-WebAudio/web-audio-api,programming language/library/plugin specifically to create/process sound or music
-WebAudio/web-midi-api,programming language/library/plugin specifically to create/process sound or music
-arduino/Arduino,related to electronics
-arduino/ArduinoCore-API,related to electronics
-arduino/arduino-ide,app/website/program with a GUI
-audacity/audacity,app/website/program with a GUI
-autonomousvision/projected-gan,programming language/library/plugin specifically to create/process something visual
-brandongmwong/elizabot-js,text and speech
-brave/brave-browser,app/website/program with a GUI
+BelaPlatform/Bela,sound/music
+EnvelopSound/EnvelopForLive,sound/music
+FFmpeg/FFmpeg,CLI
+GNOME/gimp,GUI
+HandBrake/HandBrake,GUI
+KDE/plasma-desktop,GUI
+KhronosGroup/GLSL,visual
+KhronosGroup/WebGL,visual
+KhronosGroup/glslang,visual
+LibreOffice/core,GUI
+Makerfabs/Makerfabs-ESP32-UWB-DW3000,electronics
+NVlabs/stylegan2,visual
+PipeWire/pipewire,CLI
+ProtonMail/WebClients,GUI
+TU-Studio/IEMPluginSuite,sound/music
+VSCodium/vscodium,GUI
+WebAudio/web-audio-api,sound/music
+WebAudio/web-midi-api,sound/music
+arduino/Arduino,electronics
+arduino/ArduinoCore-API,electronics
+arduino/arduino-ide,GUI
+audacity/audacity,GUI
+autonomousvision/projected-gan,visual
+brandongmwong/elizabot-js,text/speech
+brave/brave-browser,GUI
 brave/brave-core,engine
-btel/svg_utils,programming language/library/plugin specifically to create/process something visual
-caprover/caprover,other programming language/library/plugin
-carstenlebek/svelte-email,other programming language/library/plugin
-chromium/chromium,app/website/program with a GUI
-coqui-ai/TTS,text and speech
-cuviper/autocfg,other programming language/library/plugin
-djc/rustc-version-rs,other programming language/library/plugin
-dtolnay/proc-macro2,other programming language/library/plugin
-dtolnay/quote,other programming language/library/plugin
-dtolnay/semver,other programming language/library/plugin
-dtolnay/syn,other programming language/library/plugin
-dtolnay/unicode-ident,other programming language/library/plugin
-electro-smith/libDaisy,related to electronics
-emacs-mirror/emacs,app/website/program with a GUI
-espressif/arduino-esp32,related to electronics
-festvox/festival,text and speech
-git/git,command-line tool
-github/docs,app/website/program with a GUI
-github/rest-api-description,other programming language/library/plugin
-googlefonts/Inconsolata,text and speech
-hideakitai/ESP32SPISlave,related to electronics
-huggingface/chat-ui,app/website/program with a GUI
-i3/i3.github.io,app/website/program with a GUI
-image-rs/image,programming language/library/plugin specifically to create/process something visual
-indexmap-rs/indexmap,other programming language/library/plugin
-inkscape/inkscape,app/website/program with a GUI
-jackaudio/jack2,programming language/library/plugin specifically to create/process sound or music
-joshnuss/svelte-persisted-store,other programming language/library/plugin
-keenethics/svelte-notifications,other programming language/library/plugin
-kirovj/pocketbase-pyclient,other programming language/library/plugin
-korken89/fugit,related to electronics
-matplotlib/matplotlib,programming language/library/plugin specifically to create/process something visual
-meta-llama/llama-models,other programming language/library/plugin
-microsoft/TypeScript,other programming language/library/plugin
-microsoft/vscode,app/website/program with a GUI
-moment/moment,other programming language/library/plugin
-mossblaser/plottie,programming language/library/plugin specifically to create/process something visual
+btel/svg_utils,visual
+caprover/caprover,other
+carstenlebek/svelte-email,other
+chromium/chromium,GUI
+coqui-ai/TTS,text/speech
+cuviper/autocfg,other
+djc/rustc-version-rs,other
+dtolnay/proc-macro2,other
+dtolnay/quote,other
+dtolnay/semver,other
+dtolnay/syn,other
+dtolnay/unicode-ident,other
+electro-smith/libDaisy,electronics
+emacs-mirror/emacs,GUI
+espressif/arduino-esp32,electronics
+festvox/festival,text/speech
+git/git,CLI
+github/docs,GUI
+github/rest-api-description,other
+googlefonts/Inconsolata,text/speech
+hideakitai/ESP32SPISlave,electronics
+huggingface/chat-ui,GUI
+i3/i3.github.io,GUI
+image-rs/image,visual
+indexmap-rs/indexmap,other
+inkscape/inkscape,GUI
+jackaudio/jack2,sound/music
+joshnuss/svelte-persisted-store,other
+keenethics/svelte-notifications,other
+kirovj/pocketbase-pyclient,other
+korken89/fugit,electronics
+matplotlib/matplotlib,visual
+meta-llama/llama-models,other
+microsoft/TypeScript,other
+microsoft/vscode,GUI
+moment/moment,other
+mossblaser/plottie,visual
 mozilla/gecko-dev,engine
-mozman/svgwrite,programming language/library/plugin specifically to create/process something visual
-mozsearch/mozsearch,other programming language/library/plugin
-mrdoob/three.js,programming language/library/plugin specifically to create/process something visual
-nextcloud/collectives,app/website/program with a GUI
-nextcloud/server,app/website/program with a GUI
-nextcloud/spreed,app/website/program with a GUI
-nextcloud/talk-android,app/website/program with a GUI
-nextcloud/text,app/website/program with a GUI
-nodejs/node,other programming language/library/plugin
-nodemailer/nodemailer,other programming language/library/plugin
-nolimits4web/swiper,other programming language/library/plugin
-notepad-plus-plus/notepad-plus-plus,app/website/program with a GUI
-npm/cli,command-line tool
-numpy/numpy,other programming language/library/plugin
-openai/openai-node,other programming language/library/plugin
-openframeworks/openFrameworks,programming language/library/plugin specifically to create/process something visual
-otuva/handwriting-synthesis,text and speech
-pocketbase/pocketbase,app/website/program with a GUI
-popcornmix/omxplayer,command-line tool
-probe-rs/rtt-target,related to electronics
-processing/p5.js,programming language/library/plugin specifically to create/process something visual
-processing/processing,programming language/library/plugin specifically to create/process something visual
-pure-data/pure-data,programming language/library/plugin specifically to create/process sound or music
-python/cpython,other programming language/library/plugin
-ritwickdey/vscode-live-server,app/website/program with a GUI
-rtic-rs/rtic,related to electronics
-rtyley/bfg-repo-cleaner,command-line tool
-rust-embedded/bare-metal,related to electronics
-rust-embedded/cortex-m,related to electronics
-rust-embedded/critical-section,related to electronics
-rust-embedded/embedded-alloc,related to electronics
-rust-embedded/embedded-hal,related to electronics
-rust-embedded/nb,related to electronics
-rust-embedded/volatile-register,related to electronics
-rust-lang/cargo,other programming language/library/plugin
-rust-lang/hashbrown,other programming language/library/plugin
-rust-lang/libm,other programming language/library/plugin
-rust-lang/log,other programming language/library/plugin
-rust-lang/rust,other programming language/library/plugin
-rust-num/num-traits,other programming language/library/plugin
-sass/sass,programming language/library/plugin specifically to create/process something visual
-sc00/svelte-textarea-auto-height,other programming language/library/plugin
-scikit-learn/scikit-learn,other programming language/library/plugin
-scipy/scipy,other programming language/library/plugin
-signalapp/Signal-Android,app/website/program with a GUI
-signalapp/Signal-Desktop,app/website/program with a GUI
-signalapp/Signal-iOS,app/website/program with a GUI
-sjvasquez/handwriting-synthesis,text and speech
-steveklabnik/semver-parser,other programming language/library/plugin
-stm32-rs/stm32h7xx-hal,related to electronics
-supercollider/sc3-plugins,programming language/library/plugin specifically to create/process sound or music
-supercollider/supercollider,programming language/library/plugin specifically to create/process sound or music
-sveltejs/svelte,other programming language/library/plugin
-tarcieri/micromath,related to electronics
-tensorflow/tensorflow,other programming language/library/plugin
-textmate/textmate,app/website/program with a GUI
+mozman/svgwrite,visual
+mozsearch/mozsearch,other
+mrdoob/three.js,visual
+nextcloud/collectives,GUI
+nextcloud/server,GUI
+nextcloud/spreed,GUI
+nextcloud/talk-android,GUI
+nextcloud/text,GUI
+nodejs/node,other
+nodemailer/nodemailer,other
+nolimits4web/swiper,other
+notepad-plus-plus/notepad-plus-plus,GUI
+npm/cli,CLI
+numpy/numpy,other
+openai/openai-node,other
+openframeworks/openFrameworks,visual
+otuva/handwriting-synthesis,text/speech
+pocketbase/pocketbase,GUI
+popcornmix/omxplayer,CLI
+probe-rs/rtt-target,electronics
+processing/p5.js,visual
+processing/processing,visual
+pure-data/pure-data,sound/music
+python/cpython,other
+ritwickdey/vscode-live-server,GUI
+rtic-rs/rtic,electronics
+rtyley/bfg-repo-cleaner,CLI
+rust-embedded/bare-metal,electronics
+rust-embedded/cortex-m,electronics
+rust-embedded/critical-section,electronics
+rust-embedded/embedded-alloc,electronics
+rust-embedded/embedded-hal,electronics
+rust-embedded/nb,electronics
+rust-embedded/volatile-register,electronics
+rust-lang/cargo,other
+rust-lang/hashbrown,other
+rust-lang/libm,other
+rust-lang/log,other
+rust-lang/rust,other
+rust-num/num-traits,other
+sass/sass,visual
+sc00/svelte-textarea-auto-height,other
+scikit-learn/scikit-learn,other
+scipy/scipy,other
+signalapp/Signal-Android,GUI
+signalapp/Signal-Desktop,GUI
+signalapp/Signal-iOS,GUI
+sjvasquez/handwriting-synthesis,text/speech
+steveklabnik/semver-parser,other
+stm32-rs/stm32h7xx-hal,electronics
+supercollider/sc3-plugins,sound/music
+supercollider/supercollider,sound/music
+sveltejs/svelte,other
+tarcieri/micromath,electronics
+tensorflow/tensorflow,other
+textmate/textmate,GUI
 torvalds/linux,kernel
 v8/v8,engine
-videolan/vlc,app/website/program with a GUI
-vitejs/vite,other programming language/library/plugin
+videolan/vlc,GUI
+vitejs/vite,other

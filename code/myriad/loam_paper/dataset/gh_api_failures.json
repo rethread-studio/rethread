@@ -1,7 +1,7 @@
 [
  {
   "name": "chromium/chromium",
-  "category": "app/website/program with a GUI"
+  "category": "GUI"
  },
  {
   "name": "torvalds/linux",
