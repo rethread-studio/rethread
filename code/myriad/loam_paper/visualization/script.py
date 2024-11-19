@@ -19,14 +19,16 @@ def avg_contributors_per_category_barplot():
         avg_loggedin = repos.loc[:, "loggedin_contributors"].mean()
         if avg_anonymous == avg_anonymous: data.append(
             {
-                "category": category, 
-                "avg_anonymous": avg_anonymous, 
-                "avg_loggedin": avg_loggedin
+                "category": category,
+                "loggedin": avg_loggedin,
+                "anonymous": avg_anonymous
             }
         )
     data = pd.DataFrame(data)
     data.set_index("category").plot(kind="bar", stacked=False, color=["steelblue", "red"])
     plt.yscale("log")
+    plt.xlabel("category")
+    plt.ylabel("average number of contributors")
     plt.show()
 
 def contributions_years_scatterplot():
@@ -42,6 +44,8 @@ def contributions_years_scatterplot():
     #sns.move_legend(g, "lower center", bbox_to_anchor=(1, 1))
     g.set(yscale="log")
     plt.xticks(rotation=90)
+    plt.xlabel("year of creation")
+    plt.ylabel("total number of contributions")
     plt.show()
 
 def multi_contributors_barplot():
@@ -55,7 +59,9 @@ def multi_contributors_barplot():
         data[nb_repos_contributed_to]["number of accounts"] += 1
     data = pd.DataFrame(data)
     g = sns.barplot(data, x="number of repos contributed to", y="number of accounts", color="orange")
+    g.bar_label(g.containers[0])
     plt.yscale("log")
+    plt.ylabel("user count")
     plt.show()
 
 avg_contributors_per_category_barplot()
