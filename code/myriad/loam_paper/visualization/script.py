@@ -20,7 +20,7 @@ def avg_contributors_per_category_barplot():
         if avg_anonymous == avg_anonymous: data.append(
             {
                 "category": category,
-                "loggedin": avg_loggedin,
+                "logged-in": avg_loggedin,
                 "anonymous": avg_anonymous
             }
         )
@@ -36,19 +36,35 @@ def contributions_years_scatterplot():
     g = sns.relplot(
         data=repos_info,
         x="created_at", y="total_contributions",
-        hue="category", size=10,
-        #legend=False,
-        #palette=cmap, sizes=(10, 200),
+        hue="category", size=10
     )
-    #left=0.05, right=0.55
-    #sns.move_legend(g, "lower center", bbox_to_anchor=(1, 1))
     g.set(yscale="log")
     plt.xticks(rotation=90)
-    plt.xlabel("year of creation")
+    plt.xlabel("year of creation/apparition on GitHub")
     plt.ylabel("total number of contributions")
     plt.show()
 
+def repos_per_year_barplot():
+    # number of repos created per year
+    minYear = repos_info["created_at"].min().year
+    maxYear = repos_info["created_at"].max().year
+    data = [{"year": y} for y in range(minYear, maxYear+1)]
+    for index, row in repos_info.iterrows():
+        year = row["created_at"].year
+        cat = row["category"]
+        try:
+            data[year-minYear][cat] += 1
+        except KeyError:
+            data[year-minYear][cat] = 1
+    data = pd.DataFrame(data)
+    data.set_index("year").plot(kind="bar", stacked=True)
+    plt.xlabel("year of creation/apparition on GitHub")
+    plt.ylabel("number of repositories from the dataset")
+    plt.legend(title="category")
+    plt.show()
+
 def multi_contributors_barplot():
+    # how many (human) users contribute to multiple repos
     idx = 0
     while all_loggedin_contributors.iloc[idx]["type"] == "Bot":
         idx+=1
@@ -65,5 +81,6 @@ def multi_contributors_barplot():
     plt.show()
 
 avg_contributors_per_category_barplot()
-contributions_years_scatterplot()
+#contributions_years_scatterplot()
+repos_per_year_barplot()
 multi_contributors_barplot()
