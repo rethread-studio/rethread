@@ -54,7 +54,7 @@
   {
    "type": "User",
    "id": "glemaitre",
-   "contributions": 642
+   "contributions": 643
   },
   {
    "type": "User",
@@ -64,7 +64,7 @@
   {
    "type": "User",
    "id": "lesteve",
-   "contributions": 488
+   "contributions": 489
   },
   {
    "type": "User",
@@ -114,7 +114,7 @@
   {
    "type": "User",
    "id": "lucyleeow",
-   "contributions": 146
+   "contributions": 149
   },
   {
    "type": "User",
@@ -823,12 +823,12 @@
   },
   {
    "type": "User",
-   "id": "djsutherland",
+   "id": "olologin",
    "contributions": 11
   },
   {
    "type": "User",
-   "id": "olologin",
+   "id": "djsutherland",
    "contributions": 11
   },
   {
@@ -963,7 +963,7 @@
   },
   {
    "type": "User",
-   "id": "haiatn",
+   "id": "ROMEEZHOU",
    "contributions": 9
   },
   {
@@ -973,12 +973,7 @@
   },
   {
    "type": "User",
-   "id": "herilalaina",
-   "contributions": 9
-  },
-  {
-   "type": "User",
-   "id": "aashil",
+   "id": "haiatn",
    "contributions": 9
   },
   {
@@ -988,12 +983,27 @@
   },
   {
    "type": "User",
-   "id": "duckworthd",
+   "id": "aashil",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "ajschumacher",
    "contributions": 9
   },
   {
    "type": "User",
    "id": "fzalkow",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "duckworthd",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "herilalaina",
    "contributions": 9
   },
   {
@@ -1004,11 +1014,6 @@
   {
    "type": "User",
    "id": "taehoonlee",
-   "contributions": 9
-  },
-  {
-   "type": "User",
-   "id": "ROMEEZHOU",
    "contributions": 9
   },
   {
@@ -1053,17 +1058,12 @@
   },
   {
    "type": "User",
-   "id": "AlexisMignon",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "agamemnonc",
-   "contributions": 8
-  },
-  {
-   "type": "User",
    "id": "artsobolev",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "AlexisMignon",
    "contributions": 8
   },
   {
@@ -1078,12 +1078,12 @@
   },
   {
    "type": "User",
-   "id": "ajschumacher",
+   "id": "gxyd",
    "contributions": 8
   },
   {
    "type": "User",
-   "id": "gxyd",
+   "id": "agamemnonc",
    "contributions": 8
   },
   {

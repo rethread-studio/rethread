@@ -14,7 +14,7 @@
   {
    "type": "User",
    "id": "mdhaber",
-   "contributions": 1839
+   "contributions": 1841
   },
   {
    "type": "User",
@@ -24,7 +24,7 @@
   {
    "type": "User",
    "id": "tylerjereddy",
-   "contributions": 1189
+   "contributions": 1193
   },
   {
    "type": "User",
@@ -44,7 +44,7 @@
   {
    "type": "User",
    "id": "andyfaff",
-   "contributions": 767
+   "contributions": 768
   },
   {
    "type": "User",
@@ -278,17 +278,17 @@
   },
   {
    "type": "User",
+   "id": "dschult",
+   "contributions": 78
+  },
+  {
+   "type": "User",
    "id": "rc",
    "contributions": 77
   },
   {
    "type": "User",
    "id": "insertinterestingnamehere",
-   "contributions": 77
-  },
-  {
-   "type": "User",
-   "id": "dschult",
    "contributions": 77
   },
   {
@@ -404,7 +404,7 @@
   {
    "type": "User",
    "id": "HaoZeke",
-   "contributions": 43
+   "contributions": 44
   },
   {
    "type": "User",
@@ -578,23 +578,18 @@
   },
   {
    "type": "User",
-   "id": "peterSweter",
+   "id": "seberg",
    "contributions": 22
   },
   {
    "type": "User",
-   "id": "seberg",
+   "id": "peterSweter",
    "contributions": 22
   },
   {
    "type": "User",
    "id": "I--P",
    "contributions": 22
-  },
-  {
-   "type": "User",
-   "id": "OmarManzoor",
-   "contributions": 21
   },
   {
    "type": "User",
@@ -613,7 +608,17 @@
   },
   {
    "type": "User",
-   "id": "egorz734",
+   "id": "OmarManzoor",
+   "contributions": 21
+  },
+  {
+   "type": "User",
+   "id": "mtsokol",
+   "contributions": 20
+  },
+  {
+   "type": "User",
+   "id": "NicolasHug",
    "contributions": 20
   },
   {
@@ -623,7 +628,7 @@
   },
   {
    "type": "User",
-   "id": "NicolasHug",
+   "id": "egorz734",
    "contributions": 20
   },
   {
@@ -638,11 +643,6 @@
   },
   {
    "type": "User",
-   "id": "mtsokol",
-   "contributions": 20
-  },
-  {
-   "type": "User",
    "id": "chatcannon",
    "contributions": 19
   },
@@ -650,6 +650,11 @@
    "type": "User",
    "id": "jfbu",
    "contributions": 19
+  },
+  {
+   "type": "User",
+   "id": "DietBru",
+   "contributions": 18
   },
   {
    "type": "User",
@@ -690,11 +695,6 @@
    "type": "User",
    "id": "ndvanforeest",
    "contributions": 17
-  },
-  {
-   "type": "User",
-   "id": "DietBru",
-   "contributions": 16
   },
   {
    "type": "User",

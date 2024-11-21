@@ -34,7 +34,7 @@
   {
    "type": "User",
    "id": "cjihrig",
-   "contributions": 1146
+   "contributions": 1149
   },
   {
    "type": "User",
@@ -69,7 +69,7 @@
   {
    "type": "User",
    "id": "nodejs-github-bot",
-   "contributions": 630
+   "contributions": 632
   },
   {
    "type": "User",
@@ -149,7 +149,7 @@
   {
    "type": "User",
    "id": "RafaelGSS",
-   "contributions": 280
+   "contributions": 283
   },
   {
    "type": "User",
@@ -199,7 +199,7 @@
   {
    "type": "User",
    "id": "marco-ippolito",
-   "contributions": 160
+   "contributions": 161
   },
   {
    "type": "User",
@@ -274,7 +274,7 @@
   {
    "type": "User",
    "id": "LiviaMedeiros",
-   "contributions": 109
+   "contributions": 111
   },
   {
    "type": "User",
@@ -413,12 +413,12 @@
   },
   {
    "type": "User",
-   "id": "ruyadorno",
-   "contributions": 68
+   "id": "zcbenz",
+   "contributions": 69
   },
   {
    "type": "User",
-   "id": "zcbenz",
+   "id": "ruyadorno",
    "contributions": 68
   },
   {
@@ -1058,6 +1058,11 @@
   },
   {
    "type": "User",
+   "id": "huseyinacacak-janea",
+   "contributions": 15
+  },
+  {
+   "type": "User",
    "id": "abmusse",
    "contributions": 15
   },
@@ -1099,11 +1104,6 @@
   {
    "type": "User",
    "id": "mmomtchev",
-   "contributions": 14
-  },
-  {
-   "type": "User",
-   "id": "huseyinacacak-janea",
    "contributions": 14
   },
   {
@@ -1353,6 +1353,11 @@
   },
   {
    "type": "User",
+   "id": "mfdebian",
+   "contributions": 9
+  },
+  {
+   "type": "User",
    "id": "jscissr",
    "contributions": 9
   },
@@ -1393,7 +1398,7 @@
   },
   {
    "type": "User",
-   "id": "VerteDinde",
+   "id": "bsnote",
    "contributions": 8
   },
   {
@@ -1438,22 +1443,12 @@
   },
   {
    "type": "User",
-   "id": "mfdebian",
-   "contributions": 8
-  },
-  {
-   "type": "User",
    "id": "a0viedo",
    "contributions": 8
   },
   {
    "type": "User",
    "id": "qbit",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "bsnote",
    "contributions": 8
   },
   {
@@ -1499,6 +1494,11 @@
   {
    "type": "User",
    "id": "GlenTiki",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "VerteDinde",
    "contributions": 8
   },
   {

@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "greyson-signal",
-   "contributions": 4639
+   "contributions": 4655
   },
   {
    "type": "User",
    "id": "alex-signal",
-   "contributions": 3002
+   "contributions": 3015
   },
   {
    "type": "User",
@@ -19,7 +19,7 @@
   {
    "type": "User",
    "id": "cody-signal",
-   "contributions": 1886
+   "contributions": 1890
   },
   {
    "type": "User",
@@ -44,7 +44,7 @@
   {
    "type": "User",
    "id": "mtang-signal",
-   "contributions": 117
+   "contributions": 119
   },
   {
    "type": "User",
@@ -148,8 +148,18 @@
   },
   {
    "type": "User",
+   "id": "jamesonwilliams",
+   "contributions": 12
+  },
+  {
+   "type": "User",
    "id": "varsha888",
    "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "akonradi-signal",
+   "contributions": 11
   },
   {
    "type": "User",
@@ -163,17 +173,12 @@
   },
   {
    "type": "User",
-   "id": "akonradi-signal",
-   "contributions": 10
-  },
-  {
-   "type": "User",
    "id": "clauz9",
    "contributions": 10
   },
   {
    "type": "User",
-   "id": "2-4601",
+   "id": "eager-signal",
    "contributions": 9
   },
   {
@@ -183,7 +188,7 @@
   },
   {
    "type": "User",
-   "id": "eager-signal",
+   "id": "2-4601",
    "contributions": 9
   },
   {
@@ -208,22 +213,7 @@
   },
   {
    "type": "User",
-   "id": "Trolldemorted",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "cherryasphalt",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "greysonp",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "jack-signal",
+   "id": "passy",
    "contributions": 6
   },
   {
@@ -233,13 +223,28 @@
   },
   {
    "type": "User",
-   "id": "jamesonwilliams",
+   "id": "jack-signal",
    "contributions": 6
   },
   {
    "type": "User",
-   "id": "passy",
+   "id": "greysonp",
    "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "cherryasphalt",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "Trolldemorted",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "andrew-signal",
+   "contributions": 5
   },
   {
    "type": "User",
@@ -278,47 +283,7 @@
   },
   {
    "type": "User",
-   "id": "valldrac",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "pprucia",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "SamWhited",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "0dvictor",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "adel-signal",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "orange-elephant",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "fm-sys",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "riyapenn-signal",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "rymdhund",
+   "id": "mammuth",
    "contributions": 3
   },
   {
@@ -328,7 +293,47 @@
   },
   {
    "type": "User",
-   "id": "mammuth",
+   "id": "rymdhund",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "riyapenn-signal",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "fm-sys",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "orange-elephant",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "adel-signal",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "0dvictor",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "SamWhited",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "pprucia",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "valldrac",
    "contributions": 3
   },
   {
@@ -419,11 +424,6 @@
   {
    "type": "User",
    "id": "talhacohen",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "andrew-signal",
    "contributions": 2
   },
   {
@@ -624,6 +624,11 @@
   {
    "type": "User",
    "id": "blinry",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "crenshaw-dev",
    "contributions": 1
   },
   {
@@ -1263,11 +1268,6 @@
   },
   {
    "type": "User",
-   "id": "Arthur-GYT",
-   "contributions": 1
-  },
-  {
-   "type": "User",
    "id": "sj",
    "contributions": 1
   },
@@ -1324,6 +1324,11 @@
   {
    "type": "User",
    "id": "JordyEGNL",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "fillwithjoy1",
    "contributions": 1
   },
   {
@@ -1419,11 +1424,6 @@
   {
    "type": "User",
    "id": "mgbennett",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "crenshaw-dev",
    "contributions": 1
   },
   {

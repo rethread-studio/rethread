@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "Rich-Harris",
-   "contributions": 4768
+   "contributions": 4769
   },
   {
    "type": "User",
@@ -14,12 +14,12 @@
   {
    "type": "User",
    "id": "dummdidumm",
-   "contributions": 575
+   "contributions": 578
   },
   {
    "type": "User",
    "id": "trueadm",
-   "contributions": 443
+   "contributions": 450
   },
   {
    "type": "User",
@@ -29,7 +29,7 @@
   {
    "type": "Bot",
    "id": "github-actions[bot]",
-   "contributions": 316
+   "contributions": 320
   },
   {
    "type": "User",
@@ -39,7 +39,7 @@
   {
    "type": "User",
    "id": "paoloricciuti",
-   "contributions": 133
+   "contributions": 135
   },
   {
    "type": "User",
@@ -183,12 +183,12 @@
   },
   {
    "type": "User",
-   "id": "btakita",
+   "id": "FWeinb",
    "contributions": 12
   },
   {
    "type": "User",
-   "id": "FWeinb",
+   "id": "btakita",
    "contributions": 12
   },
   {
@@ -215,6 +215,11 @@
    "type": "User",
    "id": "jacobmischka",
    "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "fcrozatier",
+   "contributions": 10
   },
   {
    "type": "User",
@@ -263,22 +268,17 @@
   },
   {
    "type": "User",
-   "id": "fcrozatier",
-   "contributions": 9
-  },
-  {
-   "type": "User",
    "id": "kaisermann",
    "contributions": 9
   },
   {
    "type": "User",
-   "id": "ehrencrona",
+   "id": "MattiasBuelens",
    "contributions": 8
   },
   {
    "type": "User",
-   "id": "MattiasBuelens",
+   "id": "ehrencrona",
    "contributions": 8
   },
   {
@@ -703,6 +703,11 @@
   },
   {
    "type": "User",
+   "id": "rob-balfre",
+   "contributions": 2
+  },
+  {
+   "type": "User",
    "id": "ramonsnir",
    "contributions": 2
   },
@@ -734,11 +739,6 @@
   {
    "type": "User",
    "id": "thenbe",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "Mlocik97",
    "contributions": 2
   },
   {
@@ -849,6 +849,11 @@
   {
    "type": "User",
    "id": "adrian5",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "Mlocik97",
    "contributions": 2
   },
   {
@@ -1749,11 +1754,6 @@
   {
    "type": "User",
    "id": "jwicks31",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "jh0rman",
    "contributions": 1
   },
   {

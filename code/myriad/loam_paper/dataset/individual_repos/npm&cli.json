@@ -14,7 +14,7 @@
   {
    "type": "User",
    "id": "wraithgar",
-   "contributions": 1040
+   "contributions": 1043
   },
   {
    "type": "User",
@@ -248,6 +248,11 @@
   },
   {
    "type": "User",
+   "id": "DanKaplanSES",
+   "contributions": 6
+  },
+  {
+   "type": "User",
    "id": "mantoni",
    "contributions": 6
   },
@@ -258,42 +263,7 @@
   },
   {
    "type": "User",
-   "id": "DanKaplanSES",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "dr-js",
-   "contributions": 5
-  },
-  {
-   "type": "Bot",
-   "id": "dependabot[bot]",
-   "contributions": 5
-  },
-  {
-   "type": "User",
-   "id": "trentm",
-   "contributions": 5
-  },
-  {
-   "type": "User",
-   "id": "reid",
-   "contributions": 5
-  },
-  {
-   "type": "User",
-   "id": "linclark",
-   "contributions": 5
-  },
-  {
-   "type": "User",
-   "id": "legodude17",
-   "contributions": 5
-  },
-  {
-   "type": "User",
-   "id": "ericmutta",
+   "id": "indexzero",
    "contributions": 5
   },
   {
@@ -303,12 +273,47 @@
   },
   {
    "type": "User",
-   "id": "indexzero",
+   "id": "ericmutta",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "legodude17",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "linclark",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "reid",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "trentm",
    "contributions": 5
   },
   {
    "type": "User",
    "id": "H4ad",
+   "contributions": 5
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "dr-js",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "styfle",
    "contributions": 4
   },
   {
@@ -399,11 +404,6 @@
   {
    "type": "User",
    "id": "RichardLitt",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "styfle",
    "contributions": 4
   },
   {

@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "backes",
-   "contributions": 3985
+   "contributions": 3989
   },
   {
    "type": "User",
    "id": "mi-ac",
-   "contributions": 3292
+   "contributions": 3296
   },
   {
    "type": "User",
@@ -19,7 +19,7 @@
   {
    "type": "User",
    "id": "schuay",
-   "contributions": 1877
+   "contributions": 1880
   },
   {
    "type": "User",
@@ -33,23 +33,23 @@
   },
   {
    "type": "User",
+   "id": "isheludko",
+   "contributions": 1624
+  },
+  {
+   "type": "User",
    "id": "hashseed",
    "contributions": 1623
   },
   {
    "type": "User",
-   "id": "isheludko",
-   "contributions": 1623
-  },
-  {
-   "type": "User",
    "id": "verwaest",
-   "contributions": 1514
+   "contributions": 1518
   },
   {
    "type": "User",
    "id": "gahaas",
-   "contributions": 1474
+   "contributions": 1476
   },
   {
    "type": "User",
@@ -79,17 +79,17 @@
   {
    "type": "User",
    "id": "victorgomes",
-   "contributions": 1050
+   "contributions": 1053
   },
   {
    "type": "User",
    "id": "miladfarca",
-   "contributions": 1001
+   "contributions": 1002
   },
   {
    "type": "User",
    "id": "marjakh",
-   "contributions": 982
+   "contributions": 983
   },
   {
    "type": "User",
@@ -114,17 +114,17 @@
   {
    "type": "User",
    "id": "Liedtke",
-   "contributions": 733
+   "contributions": 737
   },
   {
    "type": "User",
    "id": "syg",
-   "contributions": 722
+   "contributions": 724
   },
   {
    "type": "User",
    "id": "omerktz",
-   "contributions": 719
+   "contributions": 722
   },
   {
    "type": "User",
@@ -163,12 +163,12 @@
   },
   {
    "type": "User",
-   "id": "nico-hartmann",
-   "contributions": 567
+   "id": "thibaudmichaud",
+   "contributions": 570
   },
   {
    "type": "User",
-   "id": "thibaudmichaud",
+   "id": "nico-hartmann",
    "contributions": 567
   },
   {
@@ -184,7 +184,7 @@
   {
    "type": "User",
    "id": "luyahan",
-   "contributions": 481
+   "contributions": 484
   },
   {
    "type": "User",
@@ -203,6 +203,11 @@
   },
   {
    "type": "User",
+   "id": "o-",
+   "contributions": 422
+  },
+  {
+   "type": "User",
    "id": "mtbrandy",
    "contributions": 421
   },
@@ -210,11 +215,6 @@
    "type": "User",
    "id": "alexkozy",
    "contributions": 416
-  },
-  {
-   "type": "User",
-   "id": "o-",
-   "contributions": 415
   },
   {
    "type": "User",
@@ -229,7 +229,7 @@
   {
    "type": "User",
    "id": "nickie",
-   "contributions": 368
+   "contributions": 369
   },
   {
    "type": "User",
@@ -274,7 +274,7 @@
   {
    "type": "User",
    "id": "zjiaz",
-   "contributions": 270
+   "contributions": 271
   },
   {
    "type": "User",
@@ -304,7 +304,7 @@
   {
    "type": "User",
    "id": "sroettger",
-   "contributions": 183
+   "contributions": 187
   },
   {
    "type": "User",
@@ -364,7 +364,7 @@
   {
    "type": "User",
    "id": "rmahdav",
-   "contributions": 132
+   "contributions": 133
   },
   {
    "type": "User",
@@ -373,12 +373,12 @@
   },
   {
    "type": "User",
-   "id": "joyeecheung",
+   "id": "mathiasbynens",
    "contributions": 124
   },
   {
    "type": "User",
-   "id": "mathiasbynens",
+   "id": "joyeecheung",
    "contributions": 124
   },
   {
@@ -413,12 +413,12 @@
   },
   {
    "type": "User",
-   "id": "peterwmwong",
+   "id": "ohodson",
    "contributions": 93
   },
   {
    "type": "User",
-   "id": "ohodson",
+   "id": "peterwmwong",
    "contributions": 93
   },
   {
@@ -458,12 +458,12 @@
   },
   {
    "type": "User",
-   "id": "fgmccabe",
+   "id": "how759",
    "contributions": 73
   },
   {
    "type": "User",
-   "id": "how759",
+   "id": "fgmccabe",
    "contributions": 73
   },
   {
@@ -483,12 +483,12 @@
   },
   {
    "type": "User",
-   "id": "jacobbramley",
+   "id": "lpy",
    "contributions": 64
   },
   {
    "type": "User",
-   "id": "lpy",
+   "id": "jacobbramley",
    "contributions": 64
   },
   {
@@ -578,12 +578,12 @@
   },
   {
    "type": "User",
-   "id": "legendecas",
+   "id": "happyCoder92",
    "contributions": 42
   },
   {
    "type": "User",
-   "id": "happyCoder92",
+   "id": "legendecas",
    "contributions": 42
   },
   {
@@ -634,6 +634,11 @@
   {
    "type": "User",
    "id": "yolanda15",
+   "contributions": 34
+  },
+  {
+   "type": "User",
+   "id": "acomminos",
    "contributions": 33
   },
   {
@@ -643,17 +648,12 @@
   },
   {
    "type": "User",
-   "id": "acomminos",
-   "contributions": 33
-  },
-  {
-   "type": "User",
-   "id": "frgossen",
+   "id": "ecmziegler",
    "contributions": 32
   },
   {
    "type": "User",
-   "id": "ecmziegler",
+   "id": "frgossen",
    "contributions": 32
   },
   {
@@ -663,18 +663,13 @@
   },
   {
    "type": "User",
-   "id": "danylo-boiko",
-   "contributions": 31
-  },
-  {
-   "type": "User",
    "id": "tgrohens",
    "contributions": 31
   },
   {
    "type": "User",
-   "id": "psybuzz",
-   "contributions": 30
+   "id": "danylo-boiko",
+   "contributions": 31
   },
   {
    "type": "User",
@@ -683,12 +678,17 @@
   },
   {
    "type": "User",
-   "id": "KarlSchimpf",
-   "contributions": 29
+   "id": "psybuzz",
+   "contributions": 30
   },
   {
    "type": "User",
    "id": "ryzokuken",
+   "contributions": 29
+  },
+  {
+   "type": "User",
+   "id": "KarlSchimpf",
    "contributions": 29
   },
   {
@@ -698,13 +698,18 @@
   },
   {
    "type": "User",
+   "id": "F3n67u",
+   "contributions": 28
+  },
+  {
+   "type": "User",
    "id": "pfaffe",
    "contributions": 28
   },
   {
    "type": "User",
-   "id": "F3n67u",
-   "contributions": 28
+   "id": "YoungWenMing",
+   "contributions": 27
   },
   {
    "type": "User",
@@ -718,16 +723,6 @@
   },
   {
    "type": "User",
-   "id": "YoungWenMing",
-   "contributions": 27
-  },
-  {
-   "type": "User",
-   "id": "dusmil",
-   "contributions": 26
-  },
-  {
-   "type": "User",
    "id": "jgouly",
    "contributions": 26
   },
@@ -738,12 +733,17 @@
   },
   {
    "type": "User",
+   "id": "dusmil",
+   "contributions": 26
+  },
+  {
+   "type": "User",
    "id": "sharmasuraj0123",
    "contributions": 25
   },
   {
    "type": "User",
-   "id": "domenic",
+   "id": "joransiu",
    "contributions": 24
   },
   {
@@ -753,23 +753,18 @@
   },
   {
    "type": "User",
-   "id": "PiotrSikora",
-   "contributions": 24
-  },
-  {
-   "type": "User",
    "id": "rongjiecomputer",
    "contributions": 24
   },
   {
    "type": "User",
-   "id": "joransiu",
+   "id": "domenic",
    "contributions": 24
   },
   {
    "type": "User",
-   "id": "jjykh",
-   "contributions": 23
+   "id": "PiotrSikora",
+   "contributions": 24
   },
   {
    "type": "User",
@@ -778,12 +773,22 @@
   },
   {
    "type": "User",
+   "id": "jjykh",
+   "contributions": 23
+  },
+  {
+   "type": "User",
+   "id": "zetafunction",
+   "contributions": 22
+  },
+  {
+   "type": "User",
    "id": "yuki3",
    "contributions": 22
   },
   {
    "type": "User",
-   "id": "zetafunction",
+   "id": "jupvfranco",
    "contributions": 22
   },
   {
@@ -798,18 +803,13 @@
   },
   {
    "type": "User",
-   "id": "jupvfranco",
-   "contributions": 22
-  },
-  {
-   "type": "User",
    "id": "klaasb",
    "contributions": 22
   },
   {
    "type": "User",
-   "id": "JialuZhang-intel",
-   "contributions": 21
+   "id": "jupvfranco",
+   "contributions": 22
   },
   {
    "type": "User",
@@ -818,12 +818,17 @@
   },
   {
    "type": "User",
-   "id": "ZhiguoZh",
-   "contributions": 20
+   "id": "JialuZhang-intel",
+   "contributions": 21
   },
   {
    "type": "User",
    "id": "indutny",
+   "contributions": 20
+  },
+  {
+   "type": "User",
+   "id": "ZhiguoZh",
    "contributions": 20
   },
   {
@@ -908,17 +913,17 @@
   },
   {
    "type": "User",
+   "id": "exinfinitum",
+   "contributions": 15
+  },
+  {
+   "type": "User",
    "id": "albertnetymk",
    "contributions": 15
   },
   {
    "type": "User",
    "id": "TimothyGu",
-   "contributions": 15
-  },
-  {
-   "type": "User",
-   "id": "exinfinitum",
    "contributions": 15
   },
   {
@@ -968,6 +973,11 @@
   },
   {
    "type": "User",
+   "id": "OrKoN",
+   "contributions": 13
+  },
+  {
+   "type": "User",
    "id": "yutakahirano",
    "contributions": 12
   },
@@ -999,11 +1009,6 @@
   {
    "type": "User",
    "id": "bsep-chromium",
-   "contributions": 12
-  },
-  {
-   "type": "User",
-   "id": "OrKoN",
    "contributions": 12
   },
   {

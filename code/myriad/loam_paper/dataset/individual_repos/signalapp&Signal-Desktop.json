@@ -9,12 +9,12 @@
   {
    "type": "User",
    "id": "scottnonnenberg-signal",
-   "contributions": 2059
+   "contributions": 2060
   },
   {
    "type": "User",
    "id": "indutny-signal",
-   "contributions": 1726
+   "contributions": 1733
   },
   {
    "type": "User",
@@ -39,17 +39,17 @@
   {
    "type": "User",
    "id": "jamiebuilds-signal",
-   "contributions": 380
+   "contributions": 388
   },
   {
    "type": "User",
    "id": "trevor-signal",
-   "contributions": 279
+   "contributions": 285
   },
   {
    "type": "User",
    "id": "ayumi-signal",
-   "contributions": 272
+   "contributions": 277
   },
   {
    "type": "User",
@@ -118,17 +118,17 @@
   },
   {
    "type": "User",
-   "id": "s0",
-   "contributions": 12
-  },
-  {
-   "type": "User",
    "id": "dsanders11",
    "contributions": 12
   },
   {
    "type": "User",
-   "id": "cybre-finn",
+   "id": "s0",
+   "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "hackerbirds",
    "contributions": 10
   },
   {
@@ -138,7 +138,7 @@
   },
   {
    "type": "User",
-   "id": "hackerbirds",
+   "id": "cybre-finn",
    "contributions": 10
   },
   {
@@ -153,7 +153,7 @@
   },
   {
    "type": "User",
-   "id": "akonradi-signal",
+   "id": "mutexlox-signal",
    "contributions": 7
   },
   {
@@ -163,23 +163,8 @@
   },
   {
    "type": "User",
-   "id": "Trolldemorted",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "OdysseasKr",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "cowlicks",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "lamemakes",
-   "contributions": 6
+   "id": "akonradi-signal",
+   "contributions": 7
   },
   {
    "type": "User",
@@ -193,7 +178,27 @@
   },
   {
    "type": "User",
-   "id": "mutexlox-signal",
+   "id": "lamemakes",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "cowlicks",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "OdysseasKr",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "Trolldemorted",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "yash-signal",
    "contributions": 5
   },
   {
@@ -209,11 +214,6 @@
   {
    "type": "User",
    "id": "awaitlink",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "yash-signal",
    "contributions": 4
   },
   {

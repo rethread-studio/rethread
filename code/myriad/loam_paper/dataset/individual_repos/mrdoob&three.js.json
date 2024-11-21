@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "mrdoob",
-   "contributions": 18382
+   "contributions": 18383
   },
   {
    "type": "User",
    "id": "Mugen87",
-   "contributions": 5033
+   "contributions": 5038
   },
   {
    "type": "User",
@@ -24,7 +24,7 @@
   {
    "type": "User",
    "id": "sunag",
-   "contributions": 1162
+   "contributions": 1168
   },
   {
    "type": "User",
@@ -64,7 +64,7 @@
   {
    "type": "User",
    "id": "linbingquan",
-   "contributions": 336
+   "contributions": 337
   },
   {
    "type": "User",
@@ -303,6 +303,11 @@
   },
   {
    "type": "User",
+   "id": "puxiao",
+   "contributions": 39
+  },
+  {
+   "type": "User",
    "id": "naotaro0123",
    "contributions": 39
   },
@@ -314,11 +319,6 @@
   {
    "type": "User",
    "id": "CodyJasonBennett",
-   "contributions": 38
-  },
-  {
-   "type": "User",
-   "id": "puxiao",
    "contributions": 38
   },
   {

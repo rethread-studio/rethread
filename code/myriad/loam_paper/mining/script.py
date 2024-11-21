@@ -54,7 +54,7 @@ def save_repo_data(repo_name, contributors_list):
 	with open(filename + ".json", "w") as fp:
 		json.dump(repo_data, fp, indent = 1)
 
-def find(arr, attr, val):
+def find_element_that_has_attribute(arr, attr, val):
 	return [el for el in arr if el[attr] == val][0]
 
 def get_all_loggedin_contributors(repos):
@@ -63,27 +63,34 @@ def get_all_loggedin_contributors(repos):
 	gh_api_failures = []
 	for [repo_name, category] in repos:
 		print(repo_name + " (" + category + ")")
+
+		exclusivity = None
+		for l in exclusive_lists:
+			if repo_name in l["repos"]:
+				exclusivity = l["artwork"]
+
+		repo_info = {
+			"name": repo_name,
+			"category": category,
+			"exclusivity": exclusivity
+		}
 		
 		try:
 			created_at, contributors_list, total_contributions, count_anonymous_contributors = get_contributors(repo_name)
 			save_repo_data(repo_name, contributors_list)
 
-			repo_info = {
-				"name": repo_name,
-				"category": category,
-				"created_at": created_at,
-				"total_contributions": total_contributions,
-				"anonymous_contributors": count_anonymous_contributors,
-				"loggedin_contributors": len(contributors_list)
-			}
+			repo_info["created_at"] = created_at
+			repo_info["total_contributions"] = total_contributions
+			repo_info["anonymous_contributors"] = count_anonymous_contributors
+			repo_info["loggedin_contributors"] = len(contributors_list)
+			
 			repos_info.append(repo_info)
 
 			all_ids = [c["id"] for c in all_loggedin_contributors]
 			for c in contributors_list:
 				if c["id"] in all_ids:
 					# it's a known contributor
-					#found_contributor = [contrib for contrib in all_loggedin_contributors if c["id"] == contrib["id"]][0]
-					found_contributor = find(all_loggedin_contributors, "id", c["id"])
+					found_contributor = find_element_that_has_attribute(all_loggedin_contributors, "id", c["id"])
 					found_contributor["contributions"].append({"repo_name": repo_name, "contributions": c["contributions"]})
 				else:
 					# it's a new contributor
@@ -93,10 +100,6 @@ def get_all_loggedin_contributors(repos):
 						"contributions": [{"repo_name": repo_name, "contributions": c["contributions"]}]
 					})
 		except Exception as e: 
-			repo_info = {
-				"name": repo_name,
-				"category": category
-			}
 			gh_api_failures.append(repo_info)
 			print(e)
 
@@ -118,7 +121,7 @@ def get_categories_info(repos):
 		all_categories = [c["category"] for c in categories_info]
 		if category in all_categories: 
 			# it's a known category
-			found_category_info = find(categories_info, "category", category)
+			found_category_info = find_element_that_has_attribute(categories_info, "category", category)
 			found_category_info["repos"].append(repo_name)
 		else:
 			# it's a new category
@@ -134,6 +137,11 @@ def get_categories_info(repos):
 	
 	with open("../dataset/categories_info.json", "w") as fp:
 		json.dump(categories_info, fp, indent = 1)
+	
+with open("./exclusive_lists.csv", mode = "r") as f:
+	csvFile = csv.reader(f)
+	lines = [line for line in csvFile]
+	exclusive_lists = [{"artwork": artwork, "repos": repos.split(";")} for [artwork, repos] in lines]
 
 with open("./repo_list.csv", mode = "r") as f:
 	csvFile = csv.reader(f)

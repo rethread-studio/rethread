@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "nickvergessen",
-   "contributions": 8140
+   "contributions": 8160
   },
   {
    "type": "User",
    "id": "nextcloud-bot",
-   "contributions": 2183
+   "contributions": 2186
   },
   {
    "type": "User",
@@ -24,12 +24,12 @@
   {
    "type": "User",
    "id": "Antreesy",
-   "contributions": 1550
+   "contributions": 1559
   },
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 1422
+   "contributions": 1424
   },
   {
    "type": "Bot",
@@ -54,7 +54,7 @@
   {
    "type": "User",
    "id": "DorraJaouad",
-   "contributions": 408
+   "contributions": 415
   },
   {
    "type": "User",
@@ -74,7 +74,7 @@
   {
    "type": "User",
    "id": "nextcloud-command",
-   "contributions": 104
+   "contributions": 105
   },
   {
    "type": "User",
@@ -308,17 +308,17 @@
   },
   {
    "type": "User",
-   "id": "KANE-99",
-   "contributions": 2
-  },
-  {
-   "type": "User",
    "id": "hamza221",
    "contributions": 2
   },
   {
    "type": "User",
-   "id": "Jerome-Herbinet",
+   "id": "KANE-99",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "jimlinntu",
    "contributions": 2
   },
   {
@@ -328,7 +328,7 @@
   },
   {
    "type": "User",
-   "id": "jimlinntu",
+   "id": "Jerome-Herbinet",
    "contributions": 2
   },
   {
@@ -363,6 +363,11 @@
   },
   {
    "type": "User",
+   "id": "aaronsegura",
+   "contributions": 1
+  },
+  {
+   "type": "User",
    "id": "roliverio",
    "contributions": 1
   },
@@ -384,6 +389,11 @@
   {
    "type": "User",
    "id": "pboguslawski",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sowjanyakch",
    "contributions": 1
   },
   {
@@ -414,11 +424,6 @@
   {
    "type": "User",
    "id": "robotboyfriend",
-   "contributions": 1
-  },
-  {
-   "type": "User",
-   "id": "aaronsegura",
    "contributions": 1
   },
   {

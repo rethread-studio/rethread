@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "per1234",
-   "contributions": 127
+   "contributions": 129
   },
   {
    "type": "User",
@@ -49,12 +49,17 @@
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 21
+   "contributions": 22
   },
   {
    "type": "User",
    "id": "msujew",
    "contributions": 15
+  },
+  {
+   "type": "User",
+   "id": "giacomocusinato",
+   "contributions": 12
   },
   {
    "type": "User",
@@ -68,6 +73,11 @@
   },
   {
    "type": "User",
+   "id": "dankeboy36",
+   "contributions": 8
+  },
+  {
+   "type": "User",
    "id": "nmzaheer",
    "contributions": 7
   },
@@ -75,16 +85,6 @@
    "type": "User",
    "id": "svenefftinge",
    "contributions": 7
-  },
-  {
-   "type": "User",
-   "id": "dankeboy36",
-   "contributions": 7
-  },
-  {
-   "type": "User",
-   "id": "giacomocusinato",
-   "contributions": 6
   },
   {
    "type": "User",

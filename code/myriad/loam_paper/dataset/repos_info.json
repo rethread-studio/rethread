@@ -2,54 +2,61 @@
  {
   "name": "git/git",
   "category": "CLI",
+  "exclusivity": null,
   "created_at": "2008-07-23 14:21:26+00:00",
-  "total_contributions": 75309,
+  "total_contributions": 75326,
   "anonymous_contributors": 1836,
   "loggedin_contributors": 416
  },
  {
   "name": "openframeworks/openFrameworks",
   "category": "visual",
+  "exclusivity": "apocryph",
   "created_at": "2009-10-21 21:55:54+00:00",
-  "total_contributions": 17464,
+  "total_contributions": 17478,
   "anonymous_contributors": 153,
   "loggedin_contributors": 289
  },
  {
   "name": "mrdoob/three.js",
   "category": "visual",
+  "exclusivity": "glommen",
   "created_at": "2010-03-23 18:58:01+00:00",
-  "total_contributions": 44422,
-  "anonymous_contributors": 1962,
+  "total_contributions": 44439,
+  "anonymous_contributors": 1964,
   "loggedin_contributors": 364
  },
  {
   "name": "rust-lang/rust",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2010-06-16 20:39:03+00:00",
-  "total_contributions": 270919,
-  "anonymous_contributors": 6620,
-  "loggedin_contributors": 446
+  "total_contributions": 271139,
+  "anonymous_contributors": 6623,
+  "loggedin_contributors": 447
  },
  {
   "name": "scikit-learn/scikit-learn",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2010-08-17 09:43:38+00:00",
-  "total_contributions": 31896,
-  "anonymous_contributors": 2813,
+  "total_contributions": 31906,
+  "anonymous_contributors": 2817,
   "loggedin_contributors": 408
  },
  {
   "name": "numpy/numpy",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2010-09-13 23:02:39+00:00",
-  "total_contributions": 37481,
+  "total_contributions": 37505,
   "anonymous_contributors": 1411,
   "loggedin_contributors": 433
  },
  {
   "name": "arduino/Arduino",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2010-09-17 19:10:36+00:00",
   "total_contributions": 7376,
   "anonymous_contributors": 54,
@@ -58,14 +65,16 @@
  {
   "name": "sass/sass",
   "category": "visual",
+  "exclusivity": "dear-ai",
   "created_at": "2010-09-22 06:16:55+00:00",
-  "total_contributions": 890,
+  "total_contributions": 891,
   "anonymous_contributors": 2,
   "loggedin_contributors": 26
  },
  {
   "name": "nodemailer/nodemailer",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2011-01-19 21:17:36+00:00",
   "total_contributions": 1069,
   "anonymous_contributors": 33,
@@ -74,14 +83,16 @@
  {
   "name": "matplotlib/matplotlib",
   "category": "visual",
+  "exclusivity": "dear-ai",
   "created_at": "2011-02-19 03:17:12+00:00",
-  "total_contributions": 51330,
-  "anonymous_contributors": 1327,
+  "total_contributions": 51346,
+  "anonymous_contributors": 1329,
   "loggedin_contributors": 419
  },
  {
   "name": "moment/moment",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2011-03-01 02:46:06+00:00",
   "total_contributions": 4064,
   "anonymous_contributors": 290,
@@ -90,14 +101,16 @@
  {
   "name": "scipy/scipy",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2011-03-09 18:52:03+00:00",
-  "total_contributions": 33864,
-  "anonymous_contributors": 1299,
+  "total_contributions": 33877,
+  "anonymous_contributors": 1301,
   "loggedin_contributors": 413
  },
  {
   "name": "btel/svg_utils",
   "category": "visual",
+  "exclusivity": "dear-ai",
   "created_at": "2011-04-12 15:41:55+00:00",
   "total_contributions": 198,
   "anonymous_contributors": 4,
@@ -106,30 +119,34 @@
  {
   "name": "FFmpeg/FFmpeg",
   "category": "CLI",
+  "exclusivity": null,
   "created_at": "2011-04-14 14:12:38+00:00",
-  "total_contributions": 117371,
-  "anonymous_contributors": 2100,
+  "total_contributions": 117403,
+  "anonymous_contributors": 2102,
   "loggedin_contributors": 311
  },
  {
   "name": "signalapp/Signal-Android",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2011-12-15 20:01:12+00:00",
-  "total_contributions": 15709,
-  "anonymous_contributors": 47,
+  "total_contributions": 15755,
+  "anonymous_contributors": 48,
   "loggedin_contributors": 306
  },
  {
   "name": "videolan/vlc",
   "category": "GUI",
+  "exclusivity": "why-am-i-seeing-this",
   "created_at": "2012-01-29 19:30:36+00:00",
-  "total_contributions": 105088,
+  "total_contributions": 105188,
   "anonymous_contributors": 750,
   "loggedin_contributors": 292
  },
  {
   "name": "jackaudio/jack2",
   "category": "sound/music",
+  "exclusivity": "loam",
   "created_at": "2012-02-02 17:37:08+00:00",
   "total_contributions": 4072,
   "anonymous_contributors": 28,
@@ -138,30 +155,34 @@
  {
   "name": "nolimits4web/swiper",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2012-03-14 19:11:45+00:00",
-  "total_contributions": 3694,
+  "total_contributions": 3696,
   "anonymous_contributors": 48,
-  "loggedin_contributors": 288
+  "loggedin_contributors": 289
  },
  {
   "name": "supercollider/supercollider",
   "category": "sound/music",
+  "exclusivity": "loam",
   "created_at": "2012-05-04 19:24:51+00:00",
-  "total_contributions": 26314,
+  "total_contributions": 26316,
   "anonymous_contributors": 122,
   "loggedin_contributors": 219
  },
  {
   "name": "GNOME/gimp",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2012-06-03 13:37:45+00:00",
-  "total_contributions": 46236,
+  "total_contributions": 46252,
   "anonymous_contributors": 936,
   "loggedin_contributors": 166
  },
  {
   "name": "brandongmwong/elizabot-js",
   "category": "text/speech",
+  "exclusivity": "dear-ai",
   "created_at": "2012-07-18 23:36:11+00:00",
   "total_contributions": 4,
   "anonymous_contributors": 1,
@@ -170,6 +191,7 @@
  {
   "name": "KhronosGroup/WebGL",
   "category": "visual",
+  "exclusivity": "megatouch",
   "created_at": "2012-07-27 17:21:51+00:00",
   "total_contributions": 6728,
   "anonymous_contributors": 67,
@@ -178,6 +200,7 @@
  {
   "name": "textmate/textmate",
   "category": "GUI",
+  "exclusivity": "apocryph",
   "created_at": "2012-08-08 16:25:52+00:00",
   "total_contributions": 5756,
   "anonymous_contributors": 18,
@@ -186,6 +209,7 @@
  {
   "name": "popcornmix/omxplayer",
   "category": "CLI",
+  "exclusivity": null,
   "created_at": "2012-08-27 18:54:21+00:00",
   "total_contributions": 531,
   "anonymous_contributors": 14,
@@ -194,6 +218,7 @@
  {
   "name": "supercollider/sc3-plugins",
   "category": "sound/music",
+  "exclusivity": "loam",
   "created_at": "2012-12-01 18:53:11+00:00",
   "total_contributions": 1385,
   "anonymous_contributors": 20,
@@ -202,6 +227,7 @@
  {
   "name": "rtyley/bfg-repo-cleaner",
   "category": "CLI",
+  "exclusivity": "loam",
   "created_at": "2012-12-21 00:14:20+00:00",
   "total_contributions": 488,
   "anonymous_contributors": 2,
@@ -210,6 +236,7 @@
  {
   "name": "WebAudio/web-midi-api",
   "category": "sound/music",
+  "exclusivity": "megatouch",
   "created_at": "2013-01-10 18:45:33+00:00",
   "total_contributions": 312,
   "anonymous_contributors": 5,
@@ -218,6 +245,7 @@
  {
   "name": "processing/processing",
   "category": "visual",
+  "exclusivity": "relaxrelaxrelax",
   "created_at": "2013-01-24 21:17:22+00:00",
   "total_contributions": 13211,
   "anonymous_contributors": 29,
@@ -226,6 +254,7 @@
  {
   "name": "processing/p5.js",
   "category": "visual",
+  "exclusivity": "loam",
   "created_at": "2013-02-26 03:14:47+00:00",
   "total_contributions": 11690,
   "anonymous_contributors": 423,
@@ -234,6 +263,7 @@
  {
   "name": "WebAudio/web-audio-api",
   "category": "sound/music",
+  "exclusivity": "megatouch",
   "created_at": "2013-08-30 11:29:49+00:00",
   "total_contributions": 3316,
   "anonymous_contributors": 15,
@@ -242,54 +272,61 @@
  {
   "name": "mozilla/gecko-dev",
   "category": "engine",
+  "exclusivity": null,
   "created_at": "2013-10-11 20:35:42+00:00",
-  "total_contributions": 937482,
-  "anonymous_contributors": 11433,
+  "total_contributions": 938012,
+  "anonymous_contributors": 11439,
   "loggedin_contributors": 279
  },
  {
   "name": "LibreOffice/core",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2013-10-31 15:46:52+00:00",
-  "total_contributions": 500519,
+  "total_contributions": 500623,
   "anonymous_contributors": 2462,
   "loggedin_contributors": 167
  },
  {
   "name": "signalapp/Signal-Desktop",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2014-02-24 19:53:36+00:00",
-  "total_contributions": 11226,
+  "total_contributions": 11256,
   "anonymous_contributors": 37,
   "loggedin_contributors": 220
  },
  {
   "name": "rust-lang/cargo",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2014-03-04 23:20:42+00:00",
-  "total_contributions": 18994,
-  "anonymous_contributors": 751,
+  "total_contributions": 19006,
+  "anonymous_contributors": 752,
   "loggedin_contributors": 419
  },
  {
   "name": "signalapp/Signal-iOS",
   "category": "GUI",
+  "exclusivity": "relaxrelaxrelax",
   "created_at": "2014-05-04 15:42:40+00:00",
-  "total_contributions": 35205,
+  "total_contributions": 35265,
   "anonymous_contributors": 27,
   "loggedin_contributors": 148
  },
  {
   "name": "image-rs/image",
   "category": "visual",
+  "exclusivity": "loam",
   "created_at": "2014-05-25 11:39:07+00:00",
-  "total_contributions": 3385,
+  "total_contributions": 3386,
   "anonymous_contributors": 28,
   "loggedin_contributors": 308
  },
  {
   "name": "i3/i3.github.io",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2014-06-16 20:25:47+00:00",
   "total_contributions": 578,
   "anonymous_contributors": 9,
@@ -298,14 +335,16 @@
  {
   "name": "microsoft/TypeScript",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2014-06-17 15:28:39+00:00",
-  "total_contributions": 36297,
+  "total_contributions": 36299,
   "anonymous_contributors": 543,
   "loggedin_contributors": 347
  },
  {
   "name": "dtolnay/semver",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2014-07-30 15:01:22+00:00",
   "total_contributions": 642,
   "anonymous_contributors": 3,
@@ -314,14 +353,16 @@
  {
   "name": "emacs-mirror/emacs",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2014-08-07 06:58:17+00:00",
-  "total_contributions": 175532,
+  "total_contributions": 175533,
   "anonymous_contributors": 1379,
   "loggedin_contributors": 332
  },
  {
   "name": "pure-data/pure-data",
   "category": "sound/music",
+  "exclusivity": null,
   "created_at": "2014-08-18 09:36:46+00:00",
   "total_contributions": 7019,
   "anonymous_contributors": 30,
@@ -330,6 +371,7 @@
  {
   "name": "inkscape/inkscape",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2014-08-20 20:27:16+00:00",
   "total_contributions": 89,
   "anonymous_contributors": 2,
@@ -338,22 +380,25 @@
  {
   "name": "v8/v8",
   "category": "engine",
+  "exclusivity": null,
   "created_at": "2014-09-24 15:24:30+00:00",
-  "total_contributions": 91740,
+  "total_contributions": 91819,
   "anonymous_contributors": 914,
-  "loggedin_contributors": 205
+  "loggedin_contributors": 206
  },
  {
   "name": "nodejs/node",
   "category": "other",
+  "exclusivity": "infinite-sand-sorter",
   "created_at": "2014-11-26 19:57:11+00:00",
-  "total_contributions": 42876,
+  "total_contributions": 42890,
   "anonymous_contributors": 3612,
   "loggedin_contributors": 434
  },
  {
   "name": "rust-lang/log",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2014-12-13 21:45:04+00:00",
   "total_contributions": 838,
   "anonymous_contributors": 12,
@@ -362,6 +407,7 @@
  {
   "name": "EnvelopSound/EnvelopForLive",
   "category": "sound/music",
+  "exclusivity": "a-not-so-distant-past",
   "created_at": "2015-01-27 05:46:58+00:00",
   "total_contributions": 613,
   "anonymous_contributors": 1,
@@ -370,46 +416,52 @@
  {
   "name": "mozsearch/mozsearch",
   "category": "other",
+  "exclusivity": null,
   "created_at": "2015-03-16 05:03:18+00:00",
-  "total_contributions": 1950,
+  "total_contributions": 1953,
   "anonymous_contributors": 5,
   "loggedin_contributors": 36
  },
  {
   "name": "audacity/audacity",
   "category": "GUI",
+  "exclusivity": null,
   "created_at": "2015-03-26 10:46:17+00:00",
-  "total_contributions": 20526,
+  "total_contributions": 20549,
   "anonymous_contributors": 65,
   "loggedin_contributors": 217
  },
  {
   "name": "notepad-plus-plus/notepad-plus-plus",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2015-03-28 00:05:08+00:00",
-  "total_contributions": 6041,
+  "total_contributions": 6055,
   "anonymous_contributors": 49,
-  "loggedin_contributors": 370
+  "loggedin_contributors": 371
  },
  {
   "name": "KhronosGroup/glslang",
   "category": "visual",
+  "exclusivity": "megatouch",
   "created_at": "2015-06-25 17:54:39+00:00",
-  "total_contributions": 5163,
+  "total_contributions": 5164,
   "anonymous_contributors": 29,
   "loggedin_contributors": 298
  },
  {
   "name": "HandBrake/HandBrake",
   "category": "GUI",
+  "exclusivity": "why-am-i-seeing-this",
   "created_at": "2015-08-22 16:32:28+00:00",
-  "total_contributions": 12768,
+  "total_contributions": 12772,
   "anonymous_contributors": 27,
   "loggedin_contributors": 116
  },
  {
   "name": "djc/rustc-version-rs",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2015-08-24 00:09:32+00:00",
   "total_contributions": 116,
   "anonymous_contributors": 2,
@@ -418,30 +470,34 @@
  {
   "name": "microsoft/vscode",
   "category": "GUI",
+  "exclusivity": null,
   "created_at": "2015-09-03 20:23:38+00:00",
-  "total_contributions": 127066,
-  "anonymous_contributors": 2273,
-  "loggedin_contributors": 334
+  "total_contributions": 127327,
+  "anonymous_contributors": 2274,
+  "loggedin_contributors": 333
  },
  {
   "name": "KDE/plasma-desktop",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2015-09-18 15:34:58+00:00",
-  "total_contributions": 12541,
+  "total_contributions": 12543,
   "anonymous_contributors": 55,
   "loggedin_contributors": 305
  },
  {
   "name": "tensorflow/tensorflow",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2015-11-07 01:19:20+00:00",
-  "total_contributions": 172086,
+  "total_contributions": 172277,
   "anonymous_contributors": 4311,
-  "loggedin_contributors": 407
+  "loggedin_contributors": 408
  },
  {
   "name": "arduino/ArduinoCore-API",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2016-03-18 15:52:10+00:00",
   "total_contributions": 348,
   "anonymous_contributors": 0,
@@ -450,14 +506,16 @@
  {
   "name": "steveklabnik/semver-parser",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2016-05-12 00:45:23+00:00",
-  "total_contributions": 125,
+  "total_contributions": 129,
   "anonymous_contributors": 2,
   "loggedin_contributors": 16
  },
  {
   "name": "googlefonts/Inconsolata",
   "category": "text/speech",
+  "exclusivity": "loam",
   "created_at": "2016-05-23 16:40:37+00:00",
   "total_contributions": 171,
   "anonymous_contributors": 2,
@@ -466,22 +524,25 @@
  {
   "name": "nextcloud/server",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2016-06-02 07:44:14+00:00",
-  "total_contributions": 78082,
-  "anonymous_contributors": 908,
-  "loggedin_contributors": 352
+  "total_contributions": 78151,
+  "anonymous_contributors": 909,
+  "loggedin_contributors": 353
  },
  {
   "name": "ProtonMail/WebClients",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2016-06-08 11:16:51+00:00",
-  "total_contributions": 39632,
-  "anonymous_contributors": 112,
+  "total_contributions": 39837,
+  "anonymous_contributors": 113,
   "loggedin_contributors": 66
  },
  {
   "name": "BelaPlatform/Bela",
   "category": "sound/music",
+  "exclusivity": "pain-creature",
   "created_at": "2016-06-22 14:43:22+00:00",
   "total_contributions": 3375,
   "anonymous_contributors": 9,
@@ -490,14 +551,16 @@
  {
   "name": "nextcloud/spreed",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2016-09-01 08:08:37+00:00",
-  "total_contributions": 21320,
+  "total_contributions": 21363,
   "anonymous_contributors": 16,
-  "loggedin_contributors": 101
+  "loggedin_contributors": 102
  },
  {
   "name": "dtolnay/quote",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2016-09-03 05:34:45+00:00",
   "total_contributions": 645,
   "anonymous_contributors": 0,
@@ -506,14 +569,16 @@
  {
   "name": "dtolnay/syn",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2016-09-03 18:35:01+00:00",
-  "total_contributions": 4842,
+  "total_contributions": 4846,
   "anonymous_contributors": 4,
   "loggedin_contributors": 95
  },
  {
   "name": "indexmap-rs/indexmap",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2016-09-15 13:06:08+00:00",
   "total_contributions": 850,
   "anonymous_contributors": 4,
@@ -522,6 +587,7 @@
  {
   "name": "rust-embedded/volatile-register",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2016-09-27 19:33:09+00:00",
   "total_contributions": 28,
   "anonymous_contributors": 1,
@@ -530,6 +596,7 @@
  {
   "name": "rust-embedded/cortex-m",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2016-09-27 23:35:04+00:00",
   "total_contributions": 1532,
   "anonymous_contributors": 7,
@@ -538,14 +605,16 @@
  {
   "name": "espressif/arduino-esp32",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2016-10-06 06:04:20+00:00",
-  "total_contributions": 2811,
+  "total_contributions": 2812,
   "anonymous_contributors": 280,
   "loggedin_contributors": 460
  },
  {
   "name": "rust-embedded/embedded-alloc",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2016-11-19 15:34:18+00:00",
   "total_contributions": 171,
   "anonymous_contributors": 2,
@@ -554,14 +623,16 @@
  {
   "name": "sveltejs/svelte",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2016-11-20 18:13:05+00:00",
-  "total_contributions": 9648,
-  "anonymous_contributors": 375,
+  "total_contributions": 9668,
+  "anonymous_contributors": 376,
   "loggedin_contributors": 415
  },
  {
   "name": "mozman/svgwrite",
   "category": "visual",
+  "exclusivity": "dear-ai",
   "created_at": "2017-01-22 08:29:23+00:00",
   "total_contributions": 394,
   "anonymous_contributors": 5,
@@ -570,14 +641,16 @@
  {
   "name": "python/cpython",
   "category": "other",
+  "exclusivity": null,
   "created_at": "2017-02-10 19:23:51+00:00",
-  "total_contributions": 124404,
-  "anonymous_contributors": 2781,
+  "total_contributions": 124448,
+  "anonymous_contributors": 2782,
   "loggedin_contributors": 349
  },
  {
   "name": "KhronosGroup/GLSL",
   "category": "visual",
+  "exclusivity": "megatouch",
   "created_at": "2017-03-05 00:37:33+00:00",
   "total_contributions": 478,
   "anonymous_contributors": 8,
@@ -586,6 +659,7 @@
  {
   "name": "rtic-rs/rtic",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2017-03-05 05:28:17+00:00",
   "total_contributions": 1745,
   "anonymous_contributors": 8,
@@ -594,22 +668,25 @@
  {
   "name": "dtolnay/proc-macro2",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2017-05-20 02:35:07+00:00",
-  "total_contributions": 1148,
+  "total_contributions": 1173,
   "anonymous_contributors": 1,
   "loggedin_contributors": 28
  },
  {
   "name": "PipeWire/pipewire",
   "category": "CLI",
+  "exclusivity": "loam",
   "created_at": "2017-05-29 11:30:05+00:00",
-  "total_contributions": 13031,
+  "total_contributions": 13033,
   "anonymous_contributors": 51,
   "loggedin_contributors": 288
  },
  {
   "name": "rust-embedded/nb",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2017-06-08 03:49:59+00:00",
   "total_contributions": 65,
   "anonymous_contributors": 0,
@@ -618,14 +695,16 @@
  {
   "name": "rust-embedded/embedded-hal",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2017-06-09 20:57:29+00:00",
-  "total_contributions": 887,
+  "total_contributions": 889,
   "anonymous_contributors": 3,
   "loggedin_contributors": 65
  },
  {
   "name": "rust-embedded/bare-metal",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2017-06-22 00:32:17+00:00",
   "total_contributions": 87,
   "anonymous_contributors": 0,
@@ -634,6 +713,7 @@
  {
   "name": "ritwickdey/vscode-live-server",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2017-06-27 20:35:26+00:00",
   "total_contributions": 328,
   "anonymous_contributors": 1,
@@ -642,6 +722,7 @@
  {
   "name": "festvox/festival",
   "category": "text/speech",
+  "exclusivity": "loam",
   "created_at": "2017-09-04 15:49:51+00:00",
   "total_contributions": 81,
   "anonymous_contributors": 0,
@@ -650,14 +731,16 @@
  {
   "name": "nextcloud/talk-android",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2017-09-11 06:53:14+00:00",
-  "total_contributions": 9843,
+  "total_contributions": 9921,
   "anonymous_contributors": 11,
   "loggedin_contributors": 43
  },
  {
   "name": "caprover/caprover",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2017-10-25 05:00:43+00:00",
   "total_contributions": 1692,
   "anonymous_contributors": 5,
@@ -666,22 +749,25 @@
  {
   "name": "brave/brave-browser",
   "category": "GUI",
+  "exclusivity": "why-am-i-seeing-this",
   "created_at": "2017-11-09 23:44:38+00:00",
-  "total_contributions": 8940,
+  "total_contributions": 8959,
   "anonymous_contributors": 10,
   "loggedin_contributors": 94
  },
  {
   "name": "brave/brave-core",
   "category": "engine",
+  "exclusivity": "why-am-i-seeing-this",
   "created_at": "2017-11-10 03:33:30+00:00",
-  "total_contributions": 65816,
+  "total_contributions": 65902,
   "anonymous_contributors": 159,
   "loggedin_contributors": 290
  },
  {
   "name": "rust-num/num-traits",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2017-12-19 01:37:18+00:00",
   "total_contributions": 1163,
   "anonymous_contributors": 13,
@@ -690,6 +776,7 @@
  {
   "name": "sjvasquez/handwriting-synthesis",
   "category": "text/speech",
+  "exclusivity": "dear-ai",
   "created_at": "2018-02-25 21:59:38+00:00",
   "total_contributions": 22,
   "anonymous_contributors": 3,
@@ -698,6 +785,7 @@
  {
   "name": "cuviper/autocfg",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2018-05-30 18:18:52+00:00",
   "total_contributions": 112,
   "anonymous_contributors": 0,
@@ -706,14 +794,16 @@
  {
   "name": "npm/cli",
   "category": "CLI",
+  "exclusivity": "infinite-sand-sorter",
   "created_at": "2018-07-05 23:26:52+00:00",
-  "total_contributions": 12592,
+  "total_contributions": 12596,
   "anonymous_contributors": 501,
   "loggedin_contributors": 430
  },
  {
   "name": "rust-lang/libm",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2018-07-12 05:47:15+00:00",
   "total_contributions": 536,
   "anonymous_contributors": 2,
@@ -722,6 +812,7 @@
  {
   "name": "VSCodium/vscodium",
   "category": "GUI",
+  "exclusivity": "infinite-sand-sorter",
   "created_at": "2018-08-13 14:26:58+00:00",
   "total_contributions": 1345,
   "anonymous_contributors": 13,
@@ -730,6 +821,7 @@
  {
   "name": "rust-lang/hashbrown",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2018-10-28 21:58:58+00:00",
   "total_contributions": 1081,
   "anonymous_contributors": 9,
@@ -738,14 +830,16 @@
  {
   "name": "nextcloud/text",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2019-03-17 08:13:20+00:00",
-  "total_contributions": 8696,
+  "total_contributions": 8702,
   "anonymous_contributors": 4,
   "loggedin_contributors": 70
  },
  {
   "name": "tarcieri/micromath",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2019-04-28 08:53:58+00:00",
   "total_contributions": 163,
   "anonymous_contributors": 1,
@@ -754,6 +848,7 @@
  {
   "name": "keenethics/svelte-notifications",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2019-05-21 20:18:44+00:00",
   "total_contributions": 142,
   "anonymous_contributors": 1,
@@ -762,6 +857,7 @@
  {
   "name": "stm32-rs/stm32h7xx-hal",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2019-05-25 04:35:48+00:00",
   "total_contributions": 1328,
   "anonymous_contributors": 4,
@@ -770,14 +866,16 @@
  {
   "name": "github/docs",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2019-05-31 15:57:39+00:00",
-  "total_contributions": 51153,
-  "anonymous_contributors": 2124,
+  "total_contributions": 51228,
+  "anonymous_contributors": 2128,
   "loggedin_contributors": 431
  },
  {
   "name": "electro-smith/libDaisy",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2019-08-06 15:31:04+00:00",
   "total_contributions": 1287,
   "anonymous_contributors": 5,
@@ -786,6 +884,7 @@
  {
   "name": "mossblaser/plottie",
   "category": "visual",
+  "exclusivity": "dear-ai",
   "created_at": "2019-11-08 10:45:41+00:00",
   "total_contributions": 29,
   "anonymous_contributors": 0,
@@ -794,6 +893,7 @@
  {
   "name": "NVlabs/stylegan2",
   "category": "visual",
+  "exclusivity": "apocryph",
   "created_at": "2019-11-26 20:52:23+00:00",
   "total_contributions": 19,
   "anonymous_contributors": 0,
@@ -802,6 +902,7 @@
  {
   "name": "probe-rs/rtt-target",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2020-04-04 21:33:48+00:00",
   "total_contributions": 102,
   "anonymous_contributors": 0,
@@ -810,14 +911,16 @@
  {
   "name": "vitejs/vite",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2020-04-21 05:03:57+00:00",
-  "total_contributions": 7254,
-  "anonymous_contributors": 619,
+  "total_contributions": 7269,
+  "anonymous_contributors": 622,
   "loggedin_contributors": 440
  },
  {
   "name": "coqui-ai/TTS",
   "category": "text/speech",
+  "exclusivity": "loam",
   "created_at": "2020-05-20 15:45:28+00:00",
   "total_contributions": 4668,
   "anonymous_contributors": 20,
@@ -826,14 +929,16 @@
  {
   "name": "github/rest-api-description",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2020-06-22 16:33:37+00:00",
-  "total_contributions": 2634,
+  "total_contributions": 2642,
   "anonymous_contributors": 1,
   "loggedin_contributors": 23
  },
  {
   "name": "joshnuss/svelte-persisted-store",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2020-07-03 05:10:23+00:00",
   "total_contributions": 338,
   "anonymous_contributors": 0,
@@ -842,14 +947,16 @@
  {
   "name": "arduino/arduino-ide",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2021-02-08 10:43:01+00:00",
-  "total_contributions": 1433,
+  "total_contributions": 1443,
   "anonymous_contributors": 7,
   "loggedin_contributors": 37
  },
  {
   "name": "rust-embedded/critical-section",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2021-05-09 21:47:16+00:00",
   "total_contributions": 131,
   "anonymous_contributors": 2,
@@ -858,6 +965,7 @@
  {
   "name": "hideakitai/ESP32SPISlave",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2021-07-26 09:59:46+00:00",
   "total_contributions": 59,
   "anonymous_contributors": 0,
@@ -866,6 +974,7 @@
  {
   "name": "korken89/fugit",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2021-10-11 07:35:08+00:00",
   "total_contributions": 101,
   "anonymous_contributors": 0,
@@ -874,6 +983,7 @@
  {
   "name": "autonomousvision/projected-gan",
   "category": "visual",
+  "exclusivity": "apocryph",
   "created_at": "2021-11-01 15:13:19+00:00",
   "total_contributions": 23,
   "anonymous_contributors": 1,
@@ -882,22 +992,25 @@
  {
   "name": "openai/openai-node",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2021-12-14 22:32:58+00:00",
-  "total_contributions": 700,
+  "total_contributions": 712,
   "anonymous_contributors": 1,
-  "loggedin_contributors": 24
+  "loggedin_contributors": 26
  },
  {
   "name": "dtolnay/unicode-ident",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2022-05-16 00:44:49+00:00",
-  "total_contributions": 148,
+  "total_contributions": 153,
   "anonymous_contributors": 0,
-  "loggedin_contributors": 1
+  "loggedin_contributors": 2
  },
  {
   "name": "sc00/svelte-textarea-auto-height",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2022-07-04 19:29:54+00:00",
   "total_contributions": 7,
   "anonymous_contributors": 0,
@@ -906,14 +1019,16 @@
  {
   "name": "pocketbase/pocketbase",
   "category": "GUI",
+  "exclusivity": "dear-ai",
   "created_at": "2022-07-05 06:06:21+00:00",
-  "total_contributions": 1448,
+  "total_contributions": 1450,
   "anonymous_contributors": 1,
   "loggedin_contributors": 39
  },
  {
   "name": "Makerfabs/Makerfabs-ESP32-UWB-DW3000",
   "category": "electronics",
+  "exclusivity": "loam",
   "created_at": "2022-08-01 06:15:28+00:00",
   "total_contributions": 7,
   "anonymous_contributors": 0,
@@ -922,6 +1037,7 @@
  {
   "name": "kirovj/pocketbase-pyclient",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2022-09-02 18:43:09+00:00",
   "total_contributions": 45,
   "anonymous_contributors": 0,
@@ -930,14 +1046,16 @@
  {
   "name": "nextcloud/collectives",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2022-12-13 10:57:21+00:00",
-  "total_contributions": 3741,
+  "total_contributions": 3743,
   "anonymous_contributors": 13,
   "loggedin_contributors": 58
  },
  {
   "name": "carstenlebek/svelte-email",
   "category": "other",
+  "exclusivity": "dear-ai",
   "created_at": "2023-02-02 10:10:24+00:00",
   "total_contributions": 50,
   "anonymous_contributors": 0,
@@ -946,14 +1064,16 @@
  {
   "name": "huggingface/chat-ui",
   "category": "GUI",
+  "exclusivity": "loam",
   "created_at": "2023-02-17 15:31:50+00:00",
-  "total_contributions": 1146,
+  "total_contributions": 1163,
   "anonymous_contributors": 2,
   "loggedin_contributors": 110
  },
  {
   "name": "otuva/handwriting-synthesis",
   "category": "text/speech",
+  "exclusivity": "dear-ai",
   "created_at": "2023-05-28 11:59:04+00:00",
   "total_contributions": 86,
   "anonymous_contributors": 3,
@@ -962,6 +1082,7 @@
  {
   "name": "TU-Studio/IEMPluginSuite",
   "category": "sound/music",
+  "exclusivity": "a-not-so-distant-past",
   "created_at": "2024-01-10 14:47:14+00:00",
   "total_contributions": 1489,
   "anonymous_contributors": 12,
@@ -970,8 +1091,9 @@
  {
   "name": "meta-llama/llama-models",
   "category": "other",
+  "exclusivity": "loam",
   "created_at": "2024-06-27 22:14:09+00:00",
-  "total_contributions": 141,
+  "total_contributions": 143,
   "anonymous_contributors": 2,
   "loggedin_contributors": 27
  }

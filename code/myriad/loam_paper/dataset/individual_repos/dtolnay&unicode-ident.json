@@ -4,7 +4,12 @@
   {
    "type": "User",
    "id": "dtolnay",
-   "contributions": 148
+   "contributions": 151
+  },
+  {
+   "type": "User",
+   "id": "Jake-Shadle",
+   "contributions": 2
   }
  ]
 }

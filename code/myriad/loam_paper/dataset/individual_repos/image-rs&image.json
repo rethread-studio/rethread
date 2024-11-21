@@ -68,12 +68,7 @@
   },
   {
    "type": "User",
-   "id": "kaj",
-   "contributions": 21
-  },
-  {
-   "type": "User",
-   "id": "hauleth",
+   "id": "awxkee",
    "contributions": 21
   },
   {
@@ -83,7 +78,12 @@
   },
   {
    "type": "User",
-   "id": "awxkee",
+   "id": "hauleth",
+   "contributions": 21
+  },
+  {
+   "type": "User",
+   "id": "kaj",
    "contributions": 21
   },
   {
@@ -103,7 +103,7 @@
   },
   {
    "type": "User",
-   "id": "paolobarbolini",
+   "id": "JohnTitor",
    "contributions": 15
   },
   {
@@ -113,17 +113,12 @@
   },
   {
    "type": "User",
-   "id": "JohnTitor",
+   "id": "paolobarbolini",
    "contributions": 15
   },
   {
    "type": "User",
-   "id": "Josh015",
-   "contributions": 14
-  },
-  {
-   "type": "User",
-   "id": "lo48576",
+   "id": "birktj",
    "contributions": 14
   },
   {
@@ -133,7 +128,12 @@
   },
   {
    "type": "User",
-   "id": "birktj",
+   "id": "lo48576",
+   "contributions": 14
+  },
+  {
+   "type": "User",
+   "id": "Josh015",
    "contributions": 14
   },
   {
@@ -168,6 +168,11 @@
   },
   {
    "type": "User",
+   "id": "Veykril",
+   "contributions": 9
+  },
+  {
+   "type": "User",
    "id": "brookst",
    "contributions": 9
   },
@@ -178,12 +183,7 @@
   },
   {
    "type": "User",
-   "id": "Veykril",
-   "contributions": 9
-  },
-  {
-   "type": "User",
-   "id": "orhun",
+   "id": "CensoredUsername",
    "contributions": 9
   },
   {
@@ -193,7 +193,7 @@
   },
   {
    "type": "User",
-   "id": "CensoredUsername",
+   "id": "orhun",
    "contributions": 9
   },
   {
@@ -353,6 +353,11 @@
   },
   {
    "type": "User",
+   "id": "FlareFlo",
+   "contributions": 5
+  },
+  {
+   "type": "User",
    "id": "BezPowell",
    "contributions": 5
   },
@@ -398,27 +403,17 @@
   },
   {
    "type": "User",
-   "id": "torokati44",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "tafia",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "FlareFlo",
-   "contributions": 4
-  },
-  {
-   "type": "User",
    "id": "Ryman",
    "contributions": 4
   },
   {
    "type": "User",
    "id": "mfro",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "maxsnew",
    "contributions": 4
   },
   {
@@ -438,7 +433,7 @@
   },
   {
    "type": "User",
-   "id": "maxsnew",
+   "id": "tafia",
    "contributions": 4
   },
   {
@@ -449,6 +444,11 @@
   {
    "type": "User",
    "id": "sdroege",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "torokati44",
    "contributions": 4
   },
   {
