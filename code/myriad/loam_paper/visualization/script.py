@@ -8,6 +8,8 @@ all_loggedin_contributors = pd.read_json("../dataset/all_loggedin_contributors.j
 
 with open("../dataset/categories_info.json", "r") as f:
 	categories_info = json.load(f)
+category_names = [c["category"] for c in categories_info]
+category_names.sort()
 
 def avg_contributors_per_category_barplot():
     # average number of anon/loggedin contributors per category
@@ -48,14 +50,16 @@ def repos_per_year_barplot():
     # number of repos created per year
     minYear = repos_info["created_at"].min().year
     maxYear = repos_info["created_at"].max().year
-    data = [{"year": y} for y in range(minYear, maxYear+1)]
+    data = []
+    for y in range(minYear, maxYear+1):
+        o = {"year": y}
+        for cat in category_names:
+            o[cat] = 0
+        data.append(o)
     for index, row in repos_info.iterrows():
         year = row["created_at"].year
         cat = row["category"]
-        try:
-            data[year-minYear][cat] += 1
-        except KeyError:
-            data[year-minYear][cat] = 1
+        data[year-minYear][cat] += 1
     data = pd.DataFrame(data)
     data.set_index("year").plot(kind="bar", stacked=True)
     plt.xlabel("year of creation/apparition on GitHub")
@@ -80,7 +84,33 @@ def multi_contributors_barplot():
     plt.ylabel("user count")
     plt.show()
 
+def exclusive_repos_per_artwork_barplot():
+    # number of exclusive repos per artwork
+    artworks = list(set(repos_info.loc[:,"exclusivity"]))
+    artworks.remove(None)
+    artworks.remove("loam")
+    artworks.sort()
+    data = []
+    for a in ["A ... past", "Apocryph", "Dear Ai", "Glommen", "... Sand Sorter", "Megatouch", "Pain", "RELAX...", "Why ... this?"]:
+        o = {"exclusivity": a}
+        for cat in category_names:
+            o[cat] = 0
+        data.append(o)
+    for index, row in repos_info.iterrows():
+        exclusivity = row["exclusivity"]
+        if exclusivity in [None, "loam"]: continue
+        idx = artworks.index(exclusivity)
+        category = row["category"]
+        data[idx][category] += 1
+    data = pd.DataFrame(data)
+    data.set_index("exclusivity").plot(kind="bar", stacked=True)
+    plt.xlabel("artworks")
+    plt.ylabel("number of exclusive repositories")
+    plt.legend(title="category")
+    plt.show()
+
 avg_contributors_per_category_barplot()
 #contributions_years_scatterplot()
 repos_per_year_barplot()
 multi_contributors_barplot()
+exclusive_repos_per_artwork_barplot()
