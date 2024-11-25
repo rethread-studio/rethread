@@ -1,0 +1,120 @@
+{
+ "repo_name": "github/rest-api-description",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "github-openapi-bot",
+   "contributions": 1259
+  },
+  {
+   "type": "User",
+   "id": "dinonuggies1",
+   "contributions": 324
+  },
+  {
+   "type": "User",
+   "id": "becco",
+   "contributions": 288
+  },
+  {
+   "type": "User",
+   "id": "shiftkey",
+   "contributions": 171
+  },
+  {
+   "type": "User",
+   "id": "mattpage",
+   "contributions": 140
+  },
+  {
+   "type": "User",
+   "id": "bearcherian",
+   "contributions": 103
+  },
+  {
+   "type": "User",
+   "id": "ahoglund",
+   "contributions": 98
+  },
+  {
+   "type": "User",
+   "id": "mmrobins",
+   "contributions": 44
+  },
+  {
+   "type": "User",
+   "id": "timrogers",
+   "contributions": 36
+  },
+  {
+   "type": "User",
+   "id": "izuzak",
+   "contributions": 22
+  },
+  {
+   "type": "User",
+   "id": "easyt",
+   "contributions": 15
+  },
+  {
+   "type": "User",
+   "id": "jencarlucci",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "bruce",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "skedwards88",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "imwiss",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "nickfloyd",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "gr2m",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "AaronDewes",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "outofgamut",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "philsturgeon",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "shawnHartsell",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "zeke",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "cconcannon",
+   "contributions": 1
+  }
+ ]
+}

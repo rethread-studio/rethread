@@ -1,0 +1,145 @@
+{
+ "repo_name": "dtolnay/proc-macro2",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "dtolnay",
+   "contributions": 1016
+  },
+  {
+   "type": "User",
+   "id": "alexcrichton",
+   "contributions": 104
+  },
+  {
+   "type": "User",
+   "id": "mystor",
+   "contributions": 19
+  },
+  {
+   "type": "User",
+   "id": "bjorn3",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "SergioBenitez",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "CensoredUsername",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "kevinmehall",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "jrvidal",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "basavesh",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mathstuf",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "CreepySkeleton",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ivanbakel",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "buchgr",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "kazimuth",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "zzau13",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Kestrer",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "LukasKalbertodt",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "lukaslueg",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Michael-F-Bryan",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nnethercote",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ogoffart",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Elrendio",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "soenkehahn",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Nemo157",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "hcpl",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "klensy",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rickwebiii",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "xd009642",
+   "contributions": 1
+  }
+ ]
+}

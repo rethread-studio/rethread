@@ -1,0 +1,40 @@
+{
+ "repo_name": "rust-embedded/volatile-register",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "newAM",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "adamgreig",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Dirbaio",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "thejpster",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "japaric",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "robyoung",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "homunkulus",
+   "contributions": 1
+  }
+ ]
+}

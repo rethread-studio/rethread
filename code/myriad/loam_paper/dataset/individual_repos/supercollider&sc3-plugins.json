@@ -1,0 +1,265 @@
+{
+ "repo_name": "supercollider/sc3-plugins",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "danstowell",
+   "contributions": 205
+  },
+  {
+   "type": "User",
+   "id": "timblechmann",
+   "contributions": 91
+  },
+  {
+   "type": "User",
+   "id": "mossheim",
+   "contributions": 77
+  },
+  {
+   "type": "User",
+   "id": "dyfer",
+   "contributions": 63
+  },
+  {
+   "type": "User",
+   "id": "joslloand",
+   "contributions": 62
+  },
+  {
+   "type": "User",
+   "id": "sonoro1234",
+   "contributions": 56
+  },
+  {
+   "type": "User",
+   "id": "LFSaw",
+   "contributions": 54
+  },
+  {
+   "type": "User",
+   "id": "telephon",
+   "contributions": 38
+  },
+  {
+   "type": "User",
+   "id": "joshpar",
+   "contributions": 26
+  },
+  {
+   "type": "User",
+   "id": "gusano",
+   "contributions": 26
+  },
+  {
+   "type": "User",
+   "id": "florian-grond",
+   "contributions": 25
+  },
+  {
+   "type": "User",
+   "id": "patrickdupuis",
+   "contributions": 25
+  },
+  {
+   "type": "User",
+   "id": "scztt",
+   "contributions": 25
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 24
+  },
+  {
+   "type": "User",
+   "id": "sicklincoln",
+   "contributions": 22
+  },
+  {
+   "type": "User",
+   "id": "hzulla",
+   "contributions": 18
+  },
+  {
+   "type": "User",
+   "id": "redFrik",
+   "contributions": 16
+  },
+  {
+   "type": "User",
+   "id": "dvzrv",
+   "contributions": 15
+  },
+  {
+   "type": "User",
+   "id": "lijon",
+   "contributions": 15
+  },
+  {
+   "type": "User",
+   "id": "dotinspace",
+   "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "llloret",
+   "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "bagong",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "jngpng",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "jleben",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "yvol",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "crucialfelix",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "mtmccrea",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "tdug",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "kisielk",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "capital-G",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "yurivict",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "snappizz",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "miczac",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "miguel-negrao",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "gantz-giraffe",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "muellmusik",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "lisongx",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "simonvanderveldt",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "timsutton",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "TristanCacqueray",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "defaultxr",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "vivid-synth",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mlang",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "madskjeldgaard",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "jamshark70",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "hectorgonzalezo",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "giuliomoro",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ethancrawford",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "edwardloveall",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "celesteh",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "yaxu",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "8c6794b6",
+   "contributions": 1
+  }
+ ]
+}

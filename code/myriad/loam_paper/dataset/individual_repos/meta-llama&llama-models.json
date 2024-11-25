@@ -1,0 +1,140 @@
+{
+ "repo_name": "meta-llama/llama-models",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "ashwinb",
+   "contributions": 58
+  },
+  {
+   "type": "User",
+   "id": "jspisak",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "dltn",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "yanxi0830",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "wukaixingxp",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "machina-source",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "rohit-ptl",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "hardikjshah",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "samuelselvan",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "ConnorHack",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "raghotham",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "wysuperfly",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "varunfb",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "pmysl",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "minimalic",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "liyunlu0618",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "yufengzh",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "kit1980",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "knibesh",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "fbnav",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "matthewberryman",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "marklysze",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "derrix060",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "jasonkrone",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "eltociear",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "garvsl",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "anordin95",
+   "contributions": 1
+  }
+ ]
+}

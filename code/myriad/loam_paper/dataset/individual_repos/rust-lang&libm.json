@@ -1,0 +1,275 @@
+{
+ "repo_name": "rust-lang/libm",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "tgross35",
+   "contributions": 110
+  },
+  {
+   "type": "User",
+   "id": "japaric",
+   "contributions": 60
+  },
+  {
+   "type": "User",
+   "id": "alexcrichton",
+   "contributions": 57
+  },
+  {
+   "type": "Bot",
+   "id": "bors[bot]",
+   "contributions": 53
+  },
+  {
+   "type": "User",
+   "id": "Amanieu",
+   "contributions": 34
+  },
+  {
+   "type": "User",
+   "id": "burrbull",
+   "contributions": 31
+  },
+  {
+   "type": "User",
+   "id": "Lokathor",
+   "contributions": 20
+  },
+  {
+   "type": "User",
+   "id": "erikdesjardins",
+   "contributions": 14
+  },
+  {
+   "type": "User",
+   "id": "P1n3appl3",
+   "contributions": 14
+  },
+  {
+   "type": "User",
+   "id": "gnzlbg",
+   "contributions": 14
+  },
+  {
+   "type": "User",
+   "id": "m1el",
+   "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "porglezomp",
+   "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "Veykril",
+   "contributions": 10
+  },
+  {
+   "type": "User",
+   "id": "rrbutani",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "Schultzer",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "varkor",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "jackmott",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "eldruin",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "Jules-Bertholet",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "kirch7",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "ZagButNoZig",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "notriddle",
+   "contributions": 3
+  },
+  {
+   "type": "Bot",
+   "id": "github-actions[bot]",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "JohnTitor",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "mulkieran",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "software-opal",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "mb64",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "lucasmarqs",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "JSorngard",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "GuillaumeGomez",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "ankane",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "Amjad50",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "vjackson725",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "quaternic",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "klensy",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "kellda",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "bjorn3",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "beetrees",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "heiher",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "TDecking",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "SuKiN-a",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "kpp",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "richard-uk1",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "phip1611",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Outurnate",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "moritz-meier",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "keram88",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "jfthuong",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "jturner314-nrl",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "CryZe",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "bvinc",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "4tm4j33tk4ur",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ajtribick",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ajfrantz",
+   "contributions": 1
+  }
+ ]
+}

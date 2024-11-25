@@ -1,0 +1,100 @@
+{
+ "repo_name": "mozman/svgwrite",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "mozman",
+   "contributions": 55
+  },
+  {
+   "type": "User",
+   "id": "cghanke",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "normanrz",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "florianfesti",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "mitar",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "jamadagni",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "eumiro",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "jmahmood",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "Wlouiskroeger",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nathanwoody",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "vojtechtrefny",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "suriya",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "shlomif",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "PaulCordo",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nathan-muir",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "qbilius",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Natureshadow",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "dbready",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "resloved",
+   "contributions": 1
+  }
+ ]
+}

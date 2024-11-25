@@ -8,6 +8,7 @@ KhronosGroup/GLSL
 KhronosGroup/WebGL
 KhronosGroup/glslang
 LibreOffice/core
+Makerfabs/Makerfabs-ESP32-UWB-DW3000
 NVlabs/stylegan2
 PipeWire/pipewire
 ProtonMail/WebClients
@@ -43,8 +44,10 @@ git/git
 github/docs
 github/rest-api-description
 googlefonts/Inconsolata
+hideakitai/ESP32SPISlave
 huggingface/chat-ui
 i3/i3.github.io
+image-rs/image
 indexmap-rs/indexmap
 inkscape/inkscape
 jackaudio/jack2
@@ -70,6 +73,7 @@ nextcloud/text
 nodejs/node
 nodemailer/nodemailer
 nolimits4web/swiper
+notepad-plus-plus/notepad-plus-plus
 npm/npm
 numpy/numpy
 openai/openai-node

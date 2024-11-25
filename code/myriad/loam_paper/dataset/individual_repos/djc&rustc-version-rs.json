@@ -1,0 +1,80 @@
+{
+ "repo_name": "djc/rustc-version-rs",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "Kimundi",
+   "contributions": 53
+  },
+  {
+   "type": "User",
+   "id": "djc",
+   "contributions": 36
+  },
+  {
+   "type": "User",
+   "id": "programmerjake",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "kamalmarhubi",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "dtolnay",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "GuillaumeGomez",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "shepmaster",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "hkBst",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mgeisler",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "phansch",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "AnderEnder",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "RalfJung",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "bgourlie",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "JohnTitor",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mcarton",
+   "contributions": 1
+  }
+ ]
+}

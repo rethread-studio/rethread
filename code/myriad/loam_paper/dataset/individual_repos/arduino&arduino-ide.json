@@ -1,0 +1,190 @@
+{
+ "repo_name": "arduino/arduino-ide",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "per1234",
+   "contributions": 129
+  },
+  {
+   "type": "User",
+   "id": "jbicker",
+   "contributions": 84
+  },
+  {
+   "type": "User",
+   "id": "kittaakos",
+   "contributions": 64
+  },
+  {
+   "type": "User",
+   "id": "spoenemann",
+   "contributions": 64
+  },
+  {
+   "type": "User",
+   "id": "fstasi",
+   "contributions": 57
+  },
+  {
+   "type": "User",
+   "id": "silvanocerza",
+   "contributions": 33
+  },
+  {
+   "type": "Bot",
+   "id": "github-actions[bot]",
+   "contributions": 32
+  },
+  {
+   "type": "User",
+   "id": "francescospissu",
+   "contributions": 32
+  },
+  {
+   "type": "User",
+   "id": "davegarthsimpson",
+   "contributions": 26
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 22
+  },
+  {
+   "type": "User",
+   "id": "msujew",
+   "contributions": 15
+  },
+  {
+   "type": "User",
+   "id": "giacomocusinato",
+   "contributions": 12
+  },
+  {
+   "type": "User",
+   "id": "mastrolinux",
+   "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "jankeromnes",
+   "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "dankeboy36",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "nmzaheer",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "svenefftinge",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "sebromero",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "pirropirro",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "r3inbowari",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "lukasb1b",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "wh201906",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "ulemons",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "coby2023t",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "yash-markad",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "IrregularShed",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Sebastian-Brzuzek",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nbourre",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "facchinm",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Jmarinis",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "InstantMuffin",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "palazzol",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "federicobond",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "dwightfowler-cd",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ben-qnimble",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "streak324",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "alranel",
+   "contributions": 1
+  }
+ ]
+}

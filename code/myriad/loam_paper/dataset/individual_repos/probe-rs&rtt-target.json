@@ -1,0 +1,100 @@
+{
+ "repo_name": "probe-rs/rtt-target",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "mvirkkunen",
+   "contributions": 52
+  },
+  {
+   "type": "User",
+   "id": "Yatekii",
+   "contributions": 17
+  },
+  {
+   "type": "User",
+   "id": "bugadani",
+   "contributions": 11
+  },
+  {
+   "type": "User",
+   "id": "Dirbaio",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "xoac",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "eZioPan",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "tpilt",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "tgross35",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "vpochapuis",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Disasm",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "romixlab",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "robamu",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "perlindgren",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mattico",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "noppej",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "IsaacDynamo",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "diondokter",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "danc86",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "atouchet",
+   "contributions": 1
+  }
+ ]
+}

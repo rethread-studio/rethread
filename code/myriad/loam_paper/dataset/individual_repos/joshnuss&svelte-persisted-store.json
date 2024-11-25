@@ -1,0 +1,80 @@
+{
+ "repo_name": "joshnuss/svelte-persisted-store",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "joshnuss",
+   "contributions": 199
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 79
+  },
+  {
+   "type": "User",
+   "id": "bertmad3400",
+   "contributions": 23
+  },
+  {
+   "type": "User",
+   "id": "rubenhensen",
+   "contributions": 15
+  },
+  {
+   "type": "User",
+   "id": "danawoodman",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "aubergene",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "MathiasWP",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "patrickleet",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "amserra",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "benaltair",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "benmccann",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "niemyjski",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mrexodia",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ghostdevv",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "intercepted16",
+   "contributions": 1
+  }
+ ]
+}

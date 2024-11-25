@@ -1,0 +1,85 @@
+{
+ "repo_name": "steveklabnik/semver-parser",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "steveklabnik",
+   "contributions": 76
+  },
+  {
+   "type": "User",
+   "id": "udoprog",
+   "contributions": 18
+  },
+  {
+   "type": "User",
+   "id": "mikrostew",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "hone",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "raphlinus",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "matklad",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "djc",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "kamalmarhubi",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "ScottAbbey",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "stanciuadrian",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "BurntSushi",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "arthurscchan",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "connorkuehl",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Keruspe",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rap2hpoutre",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Byron",
+   "contributions": 1
+  }
+ ]
+}

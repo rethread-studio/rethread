@@ -1,0 +1,12 @@
+[
+ {
+  "name": "chromium/chromium",
+  "category": "GUI",
+  "exclusivity": null
+ },
+ {
+  "name": "torvalds/linux",
+  "category": "kernel",
+  "exclusivity": null
+ }
+]

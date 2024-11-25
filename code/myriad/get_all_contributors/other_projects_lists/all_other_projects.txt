@@ -5,6 +5,7 @@ IEM Plug-in Suite
 Inkscape
 IrfanView
 LinuxCommand
+Louise
 Mind Monitor
 Tor
 XnConvert

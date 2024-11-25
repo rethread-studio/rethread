@@ -1,0 +1,295 @@
+{
+ "repo_name": "nextcloud/collectives",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "mejo-",
+   "contributions": 1983
+  },
+  {
+   "type": "User",
+   "id": "azul",
+   "contributions": 451
+  },
+  {
+   "type": "User",
+   "id": "nextcloud-bot",
+   "contributions": 350
+  },
+  {
+   "type": "Bot",
+   "id": "renovate[bot]",
+   "contributions": 230
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 168
+  },
+  {
+   "type": "User",
+   "id": "max-nextcloud",
+   "contributions": 130
+  },
+  {
+   "type": "User",
+   "id": "juliusknorr",
+   "contributions": 85
+  },
+  {
+   "type": "Bot",
+   "id": "github-actions[bot]",
+   "contributions": 34
+  },
+  {
+   "type": "User",
+   "id": "p-bo",
+   "contributions": 22
+  },
+  {
+   "type": "User",
+   "id": "elzody",
+   "contributions": 22
+  },
+  {
+   "type": "User",
+   "id": "NathanBnm",
+   "contributions": 19
+  },
+  {
+   "type": "User",
+   "id": "nextcloud-command",
+   "contributions": 17
+  },
+  {
+   "type": "User",
+   "id": "Raudius",
+   "contributions": 17
+  },
+  {
+   "type": "User",
+   "id": "grnd-alt",
+   "contributions": 15
+  },
+  {
+   "type": "User",
+   "id": "blizzz",
+   "contributions": 10
+  },
+  {
+   "type": "User",
+   "id": "Rozenandrey",
+   "contributions": 10
+  },
+  {
+   "type": "User",
+   "id": "vfeshenko",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "jenspeternielsen",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "weblate",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "ikunya",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "skjnldsv",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "comradekingu",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "pjrobertson",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "leonardokr",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "marcotrevisan",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "provokateurin",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "Koc",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "rajasekaran86",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "urmatej",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "susnux",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "KovalevArtem",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "nickvergessen",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "julien-nc",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "LeoColman",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "larusalka",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "iWangJiaxiang",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "tcitworld",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "luka-nextcloud",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "rotdrop",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "AndyScherzinger",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "Omaha2002",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "SimJoSt",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "coop2540",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Jerome-Herbinet",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Kaiz3r63",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "icewind1991",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "IceCreamPie-dev",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "szaimen",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rakekniven",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "snehar97",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mioli104",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "jancborchardt",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "hweihwang",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "xinomilo",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "CarlSchwan",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "akhil1508",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "AIlkiv",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "4O4",
+   "contributions": 1
+  }
+ ]
+}

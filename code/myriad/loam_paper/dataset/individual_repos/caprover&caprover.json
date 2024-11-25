@@ -1,0 +1,290 @@
+{
+ "repo_name": "caprover/caprover",
+ "contributors": [
+  {
+   "type": "User",
+   "id": "githubsaturn",
+   "contributions": 1526
+  },
+  {
+   "type": "User",
+   "id": "ngoyal16",
+   "contributions": 20
+  },
+  {
+   "type": "User",
+   "id": "sidharthv96",
+   "contributions": 16
+  },
+  {
+   "type": "User",
+   "id": "etienne-dldc",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "ZeekoZhu",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "jonaskuske",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "drmrbrewer",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "solomon23",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "juanfrnz",
+   "contributions": 5
+  },
+  {
+   "type": "Bot",
+   "id": "dependabot[bot]",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "jpolvora",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "TheSpiritMan",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "fcosrno",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "LiquidITGuy",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "devnixs",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "rafaelstz",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "bztes",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "olragon",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "monkeywithacupcake",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "janericwinkelmann",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "JacobSamro",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "buglinjo",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "gnuns",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "matt-oakes",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "MeXaaR",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "MitchellCash",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "nileshtrivedi",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rklos",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "robgraeber",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "robertsilen",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "iamrommel",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "tbroadley",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "thgh",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "EmrysMyrddin",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "c43721",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "djexvr",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "guilh22",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ilijaNL",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sean-nicholas",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "polotto",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "panasenco",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "ariaieboy",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "VoidMonk",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "clouedoc",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "david-szabo97",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "fiblan",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "FloMaetschke",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Fractal-Tess",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "hamza-younas94",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "horacehylee",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "hugojosefson",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Ismaaa",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "sneak",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "miyagui",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "vitalragaz",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Logstor",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "mathiasm74",
+   "contributions": 1
+  }
+ ]
+}

@@ -1,0 +1,90 @@
+{
+ "repo_name": "rust-embedded/bare-metal",
+ "contributors": [
+  {
+   "type": "Bot",
+   "id": "bors[bot]",
+   "contributions": 21
+  },
+  {
+   "type": "User",
+   "id": "japaric",
+   "contributions": 18
+  },
+  {
+   "type": "User",
+   "id": "jonas-schievink",
+   "contributions": 14
+  },
+  {
+   "type": "User",
+   "id": "adamgreig",
+   "contributions": 10
+  },
+  {
+   "type": "User",
+   "id": "bradleyharden",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "therealprof",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "thalesfragoso",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "reitermarkus",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "m-ou-se",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "korken89",
+   "contributions": 2
+  },
+  {
+   "type": "User",
+   "id": "thenewwazoo",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "rubberduck203",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "teskje",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "LeSeulArtichaut",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Disasm",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "Nemo157",
+   "contributions": 1
+  },
+  {
+   "type": "User",
+   "id": "eupn",
+   "contributions": 1
+  }
+ ]
+}

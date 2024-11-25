@@ -13,3 +13,4 @@ extension/scripts
 code/myriad/get_all_contributors/gh_contributors
 code/myriad/get_all_contributors/other_contributors
 code/myriad/get_all_contributors/github_access_token.txt
+code/myriad/loam_paper/mining/github_access_token.txt

@@ -24,6 +24,7 @@ def get_gh_contributors(repo):
 	total_contributors = contributors.totalCount
 	total_contributions = 0
 	contributors_list = []
+	identified_contributors = [];
 
 	for i in range(total_contributors):
 		c = contributors[i]
@@ -36,21 +37,20 @@ def get_gh_contributors(repo):
 			contributor_info["id"] = hexhash[2:].rjust(16, "0")
 		else:
 			contributor_info["id"] = c.login
+			identified_contributors.append(c.login)
 
 		total_contributions += c.contributions
 		contributors_list.append(contributor_info)
 		print_progress_bar(i+1, total_contributors)
 
-	# fuse users with same email?
 	print("")
 	
-	return total_contributions, contributors_list
+	return total_contributions, contributors_list, identified_contributors
 
-def get_gh_commit_history(repo, end_date):
+def get_gh_commit_history(repo, end_date = datetime.now().astimezone()):
 	print("Getting commits")
 
 	start_date = repo.created_at.astimezone()
-	end_date = datetime.now().astimezone()
 	total_days = (end_date - start_date).days
 	n_periods = 32
 	period_days = total_days // n_periods
@@ -73,7 +73,7 @@ def get_and_save_gh_info(repo_name):
 	repo = g.get_repo(repo_name)
 
 	#commits_over_time = get_gh_commit_history(repo)
-	total_contributions, contributors_list = get_gh_contributors(repo)
+	total_contributions, contributors_list, identified_contributors = get_gh_contributors(repo)
 
 	filename = "./gh_contributors/" + repo_name.replace("/", "&")
 	repo_data = {
@@ -87,6 +87,7 @@ def get_and_save_gh_info(repo_name):
 	with open(filename + ".txt", "w") as fp:
 		fp.write("\n".join(c["id"] for c in contributors_list))
 
+	return identified_contributors
 
 def print_progress_bar(iteration, total, length=50):
     filled_length = int(length * iteration // total)
@@ -118,11 +119,13 @@ def turn_json_into_txt(name, path):
 with open("./gh_repos_lists/all_gh_repos.txt", "r") as f:
     repos = f.readlines()
 
+all_identified_contributors = []
 for repo in repos:
 	name = repo.rstrip("\n")
 	print(name)
 	try:
-		get_and_save_gh_info(name)
+		identified_contributors = get_and_save_gh_info(name)
+		all_identified_contributors = list(set(all_identified_contributors).union(set(identified_contributors)))
 	except:
 		print("Can't use GitHub API, looking for .json or .txt files")
 		try:
@@ -134,6 +137,10 @@ for repo in repos:
 				print(".txt found and .json created")
 			except:
 				print("No file found")
+
+all_identified_contributors.sort()
+with open("gh_contributors/all_gh_ids.txt", "w") as f:
+		f.write("\n".join(c for c in all_identified_contributors))
 
 with open("./other_projects_lists/all_other_projects.txt", "r") as f:
     other_projects = f.readlines()
