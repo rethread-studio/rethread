@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "gitster",
-   "contributions": 26486
+   "contributions": 26506
   },
   {
    "type": "User",
    "id": "peff",
-   "contributions": 4468
+   "contributions": 4473
   },
   {
    "type": "User",
@@ -79,7 +79,7 @@
   {
    "type": "User",
    "id": "ttaylorr",
-   "contributions": 738
+   "contributions": 741
   },
   {
    "type": "User",
@@ -1063,6 +1063,11 @@
   },
   {
    "type": "User",
+   "id": "jsoref",
+   "contributions": 20
+  },
+  {
+   "type": "User",
    "id": "kraai",
    "contributions": 20
   },
@@ -1109,11 +1114,6 @@
   {
    "type": "User",
    "id": "ferrous26",
-   "contributions": 18
-  },
-  {
-   "type": "User",
-   "id": "jsoref",
    "contributions": 18
   },
   {

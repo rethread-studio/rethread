@@ -84,7 +84,7 @@
   {
    "type": "User",
    "id": "capital-G",
-   "contributions": 86
+   "contributions": 87
   },
   {
    "type": "User",
@@ -468,6 +468,11 @@
   },
   {
    "type": "User",
+   "id": "xunil-cloud",
+   "contributions": 4
+  },
+  {
+   "type": "User",
    "id": "baconpaul",
    "contributions": 4
   },
@@ -488,37 +493,7 @@
   },
   {
    "type": "User",
-   "id": "meatballhat",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "danielmkarlsson",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "susnux",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "g-roma",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "marcan",
-   "contributions": 4
-  },
-  {
-   "type": "User",
    "id": "pcbeard",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "jaschanarveson",
    "contributions": 4
   },
   {
@@ -528,12 +503,37 @@
   },
   {
    "type": "User",
-   "id": "hzulla",
-   "contributions": 3
+   "id": "jaschanarveson",
+   "contributions": 4
   },
   {
    "type": "User",
-   "id": "chkworks",
+   "id": "marcan",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "danielmkarlsson",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "g-roma",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "meatballhat",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "susnux",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "mohayonao",
    "contributions": 3
   },
   {
@@ -543,12 +543,7 @@
   },
   {
    "type": "User",
-   "id": "mohayonao",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "xunil-cloud",
+   "id": "chkworks",
    "contributions": 3
   },
   {
@@ -569,6 +564,11 @@
   {
    "type": "User",
    "id": "marierm",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "hzulla",
    "contributions": 3
   },
   {

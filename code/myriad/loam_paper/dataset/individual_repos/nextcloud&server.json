@@ -19,7 +19,7 @@
   {
    "type": "User",
    "id": "nickvergessen",
-   "contributions": 4984
+   "contributions": 4985
   },
   {
    "type": "User",
@@ -39,7 +39,7 @@
   {
    "type": "User",
    "id": "nextcloud-bot",
-   "contributions": 2828
+   "contributions": 2833
   },
   {
    "type": "User",
@@ -69,7 +69,7 @@
   {
    "type": "User",
    "id": "ChristophWurst",
-   "contributions": 1649
+   "contributions": 1650
   },
   {
    "type": "User",
@@ -79,7 +79,7 @@
   {
    "type": "User",
    "id": "come-nc",
-   "contributions": 1354
+   "contributions": 1355
   },
   {
    "type": "User",
@@ -119,7 +119,7 @@
   {
    "type": "User",
    "id": "kesselb",
-   "contributions": 673
+   "contributions": 677
   },
   {
    "type": "Bot",
@@ -134,7 +134,7 @@
   {
    "type": "User",
    "id": "artonge",
-   "contributions": 594
+   "contributions": 598
   },
   {
    "type": "User",
@@ -149,17 +149,17 @@
   {
    "type": "User",
    "id": "nextcloud-command",
-   "contributions": 443
+   "contributions": 444
   },
   {
    "type": "User",
    "id": "provokateurin",
-   "contributions": 426
+   "contributions": 438
   },
   {
    "type": "User",
    "id": "marcelklehr",
-   "contributions": 409
+   "contributions": 411
   },
   {
    "type": "User",
@@ -199,7 +199,7 @@
   {
    "type": "User",
    "id": "solracsf",
-   "contributions": 184
+   "contributions": 187
   },
   {
    "type": "User",
@@ -219,7 +219,7 @@
   {
    "type": "User",
    "id": "miaulalala",
-   "contributions": 158
+   "contributions": 159
   },
   {
    "type": "User",
@@ -249,7 +249,7 @@
   {
    "type": "User",
    "id": "st3iny",
-   "contributions": 120
+   "contributions": 122
   },
   {
    "type": "User",
@@ -763,6 +763,11 @@
   },
   {
    "type": "User",
+   "id": "luka-nextcloud",
+   "contributions": 11
+  },
+  {
+   "type": "User",
    "id": "jlehtoranta",
    "contributions": 11
   },
@@ -804,11 +809,6 @@
   {
    "type": "User",
    "id": "houqp",
-   "contributions": 10
-  },
-  {
-   "type": "User",
-   "id": "luka-nextcloud",
    "contributions": 10
   },
   {

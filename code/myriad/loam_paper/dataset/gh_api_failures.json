@@ -5,8 +5,13 @@
   "exclusivity": null
  },
  {
+  "name": "tensorflow/tensorflow",
+  "category": "AI/ML",
+  "exclusivity": "dear-ai"
+ },
+ {
   "name": "torvalds/linux",
-  "category": "kernel",
+  "category": "other",
   "exclusivity": null
  }
 ]

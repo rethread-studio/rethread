@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "backes",
-   "contributions": 3989
+   "contributions": 3991
   },
   {
    "type": "User",
    "id": "mi-ac",
-   "contributions": 3296
+   "contributions": 3298
   },
   {
    "type": "User",
@@ -29,7 +29,7 @@
   {
    "type": "User",
    "id": "LeszekSwirski",
-   "contributions": 1797
+   "contributions": 1798
   },
   {
    "type": "User",
@@ -49,7 +49,7 @@
   {
    "type": "User",
    "id": "gahaas",
-   "contributions": 1476
+   "contributions": 1478
   },
   {
    "type": "User",
@@ -79,17 +79,17 @@
   {
    "type": "User",
    "id": "victorgomes",
-   "contributions": 1053
+   "contributions": 1054
   },
   {
    "type": "User",
    "id": "miladfarca",
-   "contributions": 1002
+   "contributions": 1010
   },
   {
    "type": "User",
    "id": "marjakh",
-   "contributions": 983
+   "contributions": 985
   },
   {
    "type": "User",
@@ -114,12 +114,12 @@
   {
    "type": "User",
    "id": "Liedtke",
-   "contributions": 737
+   "contributions": 738
   },
   {
    "type": "User",
    "id": "syg",
-   "contributions": 724
+   "contributions": 727
   },
   {
    "type": "User",
@@ -164,12 +164,12 @@
   {
    "type": "User",
    "id": "thibaudmichaud",
-   "contributions": 570
+   "contributions": 572
   },
   {
    "type": "User",
    "id": "nico-hartmann",
-   "contributions": 567
+   "contributions": 568
   },
   {
    "type": "User",
@@ -204,7 +204,7 @@
   {
    "type": "User",
    "id": "o-",
-   "contributions": 422
+   "contributions": 427
   },
   {
    "type": "User",
@@ -229,7 +229,7 @@
   {
    "type": "User",
    "id": "nickie",
-   "contributions": 369
+   "contributions": 371
   },
   {
    "type": "User",
@@ -293,17 +293,17 @@
   },
   {
    "type": "User",
+   "id": "sroettger",
+   "contributions": 191
+  },
+  {
+   "type": "User",
    "id": "fhinkel",
    "contributions": 191
   },
   {
    "type": "User",
    "id": "almuthanna-athamina",
-   "contributions": 187
-  },
-  {
-   "type": "User",
-   "id": "sroettger",
    "contributions": 187
   },
   {
@@ -358,13 +358,13 @@
   },
   {
    "type": "User",
-   "id": "rossberg",
-   "contributions": 134
+   "id": "rmahdav",
+   "contributions": 135
   },
   {
    "type": "User",
-   "id": "rmahdav",
-   "contributions": 133
+   "id": "rossberg",
+   "contributions": 134
   },
   {
    "type": "User",
@@ -444,7 +444,7 @@
   {
    "type": "User",
    "id": "tunz",
-   "contributions": 76
+   "contributions": 77
   },
   {
    "type": "User",
@@ -784,11 +784,6 @@
   {
    "type": "User",
    "id": "yuki3",
-   "contributions": 22
-  },
-  {
-   "type": "User",
-   "id": "jupvfranco",
    "contributions": 22
   },
   {

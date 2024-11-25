@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "greyson-signal",
-   "contributions": 4655
+   "contributions": 4660
   },
   {
    "type": "User",
@@ -68,12 +68,12 @@
   },
   {
    "type": "User",
-   "id": "Sgn-32",
+   "id": "FeuRenard",
    "contributions": 45
   },
   {
    "type": "User",
-   "id": "FeuRenard",
+   "id": "Sgn-32",
    "contributions": 45
   },
   {
@@ -83,12 +83,12 @@
   },
   {
    "type": "User",
-   "id": "fumiakiy",
+   "id": "lucio-signal",
    "contributions": 42
   },
   {
    "type": "User",
-   "id": "lucio-signal",
+   "id": "fumiakiy",
    "contributions": 42
   },
   {
@@ -128,12 +128,12 @@
   },
   {
    "type": "User",
-   "id": "thoughtbox",
+   "id": "AsamK",
    "contributions": 19
   },
   {
    "type": "User",
-   "id": "AsamK",
+   "id": "thoughtbox",
    "contributions": 19
   },
   {
@@ -158,7 +158,7 @@
   },
   {
    "type": "User",
-   "id": "akonradi-signal",
+   "id": "s0",
    "contributions": 11
   },
   {
@@ -168,7 +168,7 @@
   },
   {
    "type": "User",
-   "id": "s0",
+   "id": "akonradi-signal",
    "contributions": 11
   },
   {
@@ -178,7 +178,7 @@
   },
   {
    "type": "User",
-   "id": "eager-signal",
+   "id": "2-4601",
    "contributions": 9
   },
   {
@@ -188,7 +188,7 @@
   },
   {
    "type": "User",
-   "id": "2-4601",
+   "id": "eager-signal",
    "contributions": 9
   },
   {
@@ -268,6 +268,11 @@
   },
   {
    "type": "User",
+   "id": "valldrac",
+   "contributions": 4
+  },
+  {
+   "type": "User",
    "id": "GrzegorzBobryk",
    "contributions": 4
   },
@@ -283,47 +288,7 @@
   },
   {
    "type": "User",
-   "id": "mammuth",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "Karalix",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "rymdhund",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "riyapenn-signal",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "fm-sys",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "orange-elephant",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "adel-signal",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "0dvictor",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "SamWhited",
+   "id": "3xo",
    "contributions": 3
   },
   {
@@ -333,12 +298,47 @@
   },
   {
    "type": "User",
-   "id": "valldrac",
+   "id": "SamWhited",
    "contributions": 3
   },
   {
    "type": "User",
-   "id": "3xo",
+   "id": "0dvictor",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "adel-signal",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "orange-elephant",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "fm-sys",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "riyapenn-signal",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "rymdhund",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "Karalix",
+   "contributions": 3
+  },
+  {
+   "type": "User",
+   "id": "mammuth",
    "contributions": 3
   },
   {
