@@ -132,6 +132,8 @@ def get_categories_info(repos):
 			categories_info.append(new_category_info)
 	
 	categories_info.sort(key=lambda x: x["category"])
+	other_idx = [i for i, cat_info in enumerate(categories_info) if cat_info["category"] == "other"][0]
+	categories_info[other_idx], categories_info[-1] = categories_info[-1], categories_info[other_idx]
 	for c in categories_info:
 		c["repos"].sort()
 	
@@ -147,5 +149,5 @@ with open("./repo_list.csv", mode = "r") as f:
 	csvFile = csv.reader(f)
 	repos = [line for line in csvFile]
 
-get_all_loggedin_contributors(repos)
+#get_all_loggedin_contributors(repos)
 get_categories_info(repos)

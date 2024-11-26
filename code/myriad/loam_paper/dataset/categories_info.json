@@ -87,6 +87,49 @@
   ]
  },
  {
+  "category": "visual",
+  "repos": [
+   "KhronosGroup/GLSL",
+   "KhronosGroup/WebGL",
+   "KhronosGroup/glslang",
+   "btel/svg_utils",
+   "image-rs/image",
+   "matplotlib/matplotlib",
+   "mossblaser/plottie",
+   "mozman/svgwrite",
+   "mrdoob/three.js",
+   "openframeworks/openFrameworks",
+   "processing/p5.js",
+   "processing/processing",
+   "sass/sass"
+  ]
+ },
+ {
+  "category": "sound/music",
+  "repos": [
+   "BelaPlatform/Bela",
+   "EnvelopSound/EnvelopForLive",
+   "TU-Studio/IEMPluginSuite",
+   "WebAudio/web-audio-api",
+   "WebAudio/web-midi-api",
+   "jackaudio/jack2",
+   "pure-data/pure-data",
+   "supercollider/sc3-plugins",
+   "supercollider/supercollider"
+  ]
+ },
+ {
+  "category": "text/speech",
+  "repos": [
+   "brandongmwong/elizabot-js",
+   "coqui-ai/TTS",
+   "festvox/festival",
+   "googlefonts/Inconsolata",
+   "otuva/handwriting-synthesis",
+   "sjvasquez/handwriting-synthesis"
+  ]
+ },
+ {
   "category": "other",
   "repos": [
    "caprover/caprover",
@@ -123,49 +166,6 @@
    "sveltejs/svelte",
    "torvalds/linux",
    "vitejs/vite"
-  ]
- },
- {
-  "category": "sound/music",
-  "repos": [
-   "BelaPlatform/Bela",
-   "EnvelopSound/EnvelopForLive",
-   "TU-Studio/IEMPluginSuite",
-   "WebAudio/web-audio-api",
-   "WebAudio/web-midi-api",
-   "jackaudio/jack2",
-   "pure-data/pure-data",
-   "supercollider/sc3-plugins",
-   "supercollider/supercollider"
-  ]
- },
- {
-  "category": "text/speech",
-  "repos": [
-   "brandongmwong/elizabot-js",
-   "coqui-ai/TTS",
-   "festvox/festival",
-   "googlefonts/Inconsolata",
-   "otuva/handwriting-synthesis",
-   "sjvasquez/handwriting-synthesis"
-  ]
- },
- {
-  "category": "visual",
-  "repos": [
-   "KhronosGroup/GLSL",
-   "KhronosGroup/WebGL",
-   "KhronosGroup/glslang",
-   "btel/svg_utils",
-   "image-rs/image",
-   "matplotlib/matplotlib",
-   "mossblaser/plottie",
-   "mozman/svgwrite",
-   "mrdoob/three.js",
-   "openframeworks/openFrameworks",
-   "processing/p5.js",
-   "processing/processing",
-   "sass/sass"
   ]
  }
 ]
