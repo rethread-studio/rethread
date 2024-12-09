@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "Rich-Harris",
-   "contributions": 4769
+   "contributions": 4771
   },
   {
    "type": "User",
@@ -19,7 +19,7 @@
   {
    "type": "User",
    "id": "trueadm",
-   "contributions": 450
+   "contributions": 451
   },
   {
    "type": "User",
@@ -29,7 +29,7 @@
   {
    "type": "Bot",
    "id": "github-actions[bot]",
-   "contributions": 320
+   "contributions": 321
   },
   {
    "type": "User",
@@ -228,12 +228,12 @@
   },
   {
    "type": "User",
-   "id": "wackbyte",
+   "id": "arxpoetica",
    "contributions": 9
   },
   {
    "type": "User",
-   "id": "arxpoetica",
+   "id": "wackbyte",
    "contributions": 9
   },
   {
@@ -293,17 +293,17 @@
   },
   {
    "type": "User",
-   "id": "metonym",
-   "contributions": 7
-  },
-  {
-   "type": "User",
    "id": "Harald-1",
    "contributions": 7
   },
   {
    "type": "User",
-   "id": "esarbanis",
+   "id": "metonym",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "stalkerg",
    "contributions": 6
   },
   {
@@ -313,27 +313,7 @@
   },
   {
    "type": "User",
-   "id": "stalkerg",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "Axelen123",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "ivanhofer",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "m59peacemaker",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "taylorzane",
+   "id": "esarbanis",
    "contributions": 6
   },
   {
@@ -344,6 +324,26 @@
   {
    "type": "User",
    "id": "theodorejb",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "taylorzane",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "m59peacemaker",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "ivanhofer",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "Axelen123",
    "contributions": 6
   },
   {
@@ -363,22 +363,12 @@
   },
   {
    "type": "User",
-   "id": "LostKobrakai",
-   "contributions": 5
-  },
-  {
-   "type": "User",
    "id": "efeskucuk",
    "contributions": 5
   },
   {
    "type": "User",
    "id": "thollander",
-   "contributions": 5
-  },
-  {
-   "type": "User",
-   "id": "bfanger",
    "contributions": 5
   },
   {
@@ -413,11 +403,6 @@
   },
   {
    "type": "User",
-   "id": "FoHoOV",
-   "contributions": 5
-  },
-  {
-   "type": "User",
    "id": "jesseskinner",
    "contributions": 5
   },
@@ -425,6 +410,26 @@
    "type": "User",
    "id": "jamesscottbrown",
    "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "FoHoOV",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "LostKobrakai",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "bfanger",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "cristinecula",
+   "contributions": 4
   },
   {
    "type": "User",
@@ -454,11 +459,6 @@
   {
    "type": "User",
    "id": "Link-the-elf",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "cristinecula",
    "contributions": 4
   },
   {
@@ -513,6 +513,11 @@
   },
   {
    "type": "User",
+   "id": "Theo-Steiner",
+   "contributions": 4
+  },
+  {
+   "type": "User",
    "id": "timhall",
    "contributions": 4
   },
@@ -520,6 +525,11 @@
    "type": "User",
    "id": "Wolfr",
    "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "andrelmlins",
+   "contributions": 3
   },
   {
    "type": "User",
@@ -544,11 +554,6 @@
   {
    "type": "User",
    "id": "eltigerchino",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "Theo-Steiner",
    "contributions": 3
   },
   {
@@ -589,11 +594,6 @@
   {
    "type": "User",
    "id": "dmitry-kurmanov",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "andrelmlins",
    "contributions": 3
   },
   {

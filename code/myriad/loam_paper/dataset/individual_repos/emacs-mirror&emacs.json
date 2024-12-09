@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "Eli-Zaretskii",
-   "contributions": 13988
+   "contributions": 14000
   },
   {
    "type": "User",
@@ -14,7 +14,7 @@
   {
    "type": "User",
    "id": "monnier",
-   "contributions": 9839
+   "contributions": 9842
   },
   {
    "type": "User",
@@ -34,12 +34,12 @@
   {
    "type": "User",
    "id": "albinus",
-   "contributions": 4028
+   "contributions": 4032
   },
   {
    "type": "User",
    "id": "skangas",
-   "contributions": 3922
+   "contributions": 3926
   },
   {
    "type": "User",
@@ -149,7 +149,7 @@
   {
    "type": "User",
    "id": "rpluim",
-   "contributions": 467
+   "contributions": 468
   },
   {
    "type": "User",
@@ -159,7 +159,7 @@
   {
    "type": "User",
    "id": "jimporter",
-   "contributions": 450
+   "contributions": 451
   },
   {
    "type": "User",
@@ -174,7 +174,7 @@
   {
    "type": "User",
    "id": "jpneverwas",
-   "contributions": 437
+   "contributions": 438
   },
   {
    "type": "User",
@@ -274,7 +274,7 @@
   {
    "type": "User",
    "id": "spwhitton",
-   "contributions": 169
+   "contributions": 170
   },
   {
    "type": "User",
@@ -419,7 +419,7 @@
   {
    "type": "User",
    "id": "eshelyaron",
-   "contributions": 75
+   "contributions": 77
   },
   {
    "type": "User",
@@ -783,6 +783,11 @@
   },
   {
    "type": "User",
+   "id": "aaronjensen",
+   "contributions": 18
+  },
+  {
+   "type": "User",
    "id": "kjambunathan",
    "contributions": 18
   },
@@ -833,6 +838,11 @@
   },
   {
    "type": "User",
+   "id": "LaurenceWarne",
+   "contributions": 16
+  },
+  {
+   "type": "User",
    "id": "Hi-Angel",
    "contributions": 16
   },
@@ -849,11 +859,6 @@
   {
    "type": "User",
    "id": "ashawley",
-   "contributions": 16
-  },
-  {
-   "type": "User",
-   "id": "aaronjensen",
    "contributions": 16
   },
   {
@@ -919,11 +924,6 @@
   {
    "type": "User",
    "id": "sunlin7",
-   "contributions": 14
-  },
-  {
-   "type": "User",
-   "id": "LaurenceWarne",
    "contributions": 14
   },
   {
@@ -1068,6 +1068,11 @@
   },
   {
    "type": "User",
+   "id": "Chris00",
+   "contributions": 10
+  },
+  {
+   "type": "User",
    "id": "steelman",
    "contributions": 10
   },
@@ -1123,7 +1128,7 @@
   },
   {
    "type": "User",
-   "id": "edkolev",
+   "id": "ohler",
    "contributions": 9
   },
   {
@@ -1158,17 +1163,12 @@
   },
   {
    "type": "User",
-   "id": "Chris00",
-   "contributions": 9
-  },
-  {
-   "type": "User",
-   "id": "ohler",
-   "contributions": 9
-  },
-  {
-   "type": "User",
    "id": "cdominik",
+   "contributions": 9
+  },
+  {
+   "type": "User",
+   "id": "edkolev",
    "contributions": 9
   },
   {
@@ -1228,22 +1228,7 @@
   },
   {
    "type": "User",
-   "id": "aspiers",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "amodra",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "c-alpha",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "ian-kelling",
+   "id": "larsbrinkhoff",
    "contributions": 8
   },
   {
@@ -1253,32 +1238,27 @@
   },
   {
    "type": "User",
-   "id": "larsbrinkhoff",
+   "id": "ian-kelling",
    "contributions": 8
   },
   {
    "type": "User",
-   "id": "PhilHudson",
-   "contributions": 7
+   "id": "c-alpha",
+   "contributions": 8
   },
   {
    "type": "User",
-   "id": "vspinu",
-   "contributions": 7
+   "id": "amodra",
+   "contributions": 8
   },
   {
    "type": "User",
-   "id": "SamB",
-   "contributions": 7
+   "id": "aspiers",
+   "contributions": 8
   },
   {
    "type": "User",
-   "id": "killdash9",
-   "contributions": 7
-  },
-  {
-   "type": "User",
-   "id": "aikrahguzar",
+   "id": "julliard",
    "contributions": 7
   },
   {
@@ -1288,7 +1268,27 @@
   },
   {
    "type": "User",
-   "id": "julliard",
+   "id": "aikrahguzar",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "killdash9",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "SamB",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "vspinu",
+   "contributions": 7
+  },
+  {
+   "type": "User",
+   "id": "PhilHudson",
    "contributions": 7
   },
   {

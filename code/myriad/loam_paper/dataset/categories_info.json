@@ -1,5 +1,17 @@
 [
  {
+  "category": "AI/ML",
+  "repos": [
+   "NVlabs/stylegan2",
+   "autonomousvision/projected-gan",
+   "huggingface/chat-ui",
+   "meta-llama/llama-models",
+   "openai/openai-node",
+   "scikit-learn/scikit-learn",
+   "tensorflow/tensorflow"
+  ]
+ },
+ {
   "category": "CLI",
   "repos": [
    "FFmpeg/FFmpeg",
@@ -25,7 +37,6 @@
    "chromium/chromium",
    "emacs-mirror/emacs",
    "github/docs",
-   "huggingface/chat-ui",
    "i3/i3.github.io",
    "inkscape/inkscape",
    "microsoft/vscode",
@@ -76,51 +87,21 @@
   ]
  },
  {
-  "category": "kernel",
+  "category": "visual",
   "repos": [
-   "torvalds/linux"
-  ]
- },
- {
-  "category": "other",
-  "repos": [
-   "caprover/caprover",
-   "carstenlebek/svelte-email",
-   "cuviper/autocfg",
-   "djc/rustc-version-rs",
-   "dtolnay/proc-macro2",
-   "dtolnay/quote",
-   "dtolnay/semver",
-   "dtolnay/syn",
-   "dtolnay/unicode-ident",
-   "github/rest-api-description",
-   "indexmap-rs/indexmap",
-   "joshnuss/svelte-persisted-store",
-   "keenethics/svelte-notifications",
-   "kirovj/pocketbase-pyclient",
-   "meta-llama/llama-models",
-   "microsoft/TypeScript",
-   "moment/moment",
-   "mozsearch/mozsearch",
-   "nodejs/node",
-   "nodemailer/nodemailer",
-   "nolimits4web/swiper",
-   "numpy/numpy",
-   "openai/openai-node",
-   "python/cpython",
-   "rust-lang/cargo",
-   "rust-lang/hashbrown",
-   "rust-lang/libm",
-   "rust-lang/log",
-   "rust-lang/rust",
-   "rust-num/num-traits",
-   "sc00/svelte-textarea-auto-height",
-   "scikit-learn/scikit-learn",
-   "scipy/scipy",
-   "steveklabnik/semver-parser",
-   "sveltejs/svelte",
-   "tensorflow/tensorflow",
-   "vitejs/vite"
+   "KhronosGroup/GLSL",
+   "KhronosGroup/WebGL",
+   "KhronosGroup/glslang",
+   "btel/svg_utils",
+   "image-rs/image",
+   "matplotlib/matplotlib",
+   "mossblaser/plottie",
+   "mozman/svgwrite",
+   "mrdoob/three.js",
+   "openframeworks/openFrameworks",
+   "processing/p5.js",
+   "processing/processing",
+   "sass/sass"
   ]
  },
  {
@@ -149,23 +130,42 @@
   ]
  },
  {
-  "category": "visual",
+  "category": "other",
   "repos": [
-   "KhronosGroup/GLSL",
-   "KhronosGroup/WebGL",
-   "KhronosGroup/glslang",
-   "NVlabs/stylegan2",
-   "autonomousvision/projected-gan",
-   "btel/svg_utils",
-   "image-rs/image",
-   "matplotlib/matplotlib",
-   "mossblaser/plottie",
-   "mozman/svgwrite",
-   "mrdoob/three.js",
-   "openframeworks/openFrameworks",
-   "processing/p5.js",
-   "processing/processing",
-   "sass/sass"
+   "caprover/caprover",
+   "carstenlebek/svelte-email",
+   "cuviper/autocfg",
+   "djc/rustc-version-rs",
+   "dtolnay/proc-macro2",
+   "dtolnay/quote",
+   "dtolnay/semver",
+   "dtolnay/syn",
+   "dtolnay/unicode-ident",
+   "github/rest-api-description",
+   "indexmap-rs/indexmap",
+   "joshnuss/svelte-persisted-store",
+   "keenethics/svelte-notifications",
+   "kirovj/pocketbase-pyclient",
+   "microsoft/TypeScript",
+   "moment/moment",
+   "mozsearch/mozsearch",
+   "nodejs/node",
+   "nodemailer/nodemailer",
+   "nolimits4web/swiper",
+   "numpy/numpy",
+   "python/cpython",
+   "rust-lang/cargo",
+   "rust-lang/hashbrown",
+   "rust-lang/libm",
+   "rust-lang/log",
+   "rust-lang/rust",
+   "rust-num/num-traits",
+   "sc00/svelte-textarea-auto-height",
+   "scipy/scipy",
+   "steveklabnik/semver-parser",
+   "sveltejs/svelte",
+   "torvalds/linux",
+   "vitejs/vite"
   ]
  }
 ]

@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "mrdoob",
-   "contributions": 18383
+   "contributions": 18384
   },
   {
    "type": "User",
    "id": "Mugen87",
-   "contributions": 5038
+   "contributions": 5044
   },
   {
    "type": "User",
@@ -18,13 +18,13 @@
   },
   {
    "type": "User",
-   "id": "WestLangley",
-   "contributions": 1168
+   "id": "sunag",
+   "contributions": 1177
   },
   {
    "type": "User",
-   "id": "sunag",
-   "contributions": 1168
+   "id": "WestLangley",
+   "contributions": 1169
   },
   {
    "type": "User",
@@ -104,7 +104,7 @@
   {
    "type": "Bot",
    "id": "renovate[bot]",
-   "contributions": 178
+   "contributions": 180
   },
   {
    "type": "User",
@@ -598,6 +598,11 @@
   },
   {
    "type": "User",
+   "id": "mrxz",
+   "contributions": 17
+  },
+  {
+   "type": "User",
    "id": "philogb",
    "contributions": 16
   },
@@ -609,11 +614,6 @@
   {
    "type": "User",
    "id": "brianchirls",
-   "contributions": 16
-  },
-  {
-   "type": "User",
-   "id": "kintel",
    "contributions": 16
   },
   {
@@ -633,7 +633,7 @@
   },
   {
    "type": "User",
-   "id": "mrxz",
+   "id": "kintel",
    "contributions": 16
   },
   {

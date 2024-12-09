@@ -29,12 +29,12 @@
   {
    "type": "User",
    "id": "targos",
-   "contributions": 1191
+   "contributions": 1192
   },
   {
    "type": "User",
    "id": "cjihrig",
-   "contributions": 1149
+   "contributions": 1152
   },
   {
    "type": "User",
@@ -44,7 +44,7 @@
   {
    "type": "User",
    "id": "joyeecheung",
-   "contributions": 993
+   "contributions": 994
   },
   {
    "type": "User",
@@ -59,7 +59,7 @@
   {
    "type": "User",
    "id": "aduh95",
-   "contributions": 741
+   "contributions": 742
   },
   {
    "type": "User",
@@ -69,7 +69,7 @@
   {
    "type": "User",
    "id": "nodejs-github-bot",
-   "contributions": 632
+   "contributions": 633
   },
   {
    "type": "User",
@@ -84,7 +84,7 @@
   {
    "type": "User",
    "id": "mhdawson",
-   "contributions": 391
+   "contributions": 393
   },
   {
    "type": "User",
@@ -104,7 +104,7 @@
   {
    "type": "User",
    "id": "richardlau",
-   "contributions": 361
+   "contributions": 362
   },
   {
    "type": "User",
@@ -149,7 +149,7 @@
   {
    "type": "User",
    "id": "RafaelGSS",
-   "contributions": 283
+   "contributions": 284
   },
   {
    "type": "User",
@@ -174,12 +174,17 @@
   {
    "type": "User",
    "id": "panva",
-   "contributions": 202
+   "contributions": 203
   },
   {
    "type": "User",
    "id": "TooTallNate",
    "contributions": 197
+  },
+  {
+   "type": "User",
+   "id": "mcollina",
+   "contributions": 166
   },
   {
    "type": "User",
@@ -189,11 +194,6 @@
   {
    "type": "User",
    "id": "Fishrock123",
-   "contributions": 165
-  },
-  {
-   "type": "User",
-   "id": "mcollina",
    "contributions": 165
   },
   {
@@ -214,7 +214,7 @@
   {
    "type": "User",
    "id": "RedYetiDev",
-   "contributions": 155
+   "contributions": 156
   },
   {
    "type": "User",
@@ -264,7 +264,7 @@
   {
    "type": "User",
    "id": "codebytere",
-   "contributions": 120
+   "contributions": 122
   },
   {
    "type": "User",
@@ -293,12 +293,12 @@
   },
   {
    "type": "User",
-   "id": "mmarchini",
-   "contributions": 101
+   "id": "juanarbol",
+   "contributions": 102
   },
   {
    "type": "User",
-   "id": "juanarbol",
+   "id": "mmarchini",
    "contributions": 101
   },
   {
@@ -354,7 +354,7 @@
   {
    "type": "User",
    "id": "npm-robot",
-   "contributions": 78
+   "contributions": 79
   },
   {
    "type": "User",
@@ -1468,27 +1468,7 @@
   },
   {
    "type": "User",
-   "id": "boneskull",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "backes",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "fb55",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "dygabo",
-   "contributions": 8
-  },
-  {
-   "type": "User",
-   "id": "codegagan",
+   "id": "VerteDinde",
    "contributions": 8
   },
   {
@@ -1498,7 +1478,27 @@
   },
   {
    "type": "User",
-   "id": "VerteDinde",
+   "id": "codegagan",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "dygabo",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "fb55",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "backes",
+   "contributions": 8
+  },
+  {
+   "type": "User",
+   "id": "boneskull",
    "contributions": 8
   },
   {
@@ -1588,6 +1588,11 @@
   },
   {
    "type": "User",
+   "id": "puskin94",
+   "contributions": 7
+  },
+  {
+   "type": "User",
    "id": "digitalinfinity",
    "contributions": 7
   },
@@ -1618,12 +1623,12 @@
   },
   {
    "type": "User",
-   "id": "jvelezpo",
+   "id": "jun-oka",
    "contributions": 7
   },
   {
    "type": "User",
-   "id": "jun-oka",
+   "id": "jvelezpo",
    "contributions": 7
   },
   {
@@ -1654,11 +1659,6 @@
   {
    "type": "User",
    "id": "sebdeckers",
-   "contributions": 6
-  },
-  {
-   "type": "User",
-   "id": "rustyconover",
    "contributions": 6
   },
   {
@@ -1743,11 +1743,6 @@
   },
   {
    "type": "User",
-   "id": "puskin94",
-   "contributions": 6
-  },
-  {
-   "type": "User",
    "id": "bjori",
    "contributions": 6
   },
@@ -1784,6 +1779,11 @@
   {
    "type": "User",
    "id": "raymondfeng",
+   "contributions": 6
+  },
+  {
+   "type": "User",
+   "id": "rustyconover",
    "contributions": 6
   },
   {

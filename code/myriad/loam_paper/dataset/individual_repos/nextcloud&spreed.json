@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "nickvergessen",
-   "contributions": 8160
+   "contributions": 8183
   },
   {
    "type": "User",
    "id": "nextcloud-bot",
-   "contributions": 2186
+   "contributions": 2190
   },
   {
    "type": "User",
@@ -24,12 +24,12 @@
   {
    "type": "User",
    "id": "Antreesy",
-   "contributions": 1559
+   "contributions": 1581
   },
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 1424
+   "contributions": 1431
   },
   {
    "type": "Bot",
@@ -54,12 +54,12 @@
   {
    "type": "User",
    "id": "DorraJaouad",
-   "contributions": 415
+   "contributions": 416
   },
   {
    "type": "User",
    "id": "ShGKme",
-   "contributions": 220
+   "contributions": 221
   },
   {
    "type": "User",
@@ -74,7 +74,7 @@
   {
    "type": "User",
    "id": "nextcloud-command",
-   "contributions": 105
+   "contributions": 106
   },
   {
    "type": "User",
@@ -114,7 +114,7 @@
   {
    "type": "Bot",
    "id": "github-actions[bot]",
-   "contributions": 42
+   "contributions": 43
   },
   {
    "type": "User",
@@ -228,6 +228,11 @@
   },
   {
    "type": "User",
+   "id": "miaulalala",
+   "contributions": 5
+  },
+  {
+   "type": "User",
    "id": "silopolis",
    "contributions": 4
   },
@@ -264,11 +269,6 @@
   {
    "type": "User",
    "id": "tcitworld",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "miaulalala",
    "contributions": 3
   },
   {

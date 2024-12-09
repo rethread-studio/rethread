@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "nsarrazin",
-   "contributions": 550
+   "contributions": 552
   },
   {
    "type": "User",
@@ -29,7 +29,7 @@
   {
    "type": "Bot",
    "id": "dependabot[bot]",
-   "contributions": 24
+   "contributions": 25
   },
   {
    "type": "User",
@@ -38,18 +38,13 @@
   },
   {
    "type": "User",
-   "id": "rtrompier",
-   "contributions": 16
-  },
-  {
-   "type": "User",
    "id": "alak",
    "contributions": 16
   },
   {
    "type": "User",
-   "id": "neven4",
-   "contributions": 6
+   "id": "rtrompier",
+   "contributions": 16
   },
   {
    "type": "User",
@@ -58,8 +53,33 @@
   },
   {
    "type": "User",
+   "id": "neven4",
+   "contributions": 6
+  },
+  {
+   "type": "User",
    "id": "AndreasMadsen",
    "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "evalstate",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "julien-blanchon",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "osanseviero",
+   "contributions": 4
+  },
+  {
+   "type": "User",
+   "id": "TP-O",
+   "contributions": 4
   },
   {
    "type": "User",
@@ -73,27 +93,7 @@
   },
   {
    "type": "User",
-   "id": "TP-O",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "osanseviero",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "julien-blanchon",
-   "contributions": 4
-  },
-  {
-   "type": "User",
-   "id": "krakenftw",
-   "contributions": 3
-  },
-  {
-   "type": "User",
-   "id": "gururise",
+   "id": "gugarosa",
    "contributions": 3
   },
   {
@@ -103,12 +103,12 @@
   },
   {
    "type": "User",
-   "id": "evalstate",
+   "id": "gururise",
    "contributions": 3
   },
   {
    "type": "User",
-   "id": "gugarosa",
+   "id": "krakenftw",
    "contributions": 3
   },
   {

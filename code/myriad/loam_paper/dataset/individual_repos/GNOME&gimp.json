@@ -4,7 +4,7 @@
   {
    "type": "User",
    "id": "mitchfoo",
-   "contributions": 13788
+   "contributions": 13789
   },
   {
    "type": "User",
@@ -14,7 +14,7 @@
   {
    "type": "User",
    "id": "cmyk-student",
-   "contributions": 605
+   "contributions": 609
   },
   {
    "type": "User",
@@ -64,12 +64,12 @@
   {
    "type": "User",
    "id": "brunvonlope",
-   "contributions": 300
+   "contributions": 305
   },
   {
    "type": "User",
    "id": "haaninjo",
-   "contributions": 289
+   "contributions": 290
   },
   {
    "type": "User",
@@ -84,7 +84,7 @@
   {
    "type": "User",
    "id": "bootchk",
-   "contributions": 204
+   "contributions": 205
   },
   {
    "type": "User",
@@ -733,6 +733,11 @@
   },
   {
    "type": "User",
+   "id": "rockwalrus",
+   "contributions": 5
+  },
+  {
+   "type": "User",
    "id": "mirecta",
    "contributions": 5
   },
@@ -758,17 +763,17 @@
   },
   {
    "type": "User",
-   "id": "jimmac",
-   "contributions": 5
-  },
-  {
-   "type": "User",
-   "id": "rockwalrus",
+   "id": "Alexmelman88",
    "contributions": 5
   },
   {
    "type": "User",
    "id": "xsdg",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "rupertwh",
    "contributions": 5
   },
   {
@@ -779,11 +784,6 @@
   {
    "type": "User",
    "id": "muzena",
-   "contributions": 5
-  },
-  {
-   "type": "User",
-   "id": "Alexmelman88",
    "contributions": 5
   },
   {
@@ -803,7 +803,12 @@
   },
   {
    "type": "User",
-   "id": "emintufan",
+   "id": "jimmac",
+   "contributions": 5
+  },
+  {
+   "type": "User",
+   "id": "nacho",
    "contributions": 5
   },
   {
@@ -813,7 +818,7 @@
   },
   {
    "type": "User",
-   "id": "nacho",
+   "id": "emintufan",
    "contributions": 5
   },
   {

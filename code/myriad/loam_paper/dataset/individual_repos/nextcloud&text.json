@@ -4,12 +4,12 @@
   {
    "type": "User",
    "id": "juliusknorr",
-   "contributions": 2160
+   "contributions": 2161
   },
   {
    "type": "User",
    "id": "nextcloud-command",
-   "contributions": 1301
+   "contributions": 1302
   },
   {
    "type": "Bot",
@@ -34,7 +34,7 @@
   {
    "type": "Bot",
    "id": "renovate[bot]",
-   "contributions": 586
+   "contributions": 593
   },
   {
    "type": "Bot",
@@ -44,7 +44,7 @@
   {
    "type": "Bot",
    "id": "github-actions[bot]",
-   "contributions": 169
+   "contributions": 176
   },
   {
    "type": "User",
@@ -183,6 +183,11 @@
   },
   {
    "type": "User",
+   "id": "joshtrichards",
+   "contributions": 3
+  },
+  {
+   "type": "User",
    "id": "gary-kim",
    "contributions": 3
   },
@@ -229,11 +234,6 @@
   {
    "type": "User",
    "id": "DerpgonCz",
-   "contributions": 2
-  },
-  {
-   "type": "User",
-   "id": "joshtrichards",
    "contributions": 2
   },
   {

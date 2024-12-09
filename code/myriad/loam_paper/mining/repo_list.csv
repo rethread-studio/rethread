@@ -9,7 +9,7 @@ KhronosGroup/WebGL,visual
 KhronosGroup/glslang,visual
 LibreOffice/core,GUI
 Makerfabs/Makerfabs-ESP32-UWB-DW3000,electronics
-NVlabs/stylegan2,visual
+NVlabs/stylegan2,AI/ML
 PipeWire/pipewire,CLI
 ProtonMail/WebClients,GUI
 TU-Studio/IEMPluginSuite,sound/music
@@ -20,7 +20,7 @@ arduino/Arduino,electronics
 arduino/ArduinoCore-API,electronics
 arduino/arduino-ide,GUI
 audacity/audacity,GUI
-autonomousvision/projected-gan,visual
+autonomousvision/projected-gan,AI/ML
 brandongmwong/elizabot-js,text/speech
 brave/brave-browser,GUI
 brave/brave-core,engine
@@ -45,7 +45,7 @@ github/docs,GUI
 github/rest-api-description,other
 googlefonts/Inconsolata,text/speech
 hideakitai/ESP32SPISlave,electronics
-huggingface/chat-ui,GUI
+huggingface/chat-ui,AI/ML
 i3/i3.github.io,GUI
 image-rs/image,visual
 indexmap-rs/indexmap,other
@@ -56,7 +56,7 @@ keenethics/svelte-notifications,other
 kirovj/pocketbase-pyclient,other
 korken89/fugit,electronics
 matplotlib/matplotlib,visual
-meta-llama/llama-models,other
+meta-llama/llama-models,AI/ML
 microsoft/TypeScript,other
 microsoft/vscode,GUI
 moment/moment,other
@@ -76,7 +76,7 @@ nolimits4web/swiper,other
 notepad-plus-plus/notepad-plus-plus,GUI
 npm/cli,CLI
 numpy/numpy,other
-openai/openai-node,other
+openai/openai-node,AI/ML
 openframeworks/openFrameworks,visual
 otuva/handwriting-synthesis,text/speech
 pocketbase/pocketbase,GUI
@@ -104,7 +104,7 @@ rust-lang/rust,other
 rust-num/num-traits,other
 sass/sass,visual
 sc00/svelte-textarea-auto-height,other
-scikit-learn/scikit-learn,other
+scikit-learn/scikit-learn,AI/ML
 scipy/scipy,other
 signalapp/Signal-Android,GUI
 signalapp/Signal-Desktop,GUI
@@ -116,7 +116,7 @@ supercollider/sc3-plugins,sound/music
 supercollider/supercollider,sound/music
 sveltejs/svelte,other
 tarcieri/micromath,electronics
-tensorflow/tensorflow,other
+tensorflow/tensorflow,AI/ML
 textmate/textmate,GUI
 torvalds/linux,other
 v8/v8,engine
