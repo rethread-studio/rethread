@@ -118,7 +118,7 @@ const options = {
   length: 400,
   fov: 90,
 
-  installation: true,
+  installation: false,
 
   colors: {
     url: 0xee4035,
@@ -159,10 +159,46 @@ const options = {
 // Receive packets
 const ws = WebSocketClient();
 
-const containerViz = document.getElementById("container-particles");
+// const containerViz = document.getElementById("container-particles");
+const containerViz = document.getElementById("container");
 const myApp = new AppViz(containerViz, options);
 myApp.init();
 window.addEventListener("resize", appResize, false);
+
+var page_stats = {
+  countries: new Set(),
+  media: new Map(),
+  urls: new Set(),
+}
+
+function clear_stats() {
+  page_stats.countries = new Set();
+  page_stats.media = new Map();
+  page_stats.urls = new Set();
+}
+
+function set_stats() {
+  const urls_div = document.getElementById("urls");
+  const media_div = document.getElementById("media");
+  const regions_div = document.getElementById("region");
+  let countries_string = "";
+  page_stats.countries.forEach((c) => {
+    countries_string += c;
+    countries_string += "<br/>";
+  });
+  regions_div.innerHTML = countries_string;
+  let urls_string = "";
+  page_stats.urls.forEach((c) => {
+    urls_string += c;
+    urls_string += "<br/>";
+  });
+  urls_div.innerHTML= urls_string;
+  let media_string = "";
+  page_stats.media.forEach((value, key, map) => {
+    media_string += "<div style=\"text-align: right; margin-right: 10px;\">" + value + "</div><div>" + key + "</div>";
+  });
+  media_div.innerHTML= media_string;
+}
 
 function appResize() {
   myApp.onWindowResize();
@@ -191,6 +227,8 @@ const onmessage = (message) => {
       mesh.userData.scaleFollower = 0;
     }
 
+    clear_stats();
+
     if (json.current_tab.url.indexOf("chrome-extension") == 0) {
       return;
     }
@@ -198,6 +236,8 @@ const onmessage = (message) => {
     window.idle = false;
     setElementsToIdle(false);
     let url = new URL(json.current_tab.url);
+
+    page_stats.urls.add(url);
 
     if (packageInterval != null && packageInterval != undefined) clearInterval(packageInterval);
 
@@ -212,7 +252,8 @@ const onmessage = (message) => {
     eraseMessage();
     //SEND A REPORT MESSAGE AFTER 5 SECCONDS
 
-    erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 5000);
+    // erasetimeout = setTimeout(() => { sendReport(myApp.publishReport()) }, 5000);
+    //
 
   }
 
@@ -241,9 +282,20 @@ const onmessage = (message) => {
     //if it does not have, include the host name as a service
     if (packet.services.length === 0) {
       packet.services.push(packet.hostname);
+      page_stats.urls.add(packet.hostname);
     }
     let location = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
 
+    if(location !== "") {
+      page_stats.countries.add(location);
+    }
+
+    let type_num = page_stats.media.get(packet.type);
+    if(type_num == undefined) {
+      type_num = 0;
+    }
+    page_stats.media.set(packet.type, type_num + 1);
+    console.log(page_stats.media);
 
     for (let c of countries) {
       if (c.geometry.name == location) {
@@ -267,12 +319,12 @@ const onmessage = (message) => {
     packetsOverTime++;
     numRequests++;
     //If it goes over the glitchThreshold trigger glitch
-    if (packetsOverTime > glitchThreshold) {
-      if (!triggerThisFrame) {
-        glitchPass.triggerActivation(packetsOverTime);
-        triggerThisFrame = true;
-      }
-    } else {
+    // if (packetsOverTime > glitchThreshold) {
+    //   if (!triggerThisFrame) {
+    //     glitchPass.triggerActivation(packetsOverTime);
+    //     triggerThisFrame = true;
+    //   }
+    // } else {
       //Process each of the services in the packet
       for (const service of packet.services) {
         //ADD SERVICE TO TEXT
@@ -297,7 +349,7 @@ const onmessage = (message) => {
         lastRegisteredPerService.set(country, time);
         activeService = country;
       }
-    }
+    // }
 
     // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
     const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
@@ -325,6 +377,8 @@ const onmessage = (message) => {
       setElementsToIdle(false)
     }
   }
+
+  set_stats();
 
 };
 
@@ -622,7 +676,8 @@ function init() {
 
   camera = new THREE.PerspectiveCamera(
     45,
-    options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight,
+    // options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight,
+    window.innerWidth/window.innerHeight,
     1,
     4000
   );
@@ -641,7 +696,7 @@ function init() {
 
   countries = countryLayers.countries;
 
-  scene.fog = new THREE.Fog(0xfafafa, 40, 2000);
+  // scene.fog = new THREE.Fog(0xfafafa, 40, 2000);
 
   const light = new THREE.HemisphereLight(0xffffff, 0x555555, 0.7);
   scene.add(light);
@@ -793,7 +848,7 @@ function init() {
   if (options.installation) {
     renderer.setSize(window.innerWidth / 2, 1220, true);
   } else {
-    renderer.setSize(window.innerWidth / 2, 1220, true);
+    renderer.setSize(window.innerWidth, window.innerHeight, true);
 
   }
 
@@ -832,16 +887,12 @@ function init() {
 }
 
 function onWindowResize() {
-  const aspectRatio = options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
+  // const aspectRatio = options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
+  const aspectRatio = window.innerWidth  / window.innerHeight;
   camera.aspect = aspectRatio;
   camera.updateProjectionMatrix();
 
-  if (options.installation) {
-    renderer.setSize(window.innerWidth / 2, 1220, false);
-  } else {
-
-    renderer.setSize(window.innerWidth / 2, window.innerHeight, false);
-  }
+  renderer.setSize(window.innerWidth, window.innerHeight, true);
 }
 
 function rotateGlobe() {
@@ -1122,6 +1173,10 @@ function animate() {
   packetsOverTime *= 0.95;
   triggerThisFrame = false;
   lastUpdate = now;
+
+  const canvas = renderer.domElement;
+  camera.aspect = canvas.clientWidth / canvas.clientHeight;
+  camera.updateProjectionMatrix();
 }
 
 function render() {

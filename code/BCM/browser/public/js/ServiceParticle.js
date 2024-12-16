@@ -53,7 +53,7 @@ class AppViz {
             this.renderer.setSize(window.innerWidth / 2, 1220, true);
         } else {
 
-            this.renderer.setSize(window.innerWidth / 2, 1220, true);
+            this.renderer.setSize(window.innerWidth, window.innerHeight, true);
         }
 
 
@@ -69,7 +69,7 @@ class AppViz {
         // );
         this.camera = new THREE.PerspectiveCamera(
             this.options.fov,
-            this.options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight,
+            this.options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth) / window.innerHeight,
             0.1,
             10000
         );
@@ -134,13 +134,14 @@ class AppViz {
     }
 
     onWindowResize() {
-        const aspectRatio = this.options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
+        // const aspectRatio = this.options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
+        const aspectRatio =  window.innerWidth / window.innerHeight;
         this.camera.aspect = aspectRatio;
         this.camera.updateProjectionMatrix();
 
         const height = this.options.installation ? 1220 : window.innerHeight;
 
-        this.renderer.setSize(window.innerWidth / 2, height, false);
+        this.renderer.setSize(window.innerWidth, height, false);
 
     }
 
@@ -493,10 +494,13 @@ class PackageParticle {
 
     init() {
 
-        this.geometry = new THREE.OctahedronGeometry(this.size, 0);
+        const geometry = new THREE.OctahedronGeometry(this.size, 0);
         const newcolor = !this.idle ? this.color : 0xD0D0D0;
-        this.material = new THREE.MeshPhongMaterial({ color: newcolor });
-        this.shape = new THREE.Mesh(this.geometry, this.material);
+        // this.material = new THREE.MeshPhongMaterial({ color: newcolor });
+        // this.shape = new THREE.Mesh(this.geometry, this.material);
+        this.geometry = new THREE.EdgesGeometry(geometry); // or WireframeGeometry( geometry )
+        this.material = new THREE.LineBasicMaterial({ color: newcolor, linewidth: 2 });
+        this.shape = new THREE.LineSegments(geo, mat);
 
 
         //position of the shape
@@ -774,11 +778,15 @@ class serviceParticle {
 
     init() {
         const newColor = !this.idle ? 0x6A82FB : 0xA9A9A9;
-        this.geometry = new THREE.DodecahedronBufferGeometry(0.3);
-        this.material = new THREE.MeshPhongMaterial({ color: newColor });
-        this.shape = new THREE.Mesh(this.geometry, this.material);
-        this.shape.castShadow = true;
-        this.shape.recieveShadow = true;
+        const geometry = new THREE.DodecahedronBufferGeometry(0.3);
+        // this.material = new THREE.MeshPhongMaterial({ color: newColor });
+
+        this.geometry = new THREE.EdgesGeometry(geometry); // or WireframeGeometry( geometry )
+        this.material = new THREE.LineBasicMaterial({ color: newColor, linewidth: 2 });
+        this.shape = new THREE.LineSegments(this.geometry, this.material);
+        // this.shape = new THREE.Mesh(this.geometry, this.material);
+        // this.shape.castShadow = true;
+        // this.shape.recieveShadow = true;
 
         this.shape.scale.set(0, 0, 0);
 
@@ -1052,7 +1060,7 @@ class urlParticle {
         const x = (this.tempV.x * .5 + .5) * canvas.clientWidth;
         const y = (this.tempV.y * -.5 + .5) * canvas.clientHeight;
         // move the elem to that position
-        this.elem.style.transform = `translate(30%, -50%) translate(${x}px,${y}px)`;
+        this.elem.style.transform = `translate(30%, 0%) translate(${x}px,${y}px)`;
     }
 
     createText(inText, pos) {

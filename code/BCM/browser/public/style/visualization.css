@@ -13,6 +13,14 @@ body {
   color: #fdfdfd;
   cursor: url(data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7), auto;
   transition: all 1s ease;
+  /* background: #111 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAG0lEQVQYV2P8//+/FCMj4zMGJMCIzIGxKRQEAJgPBAbJqUVTAAAAAElFTkSuQmCC) repeat; */
+
+  /* background-size: 36px 36px;
+  background-image: radial-gradient(circle, #000000 1px, rgba(0, 0, 0, 0) 1px); */
+  /* background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, grey 1px, transparent 1px),
+    linear-gradient(to bottom, grey 1px, transparent 1px); */
   /* GREY */
   /* background-color: #333647; */
   /* BLUE */
@@ -42,6 +50,38 @@ body {
   background-size: cover; */
 
 
+}
+h3 {
+	color: #bfbfbf;
+	font-size: 23pt;
+  font-family: "Iceland", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+
+}
+.iceland-regular {
+  font-family: "Iceland", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+/* HTML: <div class="grid-lines"></div> */
+.grid-lines {
+  --s: 21px;  /* control the size of the grid */
+  --n: 4;     /* control the granularity */
+  --t: 1px;   /* the thickness */
+  --g: 4px;  /* the gap between dashes */
+  
+  --c:#556270 4%,#000 0;
+  background: 
+    conic-gradient(at var(--g) var(--t),var(--c))
+     calc((var(--s)/var(--n) - var(--g) + var(--t))/2) 0/
+     calc(var(--s)/var(--n)) var(--s),
+    conic-gradient(from 180deg at var(--t) var(--g),var(--c))
+     0 calc((var(--s)/var(--n) - var(--g) + var(--t))/2)/
+     var(--s) calc(var(--s)/var(--n));
+  /* you probably don't need to set any size in your case */
+  width: calc(round(down,100%,var(--s)) + var(--t));
+  height: calc(4*var(--s) + var(--t));
 }
 
 .gradient{
@@ -141,10 +181,9 @@ background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, F
   50%{background-position:90% 50%}
   100%{background-position:10% 50%}
 }
-@-moz-keyframes GradientAnimation {
-  0%{background-position:10% 50%}
-  50%{background-position:90% 50%}
-  100%{background-position:10% 50%}
+@-moz-keyframes GradientAnimation  body{
+  background-color: black;
+} }
 }
 @keyframes GradientAnimation {
   0%{background-position:10% 50%}
@@ -168,9 +207,6 @@ background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, F
   background-size: cover;
   width: 100%;
 }
-/* body{
-  padding-top:  470px;
-} */
 
 #visualization {
   position: absolute;
@@ -191,7 +227,7 @@ background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, F
   width: 60%;
 	height: 100%;
 	/* overflow: hidden; */
-  margin-top: 470px;
+  /* margin-top: 470px; */
   right:0;
 }
 
@@ -372,7 +408,7 @@ canvas {
 }
 
 #container{
-    margin-top: 470px;
+    /* margin-top: 470px; */
     position: absolute;
 }
 
