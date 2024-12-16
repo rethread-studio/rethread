@@ -132,7 +132,7 @@ const options = {
   countries: {
     color: 0xFFFFFF,
     transparent: false,
-    opacityBaseLevel: 0.5
+    opacityBaseLevel: 0.7
   },
   packagesColor: {
     websocket: 0xF28527,
@@ -162,35 +162,42 @@ const ws = WebSocketClient();
 // const containerViz = document.getElementById("container-particles");
 const containerViz = document.getElementById("container");
 const myApp = new AppViz(containerViz, options);
-myApp.init();
-window.addEventListener("resize", appResize, false);
 
 var page_stats = {
   countries: new Set(),
   media: new Map(),
   urls: new Set(),
+  services: new Set(),
 }
 
 function clear_stats() {
   page_stats.countries = new Set();
   page_stats.media = new Map();
   page_stats.urls = new Set();
+  page_stats.services = new Set();
 }
 
 function set_stats() {
   const urls_div = document.getElementById("urls");
   const media_div = document.getElementById("media");
   const regions_div = document.getElementById("region");
+  const services_div = document.getElementById("services");
   let countries_string = "";
   page_stats.countries.forEach((c) => {
     countries_string += c;
     countries_string += "<br/>";
   });
   regions_div.innerHTML = countries_string;
+  let services_string = "";
+  page_stats.services.forEach((c) => {
+    services_string += c;
+    services_string += "<br/>";
+  });
+  services_div.innerHTML = services_string;
   let urls_string = "";
   page_stats.urls.forEach((c) => {
-    urls_string += c;
-    urls_string += "<br/>";
+    urls_string += c + "  ";
+    // urls_string += "<br/>";
   });
   urls_div.innerHTML= urls_string;
   let media_string = "";
@@ -277,13 +284,15 @@ const onmessage = (message) => {
 
     //Get the information from the request
     const packet = json.request;
+    // console.log(packet);
 
     // //CHECK if it has any packaggites
     //if it does not have, include the host name as a service
     if (packet.services.length === 0) {
       packet.services.push(packet.hostname);
-      page_stats.urls.add(packet.hostname);
     }
+    packet.services.forEach((s) => page_stats.services.add(s));
+    page_stats.urls.add(packet.url);
     let location = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
 
     if(location !== "") {
@@ -295,7 +304,6 @@ const onmessage = (message) => {
       type_num = 0;
     }
     page_stats.media.set(packet.type, type_num + 1);
-    console.log(page_stats.media);
 
     for (let c of countries) {
       if (c.geometry.name == location) {
@@ -542,17 +550,6 @@ function addParticle(service, vec3, packetSize) {
 }
 
 
-//NOT USED
-let textMaterialDefault = new THREE.MeshBasicMaterial({
-  color: 0xffffff,
-  transparent: true,
-  opacity: 0.7,
-});
-let textMaterialActive = new THREE.MeshBasicMaterial({
-  color: 0xE5463C,
-  transparent: true,
-  opacity: 0.9,
-});
 
 //Create a 3d text
 // take the service and its position
@@ -566,8 +563,8 @@ function createText(service, servicePos) {
   });
   let geometry = new THREE.TextGeometry(service, {
     font: font,
-    size: 3,
-    height: 1,
+    size: 1,
+    height: 0.5,
     curveSegments: 12,
     bevelEnabled: false,
     bevelSize: 0,
@@ -580,7 +577,7 @@ function createText(service, servicePos) {
   let textObj = {
     mesh: textMesh,
     service: service,
-    lifetime: 0.5,
+    lifetime: 1.5,
   };
   particlesTextObjects.push(textObj);
   particles_group.add(textMesh);
@@ -883,6 +880,8 @@ function init() {
   // stats = new Stats();
   // container.appendChild(stats.dom);
 
+  myApp.init(renderer);
+  // window.addEventListener("resize", appResize, false);
   window.addEventListener("resize", onWindowResize, false);
 }
 
@@ -1212,7 +1211,7 @@ function generateCountries() {
       shading: THREE.SmoothShading,
       shininess: 50,
     });
-    const scale = 18; // + Math.random() / 2;
+    const scale = 22; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);
     mesh.scale.x = scale;
     mesh.scale.y = scale;

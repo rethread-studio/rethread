@@ -26,7 +26,7 @@ class AppViz {
         this.numCountries = 0;
     }
 
-    init() {
+    init(renderer) {
         const loader = new THREE.FontLoader();
 
         const thisApp = this;
@@ -38,6 +38,7 @@ class AppViz {
         //BINDS
         this.render = this.render.bind(this)
 
+        // this.renderer = renderer;
         this.renderer = new THREE.WebGLRenderer({
             antialias: false,
             alpha: true
@@ -500,7 +501,7 @@ class PackageParticle {
         // this.shape = new THREE.Mesh(this.geometry, this.material);
         this.geometry = new THREE.EdgesGeometry(geometry); // or WireframeGeometry( geometry )
         this.material = new THREE.LineBasicMaterial({ color: newcolor, linewidth: 2 });
-        this.shape = new THREE.LineSegments(geo, mat);
+        this.shape = new THREE.LineSegments(this.geometry, mat);
 
 
         //position of the shape

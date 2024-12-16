@@ -18,26 +18,30 @@
     style="position:absolute; top:0; left: 0; width: 100vw; height: 100vh; display:flex; flex-direction: row;">
     <div id="sidebar-left"
       style="border-right: 2px; border-color: #333; border-style: hidden dotted hidden hidden; width: 15vw; height: 100vh; display: flex;">
-      <div style="flex-grow: 1; box-shadow: 0px -3px 0px red inset; border: 2px; border-style: dotted; border-color: #222; margin:20px; padding-left: 20px; width: 100%;
-box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); background-color: rgb(0, 0, 0, 0.5);">
-        <h3 style="">URLs contacted</h3>
-        <div id="urls"></div>
+      <div style="flex-grow: 1; box-shadow: 0px -3px 0px red inset; border: 2px; border-color: #222; margin:20px; padding-left: 20px; width: 100%;
+box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); background-color: rgb(0, 0, 0, 0.5); display:flex; flex-direction: row; align-items: center; height: 100%;">
+        <!-- <h3 style="">URLs contacted</h3> -->
+
+        <!-- <h3 style="">media fetched</h3> -->
+        <div id="media" style="display:grid;grid-template-columns: repeat(2, 50fr [col-start]);"></div>
       </div>
 
     </div>
-    <div id="main-area" style="width: 70vw; height: 100vh;"></div>
+    <div id="main-area" style="width: 70vw; height: 100vh;">
+
+        <div id="urls" style="overflow-wrap: break-word; word-break: break-all; color: #444; font-size: 8pt;"></div>
+    </div>
     <div id="sidebar-right"
       style="border-left: 2px; border-color: #333; border-style: hidden hidden hidden dotted; width: 15vw; height: 100vh; display: flex; flex-direction: column;">
 
-      <div style="flex-grow: 1; box-shadow: 0px -3px 0px red inset; border: 2px; border-style: dotted; border-color: #222; margin:20px; padding-left: 20px;
+      <div style="flex-grow: 1; box-shadow: 0px -3px 0px red inset; border: 2px; border-color: #222; margin:20px; padding-left: 20px;
 box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); background-color: rgb(0, 0, 0, 0.5);">
-        <h3 style="">regions connected</h3>
-        <div id="region"></div>
+        <!-- <h3 style="">regions connected</h3> -->
+        <div id="region" style="display:flex; flex-direction: row; align-items: center; height: 100%;"></div>
       </div>
-      <div style="flex-grow: 1; box-shadow: 0px -3px 0px red inset; border: 2px; border-style: dotted; border-color: #222; margin:20px; padding-left: 20px; 
+      <div style="flex-grow: 1; box-shadow: 0px -3px 0px red inset; border: 2px; border-color: #222; margin:20px; padding-left: 20px;
 box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); background-color: rgb(0, 0, 0, 0.5);">
-        <h3 style="">media fetched</h3>
-        <div id="media" style="display:grid;grid-template-columns: repeat(2, 50fr [col-start]);"></div>
+        <div id="services" style="display:flex; flex-direction: row; align-items: center; height: 100%;"></div>
       </div>
     </div>
   </div>
