@@ -718,7 +718,7 @@ class serviceParticle {
         this.elem;
         this.tempV = new THREE.Vector3();
         this.renderer = renderer;
-        this.timeStamp = Date.now() + (5 * 1000);
+        this.timeStamp = Date.now() + (5000 * 1000);
         this.status = 'TWEENIN'
         this.requestId = requestId;
         this.anglePos = anglePos;
@@ -742,7 +742,7 @@ class serviceParticle {
 
         this.packagesNum++;
         const scale = this.shape.scale;
-        const step = 0.0001;
+        const step = 0.01;
         this.shape.scale.set(
             Math.min(5, scale.x + (step * this.packagesNum)),
             Math.min(5, scale.y + (step * this.packagesNum)),
@@ -837,7 +837,7 @@ class serviceParticle {
 
             this.changeStatus();
         }
-        this.radius += dist > 8 ? 0 : this.speed;
+        // this.radius += dist > 8 ? 0 : this.speed;
         this.shape.position.copy(this.getCircularPosition(this.anglePos))
 
         this.shape.rotateX(this.rotation)
@@ -958,7 +958,7 @@ class urlParticle {
         this.elem;
         this.tempV = new THREE.Vector3();
         this.renderer = renderer;
-        this.timeStamp = Date.now() + (5 * 1000);
+        this.timeStamp = Date.now() + (5000 * 1000);
         this.status = 'ACTIVE'
         this.requestId = requestId;
         this.idle = false;
@@ -966,7 +966,7 @@ class urlParticle {
     }
 
     updateTime() {
-        this.timeStamp = this.timeStamp + (5 * 1000)
+        this.timeStamp = this.timeStamp + (5000 * 1000)
     }
 
     getName() {
