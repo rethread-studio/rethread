@@ -136,13 +136,13 @@ class AppViz {
 
     onWindowResize() {
         // const aspectRatio = this.options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
-        const aspectRatio =  window.innerWidth / window.innerHeight;
+        const aspectRatio = window.innerWidth / window.innerHeight;
         this.camera.aspect = aspectRatio;
         this.camera.updateProjectionMatrix();
 
-        const height = this.options.installation ? 1220 : window.innerHeight;
+        // const height = this.options.installation ? 1220 : window.innerHeight;
 
-        this.renderer.setSize(window.innerWidth, height, false);
+        this.renderer.setSize(window.innerWidth, window.innerHeight, true);
 
     }
 
@@ -307,23 +307,26 @@ class AppViz {
         if (!this.packagesNames.includes(type)) this.packagesNames.push(type)
         if (type == "image") this.numImages++;
 
-        const newPackage = new PackageParticle(
-            this.scene,
-            method,
-            type,
-            this.font,
-            this.camera,
-            this.renderer,
-            timeStamp,
-            this.options.showLabels,
-            position,
-            s.randomDelay,
-            packColor,
-            country,
-            this.idle
-        );
-        newPackage.init();
-        this.packages.push(newPackage);
+        if (this.packages.length < 10) {
+
+            const newPackage = new PackageParticle(
+                this.scene,
+                method,
+                type,
+                this.font,
+                this.camera,
+                this.renderer,
+                timeStamp,
+                this.options.showLabels,
+                position,
+                s.randomDelay,
+                packColor,
+                country,
+                this.idle
+            );
+            newPackage.init();
+            this.packages.push(newPackage);
+        }
     }
 
     addService(name, type, timeStamp) {
@@ -501,7 +504,7 @@ class PackageParticle {
         // this.shape = new THREE.Mesh(this.geometry, this.material);
         this.geometry = new THREE.EdgesGeometry(geometry); // or WireframeGeometry( geometry )
         this.material = new THREE.LineBasicMaterial({ color: newcolor, linewidth: 2 });
-        this.shape = new THREE.LineSegments(this.geometry, mat);
+        this.shape = new THREE.LineSegments(this.geometry, this.material);
 
 
         //position of the shape

@@ -86,27 +86,27 @@ var initTimeout = null;
 function init() {
   clearTimeout(initTimeout);
   document.addEventListener('contextmenu', event => event.preventDefault());
-  injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
-  createButton("pellowHomeButton", "Home", function (event) {
-    event.preventDefault();
-    var iframe = document.getElementById("pellowHome");
-    if (iframe) {
-      closeHome();
-    } else {
-      displayHome();
-    }
-    return false;
-  });
-  createButton("pellowLegendButton", "Legend", function (event) {
-    event.preventDefault();
-    var iframe = document.getElementById("pellowLegend");
-    if (iframe) {
-      closeLegend();
-    } else {
-      displayLegend();
-    }
-    return false;
-  });
+  // injectStyle(chrome.extension.getURL("style/tabStyle.css"), "head");
+  // createButton("pellowHomeButton", "Home", function (event) {
+  //   event.preventDefault();
+  //   var iframe = document.getElementById("pellowHome");
+  //   if (iframe) {
+  //     closeHome();
+  //   } else {
+  //     displayHome();
+  //   }
+  //   return false;
+  // });
+  // createButton("pellowLegendButton", "Legend", function (event) {
+  //   event.preventDefault();
+  //   var iframe = document.getElementById("pellowLegend");
+  //   if (iframe) {
+  //     closeLegend();
+  //   } else {
+  //     displayLegend();
+  //   }
+  //   return false;
+  // });
 }
 if (!isIFrame) {
   window.addEventListener("DOMContentLoaded", init);

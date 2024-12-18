@@ -132,7 +132,7 @@ const options = {
   countries: {
     color: 0xFFFFFF,
     transparent: false,
-    opacityBaseLevel: 0.7
+    opacityBaseLevel: 0.9
   },
   packagesColor: {
     websocket: 0xF28527,
@@ -166,14 +166,18 @@ const myApp = new AppViz(containerViz, options);
 var page_stats = {
   countries: new Set(),
   media: new Map(),
+  media_last_update: 0,
   urls: new Set(),
+  urls_last_update: 0,
   services: new Set(),
 }
 
 function clear_stats() {
   page_stats.countries = new Set();
   page_stats.media = new Map();
+  page_stats.media_last_update = 0;
   page_stats.urls = new Set();
+  page_stats.urls_last_update = 0;
   page_stats.services = new Set();
 }
 
@@ -194,17 +198,46 @@ function set_stats() {
     services_string += "<br/>";
   });
   services_div.innerHTML = services_string;
-  let urls_string = "";
-  page_stats.urls.forEach((c) => {
-    urls_string += c + "  ";
-    // urls_string += "<br/>";
-  });
-  urls_div.innerHTML= urls_string;
-  let media_string = "";
-  page_stats.media.forEach((value, key, map) => {
-    media_string += "<div style=\"text-align: right; margin-right: 10px;\">" + value + "</div><div>" + key + "</div>";
-  });
-  media_div.innerHTML= media_string;
+
+  if (page_stats.urls_last_update != page_stats.urls.size) {
+
+    let urls_string = "";
+    page_stats.urls.forEach((c) => {
+      urls_string += c + "  ";
+      // urls_string += "<br/>";
+    });
+    urls_div.innerHTML = urls_string;
+    page_stats.urls_last_update = page_stats.urls.size;
+  }
+  if (page_stats.media_last_update != page_stats.media.size) {
+    let media_string = "";
+    page_stats.media.forEach((value, key, map) => {
+      media_string += "<div style=\"text-align: right; margin-right: 10px;\">" + value + "</div><div>" + mediaTypeTranslator(key) + "</div>";
+    });
+    media_div.innerHTML = media_string;
+    page_stats.media_last_update = page_stats.media.size;
+  }
+}
+function mediaTypeTranslator(type) {
+  switch (String(type)) {
+    case "main_frame":
+      return "main page";
+      break;
+    case "script":
+      return "code";
+      break;
+    case "stylesheet":
+      return "design style";
+      break;
+    case "ping":
+      return "are you there?";
+      break;
+    case "sub_frame":
+      return "page in page";
+      break;
+    default:
+      return type;
+  }
 }
 
 function appResize() {
@@ -213,11 +246,15 @@ function appResize() {
 // SERVICE VIZ 
 // const serviceViz = new ServiceGenerator(1220, window.innerWidth);
 
+var waitingMessages = [];
 
 
 //READ THE SOCKET FOR ACTIVITY
 const onmessage = (message) => {
-  const json = JSON.parse(message.data);
+  waitingMessages.push(message.data);
+}
+const parseMessage = (message) => {
+  const json = JSON.parse(message);
   //Per request we want to add three elements
 
 
@@ -295,12 +332,12 @@ const onmessage = (message) => {
     page_stats.urls.add(packet.url);
     let location = packet.location != null && packet.location != undefined ? getCountryName(packet.location.country) : "";
 
-    if(location !== "") {
+    if (location !== "") {
       page_stats.countries.add(location);
     }
 
     let type_num = page_stats.media.get(packet.type);
-    if(type_num == undefined) {
+    if (type_num == undefined) {
       type_num = 0;
     }
     page_stats.media.set(packet.type, type_num + 1);
@@ -326,13 +363,13 @@ const onmessage = (message) => {
     //Increment the counter for packetsOverTime
     packetsOverTime++;
     numRequests++;
-    //If it goes over the glitchThreshold trigger glitch
-    // if (packetsOverTime > glitchThreshold) {
-    //   if (!triggerThisFrame) {
-    //     glitchPass.triggerActivation(packetsOverTime);
-    //     triggerThisFrame = true;
-    //   }
-    // } else {
+    // If it goes over the glitchThreshold trigger glitch
+    if (packetsOverTime > glitchThreshold) {
+      if (!triggerThisFrame) {
+        glitchPass.triggerActivation(packetsOverTime);
+        triggerThisFrame = true;
+      }
+    } else {
       //Process each of the services in the packet
       for (const service of packet.services) {
         //ADD SERVICE TO TEXT
@@ -357,7 +394,7 @@ const onmessage = (message) => {
         lastRegisteredPerService.set(country, time);
         activeService = country;
       }
-    // }
+    }
 
     // if (jserviceVizson.request.initiator != undefined) serviceViz.addInitiator(json.request.initiator)
     const packColor = options.packagesColor[json.request.type] != null ? options.packagesColor[json.request.type] : packagesColor.default;
@@ -674,7 +711,7 @@ function init() {
   camera = new THREE.PerspectiveCamera(
     45,
     // options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight,
-    window.innerWidth/window.innerHeight,
+    window.innerWidth / window.innerHeight,
     1,
     4000
   );
@@ -881,13 +918,13 @@ function init() {
   // container.appendChild(stats.dom);
 
   myApp.init(renderer);
-  // window.addEventListener("resize", appResize, false);
+  window.addEventListener("resize", appResize, false);
   window.addEventListener("resize", onWindowResize, false);
 }
 
 function onWindowResize() {
   // const aspectRatio = options.installation ? (window.innerWidth / 2) / 1220 : (window.innerWidth / 2) / window.innerHeight;
-  const aspectRatio = window.innerWidth  / window.innerHeight;
+  const aspectRatio = window.innerWidth / window.innerHeight;
   camera.aspect = aspectRatio;
   camera.updateProjectionMatrix();
 
@@ -960,6 +997,19 @@ function rotateGlobe() {
 var lastUpdate = 0;
 
 function animate() {
+  if (waitingMessages.length > 0) {
+    let i = 0;
+    let numToParse = Math.min(waitingMessages.length, 10);
+    while (i < numToParse) {
+      let mess = waitingMessages.shift(); // remove first and return it
+      try {
+        parseMessage(mess);
+      } catch (error) {
+        console.log(error);
+      }
+      i += 1;
+    }
+  }
   let now = Date.now() * 0.001;
   let dt = now - lastUpdate;
   if (dt !== dt) {
@@ -1210,6 +1260,7 @@ function generateCountries() {
       opacity: options.countries.opacityBaseLevel,
       shading: THREE.SmoothShading,
       shininess: 50,
+      dithering: true,
     });
     const scale = 22; // + Math.random() / 2;
     const mesh = new THREE.Mesh(geometry, material);

@@ -57,12 +57,15 @@ h3 {
   font-family: "Iceland", sans-serif;
   font-weight: 400;
   font-style: normal;
-
 }
 .iceland-regular {
-  font-family: "Iceland", sans-serif;
-  font-weight: 400;
+    font-family: 'neueBit', sans-serif;
+  /* font-family: "IBM Plex Mono", serif; */
+  /* font-family: "Iceland", sans-serif; */
+  font-weight: 300;
   font-style: normal;
+  font-size: 20pt;
+  line-height: 1.15;
 }
 /* HTML: <div class="grid-lines"></div> */
 .grid-lines {
@@ -240,7 +243,6 @@ background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, F
   color: white;
   opacity: 1;
   font-family: 'neueBit', sans-serif;
-
   /* text-transform: uppercase; */
 
 }
