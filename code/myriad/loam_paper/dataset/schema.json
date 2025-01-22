@@ -80,32 +80,6 @@
             "required": ["name", "category", "exclusivity"]
           }
         }
-      },
-      {
-        "file_name": "individual_repos/{owner_name}.json",
-        "description": "Information about individual repositories and their contributors.",
-        "schema": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "repo_name": { "type": "string" },
-              "contributors": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "type": { "type": "string", "enum": ["User", "Bot"] },
-                    "id": { "type": "string" },
-                    "contributions": { "type": "integer" }
-                  },
-                  "required": ["type", "id", "contributions"]
-                }
-              }
-            },
-            "required": ["repo_name", "contributors"]
-          }
-        }
       }
     ]
   }
