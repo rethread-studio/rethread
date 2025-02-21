@@ -1,0 +1,85 @@
+{
+    "dataset_name": "Myriad People",
+    "files": [
+      {
+        "file_name": "all_loggedin_contributors.json",
+        "description": "List of logged-in contributors and their contributions to repositories.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["User", "Bot"] },
+              "id": { "type": "string" },
+              "contributions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "repo_name": { "type": "string" },
+                    "contributions": { "type": "integer" }
+                  },
+                  "required": ["repo_name", "contributions"]
+                }
+              }
+            },
+            "required": ["type", "id", "contributions"]
+          }
+        }
+      },
+      {
+        "file_name": "categories_info.json",
+        "description": "List of categories and their repositories.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": { "type": "string" },
+              "repos": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["category", "repos"]
+          }
+        }
+      },
+      {
+        "file_name": "repos_info.json",
+        "description": "Information about repositories for which the GitHub API fetched data.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "category": { "type": "string" },
+              "exclusivity": { "type": ["string", "null"] },
+              "created_at": { "type": "string", "format": "datetime" },
+              "total_contributions": { "type": "integer" },
+              "anonymous_contributors": { "type": "integer" },
+              "loggedin_contributors": { "type": "integer" }
+            },
+            "required": ["name", "category", "exclusivity", "created_at", "total_contributions", "anonymous_contributors", "loggedin_contributors"]
+          }
+        }
+      },
+      {
+        "file_name": "gh_api_failures.json",
+        "description": "List of repositories for which the GitHub API failed to fetch data.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "category": { "type": "string" },
+              "exclusivity": { "type": ["string", "null"] }
+            },
+            "required": ["name", "category", "exclusivity"]
+          }
+        }
+      }
+    ]
+  }
