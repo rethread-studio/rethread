@@ -1,0 +1,23 @@
+[package]
+name = "strace_collector_json"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+nix = "0.26.2"
+owo-colors = "3.5.0"
+serde_json = "1.0.94"
+syscalls_shared = { path = "../syscalls_shared/" }
+protocol = { version = "3.4", features = ["derive"] }
+argh = "0.1.10"
+postcard = { version = "1.0.4", features = ["alloc", "use-std"] }
+tungstenite = "0.18.0"
+env_logger = "0.10.0"
+url = "2.3.1"
+log = "0.4.17"
+ctrlc = "3.2.5"
+tracing-subscriber = "0.3.16"
+tracing = "0.1.37"
+anyhow = "1.0.70"

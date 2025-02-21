@@ -1,0 +1,14 @@
+{
+  "name": "strace_collector_node_relay",
+  "version": "1.0.0",
+  "description": "Accepts strace json and relays it to browser clients",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.18.1"
+  }
+}

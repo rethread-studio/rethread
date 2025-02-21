@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "strace_collector",
+    "strace_collector_json",
     "data_vertex",
     "syscalls_shared",
     "syscalls_sonifier",
