@@ -58,9 +58,13 @@ div.content {
     padding-right: 2rem;
     padding-left: 2rem;
     padding-top: 3%;
-    margin-bottom: 8rem;
 }
 
+div.subtitle {
+    max-width: 42rem;
+    padding-right: 2rem;
+    padding-left: 2rem;
+}
 div.footer {
     text-align: center;
     position: absolute;
@@ -115,6 +119,11 @@ p {
     text-align: justify;
     margin-bottom: 1.5rem;
     font-size: 27px;
+}
+p.subtitle {
+    background-color: hsla(0,0%,50%,0.5);
+    font-size: 21px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 li {
     color: white;
