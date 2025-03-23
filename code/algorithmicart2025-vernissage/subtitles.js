@@ -5,7 +5,7 @@ window.addEventListener("load", function() {
     // on page load: fetch text in index.html and display two lines every 3 second
     getData()
     index=0
-    window.setInterval(showcode, 3000)
+    window.setInterval(showcode, 2000)
 });
 
 function getData() {
