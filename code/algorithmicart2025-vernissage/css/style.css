@@ -122,8 +122,12 @@ p {
 }
 p.subtitle {
     background-color: hsla(0,0%,50%,0.5);
-    font-size: 21px;
+    font-size: 17px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+    margin-top: 0.5%;
+    padding-top: 2%;
+    padding-bottom: 2%;
 }
 li {
     color: white;
