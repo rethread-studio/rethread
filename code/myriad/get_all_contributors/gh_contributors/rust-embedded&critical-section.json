@@ -1,0 +1,76 @@
+{
+ "repo_name": "rust-embedded/critical-section",
+ "total_contributions": 131,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 74,
+   "id": "Dirbaio"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 11,
+   "id": "117f16419fb5bfe7"
+  },
+  {
+   "type": "Bot",
+   "contributions": 11,
+   "id": "bors[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 9,
+   "id": "adamgreig"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 5,
+   "id": "1aa9fb5feae231c8"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "eldruin"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "jannic"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "reitermarkus"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "lulf"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "chrysn"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Catamantaloedis"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "MabezDev"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "torrancew"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "vi"
+  }
+ ]
+}

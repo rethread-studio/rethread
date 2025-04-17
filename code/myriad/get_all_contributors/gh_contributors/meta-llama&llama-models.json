@@ -1,0 +1,151 @@
+{
+ "repo_name": "meta-llama/llama-models",
+ "total_contributions": 138,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 55,
+   "id": "ashwinb"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 17,
+   "id": "38efe6d0c823b496"
+  },
+  {
+   "type": "User",
+   "contributions": 9,
+   "id": "jspisak"
+  },
+  {
+   "type": "User",
+   "contributions": 9,
+   "id": "dltn"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 6,
+   "id": "66f9326b84881683"
+  },
+  {
+   "type": "User",
+   "contributions": 6,
+   "id": "yanxi0830"
+  },
+  {
+   "type": "User",
+   "contributions": 6,
+   "id": "wukaixingxp"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "machina-source"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "rohit-ptl"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "hardikjshah"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "samuelselvan"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "ConnorHack"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "raghotham"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "wysuperfly"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "varunfb"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "pmysl"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "minimalic"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "liyunlu0618"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "yufengzh"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "kit1980"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "knibesh"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "fbnav"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "matthewberryman"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "marklysze"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "derrix060"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "jasonkrone"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "eltociear"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "garvsl"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "anordin95"
+  }
+ ]
+}

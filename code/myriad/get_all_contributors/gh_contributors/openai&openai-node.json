@@ -1,0 +1,131 @@
+{
+ "repo_name": "openai/openai-node",
+ "total_contributions": 682,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 369,
+   "id": "stainless-bot"
+  },
+  {
+   "type": "Bot",
+   "contributions": 114,
+   "id": "stainless-app[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 65,
+   "id": "schnerd"
+  },
+  {
+   "type": "User",
+   "contributions": 31,
+   "id": "RobertCraigie"
+  },
+  {
+   "type": "User",
+   "contributions": 31,
+   "id": "athyuttamre"
+  },
+  {
+   "type": "User",
+   "contributions": 14,
+   "id": "jeevnayak"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 12,
+   "id": "7b6b89cde0360a97"
+  },
+  {
+   "type": "User",
+   "contributions": 12,
+   "id": "nknj"
+  },
+  {
+   "type": "User",
+   "contributions": 9,
+   "id": "logankilpatrick"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "Just-Moh-it"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "deyaaeldeen"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "simonpfish"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "alexlevy0"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "rattrayalex"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "AngelosP"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "arnif"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "darrenmce"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ceifa"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "guspan-tanadi"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "jacobzim-stl"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "granmoe"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "scottaddie"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "buster95"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "yjp20"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "meorphis"
+  }
+ ]
+}

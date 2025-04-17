@@ -1,0 +1,56 @@
+{
+ "repo_name": "cuviper/autocfg",
+ "total_contributions": 112,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 84,
+   "id": "cuviper"
+  },
+  {
+   "type": "Bot",
+   "contributions": 8,
+   "id": "bors[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 7,
+   "id": "roblabla"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "Techcable"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "adamreichold"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "LingMan"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "amincheloh"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "silwol"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "dingelish"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "leo60228"
+  }
+ ]
+}

@@ -1,0 +1,271 @@
+{
+ "repo_name": "i3/i3.github.io",
+ "total_contributions": 573,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 410,
+   "id": "stapelberg"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 40,
+   "id": "0a393553110dc632"
+  },
+  {
+   "type": "User",
+   "contributions": 32,
+   "id": "Airblader"
+  },
+  {
+   "type": "User",
+   "contributions": 16,
+   "id": "orestisfl"
+  },
+  {
+   "type": "User",
+   "contributions": 11,
+   "id": "sur5r"
+  },
+  {
+   "type": "User",
+   "contributions": 6,
+   "id": "ultrabug"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "tyll"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "sanderdlm"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "sucrecacao"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 2,
+   "id": "0a393553110dc632"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "rrobgill"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "malin-as"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "jtpereyda"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "fbrinker"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "burik666"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "snprajwal"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "quantenzitrone"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "sardemff7"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "59d91b0329a772db"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "7015af6f277d1dd7"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "1f6d60d8cf7fe298"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "tylerbrazier"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "woodruffw"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "geshido"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "anadahz"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "techtonik"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "crocket"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "foo-dogsquared"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "grokkingnix"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "5d9879ed8d67b742"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ketomi"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "koebi"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "shdown"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "tgaz"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "wifiextender"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "alexanderchiu"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "f3ath"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "7c76349f8f526993"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "detikpw"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "duckunix"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "THEshushma"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Fireshadow3"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "2b972b81a337c33a"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "7909e7bc08891d01"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "issmirnov"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "jwflory"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "JakobHaufe"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ltoenning"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Malix-Labs"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "prosoitos"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "mateusduboli"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "nikitabobko"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "obar"
+  }
+ ]
+}

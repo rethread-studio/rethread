@@ -1,0 +1,21 @@
+{
+ "repo_name": "hideakitai/ESP32SPISlave",
+ "total_contributions": 59,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 57,
+   "id": "hideakitai"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Erhannis"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "simondlevy"
+  }
+ ]
+}

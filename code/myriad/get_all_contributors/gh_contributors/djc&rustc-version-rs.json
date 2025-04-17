@@ -1,0 +1,91 @@
+{
+ "repo_name": "djc/rustc-version-rs",
+ "total_contributions": 116,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 53,
+   "id": "Kimundi"
+  },
+  {
+   "type": "User",
+   "contributions": 36,
+   "id": "djc"
+  },
+  {
+   "type": "User",
+   "contributions": 8,
+   "id": "programmerjake"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "kamalmarhubi"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 2,
+   "id": "606c06a14cb8af35"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "dtolnay"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "GuillaumeGomez"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "34360add80bc49e1"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "shepmaster"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "hkBst"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "mgeisler"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "phansch"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "AnderEnder"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "RalfJung"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "bgourlie"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "JohnTitor"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "mcarton"
+  }
+ ]
+}

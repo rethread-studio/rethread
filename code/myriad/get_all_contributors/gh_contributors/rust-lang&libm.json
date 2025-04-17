@@ -1,0 +1,281 @@
+{
+ "repo_name": "rust-lang/libm",
+ "total_contributions": 521,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 96,
+   "id": "tgross35"
+  },
+  {
+   "type": "User",
+   "contributions": 60,
+   "id": "japaric"
+  },
+  {
+   "type": "User",
+   "contributions": 57,
+   "id": "alexcrichton"
+  },
+  {
+   "type": "Bot",
+   "contributions": 53,
+   "id": "bors[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 34,
+   "id": "Amanieu"
+  },
+  {
+   "type": "User",
+   "contributions": 31,
+   "id": "burrbull"
+  },
+  {
+   "type": "User",
+   "contributions": 20,
+   "id": "Lokathor"
+  },
+  {
+   "type": "User",
+   "contributions": 14,
+   "id": "erikdesjardins"
+  },
+  {
+   "type": "User",
+   "contributions": 14,
+   "id": "P1n3appl3"
+  },
+  {
+   "type": "User",
+   "contributions": 14,
+   "id": "gnzlbg"
+  },
+  {
+   "type": "User",
+   "contributions": 12,
+   "id": "m1el"
+  },
+  {
+   "type": "User",
+   "contributions": 11,
+   "id": "porglezomp"
+  },
+  {
+   "type": "User",
+   "contributions": 10,
+   "id": "Veykril"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 9,
+   "id": "74a0616c3ec01338"
+  },
+  {
+   "type": "User",
+   "contributions": 8,
+   "id": "rrbutani"
+  },
+  {
+   "type": "User",
+   "contributions": 6,
+   "id": "Schultzer"
+  },
+  {
+   "type": "User",
+   "contributions": 6,
+   "id": "varkor"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "jackmott"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "eldruin"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "Jules-Bertholet"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "kirch7"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "ZagButNoZig"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "notriddle"
+  },
+  {
+   "type": "Bot",
+   "contributions": 3,
+   "id": "github-actions[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "JohnTitor"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "mulkieran"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "software-opal"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "mb64"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "lucasmarqs"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "JSorngard"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 2,
+   "id": "367ac5cd7bc5b0c8"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "GuillaumeGomez"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "ankane"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "Amjad50"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "vjackson725"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "quaternic"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "klensy"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "kellda"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "bjorn3"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "heiher"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "TDecking"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "SuKiN-a"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "kpp"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "richard-uk1"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "phip1611"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Outurnate"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "moritz-meier"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "keram88"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "jfthuong"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "jturner314-nrl"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "CryZe"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "bvinc"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "4tm4j33tk4ur"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ajtribick"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ajfrantz"
+  }
+ ]
+}

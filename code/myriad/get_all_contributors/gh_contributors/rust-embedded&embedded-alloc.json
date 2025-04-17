@@ -1,0 +1,156 @@
+{
+ "repo_name": "rust-embedded/embedded-alloc",
+ "total_contributions": 171,
+ "contributors": [
+  {
+   "type": "Bot",
+   "contributions": 32,
+   "id": "bors[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 26,
+   "id": "japaric"
+  },
+  {
+   "type": "User",
+   "contributions": 22,
+   "id": "newAM"
+  },
+  {
+   "type": "User",
+   "contributions": 12,
+   "id": "Dirbaio"
+  },
+  {
+   "type": "User",
+   "contributions": 10,
+   "id": "jannic"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 10,
+   "id": "3e66ba524566cc6e"
+  },
+  {
+   "type": "User",
+   "contributions": 8,
+   "id": "rmja"
+  },
+  {
+   "type": "User",
+   "contributions": 7,
+   "id": "adamgreig"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "trueb2"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "phil-opp"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "thalesfragoso"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "f-bro"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "jonas-schievink"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "thejpster"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "oli-obk"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 2,
+   "id": "2d2960f953076341"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "eldruin"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "avlec"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "sno2"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "xkr47"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "LeSeulArtichaut"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "reitermarkus"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Nicoretti"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "nviennot"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "rursprung"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "rukai"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Spadi0"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "sbechet"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "VictorKoenders"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "wcampbell0x2a"
+  }
+ ]
+}

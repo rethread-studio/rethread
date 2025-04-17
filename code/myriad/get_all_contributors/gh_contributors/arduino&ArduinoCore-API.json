@@ -1,0 +1,191 @@
+{
+ "repo_name": "arduino/ArduinoCore-API",
+ "total_contributions": 348,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 144,
+   "id": "aentinger"
+  },
+  {
+   "type": "User",
+   "contributions": 63,
+   "id": "facchinm"
+  },
+  {
+   "type": "User",
+   "contributions": 20,
+   "id": "giulcioffi"
+  },
+  {
+   "type": "User",
+   "contributions": 17,
+   "id": "sgryphon"
+  },
+  {
+   "type": "User",
+   "contributions": 16,
+   "id": "cmaglie"
+  },
+  {
+   "type": "User",
+   "contributions": 15,
+   "id": "jboynes"
+  },
+  {
+   "type": "User",
+   "contributions": 14,
+   "id": "matthijskooijman"
+  },
+  {
+   "type": "User",
+   "contributions": 8,
+   "id": "per1234"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "edgar-bonet"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "pillo79"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "pennam"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "iabdalkader"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "PiotrekB416"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "tttapa"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "alranel"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "CamelCaseName"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "earlephilhower"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "leg0"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "cousteaulecommandant"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "RobTillaart"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "oclyke"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "umbynos"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "jamadagni"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "sandeepmistry"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Rotzbua"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "positron96"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "mcspr"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "JAndrassy"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "obra"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "jrowberg"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "haydenroche5"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "guberti"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "BillyDonahue"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "bblanchon"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "arnavb"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "andreagilardoni"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "zakkie"
+  }
+ ]
+}

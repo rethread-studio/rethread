@@ -1,0 +1,226 @@
+{
+ "repo_name": "arduino/arduino-ide",
+ "total_contributions": 1422,
+ "contributors": [
+  {
+   "type": "Anonymous",
+   "contributions": 433,
+   "id": "51bbaf4580c9d562"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 240,
+   "id": "0968d373364cc468"
+  },
+  {
+   "type": "User",
+   "contributions": 117,
+   "id": "per1234"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 87,
+   "id": "36e3abb79a758217"
+  },
+  {
+   "type": "User",
+   "contributions": 84,
+   "id": "jbicker"
+  },
+  {
+   "type": "User",
+   "contributions": 64,
+   "id": "kittaakos"
+  },
+  {
+   "type": "User",
+   "contributions": 64,
+   "id": "spoenemann"
+  },
+  {
+   "type": "User",
+   "contributions": 57,
+   "id": "fstasi"
+  },
+  {
+   "type": "User",
+   "contributions": 33,
+   "id": "silvanocerza"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 33,
+   "id": "78fece71cabad394"
+  },
+  {
+   "type": "Bot",
+   "contributions": 32,
+   "id": "github-actions[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 32,
+   "id": "francescospissu"
+  },
+  {
+   "type": "User",
+   "contributions": 26,
+   "id": "davegarthsimpson"
+  },
+  {
+   "type": "Bot",
+   "contributions": 21,
+   "id": "dependabot[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 15,
+   "id": "msujew"
+  },
+  {
+   "type": "User",
+   "contributions": 11,
+   "id": "mastrolinux"
+  },
+  {
+   "type": "User",
+   "contributions": 11,
+   "id": "jankeromnes"
+  },
+  {
+   "type": "User",
+   "contributions": 7,
+   "id": "nmzaheer"
+  },
+  {
+   "type": "User",
+   "contributions": 7,
+   "id": "svenefftinge"
+  },
+  {
+   "type": "User",
+   "contributions": 7,
+   "id": "dankeboy36"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "sebromero"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "pirropirro"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "giacomocusinato"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "r3inbowari"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "lukasb1b"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "wh201906"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 2,
+   "id": "63c726aac8101c61"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ulemons"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "coby2023t"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "yash-markad"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "IrregularShed"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "529addaab83b1ec4"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Sebastian-Brzuzek"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "63c726aac8101c61"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "nbourre"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "facchinm"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Jmarinis"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "InstantMuffin"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "palazzol"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "federicobond"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "dwightfowler-cd"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ben-qnimble"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "streak324"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "alranel"
+  }
+ ]
+}
