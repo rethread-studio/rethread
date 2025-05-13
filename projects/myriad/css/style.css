@@ -102,6 +102,12 @@ h3 {
 a {
     color: black;
     text-decoration-color: orange;
+    text-decoration-skip-ink: none;
+}
+
+a.emphasized {
+    font-family: Inconsolata-SemiBold;
+    text-decoration-thickness: 1.25px;
 }
 
 .dark-mode a {
