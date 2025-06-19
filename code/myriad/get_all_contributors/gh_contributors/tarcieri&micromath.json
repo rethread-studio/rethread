@@ -1,0 +1,51 @@
+{
+ "repo_name": "tarcieri/micromath",
+ "total_contributions": 163,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 129,
+   "id": "tarcieri"
+  },
+  {
+   "type": "User",
+   "contributions": 12,
+   "id": "Cazadorro"
+  },
+  {
+   "type": "User",
+   "contributions": 11,
+   "id": "sunsided"
+  },
+  {
+   "type": "User",
+   "contributions": 5,
+   "id": "korken89"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "careyk007"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "llogiq"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "5a18334c35833b33"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "timboldt"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "everdrone"
+  }
+ ]
+}

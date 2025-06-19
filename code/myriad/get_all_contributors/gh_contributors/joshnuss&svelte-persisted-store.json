@@ -1,0 +1,81 @@
+{
+ "repo_name": "joshnuss/svelte-persisted-store",
+ "total_contributions": 338,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 199,
+   "id": "joshnuss"
+  },
+  {
+   "type": "Bot",
+   "contributions": 79,
+   "id": "dependabot[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 23,
+   "id": "bertmad3400"
+  },
+  {
+   "type": "User",
+   "contributions": 15,
+   "id": "rubenhensen"
+  },
+  {
+   "type": "User",
+   "contributions": 6,
+   "id": "danawoodman"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "aubergene"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "MathiasWP"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "patrickleet"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "amserra"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "benaltair"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "benmccann"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "niemyjski"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "mrexodia"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ghostdevv"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "intercepted16"
+  }
+ ]
+}

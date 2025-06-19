@@ -1,0 +1,36 @@
+{
+ "repo_name": "otuva/handwriting-synthesis",
+ "total_contributions": 86,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 62,
+   "id": "otuva"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 12,
+   "id": "015fd466b60efd55"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 6,
+   "id": "51767a02261b2575"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 4,
+   "id": "015fd466b60efd55"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "bryandam"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "netcarver"
+  }
+ ]
+}

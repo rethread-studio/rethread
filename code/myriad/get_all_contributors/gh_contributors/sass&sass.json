@@ -1,0 +1,146 @@
+{
+ "repo_name": "sass/sass",
+ "total_contributions": 886,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 604,
+   "id": "nex3"
+  },
+  {
+   "type": "Bot",
+   "contributions": 99,
+   "id": "dependabot[bot]"
+  },
+  {
+   "type": "User",
+   "contributions": 32,
+   "id": "stof"
+  },
+  {
+   "type": "User",
+   "contributions": 24,
+   "id": "jamesnw"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 23,
+   "id": "445b3a1a8d1a762f"
+  },
+  {
+   "type": "User",
+   "contributions": 19,
+   "id": "jathak"
+  },
+  {
+   "type": "User",
+   "contributions": 17,
+   "id": "ntkme"
+  },
+  {
+   "type": "User",
+   "contributions": 14,
+   "id": "jgerigmeyer"
+  },
+  {
+   "type": "User",
+   "contributions": 8,
+   "id": "mirisuzanne"
+  },
+  {
+   "type": "User",
+   "contributions": 7,
+   "id": "Goodwine"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 5,
+   "id": "1a72e42c4065226e"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "connorskees"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "jerivas"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "Awjin"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "pamelalozano16"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "dvdherron"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "asottile"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "larsgrefer"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "TeresaPartidaS"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "Rafer45"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "adamhooper"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ahmdtalat"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "bramus"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "duncansmart"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "jlosito"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "codemacabre"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "nschonni"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "xnuk"
+  }
+ ]
+}

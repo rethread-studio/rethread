@@ -1,0 +1,10 @@
+korken89
+bors[bot]
+dependabot[bot]
+burrbull
+adamgreig
+TDHolmes
+andresv
+haata
+jannic
+qiuchengxuan

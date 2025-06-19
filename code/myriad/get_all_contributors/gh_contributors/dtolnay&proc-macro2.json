@@ -1,0 +1,151 @@
+{
+ "repo_name": "dtolnay/proc-macro2",
+ "total_contributions": 1147,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 990,
+   "id": "dtolnay"
+  },
+  {
+   "type": "User",
+   "contributions": 104,
+   "id": "alexcrichton"
+  },
+  {
+   "type": "User",
+   "contributions": 19,
+   "id": "mystor"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "bjorn3"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "SergioBenitez"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "CensoredUsername"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "kevinmehall"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "jrvidal"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 1,
+   "id": "070019bec71ad093"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "basavesh"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "mathstuf"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "CreepySkeleton"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ivanbakel"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "buchgr"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "kazimuth"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "zzau13"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Kestrer"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "LukasKalbertodt"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "lukaslueg"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Michael-F-Bryan"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "nnethercote"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "ogoffart"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Elrendio"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "soenkehahn"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Nemo157"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "hcpl"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "klensy"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "rickwebiii"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "xd009642"
+  }
+ ]
+}

@@ -1,0 +1,126 @@
+{
+ "repo_name": "dtolnay/quote",
+ "total_contributions": 644,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 586,
+   "id": "dtolnay"
+  },
+  {
+   "type": "User",
+   "contributions": 15,
+   "id": "mystor"
+  },
+  {
+   "type": "User",
+   "contributions": 13,
+   "id": "alexcrichton"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "SimonSapin"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "nnethercote"
+  },
+  {
+   "type": "User",
+   "contributions": 3,
+   "id": "lqd"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "randomPoison"
+  },
+  {
+   "type": "User",
+   "contributions": 2,
+   "id": "sgrif"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "hauleth"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "hcpl"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "torkleyy"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "skondrashov"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "rkarp"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "vorner"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "mfreeborn"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "qnighy"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "lukaslueg"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "staktrace"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "Emilgardis"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "eddyb"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "CreepySkeleton"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "chills42"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "colin-kiegel"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "SoftwareApe"
+  }
+ ]
+}

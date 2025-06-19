@@ -1,0 +1,126 @@
+{
+ "repo_name": "github/rest-api-description",
+ "total_contributions": 2610,
+ "contributors": [
+  {
+   "type": "User",
+   "contributions": 1243,
+   "id": "github-openapi-bot"
+  },
+  {
+   "type": "User",
+   "contributions": 320,
+   "id": "dinonuggies1"
+  },
+  {
+   "type": "User",
+   "contributions": 288,
+   "id": "becco"
+  },
+  {
+   "type": "User",
+   "contributions": 161,
+   "id": "shiftkey"
+  },
+  {
+   "type": "User",
+   "contributions": 140,
+   "id": "mattpage"
+  },
+  {
+   "type": "User",
+   "contributions": 101,
+   "id": "bearcherian"
+  },
+  {
+   "type": "Anonymous",
+   "contributions": 101,
+   "id": "55af3607f7a23ab9"
+  },
+  {
+   "type": "User",
+   "contributions": 98,
+   "id": "ahoglund"
+  },
+  {
+   "type": "User",
+   "contributions": 44,
+   "id": "mmrobins"
+  },
+  {
+   "type": "User",
+   "contributions": 36,
+   "id": "timrogers"
+  },
+  {
+   "type": "User",
+   "contributions": 22,
+   "id": "izuzak"
+  },
+  {
+   "type": "User",
+   "contributions": 15,
+   "id": "easyt"
+  },
+  {
+   "type": "User",
+   "contributions": 8,
+   "id": "jencarlucci"
+  },
+  {
+   "type": "User",
+   "contributions": 7,
+   "id": "bruce"
+  },
+  {
+   "type": "User",
+   "contributions": 6,
+   "id": "skedwards88"
+  },
+  {
+   "type": "User",
+   "contributions": 6,
+   "id": "imwiss"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "nickfloyd"
+  },
+  {
+   "type": "User",
+   "contributions": 4,
+   "id": "gr2m"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "AaronDewes"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "outofgamut"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "philsturgeon"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "shawnHartsell"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "zeke"
+  },
+  {
+   "type": "User",
+   "contributions": 1,
+   "id": "cconcannon"
+  }
+ ]
+}

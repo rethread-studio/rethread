@@ -1,0 +1,471 @@
+{
+ "repo_name": "Inkscape",
+ "total_contributions": 93,
+ "contributors": [
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "jabier.arraiza"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "doctormo"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "thomas-holder"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "tavmjong"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "michal_kowalski"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "pbs3141"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "eduard.braun2"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "nathanal"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "dboles"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "marcjeanmougin"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "rs-math"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "sushant.co19"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "dehesselle"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "parthpant4"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "moini"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "vaibhavmalik2018"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "linkmauve"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "adam.belis"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "ted"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "valavanisalex"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "bubu"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "sanidhyas3s"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "tomik.marny"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "diedenrezi"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "jonathan.neuhauser"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "sergei.a.izmailov"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "ssssss1233345"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "kris.degussem"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "vanntile"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "byteslice"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "krishnaiiserp"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "jsferr4"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "paix.jp"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "firashanife"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "aayushshah22"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "aadilshabier1"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "jonathan.hofinger"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "maxgaukler"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "anonymous8"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "yurchor"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "jmas"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "miles"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "guillaume.audirac"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "lucasvieites"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "milotype"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "ykachi"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "cajhne"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "reddeloostw"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "rachanapodaralla"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "mfloryan"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "fellsnet"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "leejuyuu"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "j0tamaker58"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "mwoehlke.floss"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "p.h.hacker007"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "shlomifish"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "anshudhar2001"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "agarwalsiddhant53"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "asier.sarasua"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "dwivedi.utkarsh01"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "vaibhavmalik2019"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "rick"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "yugiarora"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "mehdi.chinoune"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "mattia"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "heskjestad"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "elendil.krir17"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "agrawalkhushal04"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "luca.bacci982"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "classenu"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "krir17"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "jobel"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "aashutoshkonge"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "juca"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "arkamar"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "michael"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "andreasschalk"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "codamidev"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "ltlnx"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "enceladus"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "kai.schroeder"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "tavjong"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "hub"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "probono"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "mansins168"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "frederic.decrolier"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "vanshuppal2002"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "gautamy672"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "amphetamachine"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "abhayonlyone"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "marc-antoinea"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "brunolopesdsilv"
+  },
+  {
+   "type": "Other",
+   "contributions": 1,
+   "id": "krypalkora1984"
+  }
+ ]
+}

@@ -48,6 +48,10 @@ body {
     flex-direction: column;
 }
 
+span {
+    text-align: center;
+}
+
 div.header {
     text-align: center;
     padding-top: 2rem;
@@ -57,7 +61,7 @@ div.content {
     max-width: 42rem;
     padding-right: 2rem;
     padding-left: 2rem;
-    padding-top: 3%;
+    padding-top: 1rem;
     margin-bottom: 8rem;
 }
 
@@ -98,6 +102,12 @@ h3 {
 a {
     color: black;
     text-decoration-color: orange;
+    text-decoration-skip-ink: none;
+}
+
+a.emphasized {
+    font-family: Inconsolata-SemiBold;
+    text-decoration-thickness: 1.25px;
 }
 
 .dark-mode a {
@@ -118,6 +128,7 @@ br.list {
 }
 
 p {
+    margin-top: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
@@ -181,7 +192,6 @@ button:hover {
 
 img {
     margin-top: 1rem;
-    margin-bottom: 1rem;
 }
 
 pre {
