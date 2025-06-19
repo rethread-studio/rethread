@@ -1,4 +1,6 @@
 
+https://www.waveshare.com/wiki/E-Paper_ESP32_Driver_Board
+
 # Installation
 
 To program the esp32 microcontroller, we need the `esp32-waveshare-epd` Arduino library. Download and put it in the Arduino libraries folder on your system.
