@@ -1,0 +1,105 @@
+@font-face {
+    font-family: gensco;
+    src: url(fonts/GENSCO.otf);
+}
+
+@font-face {
+    font-family: venus-acier;
+    src: url(fonts/Venus+Acier.otf);
+}
+
+@font-face {
+    font-family: venus-plomb;
+    src: url(fonts/Venus+Plomb.otf);
+}
+
+html {
+    position: relative; 
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: venus-acier, sans-serif;
+    font-weight: normal;
+    line-height: 1.3em;
+    letter-spacing: 1px;
+    font-size: 16px;
+    min-height: 100%;
+}
+
+body {
+    color: black;
+    background-image: url("../background_collage.png");
+    background-repeat: repeat;
+    background-size: 300px;
+}
+
+.center-horizontally {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+div.content {
+    max-width: 38rem;
+    padding: 1.5rem;
+    margin: 1rem;
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+h1, h2, h3 {
+    font-weight: normal;
+}
+
+h1 {
+    font-size: 40px;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    font-family: gensco, serif;
+}
+
+h2 {
+    font-size: 20px;
+    font-family: venus-plomb, sans-serif;
+    margin-bottom: 2rem;
+}
+
+h3 {
+    font-size: 16px;
+    font-family: venus-plomb, sans-serif;
+    margin-top: 1.5rem;
+}
+
+a {
+    color: black;
+    text-decoration-color: black;
+    text-decoration-skip-ink: none;
+}
+
+a:hover {
+    color: black;
+}
+
+br {
+    display: block;
+}
+
+p {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+b {
+    font-family: venus-acier, sans-serif;
+    font-weight: normal;
+}
+
+@media (pointer:none), (pointer:coarse) {
+    body {
+        background-size: 200px;
+    }
+    div.content {
+        margin-bottom: 15rem;
+    }
+}
